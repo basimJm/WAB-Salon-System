@@ -7,7 +7,7 @@ on:
       - "WAB-Server/**"
       - ".github/workflows/server-ci.yml"
   push:
-    branches: [main]
+    branches: [main, server]
     paths:
       - "WAB-Server/**"
       - ".github/workflows/server-ci.yml"

@@ -118,7 +118,7 @@ Every endpoint returns one of two shapes, built only by the helpers in `utils/re
 ## 10. Tests and Delivery
 - Every task ships with unit tests: services and domain rules first (availability, state machine, refunds, permissions, pricing), plus the error handler, the response helpers and the locale-completeness check. All tests, lint, type-check and build must pass.
 - Every endpoint change updates its OpenAPI contract in `contracts/`, Swagger and the Postman collection in the same PR (see §11).
-- Follow the root workflow: branch from an updated `main`, run three verification loops (loop 1 includes the business-domain double-check), do the four-role review, then open a PR. Never push to `main`.
+- Follow the root workflow, but server tasks branch from an updated `server` (the server master branch, `.claude/rules.md` §3.8) and their PRs target `server`: run three verification loops (loop 1 includes the business-domain double-check), do the four-role review, then open a PR. Never push to `main`.
 
 ## 11. Swagger and Postman: updated after every task (mandatory)
 - The API docs are generated from code and live in the repo. Do not edit the generated files by hand.

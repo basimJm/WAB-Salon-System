@@ -39,3 +39,4 @@
 5. **Four-role review before push** (see `.claude/hooks.md`). Record `Review: PASSED` in `.claude/session.md`. Fix every blocking finding first.
 6. **Keep `session.md` and `memory.md` current** (see `.claude/hooks.md` §3).
 7. Never commit secrets; never edit `.env*` files without explicit permission.
+8. **Server work uses the `server` branch as its master.** All WAB-Server tasks branch from the latest `origin/server` and their PRs target `server` (never `main`); `server` is created from `main` and the user merges `server` into `main` when they decide. After each merge, restart the working branch from `origin/server`. If `server` is behind `main`, merge `main` into `server` first (pull request, never a force-push). Other projects keep using `main`.
