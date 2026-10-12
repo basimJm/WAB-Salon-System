@@ -122,7 +122,7 @@
 ### T-009 — SRV-003 Logger with redaction + request id
 - Project: `WAB-Server/` (`src/utils/logger`, `src/middlewares/requestId.ts`, `src/constants/logging.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #7 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #8 merged)
 - Acceptance criteria (BE/NFR: NFR-08 structured logs + traceId, NFR-01 no sensitive data in logs; server rules §8 logs, §5 constants):
   - [x] Structured JSON logger (pino) at the configured level; every log object redacted before output
   - [x] Tokens, passwords, OTP, IBAN, card data removed; phone numbers masked (last 3 digits); key matching case/separator-insensitive; nested, circular and deep objects safe; input never mutated
@@ -133,7 +133,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — added `pino` and `express` 5 (+ `@types/express`) deps; `traceId` = `req.id` is reused by SRV-004a error responses. Message strings are not scanned (only object fields) — callers must not interpolate secrets.
 - Notes: Next after merge: SRV-004.
 
+### T-010 — SRV-004 Error model, error codes, AR/EN locales, Accept-Language
+- Project: `WAB-Server/` (`src/utils/errors`, `src/utils/i18n`, `src/middlewares/language.ts`, `src/locales/*.json`, `src/constants/{errorCodes,http,i18n}.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #8 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-11 localization, NFR-09; BUSINESS_DOMAIN §11 error codes, §2 Language; server rules §7, §8):
+  - [x] `BaseError` + ValidationError 400, Unauthorized 401, Forbidden 403, NotFound 404, Conflict 409, BusinessRule 422, RateLimit 429, Payment 402, ExternalService 502/503, Internal 500 (not operational); each carries code, httpStatus, messageKey, details, isOperational
+  - [x] `ERROR_CODES` = exactly the 41 codes of BUSINESS_DOMAIN §11 (test-enforced); every code has `errors.<CODE>` in `ar.json` and `en.json`
+  - [x] Locale completeness test: same keys, no empty values, same placeholders, Arabic script in ar
+  - [x] `Accept-Language` parsing (q-weights, regions, `*`, invalid) with default `ar`; `req.language` + `req.t()`
+  - [x] No hardcoded values: statuses/codes/languages in `constants/`, messages only in `locales/`
+- Tests: `cd WAB-Server && npm test` — 93 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISIONS TO CONFIRM: (1) domain has no code for provider failures, so `ExternalServiceError` uses code `INTERNAL` with status 502/503 (add `EXTERNAL_SERVICE_ERROR` to BUSINESS_DOMAIN §11 if you want a distinct code); (2) `PaymentError` uses HTTP 402; (3) code `INTERNAL` (domain) is used, not `INTERNAL_ERROR` from server-rules examples.
+- Notes: Next after merge: SRV-004a (global error handler, process handlers).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-004 — next server task, start only after T-009 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-004a — next server task, start only after T-010 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
