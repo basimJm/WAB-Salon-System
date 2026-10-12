@@ -107,7 +107,7 @@
 ### T-008 — SRV-002 Config/env loader + `.env.example`
 - Project: `WAB-Server/` (`src/config`, `src/constants/env.ts`, `.env.example`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #6 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #7 merged)
 - Acceptance criteria (BE/NFR: NFR-01 secrets only in env, NFR-09; BUSINESS_DOMAIN: none; server rules §5):
   - [x] Env validated with a schema at startup; invalid/missing → `ConfigError` naming keys only (never values)
   - [x] No defaults for connection secrets (MONGODB_URI, REDIS_URL); non-secret defaults live in `constants/`
@@ -119,7 +119,21 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — `ConfigError` is a plain Error for now; SRV-004 may re-base it on `BaseError`. Later tasks add their keys to schema + `.env.example` (e.g. JWT, Firebase, S3, SMTP, gateway).
 - Notes: Next after merge: SRV-003.
 
+### T-009 — SRV-003 Logger with redaction + request id
+- Project: `WAB-Server/` (`src/utils/logger`, `src/middlewares/requestId.ts`, `src/constants/logging.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #7 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-08 structured logs + traceId, NFR-01 no sensitive data in logs; server rules §8 logs, §5 constants):
+  - [x] Structured JSON logger (pino) at the configured level; every log object redacted before output
+  - [x] Tokens, passwords, OTP, IBAN, card data removed; phone numbers masked (last 3 digits); key matching case/separator-insensitive; nested, circular and deep objects safe; input never mutated
+  - [x] `requestId` middleware: reuses a well-formed `X-Request-Id`, else UUID; sets response header, `req.id`, child `req.log` (`traceId`); rejects oversize/odd/injection values
+  - [x] All names/limits/placeholders in `constants/logging.ts`
+- Tests: `cd WAB-Server && npm test` — 52 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — added `pino` and `express` 5 (+ `@types/express`) deps; `traceId` = `req.id` is reused by SRV-004a error responses. Message strings are not scanned (only object fields) — callers must not interpolate secrets.
+- Notes: Next after merge: SRV-004.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-003 — next server task, start only after T-008 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-004 — next server task, start only after T-009 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
