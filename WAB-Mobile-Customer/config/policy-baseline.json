@@ -9,10 +9,6 @@
     "H003": 2,
     "H006": 2
   },
-  "composeApp/src/commonMain/kotlin/com/fab/wab/customer/app/ui/SplashScreen.kt": {
-    "H002": 3,
-    "H006": 9
-  },
   "composeApp/src/iosMain/kotlin/com/fab/wab/customer/Platform.ios.kt": {
     "H004": 1
   },
@@ -42,150 +38,6 @@
     "H004": 1
   },
   "core/data/src/iosMain/kotlin/com/fab/wab/customer/core/data/location/DeviceLocationProvider.ios.kt": {
-    "H006": 2
-  },
-  "core/design-system/src/androidMain/kotlin/com/fab/wab/customer/designsystem/components/map/MapLocation.android.kt": {
-    "H006": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/badge/AppBadge.kt": {
-    "H002": 6,
-    "H006": 2
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/button/AppButton.kt": {
-    "H002": 4,
-    "H006": 2
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/button/AppIconButton.kt": {
-    "H002": 1,
-    "H006": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/card/AppCard.kt": {
-    "H002": 2
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/checkbox/AppCheckbox.kt": {
-    "H002": 11,
-    "H003": 1,
-    "H006": 3
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/chip/AppChip.kt": {
-    "H002": 6,
-    "H006": 4
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/counter/AppNumericCounter.kt": {
-    "H002": 15,
-    "H003": 2,
-    "H006": 6
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/dialog/AppBottomSheet.kt": {
-    "H006": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/dialog/AppFeedbackDialog.kt": {
-    "H001": 1,
-    "H002": 5,
-    "H006": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/divider/AppDivider.kt": {
-    "H002": 3
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/feedback/AppEmptyState.kt": {
-    "H002": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/feedback/AppError.kt": {
-    "H002": 1,
-    "H003": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/feedback/AppLoading.kt": {
-    "H002": 2
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/feedback/AppOfflineState.kt": {
-    "H002": 1,
-    "H003": 2
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/loading/AppLoadingShimmer.kt": {
-    "H001": 4,
-    "H002": 29,
-    "H006": 61
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/map/MapLocation.kt": {
-    "H006": 2
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/navigation/AppBottomBar.kt": {
-    "H001": 2,
-    "H002": 11,
-    "H006": 2
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/navigation/AppNavigationRail.kt": {
-    "H006": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/navigation/AppTopBar.kt": {
-    "H001": 1,
-    "H002": 4,
-    "H003": 1,
-    "H006": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/screen/AppScreen.kt": {
-    "H002": 2,
-    "H003": 5
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/selector/AppSegmentedSelector.kt": {
-    "H002": 5,
-    "H006": 2
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/stepper/AuditTrailStepper.kt": {
-    "L001": 1,
-    "H002": 24,
-    "H006": 16
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/switch/AppSwitch.kt": {
-    "H001": 3,
-    "H002": 11,
-    "H006": 7
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/textfield/AppBaseTextField.kt": {
-    "H002": 17,
-    "H006": 2
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/textfield/AppDropdown.kt": {
-    "H002": 7,
-    "H006": 2
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/textfield/AppOptionalTextField.kt": {
-    "H002": 1,
-    "H006": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/textfield/AppPasswordField.kt": {
-    "H002": 2,
-    "H006": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/textfield/AppPhoneField.kt": {
-    "H002": 6,
-    "H006": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/textfield/AppSearchTextField.kt": {
-    "H002": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/textfield/AppTextField.kt": {
-    "H002": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/components/toggle/AppToggle.kt": {
-    "H002": 7,
-    "H006": 6
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/icons/AppIcons.kt": {
-    "L001": 1,
-    "H001": 58,
-    "H002": 110,
-    "H006": 2927
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/theme/TypographyTokens.kt": {
-    "L001": 1
-  },
-  "core/design-system/src/commonMain/kotlin/com/fab/wab/customer/designsystem/utils/DesignSystemUtils.kt": {
-    "H001": 10,
-    "H002": 3,
-    "H006": 20
-  },
-  "core/design-system/src/iosMain/kotlin/com/fab/wab/customer/designsystem/components/map/MapLocation.ios.kt": {
     "H006": 2
   },
   "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/client/AuthTokenPlugin.kt": {
@@ -252,8 +104,5 @@
   },
   "feature/sample/presentation/src/commonMain/kotlin/com/fab/wab/customer/feature/sample/presentation/controller/vm/SampleViewModel.kt": {
     "H003": 2
-  },
-  "feature/sample/presentation/src/commonMain/kotlin/com/fab/wab/customer/feature/sample/presentation/screen/SampleScreen.kt": {
-    "H002": 5
   }
 }

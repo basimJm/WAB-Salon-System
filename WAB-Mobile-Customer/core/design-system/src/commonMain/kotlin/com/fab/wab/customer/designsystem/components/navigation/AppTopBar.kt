@@ -1,126 +1,62 @@
 package com.fab.wab.customer.designsystem.components.navigation
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
+import com.fab.wab.customer.designsystem.components.button.AppIconButton
+import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
-import com.fab.wab.customer.designsystem.theme.LocalAppColors
+import com.fab.wab.customer.designsystem.resources.Res
+import com.fab.wab.customer.designsystem.resources.common_back
+import com.fab.wab.customer.designsystem.theme.AppTheme
+import org.jetbrains.compose.resources.stringResource
 
-private val TopBarHeight = 64.dp
-
-@OptIn(ExperimentalMaterial3Api::class)
+/** Top bar: back at Start (mirrors in RTL), centered title, actions at End. Respects the status bar and cutouts. */
 @Composable
 fun AppTopBar(
     title: String,
     modifier: Modifier = Modifier,
-    navigationIcon: ImageVector? = null,
-    onNavigationClick: (() -> Unit)? = null,
+    onBack: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
-    glassmorphism: Boolean = true,
 ) {
-    val colors = LocalAppColors.current
-
-    val containerColor = if (glassmorphism) {
-        Color.White.copy(alpha = 0.05f)
-    } else {
-        colors.surface
-    }
-
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = colors.onSurface,
-            )
-        },
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .then(
-                if (glassmorphism) {
-                    Modifier
-                        .background(
-                            containerColor,
-                            RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
-                        )
-                        .height(TopBarHeight)
-                } else {
-                    Modifier.height(TopBarHeight)
-                }
-            ),
-        navigationIcon = {
-            if (navigationIcon != null && onNavigationClick != null) {
-                IconButton(onClick = onNavigationClick) {
-                    Icon(
-                        imageVector = navigationIcon,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(24.dp),
-                        tint = colors.primary,
-                    )
-                }
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .height(AppTheme.sizes.topBarHeight)
+            .padding(horizontal = AppTheme.spacing.space4),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.width(AppTheme.sizes.touchTarget), contentAlignment = Alignment.Center) {
+            if (onBack != null) {
+                AppIconButton(AppIcons.Back, stringResource(Res.string.common_back), onBack)
             }
-        },
-        actions = actions,
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Unspecified,
-            navigationIconContentColor = Color.Unspecified,
-            titleContentColor = colors.onSurface,
-            actionIconContentColor = Color.Unspecified
-        ),
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppTopBarWithBack(
-    title: String,
-    modifier: Modifier = Modifier,
-    onBackClick: () -> Unit,
-    actions: @Composable RowScope.() -> Unit = {},
-    glassmorphism: Boolean = true,
-) {
-    AppTopBar(
-        title = title,
-        modifier = modifier,
-        navigationIcon = AppIcons.ArrowBack,
-        onNavigationClick = onBackClick,
-        actions = actions,
-        glassmorphism = glassmorphism,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppTopBarWithMenu(
-    title: String,
-    modifier: Modifier = Modifier,
-    onMenuClick: () -> Unit,
-    actions: @Composable RowScope.() -> Unit = {},
-    glassmorphism: Boolean = true,
-) {
-    AppTopBar(
-        title = title,
-        modifier = modifier,
-        navigationIcon = AppIcons.Menu,
-        onNavigationClick = onMenuClick,
-        actions = actions,
-        glassmorphism = glassmorphism,
-    )
+        }
+        AppText(
+            text = title,
+            style = AppTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            modifier = Modifier.weight(1f),
+        )
+        Row(
+            modifier = Modifier.widthIn(min = AppTheme.sizes.touchTarget),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+            content = actions,
+        )
+    }
 }

@@ -1,140 +1,93 @@
 package com.fab.wab.customer.designsystem.theme
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.LayoutDirection
 import com.fab.wab.customer.core.ui.utils.LocalDarkTheme
 
-/**
- * Full Material3 ColorScheme including surface container tokens.
- * Material3 ColorScheme only exposes surface + surfaceVariant at the scheme level,
- * so the extended 8-level container palette is available via LocalAppColors.
- */
-private fun AppColors.toMaterial3LightScheme() = lightColorScheme(
-    primary = primary,
-    onPrimary = onPrimary,
-    primaryContainer = primaryContainer,
-    onPrimaryContainer = onPrimaryContainer,
-    secondary = secondary,
-    onSecondary = onSecondary,
-    secondaryContainer = secondaryContainer,
-    onSecondaryContainer = onSecondaryContainer,
-    tertiary = tertiary,
-    onTertiary = onTertiary,
-    tertiaryContainer = tertiaryContainer,
-    onTertiaryContainer = onTertiaryContainer,
-    background = background,
-    onBackground = onBackground,
-    surface = surface,
-    onSurface = onSurface,
-    surfaceVariant = surfaceVariant,
-    onSurfaceVariant = onSurfaceVariant,
-    error = error,
-    onError = onError,
-    errorContainer = errorContainer,
-    onErrorContainer = onErrorContainer,
-    outline = outline,
-    outlineVariant = outlineVariant,
-    scrim = scrim,
-    inverseSurface = inverseSurface,
-    inverseOnSurface = inverseOnSurface,
-    inversePrimary = inversePrimary,
-)
+/** Material scheme built from WAB roles, so any stock Material component still looks like WAB. */
+internal fun AppColors.toMaterialScheme(): ColorScheme {
+    val base = if (isDark) darkColorScheme() else lightColorScheme()
+    return base.copy(
+        primary = accent,
+        onPrimary = onAccent,
+        primaryContainer = accentContainer,
+        onPrimaryContainer = accent,
+        secondary = gradientEnd,
+        onSecondary = onGradient,
+        background = background,
+        onBackground = ink,
+        surface = card,
+        onSurface = ink,
+        surfaceVariant = surface,
+        onSurfaceVariant = muted,
+        surfaceTint = accent,
+        error = danger,
+        onError = onGradient,
+        errorContainer = dangerContainer,
+        onErrorContainer = danger,
+        outline = muted,
+        outlineVariant = line,
+        scrim = scrim,
+        surfaceContainerLowest = background,
+        surfaceContainerLow = card,
+        surfaceContainer = card,
+        surfaceContainerHigh = card,
+        surfaceContainerHighest = surface,
+    )
+}
 
-private fun AppColors.toMaterial3DarkScheme() = darkColorScheme(
-    primary = primary,
-    onPrimary = onPrimary,
-    primaryContainer = primaryContainer,
-    onPrimaryContainer = onPrimaryContainer,
-    secondary = secondary,
-    onSecondary = onSecondary,
-    secondaryContainer = secondaryContainer,
-    onSecondaryContainer = onSecondaryContainer,
-    tertiary = tertiary,
-    onTertiary = onTertiary,
-    tertiaryContainer = tertiaryContainer,
-    onTertiaryContainer = onTertiaryContainer,
-    background = background,
-    onBackground = onBackground,
-    surface = surface,
-    onSurface = onSurface,
-    surfaceVariant = surfaceVariant,
-    onSurfaceVariant = onSurfaceVariant,
-    error = error,
-    onError = onError,
-    errorContainer = errorContainer,
-    onErrorContainer = onErrorContainer,
-    outline = outline,
-    outlineVariant = outlineVariant,
-    scrim = scrim,
-    inverseSurface = inverseSurface,
-    inverseOnSurface = inverseOnSurface,
-    inversePrimary = inversePrimary,
-)
+@Composable
+fun rememberAppWindowSize(): AppWindowSize {
+    val container = LocalWindowInfo.current.containerSize
+    val density = LocalDensity.current
+    return remember(container, density) {
+        with(density) { AppWindowSize(width = container.width.toDp(), height = container.height.toDp()) }
+    }
+}
 
 /**
- * AppTheme — Emerald Alchemist design system theme.
- *
- * Provides two distinct visual identities:
- * - Dark: "WABCustomer" — bright emerald #4edea3 on deep forest #0e1511
- *         Fonts: Epilogue (headlines) + Inter (body)
- * - Light: "Emerald Alchemist" — deep emerald #006c49 on mint #f0fdf4
- *         Fonts: Manrope (headlines) + Plus Jakarta Sans (body)
- *
- * The extended 8-level surface container palette is accessible via
- * [LocalAppColors] for components that need fine-grained tonal control.
- * Typography tokens are built inside this @Composable scope so that Font(resource = ...)
- * composable calls can load the bundled woff2 font files.
- *
- * @param darkTheme selects between dark and light visual identities
- * @param dynamicColor ignored (Stitch design system takes precedence)
- * @param content app content
- *
- * Source: https://stitch.withgoogle.com/projects/5464419906246487732
+ * The WAB theme. Dark/light comes from [LocalDarkTheme] (Light / Dark / System is resolved by the app shell);
+ * Arabic fonts follow the layout direction (Arabic = RTL).
  */
 @Composable
 fun AppTheme(
-    dynamicColor: Boolean = false,
+    darkTheme: Boolean = LocalDarkTheme.current,
+    windowSize: AppWindowSize = rememberAppWindowSize(),
     content: @Composable () -> Unit,
 ) {
-    val darkTheme = LocalDarkTheme.current
-
-    val colorTokens = if (darkTheme) DarkColorTokens else LightColorTokens
-    val colorScheme = if (darkTheme) {
-        colorTokens.toMaterial3DarkScheme()
-    } else {
-        colorTokens.toMaterial3LightScheme()
+    val colors = if (darkTheme) DarkColors else LightColors
+    val fonts = rememberAppFontFamilies(arabic = LocalLayoutDirection.current == LayoutDirection.Rtl)
+    val typography = remember(fonts) { appTypography(fonts.headline, fonts.body) }
+    val scheme = remember(colors) { colors.toMaterialScheme() }
+    val adaptive = remember(windowSize) { adaptiveFor(windowSize) }
+    CompositionLocalProvider(
+        LocalDarkTheme provides darkTheme,
+        LocalAppColors provides colors,
+        LocalTypography provides typography,
+        LocalAdaptive provides adaptive,
+    ) {
+        MaterialTheme(colorScheme = scheme, typography = typography.toMaterialTypography(), content = content)
     }
-    // Build typography inside @Composable scope so Font(resource = ...) composable calls work
-    val typographyTokens = if (darkTheme) {
-        DarkTypographyTokens()
-    } else {
-        LightTypographyTokens()
-    }
+}
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = typographyTokens.toMaterial3Typography(),
-
-        ) {
-        ProvideDesignSystemTokens(
-            colors = colorTokens,
-            spacing = DefaultSpacingTokens,
-            typography = typographyTokens,
-            shapes = DefaultShapeTokens,
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(colorTokens.background),
-            ) {
-                content()
-            }
-        }
-    }
+/** Short accessors: `AppTheme.colors`, `AppTheme.spacing`... for use inside composables. */
+object AppTheme {
+    val colors: AppColors @Composable get() = LocalAppColors.current
+    val spacing: SpacingTokens @Composable get() = LocalSpacing.current
+    val shapes: ShapeTokens @Composable get() = LocalShapes.current
+    val sizes: SizeTokens @Composable get() = LocalSizes.current
+    val elevation: ElevationTokens @Composable get() = LocalElevation.current
+    val alpha: AlphaTokens @Composable get() = LocalAlpha.current
+    val motion: MotionTokens @Composable get() = LocalMotion.current
+    val typography: TypographyTokens @Composable get() = LocalTypography.current
+    val adaptive: AdaptiveTokens @Composable get() = LocalAdaptive.current
 }
