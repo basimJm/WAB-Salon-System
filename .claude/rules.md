@@ -1,0 +1,41 @@
+# WAB — Mandatory Rules (all projects, every task)
+
+> Enforced by `CLAUDE.md` imports and `.claude/settings.json` hooks. Project folders may add stricter rules; they never relax these.
+
+## 1. Token Efficiency
+- Use the minimum context, tool calls, and output necessary to complete the task correctly.
+- Never scan the entire repository unless the task explicitly requires it.
+- Start by inspecting `git status`, the relevant files, and the existing implementation.
+- Search for specific symbols, classes, functions, and usages before opening files.
+- Read only relevant sections of large files, logs, and documentation.
+- Never reread files or repeat searches unless new information justifies it.
+- Avoid dumping full build logs, dependency trees, generated files, or unrelated code into context.
+- Prefer concise summaries and targeted command output.
+- Do not explain obvious code or produce lengthy progress updates.
+- Use the existing project structure and abstractions instead of inventing new ones.
+- Avoid unnecessary agents, parallel investigations, and repeated planning.
+- Use the simplest suitable model for routine tasks; reserve stronger reasoning for complex architectural decisions.
+- Use `/clear` between unrelated tasks and `/compact` when continuing a long task with useful context.
+- Check `.claude/memory.md` before investigating; it may already hold the answer.
+
+## 2. Understand Requirements Before Coding
+- Identify the exact requested outcome before modifying code.
+- Inspect the relevant implementation, its callers, dependencies, and existing tests.
+- Convert the request into explicit acceptance criteria (write them into `.claude/session.md`).
+- Identify constraints, edge cases, and potential regressions.
+- Distinguish explicit requirements from assumptions.
+- If a missing detail materially affects correctness, ask a concise clarifying question before proceeding.
+- Do not ask questions that can be answered by inspecting the repository.
+- For complex or multi-file changes, provide a short implementation plan and list the expected files before editing.
+- For straightforward changes, skip unnecessary planning and proceed directly.
+- Do not expand the scope, refactor unrelated code, or introduce additional features without justification.
+- Requirements source of truth: the project's PRD > BRD > Design Script > design files (see `CLAUDE.md` §3).
+
+## 3. Delivery Rules
+1. **Unit tests for every task.** Every code change ships with unit tests covering the acceptance criteria, edge cases and the regression it fixes. Run them; all must pass. No tests → task not done.
+2. **Never commit or push to `main`.** Always: `git checkout main && git pull --ff-only` → `git checkout -b <type>/<short-name>` (types: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`) → commit on the branch → push the branch → open a PR. Never force-push, never `--no-verify`.
+3. **No hardcoded values anywhere.** No hardcoded URLs, hosts, ports, keys, secrets, IDs, user-visible strings, colors, sizes, limits, timeouts or magic numbers in code. Use config/env, constants files, localization resources, theme/design tokens, or server-driven settings.
+4. **Three verification loops before push.** Re-check the work against every acceptance criterion three separate times (loop 1: requirements coverage; loop 2: edge cases, errors, security, no-hardcode; loop 3: tests/build/lint green + PRD/BRD consistency). Record each loop in `.claude/session.md` (`Loops: 3/3`).
+5. **Four-role review before push** (see `.claude/hooks.md`). Record `Review: PASSED` in `.claude/session.md`. Fix every blocking finding first.
+6. **Keep `session.md` and `memory.md` current** (see `.claude/hooks.md` §3).
+7. Never commit secrets; never edit `.env*` files without explicit permission.
