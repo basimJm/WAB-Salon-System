@@ -45,6 +45,9 @@ export const envSchema = z
     [ENV_KEYS.redisUrl]: z.string().regex(REDIS_URL_PATTERN),
     [ENV_KEYS.otpProvider]: providerMode,
     [ENV_KEYS.storageProvider]: providerMode,
+    [ENV_KEYS.notifierProvider]: providerMode,
+    [ENV_KEYS.paymentProvider]: providerMode,
+    [ENV_KEYS.analyticsProvider]: providerMode,
   })
   // Production never runs on fakes, and never guesses: every provider must be named `real`.
   .superRefine((env, context) => {

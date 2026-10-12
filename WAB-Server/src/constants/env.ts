@@ -30,7 +30,16 @@ export const ENV_KEYS = {
   redisUrl: 'REDIS_URL',
   otpProvider: 'OTP_PROVIDER',
   storageProvider: 'STORAGE_PROVIDER',
+  notifierProvider: 'NOTIFIER_PROVIDER',
+  paymentProvider: 'PAYMENT_PROVIDER',
+  analyticsProvider: 'ANALYTICS_PROVIDER',
 } as const;
 
 /** Keys that pick `fake` or `real` for an external provider; production must set them to `real`. */
-export const PROVIDER_ENV_KEYS = [ENV_KEYS.otpProvider, ENV_KEYS.storageProvider] as const;
+export const PROVIDER_ENV_KEYS = [
+  ENV_KEYS.otpProvider,
+  ENV_KEYS.storageProvider,
+  ENV_KEYS.notifierProvider,
+  ENV_KEYS.paymentProvider,
+  ENV_KEYS.analyticsProvider,
+] as const;
