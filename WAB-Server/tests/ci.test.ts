@@ -34,9 +34,9 @@ const commands = (job: Job | undefined): string[] =>
   (job?.steps ?? []).flatMap((step) => (step.run === undefined ? [] : [step.run]));
 
 describe('server CI workflow (SRV-010)', () => {
-  it('runs on pull requests and on main, only when the server changes', () => {
+  it('runs on pull requests and on main and server, only when the server changes', () => {
     expect(workflow.on.pull_request.paths).toContain('WAB-Server/**');
-    expect(workflow.on.push.branches).toEqual(['main']);
+    expect(workflow.on.push.branches).toEqual(['main', 'server']);
     expect(workflow.on.push.paths).toContain('WAB-Server/**');
     expect(workflow.on.push.paths).toContain('.github/workflows/server-ci.yml');
   });

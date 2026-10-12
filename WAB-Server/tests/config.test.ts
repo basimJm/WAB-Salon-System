@@ -8,6 +8,8 @@ import { DEFAULT_PORT, ENV_KEYS, PORT_MAX, envFileName } from '../src/constants/
 const MONGO = 'mongodb://user:s3cret@localhost/wab';
 const REDIS = 'redis://localhost:6379';
 
+const REAL_PROVIDERS = { OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'real' };
+
 const validEnv = (overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv => ({
   [ENV_KEYS.mongoUri]: MONGO,
   [ENV_KEYS.redisUrl]: REDIS,
@@ -41,8 +43,38 @@ describe('loadConfig', () => {
     expect(invalidKeysOf(validEnv({ PORT: 'abc' }))).toEqual([ENV_KEYS.port]);
   });
 
+  it('defaults every provider to the fake outside production', () => {
+    expect(loadConfig(validEnv()).providers).toEqual({ otp: 'fake', storage: 'fake' });
+    expect(loadConfig(validEnv({ NODE_ENV: 'test' })).providers).toEqual({
+      otp: 'fake',
+      storage: 'fake',
+    });
+  });
+
+  it('reads the provider modes and rejects unknown ones', () => {
+    const config = loadConfig(validEnv({ OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'fake' }));
+    expect(config.providers).toEqual({ otp: 'real', storage: 'fake' });
+    expect(invalidKeysOf(validEnv({ OTP_PROVIDER: 'mock' }))).toEqual([ENV_KEYS.otpProvider]);
+    expect(invalidKeysOf(validEnv({ STORAGE_PROVIDER: '' }))).toEqual([ENV_KEYS.storageProvider]);
+  });
+
+  it('requires production to name every provider as real, never defaulting or faking', () => {
+    const production = validEnv({ NODE_ENV: 'production' });
+    expect(invalidKeysOf(production)).toEqual([ENV_KEYS.otpProvider, ENV_KEYS.storageProvider]);
+    expect(
+      invalidKeysOf({ ...production, OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'fake' }),
+    ).toEqual([ENV_KEYS.storageProvider]);
+    expect(
+      invalidKeysOf({ ...production, OTP_PROVIDER: 'fake', STORAGE_PROVIDER: 'real' }),
+    ).toEqual([ENV_KEYS.otpProvider]);
+    const ok = loadConfig({ ...production, OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'real' });
+    expect(ok.providers).toEqual({ otp: 'real', storage: 'real' });
+  });
+
   it('flags production', () => {
-    expect(loadConfig(validEnv({ NODE_ENV: 'production' })).isProduction).toBe(true);
+    expect(loadConfig(validEnv({ ...REAL_PROVIDERS, NODE_ENV: 'production' })).isProduction).toBe(
+      true,
+    );
   });
 
   it('rejects unknown NODE_ENV and LOG_LEVEL', () => {
