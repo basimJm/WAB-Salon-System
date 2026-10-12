@@ -547,7 +547,7 @@
 ### T-034 — SRV-023 Provider interfaces and fakes: notifier, payments, analytics
 - Project: `WAB-Server/` (`src/providers/{notifier,payments,analytics}/*`, `src/providers/{idempotency,index}.ts`, `src/constants/{providers,env}.ts`, `src/config/*`, `.env.example`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #33 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #39 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-40..43 payments via `wab-payments` (verify server-side, idempotency, every attempt with gateway codes, refunds REFUND_PENDING → REFUNDED/FAILED), BE-51/52 push incl. high-priority/time-sensitive booking requests, BE-62 admin email, BE-61 analytics; wab-notifications NOT-01..06/10/11, wab-payments PAY-01/04/05/07/08/09, wab-analytics ANA-01/02/04; backlog: fake payment provider supports success/fail/cancel/pending/refund-fail; typed interfaces; fake selected by config):
   - [x] `Notifier.sendPush({target: tokens | topic, message, idempotencyKey})` → per-token `SENT | INVALID_TOKEN | FAILED`, invalid tokens listed for cleanup, visible / data-only messages, high priority, iOS time-sensitive, action category, badge, Android full-screen flag; ≤ 500 tokens, no blank/duplicate tokens; `sendEmail` with accepted/rejected addresses; one logical notification = one key (repeat returns the first result and sends nothing; same key with a different request is a caller bug)
   - [x] `PaymentProvider`: `createSession` (idempotent, integer fils > 0), `verify` (normalized status + raw gateway code/message), `refund` (idempotent; only on a SUCCEEDED payment; partial refunds up to the captured amount, pending refunds count), `getRefund`, `handleWebhook` (unverifiable signature/body → 401); `FakePaymentProvider` scenarios success / fail / cancel / pending (+ `settle`) and refund success / fail / pending (+ `settleRefund`)
@@ -560,7 +560,21 @@
 - Notes: `IdempotencyStore` (`providers/idempotency.ts`) is shared by the notifier and payment fakes; real adapters get idempotency from the gateway/FCM keys. API docs: no change.
 - Next: SRV-024 (auth schemas). PRs target `server`.
 
+### T-035 — SRV-024 Identity schemas: customers, members, installations, refreshTokens, admins
+- Project: `WAB-Server/` (`src/models/{customer,member,installation,refreshToken,admin}.model.ts`, `src/repositories/identity.repository.ts`, `src/constants/{enums,identity}.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #39 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-01, BE-04 accounts, NFR-01 no raw tokens stored; BUSINESS_DOMAIN §3.1 customers/installations/refreshTokens/admins, §3.4 members, §2 enums):
+  - [x] Models with the documented fields, defaults, enums and indexes (customers: unique `phone.e164`, status, createdAt, text search; members: unique phone, `{salonId, active}`, `{salonId, providesServices, staff.serviceIds}`, one OWNER per salon via partial unique index; installations: unique `{app, installationId}` + customer/member/fcmToken; refreshTokens: unique `tokenHash` (SHA-256 hex only), subject index, TTL on `expiresAt`; admins: unique email); collection names as in the domain; all registered in `ALL_MODELS`
+  - [x] Rules in the schema: `e164 = dialCode + number`; lowercase emails; names 1–50; 15 permissions only (owner-only capabilities rejected); staff profile required when `providesServices`; working hours as a pair with start < end, `HH:mm`; rating 0–5, whole counts
+  - [x] Repositories: `findByPhone` (customers, members), `findByInstallation(app, id)`, `findByTokenHash`, `findByEmail` (case-insensitive)
+  - [x] Enums `Language`, `AppKind`, `CustomerStatus`, `MemberRole`, `Permission`, `SubjectType`; no hardcoded values
+- Tests: `cd WAB-Server && npm test` — 1177 pass (37 suites); full format:check, lint, typecheck, build green; audit 0; `npm run docs` no diff. `tests/identitySchemas.test.ts` (71). Mutation check skipped at the user's request ("fast").
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Schemas only (no API change). Refresh rotation/revocation logic is SRV-026; JWT SRV-025. Customers are not soft-hidden by status in the repository: services decide on BLOCKED/DELETED. `members.salonId` is a plain ObjectId until the salons model exists. API docs: no change.
+- Next: SRV-025 (JWT + scope middleware).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-024 — next server task after T-034 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-025 — next server task after T-035 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

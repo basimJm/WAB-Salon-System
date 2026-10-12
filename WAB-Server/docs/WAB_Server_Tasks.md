@@ -66,9 +66,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-020 | Audit-log writer + server-events writer (append-only) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-021 | Booking reference number + id utils | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-022 | Interfaces + stubs: OtpProvider, StorageProvider | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-023 | Interfaces + stubs: Notifier, PaymentProvider, AnalyticsProvider | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-023 | Interfaces + stubs: Notifier, PaymentProvider, AnalyticsProvider | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-024 | Schemas/repositories: customers, members, installations, refreshTokens, admins | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-023 is merged: **SRV-024** (SRV-011 is PENDING).
+Next task to start after SRV-024 is merged: **SRV-025** (SRV-011 is PENDING).
 
 ---
 
@@ -116,14 +117,14 @@ Abstractions the server depends on, with fakes, so no task waits for an SDK (ROA
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
 | SRV-022 | Interfaces + stubs: `OtpProvider` (verify Firebase ID token + phone match), `StorageProvider` (presign/confirm/sign/delete/CDN URL) | `feat/srv-022-if-otp-storage` | — | DONE | Typed interfaces/errors; fake impl selected by config (`*_PROVIDER=fake|real`). |
-| SRV-023 | Interfaces + stubs: `Notifier` (push/email), `PaymentProvider` (session/verify/refund/webhook), `AnalyticsProvider` (record/query) | `feat/srv-023-if-notify-pay-analytics` | — | IN REVIEW | Fake payment provider supports success/fail/cancel/pending/refund-fail scenarios. |
+| SRV-023 | Interfaces + stubs: `Notifier` (push/email), `PaymentProvider` (session/verify/refund/webhook), `AnalyticsProvider` (record/query) | `feat/srv-023-if-notify-pay-analytics` | — | DONE | Fake payment provider supports success/fail/cancel/pending/refund-fail scenarios. |
 
 ## Stage D — Identity & access
 Three token scopes. Roadmap SRV-03.
 
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
-| SRV-024 | Schemas/repositories: customers, members, installations, refreshTokens, admins (indexes per BUSINESS §3.1) | `feat/srv-024-schemas-auth` | SRV-012 | TODO |  |
+| SRV-024 | Schemas/repositories: customers, members, installations, refreshTokens, admins (indexes per BUSINESS §3.1) | `feat/srv-024-schemas-auth` | SRV-012 | IN REVIEW |  |
 | SRV-025 | JWT access tokens (short TTL from settings) + per-scope auth middleware (customer/merchant/admin never interchangeable) | `feat/srv-025-jwt` | SRV-024 | TODO | Customer token on merchant/admin route → `FORBIDDEN`; tests for all 3×3 combos. |
 | SRV-026 | Refresh tokens: hashed storage, rotation, family revocation on reuse, logout, logout-all | `feat/srv-026-refresh` | SRV-025 | TODO |  |
 | SRV-027 | OTP pre-check endpoint + platform limits (5 req/5 min → 15 min block; 5 wrong → 15 min block) + `otpLength` + resend timing; report-wrong-attempt endpoint | `feat/srv-027-otp-precheck` | SRV-014, SRV-022 | TODO | Values from settings; `OTP_BLOCKED`, `RATE_LIMITED` codes. |

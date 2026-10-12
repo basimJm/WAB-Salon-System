@@ -1,8 +1,13 @@
+import { AdminModel } from './admin.model';
 import { AreaModel } from './area.model';
 import { AuditLogModel } from './auditLog.model';
 import { CatalogServiceModel } from './catalogService.model';
 import { CityModel } from './city.model';
 import { CountryModel } from './country.model';
+import { CustomerModel } from './customer.model';
+import { InstallationModel } from './installation.model';
+import { MemberModel } from './member.model';
+import { RefreshTokenModel } from './refreshToken.model';
 import { ServerEventModel } from './serverEvent.model';
 import { SettingModel } from './setting.model';
 
@@ -18,4 +23,9 @@ export const ALL_MODELS = [
   CatalogServiceModel,
   AuditLogModel,
   ServerEventModel,
+  CustomerModel,
+  MemberModel,
+  InstallationModel,
+  RefreshTokenModel,
+  AdminModel,
 ] as const;

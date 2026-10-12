@@ -10,3 +10,40 @@ export type ActorType = (typeof ACTOR_TYPES)[number];
 /** Client platform (BUSINESS_DOMAIN.md §1 `Platform`). */
 export const PLATFORMS = ['ANDROID', 'IOS', 'WEB'] as const;
 export type Platform = (typeof PLATFORMS)[number];
+
+/** Languages of the apps and notifications (BUSINESS_DOMAIN.md §2). */
+export const LANGUAGES = ['ar', 'en'] as const;
+export type Language = (typeof LANGUAGES)[number];
+
+export const APP_KINDS = ['CUSTOMER', 'MERCHANT'] as const;
+export type AppKind = (typeof APP_KINDS)[number];
+
+export const CUSTOMER_STATUSES = ['ACTIVE', 'BLOCKED', 'DELETION_PENDING', 'DELETED'] as const;
+export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
+
+export const MEMBER_ROLES = ['OWNER', 'MANAGER', 'EMPLOYEE'] as const;
+export type MemberRole = (typeof MEMBER_ROLES)[number];
+
+/** The 15 per-feature permissions an owner grants (Merchant PRD §6). Owner-only capabilities are never stored. */
+export const PERMISSIONS = [
+  'DASHBOARD_VIEW',
+  'BOOKINGS_VIEW_ALL',
+  'BOOKINGS_VIEW_OWN',
+  'BOOKINGS_RESPOND',
+  'BOOKINGS_OPERATE',
+  'SALON_PROFILE_MANAGE',
+  'GALLERY_MANAGE',
+  'WORKING_HOURS_MANAGE',
+  'SERVICES_MANAGE',
+  'STAFF_MANAGE',
+  'POLICIES_MANAGE',
+  'REVIEWS_VIEW',
+  'STATISTICS_VIEW',
+  'FINANCE_VIEW',
+  'SUBSCRIPTION_VIEW',
+] as const;
+export type Permission = (typeof PERMISSIONS)[number];
+
+/** Who a refresh token belongs to. */
+export const SUBJECT_TYPES = ['CUSTOMER', 'MEMBER', 'ADMIN'] as const;
+export type SubjectType = (typeof SUBJECT_TYPES)[number];
