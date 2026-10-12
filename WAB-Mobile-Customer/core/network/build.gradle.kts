@@ -12,6 +12,7 @@ kotlin {
     }
     sourceSets.commonMain.dependencies {
         implementation(libs.bundles.network)
+        implementation(projects.core.common)
         implementation(projects.core.domain)
         implementation(projects.core.storage)
         implementation(libs.koin.core)

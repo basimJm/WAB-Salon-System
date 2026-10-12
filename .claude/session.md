@@ -348,7 +348,45 @@
 - Notes: Not in this task: 12-hour AM/PM text (ar: ص / م from `locales/`) and "numerals follow the active language" (both PRDs) → message-formatting/notification task; `settings.timezone` wiring → SRV-017. Assumption to confirm: salon hours never pass midnight (`close` later than `open` on the same day) — no document says otherwise; the schedule task enforces it. API docs: no change.
 - Next: SRV-017 (settings). Merge only after ALL CI checks green.
 
-### T-024 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
+### T-024 — WAB-Mobile-Customer project rules
+- Project: `WAB-Mobile-Customer/` (`CLAUDE.md`; link in root `CLAUDE.md`)
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: DONE
+- Acceptance criteria (user request: rules at WAB-Mobile-Customer level, after reading all md/.claude/root files):
+  - [x] Clean Architecture + MVI by delegate (`BaseViewModel : MVI by mvi(initialState)`; Contract/ViewModel/Screen layering) documented from the real code
+  - [x] No hardcoded values (strings, colors, dp/sp, URLs, numbers) with the allowed-literal list and CI enforcement
+  - [x] Arabic + English for every resource (same keys/placeholders, Arabic first)
+  - [x] Performance-first checklist (stability, lazy keys, draw-phase reads, lifecycle collection, R8, size budget)
+  - [x] All build variants: Android dev/prod x debug/release, iOS Debug/Release-Dev/Prod + schemes
+  - [x] Always run CI; no runtime/compile errors, no warnings; no file over 300 lines
+  - [x] Portrait + landscape, phones to tablets, font scale, RTL/LTR, light/dark
+  - [x] New branch per task; never push to `main` (cloud-pinned branch exception stated)
+  - [x] Mandatory-reading list covers root `CLAUDE.md`, every `.claude/*.md`, `AGENTS.md`, `TECHSTACK.md`, PRD/BRD/Design Script; real module map replaces the generated one in `AGENTS.md`
+  - [x] Linked from root `CLAUDE.md` (§6)
+- Tests: docs only (no source code); every module path, file and class named in the rules was checked against the repo
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — docs only. The rules also name artifacts that T-025..T-027 deliver (`scripts/ci/*`, `customer-ci.yml`, `config/budgets.json`, `LocalSizes`/`LocalElevation`/`LocalAdaptive`, `AppWindowSize`, `AppAdaptiveGrid`, the iOS `iosApp-Dev|Prod` schemes); T-027 records the final reconciliation of those names.
+- Notes: Branch is the cloud-pinned branch (restarted from `main` after PR #22 merged; exception to `<type>/<name>`). `AGENTS.md` is generated and points at a missing `PROJECT_STRUCTURE.md`; left untouched, CLAUDE.md §2 is the module map. Open: separate Firebase apps for dev (`applicationIdSuffix`) need the owner's Firebase dev project.
+
+### T-025 — Customer app build variants + CI (Android, iOS, security, lint, hardcode, performance)
+- Project: `WAB-Mobile-Customer/` (`build-logic`, `androidApp`, `iosApp`, `core/common`, `core/network`, `composeApp`, `scripts/ci`, `config`) + `.github/workflows/customer-ci.yml`
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (user request: CI that builds, checks security, lint, hardcoded values and performance for Android and iOS; all build variants dev[debug, release] and prod[debug, release] + iOS schemes; no warnings; files <= 300 lines):
+  - [x] Android flavors `dev`/`prod` x build types `debug`/`release` (AGP DSL checked against the 9.1 API reference); per-flavor `BuildConfig.API_BASE_URL`/`ENVIRONMENT` from `gradle.properties`/`local.properties`; dev app name override (AR+EN); release minified + shrunk (R8) with keep rules; Lint with `warningsAsErrors`
+  - [x] iOS configurations `Debug-Dev`, `Release-Dev`, `Debug-Prod`, `Release-Prod` (Xcode project parsed OK), shared schemes `iosApp-Dev`/`iosApp-Prod`, `Dev.xcconfig`/`Prod.xcconfig` -> Info.plist (`APP_ENV`, `API_BASE_URL`), `KOTLIN_FRAMEWORK_BUILD_TYPE`, Swift/Clang warnings as errors, AR+EN `InfoPlist.strings`
+  - [x] No hardcoded environment values: `AppEnvironment` (core/common) provided by Android `BuildConfig` / iOS Info.plist through Koin; removed `ApiConstants`, the hardcoded iOS URL, the stub `AppInfoProvider` (version "1.0.0") and a dead `ApiConfig`
+  - [x] Kotlin `allWarningsAsErrors` (opt-out only with `-PwarningsAsErrors=false`), `kotlin-test` + JVM host tests (`testAndroidHostTest`) for every KMP module
+  - [x] `scripts/ci/policy_checks.py`: file length (300), hardcoded colors/dimensions/texts/URLs/secrets/magic numbers, crash-prone and slow constructs (`!!`, `runBlocking`, lazy `items` without key, `collectAsState`...), AR/EN resource parity, variant wiring, config security (manifest, ATS, repositories, tracked secret files), release APK budget; ratchet baselines for legacy debt (may only shrink)
+  - [x] detekt 1.23.8 + Compose rules 0.4.22 (SHA-256 pinned downloads), SwiftLint, gitleaks
+  - [x] `customer-ci.yml`: policy, lint, secret-scan, Android matrix (assemble + lint + tests + R8/APK budget), iOS matrix (xcodebuild + Kotlin/Native tests + SwiftLint), one required `Customer CI passed` check
+  - [x] Security hardening: `allowBackup=false`, `usesCleartextTraffic=false`
+- Tests: `python3 -m unittest discover -s scripts/ci/tests` — 67 pass (policy lexer, hardcoded, quality, baseline, localization, file length, variants, security, budget, CLI, and the repository itself); `scripts/ci/run_detekt.sh` exit 0; `policy_checks.py all` ok; Kotlin `AppEnvironmentTest` (runs in CI)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT VERIFIED HERE: the sandbox cannot reach Google Maven/the Android SDK (`dl.google.com` is blocked by the egress policy), so Gradle (Android/iOS), Android Lint, R8 and `xcodebuild` have not run locally; the first CI run is the real compile. DECISIONS TO CONFIRM: (1) dev keeps the production application id/bundle id (a suffix needs a matching Firebase app; `DEV_APPLICATION_ID_SUFFIX`/`BUNDLE_ID_SUFFIX` are ready); (2) API hosts are PLACEHOLDERS until the platform domain is decided; (3) `allowBackup=false` and `usesCleartextTraffic=false` are new; (4) no dependency vulnerability scan yet (Gradle has no lockfile): recommend Dependabot alerts or Gradle dependency locking + OSV.
+- Notes: Legacy debt is in `config/policy-baseline.json` and `config/detekt/baseline.xml`; T-026/T-027 remove the design-system entries. Local runs: `scripts/ci/run_local_checks.sh`.
+
+### T-026 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
 - Project: `WAB-Server/` (`src/models/setting.model.ts`, `src/repositories/settings.repository.ts`, `src/domain/settings/*`, `src/constants/settings.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #22 merged)
 - Status: IN REVIEW
@@ -367,5 +405,5 @@
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-017a — next server task after T-024 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-017a — next server task after T-026 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

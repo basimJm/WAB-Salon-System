@@ -14,13 +14,15 @@ fun MainViewController() = ComposeUIViewController {
     App(null)
 }
 
+// Called from AppDelegate.swift, so the compiler sees no Kotlin caller.
 @Suppress("unused")
 fun initKoin() {
     startKoin {
-        modules(appModules)
+        modules(appModules + iosAppEnvironmentModule())
     }
 }
 
+// Called from AppDelegate.swift, so the compiler sees no Kotlin caller.
 @Suppress("unused")
 fun saveFcmToken(token: String) {
     val appSettings: AppSettings = KoinPlatform.getKoin().get()
