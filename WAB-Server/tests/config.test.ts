@@ -3,12 +3,31 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ConfigError, loadConfig, readEnvSources } from '../src/config';
 import { envSchema } from '../src/config/env.schema';
-import { DEFAULT_PORT, ENV_KEYS, PORT_MAX, envFileName } from '../src/constants/env';
+import {
+  DEFAULT_PORT,
+  ENV_KEYS,
+  PORT_MAX,
+  PROVIDER_ENV_KEYS,
+  envFileName,
+} from '../src/constants/env';
 
 const MONGO = 'mongodb://user:s3cret@localhost/wab';
 const REDIS = 'redis://localhost:6379';
 
-const REAL_PROVIDERS = { OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'real' };
+const REAL_PROVIDERS = {
+  OTP_PROVIDER: 'real',
+  STORAGE_PROVIDER: 'real',
+  NOTIFIER_PROVIDER: 'real',
+  PAYMENT_PROVIDER: 'real',
+  ANALYTICS_PROVIDER: 'real',
+};
+const ALL_FAKE_MODES = {
+  otp: 'fake',
+  storage: 'fake',
+  notifier: 'fake',
+  payments: 'fake',
+  analytics: 'fake',
+};
 
 const validEnv = (overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv => ({
   [ENV_KEYS.mongoUri]: MONGO,
@@ -44,31 +63,48 @@ describe('loadConfig', () => {
   });
 
   it('defaults every provider to the fake outside production', () => {
-    expect(loadConfig(validEnv()).providers).toEqual({ otp: 'fake', storage: 'fake' });
-    expect(loadConfig(validEnv({ NODE_ENV: 'test' })).providers).toEqual({
-      otp: 'fake',
-      storage: 'fake',
+    expect(loadConfig(validEnv()).providers).toEqual(ALL_FAKE_MODES);
+    expect(loadConfig(validEnv({ NODE_ENV: 'test' })).providers).toEqual(ALL_FAKE_MODES);
+  });
+
+  it.each([
+    [ENV_KEYS.otpProvider, 'otp'],
+    [ENV_KEYS.storageProvider, 'storage'],
+    [ENV_KEYS.notifierProvider, 'notifier'],
+    [ENV_KEYS.paymentProvider, 'payments'],
+    [ENV_KEYS.analyticsProvider, 'analytics'],
+  ] as const)('maps %s to providers.%s and nothing else', (key, field) => {
+    expect(loadConfig(validEnv({ [key]: 'real' })).providers).toEqual({
+      ...ALL_FAKE_MODES,
+      [field]: 'real',
     });
   });
 
-  it('reads the provider modes and rejects unknown ones', () => {
-    const config = loadConfig(validEnv({ OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'fake' }));
-    expect(config.providers).toEqual({ otp: 'real', storage: 'fake' });
-    expect(invalidKeysOf(validEnv({ OTP_PROVIDER: 'mock' }))).toEqual([ENV_KEYS.otpProvider]);
-    expect(invalidKeysOf(validEnv({ STORAGE_PROVIDER: '' }))).toEqual([ENV_KEYS.storageProvider]);
+  it('rejects unknown or empty provider modes', () => {
+    for (const key of PROVIDER_ENV_KEYS) {
+      expect(invalidKeysOf(validEnv({ [key]: 'mock' }))).toEqual([key]);
+      expect(invalidKeysOf(validEnv({ [key]: '' }))).toEqual([key]);
+    }
   });
 
   it('requires production to name every provider as real, never defaulting or faking', () => {
     const production = validEnv({ NODE_ENV: 'production' });
-    expect(invalidKeysOf(production)).toEqual([ENV_KEYS.otpProvider, ENV_KEYS.storageProvider]);
-    expect(
-      invalidKeysOf({ ...production, OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'fake' }),
-    ).toEqual([ENV_KEYS.storageProvider]);
-    expect(
-      invalidKeysOf({ ...production, OTP_PROVIDER: 'fake', STORAGE_PROVIDER: 'real' }),
-    ).toEqual([ENV_KEYS.otpProvider]);
-    const ok = loadConfig({ ...production, OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'real' });
-    expect(ok.providers).toEqual({ otp: 'real', storage: 'real' });
+    expect(invalidKeysOf(production)).toEqual([...PROVIDER_ENV_KEYS]);
+    for (const key of PROVIDER_ENV_KEYS) {
+      expect(invalidKeysOf({ ...production, ...REAL_PROVIDERS, [key]: 'fake' })).toEqual([key]);
+      const others = Object.fromEntries(
+        Object.entries(REAL_PROVIDERS).filter(([name]) => name !== key),
+      );
+      expect(invalidKeysOf({ ...production, ...others })).toEqual([key]);
+    }
+    const ok = loadConfig({ ...production, ...REAL_PROVIDERS });
+    expect(ok.providers).toEqual({
+      otp: 'real',
+      storage: 'real',
+      notifier: 'real',
+      payments: 'real',
+      analytics: 'real',
+    });
   });
 
   it('flags production', () => {

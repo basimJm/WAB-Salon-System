@@ -23,7 +23,13 @@ export interface AppConfig {
   readonly mongo: { readonly uri: string };
   readonly redis: { readonly url: string };
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
-  readonly providers: { readonly otp: ProviderMode; readonly storage: ProviderMode };
+  readonly providers: {
+    readonly otp: ProviderMode;
+    readonly storage: ProviderMode;
+    readonly notifier: ProviderMode;
+    readonly payments: ProviderMode;
+    readonly analytics: ProviderMode;
+  };
 }
 
 /** Thrown at startup when the environment is invalid. Names the bad keys, never their values. */
@@ -76,6 +82,9 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
     providers: Object.freeze({
       otp: values[ENV_KEYS.otpProvider] ?? DEFAULT_PROVIDER_MODE,
       storage: values[ENV_KEYS.storageProvider] ?? DEFAULT_PROVIDER_MODE,
+      notifier: values[ENV_KEYS.notifierProvider] ?? DEFAULT_PROVIDER_MODE,
+      payments: values[ENV_KEYS.paymentProvider] ?? DEFAULT_PROVIDER_MODE,
+      analytics: values[ENV_KEYS.analyticsProvider] ?? DEFAULT_PROVIDER_MODE,
     }),
   });
 };

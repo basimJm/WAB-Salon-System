@@ -530,7 +530,7 @@
 ### T-033 — SRV-022 Provider interfaces and fakes: OTP and storage
 - Project: `WAB-Server/` (`src/providers/{index.ts,otp/*,storage/*}`, `src/constants/providers.ts`, `src/config/*`, `.env.example`, `CLAUDE.md` §4, `README.md`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #32 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #33 merged into `server` by the user)
 - Acceptance criteria (BE/NFR: BE-01 / BE-07 phone + Firebase OTP via `wab-otp`, BE-70 presigned uploads via `wab-storage`, NFR-09; wab-otp BRD OTP-02/03/09, wab-storage BRD STO-01..05; backlog: typed interfaces/errors, fake implementation selected by config `*_PROVIDER=fake|real`; server rules §2 externals only through interfaces injected into services):
   - [x] `OtpProvider.verify({proof, expectedPhone, purpose})` → `VERIFIED(phone) | INVALID_PROOF | PHONE_MISMATCH | EXPIRED`; provider outage throws `ExternalServiceError` (never an outcome); E.164 phones
   - [x] `FakeOtpProvider` + `fakeOtpProof(phone, kind)` (valid / expired / invalid / provider-error); garbage proofs are `INVALID_PROOF`; a non-E.164 expected phone is a caller bug (`RangeError`)
@@ -561,5 +561,5 @@
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-023 — next server task after T-033 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-024 — next server task after T-034 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
