@@ -1,4 +1,5 @@
 import { createServer, type Server } from 'node:http';
+import type { Redis } from 'ioredis';
 import { createApp } from './app';
 import { loadConfig, type AppConfig } from './config';
 import {
@@ -7,6 +8,7 @@ import {
   disconnectMongo,
 } from './utils/database/connection';
 import type { ReadinessCheck } from './utils/health';
+import { connectRedis, createRedisReadinessCheck, disconnectRedis } from './utils/redis/client';
 import { createLogger, type Logger } from './utils/logger';
 import {
   createShutdown,
@@ -76,13 +78,20 @@ const main = async (): Promise<void> => {
   const config = loadConfig();
   const logger = createLogger({ level: config.logLevel });
   const mongo = await connectMongo(config, logger);
+  let redis: Redis | undefined;
   try {
+    redis = await connectRedis(config, logger);
+    const connected = redis;
     await startServer(config, logger, {
       proc: process,
-      closables: [{ name: 'mongodb', close: disconnectMongo }],
-      readinessChecks: [createMongoReadinessCheck(mongo)],
+      closables: [
+        { name: 'redis', close: () => disconnectRedis(connected) },
+        { name: 'mongodb', close: disconnectMongo },
+      ],
+      readinessChecks: [createMongoReadinessCheck(mongo), createRedisReadinessCheck(connected)],
     });
   } catch (error) {
+    if (redis) await disconnectRedis(redis);
     await disconnectMongo();
     throw error;
   }

@@ -9,6 +9,8 @@ interface Step {
   with?: Record<string, unknown>;
 }
 interface Job {
+  services?: Record<string, { image: string; ports: string[]; options: string }>;
+  env?: Record<string, string>;
   steps: Step[];
   'runs-on': string;
   'timeout-minutes'?: number;
@@ -61,6 +63,13 @@ describe('server CI workflow (SRV-010)', () => {
 
   it('audits production dependencies and fails on high severity', () => {
     expect(commands(workflow.jobs['verify'])).toContain('npm audit --omit=dev --audit-level=high');
+  });
+
+  it('provides a real Redis to the tests through REDIS_TEST_URL', () => {
+    const verify = workflow.jobs['verify'];
+    expect(verify?.services?.['redis']?.image).toMatch(/^redis:7/);
+    expect(verify?.services?.['redis']?.options).toContain('--health-cmd');
+    expect(verify?.env?.['REDIS_TEST_URL']).toBe('redis://127.0.0.1:6379');
   });
 
   it('uses the Node version the project requires', () => {

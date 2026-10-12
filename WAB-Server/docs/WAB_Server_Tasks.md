@@ -54,9 +54,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-008 | Swagger + Postman generation, `/docs`, docs-after-every-task rule | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-009 | Dockerfile + docker-compose for local development | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-010 | GitHub Actions CI (verify + secret scan) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-012 | MongoDB connection and base repository | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-012 | MongoDB connection and base repository | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-013 | Redis client and distributed lock helper | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-012 is merged: **SRV-013** (SRV-011 is PENDING).
+Next task to start after SRV-013 is merged: **SRV-014** (SRV-011 is PENDING).
 
 ---
 
@@ -86,8 +87,8 @@ Mongo/Redis plumbing, money/time, settings, seeds. Roadmap SRV-02.
 
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
-| SRV-012 | Mongo connection + base repository (typed CRUD, pagination, soft-delete) + test strategy | `feat/srv-012-mongo` | — | IN REVIEW | Tests must run offline: in-memory repository fakes for unit tests; `mongodb-memory-server` for integration tests only if it can be downloaded (no `mongod` binary on the cloud runner). |
-| SRV-013 | Redis client + distributed lock helper (acquire/renew/release, TTL) | `feat/srv-013-redis` | — | TODO | Used for staff/slot locks; tested with ioredis-mock or local `redis-server`. |
+| SRV-012 | Mongo connection + base repository (typed CRUD, pagination, soft-delete) + test strategy | `feat/srv-012-mongo` | — | DONE | Tests must run offline: in-memory repository fakes for unit tests; `mongodb-memory-server` for integration tests only if it can be downloaded (no `mongod` binary on the cloud runner). |
+| SRV-013 | Redis client + distributed lock helper (acquire/renew/release, TTL) | `feat/srv-013-redis` | — | IN REVIEW | Used for staff/slot locks; tested with ioredis-mock or local `redis-server`. |
 | SRV-014 | Redis counter/flag helpers for rate limits and blocks (TTL counters) | `feat/srv-014-ratelimit` | — | TODO | Generic `hit/limit/block` used by OTP, login and payments. |
 | SRV-015 | Money utils: integer fils, JOD 3-decimal string (de)serialization, half-up rounding | `feat/srv-015-money` | — | TODO | Never floats; property-style tests for rounding. |
 | SRV-016 | Time utils: UTC storage, Asia/Amman day boundaries, `HH:mm` parsing, DST-safe ranges | `feat/srv-016-time` | — | TODO | Config-driven timezone; tests around midnight/day change. |
