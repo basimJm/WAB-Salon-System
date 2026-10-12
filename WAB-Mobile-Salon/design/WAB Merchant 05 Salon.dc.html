@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button,textarea{font-family:inherit}
+input:focus,textarea:focus{outline:none}
+input::placeholder,textarea::placeholder{color:#9CA3AF}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes drop{0%{transform:translateY(-16px)}60%{transform:translateY(2px)}100%{transform:none}}
+@keyframes jiggle{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ isDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+
+<sc-if value="{{ on.hub }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px">
+  <sc-if value="{{ offline }}"><div style="margin:4px 14px 0;padding:9px 12px;border-radius:12px;background:rgba(217,70,122,.1);font-size:11.5px;color:var(--ink);display:flex;gap:8px;align-items:center;flex-shrink:0"><span style="width:7px;height:7px;border-radius:50%;background:#D9467A;flex-shrink:0"></span><span style="flex:1">{{ t.offlineMsg }}</span><a href="WAB Merchant 08 Finance More.dc.html?s=contact" style="font-weight:700;color:#D9467A">{{ t.contactShort }}</a></div></sc-if>
+  <div style="flex:1;overflow-y:auto;padding:8px 20px 20px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:22px;flex-shrink:0">{{ t.salon }}</div>
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:20px;border:1px solid var(--line);background:var(--card);flex-shrink:0">
+      <div style="width:56px;height:56px;border-radius:16px;overflow:hidden;flex-shrink:0"><image-slot compact="" id="{{ logoSlot }}" shape="rounded" radius="16" placeholder="+"></image-slot></div>
+      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15.5px">{{ salonName }}</div><div style="font-size:12px;color:var(--muted)">{{ typeLine }}</div></div>
+      <span style="{{ chip.style }}"><span style="{{ chip.dot }}"></span>{{ chip.label }}</span>
+    </div>
+    <sc-if value="{{ hubEmpty }}"><div style="padding:16px;border-radius:16px;background:var(--surface);font-size:13px;color:var(--muted);line-height:1.6;text-align:center">{{ t.noAccess }}</div></sc-if>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0">
+      <sc-for list="{{ tiles }}" as="x" hint-placeholder-count="10">
+        <a href="{{ x.href }}" style="{{ x.style }}">
+          <span style="display:flex;justify-content:space-between;align-items:flex-start">
+            <span style="width:40px;height:40px;border-radius:12px;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ x.d }}"></path></svg></span>
+            <sc-if value="{{ x.missing }}"><span style="font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:7px;background:rgba(217,70,122,.1);color:#D9467A">! {{ t.missing }}</span></sc-if>
+          </span>
+          <span style="display:block;font-weight:700;font-size:14px;color:var(--ink);margin-top:10px">{{ x.title }}</span>
+          <span style="display:block;font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.45">{{ x.sub }}</span>
+        </a>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex;padding:8px 6px 26px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0">
+    <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5"><a href="{{ tb.href }}" style="{{ tb.style }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ tb.d }}"></path></svg><span>{{ tb.label }}</span></a></sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ topbar.show }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;height:50px;padding:50px 10px 0;position:relative;flex-shrink:0;box-sizing:content-box">
+    <button onClick="{{ topbar.onBack }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:50px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;pointer-events:none">{{ topbar.title }}</div>
+    <div style="flex:1"></div>
+    <sc-if value="{{ topbar.hasAction }}"><button onClick="{{ topbar.onAction }}" style="height:40px;padding:0 12px;border:none;background:none;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;position:relative;z-index:1">{{ topbar.action }}</button></sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.profile }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:14px">
+    <div style="position:relative;flex-shrink:0;margin-bottom:34px">
+      <div style="height:180px;border-radius:20px;overflow:hidden;position:relative"><image-slot id="{{ coverSlot }}" shape="rect" placeholder="{{ t.coverPh }}"></image-slot></div>
+      <button onClick="{{ openCropCover }}" style="position:absolute;top:10px;inset-inline-end:10px;height:34px;padding:0 12px;border-radius:10px;border:none;background:rgba(20,23,43,.6);color:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"></path></svg>16:9</button>
+      <div style="position:absolute;bottom:-34px;inset-inline-start:18px;width:84px;height:84px;border-radius:50%;overflow:hidden;border:4px solid var(--bg);box-sizing:border-box;background:var(--surface)"><image-slot compact="" id="{{ logoSlot }}" shape="circle" placeholder="+"></image-slot></div>
+      <button onClick="{{ openCropLogo }}" style="position:absolute;bottom:-30px;inset-inline-start:80px;width:30px;height:30px;border-radius:50%;border:3px solid var(--bg);background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"></path></svg></button>
+    </div>
+    <sc-for list="{{ pf }}" as="f" hint-placeholder-count="2">
+      <div style="flex-shrink:0">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px"><span>{{ f.label }}</span><span style="color:var(--faint);font-weight:500">{{ f.count }}</span></div>
+        <sc-if value="{{ f.isArea }}"><textarea value="{{ f.value }}" onChange="{{ f.onChange }}" style="{{ f.taStyle }}"></textarea></sc-if>
+        <sc-if value="{{ f.isInput }}"><input value="{{ f.value }}" dir="{{ f.dir }}" onChange="{{ f.onChange }}" placeholder="{{ f.ph }}" style="{{ f.style }}"></sc-if>
+        <sc-if value="{{ f.err }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ f.errMsg }}</div></sc-if>
+      </div>
+    </sc-for>
+    <div style="flex-shrink:0">
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.location }}</div>
+      <button onClick="{{ openMap }}" style="{{ mapCard }}">
+        <span style="position:absolute;inset:0;background:linear-gradient(0deg,var(--map1) 0,var(--map1) 100%);background-image:linear-gradient(90deg,var(--mapline) 1px,transparent 1px),linear-gradient(0deg,var(--mapline) 1px,transparent 1px);background-size:34px 34px"></span>
+        <span style="position:absolute;left:-10%;right:-10%;top:46%;height:12px;background:var(--maproad);transform:rotate(-8deg)"></span>
+        <span style="position:absolute;top:-10%;bottom:-10%;left:58%;width:10px;background:var(--maproad);transform:rotate(12deg)"></span>
+        <span style="position:absolute;left:50%;top:42%;transform:translate(-50%,-100%);color:#6D28D9"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12zm0-9a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"></path></svg></span>
+        <span style="position:absolute;bottom:8px;inset-inline-start:8px;inset-inline-end:8px;padding:8px 10px;border-radius:10px;background:var(--card);font-size:12px;font-weight:600;color:var(--ink);display:flex;justify-content:space-between;align-items:center;text-align:start"><span>{{ locText }}</span><span style="color:var(--accent)">{{ t.change }}</span></span>
+      </button>
+      <sc-if value="{{ errLoc }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.locErr }}</div></sc-if>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0">
+      <div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.city }}</div><div style="{{ roField }}">{{ cityName }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--faint)"><path d="M6 9l6 6 6-6"></path></svg></div></div>
+      <div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.area }}</div><div style="{{ roField }}">{{ areaName }}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--faint)"><path d="M6 9l6 6 6-6"></path></svg></div></div>
+    </div>
+    <sc-for list="{{ pf2 }}" as="f" hint-placeholder-count="3">
+      <div style="flex-shrink:0">
+        <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ f.label }}</div>
+        <input value="{{ f.value }}" dir="{{ f.dir }}" onChange="{{ f.onChange }}" placeholder="{{ f.ph }}" style="{{ f.style }}">
+        <sc-if value="{{ f.err }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ f.errMsg }}</div></sc-if>
+      </div>
+    </sc-for>
+    <div style="flex-shrink:0">
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.stype }}</div>
+      <div style="{{ roField }}"><span>{{ typeName }}</span><span style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--faint)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path></svg>{{ t.locked }}</span></div>
+    </div>
+    <button onClick="{{ openPreview }}" style="height:48px;border-radius:14px;border:1.5px solid #D8B4FE;background:var(--soft);color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>{{ t.preview }}</button>
+  </div>
+  <div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0"><button onClick="{{ saveProfile }}" style="{{ saveBtn }}"><sc-if value="{{ saving }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if><sc-if value="{{ notSaving }}">{{ t.save }}</sc-if></button></div>
+</sc-if>
+
+<sc-if value="{{ on.map }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;position:relative;overflow:hidden;--mapline:rgba(109,40,217,.07)">
+    <div style="position:absolute;inset:0;background:var(--map1);background-image:linear-gradient(90deg,var(--mapline) 1px,transparent 1px),linear-gradient(0deg,var(--mapline) 1px,transparent 1px);background-size:44px 44px"></div>
+    <div style="position:absolute;left:-20%;right:-20%;top:38%;height:18px;background:var(--maproad);transform:rotate(-8deg)"></div>
+    <div style="position:absolute;left:-20%;right:-20%;top:70%;height:12px;background:var(--maproad);transform:rotate(4deg)"></div>
+    <div style="position:absolute;top:-10%;bottom:-10%;left:62%;width:14px;background:var(--maproad);transform:rotate(12deg)"></div>
+    <div style="position:absolute;top:-10%;bottom:-10%;left:22%;width:10px;background:var(--maproad);transform:rotate(-6deg)"></div>
+    <div style="position:absolute;left:30%;top:14%;width:90px;height:60px;border-radius:14px;background:rgba(46,158,120,.16)"></div>
+    <div style="position:absolute;left:50%;top:46%;transform:translate(-50%,-100%);color:#6D28D9;animation:drop .5s ease both"><svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12zm0-9a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"></path></svg></div>
+    <div style="position:absolute;left:50%;top:46%;width:14px;height:6px;margin-left:-7px;border-radius:50%;background:rgba(0,0,0,.2)"></div>
+    <div style="position:absolute;top:110px;left:16px;right:16px;display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:14px;background:var(--card);box-shadow:0 10px 26px rgba(31,34,51,.14)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint)"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.5-4.5"></path></svg><input placeholder="{{ t.searchPlace }}" style="flex:1;border:none;background:transparent;color:var(--ink);font-size:14px"></div>
+    <button onClick="{{ useMyLoc }}" style="position:absolute;bottom:200px;inset-inline-end:16px;height:44px;padding:0 14px;border-radius:14px;border:none;background:var(--card);color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 10px 26px rgba(31,34,51,.14)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>{{ t.useMine }}</button>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:18px 20px 30px;border-radius:24px 24px 0 0;background:var(--card);box-shadow:0 -10px 30px rgba(31,34,51,.1)">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">{{ t.pinHint }}</div>
+      <div style="font-weight:700;font-size:15px;margin-bottom:14px">{{ locText }}</div>
+      <button onClick="{{ confirmMap }}" style="width:100%;height:52px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;cursor:pointer">{{ t.confirmLoc }}</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.preview }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column">
+    <div style="margin:0 16px 10px;padding:8px 12px;border-radius:12px;background:var(--soft);color:var(--accent);font-size:12px;font-weight:600;text-align:center;flex-shrink:0">{{ t.previewNote }}</div>
+    <div style="height:220px;position:relative;flex-shrink:0"><image-slot id="{{ coverSlot }}" shape="rect" placeholder="{{ t.coverPh }}"></image-slot></div>
+    <div style="margin-top:-26px;border-radius:26px 26px 0 0;background:var(--bg);position:relative;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="width:58px;height:58px;border-radius:50%;overflow:hidden;flex-shrink:0;border:3px solid var(--soft)"><image-slot compact="" id="{{ logoSlot }}" shape="circle" placeholder="+"></image-slot></div>
+        <div style="flex:1;min-width:0"><div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:20px">{{ pv.name }}</div><div style="font-size:12.5px;color:var(--muted)">{{ pv.area }}</div></div>
+        <span style="font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:8px;color:#2E9E78;background:rgba(46,158,120,.12)">{{ t.openNow }}</span>
+      </div>
+      <div style="display:flex;gap:14px;font-size:13px"><span style="font-weight:700">★ 4.8 <span style="color:var(--muted);font-weight:500">(126)</span></span><span style="color:var(--muted)">{{ pv.type }}</span></div>
+      <div style="font-size:13.5px;line-height:1.7;color:var(--ink)">{{ pv.desc }}</div>
+      <div style="display:flex;gap:6px;overflow:hidden">
+        <sc-for list="{{ pvTabs }}" as="x" hint-placeholder-count="4"><span style="{{ x.style }}">{{ x.label }}</span></sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="height:44px;border-radius:12px;background:var(--soft);color:var(--accent);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center">{{ t.call }}</div><div style="height:44px;border-radius:12px;background:rgba(46,158,120,.12);color:#2E9E78;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center">WhatsApp</div></div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.gallery }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 16px 20px;display:flex;flex-direction:column;gap:10px">
+    <sc-if value="{{ galEmpty }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px">
+        <div style="width:110px;height:110px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--accent)"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h16v14H4zM4 15l4.5-4.5 4 4 3-3L20 16M15.5 9.5h.01"></path></svg></div>
+        <div style="font-weight:700;font-size:17px;margin-bottom:6px">{{ t.galEmptyT }}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">{{ t.galEmptyB }}</div>
+        <button onClick="{{ addMedia }}" style="height:48px;padding:0 26px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">+ {{ t.addMedia }}</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ galHas }}">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0"><span style="font-size:12.5px;color:var(--muted)">{{ galCount }}</span><sc-if value="{{ galMode.reorder }}"><span style="font-size:12px;font-weight:700;color:var(--accent)">{{ t.dragHint }}</span></sc-if><sc-if value="{{ galMode.select }}"><span style="font-size:12px;font-weight:700;color:var(--accent)">{{ selCount }}</span></sc-if></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex-shrink:0">
+        <sc-for list="{{ media }}" as="m" hint-placeholder-count="9">
+          <button onClick="{{ m.onClick }}" style="{{ m.style }}">
+            <span style="position:absolute;inset:0"><image-slot compact="" id="{{ m.slot }}" shape="rect" placeholder="+"></image-slot></span>
+            <sc-if value="{{ m.video }}"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none"><span style="width:34px;height:34px;border-radius:50%;background:rgba(20,23,43,.55);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg></span></span><span dir="ltr" style="position:absolute;bottom:5px;right:6px;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5);pointer-events:none">0:{{ m.dur }}</span></sc-if>
+            <sc-if value="{{ m.up }}"><span style="position:absolute;inset:0;background:rgba(20,23,43,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;font-size:12px;font-weight:700;pointer-events:none"><span dir="ltr">{{ m.pct }}</span><span style="width:70%;height:4px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden"><span style="{{ m.bar }}"></span></span></span></sc-if>
+            <sc-if value="{{ m.fail }}"><span style="position:absolute;inset:0;background:rgba(217,70,122,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;font-size:11.5px;font-weight:700">↻<span>{{ t.retry }}</span></span></sc-if>
+            <sc-if value="{{ m.showNum }}"><span style="position:absolute;top:5px;inset-inline-start:5px;width:22px;height:22px;border-radius:50%;background:rgba(20,23,43,.6);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:none">{{ m.n }}</span></sc-if>
+            <sc-if value="{{ m.showSel }}"><span style="{{ m.selStyle }}"><sc-if value="{{ m.sel }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if></span></sc-if>
+            <sc-if value="{{ m.cover }}"><span style="position:absolute;bottom:5px;inset-inline-start:5px;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:5px;background:#fff;color:#6D28D9;pointer-events:none">{{ t.first }}</span></sc-if>
+          </button>
+        </sc-for>
+        <sc-if value="{{ galMode.normal }}"><button onClick="{{ addMedia }}" style="aspect-ratio:1;border-radius:12px;border:1.5px dashed #D8B4FE;background:var(--card);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-size:12px;font-weight:700"><span style="font-size:22px;line-height:1">+</span>{{ t.add }}</button></sc-if>
+      </div>
+      <div style="font-size:11.5px;color:var(--faint);line-height:1.6;flex-shrink:0">{{ t.galHint }}</div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ galBar }}">
+    <div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <sc-if value="{{ galMode.select }}"><button onClick="{{ cancelMode }}" style="height:50px;border-radius:14px;border:1.5px solid var(--line);background:none;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer">{{ t.cancel }}</button><button onClick="{{ askDelete }}" style="{{ delBtn }}">{{ delLabel }}</button></sc-if>
+      <sc-if value="{{ galMode.reorder }}"><button onClick="{{ cancelMode }}" style="height:50px;border-radius:14px;border:1.5px solid var(--line);background:none;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer">{{ t.cancel }}</button><button onClick="{{ saveOrder }}" style="height:50px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">{{ t.saveOrder }}</button></sc-if>
+      <sc-if value="{{ galMode.normal }}"><button onClick="{{ startReorder }}" style="height:50px;border-radius:14px;border:none;background:var(--soft);color:var(--accent);font-size:14px;font-weight:700;cursor:pointer">⇅ {{ t.reorder }}</button><button onClick="{{ startSelect }}" style="height:50px;border-radius:14px;border:none;background:var(--soft);color:var(--accent);font-size:14px;font-weight:700;cursor:pointer">{{ t.select }}</button></sc-if>
+    </div>
+  </sc-if>
+</sc-if>
+
+<sc-if value="{{ on.hours }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:var(--surface);flex-shrink:0"><sc-for list="{{ hTabs }}" as="x" hint-placeholder-count="2"><button onClick="{{ x.onClick }}" style="{{ x.style }}">{{ x.label }}</button></sc-for></div>
+    <sc-if value="{{ hTab.week }}">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0"><span style="font-size:12.5px;color:var(--muted)">{{ t.weekHint }}</span><button onClick="{{ copyAll }}" style="height:34px;padding:0 12px;border-radius:10px;border:none;background:var(--soft);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer">⧉ {{ t.copyAll }}</button></div>
+      <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+        <div style="{{ d.style }}">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="flex:1;font-weight:700;font-size:14px">{{ d.name }}</span>
+            <sc-if value="{{ d.off }}"><span style="font-size:12.5px;color:var(--faint);font-weight:600">{{ t.closed }}</span></sc-if>
+            <button onClick="{{ d.toggle }}" style="{{ d.track }}"><span style="{{ d.knob }}"></span></button>
+          </div>
+          <sc-if value="{{ d.open }}">
+            <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-top:10px">
+              <button onClick="{{ d.pickFrom }}" style="{{ d.fromStyle }}"><span style="font-size:10.5px;color:var(--muted);font-weight:500">{{ t.from }}</span>{{ d.from }}</button>
+              <span style="color:var(--faint)">—</span>
+              <button onClick="{{ d.pickTo }}" style="{{ d.toStyle }}"><span style="font-size:10.5px;color:var(--muted);font-weight:500">{{ t.to }}</span>{{ d.to }}</button>
+            </div>
+            <sc-if value="{{ d.err }}"><div style="color:#D9467A;font-size:11.5px;margin-top:6px">{{ t.hoursErr }}</div></sc-if>
+          </sc-if>
+        </div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{ hTab.closures }}">
+      <div style="font-size:12.5px;color:var(--muted);line-height:1.6;flex-shrink:0">{{ t.closuresHint }}</div>
+      <sc-if value="{{ noClosures }}"><div style="padding:30px 16px;border-radius:18px;background:var(--surface);text-align:center;font-size:13px;color:var(--muted)">{{ t.noClosures }}</div></sc-if>
+      <sc-for list="{{ closures }}" as="c" hint-placeholder-count="2">
+        <div style="{{ c.style }}">
+          <span style="width:44px;height:44px;border-radius:12px;background:var(--soft);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;line-height:1.1"><span style="font-size:16px;font-weight:700">{{ c.d }}</span><span style="font-size:9.5px;font-weight:600">{{ c.mo }}</span></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:14px">{{ c.range }}</span><span style="display:block;font-size:12px;color:var(--muted)">{{ c.reason }}</span></span>
+          <button onClick="{{ c.onDel }}" style="width:38px;height:38px;border-radius:10px;border:none;background:rgba(217,70,122,.08);color:#D9467A;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"></path></svg></button>
+        </div>
+      </sc-for>
+      <button onClick="{{ openClosure }}" style="height:50px;border-radius:14px;border:1.5px dashed #D8B4FE;background:var(--card);color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0">+ {{ t.addClosure }}</button>
+    </sc-if>
+  </div>
+  <sc-if value="{{ hTab.week }}"><div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0"><button onClick="{{ saveHours }}" style="{{ hoursBtn }}">{{ t.save }}</button></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ sheetOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:40;background:rgba(10,8,20,.5);display:flex;flex-direction:column;justify-content:flex-end">
+    <div onClick="{{ closeSheet }}" style="flex:1"></div>
+    <div style="background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 30px;animation:sheetUp .3s ease both;max-height:86%;overflow-y:auto;box-sizing:border-box">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px"></div>
+      <sc-if value="{{ sh.crop }}">
+        <div style="font-weight:700;font-size:17px;margin-bottom:12px">{{ cropTitle }}</div>
+        <div style="{{ cropBox }}">
+          <span style="position:absolute;inset:0"><image-slot id="{{ cropSlot }}" shape="rect" placeholder="+"></image-slot></span>
+          <span style="{{ cropFrame }}"><span style="position:absolute;inset:0;background-image:linear-gradient(90deg,transparent 33%,rgba(255,255,255,.6) 33%,rgba(255,255,255,.6) calc(33% + 1px),transparent calc(33% + 1px),transparent 66%,rgba(255,255,255,.6) 66%,rgba(255,255,255,.6) calc(66% + 1px),transparent calc(66% + 1px)),linear-gradient(0deg,transparent 33%,rgba(255,255,255,.6) 33%,rgba(255,255,255,.6) calc(33% + 1px),transparent calc(33% + 1px),transparent 66%,rgba(255,255,255,.6) 66%,rgba(255,255,255,.6) calc(66% + 1px),transparent calc(66% + 1px))"></span></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 18px"><span style="font-size:12px;color:var(--muted)">−</span><div style="flex:1;height:4px;border-radius:2px;background:var(--line);position:relative"><div style="position:absolute;inset-inline-start:0;width:40%;height:100%;border-radius:2px;background:#A855F7"></div><div style="position:absolute;inset-inline-start:40%;top:-8px;width:20px;height:20px;margin-inline-start:-10px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div></div><span style="font-size:12px;color:var(--muted)">+</span></div>
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px"><button onClick="{{ closeSheet }}" style="height:50px;border-radius:14px;border:1.5px solid var(--line);background:none;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer">{{ t.cancel }}</button><button onClick="{{ applyCrop }}" style="height:50px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">{{ t.useImage }}</button></div>
+      </sc-if>
+      <sc-if value="{{ sh.time }}">
+        <div style="font-weight:700;font-size:17px;margin-bottom:4px">{{ timeTitle }}</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px">{{ timeSub }}</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:260px;overflow-y:auto">
+          <sc-for list="{{ timeOpts }}" as="o" hint-placeholder-count="16"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sh.closure }}">
+        <div style="font-weight:700;font-size:17px;margin-bottom:4px">{{ t.addClosure }}</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;line-height:1.6">{{ t.closureSub }}</div>
+        <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">{{ t.dates }}</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px"><sc-for list="{{ calDow }}" as="w" hint-placeholder-count="7"><span style="text-align:center;font-size:10.5px;color:var(--faint);font-weight:600">{{ w }}</span></sc-for></div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px"><sc-for list="{{ calDays }}" as="c" hint-placeholder-count="14"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.n }}</button></sc-for></div>
+        <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.reasonL }}</div>
+        <input value="{{ closureReason }}" onChange="{{ onClosureReason }}" placeholder="{{ t.reasonPh }}" style="width:100%;box-sizing:border-box;height:50px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:14.5px;margin-bottom:16px">
+        <button onClick="{{ submitClosure }}" style="{{ closureBtn }}"><sc-if value="{{ checking }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if><sc-if value="{{ notChecking }}">{{ t.addClosure }}</sc-if></button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ dlg.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;background:rgba(10,8,20,.5);display:flex;align-items:center;justify-content:center;padding:24px">
+    <div style="background:var(--card);border-radius:24px;padding:22px 18px 16px;width:100%;animation:fadeUp .25s ease both;box-shadow:0 30px 60px rgba(0,0,0,.25);max-height:80%;overflow-y:auto;box-sizing:border-box">
+      <div style="{{ dlg.iconStyle }}">{{ dlg.icon }}</div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px;text-align:center">{{ dlg.title }}</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;text-align:center">{{ dlg.body }}</div>
+      <sc-if value="{{ dlg.hasList }}">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+          <sc-for list="{{ dlg.list }}" as="r"><div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface);font-size:12.5px"><span style="flex:1;min-width:0"><span style="display:flex;align-items:center;gap:5px;font-weight:700">{{ r.cust }}<sc-if value="{{ r.bride }}"><span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:linear-gradient(135deg,#B83268,#D9467A);color:#fff">{{ t.bride }}</span></sc-if></span><span style="display:block;color:var(--muted)">{{ r.when }}</span></span><span dir="ltr" style="font-size:11px;color:var(--faint)">{{ r.ref }}</span></div></sc-for>
+        </div>
+        <div style="padding:10px 12px;border-radius:12px;background:rgba(46,158,120,.1);color:#2E9E78;font-size:12px;font-weight:600;margin-bottom:12px">{{ t.conflictRefund }}</div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ dlg.onPrimary }}" style="{{ dlg.primaryStyle }}">{{ dlg.primary }}</button>
+        <sc-if value="{{ dlg.hasAlt }}"><button onClick="{{ dlg.onAlt }}" style="height:48px;border-radius:14px;border:none;background:var(--soft);color:var(--accent);font-size:14px;font-weight:700;cursor:pointer">{{ dlg.alt }}</button></sc-if>
+        <button onClick="{{ closeDlg }}" style="height:44px;border-radius:14px;border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer">{{ dlg.secondary }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:20px;right:20px;bottom:110px;z-index:60;padding:13px 16px;border-radius:14px;background:#1F2233;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;animation:fadeUp .25s ease both;box-shadow:0 14px 30px rgba(0,0,0,.25)"><span style="width:22px;height:22px;border-radius:50%;background:#2E9E78;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>{{ toast }}</div>
+</sc-if>
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Business · Merchant</div><div style="font-size:11.5px;color:#6B7280">05 · Salon (M12–M15)</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="9"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="5"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="4"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+  <div style="font-size:11px;color:#6B7280;line-height:1.55;background:#F8F7FB;border-radius:10px;padding:10px">Drop real photos onto any image slot (cover, logo, gallery) — they persist. Closure on Oct 10 conflicts with the bridal booking; any other date saves directly.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wabm_proto_settings';
+const CUR='WAB Merchant 05 Salon.dc.html';
+const FILES=[['01 Onboarding','WAB Merchant 01 Onboarding.dc.html'],['02 Home','WAB Merchant 02 Home.dc.html'],['03 Bookings','WAB Merchant 03 Bookings.dc.html'],['04 Calendar','WAB Merchant 04 Calendar.dc.html'],['05 Salon','WAB Merchant 05 Salon.dc.html'],['06 Services & Team','WAB Merchant 06 Services Team.dc.html'],['07 Policies & Insights','WAB Merchant 07 Policies Insights.dc.html'],['08 Finance & More','WAB Merchant 08 Finance More.dc.html'],['Ad','WAB Merchant Ad.dc.html']];
+const CTRL=[['lang','Language',[['ar','AR'],['en','EN']]],['theme','Theme',[['light','Light'],['dark','Dark']]],['role','Role',[['owner','Owner'],['manager','Manager'],['employee','Employee']]],['gender','Salon',[['female','Women'],['male','Men']]],['sstate','State',[['live','Live'],['offline','Offline'],['incomplete','Incompl.']]]];
+const ALLP=['DASHBOARD_VIEW','BOOKINGS_VIEW_ALL','BOOKINGS_VIEW_OWN','BOOKINGS_RESPOND','BOOKINGS_OPERATE','SALON_PROFILE_MANAGE','GALLERY_MANAGE','WORKING_HOURS_MANAGE','SERVICES_MANAGE','STAFF_MANAGE','POLICIES_MANAGE','REVIEWS_VIEW','STATISTICS_VIEW','FINANCE_VIEW','SUBSCRIPTION_VIEW','TEAM_MANAGE','PAYOUT_DETAILS_MANAGE','SALON_DELETE_REQUEST'];
+const PERMS={owner:ALLP,manager:ALLP.filter(k=>!['FINANCE_VIEW','POLICIES_MANAGE','TEAM_MANAGE','PAYOUT_DETAILS_MANAGE','SALON_DELETE_REQUEST','BOOKINGS_VIEW_OWN'].includes(k)),employee:['DASHBOARD_VIEW','BOOKINGS_VIEW_OWN','REVIEWS_VIEW']};
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1','--shim':d?'#252946':'#EFEBF7','--shim2':d?'#323760':'#F9F7FD','--map1':d?'#1E2240':'#F1EEF7','--mapline':d?'rgba(255,255,255,.05)':'rgba(109,40,217,.06)','--maproad':d?'#2B3058':'#FFFFFF'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+function btn(on,bg){return {width:'100%',height:'54px',borderRadius:'14px',border:'none',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:on?(bg||'linear-gradient(135deg,#6D28D9,#A855F7)'):'var(--soft)',color:on?'#fff':'var(--faint)',fontSize:'15px',fontWeight:600,cursor:on?'pointer':'default',boxShadow:on&&!bg?'0 10px 24px rgba(109,40,217,.28)':'none'}}
+function field(err){return {width:'100%',boxSizing:'border-box',height:'52px',padding:'0 14px',background:'var(--card)',border:'1.5px solid '+(err?'#D9467A':'var(--line)'),borderRadius:'14px',color:'var(--ink)',fontSize:'15px'}}
+function sw(on){return {track:{width:'46px',height:'28px',borderRadius:'14px',border:'none',padding:0,background:on?'#A855F7':'var(--line)',position:'relative',flexShrink:0,cursor:'pointer',transition:'background .2s'},knob:{position:'absolute',top:'3px',insetInlineStart:on?'21px':'3px',width:'22px',height:'22px',borderRadius:'50%',background:'#fff',boxShadow:'0 2px 4px rgba(0,0,0,.2)',transition:'all .2s'}}}
+const TABD=[['home','M4 11.5 12 4l8 7.5M6 10v9.5h12V10','WAB Merchant 02 Home.dc.html?s=home','DASHBOARD_VIEW'],['book','M8 6h11M8 12h11M8 18h11M4 6h.01M4 12h.01M4 18h.01','WAB Merchant 03 Bookings.dc.html?s=pending','BOOK'],['cal','M5 6h14v14H5zM5 10.5h14M9 3.5v4M15 3.5v4','WAB Merchant 04 Calendar.dc.html?s=day','BOOK'],['salon','M4 9.5 5.5 4h13L20 9.5M4 9.5h16M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0M5.5 12v8h13v-8','WAB Merchant 05 Salon.dc.html?s=hub','MGMT'],['more','M4 6h16M4 12h16M4 18h16','WAB Merchant 08 Finance More.dc.html?s=more','ANY']];
+function can(perms,k){if(k==='ANY')return true;if(k==='BOOK')return perms.includes('BOOKINGS_VIEW_ALL')||perms.includes('BOOKINGS_VIEW_OWN');if(k==='MGMT')return ['SALON_PROFILE_MANAGE','SERVICES_MANAGE','STAFF_MANAGE','REVIEWS_VIEW','STATISTICS_VIEW','TEAM_MANAGE'].some(p=>perms.includes(p));return perms.includes(k)}
+function tabs(active,t,perms){return TABD.filter(x=>can(perms,x[3])).map(([k,d,href])=>({d,href,label:t.tab[k],style:{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px',padding:'6px 0',fontSize:'11px',fontWeight:k===active?700:500,color:k===active?'var(--accent)':'var(--faint)'}}))}
+const TILES=[['profile','M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5a7.5 7.5 0 0 1 15 0','SALON_PROFILE_MANAGE','WAB Merchant 05 Salon.dc.html?s=profile'],['gallery','M4 5h16v14H4zM4 15l4.5-4.5 4 4 3-3L20 16','GALLERY_MANAGE','WAB Merchant 05 Salon.dc.html?s=gallery'],['hours','M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z','WORKING_HOURS_MANAGE','WAB Merchant 05 Salon.dc.html?s=hours'],['services','M6 4l6 8M18 4l-6 8M12 12v8M8 20h8','SERVICES_MANAGE','WAB Merchant 06 Services Team.dc.html?s=services'],['team','M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 6.5M21.5 20a6.5 6.5 0 0 0-4-6','STAFF_MANAGE','WAB Merchant 06 Services Team.dc.html?s=team'],['policies','M6 3h9l4 4v14H6zM9 12h7M9 16h5','POLICIES_MANAGE','WAB Merchant 07 Policies Insights.dc.html?s=policies'],['reviews','M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z','REVIEWS_VIEW','WAB Merchant 07 Policies Insights.dc.html?s=reviews'],['stats','M4 20V10M10 20V4M16 20v-7M22 20H2','STATISTICS_VIEW','WAB Merchant 07 Policies Insights.dc.html?s=stats'],['finance','M3 7h18v12H3zM3 11h18M7 15h3','FINANCE_VIEW','WAB Merchant 08 Finance More.dc.html?s=finance'],['sub','M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 15.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z','SUBSCRIPTION_VIEW','WAB Merchant 08 Finance More.dc.html?s=subActive']];
+const DAYS={ar:['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'],en:['Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday']};
+const D={ar:{tab:{home:'الرئيسية',book:'الحجوزات',cal:'التقويم',salon:'الصالون',more:'المزيد'},offlineMsg:'صالونك غير ظاهر للزبائن حالياً. تواصل مع WAB لإعادة التفعيل',contactShort:'تواصل',salon:'إدارة الصالون',missing:'ناقص',noAccess:'لا تملك صلاحيات لإدارة الصالون. تواصل مع المالك.',
+tiles:{profile:['الملف والصور','الاسم، الوصف، الموقع والتواصل'],gallery:['المعرض','24 صورة · 3 فيديو'],hours:['ساعات العمل','والإغلاقات المؤقتة'],services:['الخدمات','12 خدمة مفعّلة'],team:['الطاقم والفريق','5 أعضاء · 4 يقدمون خدمات'],policies:['السياسات','الإلغاء، الدفع، العربون'],reviews:['التقييمات','★ 4.8 · 126 تقييم'],stats:['الإحصائيات','الحجوزات والإيرادات'],finance:['المالية','الرصيد، المعاملات، الدفعات'],sub:['الاشتراك والحالة','فترة مجانية · 5 أيام']},
+chip:{live:'مباشر',offline:'غير متصل',incomplete:'غير مكتمل'},women:'صالون نسائي',men:'صالون رجالي',
+profileT:'الملف والصور',name:'اسم الصالون',desc:'الوصف',location:'الموقع على الخريطة',change:'تغيير',city:'المدينة',area:'المنطقة',phone:'رقم الهاتف',wa:'واتساب (اختياري)',locText:'شارع عبدون الرئيسي، بجانب دوار عبدون',stype:'نوع الصالون',locked:'لا يمكن تغييره',preview:'معاينة كما يراه الزبون',save:'حفظ التغييرات',saved:'تم حفظ التغييرات',coverPh:'صورة الغلاف 16:9',reqErr:'هذا الحقل مطلوب',phoneErr:'رقم الهاتف غير صحيح',locErr:'حدّد موقع الصالون على الخريطة',
+mapT:'الموقع على الخريطة',searchPlace:'ابحث عن عنوان أو معلم',useMine:'استخدم موقعي',pinHint:'حرّك الخريطة لتثبيت الدبوس على مدخل الصالون',confirmLoc:'تأكيد الموقع',previewT:'معاينة',previewNote:'هكذا يظهر صالونك للزبائن في تطبيق WAB',openNow:'مفتوح الآن',call:'اتصال',pvTabs:['الخدمات','الطاقم','المعرض','التقييمات'],
+cropCover:'قص صورة الغلاف (16:9)',cropLogo:'قص الصورة الشخصية (1:1)',useImage:'استخدام الصورة',cancel:'إلغاء',unsavedT:'لديك تغييرات غير محفوظة',unsavedB:'هل تريد حفظ التغييرات قبل المغادرة؟',saveLeave:'حفظ والخروج',discard:'تجاهل التغييرات',stay:'متابعة التعديل',
+galleryT:'المعرض',galEmptyT:'أضف أعمالك',galEmptyB:'الصور والفيديوهات تساعد الزبائن على اختيار صالونك. أضف أفضل أعمالك.',addMedia:'إضافة صور وفيديو',add:'إضافة',retry:'إعادة',first:'الأولى',galHint:'حتى 50 صورة (10 ميغابايت) و10 فيديوهات (60 ثانية). أول صورة تظهر أولاً للزبائن.',reorder:'إعادة الترتيب',select:'تحديد',saveOrder:'حفظ الترتيب',dragHint:'اسحب لإعادة الترتيب',selected:'محدد',del:'حذف',delT:'حذف {n} عناصر؟',delB:'سيتم حذفها من معرض صالونك ولن تظهر للزبائن.',deleted:'تم الحذف',orderSaved:'تم حفظ الترتيب',items:'عنصر',
+hoursT:'ساعات العمل',weekTab:'الأسبوع',closTab:'الإغلاقات',weekHint:'حدد أيام وساعات العمل',copyAll:'نسخ لكل الأيام',closed:'مغلق',from:'من',to:'إلى',hoursErr:'وقت الإغلاق يجب أن يكون بعد وقت الفتح',copied:'تم نسخ ساعات السبت لكل أيام العمل',hoursSaved:'تم حفظ ساعات العمل',pickFrom:'وقت الفتح',pickTo:'وقت الإغلاق',
+closuresHint:'أغلق الصالون مؤقتاً لأيام محددة (عطلة، صيانة…). لن يتمكن الزبائن من الحجز خلالها.',noClosures:'لا توجد إغلاقات مجدولة',addClosure:'إضافة إغلاق',closureSub:'اختر يوماً أو نطاق أيام. سنتحقق من الحجوزات المتأثرة.',dates:'التاريخ',reasonL:'السبب (اختياري)',reasonPh:'مثال: صيانة',
+conflictT:'يوجد حجوزات في هذه الفترة',conflictB:'لا يمكن إضافة الإغلاق قبل التعامل مع الحجوزات التالية:',conflictRefund:'سيتم إلغاؤها مع استرداد كامل وإشعار الزبائن',cancelAll:'إلغاء الحجوزات وإضافة الإغلاق',back:'رجوع',closureAdded:'تمت إضافة الإغلاق',closureCancelled:'تم إلغاء {n} حجوزات وإضافة الإغلاق',bride:'عروس',removed:'تم حذف الإغلاق',am:'ص',pm:'م',mo:'أكتوبر',moS:'أكت',nov:'نوف'},
+en:{tab:{home:'Home',book:'Bookings',cal:'Calendar',salon:'Salon',more:'More'},offlineMsg:'Your salon is offline and hidden from customers. Contact WAB to reactivate.',contactShort:'Contact',salon:'Manage salon',missing:'Missing',noAccess:"You don't have permission to manage the salon. Contact the owner.",
+tiles:{profile:['Profile & images','Name, description, location, contact'],gallery:['Gallery','24 photos · 3 videos'],hours:['Working hours','and temporary closures'],services:['Services','12 active services'],team:['Staff & team','5 members · 4 providers'],policies:['Policies','Cancellation, payment, deposit'],reviews:['Reviews','★ 4.8 · 126 reviews'],stats:['Statistics','Bookings and revenue'],finance:['Finance','Balance, transactions, payouts'],sub:['Subscription & status','Free trial · 5 days']},
+chip:{live:'Live',offline:'Offline',incomplete:'Incomplete'},women:"Women's salon",men:"Men's salon",
+profileT:'Profile & images',name:'Salon name',desc:'Description',location:'Map location',change:'Change',city:'City',area:'Area',phone:'Phone number',wa:'WhatsApp (optional)',locText:'Abdoun Main St., next to Abdoun Circle',stype:'Salon type',locked:'Cannot be changed',preview:'Preview as customer',save:'Save changes',saved:'Changes saved',coverPh:'Cover image 16:9',reqErr:'This field is required',phoneErr:'Invalid phone number',locErr:'Pin your salon on the map',
+mapT:'Map location',searchPlace:'Search address or landmark',useMine:'Use my location',pinHint:'Move the map to place the pin at your salon entrance',confirmLoc:'Confirm location',previewT:'Preview',previewNote:'This is how customers see your salon in WAB',openNow:'Open now',call:'Call',pvTabs:['Services','Staff','Gallery','Reviews'],
+cropCover:'Crop cover (16:9)',cropLogo:'Crop profile image (1:1)',useImage:'Use image',cancel:'Cancel',unsavedT:'You have unsaved changes',unsavedB:'Save your changes before leaving?',saveLeave:'Save & exit',discard:'Discard changes',stay:'Keep editing',
+galleryT:'Gallery',galEmptyT:'Add your work',galEmptyB:'Photos and videos help customers choose your salon. Add your best work.',addMedia:'Add photos & video',add:'Add',retry:'Retry',first:'First',galHint:'Up to 50 photos (10 MB) and 10 videos (60 s). The first photo is shown first to customers.',reorder:'Reorder',select:'Select',saveOrder:'Save order',dragHint:'Drag to reorder',selected:'selected',del:'Delete',delT:'Delete {n} items?',delB:"They'll be removed from your gallery and hidden from customers.",deleted:'Deleted',orderSaved:'Order saved',items:'items',
+hoursT:'Working hours',weekTab:'Week',closTab:'Closures',weekHint:'Set your working days and hours',copyAll:'Copy to all days',closed:'Closed',from:'From',to:'To',hoursErr:'Closing time must be after opening time',copied:"Saturday's hours copied to all working days",hoursSaved:'Working hours saved',pickFrom:'Opening time',pickTo:'Closing time',
+closuresHint:"Close the salon temporarily on specific days (holiday, maintenance…). Customers can't book during closures.",noClosures:'No scheduled closures',addClosure:'Add closure',closureSub:"Choose a day or range. We'll check affected bookings.",dates:'Dates',reasonL:'Reason (optional)',reasonPh:'e.g. Maintenance',
+conflictT:'There are bookings in this period',conflictB:'You must handle these bookings before adding the closure:',conflictRefund:'They will be cancelled with a full refund and customers notified',cancelAll:'Cancel bookings & add closure',back:'Back',closureAdded:'Closure added',closureCancelled:'{n} bookings cancelled and closure added',bride:'Bride',removed:'Closure removed',am:'AM',pm:'PM',mo:'October',moS:'Oct',nov:'Nov'}};
+function tm(m,t){const h=Math.floor(m/60),mm=m%60;return (h%12||12)+':'+String(mm).padStart(2,'0')+' '+(h>=12?t.pm:t.am)}
+const SALON={female:[['بيلا هاوس','Bella House'],['صالون نسائي متخصص بتجهيز العرائس والمكياج والعناية بالشعر، بفريق محترف وأجواء راقية في قلب عبدون.','A women’s salon specialising in bridal styling, makeup and hair care, with a professional team in the heart of Abdoun.']],male:[['صالون النخبة للرجال',"Elite Men's Salon"],['صالون رجالي عصري للحلاقة وتهذيب اللحية والعناية بالبشرة وباقات العرسان.','A modern men’s salon for haircuts, beard grooming, skin care and groom packages.']]};
+const CONF={female:[['سارة العلي','Sara Al-Ali','WAB-24817',840,1],['دينا حمدان','Dina Hamdan','WAB-24820',660,0],['ريم الزعبي','Reem Al-Zoubi','WAB-24822',1020,0]],male:[['محمد العمري','Mohammad Al-Omari','WAB-24817',840,0],['يزن حداد','Yazan Haddad','WAB-24820',660,0]]};
+const MED=()=>Array.from({length:9},(_,i)=>({id:i+1,video:i===2||i===6,dur:[0,0,24,0,0,0,48,0,0][i],state:'done',p:100}));
+const WEEK=()=>[[600,1260],[600,1260],[600,1260],[600,1260],[600,1260],[600,1320],null];
+const DEF={screen:'hub',dirty:false,errors:false,form:null,crop:null,sheet:null,dialog:null,saving:false,media:null,gmode:'normal',sel:[],week:null,htab:'week',pick:null,closures:[[20,21,'oct','maint']],range:[],creason:'',checking:false,toast:null};
+const PRE={hub:{},hubManager:{role:'manager'},hubEmployee:{role:'employee'},hubIncomplete:{sstate:'incomplete'},profile:{screen:'profile'},profileEdit:{screen:'profile',dirty:true,editName:1},profileCrop:{screen:'profile',sheet:'crop',crop:'cover'},map:{screen:'map'},profileErr:{screen:'profile',errors:true,blank:1},unsaved:{screen:'profile',dirty:true,editName:1,dialog:'unsaved'},preview:{screen:'preview'},
+gallery:{screen:'gallery'},galUploading:{screen:'gallery',up:1},galFailed:{screen:'gallery',fail:1},galReorder:{screen:'gallery',gmode:'reorder'},galSelect:{screen:'gallery',gmode:'select',sel:[2,5]},galDelete:{screen:'gallery',gmode:'select',sel:[2,5],dialog:'del'},galEmpty:{screen:'gallery',media:[]},
+hours:{screen:'hours'},hoursPicker:{screen:'hours',sheet:'time',pick:[1,'to']},hoursInvalid:{screen:'hours',bad:1},closures:{screen:'hours',htab:'closures'},closureAdd:{screen:'hours',htab:'closures',sheet:'closure',range:[10]},closureConflict:{screen:'hours',htab:'closures',sheet:'closure',range:[10],dialog:'conflict'},hoursSaved:{screen:'hours',toastKey:'hoursSaved'}};
+const NAV=[['M12 Salon hub',[['Owner (all)','hub'],['Manager (subset)','hubManager'],['Employee','hubEmployee'],['With ناقص warnings','hubIncomplete']]],['M13 Profile edit',[['Default','profile'],['Editing','profileEdit'],['Crop sheet','profileCrop'],['Map picker','map'],['Validation errors','profileErr'],['Unsaved dialog','unsaved'],['Customer preview','preview']]],['M14 Gallery',[['Grid','gallery'],['Uploading','galUploading'],['Failed + retry','galFailed'],['Reorder mode','galReorder'],['Select','galSelect'],['Delete confirm','galDelete'],['Empty','galEmpty']]],['M15 Hours & closures',[['Weekly','hours'],['Time picker','hoursPicker'],['Invalid hours','hoursInvalid'],['Closures list','closures'],['Add closure','closureAdd'],['Conflict dialog','closureConflict'],['Saved toast','hoursSaved']]]];
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();return Object.assign({lang:p.lang||'ar',theme:p.theme||'light',role:p.role||'owner',gender:p.gender||'female',sstate:p.sstate||'live',preset:'hub'},DEF)})();
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k);this.iv=setInterval(()=>{const m=this.state.media;if(m&&m.some(x=>x.state==='up'&&!x.stuck))this.setState({media:m.map(x=>x.state==='up'&&!x.stuck?(x.p>=90?Object.assign({},x,{state:'done',p:100}):Object.assign({},x,{p:x.p+12})):x)})},400)}
+  componentWillUnmount(){clearInterval(this.iv);clearTimeout(this.toastT)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,role:s.role,gender:s.gender,sstate:s.sstate}))}
+  setPref(k,v){this.setState({[k]:v,form:null},()=>this.savePrefs())}
+  baseForm(){const s=this.state,L=s.lang==='ar'?0:1,S=SALON[s.gender];return {name:S[0][L],desc:S[1][L],phone:'0795550140',wa:'0795550140',loc:true}}
+  go(k){const p=PRE[k];if(!p)return;const r=p.role||(['hubManager','hubEmployee'].includes(this.state.preset)&&!p.role?'owner':this.state.role);
+    const st=Object.assign({},DEF,p,{preset:k,role:p.role||(this.state.role==='employee'||this.state.role==='manager'&&k!=='hubManager'?'owner':this.state.role)});if(p.sstate)st.sstate=p.sstate;else if(k!=='hubIncomplete')st.sstate=this.state.sstate==='incomplete'?'live':this.state.sstate;
+    const f=Object.assign({},this.baseForm());if(p.editName)f.name=f.name+' '+(this.state.lang==='ar'?'للعرائس':'Bridal');if(p.blank){f.name='';f.phone='0795';f.loc=false}st.form=f;
+    let m=MED();if(p.up)m=m.concat([{id:10,state:'up',p:38,stuck:true},{id:11,state:'up',p:72,stuck:true}]);if(p.fail)m=m.concat([{id:12,state:'fail',p:0}]);st.media=p.media||m;
+    const w=WEEK();if(p.bad)w[2]=[1140,600];st.week=w;
+    ['editName','blank','up','fail','bad','toastKey'].forEach(x=>delete st[x]);
+    this.setState(st,()=>{this.savePrefs();if(p.toastKey)this.toast(D[this.state.lang][p.toastKey])})}
+  toast(m){this.setState({toast:m});clearTimeout(this.toastT);this.toastT=setTimeout(()=>this.setState({toast:null}),2000)}
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],g=s.gender,L=ar?0:1,perms=PERMS[s.role];
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const f=s.form||this.baseForm();const setF=o=>this.setState({form:Object.assign({},f,o),dirty:true});
+    const inc=s.sstate==='incomplete';const cc={live:['#2E9E78','rgba(46,158,120,.12)'],offline:['#D9467A','rgba(217,70,122,.1)'],incomplete:['#B7791F','rgba(245,158,11,.14)']}[s.sstate];
+    const tiles=TILES.filter(x=>perms.includes(x[2])).map(([k,d,p,href])=>({d,href,title:t.tiles[k][0],sub:t.tiles[k][1],missing:inc&&(k==='services'||k==='team'),
+      style:{display:'block',padding:'14px',borderRadius:'18px',border:'1px solid '+(inc&&(k==='services'||k==='team')?'rgba(217,70,122,.35)':'var(--line)'),background:'var(--card)',boxShadow:'0 4px 14px rgba(31,34,51,.04)'}}));
+    const E=s.errors,phoneOk=/^07[789]\d{7}$/.test(f.phone);
+    const mk=(k,label,o)=>Object.assign({label,value:f[k],onChange:e=>setF({[k]:e.target.value}),style:field(E&&o.bad),dir:o.dir||(ar?'rtl':'ltr'),ph:o.ph||'',err:E&&o.bad,errMsg:o.msg||t.reqErr,isInput:!o.area,isArea:!!o.area,count:o.count||'',
+      taStyle:Object.assign(field(false),{height:'110px',padding:'12px 14px',resize:'none',lineHeight:'1.6',fontSize:'14px'})},{});
+    const pf=[mk('name',t.name,{bad:!f.name.trim(),count:f.name.length+'/50'}),mk('desc',t.desc,{area:1,count:f.desc.length+'/1000'})];
+    const pf2=[mk('phone',t.phone,{bad:!phoneOk,dir:'ltr',msg:t.phoneErr,ph:'07X XXX XXXX'}),mk('wa',t.wa,{dir:'ltr',ph:'07X XXX XXXX'})];
+    const backToHub=()=>{if(s.screen==='profile'&&s.dirty){this.setState({dialog:'unsaved'});return}this.setState({screen:'hub',dirty:false,gmode:'normal',sel:[]})};
+    const TB={profile:[t.profileT,backToHub],map:[t.mapT,()=>this.setState({screen:'profile'})],preview:[t.previewT,()=>this.setState({screen:'profile'})],gallery:[t.galleryT,backToHub],hours:[t.hoursT,backToHub]}[s.screen];
+    const media=s.media||MED();const done=media.filter(m=>m.state==='done');
+    const order=s.gmode==='reorder'?media.slice():media;
+    const mediaV=order.map((m,i)=>{const sel=s.sel.includes(m.id);return {slot:'mgal-'+g+'-'+((m.id-1)%12+1),video:m.video,dur:m.dur,up:m.state==='up',fail:m.state==='fail',pct:m.p+'%',bar:{display:'block',height:'100%',width:m.p+'%',background:'#fff',borderRadius:'2px'},n:i+1,showNum:s.gmode==='reorder',showSel:s.gmode==='select',sel,cover:i===0&&s.gmode==='normal',
+      selStyle:{position:'absolute',top:'6px',insetInlineEnd:'6px',width:'24px',height:'24px',borderRadius:'50%',boxSizing:'border-box',display:'flex',alignItems:'center',justifyContent:'center',background:sel?'#A855F7':'rgba(255,255,255,.7)',border:sel?'none':'2px solid #fff',pointerEvents:'none'},
+      onClick:()=>{if(m.state==='fail'){this.setState({media:media.map(x=>x.id===m.id?Object.assign({},x,{state:'up',p:10,stuck:false}):x)});return}
+        if(s.gmode==='select'){this.setState({sel:sel?s.sel.filter(x=>x!==m.id):s.sel.concat([m.id])});return}
+        if(s.gmode==='reorder'&&i>0){const a=media.slice();[a[i-1],a[i]]=[a[i],a[i-1]];this.setState({media:a})}},
+      style:{position:'relative',aspectRatio:'1',borderRadius:'12px',overflow:'hidden',border:sel?'2.5px solid #A855F7':'none',padding:0,background:'var(--surface)',cursor:'pointer',animation:s.gmode==='reorder'?'jiggle .3s ease-in-out infinite':'none',boxShadow:s.gmode==='reorder'?'0 6px 16px rgba(31,34,51,.15)':'none'}}});
+    const week=s.week||WEEK();
+    const days=DAYS[s.lang].map((n,i)=>{const w=week[i],bad=w&&w[1]<=w[0];const sty=a=>({height:'50px',borderRadius:'12px',border:'1.5px solid '+(bad?'#D9467A':(s.sheet==='time'&&s.pick&&s.pick[0]===i&&s.pick[1]===a?'#A855F7':'var(--line)')),background:'var(--card)',color:'var(--ink)',fontSize:'14px',fontWeight:700,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',lineHeight:1.2});
+      const s2=sw(!!w);return {name:n,open:!!w,off:!w,err:bad,from:w?tm(w[0],t):'',to:w?tm(w[1],t):'',fromStyle:sty('from'),toStyle:sty('to'),track:s2.track,knob:s2.knob,
+        toggle:()=>{const a=week.slice();a[i]=w?null:[600,1260];this.setState({week:a})},pickFrom:()=>this.setState({sheet:'time',pick:[i,'from']}),pickTo:()=>this.setState({sheet:'time',pick:[i,'to']}),
+        style:{padding:'14px',borderRadius:'16px',border:'1px solid var(--line)',background:w?'var(--card)':'var(--surface)',flexShrink:0}}});
+    const anyBad=week.some(w=>w&&w[1]<=w[0]);
+    const pk=s.pick;const timeOpts=[];for(let m=360;m<=1440;m+=30){const cur=pk&&week[pk[0]]&&week[pk[0]][pk[1]==='from'?0:1]===m;timeOpts.push({label:tm(m%1440===0&&m?1440-1:m,t).replace(':59',':59'),onClick:()=>{const a=week.slice();const w=a[pk[0]].slice();w[pk[1]==='from'?0:1]=m===1440?1439:m;a[pk[0]]=w;this.setState({week:a,sheet:null})},style:{height:'42px',borderRadius:'11px',border:'1.5px solid '+(cur?'#A855F7':'var(--line)'),background:cur?'var(--soft)':'var(--card)',color:cur?'var(--accent)':'var(--ink)',fontSize:'12px',fontWeight:600,cursor:'pointer'}})}
+    const cdow=ar?['س','ح','ن','ث','ر','خ','ج']:['S','S','M','T','W','T','F'];
+    const calDays=Array.from({length:14},(_,i)=>{const d=10+i,sel=s.range.includes(d),past=false;const lo=Math.min(...s.range),hi=Math.max(...s.range);const inR=s.range.length===2&&d>lo&&d<hi;
+      return {n:d,onClick:()=>{let r=s.range;if(r.length!==1)r=[d];else if(r[0]===d)r=[];else r=[r[0],d].sort((a,b)=>a-b);this.setState({range:r})},style:{height:'40px',borderRadius:'11px',border:'none',cursor:'pointer',fontSize:'13.5px',fontWeight:700,background:sel?'linear-gradient(135deg,#6D28D9,#A855F7)':inR?'var(--soft)':'var(--surface)',color:sel?'#fff':(i%7===6?'var(--faint)':'var(--ink)')}}});
+    const rLo=s.range.length?Math.min(...s.range):0,rHi=s.range.length?Math.max(...s.range):0;const conflictHit=s.range.length&&rLo<=10&&rHi>=10;
+    const conflicts=CONF[g].map(([a,b,ref,m,br])=>({cust:ar?a:b,ref,bride:g==='female'&&!!br,when:(ar?'السبت 10 أكتوبر · ':'Sat, Oct 10 · ')+tm(m,t)}));
+    const addClosure=(cancelled)=>{const c=[rLo,rHi,'oct',s.creason||null];this.setState({closures:s.closures.concat([c]).sort((a,b)=>a[0]-b[0]),sheet:null,dialog:null,range:[],creason:''});this.toast(cancelled?t.closureCancelled.replace('{n}',conflicts.length):t.closureAdded)};
+    const closures=s.closures.map(([a,b,mo,r],i)=>({d:a,mo:t.moS,range:a===b?(a+' '+t.mo):(a+'–'+b+' '+t.mo),reason:r==='maint'?(ar?'صيانة دورية':'Routine maintenance'):(r||(ar?'بدون سبب':'No reason')),onDel:()=>{this.setState({closures:s.closures.filter((_,j)=>j!==i)});this.toast(t.removed)},style:{display:'flex',alignItems:'center',gap:'12px',padding:'12px',borderRadius:'16px',border:'1px solid var(--line)',flexShrink:0}}));
+    const icS=rose=>({width:'54px',height:'54px',borderRadius:'50%',margin:'0 auto 12px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'22px',fontWeight:700,background:rose?'rgba(217,70,122,.12)':'var(--soft)',color:rose?'#D9467A':'var(--accent)'});
+    const pB=bg=>({height:'50px',borderRadius:'14px',border:'none',background:bg,color:'#fff',fontSize:'14.5px',fontWeight:600,cursor:'pointer'});
+    const doSave=(after)=>{const ok=f.name.trim()&&phoneOk&&f.loc;if(!ok){this.setState({errors:true,dialog:null});return}this.setState({saving:true,dialog:null});setTimeout(()=>{this.setState({saving:false,dirty:false,errors:false});this.toast(t.saved);if(after)this.setState({screen:'hub'})},800)};
+    const DL={unsaved:{icon:'!',iconStyle:icS(false),title:t.unsavedT,body:t.unsavedB,primary:t.saveLeave,primaryStyle:pB('linear-gradient(135deg,#6D28D9,#A855F7)'),onPrimary:()=>doSave(true),hasAlt:true,alt:t.discard,onAlt:()=>this.setState({dialog:null,dirty:false,form:null,screen:'hub'}),secondary:t.stay},
+      del:{icon:'🗑',iconStyle:icS(true),title:t.delT.replace('{n}',s.sel.length),body:t.delB,primary:t.del,primaryStyle:pB('#D9467A'),onPrimary:()=>{this.setState({media:media.filter(m=>!s.sel.includes(m.id)),sel:[],gmode:'normal',dialog:null});this.toast(t.deleted)},secondary:t.cancel},
+      conflict:{icon:'!',iconStyle:icS(true),title:t.conflictT,body:t.conflictB,hasList:true,list:conflicts,primary:t.cancelAll,primaryStyle:pB('#D9467A'),onPrimary:()=>addClosure(true),secondary:t.back}};
+    const dm=DL[s.dialog];
+    const pv={name:f.name||'—',desc:f.desc,area:ar?'عمّان، عبدون':'Amman, Abdoun',type:g==='female'?t.women:t.men};
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',themeVars:tv(s.lang,s.theme),
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),controls:CTRL.map(([k,label,o])=>({label,opts:seg(k,o)})),
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      on:{hub:s.screen==='hub',profile:s.screen==='profile',map:s.screen==='map',preview:s.screen==='preview',gallery:s.screen==='gallery',hours:s.screen==='hours'},
+      offline:s.sstate==='offline',logoSlot:'msalon-logo-'+g,coverSlot:'mcover-'+g,salonName:SALON[g][0][L],typeLine:(g==='female'?t.women:t.men)+' · '+(ar?'عمّان، عبدون':'Amman, Abdoun'),
+      chip:{label:t.chip[s.sstate],style:{display:'inline-flex',alignItems:'center',gap:'5px',fontSize:'11px',fontWeight:700,padding:'4px 9px',borderRadius:'8px',color:cc[0],background:cc[1],flexShrink:0},dot:{width:'6px',height:'6px',borderRadius:'50%',background:cc[0]}},
+      tiles,hubEmpty:!tiles.length,tabs:tabs('salon',t,perms),
+      topbar:TB?{show:true,title:TB[0],onBack:TB[1],hasAction:s.screen==='gallery'&&s.gmode==='normal'&&media.length>0,action:'+ '+t.add,onAction:()=>this.setState({media:media.concat([{id:Date.now()%1000+20,state:'up',p:5}])})}:{show:false},
+      pf,pf2,openMap:()=>this.setState({screen:'map'}),locText:f.loc?t.locText:'—',errLoc:E&&!f.loc,
+      mapCard:{position:'relative',width:'100%',height:'150px',borderRadius:'16px',overflow:'hidden',border:'1.5px solid '+(E&&!f.loc?'#D9467A':'var(--line)'),padding:0,cursor:'pointer',background:'var(--map1)',display:'block'},
+      cityName:ar?'عمّان':'Amman',areaName:ar?'عبدون':'Abdoun',typeName:g==='female'?t.women:t.men,roField:{height:'52px',boxSizing:'border-box',padding:'0 14px',borderRadius:'14px',background:'var(--surface)',border:'1.5px solid var(--line)',display:'flex',alignItems:'center',justifyContent:'space-between',fontSize:'14.5px',color:'var(--ink)'},
+      openPreview:()=>this.setState({screen:'preview'}),saveProfile:()=>doSave(false),saveBtn:btn(s.dirty||E),saving:s.saving,notSaving:!s.saving,
+      useMyLoc:()=>this.toast(ar?'تم تحديد موقعك الحالي':'Current location found'),confirmMap:()=>this.setState({screen:'profile',form:Object.assign({},f,{loc:true}),dirty:true}),
+      pv,pvTabs:t.pvTabs.map((l,i)=>({label:l,style:{height:'34px',padding:'0 14px',borderRadius:'10px',fontSize:'12.5px',fontWeight:600,display:'flex',alignItems:'center',flexShrink:0,background:i===0?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--surface)',color:i===0?'#fff':'var(--muted)'}})),
+      openCropCover:()=>this.setState({sheet:'crop',crop:'cover'}),openCropLogo:()=>this.setState({sheet:'crop',crop:'logo'}),cropTitle:s.crop==='logo'?t.cropLogo:t.cropCover,cropSlot:s.crop==='logo'?'msalon-logo-'+g:'mcover-'+g,
+      cropBox:{position:'relative',height:'230px',borderRadius:'16px',overflow:'hidden',background:'#000'},
+      cropFrame:s.crop==='logo'?{position:'absolute',left:'50%',top:'50%',width:'190px',height:'190px',marginLeft:'-95px',marginTop:'-95px',borderRadius:'50%',boxShadow:'0 0 0 999px rgba(0,0,0,.55)',border:'2px solid #fff',overflow:'hidden',pointerEvents:'none'}:{position:'absolute',left:'12px',right:'12px',top:'50%',height:'176px',marginTop:'-88px',boxShadow:'0 0 0 999px rgba(0,0,0,.55)',border:'2px solid #fff',pointerEvents:'none'},
+      applyCrop:()=>{this.setState({sheet:null,dirty:true})},
+      galEmpty:!media.length,galHas:media.length>0,galCount:done.length+' '+t.items,galMode:{normal:s.gmode==='normal',reorder:s.gmode==='reorder',select:s.gmode==='select'},selCount:s.sel.length+' '+t.selected,media:mediaV,galBar:media.length>0,
+      addMedia:()=>this.setState({media:media.concat([{id:30,state:'up',p:5},{id:31,state:'up',p:2,video:true,dur:15}])}),startReorder:()=>this.setState({gmode:'reorder'}),startSelect:()=>this.setState({gmode:'select',sel:[]}),cancelMode:()=>this.setState({gmode:'normal',sel:[]}),
+      saveOrder:()=>{this.setState({gmode:'normal'});this.toast(t.orderSaved)},askDelete:()=>{if(s.sel.length)this.setState({dialog:'del'})},delLabel:t.del+(s.sel.length?' ('+s.sel.length+')':''),delBtn:{height:'50px',borderRadius:'14px',border:'none',background:s.sel.length?'#D9467A':'var(--soft)',color:s.sel.length?'#fff':'var(--faint)',fontSize:'14.5px',fontWeight:600,cursor:'pointer'},
+      hTabs:[['week',t.weekTab],['closures',t.closTab]].map(([k,l])=>({label:l,onClick:()=>this.setState({htab:k}),style:{height:'38px',borderRadius:'11px',border:'none',cursor:'pointer',fontSize:'13px',fontWeight:600,background:s.htab===k?'linear-gradient(135deg,#6D28D9,#A855F7)':'transparent',color:s.htab===k?'#fff':'var(--muted)'}})),
+      hTab:{week:s.htab==='week',closures:s.htab==='closures'},days,copyAll:()=>{const src=week[0]||[600,1260];this.setState({week:week.map(w=>w?src.slice():null)});this.toast(t.copied)},
+      saveHours:()=>{if(anyBad)return;this.toast(t.hoursSaved)},hoursBtn:btn(!anyBad),
+      timeTitle:pk?(pk[1]==='from'?t.pickFrom:t.pickTo):'',timeSub:pk?DAYS[s.lang][pk[0]]:'',timeOpts,
+      noClosures:!s.closures.length,closures,openClosure:()=>this.setState({sheet:'closure',range:[],creason:''}),calDow:cdow.concat(cdow).slice(0,7),calDays,
+      closureReason:s.creason,onClosureReason:e=>this.setState({creason:e.target.value}),closureBtn:btn(s.range.length>0),checking:s.checking,notChecking:!s.checking,
+      submitClosure:()=>{if(!s.range.length)return;this.setState({checking:true});setTimeout(()=>{this.setState({checking:false});if(conflictHit)this.setState({dialog:'conflict'});else addClosure(false)},700)},
+      sheetOn:!!s.sheet,sh:{crop:s.sheet==='crop',time:s.sheet==='time',closure:s.sheet==='closure'},closeSheet:()=>this.setState({sheet:null}),
+      dlg:dm?Object.assign({show:true,hasList:false,hasAlt:false},dm):{show:false},closeDlg:()=>this.setState({dialog:null}),toast:s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

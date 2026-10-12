@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#6D28D9"><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#6D28D9"/><rect x="130" y="80" width="140" height="240" rx="26" fill="none" stroke="#fff" stroke-width="12"/><text x="200" y="222" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="54" fill="#fff">WAB</text></svg></template>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button,textarea{font-family:inherit}
+input:focus,textarea:focus{outline:none}
+textarea::placeholder{color:#9CA3AF}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ deviceDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+
+<sc-if value="{{ on.details }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px">
+  <div style="display:flex;align-items:center;height:50px;padding:0 8px;position:relative;flex-shrink:0">
+    <a href="WAB 02 Discovery.dc.html" style="width:44px;height:44px;color:var(--ink);display:flex;align-items:center;justify-content:center;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></a>
+    <div style="position:absolute;inset:0 96px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15.5px;white-space:nowrap;overflow:hidden">{{ salon.name }}</div>
+    <div style="flex:1"></div>
+    <button onClick="{{ openShare }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 15V3.5M7.5 8 12 3.5 16.5 8M5 12.5V20h14v-7.5"></path></svg></button>
+    <button onClick="{{ toggleFav }}" style="width:44px;height:44px;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="21" height="21" viewBox="0 0 24 24" fill="{{ heartFill }}" stroke="#D9467A" stroke-width="1.9"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.2 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button>
+  </div>
+
+  <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:12px;padding:0 20px">
+      <div style="width:100%;height:180px;border-radius:22px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="width:92px;height:92px;border-radius:50%;margin-top:-58px;border:4px solid var(--bg);background:var(--shim)"></div>
+      <div style="width:170px;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="width:220px;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="display:flex;gap:10px;width:100%"><div style="flex:1;height:46px;border-radius:14px;background:var(--shim)"></div><div style="flex:1;height:46px;border-radius:14px;background:var(--shim)"></div></div>
+      <div style="width:100%;height:70px;border-radius:14px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="display:flex;gap:14px;width:100%"><sc-for list="{{ four }}" as="x" hint-placeholder-count="4"><div style="width:62px;height:62px;border-radius:50%;background:var(--shim)"></div></sc-for></div>
+      <div style="width:100%;height:120px;border-radius:14px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ errorOn }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 36px">
+      <div style="width:120px;height:120px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:22px;color:var(--accent)"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px">{{ t.errServer }}</div>
+      <div style="font-size:13.5px;color:var(--muted);margin-bottom:22px">{{ t.errServerBody }}</div>
+      <button onClick="{{ retry }}" style="height:48px;padding:0 30px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ t.retry }}</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;overflow-y:auto;padding-bottom:24px">
+    <div style="margin:0 20px;height:180px;border-radius:22px;overflow:hidden"><image-slot id="{{ salon.cover }}" shape="rect" placeholder="Salon cover"></image-slot></div>
+    <div style="display:flex;justify-content:center;margin-top:-50px;position:relative">
+      <div style="width:96px;height:96px;border-radius:50%;overflow:hidden;border:4px solid var(--bg);box-shadow:0 8px 20px rgba(31,34,51,.15);background:var(--card)"><image-slot id="{{ salon.logo }}" shape="circle" placeholder="Logo"></image-slot></div>
+    </div>
+    <div style="text-align:center;padding:10px 20px 0">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:21px;margin-bottom:6px">{{ salon.name }}</div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="{{ statusStyle }}"><span style="width:6px;height:6px;border-radius:50%;background:currentColor"></span>{{ statusText }}</div>
+        <div style="display:flex;align-items:center;gap:3px;font-size:12.5px;font-weight:700"><svg width="13" height="13" viewBox="0 0 24 24" fill="#F59E0B"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"></path></svg>{{ salon.rating }}<span style="color:var(--faint);font-weight:500">({{ salon.count }})</span></div>
+      </div>
+      <button onClick="{{ openMaps }}" style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;border:none;background:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;padding:6px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"></path><circle cx="12" cy="9" r="2.3"></circle></svg><span style="text-decoration:underline;text-underline-offset:3px">{{ salon.loc }}</span>
+      </button>
+    </div>
+    <div style="display:flex;gap:10px;padding:12px 20px 0">
+      <button style="flex:1;height:48px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>{{ t.call }}</button>
+      <sc-if value="{{ hasWa }}"><button style="flex:1;height:48px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2E9E78" stroke-width="1.8"><path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"></path><path d="M9 9.5c.3 2 2.5 4.2 4.5 4.5l1-1.2 1.8.8c-.3 1.2-1.3 1.9-2.5 1.7C10.6 15 8.9 13.3 8.4 10.2 8.2 9 9 8 10.2 7.7l.8 1.8z"></path></svg>{{ t.whatsapp }}</button></sc-if>
+    </div>
+    <div style="padding:18px 20px 0">
+      <div style="{{ descStyle }}">{{ salon.desc }}</div>
+      <button onClick="{{ toggleDesc }}" style="border:none;background:none;color:var(--accent);font-weight:600;font-size:13px;padding:6px 0;cursor:pointer">{{ descBtn }}</button>
+    </div>
+
+    <div style="margin:10px 20px 0;border:1px solid var(--line);border-radius:18px;overflow:hidden">
+      <button onClick="{{ toggleHours }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:14px 16px;border:none;background:var(--surface);color:var(--ink);cursor:pointer;text-align:start">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--accent)"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>
+        <span style="flex:1;font-weight:700;font-size:14.5px">{{ t.hours }}</span>
+        <span style="font-size:12px;color:var(--muted)">{{ todayLine }}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="{{ hoursChev }}"><path d="M6 9l6 6 6-6"></path></svg>
+      </button>
+      <sc-if value="{{ hoursOpen }}">
+        <div style="padding:6px 16px 14px">
+          <sc-for list="{{ week }}" as="d" hint-placeholder-count="7">
+            <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px"><span style="{{ d.dayStyle }}">{{ d.day }}</span><span style="{{ d.valStyle }}">{{ d.val }}</span></div>
+          </sc-for>
+          <div style="display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(217,70,122,.08)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D9467A" stroke-width="2" style="flex-shrink:0;margin-top:2px"><rect x="4" y="5.5" width="16" height="15" rx="2.5"></rect><path d="M4 10h16M9 14l6 4M15 14l-6 4"></path></svg>
+            <div style="font-size:12.5px;line-height:1.5"><div style="font-weight:700;color:#D9467A">{{ t.upcomingClosure }}</div>{{ t.closure }}</div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin:24px 0 12px"><div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:17px">{{ t.staff }}</div></div>
+    <div style="display:flex;gap:14px;overflow-x:auto;padding:0 20px 4px;scrollbar-width:none">
+      <sc-for list="{{ staff }}" as="p" hint-placeholder-count="4">
+        <button onClick="{{ p.onClick }}" style="width:72px;flex-shrink:0;border:none;background:none;padding:0;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="position:relative;width:64px;height:64px">
+            <div style="width:64px;height:64px;border-radius:50%;overflow:hidden"><image-slot id="{{ p.img }}" shape="circle" placeholder="Staff"></image-slot></div>
+            <div style="{{ p.dotStyle }}"></div>
+          </div>
+          <div style="font-size:12.5px;font-weight:600">{{ p.name }}</div>
+          <div style="{{ p.availStyle }}">{{ p.avail }}</div>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin:26px 0 12px">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:17px">{{ t.reviews }}</div>
+      <sc-if value="{{ hasReviews }}"><div style="font-size:12.5px;color:var(--muted)"><b style="color:var(--ink)">{{ salon.rating }} {{ t.of5 }}</b> · {{ salon.count }} {{ t.reviewsWord }}</div></sc-if>
+    </div>
+    <div style="padding:0 20px;display:flex;flex-direction:column;gap:10px">
+      <sc-if value="{{ hasReviews }}">
+        <sc-for list="{{ reviews3 }}" as="r" hint-placeholder-count="3">
+          <div style="padding:14px;border-radius:16px;background:var(--surface)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="font-weight:700;font-size:13.5px">{{ r.name }}</div><div style="font-size:11.5px;color:var(--faint)">{{ r.date }}</div></div>
+            <div style="color:#F59E0B;font-size:13px;letter-spacing:1px;margin-bottom:6px">{{ r.stars }}</div>
+            <div style="font-size:12.5px;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ r.text }}</div>
+            <div style="font-size:12px;color:var(--accent);font-weight:600;margin-top:4px">{{ t.seeMore }}</div>
+          </div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ noReviews }}"><div style="padding:22px;border-radius:16px;background:var(--surface);text-align:center;font-size:13.5px;color:var(--muted)">{{ t.noReviews }}</div></sc-if>
+      <div style="display:flex;gap:10px">
+        <sc-if value="{{ hasReviews }}"><button onClick="{{ goReviews }}" style="flex:1;height:46px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer">{{ t.seeAll }}</button></sc-if>
+        <button onClick="{{ addSalonReview }}" style="flex:1;height:46px;border-radius:14px;border:none;background:var(--soft);color:var(--accent);font-size:13.5px;font-weight:600;cursor:pointer">+ {{ t.addReview }}</button>
+      </div>
+    </div>
+
+    <div style="padding:0 20px;margin:26px 0 8px;font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:17px">{{ t.services }}</div>
+    <div style="padding:0 20px">
+      <sc-for list="{{ services }}" as="sv" hint-placeholder-count="5">
+        <button onClick="{{ sv.onClick }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 0;border:none;border-bottom:1px solid var(--line);background:none;color:var(--ink);cursor:pointer;text-align:start">
+          <div style="width:52px;height:52px;border-radius:12px;overflow:hidden;flex-shrink:0"><image-slot id="{{ sv.img }}" shape="rect" placeholder="Svc"></image-slot></div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600">{{ sv.name }}<sc-if value="{{ sv.vip }}"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff">VIP</span></sc-if></div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">{{ sv.dur }}</div>
+          </div>
+          <div style="font-weight:700;font-size:14px;color:var(--accent)">{{ sv.price }}</div>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="padding:0 20px;margin:26px 0 12px;font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:17px">{{ t.gallery }}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 20px">
+      <sc-for list="{{ gallery }}" as="gi" hint-placeholder-count="9">
+        <div onClick="{{ gi.onClick }}" style="position:relative;aspect-ratio:1;overflow:hidden;cursor:pointer;border-radius:6px">
+          <image-slot id="{{ gi.img }}" shape="rect" placeholder=""></image-slot>
+          <sc-if value="{{ gi.video }}"><div style="position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2)"><div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="#6D28D9"><path d="M8 5v14l11-7z"></path></svg></div></div></sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0">
+    <button onClick="{{ onBook }}" style="width:100%;height:54px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15.5px;font-weight:600;cursor:pointer;box-shadow:0 10px 24px rgba(109,40,217,.3)">{{ t.bookNow }}</button>
+  </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ on.reviews }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px">
+  <div style="display:flex;align-items:center;height:50px;padding:0 12px;position:relative;flex-shrink:0">
+    <button onClick="{{ backFromReviews }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px">{{ reviewsTitle }}</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:10px">
+    <sc-if value="{{ revLoading }}"><sc-for list="{{ four }}" as="x" hint-placeholder-count="4"><div style="height:110px;flex-shrink:0;border-radius:16px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></sc-if>
+    <sc-if value="{{ revPh.show }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 24px">
+        <div style="width:110px;height:110px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--accent)"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="{{ revPh.icon }}"></path></svg></div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:18px">{{ revPh.title }}</div>
+        <sc-if value="{{ revPh.hasAction }}"><button onClick="{{ revPh.onAction }}" style="height:46px;padding:0 28px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ t.retry }}</button></sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ revReady }}">
+      <div style="display:flex;align-items:center;gap:16px;padding:16px;border-radius:18px;background:var(--surface);flex-shrink:0">
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:40px;line-height:1;color:var(--accent)">{{ revAvg }}</div>
+        <div><div style="color:#F59E0B;font-size:16px;letter-spacing:2px">★★★★★</div><div style="font-size:12.5px;color:var(--muted);margin-top:4px">{{ revCountText }}</div></div>
+      </div>
+      <sc-for list="{{ allReviews }}" as="r" hint-placeholder-count="5">
+        <div style="padding:14px;border-radius:16px;border:1px solid var(--line);flex-shrink:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="font-weight:700;font-size:13.5px">{{ r.name }}</div><div style="font-size:11.5px;color:var(--faint)">{{ r.date }}</div></div>
+          <div style="color:#F59E0B;font-size:13px;letter-spacing:1px;margin-bottom:6px">{{ r.stars }}</div>
+          <div style="font-size:12.5px;color:var(--muted);line-height:1.6">{{ r.text }}</div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ revPaging }}"><div style="height:110px;flex-shrink:0;border-radius:16px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-if>
+    </sc-if>
+  </div>
+  <div style="padding:12px 20px 30px;border-top:1px solid var(--line);flex-shrink:0">
+    <button onClick="{{ openAddReview }}" style="width:100%;height:52px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;cursor:pointer">+ {{ t.addReview }}</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ on.media }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;background:#000;color:#fff;padding-top:50px;position:relative">
+  <div style="display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 12px;flex-shrink:0">
+    <button onClick="{{ closeMedia }}" style="width:44px;height:44px;border:none;background:rgba(255,255,255,.12);border-radius:50%;color:#fff;cursor:pointer;font-size:16px">✕</button>
+    <div dir="ltr" style="font-size:14px;font-weight:600">{{ mediaCounter }}</div>
+    <div style="width:44px"></div>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative">
+    <sc-if value="{{ mediaLoading }}"><span style="width:36px;height:36px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>
+    <sc-if value="{{ mediaReady }}">
+      <div style="width:100%;height:470px"><image-slot id="{{ mediaImg }}" shape="rect" placeholder="Gallery item"></image-slot></div>
+      <sc-if value="{{ mediaIsVideo }}"><div style="position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center"><div style="width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="#6D28D9"><path d="M8 5v14l11-7z"></path></svg></div></div></sc-if>
+    </sc-if>
+    <button onClick="{{ mediaPrev }}" style="position:absolute;left:0;top:0;bottom:0;width:70px;border:none;background:none;cursor:pointer"></button>
+    <button onClick="{{ mediaNext }}" style="position:absolute;right:0;top:0;bottom:0;width:70px;border:none;background:none;cursor:pointer"></button>
+  </div>
+  <sc-if value="{{ mediaIsVideo }}">
+    <div dir="ltr" style="display:flex;align-items:center;gap:12px;padding:14px 20px 38px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"></path></svg>
+      <span style="font-size:12px">0:12</span>
+      <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.25);position:relative"><div style="position:absolute;left:0;top:0;bottom:0;width:32%;border-radius:2px;background:#A855F7"></div><div style="position:absolute;left:32%;top:-5px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#fff"></div></div>
+      <span style="font-size:12px">0:38</span>
+    </div>
+  </sc-if>
+  <sc-if value="{{ mediaIsImage }}"><div style="text-align:center;font-size:12.5px;color:rgba(255,255,255,.65);padding:14px 20px 40px">{{ t.zoomHint }}</div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheet.staff }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column;padding-top:50px;animation:sheetUp .3s ease both">
+  <div style="display:flex;align-items:center;height:50px;padding:0 12px;position:relative;flex-shrink:0">
+    <button onClick="{{ closeSheet }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);cursor:pointer;font-size:18px;position:relative;z-index:1">✕</button>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;pointer-events:none">{{ t.staffProfile }}</div>
+  </div>
+  <sc-if value="{{ staffLoading }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px">
+      <div style="width:104px;height:104px;border-radius:50%;background:var(--shim)"></div>
+      <div style="width:120px;height:16px;border-radius:8px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="width:100%;height:70px;border-radius:16px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="width:100%;height:90px;border-radius:16px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ staffReady }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 30px">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px">
+      <div style="width:104px;height:104px;border-radius:50%;overflow:hidden;box-shadow:0 10px 24px rgba(109,40,217,.2)"><image-slot id="{{ sp.img }}" shape="circle" placeholder="Staff"></image-slot></div>
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:21px;margin-top:6px">{{ sp.name }}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+        <span style="font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--soft);color:var(--accent)">{{ sp.role }}</span>
+        <span style="{{ sp.statusStyle }}">{{ sp.status }}</span>
+        <sc-if value="{{ sp.bride }}"><span style="font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:8px;background:rgba(244,167,196,.25);color:#B83268">{{ t.brideQ }}</span></sc-if>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0">
+      <sc-for list="{{ sp.stats }}" as="st" hint-placeholder-count="3"><div style="padding:12px 6px;border-radius:14px;background:var(--surface);text-align:center"><div style="font-weight:700;font-size:16px;color:var(--accent)">{{ st.v }}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">{{ st.l }}</div></div></sc-for>
+    </div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:18px">{{ sp.bio }}</div>
+    <div style="font-weight:700;font-size:14.5px;margin-bottom:10px">{{ t.workDays }}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px"><sc-for list="{{ sp.days }}" as="d" hint-placeholder-count="7"><span style="{{ d.style }}">{{ d.l }}</span></sc-for></div>
+    <div style="font-weight:700;font-size:14.5px;margin-bottom:10px">{{ t.staffServices }}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px"><sc-for list="{{ sp.services }}" as="x" hint-placeholder-count="4"><span style="font-size:12.5px;padding:7px 12px;border-radius:16px;border:1px solid var(--line)">{{ x }}</span></sc-for></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-weight:700;font-size:14.5px">{{ t.reviews }}</div><sc-if value="{{ sp.hasReviews }}"><div style="font-size:12.5px;color:var(--muted)">{{ sp.rating }} {{ t.of5 }} · {{ sp.count }}</div></sc-if></div>
+    <sc-if value="{{ sp.hasReviews }}"><div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ reviews3 }}" as="r" hint-placeholder-count="3"><div style="padding:12px 14px;border-radius:14px;background:var(--surface)"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700">{{ r.name }}<span style="font-size:11px;color:var(--faint);font-weight:400">{{ r.date }}</span></div><div style="color:#F59E0B;font-size:12px;margin:4px 0">{{ r.stars }}</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ r.text }}</div></div></sc-for></div></sc-if>
+    <sc-if value="{{ sp.noReviews }}"><div style="padding:18px;border-radius:14px;background:var(--surface);text-align:center;font-size:13px;color:var(--muted)">{{ t.noStaffReviews }}</div></sc-if>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <sc-if value="{{ sp.hasReviews }}"><button onClick="{{ goStaffReviews }}" style="flex:1;height:46px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer">{{ t.seeAll }}</button></sc-if>
+      <button onClick="{{ addStaffReview }}" style="flex:1;height:46px;border-radius:14px;border:none;background:var(--soft);color:var(--accent);font-size:13.5px;font-weight:600;cursor:pointer">+ {{ t.addReview }}</button>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheet.service }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:30;background:rgba(10,8,20,.45);display:flex;flex-direction:column;justify-content:flex-end">
+  <div onClick="{{ closeSheet }}" style="flex:1"></div>
+  <div style="background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 34px;animation:sheetUp .3s ease both">
+    <div style="width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px"></div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:20px">{{ ss.name }}</div>
+      <div style="font-weight:700;font-size:18px;color:var(--accent);white-space:nowrap">{{ ss.price }}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);margin:6px 0 14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>{{ ss.dur }}</div>
+    <div style="font-size:13.5px;color:var(--muted);line-height:1.7;margin-bottom:16px">{{ ss.desc }}</div>
+    <sc-if value="{{ ss.hasMedia }}">
+      <div style="display:flex;gap:8px;overflow-x:auto">
+        <sc-for list="{{ ss.media }}" as="m" hint-placeholder-count="3">
+          <div onClick="{{ m.onClick }}" style="position:relative;width:110px;height:110px;border-radius:14px;overflow:hidden;flex-shrink:0;cursor:pointer"><image-slot id="{{ m.img }}" shape="rect" placeholder=""></image-slot><sc-if value="{{ m.video }}"><div style="position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2)"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg></div></sc-if></div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheet.addReview }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:35;background:rgba(10,8,20,.45);display:flex;flex-direction:column;justify-content:flex-end">
+  <div onClick="{{ closeSheet }}" style="flex:1"></div>
+  <div style="background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 34px;animation:sheetUp .3s ease both">
+    <div style="width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px"></div>
+    <sc-if value="{{ rvSuccess }}">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 10px 6px">
+        <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#6D28D9,#A855F7);display:flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+        <div style="font-weight:700;font-size:16.5px;line-height:1.5;margin-bottom:18px">{{ t.reviewThanks }}</div>
+        <button onClick="{{ closeSheet }}" style="width:100%;height:50px;border-radius:14px;border:none;background:var(--soft);color:var(--accent);font-size:14.5px;font-weight:600;cursor:pointer">{{ t.done }}</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ rvForm }}">
+      <div style="font-weight:700;font-size:17px;text-align:center;margin-bottom:4px">{{ t.addReview }}</div>
+      <div style="font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:16px">{{ rvTarget }}</div>
+      <div dir="ltr" style="display:flex;justify-content:center;gap:8px;margin-bottom:18px">
+        <sc-for list="{{ rvStars }}" as="st" hint-placeholder-count="5"><button onClick="{{ st.onClick }}" style="border:none;background:none;padding:2px;cursor:pointer"><svg width="36" height="36" viewBox="0 0 24 24" fill="{{ st.fill }}" stroke="#F59E0B" stroke-width="1.5"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"></path></svg></button></sc-for>
+      </div>
+      <textarea value="{{ rvComment }}" onChange="{{ onRvComment }}" placeholder="{{ t.commentPh }}" style="width:100%;box-sizing:border-box;height:110px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-size:14px;padding:12px 14px;resize:none;margin-bottom:16px"></textarea>
+      <button onClick="{{ submitReview }}" style="{{ rvBtn }}">
+        <sc-if value="{{ rvSubmitting }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>
+        <sc-if value="{{ rvIdle }}">{{ t.submit }}</sc-if>
+      </button>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheet.share }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:30;background:rgba(10,8,20,.45);display:flex;flex-direction:column;justify-content:flex-end">
+  <div onClick="{{ closeSheet }}" style="flex:1"></div>
+  <div style="background:var(--surface);border-radius:26px 26px 0 0;padding:10px 20px 34px;animation:sheetUp .3s ease both">
+    <div style="width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px"></div>
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:var(--card);margin-bottom:18px">
+      <div style="width:48px;height:48px;border-radius:12px;overflow:hidden;flex-shrink:0"><image-slot id="{{ salon.logo }}" shape="rect" placeholder=""></image-slot></div>
+      <div style="min-width:0"><div style="font-weight:700;font-size:14px">{{ salon.name }}</div><div dir="ltr" style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:start">https://wab.jo/salon/{{ salon.id }}</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-around">
+      <sc-for list="{{ shareApps }}" as="ap" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px"><div style="{{ ap.style }}">{{ ap.g }}</div>{{ ap.l }}</div></sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheet.maps }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:30;background:rgba(10,8,20,.45);display:flex;flex-direction:column;justify-content:flex-end">
+  <div onClick="{{ closeSheet }}" style="flex:1"></div>
+  <div style="background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 34px;animation:sheetUp .3s ease both">
+    <div style="width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px"></div>
+    <div style="font-weight:700;font-size:16px;margin-bottom:10px">{{ t.openWith }}</div>
+    <sc-for list="{{ mapApps }}" as="m" hint-placeholder-count="3"><button onClick="{{ closeSheet }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px 0;border:none;border-bottom:1px solid var(--line);background:none;color:var(--ink);font-size:14.5px;cursor:pointer;text-align:start"><span style="{{ m.style }}">{{ m.g }}</span>{{ m.l }}</button></sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ authDialog }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;background:rgba(10,8,20,.5);display:flex;align-items:center;justify-content:center;padding:28px">
+    <div style="background:var(--card);border-radius:24px;padding:26px 22px 20px;width:100%;text-align:center;animation:fadeUp .25s ease both">
+      <div style="width:56px;height:56px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:var(--soft);color:var(--accent)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path></svg></div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:22px">{{ t.authTitle }}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a href="WAB 01 Auth.dc.html?s=loginEmpty" style="height:50px;border-radius:14px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ t.login }}</a>
+        <button onClick="{{ closeDialog }}" style="height:46px;border-radius:14px;border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer">{{ t.cancel }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Customer App</div><div style="font-size:11.5px;color:#6B7280">{{ panelTitle }}</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="6"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="4"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="5"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wab_proto_settings';
+const CUR='WAB 03 Salon.dc.html';
+const FILES=[['01 Auth','WAB 01 Auth.dc.html'],['02 Discovery','WAB 02 Discovery.dc.html'],['03 Salon','WAB 03 Salon.dc.html'],['04 Booking','WAB 04 Booking Flow.dc.html'],['05 Bookings','WAB 05 Bookings.dc.html'],['06 Account','WAB 06 Account.dc.html']];
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1','--shim':d?'#252946':'#EFEBF7','--shim2':d?'#323760':'#F9F7FD'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+function badge(c,bg){return {display:'inline-flex',alignItems:'center',gap:'6px',fontSize:'11.5px',fontWeight:700,padding:'4px 10px',borderRadius:'8px',color:c,background:bg}}
+const GREEN='#2E9E78',ROSE='#D9467A';
+const D={
+ar:{call:'اتصال',whatsapp:'واتساب',open:'مفتوح',closed:'مغلق',closedNow:'مغلق الآن',seeMore:'عرض المزيد',less:'عرض أقل',hours:'أيام وساعات العمل',dayOff:'عطلة',today:'اليوم',upcomingClosure:'إغلاق استثنائي قادم',closure:'مغلق 10–12 ذو الحجة – عيد الأضحى',staff:'الطاقم',onDuty:'مداوم اليوم',onLeave:'في إجازة',reviews:'التقييمات',of5:'من 5',reviewsWord:'تقييم',seeAll:'عرض الكل',addReview:'أضف تقييم',noReviews:'لا يوجد تقييمات حالية لهذا الصالون',noStaffReviews:'لا يوجد تقييمات لهذا الموظف بعد',services:'الخدمات',gallery:'معرض الأعمال',bookNow:'احجز الآن',min:'دقيقة',cur:'د.أ',retry:'إعادة المحاولة',errServer:'حدث خطأ ما',errServerBody:'نعتذر، حدثت مشكلة غير متوقعة.',salonReviews:'تقييمات الصالون',staffReviewsOf:'تقييمات ',noReviewsShort:'لا توجد تقييمات بعد',zoomHint:'اضغط مرتين أو باعد بإصبعين للتكبير',staffProfile:'الملف الشخصي للموظف',brideQ:'مؤهلة للعرائس',years:'سنوات خبرة',customers:'عميل عبر التطبيق',rating:'التقييم',workDays:'أيام العمل',staffServices:'الخدمات التي يقدمها',roles:{owner:'مالك',manager:'مدير',employee:'موظف'},reviewThanks:'شكراً لك! سيظهر تقييمك بعد الموافقة',done:'تم',commentPh:'اكتب تعليقك (اختياري)',submit:'إرسال التقييم',openWith:'فتح الموقع باستخدام',authTitle:'يجب تسجيل الدخول للمتابعة',login:'تسجيل الدخول',cancel:'إلغاء',copy:'نسخ الرابط',messages:'الرسائل',more2:'المزيد',basedOn:'بناءً على',am:'ص',pm:'م',days:['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة']},
+en:{call:'Call',whatsapp:'WhatsApp',open:'Open',closed:'Closed',closedNow:'Closed now',seeMore:'See more',less:'Show less',hours:'Working days & hours',dayOff:'Day off',today:'Today',upcomingClosure:'Upcoming closure',closure:'Closed 10–12 Dhul Hijjah – Eid Al-Adha',staff:'Staff',onDuty:'On duty today',onLeave:'On leave',reviews:'Reviews',of5:'/ 5',reviewsWord:'reviews',seeAll:'See all',addReview:'Add review',noReviews:'There are no reviews for this salon yet.',noStaffReviews:'No reviews for this staff member yet.',services:'Services',gallery:'Portfolio',bookNow:'Book now',min:'min',cur:'JOD',retry:'Retry',errServer:'Something went wrong',errServerBody:'Sorry, an unexpected problem occurred.',salonReviews:'Salon reviews',staffReviewsOf:'Reviews · ',noReviewsShort:'No reviews yet',zoomHint:'Double-tap or pinch to zoom',staffProfile:'Staff profile',brideQ:'Bride qualified',years:'Years exp.',customers:'App customers',rating:'Rating',workDays:'Working days',staffServices:'Services provided',roles:{owner:'Owner',manager:'Manager',employee:'Employee'},reviewThanks:'Thank you! Your review will appear after approval.',done:'Done',commentPh:'Write a comment (optional)',submit:'Submit review',openWith:'Open location with',authTitle:'You need to log in to continue',login:'Log in',cancel:'Cancel',copy:'Copy link',messages:'Messages',more2:'More',basedOn:'Based on',am:'AM',pm:'PM',days:['Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday']}};
+const SALON={
+male:{id:'elite-men',name:['صالون النخبة للرجال',"Elite Men's Salon"],loc:['عمّان، عبدون، شارع 12','Amman, Abdoun, Street 12'],rating:'4.9',count:214,hours:[10,22],
+desc:['صالون النخبة وجهتك للعناية الرجالية المتكاملة في قلب عبدون. نقدم قصات كلاسيكية وعصرية، تهذيب اللحية، الحلاقة بالموس والمنشفة الساخنة، وجلسات تنظيف البشرة على يد فريق من أمهر الحلاقين في عمّان، مع أدوات معقمة ومنتجات عالمية وأجواء مريحة تليق بك.',"Elite is your destination for complete men's grooming in the heart of Abdoun. We offer classic and modern cuts, beard shaping, hot-towel shaves and skin cleansing by some of Amman's most skilled barbers — with sterilized tools, premium products and a relaxed atmosphere."],
+staff:[['عمر','Omar','owner',4.9,86,1,0,0,12,640],['خالد','Khaled','manager',4.8,64,1,0,0,9,410],['يوسف','Yousef','employee',4.7,41,0,1,0,6,260],['فراس','Firas','employee',4.6,28,1,0,0,4,180],['سامر','Samer','employee',4.5,19,1,0,0,3,95]],
+services:[['قص شعر','Haircut',30,8,0],['قص شعر + لحية','Haircut + beard',45,12,0],['تهذيب اللحية','Beard trim',20,5,0],['حلاقة بالموس','Hot towel shave',25,7,0],['تنظيف بشرة','Skin cleansing',40,15,0],['صبغة شعر','Hair color',45,18,0]],
+reviews:[['أحمد م.','Ahmad M.',5,'تجربة ممتازة، الحلاق محترف جداً والمكان نظيف ومريح. التزموا بالموعد تماماً وأنصح به بشدة لكل من يبحث عن قصة مرتبة.','Excellent experience — the barber was very professional and the place is clean and relaxing. They kept to the exact time. Highly recommended.','قبل يومين','2 days ago'],['محمد ع.','Mohammad A.',4,'خدمة رائعة وأسعار مناسبة، فقط الانتظار كان أطول قليلاً من المتوقع.','Great service and fair prices, the wait was just a bit longer than expected.','أمس','Yesterday'],['ليث ك.','Laith K.',5,'أفضل حلاقة بالموس جربتها في عمّان.','The best hot-towel shave I have had in Amman.','12 سبتمبر 2026','Sep 12, 2026'],['زيد ر.','Zaid R.',5,'فريق محترم ومواعيد دقيقة.','Respectful team and punctual.','3 سبتمبر 2026','Sep 3, 2026'],['عمرو ف.','Amr F.',4,'المكان جميل والقصة ممتازة.','Nice place and a great cut.','28 أغسطس 2026','Aug 28, 2026']]},
+female:{id:'bella-house',name:['بيلا هاوس','Bella House'],loc:['عمّان، عبدون، شارع 5','Amman, Abdoun, Street 5'],rating:'4.9',count:268,hours:[10,20],
+desc:['بيلا هاوس صالون نسائي متكامل في عبدون، متخصص في التسريحات والمكياج وباقات العرائس. تعمل لدينا خبيرات معتمدات بأحدث التقنيات والمنتجات العالمية، في أجواء خاصة وهادئة، مع باقات VIP للعروس تشمل التجربة المسبقة والمتابعة يوم الزفاف.','Bella House is a full-service women’s salon in Abdoun specializing in styling, makeup and bridal packages. Our certified experts use the latest techniques and premium products in a private, calm setting, with VIP bridal packages including a trial session and wedding-day follow-up.'],
+staff:[['رنا','Rana','owner',4.9,102,1,0,1,14,820],['دانة','Dana','manager',4.8,77,1,0,1,8,450],['لين','Leen','employee',4.7,39,0,1,0,5,210],['هبة','Hiba','employee',4.8,51,1,0,1,6,300],['سلمى','Salma','employee',4.6,22,1,0,0,3,120]],
+services:[['تسريحة شعر','Hair styling',60,25,0],['مكياج سهرة','Evening makeup',60,35,0],['مكياج عروس','Bridal makeup',120,180,1],['باقة العروس الكاملة','Full bridal package',240,350,1],['مناكير وباديكير','Mani & pedi',60,20,0],['تنظيف بشرة','Facial',50,30,0]],
+reviews:[['رهف ع.','Rahaf A.',5,'الخبيرة كانت رائعة جداً، المكياج ثابت طوال الحفلة والتعامل راقٍ. شكراً لكم على هذه التجربة الجميلة وسأعود بالتأكيد.','The artist was wonderful, the makeup lasted all night and the service was elegant. Thank you for a lovely experience — I will definitely be back.','قبل يومين','2 days ago'],['دينا س.','Dina S.',4,'تسريحة جميلة جداً، المكان مزدحم قليلاً في نهاية الأسبوع.','Beautiful styling, a bit busy on weekends.','أمس','Yesterday'],['نور ح.','Noor H.',5,'باقة العروس تستحق كل دينار.','The bridal package is worth every dinar.','10 سبتمبر 2026','Sep 10, 2026'],['تالا م.','Tala M.',5,'تعامل راقٍ ونتيجة مذهلة.','Classy service, stunning result.','2 سبتمبر 2026','Sep 2, 2026'],['جنى ب.','Jana B.',4,'مناكير ممتاز ودقيق.','Excellent, precise manicure.','25 أغسطس 2026','Aug 25, 2026']]}};
+const GAL=[0,1,0,0,0,1,0,0,0];
+const DEF={screen:'details',closed:false,descExp:false,hoursOpen:false,noWa:false,noReviews:false,fav:false,state:'',sheet:null,dialog:null,staffIdx:0,staffLoading:false,staffNoRev:false,svcIdx:0,svcNoMedia:false,revOf:'salon',revState:'',rvRating:0,rvComment:'',rvSubmitting:false,rvSuccess:false,rvTarget:'salon',mediaIdx:1,mediaLoading:false,mediaFrom:'details'};
+const PRE={def:{},closed:{closed:true},descExp:{descExp:true},hoursExp:{hoursOpen:true},noWa:{noWa:true},noRev:{noReviews:true},favOn:{fav:true},favOff:{fav:false},loading:{state:'loading'},error:{state:'error'},guestBook:{user:'guest',dialog:'auth'},maps:{sheet:'maps'},share:{sheet:'share'},
+staffOn:{sheet:'staff',staffIdx:0},staffLeave:{sheet:'staff',staffIdx:2},staffNoRev:{sheet:'staff',staffIdx:4,staffNoRev:true},staffLoading:{sheet:'staff',staffLoading:true},
+svcMedia:{sheet:'service',svcIdx:0},svcNoMedia:{sheet:'service',svcIdx:2,svcNoMedia:true},
+revSalon:{screen:'reviews',revOf:'salon'},revStaff:{screen:'reviews',revOf:'staff',staffIdx:0},revLoading:{screen:'reviews',revState:'loading'},revPaging:{screen:'reviews',revState:'paging'},revEmpty:{screen:'reviews',revState:'empty'},revError:{screen:'reviews',revState:'error'},
+addEmpty:{screen:'reviews',sheet:'addReview'},addFilled:{screen:'reviews',sheet:'addReview',rvRating:4,rvComment:'x'},addSubmitting:{screen:'reviews',sheet:'addReview',rvRating:4,rvComment:'x',rvSubmitting:true},addSuccess:{screen:'reviews',sheet:'addReview',rvSuccess:true},
+mediaImage:{screen:'media',mediaIdx:0},mediaVideo:{screen:'media',mediaIdx:1},mediaLoading:{screen:'media',mediaLoading:true}};
+const NAV=[['S07 Salon Details',[['Default','def'],['Closed now','closed'],['Description expanded','descExp'],['Hours expanded','hoursExp'],['No WhatsApp','noWa'],['No reviews','noRev'],['Favorite on','favOn'],['Favorite off','favOff'],['Loading','loading'],['Error','error'],['Guest → Book','guestBook'],['Maps chooser','maps'],['Share sheet','share']]],['S07a Staff sheet',[['On duty','staffOn'],['On leave','staffLeave'],['No reviews','staffNoRev'],['Loading','staffLoading']]],['S07b Service sheet',[['With media','svcMedia'],['Without media','svcNoMedia']]],['S08/S09 Reviews',[['Salon reviews','revSalon'],['Staff reviews','revStaff'],['Loading','revLoading'],['Paging','revPaging'],['Empty','revEmpty'],['Error','revError'],['Add – empty','addEmpty'],['Add – filled','addFilled'],['Add – submitting','addSubmitting'],['Add – success','addSuccess']]],['S10 Media viewer',[['Image','mediaImage'],['Video','mediaVideo'],['Loading','mediaLoading']]]];
+function hr(h,t){return (h%12||12)+':00 '+(h>=12?t.pm:t.am)}
+function stars(n){return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n)}
+
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();const q=new URLSearchParams(location.search);const g=q.get('g');return Object.assign({lang:p.lang||'ar',theme:p.theme||'light',user:p.user||'registered',gender:(g==='male'||g==='female')?g:(p.gender||'female'),preset:'def'},DEF)})();
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,user:s.user,gender:s.gender}))}
+  setPref(k,v){this.setState({[k]:v},()=>this.savePrefs())}
+  go(k){const p=PRE[k];if(p)this.setState(Object.assign({},DEF,p,{preset:k}),()=>{if(p.user)this.savePrefs()})}
+  load(key,ms){this.setState({[key]:'loading'});setTimeout(()=>this.setState({[key]:''}),ms||700)}
+  gate(fn){if(this.state.user!=='registered'){this.setState({dialog:'auth'});return}fn()}
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],L=ar?0:1,S=SALON[s.gender];
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const pr=n=>n+' '+t.cur,du=n=>n+' '+t.min;
+    const rev=S.reviews.map(r=>({name:r[L],stars:stars(r[2]),text:r[3+L],date:r[5+L]}));
+    const st=S.staff[s.staffIdx];
+    const svc=S.services[s.svcIdx];
+    const openAddReview=(target)=>this.gate(()=>this.setState({sheet:'addReview',rvRating:0,rvComment:'',rvSuccess:false,rvSubmitting:false,rvTarget:target}));
+    const revPh=s.revState==='empty'?{show:true,icon:'M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z',title:t.noReviewsShort,hasAction:false}:s.revState==='error'?{show:true,icon:'M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',title:t.errServer,hasAction:true,onAction:()=>this.load('revState')}:{show:false};
+    const workDays=[1,1,1,1,1,1,0].map((w,i)=>st[6]&&i===2?0:w);
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',deviceDark:s.theme==='dark'||s.screen==='media',themeVars:tv(s.lang,s.theme),panelTitle:'03 · Salon',
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),
+      controls:[{label:'Language',opts:seg('lang',[['ar','AR'],['en','EN']])},{label:'Theme',opts:seg('theme',[['light','Light'],['dark','Dark']])},{label:'User',opts:seg('user',[['guest','Guest'],['registered','Registered']])},{label:'Gender',opts:seg('gender',[['male','Men'],['female','Women']])}],
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      on:{details:s.screen==='details',reviews:s.screen==='reviews',media:s.screen==='media'},four:[1,2,3,4],
+      salon:{id:S.id,name:S.name[L],loc:S.loc[L],desc:S.desc[L],rating:S.rating,count:S.count,cover:'cover-'+S.id,logo:'logo-'+S.id},
+      heartFill:s.fav?'#D9467A':'none',toggleFav:()=>this.gate(()=>this.setState({fav:!s.fav})),openShare:()=>this.setState({sheet:'share'}),
+      loading:s.state==='loading',errorOn:s.state==='error',ready:!s.state,retry:()=>this.load('state'),
+      statusText:s.closed?t.closedNow:t.open+' · '+hr(S.hours[0],t)+' – '+hr(S.hours[1],t),statusStyle:s.closed?badge(ROSE,'rgba(217,70,122,.1)'):badge(GREEN,'rgba(46,158,120,.1)'),
+      openMaps:()=>this.setState({sheet:'maps'}),hasWa:!s.noWa,
+      descStyle:s.descExp?{fontSize:'13.5px',color:'var(--muted)',lineHeight:1.7}:{fontSize:'13.5px',color:'var(--muted)',lineHeight:1.7,display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden'},
+      descBtn:s.descExp?t.less:t.seeMore,toggleDesc:()=>this.setState({descExp:!s.descExp}),
+      toggleHours:()=>this.setState({hoursOpen:!s.hoursOpen}),hoursOpen:s.hoursOpen,hoursChev:{color:'var(--faint)',transform:s.hoursOpen?'rotate(180deg)':'none',transition:'transform .2s'},
+      todayLine:s.closed?t.closed:hr(S.hours[0],t)+' – '+hr(S.hours[1],t),
+      week:t.days.map((d,i)=>{const off=i===6,today=i===2;return {day:d+(today?' · '+t.today:''),val:off?t.dayOff:hr(S.hours[0],t)+' – '+hr(S.hours[1],t),dayStyle:{fontWeight:today?700:500,color:today?'var(--accent)':'var(--ink)'},valStyle:{color:off?ROSE:'var(--muted)',fontWeight:off?600:400}}}),
+      staff:S.staff.map((p,i)=>({name:p[L],img:'staff-'+S.id+'-'+i,avail:p[6]?t.onLeave:t.onDuty,availStyle:{fontSize:'10.5px',fontWeight:600,color:p[6]?ROSE:GREEN},dotStyle:{position:'absolute',bottom:'2px',insetInlineEnd:'2px',width:'14px',height:'14px',borderRadius:'50%',border:'2.5px solid var(--bg)',background:p[6]?ROSE:GREEN},onClick:()=>{this.setState({sheet:'staff',staffIdx:i,staffNoRev:false});this.setState({staffLoading:true});setTimeout(()=>this.setState({staffLoading:false}),600)}})),
+      hasReviews:!s.noReviews,noReviews:s.noReviews,reviews3:rev.slice(0,3),goReviews:()=>{this.setState({screen:'reviews',revOf:'salon'});this.load('revState')},
+      addSalonReview:()=>openAddReview('salon'),
+      services:S.services.map((x,i)=>({name:x[L],dur:du(x[2]),price:pr(x[3]),vip:!!x[4],img:'svc-'+S.id+'-'+i,onClick:()=>this.setState({sheet:'service',svcIdx:i,svcNoMedia:i===2})})),
+      gallery:GAL.map((v,i)=>({img:'gal-'+S.id+'-'+i,video:!!v,onClick:()=>this.setState({screen:'media',mediaIdx:i,mediaFrom:'details'})})),
+      onBook:()=>this.gate(()=>{location.href='WAB 04 Booking Flow.dc.html?g='+s.gender}),
+      reviewsTitle:s.revOf==='staff'?t.staffReviewsOf+st[L]:t.salonReviews,backFromReviews:()=>this.setState({screen:'details',sheet:s.revOf==='staff'?'staff':null}),
+      revLoading:s.revState==='loading',revPh,revReady:!s.revState||s.revState==='paging',revPaging:s.revState==='paging',
+      revAvg:s.revOf==='staff'?st[3].toFixed(1):S.rating,revCountText:t.basedOn+' '+(s.revOf==='staff'?st[4]:S.count)+' '+t.reviewsWord,allReviews:rev,
+      openAddReview:()=>openAddReview(s.revOf),
+      mediaCounter:(s.mediaIdx+1)+' / '+GAL.length,mediaImg:'gal-'+S.id+'-'+s.mediaIdx,mediaIsVideo:!s.mediaLoading&&!!GAL[s.mediaIdx],mediaIsImage:!s.mediaLoading&&!GAL[s.mediaIdx],mediaLoading:s.mediaLoading,mediaReady:!s.mediaLoading,
+      mediaPrev:()=>this.setState({mediaIdx:(s.mediaIdx+GAL.length-1)%GAL.length}),mediaNext:()=>this.setState({mediaIdx:(s.mediaIdx+1)%GAL.length}),
+      closeMedia:()=>this.setState({screen:'details',sheet:s.mediaFrom==='service'?'service':null}),
+      sheet:{staff:s.sheet==='staff',service:s.sheet==='service',addReview:s.sheet==='addReview',share:s.sheet==='share',maps:s.sheet==='maps'},closeSheet:()=>this.setState({sheet:null}),
+      staffLoading:s.staffLoading,staffReady:!s.staffLoading,
+      sp:{name:st[L],img:'staff-'+S.id+'-'+s.staffIdx,role:t.roles[st[2]],rating:st[3].toFixed(1),count:st[4],bride:!!st[7]&&s.gender==='female',status:st[6]?t.onLeave:t.onDuty,statusStyle:st[6]?badge(ROSE,'rgba(217,70,122,.1)'):badge(GREEN,'rgba(46,158,120,.1)'),
+        stats:[{v:st[8],l:t.years},{v:st[9],l:t.customers},{v:'★ '+st[3].toFixed(1),l:t.rating}],
+        bio:ar?st[0]+' من أمهر أعضاء فريقنا، يتميّز بالدقة والاهتمام بالتفاصيل ويحرص على أن يخرج كل عميل بأفضل إطلالة.':st[1]+' is one of our most skilled team members, known for precision and attention to detail — every client leaves looking their best.',
+        days:t.days.map((d,i)=>({l:d,style:{fontSize:'12px',padding:'6px 11px',borderRadius:'10px',fontWeight:600,background:workDays[i]?'var(--soft)':'transparent',color:workDays[i]?'var(--accent)':'var(--faint)',border:workDays[i]?'1px solid transparent':'1px dashed var(--line)',textDecoration:workDays[i]?'none':'line-through'}})),
+        services:S.services.slice(0,st[7]?6:4).map(x=>x[L]),hasReviews:!s.staffNoRev,noReviews:s.staffNoRev},
+      goStaffReviews:()=>{this.setState({screen:'reviews',revOf:'staff',sheet:null});this.load('revState')},addStaffReview:()=>openAddReview('staff'),
+      ss:{name:svc[L],price:pr(svc[3]),dur:du(svc[2]),desc:ar?'خدمة '+svc[0]+' تُقدَّم على يد خبراء معتمدين باستخدام منتجات عالية الجودة وأدوات معقمة. تشمل الجلسة استشارة قصيرة لاختيار الأنسب لك، والأسعار شاملة للضريبة والرسوم.':svc[1]+' performed by certified experts using quality products and sterilized tools. Includes a short consultation to choose what suits you best. Prices include tax and fees.',
+        hasMedia:!s.svcNoMedia,media:[0,1,2].map(i=>({img:'svcmedia-'+S.id+'-'+i,video:i===1,onClick:()=>this.setState({screen:'media',mediaIdx:i,sheet:null,mediaFrom:'service'})}))},
+      rvSuccess:s.rvSuccess,rvForm:!s.rvSuccess,rvTarget:s.rvTarget==='staff'?st[L]:S.name[L],
+      rvStars:[1,2,3,4,5].map(n=>({fill:n<=s.rvRating?'#F59E0B':'none',onClick:()=>this.setState({rvRating:n})})),
+      rvComment:s.rvComment==='x'?(ar?'خدمة ممتازة وتعامل راقٍ.':'Excellent service and very kind staff.'):s.rvComment,onRvComment:e=>this.setState({rvComment:e.target.value}),
+      rvSubmitting:s.rvSubmitting,rvIdle:!s.rvSubmitting,
+      rvBtn:{width:'100%',height:'52px',borderRadius:'14px',border:'none',display:'flex',alignItems:'center',justifyContent:'center',background:s.rvRating?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--soft)',color:s.rvRating?'#fff':'var(--faint)',fontSize:'15px',fontWeight:600,cursor:s.rvRating?'pointer':'default'},
+      submitReview:()=>{if(!s.rvRating||s.rvSubmitting)return;this.setState({rvSubmitting:true});setTimeout(()=>this.setState({rvSubmitting:false,rvSuccess:true}),900)},
+      shareApps:[['W',t.whatsapp,'#2E9E78'],['✉',t.messages,'#6D28D9'],['⧉',t.copy,'#1F2233'],['⋯',t.more2,'#9CA3AF']].map(([g,l,c])=>({g,l,style:{width:'54px',height:'54px',borderRadius:'16px',background:c,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'20px',fontWeight:700}})),
+      mapApps:[['G','Google Maps','#6D28D9'],['A','Apple Maps','#1F2233'],['W','Waze','#A855F7']].map(([g,l,c])=>({g,l,style:{width:'38px',height:'38px',borderRadius:'10px',background:c,color:'#fff',display:'inline-flex',alignItems:'center',justifyContent:'center',fontWeight:700}})),
+      authDialog:s.dialog==='auth',closeDialog:()=>this.setState({dialog:null})
+    };
+  }
+}
+</script>
+</body>
+</html>

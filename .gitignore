@@ -7,3 +7,10 @@ build/
 local.properties
 node_modules/
 *.log
+# secrets & archives
+.env
+.env.*
+!.env.example
+*.zip
+*.keystore
+*.jks

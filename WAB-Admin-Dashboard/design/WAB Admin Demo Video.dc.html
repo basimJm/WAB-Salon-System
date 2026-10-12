@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#0b0b12;overflow:hidden}a{color:#C9AEF7}a:hover{color:#A855F7}</style>
+<script>window.OM_SCENES = '[{"name":"Open","dur":3.5,"desc":"Logo with the Admin label and tagline, then the dashboard window rises"},{"name":"Login","dur":4.5,"desc":"Email and password typed, then the 6-digit email OTP fills in"},{"name":"Overview","dur":5,"desc":"Live overview: KPIs count up, hourly chart draws, a payment-failure event drops into the live feed"},{"name":"Alert","dur":4,"desc":"Alert email arrives, bell opens, the payment spike alert is tapped"},{"name":"Booking","dur":5,"desc":"Booking WAB-24809 with two failed deposit attempts and gateway code 05"},{"name":"Journey","dur":5,"desc":"Customer journey timeline: failed payments, JSON params, guest events before registration"},{"name":"Apps","dur":6.2,"desc":"Applications queue, document viewer zoom and rotate, approve with reason, success toast"},{"name":"Funnel","dur":4.8,"desc":"Booking funnel bars grow, payment drop-off is tapped, users drawer opens"},{"name":"Refund","dur":5.2,"desc":"Failed refund retried, fails again, then marked refunded manually with a reference"},{"name":"Payout","dur":5.2,"desc":"Select salons, review computed amounts, record bank transfer"},{"name":"Report","dur":4.8,"desc":"Monthly report opened and exported to PDF with a progress toast"},{"name":"Close","dur":4,"desc":"Window drops away, logo and closing line"}]';</script>
+<script>window.OM_PLAYBACK = '{"mode":"loop"}';</script>
+<script>window.TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{"motionEditor":true}/*EDITMODE-END*/;</script>
+</helmet>
+<x-import component-from-global-scope="WabAdminAd" from="./animations-v3.jsx ./tweaks-panel.jsx ./wab-admin-ad.jsx" hint-size="100vw,100vh" style="position:fixed;inset:0"></x-import>
+</x-dc>
+</body>
+</html>

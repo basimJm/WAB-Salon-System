@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>body{margin:0;background:#fff;font-family:'Poppins',sans-serif}a{color:#6D28D9;text-decoration:none}</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="390,844">
+  <div style="{{ screenStyle }}">
+    <div style="display:flex;align-items:center;padding:0 20px 12px;position:relative;flex-shrink:0">
+      <button onclick="{{ onBack }}" style="background:none;border:none;color:#1F2233;padding:0;cursor:pointer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F2233" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div style="position:absolute;left:0;right:0;text-align:center;font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:#1F2233">Book Appointment</div>
+    </div>
+
+    <div style="display:flex;gap:6px;padding:0 20px 20px;flex-shrink:0">
+      <sc-for list="{{ steps }}" as="st" hint-placeholder-count="3">
+        <div style="{{ st.style }}"></div>
+      </sc-for>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:0 20px">
+      <sc-if value="{{ step === 0 }}" hint-placeholder-val="{{ true }}">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:17px;color:#1F2233;margin-bottom:14px">Choose a service</div>
+        <sc-for list="{{ services }}" as="svc" hint-placeholder-count="4">
+          <div onclick="{{ svc.onClick }}" style="{{ svc.style }}">
+            <div>
+              <div style="font-size:13.5px;font-weight:600;color:#1F2233;margin-bottom:3px">{{ svc.name }}</div>
+              <div style="font-size:11.5px;color:#9CA3AF">{{ svc.duration }} min · {{ svc.price }} JOD</div>
+            </div>
+            <div style="{{ svc.radioStyle }}"></div>
+          </div>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{ step === 1 }}" hint-placeholder-val="{{ false }}">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:17px;color:#1F2233;margin-bottom:14px">Choose your barber</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <sc-for list="{{ staffList }}" as="s" hint-placeholder-count="4">
+            <div onclick="{{ s.onClick }}" style="{{ s.style }}">
+              <div style="width:56px;height:56px;border-radius:50%;overflow:hidden;margin:0 auto 8px">
+                <image-slot id="{{ s.imgId }}" shape="circle" placeholder="Photo"></image-slot>
+              </div>
+              <div style="font-size:13px;font-weight:600;color:#1F2233;text-align:center">{{ s.name }}</div>
+              <div style="font-size:11px;color:#B45309;font-weight:600;text-align:center">★ {{ s.rating }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ step === 2 }}" hint-placeholder-val="{{ false }}">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:17px;color:#1F2233;margin-bottom:14px">Pick date &amp; time</div>
+        <div style="display:flex;gap:10px;overflow-x:auto;margin-bottom:20px">
+          <sc-for list="{{ dates }}" as="d" hint-placeholder-count="6">
+            <div onclick="{{ d.onClick }}" style="{{ d.style }}">
+              <div style="font-size:10.5px">{{ d.day }}</div>
+              <div style="font-size:15px;font-weight:700;margin-top:2px">{{ d.num }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <sc-for list="{{ times }}" as="t" hint-placeholder-count="9">
+            <div onclick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ step === 3 }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:40px">
+          <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#6D28D9,#A855F7);display:flex;align-items:center;justify-content:center;font-size:34px;color:#fff;margin-bottom:20px">✓</div>
+          <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:19px;color:#1F2233;margin-bottom:8px">Booking confirmed</div>
+          <div style="font-size:13px;color:#6B7280;text-align:center;margin-bottom:4px">{{ summary }}</div>
+        </div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ step < 3 }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:14px 20px 26px;flex-shrink:0">
+        <button onclick="{{ onNext }}" disabled="{{ !canProceed }}" style="{{ nextBtnStyle }}">{{ nextLabel }}</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ step === 3 }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:14px 20px 26px;flex-shrink:0">
+        <a href="Home Screen.dc.html" style="display:block;text-align:center;padding:15px;border-radius:14px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600">Back to Home</a>
+      </div>
+    </sc-if>
+  </div>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  allServices = [
+    { id: 1, name: 'Classic Haircut', duration: 30, price: 8 },
+    { id: 2, name: 'Skin Fade', duration: 40, price: 10 },
+    { id: 3, name: 'Beard Trim', duration: 20, price: 6 },
+    { id: 4, name: 'Hot Towel Shave', duration: 25, price: 9 },
+  ];
+  allStaff = [
+    { id: 1, name: 'Omar', rating: '4.9', imgId: 'bk-staff-1' },
+    { id: 2, name: 'Khaled', rating: '4.8', imgId: 'bk-staff-2' },
+    { id: 3, name: 'Yousef', rating: '4.9', imgId: 'bk-staff-3' },
+    { id: 4, name: 'Firas', rating: '4.7', imgId: 'bk-staff-4' },
+  ];
+  allDates = [
+    { day: 'Mon', num: 10 }, { day: 'Tue', num: 11 }, { day: 'Wed', num: 12 },
+    { day: 'Thu', num: 13 }, { day: 'Fri', num: 14 }, { day: 'Sat', num: 15 },
+  ];
+  allTimes = ['9:00', '9:30', '10:00', '11:00', '11:30', '1:00', '2:30', '4:00', '5:30'];
+
+  state = { step: 0, serviceId: null, staffId: null, dateNum: null, time: null };
+
+  onBack = () => {
+    if (this.state.step === 0) { window.location.href = 'Salon Details Screen.dc.html'; return; }
+    this.setState({ step: this.state.step - 1 });
+  };
+  onNext = () => {
+    if (this.state.step < 2) this.setState({ step: this.state.step + 1 });
+    else this.setState({ step: 3 });
+  };
+  selectService = (id) => this.setState({ serviceId: id });
+  selectStaff = (id) => this.setState({ staffId: id });
+  selectDate = (num) => this.setState({ dateNum: num });
+  selectTime = (t) => this.setState({ time: t });
+
+  renderVals() {
+    const s = this.state;
+    const stepStyle = (i) => ({ flex: 1, height: '4px', borderRadius: '2px', background: i <= s.step ? 'linear-gradient(90deg,#6D28D9,#A855F7)' : '#EEE9F7' });
+    const service = this.allServices.find((x) => x.id === s.serviceId);
+    const staff = this.allStaff.find((x) => x.id === s.staffId);
+
+    const canProceed = s.step === 0 ? !!s.serviceId : s.step === 1 ? !!s.staffId : s.step === 2 ? (!!s.dateNum && !!s.time) : true;
+
+    return {
+      step: s.step,
+      onBack: this.onBack,
+      onNext: this.onNext,
+      canProceed,
+      nextLabel: s.step === 2 ? 'Confirm Booking' : 'Continue',
+      steps: [0, 1, 2].map(stepStyle),
+      services: this.allServices.map((svc) => ({
+        ...svc,
+        onClick: () => this.selectService(svc.id),
+        style: {
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px',
+          borderRadius: '14px', marginBottom: '10px', cursor: 'pointer',
+          background: s.serviceId === svc.id ? '#F3EEFB' : '#F8F7FB',
+          border: s.serviceId === svc.id ? '1.5px solid #A855F7' : '1.5px solid transparent',
+        },
+        radioStyle: { width: '18px', height: '18px', borderRadius: '50%', border: s.serviceId === svc.id ? '5px solid #6D28D9' : '1.5px solid #D1D5DB' },
+      })),
+      staffList: this.allStaff.map((st) => ({
+        ...st,
+        onClick: () => this.selectStaff(st.id),
+        style: {
+          padding: '16px 8px', borderRadius: '14px', cursor: 'pointer', textAlign: 'center',
+          background: s.staffId === st.id ? '#F3EEFB' : '#F8F7FB',
+          border: s.staffId === st.id ? '1.5px solid #A855F7' : '1.5px solid transparent',
+        },
+      })),
+      dates: this.allDates.map((d) => ({
+        ...d,
+        onClick: () => this.selectDate(d.num),
+        style: {
+          minWidth: '54px', padding: '10px 0', borderRadius: '12px', textAlign: 'center', cursor: 'pointer', flexShrink: 0,
+          background: s.dateNum === d.num ? 'linear-gradient(135deg,#6D28D9,#A855F7)' : '#F8F7FB',
+          color: s.dateNum === d.num ? '#fff' : '#1F2233',
+        },
+      })),
+      times: this.allTimes.map((t) => ({
+        label: t, onClick: () => this.selectTime(t),
+        style: {
+          padding: '11px 0', borderRadius: '10px', textAlign: 'center', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+          background: s.time === t ? 'linear-gradient(135deg,#6D28D9,#A855F7)' : '#F8F7FB',
+          color: s.time === t ? '#fff' : '#1F2233',
+        },
+      })),
+      summary: service && staff ? service.name + ' with ' + staff.name + ' · ' + s.dateNum + ' at ' + s.time : '',
+      nextBtnStyle: {
+        width: '100%', padding: '15px', borderRadius: '14px', border: 'none', cursor: canProceed ? 'pointer' : 'default',
+        background: canProceed ? 'linear-gradient(135deg,#6D28D9,#A855F7)' : '#E5DEF5',
+        color: '#fff', fontSize: '14.5px', fontWeight: 600, fontFamily: "'Poppins',sans-serif",
+      },
+      screenStyle: {
+        display: 'flex', flexDirection: 'column', height: '100%',
+        paddingTop: '58px', boxSizing: 'border-box', background: '#fff', color: '#1F2233',
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

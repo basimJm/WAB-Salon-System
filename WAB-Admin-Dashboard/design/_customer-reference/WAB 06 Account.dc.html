@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#6D28D9"><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#6D28D9"/><rect x="130" y="80" width="140" height="240" rx="26" fill="none" stroke="#fff" stroke-width="12"/><text x="200" y="222" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="54" fill="#fff">WAB</text></svg></template>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button{font-family:inherit}
+input:focus{outline:none}
+input::placeholder{color:#9CA3AF}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ isDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+
+<sc-if value="{{ hasTopBar }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;height:50px;padding:50px 12px 0;position:relative;flex-shrink:0">
+    <button onClick="{{ onBack }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="position:absolute;inset:50px 0 0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;pointer-events:none">{{ topTitle }}</div>
+    <div style="flex:1"></div>
+    <sc-if value="{{ on.notifs }}"><button onClick="{{ openNFilter }}" style="position:relative;width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg><sc-if value="{{ nHasChips }}"><span style="position:absolute;top:9px;inset-inline-end:9px;width:8px;height:8px;border-radius:50%;background:#D9467A"></span></sc-if></button></sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.notifs }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0">
+  <sc-if value="{{ nHasChips }}"><div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 20px 10px"><sc-for list="{{ nChips }}" as="c" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:6px;height:34px;padding-inline-start:12px;padding-inline-end:6px;border-radius:17px;background:var(--soft);color:var(--accent);font-size:12.5px;font-weight:600">{{ c.label }}<button onClick="{{ c.onRemove }}" style="width:22px;height:22px;border-radius:50%;border:none;background:rgba(109,40,217,.14);color:var(--accent);cursor:pointer;font-size:11px">✕</button></div></sc-for></div></sc-if>
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 24px;display:flex;flex-direction:column;gap:8px">
+    <sc-if value="{{ nLoading }}"><sc-for list="{{ five }}" as="x" hint-placeholder-count="5"><div style="height:84px;flex-shrink:0;border-radius:16px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></sc-if>
+    <sc-if value="{{ nPh.show }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 24px">
+        <div style="width:110px;height:110px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--accent)"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="{{ nPh.icon }}"></path></svg></div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:18px">{{ nPh.title }}</div>
+        <sc-if value="{{ nPh.hasAction }}"><button onClick="{{ nPh.onAction }}" style="height:46px;padding:0 28px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ t.retry }}</button></sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ nReady }}">
+      <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="5">
+        <button onClick="{{ n.onClick }}" style="{{ n.style }}">
+          <div style="{{ n.iconBox }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="{{ n.icon }}"></path></svg></div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div style="{{ n.titleStyle }}">{{ n.title }}</div><div style="font-size:11px;color:var(--faint);white-space:nowrap;flex-shrink:0">{{ n.time }}</div></div>
+            <div style="font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ n.body }}</div>
+          </div>
+          <sc-if value="{{ n.unread }}"><span style="width:8px;height:8px;border-radius:50%;background:#A855F7;flex-shrink:0;margin-top:6px"></span></sc-if>
+        </button>
+      </sc-for>
+      <sc-if value="{{ nPaging }}"><div style="height:84px;flex-shrink:0;border-radius:16px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-if>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ on.fav }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:52px">
+  <div style="padding:8px 20px 14px"><div style="font-size:12.5px;color:var(--muted)">{{ hello }}</div><div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:22px">{{ t.favorites }}</div></div>
+  <div style="flex:1;overflow-y:auto;padding:0 20px 20px;display:flex;flex-direction:column;gap:12px">
+    <sc-if value="{{ favLoading }}"><sc-for list="{{ four }}" as="x" hint-placeholder-count="4"><div style="height:112px;flex-shrink:0;border-radius:18px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></sc-if>
+    <sc-if value="{{ favPh.show }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 24px">
+        <div style="width:110px;height:110px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--accent)"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="{{ favPh.icon }}"></path></svg></div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:8px">{{ favPh.title }}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">{{ favPh.body }}</div>
+        <button onClick="{{ favPh.onAction }}" style="height:48px;padding:0 30px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ favPh.action }}</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ favReady }}">
+      <sc-for list="{{ favs }}" as="sc" hint-placeholder-count="3">
+        <a href="{{ sc.href }}" style="display:flex;gap:12px;padding:12px;flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:18px;color:var(--ink)">
+          <div style="width:88px;height:88px;border-radius:14px;overflow:hidden;flex-shrink:0"><image-slot id="{{ sc.img }}" shape="rect" placeholder="Salon"></image-slot></div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px"><div style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.name }}</div><button onClick="{{ sc.onFav }}" style="width:30px;height:30px;border:none;background:none;cursor:pointer;padding:0;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="#D9467A" stroke="#D9467A" stroke-width="2"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.2 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button></div>
+            <div style="display:flex;align-items:center;gap:3px;font-size:12px;font-weight:700"><svg width="12" height="12" viewBox="0 0 24 24" fill="#F59E0B"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"></path></svg>{{ sc.rating }}<span style="color:var(--faint);font-weight:500">({{ sc.reviews }})</span></div>
+            <div style="font-size:12px;color:var(--muted)">{{ sc.loc }}</div>
+            <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.desc }} <span style="color:var(--accent);font-weight:600">{{ t.more }}</span></div>
+            <div style="{{ sc.statusStyle }}"><span style="width:6px;height:6px;border-radius:50%;background:currentColor"></span>{{ sc.status }}</div>
+          </div>
+        </a>
+      </sc-for>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ on.profile }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:52px">
+  <div style="flex:1;overflow-y:auto;padding:8px 20px 24px">
+    <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:22px;background:var(--surface);margin-bottom:22px">
+      <sc-if value="{{ isReg }}">
+        <button onClick="{{ openPhoto }}" style="position:relative;width:68px;height:68px;border:none;padding:0;background:none;cursor:pointer;flex-shrink:0">
+          <sc-if value="{{ hasPhoto }}"><div style="width:68px;height:68px;border-radius:50%;overflow:hidden"><image-slot id="profile-photo" shape="circle" placeholder=""></image-slot></div></sc-if>
+          <sc-if value="{{ noPhoto }}"><div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#D8B4FE,#A855F7);display:flex;align-items:flex-end;justify-content:center;overflow:hidden"><svg width="52" height="52" viewBox="0 0 24 24" fill="rgba(255,255,255,.9)"><circle cx="12" cy="9" r="4"></circle><path d="M4 22a8 8 0 0 1 16 0z"></path></svg></div></sc-if>
+          <span style="position:absolute;bottom:0;inset-inline-end:0;width:24px;height:24px;border-radius:50%;background:#6D28D9;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"></path><circle cx="12" cy="13" r="3.2"></circle></svg></span>
+        </button>
+        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:16.5px">{{ fullName }}</div><div dir="ltr" style="font-size:12.5px;color:var(--muted);text-align:start">{{ userEmail }}</div></div>
+      </sc-if>
+      <sc-if value="{{ isGuest }}">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:22px;flex-shrink:0">{{ guestInitial }}</div>
+        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:16.5px">{{ helloGuest }}</div><div style="font-size:12.5px;color:var(--muted)">{{ t.guestAcc }}</div></div>
+        <button onClick="{{ openNick }}" style="height:36px;padding:0 14px;border-radius:10px;border:none;background:var(--card);color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer">{{ t.edit }}</button>
+      </sc-if>
+    </div>
+    <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="4">
+      <div style="font-size:12px;font-weight:700;color:var(--faint);margin:0 4px 8px">{{ sec.title }}</div>
+      <div style="border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:20px;background:var(--card)">
+        <sc-for list="{{ sec.rows }}" as="r">
+          <button onClick="{{ r.onClick }}" style="width:100%;display:flex;align-items:center;gap:12px;min-height:54px;padding:0 14px;border:none;border-bottom:1px solid var(--line);background:none;color:var(--ink);cursor:pointer;text-align:start">
+            <span style="width:34px;height:34px;border-radius:10px;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.d }}"></path></svg></span>
+            <span style="flex:1;font-size:14px">{{ r.label }}</span>
+            <span style="font-size:12.5px;color:var(--muted)">{{ r.value }}</span>
+            <sc-if value="{{ r.toggle }}"><span style="{{ r.track }}"><span style="{{ r.knob }}"></span></span></sc-if>
+            <sc-if value="{{ r.chev }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint);transform:scaleX(var(--flip))"><path d="M9 5l7 7-7 7"></path></svg></sc-if>
+          </button>
+        </sc-for>
+      </div>
+    </sc-for>
+    <sc-if value="{{ isGuest }}"><a href="WAB 01 Auth.dc.html?s=loginEmpty" style="height:52px;border-radius:14px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ t.login }}</a></sc-if>
+    <sc-if value="{{ isReg }}">
+      <button onClick="{{ askLogout }}" style="width:100%;height:52px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer">{{ t.logout }}</button>
+      <button onClick="{{ askDelete }}" style="width:100%;height:46px;margin-top:8px;border:none;background:none;color:#D9467A;font-size:13.5px;font-weight:600;cursor:pointer">{{ t.deleteAcc }}</button>
+    </sc-if>
+    <div style="text-align:center;font-size:11.5px;color:var(--faint);margin-top:14px">{{ t.version }} 1.0.0 (100)</div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;padding:8px 6px 26px;border-top:1px solid var(--line);background:var(--card)">
+    <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="4">
+      <a href="{{ tb.href }}" style="{{ tb.style }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ tb.d }}"></path></svg><span>{{ tb.label }}</span></a>
+    </sc-for>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.edit }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0">
+  <div style="flex:1;overflow-y:auto;padding:8px 20px 20px;display:flex;flex-direction:column;gap:14px">
+    <sc-for list="{{ editFields }}" as="f" hint-placeholder-count="7">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ f.label }}</div>
+        <div dir="{{ f.dir }}" style="{{ f.style }}">
+          <sc-if value="{{ f.isPhone }}"><span style="display:flex;align-items:center;gap:6px;padding:0 12px;height:100%;border-right:1px solid var(--line);font-weight:600;font-size:14px">🇯🇴 +962</span></sc-if>
+          <input value="{{ f.value }}" onChange="{{ f.onChange }}" readOnly="{{ f.ro }}" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:15px;padding:0 12px;height:100%">
+          <sc-if value="{{ f.dd }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--faint);margin:0 12px"><path d="M6 9l6 6 6-6"></path></svg></sc-if>
+        </div>
+        <sc-if value="{{ f.hasErr }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ f.err }}</div></sc-if>
+      </div>
+    </sc-for>
+    <sc-if value="{{ phoneChanged }}"><div style="display:flex;gap:10px;padding:12px 14px;border-radius:14px;background:var(--soft);font-size:12.5px;color:var(--accent);line-height:1.5"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>{{ t.phoneNote }}</div></sc-if>
+  </div>
+  <div style="padding:12px 20px 30px;border-top:1px solid var(--line);flex-shrink:0">
+    <button onClick="{{ onSave }}" style="{{ saveBtn }}">
+      <sc-if value="{{ saving }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>
+      <sc-if value="{{ notSaving }}">{{ t.save }}</sc-if>
+    </button>
+  </div>
+  <sc-if value="{{ saved }}"><div style="position:absolute;bottom:110px;left:20px;right:20px;background:#1F2233;color:#fff;border-radius:14px;padding:14px 16px;font-size:13.5px;display:flex;align-items:center;gap:10px;animation:fadeUp .3s ease both;z-index:20"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ t.savedToast }}</div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ on.page }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow-y:auto;padding:8px 20px 30px">
+  <sc-if value="{{ pgLoading }}"><div style="display:flex;flex-direction:column;gap:10px"><sc-for list="{{ eight }}" as="x" hint-placeholder-count="8"><div style="height:14px;border-radius:7px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></div></sc-if>
+  <sc-if value="{{ pgError }}">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:120px 20px">
+      <div style="width:100px;height:100px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:18px;color:var(--accent)"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></div>
+      <div style="font-weight:700;font-size:16px;margin-bottom:18px">{{ t.errServer }}</div>
+      <button onClick="{{ retryPage }}" style="height:46px;padding:0 28px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ t.retry }}</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ pgRich }}">
+    <div style="font-size:12px;color:var(--faint);margin-bottom:14px">{{ t.updated }}</div>
+    <sc-for list="{{ richBlocks }}" as="rb" hint-placeholder-count="4"><div style="margin-bottom:18px"><div style="font-weight:700;font-size:15px;margin-bottom:6px">{{ rb.h }}</div><div style="font-size:13.5px;color:var(--muted);line-height:1.8">{{ rb.p }}</div></div></sc-for>
+  </sc-if>
+  <sc-if value="{{ pgFaq }}">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ faqs }}" as="fq" hint-placeholder-count="5">
+        <div style="border:1px solid var(--line);border-radius:16px;overflow:hidden">
+          <button onClick="{{ fq.onClick }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:14px 16px;border:none;background:var(--surface);color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;text-align:start"><span style="flex:1">{{ fq.q }}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="{{ fq.chev }}"><path d="M6 9l6 6 6-6"></path></svg></button>
+          <sc-if value="{{ fq.open }}"><div style="padding:12px 16px 14px;font-size:13px;color:var(--muted);line-height:1.7">{{ fq.a }}</div></sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetOn }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:40;background:rgba(10,8,20,.45);display:flex;flex-direction:column;justify-content:flex-end">
+  <div onClick="{{ closeSheet }}" style="flex:1"></div>
+  <div style="background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 34px;animation:sheetUp .3s ease both">
+    <div style="width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px"></div>
+    <div style="font-weight:700;font-size:16.5px;margin-bottom:12px;text-align:center">{{ sheetTitle }}</div>
+    <sc-if value="{{ sh.nick }}">
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.nickLabel }}</div>
+      <input value="{{ nickVal }}" onChange="{{ onNick }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;margin-bottom:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px"><sc-for list="{{ nickGenders }}" as="g" hint-placeholder-count="2"><button onClick="{{ g.onClick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for></div>
+      <button onClick="{{ closeSheet }}" style="width:100%;height:52px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;cursor:pointer">{{ t.save }}</button>
+    </sc-if>
+    <sc-if value="{{ sh.options }}">
+      <sc-for list="{{ sheetOpts }}" as="o" hint-placeholder-count="3">
+        <button onClick="{{ o.onClick }}" style="width:100%;display:flex;align-items:center;gap:12px;min-height:54px;padding:0 4px;border:none;border-bottom:1px solid var(--line);background:none;color:var(--ink);font-size:14.5px;cursor:pointer;text-align:start">
+          <span style="{{ o.iconStyle }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="{{ o.d }}"></path></svg></span>
+          <span style="{{ o.labelStyle }}">{{ o.label }}</span>
+          <sc-if value="{{ o.sel }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+        </button>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{ sh.nfilter }}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.from }}</div><div style="height:48px;border-radius:14px;border:1.5px solid var(--line);display:flex;align-items:center;padding:0 12px;font-size:14px">{{ nFrom }}</div></div>
+        <div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.to }}</div><div style="height:48px;border-radius:14px;border:1.5px solid var(--line);display:flex;align-items:center;padding:0 12px;font-size:14px">{{ nTo }}</div></div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.search }}</div>
+      <input value="{{ nSearch }}" onChange="{{ onNSearch }}" placeholder="{{ t.nSearchPh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;margin-bottom:18px">
+      <div style="display:flex;gap:10px"><button onClick="{{ resetNFilter }}" style="flex:1;height:52px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:14.5px;font-weight:600;cursor:pointer">{{ t.reset }}</button><button onClick="{{ applyNFilter }}" style="flex:2;height:52px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">{{ t.apply }}</button></div>
+    </sc-if>
+    <sc-if value="{{ sh.notif }}">
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px"><div style="{{ np.iconBox }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="{{ np.icon }}"></path></svg></div><div style="font-size:12px;color:var(--faint);margin-top:12px">{{ np.time }}</div></div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:18px">{{ np.body }}</div>
+      <sc-if value="{{ np.isBooking }}"><a href="{{ np.href }}" style="height:52px;border-radius:14px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ np.cta }}</a></sc-if>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ dlg.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;background:rgba(10,8,20,.5);display:flex;align-items:center;justify-content:center;padding:28px">
+    <div style="background:var(--card);border-radius:24px;padding:26px 22px 20px;width:100%;text-align:center;animation:fadeUp .25s ease both">
+      <div style="width:56px;height:56px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:rgba(217,70,122,.12);color:#D9467A;font-size:24px;font-weight:700">!</div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px">{{ dlg.title }}</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.7;margin-bottom:22px">{{ dlg.body }}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ dlg.onOk }}" style="height:50px;border-radius:14px;border:none;background:#D9467A;color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">{{ dlg.ok }}</button>
+        <button onClick="{{ closeSheet }}" style="height:46px;border-radius:14px;border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer">{{ t.cancel }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Customer App</div><div style="font-size:11.5px;color:#6B7280">{{ panelTitle }}</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="6"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="4"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="5"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wab_proto_settings';
+const CUR='WAB 06 Account.dc.html';
+const FILES=[['01 Auth','WAB 01 Auth.dc.html'],['02 Discovery','WAB 02 Discovery.dc.html'],['03 Salon','WAB 03 Salon.dc.html'],['04 Booking','WAB 04 Booking Flow.dc.html'],['05 Bookings','WAB 05 Bookings.dc.html'],['06 Account','WAB 06 Account.dc.html']];
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1','--shim':d?'#252946':'#EFEBF7','--shim2':d?'#323760':'#F9F7FD'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+const TABD=[['home','M4 11.5 12 4l8 7.5M6 10v9.5h12V10','WAB 02 Discovery.dc.html?s=homeReg'],['fav','M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.2 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z','WAB 06 Account.dc.html?s=fav'],['book','M5 6h14v14H5zM5 10.5h14M9 3.5v4M15 3.5v4','WAB 05 Bookings.dc.html?s=list'],['prof','M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5a7.5 7.5 0 0 1 15 0','WAB 06 Account.dc.html?s=profile']];
+const IC={globe:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9S9.5 5.5 12 3z',moon:'M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z',bell:'M12 3a5.5 5.5 0 0 0-5.5 5.5c0 3.6-1.1 5-2 6.5h15c-.9-1.5-2-2.9-2-6.5A5.5 5.5 0 0 0 12 3zM9.5 19a2.5 2.5 0 0 0 5 0',phone:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z',help:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 16.5h.01',star:'M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z',share:'M12 15V3.5M7.5 8 12 3.5 16.5 8M5 12.5V20h14v-7.5',store:'M4 9l1.5-5h13L20 9M4 9v11h16V9M4 9h16M9 20v-6h6v6',doc:'M7 3h7l4 4v14H7zM14 3v4h4M10 12h5M10 16h5',shield:'M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z',info:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01',user:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5a7.5 7.5 0 0 1 15 0',cam:'M4 8h3l2-2.5h6L17 8h3v11H4zM12 16.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z',img:'M4 5h16v14H4zM4 15l4.5-4.5L13 15l3-3 4 4M15.5 9.5h.01',trash:'M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13',wa:'M4 20l1.3-4A8 8 0 1 1 8 18.7z',mail:'M4 6h16v12H4zM4 7l8 6 8-6',sun:'M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2.5v2M12 19.5v2M4.5 12h-2M21.5 12h-2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4',device:'M7 3h10v18H7zM11 18h2',cal:'M5 6h14v14H5zM5 10.5h14M9 3.5v4M15 3.5v4',tag:'M3.5 12.5 11.5 4.5H20v8.5l-8 8z M15.5 8.5h.01',empty:'M12 3a5.5 5.5 0 0 0-5.5 5.5c0 3.6-1.1 5-2 6.5h15c-.9-1.5-2-2.9-2-6.5A5.5 5.5 0 0 0 12 3zM9.5 19a2.5 2.5 0 0 0 5 0M3 3l18 18',err:'M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',heart:'M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.2 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z'};
+const D={
+ar:{tab:{home:'الرئيسية',fav:'المفضلة',book:'الحجوزات',prof:'الملف الشخصي'},hello:'مرحباً، ',names:{male:'أحمد',female:'ليلى'},full:{male:'أحمد الحداد',female:'ليلى الحداد'},guestName:'سارة',guestAcc:'حساب زائر',edit:'تعديل',notifs:'الإشعارات',favorites:'المفضلة',more:'المزيد',open:'مفتوح',closedToday:'مغلق اليوم',noFav:'لا توجد صالونات مفضلة',noFavBody:'اضغط على القلب في أي صالون لحفظه هنا.',explore:'استكشف الصالونات',favGuest:'سجّل الدخول لحفظ صالوناتك المفضلة',favGuestBody:'ستجد هنا الصالونات التي تحبها.',login:'تسجيل الدخول',noNotifs:'لا توجد إشعارات',errServer:'حدث خطأ ما',retry:'إعادة المحاولة',settings:'الإعدادات',language:'اللغة',theme:'المظهر',pushT:'الإشعارات',support:'الدعم',contact:'تواصل معنا',faq:'الأسئلة الشائعة',rateApp:'قيّم التطبيق',shareApp:'شارك التطبيق',business:'للأعمال',regSalon:'سجّل صالونك معنا',legal:'قانوني',privacy:'سياسة الخصوصية',terms:'الشروط والأحكام',about:'من نحن',account:'الحساب',personal:'المعلومات الشخصية',logout:'تسجيل الخروج',deleteAcc:'حذف الحساب',version:'الإصدار',langs:{ar:'العربية',en:'English'},themes:{light:'فاتح',dark:'داكن',system:'حسب النظام'},nickLabel:'الاسم المستعار',editNick:'تعديل الاسم والجنس',man:'رجل',woman:'امرأة',save:'حفظ',photo:'الصورة الشخصية',camera:'الكاميرا',gallery:'المعرض',delPhoto:'حذف الصورة',logoutQ:'تسجيل الخروج؟',logoutBody:'ستتمكن من تسجيل الدخول مجدداً في أي وقت برقم هاتفك.',deleteQ:'حذف الحساب؟',deleteBody:'سيتم تعطيل حسابك لمدة 30 يوماً، ويمكنك استعادته بتسجيل الدخول خلال هذه الفترة، بعدها يُحذف نهائياً.',del:'حذف الحساب',cancel:'إلغاء',call:'اتصال',whatsapp:'واتساب',email:'البريد الإلكتروني',filter:'تصفية الإشعارات',from:'من',to:'إلى',search:'بحث',nSearchPh:'اسم الصالون…',reset:'إعادة تعيين',apply:'تطبيق',viewBooking:'عرض الحجز',rateNow:'قيّم تجربتك',first:'الاسم الأول',last:'الاسم الأخير',gender:'الجنس',city:'المدينة',area:'المنطقة',phoneL:'رقم الهاتف',reqErr:'هذا الحقل مطلوب',emailErr:'البريد الإلكتروني غير صحيح',phoneNote:'سيتم إرسال رمز تحقق إلى الرقم الجديد قبل حفظ التغييرات.',savedToast:'تم حفظ التغييرات بنجاح',updated:'آخر تحديث: 1 سبتمبر 2026',am:'ص',pm:'م'},
+en:{tab:{home:'Home',fav:'Favorites',book:'Bookings',prof:'Profile'},hello:'Hello, ',names:{male:'Ahmad',female:'Layla'},full:{male:'Ahmad Haddad',female:'Layla Haddad'},guestName:'Sara',guestAcc:'Guest account',edit:'Edit',notifs:'Notifications',favorites:'Favorites',more:'more',open:'Open',closedToday:'Closed today',noFav:'No favorite salons yet',noFavBody:'Tap the heart on any salon to save it here.',explore:'Explore salons',favGuest:'Log in to save favorite salons',favGuestBody:"Salons you love will show up here.",login:'Log in',noNotifs:'No notifications',errServer:'Something went wrong',retry:'Retry',settings:'Settings',language:'Language',theme:'Theme',pushT:'Notifications',support:'Support',contact:'Contact us',faq:'FAQ',rateApp:'Rate the app',shareApp:'Share the app',business:'For business',regSalon:'Register your salon with us',legal:'Legal',privacy:'Privacy Policy',terms:'Terms & Conditions',about:'About us',account:'Account',personal:'Personal information',logout:'Log out',deleteAcc:'Delete account',version:'Version',langs:{ar:'العربية',en:'English'},themes:{light:'Light',dark:'Dark',system:'System'},nickLabel:'Nickname',editNick:'Edit nickname & gender',man:'Man',woman:'Woman',save:'Save',photo:'Profile photo',camera:'Camera',gallery:'Gallery',delPhoto:'Delete photo',logoutQ:'Log out?',logoutBody:'You can log back in any time with your mobile number.',deleteQ:'Delete account?',deleteBody:'Your account will be deactivated for 30 days. Logging in during this period restores it; after that it is permanently deleted.',del:'Delete account',cancel:'Cancel',call:'Call',whatsapp:'WhatsApp',email:'Email',filter:'Filter notifications',from:'From',to:'To',search:'Search',nSearchPh:'Salon name…',reset:'Reset',apply:'Apply',viewBooking:'View booking',rateNow:'Rate your experience',first:'First name',last:'Last name',gender:'Gender',city:'City',area:'Area',phoneL:'Mobile number',reqErr:'This field is required',emailErr:'Invalid email address',phoneNote:'A verification code will be sent to the new number before saving.',savedToast:'Changes saved successfully',updated:'Last updated: Sep 1, 2026',am:'AM',pm:'PM'}};
+const SNAME={male:['صالون النخبة للرجال',"Elite Men's Salon"],female:['بيلا هاوس','Bella House']};
+function NOTIFS(ar,g){const n=SNAME[g][ar?0:1];return [
+['b',ar?'تمت الموافقة على حجزك':'Your booking was approved',ar?'وافق '+n+' على حجزك يوم السبت 3 أكتوبر الساعة 11:00 ص. نراك قريباً!':n+' approved your booking on Sat, Oct 3 at 11:00 AM. See you soon!',ar?'الآن':'Now',1,'approvedOk'],
+['b',ar?'تذكير بموعدك':'Appointment reminder',ar?'موعدك في '+n+' بعد 15 دقيقة. لا تتأخر!':'Your appointment at '+n+' starts in 15 minutes.',ar?'قبل دقيقتين':'2 minutes ago',1,'approvedNo'],
+['p',ar?'خصم 20% على أول حجز':'20% off your first booking',ar?'استمتع بخصم 20% على أول حجز لك عبر WAB حتى نهاية الشهر.':'Enjoy 20% off your first WAB booking until the end of the month.',ar?'قبل 3 ساعات':'3 hours ago',0,null],
+['b',ar?'اكتمل حجزك':'Booking completed',ar?'نتمنى أن تكون تجربتك رائعة! شاركنا رأيك وقيّم '+n+'.':'We hope you loved it! Share your feedback and rate '+n+'.',ar?'أمس':'Yesterday',0,'completed'],
+['b',ar?'تم رفض الحجز':'Booking rejected',ar?'نعتذر، لم يتمكن الصالون من قبول حجزك. سيتم استرداد العربون.':'Sorry, the salon couldn’t accept your booking. Your deposit will be refunded.',ar?'قبل يومين':'2 days ago',0,'rejected'],
+['p',ar?'باقات العرائس الجديدة':'New bridal packages',ar?'اكتشف باقات VIP الجديدة للعرائس في أفضل صالونات عمّان.':'Discover new VIP bridal packages at Amman’s top salons.',ar?'20 سبتمبر 2026':'Sep 20, 2026',0,null]]}
+const FAVS={male:[['صالون النخبة للرجال',"Elite Men's Salon",'عمّان، عبدون','Amman, Abdoun',4.9,214,[10,22]],['ذا جنتري','The Gentry','عمّان، الجاردنز','Amman, Gardens',4.8,176,[9,21]],['بليد آند فيد','Blade & Fade','عمّان، أم أذينة','Amman, Um Uthaina',4.7,132,null]],female:[['بيلا هاوس','Bella House','عمّان، عبدون','Amman, Abdoun',4.9,268,[10,20]],['روز آند آيفوري','Rose & Ivory','عمّان، الجاردنز','Amman, Gardens',4.8,190,[9,19]],['استوديو جلو','Glow Studio','عمّان، أم أذينة','Amman, Um Uthaina',4.7,145,null]]};
+const RICH={privacy:[['جمع البيانات','Data we collect','نجمع الاسم ورقم الهاتف والبريد الإلكتروني والمدينة لتتمكن من الحجز وإدارة حسابك. لا نجمع موقعك إلا عند استخدام ميزة الصالونات الأقرب وبعد موافقتك.','We collect your name, mobile number, email and city so you can book and manage your account. Location is only used for the Nearest feature and only with your permission.'],['استخدام البيانات','How we use it','نستخدم بياناتك لتأكيد الحجوزات وإرسال الإشعارات وتحسين التجربة. لا نبيع بياناتك لأي طرف ثالث.','We use your data to confirm bookings, send notifications and improve your experience. We never sell your data.'],['حقوقك','Your rights','يمكنك تعديل بياناتك أو حذف حسابك في أي وقت من صفحة الملف الشخصي.','You can edit your data or delete your account any time from your Profile.']],
+terms:[['الحجوزات','Bookings','جميع الحجوزات بحاجة لموافقة الصالون، والأسعار شاملة للضرائب والرسوم.','All bookings require salon approval. Prices include taxes and fees.'],['الإلغاء والاسترداد','Cancellation & refunds','تخضع عمليات الإلغاء لسياسة كل صالون الموضحة قبل تأكيد الحجز.','Cancellations follow each salon’s policy, shown before you confirm.'],['التقييمات','Reviews','تخضع جميع التقييمات لموافقة الإدارة قبل نشرها.','All reviews are subject to admin approval before publishing.']],
+about:[['WAB Wedding & Beauty','WAB Wedding & Beauty','منصة أردنية تجمع أفضل صالونات الرجال والنساء في مكان واحد، لتحجز موعدك بسهولة وثقة.','A Jordanian platform bringing the best men’s and women’s salons together, so you can book with ease and confidence.'],['رؤيتنا','Our vision','أن نكون الوجهة الأولى للجمال والعناية في الأردن.','To be Jordan’s first destination for beauty and grooming.']]};
+const FAQ=[['كيف أحجز موعداً؟','How do I book?','اختر الصالون، ثم الخدمات والموعد والموظف، وأكّد الحجز برمز التحقق.','Pick a salon, then services, time and staff, and confirm with the verification code.'],['هل يمكنني إلغاء الحجز؟','Can I cancel a booking?','نعم، وفق سياسة الصالون الموضحة في تفاصيل الحجز.','Yes, according to the salon policy shown in the booking details.'],['متى يتم استرداد المبلغ؟','When will I get my refund?','تظهر حالة الاسترداد في تفاصيل الحجز، ويعود المبلغ لوسيلة الدفع الأصلية.','Refund status appears in booking details; money returns to your original payment method.'],['هل يمكنني الحجز لأكثر من شخص؟','Can I book for others?','نعم، حتى 5 مرافقين من نفس جنس الصالون.','Yes, up to 5 companions of the salon’s gender.'],['كيف أبلّغ عن صالون؟','How do I report a salon?','تواصل معنا عبر صفحة تواصل معنا.','Reach us from the Contact us page.']];
+const DEF={screen:'profile',nState:'',sheet:null,dialog:null,nPopup:0,nFilter:null,nSearch:'',favState:'',favRemoved:{},push:true,hasPhoto:false,nick:null,ngender:null,editState:'',edits:{},page:'privacy',pgState:'',faqOpen:0,langSheet:false,themeMode:null};
+const PRE={notifs:{screen:'notifs'},nFilterSheet:{screen:'notifs',sheet:'nfilter'},nChips:{screen:'notifs',nFilter:{from:'1',to:'28',q:'x'}},nPopupB:{screen:'notifs',sheet:'notif',nPopup:0},nPopupP:{screen:'notifs',sheet:'notif',nPopup:2},nLoading:{screen:'notifs',nState:'loading'},nPaging:{screen:'notifs',nState:'paging'},nEmpty:{screen:'notifs',nState:'empty'},nError:{screen:'notifs',nState:'error'},
+favGuest:{screen:'fav',user:'guest'},fav:{screen:'fav',user:'registered'},favEmpty:{screen:'fav',user:'registered',favState:'empty'},favLoading:{screen:'fav',user:'registered',favState:'loading'},favError:{screen:'fav',user:'registered',favState:'error'},
+profileGuest:{user:'guest'},profile:{user:'registered'},profilePhoto:{user:'registered',hasPhoto:true},sheetNick:{user:'guest',sheet:'nick'},sheetPhoto:{user:'registered',hasPhoto:true,sheet:'photo'},sheetLang:{sheet:'lang'},sheetTheme:{sheet:'theme'},logout:{user:'registered',dialog:'logout'},del:{user:'registered',dialog:'delete'},contact:{sheet:'contact'},
+edit:{screen:'edit',user:'registered'},editEdited:{screen:'edit',edits:{last:'1'}},editErrors:{screen:'edit',edits:{first:'',email:'layla@'}},editPhone:{screen:'edit',edits:{phone:'795556677'}},editSaving:{screen:'edit',edits:{last:'1'},editState:'saving'},editSaved:{screen:'edit',editState:'saved'},
+privacy:{screen:'page',page:'privacy'},terms:{screen:'page',page:'terms'},about:{screen:'page',page:'about'},faq:{screen:'page',page:'faq'},pgLoading:{screen:'page',pgState:'loading'},pgError:{screen:'page',pgState:'error'}};
+const NAV=[['S19 Notifications',[['List','notifs'],['Filter sheet','nFilterSheet'],['Active chips','nChips'],['Popup – booking','nPopupB'],['Popup – promo','nPopupP'],['Loading','nLoading'],['Paging','nPaging'],['Empty','nEmpty'],['Error','nError']]],['S20 Favorites',[['Guest','favGuest'],['List','fav'],['Empty','favEmpty'],['Loading','favLoading'],['Error','favError']]],['S21 Profile',[['Guest','profileGuest'],['Registered','profile'],['With photo','profilePhoto'],['Edit nickname sheet','sheetNick'],['Photo options','sheetPhoto'],['Language','sheetLang'],['Theme','sheetTheme'],['Logout dialog','logout'],['Delete dialog','del'],['Contact sheet','contact']]],['S22 Edit personal info',[['Default','edit'],['Edited','editEdited'],['Errors','editErrors'],['Phone changed','editPhone'],['Saving','editSaving'],['Saved toast','editSaved']]],['S23 Legal & support',[['Privacy','privacy'],['Terms','terms'],['About','about'],['FAQ','faq'],['Loading','pgLoading'],['Error','pgError']]]];
+function hr(h,t){return (h%12||12)+':00 '+(h>=12?t.pm:t.am)}
+function toggle(on){return {track:{width:'44px',height:'26px',borderRadius:'13px',padding:'3px',boxSizing:'border-box',background:on?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--line)',display:'flex',justifyContent:on?'flex-end':'flex-start',flexShrink:0},knob:{width:'20px',height:'20px',borderRadius:'50%',background:'#fff',boxShadow:'0 2px 5px rgba(0,0,0,.2)',display:'block'}}}
+
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();return Object.assign({lang:p.lang||'ar',theme:p.theme||'light',user:p.user||'registered',gender:p.gender||'female',preset:'profile'},DEF)})();
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,user:s.user,gender:s.gender}))}
+  setPref(k,v){this.setState({[k]:v},()=>this.savePrefs())}
+  go(k){const p=PRE[k];if(p)this.setState(Object.assign({},DEF,p,{preset:k}),()=>{if(p.user)this.savePrefs()})}
+  load(k,ms){this.setState({[k]:'loading'});setTimeout(()=>this.setState({[k]:''}),ms||700)}
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],L=ar?0:1,g=s.gender,reg=s.user==='registered';
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const NS=NOTIFS(ar,g);
+    const nf=s.nFilter;
+    const nList=NS.filter(n=>!nf||!nf.q||nf.q==='x'||(n[1]+n[2]).toLowerCase().includes(nf.q.toLowerCase()));
+    const nPh=s.nState==='empty'?{show:true,icon:IC.empty,title:t.noNotifs,hasAction:false}:s.nState==='error'?{show:true,icon:IC.err,title:t.errServer,hasAction:true,onAction:()=>this.load('nState')}:{show:false};
+    const nIcon=type=>({icon:type==='b'?IC.cal:IC.tag,iconBox:{width:'42px',height:'42px',borderRadius:'13px',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',background:type==='b'?'var(--soft)':'rgba(244,167,196,.22)',color:type==='b'?'var(--accent)':'#B83268'}});
+    const np=NS[s.nPopup];
+    const favList=reg?FAVS[g].filter((_,i)=>!s.favRemoved[i]):[];
+    const favPh=!reg?{show:true,icon:IC.heart,title:t.favGuest,body:t.favGuestBody,action:t.login,onAction:()=>{location.href='WAB 01 Auth.dc.html?s=loginEmpty'}}:s.favState==='error'?{show:true,icon:IC.err,title:t.errServer,body:'',action:t.retry,onAction:()=>this.load('favState')}:(s.favState==='empty'||(!s.favState&&!favList.length))?{show:true,icon:IC.heart,title:t.noFav,body:t.noFavBody,action:t.explore,onAction:()=>{location.href='WAB 02 Discovery.dc.html?s=homeReg'}}:{show:false};
+    const themeMode=s.themeMode||s.theme;
+    const row=(d,label,onClick,value,o)=>Object.assign({d,label,onClick,value:value||'',chev:true,toggle:false},o||{});
+    const openPage=p=>()=>{this.setState({screen:'page',page:p,pgState:'',faqOpen:0});this.load('pgState',500)};
+    const sections=[
+      ...(reg?[{title:t.account,rows:[row(IC.user,t.personal,()=>this.setState({screen:'edit',edits:{},editState:''}))]}]:[]),
+      {title:t.settings,rows:[row(IC.globe,t.language,()=>this.setState({sheet:'lang'}),t.langs[s.lang]),row(IC.moon,t.theme,()=>this.setState({sheet:'theme'}),t.themes[themeMode]),Object.assign(row(IC.bell,t.pushT,()=>this.setState({push:!s.push}),'',{chev:false,toggle:true}),toggle(s.push))]},
+      {title:t.support,rows:[row(IC.phone,t.contact,()=>this.setState({sheet:'contact'})),row(IC.help,t.faq,openPage('faq')),row(IC.star,t.rateApp,()=>{}),row(IC.share,t.shareApp,()=>{})]},
+      {title:t.business,rows:[row(IC.store,t.regSalon,()=>{})]},
+      {title:t.legal,rows:[row(IC.shield,t.privacy,openPage('privacy')),row(IC.doc,t.terms,openPage('terms')),row(IC.info,t.about,openPage('about'))]}];
+    const opt=(d,label,onClick,sel,danger)=>({d,label,onClick,sel:!!sel,iconStyle:{width:'36px',height:'36px',borderRadius:'10px',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,background:danger?'rgba(217,70,122,.1)':'var(--soft)',color:danger?'#D9467A':'var(--accent)'},labelStyle:{flex:1,color:danger?'#D9467A':'var(--ink)',fontWeight:sel?700:500}});
+    const sheets={lang:[t.language,[opt(IC.globe,'العربية',()=>{this.setPref('lang','ar');this.setState({sheet:null})},s.lang==='ar'),opt(IC.globe,'English',()=>{this.setPref('lang','en');this.setState({sheet:null})},s.lang==='en')]],
+      theme:[t.theme,[['light',IC.sun],['dark',IC.moon],['system',IC.device]].map(([m,d])=>opt(d,t.themes[m],()=>{this.setState({themeMode:m,sheet:null});this.setPref('theme',m==='dark'?'dark':'light')},themeMode===m))],
+      photo:[t.photo,[opt(IC.cam,t.camera,()=>this.setState({sheet:null,hasPhoto:true})),opt(IC.img,t.gallery,()=>this.setState({sheet:null,hasPhoto:true})),...(s.hasPhoto?[opt(IC.trash,t.delPhoto,()=>this.setState({sheet:null,hasPhoto:false}),false,true)]:[])]],
+      contact:[t.contact,[opt(IC.phone,t.call+' · 06 555 0100',()=>{}),opt(IC.wa,t.whatsapp+' · 079 555 0100',()=>{}),opt(IC.mail,t.email+' · hello@wab.jo',()=>{})]],
+      nick:[t.editNick,[]],nfilter:[t.filter,[]],notif:[np?np[1]:'',[]]};
+    const sh=sheets[s.sheet];
+    const nickVal=s.nick===null?t.guestName:s.nick,ngender=s.ngender||g;
+    const userEmail=(g==='male'?'ahmad':'layla')+'.haddad@example.com';
+    const E=Object.assign({first:t.names[g],last:ar?'الحداد':'Haddad',email:userEmail,phone:'791234567'},s.edits);
+    if(s.edits.last==='1')E.last=ar?'الحدّاد':'Haddad-Nasser';
+    const errs={first:!E.first.trim()?t.reqErr:'',email:!/^\S+@\S+\.\S+$/.test(E.email)?t.emailErr:''};
+    const changed=Object.keys(s.edits).length>0,valid=!errs.first&&!errs.email;
+    const fStyle=(err,ro)=>({display:'flex',alignItems:'center',height:'52px',borderRadius:'14px',overflow:'hidden',border:'1.5px solid '+(err?'#D9467A':'var(--line)'),background:ro?'var(--surface)':'var(--card)'});
+    const setE=k=>e=>this.setState({edits:Object.assign({},s.edits,{[k]:e.target.value}),editState:''});
+    const fld=(k,label,value,o)=>Object.assign({label,value,onChange:setE(k),ro:false,dd:false,isPhone:false,dir:ar?'rtl':'ltr',hasErr:!!errs[k],err:errs[k]||'',style:fStyle(!!errs[k])},o||{});
+    const topTitle={notifs:t.notifs,edit:t.personal,page:{privacy:t.privacy,terms:t.terms,about:t.about,faq:t.faq}[s.page]}[s.screen]||'';
+    const dlgs={logout:{title:t.logoutQ,body:t.logoutBody,ok:t.logout,onOk:()=>{this.setState({dialog:null});this.setPref('user','guest')}},delete:{title:t.deleteQ,body:t.deleteBody,ok:t.del,onOk:()=>{this.setState({dialog:null});this.setPref('user','guest')}}};
+    const dm=dlgs[s.dialog];
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',themeVars:tv(s.lang,s.theme),panelTitle:'06 · Account',
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),
+      controls:[{label:'Language',opts:seg('lang',[['ar','AR'],['en','EN']])},{label:'Theme',opts:seg('theme',[['light','Light'],['dark','Dark']])},{label:'User',opts:seg('user',[['guest','Guest'],['registered','Registered']])},{label:'Gender',opts:seg('gender',[['male','Men'],['female','Women']])}],
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      on:{notifs:s.screen==='notifs',fav:s.screen==='fav',profile:s.screen==='profile',edit:s.screen==='edit',page:s.screen==='page'},
+      five:[1,2,3,4,5],four:[1,2,3,4],eight:[1,2,3,4,5,6,7,8],
+      hasTopBar:['notifs','edit','page'].includes(s.screen),topTitle,onBack:()=>{if(s.screen==='notifs')location.href='WAB 02 Discovery.dc.html?s=homeReg';else this.setState({screen:'profile'})},
+      showTabs:s.screen==='fav'||s.screen==='profile',tabs:TABD.map(([k,d,href])=>({d,href,label:t.tab[k],style:{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px',padding:'6px 0',fontSize:'11px',fontWeight:(k==='fav'&&s.screen==='fav')||(k==='prof'&&s.screen==='profile')?700:500,color:(k==='fav'&&s.screen==='fav')||(k==='prof'&&s.screen==='profile')?'var(--accent)':'var(--faint)'}})),
+      openNFilter:()=>this.setState({sheet:'nfilter'}),nHasChips:!!nf,
+      nChips:nf?[{label:ar?'1 – 28 سبتمبر':'Sep 1 – 28',onRemove:()=>this.setState({nFilter:null})},{label:'"'+(nf.q==='x'?SNAME[g][L]:nf.q)+'"',onRemove:()=>this.setState({nFilter:null})}]:[],
+      nLoading:s.nState==='loading',nPh,nReady:!s.nState||s.nState==='paging',nPaging:s.nState==='paging',
+      notifs:nList.map((n,i)=>{const unread=!!n[4];return Object.assign({title:n[1],body:n[2],time:n[3],unread,onClick:()=>this.setState({sheet:'notif',nPopup:NS.indexOf(n)}),
+        style:{width:'100%',flexShrink:0,display:'flex',gap:'12px',alignItems:'flex-start',padding:'14px',borderRadius:'16px',border:'1px solid '+(unread?'rgba(168,85,247,.35)':'var(--line)'),background:unread?'var(--soft)':'var(--card)',color:'var(--ink)',cursor:'pointer',textAlign:'start'},
+        titleStyle:{flex:1,minWidth:0,lineHeight:1.4,fontSize:'14px',fontWeight:unread?700:600}},nIcon(n[0]))}),
+      np:np?Object.assign({body:np[2],time:np[3],isBooking:np[0]==='b',href:'WAB 05 Bookings.dc.html?s='+(np[5]==='completed'?'rateSalon':np[5]),cta:np[5]==='completed'?t.rateNow:t.viewBooking},nIcon(np[0])):{},
+      nFrom:ar?'1 سبتمبر 2026':'Sep 1, 2026',nTo:ar?'28 سبتمبر 2026':'Sep 28, 2026',nSearch:s.nSearch,onNSearch:e=>this.setState({nSearch:e.target.value}),
+      resetNFilter:()=>this.setState({nSearch:'',nFilter:null}),applyNFilter:()=>{this.setState({sheet:null,nFilter:{q:s.nSearch||'x'}});this.load('nState',600)},
+      hello:t.hello+(reg?t.names[g]:t.guestName),favLoading:s.favState==='loading',favPh,favReady:!s.favState&&!favPh.show,
+      favs:favList.map((x,i)=>({name:x[L],loc:x[2+L],rating:x[4].toFixed(1),reviews:x[5],img:'salon-'+g+i,href:'WAB 03 Salon.dc.html?g='+g,desc:ar?'تسريحات وعناية كاملة على يد خبراء معتمدين.':'Styling and full care by certified experts.',
+        status:x[6]?t.open+' · '+hr(x[6][0],t)+' – '+hr(x[6][1],t):t.closedToday,statusStyle:{display:'flex',alignItems:'center',gap:'6px',fontSize:'11.5px',fontWeight:600,color:x[6]?'#2E9E78':'#D9467A'},
+        onFav:e=>{e.preventDefault();e.stopPropagation();const idx=FAVS[g].indexOf(x);this.setState({favRemoved:Object.assign({},s.favRemoved,{[idx]:true})})}})),
+      userEmail,isReg:reg,isGuest:!reg,hasPhoto:s.hasPhoto,noPhoto:!s.hasPhoto,fullName:t.full[g],helloGuest:t.hello+nickVal,guestInitial:nickVal.trim()[0]||'?',
+      openPhoto:()=>this.setState({sheet:'photo'}),openNick:()=>this.setState({sheet:'nick'}),sections,
+      askLogout:()=>this.setState({dialog:'logout'}),askDelete:()=>this.setState({dialog:'delete'}),
+      sheetOn:!!sh,sheetTitle:sh?sh[0]:'',sheetOpts:sh?sh[1]:[],sh:{nick:s.sheet==='nick',options:['lang','theme','photo','contact'].includes(s.sheet),nfilter:s.sheet==='nfilter',notif:s.sheet==='notif'},closeSheet:()=>this.setState({sheet:null,dialog:null}),
+      nickVal,onNick:e=>this.setState({nick:e.target.value}),
+      nickGenders:[['male',t.man],['female',t.woman]].map(([v,l])=>({label:l,onClick:()=>this.setState({ngender:v}),style:{height:'48px',borderRadius:'14px',cursor:'pointer',fontWeight:600,fontSize:'14px',fontFamily:'inherit',border:'1.5px solid '+(ngender===v?'#A855F7':'var(--line)'),background:ngender===v?'var(--soft)':'var(--card)',color:ngender===v?'var(--accent)':'var(--ink)'}})),
+      editFields:[fld('first',t.first,E.first),fld('last',t.last,E.last),fld('email',t.email,E.email,{dir:'ltr'}),fld('g',t.gender,g==='male'?t.man:t.woman,{ro:true,dd:true}),fld('c',t.city,ar?'عمّان':'Amman',{ro:true,dd:true}),fld('a',t.area,ar?'الجاردنز':'Gardens',{ro:true,dd:true}),fld('phone',t.phoneL,E.phone,{isPhone:true,dir:'ltr'})],
+      phoneChanged:!!s.edits.phone&&s.edits.phone!=='791234567',
+      saveBtn:{width:'100%',height:'54px',borderRadius:'14px',border:'none',display:'flex',alignItems:'center',justifyContent:'center',background:changed&&valid?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--soft)',color:changed&&valid?'#fff':'var(--faint)',fontSize:'15px',fontWeight:600,cursor:changed&&valid?'pointer':'default'},
+      saving:s.editState==='saving',notSaving:s.editState!=='saving',saved:s.editState==='saved',
+      onSave:()=>{if(!changed||!valid)return;if(s.edits.phone&&s.edits.phone!=='791234567'){location.href='WAB 01 Auth.dc.html?s=otpCount';return}this.setState({editState:'saving'});setTimeout(()=>this.setState({editState:'saved',edits:{}}),900)},
+      pgLoading:s.pgState==='loading',pgError:s.pgState==='error',pgRich:!s.pgState&&s.page!=='faq',pgFaq:!s.pgState&&s.page==='faq',retryPage:()=>this.load('pgState'),
+      richBlocks:(RICH[s.page]||[]).map(b=>({h:b[L],p:b[2+L]})),
+      faqs:FAQ.map((f,i)=>({q:f[L],a:f[2+L],open:s.faqOpen===i,onClick:()=>this.setState({faqOpen:s.faqOpen===i?-1:i}),chev:{color:'var(--faint)',flexShrink:0,transform:s.faqOpen===i?'rotate(180deg)':'none',transition:'transform .2s'}})),
+      dlg:dm?Object.assign({show:true},dm):{show:false}
+    };
+  }
+}
+</script>
+</body>
+</html>

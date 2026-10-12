@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button,textarea{font-family:inherit}
+input:focus,textarea:focus{outline:none}
+input::placeholder,textarea::placeholder{color:#9CA3AF}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ isDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+
+<sc-if value="{{ on.splash }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--authbg);padding:40px 24px;gap:8px;animation:fadeUp .5s ease both">
+    <img src="assets/wab-app-icon.png" alt="WAB" style="width:108px;height:108px;border-radius:28px;object-fit:cover;box-shadow:0 20px 44px rgba(109,40,217,.32)">
+    <div style="display:flex;align-items:center;gap:8px;margin-top:14px;direction:ltr">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:32px;letter-spacing:.5px">WAB</span>
+      <span style="font-size:12px;font-weight:700;padding:5px 10px;border-radius:9px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;letter-spacing:.4px">{{ t.biz }}</span>
+    </div>
+    <div style="font-size:10.5px;letter-spacing:2px;color:#A855F7;font-weight:600;direction:ltr">WEDDING &amp; BEAUTY</div>
+    <div style="position:absolute;bottom:70px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:12px">
+      <span style="width:26px;height:26px;border-radius:50%;border:3px solid var(--soft);border-top-color:#A855F7;display:inline-block;animation:spin .8s linear infinite"></span>
+      <span style="font-size:11px;color:var(--faint);direction:ltr">v1.0.0</span>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.login }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;padding:54px 22px 26px;background:var(--authbg);overflow-y:auto;animation:fadeUp .4s ease both">
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button onClick="{{ toggleLang }}" style="height:40px;min-width:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;font-size:13px;cursor:pointer">{{ t.langSwitch }}</button>
+      <button onClick="{{ toggleTheme }}" style="width:44px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--ink)"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></button>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0 22px">
+      <img src="assets/wab-app-icon.png" alt="WAB" style="width:82px;height:82px;border-radius:22px;object-fit:cover;box-shadow:0 14px 32px rgba(109,40,217,.3)">
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px;direction:ltr">
+        <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:26px;letter-spacing:.5px">WAB</span>
+        <span style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:8px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;letter-spacing:.4px">{{ t.biz }}</span>
+      </div>
+      <div style="font-size:10.5px;letter-spacing:2px;color:#A855F7;font-weight:600;direction:ltr">WEDDING &amp; BEAUTY</div>
+    </div>
+    <div style="background:var(--card);border-radius:24px;padding:22px 18px;box-shadow:0 16px 40px rgba(31,34,51,.08);border:1px solid var(--line)">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:22px;margin-bottom:4px">{{ t.headline }}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">{{ t.loginSub }}</div>
+      <div style="font-size:12.5px;font-weight:600;color:var(--accent);margin-bottom:8px">{{ t.phoneLabel }}</div>
+      <div dir="ltr" style="{{ fs.phone }}">
+        <div style="display:flex;align-items:center;gap:6px;padding:0 12px;height:52px;border-right:1px solid var(--line);color:var(--ink)"><span style="font-size:18px">🇯🇴</span><span style="font-size:14px;font-weight:600">+962</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"></path></svg></div>
+        <input type="tel" inputmode="numeric" value="{{ phone }}" onChange="{{ onPhone }}" placeholder="7X XXX XXXX" style="flex:1;min-width:0;background:transparent;border:none;color:var(--ink);font-size:15px;padding:0 12px;height:52px;letter-spacing:.5px">
+      </div>
+      <sc-if value="{{ phoneErrOn }}"><div style="color:#D9467A;font-size:12px;margin-top:6px;animation:shake .35s ease">{{ t.phoneErr }}</div></sc-if>
+      <div style="height:18px"></div>
+      <button onClick="{{ onLogin }}" style="{{ loginBtn }}">
+        <sc-if value="{{ loginLoading }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>
+        <sc-if value="{{ loginIdle }}" hint-placeholder-val="{{ true }}">{{ t.cont }}</sc-if>
+      </button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:5px;font-size:13.5px;color:var(--muted);margin-top:22px">
+      <span>{{ t.newSalon }}</span><a onClick="{{ goRegister }}" style="font-weight:700;color:var(--accent);cursor:pointer">{{ t.regSalon }}</a>
+    </div>
+    <div style="flex:1;min-height:24px"></div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:12px">
+      <a href="WAB Merchant 08 Finance More.dc.html?s=legal" style="color:var(--muted)">{{ t.privacy }}</a>
+      <a href="WAB Merchant 08 Finance More.dc.html?s=legal" style="color:var(--muted)">{{ t.terms }}</a>
+      <a href="WAB Merchant 08 Finance More.dc.html?s=contact" style="color:var(--muted)">{{ t.contact }}</a>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.otp }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;padding:54px 22px 30px;background:var(--authbg);animation:fadeUp .4s ease both">
+    <div style="display:flex;align-items:center;position:relative;min-height:44px">
+      <button onClick="{{ otpBack }}" style="width:44px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);position:relative;z-index:1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px">{{ otpHeader }}</div>
+    </div>
+    <div style="width:76px;height:76px;border-radius:24px;background:var(--soft);display:flex;align-items:center;justify-content:center;margin:30px 0 22px;color:var(--accent)">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="{{ otpIcon }}"></path></svg>
+    </div>
+    <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:23px;margin-bottom:8px">{{ t.otpTitle }}</div>
+    <div style="font-size:13.5px;color:var(--muted);line-height:1.6">{{ t.sent }} <span dir="ltr" style="color:var(--ink);font-weight:600;unicode-bidi:isolate">{{ phoneFmt }}</span></div>
+    <sc-if value="{{ isBank }}"><div style="margin-top:12px;font-size:12.5px;line-height:1.6;padding:10px 12px;border-radius:12px;background:var(--soft);color:var(--accent)">{{ t.bankNote }}</div></sc-if>
+    <div dir="ltr" style="position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:28px 0 10px">
+      <sc-for list="{{ otpBoxes }}" as="b" hint-placeholder-count="6"><div style="{{ b.style }}">{{ b.v }}</div></sc-for>
+      <input type="tel" inputmode="numeric" maxlength="6" value="{{ code }}" onChange="{{ onCode }}" style="position:absolute;inset:0;opacity:0;width:100%;cursor:pointer">
+    </div>
+    <sc-if value="{{ otpWrong }}"><div style="color:#D9467A;font-size:12.5px;animation:shake .35s ease">{{ t.wrong }}</div></sc-if>
+    <sc-if value="{{ otpBlocked }}">
+      <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(217,70,122,.1);border-radius:14px;padding:12px 14px;margin-top:4px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D9467A" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        <div style="font-size:12.5px;line-height:1.55;color:var(--ink)">{{ t.blockedOtp }}<div style="color:#D9467A;font-weight:700;margin-top:2px">{{ t.remaining }} <span dir="ltr">14:32</span></div></div>
+      </div>
+    </sc-if>
+    <div style="height:22px"></div>
+    <button onClick="{{ onVerify }}" style="{{ otpBtn }}">
+      <sc-if value="{{ otpVerifying }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>
+      <sc-if value="{{ otpIdle }}" hint-placeholder-val="{{ true }}">{{ t.verify }}</sc-if>
+    </button>
+    <div style="display:flex;justify-content:center;margin-top:18px;font-size:13px">
+      <sc-if value="{{ canResend }}"><button onClick="{{ onResend }}" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:13.5px;cursor:pointer;padding:10px">{{ t.resend }}</button></sc-if>
+      <sc-if value="{{ counting }}"><div style="color:var(--muted);padding:10px">{{ t.resendIn }} <span dir="ltr" style="font-weight:700;color:var(--ink)">{{ countdownFmt }}</span></div></sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.register }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px;background:var(--authbg)">
+    <div style="display:flex;align-items:center;gap:10px;padding:4px 18px 12px;flex-shrink:0">
+      <button onClick="{{ goLogin }}" style="width:44px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:20px">{{ t.regTitle }}</div>
+        <div style="font-size:12px;color:var(--muted)">{{ t.regSub }}</div>
+      </div>
+      <img src="assets/wab-app-icon.png" alt="WAB" style="width:40px;height:40px;border-radius:12px;object-fit:cover">
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 18px 18px">
+      <div style="background:var(--card);border-radius:24px;padding:18px 16px;border:1px solid var(--line);box-shadow:0 16px 40px rgba(31,34,51,.06);display:flex;flex-direction:column;gap:16px">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.sname }}</div>
+          <input value="{{ sname }}" onChange="{{ onSname }}" placeholder="{{ t.snamePh }}" style="{{ fs.sname }}">
+          <sc-if value="{{ errOn.sname }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.reqErr }}</div></sc-if>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.stype }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <sc-for list="{{ types }}" as="g" hint-placeholder-count="2">
+              <button onClick="{{ g.onClick }}" style="{{ g.style }}"><span style="{{ g.dot }}"></span><span>{{ g.label }}</span></button>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;padding:9px 12px;border-radius:12px;background:rgba(245,158,11,.12);color:#B7791F;font-size:12px;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>{{ t.typeWarn }}</div>
+          <sc-if value="{{ errOn.stype }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.reqErr }}</div></sc-if>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.ownerFirst }}</div>
+            <input value="{{ ofirst }}" onChange="{{ onFirst }}" style="{{ fs.ofirst }}">
+            <sc-if value="{{ errOn.ofirst }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.reqErr }}</div></sc-if>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.ownerLast }}</div>
+            <input value="{{ olast }}" onChange="{{ onLast }}" style="{{ fs.olast }}">
+            <sc-if value="{{ errOn.olast }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.reqErr }}</div></sc-if>
+          </div>
+        </div>
+        <sc-for list="{{ dropdowns }}" as="dd" hint-placeholder-count="2">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ dd.label }}</div>
+            <button onClick="{{ dd.onToggle }}" style="{{ dd.style }}"><span style="{{ dd.textStyle }}">{{ dd.value }}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--faint)"><path d="M6 9l6 6 6-6"></path></svg></button>
+            <sc-if value="{{ dd.open }}">
+              <div style="margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 30px rgba(31,34,51,.12);overflow:hidden">
+                <sc-for list="{{ dd.options }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ dd.err }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.reqErr }}</div></sc-if>
+          </div>
+        </sc-for>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px"><div style="font-size:12px;font-weight:600;color:var(--accent)">{{ t.docs }}</div><div dir="ltr" style="font-size:11.5px;color:var(--faint)">{{ docCount }}</div></div>
+          <div style="font-size:11.5px;color:var(--muted);line-height:1.55;margin-bottom:10px">{{ t.docsHint }}</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <sc-for list="{{ docs }}" as="d" hint-placeholder-count="2">
+              <div style="{{ d.style }}">
+                <sc-if value="{{ d.isImg }}"><div style="position:absolute;inset:0;opacity:.9"><image-slot compact="" id="{{ d.slot }}" shape="rect" placeholder="+"></image-slot></div></sc-if>
+                <sc-if value="{{ d.isPdf }}"><div style="position:absolute;top:12px;left:0;right:0;display:flex;justify-content:center"><div style="width:38px;height:46px;border-radius:8px;background:rgba(217,70,122,.12);color:#D9467A;font-size:10.5px;font-weight:700;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;box-sizing:border-box;direction:ltr">PDF</div></div></sc-if>
+                <sc-if value="{{ d.isDone }}"><button onClick="{{ d.onRemove }}" style="position:absolute;top:5px;inset-inline-end:5px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(20,23,43,.65);color:#fff;font-size:11px;cursor:pointer;z-index:2">✕</button></sc-if>
+                <div style="position:absolute;bottom:0;left:0;right:0;padding:6px 7px;background:var(--card);border-top:1px solid var(--line);z-index:1">
+                  <div dir="ltr" style="font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)">{{ d.name }}</div>
+                  <sc-if value="{{ d.isDone }}"><div dir="ltr" style="font-size:9.5px;color:var(--faint)">{{ d.size }}</div></sc-if>
+                  <sc-if value="{{ d.isUp }}"><div style="height:4px;border-radius:2px;background:var(--soft);margin-top:4px;overflow:hidden"><div style="{{ d.bar }}"></div></div></sc-if>
+                  <sc-if value="{{ d.isFail }}"><button onClick="{{ d.onRetry }}" style="border:none;background:none;padding:0;color:#D9467A;font-size:10px;font-weight:700;cursor:pointer">↻ {{ t.retry }}</button></sc-if>
+                </div>
+                <sc-if value="{{ d.isUp }}"><div style="position:absolute;top:0;left:0;right:0;bottom:44px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.55);z-index:1;font-size:12px;font-weight:700;color:#6D28D9;direction:ltr">{{ d.pct }}</div></sc-if>
+                <sc-if value="{{ d.isFail }}"><div style="position:absolute;top:0;left:0;right:0;bottom:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:rgba(217,70,122,.12);z-index:1;font-size:10.5px;font-weight:700;color:#D9467A"><span style="font-size:16px">!</span>{{ t.failed }}</div></sc-if>
+              </div>
+            </sc-for>
+            <sc-if value="{{ canAddDoc }}">
+              <button onClick="{{ addDoc }}" style="{{ addTile }}"><span style="width:30px;height:30px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1">+</span><span style="font-size:12px;font-weight:700">{{ t.add }}</span><span style="font-size:10px;color:var(--faint)">{{ t.addSub }}</span></button>
+            </sc-if>
+          </div>
+          <sc-if value="{{ errOn.docs }}"><div style="color:#D9467A;font-size:11.5px;margin-top:6px">{{ t.docErr }}</div></sc-if>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.email }}</div>
+          <input type="email" dir="ltr" value="{{ email }}" onChange="{{ onEmail }}" placeholder="name@salon.jo" style="{{ fs.email }}">
+          <sc-if value="{{ errOn.email }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.emailErr }}</div></sc-if>
+        </div>
+        <button onClick="{{ toggleTerms }}" style="display:flex;align-items:flex-start;gap:10px;border:none;background:none;padding:0;color:var(--ink);cursor:pointer;text-align:start;font-size:13px;line-height:1.6">
+          <span style="{{ termsBox }}"><sc-if value="{{ terms }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if></span>
+          <span>{{ t.agree }} <span style="color:var(--accent);font-weight:700">{{ t.termsLink }}</span></span>
+        </button>
+        <sc-if value="{{ errOn.terms }}"><div style="color:#D9467A;font-size:11.5px;margin-top:-10px">{{ t.termsErr }}</div></sc-if>
+      </div>
+    </div>
+    <div style="padding:12px 18px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0">
+      <button onClick="{{ onSubmit }}" style="{{ regBtn }}">
+        <sc-if value="{{ submitting }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>
+        <sc-if value="{{ regIdle }}" hint-placeholder-val="{{ true }}">{{ t.submit }}</sc-if>
+      </button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.status }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:52px;background:var(--authbg)">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 20px 0;flex-shrink:0;direction:ltr;justify-content:center">
+      <img src="assets/wab-app-icon.png" alt="WAB" style="width:30px;height:30px;border-radius:9px;object-fit:cover">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:17px">WAB</span>
+      <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:7px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff">{{ t.biz }}</span>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:22px 20px 20px;display:flex;flex-direction:column;align-items:center;text-align:center">
+      <div style="{{ st.iconWrap }}"><svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="{{ st.icon }}"></path></svg></div>
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:22px;margin:20px 0 8px">{{ st.title }}</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.7;text-wrap:pretty;max-width:310px">{{ st.body }}</div>
+      <sc-if value="{{ st.isRej }}">
+        <div style="width:100%;margin-top:18px;padding:14px;border-radius:16px;background:rgba(217,70,122,.08);text-align:start;box-sizing:border-box"><div style="font-size:12px;font-weight:700;color:#D9467A;margin-bottom:4px">{{ t.reason }}</div><div style="font-size:13px;line-height:1.6">{{ t.reasonVal }}</div></div>
+      </sc-if>
+      <sc-if value="{{ st.showInfo }}">
+        <div style="width:100%;margin-top:20px;padding:6px 16px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-align:start;box-sizing:border-box">
+          <sc-for list="{{ st.rows }}" as="r" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px"><span style="color:var(--muted)">{{ r.k }}</span><span style="font-weight:600">{{ r.v }}</span></div></sc-for>
+          <div style="font-size:12px;font-weight:700;color:var(--accent);margin:12px 0 6px">{{ t.documents }}</div>
+          <sc-for list="{{ st.docs }}" as="d" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:10px;padding:7px 0"><span style="width:32px;height:32px;border-radius:9px;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;direction:ltr">{{ d.kind }}</span><span dir="ltr" style="flex:1;font-size:12.5px;font-weight:600;text-align:start">{{ d.name }}</span><span dir="ltr" style="font-size:11px;color:var(--faint)">{{ d.size }}</span></div></sc-for>
+          <div style="height:8px"></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ st.isPending }}">
+        <div style="width:100%;margin-top:14px;padding:14px;border-radius:18px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;text-align:start;box-sizing:border-box">
+          <div style="font-weight:700;font-size:14.5px;margin-bottom:4px">{{ t.prepare }}</div>
+          <div style="font-size:12.5px;opacity:.92;line-height:1.55;margin-bottom:12px">{{ t.prepareSub }}</div>
+          <button onClick="{{ goChecklist }}" style="height:42px;padding:0 18px;border-radius:12px;border:none;background:#fff;color:#6D28D9;font-weight:700;font-size:13.5px;cursor:pointer">{{ t.prepare }}</button>
+        </div>
+        <button onClick="{{ refreshStatus }}" style="margin-top:12px;border:none;background:none;color:var(--accent);font-weight:600;font-size:13px;cursor:pointer;padding:10px;display:flex;align-items:center;gap:6px">
+          <sc-if value="{{ refreshing }}"><span style="width:14px;height:14px;border-radius:50%;border:2px solid var(--soft);border-top-color:#A855F7;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>↻ {{ t.refresh }}</button>
+      </sc-if>
+    </div>
+    <sc-if value="{{ st.hasCta }}">
+      <div style="padding:12px 20px 30px;flex-shrink:0;display:flex;flex-direction:column;gap:6px">
+        <button onClick="{{ st.onCta }}" style="{{ st.ctaStyle }}">{{ st.cta }}</button>
+        <a href="WAB Merchant 08 Finance More.dc.html?s=contact" style="text-align:center;font-size:13px;font-weight:600;color:var(--muted);padding:10px">{{ t.contactWab }}</a>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.check }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:52px">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 20px 12px;flex-shrink:0">
+      <img src="assets/wab-app-icon.png" alt="WAB" style="width:40px;height:40px;border-radius:12px;object-fit:cover">
+      <div style="flex:1;min-width:0"><div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:20px">{{ t.setupTitle }}</div><div style="font-size:12px;color:var(--muted)">{{ salonName }}</div></div>
+      <span style="{{ chip.style }}"><span style="{{ chip.dot }}"></span>{{ chip.label }}</span>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 20px 24px;display:flex;flex-direction:column;gap:12px">
+      <div style="padding:18px;border-radius:22px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;flex-shrink:0;box-shadow:0 14px 30px rgba(109,40,217,.25)">
+        <div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:30px;font-weight:700">{{ prog.done }}</span><span style="font-size:15px;opacity:.9">{{ t.of }} {{ prog.total }}</span><span style="font-size:13px;opacity:.9;margin-inline-start:4px">{{ t.done }}</span></div>
+        <div style="height:8px;border-radius:4px;background:rgba(255,255,255,.25);margin:10px 0;overflow:hidden"><div style="{{ prog.bar }}"></div></div>
+        <div style="font-size:12.5px;opacity:.95;line-height:1.55">{{ prog.msg }}</div>
+      </div>
+      <sc-if value="{{ appPending }}"><div style="display:flex;gap:10px;align-items:center;padding:11px 13px;border-radius:14px;background:rgba(245,158,11,.12);color:#B7791F;font-size:12.5px;font-weight:600;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{ t.pendingNote }}</div></sc-if>
+      <div style="font-weight:700;font-size:14px;margin-top:4px">{{ t.required }}</div>
+      <sc-for list="{{ reqItems }}" as="it" hint-placeholder-count="6">
+        <button onClick="{{ it.onClick }}" style="{{ it.style }}">
+          <span style="{{ it.mark }}"><sc-if value="{{ it.done }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if><sc-if value="{{ it.busy }}"><span style="width:14px;height:14px;border-radius:50%;border:2px solid var(--soft);border-top-color:#A855F7;display:inline-block;animation:spin .8s linear infinite"></span></sc-if><sc-if value="{{ it.idle }}">{{ it.n }}</sc-if></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:14px;margin-bottom:2px">{{ it.title }}</span><span style="display:block;font-size:12px;color:var(--muted);line-height:1.45">{{ it.sub }}</span></span>
+          <sc-if value="{{ it.done }}"><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:7px;background:rgba(46,158,120,.12);color:#2E9E78">{{ t.done }}</span></sc-if>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint);transform:scaleX(var(--flip));flex-shrink:0"><path d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </sc-for>
+      <div style="font-weight:700;font-size:14px;margin-top:6px">{{ t.optional }}</div>
+      <sc-for list="{{ optItems }}" as="it" hint-placeholder-count="2">
+        <button onClick="{{ it.onClick }}" style="{{ it.style }}">
+          <span style="{{ it.mark }}"><sc-if value="{{ it.done }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if><sc-if value="{{ it.idle }}">+</sc-if></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:14px;margin-bottom:2px">{{ it.title }}</span><span style="display:block;font-size:12px;color:var(--muted)">{{ it.sub }}</span></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint);transform:scaleX(var(--flip));flex-shrink:0"><path d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </sc-for>
+      <div style="font-size:11.5px;color:var(--faint);text-align:center;line-height:1.6;margin-top:4px">{{ t.checkHint }}</div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.live }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 26px 34px;background:var(--authbg)">
+    <div style="width:104px;height:104px;border-radius:50%;background:linear-gradient(135deg,#6D28D9,#A855F7);display:flex;align-items:center;justify-content:center;animation:pop .6s ease both;box-shadow:0 18px 40px rgba(109,40,217,.35)"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+    <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:25px;margin:24px 0 10px">{{ t.liveTitle }}</div>
+    <div style="font-size:14px;color:var(--muted);line-height:1.7;text-wrap:pretty;margin-bottom:24px">{{ t.liveBody }}</div>
+    <div style="width:100%;border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:0 14px 34px rgba(31,34,51,.08);text-align:start;animation:fadeUp .5s .2s ease both">
+      <div style="height:120px;position:relative"><image-slot id="{{ coverSlot }}" shape="rect" placeholder="Salon cover"></image-slot></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px">
+        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ salonName }}</div><div style="font-size:12px;color:var(--muted)">{{ t.area0 }}</div></div>
+        <span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:8px;color:#2E9E78;background:rgba(46,158,120,.12)"><span style="width:7px;height:7px;border-radius:50%;background:#2E9E78;animation:pulse 1.6s infinite"></span>{{ t.chipLive }}</span>
+      </div>
+    </div>
+    <div style="flex:1;min-height:24px"></div>
+    <a href="{{ homeHref }}" style="width:100%;height:54px;border-radius:14px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(109,40,217,.3)">{{ t.goHome }}</a>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.sys }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px 40px;background:var(--authbg);text-align:center;animation:fadeUp .4s ease both">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:40px;direction:ltr"><img src="assets/wab-app-icon.png" alt="WAB" style="width:44px;height:44px;border-radius:13px;object-fit:cover"><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:20px">WAB</span><span style="font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:7px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff">{{ t.biz }}</span></div>
+    <div style="width:110px;height:110px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:26px;color:var(--accent)"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="{{ sys.icon }}"></path></svg></div>
+    <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:23px;margin-bottom:10px">{{ sys.title }}</div>
+    <div style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:34px;text-wrap:pretty">{{ sys.body }}</div>
+    <button style="width:100%;height:54px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 10px 24px rgba(109,40,217,.3)">{{ sys.cta }}</button>
+  </div>
+</sc-if>
+
+<sc-if value="{{ dlg.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;background:rgba(10,8,20,.5);display:flex;align-items:center;justify-content:center;padding:28px">
+    <div style="background:var(--card);border-radius:24px;padding:26px 22px 20px;width:100%;text-align:center;animation:fadeUp .25s ease both;box-shadow:0 30px 60px rgba(0,0,0,.25)">
+      <div style="{{ dlg.iconStyle }}">{{ dlg.icon }}</div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px">{{ dlg.title }}</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:22px">{{ dlg.body }}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ dlg.onPrimary }}" style="height:50px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">{{ dlg.primary }}</button>
+        <sc-if value="{{ dlg.hasSecondary }}"><button onClick="{{ closeDialog }}" style="height:46px;border-radius:14px;border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer">{{ dlg.secondary }}</button></sc-if>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:20px;right:20px;bottom:40px;z-index:60;padding:13px 16px;border-radius:14px;background:#1F2233;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;animation:fadeUp .25s ease both;box-shadow:0 14px 30px rgba(0,0,0,.25)"><span style="width:22px;height:22px;border-radius:50%;background:#2E9E78;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>{{ toast }}</div>
+</sc-if>
+
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Business · Merchant</div><div style="font-size:11.5px;color:#6B7280">{{ panelTitle }}</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="9"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="5"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="6"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+  <div style="font-size:11px;color:#6B7280;line-height:1.55;background:#F8F7FB;border-radius:10px;padding:10px">Demo: 79… = salon member → OTP → Home · 77… = not linked · 78… = blocked · 76… = access removed. OTP 000000 = wrong code. Tap a pending checklist step to simulate completing it.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wabm_proto_settings';
+const CUR='WAB Merchant 01 Onboarding.dc.html';
+const FILES=[['01 Onboarding','WAB Merchant 01 Onboarding.dc.html'],['02 Home','WAB Merchant 02 Home.dc.html'],['03 Bookings','WAB Merchant 03 Bookings.dc.html'],['04 Calendar','WAB Merchant 04 Calendar.dc.html'],['05 Salon','WAB Merchant 05 Salon.dc.html'],['06 Services & Team','WAB Merchant 06 Services Team.dc.html'],['07 Policies & Insights','WAB Merchant 07 Policies Insights.dc.html'],['08 Finance & More','WAB Merchant 08 Finance More.dc.html'],['Ad','WAB Merchant Ad.dc.html']];
+const CTRL=[['lang','Language',[['ar','AR'],['en','EN']]],['theme','Theme',[['light','Light'],['dark','Dark']]],['role','Role',[['owner','Owner'],['manager','Manager'],['employee','Employee']]],['gender','Salon',[['female','Women'],['male','Men']]],['sstate','State',[['live','Live'],['offline','Offline'],['incomplete','Incompl.']]]];
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1','--shim':d?'#252946':'#EFEBF7','--shim2':d?'#323760':'#F9F7FD','--authbg':d?'linear-gradient(160deg,#14172B 0%,#1B1030 55%,#2A1450 100%)':'linear-gradient(170deg,#FFFFFF 0%,#F7F1FF 45%,#ECDDFC 100%)'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+function btn(on){return {width:'100%',height:'54px',flexShrink:0,borderRadius:'14px',border:'none',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:on?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--soft)',color:on?'#fff':'var(--faint)',fontSize:'15px',fontWeight:600,cursor:on?'pointer':'default',boxShadow:on?'0 10px 24px rgba(109,40,217,.28)':'none',fontFamily:'inherit'}}
+function field(err,dis,pad){return {display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',boxSizing:'border-box',height:'52px',padding:pad===0?'0':'0 14px',overflow:'hidden',background:dis?'var(--surface)':'var(--card)',border:'1.5px solid '+(err?'#D9467A':'var(--line)'),borderRadius:'14px',color:'var(--ink)',fontSize:'15px',opacity:dis?.55:1,cursor:dis?'default':'pointer',textAlign:'start',fontFamily:'inherit'}}
+const D={
+ar:{biz:'أعمال',langSwitch:'EN',headline:'نمّي صالونك مع WAB',loginSub:'سجّل الدخول برقم الهاتف المرتبط بصالونك.',phoneLabel:'رقم الهاتف',phoneErr:'رقم الهاتف غير صحيح',cont:'متابعة',newSalon:'صالون جديد؟',regSalon:'سجّل صالونك',privacy:'سياسة الخصوصية',terms:'الشروط والأحكام',contact:'تواصل معنا',
+notLinked:'هذا الرقم غير مرتبط بأي صالون',notLinkedBody:'يمكنك تسجيل صالون جديد بهذا الرقم. إن كنت من فريق أحد الصالونات، اطلب من المالك إضافة رقمك.',regNew:'سجّل صالوناً جديداً',cancel:'إلغاء',removed:'تمت إزالة صلاحية دخولك',removedBody:'قام مالك الصالون بإزالة صلاحية دخولك إلى التطبيق. تواصل معه لمزيد من المعلومات.',ok:'حسناً',blocked:'تم إيقاف هذا الرقم',blockedBody:'تم إيقاف هذا الرقم مؤقتاً. يرجى التواصل مع WAB لمزيد من المعلومات.',contactWab:'تواصل مع WAB',
+otpTitle:'أدخل رمز التحقق',sent:'أرسلنا رمزاً مكوّناً من 6 أرقام إلى',verify:'تحقق',resendIn:'إعادة الإرسال خلال',resend:'إعادة إرسال الرمز',wrong:'الرمز غير صحيح، تبقّى لك 4 محاولات',expired:'انتهت صلاحية الرمز',expiredBody:'انتهت صلاحية الرمز، يرجى طلب رمز جديد.',blockedOtp:'تم تجاوز عدد المحاولات المسموح بها. يرجى المحاولة بعد 15 دقيقة.',remaining:'الوقت المتبقي',modes:{login:'تسجيل الدخول',register:'تسجيل صالون',phone:'تغيير الرقم',bank:'تأكيد بيانات البنك'},bankNote:'لحماية أموالك، أكّد تغيير بيانات البنك بالرمز المرسل إلى هاتف المالك.',
+regTitle:'سجّل صالونك',regSub:'أرسل طلبك وسنراجعه خلال 1–2 يوم عمل.',sname:'اسم الصالون',snamePh:'مثال: بيلا هاوس',stype:'نوع الصالون',men:'رجالي',women:'نسائي',typeWarn:'لا يمكن تغيير نوع الصالون لاحقاً',ownerFirst:'الاسم الأول للمالك',ownerLast:'الاسم الأخير',city:'المدينة',area:'المنطقة',choose:'اختر',areaHint:'اختر المدينة أولاً',docs:'وثائق الترخيص',docsHint:'ارفع من 1 إلى 5 ملفات تثبت وجود الصالون وترخيصه (صورة أو PDF، حتى 10 ميغابايت للملف).',add:'إضافة',addSub:'صورة أو PDF',failed:'فشل الرفع',retry:'إعادة',email:'البريد الإلكتروني (اختياري)',emailErr:'البريد الإلكتروني غير صحيح',agree:'أوافق على',termsLink:'شروط وأحكام WAB للصالونات',termsErr:'يجب الموافقة على الشروط والأحكام',submit:'إرسال الطلب',reqErr:'هذا الحقل مطلوب',docErr:'ارفع وثيقة واحدة على الأقل',
+pendingTitle:'طلبك قيد المراجعة',pendingBody:'يراجع فريق WAB وثائقك عادةً خلال 1–2 يوم عمل، وسنرسل لك إشعاراً فور اتخاذ القرار.',submitted:'تاريخ التقديم',submittedVal:'5 أكتوبر 2026',salonL:'الصالون',typeL:'النوع',documents:'الوثائق المرفقة',prepare:'جهّز ملف صالونك',prepareSub:'ابدأ بتجهيز ملفك الآن ليصبح صالونك مباشراً فور الموافقة.',refresh:'تحديث الحالة',
+rejTitle:'لم تتم الموافقة على طلبك',rejBody:'راجع سبب الرفض، عدّل طلبك ثم أعد إرساله.',reason:'سبب الرفض',reasonVal:'صورة رخصة المهن غير واضحة ومنتهية الصلاحية. يرجى رفع نسخة سارية وواضحة.',resubmit:'تعديل وإعادة الإرسال',apprTitle:'تمت الموافقة على صالونك!',apprBody:'أكمل الخطوات المتبقية ليظهر صالونك للزبائن ويبدأ باستقبال الحجوزات.',continueSetup:'أكمل الإعداد',
+setupTitle:'جهّز صالونك',of:'من',done:'مكتمل',required:'الخطوات المطلوبة',optional:'اختياري',pendingNote:'بانتظار موافقة WAB — يمكنك تجهيز ملفك الآن.',msgLeft:'بقي {n} خطوات ليصبح صالونك مباشراً.',msgAllPending:'ملفك جاهز! سيصبح صالونك مباشراً فور الموافقة.',checkHint:'يظهر صالونك للزبائن فقط عند اكتمال الخطوات المطلوبة وموافقة WAB.',
+items:{profile:['الملف والصور','صورة الغلاف، الصورة الشخصية، الاسم والوصف'],location:['الموقع والتواصل','الموقع على الخريطة ورقم الهاتف'],hours:['ساعات العمل','يوم عمل واحد على الأقل'],services:['الخدمات','خدمة مفعّلة واحدة على الأقل بسعر ومدة'],staff:['الطاقم','موظف يقدم خدمة واحدة على الأقل وله أيام عمل'],policies:['السياسات','نافذة الإلغاء وطريقة دفع واحدة على الأقل'],gallery:['المعرض','أضف صور وفيديوهات أعمالك'],team:['صلاحيات الفريق','أضف أعضاء الفريق وحدد صلاحياتهم']},
+chipPending:'قيد المراجعة',chipInc:'غير مكتمل',chipLive:'مباشر',liveTitle:'صالونك أصبح مباشراً!',liveBody:'أصبح صالونك ظاهراً للزبائن ويمكنهم الحجز الآن. ستصلك طلبات الحجز فوراً.',goHome:'الذهاب للرئيسية',area0:'عمّان، عبدون',saved:'تم حفظ الخطوة',
+forceTitle:'تحديث مطلوب',forceBody:'يتوفر إصدار جديد من WAB أعمال. يرجى التحديث للمتابعة.',updateNow:'تحديث الآن',optTitle:'تحديث متوفر',optBody:'إصدار جديد بمزايا وتحسينات بانتظارك.',update:'تحديث',later:'لاحقاً',maintTitle:'التطبيق تحت الصيانة',maintBody:'نعمل على تحسين تجربتك، سنعود قريباً.',tryAgain:'إعادة المحاولة'},
+en:{biz:'BUSINESS',langSwitch:'ع',headline:'Grow your salon with WAB',loginSub:'Log in with the mobile number linked to your salon.',phoneLabel:'Mobile number',phoneErr:'Invalid mobile number',cont:'Continue',newSalon:'New salon?',regSalon:'Register your salon',privacy:'Privacy',terms:'Terms',contact:'Contact us',
+notLinked:'This number is not linked to any salon',notLinkedBody:'You can register a new salon with this number. If you work at a salon, ask the owner to add your number.',regNew:'Register a new salon',cancel:'Cancel',removed:'Your access was removed',removedBody:'The salon owner removed your access to the app. Contact them for more information.',ok:'OK',blocked:'This number is blocked',blockedBody:'This number is temporarily blocked. Please contact WAB for more information.',contactWab:'Contact WAB',
+otpTitle:'Enter verification code',sent:'We sent a 6-digit code to',verify:'Verify',resendIn:'Resend in',resend:'Resend code',wrong:'Incorrect code, 4 attempts left',expired:'Code expired',expiredBody:'This code has expired, please request a new one.',blockedOtp:'Too many attempts. Please try again in 15 minutes.',remaining:'Time remaining',modes:{login:'Log in',register:'Register salon',phone:'Change number',bank:'Confirm bank details'},bankNote:"To protect your money, confirm the bank details change with the code sent to the owner's phone.",
+regTitle:'Register your salon',regSub:"Submit your application — we'll review it in 1–2 business days.",sname:'Salon name',snamePh:'e.g. Bella House',stype:'Salon type',men:'Men',women:'Women',typeWarn:'Salon type cannot be changed later',ownerFirst:'Owner first name',ownerLast:'Last name',city:'City',area:'Area',choose:'Select',areaHint:'Select a city first',docs:'License documents',docsHint:'Upload 1–5 files proving your salon exists and is licensed (image or PDF, max 10 MB each).',add:'Add',addSub:'Image or PDF',failed:'Upload failed',retry:'Retry',email:'Email (optional)',emailErr:'Invalid email address',agree:'I agree to the',termsLink:'WAB Salon Terms & Conditions',termsErr:'You must accept the terms',submit:'Submit application',reqErr:'This field is required',docErr:'Upload at least one document',
+pendingTitle:'Your application is under review',pendingBody:"WAB usually reviews documents within 1–2 business days. We'll notify you as soon as there's a decision.",submitted:'Submitted on',submittedVal:'Oct 5, 2026',salonL:'Salon',typeL:'Type',documents:'Attached documents',prepare:'Prepare your salon profile',prepareSub:'Set up your profile now so your salon goes live right after approval.',refresh:'Refresh status',
+rejTitle:'Your application was not approved',rejBody:'Review the reason, edit your application and resubmit.',reason:'Rejection reason',reasonVal:'The trade license photo is unclear and expired. Please upload a valid, clear copy.',resubmit:'Edit & resubmit',apprTitle:'Your salon is approved!',apprBody:'Complete the remaining steps so customers can see and book your salon.',continueSetup:'Continue setup',
+setupTitle:'Set up your salon',of:'of',done:'Done',required:'Required steps',optional:'Optional',pendingNote:'Waiting for WAB approval — you can prepare your profile now.',msgLeft:'{n} steps left until your salon goes live.',msgAllPending:'Your profile is ready! Your salon goes live once approved.',checkHint:'Customers can see your salon only when all required steps are complete and WAB has approved it.',
+items:{profile:['Profile & images','Cover, profile image, name and description'],location:['Location & contact','Map location and phone number'],hours:['Working hours','At least one working day'],services:['Services','At least one active service with price and duration'],staff:['Staff','A provider with at least one service and working days'],policies:['Policies','Cancellation window and at least one payment option'],gallery:['Gallery','Add photos and videos of your work'],team:['Team access','Add team members and set permissions']},
+chipPending:'Under review',chipInc:'Incomplete',chipLive:'Live',liveTitle:'Your salon is now live!',liveBody:"Customers can now see and book your salon. You'll receive booking requests instantly.",goHome:'Go to Home',area0:'Amman, Abdoun',saved:'Step saved',
+forceTitle:'Update required',forceBody:'A new version of WAB Business is available. Please update to continue.',updateNow:'Update now',optTitle:'Update available',optBody:'A new version with new features and improvements is ready.',update:'Update',later:'Later',maintTitle:'Under maintenance',maintBody:"We're improving your experience. We'll be back soon.",tryAgain:'Try again'}};
+const CITIES=[{id:'amman',ar:'عمّان',en:'Amman',areas:[['عبدون','Abdoun'],['الجاردنز','Gardens'],['أم أذينة','Um Uthaina'],['الصويفية','Sweifieh'],['خلدا','Khalda']]},{id:'irbid',ar:'إربد',en:'Irbid',areas:[['الحصن','Al Husn'],['شارع الجامعة','University St.']]},{id:'zarqa',ar:'الزرقاء',en:'Zarqa',areas:[['الزرقاء الجديدة','New Zarqa']]},{id:'aqaba',ar:'العقبة',en:'Aqaba',areas:[['الشلالة','Al Shallaleh']]}];
+const SALON={female:['بيلا هاوس','Bella House'],male:['صالون النخبة للرجال',"Elite Men's Salon"]};
+const OWNER={female:[['ليلى','حداد'],['Layla','Haddad']],male:[['أحمد','النابلسي'],['Ahmad','Nabulsi']]};
+const REQ=['profile','location','hours','services','staff','policies'],OPT=['gallery','team'];
+const LINK={profile:'WAB Merchant 05 Salon.dc.html?s=profile',location:'WAB Merchant 05 Salon.dc.html?s=map',hours:'WAB Merchant 05 Salon.dc.html?s=hours',services:'WAB Merchant 06 Services Team.dc.html?s=services',staff:'WAB Merchant 06 Services Team.dc.html?s=team',policies:'WAB Merchant 07 Policies Insights.dc.html?s=policies',gallery:'WAB Merchant 05 Salon.dc.html?s=gallery',team:'WAB Merchant 06 Services Team.dc.html?s=memberAdd'};
+const DOCS=()=>[{id:1,name:'trade-license-2026.pdf',kind:'pdf',size:'1.4 MB',state:'done',p:100},{id:2,name:'salon-front.jpg',kind:'img',size:'3.2 MB',state:'done',p:100}];
+const DEF={screen:'splash',phone:'',phoneTouched:false,loginLoading:false,dialog:null,code:'',countdown:60,otpState:'',otpMode:'login',sname:'',stype:'',ofirst:'',olast:'',city:'',area:'',email:'',terms:false,docs:[],regErrors:false,submitting:false,dd:null,app:'pending',done:{},busy:null,toast:null,refreshing:false,sys:null};
+const PART={profile:1,location:1,hours:1,services:1};
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();return Object.assign({lang:p.lang||'ar',theme:p.theme||'light',role:p.role||'owner',gender:p.gender||'female',sstate:p.sstate||'live',preset:'splash'},DEF)})();
+  full(){const g=this.state.gender,ar=this.state.lang==='ar',o=OWNER[g][ar?0:1];return {sname:SALON[g][ar?0:1],stype:g,ofirst:o[0],olast:o[1],city:'amman',area:'0',email:g==='female'?'layla@bellahouse.jo':'ahmad@elite.jo',terms:true,docs:DOCS()}}
+  pre(k){const F=this.full();const P={splash:{screen:'splash'},
+    loginEmpty:{screen:'login'},loginValid:{screen:'login',phone:'791234567'},loginInvalid:{screen:'login',phone:'5512',phoneTouched:true},loginLoading:{screen:'login',phone:'791234567',loginLoading:true},notLinked:{screen:'login',phone:'771234567',dialog:'notLinked'},removed:{screen:'login',phone:'761234567',dialog:'removed'},blocked:{screen:'login',phone:'781234567',dialog:'blocked'},
+    otpCount:{screen:'otp',phone:'791234567'},otpVerifying:{screen:'otp',phone:'791234567',code:'482193',otpState:'verifying'},otpWrong:{screen:'otp',phone:'791234567',code:'000000',otpState:'wrong'},otpResend:{screen:'otp',phone:'791234567',countdown:0},otpExpired:{screen:'otp',phone:'791234567',code:'482193',countdown:0,dialog:'expired'},otpBlocked:{screen:'otp',phone:'791234567',otpState:'blocked',countdown:0},otpReg:{screen:'otp',phone:'771234567',otpMode:'register'},otpPhone:{screen:'otp',phone:'795550123',otpMode:'phone'},otpBank:{screen:'otp',phone:'791234567',otpMode:'bank'},
+    regEmpty:{screen:'register',phone:'771234567'},regFilled:Object.assign({screen:'register'},F),regUploading:Object.assign({screen:'register'},F,{docs:DOCS().concat([{id:3,name:'commercial-reg.pdf',kind:'pdf',size:'2.0 MB',state:'up',p:46,stuck:true}])}),regFailed:Object.assign({screen:'register'},F,{docs:DOCS().concat([{id:3,name:'IMG_2041.jpg',kind:'img',size:'',state:'fail',p:0}])}),regErrors:{screen:'register',sname:F.sname,regErrors:true,email:'layla@'},regSubmitting:Object.assign({screen:'register',submitting:true},F),
+    statusPending:{screen:'status',app:'pending'},statusRejected:{screen:'status',app:'rejected'},statusApproved:{screen:'status',app:'approved'},
+    checkPending:{screen:'check',app:'pending',done:PART},checkPartial:{screen:'check',app:'approved',done:PART},checkLive:{screen:'live'},
+    force:{screen:'sys',sys:'force'},optUpdate:{screen:'login',dialog:'optUpdate'},maint:{screen:'sys',sys:'maint'}};return P[k]}
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k);else this.splashT=setTimeout(()=>{if(this.state.screen==='splash')this.setState({screen:'login',preset:'loginEmpty'})},2200);
+    this.timer=setInterval(()=>{const s=this.state,u={};if(s.screen==='otp'&&s.countdown>0&&s.otpState!=='blocked'&&!s.dialog)u.countdown=s.countdown-1;
+      if(s.docs.some(d=>d.state==='up'&&!d.stuck))u.docs=s.docs.map(d=>d.state==='up'&&!d.stuck?(d.p>=88?Object.assign({},d,{state:'done',p:100,size:'2.1 MB'}):Object.assign({},d,{p:d.p+14})):d);
+      if(Object.keys(u).length)this.setState(u)},450)}
+  componentWillUnmount(){clearInterval(this.timer);clearTimeout(this.splashT);clearTimeout(this.toastT)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,role:s.role,gender:s.gender,sstate:s.sstate}))}
+  setPref(k,v){this.setState({[k]:v},()=>this.savePrefs())}
+  go(k){const p=this.pre(k);if(!p)return;clearTimeout(this.splashT);this.setState(Object.assign({},DEF,p,{preset:k}));if(k==='splash')this.splashT=setTimeout(()=>{if(this.state.screen==='splash')this.setState({screen:'login',preset:'loginEmpty'})},2200)}
+  toast(m){this.setState({toast:m});clearTimeout(this.toastT);this.toastT=setTimeout(()=>this.setState({toast:null}),1800)}
+  validPhone(v){return /^7[6789]\d{7}$/.test(v)}
+  toOtp(mode){this.setState({screen:'otp',otpMode:mode,code:'',countdown:60,otpState:'',loginLoading:false,dialog:null})}
+  onLogin=()=>{const s=this.state;if(!this.validPhone(s.phone)||s.loginLoading){this.setState({phoneTouched:true});return}
+    this.setState({loginLoading:true});setTimeout(()=>{const p=this.state.phone;
+      if(p.startsWith('77'))this.setState({loginLoading:false,dialog:'notLinked'});else if(p.startsWith('78'))this.setState({loginLoading:false,dialog:'blocked'});else if(p.startsWith('76'))this.setState({loginLoading:false,dialog:'removed'});else this.toOtp('login')},900)};
+  onVerify=()=>{const s=this.state;if(s.code.length!==6||s.otpState==='blocked'||s.otpState==='verifying')return;
+    this.setState({otpState:'verifying'});setTimeout(()=>{const s2=this.state;if(s2.code==='000000'){this.setState({otpState:'wrong'});return}
+      if(s2.otpMode==='register'){this.setState({screen:'register',otpState:''});return}
+      if(s2.otpMode==='bank'){location.href='WAB Merchant 08 Finance More.dc.html?s=bankSaved';return}
+      if(s2.otpMode==='phone'){location.href='WAB Merchant 08 Finance More.dc.html?s=phoneSaved';return}
+      location.href='WAB Merchant 02 Home.dc.html?s='+(s2.role==='employee'?'homeEmployee':'home')},900)};
+  regValid(){const s=this.state;return {sname:!!s.sname.trim(),stype:!!s.stype,ofirst:!!s.ofirst.trim(),olast:!!s.olast.trim(),city:!!s.city,area:s.area!=='',docs:s.docs.some(d=>d.state==='done')&&!s.docs.some(d=>d.state==='up'),terms:s.terms,email:!s.email||/^\S+@\S+\.\S+$/.test(s.email)}}
+  onSubmit=()=>{const v=this.regValid();if(!Object.values(v).every(Boolean)){this.setState({regErrors:true});return}this.setState({submitting:true});setTimeout(()=>this.setState({submitting:false,screen:'status',app:'pending'}),1100)};
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],g=s.gender;
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const NAV=[['M01 Splash',[['Splash','splash']]],['M02 Welcome & Login',[['Empty','loginEmpty'],['Valid','loginValid'],['Invalid phone','loginInvalid'],['Loading','loginLoading'],['Not linked dialog','notLinked'],['Access removed','removed'],['Blocked','blocked']]],['M03 OTP (6 digits)',[['Countdown','otpCount'],['Verifying','otpVerifying'],['Wrong code','otpWrong'],['Resend active','otpResend'],['Expired popup','otpExpired'],['Blocked 15 min','otpBlocked'],['Mode: Register','otpReg'],['Mode: Change phone','otpPhone'],['Mode: Bank details','otpBank']]],['M04 Salon registration',[['Empty','regEmpty'],['Filled','regFilled'],['Uploading','regUploading'],['Upload failed','regFailed'],['Validation errors','regErrors'],['Submitting','regSubmitting']]],['M05 Application status',[['Pending','statusPending'],['Rejected','statusRejected'],['Approved','statusApproved']]],['M06 Setup checklist',[['While pending','checkPending'],['Approved · 4 of 6','checkPartial'],['All done → Live!','checkLive']]],['M26 Force update / maintenance',[['Force update','force'],['Optional update','optUpdate'],['Maintenance','maint']]]];
+    const pv=this.validPhone(s.phone),rv=this.regValid(),re=s.regErrors;
+    const cityObj=CITIES.find(x=>x.id===s.city);
+    const ddDef=[['city',t.city,CITIES.map(x=>[x.id,x[s.lang]]),s.city,false],['area',t.area,cityObj?cityObj.areas.map((a,i)=>[String(i),ar?a[0]:a[1]]):[],s.area,!s.city]];
+    const dropdowns=ddDef.map(([k,label,opts,val,dis])=>{const cur=opts.find(o=>o[0]===val);const err=re&&!rv[k];
+      return {label,open:s.dd===k,err,value:cur?cur[1]:(dis?t.areaHint:t.choose),textStyle:{color:cur?'var(--ink)':'var(--faint)',fontSize:'15px'},style:field(err,dis),onToggle:()=>{if(!dis)this.setState({dd:s.dd===k?null:k})},
+        options:opts.map(([v,l])=>({label:l,onClick:()=>{const u={dd:null};if(k==='city'){u.city=v;u.area=''}else u.area=v;this.setState(u)},style:{width:'100%',padding:'13px 16px',border:'none',borderBottom:'1px solid var(--line)',background:v===val?'var(--soft)':'transparent',color:v===val?'var(--accent)':'var(--ink)',fontWeight:v===val?600:400,fontSize:'14px',textAlign:'start',cursor:'pointer',fontFamily:'inherit'}}))}});
+    const dlgMap={notLinked:{icon:'!',title:t.notLinked,body:t.notLinkedBody,primary:t.regNew,onPrimary:()=>this.toOtp('register'),secondary:t.cancel},
+      removed:{icon:'⊘',title:t.removed,body:t.removedBody,primary:t.ok,onPrimary:()=>this.setState({dialog:null,phone:''}),rose:true},
+      blocked:{icon:'⛔',title:t.blocked,body:t.blockedBody,primary:t.contactWab,onPrimary:()=>{location.href='WAB Merchant 08 Finance More.dc.html?s=contact'},secondary:t.cancel,rose:true},
+      expired:{icon:'⏱',title:t.expired,body:t.expiredBody,primary:t.resend,onPrimary:()=>this.setState({dialog:null,code:'',countdown:60,otpState:''}),secondary:t.cancel},
+      optUpdate:{icon:'↻',title:t.optTitle,body:t.optBody,primary:t.update,onPrimary:()=>this.setState({dialog:null}),secondary:t.later}};
+    const dm=dlgMap[s.dialog];
+    const dlg=dm?Object.assign({show:true,hasSecondary:!!dm.secondary,iconStyle:{width:'56px',height:'56px',borderRadius:'50%',margin:'0 auto 14px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'24px',fontWeight:700,background:dm.rose?'rgba(217,70,122,.12)':'var(--soft)',color:dm.rose?'#D9467A':'var(--accent)'}},dm):{show:false};
+    const otpErr=s.otpState==='wrong',pf=s.phone||'791234567';
+    const OTPI={login:'M7 3h10v18H7zM10.5 18h3',register:'M4 10l8-6 8 6v10H4zM9.5 20v-5h5v5',phone:'M7 3h10v18H7zM10.5 18h3',bank:'M3 9l9-5 9 5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18'};
+    const docs=s.docs.map(d=>({name:d.name,size:d.size,slot:'mreg-doc-'+d.id,isImg:d.kind==='img'&&d.state!=='fail',isPdf:d.kind==='pdf',isDone:d.state==='done',isUp:d.state==='up',isFail:d.state==='fail',pct:d.p+'%',bar:{height:'100%',width:d.p+'%',background:'linear-gradient(90deg,#6D28D9,#A855F7)',borderRadius:'2px'},
+      style:{position:'relative',height:'112px',borderRadius:'14px',overflow:'hidden',background:'var(--surface)',border:'1.5px solid '+(d.state==='fail'?'#D9467A':'var(--line)')},
+      onRemove:()=>this.setState({docs:s.docs.filter(x=>x.id!==d.id)}),onRetry:()=>this.setState({docs:s.docs.map(x=>x.id===d.id?Object.assign({},x,{state:'up',p:8,stuck:false,kind:'img'}):x)})}));
+    const salonName=SALON[g][ar?0:1];
+    const appSt={pending:{icon:'M7 3h10M7 21h10M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4',title:t.pendingTitle,body:t.pendingBody,wrap:['var(--soft)','var(--accent)'],cta:null},
+      rejected:{icon:'M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',title:t.rejTitle,body:t.rejBody,wrap:['rgba(217,70,122,.12)','#D9467A'],cta:t.resubmit,onCta:()=>this.setState(Object.assign({},this.full(),{screen:'register',docs:[{id:1,name:'trade-license-2024.pdf',kind:'pdf',size:'0.8 MB',state:'done',p:100}]}))},
+      approved:{icon:'M5 12.5l4.5 4.5L19 7.5',title:t.apprTitle,body:t.apprBody,wrap:['linear-gradient(135deg,#6D28D9,#A855F7)','#fff'],cta:t.continueSetup,onCta:()=>this.setState({screen:'check',app:'approved',done:Object.keys(s.done).length?s.done:PART})}}[s.app];
+    const st={icon:appSt.icon,title:appSt.title,body:appSt.body,isRej:s.app==='rejected',isPending:s.app==='pending',showInfo:s.app!=='approved',hasCta:!!appSt.cta,cta:appSt.cta,onCta:appSt.onCta,ctaStyle:btn(true),
+      iconWrap:{width:'124px',height:'124px',borderRadius:'50%',background:appSt.wrap[0],color:appSt.wrap[1],display:'flex',alignItems:'center',justifyContent:'center',animation:s.app==='approved'?'pop .6s ease both':'none',flexShrink:0},
+      rows:[{k:t.salonL,v:salonName},{k:t.typeL,v:g==='female'?t.women:t.men},{k:t.submitted,v:t.submittedVal}],docs:DOCS().map(d=>({name:d.name,size:d.size,kind:d.kind==='pdf'?'PDF':'IMG'}))};
+    const nDone=REQ.filter(k=>s.done[k]).length;
+    const mkItem=(k,i,opt)=>{const done=!!s.done[k],busy=s.busy===k;return {n:i+1,title:t.items[k][0],sub:t.items[k][1],done,busy,idle:!done&&!busy,
+      style:{width:'100%',flexShrink:0,display:'flex',alignItems:'center',gap:'12px',padding:'14px',borderRadius:'18px',border:'1px solid '+(done?'var(--line)':opt?'var(--line)':'#D8B4FE'),background:done?'var(--surface)':'var(--card)',color:'var(--ink)',cursor:'pointer',textAlign:'start',fontFamily:'inherit'},
+      mark:{width:'32px',height:'32px',borderRadius:'50%',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:700,background:done?'#2E9E78':'var(--soft)',color:done?'#fff':'var(--accent)'},
+      onClick:()=>{if(done){location.href=LINK[k];return}if(s.busy)return;this.setState({busy:k});setTimeout(()=>{const nd=Object.assign({},this.state.done,{[k]:1});const all=REQ.every(x=>nd[x]);this.setState({done:nd,busy:null});this.toast(t.saved);if(all&&this.state.app==='approved')setTimeout(()=>this.setState({screen:'live'}),900)},800)}}};
+    const chipC=s.app==='pending'?['#B7791F','rgba(245,158,11,.14)',t.chipPending]:['#D9467A','rgba(217,70,122,.1)',t.chipInc];
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',themeVars:tv(s.lang,s.theme),panelTitle:'01 · Onboarding (M01–M06, M26)',
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),controls:CTRL.map(([k,label,o])=>({label,opts:seg(k,o)})),
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      on:{splash:s.screen==='splash',login:s.screen==='login',otp:s.screen==='otp',register:s.screen==='register',status:s.screen==='status',check:s.screen==='check',live:s.screen==='live',sys:s.screen==='sys'},
+      toggleLang:()=>this.setPref('lang',ar?'en':'ar'),toggleTheme:()=>this.setPref('theme',s.theme==='dark'?'light':'dark'),
+      phone:s.phone,onPhone:e=>this.setState({phone:e.target.value.replace(/\D/g,'').slice(0,9),phoneTouched:false}),phoneErrOn:s.phoneTouched&&!pv,
+      fs:{phone:field(s.phoneTouched&&!pv,false,0),sname:field(re&&!rv.sname),ofirst:field(re&&!rv.ofirst),olast:field(re&&!rv.olast),email:field(re&&!rv.email)},
+      loginBtn:btn(pv),loginLoading:s.loginLoading,loginIdle:!s.loginLoading,onLogin:this.onLogin,
+      goRegister:()=>{if(!pv){this.setState({phoneTouched:true});return}this.toOtp('register')},goLogin:()=>this.setState({screen:'login'}),
+      otpHeader:t.modes[s.otpMode],otpIcon:OTPI[s.otpMode],isBank:s.otpMode==='bank',phoneFmt:'+962 '+pf.replace(/(\d)(\d{4})(\d+)/,'$1 $2 $3'),
+      code:s.code,onCode:e=>this.setState({code:e.target.value.replace(/\D/g,'').slice(0,6),otpState:s.otpState==='blocked'?'blocked':''}),
+      otpBoxes:[0,1,2,3,4,5].map(i=>({v:s.code[i]||'',style:{height:'56px',borderRadius:'14px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'22px',fontWeight:700,background:'var(--card)',color:'var(--ink)',border:'1.5px solid '+(otpErr?'#D9467A':(i===s.code.length&&s.otpState!=='blocked')?'#A855F7':s.code[i]?'#D8B4FE':'var(--line)'),boxShadow:i===s.code.length&&!otpErr?'0 0 0 4px rgba(168,85,247,.12)':'none',opacity:s.otpState==='blocked'?.5:1}})),
+      otpWrong:otpErr,otpBlocked:s.otpState==='blocked',otpVerifying:s.otpState==='verifying',otpIdle:s.otpState!=='verifying',otpBtn:btn(s.code.length===6&&s.otpState!=='blocked'),onVerify:this.onVerify,
+      canResend:s.countdown===0&&s.otpState!=='blocked',counting:s.countdown>0&&s.otpState!=='blocked',countdownFmt:'0:'+String(s.countdown).padStart(2,'0'),onResend:()=>this.setState({countdown:60,code:'',otpState:''}),
+      otpBack:()=>{if(s.otpMode==='bank'){location.href='WAB Merchant 08 Finance More.dc.html?s=bank';return}if(s.otpMode==='phone'){location.href='WAB Merchant 08 Finance More.dc.html?s=more';return}this.setState({screen:'login'})},
+      sname:s.sname,onSname:e=>this.setState({sname:e.target.value}),ofirst:s.ofirst,onFirst:e=>this.setState({ofirst:e.target.value}),olast:s.olast,onLast:e=>this.setState({olast:e.target.value}),email:s.email,onEmail:e=>this.setState({email:e.target.value}),
+      types:[['male','♂',t.men],['female','♀',t.women]].map(([v,ic,label])=>({label:ic+'  '+label,onClick:()=>this.setState({stype:v}),
+        style:{height:'54px',borderRadius:'14px',display:'flex',alignItems:'center',justifyContent:'center',gap:'10px',cursor:'pointer',fontSize:'14.5px',fontWeight:600,fontFamily:'inherit',border:'1.5px solid '+(s.stype===v?'#A855F7':(re&&!rv.stype?'#D9467A':'var(--line)')),background:s.stype===v?'var(--soft)':'var(--card)',color:s.stype===v?'var(--accent)':'var(--ink)'},
+        dot:{width:'16px',height:'16px',borderRadius:'50%',boxSizing:'border-box',border:s.stype===v?'5px solid #A855F7':'2px solid var(--faint)'}})),
+      errOn:{sname:re&&!rv.sname,stype:re&&!rv.stype,ofirst:re&&!rv.ofirst,olast:re&&!rv.olast,docs:re&&!rv.docs,terms:re&&!rv.terms,email:re&&!rv.email},
+      dropdowns,docs,docCount:s.docs.length+' / 5',canAddDoc:s.docs.length<5,addDoc:()=>this.setState({docs:s.docs.concat([{id:Date.now(),name:'IMG_'+(2040+s.docs.length)+'.jpg',kind:'img',size:'',state:'up',p:6}])}),
+      addTile:{height:'112px',borderRadius:'14px',border:'1.5px dashed '+(re&&!rv.docs?'#D9467A':'#D8B4FE'),background:'var(--card)',color:'var(--accent)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'4px',cursor:'pointer',fontFamily:'inherit'},
+      terms:s.terms,toggleTerms:()=>this.setState({terms:!s.terms}),termsBox:{width:'22px',height:'22px',borderRadius:'7px',flexShrink:0,marginTop:'1px',display:'flex',alignItems:'center',justifyContent:'center',boxSizing:'border-box',background:s.terms?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--card)',border:s.terms?'none':'1.5px solid '+(re&&!rv.terms?'#D9467A':'var(--faint)')},
+      regBtn:btn(Object.values(rv).every(Boolean)),submitting:s.submitting,regIdle:!s.submitting,onSubmit:this.onSubmit,
+      st,refreshing:s.refreshing,refreshStatus:()=>{this.setState({refreshing:true});setTimeout(()=>this.setState({refreshing:false,app:'approved'}),1200)},goChecklist:()=>this.setState({screen:'check',done:Object.keys(s.done).length?s.done:{}}),
+      salonName,chip:{label:chipC[2],style:{display:'inline-flex',alignItems:'center',gap:'6px',fontSize:'11.5px',fontWeight:700,padding:'5px 10px',borderRadius:'8px',color:chipC[0],background:chipC[1],flexShrink:0},dot:{width:'7px',height:'7px',borderRadius:'50%',background:chipC[0]}},
+      appPending:s.app==='pending',prog:{done:nDone,total:6,bar:{height:'100%',width:(nDone/6*100)+'%',background:'#fff',borderRadius:'4px',transition:'width .4s'},msg:nDone===6?t.msgAllPending:t.msgLeft.replace('{n}',6-nDone)},
+      reqItems:REQ.map((k,i)=>mkItem(k,i,false)),optItems:OPT.map((k,i)=>mkItem(k,i,true)),
+      coverSlot:'mcover-'+g,homeHref:'WAB Merchant 02 Home.dc.html?s=home',
+      sys:s.sys==='force'?{icon:'M12 3v12M7 10l5 5 5-5M5 20h14',title:t.forceTitle,body:t.forceBody,cta:t.updateNow}:{icon:'M14.5 6.5a4 4 0 0 0-5.3 5.3L4 17l3 3 5.2-5.2a4 4 0 0 0 5.3-5.3l-2.4 2.4-2.6-.4-.4-2.6z',title:t.maintTitle,body:t.maintBody,cta:t.tryAgain},
+      dlg,closeDialog:()=>this.setState({dialog:null}),toast:s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

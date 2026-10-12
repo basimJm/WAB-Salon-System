@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<aside style="{{ asideStyle }}">
+  <div style="display:flex;align-items:center;gap:11px;padding:20px 18px 18px;border-bottom:1px solid var(--line)">
+    <img src="assets/wab-app-icon.png" alt="WAB" style="width:40px;height:40px;border-radius:12px;object-fit:cover;flex-shrink:0;box-shadow:0 6px 16px rgba(109,40,217,.25)">
+    <sc-if value="{{ expanded }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+        <div style="display:flex;align-items:baseline;gap:7px"><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:21px;letter-spacing:.4px;line-height:1">WAB</span><span style="font-size:8.5px;letter-spacing:1.6px;color:#A855F7;font-weight:600;font-family:Poppins,sans-serif;direction:ltr">WEDDING &amp; BEAUTY</span></div>
+        <span style="align-self:flex-start;font-size:10.5px;font-weight:700;color:var(--accent);background:var(--soft);padding:2px 8px;border-radius:6px">{{ adminLabel }}</span>
+      </div>
+    </sc-if>
+  </div>
+  <nav style="flex:1;overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:2px">
+    <sc-for list="{{ items }}" as="it" hint-placeholder-count="12">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <a href="{{ it.href }}" onClick="{{ it.onClick }}" title="{{ it.t }}" style="{{ it.style }}">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="{{ it.icon }}"></path></svg>
+          <sc-if value="{{ expanded }}" hint-placeholder-val="{{ true }}"><span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.t }}</span></sc-if>
+          <sc-if value="{{ it.hasCount }}"><span style="{{ it.countStyle }}">{{ it.count }}</span></sc-if>
+          <sc-if value="{{ it.showChev }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="{{ it.chevStyle }}"><path d="M6 9l6 6 6-6"></path></svg></sc-if>
+        </a>
+        <sc-if value="{{ it.open }}">
+          <div style="display:flex;flex-direction:column;gap:1px;margin-bottom:4px">
+            <sc-for list="{{ it.children }}" as="c">
+              <a href="{{ c.href }}" onClick="{{ c.onClick }}" style="{{ c.style }}"><span style="{{ c.dot }}"></span><span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.t }}</span><sc-if value="{{ c.hasCount }}"><span style="{{ c.countStyle }}">{{ c.count }}</span></sc-if></a>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </nav>
+  <div style="border-top:1px solid var(--line);padding:12px 10px;display:flex;flex-direction:column;gap:6px">
+    <sc-if value="{{ expanded }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 8px">
+        <span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">{{ adminIni }}</span>
+        <div style="min-width:0;flex:1"><div style="font-weight:600;font-size:12.5px">{{ adminName }}</div><div style="font-size:11px;color:var(--muted);direction:ltr;text-align:start">admin@wab.jo</div></div>
+      </div>
+    </sc-if>
+    <button onClick="{{ toggle }}" style="height:34px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-size:12px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="{{ colIconStyle }}"><path d="M15 5l-7 7 7 7M20 5v14"></path></svg>
+      <sc-if value="{{ expanded }}" hint-placeholder-val="{{ true }}"><span>{{ collapseT }}</span></sc-if>
+    </button>
+  </div>
+</aside>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;active&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A01&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ar&quot;,&quot;en&quot;],&quot;default&quot;:&quot;ar&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onNav&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id:string)=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state={col:null,open:{}};
+  componentDidMount(){this.onR=()=>this.forceUpdate();window.addEventListener('resize',this.onR)}
+  componentWillUnmount(){window.removeEventListener('resize',this.onR)}
+  renderVals(){
+    const W=window.WABA;if(!W)return {items:[],expanded:true};
+    const lang=this.props.lang||'ar',ar=lang==='ar',active=this.props.active||'A01';
+    const pref=W.prefs();const narrow=window.innerWidth<1180;
+    const col=this.state.col!=null?this.state.col:(pref.collapsed!=null?pref.collapsed:narrow);
+    const here=decodeURIComponent(location.pathname);
+    const nav=(id)=>e=>{const f=W.FILES[W.PAGES[id].f];if(here.endsWith(f)&&this.props.onNav){e.preventDefault();this.props.onNav(id)}};
+    const cnt=(n,on)=>({minWidth:'20px',height:'20px',padding:'0 6px',boxSizing:'border-box',borderRadius:'10px',fontSize:'11px',fontWeight:700,display:'inline-flex',alignItems:'center',justifyContent:'center',background:on?'rgba(255,255,255,.22)':'#C2386B',color:'#fff',fontFamily:'Poppins,sans-serif',position:col?'absolute':'static',top:'2px',insetInlineEnd:'4px',transform:col?'scale(.85)':'none'});
+    const base=(on)=>({position:'relative',display:'flex',alignItems:'center',gap:'11px',height:'40px',padding:col?'0':'0 12px',justifyContent:col?'center':'flex-start',borderRadius:'10px',textDecoration:'none',fontSize:'13px',fontWeight:on?600:500,color:on?'#fff':'var(--ink)',background:on?'linear-gradient(135deg,#6D28D9,#A855F7)':'transparent',boxShadow:on?'0 6px 16px rgba(109,40,217,.25)':'none',cursor:'pointer'});
+    const items=W.NAV.map(n=>{
+      if(!n.g){const on=n.id===active,c=W.COUNTS[n.id];const p=W.PAGES[n.id];
+        return {t:ar?p.ar:p.en,icon:W.IC[n.icon],href:W.href(n.id),onClick:nav(n.id),style:base(on),hasCount:!!c,count:c,countStyle:cnt(c,on),showChev:false,open:false,children:[]};}
+      const inG=n.items.indexOf(active)>=0;const open=!col&&(this.state.open[n.g]!=null?this.state.open[n.g]:inG);
+      const sum=n.items.reduce((a,i)=>a+(W.COUNTS[i]||0),0);
+      const st=Object.assign(base(false),{color:inG?'var(--accent)':'var(--ink)',fontWeight:inG?600:500,background:inG&&!open?'var(--soft)':'transparent'});
+      return {t:ar?n.ar:n.en,icon:W.IC[n.icon],href:W.href(n.items[0]),onClick:e=>{if(col)return nav(n.items[0])(e);e.preventDefault();this.setState(s=>({open:Object.assign({},s.open,{[n.g]:!open})}))},style:st,hasCount:!!sum&&(!open||col),count:sum,countStyle:cnt(sum,false),showChev:!col,chevStyle:{transition:'transform .2s',transform:open?'rotate(180deg)':'none',color:'var(--faint)'},open,
+        children:n.items.map(id=>{const on=id===active,c=W.COUNTS[id],p=W.PAGES[id];return {t:ar?p.ar:p.en,href:W.href(id),onClick:nav(id),hasCount:!!c,count:c,countStyle:cnt(c,false),dot:{width:'6px',height:'6px',borderRadius:'3px',background:on?'var(--accent)':'var(--line2)',flexShrink:0},style:{display:'flex',alignItems:'center',gap:'10px',height:'34px',padding:'0 12px 0 12px',paddingInlineStart:'26px',borderRadius:'9px',fontSize:'12.5px',textDecoration:'none',color:on?'var(--accent)':'var(--muted)',fontWeight:on?600:500,background:on?'var(--soft)':'transparent'}}})};
+    });
+    return {items,expanded:!col,adminLabel:ar?'لوحة التحكم':'Admin',adminName:ar?W.ADMIN.ar:W.ADMIN.en,adminIni:ar?'ل':'L',collapseT:ar?'طي القائمة':'Collapse',
+      colIconStyle:{transform:(col?'scaleX(-1) ':'')+'scaleX(var(--flip))'},
+      toggle:()=>{const v=!col;this.setState({col:v});W.setPrefs({collapsed:v})},
+      asideStyle:{width:col?'76px':'256px',flexShrink:0,height:'100vh',position:'sticky',top:0,display:'flex',flexDirection:'column',background:'var(--side)',borderInlineEnd:'1px solid var(--line)',transition:'width .2s ease',boxSizing:'border-box',zIndex:20}};
+  }
+}
+</script>
+</body>
+</html>

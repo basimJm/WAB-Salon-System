@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#6D28D9"><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#6D28D9"/><rect x="130" y="80" width="140" height="240" rx="26" fill="none" stroke="#fff" stroke-width="12"/><text x="200" y="222" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="54" fill="#fff">WAB</text></svg></template>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button{font-family:inherit}
+input:focus{outline:none}
+input::placeholder{color:#9CA3AF}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ isDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+
+<sc-if value="{{ on.home }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:52px">
+  <sc-if value="{{ homeLoading }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;overflow:hidden;padding:8px 20px 0;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;flex-direction:column;gap:8px"><div style="width:90px;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div><div style="width:150px;height:20px;border-radius:8px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></div>
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      </div>
+      <div style="height:150px;border-radius:22px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="height:50px;border-radius:14px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="height:46px;border-radius:14px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="width:110px;height:16px;border-radius:8px;margin-top:8px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="display:flex;gap:12px"><sc-for list="{{ three }}" as="x" hint-placeholder-count="3"><div style="width:130px;height:150px;flex-shrink:0;border-radius:18px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></div>
+      <div style="width:150px;height:16px;border-radius:8px;margin-top:8px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div>
+      <div style="display:flex;gap:12px"><sc-for list="{{ three }}" as="x" hint-placeholder-count="3"><div style="width:248px;height:230px;flex-shrink:0;border-radius:20px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ homePh.show }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 36px">
+      <div style="width:120px;height:120px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:22px;color:var(--accent)"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="{{ homePh.icon }}"></path></svg></div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px">{{ homePh.title }}</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:22px">{{ homePh.body }}</div>
+      <button onClick="{{ homePh.onAction }}" style="height:48px;padding:0 30px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ t.retry }}</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ homeReady }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;overflow-y:auto;padding-bottom:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 20px 16px">
+      <div>
+        <div style="font-size:12.5px;color:var(--muted)">{{ t.helloSub }}</div>
+        <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:21px">{{ hello }}</div>
+      </div>
+      <sc-if value="{{ isReg }}">
+        <a href="WAB 06 Account.dc.html?s=notifs" style="position:relative;width:44px;height:44px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--accent)">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a5.5 5.5 0 0 0-5.5 5.5c0 3.6-1.1 5-2 6.5h15c-.9-1.5-2-2.9-2-6.5A5.5 5.5 0 0 0 12 3zM9.5 19a2.5 2.5 0 0 0 5 0"></path></svg>
+          <sc-if value="{{ hasBadge }}"><div style="position:absolute;top:-2px;inset-inline-end:-4px;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;border-radius:10px;background:#D9467A;color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)">{{ badgeText }}</div></sc-if>
+        </a>
+      </sc-if>
+    </div>
+    <div style="margin:0 20px;height:150px;border-radius:22px;overflow:hidden;position:relative;box-shadow:0 12px 30px rgba(109,40,217,.15)">
+      <sc-for list="{{ banners }}" as="b" hint-placeholder-count="3">
+        <div style="{{ b.style }}">
+          <image-slot id="{{ b.img }}" shape="rect" placeholder="Banner ad"></image-slot>
+          <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(27,16,48,.65),rgba(27,16,48,0) 70%);display:flex;flex-direction:column;justify-content:center;padding:0 20px;gap:4px">
+            <div style="color:#fff;font-weight:700;font-size:16px;max-width:190px;line-height:1.35">{{ b.title }}</div>
+            <div style="color:#E9D5FF;font-size:12px">{{ b.sub }}</div>
+          </div>
+        </div>
+      </sc-for>
+      <div style="position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:5px;pointer-events:none"><sc-for list="{{ bannerDots }}" as="d" hint-placeholder-count="3"><div style="{{ d.style }}"></div></sc-for></div>
+    </div>
+    <button onClick="{{ goSearch }}" style="margin:16px 20px 0;width:calc(100% - 40px);height:50px;display:flex;align-items:center;gap:10px;padding:0 16px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--faint);font-size:13.5px;cursor:pointer;text-align:start">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.5-4.5"></path></svg>
+      <span>{{ t.searchHint }}</span>
+    </button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:14px 20px 0;padding:5px;border-radius:16px;background:var(--surface)">
+      <sc-for list="{{ genderTabs }}" as="g" hint-placeholder-count="2"><button onClick="{{ g.onClick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin:24px 0 12px">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:17px">{{ t.services }}</div>
+      <sc-if value="{{ many }}"><a onClick="{{ goAllServices }}" style="font-size:13px;font-weight:600;color:var(--accent);cursor:pointer">{{ t.seeMore }}</a></sc-if>
+    </div>
+    <div style="display:flex;gap:12px;overflow-x:auto;padding:0 20px 4px;scrollbar-width:none">
+      <sc-for list="{{ homeServices }}" as="sv" hint-placeholder-count="4">
+        <div onClick="{{ sv.onClick }}" style="width:136px;flex-shrink:0;cursor:pointer">
+          <div style="height:96px;border-radius:18px;overflow:hidden;margin-bottom:8px"><image-slot id="{{ sv.img }}" shape="rect" placeholder="Service"></image-slot></div>
+          <div style="font-size:13.5px;font-weight:600;margin-bottom:2px">{{ sv.name }}</div>
+          <div style="font-size:11.5px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ sv.desc }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin:26px 0 12px">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:17px">{{ t.recommended }}</div>
+      <sc-if value="{{ many }}"><a onClick="{{ goRec }}" style="font-size:13px;font-weight:600;color:var(--accent);cursor:pointer">{{ t.seeAll }}</a></sc-if>
+    </div>
+    <div style="display:flex;gap:12px;overflow-x:auto;padding:0 20px 6px;scrollbar-width:none">
+      <sc-for list="{{ recSalons }}" as="sc" hint-placeholder-count="2">
+        <a href="{{ sc.href }}" style="width:250px;flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;color:var(--ink);box-shadow:0 6px 18px rgba(31,34,51,.05)">
+          <div style="height:118px;position:relative">
+            <image-slot id="{{ sc.img }}" shape="rect" placeholder="Salon photo"></image-slot>
+            <button onClick="{{ sc.onFav }}" style="position:absolute;top:10px;inset-inline-end:10px;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ sc.heartFill }}" stroke="#D9467A" stroke-width="2"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.2 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button>
+          </div>
+          <div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <div style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.name }}</div>
+              <div style="display:flex;align-items:center;gap:3px;font-size:12.5px;font-weight:700;flex-shrink:0"><svg width="13" height="13" viewBox="0 0 24 24" fill="#F59E0B"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"></path></svg>{{ sc.rating }}<span style="color:var(--faint);font-weight:500">({{ sc.reviews }})</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"></path><circle cx="12" cy="9" r="2.3"></circle></svg><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.loc }}</span></div>
+            <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.desc }} <span style="color:var(--accent);font-weight:600">{{ t.more }}</span></div>
+            <div style="{{ sc.statusStyle }}"><span style="width:6px;height:6px;border-radius:50%;background:currentColor"></span>{{ sc.status }}</div>
+          </div>
+        </a>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin:26px 0 12px">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:17px">{{ t.nearest }}</div>
+      <sc-if value="{{ showNearSeeAll }}"><a onClick="{{ goNear }}" style="font-size:13px;font-weight:600;color:var(--accent);cursor:pointer">{{ t.seeAll }}</a></sc-if>
+    </div>
+    <sc-if value="{{ nearOn }}">
+      <div style="display:flex;gap:12px;overflow-x:auto;padding:0 20px 6px;scrollbar-width:none">
+        <sc-for list="{{ nearSalons }}" as="sc" hint-placeholder-count="2">
+          <a href="{{ sc.href }}" style="width:250px;flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;color:var(--ink);box-shadow:0 6px 18px rgba(31,34,51,.05)">
+            <div style="height:118px;position:relative">
+              <image-slot id="{{ sc.img }}" shape="rect" placeholder="Salon photo"></image-slot>
+              <div style="position:absolute;bottom:10px;inset-inline-start:10px;padding:4px 10px;border-radius:10px;background:rgba(27,16,48,.72);color:#fff;font-size:11.5px;font-weight:600">{{ sc.km }}</div>
+              <button onClick="{{ sc.onFav }}" style="position:absolute;top:10px;inset-inline-end:10px;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ sc.heartFill }}" stroke="#D9467A" stroke-width="2"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.2 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button>
+            </div>
+            <div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <div style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.name }}</div>
+                <div style="display:flex;align-items:center;gap:3px;font-size:12.5px;font-weight:700;flex-shrink:0"><svg width="13" height="13" viewBox="0 0 24 24" fill="#F59E0B"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"></path></svg>{{ sc.rating }}<span style="color:var(--faint);font-weight:500">({{ sc.reviews }})</span></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"></path><circle cx="12" cy="9" r="2.3"></circle></svg><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.loc }}</span></div>
+              <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.desc }} <span style="color:var(--accent);font-weight:600">{{ t.more }}</span></div>
+              <div style="{{ sc.statusStyle }}"><span style="width:6px;height:6px;border-radius:50%;background:currentColor"></span>{{ sc.status }}</div>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ nearOff }}">
+      <div style="margin:0 20px;padding:22px 20px;border-radius:20px;background:var(--surface);border:1px dashed var(--line);display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+        <div style="width:54px;height:54px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"></path><circle cx="12" cy="9" r="2.3"></circle></svg></div>
+        <div style="font-size:13.5px;color:var(--muted);line-height:1.6;max-width:260px">{{ t.locMsg }}</div>
+        <button onClick="{{ askLocation }}" style="height:44px;padding:0 22px;border-radius:12px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:13.5px;font-weight:600;cursor:pointer">{{ t.enableLoc }}</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ nearEmpty }}">
+      <div style="margin:0 20px;padding:24px 20px;border-radius:20px;background:var(--surface);text-align:center;font-size:13.5px;color:var(--muted);line-height:1.6">{{ t.nearEmpty }}</div>
+    </sc-if>
+  </div>
+  </sc-if>
+  <sc-if value="{{ toast }}">
+    <div style="position:absolute;bottom:104px;left:20px;right:20px;z-index:20;background:#1F2233;color:#fff;border-radius:14px;padding:14px 16px;font-size:13.5px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,.25);animation:fadeUp .3s ease both">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F4A7C4" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4.5M12 16h.01"></path></svg>{{ t.salonNA }}
+    </div>
+  </sc-if>
+  <div style="display:flex;padding:8px 6px 26px;border-top:1px solid var(--line);background:var(--card)">
+    <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="4">
+      <a href="{{ tb.href }}" style="{{ tb.style }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ tb.d }}"></path></svg><span>{{ tb.label }}</span></a>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ on.salons }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px">
+  <div style="display:flex;align-items:center;height:50px;padding:0 12px;position:relative;flex-shrink:0">
+    <button onClick="{{ goHome }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px">{{ t.allSalons }}</div>
+  </div>
+  <div style="display:flex;gap:10px;padding:6px 20px 12px;flex-shrink:0">
+    <div style="flex:1;display:flex;align-items:center;gap:10px;height:50px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint);flex-shrink:0"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.5-4.5"></path></svg>
+      <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ t.searchSalon }}" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:14px">
+    </div>
+    <button onClick="{{ openFilter }}" style="position:relative;width:50px;height:50px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>
+      <sc-if value="{{ hasChips }}"><div style="position:absolute;top:-5px;inset-inline-end:-5px;width:20px;height:20px;border-radius:50%;background:#D9467A;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)">{{ chipCount }}</div></sc-if>
+    </button>
+  </div>
+  <sc-if value="{{ hasChips }}">
+    <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 12px;flex-shrink:0">
+      <sc-for list="{{ chips }}" as="c" hint-placeholder-count="2">
+        <div style="display:flex;align-items:center;gap:6px;height:34px;padding-inline-start:12px;padding-inline-end:6px;border-radius:17px;background:var(--soft);color:var(--accent);font-size:12.5px;font-weight:600">{{ c.label }}<button onClick="{{ c.onRemove }}" style="width:22px;height:22px;border-radius:50%;border:none;background:rgba(109,40,217,.14);color:var(--accent);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center">✕</button></div>
+      </sc-for>
+    </div>
+  </sc-if>
+  <div style="flex:1;overflow-y:auto;padding:0 20px 24px;display:flex;flex-direction:column;gap:12px">
+    <sc-if value="{{ listLoading }}"><sc-for list="{{ four }}" as="x" hint-placeholder-count="4"><div style="height:112px;flex-shrink:0;border-radius:18px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></sc-if>
+    <sc-if value="{{ listPh.show }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 24px">
+        <div style="width:120px;height:120px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:22px;color:var(--accent)"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="{{ listPh.icon }}"></path></svg></div>
+        <div style="font-weight:700;font-size:17px;margin-bottom:8px">{{ listPh.title }}</div>
+        <div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:22px">{{ listPh.body }}</div>
+        <sc-if value="{{ listPh.hasAction }}"><button onClick="{{ listPh.onAction }}" style="height:48px;padding:0 30px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ t.retry }}</button></sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ listReady }}">
+      <sc-for list="{{ listSalons }}" as="sc" hint-placeholder-count="4">
+        <a href="{{ sc.href }}" style="display:flex;gap:12px;padding:12px;flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:18px;color:var(--ink);box-shadow:0 4px 14px rgba(31,34,51,.04)">
+          <div style="width:88px;height:88px;border-radius:14px;overflow:hidden;flex-shrink:0"><image-slot id="{{ sc.img }}" shape="rect" placeholder="Salon"></image-slot></div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+              <div style="font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.name }}</div>
+              <button onClick="{{ sc.onFav }}" style="width:30px;height:30px;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="{{ sc.heartFill }}" stroke="#D9467A" stroke-width="2"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.2 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button>
+            </div>
+            <div style="display:flex;align-items:center;gap:3px;font-size:12px;font-weight:700"><svg width="12" height="12" viewBox="0 0 24 24" fill="#F59E0B"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"></path></svg>{{ sc.rating }}<span style="color:var(--faint);font-weight:500">({{ sc.reviews }})</span><span style="color:var(--faint);font-weight:500;margin-inline-start:6px">{{ sc.km }}</span></div>
+            <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.loc }}</div>
+            <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sc.desc }} <span style="color:var(--accent);font-weight:600">{{ t.more }}</span></div>
+            <div style="{{ sc.statusStyle }}"><span style="width:6px;height:6px;border-radius:50%;background:currentColor"></span>{{ sc.status }}</div>
+          </div>
+        </a>
+      </sc-for>
+      <sc-if value="{{ paging }}"><div style="height:112px;flex-shrink:0;border-radius:18px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-if>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ on.services }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px">
+  <div style="display:flex;align-items:center;height:50px;padding:0 12px;position:relative;flex-shrink:0">
+    <button onClick="{{ goHome }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px">{{ t.allServices }}</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:8px 20px 24px;display:flex;flex-direction:column;gap:12px">
+    <sc-if value="{{ svcLoading }}"><sc-for list="{{ four }}" as="x" hint-placeholder-count="4"><div style="height:96px;flex-shrink:0;border-radius:18px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></sc-if>
+    <sc-if value="{{ svcPh.show }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 24px">
+        <div style="width:120px;height:120px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:22px;color:var(--accent)"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="{{ svcPh.icon }}"></path></svg></div>
+        <div style="font-weight:700;font-size:17px;margin-bottom:8px">{{ svcPh.title }}</div>
+        <div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:22px">{{ svcPh.body }}</div>
+        <sc-if value="{{ svcPh.hasAction }}"><button onClick="{{ svcPh.onAction }}" style="height:48px;padding:0 30px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ t.retry }}</button></sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ svcReady }}">
+      <sc-for list="{{ allServices }}" as="sv" hint-placeholder-count="5">
+        <div onClick="{{ sv.onClick }}" style="display:flex;gap:12px;padding:12px;flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:18px;cursor:pointer">
+          <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0"><image-slot id="{{ sv.img }}" shape="rect" placeholder="Service"></image-slot></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14.5px;font-weight:700;margin-bottom:4px">{{ sv.name }}</div>
+            <div style="{{ sv.descStyle }}">{{ sv.desc }}</div>
+            <button onClick="{{ sv.onMore }}" style="border:none;background:none;padding:4px 0 0;color:var(--accent);font-weight:600;font-size:12px;cursor:pointer">{{ sv.moreLabel }}</button>
+          </div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ svcPaging }}"><div style="height:96px;flex-shrink:0;border-radius:18px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-if>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ filterOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column;padding-top:50px;animation:sheetUp .3s ease both">
+  <div style="display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 12px;position:relative;flex-shrink:0;border-bottom:1px solid var(--line)">
+    <button onClick="{{ closeFilter }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);cursor:pointer;font-size:18px;position:relative;z-index:1">✕</button>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;pointer-events:none">{{ t.filter }}</div>
+    <button onClick="{{ resetDraft }}" style="{{ resetStyle }}">{{ t.reset }}</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:18px 20px 20px">
+    <sc-if value="{{ fLoading }}">
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ eight }}" as="x" hint-placeholder-count="8"><div style="width:96px;height:38px;border-radius:19px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></div>
+    </sc-if>
+    <sc-if value="{{ fError }}">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:80px 20px">
+        <div style="width:100px;height:100px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:18px;color:var(--accent)"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:18px">{{ t.errServer }}</div>
+        <button onClick="{{ retryFilter }}" style="height:46px;padding:0 28px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ t.retry }}</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ fReady }}">
+      <div style="font-weight:700;font-size:15px;margin-bottom:12px">{{ t.services }}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ fServices }}" as="c" hint-placeholder-count="10"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for>
+        <sc-if value="{{ moreLoading }}"><sc-for list="{{ four }}" as="x"><div style="width:90px;height:38px;border-radius:19px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></sc-if>
+      </div>
+      <sc-if value="{{ showMoreSvc }}"><button onClick="{{ loadMoreSvc }}" style="border:none;background:none;color:var(--accent);font-weight:600;font-size:13px;padding:10px 0 0;cursor:pointer">{{ t.seeMore }}</button></sc-if>
+      <sc-if value="{{ showPrice }}">
+        <div style="height:1px;background:var(--line);margin:20px 0"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-weight:700;font-size:15px">{{ t.price }}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--accent)">{{ priceText }}</div>
+        </div>
+        <div onPointerDown="{{ onSlideDown }}" onPointerMove="{{ onSlideMove }}" style="position:relative;height:40px;touch-action:none;cursor:pointer;margin:0 11px">
+          <div style="position:absolute;top:18px;left:0;right:0;height:4px;border-radius:2px;background:var(--line)"></div>
+          <div style="{{ rangeFill }}"></div>
+          <div style="{{ thumbMin }}"></div>
+          <div style="{{ thumbMax }}"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--faint)"><span>{{ priceMinLbl }}</span><span>{{ priceMaxLbl }}</span></div>
+      </sc-if>
+      <div style="height:1px;background:var(--line);margin:20px 0"></div>
+      <div style="font-weight:700;font-size:15px;margin-bottom:12px">{{ t.general }}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ fGeneral }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div>
+      <div style="height:1px;background:var(--line);margin:20px 0"></div>
+      <div style="font-weight:700;font-size:15px;margin-bottom:12px">{{ t.rating }}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ fRating }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div>
+    </sc-if>
+  </div>
+  <div style="padding:12px 20px 30px;border-top:1px solid var(--line);flex-shrink:0">
+    <button onClick="{{ applyFilter }}" style="width:100%;height:54px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 10px 24px rgba(109,40,217,.28)">{{ t.apply }}</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ dlg.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;background:rgba(10,8,20,.5);display:flex;align-items:center;justify-content:center;padding:28px">
+    <div style="background:var(--card);border-radius:24px;padding:26px 22px 20px;width:100%;text-align:center;animation:fadeUp .25s ease both;box-shadow:0 30px 60px rgba(0,0,0,.25)">
+      <div style="width:56px;height:56px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:var(--soft);color:var(--accent)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="{{ dlg.icon }}"></path></svg></div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px">{{ dlg.title }}</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:22px">{{ dlg.body }}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ dlg.onPrimary }}" style="height:50px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">{{ dlg.primary }}</button>
+        <button onClick="{{ closeDialog }}" style="height:46px;border-radius:14px;border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer">{{ t.cancel }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Customer App</div><div style="font-size:11.5px;color:#6B7280">{{ panelTitle }}</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="6"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="4"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="4"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wab_proto_settings';
+const CUR='WAB 02 Discovery.dc.html';
+const FILES=[['01 Auth','WAB 01 Auth.dc.html'],['02 Discovery','WAB 02 Discovery.dc.html'],['03 Salon','WAB 03 Salon.dc.html'],['04 Booking','WAB 04 Booking Flow.dc.html'],['05 Bookings','WAB 05 Bookings.dc.html'],['06 Account','WAB 06 Account.dc.html']];
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1','--shim':d?'#252946':'#EFEBF7','--shim2':d?'#323760':'#F9F7FD'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+function chip(a){return {height:'38px',padding:'0 16px',borderRadius:'19px',cursor:'pointer',fontSize:'13px',fontWeight:600,fontFamily:'inherit',border:'1.5px solid '+(a?'#A855F7':'var(--line)'),background:a?'var(--soft)':'var(--card)',color:a?'var(--accent)':'var(--ink)'}}
+const ICON={net:'M3 3l18 18M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5-2.7M19 13a10 10 0 0 0-3-2M2 9.5a15 15 0 0 1 4.5-2.8M22 9.5A15 15 0 0 0 11 5.1M12 20h.01',server:'M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',empty:'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4M8.5 11h5',pin:'M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12zM12 11.3a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6z',gear:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 1.7-1l2.4 1 2-3.4z',lock:'M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3'};
+const TABD=[['home','M4 11.5 12 4l8 7.5M6 10v9.5h12V10','WAB 02 Discovery.dc.html?s=homeReg'],['fav','M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.2 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z','WAB 06 Account.dc.html?s=fav'],['book','M5 6h14v14H5zM5 10.5h14M9 3.5v4M15 3.5v4','WAB 05 Bookings.dc.html?s=list'],['prof','M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5a7.5 7.5 0 0 1 15 0','WAB 06 Account.dc.html?s=profile']];
+function tabs(active,t){return TABD.map(([k,d,href])=>({d,href,label:t.tab[k],style:{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px',padding:'6px 0',fontSize:'11px',fontWeight:k===active?700:500,color:k===active?'var(--accent)':'var(--faint)'}}))}
+const D={
+ar:{tab:{home:'الرئيسية',fav:'المفضلة',book:'الحجوزات',prof:'الملف الشخصي'},helloSub:'ماذا تودّ أن تحجز اليوم؟',hello:'مرحباً، ',guestName:'سارة',userName:'ليلى',searchHint:'ابحث عن اسم الصالون، الخدمة أو الفئة',men:'رجال',women:'نساء',services:'الخدمات',seeMore:'عرض المزيد',seeAll:'عرض الكل',recommended:'صالونات موصى بها',nearest:'الأقرب إليك',more:'المزيد',open:'مفتوح',closedToday:'مغلق اليوم',locMsg:'فعّل خدمات الموقع لعرض الصالونات القريبة منك',enableLoc:'تفعيل خدمات الموقع',nearEmpty:'لا توجد صالونات ضمن نطاق 10 كم من موقعك حالياً.',salonNA:'الصالون غير متاح',retry:'إعادة المحاولة',errNet:'لا يوجد اتصال بالإنترنت',errNetBody:'تحقق من اتصالك ثم حاول مجدداً.',errServer:'حدث خطأ ما',errServerBody:'نعتذر، حدثت مشكلة غير متوقعة.',allSalons:'جميع الصالونات',searchSalon:'ابحث باسم الصالون',noMatch:'لا توجد صالونات مطابقة',noMatchBody:'جرّب كلمات بحث أخرى أو عدّل الفلاتر.',allServices:'جميع الخدمات',noSvc:'لا توجد خدمات حالياً',filter:'فلتر',reset:'إعادة تعيين',price:'نطاق السعر',general:'فلاتر عامة',rating:'التقييم',apply:'تطبيق الفلتر',nearestF:'الأقرب',recF:'الموصى بها',andUp:'فأعلى',cur:'د.أ',km:'كم',less:'عرض أقل',cancel:'إلغاء',locTitle:'فعّل خدمات الموقع',locBody:'فعّل خدمات الموقع لعرض الصالونات القريبة منك.',enable:'تفعيل',deniedTitle:'الوصول إلى الموقع مرفوض',deniedBody:'يرجى السماح بالوصول إلى الموقع من إعدادات الجهاز.',settings:'الإعدادات',authTitle:'يجب تسجيل الدخول للمتابعة',authBody:'سجّل الدخول لحفظ الصالونات المفضلة والحجز.',login:'تسجيل الدخول',
+banners:[['خصم 20% على أول حجز','للعملاء الجدد فقط'],['باقات العرائس الجديدة','احجزي موعدك مبكراً'],['قريباً: الدفع بالتقسيط','ميزة جديدة في WAB']],am:'ص',pm:'م'},
+en:{tab:{home:'Home',fav:'Favorites',book:'Bookings',prof:'Profile'},helloSub:'What would you like to book today?',hello:'Hello, ',guestName:'Sara',userName:'Layla',searchHint:'Search for a salon name, service, or category',men:'Men',women:'Women',services:'Services',seeMore:'See more',seeAll:'See all',recommended:'Recommended salons',nearest:'Nearest to you',more:'more',open:'Open',closedToday:'Closed today',locMsg:'Enable location services to see salons near you',enableLoc:'Enable location services',nearEmpty:'No salons within 10 km of your location right now.',salonNA:'Salon not available',retry:'Retry',errNet:'No internet connection',errNetBody:'Check your connection and try again.',errServer:'Something went wrong',errServerBody:'Sorry, an unexpected problem occurred.',allSalons:'All Salons',searchSalon:'Search by salon name',noMatch:'No salons match your search',noMatchBody:'Try other keywords or adjust the filters.',allServices:'All Services',noSvc:'No services yet',filter:'Filter',reset:'Reset',price:'Price range',general:'General filters',rating:'Rating',apply:'Apply filter',nearestF:'Nearest',recF:'Recommended',andUp:'& up',cur:'JOD',km:'km',less:'Show less',cancel:'Cancel',locTitle:'Enable location services',locBody:'Enable location to see salons near you.',enable:'Enable',deniedTitle:'Location access denied',deniedBody:'Please allow location access from your device settings.',settings:'Settings',authTitle:'You need to log in to continue',authBody:'Log in to save favorite salons and book.',login:'Log in',
+banners:[['20% off your first booking','New customers only'],['New bridal packages','Book your date early'],['Coming soon: pay in installments','A new WAB feature']],am:'AM',pm:'PM'}};
+const SVC={male:[['قص شعر','Haircut','قصات كلاسيكية وعصرية على يد حلاقين خبراء.','Classic and modern cuts by expert barbers.'],['تهذيب اللحية','Beard trim','تحديد وتهذيب اللحية بدقة مع زيوت العناية.','Precise beard shaping finished with care oils.'],['تنظيف بشرة','Skin cleansing','تنظيف عميق للبشرة وإزالة الرؤوس السوداء وترطيب.','Deep cleansing, blackhead removal and hydration.'],['حلاقة بالموس','Hot towel shave','حلاقة تقليدية ناعمة مع منشفة ساخنة.','A smooth traditional shave with a hot towel.'],['صبغة شعر','Hair color','تغطية الشيب وألوان عصرية تدوم طويلاً.','Grey coverage and long-lasting modern shades.'],['بروتين','Keratin','علاج لتنعيم الشعر وتقليل الهيشان.','Smoothing treatment that tames frizz.'],['مساج الرأس','Head massage'],['ماسك الوجه','Face mask'],['تصفيف','Styling'],['قص أطفال','Kids haircut'],['إزالة الشعر بالخيط','Threading'],['حمام زيت','Oil bath'],['تشقير الحواجب','Brow tint'],['باقة العريس','Groom package']],
+female:[['تسريحة شعر','Hair styling','تسريحات للمناسبات والسهرات بأيدي خبيرات.','Event and evening styling by experts.'],['مكياج','Makeup','مكياج احترافي يناسب جميع المناسبات.','Professional makeup for every occasion.'],['مكياج عروس','Bridal makeup','باقة VIP للعروس مع خبيرة مؤهلة.','VIP bridal package with a qualified artist.'],['مناكير وباديكير','Mani & pedi','عناية كاملة بالأظافر مع ألوان متنوعة.','Complete nail care with a range of colors.'],['صبغة شعر','Hair color','ألوان وهايلايت بأحدث التقنيات.','Color and highlights with the latest techniques.'],['تنظيف بشرة','Facial','جلسة نضارة وتنظيف عميق للبشرة.','A glow and deep-cleansing session.'],['رموش','Lash extensions'],['حواجب','Brow shaping'],['بروتين','Keratin'],['قص شعر','Haircut'],['حنّاء','Henna'],['سشوار','Blow-dry'],['إزالة الشعر','Waxing'],['مساج','Massage']]};
+const SAL={male:[['صالون النخبة للرجال',"Elite Men's Salon",'عمّان، عبدون، شارع 12','Amman, Abdoun, Street 12',4.9,214,[10,22],1,0.8],['ذا جنتري','The Gentry','عمّان، الجاردنز، شارع 36','Amman, Gardens, Street 36',4.8,176,[9,21],1,1.6],['بليد آند فيد','Blade & Fade','عمّان، أم أذينة','Amman, Um Uthaina',4.7,132,null,0,2.4],['حلاق رويال','Royal Barber','عمّان، خلدا','Amman, Khalda',4.6,98,[11,23],1,3.9],['صالون الفارس','Al Fares Salon','عمّان، الصويفية','Amman, Sweifieh',4.5,61,[10,20],0,5.2],['ماربل للحلاقة','Marble Barbershop','عمّان، جبل عمّان','Amman, Jabal Amman',4.4,47,[12,22],0,7.1]],
+female:[['بيلا هاوس','Bella House','عمّان، عبدون، شارع 5','Amman, Abdoun, Street 5',4.9,268,[10,20],1,0.9],['روز آند آيفوري','Rose & Ivory','عمّان، الجاردنز، شارع 36','Amman, Gardens, Street 36',4.8,190,[9,19],1,1.8],['استوديو جلو','Glow Studio','عمّان، أم أذينة','Amman, Um Uthaina',4.7,145,null,0,2.7],['صالون أمارا','Amara Salon','عمّان، خلدا','Amman, Khalda',4.9,121,[10,21],1,3.5],['لومير بيوتي','Lumière Beauty','عمّان، الصويفية','Amman, Sweifieh',4.6,88,[11,20],0,4.8],['سيلك آند شاين','Silk & Shine','عمّان، جبل عمّان','Amman, Jabal Amman',4.5,64,[10,19],0,6.3]]};
+const SDESC={male:['حلاقة عصرية وعناية كاملة باللحية والبشرة في أجواء فاخرة.','Modern cuts with full beard and skin care in a premium setting.'],female:['تسريحات ومكياج وعناية بالبشرة مع خبيرات معتمدات.','Styling, makeup and skin care by certified experts.']};
+const EF={services:[],price:null,general:null,rating:null};
+const PMIN=5,PMAX=60;
+const DEF={screen:'home',homeState:'',badge:3,tab:null,loc:'off',dialog:null,many:true,bannerIdx:0,toast:false,favs:{},search:'',query:'',filters:EF,listState:'',filterOpen:false,draft:EF,fState:'',moreShown:false,moreLoading:false,svcExpanded:null,svcState:''};
+const PRE={homeReg:{user:'registered'},homeGuest:{user:'guest'},badge0:{user:'registered',badge:0},badge3:{user:'registered',badge:3},badge99:{user:'registered',badge:120},men:{tab:'male'},women:{tab:'female'},homeLoading:{homeState:'loading'},few:{many:false},locOn:{loc:'on'},locOff:{loc:'off'},locDialog:{loc:'off',dialog:'loc'},locDenied:{loc:'off',dialog:'denied'},locEmpty:{loc:'empty'},homeNet:{homeState:'net'},homeServer:{homeState:'server'},toast:{toast:true},
+salonsSearch:{screen:'salons'},salonsRec:{screen:'salons',filters:Object.assign({},EF,{general:'recommended'})},salonsNear:{screen:'salons',loc:'on',filters:Object.assign({},EF,{general:'nearest'})},salonsSvc:{screen:'salons',filters:Object.assign({},EF,{services:[0]})},salonsMulti:{screen:'salons',loc:'on',filters:{services:[0,1],price:[10,15],general:'nearest',rating:3}},salonsTyping:{screen:'salons',search:'ر',query:'ر'},salonsLoading:{screen:'salons',listState:'loading'},salonsPaging:{screen:'salons',listState:'paging'},salonsEmpty:{screen:'salons',search:'xyz',query:'xyz'},salonsNet:{screen:'salons',listState:'net'},salonsServer:{screen:'salons',listState:'server'},salonsNoLoc:{screen:'salons',loc:'off',filters:Object.assign({},EF,{general:'nearest'}),dialog:'loc'},
+filterNone:{screen:'salons',filterOpen:true},filterOne:{screen:'salons',filterOpen:true,draft:Object.assign({},EF,{services:[0]})},filterFull:{screen:'salons',filterOpen:true,moreShown:true,draft:{services:[0,2,11],price:[10,35],general:'recommended',rating:4}},filterMore:{screen:'salons',filterOpen:true,moreLoading:true},filterLoading:{screen:'salons',filterOpen:true,fState:'loading'},filterError:{screen:'salons',filterOpen:true,fState:'error'},
+svcList:{screen:'services'},svcExpanded:{screen:'services',svcExpanded:0},svcLoading:{screen:'services',svcState:'loading'},svcPaging:{screen:'services',svcState:'paging'},svcEmpty:{screen:'services',svcState:'empty'},svcError:{screen:'services',svcState:'server'}};
+const NAV=[['S03 Home',[['Registered','homeReg'],['Guest','homeGuest'],['No badge','badge0'],['Badge 3','badge3'],['Badge 99+','badge99'],['Men tab','men'],['Women tab','women'],['Loading','homeLoading'],['≤10 items','few'],['Location on','locOn'],['Location off','locOff'],['Location dialog','locDialog'],['Denied dialog','locDenied'],['None nearby','locEmpty'],['No internet','homeNet'],['Server error','homeServer'],['Salon N/A toast','toast']]],['S04 All Salons',[['From search','salonsSearch'],['Recommended','salonsRec'],['Nearest','salonsNear'],['Service','salonsSvc'],['Multi chips','salonsMulti'],['Typing','salonsTyping'],['Loading','salonsLoading'],['Paging','salonsPaging'],['Empty','salonsEmpty'],['No internet','salonsNet'],['Server error','salonsServer'],['Nearest w/o location','salonsNoLoc']]],['S05 Filter',[['Nothing selected','filterNone'],['One service','filterOne'],['Full selection','filterFull'],['See more loading','filterMore'],['Loading','filterLoading'],['Error','filterError']]],['S06 All Services',[['List','svcList'],['Expanded','svcExpanded'],['Loading','svcLoading'],['Paging','svcPaging'],['Empty','svcEmpty'],['Error','svcError']]]];
+function hr(h,t){const p=h>=12?t.pm:t.am;const x=h%12||12;return x+':00 '+p}
+
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();return Object.assign({lang:p.lang||'ar',theme:p.theme||'light',user:p.user||'registered',gender:p.gender||'female',preset:'homeReg'},DEF)})();
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k);this.bt=setInterval(()=>this.setState(s=>({bannerIdx:(s.bannerIdx+1)%3})),3500)}
+  componentWillUnmount(){clearInterval(this.bt);clearTimeout(this.deb)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,user:s.user,gender:s.gender}))}
+  setPref(k,v){this.setState({[k]:v},()=>this.savePrefs())}
+  go(k){const p=PRE[k];if(!p)return;const u=Object.assign({},DEF,p,{preset:k});if(u.screen==='salons'&&!p.draft)u.draft=u.filters;this.setState(u,()=>{if(p.user)this.savePrefs()})}
+  g(){return this.state.tab||this.state.gender}
+  load(key,ms){this.setState({[key]:'loading'});setTimeout(()=>this.setState({[key]:''}),ms||700)}
+  toSalons(filters){this.setState({screen:'salons',filters,draft:filters,search:'',query:'',filterOpen:false});this.load('listState')}
+  salonCards(list,t){const s=this.state,ar=s.lang==='ar',g=this.g();
+    return list.map(x=>{const id=g+x.i,fav=!!s.favs[id],open=!!x.h;
+      return {name:ar?x[0]:x[1],loc:ar?x[2]:x[3],desc:SDESC[g][ar?0:1],rating:x[4].toFixed(1),reviews:x[5],km:x[8]+' '+t.km,img:'salon-'+id,href:'WAB 03 Salon.dc.html?g='+g+(open?'':'&s=closed'),heartFill:fav?'#D9467A':'none',
+        onFav:e=>{e.preventDefault();e.stopPropagation();if(s.user!=='registered'){this.setState({dialog:'auth'});return}this.setState({favs:Object.assign({},s.favs,{[id]:!fav})})},
+        status:open?t.open+' · '+hr(x.h[0],t)+' – '+hr(x.h[1],t):t.closedToday,
+        statusStyle:{display:'flex',alignItems:'center',gap:'6px',fontSize:'11.5px',fontWeight:600,color:open?'#2E9E78':'#D9467A'}}})}
+  ph(kind,t,onRetry){const m={net:[ICON.net,t.errNet,t.errNetBody,1],server:[ICON.server,t.errServer,t.errServerBody,1],empty:[ICON.empty,t.noMatch,t.noMatchBody,0],svcEmpty:[ICON.empty,t.noSvc,'',0]}[kind];
+    return m?{show:true,icon:m[0],title:m[1],body:m[2],hasAction:!!m[3],onAction:onRetry}:{show:false}}
+  onSearch=e=>{const v=e.target.value;this.setState({search:v});clearTimeout(this.deb);this.deb=setTimeout(()=>{this.setState({query:v});this.load('listState',600)},500)};
+  slide(e,down){const s=this.state;if(!down&&!e.buttons)return;const r=e.currentTarget.getBoundingClientRect();let f=(e.clientX-r.left)/r.width;if(s.lang==='ar')f=1-f;f=Math.max(0,Math.min(1,f));
+    const v=Math.round(PMIN+f*(PMAX-PMIN));const p=s.draft.price||[PMIN,PMAX];
+    if(down){try{e.currentTarget.setPointerCapture(e.pointerId)}catch(_){}this.thumb=Math.abs(v-p[0])<=Math.abs(v-p[1])?0:1}
+    const np=this.thumb===0?[Math.min(v,p[1]),p[1]]:[p[0],Math.max(v,p[0])];this.setState({draft:Object.assign({},s.draft,{price:np})})}
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],g=this.g(),reg=s.user==='registered';
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const sal=SAL[g].map((x,i)=>Object.assign([...x],{i}));
+    const svcs=SVC[g].map((x,i)=>({i,name:ar?x[0]:x[1],desc:x[2]?(ar?x[2]:x[3]):(ar?'خدمة '+x[0]+' بأيدي خبراء معتمدين وبمنتجات عالية الجودة.':x[1]+' by certified experts using quality products.')}));
+    const f=s.filters,dr=s.draft;
+    let listed=sal.filter(x=>!s.query||(x[0]+' '+x[1]).toLowerCase().includes(s.query.toLowerCase()));
+    if(f.general==='recommended')listed=listed.filter(x=>x[7]);
+    if(f.general==='nearest')listed=[...listed].sort((a,b)=>a[8]-b[8]);
+    if(f.rating)listed=listed.filter(x=>x[4]>=f.rating);
+    const priceLbl=p=>p[0]+'–'+p[1]+' '+t.cur;
+    const chips=[...f.services.map(i=>({label:svcs[i].name,onRemove:()=>{const nf=Object.assign({},f,{services:f.services.filter(x=>x!==i)});if(!nf.services.length)nf.price=null;this.toSalons(nf)}})),
+      ...(f.price?[{label:priceLbl(f.price),onRemove:()=>this.toSalons(Object.assign({},f,{price:null}))}]:[]),
+      ...(f.general?[{label:f.general==='nearest'?t.nearestF:t.recF,onRemove:()=>this.toSalons(Object.assign({},f,{general:null}))}]:[]),
+      ...(f.rating?[{label:f.rating+'★ '+t.andUp,onRemove:()=>this.toSalons(Object.assign({},f,{rating:null}))}]:[])];
+    const ls=s.listState;
+    const listPh=ls==='net'||ls==='server'?this.ph(ls,t,()=>this.load('listState')):(!ls&&!listed.length?this.ph('empty',t):{show:false});
+    const svcPh=s.svcState==='empty'?this.ph('svcEmpty',t):s.svcState==='server'?this.ph('server',t,()=>this.load('svcState')):{show:false};
+    const homePh=s.homeState==='net'||s.homeState==='server'?this.ph(s.homeState,t,()=>this.load('homeState',900)):{show:false};
+    const fsvc=svcs.slice(0,s.moreShown?14:10);
+    const pr=dr.price||[PMIN,PMAX],pct=v=>((v-PMIN)/(PMAX-PMIN)*100)+'%';
+    const thumb=v=>({position:'absolute',top:'9px',insetInlineStart:'calc('+pct(v)+' - 11px)',width:'22px',height:'22px',borderRadius:'50%',background:'#fff',border:'3px solid #A855F7',boxSizing:'border-box',boxShadow:'0 2px 8px rgba(109,40,217,.3)'});
+    const draftCount=dr.services.length+(dr.general?1:0)+(dr.rating?1:0);
+    const dlgs={loc:{icon:ICON.pin,title:t.locTitle,body:t.locBody,primary:t.enable,onPrimary:()=>{this.setState({dialog:null,loc:'on'})}},denied:{icon:ICON.gear,title:t.deniedTitle,body:t.deniedBody,primary:t.settings,onPrimary:()=>this.setState({dialog:null})},auth:{icon:ICON.lock,title:t.authTitle,body:t.authBody,primary:t.login,onPrimary:()=>{location.href='WAB 01 Auth.dc.html?s=loginEmpty'}}};
+    const dm=dlgs[s.dialog];
+    const homeReady=!s.homeState||s.homeState==='';
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',themeVars:tv(s.lang,s.theme),panelTitle:'02 · Home & Discovery',
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),
+      controls:[{label:'Language',opts:seg('lang',[['ar','AR'],['en','EN']])},{label:'Theme',opts:seg('theme',[['light','Light'],['dark','Dark']])},{label:'User',opts:seg('user',[['guest','Guest'],['registered','Registered']])},{label:'Gender',opts:seg('gender',[['male','Men'],['female','Women']])}],
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      on:{home:s.screen==='home',salons:s.screen==='salons',services:s.screen==='services'},
+      three:[1,2,3],four:[1,2,3,4],eight:[1,2,3,4,5,6,7,8],
+      homeLoading:s.homeState==='loading',homePh,homeReady,
+      isReg:reg,hello:t.hello+(reg?t.userName:t.guestName),hasBadge:reg&&s.badge>0,badgeText:s.badge>99?'99+':String(s.badge),
+      banners:t.banners.map((b,i)=>({title:b[0],sub:b[1],img:'banner-'+(i+1),style:{position:'absolute',inset:0,opacity:i===s.bannerIdx?1:0,transition:'opacity .6s ease',pointerEvents:i===s.bannerIdx?'auto':'none'}})),
+      bannerDots:[0,1,2].map(i=>({style:{width:i===s.bannerIdx?'18px':'6px',height:'6px',borderRadius:'3px',background:i===s.bannerIdx?'#fff':'rgba(255,255,255,.5)',transition:'all .3s'}})),
+      goSearch:()=>this.toSalons(EF),
+      genderTabs:[['male',t.men],['female',t.women]].map(([v,l])=>({label:l,onClick:()=>{this.setState({tab:v});this.load('homeState',600)},style:{height:'40px',borderRadius:'12px',border:'none',cursor:'pointer',fontSize:'14px',fontWeight:600,fontFamily:'inherit',background:g===v?'linear-gradient(135deg,#6D28D9,#A855F7)':'transparent',color:g===v?'#fff':'var(--muted)',boxShadow:g===v?'0 6px 16px rgba(109,40,217,.25)':'none'}})),
+      many:s.many,homeServices:svcs.slice(0,6).map(x=>({name:x.name,desc:x.desc,img:'svc-'+g+'-'+x.i,onClick:()=>this.toSalons(Object.assign({},EF,{services:[x.i]}))})),
+      goAllServices:()=>{this.setState({screen:'services',svcExpanded:null});this.load('svcState')},
+      recSalons:this.salonCards(sal.filter(x=>x[7]),t),goRec:()=>this.toSalons(Object.assign({},EF,{general:'recommended'})),
+      nearOn:s.loc==='on',nearOff:s.loc==='off',nearEmpty:s.loc==='empty',showNearSeeAll:s.loc==='on'&&s.many,
+      nearSalons:this.salonCards([...sal].sort((a,b)=>a[8]-b[8]),t),goNear:()=>this.toSalons(Object.assign({},EF,{general:'nearest'})),
+      askLocation:()=>this.setState({dialog:'loc'}),toast:s.toast,tabs:tabs('home',t),
+      goHome:()=>this.setState({screen:'home'}),search:s.search,onSearch:this.onSearch,
+      hasChips:chips.length>0,chipCount:chips.length,chips,
+      listLoading:ls==='loading',listPh,listReady:!ls||ls==='paging'?!listPh.show:false,paging:ls==='paging',listSalons:this.salonCards(listed,t),
+      openFilter:()=>this.setState({filterOpen:true,draft:f,fState:''}),closeFilter:()=>this.setState({filterOpen:false}),
+      filterOpen:s.filterOpen,fLoading:s.fState==='loading',fError:s.fState==='error',fReady:!s.fState,retryFilter:()=>this.load('fState'),
+      resetDraft:()=>{if(draftCount)this.setState({draft:EF})},resetStyle:{border:'none',background:'none',fontSize:'14px',fontWeight:600,cursor:draftCount?'pointer':'default',color:draftCount?'var(--accent)':'var(--faint)',opacity:draftCount?1:.6,padding:'10px 8px',fontFamily:'inherit',position:'relative',zIndex:1},
+      fServices:fsvc.map(x=>{const a=dr.services.includes(x.i);return {label:x.name,style:chip(a),onClick:()=>{const ns=a?dr.services.filter(y=>y!==x.i):[...dr.services,x.i];this.setState({draft:Object.assign({},dr,{services:ns,price:ns.length?(dr.price||[PMIN,PMAX]):null})})}}}),
+      moreLoading:s.moreLoading,showMoreSvc:!s.moreShown&&!s.moreLoading,loadMoreSvc:()=>{this.setState({moreLoading:true});setTimeout(()=>this.setState({moreLoading:false,moreShown:true}),800)},
+      showPrice:dr.services.length>0,priceText:priceLbl(pr),priceMinLbl:PMIN+' '+t.cur,priceMaxLbl:PMAX+' '+t.cur,
+      rangeFill:{position:'absolute',top:'18px',height:'4px',borderRadius:'2px',background:'linear-gradient(90deg,#6D28D9,#A855F7)',insetInlineStart:pct(pr[0]),width:'calc('+pct(pr[1])+' - '+pct(pr[0])+')'},
+      thumbMin:thumb(pr[0]),thumbMax:thumb(pr[1]),onSlideDown:e=>this.slide(e,true),onSlideMove:e=>this.slide(e,false),
+      fGeneral:[['nearest',t.nearestF],['recommended',t.recF]].map(([v,l])=>({label:l,style:chip(dr.general===v),onClick:()=>this.setState({draft:Object.assign({},dr,{general:dr.general===v?null:v})})})),
+      fRating:[1,2,3,4,5].map(n=>({label:n+'★ '+t.andUp,style:chip(dr.rating===n),onClick:()=>this.setState({draft:Object.assign({},dr,{rating:dr.rating===n?null:n})})})),
+      applyFilter:()=>{if(dr.general==='nearest'&&s.loc!=='on'){this.setState({dialog:'loc'});return}this.toSalons(dr)},
+      svcLoading:s.svcState==='loading',svcPh,svcReady:!s.svcState||s.svcState==='paging',svcPaging:s.svcState==='paging',
+      allServices:svcs.map(x=>{const ex=s.svcExpanded===x.i;return {name:x.name,desc:x.desc+(ex?(ar?' تشمل الجلسة استشارة قصيرة لاختيار الأنسب لك، وتُستخدم فيها منتجات معتمدة وأدوات معقمة لضمان أفضل نتيجة.':' Each session includes a short consultation to choose what suits you best, using certified products and sterilized tools.'):''),img:'svc-'+g+'-'+x.i,moreLabel:ex?t.less:t.more,
+        descStyle:ex?{fontSize:'12.5px',color:'var(--muted)',lineHeight:1.6}:{fontSize:'12.5px',color:'var(--muted)',lineHeight:1.6,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'},
+        onMore:e=>{e.stopPropagation();this.setState({svcExpanded:ex?null:x.i})},onClick:()=>this.toSalons(Object.assign({},EF,{services:[x.i]}))}}),
+      dlg:dm?Object.assign({show:true},dm):{show:false},closeDialog:()=>this.setState({dialog:null})
+    };
+  }
+}
+</script>
+</body>
+</html>

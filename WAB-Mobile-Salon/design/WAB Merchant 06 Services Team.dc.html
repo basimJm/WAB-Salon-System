@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button,textarea{font-family:inherit}
+input:focus,textarea:focus{outline:none}
+input::placeholder,textarea::placeholder{color:#9CA3AF}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ isDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+  <div style="display:flex;align-items:center;height:50px;padding:50px 10px 0;position:relative;flex-shrink:0;box-sizing:content-box">
+    <button onClick="{{ onBack }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:50px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;pointer-events:none">{{ title }}</div>
+    <div style="flex:1"></div>
+    <sc-if value="{{ hasAction }}"><button onClick="{{ onAction }}" style="height:40px;padding:0 12px;border:none;background:none;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;position:relative;z-index:1">{{ actionLabel }}</button></sc-if>
+  </div>
+
+<sc-if value="{{ on.services }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:10px">
+    <sc-if value="{{ svcHas }}">
+      <div style="display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);flex-shrink:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint)"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.5-4.5"></path></svg><input value="{{ q }}" onChange="{{ onQ }}" placeholder="{{ t.searchSvc }}" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:14px"></div>
+      <a href="WAB Merchant 06 Services Team.dc.html?s=catReqList" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:14px;background:var(--surface);font-size:12.5px;color:var(--ink);flex-shrink:0"><span>{{ t.myRequests }}</span><span style="font-weight:700;color:var(--accent)">{{ t.reqCount }}</span></a>
+      <sc-for list="{{ svcs }}" as="v" hint-placeholder-count="6">
+        <div style="{{ v.style }}">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button onClick="{{ v.onEdit }}" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;border:none;background:none;padding:0;color:var(--ink);cursor:pointer;text-align:start">
+              <span style="width:54px;height:54px;border-radius:14px;overflow:hidden;flex-shrink:0;position:relative"><image-slot compact="" id="{{ v.slot }}" shape="rounded" radius="14" placeholder="+"></image-slot></span>
+              <span style="flex:1;min-width:0"><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-weight:700;font-size:14px">{{ v.name }}<sc-if value="{{ v.bride }}"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:linear-gradient(135deg,#B83268,#D9467A);color:#fff">{{ t.brideOnly }}</span></sc-if></span><span style="display:block;font-size:12.5px;color:var(--muted);margin-top:3px">{{ v.price }} · {{ v.dur }}</span></span>
+            </button>
+            <button onClick="{{ v.onToggle }}" style="{{ v.track }}"><span style="{{ v.knob }}"></span></button>
+          </div>
+          <sc-if value="{{ v.noStaff }}"><div style="display:flex;gap:6px;align-items:center;margin-top:10px;padding:7px 10px;border-radius:10px;background:rgba(245,158,11,.12);color:#B7791F;font-size:11.5px;font-weight:600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>{{ t.noStaffWarn }}</div></sc-if>
+        </div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{ svcEmpty }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px">
+        <div style="width:110px;height:110px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--accent)"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4l6 8M18 4l-6 8M12 12v8M8 20h8"></path></svg></div>
+        <div style="font-weight:700;font-size:17px;margin-bottom:6px">{{ t.svcEmptyT }}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">{{ t.svcEmptyB }}</div>
+        <button onClick="{{ goCatalog }}" style="height:48px;padding:0 26px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">+ {{ t.addSvcs }}</button>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.catalog }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);flex-shrink:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint)"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.5-4.5"></path></svg><input value="{{ cq }}" onChange="{{ onCq }}" placeholder="{{ t.searchCat }}" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:14px"></div>
+    <div style="font-size:12px;color:var(--muted);flex-shrink:0">{{ catNote }}</div>
+    <sc-for list="{{ catalog }}" as="c" hint-placeholder-count="8">
+      <button onClick="{{ c.onClick }}" style="{{ c.style }}">
+        <span style="width:46px;height:46px;border-radius:12px;overflow:hidden;flex-shrink:0;position:relative"><image-slot compact="" id="{{ c.slot }}" shape="rounded" radius="12" placeholder="+"></image-slot></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:14px">{{ c.name }}</span><span style="display:block;font-size:12px;color:var(--muted)">{{ c.cat }}</span></span>
+        <sc-if value="{{ c.added }}"><span style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:8px;background:rgba(46,158,120,.12);color:#2E9E78">✓ {{ t.added }}</span></sc-if>
+        <sc-if value="{{ c.notAdded }}"><span style="width:30px;height:30px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px">+</span></sc-if>
+      </button>
+    </sc-for>
+    <button onClick="{{ goCatReq }}" style="padding:16px;border-radius:16px;border:1.5px dashed #D8B4FE;background:var(--card);color:var(--ink);cursor:pointer;text-align:center;flex-shrink:0"><span style="display:block;font-weight:700;font-size:14px">{{ t.cantFind }}</span><span style="display:block;font-size:12.5px;color:var(--accent);font-weight:700;margin-top:4px">{{ t.requestIt }}</span></button>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.svcForm }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:var(--surface);flex-shrink:0">
+      <span style="width:62px;height:62px;border-radius:14px;overflow:hidden;flex-shrink:0;position:relative"><image-slot compact="" id="{{ sf.slot }}" shape="rounded" radius="14" placeholder="+"></image-slot></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;color:var(--muted)">{{ t.fromCatalog }}</span><span style="display:block;font-weight:700;font-size:15.5px">{{ sf.name }}</span></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint)"><path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path></svg>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0">
+      <div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.price }}</div><div style="{{ sf.priceBox }}"><input value="{{ sf.price }}" onChange="{{ onPrice }}" inputmode="decimal" dir="ltr" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:16px;font-weight:700"><span style="font-size:12px;color:var(--muted)">{{ t.cur }}</span></div></div>
+      <div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.duration }}</div><div style="{{ sf.durBox }}"><button onClick="{{ durMinus }}" style="width:32px;height:32px;border-radius:9px;border:none;background:var(--soft);color:var(--accent);font-size:18px;cursor:pointer">−</button><span style="flex:1;text-align:center;font-weight:700;font-size:15px">{{ sf.dur }}</span><button onClick="{{ durPlus }}" style="width:32px;height:32px;border-radius:9px;border:none;background:var(--soft);color:var(--accent);font-size:18px;cursor:pointer">+</button></div></div>
+    </div>
+    <div style="font-size:11.5px;color:var(--muted);margin-top:-8px;flex-shrink:0">{{ t.priceHint }}</div>
+    <sc-if value="{{ sf.priceErr }}"><div style="color:#D9467A;font-size:11.5px;margin-top:-10px">{{ t.priceErr }}</div></sc-if>
+    <sc-if value="{{ sf.isEdit }}"><div style="display:flex;gap:8px;padding:10px 12px;border-radius:12px;background:var(--soft);color:var(--accent);font-size:12px;font-weight:600;flex-shrink:0">ⓘ {{ t.priceNote }}</div></sc-if>
+    <sc-for list="{{ sfToggles }}" as="x" hint-placeholder-count="2">
+      <button onClick="{{ x.onClick }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:start;flex-shrink:0">
+        <span style="flex:1;min-width:0"><span style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px">{{ x.label }}</span><span style="display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45">{{ x.sub }}</span></span>
+        <span style="{{ x.track }}"><span style="{{ x.knob }}"></span></span>
+      </button>
+    </sc-for>
+    <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.extraDesc }}</div><textarea placeholder="{{ t.extraPh }}" style="width:100%;box-sizing:border-box;height:90px;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;resize:none"></textarea></div>
+    <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.media }}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><sc-for list="{{ sfMedia }}" as="m" hint-placeholder-count="2"><div style="aspect-ratio:1;border-radius:12px;overflow:hidden;position:relative"><image-slot compact="" id="{{ m }}" shape="rounded" radius="12" placeholder="+"></image-slot></div></sc-for><div style="aspect-ratio:1;border-radius:12px;border:1.5px dashed #D8B4FE;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:22px">+</div></div>
+    </div>
+  </div>
+  <div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+    <button onClick="{{ saveSvc }}" style="{{ sfBtn }}"><sc-if value="{{ saving }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if><sc-if value="{{ notSaving }}">{{ sfBtnLabel }}</sc-if></button>
+    <sc-if value="{{ sf.isEdit }}"><button onClick="{{ askRemoveSvc }}" style="height:42px;border:none;background:none;color:#D9467A;font-size:13.5px;font-weight:700;cursor:pointer">{{ t.removeSvc }}</button></sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.catReq }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;flex-shrink:0">{{ t.reqIntro }}</div>
+    <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.svcName }}</div><input value="{{ rName }}" onChange="{{ onRName }}" placeholder="{{ t.svcNamePh }}" style="{{ rNameStyle }}"><sc-if value="{{ rErr }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.reqErr }}</div></sc-if></div>
+    <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.desc }}</div><textarea placeholder="{{ t.reqDescPh }}" style="width:100%;box-sizing:border-box;height:110px;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;resize:none"></textarea></div>
+    <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.imgOpt }}</div><div style="width:110px;height:110px;border-radius:16px;overflow:hidden;position:relative;border:1.5px dashed #D8B4FE"><image-slot id="mcatreq-img" shape="rounded" radius="16" placeholder="+"></image-slot></div></div>
+  </div>
+  <div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0"><button onClick="{{ sendReq }}" style="{{ reqBtn }}"><sc-if value="{{ saving }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if><sc-if value="{{ notSaving }}">{{ t.sendReq }}</sc-if></button></div>
+</sc-if>
+
+<sc-if value="{{ on.catReqList }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ reqs }}" as="r" hint-placeholder-count="3">
+      <div style="{{ r.style }}">
+        <div style="display:flex;align-items:center;gap:8px;justify-content:space-between"><span style="font-weight:700;font-size:14.5px">{{ r.name }}</span><span style="{{ r.badge }}">{{ r.status }}</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">{{ r.date }}</div>
+        <sc-if value="{{ r.hasNote }}"><div style="margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--surface);font-size:12.5px;line-height:1.55"><span style="font-weight:700;color:var(--accent)">{{ t.adminNote }}: </span>{{ r.note }}</div></sc-if>
+        <sc-if value="{{ r.approved }}"><button onClick="{{ goCatalog }}" style="margin-top:10px;height:38px;padding:0 14px;border-radius:11px;border:none;background:var(--soft);color:var(--accent);font-weight:700;font-size:12.5px;cursor:pointer">{{ t.addNow }}</button></sc-if>
+      </div>
+    </sc-for>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.team }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:10px">
+    <sc-if value="{{ limited }}"><div style="padding:10px 12px;border-radius:12px;background:var(--soft);color:var(--accent);font-size:12px;font-weight:600;line-height:1.55;flex-shrink:0">ⓘ {{ t.limitedNote }}</div></sc-if>
+    <div style="font-size:12.5px;color:var(--muted);flex-shrink:0">{{ teamCount }}</div>
+    <sc-for list="{{ members }}" as="m" hint-placeholder-count="6">
+      <button onClick="{{ m.onClick }}" style="{{ m.style }}">
+        <span style="width:50px;height:50px;border-radius:50%;overflow:hidden;flex-shrink:0;position:relative"><image-slot compact="" id="{{ m.slot }}" shape="circle" placeholder="{{ m.i }}"></image-slot></span>
+        <span style="flex:1;min-width:0">
+          <span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:700;font-size:14.5px">{{ m.name }}</span><span style="{{ m.roleStyle }}">{{ m.role }}</span></span>
+          <span style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">
+            <sc-if value="{{ m.provider }}"><span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:6px;background:var(--surface);color:var(--muted)">✂ {{ t.provides }}</span></sc-if>
+            <sc-if value="{{ m.brideQ }}"><span style="font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(244,167,196,.3);color:#B83268">♛ {{ t.brideQ }}</span></sc-if>
+            <sc-if value="{{ m.leave }}"><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(245,158,11,.14);color:#B7791F">{{ t.onLeaveToday }}</span></sc-if>
+            <sc-if value="{{ m.inactive }}"><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(107,114,128,.12);color:#6B7280">{{ t.inactive }}</span></sc-if>
+          </span>
+        </span>
+        <sc-if value="{{ m.locked }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint);flex-shrink:0"><path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path></svg></sc-if>
+        <sc-if value="{{ m.chev }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint);transform:scaleX(var(--flip));flex-shrink:0"><path d="M9 5l7 7-7 7"></path></svg></sc-if>
+      </button>
+    </sc-for>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.member }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:14px;flex-shrink:0">
+      <div style="width:78px;height:78px;border-radius:50%;overflow:hidden;position:relative;flex-shrink:0;border:3px solid var(--soft)"><image-slot compact="" id="{{ mf.slot }}" shape="circle" placeholder="+"></image-slot></div>
+      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:17px">{{ mf.display }}</div><sc-if value="{{ mf.hasStats }}"><div style="font-size:12px;color:var(--muted);margin-top:3px">★ 4.9 · 48 {{ t.reviews }} · 212 {{ t.served }}</div></sc-if></div>
+    </div>
+    <sc-if value="{{ limited }}"><div style="padding:10px 12px;border-radius:12px;background:var(--soft);color:var(--accent);font-size:12px;font-weight:600;line-height:1.55;flex-shrink:0">ⓘ {{ t.limitedForm }}</div></sc-if>
+    <div style="font-weight:700;font-size:15px;flex-shrink:0">{{ t.memberInfo }}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0">
+      <div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.first }}</div><input value="{{ mf.first }}" onChange="{{ onFirst }}" disabled="{{ limited }}" style="{{ mf.firstStyle }}"></div>
+      <div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.last }}</div><input value="{{ mf.last }}" onChange="{{ onLast }}" disabled="{{ limited }}" style="{{ mf.lastStyle }}"></div>
+    </div>
+    <sc-if value="{{ mf.errName }}"><div style="color:#D9467A;font-size:11.5px;margin-top:-8px">{{ t.reqErr }}</div></sc-if>
+    <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.phone }}</div>
+      <div dir="ltr" style="{{ mf.phoneBox }}"><span style="padding:0 12px;border-right:1px solid var(--line);font-weight:600;font-size:14px;height:100%;display:flex;align-items:center">🇯🇴 +962</span><input value="{{ mf.phone }}" onChange="{{ onPhone }}" disabled="{{ limited }}" placeholder="7X XXX XXXX" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:15px;padding:0 12px"></div>
+      <sc-if value="{{ mf.errPhone }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ mf.phoneMsg }}</div></sc-if>
+      <div style="font-size:11.5px;color:var(--faint);margin-top:5px">{{ t.phoneHint }}</div>
+    </div>
+    <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.role }}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><sc-for list="{{ roles }}" as="r" hint-placeholder-count="2"><button onClick="{{ r.onClick }}" style="{{ r.style }}">{{ r.label }}</button></sc-for></div></div>
+    <sc-for list="{{ mToggles }}" as="x" hint-placeholder-count="2">
+      <button onClick="{{ x.onClick }}" style="{{ x.style }}"><span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:14px">{{ x.label }}</span><span style="display:block;font-size:12px;color:var(--muted);margin-top:2px">{{ x.sub }}</span></span><span style="{{ x.track }}"><span style="{{ x.knob }}"></span></span></button>
+    </sc-for>
+    <sc-if value="{{ mf.showPerms }}"><button onClick="{{ goPerms }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;border:1.5px solid #D8B4FE;background:var(--soft);color:var(--ink);cursor:pointer;text-align:start;flex-shrink:0"><span style="width:38px;height:38px;border-radius:11px;background:var(--card);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"></path></svg></span><span style="flex:1"><span style="display:block;font-weight:700;font-size:14px">{{ t.permissions }}</span><span style="display:block;font-size:12px;color:var(--muted)">{{ mf.permSum }}</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);transform:scaleX(var(--flip))"><path d="M9 5l7 7-7 7"></path></svg></button></sc-if>
+
+    <sc-if value="{{ mf.provider }}">
+      <div style="height:1px;background:var(--line);margin:4px 0;flex-shrink:0"></div>
+      <div style="font-weight:700;font-size:15px;flex-shrink:0">{{ t.staffProfile }}</div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;flex-shrink:0">
+        <div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.bio }}</div><input value="{{ mf.bio }}" style="{{ fieldS }}"></div>
+        <div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.years }}</div><input value="{{ mf.years }}" dir="ltr" style="{{ fieldS }}"></div>
+      </div>
+      <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">{{ t.skills }}</div><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ skills }}" as="k" hint-placeholder-count="6"><button onClick="{{ k.onClick }}" style="{{ k.style }}">{{ k.label }}</button></sc-for></div><sc-if value="{{ mf.errSkills }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.skillErr }}</div></sc-if></div>
+      <sc-if value="{{ isWomen }}"><button onClick="{{ toggleBrideQ }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;border:1px solid #F4A7C4;background:rgba(244,167,196,.08);color:var(--ink);cursor:pointer;text-align:start;flex-shrink:0"><span style="flex:1"><span style="display:block;font-weight:700;font-size:14px">♛ {{ t.brideQ }}</span><span style="display:block;font-size:12px;color:var(--muted);margin-top:2px">{{ t.brideQSub }}</span></span><span style="{{ brideSw.track }}"><span style="{{ brideSw.knob }}"></span></span></button></sc-if>
+      <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">{{ t.workDays }}</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px"><sc-for list="{{ wdays }}" as="w" hint-placeholder-count="7"><button onClick="{{ w.onClick }}" style="{{ w.style }}">{{ w.label }}</button></sc-for></div><div style="font-size:11.5px;color:var(--faint);margin-top:6px">{{ t.workHint }}</div></div>
+      <div style="flex-shrink:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:12px;font-weight:600;color:var(--accent)">{{ t.leaves }}</span><button onClick="{{ openLeave }}" style="height:32px;padding:0 12px;border-radius:9px;border:none;background:var(--soft);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer">+ {{ t.addLeave }}</button></div>
+        <sc-if value="{{ noLeaves }}"><div style="padding:14px;border-radius:14px;background:var(--surface);font-size:12.5px;color:var(--muted);text-align:center">{{ t.noLeaves }}</div></sc-if>
+        <sc-for list="{{ leaves }}" as="l" hint-placeholder-count="1"><div style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;border:1px solid var(--line);margin-bottom:6px"><span style="width:8px;height:8px;border-radius:50%;background:#F59E0B"></span><span style="flex:1;font-size:13px;font-weight:600">{{ l.range }}</span><span style="font-size:12px;color:var(--muted)">{{ l.note }}</span></div></sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ mf.canDeact }}"><button onClick="{{ askDeactivate }}" style="height:44px;border:none;background:none;color:#D9467A;font-size:13.5px;font-weight:700;cursor:pointer;flex-shrink:0">{{ t.removeMember }}</button></sc-if>
+  </div>
+  <div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0"><button onClick="{{ saveMember }}" style="{{ memberBtn }}"><sc-if value="{{ saving }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if><sc-if value="{{ notSaving }}">{{ memberBtnLabel }}</sc-if></button></div>
+</sc-if>
+
+<sc-if value="{{ on.perms }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:var(--surface);flex-shrink:0">
+      <span style="width:46px;height:46px;border-radius:50%;overflow:hidden;position:relative;flex-shrink:0"><image-slot compact="" id="{{ mf.slot }}" shape="circle" placeholder="+"></image-slot></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:15px">{{ mf.display }}</span><span style="display:block;font-size:12px;color:var(--muted)">{{ permRole }} · {{ permCount }}</span></span>
+    </div>
+    <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">{{ t.applyTpl }}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><sc-for list="{{ tpls }}" as="x" hint-placeholder-count="2"><button onClick="{{ x.onClick }}" style="{{ x.style }}">{{ x.label }}</button></sc-for></div></div>
+    <sc-for list="{{ groups }}" as="gr" hint-placeholder-count="5">
+      <div style="border-radius:18px;border:1px solid var(--line);overflow:hidden;flex-shrink:0">
+        <div style="padding:11px 14px;background:var(--surface);font-weight:700;font-size:13.5px;display:flex;justify-content:space-between"><span>{{ gr.title }}</span><span style="font-size:11.5px;color:var(--muted);font-weight:600">{{ gr.count }}</span></div>
+        <sc-for list="{{ gr.items }}" as="p">
+          <button onClick="{{ p.onClick }}" style="{{ p.style }}">
+            <span style="flex:1;min-width:0"><span style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:13.5px">{{ p.label }}<sc-if value="{{ p.locked }}"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(107,114,128,.12);color:var(--muted)">🔒 {{ t.ownerOnly }}</span></sc-if></span><span style="display:block;font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.45">{{ p.desc }}</span></span>
+            <span style="{{ p.track }}"><span style="{{ p.knob }}"></span></span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-for>
+    <div style="font-size:11.5px;color:var(--faint);line-height:1.6;flex-shrink:0">{{ t.permNote }}</div>
+  </div>
+  <div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0"><button onClick="{{ savePerms }}" style="{{ permsBtn }}"><sc-if value="{{ saving }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span>{{ t.savingPerms }}</sc-if><sc-if value="{{ notSaving }}">{{ t.savePerms }}</sc-if></button></div>
+</sc-if>
+
+<sc-if value="{{ leaveOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:40;background:rgba(10,8,20,.5);display:flex;flex-direction:column;justify-content:flex-end">
+    <div onClick="{{ closeLeave }}" style="flex:1"></div>
+    <div style="background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 30px;animation:sheetUp .3s ease both">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px"></div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:4px">{{ t.addLeave }}</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px">{{ mf.display }}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px"><sc-for list="{{ lcal }}" as="c" hint-placeholder-count="14"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.n }}</button></sc-for></div>
+      <input placeholder="{{ t.leaveNote }}" style="width:100%;box-sizing:border-box;height:50px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:14.5px;margin-bottom:16px">
+      <button onClick="{{ submitLeave }}" style="{{ leaveBtn }}"><sc-if value="{{ saving }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if><sc-if value="{{ notSaving }}">{{ t.addLeave }}</sc-if></button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ dlg.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;background:rgba(10,8,20,.5);display:flex;align-items:center;justify-content:center;padding:24px">
+    <div style="background:var(--card);border-radius:24px;padding:22px 18px 16px;width:100%;animation:fadeUp .25s ease both;box-shadow:0 30px 60px rgba(0,0,0,.25);max-height:82%;overflow-y:auto;box-sizing:border-box">
+      <div style="width:54px;height:54px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;background:rgba(217,70,122,.12);color:#D9467A">!</div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px;text-align:center">{{ dlg.title }}</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;text-align:center">{{ dlg.body }}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"><sc-for list="{{ dlg.list }}" as="r"><div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface);font-size:12.5px"><span style="flex:1;min-width:0"><span style="display:block;font-weight:700">{{ r.cust }}</span><span style="display:block;color:var(--muted)">{{ r.when }}</span></span><span dir="ltr" style="font-size:11px;color:var(--faint)">{{ r.ref }}</span></div></sc-for></div>
+      <sc-if value="{{ dlg.hasNote }}"><div style="padding:10px 12px;border-radius:12px;background:var(--soft);color:var(--accent);font-size:12px;font-weight:600;margin-bottom:12px;line-height:1.5">{{ dlg.note }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-if value="{{ dlg.hasReassign }}"><a href="WAB Merchant 03 Bookings.dc.html?s=dlgReassign" style="height:50px;border-radius:14px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ t.reassign }}</a></sc-if>
+        <button onClick="{{ dlg.onPrimary }}" style="height:50px;border-radius:14px;border:none;background:#D9467A;color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">{{ dlg.primary }}</button>
+        <button onClick="{{ closeDlg }}" style="height:44px;border-radius:14px;border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer">{{ t.back }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:20px;right:20px;bottom:110px;z-index:60;padding:13px 16px;border-radius:14px;background:#1F2233;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;animation:fadeUp .25s ease both;box-shadow:0 14px 30px rgba(0,0,0,.25)"><span style="width:22px;height:22px;border-radius:50%;background:#2E9E78;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>{{ toast }}</div>
+</sc-if>
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Business · Merchant</div><div style="font-size:11.5px;color:#6B7280">06 · Services, Team, Permissions (M16–M18)</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="9"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="5"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="3"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+  <div style="font-size:11px;color:#6B7280;line-height:1.55;background:#F8F7FB;border-radius:10px;padding:10px">Men's salon hides all bride toggles/badges. Deactivating “Evening makeup” or adding a leave on Oct 10 triggers the conflict dialog. Manager role = STAFF_MANAGE only (limited fields).</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wabm_proto_settings';
+const CUR='WAB Merchant 06 Services Team.dc.html';
+const FILES=[['01 Onboarding','WAB Merchant 01 Onboarding.dc.html'],['02 Home','WAB Merchant 02 Home.dc.html'],['03 Bookings','WAB Merchant 03 Bookings.dc.html'],['04 Calendar','WAB Merchant 04 Calendar.dc.html'],['05 Salon','WAB Merchant 05 Salon.dc.html'],['06 Services & Team','WAB Merchant 06 Services Team.dc.html'],['07 Policies & Insights','WAB Merchant 07 Policies Insights.dc.html'],['08 Finance & More','WAB Merchant 08 Finance More.dc.html'],['Ad','WAB Merchant Ad.dc.html']];
+const CTRL=[['lang','Language',[['ar','AR'],['en','EN']]],['theme','Theme',[['light','Light'],['dark','Dark']]],['role','Role',[['owner','Owner'],['manager','Manager'],['employee','Employee']]],['gender','Salon',[['female','Women'],['male','Men']]],['sstate','State',[['live','Live'],['offline','Offline'],['incomplete','Incompl.']]]];
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+function btn(on,bg){return {width:'100%',height:'54px',borderRadius:'14px',border:'none',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:on?(bg||'linear-gradient(135deg,#6D28D9,#A855F7)'):'var(--soft)',color:on?'#fff':'var(--faint)',fontSize:'15px',fontWeight:600,cursor:on?'pointer':'default',boxShadow:on&&!bg?'0 10px 24px rgba(109,40,217,.28)':'none'}}
+function field(err,dis){return {width:'100%',boxSizing:'border-box',height:'52px',padding:'0 14px',background:dis?'var(--surface)':'var(--card)',border:'1.5px solid '+(err?'#D9467A':'var(--line)'),borderRadius:'14px',color:'var(--ink)',fontSize:'15px',opacity:dis?.6:1}}
+function sw(on,dis){return {track:{width:'46px',height:'28px',borderRadius:'14px',border:'none',padding:0,background:on?(dis?'#C9AEF7':'#A855F7'):'var(--line)',position:'relative',flexShrink:0,cursor:dis?'default':'pointer',transition:'background .2s',display:'inline-block'},knob:{position:'absolute',top:'3px',insetInlineStart:on?'21px':'3px',width:'22px',height:'22px',borderRadius:'50%',background:'#fff',boxShadow:'0 2px 4px rgba(0,0,0,.2)',transition:'all .2s'}}}
+function chipS(a,rose){return {height:'38px',padding:'0 13px',borderRadius:'11px',border:'1.5px solid '+(a?(rose?'#D9467A':'#A855F7'):'var(--line)'),background:a?(rose?'rgba(244,167,196,.2)':'var(--soft)'):'var(--card)',color:a?(rose?'#B83268':'var(--accent)'):'var(--ink)',fontSize:'13px',fontWeight:600,cursor:'pointer'}}
+const CAT={female:[['قص وتسريح','Cut & style','شعر','Hair'],['صبغة شعر','Hair color','شعر','Hair'],['مكياج سهرة','Evening makeup','مكياج','Makeup'],['مكياج عروس','Bridal makeup','عرائس','Bridal'],['تسريحة عروس','Bridal hairstyle','عرائس','Bridal'],['مانيكير','Manicure','أظافر','Nails'],['بديكير','Pedicure','أظافر','Nails'],['بروتين للشعر','Hair protein','شعر','Hair'],['تنظيف بشرة','Facial','بشرة','Skin'],['رموش','Lash extensions','مكياج','Makeup']],male:[['قص شعر','Haircut','شعر','Hair'],['تهذيب اللحية','Beard trim','لحية','Beard'],['حلاقة كاملة','Full shave','لحية','Beard'],['تنظيف بشرة','Facial','بشرة','Skin'],['صبغة شعر','Hair color','شعر','Hair'],['باقة العريس','Groom package','عرسان','Groom'],['قص أطفال','Kids haircut','شعر','Hair'],['حمام زيت','Hot oil treatment','شعر','Hair']]};
+const SVCS={female:[[0,25,45,0,1],[1,45,90,0,1],[2,35,60,0,1],[3,180,120,1,1],[4,120,90,1,1],[5,15,30,0,1]],male:[[0,8,30,0,1],[1,5,15,0,1],[2,12,30,0,1],[3,15,45,0,1],[4,20,45,0,0],[5,60,90,0,1]]};
+const MEM={female:[['ليلى','حداد','Layla','Haddad','owner',0,0,0,'0791234567'],['سارة','العبدالله','Sara','Al-Abdullah','manager',0,0,0,'0795550111'],['رنا','قاسم','Rana','Qasem','employee',1,1,0,'0795550122'],['هبة','منصور','Hiba','Mansour','employee',1,0,0,'0795550133'],['دانة','سليم','Dana','Saleem','employee',1,1,0,'0795550144'],['مي','عطية','Mai','Attieh','employee',1,0,1,'0795550155'],['جنى','ناصر','Jana','Nasser','employee',1,0,0,'0795550166',1]],male:[['أحمد','النابلسي','Ahmad','Nabulsi','owner',0,0,0,'0791234567'],['محمود','سالم','Mahmoud','Salem','manager',0,0,0,'0795550111'],['عمر','قاسم','Omar','Qasem','employee',1,0,0,'0795550122'],['خالد','منصور','Khaled','Mansour','employee',1,0,0,'0795550133'],['فادي','سليم','Fadi','Saleem','employee',1,0,0,'0795550144'],['سامر','عطية','Samer','Attieh','employee',1,0,1,'0795550155']]};
+const PG=[['bookings',['BOOKINGS_VIEW_ALL','BOOKINGS_VIEW_OWN','BOOKINGS_RESPOND','BOOKINGS_OPERATE']],['salon',['SALON_PROFILE_MANAGE','GALLERY_MANAGE','WORKING_HOURS_MANAGE','SERVICES_MANAGE','POLICIES_MANAGE']],['staff',['STAFF_MANAGE','TEAM_MANAGE']],['finance',['FINANCE_VIEW','SUBSCRIPTION_VIEW','PAYOUT_DETAILS_MANAGE','SALON_DELETE_REQUEST']],['insights',['DASHBOARD_VIEW','REVIEWS_VIEW','STATISTICS_VIEW']]];
+const OWNER_ONLY=['TEAM_MANAGE','PAYOUT_DETAILS_MANAGE','SALON_DELETE_REQUEST'];
+const GRANT=PG.flatMap(g=>g[1]).filter(k=>!OWNER_ONLY.includes(k));
+const TPL={manager:GRANT.filter(k=>!['FINANCE_VIEW','POLICIES_MANAGE','BOOKINGS_VIEW_OWN'].includes(k)),employee:['BOOKINGS_VIEW_OWN','REVIEWS_VIEW']};
+const D={ar:{cur:'د.أ',min:'د',servicesT:'الخدمات',catalogT:'إضافة من الكتالوج',svcFormNew:'خدمة جديدة',svcFormEdit:'تعديل الخدمة',catReqT:'طلب خدمة جديدة',catReqListT:'طلبات الكتالوج',teamT:'الطاقم والفريق',memberNew:'إضافة عضو',permsT:'الصلاحيات',add:'+ إضافة',addMember:'+ عضو',newReq:'+ طلب',
+searchSvc:'ابحث في خدماتك',myRequests:'طلبات إضافة خدمات للكتالوج',reqCount:'3 طلبات',brideOnly:'للعروس فقط',noStaffWarn:'لا يوجد موظف يقدم هذه الخدمة — لن تظهر للحجز',svcEmptyT:'لا توجد خدمات بعد',svcEmptyB:'أضف خدمات صالونك من كتالوج WAB وحدد السعر والمدة.',addSvcs:'إضافة خدمات',
+searchCat:'ابحث في الكتالوج',catNoteF:'كتالوج الصالونات النسائية',catNoteM:'كتالوج الصالونات الرجالية',added:'مضافة',cantFind:'لا تجد خدمتك؟',requestIt:'اطلب إضافتها للكتالوج',
+fromCatalog:'من كتالوج WAB',price:'السعر',duration:'المدة (دقيقة)',priceHint:'السعر شامل الضريبة والرسوم',priceErr:'أدخل سعراً أكبر من صفر (حتى منزلتين عشريتين)',priceNote:'تغيير السعر يطبق على الحجوزات الجديدة فقط',brideOnlyL:'للعروس فقط',brideOnlySub:'تظهر فقط عند حجز خدمات العروس',activeL:'مفعّلة',activeSub:'تظهر للزبائن ويمكن حجزها',extraDesc:'وصف إضافي (اختياري)',extraPh:'تفاصيل تساعد الزبون…',media:'صور وفيديو (اختياري)',addSvc:'إضافة الخدمة',saveSvc:'حفظ التغييرات',removeSvc:'إزالة الخدمة',svcAdded:'تمت إضافة الخدمة',svcSaved:'تم حفظ الخدمة',
+deactT:'هذه الخدمة مضمّنة في حجوزات قادمة',deactB:'ستبقى هذه الحجوزات صالحة، وستُخفى الخدمة عن الحجوزات الجديدة فقط:',deactConfirm:'إيقاف الخدمة',deactivated:'تم إيقاف الخدمة للحجوزات الجديدة',activated:'تم تفعيل الخدمة',removed:'تمت إزالة الخدمة',
+reqIntro:'لم تجد خدمتك في الكتالوج؟ أرسل طلباً وسيراجعه فريق WAB. ستصلك إشعارات عند الموافقة.',svcName:'اسم الخدمة',svcNamePh:'مثال: حنّة العروس',desc:'الوصف',reqDescPh:'صف الخدمة باختصار…',imgOpt:'صورة (اختياري)',sendReq:'إرسال الطلب',reqErr:'هذا الحقل مطلوب',reqSent:'تم إرسال الطلب للمراجعة',adminNote:'ملاحظة WAB',addNow:'أضفها الآن',
+rq:{pending:'قيد المراجعة',approved:'مقبول',rejected:'مرفوض'},reqItems:[['حنّة العروس','Bridal henna','pending','5 أكتوبر 2026',''],['لوك يوم الخطوبة','Engagement look','approved','28 سبتمبر 2026','أُضيفت إلى الكتالوج ضمن فئة العرائس.'],['تدليك','Massage','rejected','20 سبتمبر 2026','خدمات التدليك خارج نطاق WAB حالياً.']],reqItemsM:[['تصفيف العريس الملكي','Royal groom styling','pending','5 أكتوبر 2026',''],['تنظيف بخار','Steam facial','approved','28 سبتمبر 2026','أُضيفت إلى الكتالوج ضمن فئة البشرة.'],['وشم','Tattoo','rejected','20 سبتمبر 2026','هذه الخدمة خارج نطاق WAB.']],
+members:'أعضاء',owner:'المالك',manager:'مسؤول',employee:'موظف',provides:'يقدم خدمات',brideQ:'مؤهلة للعرائس',onLeaveToday:'في إجازة اليوم',inactive:'غير نشط',limitedNote:'يمكنك تعديل ملفات مقدمي الخدمات فقط. إدارة الأعضاء والصلاحيات خاصة بالمالك.',limitedForm:'الاسم والهاتف والدور والصلاحيات خاصة بالمالك.',ownerLocked:'لا يمكن تعطيل أو حذف المالك',
+memberInfo:'بيانات العضو',first:'الاسم الأول',last:'الاسم الأخير',phone:'رقم الهاتف',phoneHint:'سيتمكن العضو من الدخول برقمه بعد الحفظ',phoneErr:'رقم الهاتف غير صحيح',phoneDup:'هذا الرقم مسجّل لعضو آخر',role:'الدور',activeM:'نشط',activeMSub:'يمكنه تسجيل الدخول واستخدام التطبيق',providesL:'يقدم خدمات',providesSub:'يظهر للزبائن ويمكن حجزه',permissions:'الصلاحيات',permOf:'{n} صلاحيات مفعّلة',
+staffProfile:'ملف مقدم الخدمة',bio:'نبذة',years:'سنوات الخبرة',skills:'الخدمات التي يقدمها',skillErr:'اختر خدمة واحدة على الأقل',brideQSub:'يمكن اختيارها لخدمات العروس',workDays:'أيام العمل',workHint:'ضمن أيام عمل الصالون (الجمعة مغلق)',leaves:'الإجازات',addLeave:'إضافة إجازة',noLeaves:'لا توجد إجازات قادمة',leaveNote:'ملاحظة (اختياري)',leaveAdded:'تمت إضافة الإجازة',reviews:'تقييم',served:'زبون',removeMember:'إزالة صلاحية الدخول',saveMember:'حفظ',addMemberBtn:'إضافة العضو',memberSaved:'تم حفظ بيانات العضو',memberAdded:'تمت إضافة العضو — يمكنه الدخول الآن',
+conflictT:'يوجد حجوزات متأثرة',conflictLeave:'لدى {n} حجوزات خلال الإجازة. اختر كيف تريد التعامل معها:',conflictDeact:'لدى العضو حجوزات قادمة. اختر كيف تريد التعامل معها:',reassign:'إعادة توزيع',cancelAffected:'إلغاء الحجوزات المتأثرة',cancelNote:'سيتم إلغاؤها مع استرداد كامل وإشعار الزبائن',back:'رجوع',cancelledToast:'تم إلغاء {n} حجوزات مع استرداد كامل',deactToast:'تمت إزالة صلاحية الدخول',
+applyTpl:'تطبيق قالب الدور',tplManager:'قالب المسؤول',tplEmployee:'قالب الموظف',ownerOnly:'خاصة بالمالك',savePerms:'حفظ الصلاحيات',savingPerms:'جارٍ الحفظ…',permsSaved:'تم الحفظ — تحدّثت صلاحيات العضو فوراً',permNote:'تُطبّق التغييرات فوراً على تطبيق العضو. الأقسام غير المسموحة تختفي تماماً من واجهته.',
+gt:{bookings:'الحجوزات',salon:'الصالون',staff:'الطاقم',finance:'المالية',insights:'التحليلات'},pd:{BOOKINGS_VIEW_ALL:['عرض كل الحجوزات','قائمة وتفاصيل كل حجوزات الصالون'],BOOKINGS_VIEW_OWN:['عرض حجوزاته فقط','الحجوزات المسندة إليه فقط'],BOOKINGS_RESPOND:['الرد على الطلبات','قبول ورفض طلبات الحجز'],BOOKINGS_OPERATE:['إدارة الحجوزات','إكمال، عدم حضور، إلغاء، إعادة توزيع'],SALON_PROFILE_MANAGE:['ملف الصالون','الاسم، الصور، الموقع والتواصل'],GALLERY_MANAGE:['المعرض','إضافة وترتيب وحذف الأعمال'],WORKING_HOURS_MANAGE:['ساعات العمل','الجدول الأسبوعي والإغلاقات'],SERVICES_MANAGE:['الخدمات','خدمات الصالون وطلبات الكتالوج'],POLICIES_MANAGE:['السياسات','الدفع، العربون، الإلغاء والاسترداد'],STAFF_MANAGE:['ملفات الطاقم','المهارات، الجداول والإجازات'],TEAM_MANAGE:['إدارة الفريق','إضافة وإزالة الأعضاء والصلاحيات'],FINANCE_VIEW:['المالية','المدفوعات، المبالغ المستردة والدفعات'],SUBSCRIPTION_VIEW:['الاشتراك','حالة الاشتراك والحساب'],PAYOUT_DETAILS_MANAGE:['بيانات البنك','تعديل حساب استلام الدفعات'],SALON_DELETE_REQUEST:['طلب حذف الصالون','إرسال طلب حذف الحساب'],DASHBOARD_VIEW:['الرئيسية','لوحة اليوم والطلبات'],REVIEWS_VIEW:['التقييمات','تقييمات الصالون والطاقم'],STATISTICS_VIEW:['الإحصائيات','تقارير الحجوزات والإيرادات']},
+days:['س','ح','ن','ث','ر','خ','ج'],moS:'أكتوبر'},
+en:{cur:'JOD',min:'min',servicesT:'Services',catalogT:'Add from catalog',svcFormNew:'New service',svcFormEdit:'Edit service',catReqT:'Request a service',catReqListT:'Catalog requests',teamT:'Staff & team',memberNew:'Add member',permsT:'Permissions',add:'+ Add',addMember:'+ Member',newReq:'+ Request',
+searchSvc:'Search your services',myRequests:'Catalog addition requests',reqCount:'3 requests',brideOnly:'Bride only',noStaffWarn:'No staff provides this service — it can’t be booked',svcEmptyT:'No services yet',svcEmptyB:'Add your salon services from the WAB catalog and set price and duration.',addSvcs:'Add services',
+searchCat:'Search the catalog',catNoteF:"Women's salon catalog",catNoteM:"Men's salon catalog",added:'Added',cantFind:"Can't find your service?",requestIt:'Request it to be added',
+fromCatalog:'From WAB catalog',price:'Price',duration:'Duration (min)',priceHint:'Price includes tax and fees',priceErr:'Enter a price above zero (max 2 decimals)',priceNote:'Price changes apply to new bookings only',brideOnlyL:'Bride only',brideOnlySub:'Shown only when booking bridal services',activeL:'Active',activeSub:'Visible and bookable by customers',extraDesc:'Extra description (optional)',extraPh:'Details that help the customer…',media:'Photos & video (optional)',addSvc:'Add service',saveSvc:'Save changes',removeSvc:'Remove service',svcAdded:'Service added',svcSaved:'Service saved',
+deactT:'This service is in upcoming bookings',deactB:'These bookings stay valid; the service is only hidden for new bookings:',deactConfirm:'Deactivate service',deactivated:'Service hidden for new bookings',activated:'Service activated',removed:'Service removed',
+reqIntro:"Didn't find your service? Send a request and WAB will review it. You'll be notified when approved.",svcName:'Service name',svcNamePh:'e.g. Bridal henna',desc:'Description',reqDescPh:'Briefly describe the service…',imgOpt:'Image (optional)',sendReq:'Send request',reqErr:'This field is required',reqSent:'Request sent for review',adminNote:'WAB note',addNow:'Add it now',
+rq:{pending:'Pending',approved:'Approved',rejected:'Rejected'},reqItems:[['حنّة العروس','Bridal henna','pending','Oct 5, 2026',''],['لوك يوم الخطوبة','Engagement look','approved','Sep 28, 2026','Added to the catalog under Bridal.'],['تدليك','Massage','rejected','Sep 20, 2026','Massage services are currently outside WAB scope.']],reqItemsM:[['تصفيف العريس الملكي','Royal groom styling','pending','Oct 5, 2026',''],['تنظيف بخار','Steam facial','approved','Sep 28, 2026','Added to the catalog under Skin.'],['وشم','Tattoo','rejected','Sep 20, 2026','This service is outside WAB scope.']],
+members:'members',owner:'Owner',manager:'Manager',employee:'Employee',provides:'Provides services',brideQ:'Bride-qualified',onLeaveToday:'On leave today',inactive:'Inactive',limitedNote:'You can edit service-provider profiles only. Members and permissions are managed by the owner.',limitedForm:'Name, phone, role and permissions are managed by the owner.',ownerLocked:'The owner cannot be deactivated or removed',
+memberInfo:'Member info',first:'First name',last:'Last name',phone:'Phone number',phoneHint:'The member can log in with this number after saving',phoneErr:'Invalid phone number',phoneDup:'This number belongs to another member',role:'Role',activeM:'Active',activeMSub:'Can log in and use the app',providesL:'Provides services',providesSub:'Visible to customers and bookable',permissions:'Permissions',permOf:'{n} permissions on',
+staffProfile:'Service-provider profile',bio:'Bio',years:'Years of experience',skills:'Services provided',skillErr:'Select at least one service',brideQSub:'Can be chosen for bridal services',workDays:'Working days',workHint:'Within salon working days (Friday closed)',leaves:'Leaves',addLeave:'Add leave',noLeaves:'No upcoming leaves',leaveNote:'Note (optional)',leaveAdded:'Leave added',reviews:'reviews',served:'served',removeMember:'Remove access',saveMember:'Save',addMemberBtn:'Add member',memberSaved:'Member saved',memberAdded:'Member added — they can log in now',
+conflictT:'Affected bookings',conflictLeave:'{n} bookings fall within this leave. Choose how to handle them:',conflictDeact:'This member has upcoming bookings. Choose how to handle them:',reassign:'Reassign',cancelAffected:'Cancel affected bookings',cancelNote:'They will be cancelled with a full refund and customers notified',back:'Back',cancelledToast:'{n} bookings cancelled with full refunds',deactToast:'Access removed',
+applyTpl:'Apply role template',tplManager:'Manager template',tplEmployee:'Employee template',ownerOnly:'Owner only',savePerms:'Save permissions',savingPerms:'Saving…',permsSaved:"Saved — member's permissions updated instantly",permNote:"Changes apply instantly in the member's app. Sections without permission are hidden entirely.",
+gt:{bookings:'Bookings',salon:'Salon',staff:'Staff',finance:'Finance',insights:'Insights'},pd:{BOOKINGS_VIEW_ALL:['View all bookings','List and details of all salon bookings'],BOOKINGS_VIEW_OWN:['View own bookings','Only bookings assigned to them'],BOOKINGS_RESPOND:['Respond to requests','Accept and reject booking requests'],BOOKINGS_OPERATE:['Operate bookings','Complete, no-show, cancel, reassign'],SALON_PROFILE_MANAGE:['Salon profile','Name, images, location, contact'],GALLERY_MANAGE:['Gallery','Add, reorder, delete work'],WORKING_HOURS_MANAGE:['Working hours','Weekly schedule and closures'],SERVICES_MANAGE:['Services','Salon services and catalog requests'],POLICIES_MANAGE:['Policies','Payment, deposit, cancellation, refunds'],STAFF_MANAGE:['Staff profiles','Skills, schedules and leaves'],TEAM_MANAGE:['Team management','Add/remove members and permissions'],FINANCE_VIEW:['Finance','Payments, refunds and payouts'],SUBSCRIPTION_VIEW:['Subscription','Subscription and account status'],PAYOUT_DETAILS_MANAGE:['Bank details','Edit payout bank account'],SALON_DELETE_REQUEST:['Salon deletion request','Send account deletion request'],DASHBOARD_VIEW:['Home','Today dashboard and requests'],REVIEWS_VIEW:['Reviews','Salon and staff reviews'],STATISTICS_VIEW:['Statistics','Bookings and revenue reports']},
+days:['S','S','M','T','W','T','F'],moS:'Oct'}};
+const DEF={screen:'services',q:'',cq:'',svcs:null,sidx:-1,cidx:-1,price:'',dur:45,bride:false,active:true,priceErr:false,saving:false,rName:'',rErr:false,midx:-1,mf:null,mErr:false,perms:null,leaveOn:false,lrange:[],dialog:null,dctx:null,toast:null,newReq:false};
+const PRE={services:{},servicesMen:{gender:'male'},servicesEmpty:{svcs:[]},catalog:{screen:'catalog'},svcNew:{screen:'svcForm',cidx:7,sidx:-1},svcEdit:{screen:'svcForm',sidx:2},svcBride:{screen:'svcForm',sidx:3,gender:'female'},svcErr:{screen:'svcForm',cidx:7,sidx:-1,price:'0',priceErr:true},deactivate:{dialog:'deact',dctx:2},catReq:{screen:'catReq'},catReqList:{screen:'catReqList'},
+team:{screen:'team'},teamManager:{screen:'team',role:'manager'},ownerRow:{screen:'team',ownerTap:1},memberAdd:{screen:'member',midx:-1},staffEdit:{screen:'member',midx:2},staffLimited:{screen:'member',midx:2,role:'manager'},memberErr:{screen:'member',midx:-1,mErr:true,bad:1},leaveAdd:{screen:'member',midx:2,leaveOn:true,lrange:[10]},leaveConflict:{screen:'member',midx:2,leaveOn:true,lrange:[10],dialog:'leave'},deactMember:{screen:'member',midx:2,dialog:'deactM'},
+perms:{screen:'perms',midx:1},permsEmployee:{screen:'perms',midx:3},permsSaving:{screen:'perms',midx:1,saving:true}};
+const NAV=[['M16 Services',[["Women's list",'services'],["Men's list (no bride)",'servicesMen'],['Empty','servicesEmpty'],['Catalog picker','catalog'],['New from catalog','svcNew'],['Edit service','svcEdit'],['Bride-only service','svcBride'],['Validation error','svcErr'],['Deactivate warning','deactivate'],['Catalog request form','catReq'],['Requests list','catReqList']]],['M17 Team & staff',[['Owner view','team'],['STAFF_MANAGE only','teamManager'],['Owner row locked','ownerRow'],['Add member','memberAdd'],['Validation errors','memberErr'],['Edit staff','staffEdit'],['Limited (manager)','staffLimited'],['Leave sheet','leaveAdd'],['Leave conflict','leaveConflict'],['Deactivate conflict','deactMember']]],['M18 Permissions',[['Manager template','perms'],['Employee template','permsEmployee'],['Saving','permsSaving']]]];
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();return Object.assign({lang:p.lang||'ar',theme:p.theme||'light',role:p.role||'owner',gender:p.gender||'female',sstate:p.sstate||'live',preset:'services'},DEF)})();
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k)}
+  componentWillUnmount(){clearTimeout(this.toastT)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,role:s.role,gender:s.gender,sstate:s.sstate}))}
+  setPref(k,v){this.setState({[k]:v,svcs:k==='gender'?null:this.state.svcs,mf:k==='gender'||k==='lang'?null:this.state.mf},()=>this.savePrefs())}
+  svcList(){return this.state.svcs||SVCS[this.state.gender].map(x=>x.slice())}
+  memForm(i){const s=this.state,L=s.lang==='ar',m=MEM[s.gender][i];if(!m)return {first:'',last:'',phone:'',role:'employee',active:true,provider:true,brideQ:false,skills:[],days:[0,1,2,3,4,5],leaves:[],bio:'',years:'',slot:'mmember-new'};
+    return {first:L?m[0]:m[2],last:L?m[1]:m[3],phone:m[8].slice(1),role:m[4],active:!m[9],provider:!!m[5],brideQ:!!m[6],skills:i===2?[2,3,4]:[0,1,5],days:i===2?[0,1,2,4,5]:[0,1,2,3,4,5],leaves:m[7]?[[7,7,L?'إجازة بعد الظهر':'Afternoon off']]:[[25,27,L?'سفر':'Travel']],bio:L?'خبيرة مكياج وتسريحات':'Makeup & styling expert',years:'7',slot:'mmember-'+s.gender+'-'+i}}
+  go(k){const p=PRE[k];if(!p)return;const st=Object.assign({},DEF,p,{preset:k});st.role=p.role||'owner';if(p.gender)st.gender=p.gender;
+    const tmp=Object.assign({},this.state,st);this.state=tmp;
+    if(st.screen==='svcForm'){const L=this.svcList();if(st.sidx>=0){const v=L[st.sidx];st.cidx=v[0];st.price=st.price||String(v[1]);st.dur=v[2];st.bride=!!v[3];st.active=!!v[4]}else{st.price=st.price||'';st.dur=45;st.bride=false;st.active=true}}
+    if(st.screen==='member'||st.screen==='perms'){st.mf=this.memForm(st.midx);if(p.bad){st.mf.phone='7955501';st.mf.first=''}}
+    if(st.screen==='perms'){const r=MEM[st.gender][st.midx][4];st.perms=TPL[r].slice()}
+    delete st.bad;const ownerTap=st.ownerTap;delete st.ownerTap;
+    this.setState(st,()=>{this.savePrefs();if(ownerTap)this.toast(D[this.state.lang].ownerLocked)})}
+  toast(m){this.setState({toast:m});clearTimeout(this.toastT);this.toastT=setTimeout(()=>this.setState({toast:null}),2200)}
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],g=s.gender,L=ar?0:1,isOwner=s.role==='owner',limited=s.role==='manager';
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const list=this.svcList(),cat=CAT[g];
+    const svcs=list.map((v,i)=>({v,i})).filter(({v})=>!s.q||cat[v[0]][0].includes(s.q)||cat[v[0]][1].toLowerCase().includes(s.q.toLowerCase())).map(({v,i})=>{const s2=sw(!!v[4]);const noStaff=g==='male'&&v[0]===4||g==='female'&&false;
+      return {name:cat[v[0]][L],price:v[1]+' '+t.cur,dur:v[2]+' '+t.min,bride:g==='female'&&!!v[3],noStaff:g==='male'&&i===4,slot:'msvc-'+g+'-'+v[0],track:s2.track,knob:s2.knob,
+        onEdit:()=>this.setState({screen:'svcForm',priceErr:false,sidx:i,cidx:v[0],price:String(v[1]),dur:v[2],bride:!!v[3],active:!!v[4]}),
+        onToggle:()=>{if(v[4]&&i===2){this.setState({dialog:'deact',dctx:i});return}const a=list.map(x=>x.slice());a[i][4]=v[4]?0:1;this.setState({svcs:a});this.toast(v[4]?t.deactivated:t.activated)},
+        style:{padding:'12px',borderRadius:'18px',border:'1px solid '+(g==='male'&&i===4?'rgba(245,158,11,.4)':'var(--line)'),background:v[4]?'var(--card)':'var(--surface)',opacity:v[4]?1:.75,flexShrink:0}}});
+    const addedIdx=list.map(v=>v[0]);
+    const catalog=cat.map((c,i)=>({c,i})).filter(({c})=>!s.cq||c[0].includes(s.cq)||c[1].toLowerCase().includes(s.cq.toLowerCase())).map(({c,i})=>{const added=addedIdx.includes(i);return {name:c[L],cat:c[2+L],added,notAdded:!added,slot:'msvc-'+g+'-'+i,
+      onClick:()=>{if(added)return;this.setState({screen:'svcForm',cidx:i,sidx:-1,price:'',dur:45,bride:g==='female'&&c[2]==='عرائس',active:true,priceErr:false})},
+      style:{display:'flex',alignItems:'center',gap:'12px',padding:'10px 12px',borderRadius:'16px',border:'1px solid var(--line)',background:added?'var(--surface)':'var(--card)',color:'var(--ink)',cursor:added?'default':'pointer',textAlign:'start',flexShrink:0,opacity:added?.75:1}}});
+    const pOk=/^\d+(\.\d{1,2})?$/.test(s.price)&&parseFloat(s.price)>0;
+    const sfToggles=[].concat(g==='female'?[{label:'♛ '+t.brideOnlyL,sub:t.brideOnlySub,on:s.bride,onClick:()=>this.setState({bride:!s.bride})}]:[],[{label:t.activeL,sub:t.activeSub,on:s.active,onClick:()=>this.setState({active:!s.active})}]).map(x=>Object.assign(x,sw(x.on)));
+    const sf={name:cat[s.cidx]?cat[s.cidx][L]:'',slot:'msvc-'+g+'-'+s.cidx,price:s.price,dur:s.dur,isEdit:s.sidx>=0,priceErr:s.priceErr&&!pOk,
+      priceBox:{display:'flex',alignItems:'center',gap:'6px',height:'52px',padding:'0 14px',boxSizing:'border-box',borderRadius:'14px',border:'1.5px solid '+(s.priceErr&&!pOk?'#D9467A':'var(--line)'),background:'var(--card)'},durBox:{display:'flex',alignItems:'center',gap:'6px',height:'52px',padding:'0 10px',boxSizing:'border-box',borderRadius:'14px',border:'1.5px solid var(--line)',background:'var(--card)'}};
+    const conflictsFor=n=>[['ريم الزعبي','Reem Al-Zoubi','WAB-24806',ar?'اليوم · 3:00 م':'Today · 3:00 PM'],['سارة العلي','Sara Al-Ali','WAB-24817',ar?'السبت 10 أكتوبر · 2:00 م':'Sat, Oct 10 · 2:00 PM'],['لانا مصطفى','Lana Mustafa','WAB-24825',ar?'السبت 10 أكتوبر · 5:00 م':'Sat, Oct 10 · 5:00 PM']].slice(0,n).map(r=>({cust:g==='female'?r[L]:(ar?'زيد الخطيب':'Zaid Al-Khatib'),ref:r[2],when:r[3]}));
+    const mf=s.mf||this.memForm(s.midx);const setM=o=>this.setState({mf:Object.assign({},mf,o)});
+    const phoneOk=/^7[789]\d{7}$/.test(mf.phone),dup=s.midx<0&&mf.phone==='795550111';
+    const nameOk=mf.first.trim()&&mf.last.trim();const skillsOk=!mf.provider||mf.skills.length>0;
+    const E=s.mErr;
+    const members=MEM[g].map((m,i)=>{const isO=m[4]==='owner';const canEdit=isOwner?!isO:(limited&&!!m[5]);
+      return {name:(L?m[2]:m[0])+' '+(L?m[3]:m[1]),i:(L?m[2]:m[0]).charAt(0),slot:'mmember-'+g+'-'+i,role:t[m[4]],provider:!!m[5],brideQ:g==='female'&&!!m[6],leave:!!m[7],inactive:!!m[9],locked:isO||!canEdit,chev:canEdit,
+        roleStyle:{fontSize:'10.5px',fontWeight:700,padding:'2px 8px',borderRadius:'6px',background:isO?'linear-gradient(135deg,#6D28D9,#A855F7)':m[4]==='manager'?'var(--soft)':'var(--surface)',color:isO?'#fff':m[4]==='manager'?'var(--accent)':'var(--muted)'},
+        onClick:()=>{if(isO){this.toast(t.ownerLocked);return}if(!canEdit)return;this.setState({screen:'member',midx:i,mf:this.memForm(i),mErr:false})},
+        style:{display:'flex',alignItems:'center',gap:'12px',padding:'12px',borderRadius:'18px',border:'1px solid var(--line)',background:m[9]?'var(--surface)':'var(--card)',color:'var(--ink)',cursor:canEdit||isO?'pointer':'default',textAlign:'start',flexShrink:0,opacity:!canEdit&&!isO?.6:1}}});
+    const mToggles=(limited?[]:[{label:t.activeM,sub:t.activeMSub,on:mf.active,onClick:()=>setM({active:!mf.active})}]).concat([{label:t.providesL,sub:t.providesSub,on:mf.provider,onClick:()=>{if(limited)return;setM({provider:!mf.provider})}}]).map(x=>Object.assign(x,sw(x.on,limited),{style:{display:'flex',alignItems:'center',gap:'12px',padding:'14px',borderRadius:'16px',border:'1px solid var(--line)',background:'var(--card)',color:'var(--ink)',cursor:'pointer',textAlign:'start',flexShrink:0}}));
+    const perms=s.perms||TPL[mf.role==='manager'?'manager':'employee'];
+    const mfv=Object.assign({},mf,{display:(mf.first||mf.last)?(mf.first+' '+mf.last):t.memberNew,hasStats:s.midx>=0&&mf.provider,firstStyle:field(E&&!mf.first.trim(),limited),lastStyle:field(E&&!mf.last.trim(),limited),errName:E&&!nameOk,errPhone:E&&(!phoneOk||dup),phoneMsg:dup?t.phoneDup:t.phoneErr,errSkills:E&&!skillsOk,
+      phoneBox:{display:'flex',alignItems:'center',height:'52px',borderRadius:'14px',border:'1.5px solid '+(E&&(!phoneOk||dup)?'#D9467A':'var(--line)'),background:limited?'var(--surface)':'var(--card)',overflow:'hidden',opacity:limited?.6:1},showPerms:isOwner,canDeact:isOwner&&s.midx>=0,permSum:t.permOf.replace('{n}',perms.length)});
+    const lcal=Array.from({length:14},(_,i)=>{const d=8+i,lo=Math.min(...s.lrange),hi=Math.max(...s.lrange),sel=s.lrange.includes(d),inR=s.lrange.length===2&&d>lo&&d<hi;
+      return {n:d,onClick:()=>{let r=s.lrange;if(r.length!==1)r=[d];else if(r[0]===d)r=[];else r=[r[0],d].sort((a,b)=>a-b);this.setState({lrange:r})},style:{height:'40px',borderRadius:'11px',border:'none',cursor:'pointer',fontSize:'13.5px',fontWeight:700,background:sel?'linear-gradient(135deg,#6D28D9,#A855F7)':inR?'var(--soft)':'var(--surface)',color:sel?'#fff':(i%7===1?'var(--faint)':'var(--ink)')}}});
+    const leaveHit=s.lrange.length&&Math.min(...s.lrange)<=10&&Math.max(...s.lrange)>=10;
+    const addLeave=(cancelled)=>{const lo=Math.min(...s.lrange),hi=Math.max(...s.lrange);setM({leaves:mf.leaves.concat([[lo,hi,'']])});this.setState({leaveOn:false,dialog:null,lrange:[]});this.toast(cancelled?t.cancelledToast.replace('{n}',2):t.leaveAdded)};
+    const DL={deact:{title:t.deactT,body:t.deactB,list:conflictsFor(2),primary:t.deactConfirm,hasReassign:false,hasNote:false,onPrimary:()=>{const a=list.map(x=>x.slice());a[s.dctx][4]=0;this.setState({svcs:a,dialog:null});this.toast(t.deactivated)}},
+      leave:{title:t.conflictT,body:t.conflictLeave.replace('{n}',2),list:conflictsFor(3).slice(1),primary:t.cancelAffected,hasReassign:true,hasNote:true,note:t.cancelNote,onPrimary:()=>addLeave(true)},
+      deactM:{title:t.conflictT,body:t.conflictDeact,list:conflictsFor(3),primary:t.cancelAffected,hasReassign:true,hasNote:true,note:t.cancelNote,onPrimary:()=>{this.setState({dialog:null,screen:'team'});this.toast(t.deactToast)}}};
+    const dm=DL[s.dialog];
+    const TB={services:[t.servicesT,'WAB Merchant 05 Salon.dc.html?s=hub',t.add,()=>this.setState({screen:'catalog'})],catalog:[t.catalogT,'services'],svcForm:[s.sidx>=0?t.svcFormEdit:t.svcFormNew,s.sidx>=0?'services':'catalog'],catReq:[t.catReqT,'catalog'],catReqList:[t.catReqListT,'services',t.newReq,()=>this.setState({screen:'catReq'})],team:[t.teamT,'WAB Merchant 05 Salon.dc.html?s=hub',isOwner?t.addMember:null,()=>this.setState({screen:'member',midx:-1,mf:this.memForm(-1),mErr:false})],member:[s.midx>=0?mfv.display:t.memberNew,'team'],perms:[t.permsT,'member']}[s.screen];
+    const reqItems=(g==='female'?t.reqItems:t.reqItemsM).slice();if(s.newReq)reqItems.unshift([s.rName,s.rName,'pending',ar?'7 أكتوبر 2026':'Oct 7, 2026','']);
+    const RC={pending:['#B7791F','rgba(245,158,11,.14)'],approved:['#2E9E78','rgba(46,158,120,.12)'],rejected:['#D9467A','rgba(217,70,122,.1)']};
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',themeVars:tv(s.lang,s.theme),
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),controls:CTRL.map(([k,label,o])=>({label,opts:seg(k,o)})),
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      on:{services:s.screen==='services',catalog:s.screen==='catalog',svcForm:s.screen==='svcForm',catReq:s.screen==='catReq',catReqList:s.screen==='catReqList',team:s.screen==='team',member:s.screen==='member',perms:s.screen==='perms'},
+      title:TB[0],onBack:()=>{const b=TB[1];if(b.endsWith('hub')){location.href=b;return}this.setState({screen:b})},hasAction:!!TB[2],actionLabel:TB[2]||'',onAction:TB[3]||(()=>{}),
+      q:s.q,onQ:e=>this.setState({q:e.target.value}),svcs,svcHas:list.length>0,svcEmpty:!list.length,goCatalog:()=>this.setState({screen:'catalog'}),
+      cq:s.cq,onCq:e=>this.setState({cq:e.target.value}),catNote:g==='female'?t.catNoteF:t.catNoteM,catalog,goCatReq:()=>this.setState({screen:'catReq',rName:'',rErr:false}),
+      sf,sfToggles,sfMedia:['msvcmedia-'+g+'-'+s.cidx+'-1','msvcmedia-'+g+'-'+s.cidx+'-2'],onPrice:e=>this.setState({price:e.target.value.replace(/[^\d.]/g,'')}),durMinus:()=>this.setState({dur:Math.max(5,s.dur-5)}),durPlus:()=>this.setState({dur:s.dur+5}),
+      sfBtn:btn(true),sfBtnLabel:s.sidx>=0?t.saveSvc:t.addSvc,saving:s.saving,notSaving:!s.saving,
+      saveSvc:()=>{if(!pOk){this.setState({priceErr:true});return}this.setState({saving:true});setTimeout(()=>{const a=list.map(x=>x.slice());const row=[s.cidx,parseFloat(s.price),s.dur,s.bride?1:0,s.active?1:0];if(s.sidx>=0)a[s.sidx]=row;else a.push(row);this.setState({svcs:a,saving:false,screen:'services'});this.toast(s.sidx>=0?t.svcSaved:t.svcAdded)},800)},
+      askRemoveSvc:()=>{const a=list.filter((_,i)=>i!==s.sidx);this.setState({svcs:a,screen:'services'});this.toast(t.removed)},
+      rName:s.rName,onRName:e=>this.setState({rName:e.target.value}),rErr:s.rErr&&!s.rName.trim(),rNameStyle:field(s.rErr&&!s.rName.trim()),reqBtn:btn(true),
+      sendReq:()=>{if(!s.rName.trim()){this.setState({rErr:true});return}this.setState({saving:true});setTimeout(()=>{this.setState({saving:false,screen:'catReqList',newReq:true});this.toast(t.reqSent)},800)},
+      reqs:reqItems.map(r=>({name:r[L],status:t.rq[r[2]],date:r[3],note:r[4],hasNote:!!r[4],approved:r[2]==='approved',badge:{fontSize:'11px',fontWeight:700,padding:'4px 9px',borderRadius:'8px',color:RC[r[2]][0],background:RC[r[2]][1],flexShrink:0},style:{padding:'14px',borderRadius:'18px',border:'1px solid var(--line)',flexShrink:0}})),
+      limited,teamCount:MEM[g].length+' '+t.members,members,
+      mf:mfv,onFirst:e=>setM({first:e.target.value}),onLast:e=>setM({last:e.target.value}),onPhone:e=>setM({phone:e.target.value.replace(/\D/g,'').slice(0,9)}),
+      roles:['manager','employee'].map(r=>({label:t[r],onClick:()=>{if(limited)return;setM({role:r});this.setState({perms:TPL[r].slice()})},style:Object.assign(chipS(mf.role===r),{height:'48px',opacity:limited?.6:1})})),
+      mToggles,fieldS:field(false),isWomen:g==='female',
+      skills:list.map(v=>v[0]).map(ci=>({label:cat[ci][L],onClick:()=>setM({skills:mf.skills.includes(ci)?mf.skills.filter(x=>x!==ci):mf.skills.concat([ci])}),style:chipS(mf.skills.includes(ci))})),
+      toggleBrideQ:()=>setM({brideQ:!mf.brideQ}),brideSw:sw(mf.brideQ),
+      wdays:t.days.map((d,i)=>({label:d,onClick:()=>{if(i===6)return;setM({days:mf.days.includes(i)?mf.days.filter(x=>x!==i):mf.days.concat([i])})},style:{height:'40px',borderRadius:'11px',border:'none',fontSize:'12.5px',fontWeight:700,cursor:i===6?'default':'pointer',background:i===6?'var(--surface)':mf.days.includes(i)?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--soft)',color:i===6?'var(--faint)':mf.days.includes(i)?'#fff':'var(--accent)',opacity:i===6?.5:1}})),
+      noLeaves:!mf.leaves.length,leaves:mf.leaves.map(([a,b,n])=>({range:a===b?(a+' '+t.moS):(a+'–'+b+' '+t.moS),note:n})),openLeave:()=>this.setState({leaveOn:true,lrange:[]}),
+      leaveOn:s.leaveOn,closeLeave:()=>this.setState({leaveOn:false}),lcal,leaveBtn:btn(s.lrange.length>0),
+      submitLeave:()=>{if(!s.lrange.length)return;this.setState({saving:true});setTimeout(()=>{this.setState({saving:false});if(leaveHit)this.setState({dialog:'leave'});else addLeave(false)},700)},
+      askDeactivate:()=>this.setState({dialog:'deactM'}),goPerms:()=>this.setState({screen:'perms',perms:s.perms||TPL[mf.role].slice()}),
+      memberBtn:btn(true),memberBtnLabel:s.midx>=0?t.saveMember:t.addMemberBtn,
+      saveMember:()=>{if(!limited&&(!nameOk||!phoneOk||dup||!skillsOk)){this.setState({mErr:true});return}if(!skillsOk){this.setState({mErr:true});return}this.setState({saving:true});setTimeout(()=>{this.setState({saving:false,screen:'team',mErr:false});this.toast(s.midx>=0?t.memberSaved:t.memberAdded)},800)},
+      permRole:t[mf.role]||t.employee,permCount:t.permOf.replace('{n}',perms.length),
+      tpls:[['manager',t.tplManager],['employee',t.tplEmployee]].map(([k,l])=>{const a=TPL[k].length===perms.length&&TPL[k].every(x=>perms.includes(x));return {label:l,onClick:()=>this.setState({perms:TPL[k].slice()}),style:Object.assign(chipS(a),{height:'46px'})}}),
+      groups:PG.map(([gk,keys])=>({title:t.gt[gk],count:keys.filter(k=>perms.includes(k)).length+'/'+keys.length,items:keys.map(k=>{const lock=OWNER_ONLY.includes(k),on=perms.includes(k);const s2=sw(on&&!lock,lock);return {label:t.pd[k][0],desc:t.pd[k][1],locked:lock,track:Object.assign(s2.track,{opacity:lock?.45:1}),knob:s2.knob,
+        onClick:()=>{if(lock)return;this.setState({perms:on?perms.filter(x=>x!==k):perms.concat([k])})},style:{width:'100%',display:'flex',alignItems:'center',gap:'12px',padding:'12px 14px',border:'none',borderTop:'1px solid var(--line)',background:lock?'var(--surface)':'var(--card)',color:'var(--ink)',cursor:lock?'default':'pointer',textAlign:'start'}}})})),
+      permsBtn:btn(!s.saving),savePerms:()=>{if(s.saving)return;this.setState({saving:true});setTimeout(()=>{this.setState({saving:false,screen:'member'});this.toast(t.permsSaved)},1000)},
+      dlg:dm?Object.assign({show:true},dm):{show:false,list:[]},closeDlg:()=>this.setState({dialog:null}),toast:s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

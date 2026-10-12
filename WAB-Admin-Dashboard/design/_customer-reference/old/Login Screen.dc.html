@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+  ::selection{background:#D8B4FE}
+  a{color:#6D28D9;text-decoration:none}
+  a:hover{color:#A855F7}
+  input:focus{outline:none}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-5px)}40%,60%{transform:translateX(5px)}}
+</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="390,844">
+  <div style="{{ screenStyle }}">
+
+    <sc-if value="{{ screen === 'login' }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 28px;animation:fadeUp .5s ease both">
+        <img src="assets/wab-app-icon.png" alt="WAB logo" style="width: 92px; height: 92px; border-radius: 22px; box-shadow: 0 12px 32px rgba(109,40,217,.35); object-fit: cover">
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:26px;color:#F8FAFC;letter-spacing:.5px;text-align:center">WAB</div>
+        <div style="font-size:11px;letter-spacing:2px;color:#A855F7;font-weight:600;text-align:center;margin-top:-10px">WEDDING &amp; BEAUTY</div>
+      </div>
+
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px;animation:fadeUp .6s ease both">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:22px;color:#F8FAFC;margin-bottom:6px">Welcome back</div>
+        <div style="font-size:13px;color:#9CA3AF;margin-bottom:26px;line-height:1.5">Enter your mobile number to sign in and continue planning your special moments.</div>
+
+        <div style="font-size:12px;color:#D8B4FE;font-weight:600;margin-bottom:8px">Mobile number</div>
+        <div style="{{ inputWrapStyle }}">
+          <div style="display:flex;align-items:center;gap:6px;padding:0 12px;border-right:1px solid rgba(255,255,255,.12)">
+            <span style="font-size:18px">🇯🇴</span>
+            <span style="font-size:14px;color:#E5E7EB;font-weight:600">+962</span>
+          </div>
+          <input type="tel" inputmode="numeric" placeholder="7X XXX XXXX" maxlength="9" value="{{ phone }}" oninput="{{ onPhoneInput }}" style="flex:1;background:transparent;border:none;color:#F8FAFC;font-size:15px;font-family:'Poppins',sans-serif;padding:14px 4px">
+        </div>
+        <sc-if value="{{ showError }}" hint-placeholder-val="{{ false }}">
+          <div style="color:#F4A7C4;font-size:12px;margin-top:8px;animation:shake .4s ease">Please enter a valid 9-digit number.</div>
+        </sc-if>
+
+        <button onclick="{{ onLogin }}" disabled="{{ loading }}" style="{{ loginBtnStyle }}">
+          <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">Sending code…</sc-if>
+          <sc-if value="{{ !loading }}" hint-placeholder-val="{{ true }}">Login</sc-if>
+        </button>
+
+        <div style="text-align:center;font-size:11.5px;color:#6B7280;line-height:1.6;margin-top:18px;padding:0 8px">
+          By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </div>
+      </div>
+
+      <div style="text-align: center; padding: 0 28px 8px; font-size: 13px; color: #9CA3AF; padding-bottom: 24px">
+        Don't have an account? <a href="Sign Up Screen.dc.html" style="font-weight:600">Sign up</a>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ screen === 'otp' }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:0 28px;animation:fadeUp .5s ease both">
+        <button onclick="{{ onBackToLogin }}" style="background:none;border:none;color:#D8B4FE;font-size:22px;padding:0;margin-bottom:18px;cursor:pointer">←</button>
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:22px;color:#F8FAFC;margin-bottom:8px">Verify your number</div>
+        <div style="font-size:13px;color:#9CA3AF;line-height:1.5;margin-bottom:8px">We sent a 4-digit code to <span style="color:#E5E7EB;font-weight:600">+962 {{ phone }}</span></div>
+
+        <div style="display:flex;gap:12px;margin:28px 0 10px">
+          <sc-for list="{{ otpBoxes }}" as="box" hint-placeholder-count="4">
+            <input type="text" inputmode="numeric" maxlength="1" value="{{ box.value }}" oninput="{{ box.onInput }}" style="width:100%;aspect-ratio:1;text-align:center;font-size:22px;font-weight:600;color:#F8FAFC;background:rgba(255,255,255,.06);border:1px solid rgba(216,180,254,.35);border-radius:12px;font-family:'Poppins',sans-serif">
+          </sc-for>
+        </div>
+
+        <div style="font-size:12.5px;color:#6B7280;margin-bottom:26px">
+          Didn't get a code? <a href="#" onclick="{{ onResend }}">Resend</a>
+        </div>
+
+        <button onclick="{{ onVerify }}" style="{{ verifyBtnStyle }}">Verify &amp; Continue</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ screen === 'success' }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:0 28px;animation:fadeUp .5s ease both">
+        <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#6D28D9,#A855F7);display:flex;align-items:center;justify-content:center;font-size:34px;color:#fff">✓</div>
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:20px;color:#F8FAFC">You're verified</div>
+        <div style="font-size:13px;color:#9CA3AF;text-align:center;margin-bottom:8px">Welcome to WAB. Let's plan something beautiful.</div>
+        <a href="Permissions Screen.dc.html" style="margin-top:8px;padding:14px 40px;border-radius:14px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;box-shadow:0 10px 28px rgba(109,40,217,.4)">Continue</a>
+      </div>
+    </sc-if>
+  </div>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    screen: 'login',
+    phone: '',
+    loading: false,
+    showError: false,
+    otp: ['', '', '', ''],
+  };
+
+  onPhoneInput = (e) => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 9);
+    this.setState({ phone: v, showError: false });
+  };
+
+  onLogin = () => {
+    if (this.state.phone.length !== 9) {
+      this.setState({ showError: true });
+      return;
+    }
+    this.setState({ loading: true, showError: false });
+    setTimeout(() => this.setState({ loading: false, screen: 'otp', otp: ['', '', '', ''] }), 900);
+  };
+
+  onGoSignup = (e) => { e.preventDefault(); };
+  onBackToLogin = () => this.setState({ screen: 'login' });
+  onResend = (e) => { e.preventDefault(); };
+
+  onOtpInput = (i, e) => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 1);
+    const otp = [...this.state.otp];
+    otp[i] = v;
+    this.setState({ otp });
+    if (v && e.target.nextElementSibling) e.target.nextElementSibling.focus?.();
+  };
+
+  onVerify = () => this.setState({ screen: 'success' });
+
+  renderVals() {
+    const s = this.state;
+    return {
+      screen: s.screen,
+      phone: s.phone,
+      loading: s.loading,
+      showError: s.showError,
+      onPhoneInput: this.onPhoneInput,
+      onLogin: this.onLogin,
+      onGoSignup: this.onGoSignup,
+      onBackToLogin: this.onBackToLogin,
+      onResend: this.onResend,
+      onVerify: this.onVerify,
+      otpBoxes: s.otp.map((value, i) => ({ value, onInput: (e) => this.onOtpInput(i, e) })),
+      screenStyle: {
+        display: 'flex', flexDirection: 'column', height: '100%',
+        paddingTop: '58px', boxSizing: 'border-box',
+        background: 'linear-gradient(160deg,#14172B 0%,#1B1030 55%,#2A1450 100%)',
+      },
+      inputWrapStyle: {
+        display: 'flex', alignItems: 'center',
+        background: 'rgba(255,255,255,.06)',
+        border: '1px solid rgba(216,180,254,.3)',
+        borderRadius: '14px',
+      },
+      loginBtnStyle: {
+        marginTop: '22px', padding: '15px', borderRadius: '14px', border: 'none',
+        background: s.loading ? 'linear-gradient(135deg,#6D28D9AA,#A855F7AA)' : 'linear-gradient(135deg,#6D28D9,#A855F7)',
+        color: '#fff', fontSize: '15px', fontWeight: 600, fontFamily: "'Poppins',sans-serif",
+        cursor: s.loading ? 'default' : 'pointer', boxShadow: '0 10px 28px rgba(109,40,217,.4)',
+      },
+      verifyBtnStyle: {
+        width: '100%', padding: '15px', borderRadius: '14px', border: 'none',
+        background: 'linear-gradient(135deg,#6D28D9,#A855F7)', color: '#fff',
+        fontSize: '15px', fontWeight: 600, fontFamily: "'Poppins',sans-serif",
+        cursor: 'pointer', boxShadow: '0 10px 28px rgba(109,40,217,.4)',
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

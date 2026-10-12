@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./wab-admin-kit.js"></script>
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#F6F4FA}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button,select,textarea{font-family:inherit}
+input::placeholder,textarea::placeholder{color:#9096A5}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(46,158,120,.55)}70%{box-shadow:0 0 0 7px rgba(46,158,120,0)}100%{box-shadow:0 0 0 0 rgba(46,158,120,0)}}
+@keyframes rowFlash{0%{background:rgba(46,158,120,.22)}100%{background:transparent}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes drawerInL{from{transform:translateX(-100%)}to{transform:none}}
+@keyframes drawerInR{from{transform:translateX(100%)}to{transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+</style>
+</helmet>
+<div dir="{{ dir }}" style="{{ rootStyle }}">
+  <div style="display:flex;align-items:flex-start;min-height:100vh">
+    <dc-import name="WAB Admin Sidebar" active="{{ navActive }}" lang="{{ lang }}" on-nav="{{ nav }}" hint-size="256px,100vh"></dc-import>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+      <dc-import name="WAB Admin Topbar" lang="{{ lang }}" plang="{{ plang }}" theme="{{ theme }}" hint-size="100%,64px"></dc-import>
+      <main style="padding:24px 28px 56px;width:100%;max-width:1640px;box-sizing:border-box" data-screen-label="{{ screenLabel }}">
+        <dc-import name="WAB Admin Blocks" blocks="{{ blocks }}" lang="{{ lang }}" theme="{{ theme }}" state="{{ st }}" on-retry="{{ retry }}" hint-size="100%,640px"></dc-import>
+      </main>
+    </div>
+  </div>
+  <dc-import name="WAB Admin Overlay" lang="{{ lang }}" theme="{{ theme }}" hint-size="0px,0px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;errorCard&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;State&quot;},&quot;live&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;State&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ar&quot;,&quot;en&quot;],&quot;default&quot;:&quot;ar&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;}}">
+class Component extends DCLogic {
+  state={feedN:0,live:0};
+  componentDidMount(){const go=()=>{if(!window.WABA)return setTimeout(go,50);WABA.mount(this);this._iv=setInterval(()=>{if((this.props.state||'normal')==='normal'&&!this.state._st&&this.props.live!==false)this.setState(s=>({feedN:s.feedN+1,live:s.live+1}))},6000)};go()}
+  componentDidUpdate(p){window.WABA&&WABA.update(this,p)}
+  componentWillUnmount(){window.WABA&&WABA.unmount(this)}
+  renderVals(){const W=window.WABA;if(!W||!this.state._q)return {blocks:[],rootStyle:{minHeight:'100vh',background:'#F6F4FA'},dir:'rtl',lang:'ar',plang:'ar',theme:'light',st:'loading'};
+    const x=W.ctx(this,'A01');const blocks=this.A01(x,W);
+    return {blocks,rootStyle:x.rootStyle,dir:x.dir,lang:x.lang,plang:x.plang,theme:x.theme,st:x.st,retry:x.retry,nav:x.nav,navActive:'A01',screenLabel:'A01 Live Overview / '+x.st};}
+  A01(x,W){const ar=x.ar,L=x.lang,N=W.NAMES,S=W.SALONS,lv=this.state.live,quiet=x.st==='empty';
+    const T=(a,e)=>ar?a:e;const err=this.props.errorCard!==false&&x.st==='normal'&&this.props.errorCard;
+    const k=(o)=>Object.assign({},o);
+    const act=148+(lv*3)%11;
+    const kpiNow=[
+      k({label:T('مستخدمون نشطون الآن','Active users now'),value:W.n(act),sub:T('آخر 5 دقائق','last 5 min'),spark:[96,110,104,121,130,126,141,act],parts:[[T('زوار','Guests'),W.n(Math.round(act*.38))],[T('عملاء','Customers'),W.n(Math.round(act*.51))],[T('تجار','Merchants'),W.n(act-Math.round(act*.38)-Math.round(act*.51))]],badge:{t:'iOS 58% · Android 42%',tone:'grey'}}),
+      k({label:T('تثبيتات اليوم','Installs today'),value:W.n(212+lv),delta:'+12.4%',spark:[140,160,155,170,190,185,212]}),
+      k({label:T('تسجيلات جديدة','New registrations'),value:W.n(87+Math.floor(lv/2)),delta:'+8.1%',spark:[60,64,70,68,77,81,87],sub:T('تحويل زائر ← مسجّل 41%','Guest→registered 41%')}),
+      k({label:T('حجوزات اليوم','Bookings today'),value:W.n(134+lv),delta:'+5.6%',spark:[100,112,108,121,118,129,134],parts:[[T('معلّق','Pending'),'23',W.tone('amber',x.dk)[0]],[T('مؤكد','Approved'),'78',W.tone('green',x.dk)[0]],[T('مكتمل','Done'),'21',W.tone('purple',x.dk)[0]],[T('ملغى','Cancelled'),'12',W.tone('grey',x.dk)[0]]],onClick:()=>W.go('A15')}),
+      k({label:T('طلبات بانتظار رد الصالون','Pending salon requests'),value:'23',badge:{t:T('أقدم: 47 د','Oldest: 47m'),tone:'amber'},sub:T('حجز WAB-24741 · صالون ريم','WAB-24741 · Reem Salon'),alert:'amber',onClick:()=>W.go('A15','status=pending')}),
+      k({label:T('حجوزات العرائس','Bride bookings'),value:'9',delta:'+2',sub:T('اليوم','today'),spark:[4,6,5,7,6,8,9],sparkTone:'violet'})];
+    const kpiPay=[
+      k({label:T('محاولات الدفع','Payment attempts'),value:'96',sub:T('ناجحة 88 · فاشلة 8','88 success · 8 failed'),spark:[60,72,70,81,88,90,96],onClick:()=>W.go('A08')}),
+      k({label:T('نسبة نجاح الدفع','Payment success rate'),value:'91.7%',delta:'-3.2%',sparkTone:'rose',spark:[96,95,96,94,95,93,91.7],badge:{t:T('أعلى سبب: 05 رفض البنك','Top: 05 Do not honor'),tone:'rose'},alert:'rose',onClick:()=>W.go('A27')}),
+      k({label:T('المبلغ المحصّل','Amount collected'),value:W.jod(3842.5+lv*12,L),small:true,delta:'+9.8%',spark:[2600,2900,3100,3000,3400,3600,3842]}),
+      k({label:T('مبالغ مستردة','Refunds'),value:'4',sub:T('معلّقة 3 · فاشلة 1','3 pending · 1 failed'),badge:{t:T('1 متأخر > 48س','1 overdue > 48h'),tone:'rose'},onClick:()=>W.go('A17')})];
+    const kpiOps=[
+      err?k({label:T('أخطاء الساعة الأخيرة','Errors last hour'),state:'error'}):k({label:T('أخطاء الساعة الأخيرة','Errors last hour'),value:'0.6%',sub:T('أخطاء API · أعطال 2 · حظر OTP 3','API errors · 2 crashes · 3 OTP blocks'),delta:'-0.2%',inverse:true,spark:[1.1,.9,.8,1,.7,.6],sparkTone:'green',onClick:()=>W.go('A09')}),
+      k({label:T('طلبات انضمام معلّقة','Pending applications'),value:'4',sub:T('أقدم: منذ 2 يوم','Oldest: 2 days'),alert:'amber',onClick:()=>W.go('A14')}),
+      k({label:T('صالونات غير متصلة','Offline salons'),value:'3',sub:T('2 بسبب اشتراك منتهٍ','2 due to expired subscription'),onClick:()=>W.go('A13','state=offline')}),
+      k({label:T('تجارب تنتهي ≤ 7 أيام','Trials ending ≤ 7 days'),value:'5',sub:T('أقربها: ذا جنتري خلال 3 أيام','Soonest: The Gentry in 3 days'),onClick:()=>W.go('A19','view=ending')})];
+    const zero=a=>a.map(o=>Object.assign({},o,{state:quiet?'empty':o.state,zero:o.value&&String(o.value).indexOf('%')>0?'—':(o.small?W.jod(0,L):'0'),zeroSub:T('لا نشاط بعد اليوم','No activity yet today')}));
+    const hrs=[];for(let h=6;h<=23;h++)hrs.push(h);
+    const nowH=14;const today=hrs.map(h=>h<=nowH?Math.round(3+8*Math.sin((h-6)/17*Math.PI)+(h===13?4:0)+(h===nowH?lv%3:0)):null).filter(v=>v!=null);
+    const last=hrs.map(h=>Math.round(3+7.4*Math.sin((h-6)/17*Math.PI)+(h===18?2:0)));
+    const feedBase=[
+      {t:T('فشل دفع العربون — WAB-24809','Deposit payment failed — WAB-24809'),sub:T('سارة الزعبي · دار العروس · 05 رفض البنك','Sara Al-Zoubi · Bridal House · 05 Do not honor'),tone:'rose',icon:'pay',time:W.tm(14,6,L),onClick:()=>W.go('A15','ref=WAB-24809')},
+      {t:T('حجز جديد WAB-24817','New booking WAB-24817'),sub:T('أحمد الخطيب · صالون النخبة للرجال','Ahmad Al-Khatib · Elite Men\'s Salon'),tone:'purple',icon:'cal',time:W.tm(14,2,L),onClick:()=>W.go('A15','ref=WAB-24817')},
+      {t:T('طلب انضمام جديد','New salon application'),sub:T('ستوديو ليلك · دابوق · نسائي','Lilac Studio · Dabouq · Women'),tone:'amber',icon:'store',time:W.tm(13,44,L),onClick:()=>W.go('A14')},
+      {t:T('تسجيل عميل جديد','New customer registered'),sub:T('تالا الروسان · عمّان · iOS','Tala Rousan · Amman · iOS'),tone:'green',icon:'user',time:W.tm(13,40,L),onClick:()=>W.go('A11','u=C-1052')},
+      {t:T('تقييم جديد بانتظار المراجعة','New review awaiting moderation'),sub:T('★ 2 · باربر 962 · يزن الشوبكي','★ 2 · Barber 962 · Yazan Shobaki'),tone:'amber',icon:'star',time:W.tm(13,31,L),onClick:()=>W.go('A22')},
+      {t:T('دفع ناجح — WAB-24816','Payment success — WAB-24816'),sub:T('96.00 د.أ · دفع كامل · رنا الحياري','JOD 96.00 · Paid in full · Rana Al-Hiyari'),tone:'green',icon:'ok',time:W.tm(13,20,L),onClick:()=>W.go('A15','ref=WAB-24816')},
+      {t:T('إلغاء تلقائي — WAB-24790','Auto-cancelled — WAB-24790'),sub:T('لم يرد الصالون قبل الموعد','Salon did not respond before appointment'),tone:'grey',icon:'clock',time:W.tm(12,58,L)},
+      {t:T('حظر OTP','OTP blocked'),sub:'+962 78 441 0921 · '+T('5 محاولات خاطئة','5 wrong attempts'),tone:'rose',icon:'lock',time:W.tm(12,41,L)}];
+    const liveAdds=[[T('حجز جديد','New booking'),'purple','cal'],[T('تسجيل عميل جديد','New customer'),'green','user'],[T('دفع ناجح','Payment success'),'green','ok'],[T('تقييم جديد','New review'),'amber','star']];
+    const adds=[];for(let i=this.state.feedN;i>Math.max(0,this.state.feedN-4);i--){const a=liveAdds[i%4];const n=N[(i*5)%N.length];adds.push({t:a[0]+(a[2]==='cal'?' WAB-'+(24817+i):''),sub:(ar?n[0]:n[1])+' · '+(ar?S[i%10][0]:S[i%10][1]),tone:a[1],icon:a[2],time:W.tm(14,6+Math.min(i,50),L),isNew:i===this.state.feedN})}
+    return [
+      W.head(x,{live:!quiet,sub:T('الأربعاء 7 أكتوبر 2026 · توقيت عمّان','Wednesday, Oct 7, 2026 · Asia/Amman'),actions:[{t:T('تقرير اليوم','Daily report'),icon:'file',onClick:()=>W.go('A26','r=daily')},{t:T('تنبيهات (3)','Alerts (3)'),icon:'bell',kind:'soft',onClick:()=>W.go('A27')}]}),
+      quiet?{type:'note',tone:'purple',text:T('يوم هادئ — لا يوجد نشاط مسجّل بعد اليوم. ستظهر الأرقام فور وصول أول حدث.','Quiet day — no activity recorded yet. Numbers appear as soon as the first event arrives.')}:null,
+      {type:'kpis',id:'k1',title:T('النشاط والحجوزات','Activity & bookings'),items:zero(kpiNow),min:210},
+      {type:'kpis',id:'k2',title:T('مدفوعات اليوم','Today\'s payments'),items:zero(kpiPay),span:12,min:210},
+      {type:'kpis',id:'k3',title:T('الصحة والصالونات','Health & salons'),items:zero(kpiOps),min:210},
+      {type:'chart',id:'hr',kind:'line',span:8,title:T('الحجوزات بالساعة — اليوم مقابل الأربعاء الماضي','Bookings per hour — today vs last Wednesday'),live:!quiet,area:true,isEmpty:quiet,emptyT:T('لا حجوزات اليوم بعد','No bookings yet today'),emptyIcon:'cal',
+        labels:hrs.map(h=>W.tm(h,0,L).replace(':00','')),series:[{name:T('اليوم','Today'),values:today.concat(hrs.slice(today.length).map(()=>null)).map(v=>v==null?0:v)},{name:T('الأسبوع الماضي','Last week'),values:last,dash:true,color:x.dk?'#8A90A6':'#A3A8B8'}],xName:T('الساعة','Hour'),maxX:9,h:220},
+      {type:'feed',id:'feed',span:4,title:T('النشاط المباشر','Live activity'),live:!quiet,items:quiet?[]:adds.concat(feedBase).slice(0,9),maxH:'262px',emptyT:T('لا أحداث بعد','No events yet'),emptyS:T('ستظهر الأحداث المهمة هنا لحظياً.','Important events appear here in real time.'),emptyIcon:'live'}
+    ].filter(Boolean)}
+}
+</script>
+</body>
+</html>

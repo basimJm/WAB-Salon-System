@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>body{margin:0;background:#fff;font-family:'Poppins',sans-serif}a{color:#6D28D9;text-decoration:none}input:focus{outline:none}</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="390,844">
+  <div style="{{ screenStyle }}">
+    <div style="display:flex;align-items:center;padding:0 20px 12px;position:relative;flex-shrink:0">
+      <a href="Home Screen.dc.html" style="color:#1F2233"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F2233" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></a>
+      <div style="position:absolute;left:0;right:0;text-align:center;font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:#1F2233">Salon Details</div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto">
+      <div style="height:170px;margin:0 20px 14px;border-radius:16px;overflow:hidden">
+        <image-slot id="salon-hero" shape="rect" placeholder="Salon photo"></image-slot>
+      </div>
+
+      <div style="padding:0 20px 18px">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:19px;color:#1F2233;margin-bottom:6px">Élan Men's Lounge</div>
+        <div style="display:flex;align-items:center;gap:3px;font-size:12.5px;color:#B45309;font-weight:600;margin-bottom:6px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#F59E0B" stroke="none"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.5 6.8L12 17.6 5.9 20.5l1.5-6.8L2.2 9l6.9-.7z"/></svg>
+          4.9 · 214 reviews
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:12.5px;color:#9CA3AF;margin-bottom:12px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>
+          Abdoun, Amman — 2nd Circle
+        </div>
+        <div style="font-size:13px;color:#6B7280;line-height:1.6">A modern men's grooming lounge offering precision cuts, hot towel shaves, and skin treatments in a relaxed setting.</div>
+      </div>
+
+      <div style="padding:0 0 8px 20px;font-family:'Playfair Display',serif;font-weight:600;font-size:15.5px;color:#1F2233">Our barbers</div>
+      <div style="display:flex;gap:14px;overflow-x:auto;padding:0 20px 22px">
+        <sc-for list="{{ staff }}" as="s" hint-placeholder-count="4">
+          <div style="text-align:center;min-width:70px;flex-shrink:0">
+            <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;margin-bottom:6px">
+              <image-slot id="{{ s.imgId }}" shape="circle" placeholder="Photo"></image-slot>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:#1F2233">{{ s.name }}</div>
+            <div style="font-size:11px;color:#B45309;font-weight:600">★ {{ s.rating }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="padding:0 20px 12px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:15.5px;color:#1F2233">Services</div>
+      </div>
+      <div style="padding:0 20px 12px">
+        <div style="display:flex;align-items:center;gap:8px;background:#F8F7FB;border-radius:12px;padding:10px 14px;margin-bottom:12px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.5-4.5"/></svg>
+          <input type="text" placeholder="Search services" value="{{ search }}" oninput="{{ onSearch }}" style="border:none;background:transparent;font-size:13px;flex:1;font-family:'Poppins',sans-serif;color:#1F2233" />
+        </div>
+        <div style="display:flex;gap:8px;overflow-x:auto">
+          <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="4">
+            <button onclick="{{ cat.onClick }}" style="{{ cat.style }}">{{ cat.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="padding:0 20px 24px">
+        <sc-for list="{{ visibleServices }}" as="svc" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #F0EEF5">
+            <div>
+              <div style="font-size:13.5px;font-weight:600;color:#1F2233;margin-bottom:3px">{{ svc.name }}</div>
+              <div style="font-size:11.5px;color:#9CA3AF">{{ svc.duration }} min</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="font-size:13.5px;font-weight:600;color:#1F2233">{{ svc.price }} JOD</div>
+              <a href="Booking Flow Screen.dc.html" style="padding:8px 16px;border-radius:10px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:12.5px;font-weight:600">Book</a>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  allServices = [
+    { name: 'Classic Haircut', category: 'Hair', duration: 30, price: 8 },
+    { name: 'Skin Fade', category: 'Hair', duration: 40, price: 10 },
+    { name: 'Beard Trim', category: 'Beard', duration: 20, price: 6 },
+    { name: 'Hot Towel Shave', category: 'Beard', duration: 25, price: 9 },
+    { name: 'Skin Cleansing', category: 'Skin', duration: 35, price: 14 },
+    { name: 'Facial Treatment', category: 'Skin', duration: 45, price: 18 },
+    { name: 'Hair Wash & Style', category: 'Hair', duration: 20, price: 7 },
+  ];
+
+  state = { search: '', category: 'All' };
+
+  onSearch = (e) => this.setState({ search: e.target.value });
+  onSelectCategory = (cat) => this.setState({ category: cat });
+
+  renderVals() {
+    const s = this.state;
+    const cats = ['All', 'Hair', 'Beard', 'Skin'];
+    const filtered = this.allServices.filter((svc) =>
+      (s.category === 'All' || svc.category === s.category) &&
+      svc.name.toLowerCase().includes(s.search.toLowerCase())
+    );
+    return {
+      search: s.search,
+      onSearch: this.onSearch,
+      staff: [
+        { name: 'Omar', rating: '4.9', imgId: 'staff-1' },
+        { name: 'Khaled', rating: '4.8', imgId: 'staff-2' },
+        { name: 'Yousef', rating: '4.9', imgId: 'staff-3' },
+        { name: 'Firas', rating: '4.7', imgId: 'staff-4' },
+      ],
+      categories: cats.map((c) => ({
+        label: c,
+        onClick: () => this.onSelectCategory(c),
+        style: {
+          padding: '7px 16px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+          fontSize: '12.5px', fontWeight: 600, fontFamily: "'Poppins',sans-serif", whiteSpace: 'nowrap',
+          background: s.category === c ? 'linear-gradient(135deg,#6D28D9,#A855F7)' : '#F3EEFB',
+          color: s.category === c ? '#fff' : '#6D28D9',
+        },
+      })),
+      visibleServices: filtered,
+      screenStyle: {
+        display: 'flex', flexDirection: 'column', height: '100%',
+        paddingTop: '58px', boxSizing: 'border-box', background: '#fff', color: '#1F2233',
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

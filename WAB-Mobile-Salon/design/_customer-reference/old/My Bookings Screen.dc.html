@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>body{margin:0;background:#fff;font-family:'Poppins',sans-serif}a{color:#6D28D9;text-decoration:none}</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="390,844">
+  <div style="{{ screenStyle }}">
+    <div style="padding:0 20px 14px;font-family:'Playfair Display',serif;font-weight:600;font-size:19px;color:#1F2233">My Bookings</div>
+
+    <div style="display:flex;gap:8px;padding:0 20px 16px">
+      <button onclick="{{ onUpcoming }}" style="{{ upcomingTabStyle }}">Upcoming</button>
+      <button onclick="{{ onPast }}" style="{{ pastTabStyle }}">Past</button>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:0 20px">
+      <sc-for list="{{ visibleBookings }}" as="bk" hint-placeholder-count="2">
+        <div style="border-radius:16px;background:#F8F7FB;padding:14px;margin-bottom:12px;display:flex;gap:12px">
+          <div style="width:56px;height:56px;border-radius:12px;overflow:hidden;flex-shrink:0">
+            <image-slot id="{{ bk.imgId }}" shape="rect" placeholder="Salon"></image-slot>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:13.5px;font-weight:600;color:#1F2233;margin-bottom:3px">{{ bk.salon }}</div>
+            <div style="font-size:12px;color:#6B7280;margin-bottom:3px">{{ bk.service }} with {{ bk.staff }}</div>
+            <div style="font-size:12px;color:#9CA3AF">{{ bk.datetime }}</div>
+          </div>
+          <div style="{{ bk.badgeStyle }}">{{ bk.status }}</div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ visibleBookings.length === 0 }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;color:#9CA3AF;font-size:13px;padding-top:60px">No bookings here yet.</div>
+      </sc-if>
+    </div>
+
+    <div style="display:flex;padding:10px 0 22px;border-top:1px solid #F0EEF5;background:#fff">
+      <a href="Home Screen.dc.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#9CA3AF">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.7"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h12v-9"/></svg>
+        <div style="font-size:10.5px">Home</div>
+      </a>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#6D28D9">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="1.9"><rect x="4" y="5.5" width="16" height="15" rx="2.5"/><path d="M4 9.5h16M8 3.5v3.5M16 3.5v3.5"/></svg>
+        <div style="font-size:10.5px;font-weight:600">Booking</div>
+      </div>
+      <a href="Settings Screen.dc.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#9CA3AF">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.7"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.4"/></svg>
+        <div style="font-size:10.5px">Settings</div>
+      </a>
+    </div>
+  </div>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  bookings = {
+    upcoming: [
+      { salon: "Élan Men's Lounge", service: 'Skin Fade', staff: 'Omar', datetime: 'Thu, Aug 13 · 2:30 PM', status: 'Confirmed', imgId: 'mb-1' },
+      { salon: 'Blade & Fade', service: 'Beard Trim', staff: 'Firas', datetime: 'Sat, Aug 15 · 11:00 AM', status: 'Confirmed', imgId: 'mb-2' },
+    ],
+    past: [
+      { salon: 'Royal Barbers', service: 'Classic Haircut', staff: 'Khaled', datetime: 'Jul 28 · 4:00 PM', status: 'Completed', imgId: 'mb-3' },
+    ],
+  };
+
+  state = { tab: 'upcoming' };
+  onUpcoming = () => this.setState({ tab: 'upcoming' });
+  onPast = () => this.setState({ tab: 'past' });
+
+  renderVals() {
+    const s = this.state;
+    const tabStyle = (active) => ({
+      flex: 1, padding: '11px', borderRadius: '12px', border: 'none', cursor: 'pointer',
+      fontSize: '13.5px', fontWeight: 600, fontFamily: "'Poppins',sans-serif",
+      background: active ? 'linear-gradient(135deg,#6D28D9,#A855F7)' : '#F3EEFB',
+      color: active ? '#fff' : '#6D28D9',
+    });
+    return {
+      upcomingTabStyle: tabStyle(s.tab === 'upcoming'),
+      pastTabStyle: tabStyle(s.tab === 'past'),
+      onUpcoming: this.onUpcoming,
+      onPast: this.onPast,
+      visibleBookings: this.bookings[s.tab].map((b) => ({
+        ...b,
+        badgeStyle: {
+          alignSelf: 'flex-start', fontSize: '10.5px', fontWeight: 600, padding: '4px 9px', borderRadius: '8px',
+          background: b.status === 'Confirmed' ? '#EDE4FB' : '#F0EEF5',
+          color: b.status === 'Confirmed' ? '#6D28D9' : '#6B7280',
+        },
+      })),
+      screenStyle: {
+        display: 'flex', flexDirection: 'column', height: '100%',
+        paddingTop: '58px', boxSizing: 'border-box', background: '#fff', color: '#1F2233',
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

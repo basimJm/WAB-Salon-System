@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div ref="{{ root }}" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start">
+<sc-for list="{{ bl }}" as="b" hint-placeholder-count="4">
+<div style="{{ b.wrap }}">
+
+<sc-if value="{{ b.is.head }}">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:4px">
+    <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+      <sc-if value="{{ b.hasCrumbs }}"><div style="display:flex;gap:7px;align-items:center;font-size:12px;color:var(--muted)"><sc-for list="{{ b.crumbs }}" as="c"><a href="{{ c.href }}" onClick="{{ c.onClick }}" style="color:var(--muted);cursor:pointer;text-decoration:none">{{ c.t }}</a><span style="color:var(--faint)">{{ c.sep }}</span></sc-for></div></sc-if>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <h1 style="margin:0;font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-size:25px;font-weight:700;line-height:1.25">{{ b.title }}</h1>
+        <span style="font-size:10.5px;font-weight:600;font-family:Poppins,sans-serif;color:var(--faint);border:1px solid var(--line2);border-radius:6px;padding:2px 6px;direction:ltr">{{ b.code }}</span>
+        <sc-if value="{{ b.hasStatus }}"><span style="{{ b.statusStyle }}">{{ b.status }}</span></sc-if>
+        <sc-for list="{{ b.tags }}" as="g"><span style="{{ g.style }}">{{ g.t }}</span></sc-for>
+        <sc-if value="{{ b.live }}"><span style="display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--green);background:rgba(46,158,120,.1);padding:4px 10px 4px 9px;border-radius:20px;white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:#2E9E78;box-shadow:0 0 0 0 rgba(46,158,120,.6);animation:livePulse 1.6s infinite"></span>{{ L.live }}<span style="color:var(--muted);font-weight:500">· {{ L.updated }}</span></span></sc-if>
+      </div>
+      <sc-if value="{{ b.hasSub }}"><div style="font-size:13px;color:var(--muted);text-wrap:pretty">{{ b.sub }}</div></sc-if>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <sc-for list="{{ b.actions }}" as="a"><button onClick="{{ a.onClick }}" style="{{ a.style }}"><sc-if value="{{ a.hasIcon }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ a.icon }}"></path></svg></sc-if>{{ a.t }}</button></sc-for>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ b.is.tabs }}">
+  <div style="{{ b.tabsWrap }}"><sc-for list="{{ b.items }}" as="x"><button onClick="{{ x.onClick }}" style="{{ x.style }}">{{ x.t }}<sc-if value="{{ x.hasCount }}"><span style="{{ x.countStyle }}">{{ x.count }}</span></sc-if></button></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ b.is.steps }}">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px;background:var(--card);border:1px solid var(--line);border-radius:16px"><sc-for list="{{ b.items }}" as="x"><div style="display:flex;align-items:center;gap:9px"><span style="{{ x.num }}">{{ x.n }}</span><span style="{{ x.lbl }}">{{ x.t }}</span><sc-if value="{{ x.notLast }}"><span style="width:40px;height:2px;border-radius:1px;background:var(--line2)"></span></sc-if></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ b.is.note }}">
+  <div style="{{ b.noteStyle }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="{{ b.icon }}"></path></svg><div style="flex:1;min-width:0"><sc-if value="{{ b.hasTitle }}"><div style="font-weight:700;margin-bottom:2px">{{ b.title }}</div></sc-if><div style="line-height:1.6;color:var(--ink);opacity:.86">{{ b.text }}</div></div><sc-if value="{{ b.hasAction }}"><button onClick="{{ b.action.onClick }}" style="{{ b.action.style }}">{{ b.action.t }}</button></sc-if></div>
+</sc-if>
+
+<sc-if value="{{ b.is.filters }}">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      <sc-if value="{{ b.hasDate }}">
+        <div style="position:relative">
+          <button onClick="{{ b.toggleDate }}" style="display:flex;align-items:center;gap:9px;height:38px;padding:0 13px;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--ink);cursor:pointer;font-family:inherit;font-size:12.5px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--accent)"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5v12a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5zM4 10h16M8.5 3v4M15.5 3v4"></path></svg><span style="font-weight:600">{{ b.presetT }}</span><span style="color:var(--muted)">{{ b.rangeT }}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"></path></svg></button>
+          <sc-if value="{{ b.dateOpen }}">
+            <div style="position:absolute;top:44px;inset-inline-start:0;z-index:41;width:270px;background:var(--card);border:1px solid var(--line2);border-radius:13px;box-shadow:0 18px 50px rgba(20,23,43,.16);padding:6px">
+              <sc-for list="{{ b.presets }}" as="p"><button onClick="{{ p.onClick }}" style="{{ p.style }}"><span>{{ p.t }}</span><span style="font-size:11px;color:var(--faint)">{{ p.r }}</span></button></sc-for>
+              <div style="border-top:1px solid var(--line);margin-top:4px;padding:10px 10px 6px;display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font-size:12px">{{ L.compare }}</span><button onClick="{{ b.toggleCmp }}" style="{{ b.cmpSw }}"><span style="{{ b.cmpKnob }}"></span></button></div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ b.cmpOn }}"><span style="display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:10px;background:var(--soft);color:var(--accent);font-size:12px;font-weight:600">{{ L.compare }}</span></sc-if>
+      <sc-for list="{{ b.dd }}" as="d">
+        <div style="position:relative">
+          <button onClick="{{ d.onToggle }}" style="{{ d.style }}">{{ d.label }}<sc-if value="{{ d.hasCount }}"><span style="min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--card);font-size:10.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">{{ d.count }}</span></sc-if><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"></path></svg></button>
+          <sc-if value="{{ d.open }}">
+            <div style="position:absolute;top:44px;inset-inline-start:0;z-index:41;min-width:210px;max-height:320px;overflow-y:auto;background:var(--card);border:1px solid var(--line2);border-radius:13px;box-shadow:0 18px 50px rgba(20,23,43,.16);padding:6px">
+              <sc-for list="{{ d.opts }}" as="o"><button onClick="{{ o.onClick }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:none;background:transparent;color:var(--ink);font-family:inherit;font-size:12.5px;border-radius:8px;cursor:pointer;text-align:start" style-hover="background:var(--hover)"><span style="{{ o.box }}"><sc-if value="{{ o.on }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></sc-if></span>{{ o.t }}</button></sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+      <div style="flex:1"></div>
+      <sc-if value="{{ b.hasLink }}"><button onClick="{{ b.copyLink }}" style="display:flex;align-items:center;gap:7px;height:34px;padding:0 10px;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:12px;cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7L12 6.3M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg>{{ L.copyLink }}</button></sc-if>
+    </div>
+    <sc-if value="{{ b.hasChips }}">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><sc-for list="{{ b.chips }}" as="c"><span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 6px 0 10px;padding-inline-start:10px;padding-inline-end:5px;border-radius:8px;background:var(--soft);color:var(--accent);font-size:12px;font-weight:600"><span style="color:var(--muted);font-weight:500">{{ c.k }}:</span>{{ c.t }}<button onClick="{{ c.onX }}" style="width:20px;height:20px;border:none;border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></span></sc-for><button onClick="{{ b.clearAll }}" style="border:none;background:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline">{{ L.clear }}</button></div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ b.is.kpis }}">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <sc-if value="{{ b.hasTitle }}"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:13px;font-weight:700">{{ b.title }}</span><sc-if value="{{ b.hasSub }}"><span style="font-size:12px;color:var(--muted)">{{ b.sub }}</span></sc-if></div></sc-if>
+    <div style="{{ b.gridStyle }}">
+      <sc-for list="{{ b.items }}" as="k">
+        <div onClick="{{ k.onClick }}" style="{{ k.cardStyle }}">
+          <sc-if value="{{ k.show }}">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><span style="font-size:12px;color:var(--muted);font-weight:500;line-height:1.4">{{ k.label }}</span><sc-if value="{{ k.hasBadge }}"><span style="{{ k.badgeStyle }}">{{ k.badge }}</span></sc-if></div>
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:8px">
+              <div style="display:flex;align-items:baseline;gap:6px;min-width:0"><span style="{{ k.valStyle }}">{{ k.value }}</span><sc-if value="{{ k.hasUnit }}"><span style="font-size:12px;color:var(--muted);font-weight:600">{{ k.unit }}</span></sc-if></div>
+              <sc-if value="{{ k.hasSpark }}"><svg width="78" height="28" viewBox="0 0 100 32" preserveAspectRatio="none" style="flex-shrink:0;overflow:visible"><path d="{{ k.spark }}" fill="none" stroke="{{ k.sparkC }}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;min-height:18px">
+              <sc-if value="{{ k.hasDelta }}"><span style="{{ k.deltaStyle }}">{{ k.delta }}</span></sc-if>
+              <sc-if value="{{ k.hasSub }}"><span style="font-size:11.5px;color:var(--muted)">{{ k.sub }}</span></sc-if>
+            </div>
+            <sc-if value="{{ k.hasParts }}"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2)"><sc-for list="{{ k.parts }}" as="p"><span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="{{ p.dot }}"></span>{{ p.t }} <b style="color:var(--ink);font-family:Poppins,sans-serif;font-weight:600">{{ p.v }}</b></span></sc-for></div></sc-if>
+          </sc-if>
+          <sc-if value="{{ k.load }}"><div style="display:flex;flex-direction:column;gap:12px"><div style="height:10px;width:55%;border-radius:5px;background:var(--sk);animation:pulse 1.4s ease-in-out infinite"></div><div style="height:22px;width:40%;border-radius:6px;background:var(--sk);animation:pulse 1.4s ease-in-out infinite"></div><div style="height:9px;width:70%;border-radius:5px;background:var(--sk);animation:pulse 1.4s ease-in-out infinite"></div></div></sc-if>
+          <sc-if value="{{ k.err }}"><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:12px;color:var(--muted)">{{ k.label }}</span><div style="display:flex;align-items:center;gap:7px;color:var(--rose);font-size:12.5px;font-weight:600"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 4 2.5 20h19zM12 10v4.5M12 17.5h.01"></path></svg>{{ L.errT }}</div><button onClick="{{ retry }}" style="align-self:flex-start;border:none;background:none;padding:0;color:var(--accent);font-weight:600;font-size:12px;cursor:pointer;font-family:inherit">{{ L.retry }} ↻</button></div></sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ b.is.card }}">
+<div style="background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);position:relative">
+  <sc-if value="{{ b.hasHeader }}">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)">
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 200px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:14px;font-weight:700">{{ b.title }}</span><sc-if value="{{ b.hasCount }}"><span style="font-size:11px;font-weight:600;color:var(--muted);background:var(--surface);padding:2px 8px;border-radius:6px;font-family:Poppins,sans-serif">{{ b.count }}</span></sc-if><sc-if value="{{ b.hasBadge }}"><span style="{{ b.badgeStyle }}">{{ b.badge }}</span></sc-if><sc-if value="{{ b.live }}"><span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--green)"><span style="width:7px;height:7px;border-radius:50%;background:#2E9E78;animation:livePulse 1.6s infinite"></span>{{ L.live }}</span></sc-if></div>
+        <sc-if value="{{ b.hasSub }}"><span style="font-size:11.5px;color:var(--muted)">{{ b.sub }}</span></sc-if>
+      </div>
+      <sc-if value="{{ b.hasSearch }}"><div style="display:flex;align-items:center;gap:7px;height:34px;padding:0 10px;border-radius:9px;border:1px solid var(--line2);background:var(--surface);width:220px;box-sizing:border-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" style="color:var(--faint)"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg><input value="{{ b.q }}" onChange="{{ b.onQ }}" placeholder="{{ b.searchPh }}" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-family:inherit;font-size:12.5px;outline:none"></div></sc-if>
+      <sc-if value="{{ b.hasLegend }}"><div style="display:flex;gap:12px;flex-wrap:wrap"><sc-for list="{{ b.legend }}" as="g"><span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted)"><span style="{{ g.sw }}"></span>{{ g.t }}</span></sc-for></div></sc-if>
+      <div style="display:flex;gap:6px;align-items:center;position:relative">
+        <sc-for list="{{ b.hActs }}" as="a"><button onClick="{{ a.onClick }}" title="{{ a.title }}" style="{{ a.style }}"><sc-if value="{{ a.hasIcon }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ a.icon }}"></path></svg></sc-if>{{ a.t }}</button></sc-for>
+        <sc-if value="{{ b.colsOpen }}"><div style="position:absolute;top:40px;inset-inline-end:0;z-index:41;width:220px;background:var(--card);border:1px solid var(--line2);border-radius:13px;box-shadow:0 18px 50px rgba(20,23,43,.16);padding:6px"><sc-for list="{{ b.colOpts }}" as="o"><button onClick="{{ o.onClick }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:none;background:transparent;color:var(--ink);font-family:inherit;font-size:12.5px;border-radius:8px;cursor:pointer;text-align:start" style-hover="background:var(--hover)"><span style="{{ o.box }}"><sc-if value="{{ o.on }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></sc-if></span>{{ o.t }}</button></sc-for></div></sc-if>
+        <sc-if value="{{ b.expOpen }}"><div style="position:absolute;top:40px;inset-inline-end:0;z-index:41;width:200px;background:var(--card);border:1px solid var(--line2);border-radius:13px;box-shadow:0 18px 50px rgba(20,23,43,.16);padding:6px"><sc-for list="{{ b.expOpts }}" as="o"><button onClick="{{ o.onClick }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;background:transparent;color:var(--ink);font-family:inherit;font-size:12.5px;border-radius:8px;cursor:pointer;text-align:start" style-hover="background:var(--hover)"><span style="{{ o.ic }}">{{ o.k }}</span><span style="flex:1">{{ o.t }}</span></button></sc-for></div></sc-if>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ b.hasBulkBar }}"><div style="display:flex;align-items:center;gap:10px;padding:9px 18px;background:var(--soft);border-bottom:1px solid var(--line);flex-wrap:wrap"><span style="font-weight:700;color:var(--accent);font-size:12.5px">{{ b.selT }}</span><div style="flex:1"></div><sc-for list="{{ b.bulk }}" as="a"><button onClick="{{ a.onClick }}" style="{{ a.style }}">{{ a.t }}</button></sc-for></div></sc-if>
+
+  <sc-if value="{{ b.showBody }}">
+    <sc-if value="{{ b.is.xy }}">
+      <div style="padding:16px 18px 12px;direction:ltr">
+        <div style="{{ b.plotWrap }}">
+          <sc-for list="{{ b.ticks }}" as="tk"><div style="{{ tk.line }}"></div><div style="{{ tk.lbl }}">{{ tk.t }}</div></sc-for>
+          <div style="position:absolute;top:0;bottom:0;left:40px;right:0">
+            <svg viewBox="0 0 600 200" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
+              <sc-for list="{{ b.rects }}" as="r"><rect x="{{ r.x }}" y="{{ r.y }}" width="{{ r.w }}" height="{{ r.h }}" fill="{{ r.c }}" opacity="{{ r.o }}"></rect></sc-for>
+              <sc-for list="{{ b.paths }}" as="p"><path d="{{ p.d }}" fill="{{ p.fill }}" stroke="{{ p.stroke }}" stroke-width="{{ p.sw }}" stroke-dasharray="{{ p.dash }}" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"></path></sc-for>
+            </svg>
+            <div style="{{ b.guide }}"></div>
+            <div style="position:absolute;inset:0;display:flex"><sc-for list="{{ b.cols }}" as="c"><div onMouseEnter="{{ c.on }}" onMouseLeave="{{ c.off }}" style="flex:1;height:100%;cursor:crosshair"></div></sc-for></div>
+            <sc-if value="{{ b.tipOn }}"><div style="{{ b.tipStyle }}"><div style="font-weight:700;margin-bottom:5px;font-size:11.5px">{{ b.tipT }}</div><sc-for list="{{ b.tipRows }}" as="tr"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;white-space:nowrap"><span style="{{ tr.sw }}"></span><span style="opacity:.75">{{ tr.n }}</span><span style="margin-left:auto;font-weight:700;padding-left:10px">{{ tr.v }}</span></div></sc-for></div></sc-if>
+          </div>
+        </div>
+        <div style="position:relative;height:20px;margin-left:40px;margin-top:6px"><sc-for list="{{ b.xl }}" as="x"><span style="{{ x.s }}">{{ x.t }}</span></sc-for></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ b.is.donut }}">
+      <div style="display:flex;align-items:center;gap:22px;padding:18px;flex-wrap:wrap">
+        <div style="position:relative;width:150px;height:150px;flex-shrink:0">
+          <svg viewBox="0 0 42 42" width="150" height="150"><circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--surface)" stroke-width="5.2"></circle><sc-for list="{{ b.arcs }}" as="a"><circle cx="21" cy="21" r="15.915" fill="none" stroke="{{ a.c }}" stroke-width="5.2" stroke-dasharray="{{ a.da }}" stroke-dashoffset="{{ a.do }}"></circle></sc-for></svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:Poppins,sans-serif;font-weight:700;font-size:19px">{{ b.total }}</span><span style="font-size:11px;color:var(--muted)">{{ b.totalL }}</span></div>
+        </div>
+        <div style="flex:1;min-width:160px;display:flex;flex-direction:column;gap:9px"><sc-for list="{{ b.items }}" as="it"><div style="display:flex;align-items:center;gap:9px;font-size:12.5px"><span style="{{ it.sw }}"></span><span style="flex:1;min-width:0">{{ it.t }}</span><span style="font-family:Poppins,sans-serif;font-weight:600">{{ it.v }}</span><span style="width:46px;text-align:end;color:var(--muted);font-family:Poppins,sans-serif;font-size:11.5px">{{ it.p }}</span></div></sc-for></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ b.is.hbar }}">
+      <div style="display:flex;flex-direction:column;gap:11px;padding:16px 18px"><sc-for list="{{ b.items }}" as="it"><div onClick="{{ it.onClick }}" style="{{ it.row }}"><div style="width:34%;min-width:0;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ it.t }}<sc-if value="{{ it.hasSub }}"><span style="color:var(--faint);font-size:11px"> · {{ it.sub }}</span></sc-if></div><div style="flex:1;height:9px;border-radius:5px;background:var(--surface);overflow:hidden"><div style="{{ it.bar }}"></div></div><div style="width:72px;text-align:end;font-family:Poppins,sans-serif;font-weight:600;font-size:12px">{{ it.v }}</div></div></sc-for></div>
+    </sc-if>
+    <sc-if value="{{ b.is.funnel }}">
+      <div style="display:flex;flex-direction:column;padding:8px 18px 14px">
+        <sc-for list="{{ b.steps }}" as="s">
+          <div style="display:grid;grid-template-columns:28px minmax(150px,1.2fr) minmax(160px,2fr) 92px 118px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)">
+            <span style="width:24px;height:24px;border-radius:7px;background:var(--soft);color:var(--accent);font-weight:700;font-size:11.5px;display:flex;align-items:center;justify-content:center;font-family:Poppins,sans-serif">{{ s.n }}</span>
+            <div style="min-width:0"><div style="font-weight:600;font-size:12.5px">{{ s.t }}</div><sc-if value="{{ s.hasMed }}"><div style="font-size:11px;color:var(--muted)">{{ L.median }}: {{ s.med }}</div></sc-if></div>
+            <div style="height:22px;border-radius:6px;background:var(--surface);overflow:hidden;position:relative"><div style="{{ s.bar }}"></div><span style="position:absolute;top:0;bottom:0;inset-inline-start:8px;display:flex;align-items:center;font-size:11px;font-weight:700;color:#fff;font-family:Poppins,sans-serif">{{ s.pct }}</span></div>
+            <div style="text-align:end"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:13px">{{ s.v }}</div><div style="font-size:10.5px;color:var(--muted)">{{ L.conv }} {{ s.conv }}</div></div>
+            <div style="display:flex;justify-content:flex-end"><sc-if value="{{ s.hasDrop }}"><button onClick="{{ s.onDrop }}" title="{{ L.dropUsers }}" style="{{ s.dropStyle }}">↓ {{ s.drop }} · {{ s.dropN }}</button></sc-if></div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ b.is.heat }}">
+      <div style="overflow-x:auto;padding:14px 18px"><div style="{{ b.heatGrid }}">
+        <span style="font-size:11px;font-weight:700;color:var(--muted);padding:6px 4px">{{ L.cohort }}</span><span style="font-size:11px;font-weight:700;color:var(--muted);padding:6px 4px">{{ L.size }}</span>
+        <sc-for list="{{ b.hcols }}" as="c"><span style="font-size:11px;font-weight:700;color:var(--muted);padding:6px 4px;text-align:center;font-family:Poppins,sans-serif">{{ c }}</span></sc-for>
+        <sc-for list="{{ b.hrows }}" as="r"><span style="font-size:12px;font-weight:600;padding:0 4px;display:flex;align-items:center">{{ r.t }}</span><span style="font-size:12px;color:var(--muted);font-family:Poppins,sans-serif;display:flex;align-items:center;padding:0 4px">{{ r.size }}</span><sc-for list="{{ r.cells }}" as="c"><span style="{{ c.s }}">{{ c.t }}</span></sc-for></sc-for>
+      </div></div>
+    </sc-if>
+    <sc-if value="{{ b.is.dataTable }}">
+      <div style="overflow:auto;max-height:340px"><div style="{{ b.dtGrid }}"><sc-for list="{{ b.dtHead }}" as="h"><span style="position:sticky;top:0;background:var(--surface);padding:9px 14px;font-size:11.5px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line)">{{ h }}</span></sc-for><sc-for list="{{ b.dtCells }}" as="c"><span style="{{ c.s }}">{{ c.t }}</span></sc-for></div></div>
+    </sc-if>
+
+    <sc-if value="{{ b.is.table }}">
+      <div style="{{ b.scroll }}">
+        <div style="{{ b.headRow }}">
+          <sc-if value="{{ b.hasBulk }}"><span style="padding:0 0 0 0;display:flex;align-items:center;justify-content:center"><span onClick="{{ b.selAll }}" style="{{ b.allBox }}"><sc-if value="{{ b.allOn }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></sc-if></span></span></sc-if>
+          <sc-for list="{{ b.cols }}" as="c"><span onClick="{{ c.onSort }}" style="{{ c.th }}">{{ c.t }}<span style="color:var(--accent);font-size:10px">{{ c.arrow }}</span></span></sc-for>
+        </div>
+        <sc-for list="{{ b.rows }}" as="r">
+          <div onClick="{{ r.onClick }}" style="{{ r.style }}" style-hover="background:var(--hover)">
+            <sc-if value="{{ b.hasBulk }}"><span style="display:flex;align-items:center;justify-content:center"><span onClick="{{ r.onSel }}" style="{{ r.box }}"><sc-if value="{{ r.sel }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></sc-if></span></span></sc-if>
+            <sc-for list="{{ r.cells }}" as="c">
+              <div style="{{ c.td }}">
+                <sc-if value="{{ c.k.text }}"><div onClick="{{ c.onClick }}" style="{{ c.ts }}">{{ c.t }}</div><sc-if value="{{ c.hasSub }}"><div style="{{ c.subS }}">{{ c.sub }}</div></sc-if></sc-if>
+                <sc-if value="{{ c.k.badge }}"><span style="{{ c.bs }}">{{ c.t }}</span><sc-if value="{{ c.hasSub }}"><div style="font-size:11px;color:var(--muted);margin-top:4px">{{ c.sub }}</div></sc-if></sc-if>
+                <sc-if value="{{ c.k.user }}"><div onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:9px;min-width:0"><span style="{{ c.av }}">{{ c.ini }}</span><div style="min-width:0"><div style="{{ c.ts }}">{{ c.t }}</div><sc-if value="{{ c.hasSub }}"><div style="{{ c.subS }}">{{ c.sub }}</div></sc-if></div></div></sc-if>
+                <sc-if value="{{ c.k.stars }}"><span style="display:inline-flex;align-items:center;gap:4px;font-weight:600;font-family:Poppins,sans-serif"><svg width="13" height="13" viewBox="0 0 24 24" fill="#F59E0B"><path d="m12 4 2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4-3.9-3.8 5.4-.8z"></path></svg>{{ c.t }}</span><sc-if value="{{ c.hasSub }}"><div style="font-size:11px;color:var(--muted)">{{ c.sub }}</div></sc-if></sc-if>
+                <sc-if value="{{ c.k.bar }}"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;border-radius:3px;background:var(--surface);overflow:hidden;min-width:40px"><div style="{{ c.bar }}"></div></div><span style="font-size:11.5px;font-weight:600;font-family:Poppins,sans-serif;width:36px">{{ c.t }}</span></div></sc-if>
+                <sc-if value="{{ c.k.acts }}"><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ c.acts }}" as="x"><button onClick="{{ x.onClick }}" style="{{ x.style }}">{{ x.t }}</button></sc-for></div></sc-if>
+                <sc-if value="{{ c.k.toggle }}"><button onClick="{{ c.onClick }}" style="{{ c.sw }}"><span style="{{ c.knob }}"></span></button></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+        <sc-if value="{{ b.noRows }}"><div style="padding:36px;text-align:center;color:var(--muted);font-size:12.5px">{{ L.noRes }}</div></sc-if>
+      </div>
+      <sc-if value="{{ b.hasPager }}">
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px"><select value="{{ b.size }}" onChange="{{ b.onSize }}" style="height:30px;border-radius:8px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:Poppins,sans-serif;font-size:12px;padding:0 6px"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><span>{{ L.rows }}</span></div>
+          <div style="flex:1"></div>
+          <span style="font-family:Poppins,sans-serif">{{ b.rangeT }}</span>
+          <div style="display:flex;gap:4px;direction:ltr"><button onClick="{{ b.prev }}" style="{{ b.prevS }}">‹</button><sc-for list="{{ b.pages }}" as="p"><button onClick="{{ p.onClick }}" style="{{ p.s }}">{{ p.t }}</button></sc-for><button onClick="{{ b.next }}" style="{{ b.nextS }}">›</button></div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ b.is.timeline }}">
+      <div style="display:flex;flex-direction:column;padding:6px 0 10px">
+        <sc-for list="{{ b.groups }}" as="g">
+          <div style="display:flex;flex-direction:column">
+            <sc-if value="{{ g.hasHead }}"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 18px 8px;position:sticky;top:64px;background:var(--card);z-index:2"><span style="{{ g.chip }}">{{ g.t }}</span><span style="font-size:11.5px;color:var(--muted)">{{ g.sub }}</span><sc-if value="{{ g.hasMarker }}"><span style="{{ g.markerS }}">{{ g.marker }}</span></sc-if><div style="flex:1;height:1px;background:var(--line)"></div></div></sc-if>
+            <sc-for list="{{ g.events }}" as="e">
+              <div style="{{ e.row }}">
+                <span style="font-size:11.5px;color:var(--muted);font-family:Poppins,sans-serif;padding-top:3px;white-space:nowrap">{{ e.time }}</span>
+                <div style="position:relative;display:flex;justify-content:center"><span style="position:absolute;top:0;bottom:-12px;width:2px;background:var(--line)"></span><span style="{{ e.dot }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ e.icon }}"></path></svg></span></div>
+                <div style="min-width:0;padding-bottom:4px">
+                  <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><span style="font-weight:600;font-size:12.5px">{{ e.t }}</span><sc-if value="{{ e.hasEv }}"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--accent);background:var(--soft);padding:2px 6px;border-radius:5px;direction:ltr">{{ e.ev }}</span></sc-if><sc-if value="{{ e.hasScreen }}"><span style="font-size:10.5px;font-weight:600;color:var(--muted);border:1px solid var(--line2);padding:1px 6px;border-radius:5px;font-family:Poppins,sans-serif">{{ e.screen }}</span></sc-if><sc-if value="{{ e.hasActor }}"><span style="{{ e.actorS }}">{{ e.actor }}</span></sc-if><sc-if value="{{ e.hasTag }}"><span style="{{ e.tagS }}">{{ e.tag }}</span></sc-if></div>
+                  <sc-if value="{{ e.hasSub }}"><div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.55">{{ e.sub }}</div></sc-if>
+                  <sc-if value="{{ e.hasJson }}"><button onClick="{{ e.toggle }}" style="margin-top:5px;border:none;background:none;padding:0;color:var(--accent);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit">{{ e.jsonT }}</button></sc-if>
+                  <sc-if value="{{ e.open }}"><pre dir="ltr" style="margin:8px 0 2px;padding:11px 13px;border-radius:10px;background:#14172B;color:#E9D5FF;font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.6;overflow-x:auto;text-align:left">{{ e.json }}</pre></sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ b.is.kv }}">
+      <div style="{{ b.kvGrid }}"><sc-for list="{{ b.items }}" as="it"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-size:11.5px;color:var(--muted)">{{ it.k }}</span><sc-if value="{{ it.isBadge }}"><span style="{{ it.bs }}">{{ it.v }}</span></sc-if><sc-if value="{{ it.isText }}"><span onClick="{{ it.onClick }}" style="{{ it.vs }}">{{ it.v }}</span></sc-if></div></sc-for></div>
+    </sc-if>
+
+    <sc-if value="{{ b.is.feed }}">
+      <div style="display:flex;flex-direction:column;max-height:{{ b.maxH }};overflow-y:auto">
+        <sc-for list="{{ b.items }}" as="it"><div onClick="{{ it.onClick }}" style="{{ it.row }}" style-hover="background:var(--hover)"><span style="{{ it.ic }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ it.icon }}"></path></svg></span><div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;line-height:1.45">{{ it.t }}</div><div style="font-size:11.5px;color:var(--muted);margin-top:1px">{{ it.sub }}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span style="font-size:11px;color:var(--faint);white-space:nowrap;font-family:Poppins,sans-serif">{{ it.time }}</span><sc-if value="{{ it.isNew }}"><span style="{{ it.newS }}">{{ L.newRow }}</span></sc-if></div></div></sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ b.is.cards }}">
+      <div style="{{ b.cardsGrid }}">
+        <sc-for list="{{ b.items }}" as="it">
+          <div onClick="{{ it.onClick }}" style="{{ it.box }}">
+            <sc-if value="{{ it.hasImg }}"><div style="{{ it.imgBox }}"><image-slot id="{{ it.img }}" shape="rect" placeholder="{{ it.imgPh }}"></image-slot></div></sc-if>
+            <div style="padding:14px;display:flex;flex-direction:column;gap:7px;flex:1">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px"><span style="font-weight:700;font-size:13.5px;line-height:1.4">{{ it.t }}</span><sc-if value="{{ it.hasBadge }}"><span style="{{ it.bs }}">{{ it.badge }}</span></sc-if></div>
+              <sc-if value="{{ it.hasSub }}"><span style="font-size:12px;color:var(--muted);line-height:1.55;text-wrap:pretty">{{ it.sub }}</span></sc-if>
+              <sc-if value="{{ it.hasStats }}"><div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:2px"><sc-for list="{{ it.stats }}" as="s"><div><div style="font-size:10.5px;color:var(--faint)">{{ s.k }}</div><div style="font-weight:700;font-family:Poppins,sans-serif;font-size:12.5px">{{ s.v }}</div></div></sc-for></div></sc-if>
+              <sc-if value="{{ it.hasActs }}"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px"><sc-for list="{{ it.acts }}" as="x"><button onClick="{{ x.onClick }}" style="{{ x.style }}">{{ x.t }}</button></sc-for></div></sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ b.is.checklist }}">
+      <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:8px;border-radius:4px;background:var(--surface);overflow:hidden"><div style="{{ b.pctBar }}"></div></div><span style="font-family:Poppins,sans-serif;font-weight:700;font-size:13px">{{ b.pct }}</span></div>
+        <sc-for list="{{ b.items }}" as="it"><div style="display:flex;align-items:center;gap:10px;font-size:12.5px"><span style="{{ it.ic }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="{{ it.icon }}"></path></svg></span><span style="{{ it.ts }}">{{ it.t }}</span></div></sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ b.is.sortlist }}">
+      <div style="display:flex;flex-direction:column;padding:6px 0">
+        <sc-for list="{{ b.items }}" as="it">
+          <div draggable="true" onDragStart="{{ it.ds }}" onDragOver="{{ it.dov }}" onDrop="{{ it.dp }}" onDragEnd="{{ it.de }}" style="{{ it.row }}">
+            <span style="color:var(--faint);cursor:grab;display:flex" title="{{ L.drag }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"></path></svg></span>
+            <span style="width:24px;height:24px;border-radius:7px;background:var(--soft);color:var(--accent);font-weight:700;font-size:11.5px;display:flex;align-items:center;justify-content:center;font-family:Poppins,sans-serif;flex-shrink:0">{{ it.n }}</span>
+            <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">{{ it.t }}</div><sc-if value="{{ it.hasSub }}"><div style="font-size:11.5px;color:var(--muted);margin-top:2px">{{ it.sub }}</div></sc-if></div>
+            <sc-if value="{{ it.hasMeta }}"><span style="font-size:12px;color:var(--muted);font-family:Poppins,sans-serif;white-space:nowrap">{{ it.meta }}</span></sc-if>
+            <sc-if value="{{ it.hasBadge }}"><span style="{{ it.bs }}">{{ it.badge }}</span></sc-if>
+            <div style="display:flex;gap:6px"><sc-for list="{{ it.acts }}" as="x"><button onClick="{{ x.onClick }}" style="{{ x.style }}">{{ x.t }}</button></sc-for></div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ b.is.form }}">
+      <div style="{{ b.formGrid }}">
+        <sc-for list="{{ b.fields }}" as="f">
+          <div style="{{ f.wrap }}">
+            <sc-if value="{{ f.isSection }}"><div style="font-size:12px;font-weight:700;color:var(--accent);padding-top:6px;border-top:1px dashed var(--line2);margin-top:4px;padding-top:14px">{{ f.label }}</div></sc-if>
+            <sc-if value="{{ f.notSection }}">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font-size:12.5px;font-weight:600">{{ f.label }}<span style="color:var(--rose)">{{ f.star }}</span></span><sc-if value="{{ f.isToggle }}"><button onClick="{{ f.onToggle }}" style="{{ f.sw }}"><span style="{{ f.knob }}"></span></button></sc-if></div>
+              <sc-if value="{{ f.isInput }}"><div style="{{ f.box }}"><input value="{{ f.value }}" onChange="{{ f.onChange }}" type="{{ f.itype }}" dir="{{ f.dir }}" placeholder="{{ f.ph }}" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:13px;font-family:inherit;outline:none"><sc-if value="{{ f.hasSuffix }}"><span style="font-size:12px;color:var(--muted);white-space:nowrap">{{ f.suffix }}</span></sc-if></div></sc-if>
+              <sc-if value="{{ f.isArea }}"><textarea value="{{ f.value }}" onChange="{{ f.onChange }}" dir="{{ f.dir }}" placeholder="{{ f.ph }}" style="{{ f.area }}"></textarea></sc-if>
+              <sc-if value="{{ f.isSelect }}"><select value="{{ f.value }}" onChange="{{ f.onChange }}" style="{{ f.sel }}"><sc-for list="{{ f.opts }}" as="o"><option value="{{ o.v }}">{{ o.t }}</option></sc-for></select></sc-if>
+              <sc-if value="{{ f.isSeg }}"><div style="display:inline-flex;gap:3px;padding:3px;border-radius:10px;background:var(--surface);border:1px solid var(--line);align-self:flex-start"><sc-for list="{{ f.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.s }}">{{ o.t }}</button></sc-for></div></sc-if>
+              <sc-if value="{{ f.hasErr }}"><span style="font-size:11.5px;color:var(--rose)">{{ f.err }}</span></sc-if>
+              <sc-if value="{{ f.hasHint }}"><span style="font-size:11.5px;color:var(--muted);line-height:1.5">{{ f.hint }}</span></sc-if>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ b.hasFooter }}"><div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-top:1px solid var(--line);flex-wrap:wrap"><span style="font-size:11.5px;color:var(--muted);flex:1">{{ b.foot }}</span><sc-if value="{{ b.hasSaved }}"><span style="display:inline-flex;align-items:center;gap:6px;color:var(--green);font-size:12px;font-weight:600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>{{ L.saved }}</span></sc-if><sc-for list="{{ b.fActs }}" as="a"><button onClick="{{ a.onClick }}" style="{{ a.style }}">{{ a.t }}</button></sc-for></div></sc-if>
+    </sc-if>
+  </sc-if>
+
+  <sc-if value="{{ b.isLoad }}"><div style="padding:18px;display:flex;flex-direction:column;gap:14px"><sc-for list="{{ b.skRows }}" as="s"><div style="display:flex;gap:14px;align-items:center"><div style="width:28px;height:28px;border-radius:8px;background:var(--sk);animation:pulse 1.4s ease-in-out infinite;flex-shrink:0"></div><div style="{{ s.a }}"></div><div style="{{ s.b }}"></div></div></sc-for></div></sc-if>
+  <sc-if value="{{ b.isEmpty }}"><div style="padding:46px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center"><span style="width:52px;height:52px;border-radius:16px;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:4px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="{{ b.emptyIcon }}"></path></svg></span><span style="font-weight:700;font-size:14px">{{ b.emptyT }}</span><span style="font-size:12.5px;color:var(--muted);max-width:340px;line-height:1.6">{{ b.emptyS }}</span></div></sc-if>
+  <sc-if value="{{ b.isErr }}"><div style="padding:40px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center"><span style="width:52px;height:52px;border-radius:16px;background:var(--roseSoft);color:var(--rose);display:flex;align-items:center;justify-content:center;margin-bottom:4px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4 2.5 20h19zM12 10v4.5M12 17.5h.01"></path></svg></span><span style="font-weight:700;font-size:14px">{{ L.errT }}</span><span style="font-size:12.5px;color:var(--muted)">{{ L.errS }}</span><button onClick="{{ retry }}" style="{{ retryBtn }}">↻ {{ L.retry }}</button></div></sc-if>
+</div>
+</sc-if>
+
+</div>
+</sc-for>
+<sc-if value="{{ menuOpen }}"><div onClick="{{ closeMenu }}" style="position:fixed;inset:0;z-index:40"></div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;blocks&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any[]&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ar&quot;,&quot;en&quot;],&quot;default&quot;:&quot;ar&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onRetry&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state={t:{},menu:null,vd:{},hover:null,open:{},f:{},drag:null,w:1100};
+  root=React.createRef();
+  componentDidMount(){
+    if(window.ResizeObserver){this.ro=new ResizeObserver(e=>{const w=e[0].contentRect.width;if(Math.abs(w-this.state.w)>30)this.setState({w})});const go=()=>{if(this.root.current)this.ro.observe(this.root.current);else setTimeout(go,100)};go()}
+    if(!window.WABA){const iv=setInterval(()=>{if(window.WABA){clearInterval(iv);this.forceUpdate()}},60)}
+  }
+  componentWillUnmount(){if(this.ro)this.ro.disconnect()}
+  ts(b){return Object.assign({q:'',page:0,size:b.pageSize||25,sel:{},sort:b.sort||null,hidden:{}},this.state.t[b.id])}
+  setT(id,p){this.setState(s=>({t:Object.assign({},s.t,{[id]:Object.assign({},s.t[id],p)})}))}
+  fs(b){const init=b.init||{};return Object.assign({preset:init.preset||'7d',compare:!!init.compare,vals:init.vals||{}},this.state.f[b.id])}
+  setF(b,p){const n=Object.assign({},this.fs(b),p);this.setState(s=>({f:Object.assign({},s.f,{[b.id]:n})}));if(b.onChange)b.onChange(n)}
+  renderVals(){
+    const W=window.WABA;if(!W)return {bl:[],L:{}};
+    const lang=this.props.lang||'ar',ar=lang==='ar',dk=this.props.theme==='dark',L=W.UI[lang],pal=W.pal(dk),pst=this.props.state||'normal',w=this.state.w;
+    const menu=this.state.menu,setMenu=k=>this.setState(s=>({menu:s.menu===k?null:k}));
+    const retry=()=>{this.props.onRetry&&this.props.onRetry()};
+    const skA=n=>({height:'11px',flex:n,borderRadius:'6px',background:'var(--sk)',animation:'pulse 1.4s ease-in-out infinite'});
+    const sw=on=>({width:'36px',height:'20px',borderRadius:'10px',border:'none',padding:'2px',cursor:'pointer',background:on?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--line2)',display:'flex',justifyContent:on?'flex-end':'flex-start',flexShrink:0,direction:'ltr'});
+    const knob={width:'16px',height:'16px',borderRadius:'50%',background:'#fff',boxShadow:'0 1px 3px rgba(0,0,0,.2)',display:'block'};
+    const box=on=>({width:'16px',height:'16px',borderRadius:'5px',border:on?'none':'1.5px solid var(--line2)',background:on?'var(--accent)':'transparent',display:'inline-flex',alignItems:'center',justifyContent:'center',flexShrink:0,boxSizing:'border-box',cursor:'pointer'});
+    const fmtOf=b=>b.fmt||(v=>W.n(v,b.dec||0));
+    const span=s=>{s=s||12;if(w<760)return 12;if(w<1020)return s<=4?6:12;return s};
+    const CARD={chart:1,table:1,timeline:1,kv:1,feed:1,cards:1,checklist:1,sortlist:1,form:1,empty:1};
+    const bl=(this.props.blocks||[]).filter(Boolean).map((b,bi)=>{
+      const id=b.id||('b'+bi),T=b.type;const st=b.state||(({head:1,tabs:1,filters:1,steps:1,note:1,form:1})[T]?'normal':pst);
+      const is={head:T==='head',tabs:T==='tabs',steps:T==='steps',note:T==='note',filters:T==='filters',kpis:T==='kpis',card:!!CARD[T]};
+      const v={id,is,wrap:{gridColumn:'span '+span(b.span),minWidth:0},title:b.title,hasTitle:!!b.title,sub:b.sub,hasSub:!!b.sub};
+      if(is.head){Object.assign(v,{code:b.code,hasStatus:!!b.status,status:b.status&&b.status.t,statusStyle:b.status?W.bdg(b.status.tone,dk):{},live:!!b.live,crumbs:(b.crumbs||[]).map((c,i,a)=>({t:c.t,href:c.href,onClick:c.onClick,sep:'/'})),hasCrumbs:!!(b.crumbs&&b.crumbs.length),
+        tags:(b.tags||[]).map(g=>({t:g.t,style:W.bdg(g.tone,dk)})),actions:(b.actions||[]).map(a=>({t:a.t,onClick:a.onClick,icon:W.IC[a.icon],hasIcon:!!a.icon,style:W.btn(a.kind||'secondary')}))});return v}
+      if(is.tabs){const seg=b.variant==='seg';Object.assign(v,{tabsWrap:seg?{display:'inline-flex',gap:'3px',padding:'4px',borderRadius:'12px',background:'var(--card)',border:'1px solid var(--line)',flexWrap:'wrap'}:{display:'flex',gap:'4px',borderBottom:'1px solid var(--line2)',overflowX:'auto',scrollbarWidth:'none'},
+        items:(b.items||[]).map(x=>{const on=x.id===b.active;return {t:x.t,count:x.count,hasCount:x.count!=null,onClick:()=>b.onChange&&b.onChange(x.id),countStyle:{fontSize:'10.5px',fontWeight:700,padding:'1px 7px',borderRadius:'9px',background:on?(seg?'rgba(255,255,255,.22)':'var(--soft)'):'var(--surface)',color:on?(seg?'#fff':'var(--accent)'):'var(--muted)',fontFamily:'Poppins,sans-serif'},
+          style:seg?{height:'32px',padding:'0 14px',borderRadius:'9px',border:'none',background:on?'linear-gradient(135deg,#6D28D9,#A855F7)':'transparent',color:on?'#fff':'var(--muted)',fontWeight:600,fontSize:'12.5px',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:'7px',whiteSpace:'nowrap'}:{height:'42px',padding:'0 14px',border:'none',borderBottom:'2px solid '+(on?'var(--accent)':'transparent'),marginBottom:'-1px',background:'transparent',color:on?'var(--accent)':'var(--muted)',fontWeight:on?700:500,fontSize:'13px',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:'7px',whiteSpace:'nowrap'}}})});return v}
+      if(is.steps){Object.assign(v,{items:(b.items||[]).map((t,i,a)=>{const done=i<b.active,on=i===b.active;return {t,n:done?'✓':i+1,notLast:i<a.length-1,num:{width:'26px',height:'26px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:'12px',fontFamily:'Poppins,sans-serif',background:done?'#2E9E78':on?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--surface)',color:done||on?'#fff':'var(--muted)',border:done||on?'none':'1px solid var(--line2)'},lbl:{fontSize:'12.5px',fontWeight:on?700:500,color:on?'var(--ink)':'var(--muted)'}}})});return v}
+      if(is.note){const c=W.tone(b.tone||'purple',dk);Object.assign(v,{text:b.text,icon:W.IC[b.icon||(b.tone==='rose'||b.tone==='amber'?'alert':'info')],hasAction:!!b.action,action:b.action?{t:b.action.t,onClick:b.action.onClick,style:W.btn(b.action.kind||'secondary',1)}:{},noteStyle:{display:'flex',gap:'12px',alignItems:'center',padding:'13px 16px',borderRadius:'14px',background:c[1],color:c[0],fontSize:'12.5px',border:'1px solid '+c[1]}});return v}
+      if(is.filters){const f=this.fs(b);const km=id+':date';
+        const dd=(b.dd||[]).map(d=>{const sel=f.vals[d.id]||[];const k=id+':'+d.id;return {label:d.label,count:sel.length,hasCount:!!sel.length,open:menu===k,onToggle:()=>setMenu(k),style:{display:'flex',alignItems:'center',gap:'8px',height:'38px',padding:'0 12px',borderRadius:'10px',border:'1px solid '+(sel.length?'var(--accent)':'var(--line2)'),background:sel.length?'var(--soft)':'var(--card)',color:sel.length?'var(--accent)':'var(--ink)',cursor:'pointer',fontFamily:'inherit',fontSize:'12.5px',fontWeight:sel.length?600:500},
+          opts:d.options.map(o=>{const on=sel.indexOf(o.v)>=0;return {t:o.t,on,box:box(on),onClick:()=>{const n=on?sel.filter(x=>x!==o.v):sel.concat([o.v]);this.setF(b,{vals:Object.assign({},f.vals,{[d.id]:n})})}}})}});
+        const chips=[];(b.dd||[]).forEach(d=>(f.vals[d.id]||[]).forEach(x=>{const o=d.options.find(o=>o.v===x);chips.push({k:d.label,t:o?o.t:x,onX:()=>this.setF(b,{vals:Object.assign({},f.vals,{[d.id]:(f.vals[d.id]||[]).filter(y=>y!==x)})})})}));
+        Object.assign(v,{hasDate:b.date!==false,presetT:(L.presets.find(p=>p[0]===f.preset)||[])[1],rangeT:L.range[f.preset],dateOpen:menu===km,toggleDate:()=>setMenu(km),cmpOn:f.compare,
+          presets:L.presets.map(p=>({t:p[1],r:L.range[p[0]],onClick:()=>{this.setF(b,{preset:p[0]});this.setState({menu:null})},style:{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'10px',width:'100%',padding:'8px 10px',border:'none',borderRadius:'8px',background:f.preset===p[0]?'var(--soft)':'transparent',color:f.preset===p[0]?'var(--accent)':'var(--ink)',fontWeight:f.preset===p[0]?600:500,fontFamily:'inherit',fontSize:'12.5px',cursor:'pointer',textAlign:'start'}})),
+          toggleCmp:()=>this.setF(b,{compare:!f.compare}),cmpSw:sw(f.compare),cmpKnob:knob,dd,chips,hasChips:!!chips.length,clearAll:()=>this.setF(b,{vals:{}}),hasLink:b.link!==false,copyLink:()=>W.toast(L.linkCopied,{tone:'info'})});return v}
+      if(is.kpis){const items=b.items||[];Object.assign(v,{gridStyle:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax('+(b.min||200)+'px,1fr))',gap:'12px'},
+        items:items.map(k=>{const kst=k.state||st;const empty=kst==='empty';const up=(k.delta||'')[0]!=='-';const good=k.inverse?!up:up;const c=W.tone(good?'green':'rose',dk);
+          return {label:k.label,show:kst==='normal'||empty,load:kst==='loading',err:kst==='error',value:empty?(k.zero!=null?k.zero:'0'):k.value,unit:k.unit,hasUnit:!!k.unit,hasDelta:!!k.delta&&!empty,delta:(up?'↑ ':'↓ ')+String(k.delta||'').replace(/^[-+]/,''),deltaStyle:{fontSize:'11px',fontWeight:700,color:c[0],background:c[1],padding:'2px 7px',borderRadius:'6px',fontFamily:'Poppins,sans-serif',direction:'ltr'},
+            sub:empty?(k.zeroSub||k.sub):k.sub,hasSub:!!(empty?(k.zeroSub||k.sub):k.sub),hasSpark:!!k.spark&&!empty,spark:k.spark?W.spark(k.spark):'',sparkC:k.sparkTone?W.tone(k.sparkTone,dk)[0]:pal[0],badge:k.badge&&k.badge.t,hasBadge:!!k.badge,badgeStyle:k.badge?W.bdg(k.badge.tone,dk,1):{},
+            parts:(k.parts||[]).map((p,i)=>({t:p[0],v:empty?'0':p[1],dot:{width:'6px',height:'6px',borderRadius:'3px',background:p[2]||pal[i%pal.length]}})),hasParts:!!(k.parts&&k.parts.length),onClick:k.onClick,
+            valStyle:{fontFamily:'Poppins,sans-serif',fontWeight:700,fontSize:k.small?'19px':'24px',letterSpacing:'-.3px',lineHeight:1.1,color:k.tone?W.tone(k.tone,dk)[0]:'var(--ink)',whiteSpace:'nowrap'},
+            cardStyle:{background:'var(--card)',border:'1px solid '+(k.alert&&!empty?W.tone(k.alert,dk)[0]:'var(--line)'),borderRadius:'16px',padding:'15px 16px',boxShadow:'var(--shadow)',cursor:k.onClick?'pointer':'default',minHeight:'98px',boxSizing:'border-box',display:'flex',flexDirection:'column',justifyContent:'space-between'}}})});return v}
+      // card types
+      const showBody=st==='normal';
+      Object.assign(v,{hasHeader:!!b.title||T==='table',count:b.count,hasCount:b.count!=null,badge:b.badge&&b.badge.t,hasBadge:!!b.badge,badgeStyle:b.badge?W.bdg(b.badge.tone,dk,1):{},live:!!b.live,showBody,isLoad:st==='loading',isErr:st==='error',isEmpty:st==='empty',
+        emptyT:b.emptyT||L.emptyT,emptyS:b.emptyS||L.emptyS,emptyIcon:W.IC[b.emptyIcon||'search'],skRows:[1.4,1,1.2,.8,1.1].slice(0,b.skN||5).map(x=>({a:skA(x*2),b:skA(1)})),hActs:[],legend:[],hasLegend:false,hasSearch:false});
+      const hActs=[];const iconBtn={height:'32px',minWidth:'32px',padding:'0 9px',borderRadius:'9px',border:'1px solid var(--line2)',background:'var(--card)',color:'var(--muted)',cursor:'pointer',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'6px',fontFamily:'inherit',fontSize:'12px',fontWeight:600,whiteSpace:'nowrap'};
+      const doExport=fmt=>{this.setState({menu:null});W.toast(L.exporting+' ('+fmt+')',{progress:true,then:L.exported+' · '+(b.title||'export')+(fmt==='Excel'?'.xlsx':'.pdf')})};
+      const expK=id+':exp';v.expOpen=menu===expK;v.expOpts=[['Excel','XLS','#23845F'],['PDF','PDF','#C2386B']].map(o=>({t:o[0]==='Excel'?'Excel (.xlsx)':'PDF',k:o[1],onClick:()=>doExport(o[0]),ic:{fontSize:'9px',fontWeight:800,color:'#fff',background:o[2],borderRadius:'4px',padding:'3px 4px',fontFamily:'Poppins,sans-serif'}}));
+      (b.actions||[]).forEach(a=>hActs.push({t:a.t,onClick:a.onClick,icon:W.IC[a.icon],hasIcon:!!a.icon,style:a.kind?W.btn(a.kind,1):iconBtn}));
+      if(T==='chart'){const vd=!!this.state.vd[id];
+        hActs.push({t:vd?L.viewChart:L.viewData,onClick:()=>this.setState(s=>({vd:Object.assign({},s.vd,{[id]:!vd})})),icon:W.IC[vd?'chart':'cols'],hasIcon:true,style:iconBtn});
+        if(b.exportable!==false)hActs.push({t:'',title:L.export,onClick:()=>setMenu(expK),icon:W.IC.down,hasIcon:true,style:iconBtn});
+        const fmt=fmtOf(b);const k=b.kind;
+        Object.assign(is,{xy:!vd&&(k==='line'||k==='bar'),donut:!vd&&k==='donut',hbar:!vd&&k==='hbar',funnel:!vd&&k==='funnel',heat:!vd&&k==='heat',dataTable:vd});
+        if(k==='line'||k==='bar'){const S=b.series,labels=b.labels,n=labels.length;const stacked=!!b.stacked;
+          v.legend=S.length>1||b.legendOne?S.map((s,i)=>({t:s.name,sw:{width:k==='line'?'14px':'10px',height:k==='line'?(s.dash?'0':'3px'):'10px',borderTop:s.dash?'2px dashed '+(s.color||pal[i]):'none',borderRadius:'2px',background:s.dash?'transparent':(s.color||pal[i])}})):[];v.hasLegend=!!v.legend.length;
+          let mx=0;if(stacked)for(let i=0;i<n;i++){let t=0;S.forEach(s=>t+=s.values[i]);mx=Math.max(mx,t)}else S.forEach(s=>s.values.forEach(x=>mx=Math.max(mx,x)));mx=W.nice(mx*1.04||1);
+          const H=b.h||200;v.plotWrap={position:'relative',height:H+'px'};
+          v.ticks=[0,.25,.5,.75,1].map(f=>({t:b.yfmt?b.yfmt(mx*f):W.short(mx*f),line:{position:'absolute',left:'40px',right:0,top:((1-f)*100)+'%',borderTop:'1px '+(f?'dashed':'solid')+' var(--line2)',opacity:f?.7:1},lbl:{position:'absolute',left:0,width:'34px',textAlign:'right',top:((1-f)*100)+'%',transform:'translateY(-50%)',fontSize:'10.5px',color:'var(--faint)',fontFamily:'Poppins,sans-serif'}}));
+          const y=val=>200-val/mx*200;v.rects=[];v.paths=[];
+          if(k==='line'){S.forEach((s,si)=>{const c=s.color||pal[si];const pts=s.values.map((val,i)=>[(n===1?300:i/(n-1)*600),y(val)]);const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+              if(b.area&&si===0)v.paths.push({d:d+' L600 200 L0 200 Z',fill:dk?'rgba(167,139,250,.12)':'rgba(109,40,217,.07)',stroke:'none',sw:0,dash:''});
+              v.paths.push({d,fill:'none',stroke:c,sw:s.dash?1.6:2.2,dash:s.dash?'5 4':''})})}
+          else{const gw=600/n,inner=gw*(b.barW||.62);S.forEach((s,si)=>{const c=s.color||pal[si];s.values.forEach((val,i)=>{if(stacked){let base=0;for(let j=0;j<si;j++)base+=S[j].values[i];v.rects.push({x:(i*gw+(gw-inner)/2).toFixed(1),y:y(base+val).toFixed(1),w:inner.toFixed(1),h:(val/mx*200).toFixed(1),c,o:1})}else{const bw=inner/S.length;v.rects.push({x:(i*gw+(gw-inner)/2+si*bw).toFixed(1),y:y(val).toFixed(1),w:(bw*.9).toFixed(1),h:(val/mx*200).toFixed(1),c,o:1})}})})}
+          const every=Math.ceil(n/(b.maxX||12));const xpos=i=>k==='line'?(n===1?50:i/(n-1)*100):((i+.5)/n*100);
+          v.xl=labels.map((t,i)=>({t:i%every===0||i===n-1&&k!=='line'?t:'',s:{position:'absolute',left:xpos(i)+'%',transform:k==='line'&&i===0?'none':k==='line'&&i===n-1?'translateX(-100%)':'translateX(-50%)',fontSize:'10.5px',color:'var(--faint)',whiteSpace:'nowrap',fontFamily:'inherit'}}));
+          const hv=this.state.hover&&this.state.hover.id===id?this.state.hover.i:-1;
+          v.cols=labels.map((_,i)=>({on:()=>this.setState({hover:{id,i}}),off:()=>this.setState({hover:null})}));
+          v.tipOn=hv>=0;if(hv>=0){const px=xpos(hv);v.tipT=labels[hv];v.tipRows=S.map((s,si)=>({n:s.name,v:fmt(s.values[hv]),sw:{width:'8px',height:'8px',borderRadius:'2px',background:s.color||pal[si]}}));
+            v.tipStyle={position:'absolute',top:'4px',left:px+'%',transform:px<18?'translateX(8px)':px>82?'translateX(calc(-100% - 8px))':'translateX(-50%)',background:'#1F2233',color:'#fff',padding:'9px 11px',borderRadius:'10px',pointerEvents:'none',boxShadow:'0 10px 30px rgba(0,0,0,.25)',zIndex:3,minWidth:'130px',fontFamily:ar?"'IBM Plex Sans Arabic',sans-serif":"Poppins,sans-serif",direction:ar?'rtl':'ltr'};
+            v.guide={position:'absolute',top:0,bottom:0,left:px+'%',width:'1px',background:'var(--line2)',pointerEvents:'none'}}else v.guide={display:'none'};
+          v.dtHead=[b.xName||L.label].concat(S.map(s=>s.name));v.dtRows=labels.map((l,i)=>[l].concat(S.map(s=>fmt(s.values[i]))))}
+        if(k==='donut'){const tot=b.items.reduce((a,x)=>a+x.value,0)||1;let cum=0;v.arcs=b.items.map((x,i)=>{const p=x.value/tot*100;const a={c:x.color||pal[i%pal.length],da:Math.max(p-.6,0).toFixed(2)+' '+(100-Math.max(p-.6,0)).toFixed(2),do:(25-cum).toFixed(2)};cum+=p;return a});
+          v.items=b.items.map((x,i)=>({t:x.label,v:fmt(x.value),p:(x.value/tot*100).toFixed(1)+'%',sw:{width:'10px',height:'10px',borderRadius:'3px',background:x.color||pal[i%pal.length],flexShrink:0}}));v.total=b.totalT||W.short(tot);v.totalL=b.totalL||L.total;
+          v.dtHead=[L.label,L.value,L.share];v.dtRows=b.items.map(x=>[x.label,fmt(x.value),(x.value/tot*100).toFixed(1)+'%'])}
+        if(k==='hbar'){const mx=Math.max.apply(null,b.items.map(x=>x.value))||1;v.items=b.items.map((x,i)=>({t:x.label,sub:x.sub,hasSub:!!x.sub,v:x.vt||fmt(x.value),onClick:x.onClick,row:{display:'flex',alignItems:'center',gap:'12px',cursor:x.onClick?'pointer':'default'},bar:{height:'100%',width:(x.value/mx*100)+'%',borderRadius:'5px',background:x.color||(b.mono?pal[0]:pal[i%2===0?0:2])}}));
+          v.dtHead=[L.label,L.value];v.dtRows=b.items.map(x=>[x.label+(x.sub?' · '+x.sub:''),x.vt||fmt(x.value)])}
+        if(k==='funnel'){const top=b.steps[0].value||1;v.steps=b.steps.map((s,i)=>{const prev=i?b.steps[i-1].value:s.value;const dn=prev-s.value;const nx=b.steps[i+1];const dropN=nx?s.value-nx.value:0;
+            return {n:i+1,t:s.label,med:s.median,hasMed:!!s.median,v:W.n(s.value),pct:(s.value/top*100).toFixed(1)+'%',conv:i?(s.value/prev*100).toFixed(1)+'%':'100%',hasDrop:!!nx&&dropN>0,drop:nx?((dropN)/s.value*100).toFixed(1)+'%':'',dropN:W.n(dropN),onDrop:()=>b.onDrop&&b.onDrop(i,s,nx),
+              dropStyle:{border:'none',borderRadius:'8px',padding:'5px 9px',fontSize:'11.5px',fontWeight:700,background:dropN/s.value>.25?W.tone('rose',dk)[1]:'var(--surface)',color:dropN/s.value>.25?W.tone('rose',dk)[0]:'var(--muted)',cursor:'pointer',fontFamily:'Poppins,sans-serif',whiteSpace:'nowrap'},
+              bar:{height:'100%',width:Math.max(s.value/top*100,6)+'%',borderRadius:'6px',background:'linear-gradient(90deg,#6D28D9,#A855F7)'}}});
+          v.dtHead=[L.step,L.users,L.conv,L.drop];v.dtRows=b.steps.map((s,i)=>[s.label,W.n(s.value),i?(s.value/b.steps[i-1].value*100).toFixed(1)+'%':'100%',b.steps[i+1]?((s.value-b.steps[i+1].value)/s.value*100).toFixed(1)+'%':'—'])}
+        if(k==='heat'){v.hcols=b.cols;v.heatGrid={display:'grid',gridTemplateColumns:'110px 64px repeat('+b.cols.length+',minmax(46px,1fr))',gap:'3px',minWidth:(180+b.cols.length*50)+'px'};
+          v.hrows=b.rows.map(r=>({t:r.label,size:W.n(r.size),cells:b.cols.map((_,i)=>{const x=r.values[i];if(x==null)return {t:'',s:{height:'34px',borderRadius:'6px',background:'transparent'}};const a=Math.min(1,.08+x/100*1.15);return {t:x+'%',s:{height:'34px',borderRadius:'6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11.5px',fontWeight:600,fontFamily:'Poppins,sans-serif',background:dk?'rgba(167,139,250,'+a+')':'rgba(109,40,217,'+a+')',color:a>.5?'#fff':'var(--ink)'}}})}));
+          v.dtHead=[L.cohort,L.size].concat(b.cols);v.dtRows=b.rows.map(r=>[r.label,W.n(r.size)].concat(r.values.map(x=>x==null?'—':x+'%')))}
+        if(vd){const nc=v.dtHead.length;v.dtGrid={display:'grid',gridTemplateColumns:'minmax(140px,1.4fr) repeat('+(nc-1)+',minmax(90px,1fr))'};v.dtCells=[];v.dtRows.forEach(r=>r.forEach((c,j)=>v.dtCells.push({t:c,s:{padding:'8px 14px',fontSize:'12px',borderBottom:'1px solid var(--line)',fontFamily:j?'Poppins,sans-serif':'inherit',fontWeight:j?600:500}})))}
+        if(st==='normal'&&b.isEmpty){v.showBody=false;v.isEmpty=true}
+      }
+      if(T==='table'){is.table=true;const S=this.ts(b);const cols=(b.cols||[]).filter(c=>!S.hidden[c.k]);
+        v.hasSearch=b.search!==false;v.q=S.q;v.onQ=e=>this.setT(id,{q:e.target.value,page:0});v.searchPh=b.searchPh||L.search;
+        if(b.colsMenu!==false){const ck=id+':cols';v.colsOpen=menu===ck;v.colOpts=(b.cols||[]).filter(c=>c.label).map(c=>({t:c.label,on:!S.hidden[c.k],box:box(!S.hidden[c.k]),onClick:()=>this.setT(id,{hidden:Object.assign({},S.hidden,{[c.k]:!S.hidden[c.k]})})}));hActs.push({t:'',title:L.columns,onClick:()=>setMenu(ck),icon:W.IC.cols,hasIcon:true,style:iconBtn})}
+        if(b.exportable!==false)hActs.push({t:L.export,onClick:()=>setMenu(expK),icon:W.IC.down,hasIcon:true,style:iconBtn});
+        let rows=(b.rows||[]).slice();const total=b.total!=null&&!S.q?b.total:null;
+        const txt=c=>c==null?'':typeof c==='object'?(c.t!=null?String(c.t):'')+' '+(c.sub||''):String(c);
+        if(S.q){const q=S.q.toLowerCase();rows=rows.filter(r=>(b.cols||[]).some(c=>txt(r[c.k]).toLowerCase().indexOf(q)>=0))}
+        if(S.sort){const k=S.sort.k,dir=S.sort.d;const sv=c=>c==null?'':typeof c==='object'?(c.v!=null?c.v:c.t):c;rows.sort((a,b2)=>{const x=sv(a[k]),y2=sv(b2[k]);return (typeof x==='number'&&typeof y2==='number'?x-y2:String(x).localeCompare(String(y2),ar?'ar':'en'))*dir})}
+        const N=total!=null?total:rows.length;const size=S.size,pages=Math.max(1,Math.ceil(N/size)),pg=Math.min(S.page,pages-1),start=pg*size;
+        let shown=[];if(b.gen&&total!=null){for(let i=start;i<Math.min(start+size,N);i++)shown.push(i<rows.length?rows[i]:b.gen(i))}else shown=rows.slice(start,start+size);
+        const gc=(b.bulk?'44px ':'')+cols.map(c=>c.w||'minmax(120px,1fr)').join(' ');const minW=b.minW||(cols.length*92+(b.bulk?44:0));
+        v.hasBulk=!!b.bulk;v.scroll={overflow:'auto',maxHeight:b.maxH||'620px'};
+        v.headRow={display:'grid',gridTemplateColumns:gc,minWidth:minW+'px',position:'sticky',top:0,zIndex:2,background:'var(--surface)',borderBottom:'1px solid var(--line)'};
+        v.cols=cols.map(c=>{const on=S.sort&&S.sort.k===c.k;return {t:c.label,arrow:on?(S.sort.d>0?' ↑':' ↓'):'',onSort:c.sort===false||!c.label?null:()=>this.setT(id,{sort:{k:c.k,d:on?-S.sort.d:1}}),th:{padding:'10px 12px',fontSize:'11.5px',fontWeight:700,color:on?'var(--accent)':'var(--muted)',cursor:c.sort===false?'default':'pointer',whiteSpace:'nowrap',textAlign:c.align==='end'?'end':'start',userSelect:'none'}}});
+        const sel=S.sel;const selIds=Object.keys(sel).filter(k=>sel[k]);
+        v.rows=shown.map((r,ri)=>{const rid=r.id!=null?String(r.id):String(start+ri);const on=!!sel[rid];
+          return {sel:on,box:box(on),onSel:e=>{e.stopPropagation();this.setT(id,{sel:Object.assign({},sel,{[rid]:!on})})},onClick:b.onRow?()=>b.onRow(r):null,
+            style:{display:'grid',gridTemplateColumns:gc,minWidth:minW+'px',alignItems:'center',borderBottom:'1px solid var(--line)',cursor:b.onRow?'pointer':'default',background:on?'var(--soft)':r._hl?W.tone(r._hl,dk)[1]:'transparent',animation:r._new?'rowFlash 2.4s ease':'none',minHeight:b.dense?'44px':'54px'},
+            cells:cols.map(c=>this.cell(r[c.k],c,W,dk))}});
+        v.noRows=!shown.length;
+        v.allOn=shown.length>0&&shown.every((r,ri)=>sel[r.id!=null?String(r.id):String(start+ri)]);v.allBox=box(v.allOn);
+        v.selAll=()=>{const n=Object.assign({},sel);shown.forEach((r,ri)=>{n[r.id!=null?String(r.id):String(start+ri)]=!v.allOn});this.setT(id,{sel:n})};
+        v.hasBulkBar=!!b.bulk&&selIds.length>0;v.selT=selIds.length+' '+L.selected;v.bulk=(b.bulk||[]).map(a=>({t:a.t,style:W.btn(a.kind||'secondary',1),onClick:()=>{a.onClick(selIds,()=>this.setT(id,{sel:{}}))}}));
+        v.hasPager=b.pager!==false;v.size=String(size);v.onSize=e=>this.setT(id,{size:+e.target.value,page:0});
+        v.rangeT=(N?start+1:0)+'–'+Math.min(start+size,N)+' '+L.of+' '+W.n(N);
+        const pb=on=>({minWidth:'30px',height:'30px',borderRadius:'8px',border:'1px solid '+(on?'var(--accent)':'var(--line2)'),background:on?'var(--accent)':'var(--card)',color:on?'var(--card)':'var(--ink)',cursor:'pointer',fontFamily:'Poppins,sans-serif',fontSize:'12px',fontWeight:600});
+        const pl=[];for(let i=0;i<pages;i++){if(i<3||i===pages-1||Math.abs(i-pg)<=1)pl.push(i);else if(pl[pl.length-1]!=='…')pl.push('…')}
+        v.pages=pl.map(p=>p==='…'?{t:'…',s:Object.assign(pb(false),{border:'none',background:'transparent',cursor:'default'}),onClick:null}:{t:String(p+1),s:pb(p===pg),onClick:()=>this.setT(id,{page:p})});
+        v.prev=()=>this.setT(id,{page:Math.max(0,pg-1)});v.next=()=>this.setT(id,{page:Math.min(pages-1,pg+1)});v.prevS=Object.assign(pb(false),{opacity:pg?1:.4});v.nextS=Object.assign(pb(false),{opacity:pg<pages-1?1:.4});
+        v.count=b.count!=null?b.count:W.n(N);v.hasCount=true;
+        if(st==='normal'&&b.isEmpty){v.showBody=false;v.isEmpty=true}}
+      if(T==='timeline'){is.timeline=true;
+        v.groups=(b.groups||[]).map((g,gi)=>({t:g.t,sub:g.sub,hasHead:!!g.t,marker:g.marker,hasMarker:!!g.marker,markerS:W.bdg(g.markerTone||'amber',dk,1),chip:{fontSize:'11.5px',fontWeight:700,color:'var(--accent)',background:'var(--soft)',padding:'4px 9px',borderRadius:'7px',whiteSpace:'nowrap'},
+          events:(g.events||[]).map((e,ei)=>{const key=id+':'+gi+':'+ei;const open=!!this.state.open[key];const tn=e.tone||(e.hl==='error'?'rose':e.hl==='pay'?'purple':e.hl==='ok'?'green':'grey');const c=W.tone(tn,dk);
+            return {time:e.time,t:e.t,ev:e.ev,hasEv:!!e.ev,screen:e.screen,hasScreen:!!e.screen,sub:e.sub,hasSub:!!e.sub,actor:e.actor,hasActor:!!e.actor,actorS:W.bdg(e.actorTone||'grey',dk,1),tag:e.tag,hasTag:!!e.tag,tagS:W.bdg(e.tagTone||tn,dk,1),
+              icon:W.IC[e.icon||'dots'],hasJson:!!e.json,open,json:e.json?JSON.stringify(e.json,null,2):'',jsonT:open?L.hideJson:L.showJson+' { }',toggle:()=>this.setState(s=>({open:Object.assign({},s.open,{[key]:!open})})),
+              dot:{position:'relative',zIndex:1,width:'26px',height:'26px',borderRadius:'8px',display:'flex',alignItems:'center',justifyContent:'center',background:e.hl?c[0]:'var(--card)',color:e.hl?'#fff':c[0],border:e.hl?'none':'1.5px solid var(--line2)'},
+              row:{display:'grid',gridTemplateColumns:'74px 30px minmax(0,1fr)',gap:'10px',padding:'8px 18px',background:e.hl==='error'?'var(--roseSoft)':e.hl==='pay'?'var(--paySoft)':'transparent',borderInlineStart:e.hl?'3px solid '+c[0]:'3px solid transparent'}}})}));
+        if(st==='normal'&&(!b.groups||!b.groups.length)){v.showBody=false;v.isEmpty=true}}
+      if(T==='kv'){is.kv=true;v.kvGrid={display:'grid',gridTemplateColumns:'repeat('+(w<760?1:b.cols||2)+',minmax(0,1fr))',gap:'16px 20px',padding:'16px 18px'};
+        v.items=(b.items||[]).map(r=>{const o=r[2]||{};return {k:r[0],v:r[1],isBadge:!!o.tone&&!o.text,isText:!(o.tone&&!o.text),bs:o.tone?W.bdg(o.tone,dk):{},onClick:o.onClick,vs:{fontSize:'13px',fontWeight:600,color:o.onClick?'var(--accent)':o.color?W.tone(o.color,dk)[0]:'var(--ink)',cursor:o.onClick?'pointer':'default',direction:o.ltr?'ltr':'inherit',textAlign:'start',fontFamily:o.mono?'ui-monospace,Menlo,monospace':'inherit',wordBreak:'break-word',lineHeight:1.5}}})}
+      if(T==='feed'){is.feed=true;v.maxH=b.maxH||'520px';v.items=(b.items||[]).map(it=>{const c=W.tone(it.tone||'purple',dk);return {t:it.t,sub:it.sub,time:it.time,icon:W.IC[it.icon||'dots'],isNew:!!it.isNew,onClick:it.onClick,newS:W.bdg('green',dk,1),ic:{width:'34px',height:'34px',borderRadius:'10px',background:c[1],color:c[0],display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0},row:{display:'flex',gap:'11px',alignItems:'center',padding:'11px 18px',borderBottom:'1px solid var(--line)',cursor:it.onClick?'pointer':'default',animation:it.isNew?'rowFlash 2.4s ease':'none'}}});
+        if(st==='normal'&&!(b.items||[]).length){v.showBody=false;v.isEmpty=true}}
+      if(T==='cards'){is.cards=true;v.cardsGrid={display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax('+(b.min||240)+'px,1fr))',gap:'14px',padding:'16px 18px'};
+        v.items=(b.items||[]).map(it=>({t:it.t,sub:it.sub,hasSub:!!it.sub,badge:it.badge&&it.badge.t,hasBadge:!!it.badge,bs:it.badge?W.bdg(it.badge.tone,dk,1):{},hasImg:!!it.img,img:it.img,imgPh:it.imgPh||'',imgBox:{height:(b.imgH||130)+'px',background:'var(--surface)',borderBottom:'1px solid var(--line)'},
+          stats:(it.stats||[]).map(s=>({k:s[0],v:s[1]})),hasStats:!!(it.stats&&it.stats.length),acts:(it.acts||[]).map(x=>({t:x.t,onClick:e=>{e.stopPropagation();x.onClick&&x.onClick()},style:W.btn(x.kind||'secondary',1)})),hasActs:!!(it.acts&&it.acts.length),onClick:it.onClick,
+          box:{border:'1px solid '+(it.selected?'var(--accent)':'var(--line)'),borderRadius:'14px',overflow:'hidden',background:'var(--card)',display:'flex',flexDirection:'column',cursor:it.onClick?'pointer':'default',boxShadow:it.selected?'0 0 0 3px var(--soft)':'none'}}))}
+      if(T==='checklist'){is.checklist=true;const its=b.items||[];const dn=its.filter(x=>x.done).length;const p=Math.round(dn/(its.length||1)*100);v.pct=p+'%';v.pctBar={height:'100%',width:p+'%',borderRadius:'4px',background:p===100?'#2E9E78':'linear-gradient(90deg,#6D28D9,#A855F7)'};
+        v.items=its.map(x=>({t:x.t,icon:x.done?W.IC.check:W.IC.x,ts:{color:x.done?'var(--ink)':'var(--muted)'},ic:{width:'20px',height:'20px',borderRadius:'6px',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,background:x.done?W.tone('green',dk)[1]:W.tone('rose',dk)[1],color:x.done?W.tone('green',dk)[0]:W.tone('rose',dk)[0]}}))}
+      if(T==='sortlist'){is.sortlist=true;const its=b.items||[];const dg=this.state.drag&&this.state.drag.id===id?this.state.drag:null;
+        v.items=its.map((it,i)=>({n:i+1,t:it.t,sub:it.sub,hasSub:!!it.sub,meta:it.meta,hasMeta:!!it.meta,badge:it.badge&&it.badge.t,hasBadge:!!it.badge,bs:it.badge?W.bdg(it.badge.tone,dk,1):{},acts:(it.acts||[]).map(x=>({t:x.t,onClick:x.onClick,style:W.btn(x.kind||'secondary',1)})),
+          ds:e=>{e.dataTransfer.effectAllowed='move';this.setState({drag:{id,from:i,over:i}})},dov:e=>{e.preventDefault();if(dg&&dg.over!==i)this.setState({drag:Object.assign({},dg,{over:i})})},
+          dp:e=>{e.preventDefault();if(!dg)return;const a=its.slice();const m=a.splice(dg.from,1)[0];a.splice(i,0,m);this.setState({drag:null});b.onReorder&&b.onReorder(a.map(x=>x.id));W.toast(ar?'تم تحديث الترتيب':'Order updated')},de:()=>this.setState({drag:null}),
+          row:{display:'flex',alignItems:'center',gap:'12px',padding:'11px 18px',borderBottom:'1px solid var(--line)',background:dg&&dg.from===i?'var(--soft)':'transparent',opacity:dg&&dg.from===i?.6:1,borderTop:dg&&dg.over===i&&dg.from!==i?'2px solid var(--accent)':'2px solid transparent'}}))}
+      if(T==='form'){is.form=true;v.formGrid={display:'grid',gridTemplateColumns:w<760?'1fr':'repeat(2,minmax(0,1fr))',gap:'16px 20px',padding:'18px'};
+        v.fields=(b.fields||[]).map(f=>{const e=f.err;const bx={display:'flex',alignItems:'center',gap:'8px',height:'42px',borderRadius:'11px',border:'1.5px solid '+(e?'var(--rose)':'var(--line2)'),background:f.disabled?'var(--surface)':'var(--card)',padding:'0 12px',boxSizing:'border-box'};
+          return {label:f.label,isSection:f.kind==='section',notSection:f.kind!=='section',star:f.required?' *':'',wrap:{gridColumn:f.full||f.kind==='section'||f.kind==='textarea'?'1 / -1':'auto',display:'flex',flexDirection:'column',gap:'7px',minWidth:0},
+            isToggle:f.kind==='toggle',sw:sw(!!f.value),knob,onToggle:()=>f.onChange&&f.onChange(!f.value),isInput:!f.kind||f.kind==='text'||f.kind==='number'||f.kind==='date'||f.kind==='time',itype:f.kind==='number'?'number':f.kind==='date'?'date':f.kind==='time'?'time':'text',box:bx,
+            value:f.value==null?'':f.value,onChange:ev=>f.onChange&&f.onChange(ev.target.value),dir:f.dir||'auto',ph:f.ph||'',suffix:f.suffix,hasSuffix:!!f.suffix,isArea:f.kind==='textarea',area:{minHeight:(f.rows||4)*22+'px',borderRadius:'11px',border:'1.5px solid '+(e?'var(--rose)':'var(--line2)'),background:'var(--card)',color:'var(--ink)',fontSize:'13px',fontFamily:'inherit',padding:'10px 12px',outline:'none',resize:'vertical',lineHeight:1.7},
+            isSelect:f.kind==='select',sel:Object.assign({},bx,{color:'var(--ink)',fontFamily:'inherit',fontSize:'13px'}),opts:(f.options||[]).map(o=>({v:o.v,t:o.t,onClick:()=>f.onChange&&f.onChange(o.v),s:{height:'30px',padding:'0 12px',borderRadius:'8px',border:'none',background:f.value===o.v?'var(--card)':'transparent',color:f.value===o.v?'var(--accent)':'var(--muted)',fontWeight:600,fontSize:'12px',cursor:'pointer',fontFamily:'inherit',boxShadow:f.value===o.v?'0 1px 3px rgba(31,34,51,.1)':'none'}})),isSeg:f.kind==='seg',
+            err:e,hasErr:!!e,hint:f.hint,hasHint:!!f.hint&&!e}});
+        v.hasFooter=!!b.onSave||!!b.footActs;v.foot=b.foot||L.lastUpd+' · '+(ar?'5 أكتوبر 2026، 4:12 م':'Oct 5, 2026, 4:12 PM');v.hasSaved=!!b.saved;
+        v.fActs=(b.footActs||[]).map(a=>({t:a.t,onClick:a.onClick,style:W.btn(a.kind||'secondary')})).concat(b.onSave?[{t:b.saveT||L.save,onClick:b.onSave,style:W.btn('primary')}]:[])}
+      if(T==='empty'){v.showBody=false;v.isEmpty=true;v.hasHeader=false}
+      v.hActs=hActs;return v});
+    return {bl,L,root:this.root,retry,retryBtn:Object.assign(W.btn('secondary',1),{marginTop:'8px'}),menuOpen:!!this.state.menu,closeMenu:()=>this.setState({menu:null})};
+  }
+  cell(c,col,W,dk){
+    const o=c==null?{t:'—'}:typeof c==='object'?c:{t:c};const kind=o.kind||col.kind||(o.tone&&!o.color?'badge':'text');
+    const k={text:kind==='text'||kind==='mono'||kind==='money',badge:kind==='badge',user:kind==='user',stars:kind==='stars',bar:kind==='bar',acts:kind==='acts',toggle:kind==='toggle'};
+    const link=!!o.onClick||!!o.href;
+    const r={k,t:o.t==null?'—':String(o.t),sub:o.sub,hasSub:!!o.sub,td:{padding:'9px 12px',minWidth:0,overflow:'hidden',textAlign:col.align==='end'?'end':'start'},
+      onClick:link?e=>{e.stopPropagation();if(o.onClick)o.onClick();else location.href=o.href}:null,
+      ts:{fontSize:'12.5px',fontWeight:o.bold||col.bold||link?600:500,color:link?'var(--accent)':o.color?W.tone(o.color,dk)[0]:'var(--ink)',cursor:link?'pointer':'inherit',whiteSpace:col.wrap?'normal':'nowrap',overflow:'hidden',textOverflow:'ellipsis',fontFamily:kind==='mono'?'ui-monospace,Menlo,monospace':(kind==='money'||col.num)?'Poppins,sans-serif':'inherit',fontSize:kind==='mono'?'11.5px':'12.5px',direction:o.ltr||col.ltr?'ltr':'inherit',textAlign:col.align==='end'?'end':'start',lineHeight:1.45},
+      subS:{fontSize:'11px',color:'var(--muted)',marginTop:'2px',whiteSpace:col.wrap?'normal':'nowrap',overflow:'hidden',textOverflow:'ellipsis',direction:o.subLtr?'ltr':'inherit',textAlign:'start'}};
+    if(k.badge)r.bs=W.bdg(o.tone||'grey',dk,1);
+    if(k.user){r.ini=(o.t||'?').trim()[0];r.av={width:'30px',height:'30px',borderRadius:'9px',background:'var(--soft)',color:'var(--accent)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:'12px',flexShrink:0}}
+    if(k.bar)r.bar={height:'100%',width:(o.pct||0)+'%',borderRadius:'3px',background:o.pct>=80?'#2E9E78':o.pct>=50?'linear-gradient(90deg,#6D28D9,#A855F7)':'#E0B04A'};
+    if(k.acts)r.acts=(o.acts||[]).map(x=>({t:x.t,onClick:e=>{e.stopPropagation();x.onClick&&x.onClick()},style:W.btn(x.kind||'secondary',1)}));
+    if(k.toggle){r.sw={width:'36px',height:'20px',borderRadius:'10px',border:'none',padding:'2px',cursor:'pointer',background:o.on?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--line2)',display:'flex',justifyContent:o.on?'flex-end':'flex-start',direction:'ltr'};r.knob={width:'16px',height:'16px',borderRadius:'50%',background:'#fff',display:'block'};r.onClick=e=>{e.stopPropagation();o.onToggle&&o.onToggle()}}
+    return r;
+  }
+}
+</script>
+</body>
+</html>

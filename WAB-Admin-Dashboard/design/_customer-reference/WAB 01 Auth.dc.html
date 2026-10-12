@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#6D28D9"><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#6D28D9"/><rect x="130" y="80" width="140" height="240" rx="26" fill="none" stroke="#fff" stroke-width="12"/><text x="200" y="222" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="54" fill="#fff">WAB</text></svg></template>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button{font-family:inherit}
+input:focus{outline:none}
+input::placeholder{color:#9CA3AF}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ isDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+
+<sc-if value="{{ on.onb }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;display:flex;flex-direction:column;padding:54px 24px 34px;background:var(--authbg);animation:fadeUp .4s ease both">
+    <div style="display:flex;justify-content:flex-end;min-height:44px">
+      <button onClick="{{ skipOnb }}" style="background:none;border:none;color:var(--accent);font-weight:600;font-size:14px;padding:10px 4px;cursor:pointer">{{ t.skip }}</button>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:30px">
+      <div style="height:360px;border-radius:28px;overflow:hidden;box-shadow:0 20px 50px rgba(109,40,217,.18)">
+        <image-slot id="{{ onb.img }}" shape="rect" placeholder="{{ onb.ph }}"></image-slot>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:25px;margin-bottom:10px">{{ onb.title }}</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.7;text-wrap:pretty;padding:0 12px">{{ onb.text }}</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:24px">
+      <div style="display:flex;gap:6px">
+        <sc-for list="{{ onbDots }}" as="d" hint-placeholder-count="4"><div style="{{ d.style }}"></div></sc-for>
+      </div>
+      <button onClick="{{ nextOnb }}" style="height:52px;padding:0 28px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer;box-shadow:0 10px 24px rgba(109,40,217,.3)">{{ onb.cta }}</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.nick }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;padding:74px 24px 34px;background:var(--authbg);animation:fadeUp .4s ease both">
+    <img src="assets/wab-app-icon.png" alt="WAB" style="width:64px;height:64px;border-radius:18px;object-fit:cover;margin-bottom:24px;box-shadow:0 10px 24px rgba(109,40,217,.25)">
+    <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:24px;margin-bottom:6px">{{ t.nickTitle }}</div>
+    <div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:28px">{{ t.nickSub }}</div>
+    <div style="font-size:12.5px;font-weight:600;color:var(--accent);margin-bottom:8px">{{ t.nickLabel }}</div>
+    <input value="{{ nick }}" onChange="{{ onNick }}" placeholder="{{ t.nickPh }}" style="{{ fs.nick }}">
+    <sc-if value="{{ nickErr }}"><div style="color:#D9467A;font-size:12px;margin-top:6px">{{ t.nickErr }}</div></sc-if>
+    <div style="font-size:12.5px;font-weight:600;color:var(--accent);margin:22px 0 8px">{{ t.genderLabel }}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <sc-for list="{{ nickGenders }}" as="g" hint-placeholder-count="2">
+        <button onClick="{{ g.onClick }}" style="{{ g.style }}"><span style="font-size:26px;line-height:1">{{ g.icon }}</span><span>{{ g.label }}</span></button>
+      </sc-for>
+    </div>
+    <div style="flex:1"></div>
+    <button onClick="{{ onNickContinue }}" style="{{ nickBtn }}">{{ t.cont }}</button>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.login }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;padding:54px 22px 26px;background:var(--authbg);overflow-y:auto;animation:fadeUp .4s ease both">
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button onClick="{{ toggleLang }}" style="height:40px;min-width:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;font-size:13px;cursor:pointer">{{ t.langSwitch }}</button>
+      <button onClick="{{ toggleTheme }}" style="width:44px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--ink)"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin:14px 0 26px">
+      <img src="assets/wab-app-icon.png" alt="WAB" style="width:86px;height:86px;border-radius:22px;object-fit:cover;box-shadow:0 14px 32px rgba(109,40,217,.3)">
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:26px;letter-spacing:.5px;margin-top:6px">WAB</div>
+      <div style="font-size:10.5px;letter-spacing:2px;color:#A855F7;font-weight:600;direction:ltr">WEDDING &amp; BEAUTY</div>
+    </div>
+    <div style="background:var(--card);border-radius:24px;padding:22px 18px;box-shadow:0 16px 40px rgba(31,34,51,.08);border:1px solid var(--line)">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:21px;margin-bottom:4px">{{ t.welcome }}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">{{ t.loginSub }}</div>
+      <div style="font-size:12.5px;font-weight:600;color:var(--accent);margin-bottom:8px">{{ t.phoneLabel }}</div>
+      <div dir="ltr" style="{{ fs.phone }}">
+        <button onClick="{{ openCountry }}" style="display:flex;align-items:center;gap:6px;padding:0 12px;height:52px;background:none;border:none;border-right:1px solid var(--line);color:var(--ink);cursor:pointer"><span style="font-size:18px">{{ country.flag }}</span><span style="font-size:14px;font-weight:600">{{ country.dial }}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button>
+        <input type="tel" inputmode="numeric" value="{{ phone }}" onChange="{{ onPhone }}" placeholder="7X XXX XXXX" style="flex:1;min-width:0;background:transparent;border:none;color:var(--ink);font-size:15px;padding:0 12px;height:52px;letter-spacing:.5px">
+      </div>
+      <sc-if value="{{ phoneErrOn }}"><div style="color:#D9467A;font-size:12px;margin-top:6px;animation:shake .35s ease">{{ t.phoneErr }}</div></sc-if>
+      <div style="height:18px"></div>
+      <button onClick="{{ onLogin }}" style="{{ loginBtn }}">
+        <sc-if value="{{ loginLoading }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>
+        <sc-if value="{{ loginIdle }}" hint-placeholder-val="{{ true }}">{{ t.login }}</sc-if>
+      </button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:5px;font-size:13.5px;color:var(--muted);margin-top:22px">
+      <span>{{ t.noAcc }}</span><a onClick="{{ goRegister }}" style="font-weight:700;color:var(--accent);cursor:pointer">{{ t.regNow }}</a>
+    </div>
+    <div style="flex:1;min-height:24px"></div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:12px">
+      <a href="WAB 06 Account.dc.html?s=privacy" style="color:var(--muted)">{{ t.privacy }}</a>
+      <a href="WAB 06 Account.dc.html?s=terms" style="color:var(--muted)">{{ t.terms }}</a>
+      <a href="WAB 06 Account.dc.html?s=contact" style="color:var(--muted)">{{ t.contact }}</a>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.register }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;padding:54px 22px 26px;background:var(--authbg);overflow-y:auto;animation:fadeUp .4s ease both">
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onClick="{{ goLogin }}" style="width:44px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div style="flex:1"></div>
+      <button onClick="{{ toggleLang }}" style="height:40px;min-width:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;font-size:13px;cursor:pointer">{{ t.langSwitch }}</button>
+      <button onClick="{{ toggleTheme }}" style="width:44px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--ink)"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin:18px 0 20px">
+      <img src="assets/wab-app-icon.png" alt="WAB" style="width:54px;height:54px;border-radius:15px;object-fit:cover;box-shadow:0 10px 24px rgba(109,40,217,.25)">
+      <div>
+        <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:21px">{{ t.regTitle }}</div>
+        <div style="font-size:12.5px;color:var(--muted)">{{ t.regSub }}</div>
+      </div>
+    </div>
+    <div style="background:var(--card);border-radius:24px;padding:20px 16px;box-shadow:0 16px 40px rgba(31,34,51,.08);border:1px solid var(--line);display:flex;flex-direction:column;gap:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.first }}</div>
+          <input value="{{ firstVal }}" onChange="{{ onFirst }}" style="{{ fs.first }}">
+          <sc-if value="{{ errOn.first }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.reqErr }}</div></sc-if>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.last }}</div>
+          <input value="{{ last }}" onChange="{{ onLast }}" style="{{ fs.last }}">
+          <sc-if value="{{ errOn.last }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.reqErr }}</div></sc-if>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.email }}</div>
+        <input type="email" dir="ltr" value="{{ email }}" onChange="{{ onEmail }}" placeholder="name@example.com" style="{{ fs.email }}">
+        <sc-if value="{{ errOn.email }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ emailErrText }}</div></sc-if>
+      </div>
+      <sc-for list="{{ dropdowns }}" as="dd" hint-placeholder-count="3">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ dd.label }}</div>
+          <button onClick="{{ dd.onToggle }}" style="{{ dd.style }}"><span style="{{ dd.textStyle }}">{{ dd.value }}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--faint)"><path d="M6 9l6 6 6-6"/></svg></button>
+          <sc-if value="{{ dd.open }}">
+            <div style="margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 30px rgba(31,34,51,.12);overflow:hidden">
+              <sc-for list="{{ dd.options }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ dd.err }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.reqErr }}</div></sc-if>
+        </div>
+      </sc-for>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ t.phoneLabel }}</div>
+        <div dir="ltr" style="{{ fs.rphone }}">
+          <button onClick="{{ openCountry }}" style="display:flex;align-items:center;gap:6px;padding:0 12px;height:52px;background:none;border:none;border-right:1px solid var(--line);color:var(--ink);cursor:pointer"><span style="font-size:18px">{{ country.flag }}</span><span style="font-size:14px;font-weight:600">{{ country.dial }}</span></button>
+          <input type="tel" inputmode="numeric" value="{{ rphone }}" onChange="{{ onRPhone }}" placeholder="7X XXX XXXX" style="flex:1;min-width:0;background:transparent;border:none;color:var(--ink);font-size:15px;padding:0 12px;height:52px">
+        </div>
+        <sc-if value="{{ errOn.rphone }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ t.phoneErr }}</div></sc-if>
+      </div>
+      <button onClick="{{ onRegister }}" style="{{ regBtn }}">
+        <sc-if value="{{ submitting }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>
+        <sc-if value="{{ regIdle }}" hint-placeholder-val="{{ true }}">{{ t.register }}</sc-if>
+      </button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:5px;font-size:13.5px;color:var(--muted);margin-top:18px">
+      <span>{{ t.haveAcc }}</span><a onClick="{{ goLogin }}" style="font-weight:700;color:var(--accent);cursor:pointer">{{ t.login }}</a>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:12px;margin-top:16px">
+      <a href="WAB 06 Account.dc.html?s=privacy" style="color:var(--muted)">{{ t.privacy }}</a>
+      <a href="WAB 06 Account.dc.html?s=terms" style="color:var(--muted)">{{ t.terms }}</a>
+      <a href="WAB 06 Account.dc.html?s=contact" style="color:var(--muted)">{{ t.contact }}</a>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.otp }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;padding:54px 24px 30px;background:var(--authbg);animation:fadeUp .4s ease both">
+    <div style="display:flex;align-items:center;position:relative;min-height:44px">
+      <button onClick="{{ otpBack }}" style="width:44px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);position:relative;z-index:1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px">{{ otpHeader }}</div>
+    </div>
+    <div style="width:76px;height:76px;border-radius:24px;background:var(--soft);display:flex;align-items:center;justify-content:center;margin:34px 0 22px;color:var(--accent)">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg>
+    </div>
+    <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:23px;margin-bottom:8px">{{ t.otpTitle }}</div>
+    <div style="font-size:13.5px;color:var(--muted);line-height:1.6">{{ t.sent }} <span dir="ltr" style="color:var(--ink);font-weight:600;unicode-bidi:isolate">{{ phoneFmt }}</span></div>
+    <div dir="ltr" style="position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:30px 0 10px">
+      <sc-for list="{{ otpBoxes }}" as="b" hint-placeholder-count="4"><div style="{{ b.style }}">{{ b.v }}</div></sc-for>
+      <input type="tel" inputmode="numeric" maxlength="4" value="{{ code }}" onChange="{{ onCode }}" style="position:absolute;inset:0;opacity:0;width:100%;cursor:pointer">
+    </div>
+    <sc-if value="{{ otpWrong }}"><div style="color:#D9467A;font-size:12.5px;animation:shake .35s ease">{{ t.wrong }}</div></sc-if>
+    <sc-if value="{{ otpBlocked }}">
+      <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(217,70,122,.1);border-radius:14px;padding:12px 14px;margin-top:4px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D9467A" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <div style="font-size:12.5px;line-height:1.55;color:var(--ink)">{{ t.blockedOtp }}<div style="color:#D9467A;font-weight:700;margin-top:2px">{{ t.remaining }} <span dir="ltr">14:32</span></div></div>
+      </div>
+    </sc-if>
+    <div style="height:22px"></div>
+    <button onClick="{{ onVerify }}" style="{{ otpBtn }}">
+      <sc-if value="{{ otpVerifying }}" hint-placeholder-val="{{ false }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>
+      <sc-if value="{{ otpIdle }}" hint-placeholder-val="{{ true }}">{{ t.verify }}</sc-if>
+    </button>
+    <div style="display:flex;justify-content:center;margin-top:20px;font-size:13px">
+      <sc-if value="{{ canResend }}"><button onClick="{{ onResend }}" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:13.5px;cursor:pointer;padding:10px">{{ t.resend }}</button></sc-if>
+      <sc-if value="{{ counting }}"><div style="color:var(--muted);padding:10px">{{ t.resendIn }} <span dir="ltr" style="font-weight:700;color:var(--ink)">{{ countdownFmt }}</span></div></sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.sys }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px 40px;background:var(--authbg);text-align:center;animation:fadeUp .4s ease both">
+    <img src="assets/wab-app-icon.png" alt="WAB" style="width:72px;height:72px;border-radius:20px;object-fit:cover;margin-bottom:40px">
+    <div style="width:110px;height:110px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:26px;color:var(--accent)">
+      <sc-if value="{{ on.force }}"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 20h14"/></svg></sc-if>
+      <sc-if value="{{ on.maint }}"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.5 6.5a4 4 0 0 0-5.3 5.3L4 17l3 3 5.2-5.2a4 4 0 0 0 5.3-5.3l-2.4 2.4-2.6-.4-.4-2.6z"/></svg></sc-if>
+    </div>
+    <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:23px;margin-bottom:10px">{{ sysTitle }}</div>
+    <div style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:34px;text-wrap:pretty">{{ sysBody }}</div>
+    <button onClick="{{ onSysAction }}" style="width:100%;height:54px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 10px 24px rgba(109,40,217,.3)">{{ sysCta }}</button>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showCountry }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:40;background:rgba(10,8,20,.45);display:flex;flex-direction:column;justify-content:flex-end">
+    <div onClick="{{ closeDialog }}" style="flex:1"></div>
+    <div style="background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 34px;height:68%;display:flex;flex-direction:column;animation:sheetUp .3s ease both;box-sizing:border-box">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-weight:700;font-size:16px">{{ t.countryTitle }}</div>
+        <button onClick="{{ closeDialog }}" style="width:36px;height:36px;border-radius:50%;border:none;background:var(--surface);color:var(--ink);cursor:pointer;font-size:16px">✕</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:12px;padding:0 14px;height:46px;margin-bottom:10px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint)"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.5-4.5"/></svg>
+        <input value="{{ cq }}" onChange="{{ onCq }}" placeholder="{{ t.searchCountry }}" style="flex:1;border:none;background:transparent;color:var(--ink);font-size:14px">
+      </div>
+      <div style="flex:1;overflow-y:auto">
+        <sc-for list="{{ countries }}" as="c" hint-placeholder-count="6">
+          <button onClick="{{ c.onClick }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px 4px;border:none;border-bottom:1px solid var(--line);background:none;color:var(--ink);cursor:pointer;text-align:start">
+            <span style="font-size:22px">{{ c.flag }}</span><span style="flex:1;font-size:14.5px">{{ c.name }}</span><span dir="ltr" style="font-size:13.5px;color:var(--muted);font-weight:600">{{ c.dial }}</span>
+            <sc-if value="{{ c.sel }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></sc-if>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ dlg.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;background:rgba(10,8,20,.5);display:flex;align-items:center;justify-content:center;padding:28px">
+    <div style="background:var(--card);border-radius:24px;padding:26px 22px 20px;width:100%;text-align:center;animation:fadeUp .25s ease both;box-shadow:0 30px 60px rgba(0,0,0,.25)">
+      <div style="{{ dlg.iconStyle }}">{{ dlg.icon }}</div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px">{{ dlg.title }}</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:22px">{{ dlg.body }}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ dlg.onPrimary }}" style="height:50px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">{{ dlg.primary }}</button>
+        <sc-if value="{{ dlg.hasSecondary }}"><button onClick="{{ dlg.onSecondary }}" style="height:46px;border-radius:14px;border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer">{{ dlg.secondary }}</button></sc-if>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Customer App</div><div style="font-size:11.5px;color:#6B7280">{{ panelTitle }}</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="6"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="4"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="5"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+  <div style="font-size:11px;color:#6B7280;line-height:1.55;background:#F8F7FB;border-radius:10px;padding:10px">Demo logic: numbers starting 79 are registered → OTP; 77 → not registered popup; 78 → blocked. OTP 0000 = wrong code, anything else succeeds.</div>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wab_proto_settings';
+const CUR='WAB 01 Auth.dc.html';
+const FILES=[['01 Auth','WAB 01 Auth.dc.html'],['02 Discovery','WAB 02 Discovery.dc.html'],['03 Salon','WAB 03 Salon.dc.html'],['04 Booking','WAB 04 Booking Flow.dc.html'],['05 Bookings','WAB 05 Bookings.dc.html'],['06 Account','WAB 06 Account.dc.html']];
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1','--authbg':d?'linear-gradient(160deg,#14172B 0%,#1B1030 55%,#2A1450 100%)':'linear-gradient(170deg,#FFFFFF 0%,#F7F1FF 45%,#ECDDFC 100%)'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+function btn(on){return {width:'100%',height:'54px',flexShrink:0,borderRadius:'14px',border:'none',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:on?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--soft)',color:on?'#fff':'var(--faint)',fontSize:'15px',fontWeight:600,cursor:on?'pointer':'default',boxShadow:on?'0 10px 24px rgba(109,40,217,.28)':'none',fontFamily:'inherit'}}
+function field(err,dis,pad){return {display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',boxSizing:'border-box',height:'52px',padding:pad===0?'0':'0 14px',overflow:'hidden',background:dis?'var(--surface)':'var(--card)',border:'1.5px solid '+(err?'#D9467A':'var(--line)'),borderRadius:'14px',color:'var(--ink)',fontSize:'15px',opacity:dis?.55:1,cursor:dis?'default':'pointer',textAlign:'start',fontFamily:'inherit'}}
+const D={
+ar:{skip:'تخطي',next:'التالي',start:'ابدأ الآن',onb:[['اكتشف أفضل الصالونات','صالونات رجالية ونسائية في جميع أنحاء الأردن بين يديك.'],['احجز بسهولة','اختر الخدمة والموظف والموعد المناسب لك في ثوانٍ.'],['إطلالة العروس','باقات VIP للعرائس مع خبيرات مؤهلات لليلتك الأجمل.'],['ادفع كما يناسبك','ادفع عند الوصول أو عربوناً أو كامل المبلغ أونلاين.']],
+nickTitle:'كيف نناديك؟',nickSub:'سيساعدنا ذلك في تخصيص تجربتك داخل التطبيق.',nickLabel:'الاسم المستعار',nickPh:'مثال: سارة',nickErr:'الرجاء إدخال الاسم المستعار',genderLabel:'الجنس',man:'رجل',woman:'امرأة',cont:'متابعة',
+langSwitch:'EN',welcome:'أهلاً بعودتك',loginSub:'سجّل دخولك برقم هاتفك للمتابعة.',phoneLabel:'رقم الهاتف',phoneErr:'رقم الهاتف غير صحيح',login:'تسجيل الدخول',noAcc:'ليس لديك حساب؟',regNow:'سجّل الآن',privacy:'سياسة الخصوصية',terms:'الشروط والأحكام',contact:'تواصل معنا',countryTitle:'اختر الدولة',searchCountry:'ابحث عن دولة',
+notReg:'هذا الرقم غير مسجل',notRegBody:'أنشئ حساباً جديداً باستخدام هذا الرقم للمتابعة.',goReg:'إنشاء حساب',cancel:'إلغاء',blocked:'تم إيقاف حسابك',blockedBody:'تم إيقاف حسابك، يرجى التواصل معنا لمزيد من المعلومات.',
+regTitle:'إنشاء حساب',regSub:'أكمل بياناتك لتبدأ الحجز.',first:'الاسم الأول',last:'الاسم الأخير',email:'البريد الإلكتروني',city:'المدينة',area:'المنطقة',choose:'اختر',areaHint:'اختر المدينة أولاً',reqErr:'هذا الحقل مطلوب',emailErr:'البريد الإلكتروني غير صحيح',register:'تسجيل',haveAcc:'لدي حساب،',sampleName:'سارة',
+otpTitle:'تحقق من رقمك',otpBook:'تأكيد الحجز',sent:'أرسلنا رمزاً إلى',verify:'تحقق',resendIn:'إعادة الإرسال خلال',resend:'إعادة إرسال الرمز',wrong:'الرمز غير صحيح، حاول مجدداً',expired:'انتهت صلاحية الرمز',expiredBody:'انتهت صلاحية الرمز، يرجى طلب رمز جديد.',ok:'حسناً',blockedOtp:'تم تجاوز عدد المحاولات، يرجى المحاولة بعد 15 دقيقة',remaining:'الوقت المتبقي',
+forceTitle:'تحديث مطلوب',forceBody:'يتوفر إصدار جديد من WAB. يرجى التحديث للمتابعة.',updateNow:'تحديث الآن',optTitle:'تحديث متوفر',optBody:'إصدار جديد بمزايا وتحسينات بانتظارك.',update:'تحديث',later:'لاحقاً',maintTitle:'التطبيق تحت الصيانة',maintBody:'نعمل على تحسين تجربتك، سنعود قريباً.',retry:'إعادة المحاولة'},
+en:{skip:'Skip',next:'Next',start:'Get started',onb:[['Discover top salons',"Men's and women's salons across Jordan, all in one place."],['Book in seconds','Pick your service, stylist and a time that suits you.'],['Bridal glow','VIP bridal packages with qualified experts for your big day.'],['Pay your way','Pay on arrival, a deposit, or in full online.']],
+nickTitle:'What should we call you?',nickSub:'This helps us personalize your experience.',nickLabel:'Nickname',nickPh:'e.g. Sara',nickErr:'Please enter a nickname',genderLabel:'Gender',man:'Man',woman:'Woman',cont:'Continue',
+langSwitch:'ع',welcome:'Welcome back',loginSub:'Log in with your mobile number to continue.',phoneLabel:'Mobile number',phoneErr:'Invalid mobile number',login:'Log in',noAcc:"Don't have an account?",regNow:'Register',privacy:'Privacy Policy',terms:'Terms & Conditions',contact:'Contact us',countryTitle:'Select country',searchCountry:'Search country',
+notReg:'This number is not registered',notRegBody:'Create a new account with this number to continue.',goReg:'Create account',cancel:'Cancel',blocked:'Account suspended',blockedBody:'Your account has been suspended. Please contact us for more information.',
+regTitle:'Create account',regSub:'Complete your details to start booking.',first:'First name',last:'Last name',email:'Email',city:'City',area:'Area',choose:'Select',areaHint:'Select a city first',reqErr:'This field is required',emailErr:'Invalid email address',register:'Register',haveAcc:'I already have an account –',sampleName:'Sara',
+otpTitle:'Verify your number',otpBook:'Confirm booking',sent:'We sent a code to',verify:'Verify',resendIn:'Resend in',resend:'Resend code',wrong:'Incorrect code, please try again',expired:'Code expired',expiredBody:'This code has expired, please request a new one.',ok:'OK',blockedOtp:'Too many attempts. Please try again in 15 minutes.',remaining:'Time remaining',
+forceTitle:'Update required',forceBody:'A new version of WAB is available. Please update to continue.',updateNow:'Update now',optTitle:'Update available',optBody:'A new version with new features and improvements is ready.',update:'Update',later:'Later',maintTitle:'Under maintenance',maintBody:"We're improving your experience. We'll be back soon.",retry:'Retry'}};
+const COUNTRIES=[{code:'JO',flag:'🇯🇴',ar:'الأردن',en:'Jordan',dial:'+962',re:/^7[789]\d{7}$/},{code:'SA',flag:'🇸🇦',ar:'السعودية',en:'Saudi Arabia',dial:'+966',re:/^5\d{8}$/},{code:'AE',flag:'🇦🇪',ar:'الإمارات',en:'UAE',dial:'+971',re:/^5\d{8}$/},{code:'PS',flag:'🇵🇸',ar:'فلسطين',en:'Palestine',dial:'+970',re:/^5\d{8}$/},{code:'IQ',flag:'🇮🇶',ar:'العراق',en:'Iraq',dial:'+964',re:/^7\d{9}$/},{code:'EG',flag:'🇪🇬',ar:'مصر',en:'Egypt',dial:'+20',re:/^1\d{9}$/},{code:'KW',flag:'🇰🇼',ar:'الكويت',en:'Kuwait',dial:'+965',re:/^[569]\d{7}$/}];
+const CITIES=[{id:'amman',ar:'عمّان',en:'Amman',areas:[['عبدون','Abdoun'],['الجاردنز','Gardens'],['أم أذينة','Um Uthaina'],['الصويفية','Sweifieh'],['خلدا','Khalda']]},{id:'irbid',ar:'إربد',en:'Irbid',areas:[['الحصن','Al Husn'],['شارع الجامعة','University St.']]},{id:'zarqa',ar:'الزرقاء',en:'Zarqa',areas:[['الزرقاء الجديدة','New Zarqa']]},{id:'aqaba',ar:'العقبة',en:'Aqaba',areas:[['الشلالة','Al Shallaleh']]}];
+const DEF={screen:'onb',onbPage:0,nick:'',ngender:'',nickErr:false,phone:'',phoneTouched:false,loginLoading:false,dialog:null,country:'JO',cq:'',first:null,last:'',email:'',rgender:null,city:'',area:'',rphone:'',dd:null,regErrors:false,submitting:false,code:'',countdown:45,otpState:'',otpMode:'login'};
+const FULLREG=(ar)=>({screen:'register',last:ar?'الحداد':'Haddad',email:'sara@example.com',city:'amman',area:'1',rphone:'791234567'});
+const PRE=(ar)=>({onb1:{screen:'onb',onbPage:0},onb2:{screen:'onb',onbPage:1},onb3:{screen:'onb',onbPage:2},onb4:{screen:'onb',onbPage:3},
+nickEmpty:{screen:'nick'},nickErr:{screen:'nick',nickErr:true,ngender:'female'},nickFilled:{screen:'nick',nick:ar?'سارة':'Sara',ngender:'female'},
+loginEmpty:{screen:'login'},loginValid:{screen:'login',phone:'791234567'},loginInvalid:{screen:'login',phone:'5512',phoneTouched:true},loginLoading:{screen:'login',phone:'791234567',loginLoading:true},loginCountry:{screen:'login',dialog:'country'},loginNotReg:{screen:'login',phone:'771234567',dialog:'notReg'},loginBlocked:{screen:'login',phone:'781234567',dialog:'blocked'},
+regInit:{screen:'register'},regCity:{screen:'register',city:'amman',dd:'area'},regErrors:{screen:'register',first:'',email:'sara@',regErrors:true},regValid:FULLREG(ar),regSubmitting:Object.assign(FULLREG(ar),{submitting:true}),
+otpCount:{screen:'otp',phone:'791234567'},otpVerifying:{screen:'otp',phone:'791234567',code:'4821',otpState:'verifying'},otpWrong:{screen:'otp',phone:'791234567',code:'0000',otpState:'wrong'},otpResend:{screen:'otp',phone:'791234567',countdown:0},otpExpired:{screen:'otp',phone:'791234567',code:'4821',countdown:0,dialog:'expired'},otpBlocked:{screen:'otp',phone:'791234567',otpState:'blocked',countdown:0},otpBooking:{screen:'otp',phone:'791234567',otpMode:'booking'},
+force:{screen:'force'},optUpdate:{screen:'login',dialog:'optUpdate'},maint:{screen:'maint'}});
+const NAV=[['S01 Onboarding',[['Page 1','onb1'],['Page 2','onb2'],['Page 3','onb3'],['Page 4','onb4']]],['S02 Nickname & Gender',[['Empty','nickEmpty'],['Error','nickErr'],['Filled','nickFilled']]],['S11 Login',[['Empty','loginEmpty'],['Valid','loginValid'],['Invalid','loginInvalid'],['Loading','loginLoading'],['Country picker','loginCountry'],['Not registered','loginNotReg'],['Blocked','loginBlocked']]],['S12 Register',[['Prefilled','regInit'],['City + area list','regCity'],['Validation errors','regErrors'],['All valid','regValid'],['Submitting','regSubmitting']]],['S13 OTP',[['Countdown','otpCount'],['Verifying','otpVerifying'],['Wrong code','otpWrong'],['Resend active','otpResend'],['Expired popup','otpExpired'],['Blocked','otpBlocked'],['Booking variant','otpBooking']]],['S24 System',[['Force update','force'],['Optional update','optUpdate'],['Maintenance','maint']]]];
+
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();return Object.assign({lang:p.lang||'ar',theme:p.theme||'light',user:p.user||'guest',gender:p.gender||'female',preset:'onb1'},DEF)})();
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k);
+    this.timer=setInterval(()=>{const s=this.state;if(s.screen==='otp'&&s.countdown>0&&s.otpState!=='blocked'&&!s.dialog)this.setState({countdown:s.countdown-1})},1000)}
+  componentWillUnmount(){clearInterval(this.timer)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,user:s.user,gender:s.gender}))}
+  setPref(k,v){this.setState({[k]:v},()=>this.savePrefs())}
+  go(k){const p=PRE(this.state.lang==='ar')[k];if(p)this.setState(Object.assign({},DEF,p,{preset:k}))}
+  cty(){return COUNTRIES.find(c=>c.code===this.state.country)}
+  validPhone(v){return this.cty().re.test(v)}
+  leave(href){location.href=href}
+  onLogin=()=>{const s=this.state;if(!this.validPhone(s.phone)||s.loginLoading){this.setState({phoneTouched:true});return}
+    this.setState({loginLoading:true});setTimeout(()=>{const p=this.state.phone;
+      if(p.startsWith('77'))this.setState({loginLoading:false,dialog:'notReg'});
+      else if(p.startsWith('78'))this.setState({loginLoading:false,dialog:'blocked'});
+      else this.setState({loginLoading:false,screen:'otp',otpMode:'login',code:'',countdown:45,otpState:''})},900)};
+  regValid(){const s=this.state,first=s.first===null?D[s.lang].sampleName:s.first;return {first:!!first.trim(),last:!!s.last.trim(),email:/^\S+@\S+\.\S+$/.test(s.email),gender:true,city:!!s.city,area:s.area!=='',rphone:this.validPhone(s.rphone)}}
+  onRegister=()=>{const v=this.regValid();if(!Object.values(v).every(Boolean)){this.setState({regErrors:true});return}
+    this.setState({submitting:true});setTimeout(()=>this.setState({submitting:false,screen:'otp',otpMode:'register',phone:this.state.rphone,code:'',countdown:45,otpState:''}),900)};
+  onVerify=()=>{const s=this.state;if(s.code.length!==4||s.otpState==='blocked'||s.otpState==='verifying')return;
+    this.setState({otpState:'verifying'});setTimeout(()=>{if(this.state.code==='0000'){this.setState({otpState:'wrong'});return}
+      if(this.state.otpMode==='booking'){this.leave('WAB 04 Booking Flow.dc.html?s=success');return}
+      this.setState({user:'registered'},()=>{this.savePrefs();this.leave('WAB 02 Discovery.dc.html?s=homeReg')})},900)};
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],c=this.cty();
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const onb=t.onb[s.onbPage];
+    const phoneValid=this.validPhone(s.phone);
+    const rv=this.regValid(),re=s.regErrors;
+    const firstVal=s.first===null?t.sampleName:s.first;
+    const rg=s.rgender||(s.gender==='male'?'male':'female');
+    const cityObj=CITIES.find(x=>x.id===s.city);
+    const ddDef=[['gender',t.genderLabel,[['male',t.man],['female',t.woman]],rg,false],['city',t.city,CITIES.map(x=>[x.id,x[s.lang]]),s.city,false],['area',t.area,cityObj?cityObj.areas.map((a,i)=>[String(i),ar?a[0]:a[1]]):[],s.area,!s.city]];
+    const dropdowns=ddDef.map(([k,label,opts,val,dis])=>{const cur=opts.find(o=>o[0]===val);const err=re&&!rv[k];
+      return {label,open:s.dd===k,err,value:cur?cur[1]:(dis?t.areaHint:t.choose),textStyle:{color:cur?'var(--ink)':'var(--faint)',fontSize:'15px'},style:field(err,dis),
+        onToggle:()=>{if(!dis)this.setState({dd:s.dd===k?null:k})},
+        options:opts.map(([v,l])=>({label:l,onClick:()=>{const u={dd:null};if(k==='gender')u.rgender=v;if(k==='city'){u.city=v;u.area=''}if(k==='area')u.area=v;this.setState(u)},style:{width:'100%',padding:'13px 16px',border:'none',borderBottom:'1px solid var(--line)',background:v===val?'var(--soft)':'transparent',color:v===val?'var(--accent)':'var(--ink)',fontWeight:v===val?600:400,fontSize:'14px',textAlign:'start',cursor:'pointer',fontFamily:'inherit'}}))}});
+    const dlgMap={notReg:{icon:'!',title:t.notReg,body:t.notRegBody,primary:t.goReg,onPrimary:()=>this.setState({dialog:null,screen:'register',rphone:s.phone}),secondary:t.cancel},
+      blocked:{icon:'⛔',title:t.blocked,body:t.blockedBody,primary:t.contact,onPrimary:()=>this.leave('WAB 06 Account.dc.html?s=contact'),secondary:t.cancel},
+      expired:{icon:'⏱',title:t.expired,body:t.expiredBody,primary:t.resend,onPrimary:()=>this.setState({dialog:null,code:'',countdown:60,otpState:''}),secondary:t.cancel},
+      optUpdate:{icon:'↻',title:t.optTitle,body:t.optBody,primary:t.update,onPrimary:()=>this.setState({dialog:null}),secondary:t.later}};
+    const dm=dlgMap[s.dialog];
+    const dlg=dm?Object.assign({show:true,hasSecondary:!!dm.secondary,onSecondary:()=>this.setState({dialog:null}),iconStyle:{width:'56px',height:'56px',borderRadius:'50%',margin:'0 auto 14px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'24px',fontWeight:700,background:s.dialog==='blocked'?'rgba(217,70,122,.12)':'var(--soft)',color:s.dialog==='blocked'?'#D9467A':'var(--accent)'}},dm):{show:false};
+    const otpErr=s.otpState==='wrong';
+    const nickOk=s.nick.trim()&&s.ngender;
+    const genders=[['male','♂',t.man],['female','♀',t.woman]];
+    const pf=s.phone||'791234567';
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',themeVars:tv(s.lang,s.theme),panelTitle:'01 · Auth & System',
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),
+      controls:[{label:'Language',opts:seg('lang',[['ar','AR'],['en','EN']])},{label:'Theme',opts:seg('theme',[['light','Light'],['dark','Dark']])},{label:'User',opts:seg('user',[['guest','Guest'],['registered','Registered']])},{label:'Gender',opts:seg('gender',[['male','Men'],['female','Women']])}],
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      on:{onb:s.screen==='onb',nick:s.screen==='nick',login:s.screen==='login',register:s.screen==='register',otp:s.screen==='otp',sys:s.screen==='force'||s.screen==='maint',force:s.screen==='force',maint:s.screen==='maint'},
+      onb:{title:onb[0],text:onb[1],img:'onb-'+(s.onbPage+1),ph:'Onboarding image '+(s.onbPage+1),cta:s.onbPage===3?t.start:t.next},
+      onbDots:[0,1,2,3].map(i=>({style:{width:i===s.onbPage?'22px':'8px',height:'8px',borderRadius:'4px',background:i===s.onbPage?'#A855F7':'var(--line)',transition:'all .25s'}})),
+      skipOnb:()=>this.setState({screen:'nick'}),nextOnb:()=>s.onbPage<3?this.setState({onbPage:s.onbPage+1}):this.setState({screen:'nick'}),
+      nick:s.nick,nickErr:s.nickErr,onNick:e=>this.setState({nick:e.target.value,nickErr:false}),
+      nickGenders:genders.map(([v,icon,label])=>({icon,label,onClick:()=>this.setState({ngender:v}),style:{height:'96px',borderRadius:'18px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'8px',cursor:'pointer',fontSize:'14.5px',fontWeight:600,fontFamily:'inherit',border:'1.5px solid '+(s.ngender===v?'#A855F7':'var(--line)'),background:s.ngender===v?'var(--soft)':'var(--card)',color:s.ngender===v?'var(--accent)':'var(--ink)'}})),
+      nickBtn:btn(nickOk),onNickContinue:()=>{if(!s.nick.trim()){this.setState({nickErr:true});return}if(!s.ngender)return;this.setState({user:'guest',gender:s.ngender},()=>{this.savePrefs();this.leave('WAB 02 Discovery.dc.html?s=homeGuest')})},
+      toggleLang:()=>this.setPref('lang',ar?'en':'ar'),toggleTheme:()=>this.setPref('theme',s.theme==='dark'?'light':'dark'),
+      country:c,phone:s.phone,onPhone:e=>this.setState({phone:e.target.value.replace(/\D/g,'').slice(0,10),phoneTouched:false}),
+      phoneErrOn:s.phoneTouched&&!phoneValid,
+      fs:{nick:field(s.nickErr,false),phone:field(s.phoneTouched&&!phoneValid,false,0),first:field(re&&!rv.first),last:field(re&&!rv.last),email:field(re&&!rv.email),rphone:field(re&&!rv.rphone,false,0)},
+      loginBtn:btn(phoneValid),loginLoading:s.loginLoading,loginIdle:!s.loginLoading,onLogin:this.onLogin,
+      goRegister:()=>this.setState({screen:'register',rphone:s.phone,regErrors:false}),goLogin:()=>this.setState({screen:'login'}),
+      firstVal,onFirst:e=>this.setState({first:e.target.value}),last:s.last,onLast:e=>this.setState({last:e.target.value}),email:s.email,onEmail:e=>this.setState({email:e.target.value}),
+      emailErrText:s.email?t.emailErr:t.reqErr,errOn:{first:re&&!rv.first,last:re&&!rv.last,email:re&&!rv.email,rphone:re&&!rv.rphone},
+      dropdowns,rphone:s.rphone,onRPhone:e=>this.setState({rphone:e.target.value.replace(/\D/g,'').slice(0,10)}),
+      regBtn:btn(Object.values(rv).every(Boolean)),submitting:s.submitting,regIdle:!s.submitting,onRegister:this.onRegister,
+      otpHeader:s.otpMode==='booking'?t.otpBook:'',phoneFmt:c.dial+' '+pf.replace(/(\d{2})(\d{3})(\d+)/,'$1 $2 $3'),
+      code:s.code,onCode:e=>this.setState({code:e.target.value.replace(/\D/g,'').slice(0,4),otpState:s.otpState==='blocked'?'blocked':''}),
+      otpBoxes:[0,1,2,3].map(i=>({v:s.code[i]||'',style:{height:'64px',borderRadius:'16px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'24px',fontWeight:700,background:'var(--card)',color:'var(--ink)',border:'1.5px solid '+(otpErr?'#D9467A':(i===s.code.length&&s.otpState!=='blocked')?'#A855F7':s.code[i]?'#D8B4FE':'var(--line)'),boxShadow:i===s.code.length&&!otpErr?'0 0 0 4px rgba(168,85,247,.12)':'none',opacity:s.otpState==='blocked'?.5:1}})),
+      otpWrong:otpErr,otpBlocked:s.otpState==='blocked',otpVerifying:s.otpState==='verifying',otpIdle:s.otpState!=='verifying',
+      otpBtn:btn(s.code.length===4&&s.otpState!=='blocked'),onVerify:this.onVerify,
+      canResend:s.countdown===0&&s.otpState!=='blocked',counting:s.countdown>0&&s.otpState!=='blocked',countdownFmt:'0:'+String(s.countdown).padStart(2,'0'),
+      onResend:()=>this.setState({countdown:60,code:'',otpState:''}),otpBack:()=>s.otpMode==='booking'?this.leave('WAB 04 Booking Flow.dc.html?s=sumDeposit'):this.setState({screen:s.otpMode==='register'?'register':'login'}),
+      sysTitle:s.screen==='force'?t.forceTitle:t.maintTitle,sysBody:s.screen==='force'?t.forceBody:t.maintBody,sysCta:s.screen==='force'?t.updateNow:t.retry,onSysAction:()=>{},
+      showCountry:s.dialog==='country',openCountry:()=>this.setState({dialog:'country',cq:''}),closeDialog:()=>this.setState({dialog:null}),cq:s.cq,onCq:e=>this.setState({cq:e.target.value}),
+      countries:COUNTRIES.filter(x=>(x.ar+x.en+x.dial).toLowerCase().includes(s.cq.toLowerCase())).map(x=>({flag:x.flag,name:x[s.lang],dial:x.dial,sel:x.code===s.country,onClick:()=>this.setState({country:x.code,dialog:null})})),
+      dlg
+    };
+  }
+}
+</script>
+</body>
+</html>

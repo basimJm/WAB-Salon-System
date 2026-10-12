@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>body{margin:0;background:#fff;font-family:'Poppins',sans-serif}a{color:#6D28D9;text-decoration:none}</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="390,844">
+  <div style="{{ screenStyle }}">
+    <div style="display:flex;align-items:center;padding:0 20px 14px;position:relative">
+      <a href="Home Screen.dc.html" style="color:#1F2233;font-size:20px;line-height:1">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F2233" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+      </a>
+      <div style="position:absolute;left:0;right:0;text-align:center;font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:#1F2233">All Salons</div>
+    </div>
+
+    <div style="padding:0 20px 14px">
+      <div style="display:flex;gap:8px">
+        <button onclick="{{ onSelectWomen }}" style="{{ womenTabStyle }}">Women</button>
+        <button onclick="{{ onSelectMen }}" style="{{ menTabStyle }}">Men</button>
+      </div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:0 20px">
+      <sc-for list="{{ visibleSalons }}" as="salon" hint-placeholder-count="6">
+        <a href="Salon Details Screen.dc.html" style="display:flex;gap:12px;padding:12px;border-radius:16px;background:#F8F7FB;margin-bottom:12px;text-decoration:none">
+          <div style="width:72px;height:72px;border-radius:12px;overflow:hidden;flex-shrink:0">
+            <image-slot id="{{ salon.imgId }}" shape="rect" placeholder="Logo"></image-slot>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14.5px;font-weight:600;color:#1F2233;margin-bottom:4px">{{ salon.name }}</div>
+            <div style="display:flex;align-items:center;gap:3px;font-size:12px;color:#9CA3AF;margin-bottom:4px">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>
+              {{ salon.location }}
+            </div>
+            <div style="display:flex;align-items:center;gap:3px;font-size:12px;color:#B45309;font-weight:600">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="#F59E0B" stroke="none"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.5 6.8L12 17.6 5.9 20.5l1.5-6.8L2.2 9l6.9-.7z"/></svg>
+              {{ salon.rating }} ({{ salon.reviews }} reviews)
+            </div>
+          </div>
+        </a>
+      </sc-for>
+
+      <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ true }}">
+        <button onclick="{{ onLoadMore }}" style="width:100%;padding:13px;margin-bottom:24px;border-radius:14px;border:1px solid #E5DEF5;background:#fff;color:#6D28D9;font-weight:600;font-size:13.5px;cursor:pointer">Load more</button>
+      </sc-if>
+    </div>
+  </div>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  allSalons = {
+    men: Array.from({ length: 24 }, (_, i) => ({
+      name: ['Élan Men\'s Lounge','The Gentry Club','Blade & Fade','Royal Barbers','Sharp Cuts','Marble Barbershop'][i % 6] + (i >= 6 ? ' ' + (Math.floor(i/6)+1) : ''),
+      location: ['Abdoun','Sweifieh','Shmeisani','Khalda','Deir Ghbar','Jabal Amman'][i % 6],
+      rating: (4.5 + (i % 5) * 0.1).toFixed(1), reviews: 80 + i * 7, imgId: 'as-m-' + i,
+    })),
+    women: Array.from({ length: 24 }, (_, i) => ({
+      name: ['Bella Beauty House','Rose & Ivory Salon','Glow Studio','Amara Salon','Silk & Shine','Lumière Beauty'][i % 6] + (i >= 6 ? ' ' + (Math.floor(i/6)+1) : ''),
+      location: ['Abdoun','Sweifieh','Shmeisani','Khalda','Deir Ghbar','Jabal Amman'][i % 6],
+      rating: (4.5 + (i % 5) * 0.1).toFixed(1), reviews: 90 + i * 6, imgId: 'as-w-' + i,
+    })),
+  };
+
+  state = { gender: 'men', page: 1 };
+
+  componentDidMount() {
+    const params = new URLSearchParams(window.location.search);
+    const g = params.get('gender');
+    if (g === 'women' || g === 'men') this.setState({ gender: g });
+  }
+
+  onSelectWomen = () => this.setState({ gender: 'women', page: 1 });
+  onSelectMen = () => this.setState({ gender: 'men', page: 1 });
+  onLoadMore = () => this.setState({ page: this.state.page + 1 });
+
+  renderVals() {
+    const s = this.state;
+    const tabStyle = (active) => ({
+      flex: 1, padding: '11px', borderRadius: '12px', border: 'none', cursor: 'pointer',
+      fontSize: '13.5px', fontWeight: 600, fontFamily: "'Poppins',sans-serif",
+      background: active ? 'linear-gradient(135deg,#6D28D9,#A855F7)' : '#F3EEFB',
+      color: active ? '#fff' : '#6D28D9',
+    });
+    const list = this.allSalons[s.gender];
+    const shown = list.slice(0, s.page * 10);
+    return {
+      womenTabStyle: tabStyle(s.gender === 'women'),
+      menTabStyle: tabStyle(s.gender === 'men'),
+      onSelectWomen: this.onSelectWomen,
+      onSelectMen: this.onSelectMen,
+      onLoadMore: this.onLoadMore,
+      visibleSalons: shown,
+      hasMore: shown.length < list.length,
+      screenStyle: {
+        display: 'flex', flexDirection: 'column', height: '100%',
+        paddingTop: '58px', boxSizing: 'border-box', background: '#fff', color: '#1F2233',
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button,textarea{font-family:inherit}
+input:focus,textarea:focus{outline:none}
+input::placeholder,textarea::placeholder{color:#9CA3AF}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes newIn{0%{opacity:0;transform:translateY(-18px) scale(.96)}60%{opacity:1;transform:none;box-shadow:0 0 0 4px rgba(168,85,247,.35)}100%{box-shadow:0 4px 14px rgba(31,34,51,.04)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ isDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+
+<sc-if value="{{ on.list }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px">
+  <sc-if value="{{ offline }}"><div style="margin:4px 14px 0;padding:9px 12px;border-radius:12px;background:rgba(217,70,122,.1);font-size:11.5px;color:var(--ink);display:flex;gap:8px;align-items:center;flex-shrink:0"><span style="width:7px;height:7px;border-radius:50%;background:#D9467A;flex-shrink:0"></span><span style="flex:1">{{ t.offlineMsg }}</span><a href="WAB Merchant 08 Finance More.dc.html?s=contact" style="font-weight:700;color:#D9467A">{{ t.contactShort }}</a></div></sc-if>
+  <div style="padding:8px 20px 10px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px">
+    <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:22px">{{ listTitle }}</div>
+    <sc-if value="{{ isEmp }}"><span style="font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--soft);color:var(--accent)">{{ t.ownOnly }}</span></sc-if>
+  </div>
+  <div style="padding:0 20px 10px;flex-shrink:0">
+    <div style="display:flex;gap:8px">
+      <div style="flex:1;display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint);flex-shrink:0"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.5-4.5"></path></svg>
+        <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ t.searchPh }}" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:13.5px">
+      </div>
+      <button onClick="{{ openFilter }}" style="position:relative;width:48px;height:48px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 6h16M7 12h10M10 18h4"></path></svg><sc-if value="{{ hasFilters }}"><span style="position:absolute;top:-5px;inset-inline-end:-5px;min-width:18px;height:18px;border-radius:9px;background:#A855F7;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ filterCount }}</span></sc-if></button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px;padding:4px;border-radius:14px;background:var(--surface)">
+      <sc-for list="{{ tabsTop }}" as="tb" hint-placeholder-count="4"><button onClick="{{ tb.onClick }}" style="{{ tb.style }}">{{ tb.label }}<sc-if value="{{ tb.hasCount }}"><span style="{{ tb.countStyle }}">{{ tb.count }}</span></sc-if></button></sc-for>
+    </div>
+    <sc-if value="{{ hasFilters }}"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><sc-for list="{{ chips }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="height:30px;padding:0 10px;border-radius:9px;border:none;background:var(--soft);color:var(--accent);font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer">{{ c.label }}<span style="font-size:10px">✕</span></button></sc-for></div></sc-if>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:10px">
+    <sc-if value="{{ newPill }}"><div style="align-self:center;padding:6px 14px;border-radius:20px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:12px;font-weight:700;animation:fadeUp .3s ease both;flex-shrink:0;display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1s infinite"></span>{{ t.newArrived }}</div></sc-if>
+    <sc-if value="{{ listLoading }}"><sc-for list="{{ four }}" as="x" hint-placeholder-count="4"><div style="height:132px;flex-shrink:0;border-radius:18px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></sc-if>
+    <sc-if value="{{ listPh.show }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 24px">
+        <div style="width:110px;height:110px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--accent)"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="{{ listPh.icon }}"></path></svg></div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:8px">{{ listPh.title }}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">{{ listPh.body }}</div>
+        <sc-if value="{{ listPh.hasAction }}"><button onClick="{{ listPh.onAction }}" style="height:46px;padding:0 26px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ listPh.action }}</button></sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ listReady }}">
+      <sc-for list="{{ cards }}" as="c" hint-placeholder-count="4">
+        <button onClick="{{ c.onClick }}" style="{{ c.style }}">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:700;font-size:14.5px">{{ c.cust }}</span><sc-if value="{{ c.bride }}"><span style="display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:linear-gradient(135deg,#B83268,#D9467A);color:#fff"><svg width="10" height="10" viewBox="0 0 24 24" fill="#fff"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg>{{ t.bride }}</span></sc-if></div>
+              <div dir="ltr" style="font-size:11.5px;color:var(--faint);text-align:start;margin-top:1px">#{{ c.ref }}</div>
+            </div>
+            <span style="{{ c.sStyle }}">{{ c.status }}</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0;font-size:12.5px;color:var(--muted)">
+            <span style="display:flex;align-items:center;gap:5px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 6h14v14H5zM5 10.5h14M9 3.5v4M15 3.5v4"></path></svg>{{ c.date }} · {{ c.time }}</span>
+            <span style="display:flex;align-items:center;gap:5px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 6.5M21.5 20a6.5 6.5 0 0 0-4-6"></path></svg>{{ c.persons }}</span>
+            <span style="display:flex;align-items:center;gap:5px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5a7.5 7.5 0 0 1 15 0"></path></svg>{{ c.staff }}</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="{{ c.pStyle }}">{{ c.pay }}</span><sc-if value="{{ c.hasRefund }}"><span style="{{ c.rStyle }}">{{ c.refund }}</span></sc-if><sc-if value="{{ c.isPending }}"><span style="font-size:11px;color:var(--faint);margin-inline-start:auto">{{ c.ago }}</span></sc-if></div>
+          <sc-if value="{{ c.hasAuto }}"><div style="margin-top:8px;padding:6px 10px;border-radius:9px;background:rgba(217,70,122,.08);color:#D9467A;font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{ t.autoCancel }}</div></sc-if>
+        </button>
+      </sc-for>
+      <sc-if value="{{ paging }}"><div style="height:132px;flex-shrink:0;border-radius:18px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-if>
+    </sc-if>
+  </div>
+  <div style="display:flex;padding:8px 6px 26px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0">
+    <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5"><a href="{{ tb.href }}" style="{{ tb.style }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ tb.d }}"></path></svg><span>{{ tb.label }}</span></a></sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ on.details }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px">
+  <div style="display:flex;align-items:center;height:50px;padding:0 10px;position:relative;flex-shrink:0">
+    <button onClick="{{ goList }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;pointer-events:none">{{ t.details }}</div>
+  </div>
+  <sc-if value="{{ dLoading }}">
+    <div style="flex:1;padding:6px 20px;display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ dShim }}" as="h" hint-placeholder-count="4"><div style="{{ h }}"></div></sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{ dError }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 36px">
+      <div style="width:110px;height:110px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--accent)"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></div>
+      <div style="font-weight:700;font-size:16px;margin-bottom:18px">{{ t.errServer }}</div>
+      <button onClick="{{ retryD }}" style="height:46px;padding:0 28px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ t.retry }}</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ dReady }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:12px">
+    <div style="padding:16px;border-radius:20px;background:var(--surface);flex-shrink:0">
+      <sc-if value="{{ b.bride }}"><div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;background:linear-gradient(135deg,#B83268,#D9467A);color:#fff;margin-bottom:12px;font-weight:700;font-size:13.5px"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg>{{ t.brideBooking }}</div></sc-if>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"><span style="{{ b.sStyle }}">{{ b.status }}</span><span style="{{ b.pStyle }}">{{ b.pay }}</span><sc-if value="{{ b.hasRefund }}"><span style="{{ b.rStyle }}">{{ b.refund }}</span></sc-if></div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div><div style="font-size:11.5px;color:var(--muted)">{{ t.ref }}</div><div dir="ltr" style="font-weight:700;font-size:16px;letter-spacing:.5px;text-align:start">{{ b.ref }}</div></div>
+        <button onClick="{{ copyRef }}" style="height:36px;padding:0 14px;border-radius:10px;border:none;background:var(--soft);color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer">{{ copyLabel }}</button>
+      </div>
+    </div>
+    <sc-if value="{{ b.isPending }}"><div style="display:flex;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(245,158,11,.12);flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B7791F" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><div style="font-size:12.5px;line-height:1.55"><div style="font-weight:700;color:#B7791F">{{ b.agoLine }}</div>{{ t.autoRule }}</div></div></sc-if>
+    <sc-if value="{{ b.hasReason }}"><div style="display:flex;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(217,70,122,.08);flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D9467A" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4.5M12 16h.01"></path></svg><div style="font-size:12.5px;line-height:1.55"><div style="font-weight:700;color:#D9467A">{{ b.reasonTitle }}</div>{{ b.reason }}</div></div></sc-if>
+    <div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1px solid var(--line);flex-shrink:0">
+      <span style="width:46px;height:46px;border-radius:50%;background:var(--soft);color:var(--accent);font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ b.initial }}</span>
+      <div style="flex:1;min-width:0"><div style="font-size:11.5px;color:var(--muted)">{{ t.customer }}</div><div style="font-weight:700;font-size:14.5px">{{ b.cust }}</div><div dir="ltr" style="font-size:12px;color:var(--muted);text-align:start">{{ b.phone }}</div></div>
+      <button onClick="{{ callCust }}" style="width:42px;height:42px;border-radius:12px;border:none;background:var(--soft);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg></button>
+      <button onClick="{{ waCust }}" style="width:42px;height:42px;border-radius:12px;border:none;background:rgba(46,158,120,.12);color:#2E9E78;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"></path></svg></button>
+    </div>
+    <div style="font-weight:700;font-size:15px;margin-top:2px">{{ b.personsTitle }}</div>
+    <sc-for list="{{ b.persons }}" as="p" hint-placeholder-count="1">
+      <div style="{{ p.style }}">
+        <div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;margin-bottom:8px">{{ p.name }}<sc-if value="{{ p.bride }}"><span style="display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:linear-gradient(135deg,#B83268,#D9467A);color:#fff"><svg width="10" height="10" viewBox="0 0 24 24" fill="#fff"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg>{{ t.bride }}</span></sc-if></div>
+        <sc-for list="{{ p.lines }}" as="ln"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:3px 0"><span>{{ ln.n }} <span style="color:var(--faint);font-size:11.5px">· {{ ln.d }}</span></span><span style="font-weight:600;flex-shrink:0">{{ ln.p }}</span></div></sc-for>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:9px;border-top:1px dashed var(--line);font-size:12.5px">
+          <span style="width:26px;height:26px;border-radius:50%;background:var(--soft);color:var(--accent);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ p.staffI }}</span>
+          <span style="font-weight:600;flex:1">{{ p.staff }}</span><span style="color:var(--muted)">{{ p.when }}</span>
+        </div>
+      </div>
+    </sc-for>
+    <div style="padding:14px 16px;border-radius:18px;background:var(--surface);flex-shrink:0">
+      <div style="font-weight:700;font-size:14.5px;margin-bottom:8px">{{ t.payment }}</div>
+      <sc-for list="{{ b.payRows }}" as="r" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0"><span style="color:var(--muted)">{{ r.k }}</span><span style="font-weight:600">{{ r.v }}</span></div></sc-for>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:9px 0 0;margin-top:4px;border-top:1px dashed var(--line)"><span style="font-weight:700">{{ t.remaining }}</span><span style="font-weight:700;color:var(--accent);font-size:16px">{{ b.remaining }}</span></div>
+      <sc-if value="{{ b.hasRefundInfo }}"><div style="margin-top:10px;font-size:12px;line-height:1.55;color:var(--muted)">{{ b.refundInfo }}</div></sc-if>
+    </div>
+    <div style="padding:14px 16px;border-radius:18px;border:1px solid var(--line);flex-shrink:0">
+      <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">{{ t.policy }}</div>
+      <sc-for list="{{ t.policyList }}" as="r" hint-placeholder-count="4"><div style="display:flex;gap:8px;font-size:12.5px;color:var(--muted);line-height:1.6"><span style="color:var(--accent)">•</span><span>{{ r }}</span></div></sc-for>
+    </div>
+    <div style="padding:14px 16px;border-radius:18px;border:1px solid var(--line);flex-shrink:0">
+      <div style="font-weight:700;font-size:14.5px;margin-bottom:10px">{{ t.history }}</div>
+      <sc-for list="{{ b.history }}" as="h" hint-placeholder-count="2">
+        <div style="display:flex;gap:12px">
+          <div style="display:flex;flex-direction:column;align-items:center;width:12px;flex-shrink:0"><div style="{{ h.dot }}"></div><sc-if value="{{ h.notLast }}"><div style="width:2px;flex:1;background:var(--line);margin:3px 0"></div></sc-if></div>
+          <div style="padding-bottom:14px;flex:1;min-width:0"><div style="font-weight:700;font-size:13px">{{ h.title }}</div><div style="font-size:12px;color:var(--muted)">{{ h.actor }} · {{ h.time }}</div><sc-if value="{{ h.hasNote }}"><div style="font-size:12px;color:var(--ink);margin-top:3px;line-height:1.5">{{ h.note }}</div></sc-if></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ bar.show }}">
+    <div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+      <sc-if value="{{ bar.pending }}"><div style="display:grid;grid-template-columns:1fr 1.6fr;gap:10px"><button onClick="{{ askReject }}" style="height:54px;border-radius:14px;border:1.5px solid #D9467A;background:rgba(217,70,122,.06);color:#D9467A;font-size:15px;font-weight:700;cursor:pointer">{{ t.reject }}</button><button onClick="{{ doApprove }}" style="height:54px;border-radius:14px;border:none;background:#2E9E78;color:#fff;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 10px 22px rgba(46,158,120,.3)"><sc-if value="{{ busy }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if><sc-if value="{{ notBusy }}">{{ t.approve }}</sc-if></button></div></sc-if>
+      <sc-if value="{{ bar.before }}"><div style="font-size:11.5px;color:var(--muted);text-align:center">{{ t.beforeNote }}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button onClick="{{ askCancel }}" style="height:52px;border-radius:14px;border:1.5px solid #D9467A;background:rgba(217,70,122,.06);color:#D9467A;font-size:14.5px;font-weight:700;cursor:pointer">{{ t.cancel }}</button><button onClick="{{ askReassign }}" style="height:52px;border-radius:14px;border:none;background:var(--soft);color:var(--accent);font-size:14.5px;font-weight:700;cursor:pointer">{{ t.reassign }}</button></div></sc-if>
+      <sc-if value="{{ bar.after }}"><button onClick="{{ askComplete }}" style="height:54px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px rgba(109,40,217,.28)">✓ {{ t.complete }}</button><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button onClick="{{ askNoShow }}" style="height:48px;border-radius:14px;border:1.5px solid #D9467A;background:none;color:#D9467A;font-size:14px;font-weight:700;cursor:pointer">{{ t.noshow }}</button><button onClick="{{ askReassign }}" style="height:48px;border-radius:14px;border:none;background:var(--soft);color:var(--accent);font-size:14px;font-weight:700;cursor:pointer">{{ t.reassign }}</button></div></sc-if>
+    </div>
+  </sc-if>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheet.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:40;background:rgba(10,8,20,.5);display:flex;flex-direction:column;justify-content:flex-end">
+    <div onClick="{{ closeAll }}" style="flex:1"></div>
+    <div style="background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 30px;max-height:84%;overflow-y:auto;animation:sheetUp .3s ease both;box-sizing:border-box">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px"></div>
+      <sc-if value="{{ sheet.reasons }}">
+        <div style="font-weight:700;font-size:18px;margin-bottom:4px">{{ sheet.title }}</div>
+        <div style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:12px">{{ sheet.sub }}</div>
+        <sc-for list="{{ reasons }}" as="r" hint-placeholder-count="4"><button onClick="{{ r.onClick }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:15px 4px;border:none;border-bottom:1px solid var(--line);background:none;color:var(--ink);cursor:pointer;text-align:start;font-size:14.5px"><span style="{{ r.dot }}"></span>{{ r.label }}</button></sc-for>
+        <sc-if value="{{ otherOn }}"><textarea value="{{ other }}" onChange="{{ onOther }}" placeholder="{{ t.otherPh }}" style="width:100%;box-sizing:border-box;height:80px;margin-top:12px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-size:14px;padding:12px;resize:none"></textarea></sc-if>
+        <sc-if value="{{ sheet.refundNote }}"><div style="margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(46,158,120,.1);color:#2E9E78;font-size:12.5px;font-weight:600">{{ sheet.refundNote }}</div></sc-if>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px"><button onClick="{{ sheet.onConfirm }}" style="{{ reasonBtn }}">{{ sheet.cta }}</button><button onClick="{{ closeAll }}" style="height:44px;border-radius:14px;border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer">{{ t.back }}</button></div>
+      </sc-if>
+      <sc-if value="{{ sheet.reassign }}">
+        <div style="font-weight:700;font-size:18px;margin-bottom:4px">{{ t.reassign }}</div>
+        <div style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:12px">{{ t.reassignSub }}</div>
+        <sc-if value="{{ multiPerson }}"><div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap"><sc-for list="{{ personTabs }}" as="pt" hint-placeholder-count="3"><button onClick="{{ pt.onClick }}" style="{{ pt.style }}">{{ pt.label }}</button></sc-for></div></sc-if>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">{{ reassignCurrent }}</div>
+        <sc-for list="{{ eligible }}" as="e" hint-placeholder-count="2">
+          <button onClick="{{ e.onClick }}" style="{{ e.style }}">
+            <span style="width:40px;height:40px;border-radius:50%;background:var(--soft);color:var(--accent);font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ e.i }}</span>
+            <span style="flex:1;min-width:0"><span style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px">{{ e.name }}<sc-if value="{{ e.brideQ }}"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(244,167,196,.3);color:#B83268">{{ t.brideQ }}</span></sc-if></span><span style="display:block;font-size:12px;color:#2E9E78;font-weight:600">{{ t.freeFull }}</span></span>
+            <span style="{{ e.radio }}"></span>
+          </button>
+        </sc-for>
+        <div style="font-size:11.5px;color:var(--faint);margin:6px 0 14px;line-height:1.5">{{ t.eligibleNote }}</div>
+        <button onClick="{{ confirmReassign }}" style="{{ reassignBtn }}">{{ t.confirmReassign }}</button>
+      </sc-if>
+      <sc-if value="{{ sheet.filter }}">
+        <div style="font-weight:700;font-size:18px;margin-bottom:16px">{{ t.filter }}</div>
+        <div style="font-size:12.5px;font-weight:600;color:var(--accent);margin-bottom:8px">{{ t.dateRange }}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"><sc-for list="{{ fRange }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+        <sc-if value="{{ customRange }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px"><div style="height:44px;border-radius:12px;border:1.5px solid var(--line);display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--muted)">{{ t.from }}: 1/10/2026</div><div style="height:44px;border-radius:12px;border:1.5px solid var(--line);display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--muted)">{{ t.to }}: 31/10/2026</div></div></sc-if>
+        <div style="font-size:12.5px;font-weight:600;color:var(--accent);margin:14px 0 8px">{{ t.staffF }}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ fStaff }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+        <div style="font-size:12.5px;font-weight:600;color:var(--accent);margin:16px 0 8px">{{ t.statusF }}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ fStatus }}" as="o" hint-placeholder-count="6"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+        <div style="font-size:12.5px;font-weight:600;color:var(--accent);margin:16px 0 8px">{{ t.payF }}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ fPay }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+        <sc-if value="{{ isWomen }}"><button onClick="{{ toggleBride }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font-size:14px;font-weight:600"><span style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#D9467A"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg>{{ t.brideOnly }}</span><span style="{{ brideSw.track }}"><span style="{{ brideSw.knob }}"></span></span></button></sc-if>
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:20px"><button onClick="{{ resetFilters }}" style="height:50px;border-radius:14px;border:1.5px solid var(--line);background:none;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer">{{ t.reset }}</button><button onClick="{{ applyFilters }}" style="height:50px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">{{ t.apply }}</button></div>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ dlg.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;background:rgba(10,8,20,.5);display:flex;align-items:center;justify-content:center;padding:26px">
+    <div style="background:var(--card);border-radius:24px;padding:24px 20px 18px;width:100%;text-align:center;animation:fadeUp .25s ease both;box-shadow:0 30px 60px rgba(0,0,0,.25)">
+      <div style="{{ dlg.iconStyle }}">{{ dlg.icon }}</div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px">{{ dlg.title }}</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:8px">{{ dlg.body }}</div>
+      <sc-if value="{{ dlg.hasAmount }}"><div style="font-size:26px;font-weight:700;color:var(--accent);margin:6px 0 4px">{{ dlg.amount }}</div></sc-if>
+      <sc-if value="{{ dlg.hasNote }}"><div style="{{ dlg.noteStyle }}">{{ dlg.note }}</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">
+        <button onClick="{{ dlg.onPrimary }}" style="{{ dlg.primaryStyle }}">{{ dlg.primary }}</button>
+        <sc-if value="{{ dlg.hasSecondary }}"><button onClick="{{ closeAll }}" style="height:44px;border-radius:14px;border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer">{{ t.back }}</button></sc-if>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:20px;right:20px;bottom:120px;z-index:60;padding:13px 16px;border-radius:14px;background:#1F2233;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;animation:fadeUp .25s ease both;box-shadow:0 14px 30px rgba(0,0,0,.25)"><span style="width:22px;height:22px;border-radius:50%;background:#2E9E78;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>{{ toast }}</div>
+</sc-if>
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Business · Merchant</div><div style="font-size:11.5px;color:#6B7280">{{ panelTitle }}</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="9"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="5"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="4"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+  <div style="font-size:11px;color:#6B7280;line-height:1.55;background:#F8F7FB;border-radius:10px;padding:10px">Actions update the booking live (status, payment, refund, history). Employee role sees only own bookings and no action bar. "Now" = Wed Oct 7, 12:40 PM.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wabm_proto_settings';
+const CUR='WAB Merchant 03 Bookings.dc.html';
+const FILES=[['01 Onboarding','WAB Merchant 01 Onboarding.dc.html'],['02 Home','WAB Merchant 02 Home.dc.html'],['03 Bookings','WAB Merchant 03 Bookings.dc.html'],['04 Calendar','WAB Merchant 04 Calendar.dc.html'],['05 Salon','WAB Merchant 05 Salon.dc.html'],['06 Services & Team','WAB Merchant 06 Services Team.dc.html'],['07 Policies & Insights','WAB Merchant 07 Policies Insights.dc.html'],['08 Finance & More','WAB Merchant 08 Finance More.dc.html'],['Ad','WAB Merchant Ad.dc.html']];
+const CTRL=[['lang','Language',[['ar','AR'],['en','EN']]],['theme','Theme',[['light','Light'],['dark','Dark']]],['role','Role',[['owner','Owner'],['manager','Manager'],['employee','Employee']]],['gender','Salon',[['female','Women'],['male','Men']]],['sstate','State',[['live','Live'],['offline','Offline'],['incomplete','Incompl.']]]];
+const ALLP=['DASHBOARD_VIEW','BOOKINGS_VIEW_ALL','BOOKINGS_VIEW_OWN','BOOKINGS_RESPOND','BOOKINGS_OPERATE','SALON_PROFILE_MANAGE','GALLERY_MANAGE','WORKING_HOURS_MANAGE','SERVICES_MANAGE','STAFF_MANAGE','POLICIES_MANAGE','REVIEWS_VIEW','STATISTICS_VIEW','FINANCE_VIEW','SUBSCRIPTION_VIEW','TEAM_MANAGE','PAYOUT_DETAILS_MANAGE','SALON_DELETE_REQUEST'];
+const PERMS={owner:ALLP,manager:ALLP.filter(k=>!['FINANCE_VIEW','POLICIES_MANAGE','TEAM_MANAGE','PAYOUT_DETAILS_MANAGE','SALON_DELETE_REQUEST','BOOKINGS_VIEW_OWN'].includes(k)),employee:['DASHBOARD_VIEW','BOOKINGS_VIEW_OWN','REVIEWS_VIEW']};
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1','--shim':d?'#252946':'#EFEBF7','--shim2':d?'#323760':'#F9F7FD'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+function bdg(c){return {display:'inline-flex',alignItems:'center',fontSize:'11px',fontWeight:700,padding:'4px 9px',borderRadius:'8px',color:c[0],background:c[1],flexShrink:0}}
+function chipS(a){return {height:'36px',padding:'0 13px',borderRadius:'11px',border:'1.5px solid '+(a?'#A855F7':'var(--line)'),background:a?'var(--soft)':'var(--card)',color:a?'var(--accent)':'var(--ink)',fontSize:'12.5px',fontWeight:600,cursor:'pointer'}}
+function shimS(h){return {height:h+'px',borderRadius:'18px',background:'linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%)',backgroundSize:'200% 100%',animation:'shim 1.4s linear infinite',flexShrink:0}}
+const C={amber:['#B7791F','rgba(245,158,11,.14)'],green:['#2E9E78','rgba(46,158,120,.12)'],rose:['#D9467A','rgba(217,70,122,.1)'],grey:['#6B7280','rgba(107,114,128,.12)'],purple:['#6D28D9','rgba(109,40,217,.1)']};
+const STC={pending:C.amber,approved:C.green,rejected:C.rose,cc:C.grey,cs:C.grey,auto:C.grey,completed:C.purple,noshow:C.rose};
+const TABD=[['home','M4 11.5 12 4l8 7.5M6 10v9.5h12V10','WAB Merchant 02 Home.dc.html?s=home','DASHBOARD_VIEW'],['book','M8 6h11M8 12h11M8 18h11M4 6h.01M4 12h.01M4 18h.01','WAB Merchant 03 Bookings.dc.html?s=pending','BOOK'],['cal','M5 6h14v14H5zM5 10.5h14M9 3.5v4M15 3.5v4','WAB Merchant 04 Calendar.dc.html?s=day','BOOK'],['salon','M4 9.5 5.5 4h13L20 9.5M4 9.5h16M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0M5.5 12v8h13v-8','WAB Merchant 05 Salon.dc.html?s=hub','MGMT'],['more','M4 6h16M4 12h16M4 18h16','WAB Merchant 08 Finance More.dc.html?s=more','ANY']];
+function can(perms,k){if(k==='ANY')return true;if(k==='BOOK')return perms.includes('BOOKINGS_VIEW_ALL')||perms.includes('BOOKINGS_VIEW_OWN');if(k==='MGMT')return ['SALON_PROFILE_MANAGE','GALLERY_MANAGE','WORKING_HOURS_MANAGE','SERVICES_MANAGE','STAFF_MANAGE','POLICIES_MANAGE','REVIEWS_VIEW','STATISTICS_VIEW','FINANCE_VIEW','SUBSCRIPTION_VIEW','TEAM_MANAGE'].some(p=>perms.includes(p));return perms.includes(k)}
+function tabs(active,t,perms){return TABD.filter(x=>can(perms,x[3])).map(([k,d,href])=>({d,href,label:t.tab[k],style:{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px',padding:'6px 0',fontSize:'11px',fontWeight:k===active?700:500,color:k===active?'var(--accent)':'var(--faint)'}}))}
+const CU={female:[['سارة العلي','Sara Al-Ali'],['نور خليل','Noor Khalil'],['ريم الزعبي','Reem Al-Zoubi'],['لانا مصطفى','Lana Mustafa'],['دينا حمدان','Dina Hamdan'],['هيا الشريف','Haya Al-Sharif'],['جود عبيدات','Joud Obeidat']],male:[['محمد العمري','Mohammad Al-Omari'],['زيد الخطيب','Zaid Al-Khatib'],['فراس يوسف','Firas Yousef'],['عمر سعيد','Omar Saeed'],['يزن حداد','Yazan Haddad'],['قيس المصري','Qais Al-Masri'],['أنس الرفاعي','Anas Al-Rifai']]};
+const STF={female:[['رنا','Rana',1],['هبة','Hiba',0],['دانة','Dana',1],['مي','Mai',0]],male:[['عمر','Omar',0],['خالد','Khaled',0],['فادي','Fadi',0],['سامر','Samer',0]]};
+const SV={female:[['قص وتسريح','Cut & style',25,45],['صبغة شعر','Hair color',45,90],['مكياج سهرة','Evening makeup',35,60],['مكياج عروس','Bridal makeup',180,120],['تسريحة عروس','Bridal hairstyle',120,90],['مانيكير','Manicure',15,30]],male:[['قص شعر','Haircut',8,30],['تهذيب اللحية','Beard trim',5,15],['حلاقة كاملة','Full shave',12,30],['تنظيف بشرة','Facial',15,45],['صبغة شعر','Hair color',20,45],['باقة العريس','Groom package',60,90]]};
+const COMP={mother:['أم العروس',"Bride's mother"],sister:['أخت العروس',"Bride's sister"],brother:['أخو العريس',"Groom's brother"]};
+const P1=(sv,sf)=>({female:[[0,sv,sf,null,0]],male:[[0,sv,sf,null,0]]});
+const BRIDEP={female:[[1,[3,4],0,null,0],[0,[2],1,'mother',0],[0,[0],2,'sister',60]],male:[[0,[5],0,null,0],[0,[0,1],1,'brother',0]]};
+const BK={b0:{ref:'WAB-24818',cu:3,st:'pending',pay:'deposit',date:'today',min:1200,p:P1([2],2),tab:'pending',ago:'a0',auto:1,hidden:1},
+b1:{ref:'WAB-24817',cu:0,st:'pending',pay:'deposit',date:'sat',min:840,p:BRIDEP,tab:'pending',ago:'a1'},
+b2:{ref:'WAB-24816',cu:1,st:'pending',pay:'arrival',date:'today',min:1110,p:P1([0,5],1),tab:'pending',ago:'a5',auto:1},
+b3:{ref:'WAB-24815',cu:2,st:'pending',pay:'full',date:'tom',min:960,p:P1([2],0),tab:'pending',ago:'a12'},
+b10:{ref:'WAB-24788',cu:4,st:'completed',pay:'paid',date:'today',min:600,p:P1([5],3),tab:'today'},
+b4:{ref:'WAB-24790',cu:3,st:'approved',pay:'deposit',date:'today',min:660,p:P1([1],0),tab:'today',after:1},
+b5:{ref:'WAB-24801',cu:5,st:'approved',pay:'arrival',date:'today',min:810,p:P1([0],1),tab:'today'},
+b6:{ref:'WAB-24806',cu:2,st:'approved',pay:'deposit',date:'today',min:900,p:P1([2],2),tab:'today'},
+b7:{ref:'WAB-24809',cu:6,st:'approved',pay:'full',date:'today',min:1020,p:P1([0],1),tab:'today'},
+b8:{ref:'WAB-24812',cu:4,st:'approved',pay:'deposit',date:'tom',min:720,p:P1([1,5],0),tab:'up'},
+b18:{ref:'WAB-24814',cu:1,st:'approved',pay:'full',date:'o11',min:1020,p:P1([2],2),tab:'up'},
+b11:{ref:'WAB-24770',cu:1,st:'completed',pay:'paid',date:'o5',min:780,p:P1([0],1),tab:'past'},
+b12:{ref:'WAB-24761',cu:3,st:'noshow',pay:'deposit',date:'o4',min:900,p:P1([1],0),tab:'past'},
+b13:{ref:'WAB-24755',cu:5,st:'rejected',pay:'deposit',refund:'done',date:'o3',min:720,p:P1([2],2),tab:'past',reason:0},
+b14:{ref:'WAB-24748',cu:2,st:'cs',pay:'deposit',refund:'pending',date:'o12',min:660,p:P1([0],0),tab:'past',reason:'closure'},
+b15:{ref:'WAB-24740',cu:6,st:'cc',pay:'arrival',date:'o3',min:1080,p:P1([5],3),tab:'past'},
+b16:{ref:'WAB-24733',cu:4,st:'auto',pay:'full',refund:'failed',date:'o1',min:960,p:P1([0],1),tab:'past'}};
+const ORDER=['b0','b1','b2','b3','b10','b4','b5','b6','b7','b8','b18','b11','b12','b13','b14','b15','b16'];
+const D={
+ar:{tab:{home:'الرئيسية',book:'الحجوزات',cal:'التقويم',salon:'الصالون',more:'المزيد'},offlineMsg:'صالونك غير ظاهر للزبائن حالياً. تواصل مع WAB لإعادة التفعيل',contactShort:'تواصل',bookings:'الحجوزات',myBookings:'حجوزاتي',ownOnly:'حجوزاتي فقط',searchPh:'اسم الزبون، الهاتف أو رقم المرجع',tabsL:{pending:'معلّقة',up:'القادمة',today:'اليوم',past:'السابقة'},newArrived:'وصل طلب حجز جديد',bride:'عروس',brideBooking:'حجز عروس — 3 أشخاص',persons:'أشخاص',person:'شخص',autoCancel:'يُلغى تلقائياً خلال 6 س 50 د إن لم يتم الرد',
+empty:{pending:['لا توجد طلبات معلّقة','ستظهر هنا طلبات الحجز الجديدة فور وصولها.','تحديث'],up:['لا توجد حجوزات قادمة','ستظهر هنا الحجوزات المقبولة القادمة.','عرض التقويم'],today:['لا توجد حجوزات اليوم','لا توجد مواعيد مقبولة لليوم.','عرض التقويم'],past:['لا توجد حجوزات سابقة','ستظهر هنا الحجوزات المكتملة والملغاة.','تحديث']},noResults:'لا توجد نتائج مطابقة',noResultsBody:'جرّب اسماً آخر أو رقم هاتف أو رقم مرجع مختلف.',errServer:'حدث خطأ ما',errBody:'تعذّر تحميل الحجوزات، حاول مجدداً.',retry:'إعادة المحاولة',
+details:'تفاصيل الحجز',ref:'رقم المرجع',copy:'نسخ',copied:'تم النسخ',customer:'الزبون',personsT:'الأشخاص',payment:'الدفع',method:'طريقة الدفع',total:'الإجمالي',paidOnline:'المدفوع أونلاين',remaining:'المتبقي للتحصيل',policy:'سياسة الحجز (وقت الحجز)',policyList:['يمكن للزبون الإلغاء حتى 3 ساعات قبل الموعد','العربون 20% ولا يُسترد عند إلغاء الزبون خلال المهلة','الدفع الكامل يُسترد مع خصم العربون','عدم الحضور: يحتفظ الصالون بالعربون'],history:'سجل الحالة',
+st:{pending:'معلّق',approved:'مقبول',rejected:'مرفوض',cc:'ملغي من الزبون',cs:'ملغي من الصالون',auto:'ملغي تلقائياً',completed:'مكتمل',noshow:'لم يحضر'},py:{arrival:'الدفع عند الوصول',deposit:'تم دفع العربون',full:'تم الدفع كاملاً',paid:'مدفوع'},rf:{pending:'قيد الاسترجاع',done:'تم الاسترجاع',failed:'فشل الاسترجاع'},
+agoL:{a0:'الآن',a1:'منذ دقيقة',a5:'منذ 5 دقائق',a12:'منذ 12 دقيقة'},reqAgo:'طُلب ',autoRule:'يُلغى الحجز تلقائياً مع استرداد كامل إذا لم يتم الرد خلال ساعة من موعده.',rejectReason:'سبب الرفض',cancelReason:'سبب الإلغاء',closure:'إغلاق طارئ للصالون بسبب أعمال صيانة.',autoReason:'لم يتم الرد على الطلب خلال ساعة من موعده، فأُلغي تلقائياً واسترد الزبون المبلغ.',refundFailed:'تعذّر استرداد المبلغ عبر بوابة الدفع، يتابع فريق WAB العملية.',refundPend:'سيتم استرداد المبلغ للزبون خلال 3–7 أيام عمل.',refundDone:'تم استرداد المبلغ للزبون بالكامل.',
+approve:'قبول',reject:'رفض',cancel:'إلغاء الحجز',reassign:'إعادة توزيع',complete:'مكتمل ومدفوع',noshow:'لم يحضر',beforeNote:'لم يبدأ الموعد بعد — يمكن الإلغاء أو إعادة التوزيع',back:'رجوع',
+rejectTitle:'سبب الرفض',rejectSub:'سيظهر السبب للزبون.',reasons:['محجوز بالكامل','الموظف غير متاح','الخدمة غير متاحة','أخرى'],cancelReasons:['ظرف طارئ في الصالون','الموظف غير متاح','إغلاق استثنائي','أخرى'],otherPh:'اكتب السبب…',confirmReject:'تأكيد الرفض',cancelTitle:'إلغاء الحجز',cancelSub:'اختر سبب الإلغاء، سيظهر للزبون.',fullRefund:'سيحصل الزبون على استرداد كامل',confirmCancel:'تأكيد الإلغاء',
+completeTitle:'تأكيد اكتمال الحجز',completeBody:'أكّد أنك حصّلت المبلغ المتبقي من الزبون:',completeNote:'ستصبح حالة الدفع «مدفوع».',confirmComplete:'نعم، حصّلت المبلغ',noshowTitle:'تسجيل عدم الحضور؟',noshowBody:'سيتم تطبيق سياسة عدم الحضور المحفوظة في الحجز:',noshowKeep:'يحتفظ الصالون بالعربون ({x})',noshowNone:'لا يوجد مبلغ مدفوع مسبقاً',confirmNoshow:'تأكيد عدم الحضور',
+reassignSub:'اختر موظفاً مؤهلاً ومتاحاً طوال مدة الخدمة. سيتم إشعار الزبون.',current:'الموظف الحالي: ',brideQ:'مؤهلة للعرائس',freeFull:'متاح طوال المدة',eligibleNote:'يظهر فقط الموظفون الذين يقدمون الخدمة، في دوامهم ومتاحون طوال المدة.',confirmReassign:'تأكيد إعادة التوزيع',
+concTitle:'تم التعامل مع هذا الحجز من قبل أحمد',concBody:'وافق أحمد على هذا الطلب قبل لحظات. سيتم تحديث التفاصيل.',ok:'حسناً',
+toast:{approved:'تم قبول الحجز وإشعار الزبون',rejected:'تم رفض الحجز — سيُسترد المبلغ للزبون',cancelled:'تم إلغاء الحجز واسترداد المبلغ كاملاً',completed:'تم تسجيل الحجز مكتملاً ومدفوعاً',noshow:'تم تسجيل عدم الحضور',reassigned:'تمت إعادة التوزيع وإشعار الزبون',call:'جارٍ الاتصال…',wa:'فتح واتساب…'},
+filter:'تصفية الحجوزات',dateRange:'الفترة',ranges:['اليوم','هذا الأسبوع','هذا الشهر','مخصص'],from:'من',to:'إلى',staffF:'الموظف',statusF:'الحالة',payF:'حالة الدفع',brideOnly:'حجوزات العرائس فقط',reset:'إعادة تعيين',apply:'تطبيق',
+h:{created:'طلب حجز جديد',approved:'تمت الموافقة',rejected:'تم الرفض',cs:'ألغاه الصالون',cc:'ألغاه الزبون',auto:'إلغاء تلقائي',completed:'مكتمل ومدفوع',noshow:'لم يحضر',reassigned:'إعادة توزيع'},actor:{owner:'ليلى حداد · المالك',mgr:'سارة · مسؤول',sys:'النظام'},hTimes:['قبل ساعة','قبل 50 دقيقة','قبل 10 دقائق','الآن'],
+dates:{today:'اليوم',tom:'غداً',sat:'السبت 10 أكتوبر',o11:'الأحد 11 أكتوبر',o12:'الاثنين 12 أكتوبر',o5:'5 أكتوبر',o4:'4 أكتوبر',o3:'3 أكتوبر',o1:'1 أكتوبر'},cur:'د.أ',am:'ص',pm:'م',min:'د'},
+en:{tab:{home:'Home',book:'Bookings',cal:'Calendar',salon:'Salon',more:'More'},offlineMsg:'Your salon is offline and hidden from customers. Contact WAB to reactivate.',contactShort:'Contact',bookings:'Bookings',myBookings:'My bookings',ownOnly:'Only mine',searchPh:'Customer name, phone or reference',tabsL:{pending:'Pending',up:'Upcoming',today:'Today',past:'Past'},newArrived:'New booking request arrived',bride:'Bride',brideBooking:'Bridal booking — 3 people',persons:'people',person:'person',autoCancel:'Auto-cancels in 6h 50m if not answered',
+empty:{pending:['No pending requests','New booking requests will appear here instantly.','Refresh'],up:['No upcoming bookings','Approved upcoming bookings will appear here.','Open calendar'],today:['No bookings today','There are no approved appointments today.','Open calendar'],past:['No past bookings','Completed and cancelled bookings appear here.','Refresh']},noResults:'No matching results',noResultsBody:'Try another name, phone or reference number.',errServer:'Something went wrong',errBody:"Couldn't load bookings, please try again.",retry:'Retry',
+details:'Booking details',ref:'Reference',copy:'Copy',copied:'Copied',customer:'Customer',personsT:'People',payment:'Payment',method:'Method',total:'Total',paidOnline:'Paid online',remaining:'Remaining to collect',policy:'Policy (at booking time)',policyList:['Customer can cancel up to 3 hours before','20% deposit, not refunded if the customer cancels within the window','Full payments are refunded minus the deposit','No-show: the salon keeps the deposit'],history:'Status history',
+st:{pending:'Pending',approved:'Approved',rejected:'Rejected',cc:'Cancelled by customer',cs:'Cancelled by salon',auto:'Auto-cancelled',completed:'Completed',noshow:'No-show'},py:{arrival:'Pay on arrival',deposit:'Deposit paid',full:'Fully paid',paid:'Paid'},rf:{pending:'Refund pending',done:'Refunded',failed:'Refund failed'},
+agoL:{a0:'just now',a1:'1 min ago',a5:'5 min ago',a12:'12 min ago'},reqAgo:'Requested ',autoRule:'Auto-cancelled with a full refund if not answered within 1 hour of the start time.',rejectReason:'Rejection reason',cancelReason:'Cancellation reason',closure:'Emergency salon closure for maintenance.',autoReason:'The request was not answered within 1 hour of its start, so it was auto-cancelled and refunded.',refundFailed:'The refund failed at the payment gateway; WAB is following up.',refundPend:'The customer will be refunded within 3–7 business days.',refundDone:'The customer was refunded in full.',
+approve:'Accept',reject:'Reject',cancel:'Cancel booking',reassign:'Reassign staff',complete:'Completed & paid',noshow:'No-show',beforeNote:"The appointment hasn't started — you can cancel or reassign",back:'Back',
+rejectTitle:'Reason for rejection',rejectSub:'The customer will see this reason.',reasons:['Fully booked','Staff unavailable','Service unavailable','Other'],cancelReasons:['Salon emergency','Staff unavailable','Exceptional closure','Other'],otherPh:'Write the reason…',confirmReject:'Confirm rejection',cancelTitle:'Cancel booking',cancelSub:'Choose a reason — the customer will see it.',fullRefund:'The customer will receive a full refund',confirmCancel:'Confirm cancellation',
+completeTitle:'Confirm completion',completeBody:'Confirm you collected the remaining amount:',completeNote:'Payment status will become “Paid”.',confirmComplete:'Yes, collected',noshowTitle:'Mark as no-show?',noshowBody:"The booking's saved no-show policy will apply:",noshowKeep:'The salon keeps the deposit ({x})',noshowNone:'No amount was paid in advance',confirmNoshow:'Confirm no-show',
+reassignSub:'Choose qualified staff free for the full duration. The customer will be notified.',current:'Current: ',brideQ:'Bride-qualified',freeFull:'Free for full duration',eligibleNote:'Only staff who provide the service, are on duty and free for the full duration are shown.',confirmReassign:'Confirm reassignment',
+concTitle:'This booking was already approved by Ahmad',concBody:'Ahmad approved this request moments ago. Details will refresh.',ok:'OK',
+toast:{approved:'Booking accepted — customer notified',rejected:'Booking rejected — customer will be refunded',cancelled:'Booking cancelled with a full refund',completed:'Marked as completed & paid',noshow:'Marked as no-show',reassigned:'Staff reassigned — customer notified',call:'Calling…',wa:'Opening WhatsApp…'},
+filter:'Filter bookings',dateRange:'Date range',ranges:['Today','This week','This month','Custom'],from:'From',to:'To',staffF:'Staff',statusF:'Status',payF:'Payment status',brideOnly:'Bridal bookings only',reset:'Reset',apply:'Apply',
+h:{created:'New booking request',approved:'Approved',rejected:'Rejected',cs:'Cancelled by salon',cc:'Cancelled by customer',auto:'Auto-cancelled',completed:'Completed & paid',noshow:'No-show',reassigned:'Staff reassigned'},actor:{owner:'Layla Haddad · Owner',mgr:'Sara · Manager',sys:'System'},hTimes:['1 hour ago','50 min ago','10 min ago','now'],
+dates:{today:'Today',tom:'Tomorrow',sat:'Sat, Oct 10',o11:'Sun, Oct 11',o12:'Mon, Oct 12',o5:'Oct 5',o4:'Oct 4',o3:'Oct 3',o1:'Oct 1'},cur:'JOD',am:'AM',pm:'PM',min:'min'}};
+function tm(m,t){const h=Math.floor(m/60),mm=m%60;return (h%12||12)+':'+String(mm).padStart(2,'0')+' '+(h>=12?t.pm:t.am)}
+const DEF={screen:'list',tab:'pending',search:'',query:'',listState:'',bid:'b2',dState:'',sheet:null,dialog:null,reason:-1,other:'',ov:{},copied:false,busy:false,showNew:false,newPill:false,f:{range:-1,staff:[],status:[],pay:[],bride:false},fd:null,rp:0,rsel:-1,toast:null};
+const PRE={pending:{},upcoming:{tab:'up'},today:{tab:'today'},past:{tab:'past'},filter:{sheet:'filter',tab:'up',fd:{range:1,staff:[0],status:[],pay:[],bride:false}},filtered:{tab:'past',f:{range:2,staff:[],status:['completed'],pay:[],bride:false}},brideOnly:{tab:'pending',f:{range:-1,staff:[],status:[],pay:[],bride:true}},search:{tab:'past',search:'24755',query:'24755'},searchEmpty:{search:'xyz',query:'xyz'},emptyPending:{listState:'empty'},emptyUp:{tab:'up',listState:'empty'},emptyToday:{tab:'today',listState:'empty'},emptyPast:{tab:'past',listState:'empty'},loading:{listState:'loading'},paging:{tab:'past',listState:'paging'},error:{listState:'error'},liveCard:{live:1},employee:{tab:'today',role:'employee'},
+dPending:{screen:'details',bid:'b2'},dBride:{screen:'details',bid:'b1'},dBrideApproved:{screen:'details',bid:'b1',ov:{b1:{st:'approved',hx:['approved']}}},dApprovedBefore:{screen:'details',bid:'b8'},dApprovedAfter:{screen:'details',bid:'b4'},dCompleted:{screen:'details',bid:'b10'},dNoShow:{screen:'details',bid:'b12'},dRejected:{screen:'details',bid:'b13'},dCancelSalon:{screen:'details',bid:'b14'},dCancelCust:{screen:'details',bid:'b15'},dAuto:{screen:'details',bid:'b16'},
+dlgReject:{screen:'details',bid:'b2',sheet:'reject',reason:0},dlgCancel:{screen:'details',bid:'b8',sheet:'cancel',reason:0},dlgComplete:{screen:'details',bid:'b4',dialog:'complete'},dlgNoShow:{screen:'details',bid:'b4',dialog:'noshow'},dlgReassign:{screen:'details',bid:'b8',sheet:'reassign',rsel:0},dConcurrent:{screen:'details',bid:'b3',dialog:'conc'},dLoading:{screen:'details',bid:'b2',dState:'loading'},dError:{screen:'details',bid:'b2',dState:'error'},dEmployee:{screen:'details',bid:'b5',role:'employee'}};
+const NAV=[['M08 Bookings list',[['Pending','pending'],['Upcoming','upcoming'],['Today','today'],['Past','past'],['Filter sheet','filter'],['Filtered + chips','filtered'],['Bride only','brideOnly'],['Search results','search'],['Search empty','searchEmpty'],['▶ Real-time new card','liveCard'],['Employee scope','employee']]],['M08 States',[['Empty pending','emptyPending'],['Empty upcoming','emptyUp'],['Empty today','emptyToday'],['Empty past','emptyPast'],['Loading','loading'],['Pagination','paging'],['Error','error']]],['M09 Details by status',[['Pending','dPending'],['Bride · 3 persons','dBride'],['Bride approved','dBrideApproved'],['Approved · before start','dApprovedBefore'],['Approved · after start','dApprovedAfter'],['Completed','dCompleted'],['No-show','dNoShow'],['Rejected (reason)','dRejected'],['Cancelled by salon','dCancelSalon'],['Cancelled by customer','dCancelCust'],['Auto-cancelled','dAuto'],['Employee (read-only)','dEmployee'],['Loading','dLoading'],['Error','dError']]],['M09 Dialogs',[['Reject reason','dlgReject'],['Cancel (full refund)','dlgCancel'],['Complete: collect','dlgComplete'],['No-show outcome','dlgNoShow'],['Reassign staff','dlgReassign'],['Handled by Ahmad','dConcurrent']]]];
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();return Object.assign({lang:p.lang||'ar',theme:p.theme||'light',role:p.role||'owner',gender:p.gender||'female',sstate:p.sstate||'live',preset:'pending'},DEF)})();
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k)}
+  componentWillUnmount(){clearTimeout(this.deb);clearTimeout(this.toastT);clearTimeout(this.liveT)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,role:s.role,gender:s.gender,sstate:s.sstate}))}
+  setPref(k,v){this.setState({[k]:v},()=>this.savePrefs())}
+  go(k){const p=PRE[k];if(!p)return;clearTimeout(this.liveT);const pr={};if(p.role)pr.role=p.role;else if(this.state.role==='employee'&&k!=='employee')pr.role='owner';
+    if(k==='dBride'||k==='dBrideApproved')pr.gender='female';
+    const st=Object.assign({},DEF,p,pr,{preset:k});delete st.live;this.setState(st,()=>{this.savePrefs();if(p.live)this.liveT=setTimeout(()=>{this.setState({showNew:true,newPill:true});setTimeout(()=>this.setState({newPill:false}),2600)},1600)})}
+  load(k,ms){this.setState({[k]:'loading'});setTimeout(()=>this.setState({[k]:''}),ms||700)}
+  toast(m){this.setState({toast:m});clearTimeout(this.toastT);this.toastT=setTimeout(()=>this.setState({toast:null}),2000)}
+  setOv(id,o){const s=this.state,cur=s.ov[id]||{};this.setState({ov:Object.assign({},s.ov,{[id]:Object.assign({},cur,o,{hx:(cur.hx||[]).concat(o.hx||[])})})})}
+  bk(id){const s=this.state,ar=s.lang==='ar',t=D[s.lang],L=ar?0:1,g=s.gender,raw=BK[id],o=s.ov[id]||{};
+    const st=o.st||raw.st,pay=o.pay||raw.pay,refund=o.refund!==undefined?o.refund:raw.refund;const P=SV[g];
+    const stf=o.staff||{};
+    const persons=raw.p[g].map(([br,sv,sf,nk,off],i)=>{const sfi=stf[i]!==undefined?stf[i]:sf;const dur=sv.reduce((a,x)=>a+P[x][3],0),m=raw.min+off;return {name:i===0?CU[g][raw.cu][L]:COMP[nk][L],bride:g==='female'&&!!br,lines:sv.map(x=>({n:P[x][L],d:P[x][3]+' '+t.min,p:P[x][2]+' '+t.cur})),sf:sfi,staff:STF[g][sfi][L],staffI:STF[g][sfi][L].charAt(0),when:tm(m,t)+' – '+tm(m+dur,t),sum:sv.reduce((a,x)=>a+P[x][2],0),sv,
+      style:{padding:'14px',borderRadius:'18px',border:'1px solid '+(g==='female'&&br?'#F4A7C4':'var(--line)'),background:g==='female'&&br?'rgba(244,167,196,.08)':'transparent',flexShrink:0}}});
+    const total=persons.reduce((a,p)=>a+p.sum,0),dep=Math.round(total*.2*100)/100;
+    const paidOnline=pay==='full'?total:(pay==='deposit'?dep:(pay==='paid'?(raw.pay==='full'?total:raw.pay==='deposit'?dep:0):0));
+    const remaining=['completed','paid'].includes(st)||pay==='paid'?0:(['rejected','cs','cc','auto','noshow'].includes(st)?0:total-paidOnline);
+    const reasonText=o.reasonText||(raw.reason===0?t.reasons[0]:raw.reason==='closure'?t.closure:st==='auto'?t.autoReason:null);
+    const rs=st==='rejected'?t.rejectReason:(st==='cs'||st==='auto')?t.cancelReason:null;
+    const A=t.actor,T=t.hTimes,cust=CU[g][raw.cu][L];
+    const base={pending:[],approved:['approved'],completed:['approved','completed'],noshow:['approved','noshow'],rejected:['rejected'],cs:['approved','cs'],cc:['approved','cc'],auto:['auto']}[raw.st];
+    const seq=['created'].concat(base,o.hx||[]);
+    const actorOf=k=>({created:cust,approved:A.owner,completed:STF[g][persons[0].sf][L],noshow:A.mgr,rejected:A.mgr,cs:A.owner,cc:cust,auto:A.sys,reassigned:A.owner}[k]);
+    const history=seq.map((k,i)=>({title:t.h[k],actor:actorOf(k),time:T[Math.min(i,3)],note:(k==='rejected'||k==='cs'||k==='auto')?reasonText:'',hasNote:(k==='rejected'||k==='cs'||k==='auto')&&!!reasonText,notLast:i<seq.length-1,
+      dot:{width:'12px',height:'12px',borderRadius:'50%',flexShrink:0,marginTop:'3px',background:i===seq.length-1?'#A855F7':'var(--line)',boxShadow:i===seq.length-1?'0 0 0 4px rgba(168,85,247,.18)':'none'}}));
+    const staffNames=Array.from(new Set(persons.map(p=>p.staff))).join('، ');
+    return {id,ref:raw.ref,cust,initial:cust.charAt(0),phone:'+962 79 555 01'+(40+raw.cu),st,status:t.st[st],sStyle:bdg(STC[st]),pay:t.py[pay],pStyle:bdg(C.purple),hasRefund:!!refund,refund:refund?t.rf[refund]:'',rStyle:bdg(refund==='done'?C.green:refund==='failed'?C.rose:C.amber),
+      bride:persons.some(p=>p.bride),persons,personsTitle:t.personsT+' ('+persons.length+')',personsLabel:persons.length+' '+(persons.length>1?t.persons:t.person),staff:staffNames,staffIdx:persons.map(p=>p.sf),
+      date:t.dates[raw.date],time:tm(raw.min,t),tab:o.st&&o.st!=='pending'&&raw.tab==='pending'?(raw.date==='today'?'today':(['rejected','cs'].includes(o.st)?'past':'up')):raw.tab,ago:t.agoL[raw.ago]||'',agoLine:t.reqAgo+(t.agoL[raw.ago]||''),isPending:st==='pending',hasAuto:st==='pending'&&!!raw.auto,after:!!raw.after,
+      hasReason:!!rs&&!!reasonText,reasonTitle:rs,reason:reasonText,payKey:pay,total,dep,paidOnline,remainingN:remaining,
+      payRows:[{k:t.method,v:t.py[raw.pay]},{k:t.total,v:total+' '+t.cur},{k:t.paidOnline,v:paidOnline+' '+t.cur}],remaining:remaining+' '+t.cur,
+      hasRefundInfo:!!refund,refundInfo:refund==='done'?t.refundDone:refund==='failed'?t.refundFailed:t.refundPend,history,search:(CU.female[raw.cu].concat(CU.male[raw.cu])).join(' ')+' '+raw.ref+' 079555'+(40+raw.cu)}}
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],g=s.gender,L=ar?0:1,perms=PERMS[s.role],emp=!perms.includes('BOOKINGS_VIEW_ALL');
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const all=ORDER.filter(id=>!BK[id].hidden||s.showNew).map(id=>this.bk(id)).filter(b=>!emp||b.staffIdx.includes(1));
+    const f=s.f,q=s.query.toLowerCase();
+    const pass=b=>(!f.bride||b.bride)&&(!f.staff.length||b.staffIdx.some(x=>f.staff.includes(x)))&&(!f.status.length||f.status.includes(b.st))&&(!f.pay.length||f.pay.includes(b.payKey));
+    const list=all.filter(b=>b.tab===s.tab&&pass(b)&&(!q||b.search.toLowerCase().includes(q)));
+    const counts={};['pending','up','today','past'].forEach(k=>counts[k]=all.filter(b=>b.tab===k).length);
+    const ls=s.listState;const E=t.empty[s.tab];
+    const ICN={empty:'M5 6h14v14H5zM5 10.5h14M9 3.5v4M15 3.5v4',search:'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4',err:'M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'};
+    const listPh=ls==='empty'?{show:true,icon:ICN.empty,title:E[0],body:E[1],hasAction:true,action:E[2],onAction:()=>{if(s.tab==='up'||s.tab==='today')location.href='WAB Merchant 04 Calendar.dc.html?s=day';else this.load('listState')}}:ls==='error'?{show:true,icon:ICN.err,title:t.errServer,body:t.errBody,hasAction:true,action:t.retry,onAction:()=>this.load('listState')}:(!ls&&!list.length?(q?{show:true,icon:ICN.search,title:t.noResults,body:t.noResultsBody,hasAction:false}:{show:true,icon:ICN.empty,title:E[0],body:E[1],hasAction:false}):{show:false});
+    const b=this.bk(s.bid);
+    const canR=perms.includes('BOOKINGS_RESPOND'),canO=perms.includes('BOOKINGS_OPERATE');
+    const bar={pending:b.st==='pending'&&canR,before:b.st==='approved'&&!b.after&&canO,after:b.st==='approved'&&b.after&&canO};bar.show=bar.pending||bar.before||bar.after;
+    const isCancel=s.sheet==='cancel',rl=isCancel?t.cancelReasons:t.reasons,rOk=s.reason>=0&&(s.reason<3||s.other.trim());
+    const reasonText=s.reason===3?s.other:rl[s.reason];
+    const fdo=s.fd||f;const setFd=o=>this.setState({fd:Object.assign({},fdo,o)});const tog=(arr,v)=>arr.includes(v)?arr.filter(x=>x!==v):arr.concat([v]);
+    const fc=(f.range>=0?1:0)+f.staff.length+f.status.length+f.pay.length+(f.bride?1:0);
+    const chips=[].concat(f.range>=0?[{label:t.ranges[f.range],onClick:()=>this.setState({f:Object.assign({},f,{range:-1})})}]:[],f.staff.map(x=>({label:STF[g][x][L],onClick:()=>this.setState({f:Object.assign({},f,{staff:f.staff.filter(y=>y!==x)})})})),f.status.map(x=>({label:t.st[x],onClick:()=>this.setState({f:Object.assign({},f,{status:f.status.filter(y=>y!==x)})})})),f.pay.map(x=>({label:t.py[x],onClick:()=>this.setState({f:Object.assign({},f,{pay:f.pay.filter(y=>y!==x)})})})),f.bride?[{label:t.brideOnly,onClick:()=>this.setState({f:Object.assign({},f,{bride:false})})}]:[]);
+    const person=b.persons[s.rp]||b.persons[0];
+    const eligible=STF[g].map((x,i)=>({x,i})).filter(({x,i})=>i!==person.sf&&i!==3&&(!person.bride||x[2])).map(({x,i},j)=>({name:x[L],i:x[L].charAt(0),brideQ:g==='female'&&!!x[2],onClick:()=>this.setState({rsel:i}),
+      style:{width:'100%',display:'flex',alignItems:'center',gap:'12px',padding:'12px',marginBottom:'8px',borderRadius:'16px',border:'1.5px solid '+(s.rsel===i?'#A855F7':'var(--line)'),background:s.rsel===i?'var(--soft)':'var(--card)',color:'var(--ink)',cursor:'pointer',textAlign:'start'},
+      radio:{width:'20px',height:'20px',borderRadius:'50%',boxSizing:'border-box',flexShrink:0,border:s.rsel===i?'6px solid #A855F7':'2px solid var(--faint)'}}));
+    const rselValid=eligible.length&&s.rsel>=0&&STF[g][s.rsel]&&s.rsel!==person.sf;
+    const pBtn=(bg,c)=>({height:'50px',borderRadius:'14px',border:'none',background:bg,color:c||'#fff',fontSize:'14.5px',fontWeight:600,cursor:'pointer'});
+    const icS=(rose)=>({width:'56px',height:'56px',borderRadius:'50%',margin:'0 auto 14px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'24px',fontWeight:700,background:rose?'rgba(217,70,122,.12)':'var(--soft)',color:rose?'#D9467A':'var(--accent)'});
+    const dmap={complete:{icon:'✓',iconStyle:icS(false),title:t.completeTitle,body:t.completeBody,hasAmount:true,amount:b.remaining,hasNote:true,note:t.completeNote,noteStyle:{fontSize:'12px',color:'var(--muted)'},primary:t.confirmComplete,primaryStyle:pBtn('linear-gradient(135deg,#6D28D9,#A855F7)'),hasSecondary:true,
+        onPrimary:()=>{this.setOv(b.id,{st:'completed',pay:'paid',hx:['completed']});this.setState({dialog:null});this.toast(t.toast.completed)}},
+      noshow:{icon:'!',iconStyle:icS(true),title:t.noshowTitle,body:t.noshowBody,hasAmount:false,hasNote:true,note:b.payKey==='arrival'?t.noshowNone:t.noshowKeep.replace('{x}',b.dep+' '+t.cur),noteStyle:{fontSize:'13.5px',fontWeight:700,color:'#D9467A',padding:'10px',borderRadius:'12px',background:'rgba(217,70,122,.08)'},primary:t.confirmNoshow,primaryStyle:pBtn('#D9467A'),hasSecondary:true,
+        onPrimary:()=>{this.setOv(b.id,{st:'noshow',hx:['noshow']});this.setState({dialog:null});this.toast(t.toast.noshow)}},
+      conc:{icon:'i',iconStyle:icS(false),title:t.concTitle,body:t.concBody,hasAmount:false,hasNote:false,primary:t.ok,primaryStyle:pBtn('linear-gradient(135deg,#6D28D9,#A855F7)'),hasSecondary:false,
+        onPrimary:()=>{this.setOv(b.id,{st:'approved',hx:['approved']});this.setState({dialog:null,dState:'loading'});setTimeout(()=>this.setState({dState:''}),700)}}};
+    const dm=dmap[s.dialog];
+    const sheet={show:!!s.sheet,reasons:s.sheet==='reject'||isCancel,reassign:s.sheet==='reassign',filter:s.sheet==='filter',title:isCancel?t.cancelTitle:t.rejectTitle,sub:isCancel?t.cancelSub:t.rejectSub,refundNote:isCancel||b.payKey!=='arrival'?t.fullRefund:'',cta:isCancel?t.confirmCancel:t.confirmReject,
+      onConfirm:()=>{if(!rOk)return;if(isCancel){this.setOv(b.id,{st:'cs',refund:b.payKey==='arrival'?null:'pending',reasonText,hx:['cs']});this.toast(t.toast.cancelled)}else{this.setOv(b.id,{st:'rejected',refund:b.payKey==='arrival'?null:'pending',reasonText,hx:['rejected']});this.toast(t.toast.rejected)}this.setState({sheet:null})}};
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',themeVars:tv(s.lang,s.theme),panelTitle:'03 · Bookings list & details (M08, M09)',
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),controls:CTRL.map(([k,label,o])=>({label,opts:seg(k,o)})),
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      on:{list:s.screen==='list',details:s.screen==='details'},four:[1,2,3,4],offline:s.sstate==='offline',isEmp:emp,listTitle:emp?t.myBookings:t.bookings,tabs:tabs('book',t,perms),
+      search:s.search,onSearch:e=>{const v=e.target.value;this.setState({search:v});clearTimeout(this.deb);this.deb=setTimeout(()=>{this.setState({query:v});this.load('listState',500)},500)},
+      openFilter:()=>this.setState({sheet:'filter',fd:Object.assign({},f)}),hasFilters:fc>0,filterCount:fc,chips,
+      tabsTop:['pending','up','today','past'].map(k=>({label:t.tabsL[k],hasCount:k==='pending'&&counts.pending>0,count:counts.pending,countStyle:{minWidth:'18px',height:'18px',padding:'0 4px',boxSizing:'border-box',borderRadius:'9px',background:s.tab===k?'rgba(255,255,255,.3)':'#A855F7',color:'#fff',fontSize:'10px',display:'inline-flex',alignItems:'center',justifyContent:'center',marginInlineStart:'4px'},
+        onClick:()=>{this.setState({tab:k,listState:s.listState==='empty'||s.listState==='error'?'':s.listState});this.load('listState',450)},style:{height:'38px',borderRadius:'11px',border:'none',cursor:'pointer',fontSize:'12.5px',fontWeight:600,display:'flex',alignItems:'center',justifyContent:'center',background:s.tab===k?'linear-gradient(135deg,#6D28D9,#A855F7)':'transparent',color:s.tab===k?'#fff':'var(--muted)'}})),
+      newPill:s.newPill&&s.tab==='pending',listLoading:ls==='loading',listPh,listReady:(!ls||ls==='paging')&&!listPh.show,paging:ls==='paging',
+      cards:list.map(x=>Object.assign({},x,{isPending:x.st==='pending',onClick:()=>{this.setState({screen:'details',bid:x.id,sheet:null,dialog:null});this.load('dState',500)},
+        style:{width:'100%',flexShrink:0,padding:'14px',borderRadius:'18px',border:'1px solid '+(x.bride?'#F4A7C4':'var(--line)'),background:'var(--card)',color:'var(--ink)',cursor:'pointer',textAlign:'start',boxShadow:'0 4px 14px rgba(31,34,51,.04)',animation:x.id==='b0'?'newIn 1.6s ease both':'none'}})),
+      goList:()=>this.setState({screen:'list',sheet:null,dialog:null}),dLoading:s.dState==='loading',dError:s.dState==='error',dReady:!s.dState,retryD:()=>this.load('dState'),dShim:[120,84,170,120].map(shimS),
+      b,copyLabel:s.copied?t.copied:t.copy,copyRef:()=>{try{navigator.clipboard.writeText(b.ref)}catch(e){}this.setState({copied:true})},callCust:()=>this.toast(t.toast.call),waCust:()=>this.toast(t.toast.wa),
+      bar,busy:s.busy,notBusy:!s.busy,
+      doApprove:()=>{if(s.busy)return;this.setState({busy:true});setTimeout(()=>{this.setState({busy:false});this.setOv(b.id,{st:'approved',hx:['approved']});this.toast(t.toast.approved)},800)},
+      askReject:()=>this.setState({sheet:'reject',reason:-1,other:''}),askCancel:()=>this.setState({sheet:'cancel',reason:-1,other:''}),askReassign:()=>this.setState({sheet:'reassign',rp:0,rsel:-1}),askComplete:()=>this.setState({dialog:'complete'}),askNoShow:()=>this.setState({dialog:'noshow'}),
+      closeAll:()=>this.setState({sheet:null,dialog:null}),sheet,
+      reasons:rl.map((l,i)=>({label:l,onClick:()=>this.setState({reason:i}),dot:{width:'20px',height:'20px',borderRadius:'50%',boxSizing:'border-box',flexShrink:0,border:s.reason===i?'6px solid #A855F7':'2px solid var(--faint)'}})),
+      otherOn:s.reason===3,other:s.other,onOther:e=>this.setState({other:e.target.value}),reasonBtn:{height:'52px',borderRadius:'14px',border:'none',background:rOk?'#D9467A':'var(--soft)',color:rOk?'#fff':'var(--faint)',fontSize:'15px',fontWeight:600,cursor:'pointer'},
+      multiPerson:b.persons.length>1,personTabs:b.persons.map((p,i)=>({label:p.name,onClick:()=>this.setState({rp:i,rsel:-1}),style:chipS(s.rp===i)})),reassignCurrent:t.current+person.staff,eligible,
+      reassignBtn:{width:'100%',height:'52px',borderRadius:'14px',border:'none',background:rselValid?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--soft)',color:rselValid?'#fff':'var(--faint)',fontSize:'15px',fontWeight:600,cursor:'pointer'},
+      confirmReassign:()=>{if(!rselValid)return;const cur=(s.ov[b.id]||{}).staff||{};this.setOv(b.id,{staff:Object.assign({},cur,{[s.rp]:s.rsel}),hx:['reassigned']});this.setState({sheet:null});this.toast(t.toast.reassigned)},
+      fRange:t.ranges.map((l,i)=>({label:l,onClick:()=>setFd({range:fdo.range===i?-1:i}),style:chipS(fdo.range===i)})),customRange:fdo.range===3,
+      fStaff:STF[g].map((x,i)=>({label:x[L],onClick:()=>setFd({staff:tog(fdo.staff,i)}),style:chipS(fdo.staff.includes(i))})),
+      fStatus:['pending','approved','completed','noshow','rejected','cs','cc','auto'].map(k=>({label:t.st[k],onClick:()=>setFd({status:tog(fdo.status,k)}),style:chipS(fdo.status.includes(k))})),
+      fPay:['arrival','deposit','full','paid'].map(k=>({label:t.py[k],onClick:()=>setFd({pay:tog(fdo.pay,k)}),style:chipS(fdo.pay.includes(k))})),
+      isWomen:g==='female',toggleBride:()=>setFd({bride:!fdo.bride}),brideSw:{track:{width:'46px',height:'28px',borderRadius:'14px',background:fdo.bride?'#A855F7':'var(--line)',position:'relative',flexShrink:0,transition:'background .2s'},knob:{position:'absolute',top:'3px',insetInlineStart:fdo.bride?'21px':'3px',width:'22px',height:'22px',borderRadius:'50%',background:'#fff',boxShadow:'0 2px 4px rgba(0,0,0,.2)',transition:'all .2s'}},
+      resetFilters:()=>this.setState({fd:{range:-1,staff:[],status:[],pay:[],bride:false}}),applyFilters:()=>{this.setState({f:fdo,fd:null,sheet:null});this.load('listState',500)},
+      dlg:dm?Object.assign({show:true},dm):{show:false},toast:s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

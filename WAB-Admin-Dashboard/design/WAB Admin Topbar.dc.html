@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<header style="height:64px;display:flex;align-items:center;gap:12px;padding:0 28px;background:var(--page);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:15;box-sizing:border-box">
+  <div style="position:relative;flex:1;max-width:520px">
+    <div style="display:flex;align-items:center;gap:9px;height:40px;padding:0 13px;border-radius:11px;background:var(--card);border:1px solid var(--line2)">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--faint);flex-shrink:0"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg>
+      <input value="{{ q }}" onChange="{{ onQ }}" onFocus="{{ openSearch }}" placeholder="{{ t.searchPh }}" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:13px;font-family:inherit;outline:none">
+      <span style="font-size:10.5px;color:var(--faint);border:1px solid var(--line2);border-radius:5px;padding:1px 5px;font-family:Poppins,sans-serif;direction:ltr">⌘K</span>
+    </div>
+    <sc-if value="{{ searchOpen }}">
+      <div style="position:absolute;top:46px;inset-inline-start:0;width:100%;min-width:420px;background:var(--card);border:1px solid var(--line2);border-radius:14px;box-shadow:0 18px 50px rgba(20,23,43,.16);padding:8px;z-index:40;max-height:440px;overflow-y:auto">
+        <sc-if value="{{ noRes }}"><div style="padding:22px;text-align:center;color:var(--muted);font-size:12.5px">{{ t.noRes }}</div></sc-if>
+        <sc-for list="{{ groups }}" as="g">
+          <div style="padding:6px 0">
+            <div style="font-size:11px;font-weight:700;color:var(--faint);padding:4px 10px;letter-spacing:.3px">{{ g.t }}</div>
+            <sc-for list="{{ g.items }}" as="r">
+              <a href="{{ r.href }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;color:var(--ink);text-decoration:none" style-hover="background:var(--hover)">
+                <span style="width:30px;height:30px;border-radius:9px;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0">{{ r.ini }}</span>
+                <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12.5px">{{ r.t }}</div><div style="font-size:11.5px;color:var(--muted)">{{ r.sub }}</div></div>
+              </a>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+      <div onClick="{{ closeAll }}" style="position:fixed;inset:0;z-index:30"></div>
+    </sc-if>
+  </div>
+  <div style="flex:1"></div>
+  <sc-if value="{{ enNote }}"><span style="font-size:11px;color:var(--muted);background:var(--soft);padding:5px 9px;border-radius:8px">{{ t.enNote }}</span></sc-if>
+  <button onClick="{{ toggleLang }}" title="Language" style="height:38px;min-width:42px;padding:0 11px;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">{{ t.langBtn }}</button>
+  <button onClick="{{ toggleTheme }}" title="Theme" style="width:40px;height:38px;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="{{ themeIcon }}"></path></svg></button>
+  <div style="position:relative">
+    <button onClick="{{ toggleBell }}" style="width:40px;height:38px;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 20.5a2.2 2.2 0 0 0 4 0"></path></svg><span style="position:absolute;top:-5px;inset-inline-end:-5px;min-width:18px;height:18px;border-radius:9px;background:#C2386B;color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--page);font-family:Poppins,sans-serif">{{ bellCount }}</span></button>
+    <sc-if value="{{ bellOpen }}">
+      <div style="position:absolute;top:46px;inset-inline-end:0;width:360px;background:var(--card);border:1px solid var(--line2);border-radius:14px;box-shadow:0 18px 50px rgba(20,23,43,.16);z-index:40;overflow:hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)"><span style="font-weight:700">{{ t.alerts }}</span><a href="{{ alertsHref }}" style="font-size:12px;color:var(--accent);font-weight:600">{{ t.viewAll }}</a></div>
+        <sc-for list="{{ bell }}" as="a">
+          <a href="{{ a.href }}" style="display:flex;gap:11px;padding:12px 16px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)" style-hover="background:var(--hover)">
+            <span style="{{ a.dot }}"></span>
+            <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12.5px;line-height:1.45">{{ a.t }}</div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">{{ a.sub }}</div></div>
+          </a>
+        </sc-for>
+      </div>
+      <div onClick="{{ closeAll }}" style="position:fixed;inset:0;z-index:30"></div>
+    </sc-if>
+  </div>
+  <div style="position:relative">
+    <button onClick="{{ toggleMenu }}" style="display:flex;align-items:center;gap:9px;height:38px;padding:0 6px;padding-inline-end:10px;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--ink);cursor:pointer;font-family:inherit">
+      <span style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">{{ ini }}</span>
+      <span style="font-size:12.5px;font-weight:600">{{ name }}</span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
+    </button>
+    <sc-if value="{{ menuOpen }}">
+      <div style="position:absolute;top:46px;inset-inline-end:0;width:240px;background:var(--card);border:1px solid var(--line2);border-radius:14px;box-shadow:0 18px 50px rgba(20,23,43,.16);z-index:40;padding:6px">
+        <div style="padding:10px 12px 12px;border-bottom:1px solid var(--line);margin-bottom:4px"><div style="font-weight:700">{{ name }}</div><div style="font-size:11.5px;color:var(--muted);direction:ltr;text-align:start">admin@wab.jo</div></div>
+        <sc-for list="{{ menu }}" as="m"><a href="{{ m.href }}" onClick="{{ m.onClick }}" style="{{ m.style }}" style-hover="background:var(--hover)">{{ m.t }}</a></sc-for>
+      </div>
+      <div onClick="{{ closeAll }}" style="position:fixed;inset:0;z-index:30"></div>
+    </sc-if>
+  </div>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ar&quot;,&quot;en&quot;],&quot;default&quot;:&quot;ar&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;bilingual&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state={q:'',open:null};
+  renderVals(){
+    const W=window.WABA;if(!W)return {t:{},groups:[],bell:[],menu:[]};
+    const lang=this.props.lang||'ar',ar=lang==='ar',theme=this.props.theme||'light';
+    const t=ar?{searchPh:'ابحث عن عميل، صالون، رقم حجز أو هاتف عضو…',alerts:'التنبيهات',viewAll:'عرض الكل',langBtn:this.props.plang==='en'?'ع':'EN',noRes:'لا توجد نتائج مطابقة',enNote:'English متاحة لصفحات: النظرة المباشرة، الحجوزات، رحلة المستخدم',groups:['العملاء','الصالونات','الحجوزات','الأعضاء']}:{searchPh:'Search customers, salons, booking ref or member phone…',alerts:'Alerts',viewAll:'View all',langBtn:'ع',noRes:'No matching results',enNote:'English: key pages only (Overview, Bookings, Journey)',groups:['Customers','Salons','Bookings','Members']};
+    const q=this.state.q.trim().toLowerCase();
+    const N=W.NAMES,S=W.SALONS;
+    const cust=N.slice(0,8).map((n,i)=>({t:ar?n[0]:n[1],sub:'+962 7'+(9-i%3)+' '+(310+i*37)+' '+(2040+i*113),ini:(ar?n[0]:n[1])[0],href:W.href('A12','id=C-'+(1042+i))}));
+    const sal=S.slice(0,8).map((s,i)=>({t:ar?s[0]:s[1],sub:(ar?'عمّان، ':'Amman, ')+(ar?s[3]:s[4]),ini:(ar?s[0]:s[1])[0],href:W.href('A13','id=S-'+(201+i))}));
+    const bk=['24817','24816','24809','24788','24751'].map((r,i)=>({t:'WAB-'+r,sub:(ar?N[i][0]:N[i][1])+' · '+(ar?S[i][0]:S[i][1]),ini:'#',href:W.href('A15','ref=WAB-'+r)}));
+    const mem=[[ar?'خالد السعدي':'Khaled Saadi','+962 79 554 1203',ar?'مالك · صالون النخبة':'Owner · Elite Men'],[ar?'رولا قاسم':'Rula Qasem','+962 78 221 0981',ar?'مديرة · دار العروس':'Manager · Bridal House']].map(m=>({t:m[0],sub:m[1]+' · '+m[2],ini:m[0][0],href:W.href('A11','q='+encodeURIComponent(m[1]))}));
+    const f=a=>q?a.filter(x=>(x.t+' '+x.sub).toLowerCase().indexOf(q)>=0).slice(0,4):a.slice(0,3);
+    const groups=[[t.groups[0],f(cust)],[t.groups[1],f(sal)],[t.groups[2],f(bk)],[t.groups[3],f(mem)]].filter(g=>g[1].length).map(g=>({t:g[0],items:g[1]}));
+    const d=theme==='dark';
+    const bell=[[ar?'ارتفاع في فشل الدفع: 6 محاولات خلال 15 دقيقة':'Payment failure spike: 6 attempts in 15 min',ar?'حرج · قبل 4 دقائق':'Critical · 4 min ago','rose',W.href('A27')],[ar?'طلب انضمام جديد: ستوديو ليلك':'New application: Lilac Studio',ar?'معلومة · قبل 22 دقيقة':'Info · 22 min ago','purple',W.href('A14')],[ar?'استرداد متأخر > 48 ساعة · WAB-24690':'Refund delayed > 48h · WAB-24690',ar?'تحذير · قبل ساعة':'Warning · 1h ago','amber',W.href('A17')]].map(a=>({t:a[0],sub:a[1],href:a[3],dot:{width:'8px',height:'8px',borderRadius:'4px',background:W.tone(a[2],d)[0],marginTop:'6px',flexShrink:0}}));
+    const ms={display:'block',padding:'9px 12px',borderRadius:'9px',color:'var(--ink)',textDecoration:'none',fontSize:'12.5px',cursor:'pointer'};
+    const menu=[[ar?'الملف الشخصي والأمان':'Profile & security',W.href('A28','s=profile')],[ar?'تغيير كلمة المرور':'Change password',W.href('A28','s=profile')],[ar?'مستلمو التنبيهات':'Alert recipients',W.href('A28','s=alerts')],[ar?'تسجيل الخروج':'Sign out',W.FILES.login]].map((m,i)=>({t:m[0],href:m[1],style:i===3?Object.assign({},ms,{color:'var(--rose)',borderTop:'1px solid var(--line)',marginTop:'4px'}):ms}));
+    const tg=k=>()=>this.setState(s=>({open:s.open===k?null:k}));
+    return {t,q:this.state.q,onQ:e=>this.setState({q:e.target.value,open:'search'}),openSearch:()=>this.setState({open:'search'}),searchOpen:this.state.open==='search',groups,noRes:!groups.length,
+      enNote:ar&&this.props.plang==='en',bell,bellCount:W.COUNTS.A27,bellOpen:this.state.open==='bell',alertsHref:W.href('A27'),toggleBell:tg('bell'),menuOpen:this.state.open==='menu',toggleMenu:tg('menu'),menu,
+      closeAll:()=>this.setState({open:null}),name:ar?W.ADMIN.ar:W.ADMIN.en,ini:ar?'ل':'L',themeIcon:d?W.IC.sun:W.IC.moon,
+      toggleLang:()=>W.setPrefs({lang:(this.props.plang||lang)==='ar'?'en':'ar'}),toggleTheme:()=>W.setPrefs({theme:d?'light':'dark'})};
+  }
+}
+</script>
+</body>
+</html>

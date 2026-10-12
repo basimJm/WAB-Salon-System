@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div>
+<sc-if value="{{ modalOn }}">
+  <div style="position:fixed;inset:0;z-index:80;background:rgba(20,23,43,.48);display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn .15s ease">
+    <div style="width:540px;max-width:100%;max-height:calc(100vh - 48px);overflow-y:auto;background:var(--card);border:1px solid var(--line2);border-radius:18px;box-shadow:0 30px 80px rgba(20,23,43,.3);animation:popIn .2s ease;box-sizing:border-box">
+      <div style="display:flex;gap:14px;padding:22px 24px 6px">
+        <span style="{{ m.iconWrap }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ m.icon }}"></path></svg></span>
+        <div style="flex:1;min-width:0"><div style="font-size:17px;font-weight:700;line-height:1.35">{{ m.title }}</div><sc-if value="{{ m.hasDesc }}"><div style="font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.6">{{ m.desc }}</div></sc-if></div>
+        <button onClick="{{ closeModal }}" style="width:32px;height:32px;border-radius:9px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+      </div>
+      <div style="padding:12px 24px 4px;display:flex;flex-direction:column;gap:14px">
+        <sc-if value="{{ m.hasWarn }}"><div style="display:flex;gap:10px;padding:11px 13px;border-radius:11px;background:rgba(245,158,11,.12);color:var(--amber);font-size:12.5px;line-height:1.6;font-weight:500"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" style="flex-shrink:0;margin-top:1px"><path d="M12 4 2.5 20h19zM12 10v4.5M12 17.5h.01"></path></svg><span>{{ m.warn }}</span></div></sc-if>
+        <sc-for list="{{ m.fields }}" as="f">
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <sc-if value="{{ f.hasLabel }}"><div style="font-size:12.5px;font-weight:600;color:var(--ink)">{{ f.label }}<span style="color:var(--rose)">{{ f.star }}</span></div></sc-if>
+            <sc-if value="{{ f.isInfo }}"><div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden"><sc-for list="{{ f.rows }}" as="r"><div style="display:flex;justify-content:space-between;gap:12px;padding:9px 13px;font-size:12.5px;border-bottom:1px solid var(--line);background:var(--surface)"><span style="color:var(--muted)">{{ r.k }}</span><span style="{{ r.vs }}">{{ r.v }}</span></div></sc-for></div></sc-if>
+            <sc-if value="{{ f.isText }}"><div style="display:flex;align-items:center;gap:8px;height:42px;border-radius:11px;border:1.5px solid var(--line2);background:var(--card);padding:0 12px;box-sizing:border-box;border-color:{{ f.bc }}"><input value="{{ f.value }}" onChange="{{ f.onChange }}" type="{{ f.inputType }}" placeholder="{{ f.ph }}" dir="{{ f.dir }}" style="flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:13px;font-family:inherit;outline:none"><sc-if value="{{ f.hasSuffix }}"><span style="font-size:12px;color:var(--muted)">{{ f.suffix }}</span></sc-if></div></sc-if>
+            <sc-if value="{{ f.isArea }}"><textarea value="{{ f.value }}" onChange="{{ f.onChange }}" placeholder="{{ f.ph }}" style="min-height:84px;resize:vertical;border-radius:11px;border:1.5px solid var(--line2);background:var(--card);color:var(--ink);font-size:13px;font-family:inherit;padding:10px 12px;outline:none;border-color:{{ f.bc }}"></textarea></sc-if>
+            <sc-if value="{{ f.isSelect }}"><select value="{{ f.value }}" onChange="{{ f.onChange }}" style="height:42px;border-radius:11px;border:1.5px solid var(--line2);background:var(--card);color:var(--ink);font-size:13px;font-family:inherit;padding:0 10px;border-color:{{ f.bc }}"><sc-for list="{{ f.opts }}" as="o"><option value="{{ o.v }}">{{ o.label }}</option></sc-for></select></sc-if>
+            <sc-if value="{{ f.isRadio }}"><div style="display:flex;flex-direction:column;gap:7px"><sc-for list="{{ f.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}"><span style="{{ o.dot }}"></span><span style="flex:1;text-align:start"><span style="display:block;font-weight:600;font-size:13px">{{ o.label }}</span><sc-if value="{{ o.hasSub }}"><span style="display:block;font-size:11.5px;color:var(--muted);margin-top:2px">{{ o.sub }}</span></sc-if></span><sc-if value="{{ o.hasTag }}"><span style="{{ o.tagStyle }}">{{ o.tag }}</span></sc-if></button></sc-for></div></sc-if>
+            <sc-if value="{{ f.hasErr }}"><div style="font-size:11.5px;color:var(--rose);animation:shake .3s ease">{{ f.err }}</div></sc-if>
+            <sc-if value="{{ f.hasHint }}"><div style="font-size:11.5px;color:var(--muted)">{{ f.hint }}</div></sc-if>
+          </div>
+        </sc-for>
+        <div style="display:flex;flex-direction:column;gap:6px;padding:11px 13px;border-radius:11px;background:var(--surface);font-size:11.5px;color:var(--muted);line-height:1.6">
+          <sc-if value="{{ m.hasNotify }}"><div style="display:flex;gap:8px;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 20.5a2.2 2.2 0 0 0 4 0"></path></svg><span>{{ m.notify }}</span></div></sc-if>
+          <div style="display:flex;gap:8px;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z"></path></svg><span>{{ L.audit }}</span></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:9px;padding:18px 24px 22px">
+        <button onClick="{{ closeModal }}" style="{{ cancelBtn }}">{{ L.cancel }}</button>
+        <button onClick="{{ confirm }}" style="{{ m.confirmStyle }}"><sc-if value="{{ busy }}"><span style="width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>{{ m.confirm }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ drawerOn }}">
+  <div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;z-index:70;background:rgba(20,23,43,.35);animation:fadeIn .15s ease"></div>
+  <div style="position:fixed;top:0;bottom:0;inset-inline-end:0;width:560px;max-width:94vw;z-index:71;background:var(--card);border-inline-start:1px solid var(--line2);box-shadow:0 0 60px rgba(20,23,43,.2);display:flex;flex-direction:column;animation:{{ drawerAnim }}">
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:20px 22px;border-bottom:1px solid var(--line)">
+      <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:16px;font-weight:700">{{ d.title }}</span><sc-if value="{{ d.hasBadge }}"><span style="{{ d.badgeStyle }}">{{ d.badge }}</span></sc-if></div><sc-if value="{{ d.hasSub }}"><div style="font-size:12px;color:var(--muted);margin-top:3px">{{ d.sub }}</div></sc-if></div>
+      <button onClick="{{ closeDrawer }}" style="width:32px;height:32px;border-radius:9px;border:1px solid var(--line2);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:20px">
+      <sc-for list="{{ d.sections }}" as="s">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-if value="{{ s.hasTitle }}"><div style="font-size:11.5px;font-weight:700;color:var(--faint);letter-spacing:.3px">{{ s.title }}</div></sc-if>
+          <sc-if value="{{ s.isKv }}"><div style="border:1px solid var(--line);border-radius:12px;overflow:hidden"><sc-for list="{{ s.kv }}" as="r"><div style="display:flex;justify-content:space-between;gap:14px;padding:9px 13px;font-size:12.5px;border-bottom:1px solid var(--line)"><span style="color:var(--muted);flex-shrink:0">{{ r.k }}</span><span style="{{ r.vs }}" onClick="{{ r.onClick }}">{{ r.v }}</span></div></sc-for></div></sc-if>
+          <sc-if value="{{ s.isJson }}"><pre dir="ltr" style="margin:0;padding:13px 14px;border-radius:12px;background:#14172B;color:#E9D5FF;font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.65;overflow-x:auto;white-space:pre;text-align:left">{{ s.json }}</pre></sc-if>
+          <sc-if value="{{ s.isTl }}"><div style="display:flex;flex-direction:column"><sc-for list="{{ s.tl }}" as="e"><div style="display:flex;gap:11px;position:relative;padding-bottom:14px"><span style="{{ e.dot }}"></span><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:10px"><span style="font-weight:600;font-size:12.5px">{{ e.t }}</span><span style="font-size:11.5px;color:var(--faint);white-space:nowrap">{{ e.time }}</span></div><sc-if value="{{ e.hasSub }}"><div style="font-size:11.5px;color:var(--muted);margin-top:2px">{{ e.sub }}</div></sc-if></div></div></sc-for></div></sc-if>
+          <sc-if value="{{ s.isList }}"><div style="display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden"><sc-for list="{{ s.list }}" as="r"><a href="{{ r.href }}" onClick="{{ r.onClick }}" style="display:flex;align-items:center;gap:11px;padding:10px 13px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;cursor:pointer" style-hover="background:var(--hover)"><span style="width:30px;height:30px;border-radius:9px;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0">{{ r.ini }}</span><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12.5px">{{ r.t }}</div><div style="font-size:11.5px;color:var(--muted)">{{ r.sub }}</div></div><span style="font-size:11.5px;color:var(--accent);font-weight:600;white-space:nowrap">{{ r.cta }}</span></a></sc-for></div></sc-if>
+          <sc-if value="{{ s.isDiff }}"><div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:12px"><div style="display:grid;grid-template-columns:1fr 1.3fr 1.3fr;background:var(--surface);font-weight:700;color:var(--muted)"><span style="padding:8px 11px">{{ L.field }}</span><span style="padding:8px 11px">{{ L.before }}</span><span style="padding:8px 11px">{{ L.after }}</span></div><sc-for list="{{ s.diff }}" as="r"><div style="display:grid;grid-template-columns:1fr 1.3fr 1.3fr;border-top:1px solid var(--line)"><span style="padding:9px 11px;font-weight:600">{{ r.f }}</span><span style="padding:9px 11px;background:var(--roseSoft);color:var(--rose);text-decoration:line-through">{{ r.b }}</span><span style="padding:9px 11px;background:rgba(46,158,120,.08);color:var(--green);font-weight:600">{{ r.a }}</span></div></sc-for></div></sc-if>
+          <sc-if value="{{ s.isText }}"><div style="font-size:12.5px;line-height:1.7;color:var(--ink);padding:12px 14px;border-radius:12px;background:var(--surface)">{{ s.text }}</div></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ d.hasActions }}"><div style="display:flex;gap:9px;padding:14px 22px;border-top:1px solid var(--line);flex-wrap:wrap"><sc-for list="{{ d.actions }}" as="a"><button onClick="{{ a.onClick }}" style="{{ a.style }}">{{ a.t }}</button></sc-for></div></sc-if>
+  </div>
+</sc-if>
+<div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none">
+  <sc-for list="{{ toasts }}" as="x">
+    <div style="{{ x.style }}">
+      <span style="{{ x.iconWrap }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="{{ x.icon }}"></path></svg></span>
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0"><span>{{ x.text }}</span><sc-if value="{{ x.prog }}"><span style="display:block;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);overflow:hidden"><span style="{{ x.bar }}"></span></span></sc-if></div>
+    </div>
+  </sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ar&quot;,&quot;en&quot;],&quot;default&quot;:&quot;ar&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state={modal:null,vals:{},errs:{},busy:false,drawer:null,toasts:[]};
+  componentDidMount(){
+    const go=()=>{const W=window.WABA;if(!W){setTimeout(go,60);return}
+      this.offs=[W.on('modal',s=>{const v={};(s.fields||[]).forEach(f=>{if(f.value!=null)v[f.id]=f.value;else if(f.type==='radio'&&f.options&&f.options[0])v[f.id]=f.options.filter(o=>!o.disabled)[0].v;else if(f.type==='select'&&f.options)v[f.id]=f.options[0].v});this.setState({modal:s,vals:v,errs:{},busy:false})}),
+        W.on('drawer',s=>this.setState({drawer:s})),
+        W.on('toast',x=>this.addToast(x)),W.on('close',()=>this.setState({modal:null,drawer:null}))];
+      this.forceUpdate()};go();
+    this.kd=e=>{if(e.key==='Escape')this.setState({modal:null,drawer:null})};window.addEventListener('keydown',this.kd);
+  }
+  componentWillUnmount(){(this.offs||[]).forEach(f=>f());window.removeEventListener('keydown',this.kd)}
+  addToast(x){const id=Math.random();const T={id,text:x.text,tone:x.tone||'success',prog:!!x.progress,p:0};this.setState(s=>({toasts:s.toasts.concat([T])}));
+    if(x.progress){let p=0;const iv=setInterval(()=>{p+=14+Math.random()*12;if(p>=100){clearInterval(iv);this.setState(s=>({toasts:s.toasts.map(t=>t.id===id?Object.assign({},t,{prog:false,p:100,text:x.then||x.text,tone:'success'}):t)}));setTimeout(()=>this.dropToast(id),2600)}else this.setState(s=>({toasts:s.toasts.map(t=>t.id===id?Object.assign({},t,{p}):t)}))},260)}
+    else setTimeout(()=>this.dropToast(id),x.ms||3000)}
+  dropToast(id){this.setState(s=>({toasts:s.toasts.filter(t=>t.id!==id)}))}
+  doConfirm(){const W=window.WABA,m=this.state.modal,lang=this.props.lang||'ar',L=W.UI[lang];const v=this.state.vals,errs={};
+    (m.fields||[]).forEach(f=>{if(!this.vis(f))return;const val=(v[f.id]==null?'':String(v[f.id])).trim();if(f.type==='reason'&&val.length<5)errs[f.id]=L.reasonReq;else if(f.required&&!val)errs[f.id]=L.reqErr;else if(f.validate){const e=f.validate(val,v);if(e)errs[f.id]=e}});
+    if(Object.keys(errs).length){this.setState({errs});return}
+    this.setState({busy:true});setTimeout(()=>{this.setState({modal:null,busy:false});if(m.onConfirm)m.onConfirm(v);if(m.success!==false)W.toast(m.success||(lang==='ar'?'تم تنفيذ الإجراء بنجاح':'Action completed'))},750)}
+  vis(f){if(!f.showIf)return true;return this.state.vals[f.showIf[0]]===f.showIf[1]}
+  renderVals(){
+    const W=window.WABA;if(!W)return {modalOn:false,drawerOn:false,toasts:[],m:{fields:[]},d:{sections:[]},L:{}};
+    const lang=this.props.lang||'ar',ar=lang==='ar',dk=this.props.theme==='dark',L=Object.assign({},W.UI[lang],ar?{field:'الحقل',before:'قبل',after:'بعد'}:{field:'Field',before:'Before',after:'After'});
+    const m=this.state.modal,v=this.state.vals,setV=(id,x)=>this.setState(s=>({vals:Object.assign({},s.vals,{[id]:x}),errs:Object.assign({},s.errs,{[id]:null})}));
+    let mv={fields:[]};
+    if(m){const tn=m.tone||'primary';const tc=tn==='danger'?'rose':tn==='warning'?'amber':tn==='success'?'green':'purple';const c=W.tone(tc,dk);
+      mv={title:m.title,desc:m.desc,hasDesc:!!m.desc,warn:m.warning,hasWarn:!!m.warning,notify:m.notify,hasNotify:!!m.notify,confirm:m.confirm||L.confirm,
+        confirmStyle:Object.assign(W.btn(tn==='danger'?'danger':tn==='success'?'success':'primary'),{opacity:this.state.busy?.75:1}),
+        icon:W.IC[m.icon||(tn==='danger'?'alert':tn==='success'?'ok':'info')],iconWrap:{width:'40px',height:'40px',borderRadius:'12px',background:c[1],color:c[0],display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0},
+        fields:(m.fields||[]).filter(f=>this.vis(f)).map(f=>{const e=this.state.errs[f.id],ty=f.type;const val=v[f.id]==null?'':v[f.id];
+          return {label:ty==='reason'&&!f.label?L.reason:f.label,hasLabel:!!(f.label||ty==='reason'),star:(ty==='reason'||f.required)?' *':'',isInfo:ty==='info',rows:(f.rows||[]).map(r=>({k:r[0],v:r[1],vs:{fontWeight:600,color:r[2]?W.tone(r[2],dk)[0]:'var(--ink)'}})),
+            isText:ty==='text'||ty==='number'||ty==='date',inputType:ty==='number'?'number':ty==='date'?'date':'text',isArea:ty==='reason'||ty==='textarea',isSelect:ty==='select',isRadio:ty==='radio',
+            value:val,onChange:ev=>setV(f.id,ev.target.value),ph:f.placeholder||(ty==='reason'?(ar?'اكتب سبباً واضحاً — سيظهر في سجل الأفعال':'Write a clear reason — shown in the audit log'):''),dir:f.dir||'auto',suffix:f.suffix,hasSuffix:!!f.suffix,bc:e?'var(--rose)':'var(--line2)',
+            err:e,hasErr:!!e,hint:f.hint,hasHint:!!f.hint&&!e,
+            opts:(f.options||[]).map(o=>{const on=val===o.v;return {v:o.v,label:o.label,sub:o.sub,hasSub:!!o.sub,tag:o.tag,hasTag:!!o.tag,tagStyle:W.bdg(o.tagTone||'grey',dk,1),onClick:()=>{if(!o.disabled)setV(f.id,o.v)},
+              style:{display:'flex',alignItems:'center',gap:'11px',padding:'11px 13px',borderRadius:'12px',border:'1.5px solid '+(on?'var(--accent)':'var(--line2)'),background:on?'var(--soft)':'var(--card)',color:'var(--ink)',cursor:o.disabled?'not-allowed':'pointer',opacity:o.disabled?.5:1,fontFamily:'inherit',width:'100%'},
+              dot:{width:'16px',height:'16px',borderRadius:'50%',border:on?'5px solid var(--accent)':'2px solid var(--line2)',boxSizing:'border-box',flexShrink:0}}})}})};}
+    const dr=this.state.drawer;let dv={sections:[]};
+    if(dr){dv={title:dr.title,sub:dr.sub,hasSub:!!dr.sub,badge:dr.badge&&dr.badge.t,hasBadge:!!dr.badge,badgeStyle:dr.badge?W.bdg(dr.badge.tone,dk):{},
+      actions:(dr.actions||[]).map(a=>({t:a.t,onClick:a.onClick,style:W.btn(a.kind||'secondary',1)})),hasActions:!!(dr.actions&&dr.actions.length),
+      sections:(dr.sections||[]).map(s=>({title:s.title,hasTitle:!!s.title,isKv:!!s.kv,kv:(s.kv||[]).map(r=>{const o=r[2]||{};return {k:r[0],v:r[1],onClick:o.onClick,vs:{fontWeight:600,textAlign:'end',color:o.tone?W.tone(o.tone,dk)[0]:o.onClick?'var(--accent)':'var(--ink)',cursor:o.onClick?'pointer':'default',direction:o.ltr?'ltr':'inherit',fontFamily:o.mono?"ui-monospace,Menlo,monospace":'inherit',fontSize:o.mono?'11.5px':'12.5px',wordBreak:'break-all'}}}),
+        isJson:s.json!=null,json:s.json!=null?JSON.stringify(s.json,null,2):'',isText:!!s.text,text:s.text,isDiff:!!s.diff,diff:(s.diff||[]).map(r=>({f:r[0],b:r[1],a:r[2]})),
+        isList:!!s.list,list:(s.list||[]).map(r=>({t:r.t,sub:r.sub,ini:r.ini||(r.t||'?')[0],href:r.href,onClick:r.onClick,cta:r.cta||''})),
+        isTl:!!s.tl,tl:(s.tl||[]).map(e=>({t:e.t,sub:e.sub,hasSub:!!e.sub,time:e.time,dot:{width:'10px',height:'10px',borderRadius:'5px',marginTop:'4px',flexShrink:0,background:W.tone(e.tone||'purple',dk)[0],boxShadow:'0 0 0 4px '+W.tone(e.tone||'purple',dk)[1]}}))}))};}
+    const toasts=this.state.toasts.map(x=>{const c=x.tone==='error'?'#C2386B':x.tone==='info'?'#6D28D9':'#23845F';return {text:x.text,prog:x.prog,icon:x.prog?W.IC.down:x.tone==='error'?W.IC.x:W.IC.check,
+      bar:{display:'block',height:'100%',width:x.p+'%',background:'#C9AEF7',transition:'width .25s'},
+      iconWrap:{width:'24px',height:'24px',borderRadius:'8px',background:x.prog?'rgba(255,255,255,.14)':c,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:'#fff'},
+      style:{pointerEvents:'auto',display:'flex',alignItems:'center',gap:'11px',padding:'11px 16px 11px 12px',borderRadius:'13px',background:'#1F2233',color:'#fff',fontSize:'13px',fontWeight:500,boxShadow:'0 16px 40px rgba(20,23,43,.3)',animation:'toastIn .25s ease',direction:ar?'rtl':'ltr',fontFamily:ar?"'IBM Plex Sans Arabic',sans-serif":"'Poppins',sans-serif",border:'1px solid rgba(255,255,255,.08)'}}});
+    return {L,modalOn:!!m,m:mv,busy:this.state.busy,closeModal:()=>this.setState({modal:null}),confirm:()=>this.doConfirm(),cancelBtn:W.btn('secondary'),
+      drawerOn:!!dr,d:dv,closeDrawer:()=>this.setState({drawer:null}),drawerAnim:ar?'drawerInL .22s ease':'drawerInR .22s ease',toasts};
+  }
+}
+</script>
+</body>
+</html>

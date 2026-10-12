@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+button{font-family:inherit}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ isDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px">
+  <sc-if value="{{ offline }}"><div style="margin:4px 14px 0;padding:9px 12px;border-radius:12px;background:rgba(217,70,122,.1);font-size:11.5px;color:var(--ink);display:flex;gap:8px;align-items:center;flex-shrink:0"><span style="width:7px;height:7px;border-radius:50%;background:#D9467A;flex-shrink:0"></span><span style="flex:1">{{ t.offlineMsg }}</span></div></sc-if>
+  <div style="display:flex;align-items:center;gap:8px;padding:8px 16px 8px 20px;flex-shrink:0">
+    <div style="flex:1;min-width:0"><div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:22px">{{ t.title }}</div><div style="font-size:12px;color:var(--muted)">{{ monthLabel }}</div></div>
+    <button onClick="{{ goToday }}" style="height:38px;padding:0 12px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer">{{ t.today }}</button>
+    <sc-if value="{{ canFilter }}"><button onClick="{{ openFilter }}" style="position:relative;width:40px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 6.5M21.5 20a6.5 6.5 0 0 0-4-6"></path></svg><sc-if value="{{ filtered }}"><span style="position:absolute;top:-4px;inset-inline-end:-4px;width:16px;height:16px;border-radius:8px;background:#A855F7;color:#fff;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ filterCount }}</span></sc-if></button></sc-if>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;padding:0 16px 8px;flex-shrink:0">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;border-radius:12px;background:var(--surface);flex:1">
+      <sc-for list="{{ modes }}" as="m" hint-placeholder-count="2"><button onClick="{{ m.onClick }}" style="{{ m.style }}">{{ m.label }}</button></sc-for>
+    </div>
+    <button onClick="{{ prevWeek }}" style="width:36px;height:36px;border-radius:10px;border:none;background:var(--soft);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <button onClick="{{ nextWeek }}" style="width:36px;height:36px;border-radius:10px;border:none;background:var(--soft);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="transform:scaleX(var(--flip))"><path d="M9 5l7 7-7 7"></path></svg></button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 12px 8px;flex-shrink:0">
+    <sc-for list="{{ strip }}" as="d" hint-placeholder-count="7"><button onClick="{{ d.onClick }}" style="{{ d.style }}"><span style="font-size:10.5px;opacity:.85">{{ d.dow }}</span><span style="font-size:15px;font-weight:700">{{ d.n }}</span><span style="{{ d.dot }}"></span></button></sc-for>
+  </div>
+
+  <sc-if value="{{ loading }}">
+    <div style="flex:1;padding:4px 16px;display:flex;gap:6px;overflow:hidden">
+      <div style="width:40px;display:flex;flex-direction:column;gap:30px;padding-top:30px"><sc-for list="{{ eight }}" as="x" hint-placeholder-count="8"><div style="height:10px;border-radius:5px;background:var(--shim)"></div></sc-for></div>
+      <sc-for list="{{ four }}" as="x" hint-placeholder-count="4"><div style="flex:1;display:flex;flex-direction:column;gap:8px"><div style="height:44px;border-radius:12px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div><div style="{{ x }}"></div><div style="height:60px;border-radius:12px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></div></sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ dayOn }}">
+  <div style="flex:1;overflow:auto;position:relative">
+    <div style="display:flex;position:sticky;top:0;z-index:3;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 0">
+      <div style="width:48px;flex-shrink:0"></div>
+      <sc-for list="{{ cols }}" as="c" hint-placeholder-count="4">
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="{{ c.avatar }}">{{ c.i }}</span>
+          <span style="font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">{{ c.name }}</span>
+          <sc-if value="{{ c.hasTag }}"><span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:rgba(245,158,11,.15);color:#B7791F">{{ c.tag }}</span></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;position:relative">
+      <div style="width:48px;flex-shrink:0;position:relative;height:728px">
+        <sc-for list="{{ hours }}" as="h" hint-placeholder-count="13"><div style="{{ h.style }}">{{ h.label }}</div></sc-for>
+      </div>
+      <sc-for list="{{ cols }}" as="c" hint-placeholder-count="4">
+        <div style="{{ c.colStyle }}">
+          <sc-for list="{{ c.shades }}" as="sd"><div style="{{ sd.style }}"><span style="font-size:9.5px;font-weight:700;color:var(--faint);padding:4px">{{ sd.label }}</span></div></sc-for>
+          <sc-for list="{{ c.blocks }}" as="b">
+            <a href="{{ b.href }}" style="{{ b.style }}">
+              <span style="display:flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;line-height:1.2"><sc-if value="{{ b.bride }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="#D9467A" style="flex-shrink:0"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg></sc-if><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.cust }}</span></span>
+              <span style="display:block;font-size:9.5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.svc }}</span>
+              <span style="display:block;font-size:9px;opacity:.75">{{ b.time }}</span>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+      <sc-if value="{{ showNow }}"><div style="{{ nowLine }}"><span style="position:absolute;inset-inline-start:-4px;top:-4px;width:9px;height:9px;border-radius:50%;background:#D9467A"></span></div></sc-if>
+    </div>
+    <sc-if value="{{ dayEmpty }}">
+      <div style="position:absolute;left:24px;right:24px;top:170px;z-index:4;padding:22px 18px;border-radius:20px;background:var(--card);border:1px solid var(--line);box-shadow:0 18px 40px rgba(31,34,51,.12);text-align:center;animation:fadeUp .3s ease both">
+        <div style="width:58px;height:58px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 6h14v14H5zM5 10.5h14M9 3.5v4M15 3.5v4"></path></svg></div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">{{ emptyTitle }}</div>
+        <div style="font-size:12.5px;color:var(--muted);line-height:1.6">{{ emptyBody }}</div>
+      </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ weekOn }}">
+  <div style="flex:1;overflow:auto">
+    <div style="display:flex;position:relative">
+      <div style="width:40px;flex-shrink:0;position:relative;height:728px">
+        <sc-for list="{{ hoursW }}" as="h" hint-placeholder-count="13"><div style="{{ h.style }}">{{ h.label }}</div></sc-for>
+      </div>
+      <sc-for list="{{ wcols }}" as="c" hint-placeholder-count="7">
+        <button onClick="{{ c.onClick }}" style="{{ c.colStyle }}">
+          <sc-for list="{{ c.shades }}" as="sd"><span style="{{ sd.style }}"><span style="font-size:9px;font-weight:700;color:var(--faint);writing-mode:vertical-rl;padding:6px 0">{{ sd.label }}</span></span></sc-for>
+          <sc-for list="{{ c.blocks }}" as="b"><span style="{{ b.style }}"><sc-if value="{{ b.bride }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="#fff"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg></sc-if></span></sc-for>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px 12px;padding:8px 16px;border-top:1px solid var(--line);flex-shrink:0">
+    <sc-for list="{{ legend }}" as="l" hint-placeholder-count="4"><span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="{{ l.dot }}"></span>{{ l.name }}</span></sc-for>
+  </div>
+  </sc-if>
+
+  <div style="display:flex;padding:8px 6px 26px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0">
+    <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5"><a href="{{ tb.href }}" style="{{ tb.style }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ tb.d }}"></path></svg><span>{{ tb.label }}</span></a></sc-for>
+  </div>
+</div>
+
+<sc-if value="{{ filterOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:40;background:rgba(10,8,20,.5);display:flex;flex-direction:column;justify-content:flex-end">
+    <div onClick="{{ closeFilter }}" style="flex:1"></div>
+    <div style="background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 30px;animation:sheetUp .3s ease both">
+      <div style="width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px"></div>
+      <div style="font-weight:700;font-size:18px;margin-bottom:4px">{{ t.filterTitle }}</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px">{{ t.filterSub }}</div>
+      <sc-for list="{{ fstaff }}" as="f" hint-placeholder-count="4">
+        <button onClick="{{ f.onClick }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 4px;border:none;border-bottom:1px solid var(--line);background:none;color:var(--ink);cursor:pointer;text-align:start">
+          <span style="{{ f.avatar }}">{{ f.i }}</span><span style="flex:1;font-size:14.5px;font-weight:600">{{ f.name }}</span>
+          <span style="{{ f.box }}"><sc-if value="{{ f.on }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if></span>
+        </button>
+      </sc-for>
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:18px">
+        <button onClick="{{ selectAll }}" style="height:50px;border-radius:14px;border:1.5px solid var(--line);background:none;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer">{{ t.all }}</button>
+        <button onClick="{{ closeFilter }}" style="height:50px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer">{{ t.apply }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Business · Merchant</div><div style="font-size:11.5px;color:#6B7280">04 · Calendar (M11)</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="9"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="5"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="1"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+  <div style="font-size:11px;color:#6B7280;line-height:1.55;background:#F8F7FB;border-radius:10px;padding:10px">Tap a block to open booking details. Hatched = salon closed; amber = staff leave. Dashed blocks are pending. Today = Wed Oct 7; Sat Oct 10 has the bridal booking; Friday is closed.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wabm_proto_settings';
+const CUR='WAB Merchant 04 Calendar.dc.html';
+const FILES=[['01 Onboarding','WAB Merchant 01 Onboarding.dc.html'],['02 Home','WAB Merchant 02 Home.dc.html'],['03 Bookings','WAB Merchant 03 Bookings.dc.html'],['04 Calendar','WAB Merchant 04 Calendar.dc.html'],['05 Salon','WAB Merchant 05 Salon.dc.html'],['06 Services & Team','WAB Merchant 06 Services Team.dc.html'],['07 Policies & Insights','WAB Merchant 07 Policies Insights.dc.html'],['08 Finance & More','WAB Merchant 08 Finance More.dc.html'],['Ad','WAB Merchant Ad.dc.html']];
+const CTRL=[['lang','Language',[['ar','AR'],['en','EN']]],['theme','Theme',[['light','Light'],['dark','Dark']]],['role','Role',[['owner','Owner'],['manager','Manager'],['employee','Employee']]],['gender','Salon',[['female','Women'],['male','Men']]],['sstate','State',[['live','Live'],['offline','Offline'],['incomplete','Incompl.']]]];
+const ALLP=['DASHBOARD_VIEW','BOOKINGS_VIEW_ALL','BOOKINGS_VIEW_OWN','BOOKINGS_RESPOND','BOOKINGS_OPERATE','SALON_PROFILE_MANAGE','GALLERY_MANAGE','WORKING_HOURS_MANAGE','SERVICES_MANAGE','STAFF_MANAGE','POLICIES_MANAGE','REVIEWS_VIEW','STATISTICS_VIEW','FINANCE_VIEW','SUBSCRIPTION_VIEW','TEAM_MANAGE','PAYOUT_DETAILS_MANAGE','SALON_DELETE_REQUEST'];
+const PERMS={owner:ALLP,manager:ALLP.filter(k=>!['FINANCE_VIEW','POLICIES_MANAGE','TEAM_MANAGE','PAYOUT_DETAILS_MANAGE','SALON_DELETE_REQUEST','BOOKINGS_VIEW_OWN'].includes(k)),employee:['DASHBOARD_VIEW','BOOKINGS_VIEW_OWN','REVIEWS_VIEW']};
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1','--shim':d?'#252946':'#EFEBF7','--shim2':d?'#323760':'#F9F7FD','--hatch':d?'rgba(255,255,255,.05)':'rgba(31,34,51,.05)'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+const TABD=[['home','M4 11.5 12 4l8 7.5M6 10v9.5h12V10','WAB Merchant 02 Home.dc.html?s=home','DASHBOARD_VIEW'],['book','M8 6h11M8 12h11M8 18h11M4 6h.01M4 12h.01M4 18h.01','WAB Merchant 03 Bookings.dc.html?s=pending','BOOK'],['cal','M5 6h14v14H5zM5 10.5h14M9 3.5v4M15 3.5v4','WAB Merchant 04 Calendar.dc.html?s=day','BOOK'],['salon','M4 9.5 5.5 4h13L20 9.5M4 9.5h16M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0M5.5 12v8h13v-8','WAB Merchant 05 Salon.dc.html?s=hub','MGMT'],['more','M4 6h16M4 12h16M4 18h16','WAB Merchant 08 Finance More.dc.html?s=more','ANY']];
+function can(perms,k){if(k==='ANY')return true;if(k==='BOOK')return perms.includes('BOOKINGS_VIEW_ALL')||perms.includes('BOOKINGS_VIEW_OWN');if(k==='MGMT')return ['SALON_PROFILE_MANAGE','SERVICES_MANAGE','STAFF_MANAGE','REVIEWS_VIEW','STATISTICS_VIEW','TEAM_MANAGE'].some(p=>perms.includes(p));return perms.includes(k)}
+function tabs(active,t,perms){return TABD.filter(x=>can(perms,x[3])).map(([k,d,href])=>({d,href,label:t.tab[k],style:{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px',padding:'6px 0',fontSize:'11px',fontWeight:k===active?700:500,color:k===active?'var(--accent)':'var(--faint)'}}))}
+const CU={female:[['سارة العلي','Sara Al-Ali'],['نور خليل','Noor Khalil'],['ريم الزعبي','Reem Al-Zoubi'],['لانا مصطفى','Lana Mustafa'],['دينا حمدان','Dina Hamdan'],['هيا الشريف','Haya Al-Sharif'],['جود عبيدات','Joud Obeidat']],male:[['محمد العمري','Mohammad Al-Omari'],['زيد الخطيب','Zaid Al-Khatib'],['فراس يوسف','Firas Yousef'],['عمر سعيد','Omar Saeed'],['يزن حداد','Yazan Haddad'],['قيس المصري','Qais Al-Masri'],['أنس الرفاعي','Anas Al-Rifai']]};
+const STF={female:[['رنا','Rana'],['هبة','Hiba'],['دانة','Dana'],['مي','Mai']],male:[['عمر','Omar'],['خالد','Khaled'],['فادي','Fadi'],['سامر','Samer']]};
+const SV={female:[['قص وتسريح','Cut & style',45],['صبغة شعر','Hair color',90],['مكياج سهرة','Evening makeup',60],['مكياج عروس','Bridal makeup',120],['تسريحة عروس','Bridal hairstyle',90],['مانيكير','Manicure',30]],male:[['قص شعر','Haircut',30],['تهذيب اللحية','Beard trim',15],['حلاقة كاملة','Full shave',30],['تنظيف بشرة','Facial',45],['صبغة شعر','Hair color',45],['باقة العريس','Groom package',90]]};
+const SC=[['#6D28D9','rgba(109,40,217,.13)'],['#B83268','rgba(244,167,196,.32)'],['#2E9E78','rgba(46,158,120,.15)'],['#B7791F','rgba(245,158,11,.17)']];
+const START=540,END=1320,HH=56;
+const DOW={ar:['سبت','أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة'],en:['Sat','Sun','Mon','Tue','Wed','Thu','Fri']};
+function dayData(d,g){if((d-3)%7===6)return [];
+  if(d===7)return [[600,4,5,3,'completed','dCompleted'],[660,3,1,0,'approved','dApprovedAfter'],[810,5,0,1,'approved','dApprovedBefore'],[900,2,2,2,'approved','dApprovedBefore'],[1020,6,0,1,'approved','dApprovedBefore'],[1110,1,0,1,'pending','dPending']].map(([m,cu,sv,sf,st,det])=>({m,cu,sv,sf,st,det,dur:SV[g][sv][2]}));
+  if(d===10){const L=g==='female'?[[840,0,3,0,'pending','dBride',210,1],[840,0,2,1,'pending','dBride',60,0],[900,0,0,2,'pending','dBride',45,0],[660,4,1,1,'approved','dApprovedBefore',90,0],[1020,2,5,3,'approved','dApprovedBefore',30,0]]:[[840,0,5,0,'pending','dPending',90,0],[840,0,0,1,'pending','dPending',45,0],[660,4,1,1,'approved','dApprovedBefore',15,0],[1020,2,3,3,'approved','dApprovedBefore',45,0]];return L.map(([m,cu,sv,sf,st,det,dur,br])=>({m,cu,sv,sf,st,det,dur,bride:!!br}))}
+  if(d===8)return [[720,4,1,0,'approved','dApprovedBefore'],[960,2,2,0,'pending','dPending'],[630,5,0,2,'approved','dApprovedBefore']].map(([m,cu,sv,sf,st,det])=>({m,cu,sv,sf,st,det,dur:SV[g][sv][2]}));
+  if(d===12||d===14)return [];
+  const n=2+(d%3),out=[];const ok=[0,1,2,5];for(let i=0;i<n;i++){const sv=ok[(i+d)%4];out.push({m:600+i*150+(d%3)*30,cu:(i+d)%7,sv,sf:(i+d)%4,st:d<7?'completed':'approved',det:d<7?'dCompleted':'dApprovedBefore',dur:SV[g][sv][2]})}return out}
+const D={ar:{tab:{home:'الرئيسية',book:'الحجوزات',cal:'التقويم',salon:'الصالون',more:'المزيد'},title:'التقويم',today:'اليوم',day:'يوم',week:'أسبوع',month:'أكتوبر 2026',closed:'مغلق',leave:'إجازة',leaveFrom:'إجازة من 2 م',onLeave:'في إجازة',am:'ص',pm:'م',emptyT:'لا توجد حجوزات اليوم',emptyB:'لا توجد مواعيد في هذا اليوم. ستظهر الحجوزات هنا فور قبولها.',closedT:'الصالون مغلق',closedB:'يوم الجمعة يوم عطلة حسب ساعات العمل.',filterTitle:'عرض الطاقم',filterSub:'اختر الموظفين الظاهرين في التقويم',all:'الكل',apply:'تطبيق',offlineMsg:'صالونك غير ظاهر للزبائن حالياً. تواصل مع WAB لإعادة التفعيل',pending:'معلّق'},
+en:{tab:{home:'Home',book:'Bookings',cal:'Calendar',salon:'Salon',more:'More'},title:'Calendar',today:'Today',day:'Day',week:'Week',month:'October 2026',closed:'Closed',leave:'Leave',leaveFrom:'Leave from 2 PM',onLeave:'On leave',am:'AM',pm:'PM',emptyT:'No bookings this day',emptyB:'No appointments on this day. Bookings appear here once approved.',closedT:'Salon closed',closedB:'Friday is a day off per your working hours.',filterTitle:'Show staff',filterSub:'Choose which staff appear in the calendar',all:'All',apply:'Apply',offlineMsg:'Your salon is offline and hidden from customers. Contact WAB to reactivate.',pending:'Pending'}};
+function hl(m,t){const h=Math.floor(m/60);return (h%12||12)+' '+(h>=12?t.pm:t.am)}
+function tm(m,t){const h=Math.floor(m/60),mm=m%60;return (h%12||12)+':'+String(mm).padStart(2,'0')}
+const PRE={day:{},dayBride:{day:10,ws:10},week:{mode:'week'},weekNext:{mode:'week',ws:10},filter:{filter:true},filtered:{staff:[0,1]},employee:{role:'employee'},empty:{day:12,ws:10},closedDay:{day:9},loading:{loading:true}};
+const NAV=[['M11 Calendar',[['Day view (today)','day'],['Day · bride (Sat)','dayBride'],['Week view','week'],['Next week','weekNext'],['Staff filter sheet','filter'],['Filtered (2 staff)','filtered'],['Employee (single column)','employee'],['Day with no bookings','empty'],['Closed day (Fri)','closedDay'],['Loading','loading']]]];
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();return {lang:p.lang||'ar',theme:p.theme||'light',role:p.role||'owner',gender:p.gender||'female',sstate:p.sstate||'live',preset:'day',mode:'day',day:7,ws:3,staff:[0,1,2,3],filter:false,loading:false}})();
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,role:s.role,gender:s.gender,sstate:s.sstate}))}
+  setPref(k,v){this.setState({[k]:v},()=>this.savePrefs())}
+  go(k){const p=PRE[k];if(!p)return;const r=p.role||(this.state.role==='employee'?'owner':this.state.role);this.setState(Object.assign({mode:'day',day:7,ws:3,staff:[0,1,2,3],filter:false,loading:false},p,{role:r,preset:k}),()=>{this.savePrefs();if(p.loading)setTimeout(()=>this.setState({loading:false}),2200)})}
+  flash(){this.setState({loading:true});clearTimeout(this.lt);this.lt=setTimeout(()=>this.setState({loading:false}),500)}
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],g=s.gender,L=ar?0:1,perms=PERMS[s.role],emp=!perms.includes('BOOKINGS_VIEW_ALL');
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const shownStaff=emp?[1]:s.staff;
+    const isFri=d=>(d-3)%7===6;
+    const hours=[];for(let m=START;m<END;m+=60)hours.push({label:hl(m,t),style:{position:'absolute',top:((m-START)/60*HH-6)+'px',insetInlineEnd:'6px',fontSize:'10px',color:'var(--faint)',fontWeight:600,whiteSpace:'nowrap'}});
+    const hoursW=hours.map(h=>({label:h.label.replace(/ (ص|م|AM|PM)/,''),style:Object.assign({},h.style,{insetInlineEnd:'8px'})}));
+    const gridBg={backgroundImage:'repeating-linear-gradient(to bottom,var(--line) 0,var(--line) 1px,transparent 1px,transparent '+HH+'px)'};
+    const hatch=(a,b,label,amber)=>({label,style:{position:'absolute',left:0,right:0,top:((a-START)/60*HH)+'px',height:((b-a)/60*HH)+'px',background:amber?'repeating-linear-gradient(135deg,rgba(245,158,11,.14) 0,rgba(245,158,11,.14) 6px,rgba(245,158,11,.06) 6px,rgba(245,158,11,.06) 12px)':'repeating-linear-gradient(135deg,var(--hatch) 0,var(--hatch) 6px,transparent 6px,transparent 12px)',display:'flex',alignItems:'flex-start',justifyContent:'center',boxSizing:'border-box',overflow:'hidden'}});
+    const data=dayData(s.day,g);
+    const fri=isFri(s.day);
+    const cols=shownStaff.map(i=>{const leave=s.day===7&&i===3;const shades=fri?[hatch(START,END,t.closed)]:[hatch(START,600,t.closed),hatch(1260,END,t.closed)].concat(leave?[hatch(840,1260,t.leave,true)]:[]);
+      const c=SC[i];
+      const blocks=data.filter(b=>b.sf===i).map(b=>{const pend=b.st==='pending',done=b.st==='completed';return {cust:CU[g][b.cu][L],svc:SV[g][b.sv][L],time:tm(b.m,t)+'–'+tm(b.m+b.dur,t),bride:g==='female'&&!!b.bride,href:'WAB Merchant 03 Bookings.dc.html?s='+b.det,
+        style:{position:'absolute',left:'3px',right:'3px',top:((b.m-START)/60*HH+1)+'px',height:(b.dur/60*HH-3)+'px',borderRadius:'10px',padding:'5px 6px',boxSizing:'border-box',overflow:'hidden',background:pend?'var(--card)':c[1],border:pend?'1.5px dashed '+c[0]:(b.bride&&g==='female'?'1.5px solid #D9467A':'none'),color:c[0],opacity:done?.6:1,display:'flex',flexDirection:'column',gap:'1px',zIndex:1}}});
+      return {i:STF[g][i][L].charAt(0),name:STF[g][i][L],hasTag:leave,tag:t.leaveFrom,shades,blocks,
+        avatar:{width:'30px',height:'30px',borderRadius:'50%',background:c[1],color:c[0],fontWeight:700,fontSize:'13px',display:'flex',alignItems:'center',justifyContent:'center'},
+        colStyle:Object.assign({flex:1,minWidth:0,position:'relative',height:((END-START)/60*HH)+'px',borderInlineStart:'1px solid var(--line)'},gridBg)}});
+    const visible=data.filter(b=>shownStaff.includes(b.sf));
+    const wdays=[0,1,2,3,4,5,6].map(i=>s.ws+i);
+    const wcols=wdays.map(d=>{const dd=dayData(d,g).filter(b=>shownStaff.includes(b.sf));const f=isFri(d);
+      return {onClick:()=>{this.setState({mode:'day',day:d});this.flash()},shades:f?[hatch(START,END,t.closed)]:[hatch(START,600,''),hatch(1260,END,'')],
+        blocks:dd.map(b=>({bride:g==='female'&&!!b.bride,style:{position:'absolute',left:'2px',right:'2px',top:((b.m-START)/60*HH+1)+'px',height:(b.dur/60*HH-2)+'px',borderRadius:'6px',background:b.st==='pending'?'transparent':SC[b.sf][0],border:b.st==='pending'?'1.5px dashed '+SC[b.sf][0]:'none',opacity:b.st==='completed'?.45:.9,boxSizing:'border-box',display:'flex',justifyContent:'center',paddingTop:'3px'}})),
+        colStyle:Object.assign({flex:1,minWidth:0,position:'relative',height:((END-START)/60*HH)+'px',borderInlineStart:'1px solid var(--line)',background:d===7?'rgba(168,85,247,.05)':'transparent',padding:0,border:'none',borderLeft:'1px solid var(--line)',cursor:'pointer'},gridBg)}});
+    const strip=wdays.map((d,i)=>{const a=s.mode==='day'&&d===s.day,has=dayData(d,g).some(b=>shownStaff.includes(b.sf));return {dow:DOW[s.lang][i],n:d,onClick:()=>{this.setState({mode:'day',day:d});this.flash()},
+      style:{height:'58px',borderRadius:'14px',border:d===7&&!a?'1.5px solid #D8B4FE':'none',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'1px',cursor:'pointer',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--surface)',color:a?'#fff':(isFri(d)?'var(--faint)':'var(--ink)')},
+      dot:{width:'5px',height:'5px',borderRadius:'50%',background:has?(a?'#fff':'#A855F7'):'transparent'}}});
+    const dayEmpty=s.mode==='day'&&!visible.length;
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',themeVars:tv(s.lang,s.theme),
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),controls:CTRL.map(([k,label,o])=>({label,opts:seg(k,o)})),
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      offline:s.sstate==='offline',monthLabel:t.month,goToday:()=>{this.setState({day:7,ws:3});this.flash()},canFilter:!emp,openFilter:()=>this.setState({filter:true}),filtered:!emp&&s.staff.length<4,filterCount:s.staff.length,
+      modes:[['day',t.day],['week',t.week]].map(([k,l])=>({label:l,onClick:()=>{this.setState({mode:k});this.flash()},style:{height:'34px',borderRadius:'10px',border:'none',cursor:'pointer',fontSize:'13px',fontWeight:600,background:s.mode===k?'var(--card)':'transparent',color:s.mode===k?'var(--accent)':'var(--muted)',boxShadow:s.mode===k?'0 2px 8px rgba(31,34,51,.08)':'none'}})),
+      prevWeek:()=>{const ws=Math.max(3,s.ws-7);this.setState({ws,day:ws===3?7:ws});this.flash()},nextWeek:()=>{const ws=Math.min(10,s.ws+7);this.setState({ws,day:ws});this.flash()},
+      strip,loading:s.loading,eight:[1,2,3,4,5,6,7,8],four:[90,150,60,120].slice(0,emp?1:4).map(h=>({height:h+'px',borderRadius:'12px',background:'linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%)',backgroundSize:'200% 100%',animation:'shim 1.4s linear infinite'})),
+      dayOn:!s.loading&&s.mode==='day',weekOn:!s.loading&&s.mode==='week',gridH:((END-START)/60*HH)+'px',hours,hoursW,cols,wcols,
+      showNow:s.day===7&&s.mode==='day',nowLine:{position:'absolute',insetInlineStart:'48px',insetInlineEnd:0,top:((760-START)/60*HH)+'px',height:'2px',background:'#D9467A',zIndex:2},
+      dayEmpty,emptyTitle:fri?t.closedT:t.emptyT,emptyBody:fri?t.closedB:t.emptyB,
+      legend:shownStaff.map(i=>({name:STF[g][i][L],dot:{width:'10px',height:'10px',borderRadius:'3px',background:SC[i][0]}})),
+      tabs:tabs('cal',t,perms),
+      filterOn:s.filter,closeFilter:()=>{this.setState({filter:false});this.flash()},selectAll:()=>this.setState({staff:[0,1,2,3]}),
+      fstaff:[0,1,2,3].map(i=>{const on=s.staff.includes(i);return {i:STF[g][i][L].charAt(0),name:STF[g][i][L],on,onClick:()=>this.setState({staff:on?(s.staff.length>1?s.staff.filter(x=>x!==i):s.staff):s.staff.concat([i]).sort()}),
+        avatar:{width:'36px',height:'36px',borderRadius:'50%',background:SC[i][1],color:SC[i][0],fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'},
+        box:{width:'22px',height:'22px',borderRadius:'7px',boxSizing:'border-box',display:'flex',alignItems:'center',justifyContent:'center',background:on?'linear-gradient(135deg,#6D28D9,#A855F7)':'transparent',border:on?'none':'1.5px solid var(--faint)'}}})
+    };
+  }
+}
+</script>
+</body>
+</html>

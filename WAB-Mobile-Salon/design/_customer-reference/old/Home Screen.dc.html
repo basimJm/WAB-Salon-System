@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  body{margin:0;background:#fff;font-family:'Poppins',sans-serif}
+  a{color:#6D28D9;text-decoration:none}
+  a:hover{color:#A855F7}
+  .hscroll{display:flex;gap:12px;overflow-x:auto;padding:0 20px 4px;scrollbar-width:none}
+  .hscroll::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="" hint-size="390,844">
+  <div style="{{ screenStyle }}">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px 16px">
+      <div>
+        <div style="font-size:12px;color:#9CA3AF">Welcome back,</div>
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:19px;color:#1F2233">Layla</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <div style="width:40px;height:40px;border-radius:50%;background:#F3EEFB;display:flex;align-items:center;justify-content:center">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="1.8"><path d="M20.8 8.6c0 4.6-8.8 10.4-8.8 10.4S3.2 13.2 3.2 8.6a5.4 5.4 0 0 1 9.8-3.1A5.4 5.4 0 0 1 20.8 8.6z"/></svg>
+        </div>
+        <div style="width:40px;height:40px;border-radius:50%;background:#F3EEFB;display:flex;align-items:center;justify-content:center;position:relative">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="1.8"><path d="M12 3a5.5 5.5 0 0 0-5.5 5.5c0 3.6-1.1 5-2 6.5h15c-.9-1.5-2-2.9-2-6.5A5.5 5.5 0 0 0 12 3z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg>
+          <div style="position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:#A855F7;border:1.5px solid #fff"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto">
+      <div class="hscroll" style="margin-bottom:22px">
+        <sc-for list="{{ banners }}" as="b" hint-placeholder-count="2">
+          <div style="min-width:280px;height:130px;border-radius:18px;position:relative;overflow:hidden;flex-shrink:0">
+            <image-slot id="{{ b.id }}" shape="rect" placeholder="Salon ad banner"></image-slot>
+            <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,15,35,.55),transparent 60%);pointer-events:none;display:flex;flex-direction:column;justify-content:center;padding:0 18px">
+              <div style="color:#fff;font-weight:600;font-size:15px;max-width:160px">{{ b.title }}</div>
+              <div style="color:#E9D5FF;font-size:11.5px;margin-top:3px">{{ b.subtitle }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;gap:8px;padding:0 20px;margin-bottom:22px">
+        <button onclick="{{ onSelectWomen }}" style="{{ womenTabStyle }}">Women</button>
+        <button onclick="{{ onSelectMen }}" style="{{ menTabStyle }}">Men</button>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:12px">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:#1F2233">Top salons in Jordan</div>
+        <a href="{{ allSalonsHref }}" style="font-size:12.5px;font-weight:600">See more</a>
+      </div>
+      <div class="hscroll" style="margin-bottom:26px">
+        <sc-for list="{{ topSalons }}" as="salon" hint-placeholder-count="4">
+          <a href="Salon Details Screen.dc.html" style="min-width:150px;flex-shrink:0;text-decoration:none">
+            <div style="width:150px;height:96px;border-radius:14px;overflow:hidden;margin-bottom:8px">
+              <image-slot id="{{ salon.imgId }}" shape="rect" placeholder="Salon photo"></image-slot>
+            </div>
+            <div style="font-size:13.5px;font-weight:600;color:#1F2233;margin-bottom:2px">{{ salon.name }}</div>
+            <div style="display:flex;align-items:center;gap:3px;font-size:11.5px;color:#9CA3AF;margin-bottom:3px">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>
+              {{ salon.location }}
+            </div>
+            <div style="display:flex;align-items:center;gap:3px;font-size:11.5px;color:#B45309;font-weight:600">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="#F59E0B" stroke="none"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.5 6.8L12 17.6 5.9 20.5l1.5-6.8L2.2 9l6.9-.7z"/></svg>
+              {{ salon.rating }} ({{ salon.reviews }})
+            </div>
+          </a>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ gpsEnabled }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:12px">
+          <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:#1F2233">Nearest to you</div>
+          <a href="{{ allSalonsHref }}" style="font-size:12.5px;font-weight:600">See more</a>
+        </div>
+        <div class="hscroll" style="margin-bottom:26px">
+          <sc-for list="{{ nearestSalons }}" as="salon" hint-placeholder-count="4">
+            <a href="Salon Details Screen.dc.html" style="min-width:150px;flex-shrink:0;text-decoration:none">
+              <div style="width:150px;height:96px;border-radius:14px;overflow:hidden;margin-bottom:8px">
+                <image-slot id="{{ salon.imgId }}" shape="rect" placeholder="Salon photo"></image-slot>
+              </div>
+              <div style="font-size:13.5px;font-weight:600;color:#1F2233;margin-bottom:2px">{{ salon.name }}</div>
+              <div style="display:flex;align-items:center;gap:3px;font-size:11.5px;color:#9CA3AF">{{ salon.location }} · {{ salon.distance }}</div>
+            </a>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ !gpsEnabled }}" hint-placeholder-val="{{ true }}">
+        <div style="margin:0 20px 26px;padding:20px;border-radius:16px;background:#F8F7FB;text-align:center">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="1.8" style="margin-bottom:8px"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>
+          <div style="font-size:13px;color:#6B7280;margin-bottom:12px">Enable location to see nearest salons</div>
+          <button onclick="{{ onEnableGps }}" style="padding:10px 22px;border-radius:12px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Enable location</button>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:12px">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:#1F2233">Top hairstyles in Jordan</div>
+        <a href="#" style="font-size:12.5px;font-weight:600">See more</a>
+      </div>
+      <div class="hscroll" style="padding-bottom:20px">
+        <sc-for list="{{ hairstyles }}" as="style" hint-placeholder-count="4">
+          <div style="min-width:118px;flex-shrink:0">
+            <div style="width:118px;height:140px;border-radius:14px;overflow:hidden;margin-bottom:8px">
+              <image-slot id="{{ style.imgId }}" shape="rounded" placeholder="Style photo"></image-slot>
+            </div>
+            <div style="font-size:12.5px;font-weight:600;color:#1F2233;text-align:center">{{ style.name }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;padding:10px 0 22px;border-top:1px solid #F0EEF5;background:#fff">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#6D28D9">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="1.9"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h12v-9"/></svg>
+        <div style="font-size:10.5px;font-weight:600">Home</div>
+      </div>
+      <a href="My Bookings Screen.dc.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#9CA3AF">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.7"><rect x="4" y="5.5" width="16" height="15" rx="2.5"/><path d="M4 9.5h16M8 3.5v3.5M16 3.5v3.5"/></svg>
+        <div style="font-size:10.5px">Booking</div>
+      </a>
+      <a href="Settings Screen.dc.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#9CA3AF">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.7"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.4"/></svg>
+        <div style="font-size:10.5px">Settings</div>
+      </a>
+    </div>
+  </div>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    gender: 'men',
+    gpsEnabled: false,
+    banners: [
+      { id: 'banner-1', title: '20% off first booking', subtitle: 'New customers only' },
+      { id: 'banner-2', title: 'Ramadan glow package', subtitle: 'Book before it ends' },
+    ],
+    salonsMen: [
+      { name: "Élan Men's Lounge", location: 'Abdoun', rating: '4.9', reviews: 214, imgId: 'salon-m1' },
+      { name: 'The Gentry Club', location: 'Sweifieh', rating: '4.8', reviews: 176, imgId: 'salon-m2' },
+      { name: 'Blade & Fade', location: 'Shmeisani', rating: '4.7', reviews: 132, imgId: 'salon-m3' },
+      { name: 'Royal Barbers', location: 'Khalda', rating: '4.9', reviews: 98, imgId: 'salon-m4' },
+    ],
+    salonsWomen: [
+      { name: 'Bella Beauty House', location: 'Abdoun', rating: '4.9', reviews: 268, imgId: 'salon-w1' },
+      { name: 'Rose & Ivory Salon', location: 'Sweifieh', rating: '4.8', reviews: 190, imgId: 'salon-w2' },
+      { name: 'Glow Studio', location: 'Shmeisani', rating: '4.7', reviews: 145, imgId: 'salon-w3' },
+      { name: 'Amara Salon', location: 'Khalda', rating: '4.9', reviews: 121, imgId: 'salon-w4' },
+    ],
+    nearestSalons: [
+      { name: 'Élan Men\'s Lounge', location: 'Abdoun', distance: '0.8 km', imgId: 'near-1' },
+      { name: 'Blade & Fade', location: 'Shmeisani', distance: '1.4 km', imgId: 'near-2' },
+      { name: 'Royal Barbers', location: 'Khalda', distance: '2.1 km', imgId: 'near-3' },
+    ],
+    hairstyles: [
+      { name: 'Textured Crop', imgId: 'style-1' },
+      { name: 'Skin Fade', imgId: 'style-2' },
+      { name: 'Slick Back', imgId: 'style-3' },
+      { name: 'Curly Top', imgId: 'style-4' },
+    ],
+  };
+
+  onSelectWomen = () => this.setState({ gender: 'women' });
+  onSelectMen = () => this.setState({ gender: 'men' });
+  onEnableGps = () => this.setState({ gpsEnabled: true });
+
+  renderVals() {
+    const s = this.state;
+    const tabStyle = (active) => ({
+      flex: 1, padding: '11px', borderRadius: '12px', border: 'none', cursor: 'pointer',
+      fontSize: '13.5px', fontWeight: 600, fontFamily: "'Poppins',sans-serif",
+      background: active ? 'linear-gradient(135deg,#6D28D9,#A855F7)' : '#F3EEFB',
+      color: active ? '#fff' : '#6D28D9',
+    });
+    return {
+      gpsEnabled: s.gpsEnabled,
+      onSelectWomen: this.onSelectWomen,
+      onSelectMen: this.onSelectMen,
+      onEnableGps: this.onEnableGps,
+      womenTabStyle: tabStyle(s.gender === 'women'),
+      menTabStyle: tabStyle(s.gender === 'men'),
+      banners: s.banners,
+      topSalons: s.gender === 'men' ? s.salonsMen : s.salonsWomen,
+      nearestSalons: s.nearestSalons,
+      hairstyles: s.hairstyles,
+      allSalonsHref: 'All Salons Screen.dc.html?gender=' + s.gender,
+      screenStyle: {
+        display: 'flex', flexDirection: 'column', height: '100%',
+        paddingTop: '58px', boxSizing: 'border-box', background: '#fff', color: '#1F2233',
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

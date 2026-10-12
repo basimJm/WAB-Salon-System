@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button,textarea{font-family:inherit}
+input:focus,textarea:focus{outline:none}
+input::placeholder,textarea::placeholder{color:#9CA3AF}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes wave{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ isDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+  <sc-if value="{{ hasTop }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;height:50px;padding:50px 10px 0;position:relative;flex-shrink:0;box-sizing:content-box">
+    <button onClick="{{ onBack }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:50px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;pointer-events:none">{{ title }}</div>
+    <div style="flex:1"></div>
+    <sc-if value="{{ hasBankBtn }}"><button onClick="{{ goBank }}" style="height:40px;padding:0 12px;border:none;background:none;color:var(--accent);font-size:13.5px;font-weight:700;cursor:pointer;position:relative;z-index:1">{{ t.bankBtn }}</button></sc-if>
+  </div>
+  </sc-if>
+
+<sc-if value="{{ on.more }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px">
+  <sc-if value="{{ offline }}"><div style="margin:4px 14px 0;padding:9px 12px;border-radius:12px;background:rgba(217,70,122,.1);font-size:11.5px;color:var(--ink);display:flex;gap:8px;align-items:center;flex-shrink:0"><span style="width:7px;height:7px;border-radius:50%;background:#D9467A;flex-shrink:0"></span><span style="flex:1">{{ t.offlineMsg }}</span><button onClick="{{ goContact }}" style="border:none;background:none;font-weight:700;color:#D9467A;cursor:pointer;font-size:11.5px">{{ t.contactShort }}</button></div></sc-if>
+  <div style="flex:1;overflow-y:auto;padding:8px 20px 20px;display:flex;flex-direction:column;gap:14px">
+    <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:22px;flex-shrink:0">{{ t.more }}</div>
+    <div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:20px;background:var(--surface);flex-shrink:0">
+      <div style="width:58px;height:58px;border-radius:50%;overflow:hidden;position:relative;flex-shrink:0;border:3px solid var(--card)"><image-slot compact="" id="{{ me.slot }}" shape="circle" placeholder="{{ me.i }}"></image-slot></div>
+      <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:700;font-size:16px">{{ me.name }}</span><span style="{{ me.roleStyle }}">{{ me.role }}</span></div><div dir="ltr" style="font-size:12.5px;color:var(--muted);text-align:start;margin-top:2px">{{ me.phone }}</div><div style="font-size:12px;color:var(--muted)">{{ me.salon }}</div></div>
+    </div>
+    <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="4">
+      <div style="flex-shrink:0">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin:2px 4px 8px">{{ sec.title }}</div>
+        <div style="border-radius:18px;border:1px solid var(--line);overflow:hidden;background:var(--card)">
+          <sc-for list="{{ sec.rows }}" as="r">
+            <button onClick="{{ r.onClick }}" style="{{ r.style }}">
+              <span style="{{ r.iconStyle }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.d }}"></path></svg></span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-weight:600;font-size:14px">{{ r.label }}</span><sc-if value="{{ r.hasSub }}"><span style="{{ r.subStyle }}">{{ r.sub }}</span></sc-if></span>
+              <sc-if value="{{ r.hasVal }}"><span style="font-size:12.5px;color:var(--muted);font-weight:600">{{ r.val }}</span></sc-if>
+              <sc-if value="{{ r.hasSw }}"><span style="{{ r.track }}"><span style="{{ r.knob }}"></span></span></sc-if>
+              <sc-if value="{{ r.wave }}"><span style="display:flex;gap:2px;align-items:center;height:18px"><span style="width:3px;height:18px;border-radius:2px;background:#A855F7;animation:wave .6s infinite"></span><span style="width:3px;height:18px;border-radius:2px;background:#A855F7;animation:wave .6s .15s infinite"></span><span style="width:3px;height:18px;border-radius:2px;background:#A855F7;animation:wave .6s .3s infinite"></span></span></sc-if>
+              <sc-if value="{{ r.chev }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint);transform:scaleX(var(--flip));flex-shrink:0"><path d="M9 5l7 7-7 7"></path></svg></sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+    <div style="text-align:center;font-size:11.5px;color:var(--faint);direction:ltr;flex-shrink:0">WAB Business v1.0.0 (124)</div>
+  </div>
+  <div style="display:flex;padding:8px 6px 26px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0">
+    <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5"><a href="{{ tb.href }}" style="{{ tb.style }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ tb.d }}"></path></svg><span>{{ tb.label }}</span></a></sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ on.finance }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:12px">
+    <div style="padding:18px;border-radius:22px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;flex-shrink:0;box-shadow:0 14px 30px rgba(109,40,217,.25)">
+      <div style="font-size:12.5px;opacity:.9">{{ t.pendingPayout }}</div>
+      <div style="font-size:30px;font-weight:700;margin:2px 0 12px">{{ fin.pending }}</div>
+      <div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(255,255,255,.25);font-size:12.5px"><span style="opacity:.9">{{ t.lastPayout }}</span><span style="font-weight:700">{{ fin.last }}</span></div>
+    </div>
+    <div style="display:flex;gap:8px;padding:10px 12px;border-radius:12px;background:var(--surface);font-size:11.5px;color:var(--muted);line-height:1.55;flex-shrink:0"><span style="color:var(--accent);font-weight:700">ⓘ</span>{{ t.finInfo }}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:14px;background:var(--surface);flex-shrink:0"><sc-for list="{{ fTabs }}" as="x" hint-placeholder-count="3"><button onClick="{{ x.onClick }}" style="{{ x.style }}">{{ x.label }}</button></sc-for></div>
+    <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap"><sc-for list="{{ fRanges }}" as="x" hint-placeholder-count="4"><button onClick="{{ x.onClick }}" style="{{ x.style }}">{{ x.label }}</button></sc-for></div>
+    <sc-if value="{{ fLoading }}"><sc-for list="{{ four }}" as="h" hint-placeholder-count="4"><div style="{{ h }}"></div></sc-for></sc-if>
+    <sc-if value="{{ fEmpty }}"><div style="padding:40px 20px;text-align:center"><div style="width:90px;height:90px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--accent)"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h18v12H3zM3 11h18M7 15h3"></path></svg></div><div style="font-weight:700;font-size:15px;margin-bottom:4px">{{ emptyTitle }}</div><div style="font-size:12.5px;color:var(--muted)">{{ t.finEmptyB }}</div></div></sc-if>
+    <sc-if value="{{ fReady }}">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+        <div style="padding:14px;border-radius:18px;border:1px solid var(--line);flex-shrink:0">
+          <div style="display:flex;align-items:flex-start;gap:10px"><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">{{ r.title }}</div><div style="font-size:11.5px;color:var(--faint);margin-top:2px"><span dir="ltr">{{ r.ref }}</span> · {{ r.date }}</div></div><div style="text-align:end"><div style="font-weight:700;font-size:15px">{{ r.amount }}</div><sc-if value="{{ r.hasBadge }}"><span style="{{ r.badge }}">{{ r.status }}</span></sc-if></div></div>
+          <div style="display:flex;flex-direction:column;gap:3px;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)"><sc-for list="{{ r.lines }}" as="l"><div style="{{ l.style }}"><span style="color:var(--muted)">{{ l.k }}</span><span>{{ l.v }}</span></div></sc-for></div>
+        </div>
+      </sc-for>
+    </sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.bank }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;gap:10px;padding:12px 14px;border-radius:14px;background:var(--soft);color:var(--accent);font-size:12.5px;font-weight:600;line-height:1.55;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"></path></svg>{{ t.bankNote }}</div>
+    <sc-if value="{{ bankSaved }}"><div style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:14px;background:rgba(46,158,120,.1);color:#2E9E78;font-size:12.5px;font-weight:700;flex-shrink:0">✓ {{ t.bankVerified }}</div></sc-if>
+    <sc-for list="{{ bankFields }}" as="f" hint-placeholder-count="3">
+      <div style="flex-shrink:0"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">{{ f.label }}</div><input value="{{ f.value }}" dir="{{ f.dir }}" onChange="{{ f.onChange }}" placeholder="{{ f.ph }}" style="{{ f.style }}"><sc-if value="{{ f.err }}"><div style="color:#D9467A;font-size:11.5px;margin-top:5px">{{ f.msg }}</div></sc-if><sc-if value="{{ f.hasHint }}"><div style="font-size:11.5px;color:var(--faint);margin-top:5px">{{ f.hint }}</div></sc-if></div>
+    </sc-for>
+  </div>
+  <div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0"><button onClick="{{ saveBank }}" style="{{ bankBtnS }}"><sc-if value="{{ saving }}"><span style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:spin .8s linear infinite"></span></sc-if><sc-if value="{{ notSaving }}">{{ t.bankContinue }}</sc-if></button></div>
+</sc-if>
+
+<sc-if value="{{ on.sub }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 24px;display:flex;flex-direction:column;gap:12px">
+    <div style="padding:16px;border-radius:20px;border:1px solid var(--line);flex-shrink:0">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">{{ t.salonState }}</div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="{{ sub.chip }}"><span style="{{ sub.dot }}"></span>{{ sub.stateLabel }}</span><span style="font-size:12.5px;color:var(--muted);flex:1">{{ sub.stateSub }}</span></div>
+    </div>
+    <div style="{{ sub.card }}">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12.5px;opacity:.9">{{ t.subscription }}</span><span style="{{ sub.badge }}">{{ sub.badgeLabel }}</span></div>
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:24px;margin:8px 0 4px">{{ sub.title }}</div>
+      <div style="font-size:13px;opacity:.92">{{ sub.sub }}</div>
+      <sc-if value="{{ sub.hasBar }}"><div style="height:8px;border-radius:4px;background:rgba(255,255,255,.25);margin-top:14px;overflow:hidden"><div style="{{ sub.bar }}"></div></div></sc-if>
+    </div>
+    <div style="font-size:12.5px;color:var(--muted);line-height:1.65;flex-shrink:0">{{ t.subPaidOutside }}</div>
+    <button onClick="{{ goContact }}" style="width:100%;height:54px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;cursor:pointer;flex-shrink:0;box-shadow:0 10px 24px rgba(109,40,217,.28)">{{ sub.cta }}</button>
+    <button onClick="{{ goContactFeatured }}" style="display:flex;align-items:center;gap:12px;padding:16px;border-radius:20px;border:1.5px solid #F4A7C4;background:rgba(244,167,196,.1);color:var(--ink);cursor:pointer;text-align:start;flex-shrink:0">
+      <span style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#B83268,#D9467A);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"></path></svg></span>
+      <span style="flex:1"><span style="display:block;font-weight:700;font-size:14.5px">{{ t.featured }}</span><span style="display:block;font-size:12px;color:var(--muted);margin-top:2px">{{ t.featuredSub }}</span></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--faint);transform:scaleX(var(--flip))"><path d="M9 5l7 7-7 7"></path></svg>
+    </button>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.contact }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 24px;display:flex;flex-direction:column;gap:12px">
+    <div style="text-align:center;padding:10px 0 6px;flex-shrink:0"><img src="assets/wab-app-icon.png" alt="" style="width:72px;height:72px;border-radius:20px;object-fit:cover;box-shadow:0 12px 28px rgba(109,40,217,.25)"><div style="font-weight:700;font-size:17px;margin-top:12px">{{ t.contactT }}</div><div style="font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.6">{{ contactSub }}</div></div>
+    <sc-for list="{{ channels }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:start;flex-shrink:0"><span style="{{ c.ic }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="{{ c.d }}"></path></svg></span><span style="flex:1"><span style="display:block;font-weight:700;font-size:14px">{{ c.label }}</span><span dir="ltr" style="display:block;font-size:12.5px;color:var(--muted);text-align:start">{{ c.v }}</span></span></button></sc-for>
+    <div style="font-weight:700;font-size:14.5px;margin-top:6px;flex-shrink:0">{{ t.faq }}</div>
+    <sc-for list="{{ faqs }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.onClick }}" style="padding:14px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:start;flex-shrink:0"><span style="display:flex;justify-content:space-between;gap:10px;font-weight:600;font-size:13.5px">{{ f.q }}<span style="color:var(--accent)">{{ f.sign }}</span></span><sc-if value="{{ f.open }}"><span style="display:block;font-size:12.5px;color:var(--muted);line-height:1.65;margin-top:8px">{{ f.a }}</span></sc-if></button></sc-for>
+  </div>
+</sc-if>
+
+<sc-if value="{{ on.legal }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 24px;display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ legal }}" as="l" hint-placeholder-count="3"><div style="padding:16px;border-radius:18px;border:1px solid var(--line);flex-shrink:0"><div style="font-weight:700;font-size:14.5px;margin-bottom:6px">{{ l.t }}</div><div style="font-size:12.5px;color:var(--muted);line-height:1.7">{{ l.b }}</div><div style="font-size:11px;color:var(--faint);margin-top:8px">{{ t.updated }}</div></div></sc-for>
+  </div>
+</sc-if>
+
+<sc-if value="{{ dlg.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;background:rgba(10,8,20,.5);display:flex;align-items:center;justify-content:center;padding:26px">
+    <div style="background:var(--card);border-radius:24px;padding:24px 20px 16px;width:100%;text-align:center;animation:fadeUp .25s ease both;box-shadow:0 30px 60px rgba(0,0,0,.25)">
+      <div style="{{ dlg.iconStyle }}">{{ dlg.icon }}</div>
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px">{{ dlg.title }}</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.65;margin-bottom:20px">{{ dlg.body }}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ dlg.onPrimary }}" style="{{ dlg.primaryStyle }}">{{ dlg.primary }}</button>
+        <button onClick="{{ closeDlg }}" style="height:44px;border-radius:14px;border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer">{{ t.cancel }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:20px;right:20px;bottom:110px;z-index:60;padding:13px 16px;border-radius:14px;background:#1F2233;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;animation:fadeUp .25s ease both;box-shadow:0 14px 30px rgba(0,0,0,.25)"><span style="width:22px;height:22px;border-radius:50%;background:#2E9E78;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>{{ toast }}</div>
+</sc-if>
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Business · Merchant</div><div style="font-size:11.5px;color:#6B7280">08 · Finance, Subscription, More (M22, M23, M25)</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="9"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="5"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="3"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+  <div style="font-size:11px;color:#6B7280;line-height:1.55;background:#F8F7FB;border-radius:10px;padding:10px">Bank change → OTP to owner's phone (01 Onboarding) → back here verified. Language/Theme rows in More switch the whole prototype.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wabm_proto_settings';
+const CUR='WAB Merchant 08 Finance More.dc.html';
+const FILES=[['01 Onboarding','WAB Merchant 01 Onboarding.dc.html'],['02 Home','WAB Merchant 02 Home.dc.html'],['03 Bookings','WAB Merchant 03 Bookings.dc.html'],['04 Calendar','WAB Merchant 04 Calendar.dc.html'],['05 Salon','WAB Merchant 05 Salon.dc.html'],['06 Services & Team','WAB Merchant 06 Services Team.dc.html'],['07 Policies & Insights','WAB Merchant 07 Policies Insights.dc.html'],['08 Finance & More','WAB Merchant 08 Finance More.dc.html'],['Ad','WAB Merchant Ad.dc.html']];
+const CTRL=[['lang','Language',[['ar','AR'],['en','EN']]],['theme','Theme',[['light','Light'],['dark','Dark']]],['role','Role',[['owner','Owner'],['manager','Manager'],['employee','Employee']]],['gender','Salon',[['female','Women'],['male','Men']]],['sstate','State',[['live','Live'],['offline','Offline'],['incomplete','Incompl.']]]];
+const ALLP=['DASHBOARD_VIEW','BOOKINGS_VIEW_ALL','BOOKINGS_VIEW_OWN','BOOKINGS_RESPOND','BOOKINGS_OPERATE','SALON_PROFILE_MANAGE','GALLERY_MANAGE','WORKING_HOURS_MANAGE','SERVICES_MANAGE','STAFF_MANAGE','POLICIES_MANAGE','REVIEWS_VIEW','STATISTICS_VIEW','FINANCE_VIEW','SUBSCRIPTION_VIEW','TEAM_MANAGE','PAYOUT_DETAILS_MANAGE','SALON_DELETE_REQUEST'];
+const PERMS={owner:ALLP,manager:ALLP.filter(k=>!['FINANCE_VIEW','POLICIES_MANAGE','TEAM_MANAGE','PAYOUT_DETAILS_MANAGE','SALON_DELETE_REQUEST','BOOKINGS_VIEW_OWN'].includes(k)),employee:['DASHBOARD_VIEW','BOOKINGS_VIEW_OWN','REVIEWS_VIEW']};
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1','--shim':d?'#252946':'#EFEBF7','--shim2':d?'#323760':'#F9F7FD'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+function segS(a){return {height:'38px',borderRadius:'11px',border:'none',cursor:'pointer',fontSize:'12.5px',fontWeight:600,background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'transparent',color:a?'#fff':'var(--muted)'}}
+function chipS(a){return {height:'32px',padding:'0 12px',borderRadius:'10px',border:'1.5px solid '+(a?'#A855F7':'var(--line)'),background:a?'var(--soft)':'var(--card)',color:a?'var(--accent)':'var(--ink)',fontSize:'12px',fontWeight:600,cursor:'pointer'}}
+function field(err){return {width:'100%',boxSizing:'border-box',height:'52px',padding:'0 14px',background:'var(--card)',border:'1.5px solid '+(err?'#D9467A':'var(--line)'),borderRadius:'14px',color:'var(--ink)',fontSize:'15px'}}
+function sw(on){return {track:{width:'46px',height:'28px',borderRadius:'14px',background:on?'#A855F7':'var(--line)',position:'relative',flexShrink:0,transition:'background .2s',display:'inline-block'},knob:{position:'absolute',top:'3px',insetInlineStart:on?'21px':'3px',width:'22px',height:'22px',borderRadius:'50%',background:'#fff',boxShadow:'0 2px 4px rgba(0,0,0,.2)',transition:'all .2s'}}}
+function shimS(h){return {height:h+'px',borderRadius:'18px',background:'linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%)',backgroundSize:'200% 100%',animation:'shim 1.4s linear infinite',flexShrink:0}}
+const C={amber:['#B7791F','rgba(245,158,11,.14)'],green:['#2E9E78','rgba(46,158,120,.12)'],rose:['#D9467A','rgba(217,70,122,.1)']};
+const TABD=[['home','M4 11.5 12 4l8 7.5M6 10v9.5h12V10','WAB Merchant 02 Home.dc.html?s=home','DASHBOARD_VIEW'],['book','M8 6h11M8 12h11M8 18h11M4 6h.01M4 12h.01M4 18h.01','WAB Merchant 03 Bookings.dc.html?s=pending','BOOK'],['cal','M5 6h14v14H5zM5 10.5h14M9 3.5v4M15 3.5v4','WAB Merchant 04 Calendar.dc.html?s=day','BOOK'],['salon','M4 9.5 5.5 4h13L20 9.5M4 9.5h16M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0M5.5 12v8h13v-8','WAB Merchant 05 Salon.dc.html?s=hub','MGMT'],['more','M4 6h16M4 12h16M4 18h16','WAB Merchant 08 Finance More.dc.html?s=more','ANY']];
+function can(perms,k){if(k==='ANY')return true;if(k==='BOOK')return perms.includes('BOOKINGS_VIEW_ALL')||perms.includes('BOOKINGS_VIEW_OWN');if(k==='MGMT')return ['SALON_PROFILE_MANAGE','SERVICES_MANAGE','STAFF_MANAGE','REVIEWS_VIEW','STATISTICS_VIEW','TEAM_MANAGE'].some(p=>perms.includes(p));return perms.includes(k)}
+function tabs(active,t,perms){return TABD.filter(x=>can(perms,x[3])).map(([k,d,href])=>({d,href,label:t.tab[k],style:{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px',padding:'6px 0',fontSize:'11px',fontWeight:k===active?700:500,color:k===active?'var(--accent)':'var(--faint)'}}))}
+const ME={owner:{female:['ليلى حداد','Layla Haddad','0791234567'],male:['أحمد النابلسي','Ahmad Nabulsi','0791234567']},manager:{female:['سارة العبدالله','Sara Al-Abdullah','0795550111'],male:['محمود سالم','Mahmoud Salem','0795550111']},employee:{female:['هبة منصور','Hiba Mansour','0795550133'],male:['خالد منصور','Khaled Mansour','0795550133']}};
+const SALON={female:['بيلا هاوس','Bella House'],male:['صالون النخبة للرجال',"Elite Men's Salon"]};
+const TX=[['WAB-24817','o7','deposit',85,2.55],['WAB-24815','o7','full',35,1.05],['WAB-24812','o6','deposit',14,.42],['WAB-24809','o6','full',25,.75],['WAB-24806','o5','deposit',7,.21],['WAB-24790','o5','deposit',9,.27]];
+const RF=[['WAB-24755',7,'rejected','done','o3','o4'],['WAB-24748',5,'cs','pending','o6',''],['WAB-24733',25,'auto','failed','o1','o2']];
+const PO=[['p3',1480,44.4,25,'pending','',''],['p2',1310,39.3,12,'transferred','o1','TRX-88213'],['p1',1120,33.6,0,'transferred','s24','TRX-87150']];
+const D={ar:{tab:{home:'الرئيسية',book:'الحجوزات',cal:'التقويم',salon:'الصالون',more:'المزيد'},more:'المزيد',offlineMsg:'صالونك غير ظاهر للزبائن حالياً. تواصل مع WAB لإعادة التفعيل',contactShort:'تواصل',role:{owner:'المالك',manager:'مسؤول',employee:'موظف'},
+sec:{account:'الحساب',business:'الأعمال',settings:'الإعدادات',support:'الدعم والقانوني',danger:'الحساب'},r:{phone:'تغيير رقم الهاتف',phoneSub:'سيُرسل رمز تحقق إلى الرقم الجديد',finance:'المالية',financeSub:'الرصيد، المعاملات، الدفعات',sub:'الاشتراك والحالة',subSub:'فترة مجانية · تبقّى 5 أيام',lang:'اللغة',theme:'الوضع الداكن',push:'الإشعارات',pushSub:'طلبات الحجز والتحديثات',overlay:'الظهور فوق التطبيقات',overlayOn:'مفعّل (Android)',overlayOff:'غير مفعّل — اضغط للتفعيل',sound:'تجربة صوت التنبيه',soundSub:'نغمة طلب الحجز الجديد',contact:'تواصل مع WAB',faq:'الأسئلة الشائعة',terms:'الشروط والأحكام',privacy:'سياسة الخصوصية',about:'عن WAB',logout:'تسجيل الخروج',delMember:'حذف حسابي',delMemberSub:'إزالة صلاحية دخولك إلى هذا الصالون',delOwner:'طلب حذف الصالون',delOwnerSub:'سيتواصل معك فريق WAB لإتمام الطلب'},langV:'العربية',
+logoutT:'تسجيل الخروج؟',logoutB:'ستحتاج إلى رقم هاتفك ورمز التحقق للدخول مجدداً.',logoutBtn:'تسجيل الخروج',delMT:'حذف حسابك؟',delMB:'ستتم إزالة صلاحية دخولك إلى صالون {s} وتسجيل خروجك. يمكن للمالك إضافتك مجدداً لاحقاً.',delMBtn:'حذف حسابي',delOT:'طلب حذف الصالون',delOB:'سيُرسل طلب حذف صالون {s} إلى فريق WAB، وسيتواصلون معك لتأكيد الطلب وتسوية أي مستحقات قبل الحذف النهائي.',delOBtn:'إرسال الطلب',delOSent:'تم إرسال طلب الحذف — سيتواصل معك فريق WAB',cancel:'إلغاء',playing:'جارٍ تشغيل نغمة التنبيه…',overlayEnabled:'تم تفعيل الظهور فوق التطبيقات',phoneSaved:'تم تغيير رقم الهاتف بنجاح',
+financeT:'المالية',bankBtn:'بيانات البنك',pendingPayout:'الدفعة القادمة (قيد التحويل)',lastPayout:'آخر دفعة · 1 أكتوبر',finInfo:'يجمع WAB المدفوعات أونلاين. تُخصم رسوم بوابة الدفع من دفعاتك، ويتم تحويل الدفعات يدوياً من قبل WAB.',ft:['المعاملات','المبالغ المستردة','الدفعات'],ranges:['هذا الشهر','آخر 3 أشهر','هذه السنة','مخصص'],finEmptyT:['لا توجد معاملات','لا توجد مبالغ مستردة','لا توجد دفعات'],finEmptyB:'جرّب فترة أخرى.',
+type:{deposit:'عربون',full:'دفع كامل'},amount:'المبلغ',fee:'رسوم البوابة',net:'الصافي',reason:'السبب',rsn:{rejected:'رفض الصالون',cs:'إلغاء من الصالون',auto:'إلغاء تلقائي'},refSt:{done:'تم الاسترجاع',pending:'قيد الاسترجاع',failed:'فشل الاسترجاع'},requested:'تاريخ الطلب',completed:'تاريخ الاسترجاع',period:'الفترة',gross:'الإجمالي',fees:'الرسوم',refunds:'مستردات مخصومة',transfer:'التحويل',poSt:{pending:'قيد التحويل',transferred:'تم التحويل'},
+per:{p3:'1–15 أكتوبر',p2:'16–30 سبتمبر',p1:'1–15 سبتمبر'},dt:{o7:'7 أكتوبر',o6:'6 أكتوبر',o5:'5 أكتوبر',o4:'4 أكتوبر',o3:'3 أكتوبر',o2:'2 أكتوبر',o1:'1 أكتوبر',s24:'16 سبتمبر'},payoutTitle:'دفعة',
+bankT:'بيانات البنك',bankNote:'لحماية أموالك، يتطلب تغيير بيانات البنك رمز تحقق يُرسل إلى هاتف المالك.',bankName:'اسم البنك',holder:'اسم صاحب الحساب',iban:'رقم الآيبان (IBAN)',ibanHint:'يبدأ بـ JO ويتكون من 30 خانة',ibanErr:'رقم الآيبان غير صحيح',reqErr:'هذا الحقل مطلوب',bankContinue:'متابعة والتحقق',bankVerified:'تم تأكيد وحفظ بيانات البنك',
+subT:'الاشتراك والحالة',salonState:'حالة الصالون',st:{live:'مباشر',offline:'غير متصل',incomplete:'غير مكتمل'},stSub:{live:'ظاهر للزبائن ويستقبل الحجوزات',offline:'مخفي عن الزبائن',incomplete:'أكمل الخطوات المطلوبة'},subscription:'الاشتراك',trialT:'فترة مجانية',trialS:'تبقّى 5 أيام · تنتهي في 12 أكتوبر 2026',activeT:'اشتراك شهري فعّال',activeS:'يتجدد في 1 نوفمبر 2026',expT:'انتهى الاشتراك',expS:'انتهى في 30 سبتمبر 2026 — صالونك غير متصل',badge:{trial:'تجريبي',active:'فعّال',expired:'منتهي'},subPaidOutside:'يتم دفع الاشتراكات خارج التطبيق. تواصل مع فريق WAB لتفعيل أو تجديد اشتراكك.',ctaActivate:'تواصل مع WAB للتفعيل',ctaRenew:'تواصل مع WAB للتجديد',ctaContact:'تواصل مع WAB',featured:'اظهر ضمن الصالونات الموصى بها',featuredSub:'ميّز صالونك في الصفحة الرئيسية لتطبيق الزبائن',
+contactT:'تواصل مع WAB',contactSub:'فريقنا متاح من السبت إلى الخميس، 9 ص – 6 م',contactFeatured:'أخبرنا أنك مهتم بالظهور ضمن الصالونات الموصى بها',ch:['اتصال','واتساب','البريد الإلكتروني'],opening:'جارٍ الفتح…',faq:'الأسئلة الشائعة',faqs:[['متى تصلني الدفعات؟','يحوّل فريق WAB الدفعات يدوياً كل أسبوعين إلى حسابك البنكي بعد خصم رسوم البوابة والمستردات.'],['كيف أضيف موظفاً؟','من الصالون ← الطاقم والفريق ← إضافة عضو. أدخل رقم هاتفه وسيتمكن من الدخول فوراً.'],['ماذا يحدث إن لم أرد على طلب حجز؟','يُلغى الطلب تلقائياً مع استرداد كامل للزبون إذا لم يتم الرد خلال ساعة من موعده.']],
+legalT:'الشروط والخصوصية',legal:[['الشروط والأحكام للصالونات','توضح هذه الشروط علاقة الصالون بمنصة WAB، بما في ذلك استقبال الحجوزات، سياسات الإلغاء والاسترداد، ورسوم بوابة الدفع وآلية الدفعات.'],['سياسة الخصوصية','نجمع فقط البيانات اللازمة لتشغيل حسابك وإدارة الحجوزات، ولا نشارك بيانات زبائنك مع أي طرف ثالث لأغراض تسويقية.'],['عن WAB','WAB Wedding & Beauty منصة أردنية تربط الزبائن بأفضل صالونات التجميل والعرائس.']],updated:'آخر تحديث: 1 سبتمبر 2026'},
+en:{tab:{home:'Home',book:'Bookings',cal:'Calendar',salon:'Salon',more:'More'},more:'More',offlineMsg:'Your salon is offline and hidden from customers. Contact WAB to reactivate.',contactShort:'Contact',role:{owner:'Owner',manager:'Manager',employee:'Employee'},
+sec:{account:'Account',business:'Business',settings:'Settings',support:'Support & legal',danger:'Account'},r:{phone:'Change phone number',phoneSub:'A code will be sent to the new number',finance:'Finance',financeSub:'Balance, transactions, payouts',sub:'Subscription & status',subSub:'Free trial · 5 days left',lang:'Language',theme:'Dark mode',push:'Notifications',pushSub:'Booking requests and updates',overlay:'Display over other apps',overlayOn:'Enabled (Android)',overlayOff:'Off — tap to enable',sound:'Test alert sound',soundSub:'New booking request tone',contact:'Contact WAB',faq:'FAQ',terms:'Terms & Conditions',privacy:'Privacy Policy',about:'About WAB',logout:'Log out',delMember:'Delete my account',delMemberSub:'Remove your access to this salon',delOwner:'Request salon deletion',delOwnerSub:'WAB will contact you to complete it'},langV:'English',
+logoutT:'Log out?',logoutB:"You'll need your phone number and a verification code to log in again.",logoutBtn:'Log out',delMT:'Delete your account?',delMB:'Your access to {s} will be removed and you will be logged out. The owner can add you again later.',delMBtn:'Delete my account',delOT:'Request salon deletion',delOB:'A deletion request for {s} will be sent to WAB. They will contact you to confirm and settle any balances before final deletion.',delOBtn:'Send request',delOSent:'Deletion request sent — WAB will contact you',cancel:'Cancel',playing:'Playing alert tone…',overlayEnabled:'Display over other apps enabled',phoneSaved:'Phone number changed successfully',
+financeT:'Finance',bankBtn:'Bank details',pendingPayout:'Next payout (pending)',lastPayout:'Last payout · Oct 1',finInfo:'Payments are collected by WAB. Gateway fees are deducted from your payouts. Payouts are transferred manually by WAB.',ft:['Transactions','Refunds','Payouts'],ranges:['This month','Last 3 months','This year','Custom'],finEmptyT:['No transactions','No refunds','No payouts'],finEmptyB:'Try another period.',
+type:{deposit:'Deposit',full:'Full payment'},amount:'Amount',fee:'Gateway fee',net:'Net',reason:'Reason',rsn:{rejected:'Rejected by salon',cs:'Cancelled by salon',auto:'Auto-cancelled'},refSt:{done:'Refunded',pending:'Pending',failed:'Failed'},requested:'Requested',completed:'Refunded on',period:'Period',gross:'Gross',fees:'Fees',refunds:'Refunds deducted',transfer:'Transfer',poSt:{pending:'Pending',transferred:'Transferred'},
+per:{p3:'Oct 1–15',p2:'Sep 16–30',p1:'Sep 1–15'},dt:{o7:'Oct 7',o6:'Oct 6',o5:'Oct 5',o4:'Oct 4',o3:'Oct 3',o2:'Oct 2',o1:'Oct 1',s24:'Sep 16'},payoutTitle:'Payout',
+bankT:'Bank details',bankNote:"To protect your money, changing bank details requires a code sent to the owner's phone.",bankName:'Bank name',holder:'Account holder',iban:'IBAN',ibanHint:'Starts with JO, 30 characters',ibanErr:'Invalid IBAN',reqErr:'This field is required',bankContinue:'Continue & verify',bankVerified:'Bank details verified and saved',
+subT:'Subscription & status',salonState:'Salon status',st:{live:'Live',offline:'Offline',incomplete:'Incomplete'},stSub:{live:'Visible and accepting bookings',offline:'Hidden from customers',incomplete:'Complete the required steps'},subscription:'Subscription',trialT:'Free trial',trialS:'5 days left · ends Oct 12, 2026',activeT:'Monthly plan active',activeS:'Renews Nov 1, 2026',expT:'Subscription expired',expS:'Expired Sep 30, 2026 — your salon is offline',badge:{trial:'Trial',active:'Active',expired:'Expired'},subPaidOutside:'Subscriptions are paid outside the app. Contact WAB to activate or renew your subscription.',ctaActivate:'Contact WAB to activate',ctaRenew:'Contact WAB to renew',ctaContact:'Contact WAB',featured:'Get featured in Recommended Salons',featuredSub:'Highlight your salon on the customer app home',
+contactT:'Contact WAB',contactSub:'Our team is available Sat–Thu, 9 AM – 6 PM',contactFeatured:"Tell us you're interested in being featured",ch:['Call','WhatsApp','Email'],opening:'Opening…',faq:'FAQ',faqs:[['When do I get paid?','WAB transfers payouts manually every two weeks to your bank account after gateway fees and refunds.'],['How do I add a staff member?','Salon → Staff & team → Add member. Enter their phone and they can log in right away.'],["What if I don't answer a request?",'It is auto-cancelled with a full refund if not answered within 1 hour of its start time.']],
+legalT:'Terms & privacy',legal:[['Salon Terms & Conditions','These terms describe your relationship with WAB, including receiving bookings, cancellation and refund policies, gateway fees and payouts.'],['Privacy Policy','We only collect data needed to run your account and manage bookings, and never share customer data with third parties for marketing.'],['About WAB','WAB Wedding & Beauty is a Jordanian platform connecting customers with the best beauty and bridal salons.']],updated:'Last updated: Sep 1, 2026'}};
+const DEF={screen:'more',ftab:0,frange:0,fState:'',bank:null,bankErr:false,bankOk:false,saving:false,subKind:'trial',push:true,overlay:true,sound:false,dialog:null,faq:-1,featured:false,toast:null};
+const PRE={more:{},moreEmployee:{role:'employee'},logout:{dialog:'logout'},delMember:{role:'employee',dialog:'delM'},delOwner:{dialog:'delO'},phoneSaved:{toastKey:'phoneSaved'},
+finance:{screen:'finance'},refunds:{screen:'finance',ftab:1},payouts:{screen:'finance',ftab:2},finEmpty:{screen:'finance',ftab:1,frange:3,fState:'empty'},finLoading:{screen:'finance',fState:'loading'},bank:{screen:'bank'},bankErr:{screen:'bank',bankErr:true,badIban:1},bankSaved:{screen:'bank',bankOk:true},
+subTrial:{screen:'sub',subKind:'trial'},subActive:{screen:'sub',subKind:'active'},subExpired:{screen:'sub',subKind:'expired',sstate:'offline'},contact:{screen:'contact'},legal:{screen:'legal'}};
+const NAV=[['M25 More',[['Owner','more'],['Employee','moreEmployee'],['Logout dialog','logout'],['Delete (member)','delMember'],['Delete (owner request)','delOwner'],['Contact WAB','contact'],['Legal','legal']]],['M22 Finance',[['Transactions','finance'],['Refunds','refunds'],['Payouts','payouts'],['Empty','finEmpty'],['Loading','finLoading'],['Bank details','bank'],['Bank invalid IBAN','bankErr'],['Bank saved (after OTP)','bankSaved']]],['M23 Subscription',[['Trial','subTrial'],['Active','subActive'],['Expired + Offline','subExpired']]]];
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();return Object.assign({lang:p.lang||'ar',theme:p.theme||'light',role:p.role||'owner',gender:p.gender||'female',sstate:p.sstate||'live',preset:'more'},DEF)})();
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k)}
+  componentWillUnmount(){clearTimeout(this.toastT)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,role:s.role,gender:s.gender,sstate:s.sstate}))}
+  setPref(k,v){this.setState({[k]:v},()=>this.savePrefs())}
+  go(k){const p=PRE[k];if(!p)return;const st=Object.assign({},DEF,p,{preset:k});st.role=p.role||(this.state.role==='employee'?'owner':this.state.role);if(['finance','refunds','payouts','finEmpty','finLoading','bank','bankErr','bankSaved','delOwner','subTrial','subActive','subExpired'].includes(k))st.role='owner';
+    st.sstate=p.sstate||(this.state.sstate==='offline'&&k!=='subExpired'?this.state.sstate:(k==='subExpired'?'offline':this.state.sstate));
+    if(p.badIban)st.bank={name:'',holder:'Layla Haddad',iban:'JO94CBJO00100'};
+    const tk=p.toastKey;delete st.toastKey;delete st.badIban;
+    this.setState(st,()=>{this.savePrefs();if(tk)this.toast(D[this.state.lang][tk]);if(p.fState==='loading')setTimeout(()=>this.setState({fState:''}),2000)})}
+  toast(m){this.setState({toast:m});clearTimeout(this.toastT);this.toastT=setTimeout(()=>this.setState({toast:null}),2200)}
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],g=s.gender,L=ar?0:1,perms=PERMS[s.role],isOwner=s.role==='owner',R=t.r;
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const m=ME[s.role][g];
+    const ic=(rose)=>({width:'36px',height:'36px',borderRadius:'11px',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',background:rose?'rgba(217,70,122,.1)':'var(--soft)',color:rose?'#D9467A':'var(--accent)'});
+    const row=(o)=>Object.assign({hasSub:!!o.sub,hasVal:!!o.val,hasSw:o.sw!==undefined,chev:!!o.chev,wave:!!o.wave,iconStyle:ic(o.rose),subStyle:{display:'block',fontSize:'11.5px',color:o.subColor||'var(--muted)',marginTop:'1px'},
+      style:{width:'100%',display:'flex',alignItems:'center',gap:'12px',padding:'12px 14px',border:'none',borderTop:'1px solid var(--line)',background:'transparent',color:o.rose?'#D9467A':'var(--ink)',cursor:'pointer',textAlign:'start',marginTop:'-1px'}},o.sw!==undefined?sw(o.sw):{},o);
+    const I={phone:'M7 3h10v18H7zM10.5 18h3',fin:'M3 7h18v12H3zM3 11h18M7 15h3',sub:'M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 15.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z',lang:'M4 5h9M8.5 3v2M6 5c0 5 4 8 7 9M11 5c-1 4-4 8-7 9M13 20l4-9 4 9M14.5 17h5',moon:'M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z',bell:'M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0',layers:'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5',sound:'M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11',help:'M5 4h14v12H9l-4 4z',doc:'M6 3h9l4 4v14H6zM9 12h7M9 16h5',lock:'M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3',info:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01',out:'M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10',trash:'M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13'};
+    const sections=[{title:t.sec.account,rows:[row({label:R.phone,sub:R.phoneSub,d:I.phone,chev:1,onClick:()=>{location.href='WAB Merchant 01 Onboarding.dc.html?s=otpPhone'}})]}];
+    const biz=[].concat(perms.includes('FINANCE_VIEW')?[row({label:R.finance,sub:R.financeSub,d:I.fin,chev:1,onClick:()=>this.setState({screen:'finance'})})]:[],perms.includes('SUBSCRIPTION_VIEW')?[row({label:R.sub,sub:R.subSub,subColor:'#B7791F',d:I.sub,chev:1,onClick:()=>this.setState({screen:'sub'})})]:[]);
+    if(biz.length)sections.push({title:t.sec.business,rows:biz});
+    sections.push({title:t.sec.settings,rows:[row({label:R.lang,val:t.langV,d:I.lang,chev:1,onClick:()=>this.setPref('lang',ar?'en':'ar')}),row({label:R.theme,d:I.moon,sw:s.theme==='dark',onClick:()=>this.setPref('theme',s.theme==='dark'?'light':'dark')}),row({label:R.push,sub:R.pushSub,d:I.bell,sw:s.push,onClick:()=>this.setState({push:!s.push})}),
+      row({label:R.overlay,sub:s.overlay?R.overlayOn:R.overlayOff,subColor:s.overlay?'#2E9E78':'#D9467A',d:I.layers,chev:!s.overlay,onClick:()=>{if(!s.overlay){this.setState({overlay:true});this.toast(t.overlayEnabled)}else location.href='WAB Merchant 02 Home.dc.html?s=perm'}}),
+      row({label:R.sound,sub:R.soundSub,d:I.sound,wave:s.sound,onClick:()=>{this.setState({sound:true});this.toast(t.playing);try{const A=window.AudioContext||window.webkitAudioContext;const c=new A();[0,.25].forEach(o=>{const os=c.createOscillator(),gn=c.createGain();os.frequency.value=880;gn.gain.value=.08;os.connect(gn);gn.connect(c.destination);os.start(c.currentTime+o);os.stop(c.currentTime+o+.15)})}catch(e){}setTimeout(()=>this.setState({sound:false}),1400)}})]});
+    sections.push({title:t.sec.support,rows:[row({label:R.contact,d:I.help,chev:1,onClick:()=>this.setState({screen:'contact',featured:false})}),row({label:R.faq,d:I.info,chev:1,onClick:()=>this.setState({screen:'contact'})}),row({label:R.terms,d:I.doc,chev:1,onClick:()=>this.setState({screen:'legal'})}),row({label:R.privacy,d:I.lock,chev:1,onClick:()=>this.setState({screen:'legal'})})]});
+    sections.push({title:t.sec.danger,rows:[row({label:R.logout,d:I.out,onClick:()=>this.setState({dialog:'logout'})}),row({label:isOwner?R.delOwner:R.delMember,sub:isOwner?R.delOwnerSub:R.delMemberSub,d:I.trash,rose:1,onClick:()=>this.setState({dialog:isOwner?'delO':'delM'})})]});
+    const icS=rose=>({width:'56px',height:'56px',borderRadius:'50%',margin:'0 auto 14px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'22px',fontWeight:700,background:rose?'rgba(217,70,122,.12)':'var(--soft)',color:rose?'#D9467A':'var(--accent)'});
+    const pB=bg=>({height:'50px',borderRadius:'14px',border:'none',background:bg,color:'#fff',fontSize:'14.5px',fontWeight:600,cursor:'pointer'});
+    const sn=SALON[g][L];
+    const DL={logout:{icon:'⎋',iconStyle:icS(false),title:t.logoutT,body:t.logoutB,primary:t.logoutBtn,primaryStyle:pB('linear-gradient(135deg,#6D28D9,#A855F7)'),onPrimary:()=>{location.href='WAB Merchant 01 Onboarding.dc.html?s=loginEmpty'}},
+      delM:{icon:'!',iconStyle:icS(true),title:t.delMT,body:t.delMB.replace('{s}',sn),primary:t.delMBtn,primaryStyle:pB('#D9467A'),onPrimary:()=>{location.href='WAB Merchant 01 Onboarding.dc.html?s=loginEmpty'}},
+      delO:{icon:'!',iconStyle:icS(true),title:t.delOT,body:t.delOB.replace('{s}',sn),primary:t.delOBtn,primaryStyle:pB('#D9467A'),onPrimary:()=>{this.setState({dialog:null});this.toast(t.delOSent)}}};
+    const dm=DL[s.dialog];
+    const cur=v=>(Math.round(v*100)/100).toFixed(2)+' '+(ar?'د.أ':'JOD');
+    const bd=c=>({display:'inline-block',marginTop:'4px',fontSize:'10.5px',fontWeight:700,padding:'2px 8px',borderRadius:'6px',color:c[0],background:c[1]});
+    const ln=(k,v,bold)=>({k,v,style:{display:'flex',justifyContent:'space-between',fontSize:bold?'13px':'12px',fontWeight:bold?700:500}});
+    let rows=[];
+    if(s.ftab===0)rows=TX.map(([ref,d,ty,a,f])=>({title:t.type[ty],ref,date:t.dt[d],amount:cur(a),hasBadge:false,lines:[ln(t.amount,cur(a)),ln(t.fee,'−'+cur(f)),ln(t.net,cur(a-f),1)]}));
+    if(s.ftab===1)rows=RF.map(([ref,a,r,st,d1,d2])=>({title:t.rsn[r],ref,date:t.dt[d1],amount:cur(a),hasBadge:true,status:t.refSt[st],badge:bd(st==='done'?C.green:st==='failed'?C.rose:C.amber),lines:[ln(t.requested,t.dt[d1])].concat(d2?[ln(t.completed,t.dt[d2])]:[])}));
+    if(s.ftab===2)rows=PO.map(([p,gr,fe,rf,st,d,trx])=>({title:t.payoutTitle+' · '+t.per[p],ref:trx||'—',date:d?t.dt[d]:t.poSt.pending,amount:cur(gr-fe-rf),hasBadge:true,status:t.poSt[st],badge:bd(st==='transferred'?C.green:C.amber),lines:[ln(t.gross,cur(gr)),ln(t.fees,'−'+cur(fe)),ln(t.refunds,'−'+cur(rf)),ln(t.net,cur(gr-fe-rf),1)]}));
+    const b=s.bank||{name:ar?'بنك القاهرة عمّان':'Cairo Amman Bank',holder:ar?ME.owner[g][0]:ME.owner[g][1],iban:'JO94CBJO0010000000000131000302'};
+    const ibanOk=/^JO\d{2}[A-Z]{4}\d{22}$/.test(b.iban.replace(/\s/g,''));const E=s.bankErr;
+    const setB=o=>this.setState({bank:Object.assign({},b,o),bankOk:false});
+    const bankFields=[{label:t.bankName,value:b.name,dir:ar?'rtl':'ltr',ph:'',onChange:e=>setB({name:e.target.value}),err:E&&!b.name.trim(),msg:t.reqErr,style:field(E&&!b.name.trim())},{label:t.holder,value:b.holder,dir:ar?'rtl':'ltr',ph:'',onChange:e=>setB({holder:e.target.value}),err:E&&!b.holder.trim(),msg:t.reqErr,style:field(E&&!b.holder.trim())},{label:t.iban,value:b.iban,dir:'ltr',ph:'JO00 XXXX 0000 …',onChange:e=>setB({iban:e.target.value.toUpperCase()}),err:E&&!ibanOk,msg:t.ibanErr,hasHint:true,hint:t.ibanHint,style:Object.assign(field(E&&!ibanOk),{fontSize:'13.5px',letterSpacing:'.5px'})}];
+    const SK={trial:[t.trialT,t.trialS,t.badge.trial,t.ctaActivate,'linear-gradient(135deg,#6D28D9,#A855F7)',29],active:[t.activeT,t.activeS,t.badge.active,t.ctaContact,'linear-gradient(135deg,#1F7A5E,#2E9E78)',60],expired:[t.expT,t.expS,t.badge.expired,t.ctaRenew,'linear-gradient(135deg,#8E2A55,#D9467A)',100]}[s.subKind];
+    const scc={live:C.green,offline:C.rose,incomplete:C.amber}[s.sstate];
+    const TB={finance:[t.financeT,'more'],bank:[t.bankT,'finance'],sub:[t.subT,'more'],contact:[t.contactT,'more'],legal:[t.legalT,'more']}[s.screen];
+    const CH=[['M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z','+962 6 500 1234',['var(--soft)','var(--accent)']],['M4 20l1.3-4A8 8 0 1 1 8 18.7z','+962 79 000 1234',['rgba(46,158,120,.12)','#2E9E78']],['M3 6h18v12H3zM3 6l9 7 9-7','business@wab.jo',['rgba(245,158,11,.14)','#B7791F']]];
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',themeVars:tv(s.lang,s.theme),
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),controls:CTRL.map(([k,label,o])=>({label,opts:seg(k,o)})),
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      on:{more:s.screen==='more',finance:s.screen==='finance',bank:s.screen==='bank',sub:s.screen==='sub',contact:s.screen==='contact',legal:s.screen==='legal'},
+      hasTop:!!TB,title:TB?TB[0]:'',onBack:()=>TB&&this.setState({screen:TB[1]}),hasBankBtn:s.screen==='finance'&&perms.includes('PAYOUT_DETAILS_MANAGE'),goBank:()=>this.setState({screen:'bank',bankErr:false}),
+      offline:s.sstate==='offline',goContact:()=>this.setState({screen:'contact',featured:false}),goContactFeatured:()=>this.setState({screen:'contact',featured:true}),
+      me:{name:m[L],phone:'+962 '+m[2].slice(1).replace(/(\d{2})(\d{3})(\d{4})/,'$1 $2 $3'),role:t.role[s.role],salon:sn,i:m[L].charAt(0),slot:'mme-'+s.role+'-'+g,roleStyle:{fontSize:'10.5px',fontWeight:700,padding:'2px 8px',borderRadius:'6px',background:isOwner?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--soft)',color:isOwner?'#fff':'var(--accent)'}},
+      sections,tabs:tabs('more',t,perms),
+      fin:{pending:cur(1410.6),last:cur(1258.7)},fTabs:t.ft.map((l,i)=>({label:l,onClick:()=>{this.setState({ftab:i,fState:'loading'});setTimeout(()=>this.setState({fState:''}),500)},style:segS(s.ftab===i)})),
+      fRanges:t.ranges.map((l,i)=>({label:l,onClick:()=>{this.setState({frange:i,fState:i===3?'empty':'loading'});if(i!==3)setTimeout(()=>this.setState({fState:''}),500)},style:chipS(s.frange===i)})),
+      fLoading:s.fState==='loading',fEmpty:s.fState==='empty',fReady:!s.fState,four:[118,118,118,118].map(shimS),emptyTitle:t.finEmptyT[s.ftab],rows,
+      bankSaved:s.bankOk,bankFields,bankBtnS:{width:'100%',height:'54px',borderRadius:'14px',border:'none',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:'linear-gradient(135deg,#6D28D9,#A855F7)',color:'#fff',fontSize:'15px',fontWeight:600,cursor:'pointer'},saving:s.saving,notSaving:!s.saving,
+      saveBank:()=>{if(!b.name.trim()||!b.holder.trim()||!ibanOk){this.setState({bankErr:true});return}this.setState({saving:true});setTimeout(()=>{location.href='WAB Merchant 01 Onboarding.dc.html?s=otpBank'},700)},
+      sub:{stateLabel:t.st[s.sstate],stateSub:t.stSub[s.sstate],chip:{display:'inline-flex',alignItems:'center',gap:'6px',fontSize:'12.5px',fontWeight:700,padding:'5px 11px',borderRadius:'9px',color:scc[0],background:scc[1],flexShrink:0},dot:{width:'7px',height:'7px',borderRadius:'50%',background:scc[0]},
+        title:SK[0],sub:SK[1],badgeLabel:SK[2],cta:SK[3],card:{padding:'18px',borderRadius:'22px',background:SK[4],color:'#fff',flexShrink:0,boxShadow:'0 14px 30px rgba(31,34,51,.18)'},badge:{fontSize:'11px',fontWeight:700,padding:'4px 10px',borderRadius:'8px',background:'rgba(255,255,255,.22)',color:'#fff'},hasBar:s.subKind!=='expired',bar:{height:'100%',width:SK[5]+'%',background:'#fff',borderRadius:'4px'}},
+      contactSub:s.featured?t.contactFeatured:t.contactSub,channels:CH.map(([d,v,c],i)=>({label:t.ch[i],v,d,ic:{width:'44px',height:'44px',borderRadius:'14px',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',background:c[0],color:c[1]},onClick:()=>this.toast(t.opening)})),
+      faqs:t.faqs.map(([q,a],i)=>({q,a,open:s.faq===i,sign:s.faq===i?'−':'+',onClick:()=>this.setState({faq:s.faq===i?-1:i})})),legal:t.legal.map(([a,bb])=>({t:a,b:bb})),
+      dlg:dm?Object.assign({show:true},dm):{show:false},closeDlg:()=>this.setState({dialog:null}),toast:s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

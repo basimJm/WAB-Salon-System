@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./wab-admin-kit.js"></script>
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#F6F4FA}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button,select,textarea{font-family:inherit}
+input::placeholder,textarea::placeholder{color:#9096A5}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(46,158,120,.55)}70%{box-shadow:0 0 0 7px rgba(46,158,120,0)}100%{box-shadow:0 0 0 0 rgba(46,158,120,0)}}
+@keyframes rowFlash{0%{background:rgba(46,158,120,.22)}100%{background:transparent}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes drawerInL{from{transform:translateX(-100%)}to{transform:none}}
+@keyframes drawerInR{from{transform:translateX(100%)}to{transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+</style>
+</helmet>
+<div dir="{{ dir }}" style="{{ rootStyle }}">
+  <div style="display:flex;align-items:flex-start;min-height:100vh">
+    <dc-import name="WAB Admin Sidebar" active="{{ navActive }}" lang="{{ lang }}" on-nav="{{ nav }}" hint-size="256px,100vh"></dc-import>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+      <dc-import name="WAB Admin Topbar" lang="{{ lang }}" plang="{{ plang }}" theme="{{ theme }}" hint-size="100%,64px"></dc-import>
+      <main style="padding:24px 28px 56px;width:100%;max-width:1640px;box-sizing:border-box" data-screen-label="{{ screenLabel }}">
+        <dc-import name="WAB Admin Blocks" blocks="{{ blocks }}" lang="{{ lang }}" theme="{{ theme }}" state="{{ st }}" on-retry="{{ retry }}" hint-size="100%,640px"></dc-import>
+      </main>
+    </div>
+  </div>
+  <dc-import name="WAB Admin Overlay" lang="{{ lang }}" theme="{{ theme }}" hint-size="0px,0px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;page&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A11&quot;,&quot;A12&quot;],&quot;default&quot;:&quot;A11&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;journey&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;customer&quot;,&quot;merchant&quot;,&quot;empty&quot;],&quot;default&quot;:&quot;customer&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;A11&quot;},&quot;customerView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;list&quot;,&quot;detail&quot;],&quot;default&quot;:&quot;list&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;A12&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ar&quot;,&quot;en&quot;],&quot;default&quot;:&quot;ar&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state={};
+  componentDidMount(){const go=()=>{if(!window.WABA)return setTimeout(go,50);WABA.mount(this)};go()}
+  componentDidUpdate(p){window.WABA&&WABA.update(this,p);if(p.journey!==this.props.journey)this.setState({jq:null,jsub:null})}
+  componentWillUnmount(){window.WABA&&WABA.unmount(this)}
+  g(k,d){return this.state[k]!=null?this.state[k]:d}
+  renderVals(){const W=window.WABA;if(!W||!this.state._q)return {blocks:[],rootStyle:{minHeight:'100vh',background:'#F6F4FA'},dir:'rtl',lang:'ar',plang:'ar',theme:'light',st:'loading'};
+    const x=W.ctx(this,'A11');const blocks=(x.page==='A12'?this.A12(x,W):this.A11(x,W)).filter(Boolean);
+    return {blocks,rootStyle:x.rootStyle,dir:x.dir,lang:x.lang,plang:x.plang,theme:x.theme,st:x.st,retry:x.retry,nav:x.nav,navActive:x.page,screenLabel:x.page+' / '+x.st};}
+  who(x){const q=x.q;const sub=this.state.jsub;if(sub)return sub;if(q.u)return q.u;if(q.q)return 'M-31';const v=this.props.journey||'customer';return v==='merchant'?'M-31':v==='empty'?null:'C-1043'}
+  journeyEvents(x,W,id){const T=(a,e)=>x.ar?a:e,L=x.lang;const isM=id==='M-31';
+    const cu=W.cust().find(c=>c.id===id)||W.cust()[1];const nm=isM?T('خالد السعدي','Khaled Saadi'):(x.ar?cu.ar:cu.en);
+    if(isM)return {nm,groups:[
+      {t:T('جلسة #7 · اليوم','Session #7 · Today'),sub:'iPhone 14 · iOS 18 · '+T('تطبيق التجار 1.6.0','Merchant app 1.6.0'),events:[
+        {time:W.tm(14,3,L),t:T('قبول حجز','Booking approved'),ev:'booking_approve',screen:'M09',icon:'check',hl:'ok',sub:'WAB-24812 · '+T('يزن الشوبكي','Yazan Shobaki'),json:{bookingId:'WAB-24812',staffId:'ST-14',responseSec:412}},
+        {time:W.tm(13,58,L),t:T('عرض الطلبات المعلّقة','Viewed pending requests'),ev:'screen_view',screen:'M08',icon:'eye'},
+        {time:W.tm(13,57,L),t:T('فتح التطبيق من إشعار','App opened from push'),ev:'push_open',icon:'bell',sub:T('حجز جديد بانتظار ردك','New booking awaiting your reply')}]},
+      {t:T('جلسة #6 · أمس','Session #6 · Yesterday'),sub:'iPhone 14 · iOS 18',events:[
+        {time:W.tm(21,14,L),t:T('تعديل سعر خدمة','Service price edited'),ev:'service_update',screen:'M14',icon:'edit',sub:T('قص + لحية: 12 ← 14 د.أ','Cut + beard: 12 → 14 JOD'),json:{serviceId:'SV-08',price:{from:12,to:14}}},
+        {time:W.tm(21,9,L),t:T('خطأ في الشبكة','Network error'),ev:'api_error',icon:'err',hl:'error',sub:'PUT /v1/merchant/services/SV-08 · 504',json:{endpoint:'/v1/merchant/services/SV-08',status:504,latencyMs:30000,retry:1}},
+        {time:W.tm(21,2,L),t:T('تسجيل الدخول','Logged in'),ev:'otp_verify',screen:'M02',icon:'lock'}]}],
+      head:{type:T('عضو · مالك صالون','Member · Salon owner'),phone:'+962 79 554 1203',first:W.dt(-410,L,null,null,1),last:T('قبل 11 دقيقة','11 min ago'),reg:W.dt(-410,L,null,null,1),dev:'iPhone 14 · iOS 18 (1)',ids:'M-31 · S-201',tot:[['7',T('جلسات (30ي)','sessions (30d)')],['318',T('إجراءات','actions')],['142',T('حجوزات عولجت','bookings handled')]]}};
+    const G=[
+      {t:T('جلسة #14 · اليوم','Session #14 · Today'),sub:'iPhone 15 Pro · iOS 18.0 · '+T('العملاء','Customer')+' 2.4.1 · wifi',events:[
+        {time:W.tm(14,9,L),t:T('ترك صفحة الدفع','Left payment screen'),ev:'screen_exit',screen:'S14',icon:'x',sub:T('بعد محاولتين فاشلتين','After two failed attempts')},
+        {time:W.tm(14,6,L),t:T('فشل دفع العربون (محاولة 2)','Deposit payment failed (attempt 2)'),ev:'payment_failed',screen:'S14',icon:'pay',hl:'error',tag:'05 · Do not honor',sub:W.jod(126,L)+' · Visa •••• 4417 · WAB-24809',json:{bookingId:'WAB-24809',transactionId:'TX-90412',amount:126,currency:'JOD',method:'DEPOSIT',gateway:{code:'05',message:'Do not honor',durationMs:2140},card:{brand:'VISA',last4:'4417'}}},
+        {time:W.tm(14,5,L),t:T('بدء الدفع','Payment started'),ev:'payment_start',screen:'S14',icon:'pay',hl:'pay',sub:W.jod(126,L)+' · '+T('عربون 30%','30% deposit'),json:{transactionId:'TX-90412',amount:126}},
+        {time:W.tm(14,2,L),t:T('فشل دفع العربون (محاولة 1)','Deposit payment failed (attempt 1)'),ev:'payment_failed',screen:'S14',icon:'pay',hl:'error',tag:'05 · Do not honor',sub:W.jod(126,L)+' · Visa •••• 4417',json:{transactionId:'TX-90408',gateway:{code:'05',message:'Do not honor',durationMs:1980}}},
+        {time:W.tm(14,1,L),t:T('بدء الدفع','Payment started'),ev:'payment_start',screen:'S14',icon:'pay',hl:'pay',sub:W.jod(126,L)},
+        {time:W.tm(13,58,L),t:T('إنشاء الحجز WAB-24809','Booking created WAB-24809'),ev:'booking_submit',screen:'S13',icon:'cal',hl:'ok',sub:T('دار العروس · 3 أشخاص · عروس · 16 أكتوبر 4:00 م','Bridal House · 3 persons · bride · Oct 16, 4:00 PM'),json:{bookingId:'WAB-24809',salonId:'S-202',persons:3,bride:true,total:420,payment:'DEPOSIT'}},
+        {time:W.tm(13,57,L),t:T('تأكيد OTP','OTP verified'),ev:'otp_verify',screen:'S13',icon:'lock'},
+        {time:W.tm(13,52,L),t:T('اختيار الخدمات','Services selected'),ev:'service_select',screen:'S09',icon:'grid',sub:T('مكياج عروس · تسريحة · مكياج سهرة ×2','Bridal makeup · Hair styling · Evening makeup ×2')},
+        {time:W.tm(13,49,L),t:T('عرض تفاصيل الصالون','Salon details viewed'),ev:'salon_view',screen:'S07',icon:'store',sub:T('دار العروس · من بانر «موسم الأعراس»','Bridal House · from “Wedding season” banner')},
+        {time:W.tm(13,48,L),t:T('فتح التطبيق','App opened'),ev:'app_open',icon:'device'}]},
+      {t:T('جلسة #9 · 26 أغسطس','Session #9 · Aug 26'),sub:'iPhone 15 Pro · iOS 17.6',events:[
+        {time:W.tm(19,22,L),t:T('تم التسجيل','Registered'),ev:'sign_up',screen:'S03',icon:'user',hl:'ok',sub:T('ربط التثبيت fA9x…3201 بالحساب C-1043','Installation fA9x…3201 linked to C-1043'),json:{userId:'C-1043',installationId:'fA9x…3201',linkedGuestEvents:63}},
+        {time:W.tm(19,21,L),t:T('تأكيد OTP','OTP verified'),ev:'otp_verify',screen:'S02',icon:'lock'},
+        {time:W.tm(19,20,L),t:T('طلب OTP','OTP requested'),ev:'otp_request',screen:'S02',icon:'phone',sub:'+962 79 347 2153'}]},
+      {t:T('جلسة #3 · 22 أغسطس','Session #3 · Aug 22'),sub:'iPhone 15 Pro · iOS 17.6',marker:T('زائر — قبل التسجيل','Guest — before registration'),markerTone:'amber',events:[
+        {time:W.tm(22,40,L),t:T('إضافة للمفضلة','Added to favorites'),ev:'favorite_add',screen:'S07',icon:'star',sub:T('دار العروس','Bridal House'),actor:T('زائر','Guest'),actorTone:'amber'},
+        {time:W.tm(22,31,L),t:T('بحث','Search'),ev:'search',screen:'S04',icon:'search',sub:T('«مكياج عروس» · 14 نتيجة','“bridal makeup” · 14 results'),actor:T('زائر','Guest'),actorTone:'amber',json:{query:'مكياج عروس',results:14,filters:{rating:'4+'}}},
+        {time:W.tm(22,30,L),t:T('حفظ الاسم والجنس','Nickname & gender saved'),ev:'onboarding_done',screen:'S01',icon:'check',actor:T('زائر','Guest'),actorTone:'amber'},
+        {time:W.tm(22,28,L),t:T('أول فتح للتطبيق','First app open'),ev:'first_open',icon:'device',sub:T('تثبيت من App Store · fA9x…3201','App Store install · fA9x…3201'),actor:T('زائر','Guest'),actorTone:'amber'}]}];
+    return {nm,groups:G,head:{type:T('عميلة · مسجّلة','Customer · Registered'),phone:cu.phone,first:W.dt(-46,L,null,null,1),last:T('قبل 5 دقائق','5 min ago'),reg:W.dt(-42,L,null,null,1),dev:T('iPhone 15 Pro (تثبيت واحد)','iPhone 15 Pro (1 installation)'),ids:id+' · fA9x…3201',tot:[['14',T('جلسة','sessions')],['7',T('حجوزات','bookings')],['9',T('محاولات دفع','payment attempts')]]}};}
+  A11(x,W){const T=(a,e)=>x.ar?a:e,L=x.lang;const id=this.who(x);const empty=!id||this.state.jq==='none';
+    const order=this.g('ord','new');
+    const search={type:'form',id:'js',title:T('بحث عن مستخدم','Find a user'),fields:[{label:T('هاتف، اسم، رقم المستخدم/العضو، معرف التثبيت أو رقم الحجز','Phone, name, user/member ID, installation ID or booking ref'),full:1,value:this.g('jqv',empty?'':id==='M-31'?'+962 79 554 1203':'WAB-24809'),onChange:v=>this.setState({jqv:v}),dir:'auto',ph:T('مثال: +962 79 347 2153 أو WAB-24809','e.g. +962 79 347 2153 or WAB-24809')}],
+      footActs:[{t:T('عميلة: سارة الزعبي','Customer: Sara'),onClick:()=>this.setState({jsub:'C-1043',jq:null,jqv:'WAB-24809'})},{t:T('عضو: خالد السعدي','Member: Khaled'),onClick:()=>this.setState({jsub:'M-31',jq:null,jqv:'+962 79 554 1203'})}],onSave:()=>{const v=(this.g('jqv','')||'').trim();if(!v||/^x|^0000/.test(v))this.setState({jq:'none'});else this.setState({jq:null,jsub:/554|M-|خالد|khaled/i.test(v)?'M-31':'C-1043'})},saveT:T('بحث','Search'),foot:T('النتائج تشمل كل التثبيتات المرتبطة، بما فيها أحداث ما قبل التسجيل','Results include all linked installations, incl. pre-registration events')};
+    const H=W.head(x,{sub:T('كل حدث لكل مستخدم — مجمّعة حسب الجلسة، مع أحداث الزائر قبل التسجيل','Every event for every user — grouped by session, incl. guest events before registration'),actions:empty?[]:[{t:T('تصدير الرحلة','Export timeline'),icon:'down',onClick:()=>W.toast(T('جاري تجهيز الملف…','Preparing file…'),{progress:true,then:T('اكتمل التصدير — رحلة_','Export ready — journey_')+id+'.xlsx'})}]});
+    if(empty)return [H,search,{type:'empty',id:'e',emptyT:this.state.jq==='none'?T('لا يوجد مستخدم مطابق','No matching user'):T('ابحث عن مستخدم لعرض رحلته','Search for a user to see their journey'),emptyS:this.state.jq==='none'?T('تحقق من الرقم أو جرّب معرف التثبيت أو رقم الحجز.','Check the number or try an installation ID or booking reference.'):T('ابحث بالهاتف أو الاسم أو المعرف أو رقم الحجز.','Search by phone, name, ID or booking reference.'),emptyIcon:'route'}];
+    const J=this.journeyEvents(x,W,id);const h=J.head;
+    let groups=J.groups;const ft=this.state.jft;
+    if(order==='old')groups=groups.slice().reverse().map(g=>Object.assign({},g,{events:g.events.slice().reverse()}));
+    if(ft&&ft.length)groups=groups.map(g=>Object.assign({},g,{events:g.events.filter(e=>ft.indexOf(e.hl==='error'?'err':e.hl==='pay'||/payment/.test(e.ev)?'pay':/screen|view/.test(e.ev)?'scr':'act')>=0)})).filter(g=>g.events.length);
+    return [H,
+      {type:'kv',id:'id',span:8,title:J.nm,badge:{t:h.type,tone:id==='M-31'?'violet':'purple'},cols:3,items:[[T('الهاتف','Phone'),h.phone,{ltr:1}],[T('المعرفات','IDs'),h.ids,{mono:1,ltr:1}],[T('الأجهزة والتثبيتات','Devices & installations'),h.dev],[T('أول ظهور','First seen'),h.first],[T('آخر ظهور','Last seen'),h.last],[T('تاريخ التسجيل','Registered'),h.reg]],actions:id==='M-31'?[{t:T('فتح الصالون','Open salon'),onClick:()=>W.go('A13','id=S-201')}]:[{t:T('ملف العميل','Customer profile'),onClick:()=>W.go('A12','id='+id)}]},
+      {type:'kpis',id:'tot',span:4,min:110,items:h.tot.map(t=>({label:t[1],value:t[0]}))},
+      {type:'filters',id:'jf',init:{preset:'30d'},onChange:f=>this.setState({jft:(f.vals.et||[])}),dd:[{id:'et',label:T('نوع الحدث','Event type'),options:[{v:'scr',t:T('مشاهدة شاشة','Screen views')},{v:'act',t:T('إجراءات','Actions')},{v:'pay',t:T('مدفوعات','Payments')},{v:'err',t:T('أخطاء','Errors')}]},{id:'app',label:T('التطبيق','App'),options:[{v:'c',t:T('العملاء','Customer')},{v:'m',t:T('التجار','Merchant')}]},{id:'ses',label:T('الجلسة','Session'),options:J.groups.map((g,i)=>({v:'s'+i,t:g.t}))}]},
+      {type:'tabs',variant:'seg',items:[{id:'new',t:T('الأحدث أولاً','Newest first')},{id:'old',t:T('الأقدم أولاً','Oldest first')}],active:order,onChange:v=>this.setState({ord:v})},
+      {type:'timeline',id:'tl',title:T('الخط الزمني','Timeline'),sub:T('الأخطاء ومحاولات الدفع مميزة · انقر «عرض المعاملات» لرؤية JSON','Errors and payment attempts highlighted · tap “Show params” for JSON'),groups,live:id!=='M-31',emptyT:T('لا أحداث مطابقة للفلاتر','No events match the filters')}]}
+  A12(x,W){const C=W.cust();const id=x.q.id||(this.props.customerView==='detail'&&x.q.v!=='list'?'C-1043':null);
+    const st=c=>Object.assign(W.s('cust',c.status,'ar'),{kind:'badge'});
+    if(!id){return [W.head(x,{sub:'كل العملاء المسجّلين — انقر على الصف لفتح التفاصيل'}),
+      {type:'filters',id:'f',init:{preset:'ty'},dd:[{id:'st',label:'الحالة',options:[{v:'active',t:'نشط'},{v:'blocked',t:'محظور'},{v:'deletion',t:'حذف معلّق'}]},{id:'g',label:'الجنس',options:[{v:'m',t:'رجال'},{v:'f',t:'نساء'}]},{id:'c',label:'المدينة',options:W.CITY.map((c,i)=>({v:i,t:c[0]}))}]},
+      {type:'table',id:'t',title:'العملاء',total:18420,gen:i=>{const c=C[i%C.length];return Object.assign({},this.crow(c,W,st),{id:'C-'+(1042+i)})},onRow:r=>W.navTo(this,'A12','id='+r.id),bulk:[{t:'إرسال إشعار',onClick:ids=>W.go('A25','users='+ids.length)}],
+        cols:[{k:'n',label:'الاسم',w:'1.5fr',kind:'user'},{k:'p',label:'الهاتف',ltr:1,w:'1.2fr'},{k:'g',label:'الجنس',w:'70px'},{k:'c',label:'المدينة',w:'80px'},{k:'r',label:'تاريخ التسجيل'},{k:'l',label:'آخر نشاط'},{k:'b',label:'الحجوزات',num:1,w:'80px'},{k:'s',label:'الحالة',w:'110px'}],rows:C.map(c=>this.crow(c,W,st)),minW:1100}]}
+    const c=C.find(z=>z.id===id)||C[1];const tab=this.g('ct','profile');const blocked=this.g('blk_'+c.id,c.status==='blocked'),del=c.status==='deletion'&&!this.state['rest_'+c.id];
+    const stt=blocked?'blocked':del?'deletion':'active';
+    const acts=[{t:'إرسال إشعار',icon:'send',onClick:()=>W.modal({title:'إرسال إشعار إلى '+c.ar,icon:'send',fields:[{id:'ta',type:'text',label:'العنوان (عربي)',required:1,value:'عرض خاص لك'},{id:'ba',type:'textarea',label:'النص (عربي)',required:1,value:'احصلي على خصم 15% على حجزك القادم في دار العروس.'},{id:'te',type:'text',label:'Title (English)',dir:'ltr',value:'A special offer for you'}],confirm:'إرسال الآن',success:'تم إرسال الإشعار إلى '+c.ar})},
+      blocked?{t:'إلغاء الحظر',kind:'soft',onClick:()=>W.modal({title:'إلغاء حظر '+c.ar,tone:'success',fields:[{id:'r',type:'reason'}],confirm:'إلغاء الحظر',onConfirm:()=>this.setState({['blk_'+c.id]:false}),success:'تم إلغاء الحظر'})}:{t:'حظر',kind:'dangerSoft',onClick:()=>W.modal({title:'حظر '+c.ar+'؟',tone:'danger',desc:'لن يتمكن العميل من تسجيل الدخول أو الحجز. ستظهر له رسالة عند محاولة الدخول التالية.',fields:[{id:'r',type:'reason'}],confirm:'حظر العميل',onConfirm:()=>this.setState({['blk_'+c.id]:true}),success:'تم حظر العميل'})},
+      del?{t:'استعادة الحساب',kind:'soft',onClick:()=>W.modal({title:'استعادة حساب '+c.ar,tone:'success',desc:'الحساب ضمن فترة السماح (تبقّى 18 يوماً). ستُلغى عملية الحذف.',fields:[{id:'r',type:'reason'}],confirm:'استعادة',onConfirm:()=>this.setState({['rest_'+c.id]:true}),success:'تمت استعادة الحساب'})}:null,
+      {t:'حذف نهائي',kind:'danger',onClick:()=>W.modal({title:'حذف حساب '+c.ar+' نهائياً؟',tone:'danger',warning:'لا يمكن التراجع. ستُحذف البيانات الشخصية وتُجهَّل الحجوزات السابقة.',fields:[{id:'cf',type:'text',label:'اكتب «حذف» للتأكيد',required:1,validate:v=>v!=='حذف'?'اكتب «حذف» بالضبط':null},{id:'r',type:'reason'}],confirm:'حذف نهائي',success:'تم حذف الحساب'})}].filter(Boolean);
+    const tabs=[['profile','الملف'],['bookings','الحجوزات'],['pay','المدفوعات والاسترداد'],['reviews','التقييمات'],['journey','الرحلة'],['devices','الأجهزة'],['notif','الإشعارات']];
+    const B=[W.head(x,{title:c.ar,status:W.s('cust',stt,'ar'),crumbs:[{t:'العملاء',onClick:()=>W.navTo(this,'A12','v=list')}],sub:c.id+' · '+c.phone,actions:acts}),
+      blocked?{type:'note',tone:'rose',icon:'lock',title:'العميل محظور',text:'حُظر في 2 أكتوبر 2026 بواسطة ليث الحسن · السبب: حجوزات وهمية متكررة مع عدم الحضور.'}:null,
+      del?{type:'note',tone:'amber',title:'حذف معلّق — تبقّى 18 يوماً',text:'طلب العميل حذف حسابه في 20 سبتمبر 2026. يُحذف تلقائياً بعد انتهاء فترة السماح (30 يوماً).'}:null,
+      {type:'kpis',id:'ck',min:150,items:[{label:'الحجوزات',value:String(c.bk)},{label:'مكتملة',value:String(Math.max(0,c.bk-2))},{label:'إجمالي الإنفاق',value:W.jod(c.bk*58,'ar',0),small:true},{label:'لم يحضر',value:'0'},{label:'التقييمات',value:'3'}]},
+      {type:'tabs',items:tabs.map(t=>({id:t[0],t:t[1]})),active:tab,onChange:v=>this.setState({ct:v})}];
+    const bks=W.bk().filter(b=>b.c===c.i).slice(0,8);
+    if(tab==='profile'){const f=k=>this.g('pf_'+k,{n:c.ar,p:c.phone,g:c.g,c:String(c.city),e:c.en.toLowerCase().replace(/[^a-z]/g,'.')+'@gmail.com',l:'ar',bd:'1996-04-12'}[k]);const sv=k=>v=>this.setState({['pf_'+k]:v,saved:false});const nErr=(f('n')||'').trim().length<2?'الاسم مطلوب (حرفان على الأقل)':null;const pErr=!/^\+962 7[789] \d{3} \d{4}$/.test(f('p')||'')?'رقم أردني غير صالح — الصيغة +962 7X XXX XXXX':null;
+      B.push({type:'form',id:'pf',title:'بيانات العميل',fields:[{label:'الاسم المستعار',required:1,value:f('n'),onChange:sv('n'),err:this.state.tried?nErr:null},{label:'الهاتف',required:1,value:f('p'),onChange:sv('p'),dir:'ltr',err:this.state.tried?pErr:null,hint:'تغيير الهاتف يتطلب تحقق OTP من العميل عند الدخول التالي'},{label:'الجنس',kind:'seg',value:f('g'),onChange:sv('g'),options:[{v:'m',t:'رجال'},{v:'f',t:'نساء'}]},{label:'المدينة',kind:'select',value:f('c'),onChange:sv('c'),options:W.CITY.map((z,i)=>({v:String(i),t:z[0]}))},{label:'البريد (اختياري)',value:f('e'),onChange:sv('e'),dir:'ltr'},{label:'لغة التطبيق',kind:'seg',value:f('l'),onChange:sv('l'),options:[{v:'ar',t:'العربية'},{v:'en',t:'English'}]}],saved:this.state.saved,onSave:()=>{if(nErr||pErr){this.setState({tried:true});W.toast('تحقق من الحقول المطلوبة',{tone:'error'});return}this.setState({saved:true,tried:false});W.toast('تم حفظ التغييرات · سُجّلت في سجل الأفعال')}})}
+    if(tab==='bookings')B.push({type:'table',id:'cb',title:'حجوزات العميل',onRow:r=>W.go('A15','ref='+r.id),cols:[{k:'ref',label:'الرقم',kind:'mono',w:'110px'},{k:'s',label:'الصالون',w:'1.4fr'},{k:'d',label:'الموعد',w:'1.2fr'},{k:'st',label:'الحالة',w:'120px'},{k:'pay',label:'الدفع',w:'120px'},{k:'t',label:'الإجمالي',num:1}],rows:(bks.length?bks:W.bk().slice(0,4)).map(b=>({id:b.ref,ref:b.ref,s:W.SALONS[b.s][0],d:W.dt(b.off,'ar',b.h,b.m),st:Object.assign(W.s('b',b.status,'ar'),{kind:'badge'}),pay:Object.assign(W.s('pay',b.pay,'ar'),{kind:'badge'}),t:W.jod(b.total,'ar')}))});
+    if(tab==='pay')B.push({type:'table',id:'cp',title:'المدفوعات والاسترداد',search:false,cols:[{k:'id',label:'المعاملة',kind:'mono',w:'100px'},{k:'tm',label:'الوقت'},{k:'ty',label:'النوع'},{k:'ref',label:'الحجز',kind:'mono'},{k:'a',label:'المبلغ',num:1},{k:'r',label:'النتيجة'},{k:'gc',label:'رمز البوابة',kind:'mono'}],onRow:r=>W.go('A16','tx='+r.id),rows:[['TX-90412',0,'دفع عربون','WAB-24809',126,'failed','05 Do not honor'],['TX-90408',0,'دفع عربون','WAB-24809',126,'failed','05 Do not honor'],['TX-88120',-12,'دفع كامل','WAB-24533',85,'success','00 Approved'],['RF-1204',-30,'استرداد','WAB-24120',40,'success','—'],['TX-86004',-31,'دفع عربون','WAB-24120',40,'success','00 Approved']].map(r=>({id:r[0],tm:W.dt(r[1],'ar',14,r[1]?20:6),ty:r[2],ref:{t:r[3],onClick:()=>W.go('A15','ref='+r[3])},a:W.jod(r[4],'ar'),r:Object.assign(W.s('tx',r[5],'ar'),{kind:'badge'}),gc:r[6]}))});
+    if(tab==='reviews')B.push({type:'table',id:'cr',title:'تقييمات العميل',search:false,pager:false,cols:[{k:'s',label:'الهدف',w:'1.3fr'},{k:'r',label:'التقييم',kind:'stars',w:'70px'},{k:'c',label:'التعليق',w:'2.5fr',wrap:1},{k:'st',label:'الحالة',w:'110px'},{k:'d',label:'التاريخ'}],rows:[['دار العروس',5,'تجربة رائعة، المكياج ثبت طول الليل.','approved',-12],['ستوديو ليلك · سلمى',4,'لطيفة جداً لكن تأخرت 10 دقائق.','approved',-30],['لمسة لولو',2,'الخدمة أقل من المتوقع.','pending',-1]].map((r,i)=>({id:i,s:r[0],r:{t:String(r[1])},c:r[2],st:Object.assign(W.s('rev',r[3],'ar'),{kind:'badge'}),d:W.dt(r[4],'ar')}))});
+    if(tab==='journey'){const J=this.journeyEvents(Object.assign({},x,{ar:true,lang:'ar'}),W,'C-1043');B.push({type:'timeline',id:'cj',title:'آخر جلسات العميل',groups:J.groups.slice(0,1),actions:[{t:'فتح الرحلة الكاملة',kind:'soft',onClick:()=>W.go('A11','u='+c.id)}]})}
+    if(tab==='devices')B.push({type:'table',id:'cd',title:'الأجهزة والتثبيتات',search:false,pager:false,cols:[{k:'i',label:'معرف التثبيت',kind:'mono',w:'1.2fr'},{k:'d',label:'الجهاز'},{k:'o',label:'النظام'},{k:'v',label:'إصدار التطبيق',kind:'mono'},{k:'f',label:'أول ظهور'},{k:'l',label:'آخر ظهور'},{k:'pt',label:'رمز الإشعارات'}],rows:[['fA9x…3201','iPhone 15 Pro','iOS 18.0','2.4.1',-46,0,'فعّال'],['cQ2m…8810','iPad Air','iPadOS 17.5','2.3.2',-120,-60,'منتهي']].map((r,i)=>({id:i,i:{t:r[0],ltr:1},d:r[1],o:r[2],v:r[3],f:W.dt(r[4],'ar'),l:W.dt(r[5],'ar'),pt:{t:r[6],tone:i?'grey':'green',kind:'badge'}}))});
+    if(tab==='notif')B.push({type:'table',id:'cn',title:'الإشعارات المرسلة',search:false,cols:[{k:'t',label:'العنوان',w:'1.6fr',bold:1},{k:'ty',label:'النوع'},{k:'d',label:'أُرسل'},{k:'st',label:'الحالة'}],rows:[['فشل الدفع — أكملي حجزك','BOOKING',0,'delivered'],['تذكير: موعدك بعد ساعة','REMINDER',-12,'opened'],['عروض موسم الأعراس','PROMOTION',-15,'opened'],['تم تأكيد حجزك','BOOKING',-13,'delivered']].map((r,i)=>({id:i,t:r[0],ty:{t:r[1],kind:'mono'},d:W.dt(r[2],'ar',14,10),st:{t:r[3]==='opened'?'فُتح':'تم التسليم',tone:r[3]==='opened'?'purple':'green',kind:'badge'}}))});
+    return B}
+  crow(c,W,st){return {id:c.id,n:{t:c.ar,sub:c.id},p:{t:c.phone,ltr:1},g:c.g==='m'?'رجال':'نساء',c:W.CITY[c.city][0],r:{t:W.dt(c.reg,'ar',null,null,1),v:c.reg},l:{t:c.last===0?'اليوم':W.dt(c.last,'ar'),v:c.last},b:{t:String(c.bk),v:c.bk},s:st(c)}}
+}
+</script>
+</body>
+</html>

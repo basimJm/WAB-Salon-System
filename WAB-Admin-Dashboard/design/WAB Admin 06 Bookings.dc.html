@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./wab-admin-kit.js"></script>
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#F6F4FA}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button,select,textarea{font-family:inherit}
+input::placeholder,textarea::placeholder{color:#9096A5}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(46,158,120,.55)}70%{box-shadow:0 0 0 7px rgba(46,158,120,0)}100%{box-shadow:0 0 0 0 rgba(46,158,120,0)}}
+@keyframes rowFlash{0%{background:rgba(46,158,120,.22)}100%{background:transparent}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes drawerInL{from{transform:translateX(-100%)}to{transform:none}}
+@keyframes drawerInR{from{transform:translateX(100%)}to{transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+</style>
+</helmet>
+<div dir="{{ dir }}" style="{{ rootStyle }}">
+  <div style="display:flex;align-items:flex-start;min-height:100vh">
+    <dc-import name="WAB Admin Sidebar" active="{{ navActive }}" lang="{{ lang }}" on-nav="{{ nav }}" hint-size="256px,100vh"></dc-import>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+      <dc-import name="WAB Admin Topbar" lang="{{ lang }}" plang="{{ plang }}" theme="{{ theme }}" hint-size="100%,64px"></dc-import>
+      <main style="padding:24px 28px 56px;width:100%;max-width:1640px;box-sizing:border-box" data-screen-label="{{ screenLabel }}">
+        <dc-import name="WAB Admin Blocks" blocks="{{ blocks }}" lang="{{ lang }}" theme="{{ theme }}" state="{{ st }}" on-retry="{{ retry }}" hint-size="100%,640px"></dc-import>
+      </main>
+    </div>
+  </div>
+  <dc-import name="WAB Admin Overlay" lang="{{ lang }}" theme="{{ theme }}" hint-size="0px,0px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;bookingView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;list&quot;,&quot;pending&quot;,&quot;payfail&quot;,&quot;approved&quot;,&quot;completed&quot;,&quot;cancelled&quot;],&quot;default&quot;:&quot;list&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;live&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ar&quot;,&quot;en&quot;],&quot;default&quot;:&quot;ar&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state={newN:0};
+  componentDidMount(){const go=()=>{if(!window.WABA)return setTimeout(go,50);WABA.mount(this);this._iv=setInterval(()=>{const q=this.state._q||{};if(!q.ref&&this.cur()==='list'&&(this.props.state||'normal')==='normal'&&!this.state._st&&this.props.live!==false&&this.state.newN<6)this.setState(s=>({newN:s.newN+1}))},9000)};go()}
+  componentDidUpdate(p){window.WABA&&WABA.update(this,p)}
+  componentWillUnmount(){window.WABA&&WABA.unmount(this)}
+  g(k,d){return this.state[k]!=null?this.state[k]:d}
+  cur(){return this.props.bookingView||'list'}
+  renderVals(){const W=window.WABA;if(!W||!this.state._q)return {blocks:[],rootStyle:{minHeight:'100vh',background:'#F6F4FA'},dir:'rtl',lang:'ar',plang:'ar',theme:'light',st:'loading'};
+    const x=W.ctx(this,'A15');const V={pending:'WAB-24817',payfail:'WAB-24809',approved:'WAB-24816',completed:'WAB-24814',cancelled:'WAB-24812'};
+    const ref=x.q.ref||(x.q.v==='list'?null:V[this.cur()]);const blocks=(ref?this.detail(x,W,ref):this.list(x,W)).filter(Boolean);
+    return {blocks,rootStyle:x.rootStyle,dir:x.dir,lang:x.lang,plang:x.plang,theme:x.theme,st:x.st,retry:x.retry,nav:x.nav,navActive:'A15',screenLabel:'A15 Bookings / '+(ref?'Details '+ref:'List')+' / '+x.st};}
+  status(b){return this.g('bs_'+b.ref,b.status)}
+  pay(b){return this.g('bp_'+b.ref,b.pay)}
+  refund(b){return this.g('br_'+b.ref,b.refund)}
+  list(x,W){const T=(a,e)=>x.ar?a:e,L=x.lang,N=W.NAMES,S=W.SALONS;const all=W.bk();
+    const news=[];for(let i=this.state.newN;i>=1;i--){const ci=(i*5)%18,si=[0,2,5,8][i%4]+(N[ci][2]==='f'?1:0);news.push({ref:'WAB-'+(24817+i),c:ci,s:N[ci][2]==='f'?[1,3,4,6][i%4]:[0,2,5,8][i%4],off:2+i%5,h:10+i,m:30,persons:1,bride:false,status:'pending',pay:'arrival',refund:'none',total:N[ci][2]==='f'?45:14,cOff:0,ch:14,cm:10+i*2,_new:i===this.state.newN})}
+    const init=x.q.status?{status:[x.q.status]}:{};const f=this.state.bf||init;
+    const opt=(g,keys)=>keys.map(k=>({v:k,t:W.s(g,k,L).t}));
+    const rows=news.concat(all).filter(b=>{const ok=(k,v)=>!f[k]||!f[k].length||f[k].indexOf(v)>=0;return ok('status',this.status(b))&&ok('pay',this.pay(b))&&ok('refund',this.refund(b))&&ok('bride',b.bride?'y':'n')&&ok('g',S[b.s][2])&&ok('salon',String(b.s))&&ok('m',this.pay(b)==='arrival'?'arrival':this.pay(b)==='full'?'full':'deposit')}).map(b=>{const n=N[b.c],s=S[b.s];const st=this.status(b),py=this.pay(b),rf=this.refund(b);
+      return {id:b.ref,_new:b._new,_hl:b.ref==='WAB-24809'?'rose':null,ref:{t:b.ref,kind:'mono',bold:1},c:{kind:'user',t:x.ar?n[0]:n[1],sub:'C-'+(1042+b.c),onClick:()=>W.go('A12','id=C-'+(1042+b.c))},s:{t:x.ar?s[0]:s[1],sub:x.ar?s[3]:s[4],onClick:()=>W.go('A13','id=S-'+(201+b.s))},d:{t:W.dt(b.off,L),sub:W.tm(b.h,b.m,L),v:b.off*100+b.h},p:{t:String(b.persons),v:b.persons},br:b.bride?{t:T('عروس','Bride'),tone:'violet',kind:'badge'}:'—',st:Object.assign(W.s('b',st,L),{kind:'badge'}),py:Object.assign(W.s('pay',py,L),{kind:'badge'}),rf:rf==='none'?'—':Object.assign(W.s('ref',rf,L),{kind:'badge'}),t:{t:W.jod(b.total,L),v:b.total,kind:'money'},cr:{t:W.dt(b.cOff,L),sub:W.tm(b.ch,b.cm,L),v:b.cOff*100+b.ch}}});
+    return [W.head(x,{live:true,sub:T('كل الحجوزات — تتحدث لحظياً عبر Socket.IO','All bookings — updated in real time via Socket.IO')}),
+      {type:'filters',id:'bf',init:{preset:'30d',vals:init},onChange:v=>this.setState({bf:v.vals}),dd:[{id:'status',label:T('الحالة','Status'),options:opt('b',['pending','approved','completed','rejected','cc','cs','ca','auto','noshow'])},{id:'pay',label:T('الدفع','Payment'),options:opt('pay',['arrival','deposit','full','failed'])},{id:'refund',label:T('الاسترداد','Refund'),options:opt('ref',['pending','done','failed'])},{id:'appt',label:T('تاريخ الموعد','Appointment date'),options:[{v:'t',t:T('اليوم','Today')},{v:'w',t:T('هذا الأسبوع','This week')},{v:'n',t:T('القادم','Upcoming')}]},{id:'salon',label:T('الصالون','Salon'),options:S.map((s,i)=>({v:String(i),t:x.ar?s[0]:s[1]}))},{id:'g',label:T('الجنس','Gender'),options:[{v:'m',t:T('رجال','Men')},{v:'f',t:T('نساء','Women')}]},{id:'city',label:T('المدينة','City'),options:W.CITY.map((c,i)=>({v:i,t:x.ar?c[0]:c[1]}))},{id:'bride',label:T('عروس','Bride'),options:[{v:'y',t:T('حجوزات العرائس','Bride bookings')},{v:'n',t:T('غير عروس','Non-bride')}]},{id:'m',label:T('طريقة الدفع','Method'),options:[{v:'arrival',t:T('عند الوصول','On arrival')},{v:'deposit',t:T('عربون','Deposit')},{v:'full',t:T('دفع كامل','Full')}]}]},
+      {type:'table',id:'bt',title:T('الحجوزات','Bookings'),live:true,count:W.n(rows.length===all.length+news.length?3842+this.state.newN:rows.length),onRow:r=>W.navTo(this,'A15','ref='+r.id),rows,minW:1360,
+        cols:[{k:'ref',label:T('الرقم','Ref'),w:'112px'},{k:'c',label:T('العميل','Customer'),w:'1.4fr'},{k:'s',label:T('الصالون','Salon'),w:'1.3fr'},{k:'d',label:T('الموعد','Appointment'),w:'1fr'},{k:'p',label:T('أشخاص','Persons'),w:'64px',num:1},{k:'br',label:T('عروس','Bride'),w:'70px'},{k:'st',label:T('الحالة','Status'),w:'130px'},{k:'py',label:T('الدفع','Payment'),w:'120px'},{k:'rf',label:T('الاسترداد','Refund'),w:'120px'},{k:'t',label:T('الإجمالي','Total'),w:'100px'},{k:'cr',label:T('أُنشئ','Created'),w:'100px'}]}]}
+  detail(x,W,ref){const T=(a,e)=>x.ar?a:e,L=x.lang,N=W.NAMES,S=W.SALONS;const b=W.bkRef(ref)||W.bk()[0];const n=N[b.c],s=S[b.s];const st=this.status(b),py=this.pay(b),rf=this.refund(b);const fem=s[2]==='f';
+    const cn=x.ar?n[0]:n[1],sn=x.ar?s[0]:s[1];
+    const svc=fem?[[T('مكياج عروس','Bridal makeup'),180,90,T('العروس','Bride')],[T('تسريحة شعر','Hair styling'),60,60,T('العروس','Bride')],[T('مكياج سهرة','Evening makeup'),45,45,T('مرافقة 1','Companion 1')],[T('مكياج سهرة','Evening makeup'),45,45,T('مرافقة 2','Companion 2')]].slice(0,b.bride?2+Math.max(0,b.persons-1):b.persons+1):[[T('قص + لحية','Cut + beard'),14,45,T('العميل','Customer')],[T('تنظيف بشرة','Facial'),4,15,T('العميل','Customer')]];
+    const staff=fem?[T('سلمى حداد','Salma Haddad'),T('نادين قعوار','Nadine Qawar'),T('هلا المصري','Hala Masri')]:[T('سامي الحلبي','Sami Halabi'),T('رامي داود','Rami Dawood'),T('ماهر عودة','Maher Odeh')];
+    const notify=T('سيصل إشعار للعميل ','Customer ')+cn+T(' وللصالون ',' and salon ')+sn+T('',' will be notified');
+    const setSt=(k,extra)=>()=>this.setState(Object.assign({['bs_'+b.ref]:k},extra||{}));
+    const paidAmt=py==='full'?b.total:py==='deposit'?Math.round(b.total*.3):0;
+    const M={
+      approve:()=>W.modal({title:T('قبول الحجز ','Approve booking ')+b.ref,tone:'success',icon:'ok',fields:[{id:'s',type:'radio',label:T('الموظف','Staff'),options:staff.map((t,i)=>({v:'s'+i,label:t,sub:i?T('متاح','Available'):T('المختار من العميل','Customer’s choice')}))},{id:'r',type:'reason'}],notify,confirm:T('قبول','Approve'),onConfirm:setSt('approved'),success:T('تم قبول الحجز','Booking approved')}),
+      reject:()=>W.modal({title:T('رفض الحجز ','Reject booking ')+b.ref,tone:'danger',fields:[{id:'k',type:'select',label:T('سبب الرفض للعميل','Reason shown to customer'),options:[{v:'a',label:T('الموعد غير متاح','Slot unavailable')},{v:'b',label:T('الموظف غير متوفر','Staff unavailable')},{v:'c',label:T('الخدمة متوقفة','Service unavailable')}]},{id:'r',type:'reason'}],warning:paidAmt?T('سيُسترد ','')+W.jod(paidAmt,L)+T(' تلقائياً إلى بطاقة العميل',' will be refunded automatically'):null,notify,confirm:T('رفض','Reject'),onConfirm:setSt('rejected',paidAmt?{['br_'+b.ref]:'pending'}:{}),success:T('تم رفض الحجز','Booking rejected')}),
+      cancel:()=>W.modal({title:T('إلغاء الحجز ','Cancel booking ')+b.ref,tone:'danger',fields:[{id:'mode',type:'radio',label:T('نوع الإلغاء','Cancellation mode'),options:[{v:'admin',label:T('إلغاء إداري مع استرداد كامل','Admin cancel with full refund'),sub:T('يُسترد ','Refunds ')+W.jod(paidAmt,L)+T(' كاملاً',' in full'),tag:T('موصى به','Recommended'),tagTone:'green'},{v:'salon',label:T('كأن الصالون ألغى','As salon cancellation'),sub:T('استرداد كامل · يُحتسب على أداء الصالون','Full refund · counts against salon')},{v:'cust',label:T('حسب سياسة إلغاء العميل','Per customer cancellation policy'),sub:T('داخل النافذة: استرداد كامل · خارجها: لا يُسترد العربون','Inside window: full refund · outside: deposit kept')}]},{id:'r',type:'reason'}],notify,confirm:T('تأكيد الإلغاء','Confirm cancellation'),onConfirm:v=>this.setState({['bs_'+b.ref]:v.mode==='salon'?'cs':v.mode==='cust'?'cc':'ca',['br_'+b.ref]:paidAmt?'pending':'none'}),success:T('تم إلغاء الحجز','Booking cancelled')+(paidAmt?T(' — الاسترداد قيد المعالجة',' — refund processing'):'')}),
+      complete:()=>W.modal({title:T('تعليم كمكتمل ومدفوع','Mark completed & paid'),tone:'success',icon:'ok',fields:[{id:'a',type:'info',rows:[[T('الإجمالي','Total'),W.jod(b.total,L)],[T('مدفوع إلكترونياً','Paid online'),W.jod(paidAmt,L)],[T('المتبقي في الصالون','Collected at salon'),W.jod(b.total-paidAmt,L),'green']]},{id:'r',type:'reason'}],notify,confirm:T('تأكيد','Confirm'),onConfirm:setSt('completed'),success:T('تم تعليم الحجز كمكتمل','Marked completed')}),
+      noshow:()=>W.modal({title:T('تعليم «لم يحضر»','Mark no-show'),tone:'danger',fields:[{id:'r',type:'reason'}],warning:T('يُحتسب في سجل العميل ولا يُسترد العربون.','Counts on the customer record; deposit is not refunded.'),notify,confirm:T('تأكيد','Confirm'),onConfirm:setSt('noshow'),success:T('تم التعليم كلم يحضر','Marked no-show')}),
+      revert:()=>W.modal({title:T('التراجع عن الحالة','Revert status'),tone:'warning',warning:T('التراجع يعيد الحجز إلى «قيد الانتظار» ولا يعكس المستردات المنفّذة. استخدمه فقط لتصحيح خطأ.','Reverting returns the booking to “Pending” and does not reverse executed refunds. Use only to fix a mistake.'),fields:[{id:'to',type:'select',label:T('الحالة الجديدة','New status'),options:[{v:'pending',label:W.s('b','pending',L).t},{v:'approved',label:W.s('b','approved',L).t}]},{id:'r',type:'reason'}],notify,confirm:T('تراجع','Revert'),onConfirm:v=>this.setState({['bs_'+b.ref]:v.to}),success:T('تم تغيير الحالة','Status changed')}),
+      reassign:()=>W.modal({title:T('إعادة إسناد الموظف','Reassign staff'),fields:[{id:'s',type:'radio',label:T('الموظفون المؤهلون لهذه الخدمات والوقت','Staff eligible for these services & time'),options:staff.map((t,i)=>({v:'s'+i,label:t,sub:i===0?T('الحالي','Current'):i===1?T('متاح · تقييم 4.9','Available · 4.9 rating'):T('غير متاح — لديه حجز 4:00 م','Busy — booked at 4:00 PM'),disabled:i===2,tag:i===0?T('الحالي','Current'):null,tagTone:'grey'}))},{id:'r',type:'reason'}],notify,confirm:T('إعادة إسناد','Reassign'),success:T('تم تغيير الموظف','Staff reassigned')}),
+      refund:()=>W.modal({title:T('إصدار استرداد','Issue refund'),icon:'wallet',fields:[{id:'t',type:'radio',label:T('النوع','Type'),options:[{v:'full',label:T('استرداد كامل','Full refund'),sub:W.jod(paidAmt||b.total,L)},{v:'part',label:T('استرداد جزئي','Partial refund')}]},{id:'a',type:'number',label:T('المبلغ','Amount'),suffix:T('د.أ','JOD'),showIf:['t','part'],required:1,validate:v=>(+v<=0||+v>(paidAmt||b.total))?T('المبلغ بين 0.01 و ','Amount between 0.01 and ')+W.n(paidAmt||b.total,2):null},{id:'r',type:'reason'}],notify,confirm:T('إصدار الاسترداد','Issue refund'),onConfirm:()=>this.setState({['br_'+b.ref]:'pending'}),success:T('تم إرسال الاسترداد إلى البوابة','Refund sent to gateway')})};
+    const A=(k,t,kind)=>({t,kind,onClick:M[k]});
+    let acts=[];if(st==='pending')acts=[A('reject',T('رفض','Reject'),'dangerSoft'),A('cancel',T('إلغاء','Cancel'),'dangerSoft'),A('reassign',T('إعادة إسناد','Reassign')),A('approve',T('قبول','Approve'),'success')];
+    else if(st==='approved')acts=[A('noshow',T('لم يحضر','No-show'),'dangerSoft'),A('cancel',T('إلغاء','Cancel'),'dangerSoft'),A('reassign',T('إعادة إسناد','Reassign')),A('refund',T('استرداد','Refund')),A('complete',T('مكتمل ومدفوع','Completed & paid'),'success')];
+    else acts=[A('revert',T('تراجع عن الحالة','Revert status')),paidAmt&&rf==='none'?A('refund',T('استرداد','Refund'),'primary'):null].filter(Boolean);
+    const histBase=[{time:W.dt(b.cOff,L,b.ch,b.cm),t:T('أنشأ الحجز','Booking created'),actor:T('عميل','Customer'),actorTone:'purple',icon:'cal',sub:cn}];
+    if(ref==='WAB-24809')histBase.push({time:W.dt(0,L,14,2),t:T('فشل دفع العربون','Deposit payment failed'),actor:T('النظام','System'),actorTone:'grey',icon:'pay',hl:'error',sub:'TX-90408 · 05 Do not honor'},{time:W.dt(0,L,14,6),t:T('فشل دفع العربون (محاولة 2)','Deposit payment failed (attempt 2)'),actor:T('النظام','System'),actorTone:'grey',icon:'pay',hl:'error',sub:'TX-90412 · 05 Do not honor'},{time:W.dt(0,L,14,7),t:T('تنبيه بريد للمدير','Admin alert email'),actor:T('النظام','System'),actorTone:'grey',icon:'mail',sub:T('ارتفاع فشل الدفع','Payment failure spike')});
+    if(['approved','completed','noshow'].indexOf(b.status)>=0)histBase.push({time:W.dt(b.cOff,L,b.ch,(b.cm+9)%60),t:T('قبل الحجز','Approved'),actor:T('عضو','Member'),actorTone:'violet',icon:'check',hl:'ok',sub:staff[0]});
+    if(b.status==='completed')histBase.push({time:W.dt(b.off,L,b.h+1,b.m),t:T('أكمل الحجز','Completed'),actor:T('عضو','Member'),actorTone:'violet',icon:'ok',sub:T('دُفع المتبقي في الصالون','Remainder paid at salon')});
+    if(b.status==='ca'||ref==='WAB-24812')histBase.push({time:W.dt(b.cOff+1,L,11,20),t:T('ألغت الإدارة الحجز','Cancelled by admin'),actor:T('الإدارة','Admin'),actorTone:'rose',icon:'x',hl:'error',sub:T('السبب: الصالون أبلغ عن إغلاق طارئ · استرداد كامل','Reason: salon reported emergency closure · full refund')},{time:W.dt(b.cOff+1,L,11,21),t:T('تم الاسترداد','Refund completed'),actor:T('النظام','System'),actorTone:'grey',icon:'wallet',hl:'ok',sub:'RF-1231 · '+W.jod(paidAmt||33,L)});
+    if(st!==b.status)histBase.push({time:W.dt(0,L,14,15),t:T('غيّرت الإدارة الحالة إلى ','Admin changed status to ')+W.s('b',st,L).t,actor:T('الإدارة','Admin'),actorTone:'rose',icon:'shield',sub:T('ليث الحسن · مع سبب','Laith Hassan · with reason')});
+    const tx=ref==='WAB-24809'?[['TX-90412',0,14,6,126,'failed','05 · Do not honor'],['TX-90408',0,14,2,126,'failed','05 · Do not honor']]:paidAmt?[['TX-'+(90000+b.c*7),b.cOff,b.ch,b.cm,paidAmt,'success','00 · Approved']]:[];
+    return [W.head(x,{title:T('حجز ','Booking ')+b.ref,crumbs:[{t:T('الحجوزات','Bookings'),onClick:()=>W.navTo(this,'A15','v=list')}],status:W.s('b',st,L),live:true,tags:[b.bride?{t:T('عروس','Bride'),tone:'violet'}:null,Object.assign({},W.s('pay',py,L),{t:W.s('pay',py,L).t})].filter(Boolean).map(t=>({t:t.t,tone:t.tone})),sub:T('أُنشئ ','Created ')+W.dt(b.cOff,L,b.ch,b.cm,1),actions:acts}),
+      ref==='WAB-24809'&&py==='failed'?{type:'note',tone:'rose',icon:'pay',title:T('فشل دفع العربون مرتين','Deposit payment failed twice'),text:T('رمز البوابة 05 (رفض البنك) على Visa •••• 4417. الحجز بانتظار الدفع — يُلغى تلقائياً إذا لم يكتمل خلال 30 دقيقة.','Gateway code 05 (Do not honor) on Visa •••• 4417. Booking awaits payment — auto-cancels if not completed within 30 min.'),action:{t:T('رحلة العميلة','Customer journey'),kind:'primary',onClick:()=>W.go('A11','u=C-1043&focus=pay')}}:null,
+      {type:'kv',id:'info',span:8,title:T('تفاصيل الحجز','Booking details'),cols:3,items:[[T('العميل','Customer'),cn,{onClick:()=>W.go('A12','id=C-'+(1042+b.c))}],[T('الهاتف','Phone'),W.cust()[b.c].phone,{ltr:1}],[T('الصالون','Salon'),sn,{onClick:()=>W.go('A13','id=S-'+(201+b.s))}],[T('الموعد','Appointment'),W.dt(b.off,L,b.h,b.m,1)],[T('الأشخاص','Persons'),String(b.persons)+(b.bride?T(' · عروس',' · bride'):'')],[T('الموظف','Staff'),staff[0]],[T('طريقة الدفع','Payment method'),py==='arrival'?T('عند الوصول','On arrival'):py==='full'?T('دفع كامل','Paid in full'):T('عربون 30%','30% deposit')],[T('حالة الدفع','Payment status'),W.s('pay',py,L).t,{tone:W.s('pay',py,L).tone}],[T('الاسترداد','Refund'),rf==='none'?'—':W.s('ref',rf,L).t,rf==='none'?{}:{tone:W.s('ref',rf,L).tone}]]},
+      {type:'kpis',id:'amt',span:4,min:120,items:[{label:T('الإجمالي','Total'),value:W.jod(b.total,L),small:true},{label:T('مدفوع إلكترونياً','Paid online'),value:W.jod(paidAmt,L),small:true,tone:paidAmt?'green':null},{label:T('رسوم البوابة','Gateway fee'),value:W.jod(paidAmt*.024,L),small:true},{label:T('في الصالون','At salon'),value:W.jod(b.total-paidAmt,L),small:true}]},
+      {type:'table',id:'svc',span:7,title:T('الخدمات','Services'),search:false,pager:false,colsMenu:false,exportable:false,cols:[{k:'p',label:T('الشخص','Person')},{k:'n',label:T('الخدمة','Service'),w:'1.5fr',bold:1},{k:'d',label:T('المدة','Duration'),num:1},{k:'pr',label:T('السعر','Price'),num:1,align:'end'}],rows:svc.map((r,i)=>({id:i,p:r[3],n:r[0],d:r[2]+T(' د',' min'),pr:W.jod(r[1],L)}))},
+      {type:'timeline',id:'hist',span:5,title:T('سجل الحالات','Status history'),groups:[{events:histBase.slice().reverse()}]},
+      {type:'table',id:'tx',span:7,title:T('المعاملات والمستردات','Transactions & refunds'),search:false,pager:false,colsMenu:false,isEmpty:!tx.length,emptyT:T('لا معاملات إلكترونية','No online transactions'),emptyS:T('الدفع عند الوصول','Pay on arrival'),emptyIcon:'pay',onRow:r=>W.go('A16','tx='+r.id),cols:[{k:'id',label:T('المعاملة','Transaction'),kind:'mono'},{k:'tm',label:T('الوقت','Time')},{k:'a',label:T('المبلغ','Amount'),num:1},{k:'r',label:T('النتيجة','Result')},{k:'gc',label:T('رمز البوابة','Gateway'),kind:'mono'}],rows:tx.map(r=>({id:r[0],tm:W.dt(r[1],L,r[2],r[3]),a:W.jod(r[4],L),r:Object.assign(W.s('tx',r[5],L),{kind:'badge'}),gc:r[6]}))},
+      {type:'table',id:'nt',span:5,title:T('الإشعارات المرسلة','Notifications sent'),search:false,pager:false,colsMenu:false,exportable:false,cols:[{k:'to',label:T('إلى','To')},{k:'t',label:T('الإشعار','Notification'),w:'1.6fr'},{k:'tm',label:T('الوقت','Time')}],rows:[[T('الصالون','Salon'),T('حجز جديد بانتظار ردك','New booking awaiting reply'),W.tm(b.ch,b.cm,L)],[T('العميل','Customer'),ref==='WAB-24809'?T('لم يكتمل الدفع — حاولي مجدداً','Payment incomplete — try again'):T('تم استلام حجزك','Booking received'),W.tm(b.ch,(b.cm+1)%60,L)]].map((r,i)=>({id:i,to:r[0],t:r[1],tm:r[2]}))},
+      {type:'feed',id:'ev',title:T('الأحداث المرتبطة','Related events'),actions:[{t:T('فتح رحلة العميل','Open customer journey'),kind:'soft',onClick:()=>W.go('A11','u=C-'+(1042+b.c))}],items:[{t:'booking_submit',sub:'S13 · iPhone 15 Pro · 2.4.1',time:W.tm(b.ch,b.cm,L),icon:'cal',tone:'purple'},{t:ref==='WAB-24809'?'payment_failed × 2':'otp_verify',sub:ref==='WAB-24809'?'S14 · gateway 05':'S13',time:W.tm(b.ch,(b.cm+2)%60,L),icon:ref==='WAB-24809'?'pay':'lock',tone:ref==='WAB-24809'?'rose':'grey'},{t:'push_delivered',sub:T('إشعار الصالون','Salon notification'),time:W.tm(b.ch,(b.cm+1)%60,L),icon:'bell',tone:'green'}],maxH:'240px'}]}
+}
+</script>
+</body>
+</html>

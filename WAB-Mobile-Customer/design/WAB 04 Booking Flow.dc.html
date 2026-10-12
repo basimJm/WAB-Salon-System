@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#6D28D9"><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#6D28D9"/><rect x="130" y="80" width="140" height="240" rx="26" fill="none" stroke="#fff" stroke-width="12"/><text x="200" y="222" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="54" fill="#fff">WAB</text></svg></template>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#ECE9F5;font-family:'Poppins',sans-serif}
+a{color:#6D28D9;text-decoration:none}
+a:hover{color:#A855F7}
+input,button{font-family:inherit}
+input:focus{outline:none}
+input::placeholder{color:#9CA3AF}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding:28px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 390 }}" height="{{ 844 }}" dark="{{ isDark }}" hint-size="390,844">
+<div dir="{{ dir }}" style="{{ themeVars }}">
+
+<sc-if value="{{ inFlow }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;padding-top:50px">
+  <div style="display:flex;align-items:center;height:52px;padding:0 12px;position:relative;flex-shrink:0">
+    <button onClick="{{ onBack }}" style="width:44px;height:44px;border:none;background:none;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><div style="font-weight:700;font-size:15.5px">{{ headerTitle }}</div><div style="font-size:11.5px;color:var(--muted)">{{ salonName }}</div></div>
+  </div>
+  <sc-if value="{{ showSteps }}">
+    <div style="padding:6px 20px 14px;flex-shrink:0">
+      <div style="display:flex;gap:5px;margin-bottom:8px"><sc-for list="{{ stepBars }}" as="b" hint-placeholder-count="6"><div style="{{ b }}"></div></sc-for></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px"><span style="font-weight:700;color:var(--accent)">{{ stepLabel }}</span><span style="color:var(--muted)">{{ personLabel }}</span></div>
+    </div>
+  </sc-if>
+
+  <div style="flex:1;overflow-y:auto;padding:4px 20px 20px">
+    <sc-if value="{{ st.s0 }}" hint-placeholder-val="{{ true }}">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:20px;margin-bottom:6px">{{ t.whoTitle }}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.6">{{ whoSub }}</div>
+      <div style="font-size:12.5px;font-weight:600;color:var(--accent);margin-bottom:8px">{{ t.personName }}</div>
+      <input value="{{ cp.name }}" onChange="{{ onName }}" placeholder="{{ t.namePh }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:15px">
+      <sc-if value="{{ isWomen }}">
+        <button onClick="{{ toggleBride }}" style="width:100%;margin-top:16px;display:flex;align-items:center;gap:12px;padding:16px;border-radius:18px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:start">
+          <div style="width:44px;height:44px;border-radius:14px;background:rgba(244,167,196,.25);display:flex;align-items:center;justify-content:center;color:#B83268;flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l1.8 3.6L18 7.2l-3 2.9.7 4.1L12 12.3 8.3 14.2 9 10.1 6 7.2l4.2-.6z"></path><path d="M7 21c1.5-3 3-4.5 5-4.5s3.5 1.5 5 4.5"></path></svg></div>
+          <div style="flex:1"><div style="font-weight:700;font-size:14.5px">{{ t.isBride }}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">{{ t.brideHint }}</div></div>
+          <div style="{{ brideTrack }}"><div style="{{ brideKnob }}"></div></div>
+        </button>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ st.s1 }}" hint-placeholder-val="{{ false }}">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:20px;margin-bottom:14px">{{ t.chooseSvc }}</div>
+      <sc-if value="{{ svcLoading }}"><div style="display:flex;flex-direction:column;gap:10px"><sc-for list="{{ five }}" as="x" hint-placeholder-count="5"><div style="height:74px;border-radius:16px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></div></sc-if>
+      <sc-if value="{{ svcError }}">
+        <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:70px 20px">
+          <div style="width:100px;height:100px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin-bottom:18px;color:var(--accent)"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v5M12 16.5h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></div>
+          <div style="font-weight:700;font-size:16px;margin-bottom:18px">{{ t.errServer }}</div>
+          <button onClick="{{ retrySvc }}" style="height:46px;padding:0 28px;border-radius:14px;border:none;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ t.retry }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ svcReady }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ svcList }}" as="sv" hint-placeholder-count="5">
+            <button onClick="{{ sv.onClick }}" style="{{ sv.style }}">
+              <div style="{{ sv.box }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px">{{ sv.name }}<sc-if value="{{ sv.vip }}"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff">{{ t.vip }}</span></sc-if></div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px">{{ sv.dur }}</div>
+              </div>
+              <div style="font-weight:700;font-size:14px;color:var(--accent)">{{ sv.price }}</div>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ st.s2 }}" hint-placeholder-val="{{ false }}">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:20px;margin-bottom:14px">{{ t.pickDate }}</div>
+      <div style="border:1px solid var(--line);border-radius:20px;padding:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <button onClick="{{ prevMonth }}" style="{{ prevStyle }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M15 5l-7 7 7 7"></path></svg></button>
+          <div style="font-weight:700;font-size:15px">{{ monthLabel }}</div>
+          <button onClick="{{ nextMonth }}" style="{{ nextStyle }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:scaleX(var(--flip))"><path d="M9 5l7 7-7 7"></path></svg></button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">
+          <sc-for list="{{ weekHead }}" as="w" hint-placeholder-count="7"><div style="font-size:11px;color:var(--faint);font-weight:600;padding:4px 0">{{ w }}</div></sc-for>
+          <sc-for list="{{ calDays }}" as="d" hint-placeholder-count="35"><button onClick="{{ d.onClick }}" style="{{ d.style }}">{{ d.n }}</button></sc-for>
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--muted)">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#6D28D9,#A855F7)"></span>{{ t.selected }}</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(217,70,122,.18)"></span>{{ t.closedDay }}</span>
+        </div>
+      </div>
+      <sc-if value="{{ closureNote }}"><div style="margin-top:10px;font-size:12px;color:#D9467A;display:flex;gap:6px;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4.5M12 16h.01"></path></svg>{{ t.closureNote }}</div></sc-if>
+      <sc-if value="{{ hasDate }}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px"><div style="font-weight:700;font-size:15px">{{ t.times }}</div><div style="font-size:12px;color:var(--muted)">{{ durLabel }}</div></div>
+        <sc-if value="{{ slotsLoading }}"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><sc-for list="{{ twelve }}" as="x" hint-placeholder-count="12"><div style="height:42px;border-radius:12px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></div></sc-if>
+        <sc-if value="{{ dayFull }}"><div style="padding:22px;border-radius:16px;background:var(--surface);text-align:center;font-size:13.5px;color:var(--muted)">{{ t.noSlots }}</div></sc-if>
+        <sc-if value="{{ slotsReady }}"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><sc-for list="{{ slots }}" as="sl" hint-placeholder-count="12"><button onClick="{{ sl.onClick }}" style="{{ sl.style }}"><span dir="ltr">{{ sl.l }}</span><sc-if value="{{ sl.full }}"><span style="font-size:9.5px;display:block">{{ t.full }}</span></sc-if></button></sc-for></div></sc-if>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ st.s3 }}" hint-placeholder-val="{{ false }}">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:20px;margin-bottom:6px">{{ staffTitle }}</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px">{{ slotSummary }}</div>
+      <sc-if value="{{ staffLoading }}"><div style="display:flex;flex-direction:column;gap:10px"><sc-for list="{{ five }}" as="x" hint-placeholder-count="5"><div style="height:72px;border-radius:16px;background:linear-gradient(90deg,var(--shim) 25%,var(--shim2) 50%,var(--shim) 75%);background-size:200% 100%;animation:shim 1.4s linear infinite"></div></sc-for></div></sc-if>
+      <sc-if value="{{ staffReady }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button onClick="{{ pickAny }}" style="{{ anyStyle }}">
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="9" r="3.2"></circle><circle cx="16.5" cy="10" r="2.6"></circle><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14 19a4.5 4.5 0 0 1 7 0"></path></svg></div>
+            <div style="flex:1"><div style="font-weight:700;font-size:14.5px">{{ t.anyStaff }}</div><div style="font-size:12px;color:var(--muted)">{{ t.anyHint }}</div></div>
+            <div style="{{ anyRadio }}"></div>
+          </button>
+          <sc-for list="{{ staffList }}" as="p" hint-placeholder-count="5">
+            <button onClick="{{ p.onClick }}" style="{{ p.style }}">
+              <div style="width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0"><image-slot id="{{ p.img }}" shape="circle" placeholder=""></image-slot></div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:14.5px">{{ p.name }}<span style="font-size:12px;font-weight:600;color:#B7791F">★ {{ p.rating }}</span></div>
+                <div style="{{ p.subStyle }}">{{ p.sub }}</div>
+              </div>
+              <div style="{{ p.radio }}"></div>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ st.s4 }}" hint-placeholder-val="{{ false }}">
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:20px;margin-bottom:6px">{{ t.compTitle }}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">{{ t.compSub }}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+        <button onClick="{{ justMe }}" style="height:96px;border-radius:18px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:14px;cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--accent)"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"></path></svg>{{ justMeLabel }}</button>
+        <button onClick="{{ addCompanion }}" style="{{ addStyle }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"></circle><path d="M3 20a6 6 0 0 1 12 0M18 8v6M15 11h6"></path></svg>{{ t.addComp }}</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-weight:700;font-size:15px">{{ t.persons }}</div><div style="font-size:12.5px;font-weight:600;color:var(--accent)">{{ compCounter }}</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ personCards }}" as="pc" hint-placeholder-count="1">
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:var(--surface)">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700">{{ pc.initial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px">{{ pc.name }}<sc-if value="{{ pc.bride }}"><span style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(244,167,196,.3);color:#B83268">{{ t.bride }}</span></sc-if></div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ pc.sub }}</div>
+            </div>
+            <sc-if value="{{ pc.removable }}"><button onClick="{{ pc.onRemove }}" style="width:34px;height:34px;border-radius:50%;border:none;background:rgba(217,70,122,.1);color:#D9467A;cursor:pointer">✕</button></sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ atLimit }}"><div style="margin-top:12px;font-size:12.5px;color:#D9467A;text-align:center">{{ t.limit }}</div></sc-if>
+    </sc-if>
+
+    <sc-if value="{{ st.s5 }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ payFailed }}">
+        <div style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:14px;background:rgba(217,70,122,.1);color:#D9467A;font-size:13px;font-weight:600;margin-bottom:14px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4.5M12 16h.01"></path></svg>{{ t.payFailed }}</div>
+      </sc-if>
+      <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:20px;margin-bottom:14px">{{ t.summary }}</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ sumPersons }}" as="sp" hint-placeholder-count="1">
+          <div style="padding:14px;border-radius:18px;border:1px solid var(--line)">
+            <div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:14.5px;margin-bottom:8px">{{ sp.name }}<sc-if value="{{ sp.bride }}"><span style="font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(244,167,196,.3);color:#B83268">{{ t.bride }}</span></sc-if></div>
+            <sc-for list="{{ sp.lines }}" as="ln"><div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0"><span>{{ ln.n }}</span><span style="font-weight:600">{{ ln.p }}</span></div></sc-for>
+            <div style="display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted)"><span>{{ sp.staff }}</span><span>{{ sp.when }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;margin-top:10px;border-radius:16px;background:var(--soft)"><span style="font-weight:700">{{ t.grandTotal }}</span><span style="font-weight:700;font-size:18px;color:var(--accent)">{{ grandTotal }}</span></div>
+      <div style="margin-top:16px;padding:14px 16px;border-radius:16px;background:var(--surface)">
+        <div style="font-weight:700;font-size:14px;margin-bottom:8px">{{ t.rules }}</div>
+        <sc-for list="{{ rules }}" as="r" hint-placeholder-count="4"><div style="display:flex;gap:8px;font-size:12.5px;color:var(--muted);line-height:1.6;padding:2px 0"><span style="color:var(--accent)">•</span><span>{{ r }}</span></div></sc-for>
+      </div>
+      <div style="font-weight:700;font-size:15px;margin:18px 0 10px">{{ t.payMethod }}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ payOpts }}" as="po" hint-placeholder-count="3">
+          <button onClick="{{ po.onClick }}" style="{{ po.style }}"><div style="{{ po.radio }}"></div><div style="flex:1"><div style="font-weight:700;font-size:14px">{{ po.l }}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">{{ po.sub }}</div></div></button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ st.verify }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:20px">
+        <div style="width:76px;height:76px;border-radius:24px;background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--accent);margin-bottom:18px"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="6" y="2.5" width="12" height="19" rx="3"></rect><path d="M10.5 18.5h3"></path></svg></div>
+        <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:21px;margin-bottom:6px">{{ t.confirmBooking }}</div>
+        <div style="font-size:13px;color:var(--muted)">{{ t.sent }} <span dir="ltr" style="font-weight:600;color:var(--ink);unicode-bidi:isolate">+962 79 123 4567</span></div>
+      </div>
+      <div dir="ltr" style="position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0 14px">
+        <sc-for list="{{ otpBoxes }}" as="b" hint-placeholder-count="4"><div style="{{ b.style }}">{{ b.v }}</div></sc-for>
+        <input type="tel" inputmode="numeric" maxlength="4" value="{{ code }}" onChange="{{ onCode }}" style="position:absolute;inset:0;opacity:0;width:100%;cursor:pointer">
+      </div>
+      <div style="text-align:center;font-size:13px;color:var(--muted)">{{ t.resendIn }} <span dir="ltr" style="font-weight:700;color:var(--ink)">0:42</span></div>
+    </sc-if>
+
+    <sc-if value="{{ st.pay }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:30px">
+        <div style="width:100%;padding:20px;border-radius:20px;border:1px solid var(--line);margin-bottom:28px;box-sizing:border-box">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><span style="font-size:12px;font-weight:700;letter-spacing:1px;color:var(--faint)">{{ t.gateway }}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#2E9E78"><path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path></svg></div>
+          <div style="font-size:12.5px;color:var(--muted)">{{ t.amountDue }}</div>
+          <div style="font-weight:700;font-size:28px;color:var(--accent);margin:4px 0 16px">{{ payAmount }}</div>
+          <div style="height:46px;border-radius:12px;background:var(--surface);margin-bottom:8px"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="height:46px;border-radius:12px;background:var(--surface)"></div><div style="height:46px;border-radius:12px;background:var(--surface)"></div></div>
+        </div>
+        <span style="width:40px;height:40px;border-radius:50%;border:3.5px solid var(--soft);border-top-color:#A855F7;display:inline-block;animation:spin .8s linear infinite;margin-bottom:14px"></span>
+        <div style="font-weight:700;font-size:16px">{{ t.processing }}</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:4px">{{ t.dontClose }}</div>
+        <button onClick="{{ failPayment }}" style="margin-top:24px;border:none;background:none;color:#D9467A;font-weight:600;font-size:13px;cursor:pointer;padding:10px">{{ t.cancelPay }}</button>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ showBar }}">
+    <div style="padding:12px 20px 30px;border-top:1px solid var(--line);background:var(--card);flex-shrink:0;display:flex;align-items:center;gap:14px">
+      <sc-if value="{{ showTotals }}"><div style="flex-shrink:0"><div style="font-weight:700;font-size:17px;color:var(--accent)">{{ curTotal }}</div><div style="font-size:11.5px;color:var(--muted)">{{ curDur }}</div></div></sc-if>
+      <button onClick="{{ onNext }}" style="{{ nextBtn }}">{{ nextLabel }}</button>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ st.success }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 28px 40px">
+    <div style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,.22),transparent 70%);display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+      <div style="width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,#6D28D9,#A855F7);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 34px rgba(109,40,217,.35);animation:pop .5s ease both"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+    </div>
+    <div style="font-family:'Playfair Display','IBM Plex Sans Arabic',serif;font-weight:700;font-size:22px;margin:10px 0 8px">{{ t.successTitle }}</div>
+    <div style="font-size:14px;color:var(--muted);line-height:1.7;max-width:290px;margin-bottom:24px">{{ t.successBody }}</div>
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:16px;background:var(--surface);border:1px dashed var(--line);margin-bottom:34px">
+      <div style="text-align:start"><div style="font-size:11.5px;color:var(--muted)">{{ t.ref }}</div><div dir="ltr" style="font-weight:700;font-size:17px;letter-spacing:1px">WAB-26-48213</div></div>
+      <button onClick="{{ copyRef }}" style="height:38px;padding:0 14px;border-radius:10px;border:none;background:var(--soft);color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer">{{ copyLabel }}</button>
+    </div>
+    <a href="WAB 05 Bookings.dc.html?s=pending" style="width:100%;height:54px;border-radius:14px;background:linear-gradient(135deg,#6D28D9,#A855F7);color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(109,40,217,.3);margin-bottom:10px">{{ t.viewBooking }}</a>
+    <a href="WAB 02 Discovery.dc.html?s=homeReg" style="width:100%;height:50px;border-radius:14px;color:var(--accent);font-size:14.5px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ t.backHome }}</a>
+  </div>
+</sc-if>
+
+</div>
+</x-import>
+
+<div style="width:300px;max-width:100%;background:#fff;border-radius:22px;padding:20px;box-sizing:border-box;box-shadow:0 12px 40px rgba(31,34,51,.08);font-family:'Poppins',sans-serif;color:#1F2233;direction:ltr">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><img src="assets/wab-app-icon.png" alt="" style="width:38px;height:38px;border-radius:10px;object-fit:cover"><div><div style="font-weight:700;font-size:14px">WAB Customer App</div><div style="font-size:11.5px;color:#6B7280">{{ panelTitle }}</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="6"><a href="{{ f.href }}" style="{{ f.style }}">{{ f.label }}</a></sc-for></div>
+  <sc-for list="{{ controls }}" as="c" hint-placeholder-count="4"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:11.5px;color:#6B7280;font-weight:600">{{ c.label }}</div><div style="display:flex;gap:4px"><sc-for list="{{ c.opts }}" as="o"><button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></sc-for>
+  <div style="height:1px;background:#EEEAF4;margin:14px 0"></div>
+  <sc-for list="{{ nav }}" as="g" hint-placeholder-count="7"><div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:#6D28D9;letter-spacing:.4px;margin-bottom:6px">{{ g.title }}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><sc-for list="{{ g.items }}" as="it"><button onClick="{{ it.onClick }}" style="{{ it.style }}">{{ it.label }}</button></sc-for></div></div></sc-for>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SKEY='wab_proto_settings';
+const CUR='WAB 04 Booking Flow.dc.html';
+const FILES=[['01 Auth','WAB 01 Auth.dc.html'],['02 Discovery','WAB 02 Discovery.dc.html'],['03 Salon','WAB 03 Salon.dc.html'],['04 Booking','WAB 04 Booking Flow.dc.html'],['05 Bookings','WAB 05 Bookings.dc.html'],['06 Account','WAB 06 Account.dc.html']];
+function prefs(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')}catch(e){return {}}}
+function tv(lang,theme){const d=theme==='dark',ar=lang==='ar';return {height:'100%',position:'relative',display:'flex',flexDirection:'column',overflow:'hidden',background:'var(--bg)',color:'var(--ink)',fontFamily:ar?"'IBM Plex Sans Arabic','Poppins',sans-serif":"'Poppins','IBM Plex Sans Arabic',sans-serif",'--bg':d?'#14172B':'#FFFFFF','--card':d?'#1C1F37':'#FFFFFF','--surface':d?'#1F2340':'#F8F7FB','--soft':d?'#2C2553':'#F3EEFB','--ink':d?'#F8FAFC':'#1F2233','--muted':d?'#B6BBCB':'#6B7280','--faint':d?'#8A90A6':'#9CA3AF','--line':d?'rgba(255,255,255,.09)':'#EEEAF4','--accent':d?'#C9AEF7':'#6D28D9','--flip':ar?'-1':'1','--shim':d?'#252946':'#EFEBF7','--shim2':d?'#323760':'#F9F7FD'}}
+function pill(a){return {padding:'6px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontSize:'11px',fontWeight:600,fontFamily:"'Poppins',sans-serif",textDecoration:'none',background:a?'linear-gradient(135deg,#6D28D9,#A855F7)':'#F3EEFB',color:a?'#fff':'#6D28D9'}}
+function btn(on){return {flex:1,height:'54px',borderRadius:'14px',border:'none',background:on?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--soft)',color:on?'#fff':'var(--faint)',fontSize:'15px',fontWeight:600,cursor:on?'pointer':'default',boxShadow:on?'0 10px 24px rgba(109,40,217,.28)':'none',fontFamily:'inherit'}}
+function card(sel,dis){return {width:'100%',display:'flex',alignItems:'center',gap:'12px',padding:'12px 14px',borderRadius:'16px',border:'1.5px solid '+(sel?'#A855F7':'var(--line)'),background:sel?'var(--soft)':'var(--card)',color:'var(--ink)',cursor:dis?'default':'pointer',textAlign:'start',opacity:dis?.5:1,fontFamily:'inherit'}}
+function radio(sel){return {width:'20px',height:'20px',borderRadius:'50%',boxSizing:'border-box',flexShrink:0,border:sel?'6px solid #6D28D9':'1.5px solid var(--faint)'}}
+const D={
+ar:{book:'حجز موعد',steps:['الشخص','الخدمات','الموعد','الموظف','المرافقون','الملخص'],stepOf:'الخطوة',of:'من',whoTitle:'لمن هذا الحجز؟',whoMain:'الشخص الرئيسي هو صاحب الحساب، ويمكنك تعديل الاسم.',whoComp:'أدخل اسم المرافق. يجب أن يكون من نفس جنس الصالون.',personName:'الاسم',namePh:'اكتب الاسم',isBride:'هذا الشخص عروس',brideHint:'تظهر خدمات VIP الخاصة بالعرائس',bride:'عروس',vip:'للعروس فقط',chooseSvc:'اختر الخدمات',pickDate:'اختر التاريخ والوقت',selected:'محدد',closedDay:'مغلق',closureNote:'8 أكتوبر: إغلاق استثنائي للصيانة',times:'الأوقات المتاحة',full:'ممتلئ',noSlots:'لا توجد مواعيد متاحة في هذا اليوم',chooseStaff:'اختر الموظف',chooseStaffBride:'اختر خبيرة مؤهلة للعرائس',anyStaff:'أي موظف متاح',anyHint:'سيقوم الصالون بتعيين موظف متاح',notAvail:'غير متاح في هذا الوقت',onLeave:'في إجازة',notBride:'غير مؤهل لخدمات العرائس',available:'متاح',compTitle:'هل معك مرافقون؟',compSub:'يمكنك إضافة حتى 5 مرافقين من نفس جنس الصالون، ولكل مرافق خدماته وموعده.',justMe:'فقط لي',continueL:'متابعة',addComp:'إضافة مرافق',persons:'الأشخاص في الحجز',compOf:'مرافقين',limit:'الحد الأقصى 5 مرافقين',summary:'ملخص الحجز',grandTotal:'الإجمالي',rules:'قواعد الصالون',rulesList:['يمكن الإلغاء حتى 3 ساعات قبل الموعد','العربون 20% من إجمالي الحجز','لا يُسترد العربون عند الإلغاء من قبلك','الحجز بحاجة لموافقة الصالون'],payMethod:'طريقة الدفع',arrival:'الدفع عند الوصول',arrivalSub:'ادفع كامل المبلغ في الصالون',deposit:'عربون 20%',depositSub:'ادفع الآن والباقي عند الوصول',fullPay:'الدفع كاملاً',fullSub:'ادفع كامل المبلغ أونلاين',confirm:'تأكيد الحجز',payFailed:'فشلت عملية الدفع، لم يتم الحجز',confirmBooking:'تأكيد الحجز',sent:'أرسلنا رمزاً إلى',resendIn:'إعادة الإرسال خلال',verify:'تحقق',gateway:'بوابة الدفع الآمنة',amountDue:'المبلغ المطلوب',processing:'جارٍ معالجة الدفع…',dontClose:'لا تغلق هذه الصفحة',cancelPay:'إلغاء الدفع',successTitle:'تم إرسال طلب الحجز',successBody:'تم إرسال طلب الحجز وبانتظار موافقة الصالون. سنرسل لك إشعاراً فور الموافقة.',ref:'رقم المرجع',copy:'نسخ',copied:'تم النسخ',viewBooking:'عرض الحجز',backHome:'العودة للرئيسية',errServer:'حدث خطأ ما',retry:'إعادة المحاولة',min:'دقيقة',cur:'د.أ',services:'خدمة',with:'مع',noStaff:'لم يُحدد الموظف',am:'ص',pm:'م',months:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],wk:['س','ح','ن','ث','ر','خ','ج'],mainName:{male:'أحمد الحداد',female:'ليلى الحداد'},comps:{male:['زيد','عمر','ليث','سامي','فادي'],female:['سارة','ريم','جنى','تالا','نور']}},
+en:{book:'Book appointment',steps:['Person','Services','Date & time','Staff','Companions','Summary'],stepOf:'Step',of:'of',whoTitle:'Who is this booking for?',whoMain:'The main person is the account holder — you can edit the name.',whoComp:'Enter the companion’s name. Companions must match the salon’s gender.',personName:'Name',namePh:'Enter a name',isBride:'This person is a bride',brideHint:'Shows VIP bride-only services',bride:'Bride',vip:'Bride only',chooseSvc:'Select services',pickDate:'Pick date & time',selected:'Selected',closedDay:'Closed',closureNote:'Oct 8: exceptional closure for maintenance',times:'Available times',full:'Full',noSlots:'No available times on this day',chooseStaff:'Choose staff',chooseStaffBride:'Choose a bride-qualified expert',anyStaff:'Any available staff',anyHint:'The salon will assign someone available',notAvail:'Not available at this time',onLeave:'On leave',notBride:'Not bride-qualified',available:'Available',compTitle:'Anyone joining you?',compSub:'Add up to 5 companions of the salon’s gender, each with their own services and time.',justMe:'Just me',continueL:'Continue',addComp:'Add companion',persons:'People in this booking',compOf:'companions',limit:'Maximum 5 companions',summary:'Booking summary',grandTotal:'Total',rules:'Salon rules',rulesList:['Cancel up to 3 hours before the appointment','Deposit is 20% of the total','Deposit is not refunded if you cancel','The booking needs salon approval'],payMethod:'Payment method',arrival:'Pay on arrival',arrivalSub:'Pay the full amount at the salon',deposit:'20% deposit',depositSub:'Pay now, the rest on arrival',fullPay:'Pay in full',fullSub:'Pay the full amount online',confirm:'Confirm booking',payFailed:'Payment failed, the booking was not made',confirmBooking:'Confirm booking',sent:'We sent a code to',resendIn:'Resend in',verify:'Verify',gateway:'SECURE PAYMENT',amountDue:'Amount due',processing:'Processing payment…',dontClose:'Please don’t close this page',cancelPay:'Cancel payment',successTitle:'Booking request sent',successBody:'Your booking request was sent and is waiting for the salon’s approval. We’ll notify you once it’s approved.',ref:'Reference number',copy:'Copy',copied:'Copied',viewBooking:'View booking',backHome:'Back to Home',errServer:'Something went wrong',retry:'Retry',min:'min',cur:'JOD',services:'services',with:'with',noStaff:'Staff not selected',am:'AM',pm:'PM',months:['January','February','March','April','May','June','July','August','September','October','November','December'],wk:['Sa','Su','Mo','Tu','We','Th','Fr'],mainName:{male:'Ahmad Haddad',female:'Layla Haddad'},comps:{male:['Zaid','Omar','Laith','Sami','Fadi'],female:['Sara','Reem','Jana','Tala','Noor']}}};
+const SV={male:[['قص شعر','Haircut',30,8,0],['قص شعر + لحية','Haircut + beard',45,12,0],['تهذيب اللحية','Beard trim',20,5,0],['حلاقة بالموس','Hot towel shave',25,7,0],['تنظيف بشرة','Skin cleansing',40,15,0],['صبغة شعر','Hair color',45,18,0]],
+female:[['تسريحة شعر','Hair styling',60,25,0],['مكياج سهرة','Evening makeup',60,35,0],['مكياج عروس','Bridal makeup',120,180,1],['باقة العروس الكاملة','Full bridal package',240,350,1],['مناكير وباديكير','Mani & pedi',60,20,0],['تنظيف بشرة','Facial',50,30,0]]};
+const ST={male:[['عمر','Omar',4.9,0,0],['خالد','Khaled',4.8,0,0],['يوسف','Yousef',4.7,1,0],['فراس','Firas',4.6,0,0],['سامر','Samer',4.5,0,0]],female:[['رنا','Rana',4.9,0,1],['دانة','Dana',4.8,0,1],['لين','Leen',4.7,1,0],['هبة','Hiba',4.8,0,1],['سلمى','Salma',4.6,0,0]]};
+const SNAME={male:['صالون النخبة للرجال',"Elite Men's Salon"],female:['بيلا هاوس','Bella House']};
+const TODAY=new Date(2026,8,28),LAST=new Date(2026,8,28+90);
+const FULLDAY='2026-10-1',CLOSURE='2026-10-8';
+const key=d=>d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+function P(name,o){return Object.assign({name,bride:false,svcs:[],date:null,time:null,staff:null},o||{})}
+const DONE=(o)=>P(null,Object.assign({svcs:[0],date:'2026-9-29',time:600,staff:0},o||{}));
+const DEF={step:0,persons:[P(null)],cur:0,svcState:'',slotsState:'',staffState:'',viewM:8,payMethod:null,payOnly:false,payFailed:false,code:'',copied:false};
+const PRE={p0men:{g:'male'},p0women:{g:'female'},p0bride:{g:'female',persons:[P(null,{bride:true})]},
+s1none:{step:1},s1some:{step:1,persons:[P(null,{svcs:[0,2]})]},s1bride:{g:'female',step:1,persons:[P(null,{bride:true,svcs:[2]})]},s1loading:{step:1,svcState:'loading'},s1error:{step:1,svcState:'error'},
+s2none:{step:2,persons:[P(null,{svcs:[0]})]},s2slots:{step:2,persons:[P(null,{svcs:[0],date:'2026-9-29'})]},s2full:{step:2,persons:[P(null,{svcs:[0],date:FULLDAY})],viewM:9},s2closure:{step:2,persons:[P(null,{svcs:[0]})],viewM:9},s2loading:{step:2,persons:[P(null,{svcs:[0],date:'2026-9-29'})],slotsState:'loading'},
+s3sel:{step:3,persons:[DONE()]},s3bride:{g:'female',step:3,persons:[DONE({bride:true,svcs:[2],staff:null})]},s3loading:{step:3,persons:[DONE({staff:null})],staffState:'loading'},
+s4none:{step:4,persons:[DONE()]},s4two:{step:4,persons:[DONE(),DONE({name:'c0',time:660,staff:1}),DONE({name:'c1',time:720,staff:3})]},s4limit:{step:4,persons:[DONE(),...[0,1,2,3,4].map(i=>DONE({name:'c'+i,time:660+i*45,staff:i%2}))]},
+sumAll:{step:5,persons:[DONE({svcs:[1]})]},sumArrival:{step:5,persons:[DONE({svcs:[1]})],payOnly:true,payMethod:'arrival'},sumDeposit:{step:5,persons:[DONE({svcs:[1]})],payMethod:'deposit'},
+otp:{step:'verify',persons:[DONE({svcs:[1]})],payMethod:'deposit'},pay:{step:'pay',persons:[DONE({svcs:[1]})],payMethod:'deposit'},payFail:{step:5,persons:[DONE({svcs:[1]})],payMethod:'full',payFailed:true},success:{step:'success'}};
+const NAV=[['Step 0 · Person',[['Men’s salon','p0men'],['Women – bride off','p0women'],['Women – bride on','p0bride']]],['Step 1 · Services',[['None selected','s1none'],['Several selected','s1some'],['Bride VIP','s1bride'],['Loading','s1loading'],['Error','s1error']]],['Step 2 · Date & time',[['No date','s2none'],['Date + slots','s2slots'],['Day fully booked','s2full'],['Closure disabled','s2closure'],['Slots loading','s2loading']]],['Step 3 · Staff',[['Selected','s3sel'],['Bride case','s3bride'],['Loading','s3loading']]],['Step 4 · Companions',[['None','s4none'],['2 companions','s4two'],['Limit reached','s4limit']]],['Step 5 · Summary',[['All options','sumAll'],['Arrival only','sumArrival'],['Deposit selected','sumDeposit']]],['Step 6 · Verify & pay / S17',[['OTP','otp'],['Processing','pay'],['Payment failed','payFail'],['Success','success']]]];
+function tm(m,t){const h=Math.floor(m/60),mm=m%60;return (h%12||12)+':'+String(mm).padStart(2,'0')+' '+(h>=12?t.pm:t.am)}
+
+class Component extends DCLogic {
+  state=(()=>{const p=prefs();const q=new URLSearchParams(location.search).get('g');return Object.assign({lang:p.lang||'ar',theme:p.theme||'light',user:p.user||'registered',gender:p.gender||'female',g:(q==='male'||q==='female')?q:(p.gender||'female'),preset:'p0women'},DEF)})();
+  componentDidMount(){const k=new URLSearchParams(location.search).get('s');if(k)this.go(k)}
+  savePrefs(){const s=this.state;localStorage.setItem(SKEY,JSON.stringify({lang:s.lang,theme:s.theme,user:s.user,gender:s.gender}))}
+  setPref(k,v){const u={[k]:v};if(k==='gender')u.g=v;this.setState(u,()=>this.savePrefs())}
+  go(k){const p=PRE[k];if(!p)return;const u=Object.assign({},DEF,p,{preset:k});if(!p.g)u.g=this.state.g;u.cur=Math.max(0,(u.persons||DEF.persons).length-1);if(typeof u.step==='number'&&u.step<4)u.cur=0;this.setState(u)}
+  upd(o){const ps=[...this.state.persons];ps[this.state.cur]=Object.assign({},ps[this.state.cur],o);this.setState({persons:ps})}
+  pname(p,i){const t=D[this.state.lang],g=this.state.g;if(p.name===null)return t.mainName[g];if(/^c\d$/.test(p.name))return t.comps[g][+p.name[1]];return p.name}
+  total(p){const S=SV[this.state.g];return p.svcs.reduce((a,i)=>[a[0]+S[i][3],a[1]+S[i][2]],[0,0])}
+  canNext(){const s=this.state,p=s.persons[s.cur];if(s.step===0)return !!this.pname(p,s.cur).trim();if(s.step===1)return p.svcs.length>0&&!s.svcState;if(s.step===2)return !!(p.date&&p.time);if(s.step===3)return p.staff!==null;if(s.step===4)return true;if(s.step===5)return !!s.payMethod;return false}
+  next=()=>{const s=this.state;if(!this.canNext())return;
+    if(s.step===5){this.setState({step:'verify',code:'',payFailed:false});return}
+    if(s.step===3){this.setState({step:4,cur:s.persons.length-1});return}
+    const ns=s.step+1;this.setState({step:ns});if(ns===1)this.flash('svcState');if(ns===3)this.flash('staffState')};
+  flash(k){this.setState({[k]:'loading'});setTimeout(()=>this.setState({[k]:''}),600)}
+  back=()=>{const s=this.state;if(s.step==='verify'||s.step==='pay'){this.setState({step:5});return}if(s.step===0&&s.cur>0){const ps=s.persons.slice(0,-1);this.setState({persons:ps,cur:ps.length-1,step:4});return}if(s.step===0){location.href='WAB 03 Salon.dc.html?g='+s.g;return}this.setState({step:s.step-1})};
+  renderVals(){
+    const s=this.state,ar=s.lang==='ar',t=D[s.lang],L=ar?0:1,g=s.g,S=SV[g],p=s.persons[s.cur]||s.persons[0];
+    const seg=(k,o)=>o.map(([v,l])=>({label:l,onClick:()=>this.setPref(k,v),style:pill(s[k]===v)}));
+    const inFlow=s.step!=='success',num=typeof s.step==='number',stepIdx=num?s.step:5;
+    const [tp,td]=this.total(p);
+    const vm=s.viewM,first=new Date(2026,vm,1),lead=(first.getDay()+1)%7,dim=new Date(2026,vm+1,0).getDate();
+    const calDays=[];for(let i=0;i<lead;i++)calDays.push({n:'',onClick:()=>{},style:{height:'38px',border:'none',background:'none'}});
+    for(let d=1;d<=dim;d++){const dt=new Date(2026,vm,d),k=key(dt),past=dt<TODAY&&k!==key(TODAY),beyond=dt>LAST,fri=dt.getDay()===5,clo=k===CLOSURE,dis=past||beyond||fri||clo,sel=p.date===k;
+      calDays.push({n:d,onClick:()=>{if(dis)return;this.upd({date:k,time:null});this.flash('slotsState')},style:{height:'38px',borderRadius:'11px',border:'none',fontSize:'13.5px',fontWeight:sel?700:500,fontFamily:'inherit',cursor:dis?'default':'pointer',background:sel?'linear-gradient(135deg,#6D28D9,#A855F7)':(fri||clo)&&!past&&!beyond?'rgba(217,70,122,.12)':k===key(TODAY)?'var(--soft)':'transparent',color:sel?'#fff':dis?'var(--faint)':'var(--ink)',opacity:past||beyond?.4:1,textDecoration:clo?'line-through':'none'}})}
+    const slots=[];for(let m=600;m<1080;m+=15){const i=(m-600)/15,full=i%5===2||i%7===0||i===3,sel=p.time===m;slots.push({l:tm(m,t).replace(' ',' '),full,onClick:()=>{if(!full)this.upd({time:m})},style:{minHeight:'42px',padding:'4px 2px',borderRadius:'12px',border:'1.5px solid '+(sel?'#A855F7':'var(--line)'),background:sel?'linear-gradient(135deg,#6D28D9,#A855F7)':full?'var(--surface)':'var(--card)',color:sel?'#fff':full?'var(--faint)':'var(--ink)',fontSize:'12px',fontWeight:600,cursor:full?'default':'pointer',fontFamily:'inherit',textDecoration:full?'line-through':'none'}})}
+    const whenTxt=q=>{if(!q.date)return '';const [y,mo,d]=q.date.split('-').map(Number);return d+' '+t.months[mo-1]+(q.time?' · '+tm(q.time,t):'')};
+    const staffList=ST[g].map((x,i)=>{const leave=!!x[3],nb=p.bride&&!x[4],busy=i===3&&p.time===600,dis=leave||nb||busy,sel=p.staff===i;
+      return {name:x[L],rating:x[2].toFixed(1),img:'staff-'+(g==='male'?'elite-men':'bella-house')+'-'+i,sub:leave?t.onLeave:nb?t.notBride:busy?t.notAvail:t.available,subStyle:{fontSize:'12px',marginTop:'2px',color:dis?'#D9467A':'#2E9E78',fontWeight:500},style:card(sel,dis),radio:radio(sel),onClick:()=>{if(!dis)this.upd({staff:i})}}});
+    const staffName=q=>q.staff===null?t.noStaff:q.staff===-1?t.anyStaff:ST[g][q.staff][L];
+    const grand=s.persons.reduce((a,q)=>a+this.total(q)[0],0);
+    const dep=Math.round(grand*0.2*100)/100;
+    const payOpts=(s.payOnly?[['arrival',t.arrival,t.arrivalSub]]:[['arrival',t.arrival,t.arrivalSub],['deposit',t.deposit+' = '+dep+' '+t.cur,t.depositSub],['full',t.fullPay,t.fullSub]]).map(([v,l,sub])=>({l,sub,style:card(s.payMethod===v),radio:radio(s.payMethod===v),onClick:()=>this.setState({payMethod:v,payFailed:false})}));
+    const comps=s.persons.length-1,atLimit=comps>=5;
+    const nextLabel=s.step===5?t.confirm:s.step===4?t.continueL:t.continueL;
+    return {
+      t,dir:ar?'rtl':'ltr',isDark:s.theme==='dark',themeVars:tv(s.lang,s.theme),panelTitle:'04 · Booking Flow',
+      files:FILES.map(([l,h])=>({label:l,href:h,style:pill(h===CUR)})),
+      controls:[{label:'Language',opts:seg('lang',[['ar','AR'],['en','EN']])},{label:'Theme',opts:seg('theme',[['light','Light'],['dark','Dark']])},{label:'User',opts:seg('user',[['guest','Guest'],['registered','Registered']])},{label:'Salon',opts:seg('gender',[['male','Men'],['female','Women']])}],
+      nav:NAV.map(([title,items])=>({title,items:items.map(([label,k])=>({label,onClick:()=>this.go(k),style:pill(s.preset===k)}))})),
+      inFlow,st:{s0:s.step===0,s1:s.step===1,s2:s.step===2,s3:s.step===3,s4:s.step===4,s5:s.step===5,verify:s.step==='verify',pay:s.step==='pay',success:s.step==='success'},
+      headerTitle:s.step==='verify'?t.confirmBooking:t.book,salonName:SNAME[g][L],showSteps:num,
+      stepBars:t.steps.map((_,i)=>({flex:1,height:'4px',borderRadius:'2px',background:i<=stepIdx?'linear-gradient(90deg,#6D28D9,#A855F7)':'var(--line)'})),
+      stepLabel:t.stepOf+' '+(stepIdx+1)+' '+t.of+' 6 · '+t.steps[stepIdx],personLabel:num&&s.step<4?this.pname(p,s.cur)+(p.bride?' · '+t.bride:''):'',
+      onBack:this.back,five:[1,2,3,4,5],twelve:[...Array(12)].map((_,i)=>i),
+      whoSub:s.cur===0?t.whoMain:t.whoComp,cp:{name:this.pname(p,s.cur)},onName:e=>this.upd({name:e.target.value}),
+      isWomen:g==='female',toggleBride:()=>this.upd({bride:!p.bride,svcs:p.svcs.filter(i=>!S[i][4])}),
+      brideTrack:{width:'48px',height:'28px',borderRadius:'14px',padding:'3px',boxSizing:'border-box',background:p.bride?'linear-gradient(135deg,#6D28D9,#A855F7)':'var(--line)',display:'flex',justifyContent:p.bride?'flex-end':'flex-start',flexShrink:0},
+      brideKnob:{width:'22px',height:'22px',borderRadius:'50%',background:'#fff',boxShadow:'0 2px 6px rgba(0,0,0,.2)'},
+      svcLoading:s.svcState==='loading',svcError:s.svcState==='error',svcReady:!s.svcState,retrySvc:()=>this.flash('svcState'),
+      svcList:S.map((x,i)=>({x,i})).filter(o=>!o.x[4]||p.bride).map(({x,i})=>{const sel=p.svcs.includes(i);return {name:x[L],vip:!!x[4],dur:x[2]+' '+t.min,price:x[3]+' '+t.cur,
+        style:Object.assign(card(sel),x[4]?{background:sel?'var(--soft)':'linear-gradient(135deg,rgba(109,40,217,.06),rgba(244,167,196,.12))'}:{}),
+        box:{width:'22px',height:'22px',borderRadius:'7px',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',background:sel?'linear-gradient(135deg,#6D28D9,#A855F7)':'transparent',border:sel?'none':'1.5px solid var(--faint)'},
+        onClick:()=>this.upd({svcs:sel?p.svcs.filter(y=>y!==i):[...p.svcs,i]})}}),
+      monthLabel:t.months[vm]+' 2026',weekHead:t.wk,calDays,
+      prevMonth:()=>{if(vm>8)this.setState({viewM:vm-1})},nextMonth:()=>{if(vm<11)this.setState({viewM:vm+1})},
+      prevStyle:{width:'36px',height:'36px',borderRadius:'10px',border:'none',background:'var(--surface)',color:'var(--ink)',cursor:'pointer',opacity:vm>8?1:.35,display:'flex',alignItems:'center',justifyContent:'center'},
+      nextStyle:{width:'36px',height:'36px',borderRadius:'10px',border:'none',background:'var(--surface)',color:'var(--ink)',cursor:'pointer',opacity:vm<11?1:.35,display:'flex',alignItems:'center',justifyContent:'center'},
+      closureNote:vm===9,hasDate:!!p.date,durLabel:td+' '+t.min,slotsLoading:s.slotsState==='loading',dayFull:!s.slotsState&&p.date===FULLDAY,slotsReady:!s.slotsState&&p.date!==FULLDAY,slots,
+      staffTitle:p.bride?t.chooseStaffBride:t.chooseStaff,slotSummary:whenTxt(p)+' · '+td+' '+t.min,staffLoading:s.staffState==='loading',staffReady:!s.staffState,
+      pickAny:()=>this.upd({staff:-1}),anyStyle:card(p.staff===-1),anyRadio:radio(p.staff===-1),staffList,
+      justMeLabel:comps?t.continueL:t.justMe,justMe:()=>this.setState({step:5}),
+      addCompanion:()=>{if(atLimit)return;const ps=[...s.persons,P('')];this.setState({persons:ps,cur:ps.length-1,step:0})},
+      addStyle:{height:'96px',borderRadius:'18px',border:'1.5px dashed '+(atLimit?'var(--line)':'#A855F7'),background:atLimit?'var(--surface)':'var(--soft)',color:atLimit?'var(--faint)':'var(--accent)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'8px',fontWeight:700,fontSize:'14px',cursor:atLimit?'default':'pointer',opacity:atLimit?.6:1},
+      compCounter:comps+' '+t.of+' 5 '+t.compOf,atLimit,
+      personCards:s.persons.map((q,i)=>{const n=this.pname(q,i);return {name:n,initial:n.trim()[0]||'?',bride:q.bride,removable:i>0,sub:q.svcs.length+' '+t.services+' · '+whenTxt(q)+' · '+staffName(q),onRemove:()=>{const ps=s.persons.filter((_,j)=>j!==i);this.setState({persons:ps,cur:ps.length-1})}}}),
+      payFailed:s.payFailed,
+      sumPersons:s.persons.map((q,i)=>({name:this.pname(q,i),bride:q.bride,lines:q.svcs.map(j=>({n:S[j][L],p:S[j][3]+' '+t.cur})),staff:staffName(q),when:whenTxt(q)})),
+      grandTotal:grand+' '+t.cur,rules:t.rulesList,payOpts,
+      showBar:num,showTotals:s.step===1,curTotal:tp+' '+t.cur,curDur:td+' '+t.min,nextBtn:btn(this.canNext()),nextLabel,onNext:this.next,
+      code:s.code,onCode:e=>{const v=e.target.value.replace(/\D/g,'').slice(0,4);this.setState({code:v});if(v.length===4)setTimeout(()=>{if(s.payMethod==='arrival')this.setState({step:'success'});else{this.setState({step:'pay'});clearTimeout(this.pt);this.pt=setTimeout(()=>{if(this.state.step==='pay')this.setState({step:'success'})},2500)}},500)},
+      otpBoxes:[0,1,2,3].map(i=>({v:s.code[i]||'',style:{height:'64px',borderRadius:'16px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'24px',fontWeight:700,background:'var(--card)',border:'1.5px solid '+(i===s.code.length?'#A855F7':s.code[i]?'#D8B4FE':'var(--line)')}})),
+      payAmount:(s.payMethod==='full'?grand:dep)+' '+t.cur,failPayment:()=>{clearTimeout(this.pt);this.setState({step:5,payFailed:true})},
+      copyLabel:s.copied?t.copied:t.copy,copyRef:()=>{try{navigator.clipboard.writeText('WAB-26-48213')}catch(e){}this.setState({copied:true})}
+    };
+  }
+}
+</script>
+</body>
+</html>
