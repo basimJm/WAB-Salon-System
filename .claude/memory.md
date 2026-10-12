@@ -7,6 +7,11 @@
 - `WAB-Mobile-Salon/` and `WAB-Admin-Dashboard/` have docs + designs only; `wab-*` have BRDs only.
 - Customer app is a KMP template (`WAB-Mobile-Customer/AGENTS.md`, `TECHSTACK.md`): Kotlin 1.10, Compose MP 1.10.3, Ktor 3.4.2, Koin 4.2.0.
 
+## Delivery
+- Plan: `ROADMAP.md` (P0–P6, tracks SERVICE/SERVER/CUSTOMER/MERCHANT/ADMIN/INT; integration last in P5).
+- Unready dependency → code against `contracts/` fixtures behind an interface, mock switched by `DATA_SOURCE=mock|remote` config (`INTEGRATION_WORKFLOW.md`).
+- First task for any track: INT-01 contracts v1 (not created yet).
+
 ## Key decisions (see CLAUDE.md for full list)
 - OTP: Firebase Phone Auth (SMS); length from backend (6 now); backend verifies Firebase ID token.
 - Real-time: Socket.IO + Redis; push: FCM; jobs: BullMQ + cron.
