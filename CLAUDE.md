@@ -35,7 +35,7 @@
 |---|---|---|---|
 | `WAB-Mobile-Customer/` | Customer mobile app (Android + iOS) | Code in progress | Kotlin Multiplatform + Compose Multiplatform (see its `AGENTS.md`, `TECHSTACK.md`) |
 | `WAB-Mobile-Salon/` | Merchant (salon) mobile app | Docs + design ready, no code yet | KMP + Compose Multiplatform (same stack/template as customer) |
-| `WAB-Admin-Dashboard/` | Admin web panel | Docs + design ready, no code yet | React web app (desktop-first) |
+| `WAB-Admin-Dashboard/` | Admin web panel | Foundation in progress (ADM-01): design system, theme, base components, network/error/infrastructure layers, CI | React 19 + TypeScript + Vite (see its `CLAUDE.md`) |
 | `WAB-Server/` | Backend API for all 3 clients | Old JS code removed; to be rebuilt from scratch in TypeScript per Backend BRD | Node.js + Express + Mongoose/MongoDB + Redis + Socket.IO |
 | `wab-payments/` | Payment library (server **and** KMP) | BRD only | TypeScript npm package + KMP library |
 | `wab-otp/` | OTP verification library (server) | BRD only | TypeScript npm package |
@@ -58,7 +58,7 @@ Each project has:
 | **Whole business (data model, rules, state machines, permissions, jobs, settings, errors)** | **`BUSINESS_DOMAIN.md`** — mandatory for any server, contract or cross-project work |
 | Customer app | `WAB-Mobile-Customer/docs/WAB_Customer_BRD.md`, `WAB_Customer_App_PRD.md`, `WAB_Customer_Design_Script.md` |
 | Merchant app | `WAB-Mobile-Salon/docs/WAB_Merchant_BRD.md`, `WAB_Merchant_App_PRD.md`, `WAB_Merchant_Design_Script.md` |
-| Admin panel | `WAB-Admin-Dashboard/docs/WAB_Admin_BRD.md`, `WAB_Admin_PRD.md`, `WAB_Admin_Design_Script.md` |
+| Admin panel | `WAB-Admin-Dashboard/docs/WAB_Admin_BRD.md`, `WAB_Admin_PRD.md`, `WAB_Admin_Design_Script.md`; **rules: `WAB-Admin-Dashboard/CLAUDE.md`** (mandatory) |
 | Backend | `WAB-Server/docs/WAB_Backend_BRD.md`; task backlog `WAB-Server/docs/WAB_Server_Tasks.md` (legacy `WAB-Server/BRD.md` is superseded) |
 | Packages | `wab-*/docs/WAB_Package_*_BRD.md` |
 | Delivery plan | `ROADMAP.md` (phases & parallel tracks: SERVICE, SERVER, CUSTOMER, MERCHANT, ADMIN, INT) |
@@ -136,7 +136,7 @@ Apps track **every screen and action** in Firebase Analytics (exported to BigQue
 - Backend target: **follow `WAB-Server/CLAUDE.md`** — TypeScript strict, layered `route → middleware → controller → service → repository → schema`, separate customer/merchant/admin modules, base success/error responses localized AR+EN, validation on every input, consistent error format, no magic numbers (config/constants), tests for business rules (availability, booking state machine, refunds, permissions).
 - Mobile: follow `WAB-Mobile-Customer/AGENTS.md` (clean + feature-driven, Koin, Ktor, Compose Navigation). Wrap Firebase (OTP, push, analytics, crash) behind app-level interfaces. Payments only through `wab-payments`.
 - Admin: React, Arabic RTL default, data tables with server pagination, export (Excel/PDF), Socket.IO for live pages.
-- Respect existing per-project agent files (`WAB-Server/CLAUDE.md`, `WAB-Mobile-Customer/AGENTS.md`) — they add project-specific rules on top of this file.
+- Respect existing per-project agent files (`WAB-Server/CLAUDE.md`, `WAB-Admin-Dashboard/CLAUDE.md`, `WAB-Mobile-Customer/AGENTS.md`) — they add project-specific rules on top of this file.
 - Environments: **dev** and **prod**. CI/CD: GitHub Actions. Server hosting: DigitalOcean (TBD); files on AWS S3 + CDN.
 - Before finishing a task: build, lint, run tests, and re-check the PRD acceptance criteria you touched.
 
@@ -144,4 +144,4 @@ Apps track **every screen and action** in Firebase Analytics (exported to BigQue
 
 ## 7. Open Decisions (do not invent answers)
 
-Platform domain (API/admin/deep links) · payment gateway selection · DigitalOcean product & managed Redis · error-tracking tool · Atlas tier · package registry (GitHub Packages assumed) · KMP library choices for the merchant app (use the customer app template) · admin tech-stack details beyond React.
+Platform domain (API/admin/deep links) · payment gateway selection · DigitalOcean product & managed Redis · error-tracking tool · Atlas tier · package registry (GitHub Packages assumed) · KMP library choices for the merchant app (use the customer app template) · admin tech-stack details beyond React (working assumption in `WAB-Admin-Dashboard/CLAUDE.md`: React 19, TypeScript strict, Vite, React Router, TanStack Query, zod, i18next, Vitest, Playwright — confirm with the product owner).

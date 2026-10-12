@@ -348,6 +348,22 @@
 - Notes: Not in this task: 12-hour AM/PM text (ar: ص / م from `locales/`) and "numerals follow the active language" (both PRDs) → message-formatting/notification task; `settings.timezone` wiring → SRV-017. Assumption to confirm: salon hours never pass midnight (`close` later than `open` on the same day) — no document says otherwise; the schedule task enforces it. API docs: no change.
 - Next: SRV-017 (settings). Merge only after ALL CI checks green.
 
+### T-024 — ADM-01 Admin foundation: rules, design system, theme, base components, infrastructure, CI
+- Project: `WAB-Admin-Dashboard/` (+ `.github/workflows/admin-ci.yml`, root docs)
+- Branch: `claude/keen-noether-jgokyc`
+- Status: IN REVIEW
+- Acceptance criteria (PRD §2–3 global UI rules, §4 auth shell; ROADMAP ADM-01; user rules):
+  - [x] `WAB-Admin-Dashboard/CLAUDE.md` with the user's rules (clean arch + MVC, no hardcode, AR+EN, performance, 4 build variants, CI, zero warnings, 300-line limit, responsive, branch per task, never push main)
+  - [x] CI: typecheck, lint (0 warnings), format, unit tests, hardcoded + 300-line scan, 4-variant build matrix, bundle/perf budget + artifact safety, dependency audit, secret scan, e2e on Chromium (Android-class) and WebKit (iOS-class) in portrait + landscape
+  - [x] Design system + theme: tokens cloned from the customer design (light/dark, rem scale, RTL/LTR, fonts), CSS variables, ThemeProvider (light/dark/system), language provider (ar default)
+  - [x] Base components: Button, IconButton, Badge, Card, KpiCard, TextField/TextArea/Select/Toggle, Tabs, DataTable (sticky header, sort, skeleton/empty/error), Pagination, Modal, ReasonDialog (mandatory reason), Toast, Skeleton, Spinner, EmptyState, ErrorState, ErrorBoundary, AsyncView, PageHeader; dev-only `/design-system` gallery
+  - [x] All screen sizes: compact/medium/expanded from tokens, docked collapsible sidebar vs inert drawer, portrait/landscape, no horizontal scroll (e2e)
+  - [x] Layers: config (zod, per-variant rules), HttpClient (timeout, retry, envelope, 401), typed AppError + normalization, logger with redaction, safe storage, global error handlers, mock/real data source switch, session store, composition root, login (2-step) + guarded routes
+- Tests: `cd WAB-Admin-Dashboard && npm run verify` — 133 unit tests pass (14 files); 4 variants build; `check:size` OK for release; e2e 12/12 on Chromium (desktop, Pixel portrait/landscape, tablet); WebKit/iOS projects run in CI only (no WebKit on this runner)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (responsive/RTL/a11y for web), Architect ✔, QA ✔) — QA found and fixed: Modal stole focus on every parent render; grid items widened the page on phones (horizontal scroll); closed drawer stayed focusable (now `inert`); drawer shadow leaked while closed.
+- Notes: Branch is the cloud-pinned branch (restarted from `main`). ASSUMPTIONS to confirm: (1) stack React 19 + Vite + TS (PRD §2.2 says stack TBD); (2) "android/ios" interpreted as Android-class Chromium and iOS-class WebKit browsers/viewports because the admin is a web app; (3) "debug/release" = unminified+source maps vs minified; mock data source excluded from all prod builds; (4) admin auth endpoints (`/admin/v1/auth/login|verify-otp|logout`) are assumed until `contracts/` (INT-01) exists. Not done here: global search, alerts bell data, real pages (ADM-02…05), Socket.IO client, Excel/PDF export. CI workflow itself has not run on GitHub yet.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-017 — next server task after T-023 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
