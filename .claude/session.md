@@ -515,7 +515,7 @@
 ### T-032 — SRV-021 Booking reference number and id utils
 - Project: `WAB-Server/` (`src/utils/reference/*`, `src/utils/database/{ids,errors}.ts`, `src/constants/reference.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #30 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #32 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-32 "a unique reference number", NFR-02; BUSINESS_DOMAIN §3.4 `referenceNumber` unique ("WAB-" + 6–8 base32 chars), §12.6 format `WAB-XXXXXX` base32 without ambiguous characters; backlog: collision-safe via unique index + retry):
   - [x] `generateReferenceNumber()`: `WAB-` + 6 symbols of the Crockford base32 alphabet (no `I L O U`), from `crypto.randomBytes` masked to 5 bits (no modulo bias); source injectable for tests
   - [x] `isReferenceNumber` (canonical form only) and `normalizeReferenceNumber` (case, spaces, missing dash, look-alikes `O`→`0`, `I`/`L`→`1`; invalid → `null`) for customer/salon lookups
@@ -527,7 +527,24 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — pure helpers, no I/O. The booking model with its unique `referenceNumber` index comes with SRV-070/071, which call `withUniqueReference`. Decision to confirm: 6 symbols (32^6 ≈ 1.07 billion numbers) as in §12.6; the domain allows 6–8, change `REFERENCE_CODE_LENGTH` if volume ever needs more. API docs: no change.
 - Next: SRV-022 (provider interfaces). PRs target `server`; merge only after ALL CI checks green.
 
+### T-033 — SRV-022 Provider interfaces and fakes: OTP and storage
+- Project: `WAB-Server/` (`src/providers/{index.ts,otp/*,storage/*}`, `src/constants/providers.ts`, `src/config/*`, `.env.example`, `CLAUDE.md` §4, `README.md`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #32 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-01 / BE-07 phone + Firebase OTP via `wab-otp`, BE-70 presigned uploads via `wab-storage`, NFR-09; wab-otp BRD OTP-02/03/09, wab-storage BRD STO-01..05; backlog: typed interfaces/errors, fake implementation selected by config `*_PROVIDER=fake|real`; server rules §2 externals only through interfaces injected into services):
+  - [x] `OtpProvider.verify({proof, expectedPhone, purpose})` → `VERIFIED(phone) | INVALID_PROOF | PHONE_MISMATCH | EXPIRED`; provider outage throws `ExternalServiceError` (never an outcome); E.164 phones
+  - [x] `FakeOtpProvider` + `fakeOtpProof(phone, kind)` (valid / expired / invalid / provider-error); garbage proofs are `INVALID_PROOF`; a non-E.164 expected phone is a caller bug (`RangeError`)
+  - [x] `StorageProvider`: `createUploadUrl` (PUT target pinned to the content type, expiry), `confirmUpload` (existence, real type, size; rejected objects are deleted), `getPublicUrl` (CDN), `getSignedUrl` (private), `delete` (unknown keys ignored)
+  - [x] `FakeStorageProvider` (in memory, injectable clock) with `simulateUpload`/`has` test helpers; server-generated keys validated (no empty/`.`/`..` segments, 1024 chars), content type, positive whole `maxBytes`, TTL 1..604 800 s; invalid arguments reject (async API) or throw (`getPublicUrl`) as `RangeError`
+  - [x] Config: `OTP_PROVIDER`, `STORAGE_PROVIDER` = `fake|real`, default `fake` outside production; production must set every provider to `real` (fails fast naming the key); `createProviders` builds the fakes, refuses fakes in production, and fails loudly (`ProviderUnavailableError`) for `real` until the integrations exist
+  - [x] `.env.example`, `CLAUDE.md` §4 folder layout, `SOURCE_LAYOUT` and README updated; no hardcoded values (fake hosts use the reserved `.invalid` TLD, in `constants/providers.ts`)
+- Tests: `cd WAB-Server && npm test` — 1022 pass (33 suites); lint/format/typecheck/build green; audit 0; `npm run docs` no diff. `tests/providers.test.ts` (62) + new config tests. Mutation check: 26 compile-safe breakages (phone mismatch, expired, provider error, proof format, size/expiry boundaries, type check, visibility, private URL guard, bulk-delete atomicity, TTL and key-length limits, production guards, default mode) all caught; one redundant `..` check was found dead (the key pattern already forbids it) and removed.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISIONS TO CONFIRM: (1) `OtpProvider` carries only `verify`: the wab-otp BRD also lists `precheck/reportFailure/getConfig`, but limits, blocks and `otpLength`/resend come from the backend limiter and settings (SRV-014/017/027), so they stay out of the provider; (2) `purpose` is accepted for future server-verified providers (Firebase cannot bind it); (3) `createProviders` is NOT wired into `main()` yet: production config now requires `real`, which does not exist, so wiring it before a consumer exists would only stop the server from starting; the first consumer (SRV-027 / SRV-046) wires it. Not run against real Firebase or S3. CI note: a clean-clone replay found one real red (README not Prettier-formatted; fixed in `32f2e21`); since 13:44Z GitHub Actions jobs for this repo also fail in ~3 s with no runner (infrastructure, not code).
+- Notes: Usage: `const {otp, storage} = createProviders(config.providers, config.isProduction)` once at start-up, inject into services; tests inject `FakeOtpProvider`/`FakeStorageProvider` directly. API docs: no change.
+- Next: SRV-023 (Notifier, PaymentProvider, AnalyticsProvider). PRs target `server`; merge only after ALL CI checks green.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-022 — next server task after T-032 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-023 — next server task after T-033 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

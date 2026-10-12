@@ -26,3 +26,7 @@ npm run build && npm start            # API on the PORT from .env.development
 - Mailpit shows captured emails at `http://127.0.0.1:<MAILPIT_UI_PORT>`; MinIO's console is on `MINIO_CONSOLE_PORT`.
 - Swagger UI is at `/docs` when `NODE_ENV` is not `production`.
 - `.env*` files are never committed.
+
+## External providers
+
+OTP and file storage sit behind interfaces in `src/providers`. `OTP_PROVIDER` and `STORAGE_PROVIDER` choose `fake` (in-repo stand-in, the default outside production) or `real`. Production must set every provider to `real`; the config check refuses anything else. The real integrations arrive with the `wab-*` packages, until then `real` fails at start-up with a clear error.

@@ -8,6 +8,7 @@ export const SOURCE_LAYOUT = [
   'models',
   'repositories',
   'domain',
+  'providers',
   'modules/customer',
   'modules/merchant',
   'modules/admin',

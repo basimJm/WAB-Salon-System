@@ -52,6 +52,7 @@ src/
   models/                   # Mongoose schemas (shared by all namespaces)
   repositories/             # data access per collection
   domain/                   # shared business logic used by more than one namespace
+  providers/                # interfaces to external services (OTP, storage, notifier, payments, analytics) + in-repo fakes; selected by `*_PROVIDER=fake|real`
   modules/customer|merchant|admin/<feature>/
   jobs/, sockets/           # BullMQ processors and Socket.IO handlers (same layering: thin handler → service)
   utils/                    # ALL shared helpers: errors/, response/, i18n/, money/, time/, pagination/, logger/, async/
