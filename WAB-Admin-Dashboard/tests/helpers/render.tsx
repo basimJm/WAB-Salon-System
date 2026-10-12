@@ -1,6 +1,8 @@
 import { QueryClient } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
-import type { ReactElement, ReactNode } from 'react';
+import { Suspense, type ReactElement, type ReactNode } from 'react';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { buildRoutes } from '@/app/routes';
 import { AppProviders } from '@/app/AppProviders';
 import type { Container } from '@/app/container';
 import { createSessionStore } from '@/app/session';
@@ -35,4 +37,22 @@ export function renderWithApp(
     <AppProviders container={container}>{children}</AppProviders>
   );
   return { ...render(ui, { wrapper }), container };
+}
+
+/** Renders the real route table (guard, lazy pages, shell) at `path`. */
+export function renderRoutes(
+  path: string,
+  options: { container?: Container; language?: Language; showDesignSystem?: boolean } = {},
+) {
+  const router = createMemoryRouter(buildRoutes(options.showDesignSystem ?? true), {
+    initialEntries: [path],
+  });
+  const view = renderWithApp(
+    <Suspense fallback={null}>
+      <RouterProvider router={router} />
+    </Suspense>,
+    options.container ?? makeContainer(),
+    options.language ?? 'en',
+  );
+  return { router, ...view };
 }

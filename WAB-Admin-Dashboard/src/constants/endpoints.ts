@@ -7,5 +7,6 @@ import { ADMIN_API_PREFIX } from './http';
 export const ENDPOINTS = {
   login: `${ADMIN_API_PREFIX}/auth/login`,
   verifyOtp: `${ADMIN_API_PREFIX}/auth/verify-otp`,
+  resendOtp: `${ADMIN_API_PREFIX}/auth/resend-otp`,
   logout: `${ADMIN_API_PREFIX}/auth/logout`,
 } as const;

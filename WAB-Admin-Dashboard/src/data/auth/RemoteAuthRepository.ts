@@ -33,6 +33,10 @@ export class RemoteAuthRepository implements AuthRepository {
     return res.data;
   }
 
+  async resendOtp(challengeId: string): Promise<void> {
+    await this.http.post(ENDPOINTS.resendOtp, { schema: emptySchema, body: { challengeId } });
+  }
+
   async logout(): Promise<void> {
     await this.http.post(ENDPOINTS.logout, { schema: emptySchema });
   }
