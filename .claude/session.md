@@ -452,7 +452,7 @@
 ### T-028 — SRV-018 Reference-data seed: countries, cities, areas (Jordan)
 - Project: `WAB-Server/` (`src/models/{country,city,area}.model.ts`, `src/repositories/locations.repository.ts`, `src/seeds/*`, `src/constants/referenceData.ts`, `package.json` script `seed`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #25 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #26 merged; all 3 checks green on the head, merged by me)
 - Acceptance criteria (BE/NFR: BE-65 locations configurable by admin (data side), NFR-09; BUSINESS_DOMAIN §3.2 `countries {code, name{ar,en}, dialCode, flagKey, phoneRegex, active, sortOrder}` unique `code`, `cities {name{ar,en}, countryCode, active, sortOrder}`, `areas {cityId, name{ar,en}, active, sortOrder}` index `cityId`; Customer PRD "countries list (flag, name, dial code, phone regex)"):
   - [x] Models for countries, cities, areas exactly as §3.2 with their indexes (country `code` unique; city `{countryCode, active, sortOrder}`; area `{cityId, active, sortOrder}`), registered in `ALL_MODELS`; codes/dial codes/regex validated
   - [x] `insertIfMissing(naturalKey, data)` on the base repository: creates only when absent and never overwrites (so re-seeding keeps admin edits); reports whether it created
@@ -465,7 +465,22 @@
 - Notes: Assumptions to confirm: (1) `phoneRegex` applies to the national number without the leading 0 (`^7[789][0-9]{7}$`: Zain 77, Orange 77/78, Umniah 78/79); (2) `flagKey` is a storage key `flags/jo.svg` (the asset itself comes with the storage task); (3) only Amman gets starter areas — other cities' areas are added in the admin Locations editor. API docs: no change.
 - Next: SRV-019 (demo catalog seed). Merge only after ALL CI checks green.
 
+### T-029 — SRV-019 Demo catalog seed (dev only)
+- Project: `WAB-Server/` (`src/models/catalogService.model.ts`, `src/constants/{enums,demoCatalog}.ts`, `src/seeds/{demoCatalog,runDemo}.ts`, script `seed:demo`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #26 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-65/Admin PRD A23 catalog (data side); BUSINESS_DOMAIN §3.2 `catalogServices {name{ar,en}, description{ar,en}, imageKey, gender: Gender, active, sortOrder}`, index `{gender, active, sortOrder}` + text on names, `Gender = MALE | FEMALE`; backlog: dev-only, flagged as demo data):
+  - [x] `catalogServices` model as in §3.2 with both indexes, registered in `ALL_MODELS`; `Gender` enum constant
+  - [x] Demo data in `constants/demoCatalog.ts`: women's and men's services, every name and description in ar + en, image keys under `demo/catalog/` (the demo flag, since the domain has no field for it)
+  - [x] `seedDemoCatalog` is insert-only and idempotent (same name may exist for both genders)
+  - [x] `npm run seed:demo` refuses to run in production (exit 1, nothing written); otherwise connects, creates indexes, seeds, disconnects
+- Tests: `cd WAB-Server && npm test` — 854 pass (30 suites; also on a shared Redis with 4 workers); typecheck/lint/format/build green; audit 0. `tests/demoCatalog.test.ts` (11): data in both languages, no duplicates per audience, model + indexes, idempotent seed keeping admin edits, production refusal. Mutation check: 7 breakages (wrong key, wrong numbering, inverted production guard, unknown gender allowed, missing demo prefix…) all caught. Built `seed:demo` exits 1 in production.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — demo flag = guarded script + `demo/` image keys (no field invented). Arabic names need a native check. NOT run against a real MongoDB.
+- Notes: Assumption: `imageKey` is required in the domain, so demo rows use placeholder keys whose files do not exist (clients show a placeholder). The text index uses `default_language: none` because Arabic has no built-in Mongo stemmer; real Arabic search is the Atlas Search task (SRV-059). API docs: no change.
+- Next: SRV-020 (audit log + server events writer). Merge only after ALL CI checks green.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-019 — next server task after T-028 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-020 — next server task after T-029 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
