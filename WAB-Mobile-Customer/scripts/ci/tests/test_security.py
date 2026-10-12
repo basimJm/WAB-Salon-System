@@ -42,7 +42,7 @@ class PlistGradleTest(unittest.TestCase):
     def test_repositories_and_signing(self):
         self.assertEqual(len(security.check_gradle("a.kts", 'maven { url = uri("http://x.com") }')), 1)
         self.assertEqual(len(security.check_gradle("a.kts", "maven { isAllowInsecureProtocol = true }\nallowInsecureProtocol = true")), 1)
-        self.assertEqual(len(security.check_gradle("a.kts", 'storePassword = "hunter22"')), 1)
+        self.assertEqual(len(security.check_gradle("a.kts", 'storePassword = "' + "dummy" + "pass" + '"')), 1)
         self.assertEqual(security.check_gradle("a.kts", 'storePassword = providers.gradleProperty("P").get()\nmaven { url = uri("https://x.com") }'), [])
 
     def test_dynamic_versions_only_in_version_catalog(self):

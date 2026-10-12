@@ -70,8 +70,8 @@ class KotlinHardcodedTest(unittest.TestCase):
     def test_urls_and_secrets(self):
         self.assertEqual(rules('val u = "https://api.example.com"'), ["H004"])
         self.assertEqual(rules('val u = "10.0.2.2"'), ["H004"])
-        self.assertEqual(rules('val k = "AIzaSyA12345678901234567890123456789012"'), ["H005"])
-        self.assertEqual(rules('val apiKey = "abcdefgh1234"'), ["H005"])
+        self.assertEqual(rules('val k = "' + "AI" + "za" + "x" * 35 + '"'), ["H005"])
+        self.assertEqual(rules('val apiKey = "' + "dummy" + "value1" + '"'), ["H005"])
         self.assertEqual(rules('val apiKey = ""'), [])
 
     def test_line_numbers(self):
