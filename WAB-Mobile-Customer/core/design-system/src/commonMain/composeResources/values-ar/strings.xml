@@ -20,11 +20,9 @@
 
     <!-- Text Fields -->
     <string name="email_hint">البريد الإلكتروني</string>
-    <string name="email_placeholder">example@template.app</string>
     <string name="password_hint">إدخال كلمة المرور</string>
     <string name="password_placeholder">••••••</string>
     <string name="phone_hint">رقم هاتف أردني</string>
-    <string name="phone_placeholder">7X XXX XXXX</string>
     <string name="optional_hint">ملاحظات</string>
     <string name="optional_placeholder">أدخل تفاصيل إضافية…</string>
     <string name="invalid_email">بريد إلكتروني غير صالح</string>

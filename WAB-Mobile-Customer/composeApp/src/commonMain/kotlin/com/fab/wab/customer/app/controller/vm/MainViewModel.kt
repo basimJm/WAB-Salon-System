@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.fab.wab.customer.app.controller.contract.MainContract.SideEffect
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.contract.MainContract.UiState
-import com.fab.wab.customer.core.common.getAppInfoProvider
+import com.fab.wab.customer.core.common.AppEnvironment
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.AppSettings
@@ -22,7 +22,8 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val appSettings: AppSettings,
     private val applicationSettingsRepository: ApplicationSettingsRepository,
-    private val sessionTimeOut: SessionTimeOut
+    private val sessionTimeOut: SessionTimeOut,
+    private val environment: AppEnvironment,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState()) {
 
     init {
@@ -53,7 +54,7 @@ class MainViewModel(
                 AppResult.Loading -> Unit
 
                 is AppResult.Success -> {
-                    val currentVersion = getAppInfoProvider().appVersion
+                    val currentVersion = environment.appVersion
                     val serverVersion = result.data.appVersion
                     val isNewVersionAvailable = isVersionGreater(serverVersion, currentVersion)
 
