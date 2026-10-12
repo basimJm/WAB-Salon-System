@@ -17,5 +17,6 @@ export interface Session {
 export interface AuthRepository {
   login(email: string, password: string): Promise<LoginChallenge>;
   verifyOtp(challengeId: string, code: string): Promise<Session>;
+  resendOtp(challengeId: string): Promise<void>;
   logout(): Promise<void>;
 }

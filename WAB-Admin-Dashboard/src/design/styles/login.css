@@ -1,0 +1,58 @@
+.wab-login {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100dvh;
+}
+[data-bp='expanded'] .wab-login { grid-template-columns: minmax(0, var(--size-brand-panel)) minmax(0, 1fr); }
+
+.wab-brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-5) var(--space-4);
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-end));
+  color: var(--c-on-primary);
+}
+[data-bp='expanded'] .wab-brand { justify-content: space-between; padding: var(--space-6); }
+.wab-brand__top { display: flex; align-items: center; gap: var(--space-3); }
+.wab-logo--on-brand { background: var(--c-on-primary); color: var(--c-primary); }
+.wab-brand__names { display: grid; }
+.wab-brand__tagline { font-size: var(--fs-xs); font-weight: var(--fw-semibold); letter-spacing: var(--space-1); }
+.wab-brand__admin { font-size: var(--fs-md); font-weight: var(--fw-medium); }
+.wab-brand__copy { display: grid; gap: var(--space-3); }
+.wab-brand__headline { font-size: var(--fs-xl); font-weight: var(--fw-semibold); line-height: var(--lh); }
+.wab-brand__text, .wab-brand__security { opacity: var(--opacity-brand-text); }
+.wab-brand__security { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-sm); }
+/* Phones and tablets keep only the brand header; the story is for wide screens. */
+[data-bp='compact'] .wab-brand__copy, [data-bp='compact'] .wab-brand__security,
+[data-bp='medium'] .wab-brand__copy, [data-bp='medium'] .wab-brand__security { display: none; }
+[data-bp='compact'] .wab-brand, [data-bp='medium'] .wab-brand { gap: 0; }
+
+.wab-login__main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-4);
+  min-width: 0;
+}
+.wab-login__prefs { align-self: stretch; display: flex; justify-content: flex-end; }
+.wab-prefs { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
+.wab-login__card {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--size-auth-card);
+  margin-block: auto;
+  padding: var(--space-5);
+  border: var(--size-hairline) solid var(--c-line);
+  border-radius: var(--radius-lg);
+  background: var(--c-card);
+  box-shadow: var(--shadow-card);
+}
+[data-bp='compact'] .wab-login__card { padding: var(--space-4); }
+.wab-login__title { font-size: var(--fs-xl); font-weight: var(--fw-semibold); }
+.wab-login__lead { color: var(--c-muted); }
+.wab-login__email { color: var(--c-ink); font-weight: var(--fw-medium); }
+.wab-login__form { display: grid; gap: var(--space-4); }
+.wab-login__resend { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); color: var(--c-muted); }
