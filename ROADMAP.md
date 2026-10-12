@@ -1,7 +1,7 @@
 # WAB — End-to-End Delivery Roadmap (parallel tracks)
 
 > **Purpose:** split the whole system into phases and tasks per track so several Claude Code sessions can work **in parallel**, each on its own track, and integrate **last**.
-> **Read with:** `CLAUDE.md` (business + integration), `INTEGRATION_WORKFLOW.md` (contracts, mocks, environments), each project's `docs/` (PRD = source of truth).
+> **Read with:** `BUSINESS_DOMAIN.md` (schemas + business rules — mandatory for SERVER and INT tasks), `CLAUDE.md` (business + integration), `INTEGRATION_WORKFLOW.md` (contracts, mocks, environments), each project's `docs/` (PRD = source of truth).
 > **Rules:** every task follows `.claude/rules.md` + `.claude/hooks.md` (branch per task, unit tests, no hardcoding, 3 verification loops, 4-role review, PR).
 
 ---
