@@ -39,6 +39,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — consistent with CLAUDE.md §4–5 and PRDs.
 
+### T-004 — Consolidated business domain spec
+- Project: repo root (`BUSINESS_DOMAIN.md`, `CLAUDE.md`, `ROADMAP.md`)
+- Branch: `docs/business-domain-spec`
+- Status: DONE
+- Acceptance criteria:
+  - [x] One file describing the whole business for server schemas and logic
+  - [x] All collections with fields, types, enums, indexes and relations
+  - [x] Algorithms: completeness/state, open-closed, availability, pricing/deposit, booking creation, refunds, no-show, ratings, conflicts, subscriptions, payouts, deletion
+  - [x] Booking state machine with actors, preconditions and side effects
+  - [x] Permissions matrix, socket events, notification matrix, jobs, settings defaults, error codes, open assumptions
+  - [x] Linked from `CLAUDE.md` and `ROADMAP.md`
+- Tests: docs only; cross-checked against Customer/Merchant/Admin PRDs and Backend BRD
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — consistent with PRDs; assumptions listed in §12.
+
 ### T-005 — WAB-Server project rules
 - Project: `WAB-Server/` (`WAB-Server/CLAUDE.md`; links in `CLAUDE.md`, `INTEGRATION_WORKFLOW.md`)
 - Branch: `docs/server-rules`

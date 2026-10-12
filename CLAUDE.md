@@ -55,6 +55,7 @@ Each project has:
 
 | Area | Documents |
 |---|---|
+| **Whole business (data model, rules, state machines, permissions, jobs, settings, errors)** | **`BUSINESS_DOMAIN.md`** — mandatory for any server, contract or cross-project work |
 | Customer app | `WAB-Mobile-Customer/docs/WAB_Customer_BRD.md`, `WAB_Customer_App_PRD.md`, `WAB_Customer_Design_Script.md` |
 | Merchant app | `WAB-Mobile-Salon/docs/WAB_Merchant_BRD.md`, `WAB_Merchant_App_PRD.md`, `WAB_Merchant_Design_Script.md` |
 | Admin panel | `WAB-Admin-Dashboard/docs/WAB_Admin_BRD.md`, `WAB_Admin_PRD.md`, `WAB_Admin_Design_Script.md` |
