@@ -1,0 +1,57 @@
+{
+  "name": "wab-admin-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite --mode dev-debug",
+    "build:dev-debug": "vite build --mode dev-debug",
+    "build:dev-release": "vite build --mode dev-release",
+    "build:prod-debug": "vite build --mode prod-debug",
+    "build:prod-release": "vite build --mode prod-release",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "check:hardcoded": "node scripts/check-hardcoded.ts",
+    "check:size": "node scripts/check-bundle-size.ts",
+    "e2e": "playwright test",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run check:hardcoded"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-sans-arabic": "^5.3.0",
+    "@fontsource/poppins": "^5.3.0",
+    "@tanstack/react-query": "^5.104.2",
+    "i18next": "^26.4.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-i18next": "^17.0.16",
+    "react-router-dom": "^7.18.4",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.64.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  }
+}
