@@ -75,7 +75,7 @@
 ### T-006 — WAB-Server task backlog
 - Project: `WAB-Server/docs/WAB_Server_Tasks.md`, root docs
 - Branch: `claude/busy-johnson-2rch94`
-- Status: IN PROGRESS
+- Status: DONE (PR #5 merged)
 - Acceptance criteria:
   - [x] One md file in WAB-Server listing every task to build the whole backend, each with status (TODO/PENDING/DONE...)
   - [x] PENDING only when blocked by owner info or another SDK/package; reason stated
@@ -89,7 +89,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only; consistent with Backend BRD, BUSINESS_DOMAIN and ROADMAP.
 - Notes: Branch is the cloud-session pinned branch (exception to `<type>/<name>`); all later tasks use `feat/srv-NNN-*`. Next: SRV-001 after merge.
 
+### T-007 — SRV-001 TypeScript strict project + lint/format/test + folder layout
+- Project: `WAB-Server/`
+- Branch: `claude/busy-johnson-2rch94` (cloud-pinned branch, restarted from `main` after PR #5 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-09, NFR-10, BG-8; BUSINESS_DOMAIN: none — tooling only; server rules §2, §4, §9, §10):
+  - [x] `tsconfig` strict (+ noUncheckedIndexedAccess, noUnused*) and separate build config excluding tests
+  - [x] ESLint blocks `any` and `console`; Prettier; Jest (ts-jest); scripts build/typecheck/lint/format/test
+  - [x] Folder layout of `WAB-Server/CLAUDE.md` §4 exists, listed once in `src/constants/layout.ts`
+  - [x] Tests prove layout, strict config and lint rules; typecheck/lint/format/build/test green
+  - [x] No secrets; `.env.example` present (keys filled by SRV-002)
+- Tests: `cd WAB-Server && npm test` — 19 pass; `npm run typecheck|lint|format:check|build` green
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling only; `npm audit --omit=dev` = 0 vulns (dev-only transitive moderate advisories via jest/istanbul, tracked for SRV-010 CI audit scope).
+- Notes: Next after merge: SRV-002.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-001 — first server task, start only after T-006 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-002 — next server task, start only after T-007 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
