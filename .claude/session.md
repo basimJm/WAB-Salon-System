@@ -298,7 +298,7 @@
 ### T-021 — SRV-014 Redis counter/flag helpers, limiter and rate-limit store
 - Project: `WAB-Server/` (`src/utils/redis/{counter,limiter,rateLimitStore,keys}.ts`, `src/middlewares/{rateLimit,security}.ts`, `src/utils/errors/normalize.ts`, `src/constants/{redis,time,errorMapping}.ts`, `src/server.ts`, `src/app.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #19 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #20 merged; CI green: Server CI verify with the shared Redis container, Secret scan, GitGuardian)
 - Acceptance criteria (BE/NFR: BE-07 OTP request/wrong-code limits (generic part), NFR-01 brute-force protection, NFR-06 stateless instances; BUSINESS_DOMAIN §3.1 OTP Redis keys `otp:req|wrong|block|resend` (counter + flag + TTL), §10 settings supply the numbers later (SRV-017/027); server rules §5 constants, §8 provider errors → `ExternalServiceError`):
   - [x] `hitWindow`: atomic INCR + PEXPIRE in one Lua script (no immortal counter; a counter that lost its TTL heals); `readCounter`, `setFlag`, `flagTtlMs`, `hasFlag`, `deleteKeys`
   - [x] `startCooldown`: only the first caller per period starts it (OTP resend), others learn the remaining time; one winner under concurrency
@@ -311,7 +311,25 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISION NOTES: (1) "5 requests / 5 min → 15 min block" is implemented as: the 5th request is allowed and starts the block, the 6th is denied (`OTP_BLOCKED`) — SRV-027 passes limit=5, window=300 s, block=900 s from settings; (2) with fail-open, a Redis outage logs one error per request — acceptable until real traffic exists. API docs: no change (no endpoint added/changed).
 - Notes: Next: SRV-015 (money utils). Merge only after ALL CI checks green.
 
+### T-022 — SRV-015 Money utils (integer fils, JOD strings, half-up rounding)
+- Project: `WAB-Server/` (`src/utils/money/*`, `src/constants/money.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #20 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-02 correct money handling, BE-32 pricing/deposit (consumer SRV-067); BUSINESS_DOMAIN header conventions (integer fils, API decimal string with 3 decimals), §5.5 (`deposit = round_half_up(total × depositPercentage / 100)` to 1 fils; `remaining = total − paidOnline`), §12.1 assumption, ledger amounts are signed; server rules §9 "money only through `utils/money`", §5 constants):
+  - [x] Money is an integer number of fils (1 JOD = 1000 fils): `isFils` / `assertFils` reject floats, NaN, Infinity, unsafe integers, non-numbers; negatives allowed (signed ledger)
+  - [x] `formatJod(fils)` → decimal string with exactly 3 decimals (`12.500`, `0.001`, `-0.500`), integer arithmetic only (no float division)
+  - [x] `parseJod(text)` / `isJodString(value)`: ASCII decimal string with 0–3 decimals, no leading zeros (except `0`), no sign unless `allowNegative`, no spaces/separators/exponent/non-ASCII digits/trailing dot, bounded length, result within the safe-integer range; invalid → 400 `ValidationError`; `parseJod(formatJod(x)) === x`
+  - [x] `mulDivRound(amount, numerator, denominator)`: exact (BigInt) half-up rounding to 1 fils (ties away from zero for negatives), result must be a safe integer; `percentOf(amount, percent)` for an integer percent 0–100 (`depositPercentage` is 1–100)
+  - [x] `sumFils(values)`: validates every element and the running total (no NaN/float/overflow leaking into money)
+  - [x] Property-style tests (seeded PRNG, no new dependency) against an independent exact oracle: nearest/ties-up, monotonic, 0%/100% identities, round-trip, sums
+  - [x] No hardcoded values: unit sizes, decimals, percent bounds and the string pattern live in `constants/money.ts`
+- Tests: `cd WAB-Server && npm test` — 507 pass (24 suites; also against one shared Redis with 4 parallel workers); typecheck/lint/format/build green; `npm audit --omit=dev` 0. `tests/money.test.ts` = 162 tests: example tables (incl. the merchant-PRD deposit example, ties, negatives, hostile strings, the 2^53 boundary) + seeded property tests against independent exact oracles. Mutation check: 9 deliberate breakages of the implementation (ties round down, float arithmetic, leading zeros accepted, safe-range check too wide, percent bound, skipped element check, sign check off, floor→round, negative zero) were all caught by the tests.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — pure utilities, no I/O; client-input errors are 400 `ValidationError`, programmer errors are `TypeError`/`RangeError` (become 500 via the handler); string parsing is linear-time with a bounded length (no ReDoS/BigInt blow-up). Removed an unused `CURRENCY_CODE` constant found in review (SRV-017/transactions add it when they need it).
+- Notes: Usage for later tasks: money fields are `number` fils; convert only at the API edge (`formatJod` out, `isJodString` + `parseJod` in); `deposit = percentOf(total, depositPercentage)`, the rest by subtraction (`total - deposit`), never a second percentage. Decisions to confirm: (1) `depositPercentage` is treated as a whole percent (PRD says 1–100); a fractional percent would need `mulDivRound` with a bigger denominator; (2) no zod schema / OpenAPI `JodAmount` yet — the first endpoint with money adds it using `isJodString`/`parseJod`. API docs: no change.
+- Next: SRV-016 (time utils). Merge only after ALL CI checks green.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-015 — next server task, start only after T-021 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-016 — next server task after T-022 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
