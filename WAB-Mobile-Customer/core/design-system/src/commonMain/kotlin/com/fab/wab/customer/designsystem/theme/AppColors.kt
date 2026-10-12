@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 /**
- * WAB color roles. Values come from the design export (`design/*.dc.html`): violet brand, ink/muted/faint text
+ * WAB color roles. Values come from the design export (the `design` folder exports): violet brand, ink/muted/faint text
  * ramps, soft tinted fills, hairline borders and the four status hues. Components read roles, never raw colors.
  */
 @Immutable
