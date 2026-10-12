@@ -35,3 +35,53 @@
 .wab-toggle input:checked + .wab-toggle__mark { background: var(--c-accent); border-color: var(--c-accent); }
 .wab-toggle input:focus-visible + .wab-toggle__mark { outline: var(--size-focus-ring) solid var(--c-focus); }
 .wab-toggle input:disabled + .wab-toggle__mark { opacity: var(--opacity-disabled); }
+
+.wab-field__box { position: relative; display: grid; }
+.wab-field__control--with-end { padding-inline-end: var(--size-touch-target); }
+.wab-field__end {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: grid;
+  place-items: center;
+}
+
+.wab-segmented {
+  display: inline-flex;
+  padding: var(--space-1);
+  gap: var(--space-1);
+  border: var(--size-hairline) solid var(--c-line2);
+  border-radius: var(--radius-pill);
+  background: var(--c-card);
+}
+.wab-segmented__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: var(--size-segmented-item);
+  min-height: var(--size-segmented-item);
+  padding-inline: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--c-muted);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+}
+.wab-segmented__item:hover { color: var(--c-ink); }
+.wab-segmented__item--on {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-end));
+  color: var(--c-on-primary);
+}
+.wab-segmented__item--on:hover { color: var(--c-on-primary); }
+
+.wab-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--c-danger-soft);
+  color: var(--c-danger);
+}

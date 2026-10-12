@@ -1,4 +1,9 @@
 export const OTP_LENGTH = 6;
+/** Defaults until the admin settings API supplies them (Admin PRD §4, A28). */
+export const OTP_VALID_MINUTES = 10;
+export const RESEND_SECONDS = 60;
+export const SESSION_IDLE_MINUTES = 30;
+export const MASK_CHAR = '•';
 export const MIN_PASSWORD_LENGTH = 8;
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

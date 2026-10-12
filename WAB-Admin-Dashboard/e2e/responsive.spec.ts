@@ -54,3 +54,31 @@ test('design-system gallery renders in both languages and themes without overflo
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   expect(await noHorizontalScroll(page)).toBe(true);
 });
+
+test('login page: switch language and theme at every size, brand panel only on wide screens', async ({
+  page,
+}) => {
+  await page.goto(ROUTES.login);
+  await expect(page.locator('html')).toHaveAttribute('data-bp', /.+/);
+  const bp = await page.locator('html').getAttribute('data-bp');
+  const brandStory = page.locator('.wab-brand__headline');
+  if (bp === 'expanded') await expect(brandStory).toBeVisible();
+  else await expect(brandStory).toBeHidden();
+
+  await page.getByRole('radio', { name: 'English' }).click();
+  await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
+  await expect(page.locator('h1')).toHaveText('Sign in');
+  await page.getByRole('radio', { name: 'Dark' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  expect(await noHorizontalScroll(page)).toBe(true);
+
+  // Choices survive a reload (persisted).
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+  await page.getByRole('radio', { name: 'العربية' }).click();
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  await expect(page.locator('h1')).toHaveText('تسجيل الدخول');
+  expect(await noHorizontalScroll(page)).toBe(true);
+});

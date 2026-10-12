@@ -47,6 +47,7 @@
 - Layers: `domain` (interfaces) → `data` (remote/mock repos) → `infrastructure` (config/http/errors/logger/i18n) → `design` (tokens → CSS vars; stylesheets use `var(--…)` only) → `presentation` (components/pages/layout/controllers = MVC) → `app` (container, providers, routes). New static value → `src/constants`/tokens; new text → both `locales/*.json`.
 - Variants = Vite mode `<dev|prod>-<debug|release>`; public env via `.env.dev|.env.prod` or real env (keys in `.env.example`); prod needs https URLs + remote source and compiles out the mock. Files imported by `vite.config.ts` must use relative imports with `.ts` extensions (no `@/` alias, no extensionless).
 - Gotchas found: Modal effects must not depend on inline `onClose` (focus steal); grid content needs `minmax(0, 1fr)` or tables widen the page; `vite preview` needs `--mode dev-debug`; `vitest` + RTL `waitFor` hangs under fake timers; Node 22 runs `scripts/*.ts` directly (type stripping).
+- Login (A00): `pages/login/{BrandPanel,CredentialsStep,OtpStep}`; `PreferenceSwitches` (language + theme via `SegmentedControl`) is reusable anywhere; `data-bp` comes from `useViewport()` called in `App` (not the shell). Timer hooks in tests: advance 1 s per `act()` (chained timeouts).
 - Android/iOS for the web panel = Chromium (Pixel/Galaxy Tab) and WebKit (iPhone/iPad) projects in `playwright.config.ts`, portrait + landscape.
 
 ## Business spec

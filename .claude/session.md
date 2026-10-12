@@ -496,6 +496,21 @@
 - Review: PASSED (SE ✔, Mobile ✔ (responsive/RTL/a11y for web), Architect ✔, QA ✔) — QA found and fixed: Modal stole focus on every parent render; grid items widened the page on phones (horizontal scroll); closed drawer stayed focusable (now `inert`); drawer shadow leaked while closed.
 - Notes: Branch is the cloud-pinned branch (restarted from `main`). ASSUMPTIONS to confirm: (1) stack React 19 + Vite + TS (PRD §2.2 says stack TBD); (2) "android/ios" interpreted as Android-class Chromium and iOS-class WebKit browsers/viewports because the admin is a web app; (3) "debug/release" = unminified+source maps vs minified; mock data source excluded from all prod builds; (4) admin auth endpoints (`/admin/v1/auth/login|verify-otp|logout`) are assumed until `contracts/` (INT-01) exists. Not done here: global search, alerts bell data, real pages (ADM-02…05), Socket.IO client, Excel/PDF export. CI workflow itself has not run on GitHub yet.
 
+### T-031 — ADM-01b Admin login page redesign + language/theme switching
+- Project: `WAB-Admin-Dashboard/` (`src/presentation/pages/login/*`, `layout/PreferenceSwitches.tsx`, `form/SegmentedControl.tsx`, `design/styles/login.css`)
+- Branch: `claude/keen-noether-jgokyc`
+- Status: IN REVIEW
+- Acceptance criteria (Design Script A00, PRD §3–4; user request: change language, change theme, login page design):
+  - [x] Split login layout from `WAB Admin 01 Login.dc.html`: brand panel (logo, tagline, headline, text, security note) + form card; brand story only on wide screens, slim brand header on tablets/phones; RTL puts the brand on the right
+  - [x] Language (العربية / English) and theme (light / dark / system) switchable on the login page and persisted; direction, `lang` and fonts follow the language
+  - [x] Password show/hide, inline localized error alert, masked email on the code step, 10-minute validity text, resend countdown (60 s) with `resendOtp` repository method (remote + mock)
+  - [x] `data-bp` / `data-orientation` published for every screen (was shell-only, so login could not use the layout classes)
+  - [x] AR + EN keys for every new string; no hardcoded values (endonyms, tagline and timings in constants)
+- Tests: `cd WAB-Admin-Dashboard && npm run verify` — 153 unit tests (15 files); 4 variants build, budgets OK; e2e 16/16 on Chromium (desktop, Pixel portrait/landscape, tablet) incl. language+theme switching and reload persistence; WebKit projects run in CI only
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — QA found: layout classes were not set on the login screen (fixed in `App`, with unit + e2e wait); timer chain needs one act() per second in tests.
+- Notes: ASSUMPTION: `POST /admin/v1/auth/resend-otp {challengeId}` until contracts exist; validity (10 min), resend wait (60 s) and idle timeout (30 min) are constants until the settings API (A28) supplies them. No "forgot password" link: not in the PRD.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-020 — next server task after T-029 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

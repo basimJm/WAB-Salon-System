@@ -34,6 +34,11 @@ export const ICON_PATHS = {
   inbox: 'M3 13l3-8h12l3 8v6H3zM3 13h5l1 3h6l1-3h5',
   sortUp: 'M12 19V5M5 12l7-7 7 7',
   sortDown: 'M12 5v14M5 12l7 7 7-7',
+  monitor: 'M3 4h18v12H3zM8 20h8M12 16v4',
+  eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+  eyeOff:
+    'M3 3l18 18M10.6 5.1A9.7 9.7 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.6 6.6C3.7 8.4 2 12 2 12s4 7 10 7a9.6 9.6 0 0 0 4.3-1M9.9 9.9a3 3 0 0 0 4.2 4.2',
+  mail: 'M3 5h18v14H3zM3 7l9 6 9-6',
   logout: 'M9 21H5V3h4M16 17l5-5-5-5M21 12H9',
 } as const;
 

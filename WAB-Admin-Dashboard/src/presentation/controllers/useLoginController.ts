@@ -8,11 +8,13 @@ export type LoginStep = 'credentials' | 'code';
 
 export interface LoginController {
   step: LoginStep;
+  email: string;
   busy: boolean;
   fieldErrors: FieldErrors;
   error: AppError | null;
   submitCredentials: (email: string, password: string) => Promise<void>;
   submitCode: (code: string) => Promise<boolean>;
+  resend: () => Promise<boolean>;
   back: () => void;
 }
 
@@ -43,6 +45,7 @@ export function useLoginController(): LoginController {
 
   return {
     step,
+    email,
     busy,
     fieldErrors,
     error,
@@ -64,6 +67,10 @@ export function useLoginController(): LoginController {
       if (!result) return false;
       session.set({ ...result, admin: { ...result.admin, email: result.admin.email || email } });
       return true;
+    },
+    async resend() {
+      const done = await run(() => repositories.auth.resendOtp(challengeId).then(() => true));
+      return done === true;
     },
     back() {
       setStep('credentials');
