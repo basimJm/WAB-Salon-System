@@ -30,3 +30,7 @@ npm run build && npm start            # API on the PORT from .env.development
 ## External providers
 
 OTP, file storage, push/email, payments and analytics sit behind interfaces in `src/providers`. `OTP_PROVIDER`, `STORAGE_PROVIDER`, `NOTIFIER_PROVIDER`, `PAYMENT_PROVIDER` and `ANALYTICS_PROVIDER` choose `fake` (in-repo stand-in, the default outside production) or `real`. Production must set every provider to `real`; the config check refuses anything else. The real integrations arrive with the `wab-*` packages, until then `real` fails at start-up with a clear error.
+
+## Authentication
+
+Access tokens are HS256 JWTs signed with `JWT_ACCESS_SECRET` (required, at least 32 characters, never committed; set it in `.env.development`). Each token is valid for one namespace only (`customer`, `merchant` or `admin`); a token of another namespace gets `403`. Protect a route with `requireAuth(scope, secret)`.

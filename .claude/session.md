@@ -562,18 +562,33 @@
 ### T-035 — SRV-024 Identity schemas: customers, members, installations, refreshTokens, admins
 - Project: `WAB-Server/` (`src/models/{customer,member,installation,refreshToken,admin}.model.ts`, `src/repositories/identity.repository.ts`, `src/constants/{enums,identity}.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #39 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #41 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-01, BE-04 accounts, NFR-01 no raw tokens stored; BUSINESS_DOMAIN §3.1 customers/installations/refreshTokens/admins, §3.4 members, §2 enums):
   - [x] Models with the documented fields, defaults, enums and indexes (customers: unique `phone.e164`, status, createdAt, text search; members: unique phone, `{salonId, active}`, `{salonId, providesServices, staff.serviceIds}`, one OWNER per salon via partial unique index; installations: unique `{app, installationId}` + customer/member/fcmToken; refreshTokens: unique `tokenHash` (SHA-256 hex only), subject index, TTL on `expiresAt`; admins: unique email); collection names as in the domain; all registered in `ALL_MODELS`
   - [x] Rules in the schema: `e164 = dialCode + number`; lowercase emails; names 1–50; 15 permissions only (owner-only capabilities rejected); staff profile required when `providesServices`; working hours as a pair with start < end, `HH:mm`; rating 0–5, whole counts
   - [x] Repositories: `findByPhone` (customers, members), `findByInstallation(app, id)`, `findByTokenHash`, `findByEmail` (case-insensitive)
   - [x] Enums `Language`, `AppKind`, `CustomerStatus`, `MemberRole`, `Permission`, `SubjectType`; no hardcoded values
-- Tests: `cd WAB-Server && npm test` — 1177 pass (37 suites); full format:check, lint, typecheck, build green; audit 0; `npm run docs` no diff. `tests/identitySchemas.test.ts` (71). Mutation check skipped at the user's request ("fast").
+- Tests: `cd WAB-Server && npm test` — 1177 pass (37 suites); full format:check, lint, typecheck, build green; audit 0; `npm run docs` no diff. `tests/identitySchemas.test.ts` (71). Mutation check skipped at the user's request ("fast"). INCIDENT: the interrupted mutation run left one deliberate breakage (`min: 0` removed from `admins.failedLoginCount`) in the merged code; its test caught it and T-036 restores it.
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Schemas only (no API change). Refresh rotation/revocation logic is SRV-026; JWT SRV-025. Customers are not soft-hidden by status in the repository: services decide on BLOCKED/DELETED. `members.salonId` is a plain ObjectId until the salons model exists. API docs: no change.
 - Next: SRV-025 (JWT + scope middleware).
 
+### T-036 — SRV-025 JWT access tokens and per-scope auth middleware
+- Project: `WAB-Server/` (`src/utils/auth/accessToken.ts`, `src/middlewares/auth.ts`, `src/constants/auth.ts`, `src/config/*`, `src/types/express.d.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #41 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-01 platform access token (short-lived), BE-03 separate namespaces/scopes, NFR-01; CLAUDE.md §4.2; BUSINESS_DOMAIN §10 `auth.accessTokenTtlSec` = 900; backlog: customer token on merchant/admin route → FORBIDDEN, tests for all 3×3 combos):
+  - [x] `signAccessToken({secret, subjectType, subjectId, ttlSec, now})`: HS256, issuer `wab-server`, audience = the subject's namespace scope (CUSTOMER→customer, MEMBER→merchant, ADMIN→admin), subject = ObjectId string, expiry = `ttlSec` (caller passes the setting); invalid ttl or id are caller bugs (`RangeError`)
+  - [x] `verifyAccessToken(secret, token, now)`: only HS256 (unsigned and HS512 refused), issuer, signature, expiry (valid until the expiry second), known audience, ObjectId subject, expiry present; anything wrong → 401
+  - [x] `requireAuth(scope, secret)`: `Authorization: Bearer <jwt>` exactly; missing/malformed/expired/foreign-secret → 401 `UNAUTHORIZED`; valid token of another scope → 403 `FORBIDDEN`; sets `req.auth`; routes without it stay public (login, OTP pre-check)
+  - [x] `JWT_ACCESS_SECRET` required, no default, ≥ 32 characters (fails fast, naming the key); in `.env.example`; `AppConfig.auth.accessSecret`
+  - [x] Fix: restored `min: 0` on `admins.failedLoginCount` (left out of SRV-024 by an interrupted mutation run)
+- Tests: `cd WAB-Server && npm test` — 1207 pass (38 suites); full format:check, lint, typecheck, build green; audit 0; `npm run docs` no diff. `tests/auth.test.ts` (53: round trip for all 3 subjects, expiry boundary, tampering, alg none/HS512, issuer/audience/subject/exp checks, 3×3 scope matrix over HTTP, header variants). Mutation check not run (user asked for speed).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Dep added: `jsonwebtoken` 9. Decisions to confirm: (1) one signing secret with the scope in `aud` (separate secrets per namespace would need three env keys); (2) token carries only subject + scope: merchant role/permissions are loaded from the database per request (SRV-0xx) so a permission change applies at once; (3) no token revocation list: access tokens are short (15 min), revocation is by refresh-token family (SRV-026). Middleware is not mounted on any route yet (no protected endpoint exists). API docs: no change.
+- Next: SRV-026 (refresh tokens: hashed storage, rotation, family revocation).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-025 — next server task after T-035 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

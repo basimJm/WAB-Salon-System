@@ -13,6 +13,7 @@ import {
   PORT_MIN,
   REDIS_URL_PATTERN,
 } from '../constants/env';
+import { JWT_SECRET_MIN_LENGTH } from '../constants/auth';
 import { PROVIDER_MODES, REAL_PROVIDER_MODE } from '../constants/providers';
 import {
   DEFAULT_TRUST_PROXY_HOPS,
@@ -43,6 +44,8 @@ export const envSchema = z
       .default(DEFAULT_TRUST_PROXY_HOPS),
     [ENV_KEYS.mongoUri]: z.string().regex(MONGO_URI_PATTERN),
     [ENV_KEYS.redisUrl]: z.string().regex(REDIS_URL_PATTERN),
+    // Signs access tokens: a secret with no default, long enough for HS256.
+    [ENV_KEYS.jwtAccessSecret]: z.string().min(JWT_SECRET_MIN_LENGTH),
     [ENV_KEYS.otpProvider]: providerMode,
     [ENV_KEYS.storageProvider]: providerMode,
     [ENV_KEYS.notifierProvider]: providerMode,

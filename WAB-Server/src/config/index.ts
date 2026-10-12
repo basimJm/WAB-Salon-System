@@ -22,6 +22,7 @@ export interface AppConfig {
   readonly trustProxyHops: number;
   readonly mongo: { readonly uri: string };
   readonly redis: { readonly url: string };
+  readonly auth: { readonly accessSecret: string };
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
   readonly providers: {
     readonly otp: ProviderMode;
@@ -79,6 +80,7 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
     trustProxyHops: values[ENV_KEYS.trustProxyHops],
     mongo: Object.freeze({ uri: values[ENV_KEYS.mongoUri] }),
     redis: Object.freeze({ url: values[ENV_KEYS.redisUrl] }),
+    auth: Object.freeze({ accessSecret: values[ENV_KEYS.jwtAccessSecret] }),
     providers: Object.freeze({
       otp: values[ENV_KEYS.otpProvider] ?? DEFAULT_PROVIDER_MODE,
       storage: values[ENV_KEYS.storageProvider] ?? DEFAULT_PROVIDER_MODE,
