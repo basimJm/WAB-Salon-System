@@ -1,0 +1,8 @@
+package com.fab.wab.customer.designsystem.components.image
+
+import androidx.compose.runtime.staticCompositionLocalOf
+import coil3.ImageLoader
+
+val LocalImageLoader = staticCompositionLocalOf<ImageLoader> {
+    error("No ImageLoader provided")
+}

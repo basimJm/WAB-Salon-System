@@ -1,0 +1,34 @@
+plugins {
+    alias(libs.plugins.com.fab.wab.customer.kotlin.multiplatform.library)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+}
+
+// Pinned so the generated resource package follows the app package rather than
+// rootProject.name, which would otherwise change when the project is renamed.
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.fab.wab.customer.designsystem.resources"
+}
+
+kotlin {
+    android {
+        namespace = "com.fab.wab.customer.core.designsystem"
+        compileSdk = 36
+        minSdk = 26
+        androidResources { enable = true }
+    }
+    sourceSets.commonMain.dependencies {
+        implementation(libs.bundles.compose)
+        api(libs.compose.uiToolingPreview)
+        implementation(projects.core.navigation)
+        implementation(projects.core.ui)
+        implementation(projects.core.domain)
+        implementation(projects.core.common)
+        api(libs.material.icons.extended)
+    }
+    sourceSets.androidMain.dependencies {
+        implementation(libs.compose.uiTooling)
+        implementation(libs.bundles.map.location)
+    }
+}

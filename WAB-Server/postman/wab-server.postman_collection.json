@@ -1,0 +1,268 @@
+{
+  "info": {
+    "name": "WAB-Server API",
+    "description": "WAB (Wedding & Beauty) Server — Node.js Express MongoDB API\n\nSet `base_url` variable in your Postman environment before sending requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "wab-server"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "# Health Check\n\nCheck if the server is running\n\n---\n## Body Parameters\n\n\n---\n## Responses\n\n### 200\n```json\n{\n  \"success\": true,\n  \"message\": \"WAB Server is running\"\n}\n```"
+          },
+          "response": [
+            {
+              "name": "200",
+              "status": "200",
+              "code": 200,
+              "header": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"WAB Server is running\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth (Customer)",
+      "item": [
+        {
+          "name": "Register — Generate OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/customer/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "customer",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "# Register — Generate OTP\n\nGenerate and send OTP to the provided mobile number.\n\nIn development, OTP is always **0000**.\nIn production, OTP will be sent via SMS (3rd party integration TBD).\nThis does NOT create a user — only generates and stores OTP.\n\n---\n## Body Parameters\n\n| **firstName** | string | Required | Min 3 characters |\n| **lastName** | string | Required | Min 3 characters |\n| **email** | string | Required | Valid email format |\n| **mobile** | string | Required | Jordanian mobile starting with 07[7,8,9] |\n| **image** | file | Optional | JPEG/PNG/WebP, max 5MB (multipart) |\n\n---\n## Responses\n\n### 200\n```json\n{\n  \"success\": true,\n  \"message\": \"OTP sent successfully\",\n  \"data\": null\n}\n```\n### 422\n```json\n{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"errors\": [{ \"field\": \"firstName\", \"message\": \"firstName must be at least 3 characters\" }]\n}\n```\n### 409\n```json\n{\n  \"success\": false,\n  \"message\": \"Mobile number already registered\"\n}\n```",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"email\": \"\",\n  \"mobile\": \"\",\n  \"image\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200",
+              "status": "200",
+              "code": 200,
+              "header": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"OTP sent successfully\",\n  \"data\": null\n}"
+            },
+            {
+              "name": "422",
+              "status": "422",
+              "code": 422,
+              "header": [],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"errors\": [{ \"field\": \"firstName\", \"message\": \"firstName must be at least 3 characters\" }]\n}"
+            },
+            {
+              "name": "409",
+              "status": "409",
+              "code": 409,
+              "header": [],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Mobile number already registered\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify OTP — Register or Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/customer/auth/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "customer",
+                "auth",
+                "verify"
+              ]
+            },
+            "description": "# Verify OTP — Register or Login\n\nVerify OTP and receive JWT access token.\n\nIf user does NOT exist: creates a new verified user with role 'customer' and returns JWT.\nIf user already exists: verifies OTP and returns a new JWT (login flow).\n\n---\n## Body Parameters\n\n| **mobile** | string | Required | Must match the number used in register/login |\n| **otp** | string | Required | 4-digit OTP (0000 in development) |\n\n---\n## Responses\n\n### 200\n```json\n{\n  \"success\": true,\n  \"message\": \"Verified successfully\",\n  \"data\": {\n    \"token\": \"<YOUR_JWT_TOKEN>\",\n    \"user\": {\n      \"id\": \"<USER_ID>\",\n      \"firstName\": \"Layla\",\n      \"lastName\": \"Hassan\",\n      \"email\": \"layla@example.com\",\n      \"mobile\": \"+962799123456\",\n      \"image\": null,\n      \"role\": \"customer\"\n    }\n  }\n}\n```\n### 400\n```json\n{\n  \"success\": false,\n  \"message\": \"Invalid OTP\"\n}\n```",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"\",\n  \"otp\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200",
+              "status": "200",
+              "code": 200,
+              "header": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Verified successfully\",\n  \"data\": {\n    \"token\": \"<YOUR_JWT_TOKEN>\",\n    \"user\": {\n      \"id\": \"<USER_ID>\",\n      \"firstName\": \"Layla\",\n      \"lastName\": \"Hassan\",\n      \"email\": \"layla@example.com\",\n      \"mobile\": \"+962799123456\",\n      \"image\": null,\n      \"role\": \"customer\"\n    }\n  }\n}"
+            },
+            {
+              "name": "400",
+              "status": "400",
+              "code": 400,
+              "header": [],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Invalid OTP\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login — Generate OTP (Existing User)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/customer/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "customer",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "# Login — Generate OTP (Existing User)\n\nGenerate and send OTP for an existing registered user.\n\nUser MUST already exist (registered and verified).\nAfter getting OTP, call /verify with the OTP to receive a JWT.\n\n---\n## Body Parameters\n\n| **mobile** | string | Required | Registered Jordanian mobile number |\n\n---\n## Responses\n\n### 200\n```json\n{\n  \"success\": true,\n  \"message\": \"OTP sent successfully\",\n  \"data\": null\n}\n```\n### 404\n```json\n{\n  \"success\": false,\n  \"message\": \"User not found\"\n}\n```",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200",
+              "status": "200",
+              "code": 200,
+              "header": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"OTP sent successfully\",\n  \"data\": null\n}"
+            },
+            {
+              "name": "404",
+              "status": "404",
+              "code": 404,
+              "header": [],
+              "body": "{\n  \"success\": false,\n  \"message\": \"User not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notifications (Shared)",
+      "item": [
+        {
+          "name": "Register Device Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer <YOUR_JWT_TOKEN>"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/notifications/device-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "notifications",
+                "device-token"
+              ]
+            },
+            "description": "# Register Device Token\n\nRegister a mobile FCM push token for the authenticated user.\n\nRequires Authorization: Bearer <JWT>.\nUpserts by token — registering again refreshes the owner/platform.\nEmits a realtime 'notification' event to the user's socket room on success.\n\n---\n## Body Parameters\n\n| **token** | string | Required | FCM device token, min 20 characters |\n| **platform** | string | Optional | ios | android | web (default android) |\n\n---\n## Responses\n\n### 200\n```json\n{\n  \"success\": true,\n  \"message\": \"Device token registered successfully\",\n  \"data\": null\n}\n```\n### 401\n```json\n{\n  \"success\": false,\n  \"message\": \"Unauthorized access\"\n}\n```",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"\",\n  \"platform\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200",
+              "status": "200",
+              "code": 200,
+              "header": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Device token registered successfully\",\n  \"data\": null\n}"
+            },
+            {
+              "name": "401",
+              "status": "401",
+              "code": 401,
+              "header": [],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Unauthorized access\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

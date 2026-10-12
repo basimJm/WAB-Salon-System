@@ -1,0 +1,5 @@
+<resources>
+    <string name="sample_title">عينة</string>
+    <string name="sample_empty">لا يوجد شيء بعد</string>
+    <string name="sample_retry">إعادة المحاولة</string>
+</resources>

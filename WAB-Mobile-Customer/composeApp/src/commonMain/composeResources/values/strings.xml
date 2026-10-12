@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- Splash Screen -->
+    <string name="splash_version">v%s</string>
+    <string name="splash_loading">Loading...</string>
+
+    <!-- Update Dialogs -->
+    <string name="force_update_title">Update Required</string>
+    <string name="force_update_message">A new version is available. Please update to continue using the app.</string>
+    <string name="force_update_button">Update Now</string>
+
+    <string name="optional_update_title">New Update Available</string>
+    <string name="optional_update_message">A new version of WAB Customer is available. Would you like to update now?</string>
+    <string name="optional_update_button">Update Now</string>
+    <string name="optional_update_later">Later</string>
+
+    <!-- Maintenance Dialog -->
+    <string name="maintenance_title">Under Maintenance</string>
+    <string name="maintenance_message">We're currently performing maintenance. Please check back later.</string>
+    <string name="maintenance_exit_button">Exit App</string>
+
+    <!-- Error States -->
+    <string name="splash_error_title">Connection Error</string>
+    <string name="splash_error_message">Unable to load app settings. Please check your connection and try again.</string>
+    <string name="splash_retry_button">Retry</string>
+    <string name="unauthorized_logout_message">You are unauthorized and will be logged out.</string>
+</resources>

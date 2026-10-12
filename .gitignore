@@ -1,0 +1,9 @@
+.nested-git-backup/
+.DS_Store
+.idea/
+.kotlin/
+build/
+.gradle/
+local.properties
+node_modules/
+*.log
