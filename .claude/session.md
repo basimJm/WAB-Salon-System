@@ -92,7 +92,7 @@
 ### T-007 — SRV-001 TypeScript strict project + lint/format/test + folder layout
 - Project: `WAB-Server/`
 - Branch: `claude/busy-johnson-2rch94` (cloud-pinned branch, restarted from `main` after PR #5 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #6 merged)
 - Acceptance criteria (BE/NFR: NFR-09, NFR-10, BG-8; BUSINESS_DOMAIN: none — tooling only; server rules §2, §4, §9, §10):
   - [x] `tsconfig` strict (+ noUncheckedIndexedAccess, noUnused*) and separate build config excluding tests
   - [x] ESLint blocks `any` and `console`; Prettier; Jest (ts-jest); scripts build/typecheck/lint/format/test
@@ -104,7 +104,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling only; `npm audit --omit=dev` = 0 vulns (dev-only transitive moderate advisories via jest/istanbul, tracked for SRV-010 CI audit scope).
 - Notes: Next after merge: SRV-002.
 
+### T-008 — SRV-002 Config/env loader + `.env.example`
+- Project: `WAB-Server/` (`src/config`, `src/constants/env.ts`, `.env.example`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #6 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-01 secrets only in env, NFR-09; BUSINESS_DOMAIN: none; server rules §5):
+  - [x] Env validated with a schema at startup; invalid/missing → `ConfigError` naming keys only (never values)
+  - [x] No defaults for connection secrets (MONGODB_URI, REDIS_URL); non-secret defaults live in `constants/`
+  - [x] `.env.<NODE_ENV>` merged under real env (real env wins); unknown NODE_ENV falls back to development
+  - [x] Immutable typed `AppConfig`; `.env.example` lists every key, no values (test-enforced)
+  - [x] No `.env*` files committed
+- Tests: `cd WAB-Server && npm test` — 34 pass; typecheck/lint/format:check/build green
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — `ConfigError` is a plain Error for now; SRV-004 may re-base it on `BaseError`. Later tasks add their keys to schema + `.env.example` (e.g. JWT, Firebase, S3, SMTP, gateway).
+- Notes: Next after merge: SRV-003.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-002 — next server task, start only after T-007 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-003 — next server task, start only after T-008 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

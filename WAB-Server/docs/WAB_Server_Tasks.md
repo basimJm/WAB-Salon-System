@@ -42,9 +42,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | ID | Task | Branch | Status |
 |---|---|---|---|
 | SRV-000 | This backlog (`WAB-Server/docs/WAB_Server_Tasks.md`) + housekeeping docs | `claude/busy-johnson-2rch94` | DONE |
-| SRV-001 | TypeScript strict project + lint/format/test + folder layout | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-001 | TypeScript strict project + lint/format/test + folder layout | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-002 | Config/env loader + `.env.example` | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-001 is merged: **SRV-002**.
+Next task to start after SRV-002 is merged: **SRV-003**.
 
 ---
 
@@ -55,8 +56,8 @@ Project skeleton, cross-cutting plumbing, CI. Roadmap SRV-01.
 
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
-| SRV-001 | TypeScript strict project + ESLint (no `any`)/Prettier/Jest + folder layout of `WAB-Server/CLAUDE.md` §4 | `feat/srv-001-ts` | — | IN REVIEW | `package.json`, `tsconfig` strict, lint/format/test scripts; `src/{routes,config,constants,locales,middlewares,models,repositories,domain,modules/{customer,merchant,admin},jobs,sockets,utils}`; layering route → middleware → controller → service → repository → schema; sample test passes. |
-| SRV-002 | Config/env loader (schema-validated, dev/prod) + `.env.example` (keys only) | `feat/srv-002-config` | — | TODO | Fails fast on missing/invalid env; no secrets committed; `.env.example` lists every key. |
+| SRV-001 | TypeScript strict project + ESLint (no `any`)/Prettier/Jest + folder layout of `WAB-Server/CLAUDE.md` §4 | `feat/srv-001-ts` | — | DONE | `package.json`, `tsconfig` strict, lint/format/test scripts; `src/{routes,config,constants,locales,middlewares,models,repositories,domain,modules/{customer,merchant,admin},jobs,sockets,utils}`; layering route → middleware → controller → service → repository → schema; sample test passes. |
+| SRV-002 | Config/env loader (schema-validated, dev/prod) + `.env.example` (keys only) | `feat/srv-002-config` | — | IN REVIEW | Fails fast on missing/invalid env; no secrets committed; `.env.example` lists every key. |
 | SRV-003 | Structured logger (`utils/logger`) with sensitive-field redaction + request id middleware | `feat/srv-003-logger` | — | TODO | `traceId` in every log and error response; tokens/OTP/passwords/card data/full phone/IBAN redacted; tested. |
 | SRV-004 | Error model (`utils/errors`): `BaseError` + typed subclasses (Validation 400, Unauthorized 401, Forbidden 403, NotFound 404, Conflict 409, BusinessRule 422, RateLimit 429, Payment, ExternalService 502/503, Internal 500), error codes in `constants/` (BUSINESS_DOMAIN §11), `locales/ar.json` + `en.json`, `Accept-Language` middleware (default `ar`) | `feat/srv-004-errors` | — | TODO | Each error has `code`, `httpStatus`, `messageKey`, `details?`, `isOperational`; unit test fails if any locale key is missing in either language or empty. |
 | SRV-004a | Global `errorHandler` + `notFound` + async wrapper (`utils/async`); maps Mongoose (`CastError`, `ValidationError`, `11000`→409), JWT, schema-validator, malformed JSON (400), payload too large (413), timeouts/provider failures (502/503); unknown errors → `INTERNAL_ERROR` 500 without leaking stack; process-level `unhandledRejection`/`uncaughtException` handlers and graceful `SIGTERM` shutdown (close HTTP, DB, Redis) | `feat/srv-004a-error-handler` | SRV-004 | TODO | One handler produces the base error envelope; every mapping unit-tested; stack/queries/provider payloads logged, never returned. |
