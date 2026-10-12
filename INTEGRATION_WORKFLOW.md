@@ -34,7 +34,7 @@ contracts/
 - Every change: small PR touching only `contracts/` + `CHANGELOG.md`, reviewed with the Solution Architect checklist (`.claude/hooks.md`).
 - Server generates its Swagger from code and **must match** the contract (contract test in CI).
 - Clients generate models/clients from the OpenAPI where tooling allows (admin: TypeScript client; mobile: Kotlin models), otherwise hand-written models validated by fixture-parsing tests.
-- Common conventions: JSON camelCase; ISO-8601 UTC timestamps; money as decimal string JOD (3 decimals); IDs as strings; `Accept-Language: ar|en`; pagination `{ items, page, pageSize, total }`; error `{ code, message, details?, traceId }`.
+- Common conventions: JSON camelCase; ISO-8601 UTC timestamps; money as decimal string JOD (3 decimals); IDs as strings; `Accept-Language: ar|en`; every response uses the base envelope (`WAB-Server/CLAUDE.md` §6): success `{ success: true, message, data, meta? }` with pagination in `meta { page, pageSize, total }`; error `{ success: false, message, error: { code, details?, traceId } }`; `message` localized AR/EN.
 
 ---
 
