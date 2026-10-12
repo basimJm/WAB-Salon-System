@@ -209,7 +209,7 @@
 ### T-015 — SRV-007 Security middleware
 - Project: `WAB-Server/` (`src/middlewares/{security,rateLimit,sanitize}.ts`, `src/utils/sanitize`, `src/constants/security.ts`, config `TRUST_PROXY_HOPS`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #13 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #14 merged)
 - Acceptance criteria (BE/NFR: NFR-01 Helmet, CORS limited to admin domain, rate limiting, input size limits, NoSQL-injection + XSS sanitization; server rules §5, §8):
   - [x] Helmet headers on every response; `X-Powered-By` off
   - [x] CORS only for `CORS_ALLOWED_ORIGINS` (admin domain), no credentials, exposes `X-Request-Id`, preflight cached; no Origin (native apps) allowed; none configured = no browser origin
@@ -221,7 +221,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT done here: "HTTPS only" is terminated at the hosting platform/load balancer (DigitalOcean product + domain still undecided, SRV-011/116); Helmet's HSTS covers browsers. Per-route stricter limits come with their tasks. Added deps: helmet, cors, express-rate-limit.
 - Notes: Next: SRV-008.
 
+### T-016 — SRV-008 Swagger + Postman generation and the "docs after every task" rule
+- Project: `WAB-Server/` (`CLAUDE.md` §11, `src/docs/*`, `src/routes/{mount,health.openapi}.ts`, `docs/api/**`, `tests/docs.test.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #14 merged)
+- Status: IN REVIEW
+- Acceptance criteria (user request: rule that Swagger + Postman are updated after each task, created if missing; BE/NFR: NFR-09 Swagger + Postman always in sync; CLAUDE.md §4.1):
+  - [x] New rule `WAB-Server/CLAUDE.md` §11 (and §10 link): update `*.openapi.ts` + run `npm run docs` + commit `docs/api/**` in every task PR; "API docs: no change" when no API change; create the files if missing
+  - [x] OpenAPI 3.1 generated from zod schemas: `docs/api/openapi.{common,customer,merchant,admin}.json` (common = `/health`, `/ready`; client docs have bearer auth, empty until endpoints exist)
+  - [x] Postman v2.1 collection per document + `WAB.postman_environment.json` (`{{baseUrl}}`, `{{language}}`, per-namespace token variables, no real values), request bodies from schemas
+  - [x] Swagger UI at `/docs` and `/docs/<name>.json` outside production only (verified in headless Chromium under Helmet: renders, no console errors)
+  - [x] `tests/docs.test.ts` fails when files are stale, a route has no OpenAPI entry, a documented path has no route, or a router is attached without `mount()`
+- Tests: `cd WAB-Server && npm test` — 233 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found `/docs/<unknown>.json` served the Swagger HTML instead of 404 (fixed). Deps: @asteasolutions/zod-to-openapi, swagger-ui-express. Contracts: `contracts/` (INT-01) still does not exist; these generated files are the interim API reference. API docs: updated (health/ready).
+- Notes: User said "complete" after adding the rule: keep merging own PRs and continue. Next: SRV-009 (Docker).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-008 — next server task, start only after T-015 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-009 — next server task, start only after T-016 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

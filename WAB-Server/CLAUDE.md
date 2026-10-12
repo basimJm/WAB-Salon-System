@@ -117,5 +117,22 @@ Every endpoint returns one of two shapes, built only by the helpers in `utils/re
 
 ## 10. Tests and Delivery
 - Every task ships with unit tests: services and domain rules first (availability, state machine, refunds, permissions, pricing), plus the error handler, the response helpers and the locale-completeness check. All tests, lint, type-check and build must pass.
-- Every endpoint change updates its OpenAPI contract in `contracts/`, Swagger and the Postman collection in the same PR.
+- Every endpoint change updates its OpenAPI contract in `contracts/`, Swagger and the Postman collection in the same PR (see §11).
 - Follow the root workflow: branch from an updated `main`, run three verification loops (loop 1 includes the business-domain double-check), do the four-role review, then open a PR. Never push to `main`.
+
+## 11. Swagger and Postman: updated after every task (mandatory)
+- The API docs are generated from code and live in the repo. Do not edit the generated files by hand.
+  | What | Where |
+  |---|---|
+  | OpenAPI definition of an endpoint | `<feature>.openapi.ts` next to its routes, built from the same zod schemas as `<feature>.validation.ts` |
+  | Registration per namespace | `src/docs/index.ts` (`common`, `customer`, `merchant`, `admin`) |
+  | Swagger / OpenAPI output | `docs/api/openapi.<name>.json`, served as Swagger UI at `/docs` outside production |
+  | Postman output | `docs/api/postman/WAB-<Name>.postman_collection.json` and `WAB.postman_environment.json` |
+- **After every task**, before the PR is opened and again before it is merged:
+  1. If the task adds, changes or removes an endpoint, request or response schema, header or error code, update its `*.openapi.ts` and register it in `src/docs/index.ts`.
+  2. Run `npm run docs` and commit the regenerated `docs/api/**` files in the same PR, so `main` always matches the code after the merge.
+  3. If the task changes no API, write `API docs: no change` in the task block of `session.md`.
+- **If the files do not exist, create them** with `npm run docs`. Never skip the step because they are missing.
+- Mount every feature router with `mount(router, path, child)` from `src/routes/mount.ts` (not a bare `router.use(path, child)`), so the docs test can find all routes.
+- `tests/docs.test.ts` fails when a committed file is stale, when a route has no OpenAPI entry, or when an OpenAPI entry has no route. A task is not done while it fails.
+- Postman requests use `{{baseUrl}}`, `{{language}}` and a token variable per namespace (`{{customerToken}}`, `{{merchantToken}}`, `{{adminToken}}`). Never put real tokens, hosts or keys in the files.
