@@ -224,7 +224,7 @@
 ### T-016 — SRV-008 Swagger + Postman generation and the "docs after every task" rule
 - Project: `WAB-Server/` (`CLAUDE.md` §11, `src/docs/*`, `src/routes/{mount,health.openapi}.ts`, `docs/api/**`, `tests/docs.test.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #14 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #15 merged)
 - Acceptance criteria (user request: rule that Swagger + Postman are updated after each task, created if missing; BE/NFR: NFR-09 Swagger + Postman always in sync; CLAUDE.md §4.1):
   - [x] New rule `WAB-Server/CLAUDE.md` §11 (and §10 link): update `*.openapi.ts` + run `npm run docs` + commit `docs/api/**` in every task PR; "API docs: no change" when no API change; create the files if missing
   - [x] OpenAPI 3.1 generated from zod schemas: `docs/api/openapi.{common,customer,merchant,admin}.json` (common = `/health`, `/ready`; client docs have bearer auth, empty until endpoints exist)
@@ -234,9 +234,24 @@
 - Tests: `cd WAB-Server && npm test` — 233 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found `/docs/<unknown>.json` served the Swagger HTML instead of 404 (fixed). Deps: @asteasolutions/zod-to-openapi, swagger-ui-express. Contracts: `contracts/` (INT-01) still does not exist; these generated files are the interim API reference. API docs: updated (health/ready).
-- Notes: User said "complete" after adding the rule: keep merging own PRs and continue. Next: SRV-009 (Docker).
+- Notes: User later said they will merge manually: I no longer merge PRs. Next: SRV-009 (Docker).
+
+### T-017 — SRV-009 Dockerfile + docker-compose for local development
+- Project: `WAB-Server/` (`Dockerfile`, `.dockerignore`, `docker-compose.yml`, `docker/compose.env.example`, `README.md`, `tests/docker.test.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #15 merged)
+- Status: IN REVIEW
+- Acceptance criteria (INTEGRATION_WORKFLOW §4 local environment: Docker Mongo/Redis/MinIO/SMTP sink; NFR-01 secrets only in env, NFR-06 stateless instances; BUSINESS_DOMAIN §5.6 Mongo transaction needs a replica set):
+  - [x] `docker compose up -d` gives MongoDB (single-node replica set, auto-initiated), Redis, MinIO and Mailpit, all published on 127.0.0.1 only, data in named volumes, healthchecks
+  - [x] No credentials in the file: MinIO root user/password are required variables from git-ignored `.env`; all variables documented (keys only) in `docker/compose.env.example`
+  - [x] `api` service behind the `app` profile, waits for healthy Mongo/Redis, uses service names, optional `.env.development`
+  - [x] Multi-stage Node 22 image: `npm ci`, production deps only, non-root `node` user, `/health` healthcheck, no env files in the image; `.dockerignore` excludes `.env*`, `node_modules`, `.git`
+  - [x] `README.md` with scripts and local setup
+- Tests: `cd WAB-Server && npm test` — 248 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0; `docker compose config` valid (also with `--profile app`); runtime stage simulated (prod-only `npm ci` + `node dist/server.js` → `/health` 200, `/docs` 404 in production)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified here: the cloud runner has no Docker daemon, so `docker build` and the container healthchecks (Mongo replica-set init, MinIO `mc ready`) were not executed; first real `docker compose up` should confirm them. API docs: no change.
+- Notes: GitGuardian flagged 1 "Generic Password" on PR #16 (`docker-compose.yml` line 50: the `${MINIO_ROOT_PASSWORD:?…}` reference, no real secret). Shortened the required-variable message to `:?required`; the original text stays in an earlier commit of the PR, so the check may need to be marked a false positive in the GitGuardian dashboard. Next: SRV-010 (GitHub Actions CI) only after the user merges #16.
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-009 — next server task, start only after T-016 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-010 — next server task, start only after T-017 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
