@@ -54,7 +54,25 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — consistent with PRDs; assumptions listed in §12.
 
-### T-005 — WAB-Server task backlog
+### T-005 — WAB-Server project rules
+- Project: `WAB-Server/` (`WAB-Server/CLAUDE.md`; links in `CLAUDE.md`, `INTEGRATION_WORKFLOW.md`)
+- Branch: `docs/server-rules`
+- Status: DONE
+- Acceptance criteria:
+  - [x] Mandatory reading: root rules + all `.claude/*.md`, `BUSINESS_DOMAIN.md`, Backend BRD, PRDs
+  - [x] Business domain applied and double-checked (before coding and before push)
+  - [x] Layered TS architecture route → middleware → controller → service → repository → schema
+  - [x] Customer / merchant / admin modules separated; shared logic in `domain/`, helpers in `utils/`
+  - [x] No hardcoding; static data in constants; tunables in settings
+  - [x] Base success/error responses; AR+EN for every response
+  - [x] Every error type handled, including unexpected and process-level errors
+  - [x] Clean, reusable, readable, scalable; no duplication
+  - [x] Response envelope aligned in `INTEGRATION_WORKFLOW.md`
+- Tests: docs only (no source code)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — envelope change applied before contracts exist, so no client breakage.
+
+### T-006 — WAB-Server task backlog
 - Project: `WAB-Server/docs/WAB_Server_Tasks.md`, root docs
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN PROGRESS
@@ -65,12 +83,13 @@
   - [x] Every BE/NFR/BER requirement and BUSINESS_DOMAIN section mapped to tasks
   - [x] Legacy WAB-Server/BRD.md flagged as superseded
   - [x] Linked from CLAUDE.md and ROADMAP.md; memory.md updated
+  - [x] Aligned with `WAB-Server/CLAUDE.md` (layout, base envelope, typed errors, AR+EN, contracts rule); split rows SRV-004a, SRV-005a
 - Tests: docs only (no source); coverage matrix script-checked (no missing BE/NFR/BER); `python3 .claude/hooks/test_hooks.py`
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only; consistent with Backend BRD, BUSINESS_DOMAIN and ROADMAP.
 - Notes: Branch is the cloud-session pinned branch (exception to `<type>/<name>`); all later tasks use `feat/srv-NNN-*`. Next: SRV-001 after merge.
 
 ### Pending (next)
-- T-003 — Per-project rules for each folder (awaiting user input).
-- SRV-001 — first server task, start only after T-005 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
+- SRV-001 — first server task, start only after T-006 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

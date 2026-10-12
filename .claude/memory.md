@@ -15,6 +15,9 @@
 ## Business spec
 - `BUSINESS_DOMAIN.md` = single source for schemas, enums, rules, state machine, permissions, jobs, settings, error codes. Money = integer fils (1 JOD = 1000 fils). Booking draft → OTP → payment → booking (Redis holds 10 min).
 
+## Server rules
+- `WAB-Server/CLAUDE.md`: layers route→middleware→controller→service→repository→schema; `modules/customer|merchant|admin`, shared logic `domain/`, helpers `utils/`; base envelope `{success,message,data,meta?}` / `{success:false,message,error:{code,details?,traceId}}`; AR+EN locales required.
+
 ## Delivery
 - Plan: `ROADMAP.md` (P0–P6, tracks SERVICE/SERVER/CUSTOMER/MERCHANT/ADMIN/INT; integration last in P5).
 - Unready dependency → code against `contracts/` fixtures behind an interface, mock switched by `DATA_SOURCE=mock|remote` config (`INTEGRATION_WORKFLOW.md`).
