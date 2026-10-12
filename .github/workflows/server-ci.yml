@@ -56,6 +56,10 @@ jobs:
     name: Secret scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # gitleaks lists the pull request's commits to scan only the new ones.
+    permissions:
+      contents: read
+      pull-requests: read
     defaults:
       run:
         working-directory: .

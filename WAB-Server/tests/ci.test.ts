@@ -12,6 +12,7 @@ interface Job {
   steps: Step[];
   'runs-on': string;
   'timeout-minutes'?: number;
+  permissions?: Record<string, string>;
 }
 interface Workflow {
   on: {
@@ -80,6 +81,14 @@ describe('server CI workflow (SRV-010)', () => {
     expect(steps.some((s) => s.uses?.startsWith('gitleaks/gitleaks-action'))).toBe(true);
     const checkout = steps.find((s) => s.uses?.startsWith('actions/checkout'));
     expect(checkout?.with?.['fetch-depth']).toBe(0);
+  });
+
+  it('lets the secret scan read pull request commits and nothing more', () => {
+    expect(workflow.jobs['secret-scan']?.permissions).toEqual({
+      contents: 'read',
+      'pull-requests': 'read',
+    });
+    expect(workflow.jobs['verify']?.permissions).toBeUndefined();
   });
 
   it('gives every job a timeout', () => {

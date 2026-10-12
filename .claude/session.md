@@ -263,7 +263,7 @@
 - Tests: `cd WAB-Server && npm test` — 256 pass; all CI steps replayed in a clean copy with a fresh `npm ci` (exit 0)
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: the workflow itself has not run on GitHub yet (first run happens on this PR). gitleaks is a second secret scanner next to GitGuardian; if the repo moves to an organization, `GITLEAKS_LICENSE` is required. Dev-only advisories (jest/istanbul) are intentionally outside the audit gate. API docs: no change.
-- Notes: Contract tests job joins when `contracts/` exists (SRV-111); deploy job is SRV-011 (PENDING on hosting). Next: SRV-012 (Mongo layer) — SRV-011 is PENDING.
+- Notes: First real run: `Secret scan` failed with 403 on `GET /pulls/17/commits` (gitleaks needs `pull-requests: read`); fixed with job-level permissions + test. Contract tests job joins when `contracts/` exists (SRV-111); deploy job is SRV-011 (PENDING on hosting). Next: SRV-012 (Mongo layer) — SRV-011 is PENDING.
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
