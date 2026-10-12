@@ -314,7 +314,7 @@
 ### T-022 — SRV-015 Money utils (integer fils, JOD strings, half-up rounding)
 - Project: `WAB-Server/` (`src/utils/money/*`, `src/constants/money.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #20 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #21 merged; CI green: Server CI verify, Secret scan, GitGuardian)
 - Acceptance criteria (BE/NFR: NFR-02 correct money handling, BE-32 pricing/deposit (consumer SRV-067); BUSINESS_DOMAIN header conventions (integer fils, API decimal string with 3 decimals), §5.5 (`deposit = round_half_up(total × depositPercentage / 100)` to 1 fils; `remaining = total − paidOnline`), §12.1 assumption, ledger amounts are signed; server rules §9 "money only through `utils/money`", §5 constants):
   - [x] Money is an integer number of fils (1 JOD = 1000 fils): `isFils` / `assertFils` reject floats, NaN, Infinity, unsafe integers, non-numbers; negatives allowed (signed ledger)
   - [x] `formatJod(fils)` → decimal string with exactly 3 decimals (`12.500`, `0.001`, `-0.500`), integer arithmetic only (no float division)
@@ -329,7 +329,26 @@
 - Notes: Usage for later tasks: money fields are `number` fils; convert only at the API edge (`formatJod` out, `isJodString` + `parseJod` in); `deposit = percentOf(total, depositPercentage)`, the rest by subtraction (`total - deposit`), never a second percentage. Decisions to confirm: (1) `depositPercentage` is treated as a whole percent (PRD says 1–100); a fractional percent would need `mulDivRound` with a bigger denominator; (2) no zod schema / OpenAPI `JodAmount` yet — the first endpoint with money adds it using `isJodString`/`parseJod`. API docs: no change.
 - Next: SRV-016 (time utils). Merge only after ALL CI checks green.
 
+### T-023 — SRV-016 Time utils (UTC instants, Asia/Amman days, `HH:mm`, DST-safe ranges)
+- Project: `WAB-Server/` (`src/utils/time/*`, `src/constants/time.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #21 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-12 "UTC storage; Asia/Amman for schedules, open/closed status, reminders and reports"; consumers BER-02 (90 days, 15-min slots), BER-04/BE-34 (pending bookings hold their slot → half-open ranges); BUSINESS_DOMAIN §5.1 (instants UTC, business dates/hours in `settings.timezone`, `HH:mm` is local time), §5.3 (open/closed by local date), §5.4 (slots), `DayOfWeek` enum; server rules §9 "time only through `utils/time`", §5 constants):
+  - [x] `isHHmm` / `parseHHmm` / `formatHHmm`: strict 24-hour `HH:mm` ↔ minutes since local midnight (0–1439); invalid input → 400 `ValidationError` (same pattern as `parseJod`)
+  - [x] Civil dates `YYYY-MM-DD` independent of any zone: strict real calendar dates (leap years, no `2026-02-30`), `addDays`, `diffDays`, `dayOfWeek` (SUN…SAT = the domain enum values)
+  - [x] The time zone is always a parameter (settings/config); `DEFAULT_TIMEZONE = 'Asia/Amman'` lives in constants; invalid zone names rejected (`isValidTimeZone`); no hardcoded UTC offset
+  - [x] `localDateOf(instant, tz)` / `localMinutesOf(instant, tz)`: Amman rolls to the next day at exactly 21:00:00.000Z; 20:59:59.999Z is still the previous day
+  - [x] `zonedTimeToUtc(date, minutes, tz)`: exact inverse of the local view; DST gap → moved forward, overlap → first occurrence (documented + tested)
+  - [x] `localDayRange(date, tz)` = half-open `[start, end)`; consecutive days tile the timeline with no gap or overlap; day length 23/24/25 h (23.5/24.5 h in Lord Howe)
+  - [x] `rangesOverlap` half-open (back-to-back bookings do not conflict), `addMinutes`; invalid `Date`s rejected
+  - [x] No new dependency (built on `Intl`); every literal in `constants/time.ts`; tests cover midnight/day change, DST gap/overlap (America/New_York, Australia/Lord_Howe), seeded property tests
+- Tests: `cd WAB-Server && npm test` — 664 pass (25 suites; also against one shared Redis with 4 parallel workers); typecheck/lint/format/build green; `npm audit --omit=dev` 0. `tests/time.test.ts` = 157 tests: example tables (Amman day change at 21:00:00.000Z, year/leap-day change, the 90-day window moving exactly at local midnight, a booking running past midnight, DST gap/overlap in New York and Lord Howe, a missing midnight in Havana, half-hour/45-minute zones) + seeded property tests that use no zone rules written in the test: an independent UTC+3 oracle for Amman, a brute-force search at every DST change of 13 zones (≥ 30 transitions, ≥ 10 gaps, ≥ 10 overlaps), day ranges that tile the timeline, Sakamoto weekday oracle, addDays/diffDays inverse, brute-force range overlap. Mutation check: 14 deliberate breakages of the implementation (closed overlap, later instant in an overlap, wrong gap rule, hardcoded +03:00, fixed 24 h day, accepting 2026-02-30, weekday off by one, 24:xx accepted, midnight printed as 24, one formatter for all zones, inclusive range end, wrong diffDays sign, minutes without the hour factor, no gap shift) were all caught.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — pure functions, no I/O or state beyond a per-zone `Intl.DateTimeFormat` cache (zones come from settings/config, not clients). Client-input errors are 400 `ValidationError` (`parseHHmm`, `parseLocalDate`); programmer errors are `TypeError`/`RangeError`. Non-blocking notes: (1) `isValidTimeZone` accepts whatever `Intl` accepts, including `UTC` and fixed offsets such as `+03:00`; the settings task should also require an IANA name if it wants DST-aware zones only; (2) each `zonedTimeToUtc` costs ~4 `formatToParts` calls — fine for requests, but the availability task should compute a day's start once and add minutes for the 15-minute grid; (3) review found two literals (`12/31`, padding widths) and a duplicated pad helper — fixed. The seeded-PRNG helper moved to `tests/helpers/random.ts` and is shared with the money tests.
+- Notes: Not in this task: 12-hour AM/PM text (ar: ص / م from `locales/`) and "numerals follow the active language" (both PRDs) → message-formatting/notification task; `settings.timezone` wiring → SRV-017. Assumption to confirm: salon hours never pass midnight (`close` later than `open` on the same day) — no document says otherwise; the schedule task enforces it. API docs: no change.
+- Next: SRV-017 (settings). Merge only after ALL CI checks green.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-016 — next server task after T-022 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-017 — next server task after T-023 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

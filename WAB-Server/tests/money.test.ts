@@ -10,6 +10,7 @@ import {
   percentOf,
   sumFils,
 } from '../src/utils/money';
+import { createRandom, randomUpTo, type Random } from './helpers/random';
 
 const MAX_SAFE = Number.MAX_SAFE_INTEGER;
 
@@ -307,29 +308,9 @@ describe('sumFils', () => {
 // exact distance comparison on BigInt), so they would catch a wrong rounding rule or a float slip.
 // ---------------------------------------------------------------------------------------------
 
-/** mulberry32: small, fast, good enough for test data. */
-const createRandom = (seed: number): (() => number) => {
-  let state = seed >>> 0;
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let t = state;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 2 ** 32;
-  };
-};
-
-type Random = () => number;
 const SAMPLES = 4_000;
 const SEED = 20_261_012;
 const SCALES = [10, 1_000, 100_000, 10_000_000, 1_000_000_000_000, MAX_SAFE];
-
-/** Integer in [0, max], using 53 random bits so large maxima are covered. */
-const randomUpTo = (rand: Random, max: number): number => {
-  const high = Math.floor(rand() * 2 ** 21);
-  const low = Math.floor(rand() * 2 ** 32);
-  return (high * 2 ** 32 + low) % (max + 1);
-};
 
 /** A non-negative amount at a random order of magnitude, so small tie-prone values are common. */
 const randomAmount = (rand: Random): number =>
