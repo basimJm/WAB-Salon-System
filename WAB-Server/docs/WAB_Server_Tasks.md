@@ -52,9 +52,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-006 | Health and readiness endpoints | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-007 | Security middleware (Helmet, CORS, rate limit, sanitize) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-008 | Swagger + Postman generation, `/docs`, docs-after-every-task rule | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-009 | Dockerfile + docker-compose for local development | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-009 | Dockerfile + docker-compose for local development | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-010 | GitHub Actions CI (verify + secret scan) | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-009 is merged: **SRV-010**.
+Next task to start after SRV-010 is merged: **SRV-012** (SRV-011 is PENDING).
 
 ---
 
@@ -75,8 +76,8 @@ Project skeleton, cross-cutting plumbing, CI. Roadmap SRV-01.
 | SRV-006 | Health + readiness endpoints (Mongo/Redis checks pluggable) | `feat/srv-006-health` | — | DONE | `/health` liveness, `/ready` dependency checks; no auth. |
 | SRV-007 | Security middleware: Helmet, CORS (admin domain from config), global rate limit, body-size limits, NoSQL-injection + XSS sanitizing | `feat/srv-007-security` | — | DONE | Each control has a unit/integration test; limits come from config. |
 | SRV-008 | Swagger/OpenAPI generated from code + Postman collection export script (kept in repo) | `feat/srv-008-swagger` | — | DONE | `npm run docs` regenerates both; CI fails if stale. |
-| SRV-009 | Dockerfile + docker-compose for local dev (Mongo, Redis, MinIO, SMTP sink) | `feat/srv-009-docker` | — | IN REVIEW | `docker compose up` gives a working local environment; no secrets in files. |
-| SRV-010 | GitHub Actions CI: lint, typecheck, unit tests, `npm audit --omit=dev` (dev-only transitive advisories via jest/istanbul exist), secret scan (path-filtered to `WAB-Server/`) | `feat/srv-010-ci` | — | TODO | Required checks on PRs; contract-test job added later (see `contracts`). |
+| SRV-009 | Dockerfile + docker-compose for local dev (Mongo, Redis, MinIO, SMTP sink) | `feat/srv-009-docker` | — | DONE | `docker compose up` gives a working local environment; no secrets in files. |
+| SRV-010 | GitHub Actions CI: lint, typecheck, unit tests, `npm audit --omit=dev` (dev-only transitive advisories via jest/istanbul exist), secret scan (path-filtered to `WAB-Server/`) | `feat/srv-010-ci` | — | IN REVIEW | Required checks on PRs; contract-test job added later (see `contracts`). |
 | SRV-011 | Deploy to dev environment (DigitalOcean) from `main` | `feat/srv-011-deploy-dev` | — | PENDING | DigitalOcean product (Droplet vs App Platform), managed Redis, platform domain, secrets store — **user input**. GitHub Actions deploy job + env/secret wiring. |
 
 ## Stage B — Data layer & shared utilities
