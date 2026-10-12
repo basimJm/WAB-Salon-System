@@ -416,7 +416,7 @@
 - Tests: `ComponentLogicTest` (badge label, star fill, step state, OTP sanitising, initials) + policy tests; detekt (Compose rules) exit 0
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (see T-029). Not built: calendar, country-code picker, salon/service cards, media viewer (feature-level, need data models). Legacy hardcode debt outside the design system stays in `config/policy-baseline.json` (ratchet).
-- Notes: UnstableCollections detekt rule disabled (strong skipping).
+- Notes: UnstableCollections detekt rule disabled (strong skipping). First CI run found a real compile error (a KDoc containing a slash-star opened a nested comment, so the whole design system failed to compile); fixed, and policy rule Q008 + test now catch it. Loops/review re-run after the fix: policy tests 68 pass, detekt exit 0.
 ### T-026 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
 - Project: `WAB-Server/` (`src/models/setting.model.ts`, `src/repositories/settings.repository.ts`, `src/domain/settings/*`, `src/constants/settings.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #22 merged)
@@ -544,21 +544,20 @@
 - Notes: Usage: `const {otp, storage} = createProviders(config.providers, config.isProduction)` once at start-up, inject into services; tests inject `FakeOtpProvider`/`FakeStorageProvider` directly. API docs: no change.
 - Next: SRV-023 (Notifier, PaymentProvider, AnalyticsProvider). PRs target `server`; merge only after ALL CI checks green.
 
-### T-034 — SRV-023 Provider interfaces and fakes: notifier, payments, analytics
-- Project: `WAB-Server/` (`src/providers/{notifier,payments,analytics}/*`, `src/providers/{idempotency,index}.ts`, `src/constants/{providers,env}.ts`, `src/config/*`, `.env.example`)
-- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #33 merged; PR targets `server`)
-- Status: DONE (PR #39 merged into `server`)
-- Acceptance criteria (BE/NFR: BE-40..43 payments via `wab-payments` (verify server-side, idempotency, every attempt with gateway codes, refunds REFUND_PENDING → REFUNDED/FAILED), BE-51/52 push incl. high-priority/time-sensitive booking requests, BE-62 admin email, BE-61 analytics; wab-notifications NOT-01..06/10/11, wab-payments PAY-01/04/05/07/08/09, wab-analytics ANA-01/02/04; backlog: fake payment provider supports success/fail/cancel/pending/refund-fail; typed interfaces; fake selected by config):
-  - [x] `Notifier.sendPush({target: tokens | topic, message, idempotencyKey})` → per-token `SENT | INVALID_TOKEN | FAILED`, invalid tokens listed for cleanup, visible / data-only messages, high priority, iOS time-sensitive, action category, badge, Android full-screen flag; ≤ 500 tokens, no blank/duplicate tokens; `sendEmail` with accepted/rejected addresses; one logical notification = one key (repeat returns the first result and sends nothing; same key with a different request is a caller bug)
-  - [x] `PaymentProvider`: `createSession` (idempotent, integer fils > 0), `verify` (normalized status + raw gateway code/message), `refund` (idempotent; only on a SUCCEEDED payment; partial refunds up to the captured amount, pending refunds count), `getRefund`, `handleWebhook` (unverifiable signature/body → 401); `FakePaymentProvider` scenarios success / fail / cancel / pending (+ `settle`) and refund success / fail / pending (+ `settleRefund`)
-  - [x] `AnalyticsProvider`: `track` (same validation as the server-event tracker, never throws, returns whether stored), `linkIdentity` (installation ↔ account, no duplicates), `countEvents` by name or by Amman day (day changes at 21:00Z), half-open `[from, to)`, name filter; `FakeAnalyticsProvider`
-  - [x] Config: `NOTIFIER_PROVIDER`, `PAYMENT_PROVIDER`, `ANALYTICS_PROVIDER` = `fake|real` (default `fake` outside production, production must name all five providers `real`); `createProviders` returns all five, refuses fakes in production and fails loudly for `real`
-  - [x] No hardcoded values: limits, patterns, statuses, scenarios, fake gateway codes and signature in `constants/providers.ts`
-- Tests: `cd WAB-Server && npm test` — 1106 pass (36 suites); full `npm run format:check`, lint, typecheck, build green; audit 0; `npm run docs` no diff. New: `tests/{notifier,payments,analyticsProvider}.test.ts`, updated `tests/{config,providers}.test.ts`. Mutation check: 34 compile-safe breakages (idempotency, token/recipient limits, duplicates, badge, data-only rule, invalid-token mapping, refund total incl. pending, refund-needs-success, webhook signature, settleRefund, amount > 0, range boundaries, Amman day grouping, identity dedupe, config key mapping) all caught; two equivalent mutants ignored (type-only cast, unused-import variants that do not compile).
+### T-033 — Customer language and theme handling
+- Project: `WAB-Mobile-Customer/core/domain` (`AppLanguage`, `AppearanceSettings`), `core/storage`, `core/di`, `core/ui` (Android locale), `composeApp` (`MainViewModel`, `App`)
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD §3.1 "Default language Arabic ... change applies immediately and is persisted locally", §3.2 theme default SYSTEM, data model `language` default AR / `theme` default SYSTEM):
+  - [x] Arabic is the default everywhere (storage default was English; initial UI state used the device locale)
+  - [x] `AppLanguage` (ARABIC/ENGLISH) owns the code and `isRtl`; accepts stored codes and platform tags (`ar_JO`, `en-US`); unknown/blank falls back to Arabic; `other` for the single switch icon
+  - [x] `AppearanceSettings`: language and theme flows, `setLanguage`, `setThemeMode`, `toggleLanguage` (returns the language now in effect); registered in Koin
+  - [x] Layout direction comes from `AppLanguage.isRtl` instead of comparing a string to the literal "ar"; the Android locale provider no longer uses `!!`
+  - [x] Theme System/Light/Dark already resolved in `App`; unknown stored theme name means System
+- Tests: `AppLanguageTest` (5), `AppearanceSettingsTest` (7) with a fake settings store; policy tests 68 pass; policy baseline only shrank
 - Loops: 3/3
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISIONS TO CONFIRM: (1) money is integer fils at the provider boundary; the real gateway adapter converts to its own format (3-decimal JOD string) in `wab-payments`; (2) `AnalyticsProvider` starts with `track`, `linkIdentity`, `countEvents`; SRV-105/110 add the dashboard/journey queries; (3) providers are still not wired into `main()` (first consumers SRV-027/031/046/083/093 do it) because production now requires all five to be `real`. Not run against FCM, SMTP, a payment gateway or BigQuery.
-- Notes: `IdempotencyStore` (`providers/idempotency.ts`) is shared by the notifier and payment fakes; real adapters get idempotency from the gateway/FCM keys. API docs: no change.
-- Next: SRV-024 (auth schemas). PRs target `server`.
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (Gradle blocked) and CI runners were unavailable at the time (jobs failed in seconds with no runner). The language/theme switch screens (Login, Register, Profile, Settings) are feature work: they inject `AppearanceSettings` and call `toggleLanguage()` / `setThemeMode()`.
+- Notes: Existing installs whose stored value is a platform tag (`en_US`) still resolve. Numerals-follow-language is a formatter concern (`NumberFormatter` baseline debt), not in this task.
 
 ### T-035 — SRV-024 Identity schemas: customers, members, installations, refreshTokens, admins
 - Project: `WAB-Server/` (`src/models/{customer,member,installation,refreshToken,admin}.model.ts`, `src/repositories/identity.repository.ts`, `src/constants/{enums,identity}.ts`)

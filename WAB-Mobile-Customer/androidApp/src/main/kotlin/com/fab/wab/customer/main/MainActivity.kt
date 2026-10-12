@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.fab.wab.customer.app.ui.App
+import com.fab.wab.customer.core.ui.permission.AndroidPermissionBridge
 import org.koin.java.KoinJavaComponent.getKoin
 
 class MainActivity : ComponentActivity() {
@@ -16,9 +17,15 @@ class MainActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        getKoin().get<AndroidPermissionBridge>().attach(this)
         setContent {
             App(this)
         }
+    }
+
+    override fun onDestroy() {
+        getKoin().get<AndroidPermissionBridge>().detach()
+        super.onDestroy()
     }
 
     override fun onResume() {

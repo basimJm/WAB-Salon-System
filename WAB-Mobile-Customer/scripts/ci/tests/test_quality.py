@@ -36,6 +36,11 @@ class QualityTest(unittest.TestCase):
         self.assertEqual(rules("val s by flow.collectAsStateWithLifecycle()"), [])
         self.assertEqual(rules("Thread.sleep(5)"), ["P003"])
 
+    def test_nested_comment_opener_is_reported(self):
+        self.assertEqual(rules("/** see design/*.json for tokens */\nval a = 1"), ["Q008"])
+        self.assertEqual(rules("/* a /* b */ c */\nval a = 1"), ["Q008"])
+        self.assertEqual(rules("/** plain doc */\nval a = 1\n// a/*b"), [])
+
     def test_lazy_items_need_keys(self):
         lazy = "LazyColumn {\n    %s\n}"
         self.assertEqual(rules(lazy % "items(list) { Row() }"), ["P001"])

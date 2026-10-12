@@ -109,6 +109,9 @@ jobs:
         run: ./gradlew :androidApp:assemble${{ matrix.task }} --stacktrace
       - name: Android Lint (warnings are errors)
         run: ./gradlew :androidApp:lint${{ matrix.task }} --stacktrace
+      - name: Print Android Lint findings
+        if: failure()
+        run: cat androidApp/build/reports/lint-results-*.txt 2>/dev/null | head -300 || true
       # commonTest of every module, run on the JVM.
       - name: Unit tests
         if: matrix.task == 'DevDebug'

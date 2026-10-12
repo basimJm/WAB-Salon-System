@@ -92,3 +92,29 @@ def lex(src: str) -> tuple[str, list[StringLiteral]]:
         else:
             i += 1
     return "".join(chars), strings
+
+
+def nested_comment_openers(src: str) -> list[int]:
+    """Lines where a block comment opens inside another one. Kotlin nests comments, so `design/*.json` in a KDoc
+    leaves the comment unclosed and breaks the whole file."""
+    lines: list[int] = []
+    n, i, line = len(src), 0, 1
+    while i < n:
+        if src.startswith("/*", i):
+            depth, j = 1, i + 2
+            while j < n and depth:
+                if src.startswith("/*", j):
+                    depth += 1
+                    lines.append(line + src.count("\n", i, j))
+                    j += 2
+                elif src.startswith("*/", j):
+                    depth, j = depth - 1, j + 2
+                else:
+                    j += 1
+            line += src.count("\n", i, j)
+            i = j
+        else:
+            if src[i] == "\n":
+                line += 1
+            i += 1
+    return lines

@@ -14,6 +14,8 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to show salons near you.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need the camera to take photos for your reviews.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need your location to show salons near you.</string>
 </dict>
