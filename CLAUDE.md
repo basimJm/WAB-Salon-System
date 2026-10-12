@@ -1,5 +1,14 @@
 # WAB Wedding & Beauty — Monorepo Guide for AI Agents
 
+> **MANDATORY for every session and every task — read and apply all of these before doing anything:**
+> - Rules: @.claude/rules.md
+> - Roles: @.claude/roles.md
+> - Hooks & workflow (incl. the 4-role review): @.claude/hooks.md
+> - Session tasks (done / pending): @.claude/session.md
+> - Memory (durable facts — check before investigating): @.claude/memory.md
+>
+> Hooks in `.claude/settings.json` enforce these rules (branching, no-hardcode, unit tests, 3 verification loops, review). Never disable or bypass them.
+
 > Read this file first in every session. It explains the whole business, every project in this repo, where the requirements live, and how the projects integrate. Then read the docs of the project you are working on **before** writing code.
 
 ---
@@ -27,7 +36,7 @@
 | `WAB-Mobile-Customer/` | Customer mobile app (Android + iOS) | Code in progress | Kotlin Multiplatform + Compose Multiplatform (see its `AGENTS.md`, `TECHSTACK.md`) |
 | `WAB-Mobile-Salon/` | Merchant (salon) mobile app | Docs + design ready, no code yet | KMP + Compose Multiplatform (same stack/template as customer) |
 | `WAB-Admin-Dashboard/` | Admin web panel | Docs + design ready, no code yet | React web app (desktop-first) |
-| `WAB-Server/` | Backend API for all 3 clients | Existing JS/Express code; target is TypeScript (see Backend BRD) | Node.js + Express + Mongoose/MongoDB + Redis + Socket.IO |
+| `WAB-Server/` | Backend API for all 3 clients | Old JS code removed; to be rebuilt from scratch in TypeScript per Backend BRD | Node.js + Express + Mongoose/MongoDB + Redis + Socket.IO |
 | `wab-payments/` | Payment library (server **and** KMP) | BRD only | TypeScript npm package + KMP library |
 | `wab-otp/` | OTP verification library (server) | BRD only | TypeScript npm package |
 | `wab-notifications/` | Push + email library (server) | BRD only | TypeScript npm package |
@@ -49,7 +58,7 @@ Each project has:
 | Customer app | `WAB-Mobile-Customer/docs/WAB_Customer_BRD.md`, `WAB_Customer_App_PRD.md`, `WAB_Customer_Design_Script.md` |
 | Merchant app | `WAB-Mobile-Salon/docs/WAB_Merchant_BRD.md`, `WAB_Merchant_App_PRD.md`, `WAB_Merchant_Design_Script.md` |
 | Admin panel | `WAB-Admin-Dashboard/docs/WAB_Admin_BRD.md`, `WAB_Admin_PRD.md`, `WAB_Admin_Design_Script.md` |
-| Backend | `WAB-Server/docs/WAB_Backend_BRD.md` (+ legacy `WAB-Server/BRD.md`, `ARCHITECTURE.md`, `AGENTS.md`) |
+| Backend | `WAB-Server/docs/WAB_Backend_BRD.md` (+ legacy `WAB-Server/BRD.md`) |
 | Packages | `wab-*/docs/WAB_Package_*_BRD.md` |
 
 **Precedence:** PRD > BRD > Design Script > design files. If two documents conflict, stop and ask; do not guess. Every PRD has an "Open Items & Assumptions" table — implement the stated assumption and keep it easy to change.
@@ -124,7 +133,7 @@ Apps track **every screen and action** in Firebase Analytics (exported to BigQue
 - Backend target: **TypeScript strict**, Clean Architecture by module (`controller → service/use case → repository`), validation on every input, consistent error format, no magic numbers (config/constants), tests for business rules (availability, booking state machine, refunds, permissions).
 - Mobile: follow `WAB-Mobile-Customer/AGENTS.md` (clean + feature-driven, Koin, Ktor, Compose Navigation). Wrap Firebase (OTP, push, analytics, crash) behind app-level interfaces. Payments only through `wab-payments`.
 - Admin: React, Arabic RTL default, data tables with server pagination, export (Excel/PDF), Socket.IO for live pages.
-- Respect existing per-project agent files (`WAB-Mobile-Customer/AGENTS.md`, `WAB-Server/AGENTS.md`) — they add project-specific rules on top of this file.
+- Respect existing per-project agent files (e.g. `WAB-Mobile-Customer/AGENTS.md`) — they add project-specific rules on top of this file.
 - Environments: **dev** and **prod**. CI/CD: GitHub Actions. Server hosting: DigitalOcean (TBD); files on AWS S3 + CDN.
 - Before finishing a task: build, lint, run tests, and re-check the PRD acceptance criteria you touched.
 
