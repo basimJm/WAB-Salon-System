@@ -34,7 +34,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await redis.flushall();
+  await redis.flushdb();
 });
 
 describe('lockKey', () => {

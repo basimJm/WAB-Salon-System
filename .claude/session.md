@@ -283,7 +283,7 @@
 ### T-020 — SRV-013 Redis client and distributed lock helper
 - Project: `WAB-Server/` (`src/utils/redis/{client,keys,lock}.ts`, `src/constants/redis.ts`, `src/server.ts`, CI workflow)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #18 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #19 merged; CI green incl. the Redis service container: 22 suites / 303 tests)
 - Acceptance criteria (BE/NFR: BE-33 no double booking via locks, NFR-06 stateless instances with Redis, NFR-08 health; BUSINESS_DOMAIN §5.6 per-staff Redis lock, §9 jobs; server rules §5 constants):
   - [x] `connectRedis`: lazy connect with bounded connect/command timeouts, capped exponential retry that never gives up after startup, events logged, failure thrown as a typed 503 without leaking the URL; `disconnectRedis` graceful with hard fallback; `redis.duplicate()` documented for subscribers (Socket.IO/BullMQ)
   - [x] `/ready` includes a `redis` PING probe; server connects Redis after MongoDB, closes Redis then MongoDB after HTTP, cleans up on startup failure
@@ -292,10 +292,26 @@
   - [x] Tests run against a real Redis: spawned `redis-server` locally, `REDIS_TEST_URL` service container in CI (workflow updated + guarded by `tests/ci.test.ts`)
 - Tests: `cd WAB-Server && npm test` — 302 pass (3 consecutive runs, incl. a 15-way concurrent read-modify-write that proves mutual exclusion); typecheck/lint/format/build green; `npm audit --omit=dev` 0; external-Redis path verified locally. QA found a flawed test (lazy "dead" client pointed at the live server), not a code bug.
 - Loops: 3/3
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified on GitHub until this PR's CI runs (Redis service container). Rate-limit counters (SRV-014) and BullMQ/Socket.IO adapters reuse this client later. API docs: no change.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Rate-limit counters (SRV-014) and BullMQ/Socket.IO adapters reuse this client later. API docs: no change.
 - Notes: Next: SRV-014 (Redis rate-limit helpers). Merge only after ALL CI checks green.
+
+### T-021 — SRV-014 Redis counter/flag helpers, limiter and rate-limit store
+- Project: `WAB-Server/` (`src/utils/redis/{counter,limiter,rateLimitStore,keys}.ts`, `src/middlewares/{rateLimit,security}.ts`, `src/utils/errors/normalize.ts`, `src/constants/{redis,time,errorMapping}.ts`, `src/server.ts`, `src/app.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #19 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-07 OTP request/wrong-code limits (generic part), NFR-01 brute-force protection, NFR-06 stateless instances; BUSINESS_DOMAIN §3.1 OTP Redis keys `otp:req|wrong|block|resend` (counter + flag + TTL), §10 settings supply the numbers later (SRV-017/027); server rules §5 constants, §8 provider errors → `ExternalServiceError`):
+  - [x] `hitWindow`: atomic INCR + PEXPIRE in one Lua script (no immortal counter; a counter that lost its TTL heals); `readCounter`, `setFlag`, `flagTtlMs`, `hasFlag`, `deleteKeys`
+  - [x] `startCooldown`: only the first caller per period starts it (OTP resend), others learn the remaining time; one winner under concurrency
+  - [x] `createLimiter({counterPrefix, blockPrefix?, limit, windowMs, blockMs?})`: atomic `hit/status/reset`; the hit that reaches the limit is allowed and starts the block; later hits are denied without being counted; the block ends by TTL and starts a fresh window; limiters sharing a `blockPrefix` share the block (OTP requests + wrong codes); default block key `<counterPrefix>:block`, equal prefixes rejected; positive-integer config validated; subjects with separators/empty rejected
+  - [x] `RedisRateLimitStore` for `express-rate-limit` (shared across instances, IPv6-safe keys); the global limiter is wired to it in `main()` and **fails open** (Redis blip must not take the API down) while limiters created with the default **fail closed** (OTP, login, payments) and answer 503
+  - [x] Redis outage errors (max retries, closed connection, command timeout, offline queue disabled) → typed 503 `ExternalServiceError` (verified against real ioredis errors); look-alikes stay 500
+  - [x] No hardcoded values: prefixes/segments/time units in `constants/`; test Redis uses one logical DB per Jest worker so suites can share the CI Redis container (`flushdb`, not `flushall`)
+- Tests: `cd WAB-Server && npm test` — 345 pass locally and 3× against one shared Redis with 4 parallel workers; limiter suite repeated 10× incl. under load; typecheck/lint/format/build green; `npm audit --omit=dev` 0. QA found real defects before push: (1) default block key equalled the counter key, so every plain-window hit after the first was denied (fixed + regression tests); (2) both Redis suites used `flushall` on a shared CI Redis (fixed per-worker DB); (3) a magic `1_000` and two unused constants (replaced / removed).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISION NOTES: (1) "5 requests / 5 min → 15 min block" is implemented as: the 5th request is allowed and starts the block, the 6th is denied (`OTP_BLOCKED`) — SRV-027 passes limit=5, window=300 s, block=900 s from settings; (2) with fail-open, a Redis outage logs one error per request — acceptable until real traffic exists. API docs: no change (no endpoint added/changed).
+- Notes: Next: SRV-015 (money utils). Merge only after ALL CI checks green.
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-014 — next server task, start only after T-020 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-015 — next server task, start only after T-021 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

@@ -5,6 +5,7 @@ import {
   LOCK_DEFAULT_RETRY_DELAY_MS,
   LOCK_DEFAULT_TTL_MS,
   LOCK_RETRY_JITTER_MS,
+  REDIS_OK_REPLY,
 } from '../../constants/redis';
 import { ConflictError } from '../errors';
 
@@ -55,7 +56,7 @@ export const acquireLock = async (
 ): Promise<Lock | null> => {
   const token = randomUUID();
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    if ((await redis.set(key, token, 'PX', ttlMs, 'NX')) === 'OK')
+    if ((await redis.set(key, token, 'PX', ttlMs, 'NX')) === REDIS_OK_REPLY)
       return makeLock(redis, key, token);
     if (attempt < attempts) await sleep(retryDelayMs + randomInt(0, LOCK_RETRY_JITTER_MS));
   }
