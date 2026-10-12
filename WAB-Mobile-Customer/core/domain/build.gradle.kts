@@ -14,4 +14,8 @@ kotlin {
         implementation(libs.bundles.coroutines)
         implementation(libs.kotlinx.serialization.json)
     }
+    sourceSets.commonTest.dependencies {
+        implementation(libs.kotlin.test)
+        implementation(libs.kotlinx.coroutines.test)
+    }
 }

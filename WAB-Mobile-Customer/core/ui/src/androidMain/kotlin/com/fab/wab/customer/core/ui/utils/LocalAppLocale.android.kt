@@ -18,15 +18,8 @@ actual object LocalAppLocale {
     actual infix fun provides(value: String?): ProvidedValue<*> {
         val configuration = LocalConfiguration.current
 
-        if (defaultLocale == null) {
-            defaultLocale = Locale.getDefault()
-        }
-
-        val newLocale = if (value == null) {
-            defaultLocale!!
-        } else {
-            Locale.forLanguageTag(value)
-        }
+        val systemLocale = defaultLocale ?: Locale.getDefault().also { defaultLocale = it }
+        val newLocale = if (value == null) systemLocale else Locale.forLanguageTag(value)
 
         Locale.setDefault(newLocale)
         configuration.setLocale(newLocale)
