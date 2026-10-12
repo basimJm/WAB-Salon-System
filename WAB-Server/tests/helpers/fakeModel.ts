@@ -36,11 +36,21 @@ const matchesCondition = (actual: unknown, condition: unknown): boolean => {
   });
 };
 
+/** Reads `a.b` from nested documents, like a MongoDB dotted path. */
+const valueAt = (doc: Doc, path: string): unknown =>
+  path
+    .split('.')
+    .reduce<unknown>(
+      (value, part) =>
+        typeof value === 'object' && value !== null ? (value as Doc)[part] : undefined,
+      doc,
+    );
+
 export const matches = (doc: Doc, filter: Filter): boolean =>
   Object.entries(filter).every(([key, condition]) => {
     if (key === '$and') return (condition as Filter[]).every((part) => matches(doc, part));
     if (key === '$or') return (condition as Filter[]).some((part) => matches(doc, part));
-    return matchesCondition(doc[key], condition);
+    return matchesCondition(valueAt(doc, key), condition);
   });
 
 class FakeQuery<T> implements PromiseLike<T> {
@@ -130,10 +140,24 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
     countDocuments: (filter: Filter) => new FakeQuery(() => select(filter).length),
     exists: (filter: Filter) =>
       new FakeQuery(() => (select(filter)[0] ? { _id: select(filter)[0]?._id } : null)),
-    findOneAndUpdate: (filter: Filter, update: { $set: Doc }) =>
+    findOneAndUpdate: (filter: Filter, update: { $set: Doc }, options: { upsert?: boolean } = {}) =>
       new FakeQuery(() => {
-        const doc = select(filter)[0];
-        if (!doc) return null;
+        let doc = select(filter)[0];
+        if (!doc) {
+          if (options.upsert !== true) return null;
+          // Like MongoDB: a new document starts from the equality conditions of the filter.
+          doc = {
+            _id: new Types.ObjectId(),
+            __v: 0,
+            createdAt: new Date(),
+            ...Object.fromEntries(
+              Object.entries(filter).filter(
+                ([key, condition]) => !key.startsWith('$') && !isOperatorObject(condition),
+              ),
+            ),
+          };
+          docs.push(doc);
+        }
         Object.assign(doc, update.$set, { updatedAt: new Date() });
         return { ...doc };
       }),
