@@ -468,7 +468,7 @@
 ### T-029 — SRV-019 Demo catalog seed (dev only)
 - Project: `WAB-Server/` (`src/models/catalogService.model.ts`, `src/constants/{enums,demoCatalog}.ts`, `src/seeds/{demoCatalog,runDemo}.ts`, script `seed:demo`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #26 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #28 merged by the user)
 - Acceptance criteria (BE/NFR: BE-65/Admin PRD A23 catalog (data side); BUSINESS_DOMAIN §3.2 `catalogServices {name{ar,en}, description{ar,en}, imageKey, gender: Gender, active, sortOrder}`, index `{gender, active, sortOrder}` + text on names, `Gender = MALE | FEMALE`; backlog: dev-only, flagged as demo data):
   - [x] `catalogServices` model as in §3.2 with both indexes, registered in `ALL_MODELS`; `Gender` enum constant
   - [x] Demo data in `constants/demoCatalog.ts`: women's and men's services, every name and description in ar + en, image keys under `demo/catalog/` (the demo flag, since the domain has no field for it)
@@ -479,6 +479,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — demo flag = guarded script + `demo/` image keys (no field invented). Arabic names need a native check. NOT run against a real MongoDB.
 - Notes: Assumption: `imageKey` is required in the domain, so demo rows use placeholder keys whose files do not exist (clients show a placeholder). The text index uses `default_language: none` because Arabic has no built-in Mongo stemmer; real Arabic search is the Atlas Search task (SRV-059). API docs: no change.
 - Next: SRV-020 (audit log + server events writer). Merge only after ALL CI checks green.
+
+### T-031 — SRV-020 Audit-log writer and server-events writer (append-only)
+- Project: `WAB-Server/` (`src/models/{appendOnly,auditLog.model,serverEvent.model}.ts`, `src/repositories/{appendOnly,auditLogs,serverEvents}.repository.ts`, `src/domain/{audit,events}/*`, `src/constants/{audit,enums}.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #28 merged)
+- Status: DONE (PR #30 merged into `server`)
+- Acceptance criteria (BE/NFR: BE-65/Admin PRD audit trail, NFR-08 observability, CLAUDE.md §5.12 admin actions always with reason + audit log; BUSINESS_DOMAIN §3.7 `auditLogs {adminId, action, entityType, entityId, before?, after?, reason, ip, userAgent}` append-only, `serverEvents {ts, name, actorType, actorId?, salonId?, bookingId?, params, platform?, appVersion?}`; backlog: "No update/delete API on `auditLogs`; tests prove immutability"):
+  - [x] `auditLogs` and `serverEvents` models as in §3.7 with indexes (admin / entity / action, newest first; ts, name, actor, booking), registered in `ALL_MODELS`; `ActorType` and `Platform` enums in `constants/enums.ts`
+  - [x] Immutability: every update/replace/delete query, document delete/update, bulk write and re-save of a stored document throws `AppendOnlyViolationError` (500); append-only repositories expose only `append`, `findById`, `findPage`
+  - [x] `createAuditWriter(store).record(entry)`: validates (admin id, UPPER_SNAKE action, non-blank trimmed reason, entity, ip, user agent), omits absent before/after, a bad entry is a 400 and nothing is stored, a storage failure reaches the caller (an admin write must not succeed without its audit record)
+  - [x] `createServerEvents({store, logger}).track(event)`: validates the event (dotted lower-case name, actor type, ids, platform), redacts secrets in `params`, stamps `ts` from the clock, and NEVER throws (invalid or failed events are logged, result `false`)
+  - [x] No hardcoded values: patterns, limits and operation lists in `constants/audit.ts`
+- Tests: `cd WAB-Server && npm test` — 897 pass (31 suites); lint/format/typecheck/build green; audit 0. `tests/audit.test.ts` (43). Mutation check: 12 compile-safe breakages (dropping any mutating operation from the list, bulk-write guard, save guard, blank reason, action/admin id pattern, no redaction, throwing tracker, wrong `ts`, model not registered) all caught; 1 equivalent mutant (document-level `updateOne` hook is also covered by the query-level hook).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISIONS TO CONFIRM: (1) `serverEvents` is a normal indexed collection, not a Mongo time-series collection: Mongoose creates time-series collections only through `createCollection`, `createIndexes` would silently create a normal one, and a real MongoDB is not available here to verify; converting is a one-off migration for the ops/analytics task (SRV-110); (2) no retention (TTL) is defined by the domain, none invented; (3) database-level protection (a role without update/delete) is an ops task, the guarantee here is in code. Not wired into `server.ts` (consumers: admin tasks, SRV-027, jobs). NOT run against a real MongoDB.
+- Notes: Usage: admin services call `audit.record({adminId, action: 'SALON_SET_OFFLINE', entityType, entityId, before, after, reason, ip, userAgent})` in the same request as the change; pass snapshots without secrets. Anything non-critical uses `events.track(...)`. API docs: no change.
+- Next: SRV-021 (booking reference number). Merge only after ALL CI checks green.
 
 ### T-024 — ADM-01 Admin foundation: rules, design system, theme, base components, infrastructure, CI
 - Project: `WAB-Admin-Dashboard/` (+ `.github/workflows/admin-ci.yml`, root docs)
@@ -496,36 +512,39 @@
 - Review: PASSED (SE ✔, Mobile ✔ (responsive/RTL/a11y for web), Architect ✔, QA ✔) — QA found and fixed: Modal stole focus on every parent render; grid items widened the page on phones (horizontal scroll); closed drawer stayed focusable (now `inert`); drawer shadow leaked while closed.
 - Notes: Branch is the cloud-pinned branch (restarted from `main`). ASSUMPTIONS to confirm: (1) stack React 19 + Vite + TS (PRD §2.2 says stack TBD); (2) "android/ios" interpreted as Android-class Chromium and iOS-class WebKit browsers/viewports because the admin is a web app; (3) "debug/release" = unminified+source maps vs minified; mock data source excluded from all prod builds; (4) admin auth endpoints (`/admin/v1/auth/login|verify-otp|logout`) are assumed until `contracts/` (INT-01) exists. Not done here: global search, alerts bell data, real pages (ADM-02…05), Socket.IO client, Excel/PDF export. CI workflow itself has not run on GitHub yet.
 
-### T-031 — Customer automatic refresh-token handling
-- Project: `WAB-Mobile-Customer/core/domain/auth`, `core/network/{auth,client}`
-- Branch: `claude/amazing-cerf-vc5ja3`
-- Status: IN REVIEW
-- Acceptance criteria (Customer PRD §5 session: "Refresh MUST be automatic and transparent. Only if refresh fails: show Session expired, clear tokens"; BUSINESS_DOMAIN refreshTokens: rotate on every refresh, reuse revokes the family; CLAUDE.md §1 no `runBlocking`, no token in logs):
-  - [x] A 401 to a request that carried a token refreshes once and repeats the request with the new access token
-  - [x] Concurrent 401s share ONE refresh (single-flight lock); late requests reuse the already rotated tokens, so a refresh token is never presented twice
-  - [x] Both tokens are stored after rotation; session ends (`SessionTimeOut`) only when the backend rejects the refresh token (400/401/403/422) or none is stored; timeouts, 5xx, 429 and parse errors keep the user signed in
-  - [x] Refresh client has no interceptor (cannot recurse) and no request logger (body carries the token); `runBlocking` token/language providers removed
-- Tests: `TokenRefreshCoordinatorTest` (7: rotation stored, 8 concurrent -> 1 call, reuse, no refresh token, rejected, unavailable, null access); policy tests 68 pass; policy baseline only shrank
+### T-032 — SRV-021 Booking reference number and id utils
+- Project: `WAB-Server/` (`src/utils/reference/*`, `src/utils/database/{ids,errors}.ts`, `src/constants/reference.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #30 merged; PR targets `server`)
+- Status: DONE (PR #32 merged into `server`)
+- Acceptance criteria (BE/NFR: BE-32 "a unique reference number", NFR-02; BUSINESS_DOMAIN §3.4 `referenceNumber` unique ("WAB-" + 6–8 base32 chars), §12.6 format `WAB-XXXXXX` base32 without ambiguous characters; backlog: collision-safe via unique index + retry):
+  - [x] `generateReferenceNumber()`: `WAB-` + 6 symbols of the Crockford base32 alphabet (no `I L O U`), from `crypto.randomBytes` masked to 5 bits (no modulo bias); source injectable for tests
+  - [x] `isReferenceNumber` (canonical form only) and `normalizeReferenceNumber` (case, spaces, missing dash, look-alikes `O`→`0`, `I`/`L`→`1`; invalid → `null`) for customer/salon lookups
+  - [x] `withUniqueReference(create)`: retries with a new number only on a duplicate-key error of the reference field (or an unspecified key), rethrows other failures and duplicates of other unique indexes unchanged, gives up after 5 attempts as a 500 `InternalError` keeping the cause
+  - [x] Id utils: `isObjectIdString`, `newId`, `toObjectId` (malformed → 400); `isValidId` of the base repository reuses them; `duplicateKeyFields(error)` helper
+  - [x] No hardcoded values: prefix, length, alphabet, look-alikes, attempts in `constants/reference.ts`
+- Tests: `cd WAB-Server && npm test` — 956 pass (32 suites); lint/format/typecheck/build green; audit 0. `tests/reference.test.ts` (59): alphabet, byte→symbol mapping, 20 000-sample uniformity, canonical/normalize tables, retry rules (first try, collision, other index, compound index, other error, exhaustion, custom limit), id utils. Mutation check: 18 breakages (alphabet, length, mask, look-alike map, attempts, retry conditions, error type, separator handling, id check…) all caught; 2 equivalent mutants (`x % 32` ≡ `x & 31`; double case conversion).
 - Loops: 3/3
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled or run locally (Gradle blocked, detekt jars rate-limited); ASSUMPTIONS: endpoint `POST /customer/v1/auth/refresh` with `{refreshToken}` returning the base envelope `data.{accessToken,refreshToken}` (SRV-026/INT-01 not written yet; path in `AuthEndpoints`); the `HttpSend` interceptor assumes `expectSuccess` errors surface from `execute` (handled by catching `ResponseException`). Added test dependency kotlinx-coroutines-test (runTest).
-- Notes: Next in this PR series: language switch + theme setting UI, permission handler (replace `!!` in `PermissionChecker`).
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — pure helpers, no I/O. The booking model with its unique `referenceNumber` index comes with SRV-070/071, which call `withUniqueReference`. Decision to confirm: 6 symbols (32^6 ≈ 1.07 billion numbers) as in §12.6; the domain allows 6–8, change `REFERENCE_CODE_LENGTH` if volume ever needs more. API docs: no change.
+- Next: SRV-022 (provider interfaces). PRs target `server`; merge only after ALL CI checks green.
 
-### T-032 — Customer permission handler (notifications, location, camera)
-- Project: `WAB-Mobile-Customer/core/ui/permission`, `androidApp` (MainActivity), `core/di`, iOS plist/strings
-- Branch: `claude/amazing-cerf-vc5ja3`
+### T-033 — SRV-022 Provider interfaces and fakes: OTP and storage
+- Project: `WAB-Server/` (`src/providers/{index.ts,otp/*,storage/*}`, `src/constants/providers.ts`, `src/config/*`, `.env.example`, `CLAUDE.md` §4, `README.md`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #32 merged; PR targets `server`)
 - Status: IN REVIEW
-- Acceptance criteria (Customer PRD: location for nearby salons, camera for review photos, FCM notifications; CLAUDE.md §1 no `!!`, no hardcoded values, AR+EN):
-  - [x] One `PermissionManager` interface (status / request / openSettings / location-service switch) with `AppPermission` NOTIFICATIONS, LOCATION, CAMERA and `PermissionStatus` GRANTED, DENIED, DENIED_PERMANENTLY; replaces the global-function `PermissionChecker` (and its `!!`)
-  - [x] `PermissionFlow.ensure()`: granted -> no dialog; denied -> asks once; refusal reported as Denied, or BlockedInSettings when the system will not ask again; permanently denied never tries a dialog
-  - [x] Android: Activity Result launcher attached by `MainActivity` (suspending request), "ask again" detected by asked-before + rationale flag, notification settings vs app-details settings, GPS switch
-  - [x] iOS: UNUserNotificationCenter, AVCaptureDevice and CLLocationManager (delegate) with real dialogs and status mapping; settings URL from the system constant; AR+EN `NSCameraUsageDescription`
-  - [x] Registered through Koin (`permissionModule` in `coreDiModule`)
-- Tests: `PermissionFlowTest` (7, fake manager); policy tests 68 pass; policy baseline only shrank
+- Acceptance criteria (BE/NFR: BE-01 / BE-07 phone + Firebase OTP via `wab-otp`, BE-70 presigned uploads via `wab-storage`, NFR-09; wab-otp BRD OTP-02/03/09, wab-storage BRD STO-01..05; backlog: typed interfaces/errors, fake implementation selected by config `*_PROVIDER=fake|real`; server rules §2 externals only through interfaces injected into services):
+  - [x] `OtpProvider.verify({proof, expectedPhone, purpose})` → `VERIFIED(phone) | INVALID_PROOF | PHONE_MISMATCH | EXPIRED`; provider outage throws `ExternalServiceError` (never an outcome); E.164 phones
+  - [x] `FakeOtpProvider` + `fakeOtpProof(phone, kind)` (valid / expired / invalid / provider-error); garbage proofs are `INVALID_PROOF`; a non-E.164 expected phone is a caller bug (`RangeError`)
+  - [x] `StorageProvider`: `createUploadUrl` (PUT target pinned to the content type, expiry), `confirmUpload` (existence, real type, size; rejected objects are deleted), `getPublicUrl` (CDN), `getSignedUrl` (private), `delete` (unknown keys ignored)
+  - [x] `FakeStorageProvider` (in memory, injectable clock) with `simulateUpload`/`has` test helpers; server-generated keys validated (no empty/`.`/`..` segments, 1024 chars), content type, positive whole `maxBytes`, TTL 1..604 800 s; invalid arguments reject (async API) or throw (`getPublicUrl`) as `RangeError`
+  - [x] Config: `OTP_PROVIDER`, `STORAGE_PROVIDER` = `fake|real`, default `fake` outside production; production must set every provider to `real` (fails fast naming the key); `createProviders` builds the fakes, refuses fakes in production, and fails loudly (`ProviderUnavailableError`) for `real` until the integrations exist
+  - [x] `.env.example`, `CLAUDE.md` §4 folder layout, `SOURCE_LAYOUT` and README updated; no hardcoded values (fake hosts use the reserved `.invalid` TLD, in `constants/providers.ts`)
+- Tests: `cd WAB-Server && npm test` — 1022 pass (33 suites); lint/format/typecheck/build green; audit 0; `npm run docs` no diff. `tests/providers.test.ts` (62) + new config tests. Mutation check: 26 compile-safe breakages (phone mismatch, expired, provider error, proof format, size/expiry boundaries, type check, visibility, private URL guard, bulk-delete atomicity, TTL and key-length limits, production guards, default mode) all caught; one redundant `..` check was found dead (the key pattern already forbids it) and removed.
 - Loops: 3/3
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally: Gradle is blocked here and detekt jars are rate-limited; the iOS interop calls (UserNotifications, AVFoundation, CoreLocation) and the Android launcher are written from the API docs and must be confirmed by the first CI run. GitHub Actions runners were unavailable when this was written (jobs failed in seconds with no runner), so nothing from the permission work has been built yet.
-- Notes: Gallery access needs no permission (system photo picker). Screens that need a permission (nearby salons, review photo) call `PermissionFlow.ensure` and show a dialog with `openSettings` for BlockedInSettings; those screens are separate tasks. Next: language switch and theme setting.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISIONS TO CONFIRM: (1) `OtpProvider` carries only `verify`: the wab-otp BRD also lists `precheck/reportFailure/getConfig`, but limits, blocks and `otpLength`/resend come from the backend limiter and settings (SRV-014/017/027), so they stay out of the provider; (2) `purpose` is accepted for future server-verified providers (Firebase cannot bind it); (3) `createProviders` is NOT wired into `main()` yet: production config now requires `real`, which does not exist, so wiring it before a consumer exists would only stop the server from starting; the first consumer (SRV-027 / SRV-046) wires it. Not run against real Firebase or S3. CI note: a clean-clone replay found one real red (README not Prettier-formatted; fixed in `32f2e21`); since 13:44Z GitHub Actions jobs for this repo also fail in ~3 s with no runner (infrastructure, not code).
+- Notes: Usage: `const {otp, storage} = createProviders(config.providers, config.isProduction)` once at start-up, inject into services; tests inject `FakeOtpProvider`/`FakeStorageProvider` directly. API docs: no change.
+- Next: SRV-023 (Notifier, PaymentProvider, AnalyticsProvider). PRs target `server`; merge only after ALL CI checks green.
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-020 — next server task after T-029 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-023 — next server task after T-033 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

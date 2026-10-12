@@ -28,4 +28,9 @@ export const ENV_KEYS = {
   trustProxyHops: 'TRUST_PROXY_HOPS',
   mongoUri: 'MONGODB_URI',
   redisUrl: 'REDIS_URL',
+  otpProvider: 'OTP_PROVIDER',
+  storageProvider: 'STORAGE_PROVIDER',
 } as const;
+
+/** Keys that pick `fake` or `real` for an external provider; production must set them to `real`. */
+export const PROVIDER_ENV_KEYS = [ENV_KEYS.otpProvider, ENV_KEYS.storageProvider] as const;

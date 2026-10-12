@@ -28,6 +28,11 @@ export class MockAuthRepository implements AuthRepository {
     return { accessToken: MOCK_TOKEN, admin: { ...MOCK_ADMIN, email } };
   }
 
+  async resendOtp(challengeId: string): Promise<void> {
+    await wait(this.latencyMs);
+    if (!this.emails.has(challengeId)) throw new AppError({ kind: 'unauthorized', status: 401 });
+  }
+
   async logout(): Promise<void> {
     await wait(this.latencyMs);
   }

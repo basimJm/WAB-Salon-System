@@ -1,5 +1,8 @@
 {
-  "app": { "name": "WAB Admin", "adminLabel": "Admin" },
+  "app": {
+    "name": "WAB Admin",
+    "adminLabel": "Admin"
+  },
   "common": {
     "loading": "Loading",
     "retry": "Retry",
@@ -36,8 +39,8 @@
     "openMenu": "Open menu"
   },
   "login": {
-    "title": "Sign in to the admin panel",
-    "codeTitle": "Enter the verification code",
+    "title": "Sign in",
+    "codeTitle": "Two-step verification",
     "email": "Email",
     "password": "Password",
     "code": "Verification code",
@@ -48,6 +51,18 @@
       "email": "Enter a valid email address.",
       "password": "Password is too short.",
       "code": "Enter the {{length}}-digit code."
+    },
+    "subtitle": "Enter your administrator account details to continue.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "codeSubtitle": "We sent a {{length}}-digit code to your email. It is valid for {{minutes}} minutes.",
+    "noCode": "Didn't receive the code?",
+    "resend": "Resend code",
+    "resendIn": "Resend in {{time}}",
+    "brand": {
+      "headline": "Full visibility of the platform, full control of every detail.",
+      "text": "Every screen, booking, payment attempt and user journey — in one place, with a full log of every action.",
+      "security": "Secure connection · Two-step verification · Session ends after {{minutes}} minutes of inactivity"
     }
   },
   "errors": {
@@ -138,5 +153,12 @@
       "purple": "Completed",
       "violet": "Recommended"
     }
+  },
+  "prefs": {
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }

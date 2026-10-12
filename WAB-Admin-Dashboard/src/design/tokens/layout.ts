@@ -38,7 +38,9 @@ export const SIZES = {
   spinner: '1.5rem',
   touchTarget: '2.75rem',
   cardMin: '15rem',
-  authCard: '26rem',
+  authCard: '28rem',
+  brandPanel: '34rem',
+  segmentedItem: '2.25rem',
   badgeDot: '0.5rem',
   logo: '2.5rem',
   tableCellMin: '8rem',
@@ -62,7 +64,7 @@ export const FONT_SIZES = {
 export const FONT_WEIGHTS = { regular: '400', medium: '500', semibold: '600' } as const;
 export const LINE_HEIGHT = '1.5';
 
-export const OPACITY = { disabled: '0.5', pressed: '0.85' } as const;
+export const OPACITY = { disabled: '0.5', pressed: '0.85', brandText: '0.85' } as const;
 
 export const MOTION = {
   fast: '0.15s',

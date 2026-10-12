@@ -62,9 +62,12 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-017 | Settings model, repository, typed registry, service with Redis cache | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-017a | Create indexes at startup | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-018 | Reference-data seed (countries, cities, areas) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-019 | Demo catalog seed (dev only) | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-019 | Demo catalog seed (dev only) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-020 | Audit-log writer + server-events writer (append-only) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-021 | Booking reference number + id utils | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-022 | Interfaces + stubs: OtpProvider, StorageProvider | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-019 is merged: **SRV-020** (SRV-011 is PENDING).
+Next task to start after SRV-022 is merged: **SRV-023** (SRV-011 is PENDING).
 
 ---
 
@@ -102,16 +105,16 @@ Mongo/Redis plumbing, money/time, settings, seeds. Roadmap SRV-02.
 | SRV-017 | Settings model + service + Redis cache + defaults (BUSINESS §10), typed accessors | `feat/srv-017-settings` | SRV-012, SRV-013 | DONE | Every limit in code reads from settings; admin edit endpoint comes later (`admin-settings`). |
 | SRV-017a | Create indexes at startup: model registry (`models/index.ts`) + create-only `ensureIndexes` (never drops) wired in `main()` | `feat/srv-017a-indexes` | SRV-017 | DONE | Production runs with `autoIndex: false`, so schema-declared unique indexes (`settings.key`, later `customers.phone`, `refreshTokens.tokenHash`…) must be created explicitly. |
 | SRV-018 | Seed script: settings, countries, cities/areas (Jordan) | `feat/srv-018-seed-ref` | SRV-017 | DONE | Idempotent; real city/area names supplied or default to a documented starter set. |
-| SRV-019 | Seed script: demo catalog services (men/women, ar/en) for dev | `feat/srv-019-seed-catalog` | SRV-018 | IN REVIEW | Dev-only; flagged as demo data. |
-| SRV-020 | Audit-log writer (append-only, before/after, reason, IP) + server-events writer | `feat/srv-020-audit` | SRV-012 | TODO | No update/delete API on `auditLogs`; tests prove immutability. |
-| SRV-021 | Booking reference number (`WAB-XXXXXX` base32, no ambiguous chars) + id utils | `feat/srv-021-refnum` | — | TODO | Collision-safe via unique index + retry. |
+| SRV-019 | Seed script: demo catalog services (men/women, ar/en) for dev | `feat/srv-019-seed-catalog` | SRV-018 | DONE | Dev-only; flagged as demo data. |
+| SRV-020 | Audit-log writer (append-only, before/after, reason, IP) + server-events writer | `feat/srv-020-audit` | SRV-012 | DONE | No update/delete API on `auditLogs`; tests prove immutability. |
+| SRV-021 | Booking reference number (`WAB-XXXXXX` base32, no ambiguous chars) + id utils | `feat/srv-021-refnum` | — | DONE | Collision-safe via unique index + retry. |
 
 ## Stage C — Provider interfaces & in-repo stubs
 Abstractions the server depends on, with fakes, so no task waits for an SDK (ROADMAP §2). Real providers are separate PENDING tasks.
 
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
-| SRV-022 | Interfaces + stubs: `OtpProvider` (verify Firebase ID token + phone match), `StorageProvider` (presign/confirm/sign/delete/CDN URL) | `feat/srv-022-if-otp-storage` | — | TODO | Typed interfaces/errors; fake impl selected by config (`*_PROVIDER=fake|real`). |
+| SRV-022 | Interfaces + stubs: `OtpProvider` (verify Firebase ID token + phone match), `StorageProvider` (presign/confirm/sign/delete/CDN URL) | `feat/srv-022-if-otp-storage` | — | IN REVIEW | Typed interfaces/errors; fake impl selected by config (`*_PROVIDER=fake|real`). |
 | SRV-023 | Interfaces + stubs: `Notifier` (push/email), `PaymentProvider` (session/verify/refund/webhook), `AnalyticsProvider` (record/query) | `feat/srv-023-if-notify-pay-analytics` | — | TODO | Fake payment provider supports success/fail/cancel/pending/refund-fail scenarios. |
 
 ## Stage D — Identity & access

@@ -1,7 +1,9 @@
 import { AreaModel } from './area.model';
+import { AuditLogModel } from './auditLog.model';
 import { CatalogServiceModel } from './catalogService.model';
 import { CityModel } from './city.model';
 import { CountryModel } from './country.model';
+import { ServerEventModel } from './serverEvent.model';
 import { SettingModel } from './setting.model';
 
 /**
@@ -14,4 +16,6 @@ export const ALL_MODELS = [
   CityModel,
   AreaModel,
   CatalogServiceModel,
+  AuditLogModel,
+  ServerEventModel,
 ] as const;
