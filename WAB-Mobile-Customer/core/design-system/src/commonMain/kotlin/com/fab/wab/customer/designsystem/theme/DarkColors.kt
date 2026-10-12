@@ -38,7 +38,7 @@ val DarkColors = AppColors(
     accentContainer = Lilac.copy(alpha = 0.14f),
     onSuccessContainer = Green,
     onWarningContainer = Amber,
-    onDangerContainer = Pink,
+    onDangerContainer = Color(0xFFF58AB1),
     onNeutralContainer = Gray,
     onAccentContainer = Lilac,
     heroStart = Color(0xFF14172B),
