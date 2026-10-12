@@ -239,7 +239,7 @@
 ### T-017 — SRV-009 Dockerfile + docker-compose for local development
 - Project: `WAB-Server/` (`Dockerfile`, `.dockerignore`, `docker-compose.yml`, `docker/compose.env.example`, `README.md`, `tests/docker.test.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #15 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #16 merged by the user)
 - Acceptance criteria (INTEGRATION_WORKFLOW §4 local environment: Docker Mongo/Redis/MinIO/SMTP sink; NFR-01 secrets only in env, NFR-06 stateless instances; BUSINESS_DOMAIN §5.6 Mongo transaction needs a replica set):
   - [x] `docker compose up -d` gives MongoDB (single-node replica set, auto-initiated), Redis, MinIO and Mailpit, all published on 127.0.0.1 only, data in named volumes, healthchecks
   - [x] No credentials in the file: MinIO root user/password are required variables from git-ignored `.env`; all variables documented (keys only) in `docker/compose.env.example`
@@ -251,7 +251,21 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified here: the cloud runner has no Docker daemon, so `docker build` and the container healthchecks (Mongo replica-set init, MinIO `mc ready`) were not executed; first real `docker compose up` should confirm them. API docs: no change.
 - Notes: GitGuardian flagged 1 "Generic Password" on PR #16 (`docker-compose.yml` line 50: the `${MINIO_ROOT_PASSWORD:?…}` reference, no real secret). Shortened the required-variable message to `:?required`; the original text stays in an earlier commit of the PR, so the check may need to be marked a false positive in the GitGuardian dashboard. Next: SRV-010 (GitHub Actions CI) only after the user merges #16.
 
+### T-018 — SRV-010 GitHub Actions CI for the server
+- Project: repo root `.github/workflows/server-ci.yml`, `WAB-Server/tests/ci.test.ts`
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #16 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-01 dependency scanning in CI, NFR-10 tests run in CI; INTEGRATION_WORKFLOW §5 path-filtered CI with lint, typecheck, tests, build, secret scan):
+  - [x] Workflow runs on PRs and pushes to `main`, only when `WAB-Server/**` or the workflow changes; read-only token; concurrent runs cancelled; every job has a timeout
+  - [x] `verify` job: `npm ci`, typecheck, lint, format check, tests (includes stale Swagger/Postman check), build, `npm audit --omit=dev --audit-level=high` on Node 22
+  - [x] `secret-scan` job: gitleaks over full history; only the built-in `GITHUB_TOKEN` is referenced
+  - [x] `tests/ci.test.ts` guards the workflow's triggers, commands, Node version, permissions and secrets
+- Tests: `cd WAB-Server && npm test` — 256 pass; all CI steps replayed in a clean copy with a fresh `npm ci` (exit 0)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: the workflow itself has not run on GitHub yet (first run happens on this PR). gitleaks is a second secret scanner next to GitGuardian; if the repo moves to an organization, `GITLEAKS_LICENSE` is required. Dev-only advisories (jest/istanbul) are intentionally outside the audit gate. API docs: no change.
+- Notes: Contract tests job joins when `contracts/` exists (SRV-111); deploy job is SRV-011 (PENDING on hosting). Next: SRV-012 (Mongo layer) — SRV-011 is PENDING.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-010 — next server task, start only after T-017 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-012 — next server task (SRV-011 deploy is PENDING), start only after T-018 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
