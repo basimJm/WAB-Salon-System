@@ -12,6 +12,8 @@
 - `WAB-Server/BRD.md` is legacy and superseded (4-digit OTP, Cloudinary, old paths) — do not implement.
 - Cloud runner: Node 22, `redis-server` present, no `mongod`/docker daemon → unit tests use fakes; externals sit behind interfaces with fake providers.
 
+- SRV-001 done: `WAB-Server` has package.json (TS 5.9, jest 30/ts-jest 29, eslint 9 + typescript-eslint 8, prettier), `npm run typecheck|lint|format:check|build|test`; layout list in `src/constants/layout.ts`. TypeScript 7 exists on npm but tooling peers need <6.1 → stay on 5.9.
+
 ## Business spec
 - `BUSINESS_DOMAIN.md` = single source for schemas, enums, rules, state machine, permissions, jobs, settings, error codes. Money = integer fils (1 JOD = 1000 fils). Booking draft → OTP → payment → booking (Redis holds 10 min).
 
