@@ -6,8 +6,7 @@
     "H004": 1
   },
   "composeApp/src/commonMain/kotlin/com/fab/wab/customer/app/controller/vm/MainViewModel.kt": {
-    "H003": 2,
-    "H006": 2
+    "H003": 2
   },
   "composeApp/src/iosMain/kotlin/com/fab/wab/customer/Platform.ios.kt": {
     "H004": 1
@@ -81,9 +80,6 @@
   },
   "core/storage/src/commonMain/kotlin/com/fab/wab/customer/core/storage/db/AppDatabase.kt": {
     "Q006": 1
-  },
-  "core/ui/src/androidMain/kotlin/com/fab/wab/customer/core/ui/utils/LocalAppLocale.android.kt": {
-    "Q001": 1
   },
   "core/ui/src/commonMain/kotlin/com/fab/wab/customer/core/ui/mvi/BaseViewModel.kt": {
     "H006": 1

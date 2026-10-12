@@ -4,6 +4,7 @@ import com.fab.wab.customer.core.data.di.dataModule
 import com.fab.wab.customer.core.data.places.PlacesRepositoryImpl
 import com.fab.wab.customer.core.data.repository.LocalCacheRepositoryImpl
 import com.fab.wab.customer.core.data.repository.SessionTimeOutImpl
+import com.fab.wab.customer.core.domain.AppearanceSettings
 import com.fab.wab.customer.core.domain.repository.LocalCacheRepository
 import com.fab.wab.customer.core.domain.repository.PlacesRepository
 import com.fab.wab.customer.core.domain.repository.SessionTimeOut
@@ -21,5 +22,6 @@ val coreDiModule = module {
     singleOf(::LocalCacheRepositoryImpl) { bind<LocalCacheRepository>() }
     singleOf(::PlacesRepositoryImpl) { bind<PlacesRepository>() }
     singleOf(::SessionTimeOutImpl) { bind<SessionTimeOut>() }
+    singleOf(::AppearanceSettings)
     includes(storageModule, dataModule, networkModule, deviceLocationProviderModule, permissionModule)
 }

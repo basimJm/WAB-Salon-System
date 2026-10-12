@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -70,11 +69,7 @@ fun App(androidContext: Any?) {
     val sessionTimeOut by mainViewModel.sessionTimeOutState.collectAsStateWithLifecycle()
 
     val languageState by mainViewModel.languageState.collectAsStateWithLifecycle()
-    val isRtl by remember(languageState) {
-        mutableStateOf(languageState == "ar")
-    }
-
-    val layoutDirection = if (isRtl) {
+    val layoutDirection = if (languageState.isRtl) {
         LayoutDirection.Rtl
     } else {
         LayoutDirection.Ltr
@@ -105,7 +100,7 @@ fun App(androidContext: Any?) {
         ) {
             CompositionLocalProvider(
                 LocalImageLoader provides imageLoader,
-                LocalAppLocale provides languageState,
+                LocalAppLocale provides languageState.code,
                 LocalDarkTheme provides isDarkTheme,
             ) {
                 AppTheme {

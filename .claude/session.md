@@ -525,6 +525,21 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally: Gradle is blocked here and detekt jars are rate-limited; the iOS interop calls (UserNotifications, AVFoundation, CoreLocation) and the Android launcher are written from the API docs and must be confirmed by the first CI run. GitHub Actions runners were unavailable when this was written (jobs failed in seconds with no runner), so nothing from the permission work has been built yet.
 - Notes: Gallery access needs no permission (system photo picker). Screens that need a permission (nearby salons, review photo) call `PermissionFlow.ensure` and show a dialog with `openSettings` for BlockedInSettings; those screens are separate tasks. Next: language switch and theme setting.
 
+### T-033 — Customer language and theme handling
+- Project: `WAB-Mobile-Customer/core/domain` (`AppLanguage`, `AppearanceSettings`), `core/storage`, `core/di`, `core/ui` (Android locale), `composeApp` (`MainViewModel`, `App`)
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD §3.1 "Default language Arabic ... change applies immediately and is persisted locally", §3.2 theme default SYSTEM, data model `language` default AR / `theme` default SYSTEM):
+  - [x] Arabic is the default everywhere (storage default was English; initial UI state used the device locale)
+  - [x] `AppLanguage` (ARABIC/ENGLISH) owns the code and `isRtl`; accepts stored codes and platform tags (`ar_JO`, `en-US`); unknown/blank falls back to Arabic; `other` for the single switch icon
+  - [x] `AppearanceSettings`: language and theme flows, `setLanguage`, `setThemeMode`, `toggleLanguage` (returns the language now in effect); registered in Koin
+  - [x] Layout direction comes from `AppLanguage.isRtl` instead of comparing a string to the literal "ar"; the Android locale provider no longer uses `!!`
+  - [x] Theme System/Light/Dark already resolved in `App`; unknown stored theme name means System
+- Tests: `AppLanguageTest` (5), `AppearanceSettingsTest` (7) with a fake settings store; policy tests 68 pass; policy baseline only shrank
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (Gradle blocked) and CI runners were unavailable at the time (jobs failed in seconds with no runner). The language/theme switch screens (Login, Register, Profile, Settings) are feature work: they inject `AppearanceSettings` and call `toggleLanguage()` / `setThemeMode()`.
+- Notes: Existing installs whose stored value is a platform tag (`en_US`) still resolve. Numerals-follow-language is a formatter concern (`NumberFormatter` baseline debt), not in this task.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-020 — next server task after T-029 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
