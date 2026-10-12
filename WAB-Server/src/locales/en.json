@@ -39,5 +39,7 @@
   "errors.UPLOAD_INVALID": "The uploaded file is not valid.",
   "errors.UPLOAD_TOO_LARGE": "The uploaded file is too large.",
   "errors.MAINTENANCE": "The service is under maintenance. Please try again later.",
-  "errors.UPDATE_REQUIRED": "Please update the app to continue."
+  "errors.UPDATE_REQUIRED": "Please update the app to continue.",
+  "messages.OK": "Done successfully.",
+  "messages.CREATED": "Created successfully."
 }
