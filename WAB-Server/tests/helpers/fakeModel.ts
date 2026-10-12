@@ -36,11 +36,21 @@ const matchesCondition = (actual: unknown, condition: unknown): boolean => {
   });
 };
 
+/** Reads `a.b` from nested documents, like a MongoDB dotted path. */
+const valueAt = (doc: Doc, path: string): unknown =>
+  path
+    .split('.')
+    .reduce<unknown>(
+      (value, part) =>
+        typeof value === 'object' && value !== null ? (value as Doc)[part] : undefined,
+      doc,
+    );
+
 export const matches = (doc: Doc, filter: Filter): boolean =>
   Object.entries(filter).every(([key, condition]) => {
     if (key === '$and') return (condition as Filter[]).every((part) => matches(doc, part));
     if (key === '$or') return (condition as Filter[]).some((part) => matches(doc, part));
-    return matchesCondition(doc[key], condition);
+    return matchesCondition(valueAt(doc, key), condition);
   });
 
 class FakeQuery<T> implements PromiseLike<T> {
