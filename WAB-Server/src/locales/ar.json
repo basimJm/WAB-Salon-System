@@ -39,5 +39,7 @@
   "errors.UPLOAD_INVALID": "الملف المرفوع غير صالح.",
   "errors.UPLOAD_TOO_LARGE": "حجم الملف المرفوع كبير جدًا.",
   "errors.MAINTENANCE": "الخدمة قيد الصيانة. يرجى المحاولة لاحقًا.",
-  "errors.UPDATE_REQUIRED": "يرجى تحديث التطبيق للمتابعة."
+  "errors.UPDATE_REQUIRED": "يرجى تحديث التطبيق للمتابعة.",
+  "messages.OK": "تمت العملية بنجاح.",
+  "messages.CREATED": "تم الإنشاء بنجاح."
 }

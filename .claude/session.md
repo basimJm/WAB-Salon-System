@@ -166,7 +166,7 @@
 ### T-012 — SRV-005 Express app factory, namespaces, validate middleware, server entry
 - Project: `WAB-Server/` (`src/app.ts`, `src/server.ts`, `src/routes/index.ts`, `src/modules/{customer,merchant,admin}/index.ts`, `src/middlewares/validate.ts`, `src/constants/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #10 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #11 merged)
 - Acceptance criteria (BE/NFR: BE-03 separate namespaces, NFR-09; BUSINESS_DOMAIN §11 VALIDATION_ERROR; server rules §3 modules, §4 layout, §9 validate every input):
   - [x] `createApp` order: requestId → language → JSON parser (limit from constants) → routes → notFound → errorHandler; `X-Powered-By` off
   - [x] `/customer/v1`, `/merchant/v1`, `/admin/v1` mounted from `routes/index.ts`; each namespace has its own module router; routes never reachable under another prefix
@@ -178,7 +178,21 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found Express 5 `app.listen` hands listen errors to its callback as success, so `server.ts` uses `http.createServer`. Security headers/CORS/rate limits are SRV-007; health endpoints SRV-006; response helpers SRV-005a.
 - Notes: Next: SRV-005a. User asked me to merge my own PRs from SRV-005 on.
 
+### T-013 — SRV-005a Success response and pagination helpers
+- Project: `WAB-Server/` (`src/utils/response/successResponse.ts`, `src/utils/pagination`, `src/constants/{pagination,messages}.ts`, locales)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #11 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-11, NFR-09; BUSINESS_DOMAIN §10 pagination.appPageSize=10 / adminPageSize=25; server rules §6 envelope, §9 paginate every list):
+  - [x] `sendSuccess`/`sendCreated`/`sendPaginated` build `{success:true,message,data,meta?}` localized (ar default); `data:null` when empty; `meta` only on paginated lists; 201 for created
+  - [x] `paginationQuery(defaultPageSize)` coerces `page`/`pageSize`, defaults from constants, rejects page<1, non-integers, pageSize<1 or >100 with 400 `VALIDATION_ERROR`
+  - [x] `toSkipLimit`, `buildPaginationMeta` helpers; app (10) and admin (25) page sizes in constants
+  - [x] `messages.OK`/`messages.CREATED` in both locales (parity test passes)
+- Tests: `cd WAB-Server && npm test` — 166 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — page sizes are constants for now; settings-driven values (`pagination.*`) are passed in by services once SRV-017 exists.
+- Notes: PR left open for the user (they interrupted; do not merge until told). Next: SRV-006.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-005a — next server task, start only after T-012 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-006 — next server task, start only after T-013 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
