@@ -195,7 +195,7 @@
 ### T-014 — SRV-006 Health and readiness endpoints
 - Project: `WAB-Server/` (`src/routes/health.ts`, `src/utils/health`, `src/utils/async/timeout.ts`, `src/constants/health.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #12 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #13 merged)
 - Acceptance criteria (BE/NFR: NFR-08 health checks; server rules §6 envelope, §8 errors; BUSINESS_DOMAIN: none):
   - [x] `GET /health`: public liveness, 200 success envelope, never touches dependencies
   - [x] `GET /ready`: runs pluggable `ReadinessCheck`s in parallel with a timeout; all up → 200 with per-check status; any down/hanging/throwing → 503 error envelope naming the failing checks (`DEPENDENCY_DOWN`), no error text leaked, failure logged as warning
@@ -206,7 +206,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — extracted `withTimeout` instead of duplicating it; `/ready` 503 uses the operational `ExternalServiceError` (code INTERNAL, per SRV-004 decision).
 - Notes: User said "complete": I merge my own PRs and continue the backlog. Next: SRV-007.
 
+### T-015 — SRV-007 Security middleware
+- Project: `WAB-Server/` (`src/middlewares/{security,rateLimit,sanitize}.ts`, `src/utils/sanitize`, `src/constants/security.ts`, config `TRUST_PROXY_HOPS`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #13 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-01 Helmet, CORS limited to admin domain, rate limiting, input size limits, NoSQL-injection + XSS sanitization; server rules §5, §8):
+  - [x] Helmet headers on every response; `X-Powered-By` off
+  - [x] CORS only for `CORS_ALLOWED_ORIGINS` (admin domain), no credentials, exposes `X-Request-Id`, preflight cached; no Origin (native apps) allowed; none configured = no browser origin
+  - [x] Global per-IP rate limit (constants) → 429 `RATE_LIMITED` envelope localized; `/health` and `/ready` exempt; reusable `createRateLimiter` for OTP/login/payments (Redis store later, SRV-014); real client IP via `TRUST_PROXY_HOPS` (default 0, X-Forwarded-For ignored unless trusted)
+  - [x] Body sanitizer: drops `$…`, dotted and prototype keys at any depth; strips HTML/script from text (repeat-until-stable); secret-like fields (password, token…) never rewritten; depth limit → 400; query sanitized (Express 5 getter overridden); input not mutated
+  - [x] JSON body limit already enforced (100kb → 413)
+- Tests: `cd WAB-Server && npm test` — 206 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT done here: "HTTPS only" is terminated at the hosting platform/load balancer (DigitalOcean product + domain still undecided, SRV-011/116); Helmet's HSTS covers browsers. Per-route stricter limits come with their tasks. Added deps: helmet, cors, express-rate-limit.
+- Notes: Next: SRV-008.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-007 — next server task, start only after T-014 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-008 — next server task, start only after T-015 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

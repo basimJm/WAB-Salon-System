@@ -49,9 +49,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-004a | Global error handler, notFound, async wrapper, process handlers | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-005 | Express app factory, namespaces, validate middleware, server entry | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-005a | Success response and pagination helpers | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-006 | Health and readiness endpoints | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-006 | Health and readiness endpoints | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-007 | Security middleware (Helmet, CORS, rate limit, sanitize) | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-006 is merged: **SRV-007**.
+Next task to start after SRV-007 is merged: **SRV-008**.
 
 ---
 
@@ -69,8 +70,8 @@ Project skeleton, cross-cutting plumbing, CI. Roadmap SRV-01.
 | SRV-004a | Global `errorHandler` + `notFound` + async wrapper (`utils/async`); maps Mongoose (`CastError`, `ValidationError`, `11000`→409), JWT, schema-validator, malformed JSON (400), payload too large (413), timeouts/provider failures (502/503); unknown errors → `INTERNAL_ERROR` 500 without leaking stack; process-level `unhandledRejection`/`uncaughtException` handlers and graceful `SIGTERM` shutdown (close HTTP, DB, Redis) | `feat/srv-004a-error-handler` | SRV-004 | DONE | One handler produces the base error envelope; every mapping unit-tested; stack/queries/provider payloads logged, never returned. |
 | SRV-005 | Express app factory (`app.ts`, `server.ts`, `routes/index.ts`) mounting `/customer/v1` `/merchant/v1` `/admin/v1` + `validate` middleware (body/params/query/headers) | `feat/srv-005-app` | — | DONE | Schema validation on every input with field-level `details { field, code, message }`; modules never import across namespaces; supertest smoke tests. |
 | SRV-005a | Base response helpers (`utils/response`): success `{ success, message, data, meta? }` (pagination `meta { page, pageSize, total }`) and error `{ success:false, message, error { code, details?, traceId } }`; pagination helper (`utils/pagination`, page sizes from constants/settings) | `feat/srv-005a-responses` | SRV-005 | DONE | Controllers never hand-write `res.json`; messages localized by request language; tests for success shape and paginated meta (the error body builder `buildErrorBody` already exists from SRV-004a). |
-| SRV-006 | Health + readiness endpoints (Mongo/Redis checks pluggable) | `feat/srv-006-health` | — | IN REVIEW | `/health` liveness, `/ready` dependency checks; no auth. |
-| SRV-007 | Security middleware: Helmet, CORS (admin domain from config), global rate limit, body-size limits, NoSQL-injection + XSS sanitizing | `feat/srv-007-security` | — | TODO | Each control has a unit/integration test; limits come from config. |
+| SRV-006 | Health + readiness endpoints (Mongo/Redis checks pluggable) | `feat/srv-006-health` | — | DONE | `/health` liveness, `/ready` dependency checks; no auth. |
+| SRV-007 | Security middleware: Helmet, CORS (admin domain from config), global rate limit, body-size limits, NoSQL-injection + XSS sanitizing | `feat/srv-007-security` | — | IN REVIEW | Each control has a unit/integration test; limits come from config. |
 | SRV-008 | Swagger/OpenAPI generated from code + Postman collection export script (kept in repo) | `feat/srv-008-swagger` | — | TODO | `npm run docs` regenerates both; CI fails if stale. |
 | SRV-009 | Dockerfile + docker-compose for local dev (Mongo, Redis, MinIO, SMTP sink) | `feat/srv-009-docker` | — | TODO | `docker compose up` gives a working local environment; no secrets in files. |
 | SRV-010 | GitHub Actions CI: lint, typecheck, unit tests, `npm audit --omit=dev` (dev-only transitive advisories via jest/istanbul exist), secret scan (path-filtered to `WAB-Server/`) | `feat/srv-010-ci` | — | TODO | Required checks on PRs; contract-test job added later (see `contracts`). |

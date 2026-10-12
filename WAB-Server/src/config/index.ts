@@ -17,6 +17,8 @@ export interface AppConfig {
   readonly port: number;
   readonly logLevel: LogLevel;
   readonly corsAllowedOrigins: readonly string[];
+  /** Number of reverse proxies in front of the app (load balancer = 1); 0 = trust none. */
+  readonly trustProxyHops: number;
   readonly mongo: { readonly uri: string };
   readonly redis: { readonly url: string };
 }
@@ -65,6 +67,7 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
     port: values[ENV_KEYS.port],
     logLevel: values[ENV_KEYS.logLevel],
     corsAllowedOrigins: Object.freeze(values[ENV_KEYS.corsAllowedOrigins]),
+    trustProxyHops: values[ENV_KEYS.trustProxyHops],
     mongo: Object.freeze({ uri: values[ENV_KEYS.mongoUri] }),
     redis: Object.freeze({ url: values[ENV_KEYS.redisUrl] }),
   });

@@ -12,6 +12,11 @@ import {
   PORT_MIN,
   REDIS_URL_PATTERN,
 } from '../constants/env';
+import {
+  DEFAULT_TRUST_PROXY_HOPS,
+  TRUST_PROXY_HOPS_MAX,
+  TRUST_PROXY_HOPS_MIN,
+} from '../constants/security';
 
 const splitList = (value: string): string[] =>
   value
@@ -25,6 +30,12 @@ export const envSchema = z.object({
   [ENV_KEYS.port]: z.coerce.number().int().min(PORT_MIN).max(PORT_MAX).default(DEFAULT_PORT),
   [ENV_KEYS.logLevel]: z.enum(LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
   [ENV_KEYS.corsAllowedOrigins]: z.string().default('').transform(splitList),
+  [ENV_KEYS.trustProxyHops]: z.coerce
+    .number()
+    .int()
+    .min(TRUST_PROXY_HOPS_MIN)
+    .max(TRUST_PROXY_HOPS_MAX)
+    .default(DEFAULT_TRUST_PROXY_HOPS),
   [ENV_KEYS.mongoUri]: z.string().regex(MONGO_URI_PATTERN),
   [ENV_KEYS.redisUrl]: z.string().regex(REDIS_URL_PATTERN),
 });
