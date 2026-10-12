@@ -181,7 +181,7 @@
 ### T-013 — SRV-005a Success response and pagination helpers
 - Project: `WAB-Server/` (`src/utils/response/successResponse.ts`, `src/utils/pagination`, `src/constants/{pagination,messages}.ts`, locales)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #11 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #12 merged)
 - Acceptance criteria (BE/NFR: NFR-11, NFR-09; BUSINESS_DOMAIN §10 pagination.appPageSize=10 / adminPageSize=25; server rules §6 envelope, §9 paginate every list):
   - [x] `sendSuccess`/`sendCreated`/`sendPaginated` build `{success:true,message,data,meta?}` localized (ar default); `data:null` when empty; `meta` only on paginated lists; 201 for created
   - [x] `paginationQuery(defaultPageSize)` coerces `page`/`pageSize`, defaults from constants, rejects page<1, non-integers, pageSize<1 or >100 with 400 `VALIDATION_ERROR`
@@ -190,9 +190,23 @@
 - Tests: `cd WAB-Server && npm test` — 166 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — page sizes are constants for now; settings-driven values (`pagination.*`) are passed in by services once SRV-017 exists.
-- Notes: PR left open for the user (they interrupted; do not merge until told). Next: SRV-006.
+- Notes: Next: SRV-006.
+
+### T-014 — SRV-006 Health and readiness endpoints
+- Project: `WAB-Server/` (`src/routes/health.ts`, `src/utils/health`, `src/utils/async/timeout.ts`, `src/constants/health.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #12 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-08 health checks; server rules §6 envelope, §8 errors; BUSINESS_DOMAIN: none):
+  - [x] `GET /health`: public liveness, 200 success envelope, never touches dependencies
+  - [x] `GET /ready`: runs pluggable `ReadinessCheck`s in parallel with a timeout; all up → 200 with per-check status; any down/hanging/throwing → 503 error envelope naming the failing checks (`DEPENDENCY_DOWN`), no error text leaked, failure logged as warning
+  - [x] Mounted at root (outside `/customer|merchant|admin/v1`); `createApp({readinessChecks})` is how MongoDB/Redis checks get added later (SRV-012/013)
+  - [x] `withTimeout` shared helper (also used by shutdown); message `health.DEPENDENCY_DOWN` in ar+en
+- Tests: `cd WAB-Server && npm test` — 177 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — extracted `withTimeout` instead of duplicating it; `/ready` 503 uses the operational `ExternalServiceError` (code INTERNAL, per SRV-004 decision).
+- Notes: User said "complete": I merge my own PRs and continue the backlog. Next: SRV-007.
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-006 — next server task, start only after T-013 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-007 — next server task, start only after T-014 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
