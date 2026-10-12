@@ -60,6 +60,8 @@ Each project has:
 | Admin panel | `WAB-Admin-Dashboard/docs/WAB_Admin_BRD.md`, `WAB_Admin_PRD.md`, `WAB_Admin_Design_Script.md` |
 | Backend | `WAB-Server/docs/WAB_Backend_BRD.md` (+ legacy `WAB-Server/BRD.md`) |
 | Packages | `wab-*/docs/WAB_Package_*_BRD.md` |
+| Delivery plan | `ROADMAP.md` (phases & parallel tracks: SERVICE, SERVER, CUSTOMER, MERCHANT, ADMIN, INT) |
+| Integration & environments | `INTEGRATION_WORKFLOW.md` (contracts in `contracts/`, mocks, dev/prod, CI/CD) |
 
 **Precedence:** PRD > BRD > Design Script > design files. If two documents conflict, stop and ask; do not guess. Every PRD has an "Open Items & Assumptions" table — implement the stated assumption and keep it easy to change.
 
