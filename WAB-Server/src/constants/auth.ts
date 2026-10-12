@@ -17,3 +17,16 @@ export const SCOPE_BY_SUBJECT = {
 
 export const AUTHORIZATION_HEADER = 'authorization';
 export const BEARER_PATTERN = /^Bearer ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/;
+
+/** Refresh tokens (SRV-026): 256 random bits, base64url, so always 43 characters. */
+export const REFRESH_TOKEN_BYTES = 32;
+export const REFRESH_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
+export const REFRESH_FAMILY_BYTES = 16;
+export const TOKEN_HASH_ALGORITHM = 'sha256';
+
+export const REVOKE_REASONS = {
+  rotated: 'ROTATED',
+  logout: 'LOGOUT',
+  logoutAll: 'LOGOUT_ALL',
+  reuseDetected: 'REUSE_DETECTED',
+} as const;

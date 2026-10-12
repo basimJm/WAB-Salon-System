@@ -576,7 +576,7 @@
 ### T-036 — SRV-025 JWT access tokens and per-scope auth middleware
 - Project: `WAB-Server/` (`src/utils/auth/accessToken.ts`, `src/middlewares/auth.ts`, `src/constants/auth.ts`, `src/config/*`, `src/types/express.d.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #41 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #42 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-01 platform access token (short-lived), BE-03 separate namespaces/scopes, NFR-01; CLAUDE.md §4.2; BUSINESS_DOMAIN §10 `auth.accessTokenTtlSec` = 900; backlog: customer token on merchant/admin route → FORBIDDEN, tests for all 3×3 combos):
   - [x] `signAccessToken({secret, subjectType, subjectId, ttlSec, now})`: HS256, issuer `wab-server`, audience = the subject's namespace scope (CUSTOMER→customer, MEMBER→merchant, ADMIN→admin), subject = ObjectId string, expiry = `ttlSec` (caller passes the setting); invalid ttl or id are caller bugs (`RangeError`)
   - [x] `verifyAccessToken(secret, token, now)`: only HS256 (unsigned and HS512 refused), issuer, signature, expiry (valid until the expiry second), known audience, ObjectId subject, expiry present; anything wrong → 401
@@ -587,6 +587,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Dep added: `jsonwebtoken` 9. Decisions to confirm: (1) one signing secret with the scope in `aud` (separate secrets per namespace would need three env keys); (2) token carries only subject + scope: merchant role/permissions are loaded from the database per request (SRV-0xx) so a permission change applies at once; (3) no token revocation list: access tokens are short (15 min), revocation is by refresh-token family (SRV-026). Middleware is not mounted on any route yet (no protected endpoint exists). API docs: no change.
 - Next: SRV-026 (refresh tokens: hashed storage, rotation, family revocation).
+
+### T-037 — SRV-026 Refresh tokens: hashed storage, rotation, family revocation
+- Project: `WAB-Server/` (`src/domain/auth/refreshTokens.service.ts`, `src/repositories/identity.repository.ts`, `src/constants/auth.ts`, `tests/refreshTokens.test.ts`, `tests/helpers/fakeModel.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #42 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-01 rotating revocable refresh token, NFR-01 no raw tokens stored; CLAUDE.md §4.2; BUSINESS_DOMAIN §3.1 `refreshTokens`, §10 `auth.refreshTokenTtlDays`):
+  - [x] Token = 32 random bytes base64url (43 chars); only its SHA-256 is stored; new family per login; expiry from `ttlDays`
+  - [x] `rotate`: malformed/unknown/expired -> 401; atomic claim of the old token (one winner under concurrency); new token in the same family; old marked ROTATED + `replacedBy`
+  - [x] Reuse of a revoked token or a lost race revokes the whole family (`REUSE_DETECTED`), logged without the token, 401
+  - [x] `revoke` (logout) idempotent and silent for unknown tokens; `revokeAll(subject)` revokes only that account's active tokens
+- Tests: `cd WAB-Server && npm test` - 1229 pass (39 suites); format:check/lint/typecheck/build green; audit 0; `npm run docs` no diff. `tests/refreshTokens.test.ts` (22). Mutation check skipped (user asked for speed).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - service not wired to any endpoint yet (login/refresh endpoints: SRV-028/030). Caller signs the access token from the returned subject. API docs: no change.
+- Next: SRV-027 (OTP pre-check endpoint).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

@@ -22,6 +22,8 @@ const matchesCondition = (actual: unknown, condition: unknown): boolean => {
         return (expected as unknown[]).some((item) => same(actual, item));
       case '$nin':
         return !(expected as unknown[]).some((item) => same(actual, item));
+      case '$exists':
+        return (actual !== undefined && actual !== null) === expected;
       case '$gt':
         return (actual as number) > (expected as number);
       case '$gte':
@@ -160,6 +162,12 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
         }
         Object.assign(doc, update.$set, { updatedAt: new Date() });
         return { ...doc };
+      }),
+    updateMany: (filter: Filter, update: { $set: Doc }) =>
+      new FakeQuery(() => {
+        const found = select(filter);
+        for (const doc of found) Object.assign(doc, update.$set, { updatedAt: new Date() });
+        return { modifiedCount: found.length };
       }),
   };
   return { model: model as unknown as Model<never>, docs, calls };
