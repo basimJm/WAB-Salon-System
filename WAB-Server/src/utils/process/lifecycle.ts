@@ -1,4 +1,5 @@
 import { EXIT_CODE_FAILURE, EXIT_CODE_OK, SHUTDOWN_TIMEOUT_MS } from '../../constants/errorMapping';
+import { withTimeout } from '../async/timeout';
 import type { Logger } from '../logger';
 
 export interface Closable {
@@ -11,20 +12,6 @@ export interface ProcessLike {
   on(event: string, listener: (...args: unknown[]) => void): unknown;
   exit(code: number): never | void;
 }
-
-const withTimeout = async (task: Promise<void>, timeoutMs: number): Promise<void> => {
-  let timer: NodeJS.Timeout | undefined;
-  const timeout = new Promise<never>((_resolve, reject) => {
-    timer = setTimeout(() => {
-      reject(new Error('shutdown timed out'));
-    }, timeoutMs);
-  });
-  try {
-    await Promise.race([task, timeout]);
-  } finally {
-    if (timer) clearTimeout(timer);
-  }
-};
 
 /**
  * Closes resources in the given order (HTTP server first, then Socket.IO/BullMQ, Redis, MongoDB).

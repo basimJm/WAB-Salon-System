@@ -41,5 +41,6 @@
   "errors.MAINTENANCE": "الخدمة قيد الصيانة. يرجى المحاولة لاحقًا.",
   "errors.UPDATE_REQUIRED": "يرجى تحديث التطبيق للمتابعة.",
   "messages.OK": "تمت العملية بنجاح.",
-  "messages.CREATED": "تم الإنشاء بنجاح."
+  "messages.CREATED": "تم الإنشاء بنجاح.",
+  "health.DEPENDENCY_DOWN": "إحدى الخدمات المطلوبة غير متاحة."
 }

@@ -41,5 +41,6 @@
   "errors.MAINTENANCE": "The service is under maintenance. Please try again later.",
   "errors.UPDATE_REQUIRED": "Please update the app to continue.",
   "messages.OK": "Done successfully.",
-  "messages.CREATED": "Created successfully."
+  "messages.CREATED": "Created successfully.",
+  "health.DEPENDENCY_DOWN": "A required service is unavailable."
 }
