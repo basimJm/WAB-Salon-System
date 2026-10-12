@@ -1,50 +1,105 @@
 package com.fab.wab.customer.designsystem.components.textfield
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.VisualTransformation
+import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
-import com.fab.wab.customer.designsystem.resources.Res
-import com.fab.wab.customer.designsystem.resources.email_hint
-import com.fab.wab.customer.designsystem.resources.email_placeholder
+
+/** Debounce for search-as-you-type inputs; ViewModels use it so no request is sent per keystroke (PRD 3.5). */
+const val SEARCH_DEBOUNCE_MILLIS = 500L
 
 /**
- * Normal text field matching WABCustomer design.
- * - No icon
- * - Standard keyboard
+ * Text field with the design's states: default, focused, filled, error (message below) and disabled.
+ * The label sits above the field; [leading] and [trailing] are Start/End slots.
  */
 @Composable
 fun AppTextField(
-    state: TextFieldState,
+    value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    label: String? = null,
+    placeholder: String? = null,
+    error: String? = null,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    leading: (@Composable () -> Unit)? = null,
+    trailing: (@Composable () -> Unit)? = null,
 ) {
-    AppBaseTextField(
-        state = state,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-    )
-}
-
-@Preview
-@Composable
-private fun AppTextFieldPreview() {
-    AppTheme {
-        AppTextField(
-            state = TextFieldState(
-                hint = Res.string.email_hint,
-                placeholder = Res.string.email_placeholder,
-            ),
-            onValueChange = {},
-            modifier = Modifier.padding(16.dp)
+    val interaction = remember { MutableInteractionSource() }
+    val focused by interaction.collectIsFocusedAsState()
+    val colors = AppTheme.colors
+    val spacing = AppTheme.spacing
+    val borderColor = when {
+        error != null -> colors.danger
+        focused -> colors.accent
+        else -> colors.line
+    }
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.space6)) {
+        if (label != null) {
+            AppText(text = label, style = AppTheme.typography.labelMedium, color = colors.muted)
+        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = AppTheme.typography.bodyLarge.copy(color = colors.ink),
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            singleLine = singleLine,
+            visualTransformation = visualTransformation,
+            interactionSource = interaction,
+            cursorBrush = SolidColor(colors.accent),
+            decorationBox = { inner ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = AppTheme.sizes.fieldHeight)
+                        .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
+                        .background(if (enabled) colors.card else colors.surface, AppTheme.shapes.medium)
+                        .border(AppTheme.sizes.borderWidth, borderColor, AppTheme.shapes.medium)
+                        .padding(horizontal = spacing.space14),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(spacing.space8),
+                ) {
+                    leading?.invoke()
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                        if (value.isEmpty() && placeholder != null) {
+                            AppText(text = placeholder, style = AppTheme.typography.bodyLarge, color = colors.faint, maxLines = 1)
+                        }
+                        inner()
+                    }
+                    trailing?.invoke()
+                }
+            },
         )
+        if (error != null) {
+            AppText(text = error, style = AppTheme.typography.bodySmall, color = colors.danger)
+        }
     }
 }

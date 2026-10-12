@@ -62,7 +62,7 @@ feature/<name>/di             Koin module that binds data → domain
 - Every ViewModel, use case, mapper and token/utility has a unit test in `commonTest` (kotlin-test + coroutines test, fakes instead of mocks).
 
 ## 4. Design System (the only source of visual values)
-- Tokens live in `core/design-system/src/commonMain/.../theme`: colors (light + dark), typography, spacing, shapes, elevation, sizes, motion, and adaptive layout breakpoints. Components read them from `LocalAppColors`, `LocalSpacing`, `LocalShapes`, `LocalTypography`, `LocalSizes`, `LocalElevation`, `LocalAdaptive`; they never use raw values.
+- Tokens live in `core/design-system/src/commonMain/.../theme`: colors (light + dark), typography, spacing, shapes, elevation, sizes, motion, and adaptive layout breakpoints. Components read them through `AppTheme.colors`, `.spacing`, `.shapes`, `.typography`, `.sizes`, `.elevation`, `.alpha`, `.motion`, `.adaptive`; they never use raw values.
 - Build screens from `App*` components only. A missing component is added to the design system first (with a preview and a test), then used.
 - Layout uses Start/End, never Left/Right. Icons that have direction mirror in RTL. Text uses `TextDirection.Content`.
 - Fonts: Playfair Display (headings), Poppins (Latin body), IBM Plex Sans Arabic (Arabic body and headings). Only the bundled files in `composeResources/font`.
@@ -83,7 +83,7 @@ feature/<name>/di             Koin module that binds data → domain
 - Collect flows with `collectAsStateWithLifecycle`; cancel work when the screen is not visible; debounce search input at 500 ms.
 - No blocking work on the main thread; mapping and parsing run on `Dispatchers.Default`/IO inside data/use cases.
 - Startup: no eager initialization of features that are not on the first screen; shimmer instead of spinners for content.
-- CI enforces: R8 on for release, release APK size budget (`config/budgets.json`), Compose stability report for `core/design-system` (no unstable public parameters), detekt performance rules, Compose lint rules.
+- CI enforces: R8 on for release, release APK size budget (`config/budgets.json`), detekt performance and Compose rules, and policy checks for lazy-list keys, `collectAsStateWithLifecycle`, `runBlocking`/`Thread.sleep`.
 
 ## 7. Adaptive Layout (portrait, landscape, every size)
 - Use `AppWindowSize` (width class × height class × orientation) from the design system. Compact width: single column and bottom bar. Medium and Expanded width, or landscape: navigation rail, content constrained to the max content width token, multi-column grids (`AppAdaptiveGrid`).

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <!-- Splash Screen -->
-    <string name="splash_version">v%s</string>
+    <string name="splash_version">v%1$s</string>
     <string name="splash_loading">جاري التحميل...</string>
     
     <!-- Update Dialogs -->
@@ -24,4 +24,5 @@
     <string name="splash_error_message">تعذر تحميل إعدادات التطبيق. يرجى التحقق من الاتصال والمحاولة مرة أخرى.</string>
     <string name="splash_retry_button">إعادة المحاولة</string>
     <string name="unauthorized_logout_message">أنت غير مصرح لك وسيتم تسجيل خروجك.</string>
+    <string name="nav_home">الرئيسية</string>
 </resources>

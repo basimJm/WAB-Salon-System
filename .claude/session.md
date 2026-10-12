@@ -365,13 +365,13 @@
   - [x] Linked from root `CLAUDE.md` (§6)
 - Tests: docs only (no source code); every module path, file and class named in the rules was checked against the repo
 - Loops: 3/3
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — docs only. The rules also name artifacts that T-025..T-027 deliver (`scripts/ci/*`, `customer-ci.yml`, `config/budgets.json`, `LocalSizes`/`LocalElevation`/`LocalAdaptive`, `AppWindowSize`, `AppAdaptiveGrid`, the iOS `iosApp-Dev|Prod` schemes); T-027 records the final reconciliation of those names.
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — docs only. The rules also name artifacts that T-025, T-029, T-030 deliver (`scripts/ci/*`, `customer-ci.yml`, `config/budgets.json`, `LocalSizes`/`LocalElevation`/`LocalAdaptive`, `AppWindowSize`, `AppAdaptiveGrid`, the iOS `iosApp-Dev|Prod` schemes); T-027 records the final reconciliation of those names.
 - Notes: Branch is the cloud-pinned branch (restarted from `main` after PR #22 merged; exception to `<type>/<name>`). `AGENTS.md` is generated and points at a missing `PROJECT_STRUCTURE.md`; left untouched, CLAUDE.md §2 is the module map. Open: separate Firebase apps for dev (`applicationIdSuffix`) need the owner's Firebase dev project.
 
 ### T-025 — Customer app build variants + CI (Android, iOS, security, lint, hardcode, performance)
 - Project: `WAB-Mobile-Customer/` (`build-logic`, `androidApp`, `iosApp`, `core/common`, `core/network`, `composeApp`, `scripts/ci`, `config`) + `.github/workflows/customer-ci.yml`
 - Branch: `claude/amazing-cerf-vc5ja3`
-- Status: IN REVIEW
+- Status: DONE (PR #23 merged)
 - Acceptance criteria (user request: CI that builds, checks security, lint, hardcoded values and performance for Android and iOS; all build variants dev[debug, release] and prod[debug, release] + iOS schemes; no warnings; files <= 300 lines):
   - [x] Android flavors `dev`/`prod` x build types `debug`/`release` (AGP DSL checked against the 9.1 API reference); per-flavor `BuildConfig.API_BASE_URL`/`ENVIRONMENT` from `gradle.properties`/`local.properties`; dev app name override (AR+EN); release minified + shrunk (R8) with keep rules; Lint with `warningsAsErrors`
   - [x] iOS configurations `Debug-Dev`, `Release-Dev`, `Debug-Prod`, `Release-Prod` (Xcode project parsed OK), shared schemes `iosApp-Dev`/`iosApp-Prod`, `Dev.xcconfig`/`Prod.xcconfig` -> Info.plist (`APP_ENV`, `API_BASE_URL`), `KOTLIN_FRAMEWORK_BUILD_TYPE`, Swift/Clang warnings as errors, AR+EN `InfoPlist.strings`
@@ -384,8 +384,39 @@
 - Tests: `python3 -m unittest discover -s scripts/ci/tests` — 67 pass (policy lexer, hardcoded, quality, baseline, localization, file length, variants, security, budget, CLI, and the repository itself); `scripts/ci/run_detekt.sh` exit 0; `policy_checks.py all` ok; Kotlin `AppEnvironmentTest` (runs in CI)
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT VERIFIED HERE: the sandbox cannot reach Google Maven/the Android SDK (`dl.google.com` is blocked by the egress policy), so Gradle (Android/iOS), Android Lint, R8 and `xcodebuild` have not run locally; the first CI run is the real compile. DECISIONS TO CONFIRM: (1) dev keeps the production application id/bundle id (a suffix needs a matching Firebase app; `DEV_APPLICATION_ID_SUFFIX`/`BUNDLE_ID_SUFFIX` are ready); (2) API hosts are PLACEHOLDERS until the platform domain is decided; (3) `allowBackup=false` and `usesCleartextTraffic=false` are new; (4) no dependency vulnerability scan yet (Gradle has no lockfile): recommend Dependabot alerts or Gradle dependency locking + OSV.
-- Notes: Legacy debt is in `config/policy-baseline.json` and `config/detekt/baseline.xml`; T-026/T-027 remove the design-system entries. Local runs: `scripts/ci/run_local_checks.sh`.
+- Notes: Legacy debt is in `config/policy-baseline.json` and `config/detekt/baseline.xml`; T-029/T-030 remove the design-system entries. Local runs: `scripts/ci/run_local_checks.sh`.
 
+### T-029 — Customer design system: tokens, fonts, theme, adaptive layout
+- Project: `WAB-Mobile-Customer/core/design-system` (`theme/*`), `composeApp` (App, SplashScreen)
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (user request: implement design system and theme, handle landscape/portrait, everything related to the design; design source = `design/*.dc.html` + Design Script):
+  - [x] WAB violet light/dark color roles from the design export (ink/muted/faint, soft, line, gradient #6D28D9 to #A855F7, hero backdrop, shimmer) replace the template's emerald palette; status text colors meet 4.5:1 on their tinted containers (unit-tested)
+  - [x] Typography: Playfair Display + Poppins (English), IBM Plex Sans Arabic (Arabic, by layout direction); OFL font files bundled in composeResources/font
+  - [x] Spacing, shape, size, elevation, alpha and motion tokens; no literals outside `theme/`
+  - [x] Adaptive layout: `AppWindowSize` (width/height class, orientation), `AdaptiveTokens` (navigation bottom bar vs rail, margins, max content width, grid columns) re-evaluated on rotation
+  - [x] Material scheme/typography mapped from WAB roles; `AppTheme.colors|spacing|...` accessors
+- Tests: `AdaptiveTokensTest`, `ColorTokensTest` (commonTest, run by CI: testAndroidHostTest and iosSimulatorArm64Test)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally: Google Maven is blocked in the sandbox and the desktop harness could not resolve androidx artifacts, so CI is the first compile. Fonts come from the Google Fonts releases via npm (@expo-google-fonts, OFL).
+- Notes: Template emerald theme, `AppIcons.kt` (1905 lines of hand-drawn vectors) and 40 template components removed.
+
+### T-030 — Customer base components
+- Project: `WAB-Mobile-Customer/core/design-system` (`components/*`, `icons`, `preview`), `feature/sample`, `composeApp`
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (Design Script §1.2, PRD §3, §12):
+  - [x] Text, buttons (primary/secondary/outlined/text/destructive with enabled/disabled/loading), icon button, card, divider, status badge (5 tones) and count badge (1-99, 99+), filter chip (selectable/removable), time-slot chip, rating display + input (decimals), section header
+  - [x] Text field (default/focused/filled/error/disabled), search bar (editable + static), dropdown, OTP input (backend length, digits LTR, sanitised), segmented tabs, switch/checkbox/radio/sliders
+  - [x] Dialog (confirm/info), bottom sheet, full-screen sheet, toast, empty/error/offline states, shimmer placeholders, avatar with availability dot, step indicator
+  - [x] Navigation: top bar (back mirrors in RTL), bottom bar, rail, `AppNavScaffold` choosing by window; `AppScreen` (insets, max width), pull to refresh, adaptive grid, sticky action bar
+  - [x] AR + EN strings for every component text; no hardcoded values (policy checks: design-system and app UI have no baseline entries)
+  - [x] Sample feature screen and Splash rebuilt on the components (portrait + landscape via adaptive grid)
+  - [x] Previews: phone portrait/landscape, tablet landscape, light/dark, RTL/LTR
+- Tests: `ComponentLogicTest` (badge label, star fill, step state, OTP sanitising, initials) + policy tests; detekt (Compose rules) exit 0
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (see T-029). Not built: calendar, country-code picker, salon/service cards, media viewer (feature-level, need data models). Legacy hardcode debt outside the design system stays in `config/policy-baseline.json` (ratchet).
+- Notes: UnstableCollections detekt rule disabled (strong skipping).
 ### T-026 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
 - Project: `WAB-Server/` (`src/models/setting.model.ts`, `src/repositories/settings.repository.ts`, `src/domain/settings/*`, `src/constants/settings.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #22 merged)

@@ -1,19 +1,21 @@
 package com.fab.wab.customer.designsystem.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
-// ─────────────────────────────────────────────────────────────────
-// Typography Tokens Data Class
-// ─────────────────────────────────────────────────────────────────
-
+/**
+ * Type scale from the design: Playfair Display headings and Poppins body in English, IBM Plex Sans Arabic for
+ * everything in Arabic. Sizes are `sp`, so they follow the system font scale.
+ */
+@Immutable
 data class TypographyTokens(
+    val display: TextStyle,
     val headlineLarge: TextStyle,
     val headlineMedium: TextStyle,
     val headlineSmall: TextStyle,
@@ -26,10 +28,35 @@ data class TypographyTokens(
     val labelLarge: TextStyle,
     val labelMedium: TextStyle,
     val labelSmall: TextStyle,
-    val sectionLabel: TextStyle,
 )
 
-fun TypographyTokens.toMaterial3Typography(): Typography = Typography(
+private fun style(family: FontFamily, weight: FontWeight, size: TextUnit, lineHeight: TextUnit) = TextStyle(
+    fontFamily = family,
+    fontWeight = weight,
+    fontSize = size,
+    lineHeight = lineHeight,
+    textDirection = TextDirection.Content,
+)
+
+fun appTypography(headline: FontFamily, body: FontFamily) = TypographyTokens(
+    display = style(headline, FontWeight.Bold, 32.sp, 42.sp),
+    headlineLarge = style(headline, FontWeight.Bold, 26.sp, 36.sp),
+    headlineMedium = style(headline, FontWeight.Bold, 22.sp, 32.sp),
+    headlineSmall = style(headline, FontWeight.SemiBold, 19.sp, 28.sp),
+    titleLarge = style(body, FontWeight.Bold, 18.sp, 26.sp),
+    titleMedium = style(body, FontWeight.SemiBold, 16.sp, 24.sp),
+    titleSmall = style(body, FontWeight.SemiBold, 14.sp, 22.sp),
+    bodyLarge = style(body, FontWeight.Normal, 16.sp, 24.sp),
+    bodyMedium = style(body, FontWeight.Normal, 14.sp, 22.sp),
+    bodySmall = style(body, FontWeight.Normal, 12.sp, 18.sp),
+    labelLarge = style(body, FontWeight.SemiBold, 15.sp, 22.sp),
+    labelMedium = style(body, FontWeight.SemiBold, 12.sp, 18.sp),
+    labelSmall = style(body, FontWeight.SemiBold, 11.sp, 16.sp),
+)
+
+/** Material text styles mapped from WAB styles, so stock Material components use the bundled fonts. */
+fun TypographyTokens.toMaterialTypography() = Typography(
+    displayLarge = display,
     headlineLarge = headlineLarge,
     headlineMedium = headlineMedium,
     headlineSmall = headlineSmall,
@@ -43,336 +70,3 @@ fun TypographyTokens.toMaterial3Typography(): Typography = Typography(
     labelMedium = labelMedium,
     labelSmall = labelSmall,
 )
-
-/** System-font fallback — used when ProvideDesignSystemTokens is not in scope */
-val SystemTypographyTokens = TypographyTokens(
-    headlineLarge = TextStyle(
-        fontWeight = FontWeight.Black,
-        fontSize = 32.sp,
-        lineHeight = 40.sp,
-        letterSpacing = (-0.25).sp,
-        textDirection = TextDirection.Content
-    ),
-    headlineMedium = TextStyle(
-        fontWeight = FontWeight.Black,
-        fontSize = 28.sp,
-        lineHeight = 36.sp,
-        letterSpacing = 0.sp,
-        textDirection = TextDirection.Content
-    ),
-    headlineSmall = TextStyle(
-        fontWeight = FontWeight.Black,
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
-        letterSpacing = 0.sp,
-        textDirection = TextDirection.Content
-    ),
-    titleLarge = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp,
-        textDirection = TextDirection.Content
-    ),
-    titleMedium = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.15.sp,
-        textDirection = TextDirection.Content
-    ),
-    titleSmall = TextStyle(
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.1.sp,
-        textDirection = TextDirection.Content
-    ),
-    bodyLarge = TextStyle(
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp,
-        textDirection = TextDirection.Content
-    ),
-    bodyMedium = TextStyle(
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.25.sp,
-        textDirection = TextDirection.Content
-    ),
-    bodySmall = TextStyle(
-        fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.4.sp,
-        textDirection = TextDirection.Content
-    ),
-    labelLarge = TextStyle(
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.1.sp,
-        textDirection = TextDirection.Content
-    ),
-    labelMedium = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp,
-        textDirection = TextDirection.Content
-    ),
-    labelSmall = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize = 10.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp,
-        textDirection = TextDirection.Content
-    ),
-    sectionLabel = TextStyle(
-        fontWeight = FontWeight.Black,
-        fontSize = 10.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.2.sp,
-        textDirection = TextDirection.Content
-    ),
-)
-
-/** Backwards compatibility alias */
-val DefaultTypographyTokens = SystemTypographyTokens
-
-// ─────────────────────────────────────────────────────────────────
-// Dark & Light Typography Builders
-// NOTE: Font(resource = ...) is not available in CMP 1.10.0 on commonMain.
-// Custom fonts are loaded via expect/actual in androidMain/iosMain.
-// Until the expect/actual is implemented, these use FontFamily.SansSerif.
-// Follow-up: implement AppFonts.kt (expect) + AppFonts.android.kt / AppFonts.ios.kt (actual)
-// Font files are in: src/commonMain/resources/fonts/*.woff2
-// ─────────────────────────────────────────────────────────────────
-
-/** Dark theme typography — Epilogue headlines + Inter body */
-@Composable
-fun DarkTypographyTokens(
-    headlineFamily: FontFamily = FontFamily.SansSerif,
-    bodyFamily: FontFamily = FontFamily.SansSerif,
-): TypographyTokens = remember(headlineFamily, bodyFamily) {
-    TypographyTokens(
-        headlineLarge = TextStyle(
-            fontFamily = headlineFamily,
-            fontWeight = FontWeight.Black,
-            fontSize = 32.sp,
-            lineHeight = 40.sp,
-            letterSpacing = (-0.25).sp,
-            textDirection = TextDirection.Content
-        ),
-        headlineMedium = TextStyle(
-            fontFamily = headlineFamily,
-            fontWeight = FontWeight.Black,
-            fontSize = 28.sp,
-            lineHeight = 36.sp,
-            letterSpacing = 0.sp,
-            textDirection = TextDirection.Content
-        ),
-        headlineSmall = TextStyle(
-            fontFamily = headlineFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            lineHeight = 32.sp,
-            letterSpacing = 0.sp,
-            textDirection = TextDirection.Content
-        ),
-        titleLarge = TextStyle(
-            fontFamily = headlineFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            lineHeight = 28.sp,
-            letterSpacing = 0.sp,
-            textDirection = TextDirection.Content
-        ),
-        titleMedium = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.15.sp,
-            textDirection = TextDirection.Content
-        ),
-        titleSmall = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.1.sp,
-            textDirection = TextDirection.Content
-        ),
-        bodyLarge = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.5.sp,
-            textDirection = TextDirection.Content
-        ),
-        bodyMedium = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.25.sp,
-            textDirection = TextDirection.Content
-        ),
-        bodySmall = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.4.sp,
-            textDirection = TextDirection.Content
-        ),
-        labelLarge = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.1.sp,
-            textDirection = TextDirection.Content
-        ),
-        labelMedium = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp,
-            textDirection = TextDirection.Content
-        ),
-        labelSmall = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 10.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp,
-            textDirection = TextDirection.Content
-        ),
-        sectionLabel = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Black,
-            fontSize = 10.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.2.sp,
-            textDirection = TextDirection.Content
-        ),
-    )
-}
-
-/** Light theme typography — Manrope headlines + Plus Jakarta Sans body */
-@Composable
-fun LightTypographyTokens(
-    headlineFamily: FontFamily = FontFamily.SansSerif,
-    bodyFamily: FontFamily = FontFamily.SansSerif,
-): TypographyTokens = remember(headlineFamily, bodyFamily) {
-    TypographyTokens(
-        headlineLarge = TextStyle(
-            fontFamily = headlineFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 32.sp,
-            lineHeight = 40.sp,
-            letterSpacing = (-0.25).sp,
-            textDirection = TextDirection.Content
-        ),
-        headlineMedium = TextStyle(
-            fontFamily = headlineFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp,
-            lineHeight = 36.sp,
-            letterSpacing = 0.sp, textDirection = TextDirection.Content
-        ),
-        headlineSmall = TextStyle(
-            fontFamily = headlineFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 24.sp,
-            lineHeight = 32.sp,
-            letterSpacing = 0.sp,
-            textDirection = TextDirection.Content
-        ),
-        titleLarge = TextStyle(
-            fontFamily = headlineFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            lineHeight = 28.sp,
-            letterSpacing = 0.sp,
-            textDirection = TextDirection.Content
-        ),
-        titleMedium = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.15.sp, textDirection = TextDirection.Content
-        ),
-        titleSmall = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.1.sp,
-            textDirection = TextDirection.Content
-        ),
-        bodyLarge = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.5.sp,
-            textDirection = TextDirection.Content
-        ),
-        bodyMedium = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.25.sp,
-            textDirection = TextDirection.Content
-        ),
-        bodySmall = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.4.sp,
-            textDirection = TextDirection.Content
-        ),
-        labelLarge = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.1.sp,
-            textDirection = TextDirection.Content
-        ),
-        labelMedium = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp,
-            textDirection = TextDirection.Content
-        ),
-        labelSmall = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 10.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp,
-            textDirection = TextDirection.Content
-        ),
-        sectionLabel = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 10.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.2.sp,
-            textDirection = TextDirection.Content
-        ),
-    )
-}

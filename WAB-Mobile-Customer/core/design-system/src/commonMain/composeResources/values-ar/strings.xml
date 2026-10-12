@@ -1,32 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="nav_home">الرئيسية</string>
-    <string name="nav_order">الطلبات</string>
-    <string name="nav_wallet">المحفظة</string>
-    <string name="nav_profile">الحساب</string>
-    <string name="success_title">تم بنجاح!</string>
-    <string name="success_message">تأثيرك يزداد.</string>
-    <string name="error_title">فشل الإجراء</string>
-    <string name="error_message">حدث خطأ. حاول مجدداً.</string>
-    <string name="ok">حسناً</string>
-    <string name="retry">إعادة المحاولة</string>
-
-    <string name="show">عرض</string>
-    <string name="cart">سلة التسوق</string>
-    <string name="your_recycling_cart">سلة إعادة التدوير الخاصة بك</string>
-    <string name="total_value">القيمة الإجمالية</string>
-    <string name="place_order">إتمام الطلب</string>
-    <string name="jod">د.أ</string>
-
-    <!-- Text Fields -->
-    <string name="email_hint">البريد الإلكتروني</string>
-    <string name="password_hint">إدخال كلمة المرور</string>
-    <string name="password_placeholder">••••••</string>
-    <string name="phone_hint">رقم هاتف أردني</string>
-    <string name="optional_hint">ملاحظات</string>
-    <string name="optional_placeholder">أدخل تفاصيل إضافية…</string>
-    <string name="invalid_email">بريد إلكتروني غير صالح</string>
-    <string name="invalid_email_message">يرجى إدخال عنوان بريد إلكتروني صالح</string>
-    <string name="invalid_password_message">يجب أن تتكون كلمة المرور من 8 أحرف على الأقل</string>
-    <string name="invalid_phone_message">تنسيق رقم الهاتف الأردني غير صحيح</string>
+    <string name="common_back">رجوع</string>
+    <string name="common_close">إغلاق</string>
+    <string name="state_retry">إعادة المحاولة</string>
+    <string name="state_offline_title">لا يوجد اتصال بالإنترنت</string>
+    <string name="state_offline_message">تحقق من اتصالك وحاول مرة أخرى.</string>
+    <string name="state_error_title">حدث خطأ ما</string>
+    <string name="state_error_message">تعذر إكمال طلبك. يرجى المحاولة مرة أخرى.</string>
+    <string name="state_empty_title">لا يوجد شيء لعرضه بعد</string>
+    <string name="rating_description">التقييم %1$s من %2$s</string>
+    <string name="step_description">الخطوة %1$d من %2$d</string>
+    <string name="otp_description">رمز التحقق، تم إدخال %1$d من %2$d أرقام</string>
 </resources>

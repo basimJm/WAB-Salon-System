@@ -136,7 +136,7 @@ Compose:
   RememberContentMissing:
     active: true
   UnstableCollections:
-    active: true
+    active: false # Kotlin strong skipping makes List parameters skippable
   ViewModelForwarding:
     active: true
   ViewModelInjection:

@@ -1,64 +1,60 @@
 package com.fab.wab.customer.feature.sample.presentation.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.fab.wab.customer.designsystem.components.card.AppCard
+import com.fab.wab.customer.designsystem.components.feedback.AppEmptyState
+import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
+import com.fab.wab.customer.designsystem.components.layout.AppAdaptiveGrid
+import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
+import com.fab.wab.customer.designsystem.components.layout.AppScreen
+import com.fab.wab.customer.designsystem.components.navigation.AppTopBar
+import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerBox
+import com.fab.wab.customer.designsystem.components.text.AppText
+import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.sample.domain.model.SampleItem
 import com.fab.wab.customer.feature.sample.presentation.controller.contract.SampleContract.UiAction
 import com.fab.wab.customer.feature.sample.presentation.controller.contract.SampleContract.UiState
 import com.fab.wab.customer.feature.sample.presentation.resources.Res
 import com.fab.wab.customer.feature.sample.presentation.resources.sample_empty
-import com.fab.wab.customer.feature.sample.presentation.resources.sample_retry
+import com.fab.wab.customer.feature.sample.presentation.resources.sample_title
 import org.jetbrains.compose.resources.stringResource
 
+private const val PLACEHOLDER_COUNT = 6
+
+/** Reference screen: top bar, pull to refresh, shimmer loading, error, empty and an adaptive card grid. */
 @Composable
 fun SampleScreen(
     state: UiState,
     onEvent: (UiAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        when {
-            state.isLoading -> CircularProgressIndicator()
-
-            state.errorMessage != null -> Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(state.errorMessage, style = MaterialTheme.typography.bodyMedium)
-                Button(onClick = { onEvent(UiAction.OnRefresh) }) {
-                    Text(stringResource(Res.string.sample_retry))
+    AppScreen(
+        modifier = modifier,
+        topBar = { AppTopBar(title = stringResource(Res.string.sample_title)) },
+    ) {
+        AppPullToRefresh(refreshing = false, onRefresh = { onEvent(UiAction.OnRefresh) }) {
+            when {
+                state.isLoading -> AppAdaptiveGrid(itemCount = PLACEHOLDER_COUNT, itemKey = { it }) {
+                    AppShimmerBox(Modifier.fillMaxWidth().height(AppTheme.sizes.avatarLarge), AppTheme.shapes.medium)
                 }
-            }
 
-            state.isEmpty -> Text(
-                stringResource(Res.string.sample_empty),
-                style = MaterialTheme.typography.bodyMedium,
-            )
+                state.errorMessage != null -> Box(Modifier.fillMaxSize()) {
+                    AppErrorState(onRetry = { onEvent(UiAction.OnRefresh) }, message = state.errorMessage)
+                }
 
-            else -> LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(state.items, key = { it.id }) { item ->
-                    SampleItemCard(item = item, onClick = { onEvent(UiAction.OnItemClicked(item.id)) })
+                state.isEmpty -> Box(Modifier.fillMaxSize()) {
+                    AppEmptyState(title = stringResource(Res.string.sample_empty))
+                }
+
+                else -> AppAdaptiveGrid(itemCount = state.items.size, itemKey = { state.items[it].id }) { index ->
+                    SampleItemCard(item = state.items[index], onClick = { onEvent(UiAction.OnItemClicked(state.items[index].id)) })
                 }
             }
         }
@@ -67,10 +63,10 @@ fun SampleScreen(
 
 @Composable
 private fun SampleItemCard(item: SampleItem, onClick: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(item.title, style = MaterialTheme.typography.titleMedium)
-            Text(item.description, style = MaterialTheme.typography.bodyMedium)
+    AppCard(modifier = Modifier.fillMaxWidth(), onClick = onClick) {
+        Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
+            AppText(text = item.title, style = AppTheme.typography.titleMedium)
+            AppText(text = item.description, style = AppTheme.typography.bodyMedium, color = AppTheme.colors.muted)
         }
     }
 }
