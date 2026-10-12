@@ -20,7 +20,7 @@
   - [x] `.claude/hooks.md` + `.claude/settings.json` hooks enforcing branch, hardcode, tests and review rules
   - [x] `.claude/session.md` and `.claude/memory.md`
   - [x] `CLAUDE.md` imports all of them so every session reads them
-- Tests: `python3 .claude/hooks/test_hooks.py` — 18 pass (QA finding fixed: guard flagged flags quoted inside commit messages; now strips heredocs/quotes, covered by a test)
+- Tests: `python3 .claude/hooks/test_hooks.py` — 19 pass (QA findings fixed: guard false positives on flags inside commit messages and on other commands chained with git push; now strips quotes/heredocs and checks each shell segment, covered by tests)
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — config/docs only; hooks covered by unit tests.
 - Notes: Per-project rules to be added next (user will provide).

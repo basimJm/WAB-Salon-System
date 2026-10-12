@@ -62,6 +62,11 @@ class GuardGit(unittest.TestCase):
         self.assertIsNone(violation('git commit -m "mentions ' + flag + ' and main"', "feat/done", lookup))
         self.assertIsNotNone(violation("git commit " + flag + " -m 'x'", "feat/done", lookup))
 
+    def test_checks_each_segment_separately(self):
+        cmd = "git push -u origin feat/done && gh pr create --base main --head feat/done"
+        self.assertIsNone(violation(cmd, "feat/done", lookup))
+        self.assertIsNotNone(violation("cd x && git push origin main", "feat/done", lookup))
+
     def test_ignores_non_git_commands(self):
         self.assertIsNone(violation("npm test", "main", lookup))
         self.assertIsNone(violation("git status", "main", lookup))

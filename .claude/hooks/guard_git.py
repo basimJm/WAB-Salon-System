@@ -15,8 +15,19 @@ def strip_text(command):
     return QUOTED.sub(" ", HEREDOC.sub(" ", command))
 
 
+SEGMENT_SPLIT = re.compile(r"&&|\|\||;|\||\n")
+
+
 def violation(command, branch, block_lookup=task_block):
-    cmd = " ".join(strip_text(command).split())
+    """Check each shell segment separately so flags of other commands (e.g. `gh pr --base main`) don't leak in."""
+    for segment in SEGMENT_SPLIT.split(strip_text(command)):
+        reason = segment_violation(" ".join(segment.split()), branch, block_lookup)
+        if reason:
+            return reason
+    return None
+
+
+def segment_violation(cmd, branch, block_lookup):
     if not re.search(r"\bgit\b", cmd):
         return None
     if "--no-verify" in cmd:
