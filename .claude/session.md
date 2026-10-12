@@ -483,7 +483,7 @@
 ### T-031 — SRV-020 Audit-log writer and server-events writer (append-only)
 - Project: `WAB-Server/` (`src/models/{appendOnly,auditLog.model,serverEvent.model}.ts`, `src/repositories/{appendOnly,auditLogs,serverEvents}.repository.ts`, `src/domain/{audit,events}/*`, `src/constants/{audit,enums}.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #28 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #30 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-65/Admin PRD audit trail, NFR-08 observability, CLAUDE.md §5.12 admin actions always with reason + audit log; BUSINESS_DOMAIN §3.7 `auditLogs {adminId, action, entityType, entityId, before?, after?, reason, ip, userAgent}` append-only, `serverEvents {ts, name, actorType, actorId?, salonId?, bookingId?, params, platform?, appVersion?}`; backlog: "No update/delete API on `auditLogs`; tests prove immutability"):
   - [x] `auditLogs` and `serverEvents` models as in §3.7 with indexes (admin / entity / action, newest first; ts, name, actor, booking), registered in `ALL_MODELS`; `ActorType` and `Platform` enums in `constants/enums.ts`
   - [x] Immutability: every update/replace/delete query, document delete/update, bulk write and re-save of a stored document throws `AppendOnlyViolationError` (500); append-only repositories expose only `append`, `findById`, `findPage`
@@ -512,7 +512,22 @@
 - Review: PASSED (SE ✔, Mobile ✔ (responsive/RTL/a11y for web), Architect ✔, QA ✔) — QA found and fixed: Modal stole focus on every parent render; grid items widened the page on phones (horizontal scroll); closed drawer stayed focusable (now `inert`); drawer shadow leaked while closed.
 - Notes: Branch is the cloud-pinned branch (restarted from `main`). ASSUMPTIONS to confirm: (1) stack React 19 + Vite + TS (PRD §2.2 says stack TBD); (2) "android/ios" interpreted as Android-class Chromium and iOS-class WebKit browsers/viewports because the admin is a web app; (3) "debug/release" = unminified+source maps vs minified; mock data source excluded from all prod builds; (4) admin auth endpoints (`/admin/v1/auth/login|verify-otp|logout`) are assumed until `contracts/` (INT-01) exists. Not done here: global search, alerts bell data, real pages (ADM-02…05), Socket.IO client, Excel/PDF export. CI workflow itself has not run on GitHub yet.
 
+### T-032 — SRV-021 Booking reference number and id utils
+- Project: `WAB-Server/` (`src/utils/reference/*`, `src/utils/database/{ids,errors}.ts`, `src/constants/reference.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #30 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-32 "a unique reference number", NFR-02; BUSINESS_DOMAIN §3.4 `referenceNumber` unique ("WAB-" + 6–8 base32 chars), §12.6 format `WAB-XXXXXX` base32 without ambiguous characters; backlog: collision-safe via unique index + retry):
+  - [x] `generateReferenceNumber()`: `WAB-` + 6 symbols of the Crockford base32 alphabet (no `I L O U`), from `crypto.randomBytes` masked to 5 bits (no modulo bias); source injectable for tests
+  - [x] `isReferenceNumber` (canonical form only) and `normalizeReferenceNumber` (case, spaces, missing dash, look-alikes `O`→`0`, `I`/`L`→`1`; invalid → `null`) for customer/salon lookups
+  - [x] `withUniqueReference(create)`: retries with a new number only on a duplicate-key error of the reference field (or an unspecified key), rethrows other failures and duplicates of other unique indexes unchanged, gives up after 5 attempts as a 500 `InternalError` keeping the cause
+  - [x] Id utils: `isObjectIdString`, `newId`, `toObjectId` (malformed → 400); `isValidId` of the base repository reuses them; `duplicateKeyFields(error)` helper
+  - [x] No hardcoded values: prefix, length, alphabet, look-alikes, attempts in `constants/reference.ts`
+- Tests: `cd WAB-Server && npm test` — 956 pass (32 suites); lint/format/typecheck/build green; audit 0. `tests/reference.test.ts` (59): alphabet, byte→symbol mapping, 20 000-sample uniformity, canonical/normalize tables, retry rules (first try, collision, other index, compound index, other error, exhaustion, custom limit), id utils. Mutation check: 18 breakages (alphabet, length, mask, look-alike map, attempts, retry conditions, error type, separator handling, id check…) all caught; 2 equivalent mutants (`x % 32` ≡ `x & 31`; double case conversion).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — pure helpers, no I/O. The booking model with its unique `referenceNumber` index comes with SRV-070/071, which call `withUniqueReference`. Decision to confirm: 6 symbols (32^6 ≈ 1.07 billion numbers) as in §12.6; the domain allows 6–8, change `REFERENCE_CODE_LENGTH` if volume ever needs more. API docs: no change.
+- Next: SRV-022 (provider interfaces). PRs target `server`; merge only after ALL CI checks green.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-021 — next server task after T-031 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-022 — next server task after T-032 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

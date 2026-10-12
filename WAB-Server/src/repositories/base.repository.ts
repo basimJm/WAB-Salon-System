@@ -1,5 +1,6 @@
 import type { Model, QueryFilter, UpdateQuery } from 'mongoose';
-import { DEFAULT_SORT, OBJECT_ID_PATTERN } from '../constants/database';
+import { DEFAULT_SORT } from '../constants/database';
+import { isObjectIdString } from '../utils/database/ids';
 import {
   buildPaginationMeta,
   toSkipLimit,
@@ -18,7 +19,7 @@ export interface Page<T> {
 /** Fields to change; `undefined` means "leave as is". */
 export type Patch<TRaw> = { [K in keyof TRaw]?: TRaw[K] | undefined };
 
-export const isValidId = (id: string): boolean => OBJECT_ID_PATTERN.test(id);
+export const isValidId = (id: string): boolean => isObjectIdString(id);
 
 /**
  * Typed data access shared by all repositories (WAB-Server/CLAUDE.md §2: the only code that queries
