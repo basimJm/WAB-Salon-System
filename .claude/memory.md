@@ -43,6 +43,7 @@
 - Design source of truth: `design/*.dc.html` uses a VIOLET theme (#6D28D9 / #A855F7 gradient, ink #1F2233, dark bg #14172B; Playfair Display + Poppins + IBM Plex Sans Arabic; radii 14/16/26). The Kotlin template theme (emerald "Stitch") is NOT the product design; the design script says keep the existing design theme and logo.
 
 - Auth refresh (T-031): `TokenRefreshCoordinator` (core/network/auth, single-flight) + `installAuthRefresh` (HttpSend interceptor in `client/AuthRefreshInterceptor.kt`); refresh endpoint path is an ASSUMPTION in `AuthEndpoints` until SRV-026/INT-01. Only a rejected refresh ends the session. Tests need `kotlinx-coroutines-test`.
+- Permissions (T-032): `PermissionFlow.ensure(AppPermission)` in `core/ui/permission` (Koin `permissionModule`); Android needs `MainActivity` to attach `AndroidPermissionBridge` (done); iOS manager uses UserNotifications/AVFoundation/CoreLocation. Screens show a settings prompt for `BlockedInSettings`.
 
 ## Admin dashboard
 - `WAB-Admin-Dashboard/CLAUDE.md` = the rules (read first). React 19 + TS strict + Vite 8, Vitest, Playwright. Commands: `npm run verify` (typecheck, lint 0 warnings, format, tests, `check:hardcoded` incl. 300-line limit), `npm run build:<dev|prod>-<debug|release>`, `npm run check:size -- <variant>`, e2e: `E2E_CHROMIUM_ONLY=true PW_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome npm run e2e` (no WebKit on the runner; CI runs it).

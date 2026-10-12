@@ -82,18 +82,11 @@
   "core/storage/src/commonMain/kotlin/com/fab/wab/customer/core/storage/db/AppDatabase.kt": {
     "Q006": 1
   },
-  "core/ui/src/androidMain/kotlin/com/fab/wab/customer/core/ui/permission/PermissionChecker.android.kt": {
-    "H006": 2,
-    "Q001": 2
-  },
   "core/ui/src/androidMain/kotlin/com/fab/wab/customer/core/ui/utils/LocalAppLocale.android.kt": {
     "Q001": 1
   },
   "core/ui/src/commonMain/kotlin/com/fab/wab/customer/core/ui/mvi/BaseViewModel.kt": {
     "H006": 1
-  },
-  "core/ui/src/iosMain/kotlin/com/fab/wab/customer/core/ui/permission/PermissionChecker.ios.kt": {
-    "H006": 4
   },
   "core/ui/src/iosMain/kotlin/com/fab/wab/customer/core/ui/utils/getDefaultLocale.ios.kt": {
     "H003": 1

@@ -510,6 +510,21 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled or run locally (Gradle blocked, detekt jars rate-limited); ASSUMPTIONS: endpoint `POST /customer/v1/auth/refresh` with `{refreshToken}` returning the base envelope `data.{accessToken,refreshToken}` (SRV-026/INT-01 not written yet; path in `AuthEndpoints`); the `HttpSend` interceptor assumes `expectSuccess` errors surface from `execute` (handled by catching `ResponseException`). Added test dependency kotlinx-coroutines-test (runTest).
 - Notes: Next in this PR series: language switch + theme setting UI, permission handler (replace `!!` in `PermissionChecker`).
 
+### T-032 — Customer permission handler (notifications, location, camera)
+- Project: `WAB-Mobile-Customer/core/ui/permission`, `androidApp` (MainActivity), `core/di`, iOS plist/strings
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD: location for nearby salons, camera for review photos, FCM notifications; CLAUDE.md §1 no `!!`, no hardcoded values, AR+EN):
+  - [x] One `PermissionManager` interface (status / request / openSettings / location-service switch) with `AppPermission` NOTIFICATIONS, LOCATION, CAMERA and `PermissionStatus` GRANTED, DENIED, DENIED_PERMANENTLY; replaces the global-function `PermissionChecker` (and its `!!`)
+  - [x] `PermissionFlow.ensure()`: granted -> no dialog; denied -> asks once; refusal reported as Denied, or BlockedInSettings when the system will not ask again; permanently denied never tries a dialog
+  - [x] Android: Activity Result launcher attached by `MainActivity` (suspending request), "ask again" detected by asked-before + rationale flag, notification settings vs app-details settings, GPS switch
+  - [x] iOS: UNUserNotificationCenter, AVCaptureDevice and CLLocationManager (delegate) with real dialogs and status mapping; settings URL from the system constant; AR+EN `NSCameraUsageDescription`
+  - [x] Registered through Koin (`permissionModule` in `coreDiModule`)
+- Tests: `PermissionFlowTest` (7, fake manager); policy tests 68 pass; policy baseline only shrank
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally: Gradle is blocked here and detekt jars are rate-limited; the iOS interop calls (UserNotifications, AVFoundation, CoreLocation) and the Android launcher are written from the API docs and must be confirmed by the first CI run. GitHub Actions runners were unavailable when this was written (jobs failed in seconds with no runner), so nothing from the permission work has been built yet.
+- Notes: Gallery access needs no permission (system photo picker). Screens that need a permission (nearby salons, review photo) call `PermissionFlow.ensure` and show a dialog with `openSettings` for BlockedInSettings; those screens are separate tasks. Next: language switch and theme setting.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-020 — next server task after T-029 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
