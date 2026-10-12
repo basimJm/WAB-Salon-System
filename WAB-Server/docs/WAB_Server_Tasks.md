@@ -44,9 +44,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-000 | This backlog (`WAB-Server/docs/WAB_Server_Tasks.md`) + housekeeping docs | `claude/busy-johnson-2rch94` | DONE |
 | SRV-001 | TypeScript strict project + lint/format/test + folder layout | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-002 | Config/env loader + `.env.example` | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-003 | Logger with redaction + request id | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-003 | Logger with redaction + request id | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-004 | Error model, codes, AR/EN locales, Accept-Language | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-003 is merged: **SRV-004**.
+Next task to start after SRV-004 is merged: **SRV-004a**.
 
 ---
 
@@ -59,8 +60,8 @@ Project skeleton, cross-cutting plumbing, CI. Roadmap SRV-01.
 |---|---|---|---|---|---|
 | SRV-001 | TypeScript strict project + ESLint (no `any`)/Prettier/Jest + folder layout of `WAB-Server/CLAUDE.md` §4 | `feat/srv-001-ts` | — | DONE | `package.json`, `tsconfig` strict, lint/format/test scripts; `src/{routes,config,constants,locales,middlewares,models,repositories,domain,modules/{customer,merchant,admin},jobs,sockets,utils}`; layering route → middleware → controller → service → repository → schema; sample test passes. |
 | SRV-002 | Config/env loader (schema-validated, dev/prod) + `.env.example` (keys only) | `feat/srv-002-config` | — | DONE | Fails fast on missing/invalid env; no secrets committed; `.env.example` lists every key. |
-| SRV-003 | Structured logger (`utils/logger`) with sensitive-field redaction + request id middleware | `feat/srv-003-logger` | — | IN REVIEW | `traceId` in every log and error response; tokens/OTP/passwords/card data/full phone/IBAN redacted; tested. |
-| SRV-004 | Error model (`utils/errors`): `BaseError` + typed subclasses (Validation 400, Unauthorized 401, Forbidden 403, NotFound 404, Conflict 409, BusinessRule 422, RateLimit 429, Payment, ExternalService 502/503, Internal 500), error codes in `constants/` (BUSINESS_DOMAIN §11), `locales/ar.json` + `en.json`, `Accept-Language` middleware (default `ar`) | `feat/srv-004-errors` | — | TODO | Each error has `code`, `httpStatus`, `messageKey`, `details?`, `isOperational`; unit test fails if any locale key is missing in either language or empty. |
+| SRV-003 | Structured logger (`utils/logger`) with sensitive-field redaction + request id middleware | `feat/srv-003-logger` | — | DONE | `traceId` in every log and error response; tokens/OTP/passwords/card data/full phone/IBAN redacted; tested. |
+| SRV-004 | Error model (`utils/errors`): `BaseError` + typed subclasses (Validation 400, Unauthorized 401, Forbidden 403, NotFound 404, Conflict 409, BusinessRule 422, RateLimit 429, Payment, ExternalService 502/503, Internal 500), error codes in `constants/` (BUSINESS_DOMAIN §11), `locales/ar.json` + `en.json`, `Accept-Language` middleware (default `ar`) | `feat/srv-004-errors` | — | IN REVIEW | Each error has `code`, `httpStatus`, `messageKey`, `details?`, `isOperational`; unit test fails if any locale key is missing in either language or empty. |
 | SRV-004a | Global `errorHandler` + `notFound` + async wrapper (`utils/async`); maps Mongoose (`CastError`, `ValidationError`, `11000`→409), JWT, schema-validator, malformed JSON (400), payload too large (413), timeouts/provider failures (502/503); unknown errors → `INTERNAL_ERROR` 500 without leaking stack; process-level `unhandledRejection`/`uncaughtException` handlers and graceful `SIGTERM` shutdown (close HTTP, DB, Redis) | `feat/srv-004a-error-handler` | SRV-004 | TODO | One handler produces the base error envelope; every mapping unit-tested; stack/queries/provider payloads logged, never returned. |
 | SRV-005 | Express app factory (`app.ts`, `server.ts`, `routes/index.ts`) mounting `/customer/v1` `/merchant/v1` `/admin/v1` + `validate` middleware (body/params/query/headers) | `feat/srv-005-app` | — | TODO | Schema validation on every input with field-level `details { field, code, message }`; modules never import across namespaces; supertest smoke tests. |
 | SRV-005a | Base response helpers (`utils/response`): success `{ success, message, data, meta? }` (pagination `meta { page, pageSize, total }`) and error `{ success:false, message, error { code, details?, traceId } }`; pagination helper (`utils/pagination`, page sizes from constants/settings) | `feat/srv-005a-responses` | SRV-005 | TODO | Controllers never hand-write `res.json`; messages localized by request language; tests for both shapes and paginated meta. |
