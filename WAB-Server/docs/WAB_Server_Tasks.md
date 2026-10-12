@@ -67,9 +67,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-021 | Booking reference number + id utils | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-022 | Interfaces + stubs: OtpProvider, StorageProvider | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-023 | Interfaces + stubs: Notifier, PaymentProvider, AnalyticsProvider | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-024 | Schemas/repositories: customers, members, installations, refreshTokens, admins | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-024 | Schemas/repositories: customers, members, installations, refreshTokens, admins | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-025 | JWT access tokens + per-scope auth middleware | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-024 is merged: **SRV-025** (SRV-011 is PENDING).
+Next task to start after SRV-025 is merged: **SRV-026** (SRV-011 is PENDING).
 
 ---
 
@@ -124,8 +125,8 @@ Three token scopes. Roadmap SRV-03.
 
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
-| SRV-024 | Schemas/repositories: customers, members, installations, refreshTokens, admins (indexes per BUSINESS §3.1) | `feat/srv-024-schemas-auth` | SRV-012 | IN REVIEW |  |
-| SRV-025 | JWT access tokens (short TTL from settings) + per-scope auth middleware (customer/merchant/admin never interchangeable) | `feat/srv-025-jwt` | SRV-024 | TODO | Customer token on merchant/admin route → `FORBIDDEN`; tests for all 3×3 combos. |
+| SRV-024 | Schemas/repositories: customers, members, installations, refreshTokens, admins (indexes per BUSINESS §3.1) | `feat/srv-024-schemas-auth` | SRV-012 | DONE |  |
+| SRV-025 | JWT access tokens (short TTL from settings) + per-scope auth middleware (customer/merchant/admin never interchangeable) | `feat/srv-025-jwt` | SRV-024 | IN REVIEW | Customer token on merchant/admin route → `FORBIDDEN`; tests for all 3×3 combos. |
 | SRV-026 | Refresh tokens: hashed storage, rotation, family revocation on reuse, logout, logout-all | `feat/srv-026-refresh` | SRV-025 | TODO |  |
 | SRV-027 | OTP pre-check endpoint + platform limits (5 req/5 min → 15 min block; 5 wrong → 15 min block) + `otpLength` + resend timing; report-wrong-attempt endpoint | `feat/srv-027-otp-precheck` | SRV-014, SRV-022 | TODO | Values from settings; `OTP_BLOCKED`, `RATE_LIMITED` codes. |
 | SRV-028 | Customer register/login/phone-change/booking-confirmation via Firebase ID token (stub verifier) → platform JWT + refresh | `feat/srv-028-customer-auth` | SRV-027, SRV-026 | TODO | Phone match enforced; blocked/deleted accounts handled (`ACCOUNT_BLOCKED`). |

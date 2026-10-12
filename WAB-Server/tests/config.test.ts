@@ -32,6 +32,7 @@ const ALL_FAKE_MODES = {
 const validEnv = (overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv => ({
   [ENV_KEYS.mongoUri]: MONGO,
   [ENV_KEYS.redisUrl]: REDIS,
+  [ENV_KEYS.jwtAccessSecret]: 'a'.repeat(48),
   ...overrides,
 });
 
@@ -119,7 +120,22 @@ describe('loadConfig', () => {
   });
 
   it('has no defaults for connection secrets: missing keys fail fast', () => {
-    expect(invalidKeysOf({})).toEqual([ENV_KEYS.mongoUri, ENV_KEYS.redisUrl]);
+    expect(invalidKeysOf({})).toEqual([
+      ENV_KEYS.mongoUri,
+      ENV_KEYS.redisUrl,
+      ENV_KEYS.jwtAccessSecret,
+    ]);
+  });
+
+  it('reads the access-token secret and refuses a missing or short one', () => {
+    expect(loadConfig(validEnv()).auth.accessSecret).toBe('a'.repeat(48));
+    expect(invalidKeysOf(validEnv({ JWT_ACCESS_SECRET: 'a'.repeat(31) }))).toEqual([
+      ENV_KEYS.jwtAccessSecret,
+    ]);
+    expect(
+      loadConfig(validEnv({ JWT_ACCESS_SECRET: 'a'.repeat(32) })).auth.accessSecret,
+    ).toHaveLength(32);
+    expect(invalidKeysOf(validEnv({ JWT_ACCESS_SECRET: '' }))).toEqual([ENV_KEYS.jwtAccessSecret]);
   });
 
   it('rejects malformed connection strings', () => {

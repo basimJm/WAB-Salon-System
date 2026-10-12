@@ -1,5 +1,6 @@
 import type { Logger } from 'pino';
 import type { Language } from '../constants/i18n';
+import type { AccessTokenClaims } from '../utils/auth/accessToken';
 import type { MessageParams } from '../utils/errors';
 
 declare global {
@@ -15,6 +16,8 @@ declare global {
       t: (key: string, params?: MessageParams) => string;
       /** Output of the `validate` middleware; read it through `validated()`. */
       validated: Record<string, unknown>;
+      /** Set by `requireAuth`: who is calling and in which namespace. */
+      auth?: AccessTokenClaims;
     }
   }
 }

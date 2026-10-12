@@ -28,6 +28,7 @@ export const ENV_KEYS = {
   trustProxyHops: 'TRUST_PROXY_HOPS',
   mongoUri: 'MONGODB_URI',
   redisUrl: 'REDIS_URL',
+  jwtAccessSecret: 'JWT_ACCESS_SECRET',
   otpProvider: 'OTP_PROVIDER',
   storageProvider: 'STORAGE_PROVIDER',
   notifierProvider: 'NOTIFIER_PROVIDER',

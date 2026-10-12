@@ -9,6 +9,7 @@ const logger = createLogger({ level: 'silent' });
 const baseConfig = loadConfig({
   MONGODB_URI: 'mongodb://localhost/x',
   REDIS_URL: 'redis://localhost',
+  JWT_ACCESS_SECRET: 'a'.repeat(48),
 });
 const testConfig = { ...baseConfig, port: 0 };
 

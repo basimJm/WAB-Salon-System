@@ -31,7 +31,7 @@ const adminSchema = new Schema<AdminRaw>(
       match: EMAIL_PATTERN,
     },
     passwordHash: { type: String, required: true, maxlength: PASSWORD_HASH_MAX_LENGTH },
-    failedLoginCount: { type: Number, default: 0 },
+    failedLoginCount: { type: Number, default: 0, min: 0 },
     lockedUntil: { type: Date },
     alertEmails: {
       type: [{ type: String, lowercase: true, trim: true, match: EMAIL_PATTERN }],
