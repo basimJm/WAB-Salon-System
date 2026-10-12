@@ -36,6 +36,7 @@ export const startServer = async (
     logger,
     security: { corsAllowedOrigins: config.corsAllowedOrigins },
     trustProxyHops: config.trustProxyHops,
+    docs: !config.isProduction,
   });
   // Plain http server: Express 5's `app.listen` passes listen errors to its callback as if started.
   const server = await new Promise<Server>((resolve, reject) => {

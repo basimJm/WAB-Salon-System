@@ -1,0 +1,153 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "WAB Admin API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "VALIDATION_ERROR",
+                  "UNAUTHORIZED",
+                  "FORBIDDEN",
+                  "PERMISSION_DENIED",
+                  "NOT_FOUND",
+                  "CONFLICT",
+                  "RATE_LIMITED",
+                  "INTERNAL",
+                  "OTP_BLOCKED",
+                  "OTP_INVALID",
+                  "OTP_EXPIRED",
+                  "PHONE_NOT_REGISTERED",
+                  "PHONE_ALREADY_REGISTERED",
+                  "ACCOUNT_BLOCKED",
+                  "MEMBER_INACTIVE",
+                  "SALON_NOT_FOUND",
+                  "SALON_NOT_BOOKABLE",
+                  "SALON_CLOSED",
+                  "GENDER_MISMATCH",
+                  "TOO_MANY_COMPANIONS",
+                  "SERVICE_UNAVAILABLE",
+                  "BRIDE_ONLY_SERVICE",
+                  "STAFF_NOT_ELIGIBLE",
+                  "SLOT_UNAVAILABLE",
+                  "SLOT_TAKEN",
+                  "DATE_OUT_OF_RANGE",
+                  "PAYMENT_FAILED",
+                  "PAYMENT_NOT_VERIFIED",
+                  "PAYMENT_OPTION_NOT_ALLOWED",
+                  "DRAFT_EXPIRED",
+                  "INVALID_TRANSITION",
+                  "CANCELLATION_WINDOW_PASSED",
+                  "TOO_EARLY_TO_COMPLETE",
+                  "ALREADY_HANDLED",
+                  "SCHEDULE_CONFLICT",
+                  "OWNER_REQUIRED",
+                  "LAST_OWNER",
+                  "UPLOAD_INVALID",
+                  "UPLOAD_TOO_LARGE",
+                  "MAINTENANCE",
+                  "UPDATE_REQUIRED"
+                ]
+              },
+              "details": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              },
+              "traceId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "details",
+              "traceId"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "error"
+        ]
+      },
+      "ErrorDetail": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "code",
+          "message"
+        ]
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "pageSize",
+          "total"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {},
+  "webhooks": {}
+}

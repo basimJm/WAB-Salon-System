@@ -7,6 +7,8 @@ import { sanitizeRequest } from './middlewares/sanitize';
 import { securityMiddlewares, type SecurityOptions } from './middlewares/security';
 import { notFound } from './middlewares/notFound';
 import { requestId } from './middlewares/requestId';
+import { buildOpenApiDocuments } from './docs';
+import { createDocsRouter } from './docs/router';
 import { createRootRouter } from './routes';
 import { createHealthRouter } from './routes/health';
 import type { ReadinessCheck } from './utils/health';
@@ -22,6 +24,8 @@ export interface AppDependencies {
   readonly security?: Partial<SecurityOptions>;
   /** Reverse proxies in front of the app, so `req.ip` is the real client address. */
   readonly trustProxyHops?: number;
+  /** Serve Swagger UI at /docs. Off by default; the server turns it on outside production. */
+  readonly docs?: boolean;
 }
 
 /** Builds the Express app. Order matters: ids and language first, errors last. */
@@ -31,6 +35,7 @@ export const createApp = ({
   readinessChecks,
   security,
   trustProxyHops = DEFAULT_TRUST_PROXY_HOPS,
+  docs = false,
 }: AppDependencies): Express => {
   const app = express();
   app.disable('x-powered-by');
@@ -38,6 +43,7 @@ export const createApp = ({
   app.use(requestId(logger));
   app.use(language);
   app.use(securityMiddlewares({ corsAllowedOrigins: [], ...security }));
+  if (docs) app.use(createDocsRouter(buildOpenApiDocuments()));
   app.use(express.json({ limit: JSON_BODY_LIMIT }));
   app.use(sanitizeRequest);
   app.use(router ?? createRootRouter(undefined, createHealthRouter(readinessChecks)));

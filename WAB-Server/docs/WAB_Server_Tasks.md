@@ -12,7 +12,7 @@
 2. **One task = one branch = one PR.** Branch name is in the table (`feat/srv-NNN-<key>`), created from an up-to-date `main` (`git checkout main && git pull --ff-only`). Never commit/push to `main`; never force-push; never `--no-verify`. *(Exception: SRV-000 — this backlog — was produced on the cloud-session branch `claude/busy-johnson-2rch94`.)*
 3. **Status legend:** `TODO` ready to start · `IN PROGRESS` branch open · `IN REVIEW` PR open · `DONE` merged to `main` · `PENDING` blocked by **information from the owner** or by **another SDK/package/provider that does not exist yet** (the *Pending on* column must say exactly what). A task is **never** `PENDING` just because it is large or because a dependency can be stubbed — stub it behind an interface instead (`ROADMAP.md` §2).
 4. **Small:** a task should fit in about one working day and touch one module/concern. If it grows, split it into a new row (append `a`, `b`) before coding.
-5. **Definition of done (every task, plus `WAB-Server/CLAUDE.md` §10):** unit tests for every acceptance criterion + edge cases, all green · lint/typecheck/build green · no hardcoded values (settings, config, constants, localized messages) · no secrets · Swagger + Postman updated for any endpoint change · **3 verification loops** and **4-role review** recorded in `.claude/session.md` · `memory.md` updated with durable facts · PR opened · status here changed (`IN REVIEW` on PR, `DONE` after merge).
+5. **Definition of done (every task, plus `WAB-Server/CLAUDE.md` §10):** unit tests for every acceptance criterion + edge cases, all green · lint/typecheck/build green · no hardcoded values (settings, config, constants, localized messages) · no secrets · Swagger + Postman regenerated (`npm run docs`, `WAB-Server/CLAUDE.md` §11) and committed, or `API docs: no change` noted · **3 verification loops** and **4-role review** recorded in `.claude/session.md` · `memory.md` updated with durable facts · PR opened · status here changed (`IN REVIEW` on PR, `DONE` after merge).
 6. **Requirements order of precedence:** PRD > `WAB_Backend_BRD.md` > `BUSINESS_DOMAIN.md` (data/rules) > Design Script. Conflicts → stop and ask the owner; do not guess.
 7. **Legacy document:** `WAB-Server/BRD.md` (4-digit OTP, Cloudinary, `/v1/customer/...`, role field, express-validator) is **superseded** by the Backend BRD + `BUSINESS_DOMAIN.md` (6-digit Firebase OTP, S3 via `wab-storage`, `/customer/v1`, own JWT with scopes). Do not implement it; it is kept for history only.
 8. **Server must stay mock-friendly:** every external dependency (Firebase OTP, S3, FCM/SMTP, payment gateway, BigQuery) is behind an interface with a config-selected fake (Stage C). Real providers are the `PENDING` tasks.
@@ -50,9 +50,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-005 | Express app factory, namespaces, validate middleware, server entry | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-005a | Success response and pagination helpers | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-006 | Health and readiness endpoints | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-007 | Security middleware (Helmet, CORS, rate limit, sanitize) | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-007 | Security middleware (Helmet, CORS, rate limit, sanitize) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-008 | Swagger + Postman generation, `/docs`, docs-after-every-task rule | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-007 is merged: **SRV-008**.
+Next task to start after SRV-008 is merged: **SRV-009**.
 
 ---
 
@@ -71,8 +72,8 @@ Project skeleton, cross-cutting plumbing, CI. Roadmap SRV-01.
 | SRV-005 | Express app factory (`app.ts`, `server.ts`, `routes/index.ts`) mounting `/customer/v1` `/merchant/v1` `/admin/v1` + `validate` middleware (body/params/query/headers) | `feat/srv-005-app` | — | DONE | Schema validation on every input with field-level `details { field, code, message }`; modules never import across namespaces; supertest smoke tests. |
 | SRV-005a | Base response helpers (`utils/response`): success `{ success, message, data, meta? }` (pagination `meta { page, pageSize, total }`) and error `{ success:false, message, error { code, details?, traceId } }`; pagination helper (`utils/pagination`, page sizes from constants/settings) | `feat/srv-005a-responses` | SRV-005 | DONE | Controllers never hand-write `res.json`; messages localized by request language; tests for success shape and paginated meta (the error body builder `buildErrorBody` already exists from SRV-004a). |
 | SRV-006 | Health + readiness endpoints (Mongo/Redis checks pluggable) | `feat/srv-006-health` | — | DONE | `/health` liveness, `/ready` dependency checks; no auth. |
-| SRV-007 | Security middleware: Helmet, CORS (admin domain from config), global rate limit, body-size limits, NoSQL-injection + XSS sanitizing | `feat/srv-007-security` | — | IN REVIEW | Each control has a unit/integration test; limits come from config. |
-| SRV-008 | Swagger/OpenAPI generated from code + Postman collection export script (kept in repo) | `feat/srv-008-swagger` | — | TODO | `npm run docs` regenerates both; CI fails if stale. |
+| SRV-007 | Security middleware: Helmet, CORS (admin domain from config), global rate limit, body-size limits, NoSQL-injection + XSS sanitizing | `feat/srv-007-security` | — | DONE | Each control has a unit/integration test; limits come from config. |
+| SRV-008 | Swagger/OpenAPI generated from code + Postman collection export script (kept in repo) | `feat/srv-008-swagger` | — | IN REVIEW | `npm run docs` regenerates both; CI fails if stale. |
 | SRV-009 | Dockerfile + docker-compose for local dev (Mongo, Redis, MinIO, SMTP sink) | `feat/srv-009-docker` | — | TODO | `docker compose up` gives a working local environment; no secrets in files. |
 | SRV-010 | GitHub Actions CI: lint, typecheck, unit tests, `npm audit --omit=dev` (dev-only transitive advisories via jest/istanbul exist), secret scan (path-filtered to `WAB-Server/`) | `feat/srv-010-ci` | — | TODO | Required checks on PRs; contract-test job added later (see `contracts`). |
 | SRV-011 | Deploy to dev environment (DigitalOcean) from `main` | `feat/srv-011-deploy-dev` | — | PENDING | DigitalOcean product (Droplet vs App Platform), managed Redis, platform domain, secrets store — **user input**. GitHub Actions deploy job + env/secret wiring. |

@@ -19,7 +19,7 @@ Review the full branch diff (`git diff origin/main...HEAD` plus uncommitted chan
 Checklist (every item must be "yes" or justified):
 - **Software Engineer:** correct; minimal scope; Clean Architecture layers; strong typing; errors handled; no duplication; no hardcoded values; no secrets; efficient queries/indexes; logs without sensitive data.
 - **Mobile Engineer:** (if mobile/API-for-mobile touched) RTL+LTR, AR+EN strings in resources, light/dark, loading/empty/error states, accessibility, lifecycle/permissions, matches PRD screen + design.
-- **Solution Architect:** API namespace/scope correct; contracts versioned and documented (Swagger + Postman updated); integrations via `wab-*` abstractions; business rules from `CLAUDE.md` §5 respected; config-driven; Phase 2 payments not blocked.
+- **Solution Architect:** API namespace/scope correct; contracts versioned and documented (Swagger + Postman regenerated with `npm run docs` and committed — `WAB-Server/CLAUDE.md` §11); integrations via `wab-*` abstractions; business rules from `CLAUDE.md` §5 respected; config-driven; Phase 2 payments not blocked.
 - **QA Engineer:** acceptance criteria listed; each has a unit test; edge cases covered; all tests/build/lint green; no regression in callers.
 
 Record in the task block of `.claude/session.md`:
