@@ -254,7 +254,7 @@
 ### T-018 — SRV-010 GitHub Actions CI for the server
 - Project: repo root `.github/workflows/server-ci.yml`, `WAB-Server/tests/ci.test.ts`
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #16 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #17 merged, all checks green)
 - Acceptance criteria (BE/NFR: NFR-01 dependency scanning in CI, NFR-10 tests run in CI; INTEGRATION_WORKFLOW §5 path-filtered CI with lint, typecheck, tests, build, secret scan):
   - [x] Workflow runs on PRs and pushes to `main`, only when `WAB-Server/**` or the workflow changes; read-only token; concurrent runs cancelled; every job has a timeout
   - [x] `verify` job: `npm ci`, typecheck, lint, format check, tests (includes stale Swagger/Postman check), build, `npm audit --omit=dev --audit-level=high` on Node 22
@@ -265,7 +265,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: the workflow itself has not run on GitHub yet (first run happens on this PR). gitleaks is a second secret scanner next to GitGuardian; if the repo moves to an organization, `GITLEAKS_LICENSE` is required. Dev-only advisories (jest/istanbul) are intentionally outside the audit gate. API docs: no change.
 - Notes: First real run: `Secret scan` failed with 403 on `GET /pulls/17/commits` (gitleaks needs `pull-requests: read`); fixed with job-level permissions + test. Contract tests job joins when `contracts/` exists (SRV-111); deploy job is SRV-011 (PENDING on hosting). Next: SRV-012 (Mongo layer) — SRV-011 is PENDING.
 
+### T-019 — SRV-012 MongoDB connection and base repository
+- Project: `WAB-Server/` (`src/utils/database/{connection,plain}.ts`, `src/repositories/base.repository.ts`, `src/constants/database.ts`, `src/server.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #17 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-02 atomic ops need replica set, NFR-06 stateless, NFR-08 health, NFR-09; BUSINESS_DOMAIN §3 conventions: ObjectId `_id`, UTC timestamps, soft-delete via status fields; server rules §2 repository is the only DB code, §5 constants):
+  - [x] `connectMongo`: timeouts/pool from constants, `autoIndex` off in production, failure logged without the URI and thrown as a typed 503 `ExternalServiceError`; connect/disconnect events logged
+  - [x] `/ready` includes a `mongodb` probe (open connection + ping); server connects before listening, closes MongoDB after HTTP on shutdown, and exits 1 if the database is unreachable
+  - [x] `BaseRepository`: create, findById/findOne/findMany/findPage (skip/limit, total, stable `_id` tie-break), count, exists, updateById (`$set`, validators, undefined ignored); returns plain entities (string ids, no `_id`/`__v`, nested ObjectIds as strings); malformed ids return null without querying; `null` = not found
+  - [x] Soft deletion is per-collection via the status field: `baseFilter()` hook hides archived records from every read and write (no generic delete)
+  - [x] Test strategy: no `mongod` and MongoDB downloads are blocked on the runner, so repository logic runs against an in-memory fake model; connection failure path runs against a real unreachable address
+- Tests: `cd WAB-Server && npm test` — 280 pass; typecheck/lint/format/build green; `npm audit --omit=dev` 0; built server exits 1 with no secret in output when MongoDB is unreachable. QA found a real bug: `mongoose.ConnectionStates` was `undefined` with a named import (TypeScript's interop does not copy prototype statics), which would have made `/ready` always report MongoDB down — fixed.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified against a real MongoDB (the connect success path and real queries): first `docker compose up` run should confirm. Deps: mongoose 9. API docs: no change (the `/ready` payload shape is unchanged; it just gains a `mongodb` check entry).
+- Notes: Next: SRV-013 (Redis client + lock helper). User rule: merge my own PRs only after ALL CI checks completed and green.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-012 — next server task (SRV-011 deploy is PENDING), start only after T-018 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-013 — next server task, start only after T-019 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
