@@ -47,10 +47,14 @@ const waitUntilReady = async (url: string, server?: ChildProcess): Promise<void>
     try {
       await probe.connect();
       await probe.ping();
-      probe.disconnect();
+      // quit() closes cleanly; disconnect() would leave ioredis' 2-second force-close timer pending,
+      // which keeps Jest from exiting after a short suite.
+      await probe.quit();
       return;
     } catch {
-      probe.disconnect();
+      // A probe whose connection was refused has already ended; disconnecting it again would only
+      // leave ioredis' force-close timer pending.
+      if (probe.status !== 'end') probe.disconnect();
       if (server?.exitCode != null) throw new Error('redis-server exited before it was ready');
       if (Date.now() > deadline) throw new Error('redis-server did not become ready in time');
       await new Promise((resolve) => setTimeout(resolve, 50));

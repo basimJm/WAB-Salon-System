@@ -1,118 +1,78 @@
 package com.fab.wab.customer.designsystem.components.badge
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.fab.wab.customer.designsystem.icons.AppIcons
-import com.fab.wab.customer.designsystem.theme.LocalAppColors
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.fab.wab.customer.designsystem.components.text.AppText
+import com.fab.wab.customer.designsystem.theme.AppColors
+import com.fab.wab.customer.designsystem.theme.AppTheme
 
-enum class BadgeType {
-    PRIMARY,
-    SUCCESS,
-    WARNING,
-    ERROR,
-    INFO,
-}
+/** Meaning of a status pill: booking, payment, refund, staff and salon states all map onto these hues. */
+enum class StatusTone { Success, Warning, Danger, Neutral, Accent }
 
-@Composable
-fun AppBadge(
-    text: String,
-    modifier: Modifier = Modifier,
-    type: BadgeType = BadgeType.PRIMARY,
-    showDot: Boolean = true,
-) {
-    val colors = LocalAppColors.current
-    
-    val mainColor = when (type) {
-        BadgeType.PRIMARY -> colors.primary
-        BadgeType.SUCCESS -> colors.success
-        BadgeType.WARNING -> colors.warning
-        BadgeType.ERROR -> colors.error
-        BadgeType.INFO -> colors.info
-    }
-    
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
-            .background(mainColor.copy(alpha = 0.15f))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        androidx.compose.foundation.layout.Row(
-            verticalAlignment = Alignment.CenterVertically,
-            content = {
-                if (showDot) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(mainColor),
-                    )
-                }
-                
-                androidx.compose.foundation.layout.Spacer(
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-                
-                com.fab.wab.customer.designsystem.components.text.AppTextStyles.labelSmall(
-                    text = text,
-                    color = mainColor,
-                )
-            }
-        )
-    }
+/** Content color and tinted container for a tone. Pure, so it is unit tested. */
+fun statusColors(tone: StatusTone, colors: AppColors): Pair<Color, Color> = when (tone) {
+    StatusTone.Success -> colors.onSuccessContainer to colors.successContainer
+    StatusTone.Warning -> colors.onWarningContainer to colors.warningContainer
+    StatusTone.Danger -> colors.onDangerContainer to colors.dangerContainer
+    StatusTone.Neutral -> colors.onNeutralContainer to colors.neutralContainer
+    StatusTone.Accent -> colors.onAccentContainer to colors.accentContainer
 }
 
 @Composable
 fun AppStatusBadge(
     text: String,
+    tone: StatusTone,
     modifier: Modifier = Modifier,
-    type: BadgeType = BadgeType.PRIMARY,
+    icon: ImageVector? = null,
 ) {
-    AppBadge(
-        text = text,
-        modifier = modifier,
-        type = type,
-        showDot = true,
-    )
+    val (content, container) = statusColors(tone, AppTheme.colors)
+    val spacing = AppTheme.spacing
+    Row(
+        modifier = modifier
+            .defaultMinSize(minHeight = AppTheme.sizes.badgeHeight)
+            .background(container, AppTheme.shapes.small)
+            .padding(horizontal = spacing.space10, vertical = spacing.space4),
+        horizontalArrangement = Arrangement.spacedBy(spacing.space4),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (icon != null) {
+            Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(AppTheme.sizes.iconSmall))
+        }
+        AppText(text = text, style = AppTheme.typography.labelMedium, color = content, maxLines = 1)
+    }
 }
 
+/** Text for the notification counter: nothing for 0 or less, the number up to [max], then "max+". */
+fun countBadgeLabel(count: Int, max: Int = MAX_BADGE_COUNT): String? = when {
+    count <= 0 -> null
+    count > max -> "$max+"
+    else -> count.toString()
+}
+
+private const val MAX_BADGE_COUNT = 99
+
 @Composable
-fun AppDotIndicator(
-    modifier: Modifier = Modifier,
-    type: BadgeType = BadgeType.PRIMARY,
-    size: Int = 8,
-) {
-    val colors = LocalAppColors.current
-    
-    val dotColor = when (type) {
-        BadgeType.PRIMARY -> colors.primary
-        BadgeType.SUCCESS -> colors.success
-        BadgeType.WARNING -> colors.warning
-        BadgeType.ERROR -> colors.error
-        BadgeType.INFO -> colors.info
-    }
-    
+fun AppCountBadge(count: Int, modifier: Modifier = Modifier) {
+    val label = countBadgeLabel(count) ?: return
+    val colors = AppTheme.colors
     Box(
         modifier = modifier
-            .size(size.dp)
-            .shadow(
-                elevation = 2.dp,
-                shape = CircleShape,
-                ambientColor = dotColor,
-                spotColor = dotColor,
-            )
-            .background(dotColor, CircleShape),
-    )
+            .defaultMinSize(minWidth = AppTheme.sizes.countBadge, minHeight = AppTheme.sizes.countBadge)
+            .background(colors.danger, AppTheme.shapes.pill)
+            .padding(horizontal = AppTheme.spacing.space4),
+        contentAlignment = Alignment.Center,
+    ) {
+        AppText(text = label, style = AppTheme.typography.labelSmall, color = colors.onGradient, maxLines = 1)
+    }
 }

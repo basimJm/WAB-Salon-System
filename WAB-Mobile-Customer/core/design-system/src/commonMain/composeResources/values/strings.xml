@@ -1,34 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="nav_home">HOME</string>
-    <string name="nav_order">ORDER</string>
-    <string name="nav_wallet">WALLET</string>
-    <string name="nav_profile">PROFILE</string>
-    <string name="success_title">Success!</string>
-    <string name="success_message">Your impact is growing.</string>
-    <string name="error_title">Action Failed</string>
-    <string name="error_message">Something went wrong. Try again.</string>
-    <string name="ok">OK</string>
-    <string name="retry">RETRY</string>
-
-    <string name="show">Show</string>
-    <string name="cart">Cart</string>
-    <string name="your_recycling_cart">Your Recycling Cart</string>
-    <string name="total_value">TOTAL VALUE</string>
-    <string name="place_order">Place Order</string>
-    <string name="jod">JOD</string>
-
-    <!-- Text Fields -->
-    <string name="email_hint">Email address</string>
-    <string name="email_placeholder">example@template.app</string>
-    <string name="password_hint">Password Input</string>
-    <string name="password_placeholder">••••••</string>
-    <string name="phone_hint">Jordanian Phone Number</string>
-    <string name="phone_placeholder">7X XXX XXXX</string>
-    <string name="optional_hint">Notes</string>
-    <string name="optional_placeholder">Enter additional details…</string>
-    <string name="invalid_email">Enter a valid email address</string>
-    <string name="invalid_email_message">Please enter a valid email address</string>
-    <string name="invalid_password_message">Password must be at least 8 characters</string>
-    <string name="invalid_phone_message">Invalid Jordan mobile format</string>
+    <string name="common_back">Back</string>
+    <string name="common_close">Close</string>
+    <string name="state_retry">Try again</string>
+    <string name="state_offline_title">No internet connection</string>
+    <string name="state_offline_message">Check your connection and try again.</string>
+    <string name="state_error_title">Something went wrong</string>
+    <string name="state_error_message">We could not complete your request. Please try again.</string>
+    <string name="state_empty_title">Nothing to show yet</string>
+    <string name="rating_description">Rating %1$s out of %2$s</string>
+    <string name="step_description">Step %1$d of %2$d</string>
+    <string name="otp_description">Verification code, %1$d of %2$d digits entered</string>
 </resources>

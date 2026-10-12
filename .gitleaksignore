@@ -1,0 +1,3 @@
+# Fake secret-shaped strings in the policy-check unit tests (commit a040902); the tests now build them from parts.
+a040902a43273f8c4bc6568008aff24781e66b6f:WAB-Mobile-Customer/scripts/ci/tests/test_hardcoded.py:generic-api-key:74
+a040902a43273f8c4bc6568008aff24781e66b6f:WAB-Mobile-Customer/scripts/ci/tests/test_hardcoded.py:gcp-api-key:73

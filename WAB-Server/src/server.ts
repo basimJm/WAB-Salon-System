@@ -10,6 +10,8 @@ import {
 } from './utils/database/connection';
 import type { ReadinessCheck } from './utils/health';
 import { REDIS_KEY_PREFIX } from './constants/redis';
+import { ALL_MODELS } from './models';
+import { ensureIndexes } from './utils/database/indexes';
 import { RedisRateLimitStore } from './utils/redis/rateLimitStore';
 import { connectRedis, createRedisReadinessCheck, disconnectRedis } from './utils/redis/client';
 import { createLogger, type Logger } from './utils/logger';
@@ -88,6 +90,7 @@ const main = async (): Promise<void> => {
   const mongo = await connectMongo(config, logger);
   let redis: Redis | undefined;
   try {
+    await ensureIndexes(ALL_MODELS, logger);
     redis = await connectRedis(config, logger);
     const connected = redis;
     await startServer(config, logger, {

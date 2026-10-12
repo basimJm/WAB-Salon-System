@@ -427,9 +427,12 @@ describe('Redis outage errors are recognised as 503 (real ioredis errors)', () =
   };
 
   it('maps "max retries per request" (Redis down)', async () => {
-    const client = offline({ maxRetriesPerRequest: 1, retryStrategy: () => 20 });
+    // The client retries until the command gives up; afterwards it is told to stop by itself,
+    // because disconnecting a client between attempts leaves ioredis' force-close timer pending.
+    let giveUp = false;
+    const client = offline({ maxRetriesPerRequest: 1, retryStrategy: () => (giveUp ? null : 20) });
     const error = await failure(() => client.get('a'));
-    client.disconnect();
+    giveUp = true;
     expect((error as Error).name).toBe('MaxRetriesPerRequestError');
     expectUnavailable(error);
   });

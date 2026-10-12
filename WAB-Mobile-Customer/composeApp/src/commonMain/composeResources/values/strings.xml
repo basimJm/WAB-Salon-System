@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <!-- Splash Screen -->
-    <string name="splash_version">v%s</string>
+    <string name="splash_version">v%1$s</string>
     <string name="splash_loading">Loading...</string>
 
     <!-- Update Dialogs -->
@@ -24,4 +24,5 @@
     <string name="splash_error_message">Unable to load app settings. Please check your connection and try again.</string>
     <string name="splash_retry_button">Retry</string>
     <string name="unauthorized_logout_message">You are unauthorized and will be logged out.</string>
+    <string name="nav_home">Home</string>
 </resources>

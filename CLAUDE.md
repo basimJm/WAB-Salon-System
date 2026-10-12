@@ -134,9 +134,9 @@ Apps track **every screen and action** in Firebase Analytics (exported to BigQue
 
 - **Never commit secrets.** `.env*` (except `.env.example`), keystores, service-account JSON, xcconfig secrets stay out of git. Do not modify `.env.*` files without explicit permission.
 - Backend target: **follow `WAB-Server/CLAUDE.md`** — TypeScript strict, layered `route → middleware → controller → service → repository → schema`, separate customer/merchant/admin modules, base success/error responses localized AR+EN, validation on every input, consistent error format, no magic numbers (config/constants), tests for business rules (availability, booking state machine, refunds, permissions).
-- Mobile: follow `WAB-Mobile-Customer/AGENTS.md` (clean + feature-driven, Koin, Ktor, Compose Navigation). Wrap Firebase (OTP, push, analytics, crash) behind app-level interfaces. Payments only through `wab-payments`.
+- Mobile: follow `WAB-Mobile-Customer/CLAUDE.md` (mandatory rules: Clean Architecture + MVI by delegate, no hardcoding, AR+EN resources, all build variants, CI, 300-line files, portrait + landscape) and `WAB-Mobile-Customer/AGENTS.md` (clean + feature-driven, Koin, Ktor, Compose Navigation). Wrap Firebase (OTP, push, analytics, crash) behind app-level interfaces. Payments only through `wab-payments`.
 - Admin: React, Arabic RTL default, data tables with server pagination, export (Excel/PDF), Socket.IO for live pages.
-- Respect existing per-project agent files (`WAB-Server/CLAUDE.md`, `WAB-Admin-Dashboard/CLAUDE.md`, `WAB-Mobile-Customer/AGENTS.md`) — they add project-specific rules on top of this file.
+- Respect existing per-project agent files (`WAB-Server/CLAUDE.md`, `WAB-Admin-Dashboard/CLAUDE.md`, `WAB-Mobile-Customer/CLAUDE.md`, `WAB-Mobile-Customer/AGENTS.md`) — they add project-specific rules on top of this file.
 - Environments: **dev** and **prod**. CI/CD: GitHub Actions. Server hosting: DigitalOcean (TBD); files on AWS S3 + CDN.
 - Before finishing a task: build, lint, run tests, and re-check the PRD acceptance criteria you touched.
 

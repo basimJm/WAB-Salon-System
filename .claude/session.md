@@ -332,7 +332,7 @@
 ### T-023 — SRV-016 Time utils (UTC instants, Asia/Amman days, `HH:mm`, DST-safe ranges)
 - Project: `WAB-Server/` (`src/utils/time/*`, `src/constants/time.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #21 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #22 merged by the user at 12:37:45Z while the verify job was still running; that job then finished green at 12:38:07Z and the push run on `main` was fully green too)
 - Acceptance criteria (BE/NFR: NFR-12 "UTC storage; Asia/Amman for schedules, open/closed status, reminders and reports"; consumers BER-02 (90 days, 15-min slots), BER-04/BE-34 (pending bookings hold their slot → half-open ranges); BUSINESS_DOMAIN §5.1 (instants UTC, business dates/hours in `settings.timezone`, `HH:mm` is local time), §5.3 (open/closed by local date), §5.4 (slots), `DayOfWeek` enum; server rules §9 "time only through `utils/time`", §5 constants):
   - [x] `isHHmm` / `parseHHmm` / `formatHHmm`: strict 24-hour `HH:mm` ↔ minutes since local midnight (0–1439); invalid input → 400 `ValidationError` (same pattern as `parseJod`)
   - [x] Civil dates `YYYY-MM-DD` independent of any zone: strict real calendar dates (leap years, no `2026-02-30`), `addDays`, `diffDays`, `dayOfWeek` (SUN…SAT = the domain enum values)
@@ -347,6 +347,138 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — pure functions, no I/O or state beyond a per-zone `Intl.DateTimeFormat` cache (zones come from settings/config, not clients). Client-input errors are 400 `ValidationError` (`parseHHmm`, `parseLocalDate`); programmer errors are `TypeError`/`RangeError`. Non-blocking notes: (1) `isValidTimeZone` accepts whatever `Intl` accepts, including `UTC` and fixed offsets such as `+03:00`; the settings task should also require an IANA name if it wants DST-aware zones only; (2) each `zonedTimeToUtc` costs ~4 `formatToParts` calls — fine for requests, but the availability task should compute a day's start once and add minutes for the 15-minute grid; (3) review found two literals (`12/31`, padding widths) and a duplicated pad helper — fixed. The seeded-PRNG helper moved to `tests/helpers/random.ts` and is shared with the money tests.
 - Notes: Not in this task: 12-hour AM/PM text (ar: ص / م from `locales/`) and "numerals follow the active language" (both PRDs) → message-formatting/notification task; `settings.timezone` wiring → SRV-017. Assumption to confirm: salon hours never pass midnight (`close` later than `open` on the same day) — no document says otherwise; the schedule task enforces it. API docs: no change.
 - Next: SRV-017 (settings). Merge only after ALL CI checks green.
+
+### T-024 — WAB-Mobile-Customer project rules
+- Project: `WAB-Mobile-Customer/` (`CLAUDE.md`; link in root `CLAUDE.md`)
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: DONE
+- Acceptance criteria (user request: rules at WAB-Mobile-Customer level, after reading all md/.claude/root files):
+  - [x] Clean Architecture + MVI by delegate (`BaseViewModel : MVI by mvi(initialState)`; Contract/ViewModel/Screen layering) documented from the real code
+  - [x] No hardcoded values (strings, colors, dp/sp, URLs, numbers) with the allowed-literal list and CI enforcement
+  - [x] Arabic + English for every resource (same keys/placeholders, Arabic first)
+  - [x] Performance-first checklist (stability, lazy keys, draw-phase reads, lifecycle collection, R8, size budget)
+  - [x] All build variants: Android dev/prod x debug/release, iOS Debug/Release-Dev/Prod + schemes
+  - [x] Always run CI; no runtime/compile errors, no warnings; no file over 300 lines
+  - [x] Portrait + landscape, phones to tablets, font scale, RTL/LTR, light/dark
+  - [x] New branch per task; never push to `main` (cloud-pinned branch exception stated)
+  - [x] Mandatory-reading list covers root `CLAUDE.md`, every `.claude/*.md`, `AGENTS.md`, `TECHSTACK.md`, PRD/BRD/Design Script; real module map replaces the generated one in `AGENTS.md`
+  - [x] Linked from root `CLAUDE.md` (§6)
+- Tests: docs only (no source code); every module path, file and class named in the rules was checked against the repo
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — docs only. The rules also name artifacts that T-025, T-029, T-030 deliver (`scripts/ci/*`, `customer-ci.yml`, `config/budgets.json`, `LocalSizes`/`LocalElevation`/`LocalAdaptive`, `AppWindowSize`, `AppAdaptiveGrid`, the iOS `iosApp-Dev|Prod` schemes); T-027 records the final reconciliation of those names.
+- Notes: Branch is the cloud-pinned branch (restarted from `main` after PR #22 merged; exception to `<type>/<name>`). `AGENTS.md` is generated and points at a missing `PROJECT_STRUCTURE.md`; left untouched, CLAUDE.md §2 is the module map. Open: separate Firebase apps for dev (`applicationIdSuffix`) need the owner's Firebase dev project.
+
+### T-025 — Customer app build variants + CI (Android, iOS, security, lint, hardcode, performance)
+- Project: `WAB-Mobile-Customer/` (`build-logic`, `androidApp`, `iosApp`, `core/common`, `core/network`, `composeApp`, `scripts/ci`, `config`) + `.github/workflows/customer-ci.yml`
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: DONE (PR #23 merged)
+- Acceptance criteria (user request: CI that builds, checks security, lint, hardcoded values and performance for Android and iOS; all build variants dev[debug, release] and prod[debug, release] + iOS schemes; no warnings; files <= 300 lines):
+  - [x] Android flavors `dev`/`prod` x build types `debug`/`release` (AGP DSL checked against the 9.1 API reference); per-flavor `BuildConfig.API_BASE_URL`/`ENVIRONMENT` from `gradle.properties`/`local.properties`; dev app name override (AR+EN); release minified + shrunk (R8) with keep rules; Lint with `warningsAsErrors`
+  - [x] iOS configurations `Debug-Dev`, `Release-Dev`, `Debug-Prod`, `Release-Prod` (Xcode project parsed OK), shared schemes `iosApp-Dev`/`iosApp-Prod`, `Dev.xcconfig`/`Prod.xcconfig` -> Info.plist (`APP_ENV`, `API_BASE_URL`), `KOTLIN_FRAMEWORK_BUILD_TYPE`, Swift/Clang warnings as errors, AR+EN `InfoPlist.strings`
+  - [x] No hardcoded environment values: `AppEnvironment` (core/common) provided by Android `BuildConfig` / iOS Info.plist through Koin; removed `ApiConstants`, the hardcoded iOS URL, the stub `AppInfoProvider` (version "1.0.0") and a dead `ApiConfig`
+  - [x] Kotlin `allWarningsAsErrors` (opt-out only with `-PwarningsAsErrors=false`), `kotlin-test` + JVM host tests (`testAndroidHostTest`) for every KMP module
+  - [x] `scripts/ci/policy_checks.py`: file length (300), hardcoded colors/dimensions/texts/URLs/secrets/magic numbers, crash-prone and slow constructs (`!!`, `runBlocking`, lazy `items` without key, `collectAsState`...), AR/EN resource parity, variant wiring, config security (manifest, ATS, repositories, tracked secret files), release APK budget; ratchet baselines for legacy debt (may only shrink)
+  - [x] detekt 1.23.8 + Compose rules 0.4.22 (SHA-256 pinned downloads), SwiftLint, gitleaks
+  - [x] `customer-ci.yml`: policy, lint, secret-scan, Android matrix (assemble + lint + tests + R8/APK budget), iOS matrix (xcodebuild + Kotlin/Native tests + SwiftLint), one required `Customer CI passed` check
+  - [x] Security hardening: `allowBackup=false`, `usesCleartextTraffic=false`
+- Tests: `python3 -m unittest discover -s scripts/ci/tests` — 67 pass (policy lexer, hardcoded, quality, baseline, localization, file length, variants, security, budget, CLI, and the repository itself); `scripts/ci/run_detekt.sh` exit 0; `policy_checks.py all` ok; Kotlin `AppEnvironmentTest` (runs in CI)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT VERIFIED HERE: the sandbox cannot reach Google Maven/the Android SDK (`dl.google.com` is blocked by the egress policy), so Gradle (Android/iOS), Android Lint, R8 and `xcodebuild` have not run locally; the first CI run is the real compile. DECISIONS TO CONFIRM: (1) dev keeps the production application id/bundle id (a suffix needs a matching Firebase app; `DEV_APPLICATION_ID_SUFFIX`/`BUNDLE_ID_SUFFIX` are ready); (2) API hosts are PLACEHOLDERS until the platform domain is decided; (3) `allowBackup=false` and `usesCleartextTraffic=false` are new; (4) no dependency vulnerability scan yet (Gradle has no lockfile): recommend Dependabot alerts or Gradle dependency locking + OSV.
+- Notes: Legacy debt is in `config/policy-baseline.json` and `config/detekt/baseline.xml`; T-029/T-030 remove the design-system entries. Local runs: `scripts/ci/run_local_checks.sh`.
+
+### T-029 — Customer design system: tokens, fonts, theme, adaptive layout
+- Project: `WAB-Mobile-Customer/core/design-system` (`theme/*`), `composeApp` (App, SplashScreen)
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (user request: implement design system and theme, handle landscape/portrait, everything related to the design; design source = `design/*.dc.html` + Design Script):
+  - [x] WAB violet light/dark color roles from the design export (ink/muted/faint, soft, line, gradient #6D28D9 to #A855F7, hero backdrop, shimmer) replace the template's emerald palette; status text colors meet 4.5:1 on their tinted containers (unit-tested)
+  - [x] Typography: Playfair Display + Poppins (English), IBM Plex Sans Arabic (Arabic, by layout direction); OFL font files bundled in composeResources/font
+  - [x] Spacing, shape, size, elevation, alpha and motion tokens; no literals outside `theme/`
+  - [x] Adaptive layout: `AppWindowSize` (width/height class, orientation), `AdaptiveTokens` (navigation bottom bar vs rail, margins, max content width, grid columns) re-evaluated on rotation
+  - [x] Material scheme/typography mapped from WAB roles; `AppTheme.colors|spacing|...` accessors
+- Tests: `AdaptiveTokensTest`, `ColorTokensTest` (commonTest, run by CI: testAndroidHostTest and iosSimulatorArm64Test)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally: Google Maven is blocked in the sandbox and the desktop harness could not resolve androidx artifacts, so CI is the first compile. Fonts come from the Google Fonts releases via npm (@expo-google-fonts, OFL).
+- Notes: Template emerald theme, `AppIcons.kt` (1905 lines of hand-drawn vectors) and 40 template components removed.
+
+### T-030 — Customer base components
+- Project: `WAB-Mobile-Customer/core/design-system` (`components/*`, `icons`, `preview`), `feature/sample`, `composeApp`
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (Design Script §1.2, PRD §3, §12):
+  - [x] Text, buttons (primary/secondary/outlined/text/destructive with enabled/disabled/loading), icon button, card, divider, status badge (5 tones) and count badge (1-99, 99+), filter chip (selectable/removable), time-slot chip, rating display + input (decimals), section header
+  - [x] Text field (default/focused/filled/error/disabled), search bar (editable + static), dropdown, OTP input (backend length, digits LTR, sanitised), segmented tabs, switch/checkbox/radio/sliders
+  - [x] Dialog (confirm/info), bottom sheet, full-screen sheet, toast, empty/error/offline states, shimmer placeholders, avatar with availability dot, step indicator
+  - [x] Navigation: top bar (back mirrors in RTL), bottom bar, rail, `AppNavScaffold` choosing by window; `AppScreen` (insets, max width), pull to refresh, adaptive grid, sticky action bar
+  - [x] AR + EN strings for every component text; no hardcoded values (policy checks: design-system and app UI have no baseline entries)
+  - [x] Sample feature screen and Splash rebuilt on the components (portrait + landscape via adaptive grid)
+  - [x] Previews: phone portrait/landscape, tablet landscape, light/dark, RTL/LTR
+- Tests: `ComponentLogicTest` (badge label, star fill, step state, OTP sanitising, initials) + policy tests; detekt (Compose rules) exit 0
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (see T-029). Not built: calendar, country-code picker, salon/service cards, media viewer (feature-level, need data models). Legacy hardcode debt outside the design system stays in `config/policy-baseline.json` (ratchet).
+- Notes: UnstableCollections detekt rule disabled (strong skipping).
+### T-026 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
+- Project: `WAB-Server/` (`src/models/setting.model.ts`, `src/repositories/settings.repository.ts`, `src/domain/settings/*`, `src/constants/settings.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #22 merged)
+- Status: DONE (PR #24 merged by the user seconds after it was marked ready; CI result verified afterwards, see T-027 notes)
+- Acceptance criteria (BE/NFR: BE-65 "all platform settings configurable by admin", NFR-06 stateless instances sharing Redis, NFR-02 no stale-cache poisoning; BUSINESS_DOMAIN §3.7 `settings` (key/value, cached in Redis), §10 keys and defaults, §5.1 timezone; server rules §5 "business-tunable values come from the settings collection, defaults kept in constants", §2 repository is the only DB code):
+  - [x] A typed registry of every §10 key (38) in `domain/settings`: default (in `constants/settings.ts`) + zod schema (structural validation only: integers, positive, percent 0–100, arrays/objects, IANA time zone, currency `JOD`); every default satisfies its own schema; a test holds an independent copy of the §10 table
+  - [x] `settings` model: `key` (unique, required), `value` (Mixed, required; `0`/`false`/`[]` allowed), timestamps; `SettingsRepository` (`findAllEntries`, `upsert` that creates on first use and retries once on a duplicate-key race)
+  - [x] `createSettingsService({store, redis, logger})`: `snapshot()`, typed `get(key)`, `set(key, value)`; `set` validates (unknown key / invalid value → 400 `ValidationError` with details prefixed by the key), persists the normalized value and returns it; values stored in the database that are unknown or invalid never crash a request: the default is used and a warning names the key
+  - [x] Redis cache of the stored overrides, shared by all instances: a hit does not touch Mongo; after `set`, every instance sees the change at once (version bump + delete in one `MULTI`); a read that started before a `set` can never write stale data back (compare-and-set on the version); TTL is only a safety net; Redis down → reads fall back to Mongo and `set` still persists (error logged); a corrupt cache payload is treated as a miss
+  - [x] Returned values are read-only (frozen), so a caller cannot corrupt the in-process memo
+  - [x] No hardcoded values: key names, defaults, bounds, cache key parts and TTL in `constants/`; the service is not wired into `server.ts` yet (first consumer: SRV-027)
+- Tests: `cd WAB-Server && npm test` — 820 pass (27 suites; also on one shared Redis with 4 workers); typecheck/lint/format/build green; `npm audit --omit=dev` 0. New: `tests/settings.test.ts` (135: registry vs an independent copy of §10, every key tested by its kind, service on a real Redis incl. the stale-write race, corrupt cache, Redis outage with cool-down) and `tests/settingsRepository.test.ts` (21: model, upsert, duplicate-key retry). Mutation check: 24 deliberate breakages of the settings code all caught (QA found one real test gap — only one of the two page-size keys was bound-tested — now every key is tested per kind, and a test fails if a key has no kind). Hygiene fixed in older tests: ioredis' 2-second force-close timer made the limiter suite (SRV-014) and the Redis helper keep Jest alive after short runs.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — settings are read through one service (Redis cache shared by instances, version-guarded against stale writes, database fallback with a 5 s Redis cool-down so an outage does not slow every request); stored garbage never crashes a request. `isDuplicateKeyError` now shared with the error normalizer (no duplicate). Not wired into `server.ts` yet (first consumer SRV-027).
+- Notes: Assumptions to confirm: (1) validation is structural only — the Admin PRD (A28) lists defaults but no min/max, so ranges such as `otp.length` 4–10 are sanity guards, not business rules; (2) §10 shows `alerts.api5xxRatePct = 2 (window 10 min)` — the window is not a key, so it stays a constant for the alerts task (SRV-106); (3) the Admin PRD's "payout frequency note" is not a §10 key and is left to the admin-settings task; (4) locations, app versions and maintenance have their own collections (§3.2, §3.6), not `settings`. New backlog row **SRV-017a**: create indexes at startup (production runs with `autoIndex: false`, so the unique `settings.key` index would not exist). API docs: no change.
+- Next: SRV-017a (indexes at startup). Merge only after ALL CI checks green.
+
+### T-027 — SRV-017a Create indexes at startup
+- Project: `WAB-Server/` (`src/models/index.ts`, `src/utils/database/indexes.ts`, `src/server.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #24 merged)
+- Status: DONE (PR #25 merged by the user; PR run and `main` run green — #24 verified green too)
+- Acceptance criteria (BE/NFR: NFR-02 correctness (unique keys), NFR-06 stateless instances; BUSINESS_DOMAIN §3 indexes per collection; server rules §9 every query backed by a schema-declared index; `connectMongo` runs with `autoIndex: false` in production):
+  - [x] `models/index.ts` lists every model (`ALL_MODELS`); a test fails when a `*.model.ts` file exists that is not listed
+  - [x] `ensureIndexes(models, logger)` creates the missing indexes with `createIndexes()` (create-only: it never drops or changes an index), one model at a time, logging each model; a failure stops start-up with the model named
+  - [x] Called by `main()` right after MongoDB connects, inside the cleanup `try` so a failure closes the connections
+  - [x] No hardcoded values; safe to run on every start and from several instances at once (idempotent)
+- Tests: `cd WAB-Server && npm test` — 826 pass (28 suites; also on a shared Redis with 4 workers); typecheck/lint/format/build green; audit 0. `tests/indexes.test.ts` (6). Mutation check: swallowing a failure, skipping the first model and not awaiting `createIndexes` were all caught.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — create-only (never drops), idempotent, runs inside the start-up cleanup `try`. NOT verified against a real MongoDB (none on the runner): the first `docker compose up` run confirms. Needs the Mongo user to hold createIndex rights (included in readWrite).
+- Notes: API docs: no change. Each later schema task adds its model to `ALL_MODELS`.
+- Next: SRV-018 (reference-data seeds). Merge only after ALL CI checks green.
+
+### T-028 — SRV-018 Reference-data seed: countries, cities, areas (Jordan)
+- Project: `WAB-Server/` (`src/models/{country,city,area}.model.ts`, `src/repositories/locations.repository.ts`, `src/seeds/*`, `src/constants/referenceData.ts`, `package.json` script `seed`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #25 merged)
+- Status: DONE (PR #26 merged; all 3 checks green on the head, merged by me)
+- Acceptance criteria (BE/NFR: BE-65 locations configurable by admin (data side), NFR-09; BUSINESS_DOMAIN §3.2 `countries {code, name{ar,en}, dialCode, flagKey, phoneRegex, active, sortOrder}` unique `code`, `cities {name{ar,en}, countryCode, active, sortOrder}`, `areas {cityId, name{ar,en}, active, sortOrder}` index `cityId`; Customer PRD "countries list (flag, name, dial code, phone regex)"):
+  - [x] Models for countries, cities, areas exactly as §3.2 with their indexes (country `code` unique; city `{countryCode, active, sortOrder}`; area `{cityId, active, sortOrder}`), registered in `ALL_MODELS`; codes/dial codes/regex validated
+  - [x] `insertIfMissing(naturalKey, data)` on the base repository: creates only when absent and never overwrites (so re-seeding keeps admin edits); reports whether it created
+  - [x] Seed data in `constants/referenceData.ts`: Jordan (`JO`, `+962`, mobile regex on the national number), the 12 governorate cities, a documented starter set of Amman areas (the five named in the Design Script + common ones), every name in ar + en
+  - [x] `seedReferenceData` is idempotent (second run creates nothing), keeps manual changes, and links areas to the right city; `npm run seed` connects, creates indexes, seeds, disconnects
+  - [x] Settings are NOT seeded: a missing key already means "default", and writing the defaults would pin them against later default changes
+- Tests: `cd WAB-Server && npm test` — 843 pass (29 suites; also on a shared Redis with 4 workers); typecheck/lint/format/build green; audit 0. `tests/referenceData.test.ts` (17): seed-data integrity (both languages, Arabic script, regex accepts/rejects numbers, unique names/sort orders), models and indexes, `insertIfMissing`, seed idempotency, admin edits kept, same-named areas in two cities. Mutation check: 6 breakages; one survived (area key without `cityId`) → seed data made injectable and a test added → caught. Built `npm run seed` exits 1 cleanly without a database.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — insert-only seeds (never overwrite), models registered in `ALL_MODELS`. NOT verified against a real MongoDB (none on the runner): first `docker compose up` + `npm run seed` confirms. Public endpoints for these lists are SRV-036.
+- Notes: Assumptions to confirm: (1) `phoneRegex` applies to the national number without the leading 0 (`^7[789][0-9]{7}$`: Zain 77, Orange 77/78, Umniah 78/79); (2) `flagKey` is a storage key `flags/jo.svg` (the asset itself comes with the storage task); (3) only Amman gets starter areas — other cities' areas are added in the admin Locations editor. API docs: no change.
+- Next: SRV-019 (demo catalog seed). Merge only after ALL CI checks green.
+
+### T-029 — SRV-019 Demo catalog seed (dev only)
+- Project: `WAB-Server/` (`src/models/catalogService.model.ts`, `src/constants/{enums,demoCatalog}.ts`, `src/seeds/{demoCatalog,runDemo}.ts`, script `seed:demo`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #26 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-65/Admin PRD A23 catalog (data side); BUSINESS_DOMAIN §3.2 `catalogServices {name{ar,en}, description{ar,en}, imageKey, gender: Gender, active, sortOrder}`, index `{gender, active, sortOrder}` + text on names, `Gender = MALE | FEMALE`; backlog: dev-only, flagged as demo data):
+  - [x] `catalogServices` model as in §3.2 with both indexes, registered in `ALL_MODELS`; `Gender` enum constant
+  - [x] Demo data in `constants/demoCatalog.ts`: women's and men's services, every name and description in ar + en, image keys under `demo/catalog/` (the demo flag, since the domain has no field for it)
+  - [x] `seedDemoCatalog` is insert-only and idempotent (same name may exist for both genders)
+  - [x] `npm run seed:demo` refuses to run in production (exit 1, nothing written); otherwise connects, creates indexes, seeds, disconnects
+- Tests: `cd WAB-Server && npm test` — 854 pass (30 suites; also on a shared Redis with 4 workers); typecheck/lint/format/build green; audit 0. `tests/demoCatalog.test.ts` (11): data in both languages, no duplicates per audience, model + indexes, idempotent seed keeping admin edits, production refusal. Mutation check: 7 breakages (wrong key, wrong numbering, inverted production guard, unknown gender allowed, missing demo prefix…) all caught. Built `seed:demo` exits 1 in production.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — demo flag = guarded script + `demo/` image keys (no field invented). Arabic names need a native check. NOT run against a real MongoDB.
+- Notes: Assumption: `imageKey` is required in the domain, so demo rows use placeholder keys whose files do not exist (clients show a placeholder). The text index uses `default_language: none` because Arabic has no built-in Mongo stemmer; real Arabic search is the Atlas Search task (SRV-059). API docs: no change.
+- Next: SRV-020 (audit log + server events writer). Merge only after ALL CI checks green.
 
 ### T-024 — ADM-01 Admin foundation: rules, design system, theme, base components, infrastructure, CI
 - Project: `WAB-Admin-Dashboard/` (+ `.github/workflows/admin-ci.yml`, root docs)
@@ -366,5 +498,5 @@
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-017 — next server task after T-023 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-020 — next server task after T-029 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

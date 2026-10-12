@@ -17,6 +17,7 @@ class ComposeAppPlugin : Plugin<Project> {
 
             extensions.configure<KotlinMultiplatformExtension> {
                 jvmToolchain(21)
+                configureKotlinQuality(this)
 
                 listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
                     iosTarget.binaries.all {

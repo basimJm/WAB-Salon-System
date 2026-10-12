@@ -14,10 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fab.wab.customer.app.controller.contract.MainContract
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
@@ -38,14 +35,12 @@ import com.fab.wab.customer.core.ui.utils.LocalAppLocale
 import com.fab.wab.customer.core.ui.utils.LocalDarkTheme
 import com.fab.wab.customer.designsystem.components.image.LocalImageLoader
 import com.fab.wab.customer.designsystem.components.image.rememberImageLoader
-import com.fab.wab.customer.designsystem.components.navigation.AppNavDestination
+import com.fab.wab.customer.designsystem.components.navigation.AppNavItem
 import com.fab.wab.customer.designsystem.components.navigation.AppNavigationRail
-import com.fab.wab.customer.designsystem.resources.ic_home
-import com.fab.wab.customer.designsystem.resources.nav_home
+import com.fab.wab.customer.designsystem.icons.AppIcons
+import com.fab.wab.customer.designsystem.theme.NavigationStyle
+import com.fab.wab.customer.app.resources.nav_home
 import com.fab.wab.customer.designsystem.theme.AppTheme
-import com.fab.wab.customer.designsystem.theme.AppWindowWidthClass
-import com.fab.wab.customer.designsystem.theme.LocalWindowWidthClass
-import com.fab.wab.customer.designsystem.theme.rememberWindowWidthClass
 import com.fab.wab.customer.exitApp
 import com.fab.wab.customer.feature.sample.di.sampleModule
 import com.fab.wab.customer.feature.sample.presentation.di.samplePresentationModule
@@ -53,7 +48,6 @@ import com.fab.wab.customer.openStoreLink
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
-import com.fab.wab.customer.designsystem.resources.Res as DesignSystemRes
 
 val appModules = listOf(
     coreDiModule,
@@ -65,14 +59,7 @@ val appModules = listOf(
     samplePresentationModule,
 )
 
-// Add an entry per top-level graph to grow the rail / bottom bar.
-private val appNavDestinations = listOf(
-    AppNavDestination(
-        graph = Graph.Home,
-        labelRes = DesignSystemRes.string.nav_home,
-        iconRes = DesignSystemRes.drawable.ic_home,
-    ),
-)
+private const val HOME_NAV_ID = "home"
 
 @Composable
 fun App(androidContext: Any?) {
@@ -105,20 +92,6 @@ fun App(androidContext: Any?) {
         val imageLoader = rememberImageLoader()
         val unauthorizedLogoutMessage = stringResource(Res.string.unauthorized_logout_message)
 
-        // Adaptive layout — determine current window width class
-        val widthClass = rememberWindowWidthClass()
-
-        // Observe back stack to drive the NavigationRail selection state
-        val currentBackEntry by navController.currentBackStackEntryAsState()
-        val currentGraph: Graph? = remember(currentBackEntry) {
-            val hierarchy = currentBackEntry?.destination?.hierarchy
-            when {
-                hierarchy?.any { it.hasRoute<Graph.Home>() } == true -> Graph.Home
-                else -> null
-            }
-        }
-        val showRail = widthClass != AppWindowWidthClass.Compact
-
         CollectSideEffect(mainViewModel.sideEffect) {
             when (it) {
                 MainContract.SideEffect.KillTheApp -> exitApp()
@@ -136,16 +109,13 @@ fun App(androidContext: Any?) {
                     LocalImageLoader provides imageLoader,
                     LocalAppLocale provides languageState,
                     LocalDarkTheme provides isDarkTheme,
-                    LocalWindowWidthClass provides widthClass,
                 ) {
                     AppTheme {
+                        val homeLabel = stringResource(Res.string.nav_home)
+                        val navItems = remember(homeLabel) { listOf(AppNavItem(HOME_NAV_ID, homeLabel, AppIcons.Home)) }
                         Row(Modifier.fillMaxSize()) {
-                            if (showRail && currentGraph != null) {
-                                AppNavigationRail(
-                                    navController = navController,
-                                    currentGraph = currentGraph,
-                                    destinations = appNavDestinations,
-                                )
+                            if (AppTheme.adaptive.navigation == NavigationStyle.Rail) {
+                                AppNavigationRail(items = navItems, selectedId = HOME_NAV_ID, onSelect = {})
                             }
                             Box(Modifier.weight(1f)) {
                                 NotificationHost {

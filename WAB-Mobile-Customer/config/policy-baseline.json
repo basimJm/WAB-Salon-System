@@ -1,0 +1,108 @@
+{
+  "androidApp/src/main/kotlin/com/fab/wab/customer/main/MainActivity.kt": {
+    "H006": 1
+  },
+  "composeApp/src/androidMain/kotlin/com/fab/wab/customer/Platform.android.kt": {
+    "H004": 1
+  },
+  "composeApp/src/commonMain/kotlin/com/fab/wab/customer/app/controller/vm/MainViewModel.kt": {
+    "H003": 2,
+    "H006": 2
+  },
+  "composeApp/src/iosMain/kotlin/com/fab/wab/customer/Platform.ios.kt": {
+    "H004": 1
+  },
+  "core/common/src/androidMain/kotlin/com/fab/wab/customer/core/common/Analytics.android.kt": {
+    "H003": 1
+  },
+  "core/common/src/commonMain/kotlin/com/fab/wab/customer/core/common/NumberFormatter.kt": {
+    "H006": 3
+  },
+  "core/common/src/commonMain/kotlin/com/fab/wab/customer/core/common/Utils.kt": {
+    "H006": 11
+  },
+  "core/common/src/iosMain/kotlin/com/fab/wab/customer/core/common/Analytics.ios.kt": {
+    "H003": 1
+  },
+  "core/data/src/androidMain/kotlin/com/fab/wab/customer/core/data/location/DeviceLocationProvider.android.kt": {
+    "H006": 2,
+    "Q001": 1
+  },
+  "core/data/src/commonMain/kotlin/com/fab/wab/customer/core/data/AppPagingDataSource.kt": {
+    "H003": 1
+  },
+  "core/data/src/commonMain/kotlin/com/fab/wab/customer/core/data/PagingConfig.kt": {
+    "H006": 3
+  },
+  "core/data/src/commonMain/kotlin/com/fab/wab/customer/core/data/places/PlacesApiService.kt": {
+    "H004": 1
+  },
+  "core/data/src/iosMain/kotlin/com/fab/wab/customer/core/data/location/DeviceLocationProvider.ios.kt": {
+    "H006": 2
+  },
+  "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/client/AuthTokenPlugin.kt": {
+    "Q004": 1
+  },
+  "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/client/BaseHttpClient.kt": {
+    "H004": 3,
+    "H006": 3,
+    "Q004": 2
+  },
+  "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/config/ApiConfig.kt": {
+    "H006": 3
+  },
+  "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/safeApiCall.kt": {
+    "H003": 5,
+    "Q002": 1
+  },
+  "core/network/src/iosMain/kotlin/com/fab/wab/customer/core/network/client/NetworkLog.ios.kt": {
+    "Q002": 1
+  },
+  "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/composable/NotificationDisplay.kt": {
+    "H002": 8,
+    "H003": 1,
+    "H006": 2,
+    "P002": 1
+  },
+  "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/composable/NotificationHost.kt": {
+    "P002": 1
+  },
+  "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/manager/NotificationManager.kt": {
+    "H006": 1
+  },
+  "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/model/NotificationData.kt": {
+    "H006": 1
+  },
+  "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/model/NotificationStyle.kt": {
+    "H001": 4,
+    "H002": 1
+  },
+  "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/state/NotificationEvent.kt": {
+    "H006": 1
+  },
+  "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/state/NotificationUiState.kt": {
+    "H006": 1
+  },
+  "core/storage/src/commonMain/kotlin/com/fab/wab/customer/core/storage/db/AppDatabase.kt": {
+    "Q006": 1
+  },
+  "core/ui/src/androidMain/kotlin/com/fab/wab/customer/core/ui/permission/PermissionChecker.android.kt": {
+    "H006": 2,
+    "Q001": 2
+  },
+  "core/ui/src/androidMain/kotlin/com/fab/wab/customer/core/ui/utils/LocalAppLocale.android.kt": {
+    "Q001": 1
+  },
+  "core/ui/src/commonMain/kotlin/com/fab/wab/customer/core/ui/mvi/BaseViewModel.kt": {
+    "H006": 1
+  },
+  "core/ui/src/iosMain/kotlin/com/fab/wab/customer/core/ui/permission/PermissionChecker.ios.kt": {
+    "H006": 4
+  },
+  "core/ui/src/iosMain/kotlin/com/fab/wab/customer/core/ui/utils/getDefaultLocale.ios.kt": {
+    "H003": 1
+  },
+  "feature/sample/presentation/src/commonMain/kotlin/com/fab/wab/customer/feature/sample/presentation/controller/vm/SampleViewModel.kt": {
+    "H003": 2
+  }
+}

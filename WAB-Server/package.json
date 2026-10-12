@@ -14,6 +14,8 @@
     "format:check": "prettier --check .",
     "test": "jest",
     "start": "node dist/server.js",
+    "seed": "node dist/seeds/run.js",
+    "seed:demo": "node dist/seeds/runDemo.js",
     "docs": "npm run build && node dist/docs/generate.js"
   },
   "devDependencies": {
