@@ -234,7 +234,7 @@
 - Tests: `cd WAB-Server && npm test` — 233 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found `/docs/<unknown>.json` served the Swagger HTML instead of 404 (fixed). Deps: @asteasolutions/zod-to-openapi, swagger-ui-express. Contracts: `contracts/` (INT-01) still does not exist; these generated files are the interim API reference. API docs: updated (health/ready).
-- Notes: User said "complete" after adding the rule: keep merging own PRs and continue. Next: SRV-009 (Docker).
+- Notes: User later said they will merge manually: I no longer merge PRs. Next: SRV-009 (Docker).
 
 ### T-017 — SRV-009 Dockerfile + docker-compose for local development
 - Project: `WAB-Server/` (`Dockerfile`, `.dockerignore`, `docker-compose.yml`, `docker/compose.env.example`, `README.md`, `tests/docker.test.ts`)
@@ -249,7 +249,7 @@
 - Tests: `cd WAB-Server && npm test` — 248 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0; `docker compose config` valid (also with `--profile app`); runtime stage simulated (prod-only `npm ci` + `node dist/server.js` → `/health` 200, `/docs` 404 in production)
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified here: the cloud runner has no Docker daemon, so `docker build` and the container healthchecks (Mongo replica-set init, MinIO `mc ready`) were not executed; first real `docker compose up` should confirm them. API docs: no change.
-- Notes: Next: SRV-010 (GitHub Actions CI).
+- Notes: GitGuardian flagged 1 secret on PR #16; scan of the diff found no real secret (likely a false positive on the `MINIO_ROOT_PASSWORD` key name) — awaiting the user. Next: SRV-010 (GitHub Actions CI) only after the user merges #16.
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
