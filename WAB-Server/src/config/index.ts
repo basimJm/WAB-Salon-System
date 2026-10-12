@@ -9,6 +9,7 @@ import {
   type Environment,
   type LogLevel,
 } from '../constants/env';
+import { DEFAULT_PROVIDER_MODE, type ProviderMode } from '../constants/providers';
 import { envSchema } from './env.schema';
 
 export interface AppConfig {
@@ -21,6 +22,8 @@ export interface AppConfig {
   readonly trustProxyHops: number;
   readonly mongo: { readonly uri: string };
   readonly redis: { readonly url: string };
+  /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
+  readonly providers: { readonly otp: ProviderMode; readonly storage: ProviderMode };
 }
 
 /** Thrown at startup when the environment is invalid. Names the bad keys, never their values. */
@@ -70,5 +73,9 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
     trustProxyHops: values[ENV_KEYS.trustProxyHops],
     mongo: Object.freeze({ uri: values[ENV_KEYS.mongoUri] }),
     redis: Object.freeze({ url: values[ENV_KEYS.redisUrl] }),
+    providers: Object.freeze({
+      otp: values[ENV_KEYS.otpProvider] ?? DEFAULT_PROVIDER_MODE,
+      storage: values[ENV_KEYS.storageProvider] ?? DEFAULT_PROVIDER_MODE,
+    }),
   });
 };
