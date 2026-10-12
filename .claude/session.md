@@ -559,7 +559,21 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (Gradle blocked) and CI runners were unavailable at the time (jobs failed in seconds with no runner). The language/theme switch screens (Login, Register, Profile, Settings) are feature work: they inject `AppearanceSettings` and call `toggleLanguage()` / `setThemeMode()`.
 - Notes: Existing installs whose stored value is a platform tag (`en_US`) still resolve. Numerals-follow-language is a formatter concern (`NumberFormatter` baseline debt), not in this task.
 
+### T-035 — SRV-024 Identity schemas: customers, members, installations, refreshTokens, admins
+- Project: `WAB-Server/` (`src/models/{customer,member,installation,refreshToken,admin}.model.ts`, `src/repositories/identity.repository.ts`, `src/constants/{enums,identity}.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #39 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-01, BE-04 accounts, NFR-01 no raw tokens stored; BUSINESS_DOMAIN §3.1 customers/installations/refreshTokens/admins, §3.4 members, §2 enums):
+  - [x] Models with the documented fields, defaults, enums and indexes (customers: unique `phone.e164`, status, createdAt, text search; members: unique phone, `{salonId, active}`, `{salonId, providesServices, staff.serviceIds}`, one OWNER per salon via partial unique index; installations: unique `{app, installationId}` + customer/member/fcmToken; refreshTokens: unique `tokenHash` (SHA-256 hex only), subject index, TTL on `expiresAt`; admins: unique email); collection names as in the domain; all registered in `ALL_MODELS`
+  - [x] Rules in the schema: `e164 = dialCode + number`; lowercase emails; names 1–50; 15 permissions only (owner-only capabilities rejected); staff profile required when `providesServices`; working hours as a pair with start < end, `HH:mm`; rating 0–5, whole counts
+  - [x] Repositories: `findByPhone` (customers, members), `findByInstallation(app, id)`, `findByTokenHash`, `findByEmail` (case-insensitive)
+  - [x] Enums `Language`, `AppKind`, `CustomerStatus`, `MemberRole`, `Permission`, `SubjectType`; no hardcoded values
+- Tests: `cd WAB-Server && npm test` — 1177 pass (37 suites); full format:check, lint, typecheck, build green; audit 0; `npm run docs` no diff. `tests/identitySchemas.test.ts` (71). Mutation check skipped at the user's request ("fast").
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Schemas only (no API change). Refresh rotation/revocation logic is SRV-026; JWT SRV-025. Customers are not soft-hidden by status in the repository: services decide on BLOCKED/DELETED. `members.salonId` is a plain ObjectId until the salons model exists. API docs: no change.
+- Next: SRV-025 (JWT + scope middleware).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-024 — next server task after T-034 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-025 — next server task after T-035 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
