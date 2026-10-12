@@ -1,105 +1,51 @@
 package com.fab.wab.customer.designsystem.components.button
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.fab.wab.customer.designsystem.components.text.AppTextStyles
-import com.fab.wab.customer.designsystem.theme.LocalAppColors
-import com.fab.wab.customer.designsystem.utils.primaryGradientBackground
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
+import com.fab.wab.customer.designsystem.components.text.AppText
+import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.designsystem.utils.brandBackground
+import com.fab.wab.customer.designsystem.utils.brandBrush
+import com.fab.wab.customer.designsystem.utils.softShadow
 
-private val ButtonShape = RoundedCornerShape(16.dp)
-private val ButtonHeight = 56.dp
-private val LoadingSpinnerSize = 24.dp
-private val LoadingSpinnerStrokeWidth = 2.dp
+/** Visual weight of a button; the layout, height, shape and states are shared. */
+enum class ButtonKind { Primary, Secondary, Outlined, Text, Destructive }
 
 @Composable
 fun AppPrimaryButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    loading: Boolean = false,
-    content: @Composable () -> Unit,
-) {
-    val colors = LocalAppColors.current
-    val interactionSource = remember { MutableInteractionSource() }
-
-    Box(
-        modifier = modifier
-            .height(ButtonHeight)
-            .primaryGradientBackground(enabled = enabled && !loading, shape = ButtonShape)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = enabled && !loading,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (loading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(LoadingSpinnerSize),
-                color = colors.onPrimary,
-                strokeWidth = LoadingSpinnerStrokeWidth,
-            )
-        } else {
-            content()
-        }
-    }
-}
-
-@Composable
-fun AppPrimaryTextButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     loading: Boolean = false,
-) {
-    val colors = LocalAppColors.current
-    val interactionSource = remember { MutableInteractionSource() }
+    leadingIcon: ImageVector? = null,
+) = AppButton(text, onClick, modifier, ButtonKind.Primary, enabled, loading, leadingIcon)
 
-    Box(
-        modifier = modifier
-            .height(ButtonHeight)
-            .fillMaxWidth()
-            .primaryGradientBackground(enabled = enabled && !loading, shape = ButtonShape)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = enabled && !loading,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (loading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(LoadingSpinnerSize),
-                color = colors.onPrimary,
-                strokeWidth = LoadingSpinnerStrokeWidth,
-            )
-        } else {
-            AppTextStyles.labelLarge(
-                text = text,
-                color = colors.onPrimary
-            )
-        }
-    }
-}
+@Composable
+fun AppSecondaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    leadingIcon: ImageVector? = null,
+) = AppButton(text, onClick, modifier, ButtonKind.Secondary, enabled, false, leadingIcon)
 
 @Composable
 fun AppOutlinedButton(
@@ -107,34 +53,16 @@ fun AppOutlinedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-) {
-    val colors = LocalAppColors.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
+    leadingIcon: ImageVector? = null,
+) = AppButton(text, onClick, modifier, ButtonKind.Outlined, enabled, false, leadingIcon)
 
-    Box(
-        modifier = modifier
-            .height(ButtonHeight)
-            .fillMaxWidth()
-            .clip(ButtonShape)
-            .background(
-                if (isPressed) colors.primary.copy(alpha = 0.05f)
-                else Color.Transparent
-            )
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = enabled,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        AppTextStyles.labelLarge(
-            text = text,
-            color = colors.primary
-        )
-    }
-}
+@Composable
+fun AppTextButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) = AppButton(text, onClick, modifier, ButtonKind.Text, enabled, false, null)
 
 @Composable
 fun AppDestructiveButton(
@@ -142,31 +70,94 @@ fun AppDestructiveButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-) {
-    val colors = LocalAppColors.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
+) = AppButton(text, onClick, modifier, ButtonKind.Destructive, enabled, false, null)
 
-    Box(
+/** One button implementation: enabled, disabled and loading states for every [ButtonKind]. */
+@Composable
+fun AppButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    kind: ButtonKind = ButtonKind.Primary,
+    enabled: Boolean = true,
+    loading: Boolean = false,
+    leadingIcon: ImageVector? = null,
+) {
+    val colors = AppTheme.colors
+    val sizes = AppTheme.sizes
+    val spacing = AppTheme.spacing
+    val shape = AppTheme.shapes.medium
+    val active = enabled && !loading
+    val brush = brandBrush()
+    val contentColor = buttonContentColor(kind, active)
+    val container = Modifier
+        .defaultMinSize(minHeight = sizes.buttonHeight)
+        .let { base ->
+            when {
+                kind == ButtonKind.Primary && active ->
+                    base.softShadow(AppTheme.elevation.raised, colors.accent.copy(alpha = AppTheme.elevation.buttonShadowAlpha), shape)
+                        .brandBackground(brush, shape)
+                kind == ButtonKind.Primary -> base.clip(shape).background(colors.soft)
+                kind == ButtonKind.Secondary -> base.clip(shape).background(colors.soft)
+                kind == ButtonKind.Destructive -> base.clip(shape).background(colors.dangerContainer)
+                kind == ButtonKind.Outlined -> base.border(sizes.borderWidth, colors.line, shape).clip(shape)
+                else -> base.clip(shape)
+            }
+        }
+    Row(
         modifier = modifier
-            .height(ButtonHeight)
-            .fillMaxWidth()
-            .clip(ButtonShape)
-            .background(
-                if (isPressed) colors.error.copy(alpha = 0.1f)
-                else Color.Transparent
-            )
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = enabled,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
+            .then(container)
+            .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
+            .clickable(enabled = active, role = Role.Button, onClick = onClick)
+            .padding(horizontal = spacing.space20, vertical = spacing.space12),
+        horizontalArrangement = Arrangement.spacedBy(spacing.space8, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        AppTextStyles.labelLarge(
-            text = text,
-            color = colors.error
-        )
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(sizes.spinner),
+                color = contentColor,
+                strokeWidth = sizes.spinnerStroke,
+            )
+        } else {
+            if (leadingIcon != null) {
+                Icon(leadingIcon, contentDescription = null, tint = contentColor, modifier = Modifier.size(sizes.icon))
+            }
+            AppText(text = text, style = AppTheme.typography.labelLarge, color = contentColor, maxLines = 1)
+        }
+    }
+}
+
+@Composable
+private fun buttonContentColor(kind: ButtonKind, active: Boolean): Color {
+    val colors = AppTheme.colors
+    return when {
+        kind == ButtonKind.Primary && active -> colors.onGradient
+        kind == ButtonKind.Primary -> colors.faint
+        kind == ButtonKind.Destructive -> colors.danger
+        else -> colors.accent
+    }
+}
+
+@Composable
+fun AppIconButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    tint: Color = AppTheme.colors.ink,
+    size: Dp = AppTheme.sizes.touchTarget,
+) {
+    Row(
+        modifier = modifier
+            .size(size)
+            .clip(AppTheme.shapes.circle)
+            .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(icon, contentDescription = contentDescription, tint = tint, modifier = Modifier.size(AppTheme.sizes.iconLarge))
     }
 }

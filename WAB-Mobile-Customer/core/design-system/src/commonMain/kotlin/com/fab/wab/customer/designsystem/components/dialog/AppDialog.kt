@@ -1,164 +1,72 @@
 package com.fab.wab.customer.designsystem.components.dialog
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
-import com.fab.wab.customer.designsystem.theme.DefaultSpacingTokens
-import com.fab.wab.customer.designsystem.theme.RadiusCard
+import androidx.compose.ui.window.DialogProperties
+import com.fab.wab.customer.designsystem.components.badge.StatusTone
+import com.fab.wab.customer.designsystem.components.badge.statusColors
+import com.fab.wab.customer.designsystem.components.button.AppOutlinedButton
+import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
+import com.fab.wab.customer.designsystem.components.text.AppText
+import com.fab.wab.customer.designsystem.icons.AppIcons
+import com.fab.wab.customer.designsystem.theme.AppTheme
 
+/** Confirmation (confirm + dismiss), info (confirm only) and auth-required dialogs share this layout. */
 @Composable
 fun AppDialog(
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
-    title: String? = null,
-    message: String? = null,
-    confirmButton: String? = null,
-    dismissButton: String? = null,
-    onConfirm: (() -> Unit)? = null,
-    onDismiss: (() -> Unit)? = null,
-) {
-    Dialog(onDismissRequest = onDismissRequest) {
-        Card(
-            modifier = modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(RadiusCard),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
-        ) {
-            Column(
-                modifier = Modifier.padding(DefaultSpacingTokens.space24),
-            ) {
-                if (title != null) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Spacer(modifier = Modifier.height(DefaultSpacingTokens.space12))
-                }
-                if (message != null) {
-                    Text(
-                        text = message,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Start,
-                    )
-                    Spacer(modifier = Modifier.height(DefaultSpacingTokens.space24))
-                }
-                RowScope(
-                    confirmButton = confirmButton,
-                    dismissButton = dismissButton,
-                    onConfirm = onConfirm ?: onDismissRequest,
-                    onDismiss = onDismiss ?: onDismissRequest,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RowScope.ConfirmButton(
-    text: String,
-    onClick: () -> Unit,
-) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.weight(1f),
-    ) {
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.primary,
-        )
-    }
-}
-
-@Composable
-private fun RowScope.DismissButton(
-    text: String,
-    onClick: () -> Unit,
-) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.weight(1f),
-    ) {
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun RowScope(
-    confirmButton: String?,
-    dismissButton: String?,
+    title: String,
+    confirmText: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    message: String? = null,
+    dismissText: String? = null,
+    icon: ImageVector = AppIcons.Info,
+    tone: StatusTone = StatusTone.Accent,
+    dismissOnOutside: Boolean = true,
 ) {
-    if (confirmButton != null || dismissButton != null) {
-        androidx.compose.foundation.layout.Row(
-            modifier = Modifier.fillMaxWidth(),
+    val spacing = AppTheme.spacing
+    val (iconColor, iconContainer) = statusColors(tone, AppTheme.colors)
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnBackPress = dismissOnOutside, dismissOnClickOutside = dismissOnOutside),
+    ) {
+        Column(
+            modifier = modifier
+                .widthIn(max = AppTheme.sizes.dialogMaxWidth)
+                .fillMaxWidth()
+                .background(AppTheme.colors.card, AppTheme.shapes.extraLarge)
+                .padding(spacing.space24),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(spacing.space12),
         ) {
-            if (dismissButton != null) {
-                DismissButton(
-                    text = dismissButton,
-                    onClick = onDismiss,
-                )
+            Box(
+                modifier = Modifier.size(AppTheme.sizes.dialogIcon).background(iconContainer, AppTheme.shapes.circle),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(AppTheme.sizes.iconLarge))
             }
-            if (confirmButton != null && dismissButton != null) {
-                Spacer(modifier = Modifier.width(DefaultSpacingTokens.space8))
+            AppText(text = title, style = AppTheme.typography.titleLarge, textAlign = TextAlign.Center)
+            if (message != null) {
+                AppText(text = message, style = AppTheme.typography.bodyMedium, color = AppTheme.colors.muted, textAlign = TextAlign.Center)
             }
-            if (confirmButton != null) {
-                ConfirmButton(
-                    text = confirmButton,
-                    onClick = onConfirm,
-                )
+            AppPrimaryButton(text = confirmText, onClick = onConfirm, modifier = Modifier.fillMaxWidth())
+            if (dismissText != null) {
+                AppOutlinedButton(text = dismissText, onClick = onDismiss, modifier = Modifier.fillMaxWidth())
             }
         }
-    }
-}
-
-@Composable
-fun AppAlertDialog(
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
-    title: String? = null,
-    message: String? = null,
-    isSuccess: Boolean = false,
-    confirmButton: String = "OK",
-    onConfirm: (() -> Unit)? = null,
-) {
-    if (isSuccess) {
-        AppSuccessDialog(
-            onDismissRequest = onDismissRequest,
-            modifier = modifier,
-            title = title ?: "",
-            message = message ?: "",
-            confirmButtonText = confirmButton,
-            onConfirm = onConfirm ?: {},
-        )
-    } else {
-        AppErrorDialog(
-            onDismissRequest = onDismissRequest,
-            modifier = modifier,
-            title = title ?: "",
-            message = message ?: "",
-            confirmButtonText = confirmButton,
-            onConfirm = onConfirm ?: {},
-        )
     }
 }
