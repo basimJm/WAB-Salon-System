@@ -268,7 +268,7 @@
 ### T-019 — SRV-012 MongoDB connection and base repository
 - Project: `WAB-Server/` (`src/utils/database/{connection,plain}.ts`, `src/repositories/base.repository.ts`, `src/constants/database.ts`, `src/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #17 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #18 merged)
 - Acceptance criteria (BE/NFR: NFR-02 atomic ops need replica set, NFR-06 stateless, NFR-08 health, NFR-09; BUSINESS_DOMAIN §3 conventions: ObjectId `_id`, UTC timestamps, soft-delete via status fields; server rules §2 repository is the only DB code, §5 constants):
   - [x] `connectMongo`: timeouts/pool from constants, `autoIndex` off in production, failure logged without the URI and thrown as a typed 503 `ExternalServiceError`; connect/disconnect events logged
   - [x] `/ready` includes a `mongodb` probe (open connection + ping); server connects before listening, closes MongoDB after HTTP on shutdown, and exits 1 if the database is unreachable
@@ -280,7 +280,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified against a real MongoDB (the connect success path and real queries): first `docker compose up` run should confirm. Deps: mongoose 9. API docs: no change (the `/ready` payload shape is unchanged; it just gains a `mongodb` check entry).
 - Notes: Next: SRV-013 (Redis client + lock helper). User rule: merge my own PRs only after ALL CI checks completed and green.
 
+### T-020 — SRV-013 Redis client and distributed lock helper
+- Project: `WAB-Server/` (`src/utils/redis/{client,keys,lock}.ts`, `src/constants/redis.ts`, `src/server.ts`, CI workflow)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #18 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-33 no double booking via locks, NFR-06 stateless instances with Redis, NFR-08 health; BUSINESS_DOMAIN §5.6 per-staff Redis lock, §9 jobs; server rules §5 constants):
+  - [x] `connectRedis`: lazy connect with bounded connect/command timeouts, capped exponential retry that never gives up after startup, events logged, failure thrown as a typed 503 without leaking the URL; `disconnectRedis` graceful with hard fallback; `redis.duplicate()` documented for subscribers (Socket.IO/BullMQ)
+  - [x] `/ready` includes a `redis` PING probe; server connects Redis after MongoDB, closes Redis then MongoDB after HTTP, cleans up on startup failure
+  - [x] `lockKey(...)` namespaced keys (`lock:<parts>`), rejects empty parts and separators inside parts
+  - [x] `acquireLock` (`SET NX PX`, retry with jitter, `null` when busy), `release`/`extend` via compare-and-act Lua so a holder never touches someone else's lock, TTL frees crashed holders, `withLock` always releases and throws a caller-chosen error (default 409 `ConflictError`)
+  - [x] Tests run against a real Redis: spawned `redis-server` locally, `REDIS_TEST_URL` service container in CI (workflow updated + guarded by `tests/ci.test.ts`)
+- Tests: `cd WAB-Server && npm test` — 302 pass (3 consecutive runs, incl. a 15-way concurrent read-modify-write that proves mutual exclusion); typecheck/lint/format/build green; `npm audit --omit=dev` 0; external-Redis path verified locally. QA found a flawed test (lazy "dead" client pointed at the live server), not a code bug.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified on GitHub until this PR's CI runs (Redis service container). Rate-limit counters (SRV-014) and BullMQ/Socket.IO adapters reuse this client later. API docs: no change.
+- Notes: Next: SRV-014 (Redis rate-limit helpers). Merge only after ALL CI checks green.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-013 — next server task, start only after T-019 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-014 — next server task, start only after T-020 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
