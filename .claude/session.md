@@ -416,7 +416,7 @@
 - Tests: `ComponentLogicTest` (badge label, star fill, step state, OTP sanitising, initials) + policy tests; detekt (Compose rules) exit 0
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (see T-029). Not built: calendar, country-code picker, salon/service cards, media viewer (feature-level, need data models). Legacy hardcode debt outside the design system stays in `config/policy-baseline.json` (ratchet).
-- Notes: UnstableCollections detekt rule disabled (strong skipping).
+- Notes: UnstableCollections detekt rule disabled (strong skipping). First CI run found a real compile error (a KDoc containing a slash-star opened a nested comment, so the whole design system failed to compile); fixed, and policy rule Q008 + test now catch it. Loops/review re-run after the fix: policy tests 68 pass, detekt exit 0.
 ### T-026 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
 - Project: `WAB-Server/` (`src/models/setting.model.ts`, `src/repositories/settings.repository.ts`, `src/domain/settings/*`, `src/constants/settings.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #22 merged)
@@ -495,6 +495,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (responsive/RTL/a11y for web), Architect ✔, QA ✔) — QA found and fixed: Modal stole focus on every parent render; grid items widened the page on phones (horizontal scroll); closed drawer stayed focusable (now `inert`); drawer shadow leaked while closed.
 - Notes: Branch is the cloud-pinned branch (restarted from `main`). ASSUMPTIONS to confirm: (1) stack React 19 + Vite + TS (PRD §2.2 says stack TBD); (2) "android/ios" interpreted as Android-class Chromium and iOS-class WebKit browsers/viewports because the admin is a web app; (3) "debug/release" = unminified+source maps vs minified; mock data source excluded from all prod builds; (4) admin auth endpoints (`/admin/v1/auth/login|verify-otp|logout`) are assumed until `contracts/` (INT-01) exists. Not done here: global search, alerts bell data, real pages (ADM-02…05), Socket.IO client, Excel/PDF export. CI workflow itself has not run on GitHub yet.
+
+### T-031 — Customer automatic refresh-token handling
+- Project: `WAB-Mobile-Customer/core/domain/auth`, `core/network/{auth,client}`
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD §5 session: "Refresh MUST be automatic and transparent. Only if refresh fails: show Session expired, clear tokens"; BUSINESS_DOMAIN refreshTokens: rotate on every refresh, reuse revokes the family; CLAUDE.md §1 no `runBlocking`, no token in logs):
+  - [x] A 401 to a request that carried a token refreshes once and repeats the request with the new access token
+  - [x] Concurrent 401s share ONE refresh (single-flight lock); late requests reuse the already rotated tokens, so a refresh token is never presented twice
+  - [x] Both tokens are stored after rotation; session ends (`SessionTimeOut`) only when the backend rejects the refresh token (400/401/403/422) or none is stored; timeouts, 5xx, 429 and parse errors keep the user signed in
+  - [x] Refresh client has no interceptor (cannot recurse) and no request logger (body carries the token); `runBlocking` token/language providers removed
+- Tests: `TokenRefreshCoordinatorTest` (7: rotation stored, 8 concurrent -> 1 call, reuse, no refresh token, rejected, unavailable, null access); policy tests 68 pass; policy baseline only shrank
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled or run locally (Gradle blocked, detekt jars rate-limited); ASSUMPTIONS: endpoint `POST /customer/v1/auth/refresh` with `{refreshToken}` returning the base envelope `data.{accessToken,refreshToken}` (SRV-026/INT-01 not written yet; path in `AuthEndpoints`); the `HttpSend` interceptor assumes `expectSuccess` errors surface from `execute` (handled by catching `ResponseException`). Added test dependency kotlinx-coroutines-test (runTest).
+- Notes: Next in this PR series: language switch + theme setting UI, permission handler (replace `!!` in `PermissionChecker`).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

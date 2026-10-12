@@ -40,13 +40,9 @@
   "core/data/src/iosMain/kotlin/com/fab/wab/customer/core/data/location/DeviceLocationProvider.ios.kt": {
     "H006": 2
   },
-  "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/client/AuthTokenPlugin.kt": {
-    "Q004": 1
-  },
   "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/client/BaseHttpClient.kt": {
     "H004": 3,
-    "H006": 3,
-    "Q004": 2
+    "H006": 1
   },
   "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/config/ApiConfig.kt": {
     "H006": 3
