@@ -591,7 +591,7 @@
 ### T-037 — SRV-026 Refresh tokens: hashed storage, rotation, family revocation
 - Project: `WAB-Server/` (`src/domain/auth/refreshTokens.service.ts`, `src/repositories/identity.repository.ts`, `src/constants/auth.ts`, `tests/refreshTokens.test.ts`, `tests/helpers/fakeModel.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #42 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #43 merged into `server`; GitHub Actions had no runner, verified locally)
 - Acceptance criteria (BE/NFR: BE-01 rotating revocable refresh token, NFR-01 no raw tokens stored; CLAUDE.md §4.2; BUSINESS_DOMAIN §3.1 `refreshTokens`, §10 `auth.refreshTokenTtlDays`):
   - [x] Token = 32 random bytes base64url (43 chars); only its SHA-256 is stored; new family per login; expiry from `ttlDays`
   - [x] `rotate`: malformed/unknown/expired -> 401; atomic claim of the old token (one winner under concurrency); new token in the same family; old marked ROTATED + `replacedBy`
@@ -601,6 +601,22 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - service not wired to any endpoint yet (login/refresh endpoints: SRV-028/030). Caller signs the access token from the returned subject. API docs: no change.
 - Next: SRV-027 (OTP pre-check endpoint).
+
+### T-038 — SRV-027 OTP pre-check endpoint, platform limits, wrong-attempt report
+- Project: `WAB-Server/` (`src/domain/otp/otpGate.service.ts`, `src/modules/shared/otp/*`, `src/modules/services.ts`, `src/constants/otp.ts`, `src/app.ts`, `src/server.ts`, docs)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #43 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-07, NFR-01 stricter limits on OTP; BUSINESS_DOMAIN §3.1 OTP Redis keys, §10 `otp.*` settings, §11 `OTP_BLOCKED`; Customer PRD S13, Merchant PRD M03/§4.4):
+  - [x] `POST /customer/v1/auth/otp/request` and `/merchant/v1/auth/otp/request` (public): `{phone E.164, purpose}` -> `{allowed, otpLength, resendAfterSeconds, blockedUntil?}`; purposes customer LOGIN/REGISTER/CHANGE_PHONE/BOOKING_CONFIRMATION, merchant LOGIN/REGISTER/CHANGE_PHONE/BANK_DETAILS
+  - [x] Limits from settings, read per call: resend countdown (not counted), 5 requests / 5 min -> 15 min block (5th allowed starts the block), 5 wrong -> 15 min block; requests and wrong codes share one block; phones independent; concurrent requests -> exactly one allowed
+  - [x] `POST .../auth/otp/wrong-attempt` -> `{blocked, attemptsRemaining, blockedUntil?}`
+  - [x] `OtpGate.assertNotBlocked` (429 `OTP_BLOCKED`) and `reset` for the verification endpoints (SRV-028/033)
+  - [x] Per-IP route limit (fails closed, Redis store in `main()`); invalid input 400 with field details; no gate configured -> 503
+  - [x] Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1254 pass (40 suites, real Redis); format:check/lint/typecheck/build green; audit 0; `npm run docs` regenerated. `tests/otp.test.ts` (25). Mutation check skipped (user asked for speed).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (contract matches PRD S13), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) a blocked phone or a running resend countdown answers 200 with `allowed:false` (PRD shape) rather than 429; `OTP_BLOCKED` is thrown by `assertNotBlocked` on verification; (2) the endpoint does not check whether the phone is registered (login/register decide that in SRV-028/033, not leaking account existence here); (3) merchant purposes taken from Merchant PRD M03; (4) per-IP limit of 20/min on OTP routes is a constant. `main()` now builds the settings service and the OTP gate (first wiring).
+- Next: SRV-028 (customer auth).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

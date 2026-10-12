@@ -2,6 +2,10 @@ import { createServer, type Server } from 'node:http';
 import type { Store } from 'express-rate-limit';
 import type { Redis } from 'ioredis';
 import { createApp } from './app';
+import { createOtpGate } from './domain/otp/otpGate.service';
+import { createSettingsService } from './domain/settings';
+import type { ApiServices } from './modules/services';
+import { SettingsRepository } from './repositories/settings.repository';
 import { loadConfig, type AppConfig } from './config';
 import {
   createMongoReadinessCheck,
@@ -45,6 +49,8 @@ export interface StartOptions {
   readonly readinessChecks?: readonly ReadinessCheck[];
   /** Shared store for the global rate limit; without it each instance counts on its own. */
   readonly rateLimitStore?: Store;
+  /** Services for the feature routers (OTP gate...). */
+  readonly services?: ApiServices;
 }
 
 /**
@@ -54,7 +60,7 @@ export interface StartOptions {
 export const startServer = async (
   config: AppConfig,
   logger: Logger,
-  { proc, closables = [], readinessChecks = [], rateLimitStore }: StartOptions = {},
+  { proc, closables = [], readinessChecks = [], rateLimitStore, services }: StartOptions = {},
 ): Promise<RunningServer> => {
   const app = createApp({
     logger,
@@ -65,6 +71,7 @@ export const startServer = async (
     trustProxyHops: config.trustProxyHops,
     docs: !config.isProduction,
     readinessChecks,
+    ...(services === undefined ? {} : { services }),
   });
   // Plain http server: Express 5's `app.listen` passes listen errors to its callback as if started.
   const server = await new Promise<Server>((resolve, reject) => {
@@ -104,6 +111,17 @@ const main = async (): Promise<void> => {
         connected,
         `${REDIS_KEY_PREFIX.httpRateLimit}:global`,
       ),
+      services: {
+        otpGate: createOtpGate({
+          redis: connected,
+          settings: createSettingsService({
+            store: new SettingsRepository(),
+            redis: connected,
+            logger,
+          }),
+        }),
+        rateLimitStore: new RedisRateLimitStore(connected, `${REDIS_KEY_PREFIX.httpRateLimit}:otp`),
+      },
     });
   } catch (error) {
     if (redis) await disconnectRedis(redis);

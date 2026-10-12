@@ -127,8 +127,8 @@ Three token scopes. Roadmap SRV-03.
 |---|---|---|---|---|---|
 | SRV-024 | Schemas/repositories: customers, members, installations, refreshTokens, admins (indexes per BUSINESS §3.1) | `feat/srv-024-schemas-auth` | SRV-012 | DONE |  |
 | SRV-025 | JWT access tokens (short TTL from settings) + per-scope auth middleware (customer/merchant/admin never interchangeable) | `feat/srv-025-jwt` | SRV-024 | IN REVIEW | Customer token on merchant/admin route → `FORBIDDEN`; tests for all 3×3 combos. |
-| SRV-026 | Refresh tokens: hashed storage, rotation, family revocation on reuse, logout, logout-all | `feat/srv-026-refresh` | SRV-025 | IN REVIEW |  |
-| SRV-027 | OTP pre-check endpoint + platform limits (5 req/5 min → 15 min block; 5 wrong → 15 min block) + `otpLength` + resend timing; report-wrong-attempt endpoint | `feat/srv-027-otp-precheck` | SRV-014, SRV-022 | TODO | Values from settings; `OTP_BLOCKED`, `RATE_LIMITED` codes. |
+| SRV-026 | Refresh tokens: hashed storage, rotation, family revocation on reuse, logout, logout-all | `feat/srv-026-refresh` | SRV-025 | DONE |  |
+| SRV-027 | OTP pre-check endpoint + platform limits (5 req/5 min → 15 min block; 5 wrong → 15 min block) + `otpLength` + resend timing; report-wrong-attempt endpoint | `feat/srv-027-otp-precheck` | SRV-014, SRV-022 | IN REVIEW | Values from settings; `OTP_BLOCKED`, `RATE_LIMITED` codes. |
 | SRV-028 | Customer register/login/phone-change/booking-confirmation via Firebase ID token (stub verifier) → platform JWT + refresh | `feat/srv-028-customer-auth` | SRV-027, SRV-026 | TODO | Phone match enforced; blocked/deleted accounts handled (`ACCOUNT_BLOCKED`). |
 | SRV-029 | Merchant member login (phone lookup, `PHONE_NOT_REGISTERED`) via Firebase ID token; token carries `salonId` + permissions | `feat/srv-029-merchant-auth` | SRV-028 | TODO |  |
 | SRV-030 | Admin login: bcrypt password, lockout after N failures, session idle timeout | `feat/srv-030-admin-auth` | SRV-025 | TODO |  |
