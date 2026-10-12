@@ -20,7 +20,7 @@ class AndroidApp : Application() {
         startKoin {
             androidContext(this@AndroidApp)
             properties(mapOf("androidContext" to this@AndroidApp))
-            modules(appModules)
+            modules(appModules + appEnvironmentModule)
         }
 
         val appSettings: AppSettings = org.koin.java.KoinJavaComponent.getKoin().get()

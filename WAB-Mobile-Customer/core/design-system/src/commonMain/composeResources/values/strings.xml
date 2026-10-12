@@ -20,11 +20,11 @@
 
     <!-- Text Fields -->
     <string name="email_hint">Email address</string>
-    <string name="email_placeholder">example@template.app</string>
+    <string name="email_placeholder" translatable="false">example@template.app</string>
     <string name="password_hint">Password Input</string>
     <string name="password_placeholder">••••••</string>
     <string name="phone_hint">Jordanian Phone Number</string>
-    <string name="phone_placeholder">7X XXX XXXX</string>
+    <string name="phone_placeholder" translatable="false">7X XXX XXXX</string>
     <string name="optional_hint">Notes</string>
     <string name="optional_placeholder">Enter additional details…</string>
     <string name="invalid_email">Enter a valid email address</string>

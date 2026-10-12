@@ -63,12 +63,12 @@ class BaseHttpClient(
             url {
                 val base = config.baseUrl.trim()
                 require(base.isNotBlank()) {
-                    "API base URL is blank. Set API_BASE_URL in local.properties (e.g. http://10.0.2.2:8080 for emulator)."
+                    "API base URL is blank. Set DEV_API_BASE_URL / PROD_API_BASE_URL (Android) or API_BASE_URL in the environment xcconfig (iOS)."
                 }
                 val withoutScheme = base.removePrefix("https://").removePrefix("http://").trim()
                 val hostPart = withoutScheme.split("/").firstOrNull()?.trim() ?: ""
                 require(hostPart.isNotBlank()) {
-                    "API base URL has no host: $base. Use e.g. http://10.0.2.2:8080 (emulator) or http://<host-ip>:8080."
+                    "API base URL has no host: $base"
                 }
                 val hostAndPort = hostPart.split(":")
                 host = when (hostAndPort.size) {
