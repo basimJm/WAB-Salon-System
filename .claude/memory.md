@@ -13,6 +13,7 @@
 - Cloud runner: Node 22, `redis-server` present, no `mongod`/docker daemon → unit tests use fakes; externals sit behind interfaces with fake providers.
 
 - SRV-001 done: `WAB-Server` has package.json (TS 5.9, jest 30/ts-jest 29, eslint 9 + typescript-eslint 8, prettier), `npm run typecheck|lint|format:check|build|test`; layout list in `src/constants/layout.ts`. TypeScript 7 exists on npm but tooling peers need <6.1 → stay on 5.9.
+- SRV-002 done: `loadConfig()` in `src/config` (zod 4 schema in `env.schema.ts`; names/defaults in `src/constants/env.ts`); add new env keys to schema AND `.env.example` (test enforces). Real env overrides `.env.<NODE_ENV>`.
 
 ## Business spec
 - `BUSINESS_DOMAIN.md` = single source for schemas, enums, rules, state machine, permissions, jobs, settings, error codes. Money = integer fils (1 JOD = 1000 fils). Booking draft → OTP → payment → booking (Redis holds 10 min).
