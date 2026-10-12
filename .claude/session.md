@@ -136,7 +136,7 @@
 ### T-010 — SRV-004 Error model, error codes, AR/EN locales, Accept-Language
 - Project: `WAB-Server/` (`src/utils/errors`, `src/utils/i18n`, `src/middlewares/language.ts`, `src/locales/*.json`, `src/constants/{errorCodes,http,i18n}.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #8 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #9 merged)
 - Acceptance criteria (BE/NFR: NFR-11 localization, NFR-09; BUSINESS_DOMAIN §11 error codes, §2 Language; server rules §7, §8):
   - [x] `BaseError` + ValidationError 400, Unauthorized 401, Forbidden 403, NotFound 404, Conflict 409, BusinessRule 422, RateLimit 429, Payment 402, ExternalService 502/503, Internal 500 (not operational); each carries code, httpStatus, messageKey, details, isOperational
   - [x] `ERROR_CODES` = exactly the 41 codes of BUSINESS_DOMAIN §11 (test-enforced); every code has `errors.<CODE>` in `ar.json` and `en.json`
@@ -148,7 +148,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISIONS TO CONFIRM: (1) domain has no code for provider failures, so `ExternalServiceError` uses code `INTERNAL` with status 502/503 (add `EXTERNAL_SERVICE_ERROR` to BUSINESS_DOMAIN §11 if you want a distinct code); (2) `PaymentError` uses HTTP 402; (3) code `INTERNAL` (domain) is used, not `INTERNAL_ERROR` from server-rules examples.
 - Notes: Next after merge: SRV-004a (global error handler, process handlers).
 
+### T-011 — SRV-004a Global error handler, notFound, async wrapper, process handlers
+- Project: `WAB-Server/` (`src/middlewares/{errorHandler,notFound}.ts`, `src/utils/{errors/normalize,response/errorResponse,async,process/lifecycle}`, `src/constants/errorMapping.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #9 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-08, NFR-09, NFR-01 no leaks; BUSINESS_DOMAIN §11; server rules §6 envelope, §8 errors):
+  - [x] One `errorHandler` returns the base error envelope `{success:false,message,error:{code,details,traceId}}`, localized (ar default), traceId = request id
+  - [x] Maps Mongoose CastError/ValidationError (400), duplicate key 11000 (409), JWT errors (401), zod (400 + field details), malformed JSON (400), payload too large (413), network/timeout (503) — by name/shape, no library imports
+  - [x] Unknown/non-Error throws → `INTERNAL` 500, generic message; stack/queries/provider text logged (error level), never returned
+  - [x] `notFound` → localized 404; `asyncHandler` forwards rejections; headersSent delegates to Express; works even if requestId/language never ran
+  - [x] Process handlers: unhandledRejection/uncaughtException → fatal log, ordered graceful close (timeout, failure-tolerant, idempotent), exit 1; SIGTERM/SIGINT → exit 0
+- Tests: `cd WAB-Server && npm test` — 130 pass (supertest integration + unit); typecheck/lint/format:check/build green; `npm audit --omit=dev` 0
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found and fixed a real bug: a failing shutdown during a crash re-rejected and skipped exit. `buildErrorBody` lives here; SRV-005a adds only success/pagination helpers. `server.ts` wiring of the lifecycle helpers comes with SRV-005/006.
+- Notes: Next after merge: SRV-005. Added dev dep `supertest`.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-004a — next server task, start only after T-010 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-005 — next server task, start only after T-011 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
