@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "jest"
+    "test": "jest",
+    "start": "node dist/server.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

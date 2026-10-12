@@ -13,6 +13,8 @@ declare global {
       language: Language;
       /** Translates a locale key into the request language. */
       t: (key: string, params?: MessageParams) => string;
+      /** Output of the `validate` middleware; read it through `validated()`. */
+      validated: Record<string, unknown>;
     }
   }
 }

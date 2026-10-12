@@ -21,18 +21,12 @@ import {
   ValidationError,
   type ErrorDetail,
 } from './index';
+import { zodIssuesToDetails } from './zodDetails';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
 const invalidMessageKey = errorMessageKey(ERROR_CODES.VALIDATION_ERROR);
-
-const zodDetails = (error: ZodError): ErrorDetail[] =>
-  error.issues.map((issue) => ({
-    field: issue.path.join('.'),
-    code: issue.code,
-    messageKey: invalidMessageKey,
-  }));
 
 const mongooseDetails = (errors: unknown): ErrorDetail[] =>
   isRecord(errors)
@@ -54,7 +48,7 @@ const mongooseDetails = (errors: unknown): ErrorDetail[] =>
 export const normalizeError = (error: unknown): BaseError => {
   if (error instanceof BaseError) return error;
   if (error instanceof ZodError) {
-    return new ValidationError({ details: zodDetails(error), cause: error });
+    return new ValidationError({ details: zodIssuesToDetails(error), cause: error });
   }
   if (isRecord(error)) {
     const { name, code, type } = error;

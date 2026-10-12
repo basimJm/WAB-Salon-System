@@ -151,7 +151,7 @@
 ### T-011 — SRV-004a Global error handler, notFound, async wrapper, process handlers
 - Project: `WAB-Server/` (`src/middlewares/{errorHandler,notFound}.ts`, `src/utils/{errors/normalize,response/errorResponse,async,process/lifecycle}`, `src/constants/errorMapping.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #9 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #10 merged)
 - Acceptance criteria (BE/NFR: NFR-08, NFR-09, NFR-01 no leaks; BUSINESS_DOMAIN §11; server rules §6 envelope, §8 errors):
   - [x] One `errorHandler` returns the base error envelope `{success:false,message,error:{code,details,traceId}}`, localized (ar default), traceId = request id
   - [x] Maps Mongoose CastError/ValidationError (400), duplicate key 11000 (409), JWT errors (401), zod (400 + field details), malformed JSON (400), payload too large (413), network/timeout (503) — by name/shape, no library imports
@@ -163,7 +163,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found and fixed a real bug: a failing shutdown during a crash re-rejected and skipped exit. `buildErrorBody` lives here; SRV-005a adds only success/pagination helpers. `server.ts` wiring of the lifecycle helpers comes with SRV-005/006.
 - Notes: Next after merge: SRV-005. Added dev dep `supertest`.
 
+### T-012 — SRV-005 Express app factory, namespaces, validate middleware, server entry
+- Project: `WAB-Server/` (`src/app.ts`, `src/server.ts`, `src/routes/index.ts`, `src/modules/{customer,merchant,admin}/index.ts`, `src/middlewares/validate.ts`, `src/constants/server.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #10 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-03 separate namespaces, NFR-09; BUSINESS_DOMAIN §11 VALIDATION_ERROR; server rules §3 modules, §4 layout, §9 validate every input):
+  - [x] `createApp` order: requestId → language → JSON parser (limit from constants) → routes → notFound → errorHandler; `X-Powered-By` off
+  - [x] `/customer/v1`, `/merchant/v1`, `/admin/v1` mounted from `routes/index.ts`; each namespace has its own module router; routes never reachable under another prefix
+  - [x] `validate({body,params,query,headers})`: coerced/defaulted values, unknown keys stripped, all failing parts reported together as `body.x`/`query.x`/`params.x`/`headers.x` details; typed `validated<typeof schemas>(req)`; handler not called on failure
+  - [x] `startServer` listens, graceful HTTP shutdown, crash/signal handlers registered for the real process only; port-in-use rejects; invalid config exits 1
+  - [x] Constants only (prefixes, body limit, validation parts)
+- Tests: `cd WAB-Server && npm test` — 150 pass; typecheck/lint/format:check/build green; `npm audit --omit=dev` 0; built server smoke-tested (404 envelope, SIGTERM clean, bad config exit 1)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found Express 5 `app.listen` hands listen errors to its callback as success, so `server.ts` uses `http.createServer`. Security headers/CORS/rate limits are SRV-007; health endpoints SRV-006; response helpers SRV-005a.
+- Notes: Next: SRV-005a. User asked me to merge my own PRs from SRV-005 on.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-005 — next server task, start only after T-011 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-005a — next server task, start only after T-012 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
