@@ -19,4 +19,12 @@ kotlin {
         implementation(libs.koin.core)
         api(projects.core.notification)
     }
+    sourceSets.commonTest.dependencies {
+        implementation(libs.kotlin.test)
+        implementation(libs.kotlinx.coroutines.test)
+    }
+    sourceSets.androidMain.dependencies {
+        implementation(libs.androidx.activity.compose)
+        implementation(libs.androidx.core.ktx)
+    }
 }

@@ -93,6 +93,7 @@ class AndroidAppPlugin : Plugin<Project> {
                 add("implementation", project(":core:data"))
                 add("implementation", project(":core:domain"))
                 add("implementation", project(":core:storage"))
+                add("implementation", project(":core:ui"))
                 add("implementation", libs.findLibrary("androidx-activity-compose").get())
                 add("implementation", libs.findBundle("koin-android").get())
                 add("implementation", libs.findBundle("lifecycle").get())
