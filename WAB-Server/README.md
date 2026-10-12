@@ -29,4 +29,4 @@ npm run build && npm start            # API on the PORT from .env.development
 
 ## External providers
 
-OTP and file storage sit behind interfaces in `src/providers`. `OTP_PROVIDER` and `STORAGE_PROVIDER` choose `fake` (in-repo stand-in, the default outside production) or `real`. Production must set every provider to `real`; the config check refuses anything else. The real integrations arrive with the `wab-*` packages, until then `real` fails at start-up with a clear error.
+OTP, file storage, push/email, payments and analytics sit behind interfaces in `src/providers`. `OTP_PROVIDER`, `STORAGE_PROVIDER`, `NOTIFIER_PROVIDER`, `PAYMENT_PROVIDER` and `ANALYTICS_PROVIDER` choose `fake` (in-repo stand-in, the default outside production) or `real`. Production must set every provider to `real`; the config check refuses anything else. The real integrations arrive with the `wab-*` packages, until then `real` fails at start-up with a clear error.

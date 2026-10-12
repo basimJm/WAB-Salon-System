@@ -65,9 +65,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-019 | Demo catalog seed (dev only) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-020 | Audit-log writer + server-events writer (append-only) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-021 | Booking reference number + id utils | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-022 | Interfaces + stubs: OtpProvider, StorageProvider | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-022 | Interfaces + stubs: OtpProvider, StorageProvider | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-023 | Interfaces + stubs: Notifier, PaymentProvider, AnalyticsProvider | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-022 is merged: **SRV-023** (SRV-011 is PENDING).
+Next task to start after SRV-023 is merged: **SRV-024** (SRV-011 is PENDING).
 
 ---
 
@@ -114,8 +115,8 @@ Abstractions the server depends on, with fakes, so no task waits for an SDK (ROA
 
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
-| SRV-022 | Interfaces + stubs: `OtpProvider` (verify Firebase ID token + phone match), `StorageProvider` (presign/confirm/sign/delete/CDN URL) | `feat/srv-022-if-otp-storage` | — | IN REVIEW | Typed interfaces/errors; fake impl selected by config (`*_PROVIDER=fake|real`). |
-| SRV-023 | Interfaces + stubs: `Notifier` (push/email), `PaymentProvider` (session/verify/refund/webhook), `AnalyticsProvider` (record/query) | `feat/srv-023-if-notify-pay-analytics` | — | TODO | Fake payment provider supports success/fail/cancel/pending/refund-fail scenarios. |
+| SRV-022 | Interfaces + stubs: `OtpProvider` (verify Firebase ID token + phone match), `StorageProvider` (presign/confirm/sign/delete/CDN URL) | `feat/srv-022-if-otp-storage` | — | DONE | Typed interfaces/errors; fake impl selected by config (`*_PROVIDER=fake|real`). |
+| SRV-023 | Interfaces + stubs: `Notifier` (push/email), `PaymentProvider` (session/verify/refund/webhook), `AnalyticsProvider` (record/query) | `feat/srv-023-if-notify-pay-analytics` | — | IN REVIEW | Fake payment provider supports success/fail/cancel/pending/refund-fail scenarios. |
 
 ## Stage D — Identity & access
 Three token scopes. Roadmap SRV-03.

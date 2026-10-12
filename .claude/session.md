@@ -530,7 +530,7 @@
 ### T-033 — SRV-022 Provider interfaces and fakes: OTP and storage
 - Project: `WAB-Server/` (`src/providers/{index.ts,otp/*,storage/*}`, `src/constants/providers.ts`, `src/config/*`, `.env.example`, `CLAUDE.md` §4, `README.md`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #32 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #33 merged into `server` by the user)
 - Acceptance criteria (BE/NFR: BE-01 / BE-07 phone + Firebase OTP via `wab-otp`, BE-70 presigned uploads via `wab-storage`, NFR-09; wab-otp BRD OTP-02/03/09, wab-storage BRD STO-01..05; backlog: typed interfaces/errors, fake implementation selected by config `*_PROVIDER=fake|real`; server rules §2 externals only through interfaces injected into services):
   - [x] `OtpProvider.verify({proof, expectedPhone, purpose})` → `VERIFIED(phone) | INVALID_PROOF | PHONE_MISMATCH | EXPIRED`; provider outage throws `ExternalServiceError` (never an outcome); E.164 phones
   - [x] `FakeOtpProvider` + `fakeOtpProof(phone, kind)` (valid / expired / invalid / provider-error); garbage proofs are `INVALID_PROOF`; a non-E.164 expected phone is a caller bug (`RangeError`)
@@ -544,7 +544,23 @@
 - Notes: Usage: `const {otp, storage} = createProviders(config.providers, config.isProduction)` once at start-up, inject into services; tests inject `FakeOtpProvider`/`FakeStorageProvider` directly. API docs: no change.
 - Next: SRV-023 (Notifier, PaymentProvider, AnalyticsProvider). PRs target `server`; merge only after ALL CI checks green.
 
+### T-034 — SRV-023 Provider interfaces and fakes: notifier, payments, analytics
+- Project: `WAB-Server/` (`src/providers/{notifier,payments,analytics}/*`, `src/providers/{idempotency,index}.ts`, `src/constants/{providers,env}.ts`, `src/config/*`, `.env.example`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #33 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-40..43 payments via `wab-payments` (verify server-side, idempotency, every attempt with gateway codes, refunds REFUND_PENDING → REFUNDED/FAILED), BE-51/52 push incl. high-priority/time-sensitive booking requests, BE-62 admin email, BE-61 analytics; wab-notifications NOT-01..06/10/11, wab-payments PAY-01/04/05/07/08/09, wab-analytics ANA-01/02/04; backlog: fake payment provider supports success/fail/cancel/pending/refund-fail; typed interfaces; fake selected by config):
+  - [x] `Notifier.sendPush({target: tokens | topic, message, idempotencyKey})` → per-token `SENT | INVALID_TOKEN | FAILED`, invalid tokens listed for cleanup, visible / data-only messages, high priority, iOS time-sensitive, action category, badge, Android full-screen flag; ≤ 500 tokens, no blank/duplicate tokens; `sendEmail` with accepted/rejected addresses; one logical notification = one key (repeat returns the first result and sends nothing; same key with a different request is a caller bug)
+  - [x] `PaymentProvider`: `createSession` (idempotent, integer fils > 0), `verify` (normalized status + raw gateway code/message), `refund` (idempotent; only on a SUCCEEDED payment; partial refunds up to the captured amount, pending refunds count), `getRefund`, `handleWebhook` (unverifiable signature/body → 401); `FakePaymentProvider` scenarios success / fail / cancel / pending (+ `settle`) and refund success / fail / pending (+ `settleRefund`)
+  - [x] `AnalyticsProvider`: `track` (same validation as the server-event tracker, never throws, returns whether stored), `linkIdentity` (installation ↔ account, no duplicates), `countEvents` by name or by Amman day (day changes at 21:00Z), half-open `[from, to)`, name filter; `FakeAnalyticsProvider`
+  - [x] Config: `NOTIFIER_PROVIDER`, `PAYMENT_PROVIDER`, `ANALYTICS_PROVIDER` = `fake|real` (default `fake` outside production, production must name all five providers `real`); `createProviders` returns all five, refuses fakes in production and fails loudly for `real`
+  - [x] No hardcoded values: limits, patterns, statuses, scenarios, fake gateway codes and signature in `constants/providers.ts`
+- Tests: `cd WAB-Server && npm test` — 1106 pass (36 suites); full `npm run format:check`, lint, typecheck, build green; audit 0; `npm run docs` no diff. New: `tests/{notifier,payments,analyticsProvider}.test.ts`, updated `tests/{config,providers}.test.ts`. Mutation check: 34 compile-safe breakages (idempotency, token/recipient limits, duplicates, badge, data-only rule, invalid-token mapping, refund total incl. pending, refund-needs-success, webhook signature, settleRefund, amount > 0, range boundaries, Amman day grouping, identity dedupe, config key mapping) all caught; two equivalent mutants ignored (type-only cast, unused-import variants that do not compile).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISIONS TO CONFIRM: (1) money is integer fils at the provider boundary; the real gateway adapter converts to its own format (3-decimal JOD string) in `wab-payments`; (2) `AnalyticsProvider` starts with `track`, `linkIdentity`, `countEvents`; SRV-105/110 add the dashboard/journey queries; (3) providers are still not wired into `main()` (first consumers SRV-027/031/046/083/093 do it) because production now requires all five to be `real`. Not run against FCM, SMTP, a payment gateway or BigQuery.
+- Notes: `IdempotencyStore` (`providers/idempotency.ts`) is shared by the notifier and payment fakes; real adapters get idempotency from the gateway/FCM keys. API docs: no change.
+- Next: SRV-024 (auth schemas). PRs target `server`.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-023 — next server task after T-033 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-024 — next server task after T-034 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
