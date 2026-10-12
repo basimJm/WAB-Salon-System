@@ -53,7 +53,8 @@ fun SplashScreen(
     val colors = AppTheme.colors
     val logo = if (LocalDarkTheme.current) CoreRes.drawable.ic_app_logo_dark else CoreRes.drawable.ic_app_logo_light
     val fade = remember { Animatable(0f) }
-    LaunchedEffect(Unit) { fade.animateTo(1f, tween(durationMillis = AppTheme.motion.slow)) }
+    val fadeMillis = AppTheme.motion.slow
+    LaunchedEffect(Unit) { fade.animateTo(1f, tween(durationMillis = fadeMillis)) }
 
     AppScreen(modifier = modifier.alpha(fade.value).background(colors.background)) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

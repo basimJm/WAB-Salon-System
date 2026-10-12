@@ -416,7 +416,7 @@
 - Tests: `ComponentLogicTest` (badge label, star fill, step state, OTP sanitising, initials) + policy tests; detekt (Compose rules) exit 0
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (see T-029). Not built: calendar, country-code picker, salon/service cards, media viewer (feature-level, need data models). Legacy hardcode debt outside the design system stays in `config/policy-baseline.json` (ratchet).
-- Notes: UnstableCollections detekt rule disabled (strong skipping).
+- Notes: UnstableCollections detekt rule disabled (strong skipping). First CI run found a real compile error (a KDoc containing a slash-star opened a nested comment, so the whole design system failed to compile); fixed, and policy rule Q008 + test now catch it. Loops/review re-run after the fix: policy tests 68 pass, detekt exit 0.
 ### T-026 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
 - Project: `WAB-Server/` (`src/models/setting.model.ts`, `src/repositories/settings.repository.ts`, `src/domain/settings/*`, `src/constants/settings.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #22 merged)
@@ -543,6 +543,21 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISIONS TO CONFIRM: (1) `OtpProvider` carries only `verify`: the wab-otp BRD also lists `precheck/reportFailure/getConfig`, but limits, blocks and `otpLength`/resend come from the backend limiter and settings (SRV-014/017/027), so they stay out of the provider; (2) `purpose` is accepted for future server-verified providers (Firebase cannot bind it); (3) `createProviders` is NOT wired into `main()` yet: production config now requires `real`, which does not exist, so wiring it before a consumer exists would only stop the server from starting; the first consumer (SRV-027 / SRV-046) wires it. Not run against real Firebase or S3. CI note: a clean-clone replay found one real red (README not Prettier-formatted; fixed in `32f2e21`); since 13:44Z GitHub Actions jobs for this repo also fail in ~3 s with no runner (infrastructure, not code).
 - Notes: Usage: `const {otp, storage} = createProviders(config.providers, config.isProduction)` once at start-up, inject into services; tests inject `FakeOtpProvider`/`FakeStorageProvider` directly. API docs: no change.
 - Next: SRV-023 (Notifier, PaymentProvider, AnalyticsProvider). PRs target `server`; merge only after ALL CI checks green.
+
+### T-033 — Customer language and theme handling
+- Project: `WAB-Mobile-Customer/core/domain` (`AppLanguage`, `AppearanceSettings`), `core/storage`, `core/di`, `core/ui` (Android locale), `composeApp` (`MainViewModel`, `App`)
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD §3.1 "Default language Arabic ... change applies immediately and is persisted locally", §3.2 theme default SYSTEM, data model `language` default AR / `theme` default SYSTEM):
+  - [x] Arabic is the default everywhere (storage default was English; initial UI state used the device locale)
+  - [x] `AppLanguage` (ARABIC/ENGLISH) owns the code and `isRtl`; accepts stored codes and platform tags (`ar_JO`, `en-US`); unknown/blank falls back to Arabic; `other` for the single switch icon
+  - [x] `AppearanceSettings`: language and theme flows, `setLanguage`, `setThemeMode`, `toggleLanguage` (returns the language now in effect); registered in Koin
+  - [x] Layout direction comes from `AppLanguage.isRtl` instead of comparing a string to the literal "ar"; the Android locale provider no longer uses `!!`
+  - [x] Theme System/Light/Dark already resolved in `App`; unknown stored theme name means System
+- Tests: `AppLanguageTest` (5), `AppearanceSettingsTest` (7) with a fake settings store; policy tests 68 pass; policy baseline only shrank
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (Gradle blocked) and CI runners were unavailable at the time (jobs failed in seconds with no runner). The language/theme switch screens (Login, Register, Profile, Settings) are feature work: they inject `AppearanceSettings` and call `toggleLanguage()` / `setThemeMode()`.
+- Notes: Existing installs whose stored value is a platform tag (`en_US`) still resolve. Numerals-follow-language is a formatter concern (`NumberFormatter` baseline debt), not in this task.
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

@@ -3,6 +3,7 @@ package com.fab.wab.customer.core.storage
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.AppSettings
 import com.fab.wab.customer.core.domain.ThemeMode
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +14,7 @@ class AppSettingsImpl(
 ) : AppSettings {
 
     override val language: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.LANGUAGE] ?: AppLanguage.DEFAULT_CODE
+        preferences[PreferencesKeys.LANGUAGE] ?: AppLanguage.DEFAULT.code
     }
 
     override val themeMode: Flow<ThemeMode> = dataStore.data.map { preferences ->

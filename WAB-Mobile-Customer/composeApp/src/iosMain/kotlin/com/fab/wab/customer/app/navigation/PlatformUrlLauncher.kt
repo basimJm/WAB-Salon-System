@@ -8,7 +8,7 @@ import platform.UIKit.UIApplication
  */
 actual class PlatformUrlLauncher actual constructor() : UrlLauncher {
     override fun openUrl(url: String) {
-        val nsUrl = NSURL(string = url) ?: return
+        val nsUrl = NSURL.URLWithString(url) ?: return
         UIApplication.sharedApplication.openURL(nsUrl)
     }
 }

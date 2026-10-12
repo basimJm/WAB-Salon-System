@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -46,7 +45,6 @@ import com.fab.wab.customer.feature.sample.di.sampleModule
 import com.fab.wab.customer.feature.sample.presentation.di.samplePresentationModule
 import com.fab.wab.customer.openStoreLink
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
 val appModules = listOf(
@@ -66,81 +64,75 @@ fun App(androidContext: Any?) {
     // Hoist NavController so the adaptive rail and NavHost share the same instance
     val navController: NavHostController = rememberNavController()
 
-    KoinContext {
-        val mainViewModel: MainViewModel = koinViewModel<MainViewModel>()
-        val state by mainViewModel.state.collectAsStateWithLifecycle()
-        val sessionTimeOut by mainViewModel.sessionTimeOutState.collectAsStateWithLifecycle()
+    val mainViewModel: MainViewModel = koinViewModel<MainViewModel>()
+    val state by mainViewModel.state.collectAsStateWithLifecycle()
+    val sessionTimeOut by mainViewModel.sessionTimeOutState.collectAsStateWithLifecycle()
 
-        val languageState by mainViewModel.languageState.collectAsStateWithLifecycle()
-        val isRtl by remember(languageState) {
-            mutableStateOf(languageState == "ar")
+    val languageState by mainViewModel.languageState.collectAsStateWithLifecycle()
+    val layoutDirection = if (languageState.isRtl) {
+        LayoutDirection.Rtl
+    } else {
+        LayoutDirection.Ltr
+    }
+
+    val themeMode by mainViewModel.themeMode.collectAsStateWithLifecycle()
+    val systemDark = isSystemInDarkTheme()
+    val isDarkTheme = when (themeMode) {
+        ThemeMode.DARK -> true
+        ThemeMode.LIGHT -> false
+        ThemeMode.SYSTEM -> systemDark
+    }
+    val imageLoader = rememberImageLoader()
+    val unauthorizedLogoutMessage = stringResource(Res.string.unauthorized_logout_message)
+
+    CollectSideEffect(mainViewModel.sideEffect) {
+        when (it) {
+            MainContract.SideEffect.KillTheApp -> exitApp()
+            MainContract.SideEffect.NavigateToStore -> openStoreLink()
         }
+    }
 
-        val layoutDirection = if (isRtl) {
-            LayoutDirection.Rtl
-        } else {
-            LayoutDirection.Ltr
-        }
-
-        val themeMode by mainViewModel.themeMode.collectAsStateWithLifecycle()
-        val systemDark = isSystemInDarkTheme()
-        val isDarkTheme = when (themeMode) {
-            ThemeMode.DARK -> true
-            ThemeMode.LIGHT -> false
-            ThemeMode.SYSTEM -> systemDark
-        }
-        val imageLoader = rememberImageLoader()
-        val unauthorizedLogoutMessage = stringResource(Res.string.unauthorized_logout_message)
-
-        CollectSideEffect(mainViewModel.sideEffect) {
-            when (it) {
-                MainContract.SideEffect.KillTheApp -> exitApp()
-                MainContract.SideEffect.NavigateToStore -> openStoreLink()
-            }
-        }
-
-        if (state.splashScreenState.showSplashScreen) {
-            SplashScreen(state.splashScreenState, mainViewModel::onEvent)
-        } else {
+    if (state.splashScreenState.showSplashScreen) {
+        SplashScreen(state.splashScreenState, mainViewModel::onEvent)
+    } else {
+        CompositionLocalProvider(
+            LocalLayoutDirection provides layoutDirection,
+        ) {
             CompositionLocalProvider(
-                LocalLayoutDirection provides layoutDirection,
+                LocalImageLoader provides imageLoader,
+                LocalAppLocale provides languageState.code,
+                LocalDarkTheme provides isDarkTheme,
             ) {
-                CompositionLocalProvider(
-                    LocalImageLoader provides imageLoader,
-                    LocalAppLocale provides languageState,
-                    LocalDarkTheme provides isDarkTheme,
-                ) {
-                    AppTheme {
-                        val homeLabel = stringResource(Res.string.nav_home)
-                        val navItems = remember(homeLabel) { listOf(AppNavItem(HOME_NAV_ID, homeLabel, AppIcons.Home)) }
-                        Row(Modifier.fillMaxSize()) {
-                            if (AppTheme.adaptive.navigation == NavigationStyle.Rail) {
-                                AppNavigationRail(items = navItems, selectedId = HOME_NAV_ID, onSelect = {})
-                            }
-                            Box(Modifier.weight(1f)) {
-                                NotificationHost {
-                                    val notificationManager = rememberNotificationManager()
+                AppTheme {
+                    val homeLabel = stringResource(Res.string.nav_home)
+                    val navItems = remember(homeLabel) { listOf(AppNavItem(HOME_NAV_ID, homeLabel, AppIcons.Home)) }
+                    Row(Modifier.fillMaxSize()) {
+                        if (AppTheme.adaptive.navigation == NavigationStyle.Rail) {
+                            AppNavigationRail(items = navItems, selectedId = HOME_NAV_ID, onSelect = {})
+                        }
+                        Box(Modifier.weight(1f)) {
+                            NotificationHost {
+                                val notificationManager = rememberNotificationManager()
 
-                                    LaunchedEffect(sessionTimeOut) {
-                                        sessionTimeOut
-                                            .takeIf { it }
-                                            ?.let {
-                                                notificationManager.show(
-                                                    unauthorizedLogoutMessage,
-                                                    style = NotificationStyle.Error,
-                                                )
-                                                mainViewModel.onEvent(UiAction.OnSessionTimeOut)
-                                                navController.navigate(Graph.Home) {
-                                                    popUpTo(navController.graph.id) {
-                                                        inclusive = true
-                                                    }
-                                                    launchSingleTop = true
+                                LaunchedEffect(sessionTimeOut) {
+                                    sessionTimeOut
+                                        .takeIf { it }
+                                        ?.let {
+                                            notificationManager.show(
+                                                unauthorizedLogoutMessage,
+                                                style = NotificationStyle.Error,
+                                            )
+                                            mainViewModel.onEvent(UiAction.OnSessionTimeOut)
+                                            navController.navigate(Graph.Home) {
+                                                popUpTo(navController.graph.id) {
+                                                    inclusive = true
                                                 }
+                                                launchSingleTop = true
                                             }
-                                    }
-
-                                    MainNavigation(Graph.Home, navController)
+                                        }
                                 }
+
+                                MainNavigation(Graph.Home, navController)
                             }
                         }
                     }

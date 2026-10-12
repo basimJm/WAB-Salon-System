@@ -6,21 +6,25 @@ import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.contract.MainContract.UiState
 import com.fab.wab.customer.core.common.AppEnvironment
 import com.fab.wab.customer.core.domain.AppError
+import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.AppSettings
+import com.fab.wab.customer.core.domain.AppearanceSettings
 import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.domain.repository.ApplicationSettingsRepository
 import com.fab.wab.customer.core.domain.repository.SessionTimeOut
 import com.fab.wab.customer.core.ui.mvi.BaseViewModel
-import com.fab.wab.customer.core.ui.utils.getDefaultLocale
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+private const val STATE_SUBSCRIPTION_MS = 5_000L
+
 class MainViewModel(
     private val appSettings: AppSettings,
+    private val appearanceSettings: AppearanceSettings,
     private val applicationSettingsRepository: ApplicationSettingsRepository,
     private val sessionTimeOut: SessionTimeOut,
     private val environment: AppEnvironment,
@@ -153,16 +157,16 @@ class MainViewModel(
         }
     }
 
-    val languageState = appSettings.language.stateIn(
+    val languageState = appearanceSettings.language.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5000L),
-        getDefaultLocale()
+        SharingStarted.WhileSubscribed(STATE_SUBSCRIPTION_MS),
+        AppLanguage.DEFAULT,
     )
 
-    val themeMode = appSettings.themeMode.stateIn(
+    val themeMode = appearanceSettings.themeMode.stateIn(
         viewModelScope,
-        SharingStarted.WhileSubscribed(5000L),
-        ThemeMode.SYSTEM
+        SharingStarted.WhileSubscribed(STATE_SUBSCRIPTION_MS),
+        ThemeMode.SYSTEM,
     )
 
     val sessionTimeOutState = sessionTimeOut.sessionEventTimeOut.receiveAsFlow()

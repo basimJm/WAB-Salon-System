@@ -2,21 +2,20 @@ package com.fab.wab.customer.core.network.client
 
 import com.fab.wab.customer.core.domain.AppSettings
 import com.fab.wab.customer.core.domain.repository.SessionTimeOut
+import com.fab.wab.customer.core.network.auth.RemoteTokenRefreshApi
+import com.fab.wab.customer.core.network.auth.TokenRefreshCoordinator
 import com.fab.wab.customer.core.network.config.ApiConfig
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.DefaultRequest
-import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 
 expect fun provideHttpClientEngine(): HttpClientEngine
@@ -26,21 +25,11 @@ class BaseHttpClient(
     private val appSettings: AppSettings,
     private val sessionTimeOut: SessionTimeOut
 ) {
-    private val mutex = Mutex()
-
-    private suspend fun sendSessionTimeOutOnUnauthorized(hasAuthorizationHeader: Boolean) {
-        (hasAuthorizationHeader || !appSettings.token.first().isNullOrBlank())
-            .takeIf { it }
-            ?.let {
-                mutex.withLock {
-                    sessionTimeOut.sendSessionTimeOut(true)
-                }
+    private fun HttpClientConfig<*>.installCommon(logRequests: Boolean) {
+        if (logRequests) {
+            install(CurlLogger) {
+                isDebug = config.isDebug
             }
-    }
-
-    fun buildHttpClient() = HttpClient(provideHttpClientEngine()) {
-        install(CurlLogger) {
-            isDebug = config.isDebug
         }
         install(ContentNegotiation) {
             json(Json {
@@ -86,52 +75,25 @@ class BaseHttpClient(
             }
         }
 
-        install(AuthTokenPlugin) {
-            tokenProvider = {
-                kotlinx.coroutines.runBlocking {
-                    appSettings.token.first()
-                }
-            }
-        }
-
-
         install(AcceptLanguagePlugin) {
-            languageProvider = {
-                kotlinx.coroutines.runBlocking {
-                    appSettings.language.first()
-                }
-            }
+            languageProvider = { appSettings.language.first() }
         }
+    }
 
-        expectSuccess = true
+    /**
+     * Client for the refresh call: no token interceptor (it can never recurse into another refresh) and no
+     * request logger (its body carries the refresh token).
+     */
+    private fun buildRefreshClient() = HttpClient(provideHttpClientEngine()) {
+        installCommon(logRequests = false)
+        expectSuccess = false
+    }
 
-        HttpResponseValidator {
-            validateResponse { response ->
-                response.status.value
-                    .takeIf { it == 401 }
-                    ?.let {
-                        sendSessionTimeOutOnUnauthorized(
-                            response.call.request.headers[HttpHeaders.Authorization]
-                                .isNullOrBlank()
-                                .not()
-                        )
-                    }
-            }
-
-            handleResponseExceptionWithRequest { cause, request ->
-                (cause as? ResponseException)
-                    ?.response
-                    ?.status
-                    ?.value
-                    ?.takeIf { it == 401 }
-                    ?.let {
-                        sendSessionTimeOutOnUnauthorized(
-                            request.headers[HttpHeaders.Authorization]
-                                .isNullOrBlank()
-                                .not()
-                        )
-                    }
-            }
-        }
+    fun buildHttpClient(): HttpClient {
+        val coordinator = TokenRefreshCoordinator(appSettings, RemoteTokenRefreshApi(buildRefreshClient()))
+        return HttpClient(provideHttpClientEngine()) {
+            installCommon(logRequests = true)
+            expectSuccess = true
+        }.also { it.installAuthRefresh(appSettings, coordinator, sessionTimeOut) }
     }
 }
