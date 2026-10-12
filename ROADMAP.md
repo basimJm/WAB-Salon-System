@@ -16,6 +16,8 @@
 | **MERCHANT** | `WAB-Mobile-Salon` | Contracts (P0) + customer KMP template | SERVER APIs |
 | **ADMIN** | `WAB-Admin-Dashboard` | Contracts (P0) | SERVER APIs |
 
+**SERVER track detail:** the fine-grained, ordered task list (SRV-001…116, statuses, pending inputs) lives in `WAB-Server/docs/WAB_Server_Tasks.md`; the SRV-xx items below are its stages.
+
 Task IDs: `SVC-*`, `SRV-*`, `CUS-*`, `MER-*`, `ADM-*`, `INT-*`. One task = one branch = one PR.
 
 ---

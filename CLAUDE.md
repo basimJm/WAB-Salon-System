@@ -59,7 +59,7 @@ Each project has:
 | Customer app | `WAB-Mobile-Customer/docs/WAB_Customer_BRD.md`, `WAB_Customer_App_PRD.md`, `WAB_Customer_Design_Script.md` |
 | Merchant app | `WAB-Mobile-Salon/docs/WAB_Merchant_BRD.md`, `WAB_Merchant_App_PRD.md`, `WAB_Merchant_Design_Script.md` |
 | Admin panel | `WAB-Admin-Dashboard/docs/WAB_Admin_BRD.md`, `WAB_Admin_PRD.md`, `WAB_Admin_Design_Script.md` |
-| Backend | `WAB-Server/docs/WAB_Backend_BRD.md` (+ legacy `WAB-Server/BRD.md`) |
+| Backend | `WAB-Server/docs/WAB_Backend_BRD.md`; task backlog `WAB-Server/docs/WAB_Server_Tasks.md` (legacy `WAB-Server/BRD.md` is superseded) |
 | Packages | `wab-*/docs/WAB_Package_*_BRD.md` |
 | Delivery plan | `ROADMAP.md` (phases & parallel tracks: SERVICE, SERVER, CUSTOMER, MERCHANT, ADMIN, INT) |
 | Integration & environments | `INTEGRATION_WORKFLOW.md` (contracts in `contracts/`, mocks, dev/prod, CI/CD) |

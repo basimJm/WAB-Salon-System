@@ -54,6 +54,23 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — consistent with PRDs; assumptions listed in §12.
 
+### T-005 — WAB-Server task backlog
+- Project: `WAB-Server/docs/WAB_Server_Tasks.md`, root docs
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN PROGRESS
+- Acceptance criteria:
+  - [x] One md file in WAB-Server listing every task to build the whole backend, each with status (TODO/PENDING/DONE...)
+  - [x] PENDING only when blocked by owner info or another SDK/package; reason stated
+  - [x] Tasks small, strict order, next task not started before previous merged to main, one branch per task
+  - [x] Every BE/NFR/BER requirement and BUSINESS_DOMAIN section mapped to tasks
+  - [x] Legacy WAB-Server/BRD.md flagged as superseded
+  - [x] Linked from CLAUDE.md and ROADMAP.md; memory.md updated
+- Tests: docs only (no source); coverage matrix script-checked (no missing BE/NFR/BER); `python3 .claude/hooks/test_hooks.py`
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only; consistent with Backend BRD, BUSINESS_DOMAIN and ROADMAP.
+- Notes: Branch is the cloud-session pinned branch (exception to `<type>/<name>`); all later tasks use `feat/srv-NNN-*`. Next: SRV-001 after merge.
+
 ### Pending (next)
 - T-003 — Per-project rules for each folder (awaiting user input).
+- SRV-001 — first server task, start only after T-005 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
