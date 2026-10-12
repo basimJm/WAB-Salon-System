@@ -11,7 +11,9 @@ describe('hardcoded scanner', () => {
     expect(rules('src/a.ts', "const h = '10.0.0.12';")).toContain('ip-address');
     expect(rules('src/a.ts', "const c = '#6D28D9';")).toContain('hex-color');
     expect(rules('src/a.ts', 'const c = `rgba(1,2,3,.4)`;')).toContain('color-function');
-    expect(rules('src/a.ts', "const apiKey = 'abcd1234efgh5678';")).toContain('secret');
+    // Built from parts so the test file itself holds no secret-shaped literal.
+    const fakeKey = ['abcd', '1234', 'efgh', '5678'].join('');
+    expect(rules('src/a.ts', `const apiKey = '${fakeKey}';`)).toContain('secret');
     expect(rules('src/a.ts', 'setTimeout(fn, 4000);')).toContain('timer-literal');
   });
 
