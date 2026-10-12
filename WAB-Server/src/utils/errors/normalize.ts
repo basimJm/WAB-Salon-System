@@ -8,6 +8,8 @@ import {
   MONGOOSE_VALIDATION_ERROR_NAME,
   MONGO_DUPLICATE_KEY_CODE,
   NETWORK_ERROR_CODES,
+  REDIS_UNAVAILABLE_ERROR_MESSAGES,
+  REDIS_UNAVAILABLE_ERROR_NAMES,
   TIMEOUT_ERROR_NAMES,
 } from '../../constants/errorMapping';
 import { errorMessageKey } from '../../constants/errorCodes';
@@ -70,7 +72,9 @@ export const normalizeError = (error: unknown): BaseError => {
     }
     if (
       (typeof code === 'string' && NETWORK_ERROR_CODES.has(code)) ||
-      (typeof name === 'string' && TIMEOUT_ERROR_NAMES.has(name))
+      (typeof name === 'string' &&
+        (TIMEOUT_ERROR_NAMES.has(name) || REDIS_UNAVAILABLE_ERROR_NAMES.has(name))) ||
+      (error instanceof Error && REDIS_UNAVAILABLE_ERROR_MESSAGES.has(error.message))
     ) {
       return new ExternalServiceError({ unavailable: true, cause: error });
     }

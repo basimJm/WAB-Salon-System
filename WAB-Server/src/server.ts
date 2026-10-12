@@ -1,4 +1,5 @@
 import { createServer, type Server } from 'node:http';
+import type { Store } from 'express-rate-limit';
 import type { Redis } from 'ioredis';
 import { createApp } from './app';
 import { loadConfig, type AppConfig } from './config';
@@ -8,6 +9,8 @@ import {
   disconnectMongo,
 } from './utils/database/connection';
 import type { ReadinessCheck } from './utils/health';
+import { REDIS_KEY_PREFIX } from './constants/redis';
+import { RedisRateLimitStore } from './utils/redis/rateLimitStore';
 import { connectRedis, createRedisReadinessCheck, disconnectRedis } from './utils/redis/client';
 import { createLogger, type Logger } from './utils/logger';
 import {
@@ -38,6 +41,8 @@ export interface StartOptions {
   readonly closables?: readonly Closable[];
   /** Dependency probes for `/ready`. */
   readonly readinessChecks?: readonly ReadinessCheck[];
+  /** Shared store for the global rate limit; without it each instance counts on its own. */
+  readonly rateLimitStore?: Store;
 }
 
 /**
@@ -47,11 +52,14 @@ export interface StartOptions {
 export const startServer = async (
   config: AppConfig,
   logger: Logger,
-  { proc, closables = [], readinessChecks = [] }: StartOptions = {},
+  { proc, closables = [], readinessChecks = [], rateLimitStore }: StartOptions = {},
 ): Promise<RunningServer> => {
   const app = createApp({
     logger,
-    security: { corsAllowedOrigins: config.corsAllowedOrigins },
+    security: {
+      corsAllowedOrigins: config.corsAllowedOrigins,
+      ...(rateLimitStore === undefined ? {} : { rateLimitStore }),
+    },
     trustProxyHops: config.trustProxyHops,
     docs: !config.isProduction,
     readinessChecks,
@@ -89,6 +97,10 @@ const main = async (): Promise<void> => {
         { name: 'mongodb', close: disconnectMongo },
       ],
       readinessChecks: [createMongoReadinessCheck(mongo), createRedisReadinessCheck(connected)],
+      rateLimitStore: new RedisRateLimitStore(
+        connected,
+        `${REDIS_KEY_PREFIX.httpRateLimit}:global`,
+      ),
     });
   } catch (error) {
     if (redis) await disconnectRedis(redis);

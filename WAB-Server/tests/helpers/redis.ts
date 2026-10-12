@@ -7,6 +7,21 @@ export interface TestRedis {
   readonly stop: () => Promise<void>;
 }
 
+/** Logical DBs 1…N (DB 0 stays free); Redis ships with 16, which is more than any CI worker count. */
+const LOGICAL_DB_COUNT = 15;
+
+/**
+ * Jest runs suites in parallel workers. On a shared Redis (CI service container) each worker gets
+ * its own logical DB, so one suite's `flushdb()` can never erase keys another suite is using.
+ */
+export const redisUrlForWorker = (url: string, workerId: string | undefined): string => {
+  const worker = Number.parseInt(workerId ?? '1', 10);
+  const db = ((Number.isInteger(worker) && worker > 0 ? worker - 1 : 0) % LOGICAL_DB_COUNT) + 1;
+  const parsed = new URL(url);
+  parsed.pathname = `/${String(db)}`;
+  return parsed.toString();
+};
+
 const freePort = (): Promise<number> =>
   new Promise((resolve, reject) => {
     const probe = createServer();
@@ -50,8 +65,9 @@ const waitUntilReady = async (url: string, server?: ChildProcess): Promise<void>
 export const startTestRedis = async (): Promise<TestRedis> => {
   const external = process.env['REDIS_TEST_URL'];
   if (external) {
-    await waitUntilReady(external);
-    return { url: external, stop: () => Promise.resolve() };
+    const url = redisUrlForWorker(external, process.env['JEST_WORKER_ID']);
+    await waitUntilReady(url);
+    return { url, stop: () => Promise.resolve() };
   }
   const port = await freePort();
   const server = spawn(

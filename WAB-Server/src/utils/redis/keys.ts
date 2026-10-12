@@ -2,8 +2,12 @@ import { REDIS_KEY_PREFIX, REDIS_KEY_SEPARATOR } from '../../constants/redis';
 
 type KeyPart = string | number;
 
-/** Builds `prefix:part:part`. Empty parts and separators inside parts are rejected so keys cannot collide. */
-const buildKey = (prefix: string, parts: readonly KeyPart[]): string => {
+/**
+ * Builds `prefix:part:part`. The prefix is a trusted constant (it may contain separators such as
+ * `otp:req`); parts come from users or data, so empty parts and separators inside them are rejected
+ * and two different subjects can never collide.
+ */
+export const redisKey = (prefix: string, ...parts: KeyPart[]): string => {
   if (parts.length === 0) throw new Error('a redis key needs at least one part');
   const texts = parts.map(String);
   for (const text of texts) {
@@ -15,4 +19,4 @@ const buildKey = (prefix: string, parts: readonly KeyPart[]): string => {
 };
 
 /** e.g. `lockKey('staff', staffId, '2026-10-12')` → `lock:staff:<id>:2026-10-12`. */
-export const lockKey = (...parts: KeyPart[]): string => buildKey(REDIS_KEY_PREFIX.lock, parts);
+export const lockKey = (...parts: KeyPart[]): string => redisKey(REDIS_KEY_PREFIX.lock, ...parts);

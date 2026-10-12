@@ -42,7 +42,7 @@ export const createApp = ({
   app.set('trust proxy', trustProxyHops);
   app.use(requestId(logger));
   app.use(language);
-  app.use(securityMiddlewares({ corsAllowedOrigins: [], ...security }));
+  app.use(securityMiddlewares({ corsAllowedOrigins: [], logger, ...security }));
   if (docs) app.use(createDocsRouter(buildOpenApiDocuments()));
   app.use(express.json({ limit: JSON_BODY_LIMIT }));
   app.use(sanitizeRequest);
