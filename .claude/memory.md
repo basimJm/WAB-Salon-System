@@ -8,6 +8,7 @@
 - Customer app is a KMP template (`WAB-Mobile-Customer/AGENTS.md`, `TECHSTACK.md`): Kotlin 1.10, Compose MP 1.10.3, Ktor 3.4.2, Koin 4.2.0.
 
 ## Server backlog
+- BRANCHING (user rule, `.claude/rules.md` §3.8): `server` = master branch for server work, created from `main`. Server task branches start from `origin/server` and PRs target `server`; the user merges `server` → `main`. Restart the cloud branch `claude/busy-johnson-2rch94` from `origin/server` after each merge; sync `main` into `server` by PR when `main` moves (customer-app work lands there).
 - `WAB-Server/docs/WAB_Server_Tasks.md` = ordered small tasks SRV-001…116 (status TODO/PENDING/IN REVIEW/DONE). One task = one branch `feat/srv-NNN-<key>`; next task starts only after previous is merged to `main`; PENDING (owner info / missing SDK) tasks are skipped, not blocking.
 - `WAB-Server/BRD.md` is legacy and superseded (4-digit OTP, Cloudinary, old paths) — do not implement.
 - Cloud runner: Node 22, `redis-server` present, no `mongod`/docker daemon → unit tests use fakes; externals sit behind interfaces with fake providers.
@@ -33,6 +34,7 @@
 - SRV-017a done: every new Mongoose model must be added to `ALL_MODELS` in `src/models/index.ts` (a test enforces it); `main()` runs `ensureIndexes` (create-only) after Mongo connects.
 - SRV-018 done: `npm run seed` (`dist/seeds/run.js`) = indexes + insert-only reference data (JO, 12 cities, Amman starter areas; data in `constants/referenceData.ts`); `BaseRepository.insertIfMissing(naturalKey, data)` never overwrites. Settings are deliberately NOT seeded (missing key = default). Models: country/city/area (`phoneRegex` tested on the national number without leading 0). Fake Mongo model supports dotted paths and upsert.
 - SRV-019 done: `npm run seed:demo` (dev only; refuses `NODE_ENV=production`) inserts sample catalog services (`demo/catalog/*` image keys = the demo flag). `catalogServices` model + `Gender` in `constants/enums.ts` (add new enums there).
+- SRV-020 done: append-only collections use `makeAppendOnly(schema)` (`models/appendOnly.ts`: update/replace/delete/bulkWrite/re-save throw `AppendOnlyViolationError`) and `AppendOnlyRepository` (only `append/findById/findPage`). Admin writes: `createAuditWriter(new AuditLogsRepository()).record({adminId, action:'UPPER_SNAKE', entityType, entityId, before?, after?, reason, ip, userAgent})` (400 on blank reason; storage errors propagate). Analytics: `createServerEvents({store: new ServerEventsRepository(), logger}).track({name:'booking.created', actorType, ...})` never throws, redacts params. `serverEvents` is a plain indexed collection (domain says time-series; conversion deferred, needs real Mongo + `createCollection`). Not wired in server.ts yet.
 
 ## Customer app (WAB-Mobile-Customer)
 - Rules: `WAB-Mobile-Customer/CLAUDE.md` (Clean Architecture + MVI by delegate, no hardcoding, AR+EN, all variants, CI, <=300-line files, portrait+landscape). Module map there is real; `AGENTS.md` is generated and partly wrong.

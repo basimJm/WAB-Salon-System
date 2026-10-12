@@ -468,7 +468,7 @@
 ### T-029 — SRV-019 Demo catalog seed (dev only)
 - Project: `WAB-Server/` (`src/models/catalogService.model.ts`, `src/constants/{enums,demoCatalog}.ts`, `src/seeds/{demoCatalog,runDemo}.ts`, script `seed:demo`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #26 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #28 merged by the user)
 - Acceptance criteria (BE/NFR: BE-65/Admin PRD A23 catalog (data side); BUSINESS_DOMAIN §3.2 `catalogServices {name{ar,en}, description{ar,en}, imageKey, gender: Gender, active, sortOrder}`, index `{gender, active, sortOrder}` + text on names, `Gender = MALE | FEMALE`; backlog: dev-only, flagged as demo data):
   - [x] `catalogServices` model as in §3.2 with both indexes, registered in `ALL_MODELS`; `Gender` enum constant
   - [x] Demo data in `constants/demoCatalog.ts`: women's and men's services, every name and description in ar + en, image keys under `demo/catalog/` (the demo flag, since the domain has no field for it)
@@ -479,6 +479,22 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — demo flag = guarded script + `demo/` image keys (no field invented). Arabic names need a native check. NOT run against a real MongoDB.
 - Notes: Assumption: `imageKey` is required in the domain, so demo rows use placeholder keys whose files do not exist (clients show a placeholder). The text index uses `default_language: none` because Arabic has no built-in Mongo stemmer; real Arabic search is the Atlas Search task (SRV-059). API docs: no change.
 - Next: SRV-020 (audit log + server events writer). Merge only after ALL CI checks green.
+
+### T-031 — SRV-020 Audit-log writer and server-events writer (append-only)
+- Project: `WAB-Server/` (`src/models/{appendOnly,auditLog.model,serverEvent.model}.ts`, `src/repositories/{appendOnly,auditLogs,serverEvents}.repository.ts`, `src/domain/{audit,events}/*`, `src/constants/{audit,enums}.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #28 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-65/Admin PRD audit trail, NFR-08 observability, CLAUDE.md §5.12 admin actions always with reason + audit log; BUSINESS_DOMAIN §3.7 `auditLogs {adminId, action, entityType, entityId, before?, after?, reason, ip, userAgent}` append-only, `serverEvents {ts, name, actorType, actorId?, salonId?, bookingId?, params, platform?, appVersion?}`; backlog: "No update/delete API on `auditLogs`; tests prove immutability"):
+  - [x] `auditLogs` and `serverEvents` models as in §3.7 with indexes (admin / entity / action, newest first; ts, name, actor, booking), registered in `ALL_MODELS`; `ActorType` and `Platform` enums in `constants/enums.ts`
+  - [x] Immutability: every update/replace/delete query, document delete/update, bulk write and re-save of a stored document throws `AppendOnlyViolationError` (500); append-only repositories expose only `append`, `findById`, `findPage`
+  - [x] `createAuditWriter(store).record(entry)`: validates (admin id, UPPER_SNAKE action, non-blank trimmed reason, entity, ip, user agent), omits absent before/after, a bad entry is a 400 and nothing is stored, a storage failure reaches the caller (an admin write must not succeed without its audit record)
+  - [x] `createServerEvents({store, logger}).track(event)`: validates the event (dotted lower-case name, actor type, ids, platform), redacts secrets in `params`, stamps `ts` from the clock, and NEVER throws (invalid or failed events are logged, result `false`)
+  - [x] No hardcoded values: patterns, limits and operation lists in `constants/audit.ts`
+- Tests: `cd WAB-Server && npm test` — 897 pass (31 suites); lint/format/typecheck/build green; audit 0. `tests/audit.test.ts` (43). Mutation check: 12 compile-safe breakages (dropping any mutating operation from the list, bulk-write guard, save guard, blank reason, action/admin id pattern, no redaction, throwing tracker, wrong `ts`, model not registered) all caught; 1 equivalent mutant (document-level `updateOne` hook is also covered by the query-level hook).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DECISIONS TO CONFIRM: (1) `serverEvents` is a normal indexed collection, not a Mongo time-series collection: Mongoose creates time-series collections only through `createCollection`, `createIndexes` would silently create a normal one, and a real MongoDB is not available here to verify; converting is a one-off migration for the ops/analytics task (SRV-110); (2) no retention (TTL) is defined by the domain, none invented; (3) database-level protection (a role without update/delete) is an ops task, the guarantee here is in code. Not wired into `server.ts` (consumers: admin tasks, SRV-027, jobs). NOT run against a real MongoDB.
+- Notes: Usage: admin services call `audit.record({adminId, action: 'SALON_SET_OFFLINE', entityType, entityId, before, after, reason, ip, userAgent})` in the same request as the change; pass snapshots without secrets. Anything non-critical uses `events.track(...)`. API docs: no change.
+- Next: SRV-021 (booking reference number). Merge only after ALL CI checks green.
 
 ### T-024 — ADM-01 Admin foundation: rules, design system, theme, base components, infrastructure, CI
 - Project: `WAB-Admin-Dashboard/` (+ `.github/workflows/admin-ci.yml`, root docs)
@@ -498,5 +514,5 @@
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-020 — next server task after T-029 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-021 — next server task after T-031 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

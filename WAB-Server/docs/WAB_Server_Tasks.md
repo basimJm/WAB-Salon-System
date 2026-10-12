@@ -62,9 +62,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-017 | Settings model, repository, typed registry, service with Redis cache | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-017a | Create indexes at startup | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-018 | Reference-data seed (countries, cities, areas) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-019 | Demo catalog seed (dev only) | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-019 | Demo catalog seed (dev only) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-020 | Audit-log writer + server-events writer (append-only) | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-019 is merged: **SRV-020** (SRV-011 is PENDING).
+Next task to start after SRV-020 is merged: **SRV-021** (SRV-011 is PENDING).
 
 ---
 
