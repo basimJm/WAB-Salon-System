@@ -389,7 +389,7 @@
 ### T-026 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
 - Project: `WAB-Server/` (`src/models/setting.model.ts`, `src/repositories/settings.repository.ts`, `src/domain/settings/*`, `src/constants/settings.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #22 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #24 merged by the user seconds after it was marked ready; CI result verified afterwards, see T-027 notes)
 - Acceptance criteria (BE/NFR: BE-65 "all platform settings configurable by admin", NFR-06 stateless instances sharing Redis, NFR-02 no stale-cache poisoning; BUSINESS_DOMAIN §3.7 `settings` (key/value, cached in Redis), §10 keys and defaults, §5.1 timezone; server rules §5 "business-tunable values come from the settings collection, defaults kept in constants", §2 repository is the only DB code):
   - [x] A typed registry of every §10 key (38) in `domain/settings`: default (in `constants/settings.ts`) + zod schema (structural validation only: integers, positive, percent 0–100, arrays/objects, IANA time zone, currency `JOD`); every default satisfies its own schema; a test holds an independent copy of the §10 table
   - [x] `settings` model: `key` (unique, required), `value` (Mixed, required; `0`/`false`/`[]` allowed), timestamps; `SettingsRepository` (`findAllEntries`, `upsert` that creates on first use and retries once on a duplicate-key race)
@@ -403,7 +403,22 @@
 - Notes: Assumptions to confirm: (1) validation is structural only — the Admin PRD (A28) lists defaults but no min/max, so ranges such as `otp.length` 4–10 are sanity guards, not business rules; (2) §10 shows `alerts.api5xxRatePct = 2 (window 10 min)` — the window is not a key, so it stays a constant for the alerts task (SRV-106); (3) the Admin PRD's "payout frequency note" is not a §10 key and is left to the admin-settings task; (4) locations, app versions and maintenance have their own collections (§3.2, §3.6), not `settings`. New backlog row **SRV-017a**: create indexes at startup (production runs with `autoIndex: false`, so the unique `settings.key` index would not exist). API docs: no change.
 - Next: SRV-017a (indexes at startup). Merge only after ALL CI checks green.
 
+### T-027 — SRV-017a Create indexes at startup
+- Project: `WAB-Server/` (`src/models/index.ts`, `src/utils/database/indexes.ts`, `src/server.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #24 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: NFR-02 correctness (unique keys), NFR-06 stateless instances; BUSINESS_DOMAIN §3 indexes per collection; server rules §9 every query backed by a schema-declared index; `connectMongo` runs with `autoIndex: false` in production):
+  - [x] `models/index.ts` lists every model (`ALL_MODELS`); a test fails when a `*.model.ts` file exists that is not listed
+  - [x] `ensureIndexes(models, logger)` creates the missing indexes with `createIndexes()` (create-only: it never drops or changes an index), one model at a time, logging each model; a failure stops start-up with the model named
+  - [x] Called by `main()` right after MongoDB connects, inside the cleanup `try` so a failure closes the connections
+  - [x] No hardcoded values; safe to run on every start and from several instances at once (idempotent)
+- Tests: `cd WAB-Server && npm test` — 826 pass (28 suites; also on a shared Redis with 4 workers); typecheck/lint/format/build green; audit 0. `tests/indexes.test.ts` (6). Mutation check: swallowing a failure, skipping the first model and not awaiting `createIndexes` were all caught.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — create-only (never drops), idempotent, runs inside the start-up cleanup `try`. NOT verified against a real MongoDB (none on the runner): the first `docker compose up` run confirms. Needs the Mongo user to hold createIndex rights (included in readWrite).
+- Notes: API docs: no change. Each later schema task adds its model to `ALL_MODELS`.
+- Next: SRV-018 (reference-data seeds). Merge only after ALL CI checks green.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-017a — next server task after T-026 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-018 — next server task after T-027 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
