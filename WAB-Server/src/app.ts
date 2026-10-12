@@ -1,7 +1,10 @@
 import express, { type Express, type Router } from 'express';
+import { DEFAULT_TRUST_PROXY_HOPS } from './constants/security';
 import { JSON_BODY_LIMIT } from './constants/server';
 import { errorHandler } from './middlewares/errorHandler';
 import { language } from './middlewares/language';
+import { sanitizeRequest } from './middlewares/sanitize';
+import { securityMiddlewares, type SecurityOptions } from './middlewares/security';
 import { notFound } from './middlewares/notFound';
 import { requestId } from './middlewares/requestId';
 import { createRootRouter } from './routes';
@@ -15,15 +18,28 @@ export interface AppDependencies {
   readonly router?: Router;
   /** Dependency probes for `/ready` (MongoDB, Redis...), added as those connections exist. */
   readonly readinessChecks?: readonly ReadinessCheck[];
+  /** CORS origins and rate limit; defaults allow no browser origin and use the global limit. */
+  readonly security?: Partial<SecurityOptions>;
+  /** Reverse proxies in front of the app, so `req.ip` is the real client address. */
+  readonly trustProxyHops?: number;
 }
 
 /** Builds the Express app. Order matters: ids and language first, errors last. */
-export const createApp = ({ logger, router, readinessChecks }: AppDependencies): Express => {
+export const createApp = ({
+  logger,
+  router,
+  readinessChecks,
+  security,
+  trustProxyHops = DEFAULT_TRUST_PROXY_HOPS,
+}: AppDependencies): Express => {
   const app = express();
   app.disable('x-powered-by');
+  app.set('trust proxy', trustProxyHops);
   app.use(requestId(logger));
   app.use(language);
+  app.use(securityMiddlewares({ corsAllowedOrigins: [], ...security }));
   app.use(express.json({ limit: JSON_BODY_LIMIT }));
+  app.use(sanitizeRequest);
   app.use(router ?? createRootRouter(undefined, createHealthRouter(readinessChecks)));
   app.use(notFound);
   app.use(errorHandler(logger));

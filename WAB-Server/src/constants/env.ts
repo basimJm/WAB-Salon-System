@@ -25,6 +25,7 @@ export const ENV_KEYS = {
   port: 'PORT',
   logLevel: 'LOG_LEVEL',
   corsAllowedOrigins: 'CORS_ALLOWED_ORIGINS',
+  trustProxyHops: 'TRUST_PROXY_HOPS',
   mongoUri: 'MONGODB_URI',
   redisUrl: 'REDIS_URL',
 } as const;
