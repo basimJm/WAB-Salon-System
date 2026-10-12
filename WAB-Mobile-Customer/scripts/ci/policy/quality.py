@@ -1,11 +1,12 @@
 """R7 / performance rules (Q and P): crash-prone constructs and Compose performance anti-patterns."""
 import re
 from .files import Config, iter_files, matches_any, rel
-from .kotlin_lexer import lex
+from .kotlin_lexer import lex, nested_comment_openers
 from .model import Violation
 
 BANG, PRINT, GLOBAL_SCOPE, RUN_BLOCKING, EMPTY_CATCH, SUPPRESS, TODO = "Q001", "Q002", "Q003", "Q004", "Q005", "Q006", "Q007"
 LAZY_KEY, COLLECT_STATE, SLEEP = "P001", "P002", "P003"
+NESTED_COMMENT = "Q008"
 
 _SIMPLE = [
     (BANG, re.compile(r"!!"), "non-null assertion (!!); handle null explicitly"),
@@ -42,6 +43,7 @@ def check_source(path: str, text: str) -> list[Violation]:
     for rule, pattern, message in _SIMPLE:
         found += [Violation(path, _line_of(masked, m.start()), rule, message) for m in pattern.finditer(masked)]
     found += [Violation(path, _line_of(masked, m.start()), EMPTY_CATCH, "empty catch swallows errors") for m in _EMPTY_CATCH.finditer(masked)]
+    found += [Violation(path, line, NESTED_COMMENT, "nested block comment opener; rewrite the text so it has no slash-star") for line in nested_comment_openers(text)]
     raw_lines = text.split("\n")
     for number, raw in enumerate(raw_lines, start=1):
         if "@Suppress" in raw and "//" not in raw and "//" not in (raw_lines[number - 2] if number > 1 else ""):

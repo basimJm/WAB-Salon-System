@@ -416,7 +416,7 @@
 - Tests: `ComponentLogicTest` (badge label, star fill, step state, OTP sanitising, initials) + policy tests; detekt (Compose rules) exit 0
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (see T-029). Not built: calendar, country-code picker, salon/service cards, media viewer (feature-level, need data models). Legacy hardcode debt outside the design system stays in `config/policy-baseline.json` (ratchet).
-- Notes: UnstableCollections detekt rule disabled (strong skipping).
+- Notes: UnstableCollections detekt rule disabled (strong skipping). First CI run found a real compile error (a KDoc containing a slash-star opened a nested comment, so the whole design system failed to compile); fixed, and policy rule Q008 + test now catch it. Loops/review re-run after the fix: policy tests 68 pass, detekt exit 0.
 ### T-026 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
 - Project: `WAB-Server/` (`src/models/setting.model.ts`, `src/repositories/settings.repository.ts`, `src/domain/settings/*`, `src/constants/settings.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #22 merged)
