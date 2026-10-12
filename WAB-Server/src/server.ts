@@ -1,10 +1,17 @@
 import { createServer, type Server } from 'node:http';
 import { createApp } from './app';
 import { loadConfig, type AppConfig } from './config';
+import {
+  createMongoReadinessCheck,
+  connectMongo,
+  disconnectMongo,
+} from './utils/database/connection';
+import type { ReadinessCheck } from './utils/health';
 import { createLogger, type Logger } from './utils/logger';
 import {
   createShutdown,
   registerProcessHandlers,
+  type Closable,
   type ProcessLike,
 } from './utils/process/lifecycle';
 
@@ -22,21 +29,30 @@ const closeHttpServer = (server: Server): Promise<void> =>
     server.closeIdleConnections();
   });
 
+export interface StartOptions {
+  /** Registers crash/signal handlers; only the real entry point passes it. */
+  readonly proc?: ProcessLike;
+  /** Resources opened before the server started, closed (in this order) after HTTP stops. */
+  readonly closables?: readonly Closable[];
+  /** Dependency probes for `/ready`. */
+  readonly readinessChecks?: readonly ReadinessCheck[];
+}
+
 /**
- * Starts listening and wires graceful shutdown. Process-level crash/signal handlers are only
- * registered when a `proc` is passed (the real entry point does; tests do not).
- * Database, Redis, Socket.IO and queues add themselves to the closing order in later tasks.
+ * Starts listening and wires graceful shutdown: HTTP stops first, then the given resources
+ * (MongoDB now; Redis, Socket.IO and queues add themselves in later tasks).
  */
 export const startServer = async (
   config: AppConfig,
   logger: Logger,
-  proc?: ProcessLike,
+  { proc, closables = [], readinessChecks = [] }: StartOptions = {},
 ): Promise<RunningServer> => {
   const app = createApp({
     logger,
     security: { corsAllowedOrigins: config.corsAllowedOrigins },
     trustProxyHops: config.trustProxyHops,
     docs: !config.isProduction,
+    readinessChecks,
   });
   // Plain http server: Express 5's `app.listen` passes listen errors to its callback as if started.
   const server = await new Promise<Server>((resolve, reject) => {
@@ -47,7 +63,10 @@ export const startServer = async (
       resolve(listening);
     });
   });
-  const shutdown = createShutdown([{ name: 'http', close: () => closeHttpServer(server) }], logger);
+  const shutdown = createShutdown(
+    [{ name: 'http', close: () => closeHttpServer(server) }, ...closables],
+    logger,
+  );
   if (proc) registerProcessHandlers(proc, logger, shutdown);
   logger.info({ port: config.port, env: config.env }, 'server listening');
   return { server, shutdown };
@@ -56,7 +75,17 @@ export const startServer = async (
 const main = async (): Promise<void> => {
   const config = loadConfig();
   const logger = createLogger({ level: config.logLevel });
-  await startServer(config, logger, process);
+  const mongo = await connectMongo(config, logger);
+  try {
+    await startServer(config, logger, {
+      proc: process,
+      closables: [{ name: 'mongodb', close: disconnectMongo }],
+      readinessChecks: [createMongoReadinessCheck(mongo)],
+    });
+  } catch (error) {
+    await disconnectMongo();
+    throw error;
+  }
 };
 
 if (require.main === module) {

@@ -25,7 +25,7 @@ describe('startServer', () => {
 
   it('registers process handlers only when a process is given', async () => {
     const proc = Object.assign(new EventEmitter(), { exit: jest.fn() });
-    const { server, shutdown } = await startServer(testConfig, logger, proc);
+    const { server, shutdown } = await startServer(testConfig, logger, { proc });
     expect(proc.listenerCount('SIGTERM')).toBe(1);
     expect(proc.listenerCount('uncaughtException')).toBe(1);
     proc.emit('SIGTERM');
