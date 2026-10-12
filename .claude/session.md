@@ -332,7 +332,7 @@
 ### T-023 — SRV-016 Time utils (UTC instants, Asia/Amman days, `HH:mm`, DST-safe ranges)
 - Project: `WAB-Server/` (`src/utils/time/*`, `src/constants/time.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #21 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #22 merged by the user at 12:37:45Z while the verify job was still running; that job then finished green at 12:38:07Z and the push run on `main` was fully green too)
 - Acceptance criteria (BE/NFR: NFR-12 "UTC storage; Asia/Amman for schedules, open/closed status, reminders and reports"; consumers BER-02 (90 days, 15-min slots), BER-04/BE-34 (pending bookings hold their slot → half-open ranges); BUSINESS_DOMAIN §5.1 (instants UTC, business dates/hours in `settings.timezone`, `HH:mm` is local time), §5.3 (open/closed by local date), §5.4 (slots), `DayOfWeek` enum; server rules §9 "time only through `utils/time`", §5 constants):
   - [x] `isHHmm` / `parseHHmm` / `formatHHmm`: strict 24-hour `HH:mm` ↔ minutes since local midnight (0–1439); invalid input → 400 `ValidationError` (same pattern as `parseJod`)
   - [x] Civil dates `YYYY-MM-DD` independent of any zone: strict real calendar dates (leap years, no `2026-02-30`), `addDays`, `diffDays`, `dayOfWeek` (SUN…SAT = the domain enum values)
@@ -348,7 +348,24 @@
 - Notes: Not in this task: 12-hour AM/PM text (ar: ص / م from `locales/`) and "numerals follow the active language" (both PRDs) → message-formatting/notification task; `settings.timezone` wiring → SRV-017. Assumption to confirm: salon hours never pass midnight (`close` later than `open` on the same day) — no document says otherwise; the schedule task enforces it. API docs: no change.
 - Next: SRV-017 (settings). Merge only after ALL CI checks green.
 
+### T-024 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
+- Project: `WAB-Server/` (`src/models/setting.model.ts`, `src/repositories/settings.repository.ts`, `src/domain/settings/*`, `src/constants/settings.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #22 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-65 "all platform settings configurable by admin", NFR-06 stateless instances sharing Redis, NFR-02 no stale-cache poisoning; BUSINESS_DOMAIN §3.7 `settings` (key/value, cached in Redis), §10 keys and defaults, §5.1 timezone; server rules §5 "business-tunable values come from the settings collection, defaults kept in constants", §2 repository is the only DB code):
+  - [x] A typed registry of every §10 key (38) in `domain/settings`: default (in `constants/settings.ts`) + zod schema (structural validation only: integers, positive, percent 0–100, arrays/objects, IANA time zone, currency `JOD`); every default satisfies its own schema; a test holds an independent copy of the §10 table
+  - [x] `settings` model: `key` (unique, required), `value` (Mixed, required; `0`/`false`/`[]` allowed), timestamps; `SettingsRepository` (`findAllEntries`, `upsert` that creates on first use and retries once on a duplicate-key race)
+  - [x] `createSettingsService({store, redis, logger})`: `snapshot()`, typed `get(key)`, `set(key, value)`; `set` validates (unknown key / invalid value → 400 `ValidationError` with details prefixed by the key), persists the normalized value and returns it; values stored in the database that are unknown or invalid never crash a request: the default is used and a warning names the key
+  - [x] Redis cache of the stored overrides, shared by all instances: a hit does not touch Mongo; after `set`, every instance sees the change at once (version bump + delete in one `MULTI`); a read that started before a `set` can never write stale data back (compare-and-set on the version); TTL is only a safety net; Redis down → reads fall back to Mongo and `set` still persists (error logged); a corrupt cache payload is treated as a miss
+  - [x] Returned values are read-only (frozen), so a caller cannot corrupt the in-process memo
+  - [x] No hardcoded values: key names, defaults, bounds, cache key parts and TTL in `constants/`; the service is not wired into `server.ts` yet (first consumer: SRV-027)
+- Tests: `cd WAB-Server && npm test` — 820 pass (27 suites; also on one shared Redis with 4 workers); typecheck/lint/format/build green; `npm audit --omit=dev` 0. New: `tests/settings.test.ts` (135: registry vs an independent copy of §10, every key tested by its kind, service on a real Redis incl. the stale-write race, corrupt cache, Redis outage with cool-down) and `tests/settingsRepository.test.ts` (21: model, upsert, duplicate-key retry). Mutation check: 24 deliberate breakages of the settings code all caught (QA found one real test gap — only one of the two page-size keys was bound-tested — now every key is tested per kind, and a test fails if a key has no kind). Hygiene fixed in older tests: ioredis' 2-second force-close timer made the limiter suite (SRV-014) and the Redis helper keep Jest alive after short runs.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — settings are read through one service (Redis cache shared by instances, version-guarded against stale writes, database fallback with a 5 s Redis cool-down so an outage does not slow every request); stored garbage never crashes a request. `isDuplicateKeyError` now shared with the error normalizer (no duplicate). Not wired into `server.ts` yet (first consumer SRV-027).
+- Notes: Assumptions to confirm: (1) validation is structural only — the Admin PRD (A28) lists defaults but no min/max, so ranges such as `otp.length` 4–10 are sanity guards, not business rules; (2) §10 shows `alerts.api5xxRatePct = 2 (window 10 min)` — the window is not a key, so it stays a constant for the alerts task (SRV-106); (3) the Admin PRD's "payout frequency note" is not a §10 key and is left to the admin-settings task; (4) locations, app versions and maintenance have their own collections (§3.2, §3.6), not `settings`. New backlog row **SRV-017a**: create indexes at startup (production runs with `autoIndex: false`, so the unique `settings.key` index would not exist). API docs: no change.
+- Next: SRV-017a (indexes at startup). Merge only after ALL CI checks green.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-017 — next server task after T-023 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-017a — next server task after T-024 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.

@@ -2,6 +2,8 @@
  * Money constants (SRV-015). Amounts are integer fils; the API shows JOD as a decimal string with
  * 3 decimals (BUSINESS_DOMAIN.md, Conventions).
  */
+/** Currency is JOD only (CLAUDE.md §1). */
+export const CURRENCY_CODE = 'JOD';
 export const JOD_DECIMAL_PLACES = 3;
 export const FILS_PER_JOD = 1_000;
 

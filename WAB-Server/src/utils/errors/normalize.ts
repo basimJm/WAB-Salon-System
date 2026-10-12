@@ -6,7 +6,6 @@ import {
   JWT_ERROR_NAMES,
   MONGOOSE_CAST_ERROR_NAME,
   MONGOOSE_VALIDATION_ERROR_NAME,
-  MONGO_DUPLICATE_KEY_CODE,
   NETWORK_ERROR_CODES,
   REDIS_UNAVAILABLE_ERROR_MESSAGES,
   REDIS_UNAVAILABLE_ERROR_NAMES,
@@ -14,6 +13,7 @@ import {
 } from '../../constants/errorMapping';
 import { errorMessageKey } from '../../constants/errorCodes';
 import { HTTP_STATUS } from '../../constants/http';
+import { isDuplicateKeyError } from '../database/errors';
 import {
   BaseError,
   ConflictError,
@@ -58,7 +58,7 @@ export const normalizeError = (error: unknown): BaseError => {
     if (name === MONGOOSE_VALIDATION_ERROR_NAME && 'errors' in error) {
       return new ValidationError({ details: mongooseDetails(error['errors']), cause: error });
     }
-    if (code === MONGO_DUPLICATE_KEY_CODE) return new ConflictError({ cause: error });
+    if (isDuplicateKeyError(error)) return new ConflictError({ cause: error });
     if (typeof name === 'string' && JWT_ERROR_NAMES.has(name)) {
       return new UnauthorizedError({ cause: error });
     }

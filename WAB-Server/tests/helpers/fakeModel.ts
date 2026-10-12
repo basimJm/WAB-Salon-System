@@ -130,10 +130,24 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
     countDocuments: (filter: Filter) => new FakeQuery(() => select(filter).length),
     exists: (filter: Filter) =>
       new FakeQuery(() => (select(filter)[0] ? { _id: select(filter)[0]?._id } : null)),
-    findOneAndUpdate: (filter: Filter, update: { $set: Doc }) =>
+    findOneAndUpdate: (filter: Filter, update: { $set: Doc }, options: { upsert?: boolean } = {}) =>
       new FakeQuery(() => {
-        const doc = select(filter)[0];
-        if (!doc) return null;
+        let doc = select(filter)[0];
+        if (!doc) {
+          if (options.upsert !== true) return null;
+          // Like MongoDB: a new document starts from the equality conditions of the filter.
+          doc = {
+            _id: new Types.ObjectId(),
+            __v: 0,
+            createdAt: new Date(),
+            ...Object.fromEntries(
+              Object.entries(filter).filter(
+                ([key, condition]) => !key.startsWith('$') && !isOperatorObject(condition),
+              ),
+            ),
+          };
+          docs.push(doc);
+        }
         Object.assign(doc, update.$set, { updatedAt: new Date() });
         return { ...doc };
       }),
