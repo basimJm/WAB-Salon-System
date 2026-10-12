@@ -89,6 +89,256 @@
               }
             }
           }
+        },
+        {
+          "name": "Check a number before sending the OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/auth/check-phone",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "auth",
+                "check-phone"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "LOGIN: 404 `PHONE_NOT_REGISTERED`, 403 `ACCOUNT_BLOCKED`. REGISTER: 409 `PHONE_ALREADY_REGISTERED`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"purpose\": \"LOGIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Log in with a Firebase ID token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "auth",
+                "login"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "The token must prove the phone. An account in its deletion grace period is restored. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `ACCOUNT_BLOCKED` (403), `PHONE_NOT_REGISTERED` (404).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"idToken\": \"string\",\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Register with a Firebase ID token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "auth",
+                "register"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Creates the account and signs it in. Errors: `OTP_INVALID`, `OTP_EXPIRED`, `OTP_BLOCKED`, `PHONE_ALREADY_REGISTERED` (409).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"email\": \"string\",\n  \"gender\": \"MALE\",\n  \"cityId\": \"string\",\n  \"areaId\": \"string\",\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"idToken\": \"string\",\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Rotate the refresh token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "auth",
+                "refresh"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Returns a new access and refresh token. Reusing an old refresh token ends every session of that login (401).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Log out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "auth",
+                "logout"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Revokes the refresh token and unlinks the device. Always succeeds for well-formed tokens.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Change the phone number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/auth/change-phone",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "auth",
+                "change-phone"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Needs the Firebase ID token of the NEW number. Errors: `OTP_INVALID`, `OTP_EXPIRED`, `OTP_BLOCKED`, `PHONE_ALREADY_REGISTERED`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"idToken\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         }
       ]
     }

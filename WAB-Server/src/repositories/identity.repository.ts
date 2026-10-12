@@ -18,6 +18,23 @@ export class CustomersRepository extends BaseRepository<CustomerRaw> {
   findByPhone(e164: string): Promise<Entity<CustomerRaw> | null> {
     return this.findOne({ 'phone.e164': e164 });
   }
+
+  /** Ends the deletion grace period: the account is active again and the schedule is cleared. */
+  async restoreFromDeletion(id: string, now: Date): Promise<Entity<CustomerRaw> | null> {
+    if (!isValidId(id)) return null;
+    const restored = await this.model
+      .findOneAndUpdate(
+        { _id: id, status: 'DELETION_PENDING' },
+        {
+          $set: { status: 'ACTIVE', lastActiveAt: now },
+          $unset: { deletionRequestedAt: 1, deletionScheduledAt: 1 },
+        },
+        { new: true },
+      )
+      .lean()
+      .exec();
+    return restored === null ? null : toEntity<CustomerRaw>(restored);
+  }
 }
 
 export class MembersRepository extends BaseRepository<MemberRaw> {
@@ -40,6 +57,44 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
     installationId: string,
   ): Promise<Entity<InstallationRaw> | null> {
     return this.findOne({ app, installationId });
+  }
+
+  /** Creates or updates the device record and links it to the account that just signed in. */
+  async linkCustomer(
+    customerId: string,
+    device: Pick<InstallationRaw, 'installationId' | 'platform' | 'appVersion' | 'language'> & {
+      osVersion?: string | undefined;
+      deviceModel?: string | undefined;
+      fcmToken?: string | undefined;
+    },
+    now: Date,
+  ): Promise<void> {
+    const { installationId, fcmToken, ...optional } = device;
+    // Absent optional fields keep what is stored; `undefined` must never reach the update.
+    const rest = Object.fromEntries(
+      Object.entries(optional).filter(([, value]) => value !== undefined),
+    );
+    await this.model
+      .findOneAndUpdate(
+        { app: 'CUSTOMER', installationId },
+        {
+          $set: {
+            ...rest,
+            ...(fcmToken === undefined ? {} : { fcmToken, fcmTokenUpdatedAt: now }),
+            customerId: new Types.ObjectId(customerId),
+            lastSeenAt: now,
+          },
+        },
+        { upsert: true, runValidators: true },
+      )
+      .exec();
+  }
+
+  /** Logout: the device stays known (analytics, guest push) but is no longer an account's. */
+  async unlinkCustomer(installationId: string): Promise<void> {
+    await this.model
+      .findOneAndUpdate({ app: 'CUSTOMER', installationId }, { $unset: { customerId: 1 } })
+      .exec();
   }
 }
 

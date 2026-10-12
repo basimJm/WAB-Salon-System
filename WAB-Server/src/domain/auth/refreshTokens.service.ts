@@ -29,10 +29,17 @@ export interface IssuedRefreshToken {
   installationId?: string;
 }
 
+export interface RevokedSession {
+  subjectType: SubjectType;
+  subjectId: string;
+  installationId?: string;
+}
+
 export interface RefreshTokenService {
   issue(input: IssueInput): Promise<IssuedRefreshToken>;
   rotate(input: { token: string; ttlDays: number }): Promise<IssuedRefreshToken>;
-  revoke(token: string): Promise<void>;
+  /** Logout: returns whose session ended, or `null` when the token was unknown or malformed. */
+  revoke(token: string): Promise<RevokedSession | null>;
   revokeAll(subjectType: SubjectType, subjectId: string, reason?: string): Promise<number>;
 }
 
@@ -125,10 +132,15 @@ export const createRefreshTokenService = (deps: RefreshTokenServiceDeps): Refres
     },
 
     async revoke(token) {
-      if (!REFRESH_TOKEN_PATTERN.test(token)) return;
+      if (!REFRESH_TOKEN_PATTERN.test(token)) return null;
       const current = await repository.findByTokenHash(hashRefreshToken(token));
-      if (current === null) return;
+      if (current === null) return null;
       await repository.revokeIfActive(current.id, REVOKE_REASONS.logout, now());
+      return {
+        subjectType: current.subjectType,
+        subjectId: current.subjectId,
+        ...(current.installationId === undefined ? {} : { installationId: current.installationId }),
+      };
     },
 
     revokeAll(subjectType, subjectId, reason = REVOKE_REASONS.logoutAll) {

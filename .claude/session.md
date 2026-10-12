@@ -605,7 +605,7 @@
 ### T-038 — SRV-027 OTP pre-check endpoint, platform limits, wrong-attempt report
 - Project: `WAB-Server/` (`src/domain/otp/otpGate.service.ts`, `src/modules/shared/otp/*`, `src/modules/services.ts`, `src/constants/otp.ts`, `src/app.ts`, `src/server.ts`, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #43 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #44 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-07, NFR-01 stricter limits on OTP; BUSINESS_DOMAIN §3.1 OTP Redis keys, §10 `otp.*` settings, §11 `OTP_BLOCKED`; Customer PRD S13, Merchant PRD M03/§4.4):
   - [x] `POST /customer/v1/auth/otp/request` and `/merchant/v1/auth/otp/request` (public): `{phone E.164, purpose}` -> `{allowed, otpLength, resendAfterSeconds, blockedUntil?}`; purposes customer LOGIN/REGISTER/CHANGE_PHONE/BOOKING_CONFIRMATION, merchant LOGIN/REGISTER/CHANGE_PHONE/BANK_DETAILS
   - [x] Limits from settings, read per call: resend countdown (not counted), 5 requests / 5 min -> 15 min block (5th allowed starts the block), 5 wrong -> 15 min block; requests and wrong codes share one block; phones independent; concurrent requests -> exactly one allowed
@@ -617,6 +617,23 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (contract matches PRD S13), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) a blocked phone or a running resend countdown answers 200 with `allowed:false` (PRD shape) rather than 429; `OTP_BLOCKED` is thrown by `assertNotBlocked` on verification; (2) the endpoint does not check whether the phone is registered (login/register decide that in SRV-028/033, not leaking account existence here); (3) merchant purposes taken from Merchant PRD M03; (4) per-IP limit of 20/min on OTP routes is a constant. `main()` now builds the settings service and the OTP gate (first wiring).
 - Next: SRV-028 (customer auth).
+
+### T-039 — SRV-028 Customer register/login/refresh/logout/change-phone via Firebase ID token
+- Project: `WAB-Server/` (`src/domain/auth/customerAuth.service.ts`, `src/modules/customer/auth/*`, `src/constants/customerAuth.ts`, `src/repositories/identity.repository.ts`, `src/server.ts`, docs)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #44 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-01, BE-04, NFR-01; BUSINESS_DOMAIN §3.1 customers/installations/refreshTokens, §4.2, §11 `PHONE_NOT_REGISTERED`/`PHONE_ALREADY_REGISTERED`/`ACCOUNT_BLOCKED`/`OTP_*`; Customer PRD S11, S12, S13, S22):
+  - [x] `POST /customer/v1/auth/check-phone` (LOGIN: 404 not registered / 403 blocked; REGISTER: 409 taken)
+  - [x] `register` (201) and `login` (200): number resolved from country code + national number (active country, country regex), Firebase ID token verified for that exact number via `OtpProvider`, invalid/expired/other-number -> 401 `OTP_INVALID`/`OTP_EXPIRED`, blocked number -> 429 `OTP_BLOCKED` before the provider is asked; platform JWT (ttl from `auth.accessTokenTtlSec`) + rotating refresh token (`auth.refreshTokenTtlDays`); gate reset on success
+  - [x] register validates city/area (area belongs to the city), unique phone incl. unique-index race (409); login: BLOCKED 403, DELETED 404, DELETION_PENDING restored (grace period)
+  - [x] `refresh` rotates (reuse ends the family); a blocked/removed customer's sessions are all revoked; `logout` revokes the token and unlinks the device (idempotent)
+  - [x] `change-phone` (customer token required): proof for the NEW number, number owned by another account -> 409
+  - [x] device record (`installations`) created/updated and linked to the customer on login/register (analytics + push)
+  - [x] Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1292 pass (41 suites); format:check/lint/typecheck/build green; audit 0; `npm run docs` regenerated. `tests/customerAuth.test.ts` (38).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (matches PRD S11-S13, S22), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) booking-confirmation OTP is NOT in this PR: it belongs to the booking draft flow (no draft exists yet), the gate and provider are ready for it; (2) a DELETED customer keeps the phone unique index, so that number cannot register again until the deletion job anonymises it (SRV account deletion task); (3) `check-phone` reveals whether a number is registered, as the PRD flow requires, behind the per-IP route limit; (4) the phone is sent as `{countryCode, number}`, the server builds E.164 from the country's dial code. `RefreshTokenService.revoke` now returns the ended session.
+- Next: SRV-029 (merchant member login).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
