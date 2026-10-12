@@ -90,6 +90,19 @@ export abstract class BaseRepository<TRaw extends object> {
     };
   }
 
+  /**
+   * Creates the record only when none matches `naturalKey`; an existing one is returned untouched,
+   * so seeds can run again without overwriting what an admin changed.
+   */
+  async insertIfMissing(
+    naturalKey: QueryFilter<TRaw>,
+    data: Partial<TRaw>,
+  ): Promise<{ entity: Entity<TRaw>; created: boolean }> {
+    const existing = await this.findOne(naturalKey);
+    if (existing !== null) return { entity: existing, created: false };
+    return { entity: await this.create(data), created: true };
+  }
+
   count(filter: QueryFilter<TRaw> = {}): Promise<number> {
     return this.model.countDocuments(this.scoped(filter)).exec();
   }

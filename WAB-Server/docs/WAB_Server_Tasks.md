@@ -60,9 +60,10 @@ Also needed from the owner when the related task starts (will be asked then, not
 | SRV-015 | Money utils (integer fils, JOD strings, half-up rounding) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-016 | Time utils (UTC instants, Asia/Amman days, `HH:mm`, DST-safe ranges) | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
 | SRV-017 | Settings model, repository, typed registry, service with Redis cache | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
-| SRV-017a | Create indexes at startup | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
+| SRV-017a | Create indexes at startup | `claude/busy-johnson-2rch94` (cloud-pinned) | DONE |
+| SRV-018 | Reference-data seed (countries, cities, areas) | `claude/busy-johnson-2rch94` (cloud-pinned) | IN REVIEW |
 
-Next task to start after SRV-017a is merged: **SRV-018** (SRV-011 is PENDING).
+Next task to start after SRV-018 is merged: **SRV-019** (SRV-011 is PENDING).
 
 ---
 
@@ -98,8 +99,8 @@ Mongo/Redis plumbing, money/time, settings, seeds. Roadmap SRV-02.
 | SRV-015 | Money utils: integer fils, JOD 3-decimal string (de)serialization, half-up rounding | `feat/srv-015-money` | — | DONE | Never floats; property-style tests for rounding. `isFils/assertFils/sumFils/mulDivRound/percentOf` + `formatJod/parseJod/isJodString` in `utils/money`; constants in `constants/money.ts`. |
 | SRV-016 | Time utils: UTC storage, Asia/Amman day boundaries, `HH:mm` parsing, DST-safe ranges | `feat/srv-016-time` | — | DONE | Config-driven timezone; tests around midnight/day change. `utils/time`: `HH:mm`, calendar dates, `localDateOf/localMinutesOf/zonedTimeToUtc/localDayRange(…, timeZone)`, half-open `rangesOverlap/containsInstant`; constants in `constants/time.ts`. 12-hour AM/PM text + numerals-follow-language belong to the message-formatting task. |
 | SRV-017 | Settings model + service + Redis cache + defaults (BUSINESS §10), typed accessors | `feat/srv-017-settings` | SRV-012, SRV-013 | DONE | Every limit in code reads from settings; admin edit endpoint comes later (`admin-settings`). |
-| SRV-017a | Create indexes at startup: model registry (`models/index.ts`) + create-only `ensureIndexes` (never drops) wired in `main()` | `feat/srv-017a-indexes` | SRV-017 | IN REVIEW | Production runs with `autoIndex: false`, so schema-declared unique indexes (`settings.key`, later `customers.phone`, `refreshTokens.tokenHash`…) must be created explicitly. |
-| SRV-018 | Seed script: settings, countries, cities/areas (Jordan) | `feat/srv-018-seed-ref` | SRV-017 | TODO | Idempotent; real city/area names supplied or default to a documented starter set. |
+| SRV-017a | Create indexes at startup: model registry (`models/index.ts`) + create-only `ensureIndexes` (never drops) wired in `main()` | `feat/srv-017a-indexes` | SRV-017 | DONE | Production runs with `autoIndex: false`, so schema-declared unique indexes (`settings.key`, later `customers.phone`, `refreshTokens.tokenHash`…) must be created explicitly. |
+| SRV-018 | Seed script: settings, countries, cities/areas (Jordan) | `feat/srv-018-seed-ref` | SRV-017 | IN REVIEW | Idempotent; real city/area names supplied or default to a documented starter set. |
 | SRV-019 | Seed script: demo catalog services (men/women, ar/en) for dev | `feat/srv-019-seed-catalog` | SRV-018 | TODO | Dev-only; flagged as demo data. |
 | SRV-020 | Audit-log writer (append-only, before/after, reason, IP) + server-events writer | `feat/srv-020-audit` | SRV-012 | TODO | No update/delete API on `auditLogs`; tests prove immutability. |
 | SRV-021 | Booking reference number (`WAB-XXXXXX` base32, no ambiguous chars) + id utils | `feat/srv-021-refnum` | — | TODO | Collision-safe via unique index + retry. |

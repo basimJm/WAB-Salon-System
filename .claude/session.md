@@ -406,7 +406,7 @@
 ### T-027 — SRV-017a Create indexes at startup
 - Project: `WAB-Server/` (`src/models/index.ts`, `src/utils/database/indexes.ts`, `src/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #24 merged)
-- Status: IN REVIEW
+- Status: DONE (PR #25 merged by the user; PR run and `main` run green — #24 verified green too)
 - Acceptance criteria (BE/NFR: NFR-02 correctness (unique keys), NFR-06 stateless instances; BUSINESS_DOMAIN §3 indexes per collection; server rules §9 every query backed by a schema-declared index; `connectMongo` runs with `autoIndex: false` in production):
   - [x] `models/index.ts` lists every model (`ALL_MODELS`); a test fails when a `*.model.ts` file exists that is not listed
   - [x] `ensureIndexes(models, logger)` creates the missing indexes with `createIndexes()` (create-only: it never drops or changes an index), one model at a time, logging each model; a failure stops start-up with the model named
@@ -418,7 +418,23 @@
 - Notes: API docs: no change. Each later schema task adds its model to `ALL_MODELS`.
 - Next: SRV-018 (reference-data seeds). Merge only after ALL CI checks green.
 
+### T-028 — SRV-018 Reference-data seed: countries, cities, areas (Jordan)
+- Project: `WAB-Server/` (`src/models/{country,city,area}.model.ts`, `src/repositories/locations.repository.ts`, `src/seeds/*`, `src/constants/referenceData.ts`, `package.json` script `seed`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #25 merged)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-65 locations configurable by admin (data side), NFR-09; BUSINESS_DOMAIN §3.2 `countries {code, name{ar,en}, dialCode, flagKey, phoneRegex, active, sortOrder}` unique `code`, `cities {name{ar,en}, countryCode, active, sortOrder}`, `areas {cityId, name{ar,en}, active, sortOrder}` index `cityId`; Customer PRD "countries list (flag, name, dial code, phone regex)"):
+  - [x] Models for countries, cities, areas exactly as §3.2 with their indexes (country `code` unique; city `{countryCode, active, sortOrder}`; area `{cityId, active, sortOrder}`), registered in `ALL_MODELS`; codes/dial codes/regex validated
+  - [x] `insertIfMissing(naturalKey, data)` on the base repository: creates only when absent and never overwrites (so re-seeding keeps admin edits); reports whether it created
+  - [x] Seed data in `constants/referenceData.ts`: Jordan (`JO`, `+962`, mobile regex on the national number), the 12 governorate cities, a documented starter set of Amman areas (the five named in the Design Script + common ones), every name in ar + en
+  - [x] `seedReferenceData` is idempotent (second run creates nothing), keeps manual changes, and links areas to the right city; `npm run seed` connects, creates indexes, seeds, disconnects
+  - [x] Settings are NOT seeded: a missing key already means "default", and writing the defaults would pin them against later default changes
+- Tests: `cd WAB-Server && npm test` — 843 pass (29 suites; also on a shared Redis with 4 workers); typecheck/lint/format/build green; audit 0. `tests/referenceData.test.ts` (17): seed-data integrity (both languages, Arabic script, regex accepts/rejects numbers, unique names/sort orders), models and indexes, `insertIfMissing`, seed idempotency, admin edits kept, same-named areas in two cities. Mutation check: 6 breakages; one survived (area key without `cityId`) → seed data made injectable and a test added → caught. Built `npm run seed` exits 1 cleanly without a database.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — insert-only seeds (never overwrite), models registered in `ALL_MODELS`. NOT verified against a real MongoDB (none on the runner): first `docker compose up` + `npm run seed` confirms. Public endpoints for these lists are SRV-036.
+- Notes: Assumptions to confirm: (1) `phoneRegex` applies to the national number without the leading 0 (`^7[789][0-9]{7}$`: Zain 77, Orange 77/78, Umniah 78/79); (2) `flagKey` is a storage key `flags/jo.svg` (the asset itself comes with the storage task); (3) only Amman gets starter areas — other cities' areas are added in the admin Locations editor. API docs: no change.
+- Next: SRV-019 (demo catalog seed). Merge only after ALL CI checks green.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
-- SRV-018 — next server task after T-027 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
+- SRV-019 — next server task after T-028 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
