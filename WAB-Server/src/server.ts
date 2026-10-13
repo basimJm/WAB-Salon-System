@@ -30,6 +30,8 @@ import { createPhoneVerifier } from './domain/auth/phoneVerifier';
 import { createAdminSalonsService } from './domain/salons/adminSalons.service';
 import { createConflictFinder, noBookings } from './domain/salons/conflicts';
 import { createSalonDetailsService } from './domain/salonDetails/salonDetails.service';
+import { createFavoritesService } from './domain/favorites/favorites.service';
+import { FavoritesRepository } from './repositories/favorites.repository';
 import { createHomeService } from './domain/home/home.service';
 import { createSearchService } from './domain/search/search.service';
 import { createPolicyService } from './domain/salons/policy.service';
@@ -256,7 +258,9 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     logger,
   });
   const audit = createAuditWriter(new AuditLogsRepository());
+  const favoritesRepository = new FavoritesRepository();
   const search = createSearchService({
+    favorites: favoritesRepository,
     salons: new SalonsRepository(),
     salonServices,
     closures: new ClosuresRepository(),
@@ -277,7 +281,13 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     uploads,
     // Placements (SRV-066) and favorites (SRV-062) plug in here later.
     search,
+    favorites: createFavoritesService({
+      favorites: favoritesRepository,
+      salons: new SalonsRepository(),
+      search,
+    }),
     salonDetails: createSalonDetailsService({
+      favorites: favoritesRepository,
       salons: new SalonsRepository(),
       members: new MembersRepository(),
       salonServices,

@@ -1099,6 +1099,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - composes the banner, catalog and search services (no duplicated queries); unread count is a placeholder `UnreadLookup` until the notification core (SRV-093).
 
+### T-073 — SRV-062 Favorites
+- Project: `WAB-Server/` (`src/models/favorite.model.ts`, `src/repositories/favorites.repository.ts`, `src/domain/favorites`, `src/modules/customer/favorites`, `SearchService.cards`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN `favorites` unique pair; Customer PRD S20):
+  - [x] Add is idempotent (also under a duplicate-key race) and only for visible salons (404 `SALON_NOT_FOUND`); remove is idempotent
+  - [x] List: own favorites only, newest first, paginated, as salon cards with `isFavorite`; salons no longer visible are left out
+  - [x] Customer token required (401 / 403 for other scopes); real lookup feeds `isFavorite` in search, details and home
+- Tests: `tests/favorites.test.ts` (6); full gate green, 1842 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `total` counts saved rows, so a page can hold fewer cards than `pageSize` when a salon went offline; customer deletion purge (SRV-032) does not yet delete favorites (follow-up with the purge wiring).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

@@ -20,6 +20,7 @@ import {
   unavailableBannersService,
   unavailableGuard,
   unavailableSalonDetails,
+  unavailableFavorites,
   unavailableHome,
   unavailableSearch,
   unavailableCustomerAuth,
@@ -28,6 +29,8 @@ import {
 import { createCustomerBannersRouter } from './banners/banners.module';
 import { createSalonDetailsRouter } from './salonDetails/salonDetails.routes';
 import { SALON_DETAILS_ROUTES } from '../../constants/salonDetails';
+import { createFavoritesRouter } from './favorites/favorites.routes';
+import { FAVORITE_ROUTES } from '../../constants/favorites';
 import { createHomeRouter } from './home/home.routes';
 import { HOME_ROUTES } from '../../constants/home';
 import { createSearchRouter } from './search/search.routes';
@@ -105,6 +108,18 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createHomeRouter({
       service: services.home ?? unavailableHome,
       optionalAuth: services.installations?.customerOptional ?? unavailableGuard,
+      limiter: createRateLimiter({
+        ...SEARCH_ROUTE_RATE_LIMIT,
+        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
+      }),
+    }),
+  );
+  mount(
+    router,
+    FAVORITE_ROUTES.base,
+    createFavoritesRouter({
+      service: services.favorites ?? unavailableFavorites,
+      guard: services.installations?.customerRequired ?? unavailableGuard,
       limiter: createRateLimiter({
         ...SEARCH_ROUTE_RATE_LIMIT,
         ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
