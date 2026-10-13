@@ -19,6 +19,8 @@ import type { CatalogServiceRaw } from './models/catalogService.model';
 import { CatalogServicesRepository } from './repositories/catalog.repository';
 import { createSalonApplicationService } from './domain/salons/salonApplication.service';
 import { SalonsRepository } from './repositories/salons.repository';
+import { createSalonReviewService } from './domain/salons/salonReview.service';
+import { SubscriptionsRepository } from './repositories/subscriptions.repository';
 import { createAuditWriter } from './domain/audit/audit.service';
 import { createAdminContentServices } from './domain/adminCrud/content';
 import { createAdminLocationServices } from './domain/adminCrud/locations';
@@ -201,6 +203,22 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   return {
     otpGate,
     adminGuard,
+    adminApplications: createSalonReviewService({
+      salons: new SalonsRepository(),
+      members: new MembersRepository(),
+      subscriptions: new SubscriptionsRepository(),
+      settings,
+      storage: providers.storage,
+      audit,
+      logger,
+      // Placeholder until the notification core (SRV-093) sends the real push and in-app message.
+      notifier: {
+        reviewed: (result) => {
+          logger.info(result, 'salon application reviewed');
+          return Promise.resolve();
+        },
+      },
+    }),
     salonApplication: {
       service: createSalonApplicationService({
         ...phoneServices,

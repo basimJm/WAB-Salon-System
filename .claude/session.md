@@ -822,7 +822,7 @@
 ### T-053 — SRV-041 Salon schema + owner application (apply, status, resubmit)
 - Project: `WAB-Server/` (`src/models/salon.model.ts`, `src/domain/salons/salonApplication.service.ts`, `src/modules/merchant/salon/*`, `src/constants/salon.ts`, `src/repositories/salons.repository.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #60 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #61 merged into `server`)
 - Acceptance criteria (BE-01/BE-04 salon accounts; BUSINESS_DOMAIN §3.3 salons, §3.4 members, SalonState; Merchant PRD M05-M06):
   - [x] `salons` model exactly as §3.3 (state enum, 7-day schedule default all off, embedded policy/application/offline/completeness/rating, 2dsphere + state/gender + city/area indexes), in `ALL_MODELS`
   - [x] `POST /merchant/v1/salon/applications` (public, per-IP limited): phone proven by Firebase token (REGISTER purpose, OTP gate), owner name, salon name/gender/description/city/area (area inside the city), 1-5 unique private document keys; creates salon `APPLICATION_PENDING` + OWNER member (no permissions needed) + installation link + merchant session; a number that already belongs to a member is 409; a failed owner insert (number race) removes the salon
@@ -833,6 +833,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (matches M05-M06), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) document keys are only format-checked (no existence check) until the uploads module SRV-046; (2) the application has no transaction: compensation deletes the salon when the owner insert fails; (3) the salon gender may be changed on resubmission only (immutable after approval except by admin: SRV-042+). Not run against a real MongoDB.
 - Notes: LESSON: do not combine `set -e` with `grep ... || true` gates; use `&&` chains and print `exit=$?`. Next: SRV-042 (admin approve/reject).
+
+### T-054 — SRV-042 Admin approve/reject salon applications + TRIAL subscription
+- Project: `WAB-Server/` (`src/domain/salons/salonReview.service.ts`, `src/modules/admin/applications/*`, `src/models/subscription.model.ts`, `src/repositories/{subscriptions,salons}.repository.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #61 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (Admin PRD A14; BUSINESS_DOMAIN §3.5 subscriptions, §5.13 "on approval create TRIAL, trialEndsAt = approval + subscription.trialDays", CLAUDE.md §5.12):
+  - [x] `GET /admin/v1/salons/applications` (admin only): pending by default, any `state` filter, oldest first, paginated (25), with owner name/phone, city, submitted at, resubmission count, rejection reason
+  - [x] `GET .../:id`: detail with short-lived signed URLs of the private license documents
+  - [x] `POST .../:id/approve` and `/reject`: reason required (400 otherwise), only from `APPLICATION_PENDING` in one atomic step (a second decision or a non-pending salon is 422 `INVALID_TRANSITION`, unknown salon 404); records reviewer and time; reject keeps the reason for the owner; audit `SALON_APPLICATION_APPROVE|REJECT` with before/after state
+  - [x] Approval sets `APPROVED_INCOMPLETE` and creates the `subscriptions` row (TRIAL, `trialEndsAt` = approval + `subscription.trialDays` from settings; unique per salon, duplicate ignored); `subscriptions` model + indexes in `ALL_MODELS`
+  - [x] The owner is told through an `ApplicationNotifier`; its failure is logged and never undoes the decision (placeholder logs until SRV-093)
+- Tests: `cd WAB-Server && npm test` - 1539 pass; format/lint/typecheck/build green; audit 0. `tests/salonReview.test.ts` (9). Fake model sorts on dotted paths now.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - the applications queue socket event (`application.created`) and admin email alert come with the sockets/alerts tasks. The completeness engine (SRV-043) moves APPROVED_INCOMPLETE to LIVE. Not run against a real MongoDB.
+- Notes: Next: SRV-043 (completeness engine + state machine).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
