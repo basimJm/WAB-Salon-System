@@ -49,6 +49,7 @@ const created: string[] = [];
 let testRedis: TestRedis;
 let redis: Redis;
 let app: ReturnType<typeof createApp>;
+let bookingService: ReturnType<typeof createBookingCreationService>;
 
 beforeAll(async () => {
   testRedis = await startTestRedis();
@@ -94,7 +95,7 @@ beforeAll(async () => {
         settings,
         now,
       }),
-      bookings: createBookingCreationService({
+      bookings: (bookingService = createBookingCreationService({
         transactions: new TransactionsRepository(m.tx.model as never),
         refunds: createRefundService({
           refunds: new RefundsRepository(m.refunds.model as never),
@@ -120,7 +121,7 @@ beforeAll(async () => {
           },
         },
         now,
-      }),
+      })),
       installations: {
         service: undefined as never,
         customerOptional: requireAuth('customer', SECRET),
@@ -652,5 +653,110 @@ describe('paid bookings (SRV-085)', () => {
     const results = await Promise.all([book(draftId), book(draftId)]);
     expect(results.filter((r) => r.status === 201)).toHaveLength(1);
     expect(m.bookings.docs).toHaveLength(1);
+  });
+});
+
+describe('under load (no double booking)', () => {
+  // The HTTP route has a per-IP limit, so these call the creation service directly.
+  type Persons = { staffId: Types.ObjectId; start: Date; end: Date }[];
+  const overlap = (): boolean => {
+    const byStaff = new Map<string, { start: number; end: number }[]>();
+    for (const b of m.bookings.docs) {
+      for (const p of b['persons'] as Persons) {
+        const list = byStaff.get(String(p.staffId)) ?? [];
+        list.push({ start: p.start.getTime(), end: p.end.getTime() });
+        byStaff.set(String(p.staffId), list);
+      }
+    }
+    for (const list of byStaff.values()) {
+      list.sort((a, b) => a.start - b.start);
+      for (let i = 1; i < list.length; i += 1) {
+        if ((list[i]?.start ?? 0) < (list[i - 1]?.end ?? 0)) return true;
+      }
+    }
+    return false;
+  };
+  /** A confirmed draft of a new customer for `staff` at `time` (copied from a real one). */
+  const cloneDraft = (
+    base: Record<string, unknown>,
+    staff: Types.ObjectId,
+    time: string,
+  ): { draftId: Types.ObjectId; who: Types.ObjectId } => {
+    const who = id();
+    m.customers.docs.push({ _id: who, firstName: 'C', status: 'ACTIVE', phone: PHONE });
+    const start = new Date(amman(D, time));
+    const end = new Date(start.getTime() + 45 * 60_000);
+    const person = { ...(base['persons'] as object[])[0], staffId: staff, start, end };
+    const draft = {
+      ...base,
+      _id: id(),
+      customerId: who,
+      persons: [person],
+      appointmentStart: start,
+      appointmentEnd: end,
+    };
+    m.drafts.docs.push(draft);
+    return { draftId: draft._id, who };
+  };
+  const baseDraft = async (): Promise<Record<string, unknown>> => {
+    const draftId = await makeDraft();
+    await confirm(draftId);
+    await redis.flushdb(); // drop the template draft's slot hold: only the copies compete
+    return m.drafts.docs[0] as Record<string, unknown>;
+  };
+  const run = (c: { draftId: Types.ObjectId; who: Types.ObjectId }): Promise<unknown> =>
+    bookingService.create({ customerId: c.who.toHexString(), draftId: c.draftId.toHexString() });
+  const codes = (results: PromiseSettledResult<unknown>[]): string[] =>
+    results
+      .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+      .map((r) => String((r.reason as { code?: string }).code));
+
+  it('40 customers racing for one slot: exactly one booking, everyone else SLOT_TAKEN', async () => {
+    const base = await baseDraft();
+    const racers = Array.from({ length: 40 }, () => cloneDraft(base, staffA, '10:00'));
+    const results = await Promise.allSettled(racers.map(run));
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    expect(codes(results)).toEqual(Array.from({ length: 39 }, () => 'SLOT_TAKEN'));
+    expect(m.bookings.docs).toHaveLength(1);
+    expect(created).toHaveLength(1);
+  });
+
+  it('5 slots x 8 contenders at once: one booking per slot and nobody overlaps', async () => {
+    const base = await baseDraft();
+    const racers = ['09:00', '10:00', '11:00', '12:00', '13:00'].flatMap((time) =>
+      Array.from({ length: 8 }, () => cloneDraft(base, staffA, time)),
+    );
+    const results = await Promise.allSettled(racers.map(run));
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(5);
+    expect(codes(results).every((c) => c === 'SLOT_TAKEN')).toBe(true);
+    expect(m.bookings.docs).toHaveLength(5);
+    expect(overlap()).toBe(false);
+  });
+
+  it('overlapping neighbours (45-minute services every 30 minutes) never both win', async () => {
+    const base = await baseDraft();
+    const racers = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'].flatMap((time) =>
+      Array.from({ length: 4 }, () => cloneDraft(base, staffA, time)),
+    );
+    const results = await Promise.allSettled(racers.map(run));
+    const won = results.filter((r) => r.status === 'fulfilled').length;
+    expect(won).toBeGreaterThanOrEqual(1);
+    expect(m.bookings.docs).toHaveLength(won);
+    expect(overlap()).toBe(false);
+  });
+
+  it('24 customers booking different slots of two staff members in parallel all succeed', async () => {
+    const base = await baseDraft();
+    const starts = Array.from({ length: 12 }, (_, i) => {
+      const minutes = 9 * 60 + i * 45;
+      return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+    });
+    const racers = [staffA, staffB].flatMap((staff) =>
+      starts.map((time) => cloneDraft(base, staff, time)),
+    );
+    const results = await Promise.allSettled(racers.map(run));
+    expect(codes(results)).toEqual([]);
+    expect(m.bookings.docs).toHaveLength(24);
+    expect(overlap()).toBe(false);
   });
 });

@@ -44,3 +44,20 @@ One namespace per token scope: `/customer`, `/merchant`, `/admin` (path `/socket
 expired token is refused with `connect_error` `data.code = UNAUTHORIZED`; a token of another scope with `FORBIDDEN`.
 Each account is placed in its own room (`customer:{id}`, `member:{id}`, `admin`); events are emitted through
 `SocketHub` (`src/sockets/socketServer.ts`) and reach every instance through the Redis adapter.
+
+## Load test
+
+`npm run build && npm run loadtest` drives the read endpoints of a running server (home, search, salon details, availability) from several workers and fails (exit code 1) when a target's p95 is above 300 ms (BRD NFR-03) or more than 1 % of requests fail. It needs a deployed or local server with real data:
+
+| Variable                  | Meaning                                         |
+| ------------------------- | ----------------------------------------------- |
+| `LOADTEST_BASE_URL`       | Server root, e.g. `https://api.example.test`    |
+| `LOADTEST_CUSTOMER_TOKEN` | A customer access token                         |
+| `LOADTEST_SALON_ID`       | A LIVE salon                                    |
+| `LOADTEST_SERVICE_ID`     | One of that salon's service ids                 |
+| `LOADTEST_DATE`           | Salon-local day to ask slots for (`YYYY-MM-DD`) |
+| `LOADTEST_GENDER`         | `FEMALE` (default) or `MALE`                    |
+| `LOADTEST_CONCURRENCY`    | Workers (default 20)                            |
+| `LOADTEST_DURATION_SEC`   | Run time (default 30)                           |
+
+The no-double-booking guarantee under concurrency is covered by `tests/bookings.test.ts` ("under load": 40 customers on one slot, 5 slots × 8 contenders, overlapping neighbours, 24 parallel different slots) against a real Redis lock.
