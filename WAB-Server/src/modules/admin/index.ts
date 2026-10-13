@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { ADMIN_AUTH_ROUTES } from '../../constants/adminAuth';
 import { ADMIN_APP_CONFIG_ROUTES, ADMIN_CONTENT_ROUTES } from '../../constants/adminContent';
+import { ADMIN_BANNER_ROUTES } from '../../constants/banners';
 import { ADMIN_LOCATION_ROUTES } from '../../constants/adminCrud';
 import { mount } from '../../routes/mount';
 import {
   unavailableAdminAuth,
+  unavailableAdminBanners,
   unavailableAdminContent,
   unavailableAdminLocations,
   unavailableGuard,
@@ -13,6 +15,7 @@ import {
 } from '../services';
 import { createOtpRouteLimiter } from '../shared/otp';
 import { createAdminAppConfigRouter, createAdminContentRouter } from './content/content.routes';
+import { createAdminBannersRouter } from './banners/banners.routes';
 import { createAdminLocationsRouter } from './locations/locations.routes';
 import { createAdminAuthRouter } from './auth/auth.routes';
 
@@ -40,5 +43,10 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
   const guard = services.adminGuard ?? unavailableGuard;
   mount(router, ADMIN_CONTENT_ROUTES.base, createAdminContentRouter(content, guard));
   mount(router, ADMIN_APP_CONFIG_ROUTES.base, createAdminAppConfigRouter(content, guard));
+  mount(
+    router,
+    ADMIN_BANNER_ROUTES.base,
+    createAdminBannersRouter(services.adminBanners ?? unavailableAdminBanners, guard),
+  );
   return router;
 };

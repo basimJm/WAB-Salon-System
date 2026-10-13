@@ -10,6 +10,9 @@ import { createRefreshTokenService } from './domain/auth/refreshTokens.service';
 import { optionalAuth, requireAuth } from './middlewares/auth';
 import { createContentService } from './domain/content';
 import { ContentPagesRepository, FaqsRepository } from './repositories/content.repository';
+import { createAdminBannerService } from './domain/adminCrud/banners';
+import { createBannersService } from './domain/banners';
+import { BannersRepository } from './repositories/banners.repository';
 import { createAuditWriter } from './domain/audit/audit.service';
 import { createAdminContentServices } from './domain/adminCrud/content';
 import { createAdminLocationServices } from './domain/adminCrud/locations';
@@ -192,6 +195,8 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   return {
     otpGate,
     adminGuard,
+    banners: createBannersService({ banners: new BannersRepository(), storage: providers.storage }),
+    adminBanners: createAdminBannerService(new BannersRepository(), audit),
     adminContent: createAdminContentServices({
       pages: new ContentPagesRepository(),
       faqs,

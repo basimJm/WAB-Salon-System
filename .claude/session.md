@@ -783,7 +783,7 @@
 ### T-050 — SRV-038 parts 2-3: admin CRUD for content pages, FAQ, contact info, app versions, maintenance
 - Project: `WAB-Server/` (`src/domain/adminCrud/content.ts`, `src/modules/admin/{crud,content}/*`, `src/constants/adminContent.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #57 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #58 merged into `server`)
 - Acceptance criteria (BE-65, Admin PRD content/config; CLAUDE.md §5.12):
   - [x] `/admin/v1/content/{pages,faqs,contact-info}` and `/admin/v1/app-config/{versions,maintenance}`: list/get/create/patch on the generic CRUD, admin token only, reason required, audit (`CONTENT_PAGE_*`, `FAQ_*`, `CONTACT_INFO_*`, `APP_VERSION_*`, `MAINTENANCE_*`)
   - [x] Validation: https store URL, version pattern, E.164 phones, lower-cased email, localized text with limits; app/kind/platform cannot be changed
@@ -793,6 +793,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - creating a duplicate key (app+kind) answers 409 via the unique index. Maintenance and version changes apply at once to `GET /config`. Not run against a real MongoDB.
 - Notes: LESSON: chain gate commands with `&&`/`set -e`; in PR #57 a `;`-chained gate let a lint failure through to a commit (fixed in the same PR before merge). Next: SRV-039 (banners).
+
+### T-051 — SRV-039 Banners: admin CRUD + live-by-gender query
+- Project: `WAB-Server/` (`src/models/banner.model.ts`, `src/domain/{banners,adminCrud/banners.ts}`, `src/modules/{admin,customer}/banners/*`, `src/constants/banners.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #58 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD S05 banner carousel; BUSINESS_DOMAIN §3.6 banners, BannerAction):
+  - [x] `banners` model + index, in `ALL_MODELS`
+  - [x] `GET /customer/v1/banners?gender=MALE|FEMALE` (public, rate limited): active banners of that audience or BOTH, `startAt <= now < endAt`, display order, image of the request language (CDN URL), `{id, imageUrl, actionType, actionValue}`
+  - [x] `/admin/v1/banners` CRUD (admin token, reason + audit `BANNER_*`): SALON needs a salon id and EXTERNAL_URL an https link, NONE no value; `endAt` after `startAt`; rules checked on merged values for patches (null clears the value); switch off with `active=false`
+- Tests: `cd WAB-Server && npm test` - 1492 pass; format/lint/typecheck/build green; audit 0. `tests/banners.test.ts` (12).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - salon existence is not checked for SALON banners (salon model arrives with SRV-041); the app shows nothing for an unknown salon. Not run against a real MongoDB.
+- Notes: Next: SRV-040 (catalog services).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
