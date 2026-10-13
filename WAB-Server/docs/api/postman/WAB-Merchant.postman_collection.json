@@ -345,6 +345,99 @@
           }
         }
       ]
+    },
+    {
+      "name": "Locations",
+      "item": [
+        {
+          "name": "Active countries (flag, dial code, phone regex)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/locations/countries",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "locations",
+                "countries"
+              ],
+              "query": [],
+              "variable": []
+            }
+          }
+        },
+        {
+          "name": "Active cities of a country",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/locations/cities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "locations",
+                "cities"
+              ],
+              "query": [
+                {
+                  "key": "countryCode",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            }
+          }
+        },
+        {
+          "name": "Active areas of a city",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/locations/areas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "locations",
+                "areas"
+              ],
+              "query": [
+                {
+                  "key": "cityId",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

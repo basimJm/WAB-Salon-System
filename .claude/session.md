@@ -716,7 +716,7 @@
 ### T-045 — SRV-035 App config endpoint (version policy, maintenance, contact info)
 - Project: `WAB-Server/` (`src/domain/appConfig`, `src/modules/shared/appConfig`, `src/models/{appVersion,maintenance,contactInfo}.model.ts`, `src/repositories/appConfig.repository.ts`, `src/utils/version.ts`, `src/constants/appConfig.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #52 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #53 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-65; BUSINESS_DOMAIN §3.6 appVersions/maintenance/contactInfo, §10 `discovery.nearbyRadiusKm`, `otp.*`):
   - [x] Models `appVersions` (unique app+platform, minSupported <= latest), `maintenance` (unique app, message ar/en), `contactInfo` (E.164 phone/whatsapp, email), registered in `ALL_MODELS`
   - [x] `GET /customer/v1/config` and `/merchant/v1/config` (public, per-IP limited): `platform` ANDROID|IOS + `version` (dotted numbers) validated; update status UPDATE_REQUIRED (< minSupported), UPDATE_AVAILABLE (< latest and optionalUpdate), else OK; no policy row = OK
@@ -726,6 +726,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: enforcement middleware (MAINTENANCE / forced-update error codes on other routes) is not part of this task; version comparison is numeric part-wise (`1.10` > `1.9`).
 - Notes: Next: SRV-036 (public reference data).
+
+### T-046 — SRV-036 Public countries, cities, areas
+- Project: `WAB-Server/` (`src/domain/locations`, `src/modules/shared/locations`, `src/constants/locations.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #53 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-65 data side; BUSINESS_DOMAIN §3.2; Customer PRD countries list):
+  - [x] `GET /customer/v1/locations/countries|cities|areas` and the same under `/merchant/v1`: public, active entries only, `sortOrder` order, names in the request language, country has dial code, flag URL (storage `getPublicUrl`), phone regex
+  - [x] `cities?countryCode` (2 upper-case letters) and `areas?cityId` (ObjectId) validated, 400 with field details; unknown parent = empty list; 503 when unconfigured
+  - [x] Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1444 pass (48 suites); format:check/lint/typecheck/build green; audit 0. `tests/locations.test.ts` (18).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - lists are not paginated (small admin-curated data); the country list has no `name` in both languages (admin CRUD SRV-038 returns both).
+- Notes: Next: SRV-037 (public content).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

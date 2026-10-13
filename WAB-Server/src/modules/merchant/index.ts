@@ -3,10 +3,12 @@ import { MERCHANT_AUTH_ROUTES } from '../../constants/merchantAuth';
 import { OTP_ROUTES } from '../../constants/otp';
 import { INSTALLATION_ROUTES } from '../../constants/installations';
 import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
+import { LOCATION_ROUTES } from '../../constants/locations';
 import { mount } from '../../routes/mount';
 import { createMerchantAppConfigRouter } from '../shared/appConfig';
 import { createMerchantInstallationsRouter } from '../shared/installations';
 import { unavailableMerchantAuth, type ApiServices } from '../services';
+import { createLocationsRouterFor } from '../shared/locations';
 import { createMerchantOtpRouter, createOtpRouteLimiter } from '../shared/otp';
 import { createMerchantAuthRouter } from './auth/auth.routes';
 
@@ -24,5 +26,6 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
   );
   mount(router, INSTALLATION_ROUTES.base, createMerchantInstallationsRouter(services));
   mount(router, APP_CONFIG_ROUTES.base, createMerchantAppConfigRouter(services));
+  mount(router, LOCATION_ROUTES.base, createLocationsRouterFor(services));
   return router;
 };
