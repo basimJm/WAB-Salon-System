@@ -28,3 +28,18 @@ export const requireAuth =
       next(error);
     }
   };
+
+/**
+ * For routes open to guests that do more for a signed-in user: no `Authorization` header means a
+ * guest and the request goes on; a header that is present must be valid (no silent downgrade).
+ */
+export const optionalAuth = (scope: TokenScope, secret: string): RequestHandler => {
+  const required = requireAuth(scope, secret);
+  return (req, res, next) => {
+    if (req.get(AUTHORIZATION_HEADER) === undefined) {
+      next();
+      return;
+    }
+    required(req, res, next);
+  };
+};

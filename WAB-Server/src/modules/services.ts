@@ -1,5 +1,6 @@
 import type { RequestHandler } from 'express';
 import type { Store } from 'express-rate-limit';
+import type { InstallationService } from '../domain/installations/installations.service';
 import type { AdminLoginService } from '../domain/auth/adminLogin.service';
 import type { AdminAuthService } from '../domain/auth/adminAuth.service';
 import type { MerchantAuthService } from '../domain/auth/merchantAuth.service';
@@ -11,6 +12,13 @@ import { ExternalServiceError } from '../utils/errors';
 export interface ApiServices {
   readonly otpGate?: OtpGate;
   readonly merchantAuth?: MerchantAuthService;
+  readonly installations?: {
+    readonly service: InstallationService;
+    /** Customer app: guests allowed, a present token must be valid. */
+    readonly customerOptional: RequestHandler;
+    readonly customerRequired: RequestHandler;
+    readonly merchantRequired: RequestHandler;
+  };
   readonly adminAuth?: { readonly service: AdminAuthService; readonly login: AdminLoginService };
   readonly customerAuth?: {
     readonly service: CustomerAuthService;
@@ -63,4 +71,9 @@ export const unavailableAdminAuth: AdminAuthService = {
 export const unavailableAdminLogin: AdminLoginService = {
   start: unavailableCustomerAuthError,
   verify: unavailableCustomerAuthError,
+};
+
+export const unavailableInstallationService: InstallationService = {
+  register: unavailableCustomerAuthError,
+  setPushEnabled: unavailableCustomerAuthError,
 };

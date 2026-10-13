@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { MERCHANT_AUTH_ROUTES } from '../../constants/merchantAuth';
 import { OTP_ROUTES } from '../../constants/otp';
+import { INSTALLATION_ROUTES } from '../../constants/installations';
 import { mount } from '../../routes/mount';
+import { createMerchantInstallationsRouter } from '../shared/installations';
 import { unavailableMerchantAuth, type ApiServices } from '../services';
 import { createMerchantOtpRouter, createOtpRouteLimiter } from '../shared/otp';
 import { createMerchantAuthRouter } from './auth/auth.routes';
@@ -18,5 +20,6 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       limiter: createOtpRouteLimiter(services),
     }),
   );
+  mount(router, INSTALLATION_ROUTES.base, createMerchantInstallationsRouter(services));
   return router;
 };

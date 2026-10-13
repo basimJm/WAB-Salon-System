@@ -7,7 +7,8 @@ import { createAdminLoginService } from './domain/auth/adminLogin.service';
 import { createAdminAuthService } from './domain/auth/adminAuth.service';
 import { createMerchantAuthService } from './domain/auth/merchantAuth.service';
 import { createRefreshTokenService } from './domain/auth/refreshTokens.service';
-import { requireAuth } from './middlewares/auth';
+import { optionalAuth, requireAuth } from './middlewares/auth';
+import { createInstallationService } from './domain/installations/installations.service';
 import { createProviders } from './providers';
 import {
   AdminsRepository,
@@ -152,8 +153,21 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     cities: new CitiesRepository(),
     areas: new AreasRepository(),
   });
+  const installationService = createInstallationService({
+    installations: new InstallationsRepository(),
+    customers: new CustomersRepository(),
+    members: new MembersRepository(),
+    analytics: providers.analytics,
+    logger,
+  });
   return {
     otpGate,
+    installations: {
+      service: installationService,
+      customerOptional: optionalAuth('customer', config.auth.accessSecret),
+      customerRequired: requireAuth('customer', config.auth.accessSecret),
+      merchantRequired: requireAuth('merchant', config.auth.accessSecret),
+    },
     merchantAuth: merchantAuthService,
     adminAuth: { service: adminAuthService, login: adminLoginService },
     customerAuth: {

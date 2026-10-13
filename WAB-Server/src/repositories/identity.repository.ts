@@ -142,9 +142,27 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
     return this.unlink('MERCHANT', installationId, 'memberId');
   }
 
+  /** Creates or updates a device record without tying it to an account (guest installs). */
+  registerDevice(app: AppKind, device: DeviceRecord, now: Date): Promise<void> {
+    return this.link(app, undefined, device, now);
+  }
+
+  /**
+   * A push token belongs to exactly one installation: when an app reports a token, every other
+   * installation that still holds it (an old install, a reset id) loses it.
+   */
+  async releaseFcmToken(fcmToken: string, exceptInstallationId: string): Promise<void> {
+    await this.model
+      .updateMany(
+        { fcmToken, installationId: { $ne: exceptInstallationId } },
+        { $unset: { fcmToken: 1, fcmTokenUpdatedAt: 1 } },
+      )
+      .exec();
+  }
+
   private async link(
     app: AppKind,
-    owner: { customerId: string } | { memberId: string },
+    owner: { customerId: string } | { memberId: string } | undefined,
     device: DeviceRecord,
     now: Date,
   ): Promise<void> {
@@ -153,7 +171,7 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
     const rest = Object.fromEntries(
       Object.entries(optional).filter(([, value]) => value !== undefined),
     );
-    const [field, id] = Object.entries(owner)[0] ?? [];
+    const [field, id] = owner === undefined ? [] : (Object.entries(owner)[0] ?? []);
     await this.model
       .findOneAndUpdate(
         { app, installationId },
@@ -161,7 +179,7 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
           $set: {
             ...rest,
             ...(fcmToken === undefined ? {} : { fcmToken, fcmTokenUpdatedAt: now }),
-            [String(field)]: new Types.ObjectId(String(id)),
+            ...(field === undefined ? {} : { [field]: new Types.ObjectId(String(id)) }),
             lastSeenAt: now,
           },
         },
