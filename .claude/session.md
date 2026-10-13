@@ -1403,6 +1403,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS: (1) the booking insert is not in a Mongo transaction (claim/release compensation instead; transactions need a replica set in tests); (2) `createDirectRefunds` is the minimal immediate refund — SRV-086 adds refund records, retry/backoff and admin tools behind the same `FullRefundPort`; (3) ledger CHARGE + GATEWAY_FEE entries wait for SRV-087; (4) a late webhook success for an older attempt is not matched to the draft (draft points at the latest attempt) — orphan refund covers it. Not run against a real gateway or MongoDB.
 
+### T-097 — SRV-086 Refund service
+- Project: `WAB-Server/` (`src/models/refund.model.ts`, `src/repositories/refunds.repository.ts`, `src/domain/refunds/{refunds.service,refundHook}.ts`, `src/modules/admin/refunds/*`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §3.5 refunds, §5.10, §5.7/5.8/5.9 refund side effects; Admin PRD A17; settings `refund.maxRetries`, `refund.delayAlertHours`):
+  - [x] REFUND_PENDING → REFUNDED / retried / REFUND_FAILED; capped at the payment; idempotent (same cancellation twice = one refund, one gateway call); booking summary + `money.refunded` kept in step
+  - [x] retry with exponential backoff and a limit from settings; outage keeps the gateway key (no double refund), explicit rejection gets a new key; gateway-pending polled without counting a failure; `delayed()` list for the alert
+  - [x] wired to every booking status change that owes money (source from the final status; ADMIN for admin moves); a failing start is logged, never thrown; hooks compose without one stopping another
+  - [x] payment without a booking (slot lost, abandoned checkout) refunded in full as `SALON_REJECT` / `AUTO_CANCEL`; the payment can never back a booking afterwards
+  - [x] admin: list/filter, details, retry a failed refund, mark as refunded manually (reference + reason, audited, once)
+- Tests: `tests/refundService.test.ts` (18), `tests/bookings.test.ts` uses the real service; full gate green, 2165 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: `bookingId` optional and `gatewayRound`/`nextAttemptAt` are extensions of the refunds record; if the refund row cannot be created after a cancellation (database down) it is only logged — the cancellation stays and an admin can issue the refund (no automatic repair job yet); the ledger entry `REFUND` is SRV-087 (`refunded` hook); jobs call `runDue`/`delayed` in SRV-096; the admin alert in SRV-100.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

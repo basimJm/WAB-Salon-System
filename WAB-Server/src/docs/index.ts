@@ -68,6 +68,7 @@ import {
 } from '../modules/shared/bookings/bookingQuery.openapi';
 import { registerCustomerPaymentDocs } from '../modules/customer/payments/payments.openapi';
 import { registerPaymentWebhookDocs } from '../modules/webhooks/webhooks.openapi';
+import { registerAdminRefundDocs } from '../modules/admin/refunds/refunds.openapi';
 import { registerAdminReviewDocs } from '../modules/admin/reviews/reviews.openapi';
 import { registerAdminApplicationDocs } from '../modules/admin/applications/applications.openapi';
 import { registerAdminCatalogDocs } from '../modules/admin/catalog/catalog.openapi';
@@ -93,7 +94,7 @@ const REGISTRARS: Readonly<Record<DocName, readonly Registrar[]>> = {
   common: [registerHealthDocs, registerPaymentWebhookDocs],
   customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs, registerCustomerBannerDocs, registerCustomerCatalogDocs, registerCustomerUploadDocs, registerCustomerSearchDocs, registerCustomerSalonDetailsDocs, registerCustomerHomeDocs, registerCustomerFavoritesDocs, registerCustomerReviewDocs, registerCustomerProfileDocs, registerCustomerAvailabilityDocs, registerCustomerBookingDraftDocs, registerCustomerBookingDocs, registerCustomerBookingQueryDocs, registerCustomerPaymentDocs],
   merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs, registerMerchantCatalogDocs, registerMerchantSalonDocs, registerMerchantProfileDocs, registerMerchantUploadDocs, registerMerchantGalleryDocs, registerMerchantHoursDocs, registerMerchantServicesDocs, registerMerchantCatalogRequestDocs, registerMerchantTeamDocs, registerMerchantStaffDocs, registerMerchantLeavesDocs, registerMerchantPolicyDocs, registerMerchantBookingDocs, registerMerchantBookingQueryDocs],
-  admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs, registerAdminSalonStateDocs, registerAdminSalonsDocs, registerAdminUploadDocs, registerAdminCatalogRequestDocs, registerAdminReviewDocs, registerAdminPlacementDocs, registerAdminBookingQueryDocs],
+  admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs, registerAdminSalonStateDocs, registerAdminSalonsDocs, registerAdminUploadDocs, registerAdminCatalogRequestDocs, registerAdminReviewDocs, registerAdminPlacementDocs, registerAdminBookingQueryDocs, registerAdminRefundDocs],
 };
 
 const buildDocument = (name: DocName): ReturnType<OpenApiGeneratorV31['generateDocument']> => {

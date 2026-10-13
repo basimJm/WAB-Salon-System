@@ -92,3 +92,14 @@ export const TRANSACTION_TYPES = ['DEPOSIT', 'FULL'] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 export const TRANSACTION_STATUSES = ['PENDING', 'SUCCEEDED', 'FAILED', 'CANCELLED'] as const;
 export type TransactionStatus = (typeof TRANSACTION_STATUSES)[number];
+
+/** Why money goes back (BUSINESS_DOMAIN.md §1 `RefundSource`). */
+export const REFUND_SOURCES = [
+  'SALON_REJECT',
+  'SALON_CANCEL',
+  'AUTO_CANCEL',
+  'CUSTOMER_CANCEL',
+  'NO_SHOW_POLICY',
+  'ADMIN',
+] as const;
+export type RefundSource = (typeof REFUND_SOURCES)[number];

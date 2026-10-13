@@ -35,7 +35,9 @@ import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
 import { createCustomerProfileService } from './domain/customers/customerProfile.service';
 import { createBookingActionsService } from './domain/bookings/bookingActions.service';
-import { createDirectRefunds } from './domain/refunds/directRefunds';
+import { createRefundHook, composeBookingHooks } from './domain/refunds/refundHook';
+import { createRefundService } from './domain/refunds/refunds.service';
+import { RefundsRepository } from './repositories/refunds.repository';
 import { createPaymentsService } from './domain/payments/payments.service';
 import { TransactionsRepository } from './repositories/transactions.repository';
 import { createBookingBulkService } from './domain/bookings/bookingBulk.service';
@@ -381,11 +383,20 @@ const buildServices = (
     settings,
   });
   const transactionsRepository = new TransactionsRepository();
-  const fullRefunds = createDirectRefunds({
+  const fullRefunds = createRefundService({
+    refunds: new RefundsRepository(),
     transactions: transactionsRepository,
+    bookings: bookingsRepository,
     provider: providers.payments,
+    settings,
+    audit,
     logger,
   });
+  // Every booking status change tells the apps (sockets) and starts the refund it owes.
+  const bookingChanges = composeBookingHooks(
+    [bookingEvents, createRefundHook({ refunds: fullRefunds, logger })],
+    logger,
+  );
   const bookingCreation = createBookingCreationService({
     transactions: transactionsRepository,
     refunds: fullRefunds,
@@ -399,14 +410,14 @@ const buildServices = (
     settings,
   });
   const bookingActions = createBookingActionsService({
-    hook: bookingEvents,
+    hook: bookingChanges,
     redis,
     bookings: bookingsRepository,
     members: new MembersRepository(),
     settings,
   });
   const bookingReassign = createBookingReassignService({
-    hook: bookingEvents,
+    hook: bookingChanges,
     redis,
     bookings: bookingsRepository,
     availability,
@@ -420,7 +431,7 @@ const buildServices = (
     settings,
   });
   const bookingAdmin = createBookingAdminService({
-    hook: bookingEvents,
+    hook: bookingChanges,
     redis,
     bookings: bookingsRepository,
     members: new MembersRepository(),
@@ -437,7 +448,7 @@ const buildServices = (
     logger,
   });
   const bookingCancel = createBookingCancelService({
-    hook: bookingEvents,
+    hook: bookingChanges,
     bookings: bookingsRepository,
   });
   const favoritesRepository = new FavoritesRepository();
@@ -482,6 +493,7 @@ const buildServices = (
     bookingActions,
     bookingCancel,
     payments,
+    adminRefunds: fullRefunds,
     bookingAdmin,
     bookingBulk: createBookingBulkService({
       bookings: bookingsRepository,
