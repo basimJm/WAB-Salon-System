@@ -48,3 +48,13 @@ export const MERCHANT_SALON_ROUTES = {
   application: '/application',
   resubmit: '/application/resubmit',
 } as const;
+
+/** Admin review of salon applications (SRV-042, Admin PRD A14). */
+export const ADMIN_APPLICATION_ROUTES = {
+  base: '/salons/applications',
+  byId: '/:id',
+  approve: '/:id/approve',
+  reject: '/:id/reject',
+} as const;
+/** Lifetime of the signed URLs an admin gets to read the private license documents. */
+export const LICENSE_URL_TTL_SEC = 300;

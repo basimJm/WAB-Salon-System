@@ -92,9 +92,11 @@ class FakeQuery<T> implements PromiseLike<T> {
     const keys = Object.entries(this.sortSpec);
     const sorted = [...docs].sort((a, b) => {
       for (const [key, direction] of keys) {
-        const left = String(a[key] instanceof Date ? a[key].getTime() : a[key]);
-        const right = String(b[key] instanceof Date ? b[key].getTime() : b[key]);
-        const numeric = typeof a[key] === 'number' || a[key] instanceof Date;
+        const first = valueAt(a, key);
+        const second = valueAt(b, key);
+        const left = String(first instanceof Date ? first.getTime() : first);
+        const right = String(second instanceof Date ? second.getTime() : second);
+        const numeric = typeof first === 'number' || first instanceof Date;
         const order = numeric
           ? Number(left) - Number(right)
           : left < right
