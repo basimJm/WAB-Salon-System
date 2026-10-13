@@ -1162,6 +1162,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - `amountPaid` is JOD string at the API, fils in storage. Not done: the `recommended` flag on the admin salons list/detail (A19) and "Recommended clicks per salon" analytics.
 
+### T-078 — SRV-067 Pricing and deposit calculator
+- Project: `WAB-Server/` (`src/domain/pricing/pricing.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.5; BE-32):
+  - [x] `subtotal` = Σ prices per person, `total` = Σ subtotals, integer fils only, durations summed per person
+  - [x] `deposit` = round-half-up(total × pct / 100), computed once on the total; 0 without a percentage
+  - [x] `dueOnline` = deposit for DEPOSIT, total for FULL_ONLINE, 0 for PAY_ON_ARRIVAL; `remaining = total - dueOnline`; `dueOnline + remaining = total` always
+  - [x] Bad input (no persons/services, negative price, non-integer, bad duration, DEPOSIT without a percentage, percentage over 100) fails loudly
+- Tests: `tests/pricing.test.ts` (24, incl. 500 seeded random bookings against exact invariants); full gate green, 1927 tests
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - pure function, no I/O; used by the draft (SRV-070). Whether the chosen option is allowed by the salon policy is checked in the draft, not here. API docs: no change.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
