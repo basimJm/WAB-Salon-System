@@ -22,6 +22,7 @@ import { SalonsRepository } from './repositories/salons.repository';
 import { createSalonStateService, createStaffFacts } from './domain/salons/salonState.service';
 import { createSalonProfileService } from './domain/salons/salonProfile.service';
 import { loadMember } from './middlewares/permission';
+import { createImageVariants } from './domain/uploads/variants';
 import { createUploadsService } from './domain/uploads/uploads.service';
 import { UploadsRepository } from './repositories/uploads.repository';
 import { createSalonReviewService } from './domain/salons/salonReview.service';
@@ -204,10 +205,17 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   const faqs = new FaqsRepository();
   const pages = new ContentPagesRepository();
   const adminGuard = requireAuth('admin', config.auth.accessSecret);
+  const variants = createImageVariants({ storage: providers.storage, logger });
   const uploads = createUploadsService({
     uploads: new UploadsRepository(),
     storage: providers.storage,
     settings,
+    afterConfirm: ({ key }) => {
+      // Size variants are made in the background; a failure only means clients use the original.
+      variants.generate(key).catch((error: unknown) => {
+        logger.error({ err: error, key }, 'image variants failed');
+      });
+    },
   });
   const salonState = createSalonStateService({
     salons: new SalonsRepository(),

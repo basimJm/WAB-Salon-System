@@ -72,6 +72,8 @@ export interface UploadsDeps {
   readonly settings: Pick<SettingsService, 'get'>;
   readonly now?: () => Date;
   readonly newId?: () => string;
+  /** Called once when a public image becomes CONFIRMED (e.g. to make its size variants). */
+  readonly afterConfirm?: (upload: { key: string; purpose: UploadPurpose }) => void;
 }
 
 const reject = (
@@ -177,7 +179,10 @@ export const createUploadsService = (deps: UploadsDeps): UploadsService & Upload
           'body.key',
         );
       }
-      await uploads.transition(key, 'PENDING', 'CONFIRMED');
+      const claimed = await uploads.transition(key, 'PENDING', 'CONFIRMED');
+      if (claimed !== null && policy.visibility === 'PUBLIC' && policy.kind === 'image') {
+        deps.afterConfirm?.({ key, purpose: record.purpose });
+      }
       return { key, url };
     },
 
