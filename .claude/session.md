@@ -654,7 +654,7 @@
 ### T-041 — SRV-030 Admin password check with lockout, idle-timeout sessions, refresh/logout
 - Project: `WAB-Server/` (`src/domain/auth/adminAuth.service.ts`, `src/utils/auth/password.ts`, `src/modules/admin/auth/*`, `src/constants/adminAuth.ts`, `src/repositories/identity.repository.ts`, refresh/session token lifetime in seconds, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #46 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #47 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-02 admin email + password + 2FA, lockout and session timeout, NFR-01 bcrypt + lockout; BUSINESS_DOMAIN §3.1 `admins`, §10 `admin.maxFailedLogins`=5 / `admin.lockSec`=900 / `admin.sessionIdleSec`=1800; Admin PRD §4):
   - [x] `hashPassword`/`verifyPassword` (bcryptjs, cost 12; empty, over 72 bytes and malformed hashes are refused/false, never truncated or thrown)
   - [x] `verifyCredentials`: right password -> identity; wrong password and unknown email give the same 401 (an unknown email still pays one bcrypt comparison); failures counted atomically; the 5th wrong password locks for 15 minutes and restarts the count; while locked even the right password gets 429 and the password is not looked at; the lock ends exactly at `lockedUntil`; limits come from settings
@@ -666,6 +666,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) the password-only login ROUTE is deliberately not added: it would open a session without the second factor (Admin PRD §4); `login` + `verify-otp` ship together in SRV-031, which calls `verifyCredentials` then `openSession`; (2) a locked account answers 429 `RATE_LIMITED` (no dedicated code in BUSINESS_DOMAIN §11); (3) "alert email on new-device login" needs the Notifier and joins SRV-031; (4) new backlog row SRV-030a: an admin bootstrap script, because nothing creates the single admin yet.
 - Next: SRV-031 (admin email OTP 2FA + login routes).
+
+### T-042 — SRV-031 Admin email OTP (2FA) and the two-step login routes
+- Project: `WAB-Server/` (`src/domain/auth/adminLogin.service.ts`, `src/domain/auth/adminAuth.service.ts`, `src/modules/admin/auth/*`, `src/constants/adminAuth.ts`, `src/locales/*`, `src/server.ts`, docs)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #47 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-02, NFR-01 2FA + lockout; BUSINESS_DOMAIN §3.1 `admin:otp:{adminId}` hashed code TTL 300; Admin PRD §4 + decision "Email OTP"):
+  - [x] `POST /admin/v1/auth/login` {email, password}: right password emails a numeric code (`otp.length`) and returns `{otpRequired, expiresAt, resendAfterSeconds}` WITHOUT tokens; wrong password / unknown email / locked account send nothing
+  - [x] Code stored only as an HMAC-SHA256 (keyed with the server secret) for 300 s; a second `login` inside the resend countdown (`otp.resendAfterSec`) mails nothing new and the first code still works; later a new code replaces the old; a failed email removes the code and the cooldown so the admin can retry
+  - [x] `POST /admin/v1/auth/verify-otp` {email, code}: right code opens the session and works once (atomic delete; two simultaneous requests -> one session); missing/expired -> 401 `OTP_EXPIRED`; wrong -> 401 `OTP_INVALID` and counts toward the SAME lockout as a wrong password (5 -> 15 min, 429 afterwards, also on `login`); failure count cleared on success
+  - [x] Email in the request language (ar/en, `emails.*` keys with matching placeholders); alert email to `alertEmails` (or the admin email) when the sign-in address differs from the last one; best effort, never blocks the sign-in
+  - [x] `main()` wires the Notifier provider (fake outside production) into the login service; Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1368 pass (45 suites, real Redis); format:check/lint/typecheck/build green; audit 0; `npm run docs` regenerated. `tests/adminLogin.test.ts` (25).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) a wrong code is counted by the password lockout (not a separate OTP counter) so one limit covers both factors; (2) "new device" is approximated by "new IP address" because the admin record only keeps `lastLoginIp`; (3) the email is plain text for now (no HTML template). NOT sent through real SMTP: `NOTIFIER_PROVIDER=real` still throws until `wab-notifications` exists.
+- Next: SRV-032 (account lifecycle).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

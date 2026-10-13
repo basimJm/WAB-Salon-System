@@ -42,5 +42,9 @@
   "errors.UPDATE_REQUIRED": "Please update the app to continue.",
   "messages.OK": "Done successfully.",
   "messages.CREATED": "Created successfully.",
-  "health.DEPENDENCY_DOWN": "A required service is unavailable."
+  "health.DEPENDENCY_DOWN": "A required service is unavailable.",
+  "emails.adminOtp.subject": "WAB admin sign-in code",
+  "emails.adminOtp.body": "Your WAB admin sign-in code is {code}. It expires in {minutes} minutes. If you did not try to sign in, change your password.",
+  "emails.adminNewDevice.subject": "New WAB admin sign-in",
+  "emails.adminNewDevice.body": "The WAB admin account {email} signed in from a new address ({ip}). If this was not you, change the password now."
 }

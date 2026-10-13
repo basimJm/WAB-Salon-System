@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ADMIN_AUTH_ROUTES } from '../../constants/adminAuth';
 import { mount } from '../../routes/mount';
-import { unavailableAdminAuth, type ApiServices } from '../services';
+import { unavailableAdminAuth, unavailableAdminLogin, type ApiServices } from '../services';
 import { createOtpRouteLimiter } from '../shared/otp';
 import { createAdminAuthRouter } from './auth/auth.routes';
 
@@ -12,7 +12,8 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     router,
     ADMIN_AUTH_ROUTES.base,
     createAdminAuthRouter({
-      service: services.adminAuth ?? unavailableAdminAuth,
+      service: services.adminAuth?.service ?? unavailableAdminAuth,
+      login: services.adminAuth?.login ?? unavailableAdminLogin,
       limiter: createOtpRouteLimiter(services),
     }),
   );

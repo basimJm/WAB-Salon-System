@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import request from 'supertest';
 import { createApp } from '../src/app';
+import { unavailableAdminLogin } from '../src/modules/services';
 import { SETTING_DEFAULTS } from '../src/constants/settings';
 import { createAdminAuthService } from '../src/domain/auth/adminAuth.service';
 import { createRefreshTokenService } from '../src/domain/auth/refreshTokens.service';
@@ -268,7 +269,10 @@ describe('admin auth: HTTP', () => {
 
   it('refreshes and logs out through the API', async () => {
     const rig = await setup();
-    const app = createApp({ logger, services: { adminAuth: rig.service } });
+    const app = createApp({
+      logger,
+      services: { adminAuth: { service: rig.service, login: unavailableAdminLogin } },
+    });
     const session = await rig.service.openSession({ adminId: rig.adminId, ip: IP });
     const refreshed = await request(app)
       .post('/admin/v1/auth/refresh')
@@ -284,19 +288,16 @@ describe('admin auth: HTTP', () => {
 
   it('validates the body', async () => {
     const rig = await setup();
-    const res = await request(createApp({ logger, services: { adminAuth: rig.service } }))
+    const res = await request(
+      createApp({
+        logger,
+        services: { adminAuth: { service: rig.service, login: unavailableAdminLogin } },
+      }),
+    )
       .post('/admin/v1/auth/refresh')
       .send({ refreshToken: 'short' });
     expect(res.status).toBe(400);
     expect(bodyOf(res).error.code).toBe('VALIDATION_ERROR');
-  });
-
-  it('has no password-only login: that route comes with the second factor', async () => {
-    const rig = await setup();
-    const res = await request(createApp({ logger, services: { adminAuth: rig.service } }))
-      .post('/admin/v1/auth/login')
-      .send({ email: 'admin@example.com', password: PASSWORD });
-    expect(res.status).toBe(404);
   });
 
   it('answers 503, not 404, when admin auth is not configured', async () => {

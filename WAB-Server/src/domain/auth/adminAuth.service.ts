@@ -19,6 +19,13 @@ export interface AdminSession extends TokenPair {
 
 export interface AdminAuthService {
   /**
+   * The admin behind an email for the second factor: 401 when unknown, 429 while locked, so a
+   * locked account cannot try codes either.
+   */
+  identify(email: string): Promise<AdminIdentity>;
+  /** A wrong second factor counts like a wrong password (same lockout). */
+  recordSecondFactorFailure(input: { adminId: string; ip: string }): Promise<void>;
+  /**
    * First factor: email + password with lockout. Throws 401 for an unknown email and for a wrong
    * password (same answer), 429 while locked. Opens no session: the second factor (SRV-031) does.
    */
@@ -65,33 +72,51 @@ export const createAdminAuthService = (deps: AdminAuthDeps): AdminAuthService =>
     await verifyPassword(password, await dummyHash);
   };
 
+  /** Counts a wrong password or code; the failure that reaches the limit locks the account. */
+  const recordFailure = async (adminId: string, ip: string): Promise<void> => {
+    const [maxFailures, lockSec] = await Promise.all([
+      settings.get('admin.maxFailedLogins'),
+      settings.get('admin.lockSec'),
+    ]);
+    const lockedUntil = await admins.recordFailedLogin(
+      adminId,
+      maxFailures,
+      lockSec * MS_PER_SECOND,
+      now(),
+    );
+    if (lockedUntil !== null) logger.warn({ adminId, ip, lockedUntil }, 'admin account locked');
+  };
+
+  const assertUnlocked = (admin: { lockedUntil?: Date | undefined }): void => {
+    if (admin.lockedUntil !== undefined && admin.lockedUntil.getTime() > now().getTime()) {
+      throw new RateLimitError({ code: ERROR_CODES.RATE_LIMITED });
+    }
+  };
+
   return {
+    async identify(email) {
+      const admin = await admins.findByEmail(email);
+      if (admin === null) throw new UnauthorizedError();
+      assertUnlocked(admin);
+      return { id: admin.id, email: admin.email };
+    },
+
+    recordSecondFactorFailure({ adminId, ip }) {
+      return recordFailure(adminId, ip);
+    },
+
     async verifyCredentials({ email, password, ip }) {
       const admin = await admins.findByEmail(email);
       if (admin === null) {
         await burnComparison(password);
         throw new UnauthorizedError();
       }
-      if (admin.lockedUntil !== undefined && admin.lockedUntil.getTime() > now().getTime()) {
-        // Refused before the password is looked at, so a locked account cannot be probed.
-        throw new RateLimitError({ code: ERROR_CODES.RATE_LIMITED });
-      }
+      // Refused before the password is looked at, so a locked account cannot be probed.
+      assertUnlocked(admin);
       if (await verifyPassword(password, admin.passwordHash)) {
         return { id: admin.id, email: admin.email };
       }
-      const [maxFailures, lockSec] = await Promise.all([
-        settings.get('admin.maxFailedLogins'),
-        settings.get('admin.lockSec'),
-      ]);
-      const lockedUntil = await admins.recordFailedLogin(
-        admin.id,
-        maxFailures,
-        lockSec * MS_PER_SECOND,
-        now(),
-      );
-      if (lockedUntil !== null) {
-        logger.warn({ adminId: admin.id, ip, lockedUntil }, 'admin account locked');
-      }
+      await recordFailure(admin.id, ip);
       throw new UnauthorizedError();
     },
 

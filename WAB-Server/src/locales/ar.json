@@ -42,5 +42,9 @@
   "errors.UPDATE_REQUIRED": "يرجى تحديث التطبيق للمتابعة.",
   "messages.OK": "تمت العملية بنجاح.",
   "messages.CREATED": "تم الإنشاء بنجاح.",
-  "health.DEPENDENCY_DOWN": "إحدى الخدمات المطلوبة غير متاحة."
+  "health.DEPENDENCY_DOWN": "إحدى الخدمات المطلوبة غير متاحة.",
+  "emails.adminOtp.subject": "رمز دخول لوحة إدارة WAB",
+  "emails.adminOtp.body": "رمز دخولك إلى لوحة إدارة WAB هو {code}. تنتهي صلاحيته خلال {minutes} دقائق. إذا لم تحاول تسجيل الدخول فغيّر كلمة المرور.",
+  "emails.adminNewDevice.subject": "تسجيل دخول جديد إلى لوحة إدارة WAB",
+  "emails.adminNewDevice.body": "تم تسجيل الدخول إلى حساب الإدارة {email} من عنوان جديد ({ip}). إذا لم تكن أنت فغيّر كلمة المرور الآن."
 }
