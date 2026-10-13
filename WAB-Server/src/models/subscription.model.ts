@@ -23,6 +23,8 @@ export interface SubscriptionRaw {
   trialEndsAt: Date;
   currentPeriodEnd?: Date;
   payments: SubscriptionPayment[];
+  /** The end date the "ending soon" alert was already sent for (so it is sent once per period). */
+  warnedEnd?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,6 +50,7 @@ const subscriptionSchema = new Schema<SubscriptionRaw>(
     trialEndsAt: { type: Date, required: true },
     currentPeriodEnd: { type: Date },
     payments: { type: [paymentSchema], default: [] },
+    warnedEnd: { type: Date },
   },
   { timestamps: true, collection: SUBSCRIPTIONS_COLLECTION },
 );

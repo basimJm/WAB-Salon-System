@@ -1443,6 +1443,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: `adjustments` is an extension (net includes manual ADJUSTMENT entries; the admin tool to add them comes with the admin finance task SRV-104); amount must equal the net (a different sum = another payout); audit is written after the change (as before); notification is a logger until SRV-093; unique PENDING index not run against MongoDB.
 
+### T-100 — SRV-089 Manual subscriptions
+- Project: `WAB-Server/` (`src/domain/subscriptions/subscriptions.service.ts`, `SubscriptionsRepository.addPayment|expire|markWarned`, `src/modules/admin/subscriptions/*`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §5.13, §3.5 subscriptions; Admin PRD A19; CLAUDE.md §5.12):
+  - [x] record a payment: ACTIVE, `currentPeriodEnd = max(existing, periodTo)`, payment stored with recorder, audited; invalid amount/period/date 400 and nothing stored; duplicate reference 409; unknown salon/subscription 404
+  - [x] list/get with end date, days remaining (negative once ended), last payment; filters status and ending within N days
+  - [x] `expireDue()`: trial past end and paid period past end → EXPIRED (race-safe against a payment), others untouched, salon state untouched (Offline is the admin's manual decision)
+  - [x] `endingSoon()`: within `subscription.warnDaysBefore` days, once per end date; a payment that moves the end allows the next warning
+- Tests: `tests/subscriptionsService.test.ts` (8); full gate green, 2194 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - `warnedEnd` is an extension; the expiry job reads active subscriptions in one query (small table: one row per salon); the admin email/in-app alerts and the daily schedule come with SRV-096/100; not run against MongoDB (`$max`).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

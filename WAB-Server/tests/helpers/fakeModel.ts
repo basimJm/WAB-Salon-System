@@ -188,6 +188,7 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
         $unset?: Doc;
         $inc?: Record<string, number>;
         $push?: Doc;
+        $max?: Doc;
       },
       options: { upsert?: boolean } = {},
     ) =>
@@ -212,6 +213,12 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
         doc['updatedAt'] = new Date();
         for (const [key, step] of Object.entries(update.$inc ?? {})) {
           applySet(doc, { [key]: Number(valueAt(doc, key) ?? 0) + step });
+        }
+        for (const [key, candidate] of Object.entries(update.$max ?? {})) {
+          const current = valueAt(doc, key);
+          if (current === undefined || (candidate as number) > (current as number)) {
+            applySet(doc, { [key]: candidate });
+          }
         }
         for (const [key, item] of Object.entries(update.$push ?? {})) {
           const current = valueAt(doc, key);
