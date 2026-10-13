@@ -1,5 +1,5 @@
 import { Types, type Model } from 'mongoose';
-import type { AppKind, SubjectType } from '../constants/enums';
+import type { AppKind, CustomerStatus, SubjectType } from '../constants/enums';
 import { AdminModel, type AdminRaw } from '../models/admin.model';
 import { CustomerModel, type CustomerRaw } from '../models/customer.model';
 import { InstallationModel, type InstallationRaw } from '../models/installation.model';
@@ -29,6 +29,39 @@ export class CustomersRepository extends BaseRepository<CustomerRaw> {
     return this.findOne({ 'phone.e164': e164 });
   }
 
+  /**
+   * Moves a customer between statuses only if it is currently in one of `from` (one atomic
+   * update, so two admins or a customer and the purge job cannot both win). `null` = no change.
+   */
+  async transition(
+    id: string,
+    from: readonly CustomerStatus[],
+    change: { set: Record<string, unknown>; unset?: readonly string[] },
+  ): Promise<Entity<CustomerRaw> | null> {
+    if (!isValidId(id)) return null;
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: id, status: { $in: [...from] } },
+        {
+          $set: change.set,
+          ...(change.unset === undefined || change.unset.length === 0
+            ? {}
+            : { $unset: Object.fromEntries(change.unset.map((field) => [field, 1])) }),
+        },
+        { new: true },
+      )
+      .lean()
+      .exec();
+    return updated === null ? null : toEntity<CustomerRaw>(updated);
+  }
+
+  /** Accounts whose deletion grace period has ended, oldest first. */
+  findDueForPurge(now: Date, limit: number): Promise<Entity<CustomerRaw>[]> {
+    return this.findMany({ status: 'DELETION_PENDING', deletionScheduledAt: { $lte: now } }).then(
+      (found) => found.slice(0, limit),
+    );
+  }
+
   /** Ends the deletion grace period: the account is active again and the schedule is cleared. */
   async restoreFromDeletion(id: string, now: Date): Promise<Entity<CustomerRaw> | null> {
     if (!isValidId(id)) return null;
@@ -54,6 +87,11 @@ export class MembersRepository extends BaseRepository<MemberRaw> {
 
   findByPhone(e164: string): Promise<Entity<MemberRaw> | null> {
     return this.findOne({ phone: e164 });
+  }
+
+  /** Switches access on or off; `null` when the member does not exist. */
+  setActive(id: string, active: boolean): Promise<Entity<MemberRaw> | null> {
+    return this.updateById(id, { active });
   }
 }
 
@@ -82,6 +120,22 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
   /** Logout: the device stays known (analytics, guest push) but is no longer an account's. */
   unlinkCustomer(installationId: string): Promise<void> {
     return this.unlink('CUSTOMER', installationId, 'customerId');
+  }
+
+  /** Account deletion: no device keeps pointing at the customer (their push stops). */
+  async detachCustomer(customerId: string): Promise<void> {
+    if (!isValidId(customerId)) return;
+    await this.model
+      .updateMany({ customerId: new Types.ObjectId(customerId) }, { $unset: { customerId: 1 } })
+      .exec();
+  }
+
+  /** Member deactivation: their devices stop receiving the salon's requests. */
+  async detachMember(memberId: string): Promise<void> {
+    if (!isValidId(memberId)) return;
+    await this.model
+      .updateMany({ memberId: new Types.ObjectId(memberId) }, { $unset: { memberId: 1 } })
+      .exec();
   }
 
   unlinkMember(installationId: string): Promise<void> {

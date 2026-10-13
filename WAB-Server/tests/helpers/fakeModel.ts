@@ -171,10 +171,13 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
         for (const key of Object.keys(update.$unset ?? {})) Reflect.deleteProperty(doc, key);
         return { ...doc };
       }),
-    updateMany: (filter: Filter, update: { $set: Doc }) =>
+    updateMany: (filter: Filter, update: { $set?: Doc; $unset?: Doc }) =>
       new FakeQuery(() => {
         const found = select(filter);
-        for (const doc of found) Object.assign(doc, update.$set, { updatedAt: new Date() });
+        for (const doc of found) {
+          Object.assign(doc, update.$set ?? {}, { updatedAt: new Date() });
+          for (const key of Object.keys(update.$unset ?? {})) Reflect.deleteProperty(doc, key);
+        }
         return { modifiedCount: found.length };
       }),
   };
