@@ -310,6 +310,7 @@ export const unavailableLeaves: LeavesService = {
 export const unavailablePolicy: PolicyService = { get: unavailable, set: unavailable };
 
 export const unavailableAdminSalons: AdminSalonsService = {
+  members: unavailable,
   list: unavailable,
   detail: unavailable,
   changeGender: unavailable,

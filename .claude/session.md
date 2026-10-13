@@ -1698,6 +1698,17 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - bookings count is one count per listed row (25 max); profile edit, per-customer tabs, export not built. Not run against MongoDB.
 
+### T-111 — SRV-102 Admin salons: members view (completes the admin salon/application block)
+
+- Project: `WAB-Server/` (`adminSalons.service.ts#members`, `adminSalons.routes.ts`, `constants/salon.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (Admin PRD A13/A14; SRV-042/043/055 delivered queue, detail, license URLs, approve/reject, offline/online, gender):
+  - [x] `GET /admin/v1/salons/:id/members`: that salon only, active and inactive, owner first, effective permissions; unknown salon 404; admin token only
+- Tests: `tests/adminSalons.test.ts` (+2); full gate green; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - not built: subscription filter, recommended/30-day booking columns, admin profile editing, export. Not run against MongoDB.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
