@@ -24,6 +24,8 @@ export interface PeriodicJobsDeps {
   /** Refunds stuck longer than `refund.delayAlertHours` (the admin alert engine plugs in here). */
   /** The `alerts:evaluate` run (SRV-106): resolves to the number of new alerts. */
   readonly evaluateAlerts?: (now: Date) => Promise<number>;
+  /** The `alerts:email` run (SRV-107): resolves to the number of alerts mailed. */
+  readonly emailAlerts?: (now: Date) => Promise<number>;
   readonly onDelayedRefunds?: (refunds: Entity<RefundRaw>[]) => Promise<void>;
   readonly logger: Logger;
 }
@@ -85,6 +87,10 @@ export const createPeriodicJobs = (deps: PeriodicJobsDeps): PeriodicJobs => {
     [PERIODIC_JOBS.alertsEvaluate.name]: async () => {
       if (deps.evaluateAlerts === undefined) return;
       report(PERIODIC_JOBS.alertsEvaluate.name, { raised: await deps.evaluateAlerts(new Date()) });
+    },
+    [PERIODIC_JOBS.alertsEmail.name]: async () => {
+      if (deps.emailAlerts === undefined) return;
+      report(PERIODIC_JOBS.alertsEmail.name, { mailed: await deps.emailAlerts(new Date()) });
     },
     [PERIODIC_JOBS.paymentsReconcile.name]: async () => {
       const settled = await payments.reconcilePending();

@@ -21,3 +21,19 @@ export const ALERT_NEW_ENTITY_LOOKBACK_MIN = 30;
 /** Most entities announced per kind in one run. */
 export const ALERT_BATCH_LIMIT = 50;
 export const ALERT_SOCKET_EVENT = 'alert.created';
+
+/** Alert inbox and email delivery (SRV-107, Admin PRD A27). */
+export const ADMIN_ALERT_ROUTES = {
+  base: '/alerts',
+  byId: '/:id',
+  acknowledge: '/:id/acknowledge',
+  count: '/count',
+} as const;
+/** Quiet alerts (INFO) are mailed together once the oldest has waited this long; WARNING/CRITICAL go at once. */
+export const ALERT_DIGEST_AFTER_MIN = 60;
+/** Most alerts mailed in one run (each CRITICAL/WARNING alert is its own email). */
+export const ALERT_EMAIL_BATCH_LIMIT = 20;
+/** Alerts listed in one digest email; the rest wait for the next one. */
+export const ALERT_DIGEST_MAX_ITEMS = 50;
+/** Hex characters of the digest's idempotency key (derived from the alert ids). */
+export const ALERT_DIGEST_KEY_LENGTH = 32;

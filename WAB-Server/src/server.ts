@@ -1,3 +1,4 @@
+import { createAlertInbox } from './domain/alerts/alertInbox.service';
 import { SOCKET_ROOMS } from './constants/sockets';
 import { createAlertsService } from './domain/alerts/alerts.service';
 import { AlertsRepository } from './repositories/alerts.repository';
@@ -571,8 +572,9 @@ const buildServices = (
     providerName: config.providers.payments,
     logger,
   });
+  const alertsRepository = new AlertsRepository();
   const adminAlerts = createAlertsService({
-    alerts: new AlertsRepository(),
+    alerts: alertsRepository,
     transactions: transactionsRepository,
     refunds: refundsRepository,
     salons: new SalonsRepository(),
@@ -587,6 +589,12 @@ const buildServices = (
         title: alert.title,
       });
     },
+    logger,
+  });
+  const alertInbox = createAlertInbox({
+    alerts: alertsRepository,
+    admins: new AdminsRepository(),
+    notifier: providers.notifier,
     logger,
   });
   // Daily and periodic chores: subscriptions, account purge, refund retries, reconciliations.
@@ -604,6 +612,7 @@ const buildServices = (
       await adminAlerts.subscription(event, alert);
     },
     evaluateAlerts: (now) => adminAlerts.evaluate(now),
+    emailAlerts: (now) => alertInbox.deliverEmails(now),
     onDelayedRefunds: (delayed) => adminAlerts.refundsDelayed(delayed),
     logger,
   });
@@ -677,6 +686,7 @@ const buildServices = (
     payments,
     adminRefunds: fullRefunds,
     adminPayouts,
+    adminAlerts: alertInbox,
     adminAnalytics: createAnalyticsService({
       analytics: createMongoAnalytics({
         events: createServerEvents({ store: serverEventsRepository, logger }),

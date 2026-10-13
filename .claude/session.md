@@ -1761,6 +1761,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: the rate rule needs >= `count` attempts (assumption, avoids 1-of-1 = 100%); 5xx and crash spikes are not built (no request counts, crashes come from BigQuery SRV-110); failed refunds alerted at first deploy include old ones (once); list/acknowledge/email are SRV-107. Not run against a real MongoDB.
 
+### T-116 — SRV-107 Alert email delivery + alerts list/acknowledge
+
+- Project: `WAB-Server/` (`src/domain/alerts/alertInbox.service.ts`, `src/modules/admin/alerts`, `src/constants/alerts.ts`, `AlertsRepository.acknowledge|unemailed|markEmailed`, job `periodic.alerts-email`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (Admin PRD A27; BUSINESS_DOMAIN §3.7 alerts `emailedAt`):
+  - [x] List (status/kind, newest first, 25), NEW count, acknowledge (atomic NEW → ACKNOWLEDGED, repeat harmless, unknown 404); admin token only
+  - [x] WARNING/CRITICAL mailed at once (one email each); INFO mailed as one digest when the oldest waited 60 min; recipients = admins' alertEmails or login email; localized subject/body; `emailedAt` set only after a successful send, failures retried next run
+  - [x] Job every 5 minutes; no admin address = nothing sent and a warning
+- Tests: `tests/alertInbox.test.ts` (7) + job test; full gate green; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: emails are Arabic (no admin language stored); digest delay is a constant (PRD: configurable) until a setting key exists; acknowledge is not audited. Real SMTP waits on SRV-100.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
