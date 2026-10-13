@@ -13,6 +13,7 @@ import type { SalonDetailsService } from '../domain/salonDetails/salonDetails.se
 import type { FavoritesService } from '../domain/favorites/favorites.service';
 import type { AdminReviewsService } from '../domain/reviews/adminReviews.service';
 import type { ReviewsService } from '../domain/reviews/reviews.service';
+import type { CustomerProfileService } from '../domain/customers/customerProfile.service';
 import type { HomeService } from '../domain/home/home.service';
 import type { SearchService } from '../domain/search/search.service';
 import type { AdminSalonsService } from '../domain/salons/adminSalons.service';
@@ -54,6 +55,7 @@ export interface ApiServices {
   readonly adminSalons?: AdminSalonsService;
   readonly salonDetails?: SalonDetailsService;
   readonly home?: HomeService;
+  readonly customerProfile?: CustomerProfileService;
   readonly reviews?: ReviewsService;
   readonly favorites?: FavoritesService;
   readonly search?: SearchService;
@@ -296,6 +298,14 @@ export const unavailableReviews: ReviewsService = {
   submit: unavailable,
   list: unavailable,
   latest: unavailable,
+};
+
+export const unavailableCustomerProfile: CustomerProfileService = {
+  get: unavailable,
+  update: unavailable,
+  setAvatar: unavailable,
+  removeAvatar: unavailable,
+  deleteAccount: unavailable,
 };
 
 export const unavailableHome: HomeService = { get: unavailable };

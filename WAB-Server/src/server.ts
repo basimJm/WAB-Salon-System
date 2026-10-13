@@ -33,6 +33,7 @@ import { createSalonDetailsService } from './domain/salonDetails/salonDetails.se
 import { createFavoritesService } from './domain/favorites/favorites.service';
 import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
+import { createCustomerProfileService } from './domain/customers/customerProfile.service';
 import { createReviewsService } from './domain/reviews/reviews.service';
 import { ReviewsRepository } from './repositories/reviews.repository';
 import { createHomeService } from './domain/home/home.service';
@@ -261,6 +262,25 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     logger,
   });
   const audit = createAuditWriter(new AuditLogsRepository());
+  const accountLifecycle = createAccountLifecycleService({
+    customers: new CustomersRepository(),
+    members: new MembersRepository(),
+    installations: new InstallationsRepository(),
+    refreshTokens: phoneServices.refreshTokens,
+    storage: providers.storage,
+    audit,
+    settings,
+    logger,
+  });
+  const customerProfile = createCustomerProfileService({
+    customers: new CustomersRepository(),
+    cities: new CitiesRepository(),
+    areas: new AreasRepository(),
+    uploads,
+    storage: providers.storage,
+    lifecycle: accountLifecycle,
+    logger,
+  });
   const favoritesRepository = new FavoritesRepository();
   const reviewsService = createReviewsService({
     reviews: new ReviewsRepository(),
@@ -297,6 +317,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
       search,
     }),
     reviews: reviewsService,
+    customerProfile,
     salonDetails: createSalonDetailsService({
       favorites: favoritesRepository,
       reviews: reviewsService,
@@ -347,16 +368,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     }),
     team: createTeamService({
       members: new MembersRepository(),
-      lifecycle: createAccountLifecycleService({
-        customers: new CustomersRepository(),
-        members: new MembersRepository(),
-        installations: new InstallationsRepository(),
-        refreshTokens: phoneServices.refreshTokens,
-        storage: providers.storage,
-        audit,
-        settings,
-        logger,
-      }),
+      lifecycle: accountLifecycle,
       phones: createPhoneVerifier(phoneServices),
       storage: providers.storage,
       uploads,

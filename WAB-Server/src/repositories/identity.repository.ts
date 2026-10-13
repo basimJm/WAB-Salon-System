@@ -24,6 +24,27 @@ export class CustomersRepository extends BaseRepository<CustomerRaw> {
     super(model);
   }
 
+  /** `$set` and `$unset` in one update (profile edits, avatar removal); status is not touched here. */
+  async patch(
+    id: string,
+    change: { set: Record<string, unknown>; unset?: readonly string[] },
+  ): Promise<Entity<CustomerRaw> | null> {
+    if (!isValidId(id)) return null;
+    const unset = change.unset ?? [];
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: id },
+        {
+          ...(Object.keys(change.set).length === 0 ? {} : { $set: change.set }),
+          ...(unset.length === 0 ? {} : { $unset: Object.fromEntries(unset.map((f) => [f, 1])) }),
+        },
+        { new: true, runValidators: true },
+      )
+      .lean()
+      .exec();
+    return updated === null ? null : toEntity<CustomerRaw>(updated);
+  }
+
   /** The customer with this E.164 number, whatever their status (callers decide on blocked/deleted). */
   findByPhone(e164: string): Promise<Entity<CustomerRaw> | null> {
     return this.findOne({ 'phone.e164': e164 });
