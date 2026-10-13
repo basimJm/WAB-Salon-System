@@ -39,6 +39,7 @@ const refreshTokens = createRefreshTokenService({
   repository: new RefreshTokensRepository(tokensM.model as never),
   logger,
 });
+const permissionEvents: string[] = [];
 const checks: Parameters<UploadVerifier['assertConfirmed']>[0][] = [];
 const verifier: { reject: string[] } & UploadVerifier = {
   reject: [],
@@ -59,6 +60,12 @@ const app = createApp({
   logger,
   services: {
     team: createTeamService({
+      access: {
+        permissionsChanged: (memberId) => {
+          permissionEvents.push(memberId);
+          return Promise.resolve();
+        },
+      },
       members,
       lifecycle: createAccountLifecycleService({
         customers: new CustomersRepository(createFakeModel().model as never),
@@ -317,6 +324,21 @@ describe('team: change member', () => {
     expect(membersM.docs[1]?.['photoKey']).toBe('members/p.jpg');
     await request(app).patch(url).set(owner.headers).send({ photoKey: null });
     expect(membersM.docs[1]?.['photoKey']).toBeUndefined();
+  });
+
+  it('tells the member’s live app only when role or permissions change', async () => {
+    const owner = add('OWNER');
+    const member = add('EMPLOYEE', ['REVIEWS_VIEW']);
+    const url = `/merchant/v1/team/members/${member.id}`;
+    permissionEvents.length = 0;
+    await request(app).patch(url).set(owner.headers).send({ firstName: 'Mona' });
+    expect(permissionEvents).toEqual([]);
+    await request(app)
+      .patch(url)
+      .set(owner.headers)
+      .send({ permissions: ['STAFF_MANAGE'] });
+    await request(app).patch(url).set(owner.headers).send({ role: 'MANAGER' });
+    expect(permissionEvents).toEqual([member.id, member.id]);
   });
 
   it('a permission change applies on the very next request of that member', async () => {

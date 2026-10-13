@@ -27,6 +27,9 @@ export interface SocketIdentity {
 export interface SocketHub {
   /** Sends an event to every socket in `room` of the scope's namespace, on every instance. */
   emit(scope: TokenScope, room: string, event: string, payload: unknown): void;
+  /** Adds the sockets of `room` to more rooms / removes them from rooms (permission changes). */
+  join(scope: TokenScope, room: string, rooms: readonly string[]): void;
+  leave(scope: TokenScope, room: string, rooms: readonly string[]): void;
   /** Disconnects every socket in the room (e.g. access revoked). */
   disconnect(scope: TokenScope, room: string): void;
   close(): Promise<void>;
@@ -133,6 +136,18 @@ export const createSocketServer = (options: SocketServerOptions): SocketHub => {
   return {
     emit: (scope, room, event, payload) => {
       namespaceOf(scope).to(room).emit(event, payload);
+    },
+    join: (scope, room, rooms) => {
+      if (rooms.length > 0)
+        namespaceOf(scope)
+          .in(room)
+          .socketsJoin([...rooms]);
+    },
+    leave: (scope, room, rooms) => {
+      if (rooms.length > 0)
+        namespaceOf(scope)
+          .in(room)
+          .socketsLeave([...rooms]);
     },
     disconnect: (scope, room) => {
       namespaceOf(scope).in(room).disconnectSockets(true);

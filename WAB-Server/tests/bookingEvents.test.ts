@@ -257,6 +257,8 @@ describe('booking events', () => {
         emit: () => {
           throw new Error('redis down');
         },
+        join: () => undefined,
+        leave: () => undefined,
         disconnect: () => undefined,
         close: () => Promise.resolve(),
       },

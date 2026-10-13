@@ -22,6 +22,7 @@ import type {
 import type { Entity } from '../../utils/database/plain';
 import { BusinessRuleError, ConflictError, NotFoundError } from '../../utils/errors';
 import type { Logger } from '../../utils/logger';
+import { noAccessEvents, type AccessEvents } from '../access/accessEvents';
 import type { AuditWriter } from '../audit';
 import type { SettingsService } from '../settings';
 import type { RefreshTokenService } from './refreshTokens.service';
@@ -56,6 +57,8 @@ export interface AccountLifecycleDeps {
   readonly audit: AuditWriter;
   readonly settings: Pick<SettingsService, 'get'>;
   readonly logger: Logger;
+  /** Hangs up the live sockets of an account that lost access. */
+  readonly access?: Pick<AccessEvents, 'accessRevoked'>;
   readonly now?: () => Date;
 }
 
@@ -68,6 +71,7 @@ export const createAccountLifecycleService = (
   deps: AccountLifecycleDeps,
 ): AccountLifecycleService => {
   const { customers, members, installations, refreshTokens, storage, audit, logger } = deps;
+  const access = deps.access ?? noAccessEvents;
   const now = deps.now ?? ((): Date => new Date());
 
   const requireCustomer = async (id: string): Promise<Entity<CustomerRaw>> => {
@@ -128,6 +132,7 @@ export const createAccountLifecycleService = (
       });
       if (blocked === null) throw new ConflictError();
       await refreshTokens.revokeAll('CUSTOMER', customer.id, REVOKE_REASONS.accountBlocked);
+      await access.accessRevoked({ scope: 'customer', id: customer.id });
       await audit.record({
         adminId: actor.adminId,
         action: ACCOUNT_AUDIT_ACTIONS.customerBlock,
@@ -178,6 +183,7 @@ export const createAccountLifecycleService = (
         refreshTokens.revokeAll('CUSTOMER', customer.id, REVOKE_REASONS.accountDeletion),
         installations.detachCustomer(customer.id),
       ]);
+      await access.accessRevoked({ scope: 'customer', id: customer.id });
       return { deletionScheduledAt };
     },
 
@@ -191,6 +197,7 @@ export const createAccountLifecycleService = (
         refreshTokens.revokeAll('MEMBER', member.id, REVOKE_REASONS.memberDeactivated),
         installations.detachMember(member.id),
       ]);
+      await access.accessRevoked({ scope: 'merchant', id: member.id });
     },
 
     async reactivateMember({ memberId, salonId }) {

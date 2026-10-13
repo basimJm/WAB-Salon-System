@@ -109,6 +109,7 @@ import { ensureIndexes } from './utils/database/indexes';
 import { RedisRateLimitStore } from './utils/redis/rateLimitStore';
 import { connectRedis, createRedisReadinessCheck, disconnectRedis } from './utils/redis/client';
 import { createLogger, type Logger } from './utils/logger';
+import { createAccessEvents } from './sockets/accessEvents';
 import { createBookingEvents, type SocketRelay } from './sockets/bookingEvents';
 import { createRoomsFor } from './sockets/rooms';
 import {
@@ -325,7 +326,9 @@ const buildServices = (
     logger,
   });
   const audit = createAuditWriter(new AuditLogsRepository());
+  const accessEvents = createAccessEvents({ relay, members: new MembersRepository(), logger });
   const accountLifecycle = createAccountLifecycleService({
+    access: accessEvents,
     customers: new CustomersRepository(),
     members: new MembersRepository(),
     installations: new InstallationsRepository(),
@@ -515,6 +518,7 @@ const buildServices = (
       },
     }),
     team: createTeamService({
+      access: accessEvents,
       members: new MembersRepository(),
       lifecycle: accountLifecycle,
       phones: createPhoneVerifier(phoneServices),
