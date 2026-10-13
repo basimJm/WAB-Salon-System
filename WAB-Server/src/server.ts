@@ -13,6 +13,10 @@ import { ContentPagesRepository, FaqsRepository } from './repositories/content.r
 import { createAdminBannerService } from './domain/adminCrud/banners';
 import { createBannersService } from './domain/banners';
 import { BannersRepository } from './repositories/banners.repository';
+import { createAdminCrud } from './domain/adminCrud/adminCrud.service';
+import { createCatalogService } from './domain/catalog';
+import type { CatalogServiceRaw } from './models/catalogService.model';
+import { CatalogServicesRepository } from './repositories/catalog.repository';
 import { createAuditWriter } from './domain/audit/audit.service';
 import { createAdminContentServices } from './domain/adminCrud/content';
 import { createAdminLocationServices } from './domain/adminCrud/locations';
@@ -195,6 +199,16 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   return {
     otpGate,
     adminGuard,
+    catalog: createCatalogService({
+      catalog: new CatalogServicesRepository(),
+      storage: providers.storage,
+    }),
+    adminCatalog: createAdminCrud<CatalogServiceRaw>({
+      name: 'CATALOG_SERVICE',
+      entityType: 'catalogService',
+      store: new CatalogServicesRepository(),
+      audit,
+    }),
     banners: createBannersService({ banners: new BannersRepository(), storage: providers.storage }),
     adminBanners: createAdminBannerService(new BannersRepository(), audit),
     adminContent: createAdminContentServices({

@@ -797,7 +797,7 @@
 ### T-051 — SRV-039 Banners: admin CRUD + live-by-gender query
 - Project: `WAB-Server/` (`src/models/banner.model.ts`, `src/domain/{banners,adminCrud/banners.ts}`, `src/modules/{admin,customer}/banners/*`, `src/constants/banners.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #58 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #59 merged into `server`)
 - Acceptance criteria (Customer PRD S05 banner carousel; BUSINESS_DOMAIN §3.6 banners, BannerAction):
   - [x] `banners` model + index, in `ALL_MODELS`
   - [x] `GET /customer/v1/banners?gender=MALE|FEMALE` (public, rate limited): active banners of that audience or BOTH, `startAt <= now < endAt`, display order, image of the request language (CDN URL), `{id, imageUrl, actionType, actionValue}`
@@ -806,6 +806,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - salon existence is not checked for SALON banners (salon model arrives with SRV-041); the app shows nothing for an unknown salon. Not run against a real MongoDB.
 - Notes: Next: SRV-040 (catalog services).
+
+### T-052 — SRV-040 Catalog services: admin CRUD + list by gender
+- Project: `WAB-Server/` (`src/domain/catalog`, `src/modules/{shared,admin}/catalog/*`, `src/constants/catalog.ts`, `src/server.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #59 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE-65, Admin PRD A23, Merchant PRD service picking; BUSINESS_DOMAIN §3.2 catalogServices):
+  - [x] `GET /customer/v1/catalog/services` and `/merchant/v1/catalog/services`: `gender` required, active only, `sortOrder` order, paginated (10), name/description in the request language, CDN image URL
+  - [x] `/admin/v1/catalog/services` CRUD (admin token, reason + audit `CATALOG_SERVICE_*`): both languages, inactive included, filter by gender; gender cannot change; switch off with `active=false`
+- Tests: `cd WAB-Server && npm test` - 1508 pass; format/lint/typecheck/build green; audit 0. `tests/catalog.test.ts` (16).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - no text search yet (Atlas search is SRV-059). Not run against a real MongoDB.
+- Notes: Next: SRV-041 (salon schema + owner application).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
