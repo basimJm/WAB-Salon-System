@@ -1,3 +1,4 @@
+import { AlertModel } from './alert.model';
 import { AdminModel } from './admin.model';
 import { AppVersionModel } from './appVersion.model';
 import { ContactInfoModel } from './contactInfo.model';
@@ -78,4 +79,5 @@ export const ALL_MODELS = [
   PayoutModel,
   NotificationModel,
   PushCampaignModel,
+  AlertModel,
 ] as const;

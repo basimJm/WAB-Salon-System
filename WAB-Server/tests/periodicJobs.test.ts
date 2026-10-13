@@ -160,6 +160,20 @@ describe('periodic jobs', () => {
     expect(delayedSeen).toEqual([[{ id: 'r1' }]]);
   });
 
+  it('evaluates the alerts when an engine is wired and does nothing otherwise', async () => {
+    await run(build(), PERIODIC_JOBS.alertsEvaluate.name);
+    await run(
+      build({
+        evaluateAlerts: () => {
+          calls.push('alerts');
+          return Promise.resolve(2);
+        },
+      }),
+      PERIODIC_JOBS.alertsEvaluate.name,
+    );
+    expect(calls).toEqual(['alerts']);
+  });
+
   it('lets a failure reach the queue so it is retried', async () => {
     const jobs = build({
       accounts: { purgeDueCustomers: () => Promise.reject(new Error('db down')) },

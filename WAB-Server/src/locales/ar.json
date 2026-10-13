@@ -118,5 +118,13 @@
   "notifications.salon.gender_changed.owner.title": "تغيّرت فئة عملاء الصالون",
   "notifications.salon.gender_changed.owner.body": "غيّرت WAB فئة العملاء لـ {salon}. يرجى مراجعة خدماتك وفريقك.",
   "notifications.decision.approved": "تمت الموافقة على",
-  "notifications.decision.rejected": "تم رفض"
+  "notifications.decision.rejected": "تم رفض",
+  "alerts.PAYMENT_FAILURE_SPIKE.title": "ارتفاع في فشل عمليات الدفع",
+  "alerts.REFUND_FAILED.title": "فشلت عملية استرداد",
+  "alerts.REFUND_DELAYED.title": "تأخر استرداد",
+  "alerts.SUBSCRIPTION_ENDING.title": "اشتراك صالون على وشك الانتهاء",
+  "alerts.SUBSCRIPTION_EXPIRED.title": "انتهى اشتراك صالون",
+  "alerts.SALON_APPLICATION.title": "طلب انضمام صالون جديد",
+  "alerts.REVIEW_PENDING.title": "تقييم جديد بانتظار المراجعة",
+  "alerts.CATALOG_REQUEST.title": "طلب خدمة جديد للكتالوج"
 }

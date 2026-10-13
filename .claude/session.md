@@ -1747,6 +1747,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: no producer emits `payment.*`/`booking.*`/`api.error` events yet, so dashboards show zeros until they are added; funnels, cohorts, journeys, crashes wait for BigQuery (SRV-110). Aggregate not run against a real MongoDB.
 
+### T-115 — SRV-106 Alerts engine
+
+- Project: `WAB-Server/` (`src/models/alert.model.ts`, `src/repositories/alerts.repository.ts`, `src/domain/alerts`, `src/constants/alerts.ts`, `src/jobs/periodicJobs.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §3.7 `alerts`, §9 `alerts:evaluate` every 5 min, §10 `alerts.*`; Admin PRD A27):
+  - [x] `alerts` model registered in `ALL_MODELS`; one alert per occurrence (unique `dedupeKey`), status NEW
+  - [x] Payment failure spike: failures in `windowMin` >= `count`, or failure rate >= `ratePct` over `rateWindowMin` with at least `count` attempts; once per window; thresholds read from settings
+  - [x] Failed refunds, delayed refunds (hook from the hourly job), subscription T-7 / expired (hook from the daily job), new applications / reviews / catalog requests (last 30 min) each alerted once
+  - [x] Job `periodic.alerts-evaluate` every 5 min; one failing check does not hide the others; a failing live feed does not lose the alert
+- Tests: `tests/alerts.test.ts` (12) + `tests/periodicJobs.test.ts` (+1); full gate green; API docs: no change
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: the rate rule needs >= `count` attempts (assumption, avoids 1-of-1 = 100%); 5xx and crash spikes are not built (no request counts, crashes come from BigQuery SRV-110); failed refunds alerted at first deploy include old ones (once); list/acknowledge/email are SRV-107. Not run against a real MongoDB.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
