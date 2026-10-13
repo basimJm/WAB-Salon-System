@@ -30,6 +30,7 @@ import { createPhoneVerifier } from './domain/auth/phoneVerifier';
 import { createAdminSalonsService } from './domain/salons/adminSalons.service';
 import { createConflictFinder } from './domain/salons/conflicts';
 import { createSalonDetailsService } from './domain/salonDetails/salonDetails.service';
+import { createInboxService } from './domain/notifications/inbox.service';
 import { createFavoritesService } from './domain/favorites/favorites.service';
 import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
@@ -561,6 +562,11 @@ const buildServices = (
       search,
     }),
     reviews: reviewsService,
+    inbox: createInboxService({
+      notifications: notificationsRepository,
+      settings,
+      access: accessEvents,
+    }),
     availability,
     bookingDrafts,
     bookings: bookingCreation,

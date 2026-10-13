@@ -10,6 +10,7 @@ import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
 import type { SalonDetailsService } from '../domain/salonDetails/salonDetails.service';
+import type { InboxService } from '../domain/notifications/inbox.service';
 import type { FavoritesService } from '../domain/favorites/favorites.service';
 import type { PlacementsService } from '../domain/placements/placements.service';
 import type { AdminReviewsService } from '../domain/reviews/adminReviews.service';
@@ -90,6 +91,8 @@ export interface ApiServices {
   readonly customerProfile?: CustomerProfileService;
   readonly reviews?: ReviewsService;
   readonly favorites?: FavoritesService;
+  /** In-app notification list for both apps (S19, M24). */
+  readonly inbox?: InboxService;
   readonly search?: SearchService;
   readonly uploads?: UploadsService;
   readonly gallery?: GalleryService;
@@ -317,6 +320,12 @@ export const unavailableFavorites: FavoritesService = {
   add: unavailable,
   remove: unavailable,
   list: unavailable,
+};
+
+export const unavailableInbox: InboxService = {
+  list: unavailable,
+  unreadCount: unavailable,
+  markRead: unavailable,
 };
 
 export const unavailableAdminPlacements: PlacementsService = {

@@ -125,3 +125,13 @@ export const EVENT_BY_BOOKING_STATUS = {
   COMPLETED: 'booking.completed',
   NO_SHOW: 'booking.no_show',
 } as const satisfies Partial<Record<string, NotificationEvent>>;
+
+/** In-app inbox (SRV-094, Customer PRD S19, Merchant PRD M24). */
+export const NOTIFICATION_ROUTES = {
+  base: '/notifications',
+  read: '/read',
+  unreadCount: '/unread-count',
+} as const;
+/** Most ids one "mark as read" call may carry (a screen shows a page of 10, with room for scrolling). */
+export const MAX_READ_IDS = 50;
+export const INBOX_SEARCH_MAX_LENGTH = 100;
