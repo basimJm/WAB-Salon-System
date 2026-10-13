@@ -1338,6 +1338,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (token in handshake), Architect ✔, QA ✔) - FOUND: Redis adapter subscribes asynchronously, so tests repeat the emit until received. Permission rooms, booking events: SRV-081; `permissions.updated`/`access.revoked`: SRV-082. The access token is checked only at the handshake (15 min lifetime): clients reconnect with a fresh token.
 
+### T-092 — SRV-081 Booking rooms and events
+- Project: `WAB-Server/` (`src/sockets/{rooms,bookingEvents}.ts`, `socketServer.roomsFor`, `server.ts` wiring)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §7, CLAUDE.md §4.3, Merchant PRD M10):
+  - [x] salon rooms by permission at connect; deactivated/unknown member refused (`FORBIDDEN`); lookup failure `UNAVAILABLE`
+  - [x] `booking.requested` only to `salon:{id}:respond` (never to VIEW_ALL-only, VIEW_OWN, other salons, customers, admin); `booking.updated` to customer, `salon:{id}:all`, assigned staff who may see bookings, admin; `booking.assigned` to the new staff member, update to the old one
+  - [x] emit errors logged, never thrown into the booking flow; no-op before the hub exists
+- Tests: `tests/bookingEvents.test.ts` (7, real Redis + clients); full gate green, 2111 tests
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - rooms are decided at connect: a permission change applies to a live socket in SRV-082 (`permissions.updated` + room refresh). Staff permission check happens per emit (one member read per assigned staff).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

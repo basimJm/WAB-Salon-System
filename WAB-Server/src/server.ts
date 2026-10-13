@@ -109,7 +109,13 @@ import { ensureIndexes } from './utils/database/indexes';
 import { RedisRateLimitStore } from './utils/redis/rateLimitStore';
 import { connectRedis, createRedisReadinessCheck, disconnectRedis } from './utils/redis/client';
 import { createLogger, type Logger } from './utils/logger';
-import { createSocketServer, type SocketHub } from './sockets/socketServer';
+import { createBookingEvents, type SocketRelay } from './sockets/bookingEvents';
+import { createRoomsFor } from './sockets/rooms';
+import {
+  createSocketServer,
+  type SocketHub,
+  type SocketServerOptions,
+} from './sockets/socketServer';
 import {
   createShutdown,
   registerProcessHandlers,
@@ -145,7 +151,10 @@ export interface StartOptions {
   /** Services for the feature routers (OTP gate...). */
   readonly services?: ApiServices;
   /** Starts Socket.IO (Redis adapter) on the HTTP server; needs the shared Redis connection. */
-  readonly socket?: { readonly redis: Redis };
+  readonly socket?: {
+    readonly redis: Redis;
+    readonly roomsFor?: SocketServerOptions['roomsFor'];
+  };
 }
 
 /**
@@ -193,6 +202,7 @@ export const startServer = async (
           accessSecret: config.auth.accessSecret,
           corsAllowedOrigins: config.corsAllowedOrigins,
           logger,
+          ...(socket.roomsFor === undefined ? {} : { roomsFor: socket.roomsFor }),
         });
   const shutdown = createShutdown(
     [
@@ -209,7 +219,12 @@ export const startServer = async (
 };
 
 /** Services the feature routers need; built once, after MongoDB and Redis are connected. */
-const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServices => {
+const buildServices = (
+  config: AppConfig,
+  logger: Logger,
+  redis: Redis,
+  relay: SocketRelay,
+): ApiServices => {
   const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
   const otpGate = createOtpGate({ redis, settings });
   const providers = createProviders(config.providers, config.isProduction);
@@ -287,6 +302,12 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   const salonServices = new SalonServicesRepository();
   // Bookings come with the booking module (SRV-071); until then the checks find nothing.
   const bookingsRepository = new BookingsRepository();
+  const bookingEvents = createBookingEvents({
+    relay,
+    customers: new CustomersRepository(),
+    members: new MembersRepository(),
+    logger,
+  });
   const conflictFinder = createConflictFinder({ bookings: bookingsRepository, settings });
   const salonState = createSalonStateService({
     salons: new SalonsRepository(),
@@ -354,6 +375,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     settings,
   });
   const bookingCreation = createBookingCreationService({
+    hook: bookingEvents,
     redis,
     drafts: bookingDraftsRepository,
     bookings: bookingsRepository,
@@ -363,12 +385,14 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     settings,
   });
   const bookingActions = createBookingActionsService({
+    hook: bookingEvents,
     redis,
     bookings: bookingsRepository,
     members: new MembersRepository(),
     settings,
   });
   const bookingReassign = createBookingReassignService({
+    hook: bookingEvents,
     redis,
     bookings: bookingsRepository,
     availability,
@@ -382,13 +406,17 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     settings,
   });
   const bookingAdmin = createBookingAdminService({
+    hook: bookingEvents,
     redis,
     bookings: bookingsRepository,
     members: new MembersRepository(),
     audit,
     settings,
   });
-  const bookingCancel = createBookingCancelService({ bookings: bookingsRepository });
+  const bookingCancel = createBookingCancelService({
+    hook: bookingEvents,
+    bookings: bookingsRepository,
+  });
   const favoritesRepository = new FavoritesRepository();
   const reviewsService = createReviewsService({
     reviews: new ReviewsRepository(),
@@ -643,7 +671,8 @@ const main = async (): Promise<void> => {
     await ensureIndexes(ALL_MODELS, logger);
     redis = await connectRedis(config, logger);
     const connected = redis;
-    await startServer(config, logger, {
+    const relay: SocketRelay = {};
+    const running = await startServer(config, logger, {
       proc: process,
       closables: [
         { name: 'redis', close: () => disconnectRedis(connected) },
@@ -654,9 +683,11 @@ const main = async (): Promise<void> => {
         connected,
         `${REDIS_KEY_PREFIX.httpRateLimit}:global`,
       ),
-      services: buildServices(config, logger, connected),
-      socket: { redis: connected },
+      services: buildServices(config, logger, connected, relay),
+      socket: { redis: connected, roomsFor: createRoomsFor(new MembersRepository()) },
     });
+    // Booking services emit through the relay as soon as the hub exists.
+    if (running.sockets !== undefined) relay.current = running.sockets;
   } catch (error) {
     if (redis) await disconnectRedis(redis);
     await disconnectMongo();

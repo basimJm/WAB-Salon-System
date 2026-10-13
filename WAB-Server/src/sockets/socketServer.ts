@@ -21,6 +21,7 @@ import type { Logger } from '../utils/logger';
 /** What a connected socket carries after the handshake. */
 export interface SocketIdentity {
   readonly claims: AccessTokenClaims;
+  readonly rooms: readonly string[];
 }
 
 export interface SocketHub {
@@ -38,6 +39,14 @@ export interface SocketServerOptions {
   readonly accessSecret: string;
   readonly corsAllowedOrigins: readonly string[];
   readonly logger: Logger;
+  /**
+   * Extra rooms for the account, decided during the handshake (salon rooms by permission).
+   * `null` refuses the connection (`FORBIDDEN`), e.g. a deactivated member.
+   */
+  readonly roomsFor?: (
+    scope: TokenScope,
+    claims: AccessTokenClaims,
+  ) => Promise<readonly string[] | null>;
   /** Called after the handshake: joins rooms, loads permissions (SRV-081/082). */
   readonly onConnection?: (scope: TokenScope, socket: Socket, claims: AccessTokenClaims) => void;
   readonly now?: () => Date;
@@ -74,28 +83,38 @@ export const createSocketServer = (options: SocketServerOptions): SocketHub => {
   const namespaces = new Map<TokenScope, Namespace>();
   for (const [scope, path] of Object.entries(SOCKET_NAMESPACES) as [TokenScope, string][]) {
     const namespace = io.of(path);
-    namespace.use((socket, next) => {
+    /** Checks the handshake; resolves to the refusal, or `undefined` when the socket may connect. */
+    const handshake = async (socket: Socket): Promise<Error | undefined> => {
       const token = tokenOf(socket);
-      if (token === undefined) {
-        next(rejection(SOCKET_ERRORS.unauthorized));
-        return;
-      }
+      if (token === undefined) return rejection(SOCKET_ERRORS.unauthorized);
+      let claims: AccessTokenClaims;
       try {
-        const claims = verifyAccessToken(accessSecret, token, now());
-        if (claims.scope !== scope) {
-          next(rejection(SOCKET_ERRORS.forbidden));
-          return;
-        }
-        (socket.data as Partial<SocketIdentity>) = { claims };
-        next();
+        claims = verifyAccessToken(accessSecret, token, now());
       } catch (error) {
         if (!(error instanceof UnauthorizedError))
-          logger.error({ err: error }, 'socket handshake failed');
-        next(rejection(SOCKET_ERRORS.unauthorized));
+          logger.error({ err: error }, 'socket token check failed');
+        return rejection(SOCKET_ERRORS.unauthorized);
       }
+      if (claims.scope !== scope) return rejection(SOCKET_ERRORS.forbidden);
+      try {
+        const rooms = options.roomsFor === undefined ? [] : await options.roomsFor(scope, claims);
+        if (rooms === null) return rejection(SOCKET_ERRORS.forbidden);
+        (socket.data as SocketIdentity) = { claims, rooms };
+        return undefined;
+      } catch (error) {
+        // A database blip is not the client's fault: it may retry with the same token.
+        logger.error({ err: error }, 'socket rooms lookup failed');
+        return rejection(SOCKET_ERRORS.unavailable);
+      }
+    };
+    namespace.use((socket, next) => {
+      void handshake(socket).then((refusal) => {
+        next(refusal);
+      });
     });
     namespace.on('connection', (socket) => {
-      const { claims } = socket.data as SocketIdentity;
+      const { claims, rooms } = socket.data as SocketIdentity;
+      for (const room of rooms) void socket.join(room);
       // Every account has its own room; salon and permission rooms are added by `onConnection`.
       if (scope === 'customer') void socket.join(SOCKET_ROOMS.customer(claims.subjectId));
       if (scope === 'merchant') void socket.join(SOCKET_ROOMS.member(claims.subjectId));
