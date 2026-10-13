@@ -93,6 +93,27 @@ export class MembersRepository extends BaseRepository<MemberRaw> {
   setActive(id: string, active: boolean): Promise<Entity<MemberRaw> | null> {
     return this.updateById(id, { active });
   }
+
+  /** `$set` and `$unset` in one update (e.g. removing the photo). */
+  async patch(
+    id: string,
+    change: { set: Record<string, unknown>; unset?: readonly string[] },
+  ): Promise<Entity<MemberRaw> | null> {
+    if (!isValidId(id)) return null;
+    const unset = change.unset ?? [];
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: id },
+        {
+          $set: change.set,
+          ...(unset.length === 0 ? {} : { $unset: Object.fromEntries(unset.map((f) => [f, 1])) }),
+        },
+        { new: true, runValidators: true },
+      )
+      .lean()
+      .exec();
+    return updated === null ? null : toEntity<MemberRaw>(updated);
+  }
 }
 
 export class InstallationsRepository extends BaseRepository<InstallationRaw> {

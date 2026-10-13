@@ -6,6 +6,7 @@ import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
 import { LOCATION_ROUTES } from '../../constants/locations';
 import { CONTENT_ROUTES } from '../../constants/content';
 import { CATALOG_ROUTES } from '../../constants/catalog';
+import { MERCHANT_TEAM_ROUTES } from '../../constants/team';
 import {
   MERCHANT_CATALOG_REQUEST_ROUTES,
   MERCHANT_SERVICES_ROUTES,
@@ -24,6 +25,7 @@ import {
   unavailableGallery,
   unavailableHours,
   unavailableSalonServices,
+  unavailableTeam,
   unavailableGuard,
   unavailableMerchantAuth,
   unavailableSalonApplication,
@@ -35,6 +37,7 @@ import { createCatalogRouter } from '../shared/catalog/catalog.module';
 import { createLocationsRouterFor } from '../shared/locations';
 import { createMerchantOtpRouter, createOtpRouteLimiter } from '../shared/otp';
 import { createMerchantCatalogRequestsRouter } from './catalogRequests/requests.routes';
+import { createMerchantTeamRouter } from './team/team.routes';
 import { createMerchantServicesRouter } from './services/services.routes';
 import { createMerchantHoursRouter } from './hours/hours.routes';
 import { createMerchantGalleryRouter } from './gallery/gallery.routes';
@@ -113,6 +116,14 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     MERCHANT_CATALOG_REQUEST_ROUTES.base,
     createMerchantCatalogRequestsRouter(
       services.catalogRequests ?? unavailableCatalogRequests,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_TEAM_ROUTES.base,
+    createMerchantTeamRouter(
+      services.team ?? unavailableTeam,
       services.salonProfile?.guard ?? [unavailableGuard],
     ),
   );
