@@ -1314,6 +1314,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - audit is written after the change (same decision as T-043); admin reassign and manual refunds follow with SRV-086; notifications to both parties via the hook later.
 
+### T-090 — SRV-079 Conflict resolution (bulk cancel affected bookings)
+- Project: `WAB-Server/` (`src/domain/bookings/bookingBulk.service.ts`, `POST /merchant/v1/bookings/cancel-affected`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §5.12, Merchant PRD M15/M17 conflict dialog):
+  - [x] PENDING → rejected, APPROVED → cancelled by salon, reason from the change, full refund amount to the hook; own salon only
+  - [x] per-booking outcome, failures (started, final, foreign, missing permission) reported without stopping the rest; duplicates once; 1..100 ids
+  - [x] reassign instead = existing per-booking endpoint (SRV-076)
+- Tests: `tests/bookingBulk.test.ts` (5); full gate green, 2096 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - sequential processing (no lock storm); the client repeats the original change after cancelling.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

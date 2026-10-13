@@ -3,7 +3,9 @@ import type { z } from 'zod';
 import {
   MERCHANT_BOOKING_QUERY_ROUTES,
   MERCHANT_BOOKING_ROUTES,
+  MERCHANT_CANCEL_AFFECTED_ROUTE,
 } from '../../../constants/bookings';
+import type { BookingBulkService } from '../../../domain/bookings/bookingBulk.service';
 import type { BookingQueriesService } from '../../../domain/bookings/bookingQueries.service';
 import type { BookingReassignService } from '../../../domain/bookings/bookingReassign.service';
 import type { BookingActionsService } from '../../../domain/bookings/bookingActions.service';
@@ -17,9 +19,14 @@ import {
   calendarQuery,
   merchantBookingsQuery,
 } from '../../shared/bookings/bookingQuery.schemas';
-import { unavailableBookingQueries } from '../../services';
+import { unavailableBookingBulk, unavailableBookingQueries } from '../../services';
 import { presentSummary } from '../../customer/bookings/bookings.routes';
-import { bookingParams, decisionBody, reassignBody } from './bookings.validation';
+import {
+  bookingParams,
+  cancelAffectedBody,
+  decisionBody,
+  reassignBody,
+} from './bookings.validation';
 
 /** Salon-side booking decisions; each needs the permission of its transition (§5.7). */
 export const createMerchantBookingsRouter = (
@@ -27,6 +34,7 @@ export const createMerchantBookingsRouter = (
   guard: readonly RequestHandler[],
   reassign?: BookingReassignService,
   queries?: BookingQueriesService,
+  bulk?: BookingBulkService,
 ): Router => {
   const router = Router();
   const routes = MERCHANT_BOOKING_ROUTES;
@@ -100,6 +108,26 @@ export const createMerchantBookingsRouter = (
           audience: { kind: 'MERCHANT', salonId: req.member?.salonId ?? '', member: memberOf(req) },
           bookingId: id,
           language: req.language,
+        }),
+      });
+    }),
+  );
+
+  router.post(
+    MERCHANT_CANCEL_AFFECTED_ROUTE,
+    requirePermission(['BOOKINGS_RESPOND', 'BOOKINGS_OPERATE'], 'any'),
+    validate({ body: cancelAffectedBody }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { bookingIds, reasonCode, reasonText } = (
+        req.validated as { body: z.infer<typeof cancelAffectedBody> }
+      ).body;
+      sendSuccess(req, res, {
+        data: await (bulk ?? unavailableBookingBulk).cancelAffected({
+          salonId: req.member?.salonId ?? '',
+          member: memberOf(req),
+          bookingIds,
+          reasonCode,
+          reasonText,
         }),
       });
     }),

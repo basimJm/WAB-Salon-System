@@ -46,3 +46,7 @@ export const ADMIN_BOOKING_AUDIT = {
   entityType: 'BOOKING',
   reasonCode: 'ADMIN_ACTION',
 } as const;
+
+/** Bulk cancellation of the bookings a schedule/team change would break (SRV-079, §5.12). */
+export const MERCHANT_CANCEL_AFFECTED_ROUTE = '/cancel-affected';
+export const CANCEL_AFFECTED_MAX_BOOKINGS = 100;

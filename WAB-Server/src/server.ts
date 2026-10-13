@@ -35,6 +35,7 @@ import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
 import { createCustomerProfileService } from './domain/customers/customerProfile.service';
 import { createBookingActionsService } from './domain/bookings/bookingActions.service';
+import { createBookingBulkService } from './domain/bookings/bookingBulk.service';
 import { createBookingAdminService } from './domain/bookings/bookingAdmin.service';
 import { createBookingQueriesService } from './domain/bookings/bookingQueries.service';
 import { createBookingReassignService } from './domain/bookings/bookingReassign.service';
@@ -403,6 +404,10 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     bookingActions,
     bookingCancel,
     bookingAdmin,
+    bookingBulk: createBookingBulkService({
+      bookings: bookingsRepository,
+      actions: bookingActions,
+    }),
     bookingQueries,
     bookingReassign,
     customerProfile,
