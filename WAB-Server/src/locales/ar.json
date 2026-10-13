@@ -126,5 +126,9 @@
   "alerts.SUBSCRIPTION_EXPIRED.title": "انتهى اشتراك صالون",
   "alerts.SALON_APPLICATION.title": "طلب انضمام صالون جديد",
   "alerts.REVIEW_PENDING.title": "تقييم جديد بانتظار المراجعة",
-  "alerts.CATALOG_REQUEST.title": "طلب خدمة جديد للكتالوج"
+  "alerts.CATALOG_REQUEST.title": "طلب خدمة جديد للكتالوج",
+  "emails.alert.subject": "تنبيه WAB: {title}",
+  "emails.alert.body": "{title}\nالأهمية: {severity}\nالوقت: {time}\nافتح صفحة التنبيهات في لوحة الإدارة للتفاصيل.",
+  "emails.alertDigest.subject": "ملخص تنبيهات WAB ({count})",
+  "emails.alertDigest.body": "{count} تنبيهات جديدة:\n{lines}\nافتح صفحة التنبيهات في لوحة الإدارة للتفاصيل."
 }

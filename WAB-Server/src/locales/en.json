@@ -126,5 +126,9 @@
   "alerts.SUBSCRIPTION_EXPIRED.title": "A salon subscription has ended",
   "alerts.SALON_APPLICATION.title": "New salon application",
   "alerts.REVIEW_PENDING.title": "New review awaits moderation",
-  "alerts.CATALOG_REQUEST.title": "New catalog service request"
+  "alerts.CATALOG_REQUEST.title": "New catalog service request",
+  "emails.alert.subject": "WAB alert: {title}",
+  "emails.alert.body": "{title}\nSeverity: {severity}\nTime: {time}\nOpen the Alerts page in the admin panel for details.",
+  "emails.alertDigest.subject": "WAB alerts digest ({count})",
+  "emails.alertDigest.body": "{count} new alerts:\n{lines}\nOpen the Alerts page in the admin panel for details."
 }
