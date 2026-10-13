@@ -8623,6 +8623,229 @@
           }
         }
       }
+    },
+    "/customer/v1/bookings/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "summary": "Cancel my booking: a pending one any time (full refund), an approved one only inside the salon’s cancellation window.",
+        "description": "After the window the answer is 422 `CANCELLATION_WINDOW_PASSED`. `refundDue` (JOD) is what the refund flow will return, by the salon’s policy.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonText": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cancelled booking",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "referenceNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "paymentMethod": {
+                          "type": "string",
+                          "enum": [
+                            "PAY_ON_ARRIVAL",
+                            "DEPOSIT",
+                            "FULL_ONLINE"
+                          ]
+                        },
+                        "paymentStatus": {
+                          "type": "string"
+                        },
+                        "appointmentStart": {
+                          "type": "string"
+                        },
+                        "appointmentEnd": {
+                          "type": "string"
+                        },
+                        "respondBy": {
+                          "type": "string"
+                        },
+                        "money": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "string"
+                            },
+                            "dueOnline": {
+                              "type": "string"
+                            },
+                            "paidOnline": {
+                              "type": "string"
+                            },
+                            "remaining": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "dueOnline",
+                            "paidOnline",
+                            "remaining"
+                          ]
+                        },
+                        "refundDue": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "referenceNumber",
+                        "status",
+                        "paymentMethod",
+                        "paymentStatus",
+                        "appointmentStart",
+                        "appointmentEnd",
+                        "respondBy",
+                        "money",
+                        "refundDue"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}

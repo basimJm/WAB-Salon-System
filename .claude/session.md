@@ -1253,6 +1253,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - refunds, notifications, sockets and jobs are not fired yet (`BookingChangedHook` no-op).
 
+### T-085 — SRV-074 Customer cancel + §5.8 refund calculator
+- Project: `WAB-Server/` (`src/domain/bookings/{refunds,bookingCancel.service}.ts`, `src/modules/customer/bookings/*`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §5.7, §5.8):
+  - [x] PENDING cancel any time (refund = everything paid); APPROVED only inside the policy window (`CANCELLATION_WINDOW_PASSED`); final/other states refused; own bookings only (404)
+  - [x] `customerCancelRefund`: PAY_ON_ARRIVAL/unpaid 0; DEPOSIT by `depositRefundableOnCustomerCancel`; FULL = total or total − deposit (no % → total); never above paid
+  - [x] atomic by expected status; response has `refundDue`; hook receives it
+- Tests: `tests/bookingCancel.test.ts` (9); full gate green, 2051 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - refund execution/ledger is SRV-086; notifications/sockets later.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

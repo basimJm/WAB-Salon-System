@@ -1,5 +1,5 @@
 import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
-import { BOOKING_ROUTES } from '../../../constants/bookings';
+import { BOOKING_ROUTES, CUSTOMER_BOOKING_ROUTES } from '../../../constants/bookings';
 import { HTTP_STATUS } from '../../../constants/http';
 import { API_PREFIXES } from '../../../constants/server';
 import {
@@ -9,7 +9,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
-import { createBookingBody } from './bookings.validation';
+import { bookingIdParams, cancelBookingBody, createBookingBody } from './bookings.validation';
 
 const summary = z.object({
   id: z.string(),
@@ -49,6 +49,35 @@ export const registerCustomerBookingDocs = (registry: OpenAPIRegistry): void => 
         HTTP_STATUS.forbidden,
         HTTP_STATUS.notFound,
         HTTP_STATUS.conflict,
+        HTTP_STATUS.unprocessableEntity,
+        HTTP_STATUS.tooManyRequests,
+        HTTP_STATUS.serviceUnavailable,
+      ),
+    },
+  });
+  registry.registerPath({
+    method: 'post',
+    path: `${API_PREFIXES.customer}${BOOKING_ROUTES.base}${CUSTOMER_BOOKING_ROUTES.cancel.replace(':id', '{id}')}`,
+    tags: ['Bookings'],
+    summary:
+      'Cancel my booking: a pending one any time (full refund), an approved one only inside the salon’s cancellation window.',
+    description:
+      'After the window the answer is 422 `CANCELLATION_WINDOW_PASSED`. `refundDue` (JOD) is what the refund flow will return, by the salon’s policy.',
+    request: {
+      headers: z.object({ 'Accept-Language': acceptLanguageHeader }),
+      params: bookingIdParams,
+      body: { content: { 'application/json': { schema: cancelBookingBody } } },
+    },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Cancelled booking',
+        successResponseSchema(summary.extend({ status: z.string(), refundDue: z.string() })),
+      ),
+      ...errorResponses(
+        HTTP_STATUS.badRequest,
+        HTTP_STATUS.unauthorized,
+        HTTP_STATUS.forbidden,
+        HTTP_STATUS.notFound,
         HTTP_STATUS.unprocessableEntity,
         HTTP_STATUS.tooManyRequests,
         HTTP_STATUS.serviceUnavailable,
