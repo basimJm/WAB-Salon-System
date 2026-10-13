@@ -305,6 +305,46 @@
           }
         }
       ]
+    },
+    {
+      "name": "App config",
+      "item": [
+        {
+          "name": "Version policy, maintenance, OTP and discovery settings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "config"
+              ],
+              "query": [
+                {
+                  "key": "platform",
+                  "value": ""
+                },
+                {
+                  "key": "version",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            },
+            "description": "Public. Called at launch with the installed version: tells the app whether it must or may update, whether maintenance is on, plus OTP length/resend and the nearby radius."
+          }
+        }
+      ]
     }
   ],
   "variable": [

@@ -135,7 +135,7 @@ Three token scopes. Roadmap SRV-03.
 | SRV-030a | Admin bootstrap: `npm run seed:admin` creates the single admin from `ADMIN_EMAIL` + a password read from a prompt or env (never stored in the repo), bcrypt via `hashPassword`; refuses if an admin exists | `feat/srv-030a-admin-bootstrap` | SRV-030 | TODO | Without it no admin can exist. |
 | SRV-031 | Admin email OTP (2FA) via `Notifier` stub | `feat/srv-031-admin-2fa` | SRV-030, SRV-023 | DONE |  |
 | SRV-032 | Account blocking (admin), customer deletion request → 30-day grace → restore on login; purge/anonymize function; member deactivation revokes tokens | `feat/srv-032-account-lifecycle` | SRV-026 | DONE | Domain service only (`createAccountLifecycleService`): the admin block endpoint comes with the admin customers task (it passes an `AdminActor` for the audit entry), the customer delete-account endpoint with SRV-065, the daily `accounts:purge` trigger with the jobs task. Notifying the affected parties joins the notification tasks. |
-| SRV-033 | Installation register/update (Firebase app-instance id, FCM token, push toggle) + guest→account identity link | `feat/srv-033-installations` | SRV-024 | IN REVIEW | `PUT /customer/v1/installations` (guests allowed, a valid token also links the account and the analytics identity), `PUT /merchant/v1/installations` (member token), `PATCH /customer/v1/installations/push-enabled` (account switch). A push token belongs to one device. |
+| SRV-033 | Installation register/update (Firebase app-instance id, FCM token, push toggle) + guest→account identity link | `feat/srv-033-installations` | SRV-024 | DONE | `PUT /customer/v1/installations` (guests allowed, a valid token also links the account and the analytics identity), `PUT /merchant/v1/installations` (member token), `PATCH /customer/v1/installations/push-enabled` (account switch). A push token belongs to one device. |
 | SRV-034 | Real Firebase ID-token verification (`wab-otp` / firebase-admin) replacing the stub | `feat/srv-034-firebase-real` | — | PENDING | Firebase project service account (dev/prod) and/or `wab-otp` package published — **user input / other SDK**. |
 
 ## Stage E — Reference data & app config
@@ -143,7 +143,7 @@ Roadmap SRV-04.
 
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
-| SRV-035 | App config endpoint: version policy (min/latest/optional), maintenance, nearby radius, contact info | `feat/srv-035-app-config` | SRV-017 | TODO |  |
+| SRV-035 | App config endpoint: version policy (min/latest/optional), maintenance, nearby radius, contact info | `feat/srv-035-app-config` | SRV-017 | IN REVIEW | `GET /customer/v1/config` and `/merchant/v1/config` (public; `platform`, `version`): update status OK/UPDATE_AVAILABLE/UPDATE_REQUIRED + store URL, maintenance (localized), nearby radius, OTP length/resend, contact info. Enforcing maintenance/forced update on other routes is NOT included. |
 | SRV-036 | Public endpoints: countries, cities, areas (localized) | `feat/srv-036-ref-public` | SRV-018 | TODO |  |
 | SRV-037 | Public content: privacy/terms/about, FAQ, contact info per app | `feat/srv-037-content-public` | SRV-005 | TODO |  |
 | SRV-038 | Admin CRUD: countries/cities/areas, content pages, FAQ, contact info, app versions, maintenance (with audit + reason) | `feat/srv-038-ref-admin` | SRV-020, SRV-030 | TODO |  |
