@@ -36,3 +36,6 @@ export const createDraftBody = z.object({
     .min(1)
     .max(MAX_PERSONS_SANITY),
 });
+
+/** Firebase ID token proving the customer controls their phone (purpose BOOKING_CONFIRMATION). */
+export const verifyOtpBody = z.object({ idToken: z.string().trim().min(1).max(8192) });

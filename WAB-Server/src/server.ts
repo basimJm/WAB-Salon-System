@@ -28,12 +28,14 @@ import { CatalogRequestsRepository } from './repositories/catalogRequests.reposi
 import { createAccountLifecycleService } from './domain/auth/accountLifecycle.service';
 import { createPhoneVerifier } from './domain/auth/phoneVerifier';
 import { createAdminSalonsService } from './domain/salons/adminSalons.service';
-import { createConflictFinder, noBookings } from './domain/salons/conflicts';
+import { createConflictFinder } from './domain/salons/conflicts';
 import { createSalonDetailsService } from './domain/salonDetails/salonDetails.service';
 import { createFavoritesService } from './domain/favorites/favorites.service';
 import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
 import { createCustomerProfileService } from './domain/customers/customerProfile.service';
+import { createBookingCreationService } from './domain/bookings/bookingCreation.service';
+import { BookingsRepository } from './repositories/bookings.repository';
 import { createBookingDraftService } from './domain/bookings/bookingDraft.service';
 import { BookingDraftsRepository } from './repositories/bookingDrafts.repository';
 import { createAvailabilityService } from './domain/availability/availability.service';
@@ -251,7 +253,8 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   });
   const salonServices = new SalonServicesRepository();
   // Bookings come with the booking module (SRV-071); until then the checks find nothing.
-  const conflictFinder = createConflictFinder({ bookings: noBookings, settings });
+  const bookingsRepository = new BookingsRepository();
+  const conflictFinder = createConflictFinder({ bookings: bookingsRepository, settings });
   const salonState = createSalonStateService({
     salons: new SalonsRepository(),
     facts: createStaffFacts(new MembersRepository(), (salonId) =>
@@ -293,24 +296,37 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     audit,
   });
   const holdsStore = createHoldsStore(redis);
+  const bookingDraftsRepository = new BookingDraftsRepository();
   const availability = createAvailabilityService({
     salons: new SalonsRepository(),
     members: new MembersRepository(),
     salonServices,
     closures: new ClosuresRepository(),
     leaves: new LeavesRepository(),
+    bookings: bookingsRepository,
     holds: holdsStore,
     settings,
   });
   const bookingDrafts = createBookingDraftService({
     redis,
-    drafts: new BookingDraftsRepository(),
+    drafts: bookingDraftsRepository,
     availability,
     holds: holdsStore,
     catalog: new CatalogServicesRepository(),
     members: new MembersRepository(),
     customers: new CustomersRepository(),
     salons: new SalonsRepository(),
+    phones: createPhoneVerifier(phoneServices),
+    otpGate,
+    settings,
+  });
+  const bookingCreation = createBookingCreationService({
+    redis,
+    drafts: bookingDraftsRepository,
+    bookings: bookingsRepository,
+    availability,
+    holds: holdsStore,
+    customers: new CustomersRepository(),
     settings,
   });
   const favoritesRepository = new FavoritesRepository();
@@ -351,6 +367,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     reviews: reviewsService,
     availability,
     bookingDrafts,
+    bookings: bookingCreation,
     customerProfile,
     salonDetails: createSalonDetailsService({
       favorites: favoritesRepository,

@@ -5,7 +5,7 @@ import type { BookingDraftService, DraftView } from '../../../domain/bookings/bo
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { sendCreated, sendSuccess } from '../../../utils/response/successResponse';
-import { createDraftBody, draftParams } from './drafts.validation';
+import { createDraftBody, draftParams, verifyOtpBody } from './drafts.validation';
 
 export interface DraftsRouterOptions {
   readonly service: BookingDraftService;
@@ -57,6 +57,22 @@ export const createBookingDraftsRouter = ({
       sendSuccess(req, res, {
         data: present(await service.get({ customerId: me(req), id, language: req.language })),
       });
+    }),
+  );
+  router.post(
+    BOOKING_DRAFT_ROUTES.verifyOtp,
+    validate({ params: draftParams, body: verifyOtpBody }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { params, body } = req.validated as unknown as {
+        params: z.infer<typeof draftParams>;
+        body: z.infer<typeof verifyOtpBody>;
+      };
+      const { otpVerifiedAt } = await service.verifyOtp({
+        customerId: me(req),
+        id: params.id,
+        idToken: body.idToken,
+      });
+      sendSuccess(req, res, { data: { otpVerifiedAt: otpVerifiedAt.toISOString() } });
     }),
   );
   router.delete(

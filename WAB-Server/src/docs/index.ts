@@ -51,6 +51,7 @@ import { registerCustomerReviewDocs } from '../modules/customer/reviews/reviews.
 import { registerCustomerProfileDocs } from '../modules/customer/profile/profile.openapi';
 import { registerCustomerAvailabilityDocs } from '../modules/customer/availability/availability.openapi';
 import { registerCustomerBookingDraftDocs } from '../modules/customer/bookingDrafts/drafts.openapi';
+import { registerCustomerBookingDocs } from '../modules/customer/bookings/bookings.openapi';
 import { registerCustomerSearchDocs } from '../modules/customer/search/search.openapi';
 import { registerAdminSalonsDocs } from '../modules/admin/salons/adminSalons.openapi';
 import { registerAdminSalonStateDocs } from '../modules/admin/salons/salonState.openapi';
@@ -82,7 +83,7 @@ type Registrar = (registry: OpenAPIRegistry) => void;
  */
 const REGISTRARS: Readonly<Record<DocName, readonly Registrar[]>> = {
   common: [registerHealthDocs],
-  customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs, registerCustomerBannerDocs, registerCustomerCatalogDocs, registerCustomerUploadDocs, registerCustomerSearchDocs, registerCustomerSalonDetailsDocs, registerCustomerHomeDocs, registerCustomerFavoritesDocs, registerCustomerReviewDocs, registerCustomerProfileDocs, registerCustomerAvailabilityDocs, registerCustomerBookingDraftDocs],
+  customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs, registerCustomerBannerDocs, registerCustomerCatalogDocs, registerCustomerUploadDocs, registerCustomerSearchDocs, registerCustomerSalonDetailsDocs, registerCustomerHomeDocs, registerCustomerFavoritesDocs, registerCustomerReviewDocs, registerCustomerProfileDocs, registerCustomerAvailabilityDocs, registerCustomerBookingDraftDocs, registerCustomerBookingDocs],
   merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs, registerMerchantCatalogDocs, registerMerchantSalonDocs, registerMerchantProfileDocs, registerMerchantUploadDocs, registerMerchantGalleryDocs, registerMerchantHoursDocs, registerMerchantServicesDocs, registerMerchantCatalogRequestDocs, registerMerchantTeamDocs, registerMerchantStaffDocs, registerMerchantLeavesDocs, registerMerchantPolicyDocs],
   admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs, registerAdminSalonStateDocs, registerAdminSalonsDocs, registerAdminUploadDocs, registerAdminCatalogRequestDocs, registerAdminReviewDocs, registerAdminPlacementDocs],
 };

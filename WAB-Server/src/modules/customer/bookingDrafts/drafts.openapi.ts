@@ -9,7 +9,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
-import { createDraftBody, draftParams } from './drafts.validation';
+import { createDraftBody, draftParams, verifyOtpBody } from './drafts.validation';
 
 const draft = z.object({
   id: z.string(),
@@ -92,6 +92,25 @@ export const registerCustomerBookingDraftDocs = (registry: OpenAPIRegistry): voi
     request: { headers, params: draftParams },
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Draft', successResponseSchema(draft)),
+      ...failures,
+    },
+  });
+  registry.registerPath({
+    method: 'post',
+    path: `${base}/{id}/verify-otp`,
+    tags,
+    summary:
+      'Confirm the booking with the OTP (purpose BOOKING_CONFIRMATION): the Firebase ID token must belong to the customer’s own phone. Required before the booking is created.',
+    request: {
+      headers,
+      params: draftParams,
+      body: { content: { 'application/json': { schema: verifyOtpBody } } },
+    },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Verified',
+        successResponseSchema(z.object({ otpVerifiedAt: z.string() })),
+      ),
       ...failures,
     },
   });

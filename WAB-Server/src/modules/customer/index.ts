@@ -24,6 +24,7 @@ import {
   unavailableCustomerProfile,
   unavailableAvailability,
   unavailableBookingDrafts,
+  unavailableBookings,
   unavailableHome,
   unavailableReviews,
   unavailableSearch,
@@ -38,6 +39,8 @@ import { FAVORITE_ROUTES } from '../../constants/favorites';
 import { createReviewsRouter } from './reviews/reviews.routes';
 import { createCustomerProfileRouter } from './profile/profile.routes';
 import { CUSTOMER_PROFILE_ROUTES } from '../../constants/customerProfile';
+import { createBookingsRouter } from './bookings/bookings.routes';
+import { BOOKING_RATE_LIMIT, BOOKING_ROUTES } from '../../constants/bookings';
 import { createBookingDraftsRouter } from './bookingDrafts/drafts.routes';
 import { BOOKING_DRAFT_RATE_LIMIT, BOOKING_DRAFT_ROUTES } from '../../constants/bookingDrafts';
 import { createAvailabilityRouter } from './availability/availability.routes';
@@ -177,6 +180,18 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
       guard: services.installations?.customerRequired ?? unavailableGuard,
       limiter: createRateLimiter({
         ...BOOKING_DRAFT_RATE_LIMIT,
+        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
+      }),
+    }),
+  );
+  mount(
+    router,
+    BOOKING_ROUTES.base,
+    createBookingsRouter({
+      service: services.bookings ?? unavailableBookings,
+      guard: services.installations?.customerRequired ?? unavailableGuard,
+      limiter: createRateLimiter({
+        ...BOOKING_RATE_LIMIT,
         ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
       }),
     }),

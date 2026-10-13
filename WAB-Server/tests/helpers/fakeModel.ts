@@ -48,6 +48,10 @@ const matchesCondition = (actual: unknown, condition: unknown): boolean => {
           Math.cos(rad(lat)) * Math.cos(rad(point[1])) * Math.sin(rad(point[0] - lng) / 2) ** 2;
         return 2 * Math.asin(Math.min(1, Math.sqrt(a))) <= radians;
       }
+      case '$elemMatch':
+        return (
+          Array.isArray(actual) && actual.some((item) => matches(item as Doc, expected as Filter))
+        );
       case '$options':
         return true;
       default:

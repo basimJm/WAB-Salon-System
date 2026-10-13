@@ -14,6 +14,7 @@ import { CustomersRepository, MembersRepository } from '../src/repositories/iden
 import { LeavesRepository } from '../src/repositories/leaves.repository';
 import { SalonServicesRepository } from '../src/repositories/salonServices.repository';
 import { SalonsRepository } from '../src/repositories/salons.repository';
+import { UnauthorizedError } from '../src/utils/errors';
 import { signAccessToken } from '../src/utils/auth/accessToken';
 import { createLogger } from '../src/utils/logger';
 import { connectRedis, disconnectRedis } from '../src/utils/redis/client';
@@ -24,6 +25,8 @@ const logger = createLogger({ level: 'silent' });
 const SECRET = 'a'.repeat(48);
 // Monday 2026-10-12 11:00 in Amman.
 let clock = new Date('2026-10-12T08:00:00Z');
+const PHONE = { countryCode: 'JO', dialCode: '+962', number: '791234567', e164: '+962791234567' };
+const resets: string[] = [];
 const m = {
   salons: createFakeModel(),
   members: createFakeModel(),
@@ -68,6 +71,13 @@ beforeAll(async () => {
         members: new MembersRepository(m.members.model as never),
         customers: new CustomersRepository(m.customers.model as never),
         salons: new SalonsRepository(m.salons.model as never),
+        phones: {
+          verify: (phone, idToken) =>
+            idToken === 'valid-proof' && phone.e164 === PHONE.e164
+              ? Promise.resolve()
+              : Promise.reject(new UnauthorizedError({ code: 'OTP_INVALID' })),
+        },
+        otpGate: { reset: (e164) => Promise.resolve(void resets.push(e164)) },
         settings,
         now,
       }),
@@ -203,7 +213,7 @@ beforeEach(async () => {
     },
   );
   for (const who of [me, other]) {
-    m.customers.docs.push({ _id: who, firstName: 'C', status: 'ACTIVE' });
+    m.customers.docs.push({ _id: who, firstName: 'C', status: 'ACTIVE', phone: PHONE });
   }
 });
 
