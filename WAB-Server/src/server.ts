@@ -36,6 +36,7 @@ import { createPeriodicJobs } from './jobs/periodicJobs';
 import { createBullJobScheduler } from './jobs/bullmq';
 import type { JobHandler, JobScheduler } from './jobs/jobs';
 import { CAMPAIGN_JOB_NAME } from './constants/campaigns';
+import { createAdminCustomersService } from './domain/customers/adminCustomers.service';
 import { createCampaignsService } from './domain/campaigns/campaigns.service';
 import { CampaignsRepository } from './repositories/campaigns.repository';
 import { createFavoritesService } from './domain/favorites/favorites.service';
@@ -771,6 +772,13 @@ const buildServices = (
     salonState,
     adminPlacements: placements,
     adminCampaigns: campaigns,
+    adminCustomers: createAdminCustomersService({
+      customers: new CustomersRepository(),
+      installations: new InstallationsRepository(),
+      bookings: bookingsRepository,
+      lifecycle: accountLifecycle,
+      audit,
+    }),
     adminReviews: createAdminReviewsService({
       reviews: new ReviewsRepository(),
       salons: new SalonsRepository(),
