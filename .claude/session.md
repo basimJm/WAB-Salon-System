@@ -1456,6 +1456,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - `warnedEnd` is an extension; the expiry job reads active subscriptions in one query (small table: one row per salon); the admin email/in-app alerts and the daily schedule come with SRV-096/100; not run against MongoDB (`$max`).
 
+### T-101 — SRV-090 Salon bank details (AES-GCM, owner-only, OTP)
+- Project: `WAB-Server/` (`src/utils/crypto/aesGcm.ts`, `src/utils/iban.ts`, `src/domain/salons/payoutDetails.service.ts`, merchant + admin routes, config `PAYOUT_ENCRYPTION_KEY`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §3.3 payoutDetails "AES-GCM, key from secrets", §6 owner-only PAYOUT_DETAILS_MANAGE + OTP; Merchant PRD M22; NFR-01 encryption of sensitive fields):
+  - [x] AES-256-GCM: round trip, fresh IV, tampering / other key / malformed rejected; key = base64 of 32 bytes, validated at startup (required in production, never logged)
+  - [x] IBAN validated (checksum, charset, Jordan length) before anything else; stored encrypted + last 4; the full IBAN never leaves the server except to the admin for a transfer
+  - [x] owner only (manager 403 `OWNER_REQUIRED` on read and write); change needs a fresh OTP (`BANK_DETAILS`): wrong proof saves nothing, invalid IBAN does not consume the code
+  - [x] admin reveal is audited on every call; admin edit needs a reason and is audited without any IBAN; unknown salon 404
+- Tests: `tests/payoutDetails.test.ts` (14), `tests/config.test.ts` (production needs the key); full gate green, 2208 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M22), Architect ✔, QA ✔) - DECISIONS: key rotation needs a re-encryption job (values carry `v1:`); the OTP check reuses `PhoneVerifier.verify` with the owner's stored E.164; the admin "reveal" is a GET that writes an audit entry (reason fixed); a notification to the owner on change is left to SRV-093.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

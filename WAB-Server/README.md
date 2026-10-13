@@ -35,6 +35,8 @@ OTP, file storage, push/email, payments and analytics sit behind interfaces in `
 
 Access tokens are HS256 JWTs signed with `JWT_ACCESS_SECRET` (required, at least 32 characters, never committed; set it in `.env.development`). Each token is valid for one namespace only (`customer`, `merchant` or `admin`); a token of another namespace gets `403`. Protect a route with `requireAuth(scope, secret)`.
 
+`PAYOUT_ENCRYPTION_KEY` (base64 of 32 random bytes, e.g. `openssl rand -base64 32`; required in production, optional in development) encrypts salons' bank details at rest with AES-256-GCM. Without it the bank-details endpoints answer 503. Rotating the key needs a re-encryption of the stored values (they carry a `v1:` version prefix).
+
 ## Real-time (Socket.IO)
 
 One namespace per token scope: `/customer`, `/merchant`, `/admin` (path `/socket.io`). Connect with the access token:

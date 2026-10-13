@@ -51,6 +51,13 @@ export interface SalonApplication {
 }
 
 /** A salon (BUSINESS_DOMAIN.md §3.3). Later tasks fill location, hours, policy, payout details. */
+export interface PayoutDetails {
+  bankName: string;
+  accountHolderName: string;
+  ibanEncrypted: string;
+  ibanLast4: string;
+}
+
 export interface SalonRaw {
   name: string;
   gender: Gender;
@@ -70,6 +77,8 @@ export interface SalonRaw {
   offline?: { reason: string; at: Date; by: Types.ObjectId };
   completeness: { missing: string[]; isComplete: boolean };
   rating: { avg: number; count: number };
+  /** The IBAN is stored encrypted (AES-GCM); only its last four characters are readable. */
+  payoutDetails?: PayoutDetails;
   deletionRequestedAt?: Date;
   searchText: string;
   createdAt: Date;
@@ -176,6 +185,17 @@ const salonSchema = new Schema<SalonRaw>(
         { _id: false },
       ),
       default: () => ({ missing: [], isComplete: false }),
+    },
+    payoutDetails: {
+      type: new Schema(
+        {
+          bankName: { type: String, required: true },
+          accountHolderName: { type: String, required: true },
+          ibanEncrypted: { type: String, required: true },
+          ibanLast4: { type: String, required: true },
+        },
+        { _id: false },
+      ),
     },
     rating: {
       type: new Schema(
