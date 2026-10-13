@@ -1801,6 +1801,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: PDF is Latin-only (no Arabic shaping/bidi); finished files are kept (no expiry job yet); bookings/customers/salons tables are not exportable yet (builders to add per screen); the audit reason is a fixed text.
 
+### T-119 — SRV-113 Load test: no double booking under concurrency + load tool
+
+- Project: `WAB-Server/` (`src/utils/loadtest/*`, `src/constants/loadtest.ts`, `tests/loadtest.test.ts`, `tests/bookings.test.ts`, README)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE (p95 measurement on a real deployment pending, see notes)
+- Acceptance criteria (BRD NFR-02 no double booking, NFR-03 p95 ~300 ms; BUSINESS_DOMAIN §5.6):
+  - [x] Zero double booking under concurrency: 40 racers on one slot → exactly 1; 5 slots × 8 → 5; overlapping neighbours never both win; 24 parallel different slots all succeed; no overlapping bookings per staff (real Redis locks)
+  - [x] Reusable load tool: round-robin workers over home/search/details/availability, p50/p95/p99 + error rate per target, exit 1 over 300 ms p95 or 1 % errors; unit-tested with a virtual clock and a mocked fetch
+  - [ ] p95 verified against a real server — NOT possible here (no MongoDB/deployment); to run after SRV-011
+- Tests: `tests/loadtest.test.ts` (10), `tests/bookings.test.ts` (+4); full gate green; API docs: no change
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - the in-process tests prove correctness of the locks, not database throughput; Mongo-level uniqueness of overlapping bookings still relies on the Redis lock + atomic re-validation (no unique index can express overlap).
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
