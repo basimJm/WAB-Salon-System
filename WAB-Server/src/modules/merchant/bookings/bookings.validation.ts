@@ -8,3 +8,8 @@ export const decisionBody = z.object({
   reasonCode: z.string().regex(REASON_CODE_PATTERN),
   reasonText: z.string().trim().min(1).max(REASON_TEXT_MAX_LENGTH).optional(),
 });
+
+export const reassignBody = z.object({
+  personIndex: z.number().int().min(0),
+  staffId: z.string().regex(OBJECT_ID_PATTERN),
+});

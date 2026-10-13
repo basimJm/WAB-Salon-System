@@ -72,6 +72,34 @@ export class BookingsRepository
     return updated === null ? null : toEntity<BookingRaw>(updated);
   }
 
+  /**
+   * Replaces the staff member of one person of an APPROVED booking, only while the person still has
+   * `from` (so two simultaneous reassignments cannot both win). `null` when nothing matched.
+   */
+  async reassign(input: {
+    id: string;
+    personIndex: number;
+    from: string;
+    to: string;
+  }): Promise<Entity<BookingRaw> | null> {
+    if (!isObjectIdString(input.id)) return null;
+    const path = `persons.${String(input.personIndex)}`;
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: input.id, status: 'APPROVED', [`${path}.staffId`]: toObjectId(input.from) },
+        {
+          $set: {
+            [`${path}.staffId`]: toObjectId(input.to),
+            [`${path}.staffSelection`]: 'SPECIFIC',
+          },
+        },
+        { new: true },
+      )
+      .lean()
+      .exec();
+    return updated === null ? null : toEntity<BookingRaw>(updated);
+  }
+
   /** Live bookings of a salon that have not ended yet, for the schedule-conflict checks. */
   async upcomingForSalon(salonId: string, from: Date): Promise<UpcomingBooking[]> {
     const found = await this.findMany(
