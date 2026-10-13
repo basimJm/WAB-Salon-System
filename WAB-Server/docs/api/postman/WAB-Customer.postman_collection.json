@@ -884,6 +884,21 @@
                   "key": "general",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "lat",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "lng",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []

@@ -1065,6 +1065,17 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - recommended/favorites lookups are placeholders until SRV-066/062; nearest sorting is SRV-058.
 
+### T-070 — SRV-058 Nearest sorting with distance
+- Project: `WAB-Server/` (`src/domain/search`, `src/modules/customer/search`, `src/constants/search.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BE-21; `discovery.nearbyRadiusKm`):
+  - [x] `lat`+`lng` (both or neither, valid ranges): default sort NEAREST within the radius setting, ordered by distance, paginated; `sort=RATING` keeps rating order; `distanceKm` (1 decimal) on cards, null without position/location
+  - [x] NEAREST without position, unknown sort, half position -> 400
+- Tests: `tests/search.test.ts` (29); full gate green; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - candidates are pruned by the 2dsphere index then sorted in memory (bounded by the radius); a `$geoNear` pipeline would need aggregation support in the repository layer.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

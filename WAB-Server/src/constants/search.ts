@@ -10,3 +10,10 @@ export const SEARCH_RATING_MAX = 5;
 export const SHORT_DESCRIPTION_LENGTH = 120;
 /** Per-IP limit for the search routes (typing and filtering fire many requests). */
 export const SEARCH_ROUTE_RATE_LIMIT = { windowMs: 60_000, max: 300 } as const;
+export const SEARCH_SORTS = ['RATING', 'NEAREST'] as const;
+export type SearchSort = (typeof SEARCH_SORTS)[number];
+export const EARTH_RADIUS_KM = 6371;
+export const LATITUDE_LIMIT = 90;
+export const LONGITUDE_LIMIT = 180;
+/** Distances are shown to one decimal place (km). */
+export const DISTANCE_DECIMALS = 10;
