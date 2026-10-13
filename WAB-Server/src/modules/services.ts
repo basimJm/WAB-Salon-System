@@ -10,6 +10,7 @@ import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
 import type { SalonDetailsService } from '../domain/salonDetails/salonDetails.service';
+import type { FavoritesService } from '../domain/favorites/favorites.service';
 import type { HomeService } from '../domain/home/home.service';
 import type { SearchService } from '../domain/search/search.service';
 import type { AdminSalonsService } from '../domain/salons/adminSalons.service';
@@ -50,6 +51,7 @@ export interface ApiServices {
   readonly adminSalons?: AdminSalonsService;
   readonly salonDetails?: SalonDetailsService;
   readonly home?: HomeService;
+  readonly favorites?: FavoritesService;
   readonly search?: SearchService;
   readonly uploads?: UploadsService;
   readonly gallery?: GalleryService;
@@ -273,6 +275,16 @@ export const unavailableSalonDetails: SalonDetailsService = {
   staff: unavailable,
 };
 
+export const unavailableFavorites: FavoritesService = {
+  add: unavailable,
+  remove: unavailable,
+  list: unavailable,
+};
+
 export const unavailableHome: HomeService = { get: unavailable };
 
-export const unavailableSearch: SearchService = { search: unavailable, priceBounds: unavailable };
+export const unavailableSearch: SearchService = {
+  search: unavailable,
+  cards: unavailable,
+  priceBounds: unavailable,
+};

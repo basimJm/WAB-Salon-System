@@ -70,6 +70,8 @@ export interface SearchService {
     params: PaginationParams;
     customerId?: string | undefined;
   }): Promise<{ items: SalonCard[]; meta: PaginationMeta }>;
+  /** Cards of these salons in the given order; salons that are not visible are left out. */
+  cards(input: { ids: readonly string[]; customerId?: string | undefined }): Promise<SalonCard[]>;
   /** Slider bounds for the price filter: min/max of the sums over salons offering all services. */
   priceBounds(input: {
     gender: Gender;
@@ -168,6 +170,31 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
     };
   };
 
+  const toCards = async (
+    items: readonly Entity<SalonRaw>[],
+    customerId: string | undefined,
+    distances: ReadonlyMap<string, number>,
+  ): Promise<SalonCard[]> => {
+    const ids = items.map((s) => s.id);
+    const timeZone = await settings.get('timezone');
+    const date = localDateOf(now(), timeZone);
+    const [ranges, saved] = await Promise.all([
+      ids.length === 0 ? [] : closures.findMany({ salonId: { $in: ids }, to: { $gte: date } }),
+      customerId === undefined
+        ? Promise.resolve(new Set<string>())
+        : favorites.among(customerId, ids),
+    ]);
+    return items.map((s) =>
+      card(
+        s,
+        ranges.filter((r) => r.salonId === s.id),
+        timeZone,
+        saved.has(s.id),
+        distances.get(s.id) ?? null,
+      ),
+    );
+  };
+
   return {
     async search({ query, params, customerId }) {
       const empty = { items: [], meta: { page: params.page, pageSize: params.pageSize, total: 0 } };
@@ -238,27 +265,22 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
           if (d !== null) distances.set(s.id, d);
         }
       }
-      const ids = page.items.map((s) => s.id);
-      const timeZone = await settings.get('timezone');
-      const date = localDateOf(now(), timeZone);
-      const [ranges, saved] = await Promise.all([
-        ids.length === 0 ? [] : closures.findMany({ salonId: { $in: ids }, to: { $gte: date } }),
-        customerId === undefined
-          ? Promise.resolve(new Set<string>())
-          : favorites.among(customerId, ids),
-      ]);
       return {
-        items: page.items.map((s) =>
-          card(
-            s,
-            ranges.filter((r) => r.salonId === s.id),
-            timeZone,
-            saved.has(s.id),
-            distances.get(s.id) ?? null,
-          ),
-        ),
+        items: await toCards(page.items, customerId, distances),
         meta: page.meta,
       };
+    },
+
+    async cards({ ids, customerId }) {
+      if (ids.length === 0) return [];
+      const found = await salons.findMany({
+        _id: { $in: [...ids] },
+        state: 'LIVE',
+        'completeness.isComplete': true,
+      });
+      const byId = new Map(found.map((s) => [s.id, s]));
+      const ordered = ids.flatMap((id) => byId.get(id) ?? []);
+      return toCards(ordered, customerId, new Map());
     },
 
     async priceBounds({ gender, serviceIds }) {
