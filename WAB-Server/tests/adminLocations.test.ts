@@ -89,8 +89,8 @@ describe('admin locations', () => {
   });
 
   it('refuses a write without a reason or with a bad value, and audits nothing', async () => {
-    const { reason: _unused, ...noReason } = COUNTRY;
-    void _unused;
+    const noReason: Record<string, unknown> = { ...COUNTRY };
+    Reflect.deleteProperty(noReason, 'reason');
     for (const payload of [
       noReason,
       { ...COUNTRY, reason: '  ' },

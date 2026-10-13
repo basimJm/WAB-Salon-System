@@ -16,8 +16,9 @@ export interface AdminCrudRouterOptions<TRaw extends object> {
   readonly updateBody: z.ZodType<{ reason: string } & Record<string, unknown>>;
 }
 
-const validatedPart = <T>(req: Request, part: 'body' | 'query' | 'params'): T =>
-  (req.validated as Record<string, T>)[part] as T;
+type Parts = Record<string, Record<string, unknown>>;
+const validatedPart = (req: Request, part: 'body' | 'query'): Record<string, unknown> =>
+  (req.validated as Parts)[part] ?? {};
 
 /** GET list, GET one, POST create, PATCH update: all behind the admin guard, writes need a reason. */
 export const createAdminCrudRouter = <TRaw extends object>({
@@ -33,10 +34,10 @@ export const createAdminCrudRouter = <TRaw extends object>({
     ADMIN_CRUD_ROUTES.list,
     validate({ query: listQuery }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { page, pageSize, ...filter } = validatedPart<{ page: number; pageSize: number }>(
-        req,
-        'query',
-      );
+      const { page, pageSize, ...filter } = validatedPart(req, 'query') as {
+        page: number;
+        pageSize: number;
+      };
       const result = await service.list(filter, { page, pageSize });
       sendPaginated(req, res, result.items, { page, pageSize }, result.meta.total);
     }),
@@ -51,9 +52,9 @@ export const createAdminCrudRouter = <TRaw extends object>({
     ADMIN_CRUD_ROUTES.list,
     validate({ body: createBody }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { reason, ...data } = validatedPart<{ reason: string }>(req, 'body');
+      const { reason, ...data } = validatedPart(req, 'body') as { reason: string };
       const created = await service.create({
-        data: data as Partial<TRaw>,
+        data,
         reason,
         actor: toActor(req),
       });
@@ -64,10 +65,10 @@ export const createAdminCrudRouter = <TRaw extends object>({
     ADMIN_CRUD_ROUTES.byId,
     validate({ body: updateBody }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { reason, ...patch } = validatedPart<{ reason: string }>(req, 'body');
+      const { reason, ...patch } = validatedPart(req, 'body') as { reason: string };
       const updated = await service.update({
         id: String(req.params['id']),
-        patch: patch as Partial<TRaw>,
+        patch,
         reason,
         actor: toActor(req),
       });
