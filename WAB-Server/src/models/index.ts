@@ -3,6 +3,7 @@ import { AppVersionModel } from './appVersion.model';
 import { ContactInfoModel } from './contactInfo.model';
 import { ContentPageModel } from './contentPage.model';
 import { RecommendedPlacementModel } from './recommendedPlacement.model';
+import { BookingModel } from './booking.model';
 import { BookingDraftModel } from './bookingDraft.model';
 import { ReviewModel } from './review.model';
 import { FavoriteModel } from './favorite.model';
@@ -64,4 +65,5 @@ export const ALL_MODELS = [
   ReviewModel,
   RecommendedPlacementModel,
   BookingDraftModel,
+  BookingModel,
 ] as const;

@@ -1815,6 +1815,116 @@
               ]
             }
           }
+        },
+        {
+          "name": "Confirm the booking with the OTP (purpose BOOKING_CONFIRMATION): the Firebase ID token must belong to the customer’s own phone. Required before the booking is created.",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/bookings/drafts/:id/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "bookings",
+                "drafts",
+                ":id",
+                "verify-otp"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create the booking from a confirmed draft (status PENDING, waits for the salon). Pay-on-arrival drafts only for now; online payment arrives with the paid flow.",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "bookings"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Needs the draft’s OTP confirmation (`verify-otp`), else 422 `OTP_INVALID`. The slots are re-validated under a lock per staff member and date: a slot that went away answers 409 `SLOT_TAKEN`. An expired draft is 422 `DRAFT_EXPIRED`; an online method without a verified payment is 422 `PAYMENT_NOT_VERIFIED`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"draftId\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         }
       ]
     }

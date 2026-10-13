@@ -1217,6 +1217,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) `bookingDrafts.holdKeys` of the domain became structured `holds[]` (staff, date, start, end) because holds are sorted-set members; (2) the account holder's own gender is not checked against the salon (a mother may book for a bride); (3) slot not free = 422 `SLOT_UNAVAILABLE` at draft time, `SLOT_TAKEN` (409) is for the race at creation (SRV-071); (4) OTP verification and payment fields (`otpVerifiedAt`, `transactionId`) exist on the model but are set by SRV-071/083. Draft discard on `DELETE` frees holds immediately.
 
+### T-082 — SRV-071 Atomic booking creation (pay on arrival) + OTP confirmation
+- Project: `WAB-Server/` (`src/domain/bookings/bookingCreation.service.ts`, `bookingDraft.service.ts#verifyOtp`, `src/models/booking.model.ts`, `src/repositories/bookings.repository.ts`, `src/modules/customer/bookings`, `withLocks`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.5 bookings, §5.6 step 2-4 and 6; BE-32, BE-33, BE-34; BER-04, BER-07):
+  - [x] Booking model with the documented fields and indexes (unique reference number, overlap index), registered in `ALL_MODELS`; enums for booking/payment/refund status
+  - [x] OTP step: `verify-otp` accepts only the customer's own phone proof (purpose BOOKING_CONFIRMATION), resets the OTP counters, stores `otpVerifiedAt`; booking creation without it is 422 `OTP_INVALID`
+  - [x] Creation: own, unexpired, OTP-confirmed PAY_ON_ARRIVAL draft; online methods -> 422 `PAYMENT_NOT_VERIFIED` (paid flow = SRV-085)
+  - [x] Atomic: locks per staff and date (sorted, no deadlock), full re-validation (`plan`, "any staff" may be re-picked), overlap check; a lost slot is 409 `SLOT_TAKEN`; two parallel creates -> exactly one booking
+  - [x] PENDING booking with `statusHistory[0]`, unique reference (retry on collision), prices/policy from the draft snapshot, `respondBy`, `hasBride`, `salonGender`; draft deleted and holds released; cancelled/rejected bookings never block
+  - [x] Real `BookingBusyLookup` (availability) and `BookingLookup` (schedule/leave/staff conflicts) from the bookings collection
+- Tests: `tests/bookings.test.ts` (11, real Redis; run 5x for stability), `tests/bookingDrafts.test.ts` (27); full gate green, 2018 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) no Mongo transaction yet: the booking is one document, the draft deletion after it is best effort (TTL cleans it); the paid flow will wrap booking + transaction + ledger in one; (2) OTP is a separate endpoint (`verify-otp`) as in §5.6 order, so the paid flow can pay after it; (3) notifications/sockets/jobs are not fired yet (hook `BookingCreatedHook`). Not run against a real MongoDB (`$elemMatch` overlap query).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

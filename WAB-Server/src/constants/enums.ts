@@ -55,3 +55,34 @@ export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
 
 export const STAFF_SELECTIONS = ['SPECIFIC', 'ANY'] as const;
 export type StaffSelection = (typeof STAFF_SELECTIONS)[number];
+
+export const BOOKING_STATUSES = [
+  'PENDING',
+  'APPROVED',
+  'REJECTED',
+  'CANCELLED_BY_CUSTOMER',
+  'CANCELLED_BY_SALON',
+  'AUTO_CANCELLED',
+  'COMPLETED',
+  'NO_SHOW',
+] as const;
+export type BookingStatus = (typeof BOOKING_STATUSES)[number];
+/** Statuses whose persons occupy their staff member's time (BUSINESS_DOMAIN.md §5.6). */
+export const SLOT_HOLDING_STATUSES = [
+  'PENDING',
+  'APPROVED',
+] as const satisfies readonly BookingStatus[];
+export const BOOKING_PAYMENT_STATUSES = [
+  'PAY_ON_ARRIVAL',
+  'DEPOSIT_PAID',
+  'FULLY_PAID',
+  'PAID',
+] as const;
+export type BookingPaymentStatus = (typeof BOOKING_PAYMENT_STATUSES)[number];
+export const BOOKING_REFUND_STATUSES = [
+  'NONE',
+  'REFUND_PENDING',
+  'REFUNDED',
+  'REFUND_FAILED',
+] as const;
+export type BookingRefundStatus = (typeof BOOKING_REFUND_STATUSES)[number];
