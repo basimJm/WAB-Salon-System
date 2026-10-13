@@ -2230,6 +2230,96 @@
           }
         }
       ]
+    },
+    {
+      "name": "Salon policy",
+      "item": [
+        {
+          "name": "Current policy, or null when not set yet (POLICIES_MANAGE)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/salon/policy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "salon",
+                "policy"
+              ],
+              "query": [],
+              "variable": []
+            }
+          }
+        },
+        {
+          "name": "Replace the policy (POLICIES_MANAGE). Deposit percentage (1-100) is required when DEPOSIT is offered. Applies to new bookings only (bookings keep a snapshot).",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/salon/policy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "salon",
+                "policy"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cancellationWindowHours\": 0,\n  \"paymentOptions\": [\n    \"PAY_ON_ARRIVAL\"\n  ],\n  \"depositPercentage\": 0,\n  \"depositRefundableOnCustomerCancel\": false,\n  \"fullPaymentRefundOnCustomerCancel\": \"FULL\",\n  \"noShowDeposit\": \"KEEP\",\n  \"noShowFullPayment\": \"KEEP\",\n  \"notes\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

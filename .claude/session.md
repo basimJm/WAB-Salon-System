@@ -1004,7 +1004,7 @@
 ### T-065 — SRV-053 Staff leaves CRUD
 - Project: `WAB-Server/` (`src/domain/team/leaves.service.ts`, `src/modules/merchant/team/leaves.*`, `src/models/staffLeave.model.ts`, `src/repositories/leaves.repository.ts`, `src/constants/leaves.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #72 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #73 merged into `server`)
 - Acceptance criteria (BUSINESS_DOMAIN §3.4 `staffLeaves`, §5.12 conflicts; Merchant PRD M17 "Leaves: list + add date range (+ note)" and conflict handling):
   - [x] `staffLeaves` model (`{memberId, to}`, `{salonId, from}` indexes) in `ALL_MODELS`; dates are civil `YYYY-MM-DD` (salon calendar), `to` inclusive
   - [x] `GET|POST /merchant/v1/team/members/:id/leaves`, `PATCH|DELETE .../leaves/:leaveId`: `STAFF_MANAGE`; the member must be in the caller's salon, a leave of another member/salon is 404
@@ -1014,6 +1014,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M17), Architect ✔, QA ✔) - overlapping leaves of one member are allowed (harmless for availability); "on leave today" for the team list and the availability algorithm use `LeavesRepository.upcomingForSalon` later. Not run against a real MongoDB.
 - Notes: Next: SRV-054 (salon policies).
+
+### T-066 — SRV-054 Salon policies
+- Project: `WAB-Server/` (`src/domain/salons/policy.service.ts`, `src/modules/merchant/policy/*`, `src/constants/salon.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #73 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3 SalonPolicy, §5.2 POLICY completeness, §6 POLICIES_MANAGE; Merchant PRD M19):
+  - [x] `GET /merchant/v1/salon/policy` (null until set) and `PUT` (whole policy replaced): `POLICIES_MANAGE` only (owner always; a default MANAGER does not have it)
+  - [x] Validation: cancellation window integer 0..720 hours (720 = assumption), payment options >= 1 and unique from PAY_ON_ARRIVAL/DEPOSIT/FULL_ONLINE, deposit percentage integer 1..100 required when DEPOSIT is offered (dropped when it is not), `depositRefundableOnCustomerCancel`, `fullPaymentRefundOnCustomerCancel` FULL|MINUS_DEPOSIT, `noShowDeposit` KEEP|REFUND, `noShowFullPayment` KEEP|REFUND_MINUS_DEPOSIT|REFUND_FULL, notes <= 1000 (empty/absent removes them)
+  - [x] Saving recomputes completeness (POLICY item can make the salon LIVE); the stored policy is what bookings snapshot later
+- Tests: `cd WAB-Server && npm test` - 1760 pass; format/lint/typecheck/build green; audit 0. `tests/policy.test.ts` (18).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M19), Architect ✔, QA ✔) - the customer "Salon rules" preview and the deposit example are client-side from this data; the policy has no version history (bookings keep their own snapshot). Not run against a real MongoDB.
+- Notes: This completes the merchant salon-setup block (SRV-041..054). Next in order: SRV-055 (check the backlog row).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

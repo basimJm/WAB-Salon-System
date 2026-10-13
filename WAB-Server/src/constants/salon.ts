@@ -93,3 +93,8 @@ export const MERCHANT_PROFILE_ROUTES = { root: '/', profile: '/profile' } as con
 export const LATITUDE_LIMIT = 90;
 export const LONGITUDE_LIMIT = 180;
 export const LOCATION_TEXT_MAX_LENGTH = 300;
+
+/** Salon policy (SRV-054, Merchant PRD M19). */
+export const MERCHANT_POLICY_ROUTES = { base: '/salon/policy' } as const;
+/** Assumption (the domain only says >= 0): a cancellation window is at most 30 days. */
+export const CANCELLATION_WINDOW_MAX_HOURS = 720;
