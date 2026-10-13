@@ -26,6 +26,8 @@ export interface PeriodicJobsDeps {
   readonly evaluateAlerts?: (now: Date) => Promise<number>;
   /** The `alerts:email` run (SRV-107): resolves to the number of alerts mailed. */
   readonly emailAlerts?: (now: Date) => Promise<number>;
+  /** The `reports:aggregate` run (SRV-108): stores yesterday's numbers; resolves to that date. */
+  readonly aggregateReports?: (now: Date) => Promise<string>;
   readonly onDelayedRefunds?: (refunds: Entity<RefundRaw>[]) => Promise<void>;
   readonly logger: Logger;
 }
@@ -87,6 +89,11 @@ export const createPeriodicJobs = (deps: PeriodicJobsDeps): PeriodicJobs => {
     [PERIODIC_JOBS.alertsEvaluate.name]: async () => {
       if (deps.evaluateAlerts === undefined) return;
       report(PERIODIC_JOBS.alertsEvaluate.name, { raised: await deps.evaluateAlerts(new Date()) });
+    },
+    [PERIODIC_JOBS.reportsAggregate.name]: async () => {
+      if (deps.aggregateReports === undefined) return;
+      const date = await deps.aggregateReports(new Date());
+      logger.info({ job: PERIODIC_JOBS.reportsAggregate.name, date }, 'periodic job finished');
     },
     [PERIODIC_JOBS.alertsEmail.name]: async () => {
       if (deps.emailAlerts === undefined) return;

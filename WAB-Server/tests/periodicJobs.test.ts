@@ -174,6 +174,20 @@ describe('periodic jobs', () => {
     expect(calls).toEqual(['alerts']);
   });
 
+  it("aggregates yesterday's report when wired and does nothing otherwise", async () => {
+    await run(build(), PERIODIC_JOBS.reportsAggregate.name);
+    await run(
+      build({
+        aggregateReports: () => {
+          calls.push('reports');
+          return Promise.resolve('2026-10-12');
+        },
+      }),
+      PERIODIC_JOBS.reportsAggregate.name,
+    );
+    expect(calls).toEqual(['reports']);
+  });
+
   it('lets a failure reach the queue so it is retried', async () => {
     const jobs = build({
       accounts: { purgeDueCustomers: () => Promise.reject(new Error('db down')) },

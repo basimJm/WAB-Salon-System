@@ -1774,6 +1774,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: emails are Arabic (no admin language stored); digest delay is a constant (PRD: configurable) until a setting key exists; acknowledge is not audited. Real SMTP waits on SRV-100.
 
+### T-117 — SRV-108 Reports: daily, weekly, monthly
+
+- Project: `WAB-Server/` (`src/domain/reports`, `src/modules/admin/reports`, `src/models/report.model.ts`, `src/constants/reports.ts`, `BaseRepository.sumField|countBy`, `BookingsRepository.topSalons`, job `periodic.reports-aggregate`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (Admin PRD A26; BUSINESS_DOMAIN §9 `reports:aggregate` 02:00 Amman):
+  - [x] Daily/weekly/monthly endpoints (admin only): bookings by status + bride, payments (attempts, success, failed, cancelled, collected, fees), refunds, new customers/applications, reviews; weekly + top salons; monthly + payouts, subscriptions snapshot, growth vs previous month; money as JOD strings
+  - [x] Days are Asia/Amman ranges (starts 21:00Z); finished days stored once and reused, today live, future dates/months 400, bad date/month format 400; storage failure does not break the report
+  - [x] Nightly job stores yesterday (Amman), idempotent; month/year boundaries correct
+- Tests: `tests/reports.test.ts` (13) + job test; full gate green; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: analytics-only items (installs, DAU, funnels, retention, searches, response times, top services) wait for BigQuery (SRV-110); stored days are not refreshed after the nightly run; reports come from the real collections, not from `serverEvents` (nothing emits events yet); aggregates run only against stubs, not a real MongoDB.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

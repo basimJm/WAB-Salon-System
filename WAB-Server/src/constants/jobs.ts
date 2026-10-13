@@ -34,6 +34,7 @@ export const PERIODIC_JOBS = {
   refundsDelayed: { name: 'periodic.refunds-delayed', cron: '0 * * * *' },
   paymentsReconcile: { name: 'periodic.payments-reconcile', cron: '*/5 * * * *' },
   ledgerReconcile: { name: 'periodic.ledger-reconcile', cron: '20 2 * * *' },
+  reportsAggregate: { name: 'periodic.reports-aggregate', cron: '0 2 * * *' },
   alertsEmail: { name: 'periodic.alerts-email', cron: '*/5 * * * *' },
   alertsEvaluate: { name: 'periodic.alerts-evaluate', cron: '*/5 * * * *' },
   bookingJobsReconcile: { name: 'periodic.booking-jobs-reconcile', cron: '15 * * * *' },

@@ -20844,6 +20844,934 @@
         }
       }
     },
+    "/admin/v1/reports/daily": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "One business day (Asia/Amman): bookings, payments, refunds, registrations, reviews",
+        "description": "Finished days come from the nightly aggregate (computed once if missing); today is live. Installs, active users, funnels and retention need BigQuery (SRV-110) and are not included.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "date",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "date": {
+                          "type": "string"
+                        },
+                        "bookings": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "number"
+                            },
+                            "byStatus": {
+                              "type": "object",
+                              "properties": {
+                                "PENDING": {
+                                  "type": "number"
+                                },
+                                "APPROVED": {
+                                  "type": "number"
+                                },
+                                "REJECTED": {
+                                  "type": "number"
+                                },
+                                "CANCELLED_BY_CUSTOMER": {
+                                  "type": "number"
+                                },
+                                "CANCELLED_BY_SALON": {
+                                  "type": "number"
+                                },
+                                "AUTO_CANCELLED": {
+                                  "type": "number"
+                                },
+                                "COMPLETED": {
+                                  "type": "number"
+                                },
+                                "NO_SHOW": {
+                                  "type": "number"
+                                }
+                              }
+                            },
+                            "bride": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "byStatus",
+                            "bride"
+                          ]
+                        },
+                        "payments": {
+                          "type": "object",
+                          "properties": {
+                            "attempts": {
+                              "type": "number"
+                            },
+                            "succeeded": {
+                              "type": "number"
+                            },
+                            "failed": {
+                              "type": "number"
+                            },
+                            "cancelled": {
+                              "type": "number"
+                            },
+                            "collected": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            },
+                            "gatewayFees": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            }
+                          },
+                          "required": [
+                            "attempts",
+                            "succeeded",
+                            "failed",
+                            "cancelled",
+                            "collected",
+                            "gatewayFees"
+                          ]
+                        },
+                        "refunds": {
+                          "type": "object",
+                          "properties": {
+                            "created": {
+                              "type": "number"
+                            },
+                            "completed": {
+                              "type": "number"
+                            },
+                            "failed": {
+                              "type": "number"
+                            },
+                            "amount": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            }
+                          },
+                          "required": [
+                            "created",
+                            "completed",
+                            "failed",
+                            "amount"
+                          ]
+                        },
+                        "registrations": {
+                          "type": "object",
+                          "properties": {
+                            "customers": {
+                              "type": "number"
+                            },
+                            "applications": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "customers",
+                            "applications"
+                          ]
+                        },
+                        "reviews": {
+                          "type": "object",
+                          "properties": {
+                            "submitted": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "submitted"
+                          ]
+                        },
+                        "snapshot": {
+                          "type": "object",
+                          "properties": {
+                            "reviewsPending": {
+                              "type": "number"
+                            },
+                            "refundsPending": {
+                              "type": "number"
+                            },
+                            "applicationsPending": {
+                              "type": "number"
+                            },
+                            "subscriptions": {
+                              "type": "object",
+                              "properties": {
+                                "trial": {
+                                  "type": "number"
+                                },
+                                "active": {
+                                  "type": "number"
+                                },
+                                "expired": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "trial",
+                                "active",
+                                "expired"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "reviewsPending",
+                            "refundsPending",
+                            "applicationsPending",
+                            "subscriptions"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "date",
+                        "bookings",
+                        "payments",
+                        "refunds",
+                        "registrations",
+                        "reviews",
+                        "snapshot"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/reports/weekly": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Seven days from `from`: the daily numbers added up plus top salons",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Weekly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "bookings": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "number"
+                            },
+                            "byStatus": {
+                              "type": "object",
+                              "properties": {
+                                "PENDING": {
+                                  "type": "number"
+                                },
+                                "APPROVED": {
+                                  "type": "number"
+                                },
+                                "REJECTED": {
+                                  "type": "number"
+                                },
+                                "CANCELLED_BY_CUSTOMER": {
+                                  "type": "number"
+                                },
+                                "CANCELLED_BY_SALON": {
+                                  "type": "number"
+                                },
+                                "AUTO_CANCELLED": {
+                                  "type": "number"
+                                },
+                                "COMPLETED": {
+                                  "type": "number"
+                                },
+                                "NO_SHOW": {
+                                  "type": "number"
+                                }
+                              }
+                            },
+                            "bride": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "byStatus",
+                            "bride"
+                          ]
+                        },
+                        "payments": {
+                          "type": "object",
+                          "properties": {
+                            "attempts": {
+                              "type": "number"
+                            },
+                            "succeeded": {
+                              "type": "number"
+                            },
+                            "failed": {
+                              "type": "number"
+                            },
+                            "cancelled": {
+                              "type": "number"
+                            },
+                            "collected": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            },
+                            "gatewayFees": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            }
+                          },
+                          "required": [
+                            "attempts",
+                            "succeeded",
+                            "failed",
+                            "cancelled",
+                            "collected",
+                            "gatewayFees"
+                          ]
+                        },
+                        "refunds": {
+                          "type": "object",
+                          "properties": {
+                            "created": {
+                              "type": "number"
+                            },
+                            "completed": {
+                              "type": "number"
+                            },
+                            "failed": {
+                              "type": "number"
+                            },
+                            "amount": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            }
+                          },
+                          "required": [
+                            "created",
+                            "completed",
+                            "failed",
+                            "amount"
+                          ]
+                        },
+                        "registrations": {
+                          "type": "object",
+                          "properties": {
+                            "customers": {
+                              "type": "number"
+                            },
+                            "applications": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "customers",
+                            "applications"
+                          ]
+                        },
+                        "reviews": {
+                          "type": "object",
+                          "properties": {
+                            "submitted": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "submitted"
+                          ]
+                        },
+                        "topSalons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "salonId": {
+                                "type": "string"
+                              },
+                              "bookings": {
+                                "type": "number"
+                              },
+                              "completed": {
+                                "type": "number"
+                              },
+                              "lost": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "salonId",
+                              "bookings",
+                              "completed",
+                              "lost"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "from",
+                        "to",
+                        "bookings",
+                        "payments",
+                        "refunds",
+                        "registrations",
+                        "reviews",
+                        "topSalons"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/reports/monthly": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "One month: weekly content, payouts transferred, subscriptions, growth vs previous month",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+            },
+            "required": true,
+            "name": "month",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "month": {
+                          "type": "string"
+                        },
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "bookings": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "number"
+                            },
+                            "byStatus": {
+                              "type": "object",
+                              "properties": {
+                                "PENDING": {
+                                  "type": "number"
+                                },
+                                "APPROVED": {
+                                  "type": "number"
+                                },
+                                "REJECTED": {
+                                  "type": "number"
+                                },
+                                "CANCELLED_BY_CUSTOMER": {
+                                  "type": "number"
+                                },
+                                "CANCELLED_BY_SALON": {
+                                  "type": "number"
+                                },
+                                "AUTO_CANCELLED": {
+                                  "type": "number"
+                                },
+                                "COMPLETED": {
+                                  "type": "number"
+                                },
+                                "NO_SHOW": {
+                                  "type": "number"
+                                }
+                              }
+                            },
+                            "bride": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "byStatus",
+                            "bride"
+                          ]
+                        },
+                        "payments": {
+                          "type": "object",
+                          "properties": {
+                            "attempts": {
+                              "type": "number"
+                            },
+                            "succeeded": {
+                              "type": "number"
+                            },
+                            "failed": {
+                              "type": "number"
+                            },
+                            "cancelled": {
+                              "type": "number"
+                            },
+                            "collected": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            },
+                            "gatewayFees": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            }
+                          },
+                          "required": [
+                            "attempts",
+                            "succeeded",
+                            "failed",
+                            "cancelled",
+                            "collected",
+                            "gatewayFees"
+                          ]
+                        },
+                        "refunds": {
+                          "type": "object",
+                          "properties": {
+                            "created": {
+                              "type": "number"
+                            },
+                            "completed": {
+                              "type": "number"
+                            },
+                            "failed": {
+                              "type": "number"
+                            },
+                            "amount": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            }
+                          },
+                          "required": [
+                            "created",
+                            "completed",
+                            "failed",
+                            "amount"
+                          ]
+                        },
+                        "registrations": {
+                          "type": "object",
+                          "properties": {
+                            "customers": {
+                              "type": "number"
+                            },
+                            "applications": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "customers",
+                            "applications"
+                          ]
+                        },
+                        "reviews": {
+                          "type": "object",
+                          "properties": {
+                            "submitted": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "submitted"
+                          ]
+                        },
+                        "topSalons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "salonId": {
+                                "type": "string"
+                              },
+                              "bookings": {
+                                "type": "number"
+                              },
+                              "completed": {
+                                "type": "number"
+                              },
+                              "lost": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "salonId",
+                              "bookings",
+                              "completed",
+                              "lost"
+                            ]
+                          }
+                        },
+                        "payouts": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "number"
+                            },
+                            "amount": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            }
+                          },
+                          "required": [
+                            "count",
+                            "amount"
+                          ]
+                        },
+                        "snapshot": {
+                          "type": "object",
+                          "properties": {
+                            "reviewsPending": {
+                              "type": "number"
+                            },
+                            "refundsPending": {
+                              "type": "number"
+                            },
+                            "applicationsPending": {
+                              "type": "number"
+                            },
+                            "subscriptions": {
+                              "type": "object",
+                              "properties": {
+                                "trial": {
+                                  "type": "number"
+                                },
+                                "active": {
+                                  "type": "number"
+                                },
+                                "expired": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "trial",
+                                "active",
+                                "expired"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "reviewsPending",
+                            "refundsPending",
+                            "applicationsPending",
+                            "subscriptions"
+                          ]
+                        },
+                        "growth": {
+                          "type": "object",
+                          "properties": {
+                            "bookingsPct": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            },
+                            "collectedPct": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "bookingsPct",
+                            "collectedPct"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "month",
+                        "from",
+                        "to",
+                        "bookings",
+                        "payments",
+                        "refunds",
+                        "registrations",
+                        "reviews",
+                        "topSalons",
+                        "payouts",
+                        "snapshot",
+                        "growth"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/v1/subscriptions": {
       "get": {
         "tags": [

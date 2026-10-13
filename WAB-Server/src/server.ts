@@ -1,3 +1,6 @@
+import { createReportsService } from './domain/reports/reports.service';
+import { createMongoReportSource } from './domain/reports/reportSource';
+import { ReportsRepository } from './repositories/reports.repository';
 import { createAlertInbox } from './domain/alerts/alertInbox.service';
 import { SOCKET_ROOMS } from './constants/sockets';
 import { createAlertsService } from './domain/alerts/alerts.service';
@@ -591,6 +594,21 @@ const buildServices = (
     },
     logger,
   });
+  const reportsService = createReportsService({
+    source: createMongoReportSource({
+      bookings: bookingsRepository,
+      transactions: transactionsRepository,
+      refunds: refundsRepository,
+      customers: new CustomersRepository(),
+      salons: new SalonsRepository(),
+      reviews: new ReviewsRepository(),
+      subscriptions: new SubscriptionsRepository(),
+      payouts: payoutsRepository,
+    }),
+    reports: new ReportsRepository(),
+    settings,
+    logger,
+  });
   const alertInbox = createAlertInbox({
     alerts: alertsRepository,
     admins: new AdminsRepository(),
@@ -613,6 +631,7 @@ const buildServices = (
     },
     evaluateAlerts: (now) => adminAlerts.evaluate(now),
     emailAlerts: (now) => alertInbox.deliverEmails(now),
+    aggregateReports: (now) => reportsService.aggregateYesterday(now),
     onDelayedRefunds: (delayed) => adminAlerts.refundsDelayed(delayed),
     logger,
   });
@@ -687,6 +706,7 @@ const buildServices = (
     adminRefunds: fullRefunds,
     adminPayouts,
     adminAlerts: alertInbox,
+    adminReports: reportsService,
     adminAnalytics: createAnalyticsService({
       analytics: createMongoAnalytics({
         events: createServerEvents({ store: serverEventsRepository, logger }),

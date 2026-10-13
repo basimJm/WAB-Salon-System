@@ -153,4 +153,52 @@ export class BookingsRepository
       { appointmentStart: 1 },
     );
   }
+
+  /** Salons with the most bookings created in `[from, to)`, with how they ended. */
+  async topSalons(
+    from: Date,
+    to: Date,
+    limit: number,
+  ): Promise<{ salonId: string; bookings: number; completed: number; lost: number }[]> {
+    const rows = await this.model
+      .aggregate<{ _id: unknown; bookings: number; completed: number; lost: number }>([
+        { $match: { createdAt: { $gte: from, $lt: to } } },
+        {
+          $group: {
+            _id: '$salonId',
+            bookings: { $sum: 1 },
+            completed: { $sum: { $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0] } },
+            lost: {
+              $sum: {
+                $cond: [
+                  {
+                    $in: [
+                      '$status',
+                      [
+                        'REJECTED',
+                        'CANCELLED_BY_CUSTOMER',
+                        'CANCELLED_BY_SALON',
+                        'AUTO_CANCELLED',
+                        'NO_SHOW',
+                      ],
+                    ],
+                  },
+                  1,
+                  0,
+                ],
+              },
+            },
+          },
+        },
+        { $sort: { bookings: -1, _id: 1 } },
+        { $limit: limit },
+      ])
+      .exec();
+    return rows.map((row) => ({
+      salonId: String(row._id),
+      bookings: row.bookings,
+      completed: row.completed,
+      lost: row.lost,
+    }));
+  }
 }
