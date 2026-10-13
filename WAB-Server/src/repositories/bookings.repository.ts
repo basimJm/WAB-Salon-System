@@ -9,7 +9,7 @@ import type { BookingLookup, UpcomingBooking } from '../domain/salons/conflicts'
 import { BookingModel, type BookingRaw, type StatusHistoryEntry } from '../models/booking.model';
 import { isObjectIdString, toObjectId } from '../utils/database/ids';
 import { toEntity, type Entity } from '../utils/database/plain';
-import { BaseRepository } from './base.repository';
+import { BaseRepository, type Page } from './base.repository';
 
 /** Bookings that occupy staff time: PENDING and APPROVED (BUSINESS_DOMAIN.md §5.6). */
 const holdingStatus = { $in: [...SLOT_HOLDING_STATUSES] };
@@ -140,5 +140,17 @@ export class BookingsRepository
         end: p.end,
       })),
     }));
+  }
+
+  /** One page of bookings that still need background jobs: every PENDING one and upcoming APPROVED ones. */
+  jobCandidates(
+    now: Date,
+    params: { page: number; pageSize: number },
+  ): Promise<Page<Entity<BookingRaw>>> {
+    return this.findPage(
+      { $or: [{ status: 'PENDING' }, { status: 'APPROVED', appointmentStart: { $gt: now } }] },
+      params,
+      { appointmentStart: 1 },
+    );
   }
 }

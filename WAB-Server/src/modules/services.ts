@@ -371,6 +371,7 @@ export const unavailableBookingActions: BookingActionsService = {
   complete: unavailable,
   noShow: unavailable,
   cancel: unavailable,
+  autoCancel: unavailable,
 };
 
 export const unavailableBookingCancel: BookingCancelService = { cancel: unavailable };
