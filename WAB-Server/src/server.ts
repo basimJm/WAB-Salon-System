@@ -30,6 +30,7 @@ import { createPhoneVerifier } from './domain/auth/phoneVerifier';
 import { createAdminSalonsService } from './domain/salons/adminSalons.service';
 import { createConflictFinder, noBookings } from './domain/salons/conflicts';
 import { createSalonDetailsService } from './domain/salonDetails/salonDetails.service';
+import { createHomeService } from './domain/home/home.service';
 import { createSearchService } from './domain/search/search.service';
 import { createPolicyService } from './domain/salons/policy.service';
 import { createLeavesService } from './domain/team/leaves.service';
@@ -255,18 +256,27 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     logger,
   });
   const audit = createAuditWriter(new AuditLogsRepository());
+  const search = createSearchService({
+    salons: new SalonsRepository(),
+    salonServices,
+    closures: new ClosuresRepository(),
+    storage: providers.storage,
+    settings,
+  });
+  const catalogService = createCatalogService({
+    catalog: new CatalogServicesRepository(),
+    storage: providers.storage,
+  });
+  const bannersService = createBannersService({
+    banners: new BannersRepository(),
+    storage: providers.storage,
+  });
   return {
     otpGate,
     adminGuard,
     uploads,
     // Placements (SRV-066) and favorites (SRV-062) plug in here later.
-    search: createSearchService({
-      salons: new SalonsRepository(),
-      salonServices,
-      closures: new ClosuresRepository(),
-      storage: providers.storage,
-      settings,
-    }),
+    search,
     salonDetails: createSalonDetailsService({
       salons: new SalonsRepository(),
       members: new MembersRepository(),
@@ -410,17 +420,20 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
       }),
       guard: requireAuth('merchant', config.auth.accessSecret),
     },
-    catalog: createCatalogService({
-      catalog: new CatalogServicesRepository(),
-      storage: providers.storage,
-    }),
+    catalog: catalogService,
     adminCatalog: createAdminCrud<CatalogServiceRaw>({
       name: 'CATALOG_SERVICE',
       entityType: 'catalogService',
       store: new CatalogServicesRepository(),
       audit,
     }),
-    banners: createBannersService({ banners: new BannersRepository(), storage: providers.storage }),
+    banners: bannersService,
+    home: createHomeService({
+      banners: bannersService,
+      catalog: catalogService,
+      search,
+      customers: new CustomersRepository(),
+    }),
     adminBanners: createAdminBannerService(new BannersRepository(), audit),
     adminContent: createAdminContentServices({
       pages: new ContentPagesRepository(),
