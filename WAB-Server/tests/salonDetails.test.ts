@@ -48,6 +48,18 @@ const app = createApp({
       storage: new FakeStorageProvider(),
       settings: { get: (key: string) => Promise.resolve(SETTING_DEFAULTS[key as never]) },
       favorites,
+      reviews: {
+        latest: ({ staffId, limit }) =>
+          Promise.resolve([
+            {
+              id: staffId === undefined ? 'salon-review' : 'staff-review',
+              customerName: `top ${String(limit)}`,
+              rating: 5,
+              comment: null,
+              createdAt: NOW,
+            },
+          ]),
+      },
       now: () => NOW,
     }),
     installations: {
@@ -261,6 +273,25 @@ describe('GET /customer/v1/salons/:salonId', () => {
     expect(Object.fromEntries(staff.map((s) => [s.firstName, s.status]))).toEqual({
       Sara: 'ON_LEAVE',
       Dina: 'DAY_OFF',
+    });
+  });
+});
+
+describe('review previews', () => {
+  it('shows the rating and the latest three reviews on the salon and the staff sheet', async () => {
+    addSalon();
+    const member = addStaff();
+    const salon = bodyOf(await get(salonId.toHexString())).data['reviews'];
+    expect(salon).toMatchObject({
+      avg: 4.5,
+      count: 8,
+      latest: [{ id: 'salon-review', customerName: 'top 3' }],
+    });
+    const staff = bodyOf(await get(`${salonId.toHexString()}/staff/${member.toHexString()}`)).data;
+    expect(staff['reviews']).toMatchObject({
+      avg: 4,
+      count: 2,
+      latest: [{ id: 'staff-review' }],
     });
   });
 });

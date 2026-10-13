@@ -1196,6 +1196,219 @@
           }
         }
       ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Salon reviews (S08)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/salons/:salonId/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "salons",
+                ":salonId",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "salonId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Review a salon (rating 1-5, optional comment). Any active customer; no booking needed. Waits for approval; 429 when too many pending reviews exist for this salon.",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/salons/:salonId/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "salons",
+                ":salonId",
+                "reviews"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "salonId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 0,\n  \"comment\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Staff reviews (S09)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/salons/:salonId/staff/:memberId/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "salons",
+                ":salonId",
+                "staff",
+                ":memberId",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "salonId",
+                  "value": ""
+                },
+                {
+                  "key": "memberId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Review a staff member (independent of the salon rating)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/salons/:salonId/staff/:memberId/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "salons",
+                ":salonId",
+                "staff",
+                ":memberId",
+                "reviews"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "salonId",
+                  "value": ""
+                },
+                {
+                  "key": "memberId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 0,\n  \"comment\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

@@ -12,6 +12,18 @@ import { z } from '../../../docs/zod';
 import { salonParamsSchema, staffParamsSchema } from './salonDetails.validation';
 
 const rating = z.object({ avg: z.number(), count: z.number() });
+const reviewView = z.object({
+  id: z.string(),
+  customerName: z.string(),
+  rating: z.number(),
+  comment: z.string().nullable(),
+  createdAt: z.string(),
+});
+const reviewsPreview = z.object({
+  avg: z.number(),
+  count: z.number(),
+  latest: z.array(reviewView),
+});
 const staffSummary = z.object({
   id: z.string(),
   firstName: z.string(),
@@ -60,6 +72,7 @@ const details = z.object({
     }),
   ),
   isFavorite: z.boolean(),
+  reviews: reviewsPreview,
 });
 const staffDetails = staffSummary.extend({
   role: z.enum(['OWNER', 'MANAGER', 'EMPLOYEE']),
@@ -71,6 +84,7 @@ const staffDetails = staffSummary.extend({
     z.object({ day: z.string(), start: z.string().nullable(), end: z.string().nullable() }),
   ),
   services: z.array(z.object({ catalogServiceId: z.string(), name: z.string() })),
+  reviews: reviewsPreview,
 });
 
 export const registerCustomerSalonDetailsDocs = (registry: OpenAPIRegistry): void => {

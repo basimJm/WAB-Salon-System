@@ -32,6 +32,8 @@ import { createConflictFinder, noBookings } from './domain/salons/conflicts';
 import { createSalonDetailsService } from './domain/salonDetails/salonDetails.service';
 import { createFavoritesService } from './domain/favorites/favorites.service';
 import { FavoritesRepository } from './repositories/favorites.repository';
+import { createReviewsService } from './domain/reviews/reviews.service';
+import { ReviewsRepository } from './repositories/reviews.repository';
 import { createHomeService } from './domain/home/home.service';
 import { createSearchService } from './domain/search/search.service';
 import { createPolicyService } from './domain/salons/policy.service';
@@ -259,6 +261,13 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   });
   const audit = createAuditWriter(new AuditLogsRepository());
   const favoritesRepository = new FavoritesRepository();
+  const reviewsService = createReviewsService({
+    reviews: new ReviewsRepository(),
+    salons: new SalonsRepository(),
+    members: new MembersRepository(),
+    customers: new CustomersRepository(),
+    settings,
+  });
   const search = createSearchService({
     favorites: favoritesRepository,
     salons: new SalonsRepository(),
@@ -286,8 +295,10 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
       salons: new SalonsRepository(),
       search,
     }),
+    reviews: reviewsService,
     salonDetails: createSalonDetailsService({
       favorites: favoritesRepository,
+      reviews: reviewsService,
       salons: new SalonsRepository(),
       members: new MembersRepository(),
       salonServices,
