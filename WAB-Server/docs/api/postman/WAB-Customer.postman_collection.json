@@ -1678,6 +1678,145 @@
           }
         }
       ]
+    },
+    {
+      "name": "Booking drafts",
+      "item": [
+        {
+          "name": "Validate and price a booking (summary step), hold the slots for `booking.paymentHoldMinutes` and snapshot prices and the salon policy. Replaces the customer’s earlier draft.",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/bookings/drafts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "bookings",
+                "drafts"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Persons are checked in order and each pick blocks the next. Errors (422): SALON_NOT_BOOKABLE, TOO_MANY_COMPANIONS, GENDER_MISMATCH, SERVICE_UNAVAILABLE, BRIDE_ONLY_SERVICE, STAFF_NOT_ELIGIBLE, SALON_CLOSED, DATE_OUT_OF_RANGE, SLOT_UNAVAILABLE, PAYMENT_OPTION_NOT_ALLOWED.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"salonId\": \"string\",\n  \"paymentMethod\": \"PAY_ON_ARRIVAL\",\n  \"persons\": [\n    {\n      \"name\": \"string\",\n      \"isBride\": false,\n      \"serviceIds\": [\n        \"string\"\n      ],\n      \"staffId\": \"string\",\n      \"start\": \"string\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "My draft; an expired one is 422 `DRAFT_EXPIRED`",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/bookings/drafts/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "bookings",
+                "drafts",
+                ":id"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Discard my draft and free its held slots (idempotent)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/bookings/drafts/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "bookings",
+                "drafts",
+                ":id"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

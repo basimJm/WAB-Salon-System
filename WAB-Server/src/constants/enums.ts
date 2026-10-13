@@ -52,3 +52,6 @@ export const REVIEW_TARGETS = ['SALON', 'STAFF'] as const;
 export type ReviewTarget = (typeof REVIEW_TARGETS)[number];
 export const REVIEW_STATUSES = ['PENDING', 'APPROVED', 'REJECTED', 'REMOVED'] as const;
 export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
+
+export const STAFF_SELECTIONS = ['SPECIFIC', 'ANY'] as const;
+export type StaffSelection = (typeof STAFF_SELECTIONS)[number];

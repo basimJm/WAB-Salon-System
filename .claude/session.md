@@ -1203,6 +1203,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) POST for a read because of the structured body; (2) customer token required (booking is for registered users); (3) holds are written by the draft task (SRV-070) with `HoldsStore.place`; bookings by SRV-071 (`BookingBusyLookup`). Not run against a real MongoDB.
 
+### T-081 — SRV-070 Booking draft
+- Project: `WAB-Server/` (`src/domain/bookings/bookingDraft.service.ts`, `AvailabilityService.plan`, `src/models/{bookingDraft.model,bookingPerson}.ts`, `src/modules/customer/bookingDrafts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.5 bookingDrafts, §5.6 step 1; BE-32, BE-34; BER-01, BER-07; Customer PRD S16):
+  - [x] Validates: salon bookable, persons <= 1 + `booking.maxCompanions`, bride only at women's salons, services active and of the salon, bride-only services only for brides, staff of the salon, day open and in range, slot on the grid and free, payment option offered by the salon
+  - [x] Persons are planned in order (each pick blocks the next), "any staff" picks the least busy (tie lowest id), specific staff respected
+  - [x] Prices (`calculateAmounts`) and the salon policy are snapshotted; money returned as JOD strings (total, deposit, dueOnline, remaining)
+  - [x] Redis holds for the persons' staff for `booking.paymentHoldMinutes`; per salon-date lock so two customers cannot both get a slot; draft expires (TTL index + date check -> `DRAFT_EXPIRED`); one draft per customer, a new one replaces and frees the old one
+  - [x] Get (own only, language names), discard (idempotent, frees holds)
+- Tests: `tests/bookingDrafts.test.ts` (27, real Redis incl. a concurrent race), `tests/availabilityApi.test.ts` still green; full gate green, 2007 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) `bookingDrafts.holdKeys` of the domain became structured `holds[]` (staff, date, start, end) because holds are sorted-set members; (2) the account holder's own gender is not checked against the salon (a mother may book for a bride); (3) slot not free = 422 `SLOT_UNAVAILABLE` at draft time, `SLOT_TAKEN` (409) is for the race at creation (SRV-071); (4) OTP verification and payment fields (`otpVerifiedAt`, `transactionId`) exist on the model but are set by SRV-071/083. Draft discard on `DELETE` frees holds immediately.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

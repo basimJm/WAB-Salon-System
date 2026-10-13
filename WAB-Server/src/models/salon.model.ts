@@ -86,7 +86,7 @@ const scheduleDaySchema = new Schema<ScheduleDay>(
   { _id: false },
 );
 
-const policySchema = new Schema<SalonPolicy>(
+export const policySchema = new Schema<SalonPolicy>(
   {
     cancellationWindowHours: { type: Number, required: true, min: 0 },
     paymentOptions: {
