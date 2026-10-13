@@ -133,6 +133,7 @@ describe('audit log model', () => {
       { adminId: 1, createdAt: -1 },
       { entityType: 1, entityId: 1, createdAt: -1 },
       { action: 1, createdAt: -1 },
+      { createdAt: -1 },
     ]);
   });
 });
