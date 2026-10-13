@@ -23,6 +23,10 @@ import { createSalonStateService, createStaffFacts } from './domain/salons/salon
 import { createSalonProfileService } from './domain/salons/salonProfile.service';
 import { loadMember } from './middlewares/permission';
 import { createImageVariants } from './domain/uploads/variants';
+import { createCatalogRequestsService } from './domain/catalog/catalogRequests.service';
+import { CatalogRequestsRepository } from './repositories/catalogRequests.repository';
+import { createSalonServicesService } from './domain/salonServices/salonServices.service';
+import { SalonServicesRepository } from './repositories/salonServices.repository';
 import { createHoursService } from './domain/salons/hoursService';
 import { ClosuresRepository } from './repositories/closures.repository';
 import { createGalleryService } from './domain/gallery/gallery.service';
@@ -221,10 +225,12 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
       });
     },
   });
+  const salonServices = new SalonServicesRepository();
   const salonState = createSalonStateService({
     salons: new SalonsRepository(),
-    // Salon services arrive with their own task (SRV-050); until then no salon counts as having one.
-    facts: createStaffFacts(new MembersRepository(), () => Promise.resolve(0)),
+    facts: createStaffFacts(new MembersRepository(), (salonId) =>
+      salonServices.countActive(salonId),
+    ),
     audit: createAuditWriter(new AuditLogsRepository()),
     // Placeholder until the notification core (SRV-093) sends the real message.
     notifier: {
@@ -240,6 +246,29 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     otpGate,
     adminGuard,
     uploads,
+    catalogRequests: createCatalogRequestsService({
+      requests: new CatalogRequestsRepository(),
+      salons: new SalonsRepository(),
+      catalog: new CatalogServicesRepository(),
+      uploads,
+      audit,
+      logger,
+      // Placeholder until the notification core (SRV-093) sends the real message.
+      notifier: {
+        decided: (result) => {
+          logger.info(result, 'catalog request decided');
+          return Promise.resolve();
+        },
+      },
+    }),
+    salonServices: createSalonServicesService({
+      salons: new SalonsRepository(),
+      catalog: new CatalogServicesRepository(),
+      services: salonServices,
+      storage: providers.storage,
+      uploads,
+      state: salonState,
+    }),
     // No bookings exist yet, so the default "no conflicts" applies until the booking tasks.
     hours: createHoursService({
       salons: new SalonsRepository(),

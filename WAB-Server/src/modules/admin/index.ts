@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ADMIN_AUTH_ROUTES } from '../../constants/adminAuth';
 import { ADMIN_APP_CONFIG_ROUTES, ADMIN_CONTENT_ROUTES } from '../../constants/adminContent';
+import { ADMIN_CATALOG_REQUEST_ROUTES } from '../../constants/salonServices';
 import { ADMIN_APPLICATION_ROUTES, ADMIN_SALON_STATE_ROUTES } from '../../constants/salon';
 import { ADMIN_CATALOG_ROUTES } from '../../constants/catalog';
 import { ADMIN_BANNER_ROUTES } from '../../constants/banners';
@@ -11,6 +12,7 @@ import { createAdminUploadsRouter } from '../shared/uploads';
 import {
   unavailableAdminAuth,
   unavailableAdminBanners,
+  unavailableCatalogRequests,
   unavailableSalonReview,
   unavailableSalonState,
   unavailableAdminCatalog,
@@ -22,6 +24,7 @@ import {
 } from '../services';
 import { createOtpRouteLimiter } from '../shared/otp';
 import { createAdminAppConfigRouter, createAdminContentRouter } from './content/content.routes';
+import { createAdminCatalogRequestsRouter } from './catalogRequests/requests.routes';
 import { createAdminSalonStateRouter } from './salons/salonState.routes';
 import { createAdminApplicationsRouter } from './applications/applications.routes';
 import { createAdminCatalogRouter } from './catalog/catalog.routes';
@@ -74,5 +77,10 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     createAdminSalonStateRouter(services.salonState ?? unavailableSalonState, guard),
   );
   mount(router, UPLOAD_ROUTES.base, createAdminUploadsRouter(services));
+  mount(
+    router,
+    ADMIN_CATALOG_REQUEST_ROUTES.base,
+    createAdminCatalogRequestsRouter(services.catalogRequests ?? unavailableCatalogRequests, guard),
+  );
   return router;
 };

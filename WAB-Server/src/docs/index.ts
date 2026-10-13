@@ -31,6 +31,7 @@ import {
   registerMerchantContentDocs,
 } from '../modules/shared/content/content.openapi';
 import { registerMerchantGalleryDocs } from '../modules/merchant/gallery/gallery.openapi';
+import { registerMerchantServicesDocs } from '../modules/merchant/services/services.openapi';
 import { registerMerchantHoursDocs } from '../modules/merchant/hours/hours.openapi';
 import { registerMerchantProfileDocs } from '../modules/merchant/salon/profile.openapi';
 import { registerMerchantSalonDocs } from '../modules/merchant/salon/salon.openapi';
@@ -40,6 +41,10 @@ import {
   registerMerchantUploadDocs,
 } from '../modules/shared/uploads/uploads.openapi';
 import { registerAdminSalonStateDocs } from '../modules/admin/salons/salonState.openapi';
+import {
+  registerAdminCatalogRequestDocs,
+  registerMerchantCatalogRequestDocs,
+} from '../modules/admin/catalogRequests/requests.openapi';
 import { registerAdminApplicationDocs } from '../modules/admin/applications/applications.openapi';
 import { registerAdminCatalogDocs } from '../modules/admin/catalog/catalog.openapi';
 import {
@@ -63,8 +68,8 @@ type Registrar = (registry: OpenAPIRegistry) => void;
 const REGISTRARS: Readonly<Record<DocName, readonly Registrar[]>> = {
   common: [registerHealthDocs],
   customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs, registerCustomerBannerDocs, registerCustomerCatalogDocs, registerCustomerUploadDocs],
-  merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs, registerMerchantCatalogDocs, registerMerchantSalonDocs, registerMerchantProfileDocs, registerMerchantUploadDocs, registerMerchantGalleryDocs, registerMerchantHoursDocs],
-  admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs, registerAdminSalonStateDocs, registerAdminUploadDocs],
+  merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs, registerMerchantCatalogDocs, registerMerchantSalonDocs, registerMerchantProfileDocs, registerMerchantUploadDocs, registerMerchantGalleryDocs, registerMerchantHoursDocs, registerMerchantServicesDocs, registerMerchantCatalogRequestDocs],
+  admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs, registerAdminSalonStateDocs, registerAdminUploadDocs, registerAdminCatalogRequestDocs],
 };
 
 const buildDocument = (name: DocName): ReturnType<OpenApiGeneratorV31['generateDocument']> => {

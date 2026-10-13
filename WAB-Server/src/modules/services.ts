@@ -9,6 +9,8 @@ import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
+import type { CatalogRequestsService } from '../domain/catalog/catalogRequests.service';
+import type { SalonServicesService } from '../domain/salonServices/salonServices.service';
 import type { HoursService } from '../domain/salons/hoursService';
 import type { GalleryService } from '../domain/gallery/gallery.service';
 import type { UploadsService } from '../domain/uploads/uploads.service';
@@ -40,6 +42,8 @@ export interface ApiServices {
   readonly uploads?: UploadsService;
   readonly gallery?: GalleryService;
   readonly hours?: HoursService;
+  readonly salonServices?: SalonServicesService;
+  readonly catalogRequests?: CatalogRequestsService;
   /** Salon profile; `guard` = `requireAuth('merchant')` then `loadMember`. */
   readonly salonProfile?: {
     readonly service: SalonProfileService;
@@ -206,4 +210,18 @@ export const unavailableHours: HoursService = {
   addClosure: unavailable,
   updateClosure: unavailable,
   removeClosure: unavailable,
+};
+
+export const unavailableSalonServices: SalonServicesService = {
+  list: unavailable,
+  add: unavailable,
+  update: unavailable,
+};
+
+export const unavailableCatalogRequests: CatalogRequestsService = {
+  create: unavailable,
+  listForSalon: unavailable,
+  listForAdmin: unavailable,
+  approve: unavailable,
+  reject: unavailable,
 };

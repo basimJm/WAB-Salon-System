@@ -944,7 +944,7 @@
 ### T-061 — SRV-049 Weekly schedule, exceptional closures, open/closed and today's hours
 - Project: `WAB-Server/` (`src/domain/salons/{hours,hoursService}.ts`, `src/modules/merchant/hours/*`, `src/models/salonClosure.model.ts`, `src/repositories/closures.repository.ts`, `src/constants/hours.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #68 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #69 merged into `server`)
 - Acceptance criteria (NFR-12 Asia/Amman; BUSINESS_DOMAIN §3.3 weeklySchedule/salonClosures, §5.3 open/closed, §5.12 conflicts, §6 WORKING_HOURS_MANAGE; Merchant PRD M15):
   - [x] `todaysHours(schedule, closures, now, tz)`: local date of `now` (Amman day changes at 21:00 UTC), closed when a closure covers it (ends inclusive; reason returned) or the weekday is off, `isOpenNow` for [open, close); `closureOn(date, closures)`
   - [x] `GET /merchant/v1/salon/hours`: weekly schedule (Saturday→Friday), closures that have not ended (`editable` = starts after today), today's status
@@ -956,6 +956,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M15), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) closure dates are civil `YYYY-MM-DD` strings (domain says Date): zone-free and sortable; (2) the "cancel affected bookings" option of the conflict dialog needs bookings (SRV-070+); (3) hours that pass midnight stay unsupported (assumption from SRV-016). Not run against a real MongoDB.
 - Notes: Next: SRV-050 (salon services CRUD + catalog requests).
+
+### T-062 — SRV-050 Salon services CRUD + catalog requests (+ admin decision)
+- Project: `WAB-Server/` (`src/domain/salonServices/*`, `src/domain/catalog/catalogRequests.service.ts`, `src/modules/merchant/{services,catalogRequests}/*`, `src/modules/admin/catalogRequests/*`, models `salonService`/`catalogRequest`, `src/constants/salonServices.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #69 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (Merchant PRD M16; BUSINESS_DOMAIN §3.3 salonServices, §3.2 catalogRequests, §5.2 SERVICE completeness, §6 SERVICES_MANAGE; Admin PRD "Catalog request decision"):
+  - [x] `salonServices` (unique salon+catalog service, `{catalogServiceId, active}` index) and `catalogRequests` models in `ALL_MODELS`
+  - [x] `GET/POST/PATCH /merchant/v1/salon/services` (`SERVICES_MANAGE`): paginated list with localized catalog name/image; add only an active catalog service of the salon's gender (`GENDER_MISMATCH`), once per salon (409), price as JOD string -> integer fils > 0, duration 5..1440 and a multiple of 5, bride-only only in women's salons, extra description <= 500, media = confirmed `SERVICE_MEDIA` uploads of this salon (<= 10, unique); patch changes any of these, `extraDescription: null` clears, `active:false` switches off (no delete); other salons' services are 404
+  - [x] Completeness: the SERVICE fact now counts active salon services; every add/patch recomputes (may promote to LIVE or mark the salon not bookable)
+  - [x] `POST/GET /merchant/v1/catalog/requests` (`SERVICES_MANAGE`): name, description, optional confirmed `CATALOG_IMAGE` upload (merchants may now use it with `SERVICES_MANAGE`); own requests newest first with status and admin note
+  - [x] Admin `GET /admin/v1/catalog/requests` (pending by default, oldest first, salon name), `POST /:id/approve` (admin supplies ar+en name/description, picture if the request had none, sort order; creates the catalog service with the salon's gender; request APPROVED with `catalogServiceId`) and `/reject`; reason required, audited (`CATALOG_REQUEST_APPROVE|REJECT`), only from PENDING (422 `ALREADY_HANDLED`), salon notified through a placeholder notifier
+- Tests: `cd WAB-Server && npm test` - 1691 pass; format/lint/typecheck/build green; audit 0. `tests/salonServices.test.ts` (25).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M16), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) services are deactivated, never deleted (staff and bookings reference them); (2) the M16 warnings (upcoming bookings of a deactivated service, active service without qualified staff) need bookings/staff: with SRV-052/070; (3) price changes affect new bookings only (snapshots, SRV-067+); (4) approve claims the request first and reverts it if the catalog entry cannot be created; (5) the max duration (1440) and 10 media items are assumptions. Not run against a real MongoDB.
+- Notes: Next: SRV-051 (team members CRUD).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

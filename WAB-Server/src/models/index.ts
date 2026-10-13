@@ -11,6 +11,8 @@ import { SubscriptionModel } from './subscription.model';
 import { UploadModel } from './upload.model';
 import { GalleryItemModel } from './galleryItem.model';
 import { SalonClosureModel } from './salonClosure.model';
+import { SalonServiceModel } from './salonService.model';
+import { CatalogRequestModel } from './catalogRequest.model';
 import { AuditLogModel } from './auditLog.model';
 import { CatalogServiceModel } from './catalogService.model';
 import { CityModel } from './city.model';
@@ -43,6 +45,8 @@ export const ALL_MODELS = [
   MaintenanceModel,
   BannerModel,
   SalonModel,
+  SalonServiceModel,
+  CatalogRequestModel,
   SalonClosureModel,
   GalleryItemModel,
   UploadModel,
