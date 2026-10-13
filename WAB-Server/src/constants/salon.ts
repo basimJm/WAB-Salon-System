@@ -58,3 +58,32 @@ export const ADMIN_APPLICATION_ROUTES = {
 } as const;
 /** Lifetime of the signed URLs an admin gets to read the private license documents. */
 export const LICENSE_URL_TTL_SEC = 300;
+
+/** Things a salon profile can still lack before customers may see it (BUSINESS_DOMAIN.md §5.2). */
+export const COMPLETENESS_ITEMS = [
+  'COVER',
+  'PROFILE_IMAGE',
+  'NAME',
+  'DESCRIPTION',
+  'LOCATION',
+  'PHONE',
+  'WORKING_HOURS',
+  'SERVICE',
+  'STAFF',
+  'POLICY',
+] as const;
+export type CompletenessItem = (typeof COMPLETENESS_ITEMS)[number];
+
+/** Salon events the owner is told about. */
+export const SALON_STATE_EVENTS = [
+  'salon.live',
+  'salon.not_bookable',
+  'salon.offline',
+  'salon.online',
+] as const;
+export type SalonStateEvent = (typeof SALON_STATE_EVENTS)[number];
+export const ADMIN_SALON_STATE_ROUTES = {
+  base: '/salons',
+  offline: '/:id/offline',
+  online: '/:id/online',
+} as const;

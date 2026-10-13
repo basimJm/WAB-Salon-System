@@ -26,6 +26,7 @@ const members = createFakeModel();
 const subs = createFakeModel();
 const audits: Record<string, unknown>[] = [];
 const notified: Record<string, unknown>[] = [];
+const complete = { value: false };
 const notifier: { fail: boolean } & ApplicationNotifier = {
   fail: false,
   reviewed(input) {
@@ -49,6 +50,10 @@ const app = createApp({
           return Promise.resolve({ id: 'a', ...data } as never);
         },
       }),
+      completeness: {
+        evaluate: () =>
+          Promise.resolve({ missing: complete.value ? [] : ['COVER'], isComplete: complete.value }),
+      },
       notifier,
       logger,
       now: () => NOW,
@@ -107,6 +112,7 @@ beforeEach(() => {
   audits.length = 0;
   notified.length = 0;
   notifier.fail = false;
+  complete.value = false;
 });
 
 describe('GET /admin/v1/salons/applications', () => {
@@ -168,6 +174,14 @@ describe('approve / reject', () => {
       adminId,
     });
     expect(notified).toEqual([{ salonId: id, decision: 'approved', reason: 'license verified' }]);
+  });
+
+  it('approves straight to LIVE when the salon is already complete', async () => {
+    const id = addSalon('Glow', '2026-10-01T00:00:00Z');
+    complete.value = true;
+    const res = await post(id, 'approve', { reason: 'ok' });
+    expect(bodyOf(res).data).toMatchObject({ state: 'LIVE' });
+    expect(salons.docs[0]?.['completeness']).toEqual({ missing: [], isComplete: true });
   });
 
   it('rejects: keeps the reason for the owner, no subscription', async () => {

@@ -15,6 +15,7 @@ import type { PaginationParams } from '../../utils/pagination';
 import type { AuditWriter } from '../audit/audit.service';
 import type { AdminActor } from '../auth/accountLifecycle.service';
 import type { SettingsService } from '../settings';
+import type { SalonStateService } from './salonState.service';
 
 const PENDING: SalonState = 'APPLICATION_PENDING';
 
@@ -65,6 +66,8 @@ export interface SalonReviewDeps {
   readonly settings: Pick<SettingsService, 'get'>;
   readonly storage: Pick<StorageProvider, 'getSignedUrl'>;
   readonly audit: AuditWriter;
+  /** Decides on approval whether the salon is already complete (LIVE) or not. */
+  readonly completeness: { evaluate: SalonStateService['evaluate'] };
   readonly notifier: ApplicationNotifier;
   readonly logger: Logger;
   readonly now?: () => Date;
@@ -74,6 +77,7 @@ type Owner = NonNullable<ApplicationRow['owner']>;
 
 export const createSalonReviewService = (deps: SalonReviewDeps): SalonReviewService => {
   const { salons, members, subscriptions, settings, storage, audit, notifier, logger } = deps;
+  const { completeness } = deps;
   const now = deps.now ?? ((): Date => new Date());
 
   const row = (salon: Entity<SalonRaw>, owner: Owner | null): ApplicationRow => ({
@@ -108,10 +112,16 @@ export const createSalonReviewService = (deps: SalonReviewDeps): SalonReviewServ
   ): Promise<ApplicationRow> => {
     const before = await find(salonId);
     const at = now();
+    const checked = decision === 'approved' ? await completeness.evaluate(before) : null;
     const state: SalonState =
-      decision === 'approved' ? 'APPROVED_INCOMPLETE' : 'APPLICATION_REJECTED';
+      checked === null
+        ? 'APPLICATION_REJECTED'
+        : checked.isComplete
+          ? 'LIVE'
+          : 'APPROVED_INCOMPLETE';
     const updated = await salons.transition(salonId, PENDING, {
       state,
+      ...(checked === null ? {} : { completeness: checked }),
       application: {
         ...before.application,
         reviewedAt: at,

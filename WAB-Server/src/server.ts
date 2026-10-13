@@ -19,6 +19,7 @@ import type { CatalogServiceRaw } from './models/catalogService.model';
 import { CatalogServicesRepository } from './repositories/catalog.repository';
 import { createSalonApplicationService } from './domain/salons/salonApplication.service';
 import { SalonsRepository } from './repositories/salons.repository';
+import { createSalonStateService, createStaffFacts } from './domain/salons/salonState.service';
 import { createSalonReviewService } from './domain/salons/salonReview.service';
 import { SubscriptionsRepository } from './repositories/subscriptions.repository';
 import { createAuditWriter } from './domain/audit/audit.service';
@@ -199,11 +200,27 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   const faqs = new FaqsRepository();
   const pages = new ContentPagesRepository();
   const adminGuard = requireAuth('admin', config.auth.accessSecret);
+  const salonState = createSalonStateService({
+    salons: new SalonsRepository(),
+    // Salon services arrive with their own task (SRV-050); until then no salon counts as having one.
+    facts: createStaffFacts(new MembersRepository(), () => Promise.resolve(0)),
+    audit: createAuditWriter(new AuditLogsRepository()),
+    // Placeholder until the notification core (SRV-093) sends the real message.
+    notifier: {
+      changed: (change) => {
+        logger.info(change, 'salon state changed');
+        return Promise.resolve();
+      },
+    },
+    logger,
+  });
   const audit = createAuditWriter(new AuditLogsRepository());
   return {
     otpGate,
     adminGuard,
+    salonState,
     adminApplications: createSalonReviewService({
+      completeness: salonState,
       salons: new SalonsRepository(),
       members: new MembersRepository(),
       subscriptions: new SubscriptionsRepository(),
