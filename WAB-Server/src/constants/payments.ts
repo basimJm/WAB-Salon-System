@@ -8,3 +8,11 @@ export const IDEMPOTENCY_SEPARATOR = ':';
 export const APP_VERSION_MAX_LENGTH = 30;
 /** Stored when the gateway confirms a different amount than we asked for. */
 export const AMOUNT_MISMATCH_CODE = 'AMOUNT_MISMATCH';
+
+/** Gateway notifications (SRV-084): the signature covers the raw body, so it is kept untouched. */
+export const WEBHOOK_PREFIX = '/webhooks';
+export const PAYMENT_WEBHOOK_ROUTE = '/payments';
+export const PAYMENT_WEBHOOK_SIGNATURE_HEADER = 'x-signature';
+/** Polling fallback: attempts still PENDING after this long are asked about again. */
+export const RECONCILE_MIN_AGE_MS = 120_000;
+export const RECONCILE_BATCH_SIZE = 50;

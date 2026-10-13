@@ -17,6 +17,8 @@ declare global {
       t: (key: string, params?: MessageParams) => string;
       /** Output of the `validate` middleware; read it through `validated()`. */
       validated: Record<string, unknown>;
+      /** The JSON body exactly as received; kept for webhook routes, whose signature covers it. */
+      rawBody?: string;
       /** Set by `requireAuth`: who is calling and in which namespace. */
       auth?: AccessTokenClaims;
       /** Set by `loadMember`: the signed-in merchant member with their effective permissions. */

@@ -57,6 +57,53 @@
           }
         }
       ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "Payment gateway notification (called by the gateway, not by the apps)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-signature",
+                "value": ""
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "payments"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Authenticated by the gateway signature over the raw body (header `X-Signature`); a bad or missing signature is 401. The outcome is confirmed with a status query before anything is settled, so a repeated or forged-content notification changes nothing. Unknown sessions are acknowledged. Answers 200 `{settled}`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [
