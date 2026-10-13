@@ -8,6 +8,7 @@ import type { CustomerAuthService } from '../domain/auth/customerAuth.service';
 import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
+import type { AdminLocationServices } from './admin/locations/locations.routes';
 import type { OtpGate } from '../domain/otp/otpGate.service';
 import { ExternalServiceError } from '../utils/errors';
 
@@ -16,6 +17,9 @@ export interface ApiServices {
   readonly otpGate?: OtpGate;
   readonly appConfig?: AppConfigService;
   readonly locations?: LocationsService;
+  /** `requireAuth('admin', secret)`: every admin resource route sits behind it. */
+  readonly adminGuard?: RequestHandler;
+  readonly adminLocations?: AdminLocationServices;
   readonly content?: { readonly customer: ContentService; readonly merchant: ContentService };
   readonly merchantAuth?: MerchantAuthService;
   readonly installations?: {

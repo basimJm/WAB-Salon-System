@@ -10,6 +10,9 @@ import { createRefreshTokenService } from './domain/auth/refreshTokens.service';
 import { optionalAuth, requireAuth } from './middlewares/auth';
 import { createContentService } from './domain/content';
 import { ContentPagesRepository, FaqsRepository } from './repositories/content.repository';
+import { createAuditWriter } from './domain/audit/audit.service';
+import { createAdminLocationServices } from './domain/adminCrud/locations';
+import { AuditLogsRepository } from './repositories/auditLogs.repository';
 import { createLocationsService } from './domain/locations';
 import { createAppConfigService } from './domain/appConfig';
 import {
@@ -183,8 +186,17 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   });
   const faqs = new FaqsRepository();
   const pages = new ContentPagesRepository();
+  const adminGuard = requireAuth('admin', config.auth.accessSecret);
+  const audit = createAuditWriter(new AuditLogsRepository());
   return {
     otpGate,
+    adminGuard,
+    adminLocations: createAdminLocationServices({
+      countries: new CountriesRepository(),
+      cities: new CitiesRepository(),
+      areas: new AreasRepository(),
+      audit,
+    }),
     content: {
       customer: createContentService({ app: 'CUSTOMER', pages, faqs }),
       merchant: createContentService({ app: 'MERCHANT', pages, faqs }),
