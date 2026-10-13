@@ -5,11 +5,13 @@ import { INSTALLATION_ROUTES } from '../../constants/installations';
 import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
 import { LOCATION_ROUTES } from '../../constants/locations';
 import { CONTENT_ROUTES } from '../../constants/content';
+import { CATALOG_ROUTES } from '../../constants/catalog';
 import { mount } from '../../routes/mount';
 import { createMerchantAppConfigRouter } from '../shared/appConfig';
 import { createMerchantInstallationsRouter } from '../shared/installations';
-import { unavailableMerchantAuth, type ApiServices } from '../services';
+import { unavailableCatalogService, unavailableMerchantAuth, type ApiServices } from '../services';
 import { createMerchantContentRouter } from '../shared/content';
+import { createCatalogRouter } from '../shared/catalog/catalog.module';
 import { createLocationsRouterFor } from '../shared/locations';
 import { createMerchantOtpRouter, createOtpRouteLimiter } from '../shared/otp';
 import { createMerchantAuthRouter } from './auth/auth.routes';
@@ -30,5 +32,13 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
   mount(router, APP_CONFIG_ROUTES.base, createMerchantAppConfigRouter(services));
   mount(router, LOCATION_ROUTES.base, createLocationsRouterFor(services));
   mount(router, CONTENT_ROUTES.base, createMerchantContentRouter(services));
+  mount(
+    router,
+    CATALOG_ROUTES.base,
+    createCatalogRouter(
+      services.catalog ?? unavailableCatalogService,
+      createOtpRouteLimiter(services),
+    ),
+  );
   return router;
 };

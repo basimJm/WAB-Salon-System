@@ -6,13 +6,20 @@ import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
 import { LOCATION_ROUTES } from '../../constants/locations';
 import { CONTENT_ROUTES } from '../../constants/content';
 import { BANNER_ROUTES } from '../../constants/banners';
+import { CATALOG_ROUTES } from '../../constants/catalog';
 import { mount } from '../../routes/mount';
 import { createCustomerAppConfigRouter } from '../shared/appConfig';
 import { createCustomerInstallationsRouter } from '../shared/installations';
 import { ExternalServiceError } from '../../utils/errors';
-import { unavailableBannersService, unavailableCustomerAuth, type ApiServices } from '../services';
+import {
+  unavailableCatalogService,
+  unavailableBannersService,
+  unavailableCustomerAuth,
+  type ApiServices,
+} from '../services';
 import { createCustomerBannersRouter } from './banners/banners.module';
 import { createCustomerContentRouter } from '../shared/content';
+import { createCatalogRouter } from '../shared/catalog/catalog.module';
 import { createLocationsRouterFor } from '../shared/locations';
 import { createOtpRouteLimiter, createCustomerOtpRouter } from '../shared/otp';
 import { createCustomerAuthRouter } from './auth/auth.routes';
@@ -43,6 +50,14 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     BANNER_ROUTES.base,
     createCustomerBannersRouter(
       services.banners ?? unavailableBannersService,
+      createOtpRouteLimiter(services),
+    ),
+  );
+  mount(
+    router,
+    CATALOG_ROUTES.base,
+    createCatalogRouter(
+      services.catalog ?? unavailableCatalogService,
       createOtpRouteLimiter(services),
     ),
   );

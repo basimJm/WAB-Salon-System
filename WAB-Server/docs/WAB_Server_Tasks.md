@@ -147,14 +147,14 @@ Roadmap SRV-04.
 | SRV-036 | Public endpoints: countries, cities, areas (localized) | `feat/srv-036-ref-public` | SRV-018 | DONE | `GET /{customer|merchant}/v1/locations/countries`, `/cities?countryCode`, `/areas?cityId` (public, active only, admin order, localized; flag URL from storage). Lists are not paginated: small bounded admin-curated reference data. |
 | SRV-037 | Public content: privacy/terms/about, FAQ, contact info per app | `feat/srv-037-content-public` | SRV-005 | DONE | `GET /{customer|merchant}/v1/content/pages/{privacy|terms|about}` (404 until the admin writes it) and `/content/faqs` (admin order), localized. Contact info is already served by `GET /config` (SRV-035). |
 | SRV-038 | Admin CRUD: countries/cities/areas, content pages, FAQ, contact info, app versions, maintenance (with audit + reason) | `feat/srv-038-ref-admin` | SRV-020, SRV-030 | DONE | Part 1 DONE: `/admin/v1/locations/{countries,cities,areas}` list/get/create/patch (reason + audit, no delete, `active=false` switches off) on the generic `createAdminCrud` + `createAdminCrudRouter`. Parts 2-3: `/admin/v1/content/{pages,faqs,contact-info}` and `/admin/v1/app-config/{versions,maintenance}` on the same CRUD (minSupported <= latest enforced; app/kind/platform immutable). |
-| SRV-039 | Banners: admin CRUD + active-by-gender query | `feat/srv-039-banners` | SRV-038 | IN REVIEW | `GET /customer/v1/banners?gender=` (public, live window start<=now<end, audience + BOTH, order, image of the request language) and admin CRUD `/admin/v1/banners` (action/value consistency, end after start). |
+| SRV-039 | Banners: admin CRUD + active-by-gender query | `feat/srv-039-banners` | SRV-038 | DONE | `GET /customer/v1/banners?gender=` (public, live window start<=now<end, audience + BOTH, order, image of the request language) and admin CRUD `/admin/v1/banners` (action/value consistency, end after start). |
 
 ## Stage F — Salon domain
 Catalog, application, lifecycle, profile, team, staff, policies. Roadmap SRV-05.
 
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
-| SRV-040 | Catalog services: admin CRUD + list by gender (paginated, localized) | `feat/srv-040-catalog` | SRV-020 | TODO |  |
+| SRV-040 | Catalog services: admin CRUD + list by gender (paginated, localized) | `feat/srv-040-catalog` | SRV-020 | IN REVIEW | `GET /{customer|merchant}/v1/catalog/services?gender=` (paginated, localized, active only) and admin CRUD `/admin/v1/catalog/services` (gender fixed after creation). |
 | SRV-041 | Salon schema + owner registration/application create & resubmit (license docs keys, member OWNER created) | `feat/srv-041-salon-apply` | SRV-029 | TODO |  |
 | SRV-042 | Admin approve/reject application with reason; subscription TRIAL created on approval; notifications via stub | `feat/srv-042-salon-review` | SRV-041, SRV-020 | TODO |  |
 | SRV-043 | Completeness engine (`missing[]`, isComplete) + salon state machine (APPROVED_INCOMPLETE ↔ LIVE, OFFLINE) + `SALON_NOT_BOOKABLE` rule | `feat/srv-043-completeness` | SRV-042 | TODO |  |
