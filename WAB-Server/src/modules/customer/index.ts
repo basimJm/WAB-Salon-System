@@ -3,6 +3,8 @@ import { CUSTOMER_AUTH_ROUTES } from '../../constants/customerAuth';
 import { OTP_ROUTES } from '../../constants/otp';
 import { INSTALLATION_ROUTES } from '../../constants/installations';
 import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
+import { SEARCH_ROUTES, SEARCH_ROUTE_RATE_LIMIT } from '../../constants/search';
+import { createRateLimiter } from '../../middlewares/rateLimit';
 import { LOCATION_ROUTES } from '../../constants/locations';
 import { CONTENT_ROUTES } from '../../constants/content';
 import { BANNER_ROUTES } from '../../constants/banners';
@@ -16,10 +18,13 @@ import { ExternalServiceError } from '../../utils/errors';
 import {
   unavailableCatalogService,
   unavailableBannersService,
+  unavailableGuard,
+  unavailableSearch,
   unavailableCustomerAuth,
   type ApiServices,
 } from '../services';
 import { createCustomerBannersRouter } from './banners/banners.module';
+import { createSearchRouter } from './search/search.routes';
 import { createCustomerContentRouter } from '../shared/content';
 import { createCatalogRouter } from '../shared/catalog/catalog.module';
 import { createLocationsRouterFor } from '../shared/locations';
@@ -64,5 +69,17 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     ),
   );
   mount(router, UPLOAD_ROUTES.base, createCustomerUploadsRouter(services));
+  mount(
+    router,
+    SEARCH_ROUTES.base,
+    createSearchRouter({
+      service: services.search ?? unavailableSearch,
+      optionalAuth: services.installations?.customerOptional ?? unavailableGuard,
+      limiter: createRateLimiter({
+        ...SEARCH_ROUTE_RATE_LIMIT,
+        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
+      }),
+    }),
+  );
   return router;
 };

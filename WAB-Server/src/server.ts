@@ -29,6 +29,7 @@ import { createAccountLifecycleService } from './domain/auth/accountLifecycle.se
 import { createPhoneVerifier } from './domain/auth/phoneVerifier';
 import { createAdminSalonsService } from './domain/salons/adminSalons.service';
 import { createConflictFinder, noBookings } from './domain/salons/conflicts';
+import { createSearchService } from './domain/search/search.service';
 import { createPolicyService } from './domain/salons/policy.service';
 import { createLeavesService } from './domain/team/leaves.service';
 import { LeavesRepository } from './repositories/leaves.repository';
@@ -257,6 +258,14 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     otpGate,
     adminGuard,
     uploads,
+    // Placements (SRV-066) and favorites (SRV-062) plug in here later.
+    search: createSearchService({
+      salons: new SalonsRepository(),
+      salonServices,
+      closures: new ClosuresRepository(),
+      storage: providers.storage,
+      settings,
+    }),
     adminSalons: createAdminSalonsService({
       salons: new SalonsRepository(),
       members: new MembersRepository(),
