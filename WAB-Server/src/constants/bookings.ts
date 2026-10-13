@@ -38,3 +38,11 @@ export const ADMIN_BOOKING_ROUTES = { base: '/bookings', byId: '/:id' } as const
 /** Calendar blocks show only bookings that occupy or occupied the staff member's time. */
 export const CALENDAR_STATUSES = ['PENDING', 'APPROVED', 'COMPLETED', 'NO_SHOW'] as const;
 export type BookingAction = 'APPROVE' | 'REJECT' | 'CANCEL' | 'REASSIGN' | 'COMPLETE' | 'NO_SHOW';
+
+/** Admin booking status changes (SRV-078, Admin PRD A15). */
+export const ADMIN_BOOKING_STATUS_ROUTE = '/:id/status';
+export const ADMIN_BOOKING_AUDIT = {
+  action: 'BOOKING_STATUS_CHANGE',
+  entityType: 'BOOKING',
+  reasonCode: 'ADMIN_ACTION',
+} as const;

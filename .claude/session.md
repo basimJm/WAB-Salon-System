@@ -1301,6 +1301,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M08/M09/M11), Architect ✔, QA ✔) - search by customer is a bounded regex lookup (50 customers) — Atlas Search could replace it; closure/leave shading for the calendar is read from the hours/leaves endpoints; the "time since request / auto-cancel countdown" is derived from `createdAt`/`respondBy` by the client.
 
+### T-089 — SRV-078 Admin booking status changes
+- Project: `WAB-Server/` (`src/domain/bookings/bookingAdmin.service.ts`, `src/modules/admin/bookings/*`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §5.7 "any → any", CLAUDE.md §5.12, Admin PRD A15):
+  - [x] any change away from the current status with a mandatory non-blank reason (400 otherwise, nothing stored, no audit); same status 422 `ALREADY_HANDLED`; unknown 404
+  - [x] audit entry `BOOKING_STATUS_CHANGE` with before/after (+ `irregular`), reason, ip, user agent; history entry with actor ADMIN
+  - [x] side effects: COMPLETED → PAID + staff customersCount; reject/cancel/no-show record the decision; refund amount (§5.8/5.9 full or no-show) to the hook
+  - [x] back onto the calendar (PENDING/APPROVED from a non-holding status) re-checks staff under the staff/date lock → 409 `SLOT_TAKEN`
+- Tests: `tests/bookingAdmin.test.ts` (7); full gate green, 2091 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - audit is written after the change (same decision as T-043); admin reassign and manual refunds follow with SRV-086; notifications to both parties via the hook later.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

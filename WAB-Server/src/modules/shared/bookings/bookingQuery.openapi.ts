@@ -2,9 +2,11 @@ import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import {
   BOOKING_ROUTES,
   ADMIN_BOOKING_ROUTES,
+  ADMIN_BOOKING_STATUS_ROUTE,
   MERCHANT_BOOKING_QUERY_ROUTES,
   MERCHANT_BOOKING_ROUTES,
 } from '../../../constants/bookings';
+import { statusChangeBody } from '../../admin/bookings/bookings.validation';
 import { HTTP_STATUS } from '../../../constants/http';
 import { API_PREFIXES } from '../../../constants/server';
 import {
@@ -194,5 +196,37 @@ export const registerAdminBookingQueryDocs = (registry: OpenAPIRegistry): void =
     params: bookingIdParams,
     data: detail,
     tag: 'Bookings',
+  });
+  registry.registerPath({
+    method: 'post',
+    path: `${base}${ADMIN_BOOKING_STATUS_ROUTE.replace(':id', '{id}')}`,
+    tags: ['Bookings'],
+    summary: 'Move a booking to any other status with a mandatory reason (audited)',
+    description:
+      'Admin may make any change away from the current status (BUSINESS_DOMAIN §5.7). `irregular` is true when no actor could make that move by the normal rules (e.g. reverting a final status). Putting a booking back on the calendar needs its staff to be free (409 `SLOT_TAKEN`). Refunds and notifications follow through the refund and notification flows.',
+    request: {
+      headers,
+      params: bookingIdParams,
+      body: { content: { 'application/json': { schema: statusChangeBody } } },
+    },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Booking',
+        successResponseSchema(
+          row
+            .pick({ id: true, referenceNumber: true, status: true })
+            .extend({ irregular: z.boolean() }),
+        ),
+      ),
+      ...errorResponses(
+        HTTP_STATUS.badRequest,
+        HTTP_STATUS.unauthorized,
+        HTTP_STATUS.forbidden,
+        HTTP_STATUS.notFound,
+        HTTP_STATUS.conflict,
+        HTTP_STATUS.unprocessableEntity,
+        HTTP_STATUS.serviceUnavailable,
+      ),
+    },
   });
 };

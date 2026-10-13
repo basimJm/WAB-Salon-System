@@ -90,7 +90,11 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
   mount(
     router,
     ADMIN_BOOKING_ROUTES.base,
-    createAdminBookingsRouter(services.bookingQueries ?? unavailableBookingQueries, guard),
+    createAdminBookingsRouter(
+      services.bookingQueries ?? unavailableBookingQueries,
+      guard,
+      services.bookingAdmin,
+    ),
   );
   mount(
     router,
