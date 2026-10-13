@@ -16,6 +16,7 @@ import {
   unavailableCatalogRequests,
   unavailableAdminPlacements,
   unavailableCampaigns,
+  unavailableAdminSettings,
   unavailableAdminCustomers,
   unavailableAdminReviews,
   unavailableSalonReview,
@@ -39,6 +40,8 @@ import { createAdminSalonsRouter } from './salons/adminSalons.routes';
 import { createAdminSalonStateRouter } from './salons/salonState.routes';
 import { createAdminCustomersRouter } from './customers/customers.routes';
 import { ADMIN_CUSTOMER_ROUTES } from '../../constants/adminCustomers';
+import { createAdminAuditLogsRouter, createAdminSettingsRouter } from './settings/settings.routes';
+import { ADMIN_AUDIT_LOG_ROUTES, ADMIN_SETTINGS_ROUTES } from '../../constants/adminSettings';
 import { createAdminCampaignsRouter } from './campaigns/campaigns.routes';
 import { ADMIN_CAMPAIGN_ROUTES } from '../../constants/campaigns';
 import { createAdminPlacementsRouter } from './placements/placements.routes';
@@ -104,6 +107,16 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     router,
     ADMIN_CUSTOMER_ROUTES.base,
     createAdminCustomersRouter(services.adminCustomers ?? unavailableAdminCustomers, guard),
+  );
+  mount(
+    router,
+    ADMIN_SETTINGS_ROUTES.base,
+    createAdminSettingsRouter(services.adminSettings ?? unavailableAdminSettings, guard),
+  );
+  mount(
+    router,
+    ADMIN_AUDIT_LOG_ROUTES.base,
+    createAdminAuditLogsRouter(services.adminSettings ?? unavailableAdminSettings, guard),
   );
   mount(
     router,

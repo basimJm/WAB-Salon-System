@@ -1709,6 +1709,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - not built: subscription filter, recommended/30-day booking columns, admin profile editing, export. Not run against MongoDB.
 
+### T-112 — SRV-103 Admin settings editor and audit-log viewer
+
+- Project: `WAB-Server/` (`src/domain/adminSettings`, `src/modules/admin/settings`, `src/constants/adminSettings.ts`, `auditLogs` index)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (Admin PRD A28, A29; BE-65; CLAUDE.md §5.12; catalog requests, reviews, content already delivered by SRV-050/064/038):
+  - [x] Settings list with defaults; edit validated by the registry, applied at once, audited with before/after and a mandatory reason; unknown key 404, invalid value 400, nothing saved or audited
+  - [x] Audit-log viewer: newest first, paginated 25, filters, one entry; read-only; admin token only
+- Tests: `tests/adminSettings.test.ts` (6, real Redis); full gate green; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - values are audited as stored (settings hold no secrets). Not run against MongoDB.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
