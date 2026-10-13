@@ -38,4 +38,25 @@ export class SalonsRepository extends BaseRepository<SalonRaw> {
       .exec();
     return updated === null ? null : toEntity<SalonRaw>(updated);
   }
+
+  /** `$set` of the given fields and `$unset` of the others in one update (profile edits). */
+  async patch(
+    id: string,
+    change: { set: Record<string, unknown>; unset?: readonly string[] },
+  ): Promise<Entity<SalonRaw> | null> {
+    if (!isObjectIdString(id)) return null;
+    const unset = change.unset ?? [];
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: id },
+        {
+          $set: change.set,
+          ...(unset.length === 0 ? {} : { $unset: Object.fromEntries(unset.map((f) => [f, 1])) }),
+        },
+        { new: true, runValidators: true },
+      )
+      .lean()
+      .exec();
+    return updated === null ? null : toEntity<SalonRaw>(updated);
+  }
 }

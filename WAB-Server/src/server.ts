@@ -20,6 +20,8 @@ import { CatalogServicesRepository } from './repositories/catalog.repository';
 import { createSalonApplicationService } from './domain/salons/salonApplication.service';
 import { SalonsRepository } from './repositories/salons.repository';
 import { createSalonStateService, createStaffFacts } from './domain/salons/salonState.service';
+import { createSalonProfileService } from './domain/salons/salonProfile.service';
+import { loadMember } from './middlewares/permission';
 import { createSalonReviewService } from './domain/salons/salonReview.service';
 import { SubscriptionsRepository } from './repositories/subscriptions.repository';
 import { createAuditWriter } from './domain/audit/audit.service';
@@ -218,6 +220,19 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   return {
     otpGate,
     adminGuard,
+    salonProfile: {
+      service: createSalonProfileService({
+        salons: new SalonsRepository(),
+        cities: new CitiesRepository(),
+        areas: new AreasRepository(),
+        storage: providers.storage,
+        state: salonState,
+      }),
+      guard: [
+        requireAuth('merchant', config.auth.accessSecret),
+        loadMember(new MembersRepository()),
+      ],
+    },
     salonState,
     adminApplications: createSalonReviewService({
       completeness: salonState,
