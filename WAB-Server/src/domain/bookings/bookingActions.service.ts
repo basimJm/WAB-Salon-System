@@ -33,7 +33,12 @@ interface Target {
 
 /** Called after a status change; notifications, sockets, refunds and jobs hook in (later tasks). */
 export interface BookingChangedHook {
-  changed(booking: Entity<BookingRaw>, previous: BookingStatus): Promise<void>;
+  /** `refundDue` (fils) is set when the change returns money; the refund task executes it. */
+  changed(
+    booking: Entity<BookingRaw>,
+    previous: BookingStatus,
+    info?: { refundDue: number },
+  ): Promise<void>;
 }
 export const noBookingChangedHook: BookingChangedHook = { changed: () => Promise.resolve() };
 

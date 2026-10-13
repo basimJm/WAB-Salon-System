@@ -17,3 +17,7 @@ export const MERCHANT_BOOKING_ROUTES = {
 } as const;
 export const REASON_CODE_PATTERN = /^[A-Z][A-Z0-9_]{1,39}$/;
 export const REASON_TEXT_MAX_LENGTH = 300;
+
+export const CUSTOMER_BOOKING_ROUTES = { cancel: '/:id/cancel' } as const;
+/** Reason code stored when the customer cancels (no code is asked in the app). */
+export const CUSTOMER_CANCEL_REASON_CODE = 'CUSTOMER_REQUEST';
