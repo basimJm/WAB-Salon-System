@@ -1376,6 +1376,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `attempt` is an extension of the domain record (needed for the key). Provider errors propagate as 502/503 `ExternalServiceError`; webhook (SRV-084) and the paid booking creation (SRV-085) use `TransactionsRepository.settle`. Not run against a real gateway.
 
+### T-095 — SRV-084 Payment webhook + reconciliation
+- Project: `WAB-Server/` (`src/modules/webhooks/*`, `src/domain/payments/payments.service.ts` (`handleWebhook`, `reconcilePending`, `PaymentSettledHook`), `src/app.ts` raw body, `src/routes/index.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BE-41 "webhook signature + status query", NFR-01 webhook signature verification, BUSINESS_DOMAIN §5.6 step 3):
+  - [x] signature checked by the provider on the exact raw body: bad/missing → 401; body that is not JSON → 400
+  - [x] a notification never settles by itself: the gateway is asked; a forged "SUCCEEDED" while the gateway is pending changes nothing
+  - [x] idempotent: repeats and a verify/webhook race settle once and call the hook once; unknown session acknowledged
+  - [x] polling fallback `reconcilePending` for the job task: only attempts older than 2 min, batch limit, one failing answer does not stop the rest
+  - [x] documented in the `common` OpenAPI/Postman (not a client namespace); not reachable under `/customer/v1`
+- Tests: `tests/paymentsService.test.ts` (20), docs tests updated; full gate green, 2138 tests
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: header name `X-Signature` and JSON bodies are assumptions until the real gateway (HyperPay candidate) is chosen: only `PAYMENT_WEBHOOK_SIGNATURE_HEADER` and the provider's `handleWebhook` change; no per-route rate limit beyond the global one.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

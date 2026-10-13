@@ -4,6 +4,7 @@ import { createApp } from '../src/app';
 import { createPaymentsService } from '../src/domain/payments/payments.service';
 import { requireAuth } from '../src/middlewares/auth';
 import { FakePaymentProvider } from '../src/providers/payments/fake';
+import { FAKE_WEBHOOK_SIGNATURE } from '../src/constants/providers';
 import { BookingDraftsRepository } from '../src/repositories/bookingDrafts.repository';
 import { CustomersRepository } from '../src/repositories/identity.repository';
 import { TransactionsRepository } from '../src/repositories/transactions.repository';
@@ -16,6 +17,8 @@ const SECRET = 'a'.repeat(48);
 const NOW = new Date('2026-10-12T08:00:00Z');
 const m = { drafts: createFakeModel(), customers: createFakeModel(), tx: createFakeModel() };
 const gateway = new FakePaymentProvider();
+const settledIds: string[] = [];
+let clock = NOW;
 const me = new Types.ObjectId();
 const salon = new Types.ObjectId();
 
@@ -29,7 +32,13 @@ const app = createApp({
       provider: gateway,
       providerName: 'fake',
       logger,
-      now: () => NOW,
+      onSettled: {
+        settled: (t) => {
+          settledIds.push(t.id);
+          return Promise.resolve();
+        },
+      },
+      now: () => clock,
     }),
     installations: {
       service: undefined as never,
@@ -80,6 +89,8 @@ const verify = (id: string, who = me): request.Test =>
 const stored = (): Record<string, unknown>[] => m.tx.docs;
 
 beforeEach(() => {
+  settledIds.length = 0;
+  clock = NOW;
   for (const f of Object.values(m)) f.docs.length = 0;
   m.customers.docs.push({ _id: me, status: 'ACTIVE' });
   gateway.scenarioForNextSession('success');
@@ -202,5 +213,118 @@ describe('POST /customer/v1/payments/:id/verify', () => {
     expect((await verify(started.transactionId, stranger)).status).toBe(404);
     expect((await verify(new Types.ObjectId().toHexString())).status).toBe(404);
     expect((await verify('nope')).status).toBe(400);
+  });
+});
+
+describe('POST /webhooks/payments', () => {
+  const hook = (
+    body: object | string,
+    signature: string | null = FAKE_WEBHOOK_SIGNATURE,
+  ): request.Test => {
+    const req = request(app).post('/webhooks/payments').set('Content-Type', 'application/json');
+    if (signature !== null) void req.set('X-Signature', signature);
+    return req.send(typeof body === 'string' ? body : JSON.stringify(body));
+  };
+  const event = (sessionId: string, status = 'SUCCEEDED'): object => ({
+    sessionId,
+    status,
+    gatewayCode: '000.000.000',
+    gatewayMessage: 'ok',
+  });
+  const startPending = async (): Promise<{ id: string; sessionId: string }> => {
+    gateway.scenarioForNextSession('pending');
+    const started = bodyOf(await start(draft())).data;
+    return { id: started.transactionId, sessionId: started.sessionId ?? '' };
+  };
+
+  it('settles from the gateway’s confirmed result and acknowledges repeats without settling twice', async () => {
+    const { id, sessionId } = await startPending();
+    gateway.settle(sessionId, 'success');
+    const first = await hook(event(sessionId));
+    expect(first.status).toBe(200);
+    expect((first.body as { data: { settled: boolean } }).data.settled).toBe(true);
+    expect(stored()[0]).toMatchObject({ status: 'SUCCEEDED' });
+    const again = await hook(event(sessionId));
+    expect((again.body as { data: { settled: boolean } }).data.settled).toBe(false);
+    expect(settledIds).toEqual([id]);
+  });
+  it('never trusts the notification alone: the gateway is asked', async () => {
+    const { sessionId } = await startPending();
+    const res = await hook(event(sessionId, 'SUCCEEDED'));
+    expect(res.status).toBe(200);
+    expect((res.body as { data: { settled: boolean } }).data.settled).toBe(false);
+    expect(stored()[0]?.['status']).toBe('PENDING');
+    expect(settledIds).toEqual([]);
+  });
+  it('rejects a bad or missing signature and a body that is not JSON', async () => {
+    const { sessionId } = await startPending();
+    expect((await hook(event(sessionId), 'forged')).status).toBe(401);
+    expect((await hook(event(sessionId), null)).status).toBe(401);
+    expect((await hook('not json')).status).toBe(400);
+    expect(stored()[0]?.['status']).toBe('PENDING');
+  });
+  it('acknowledges an unknown session', async () => {
+    const res = await hook(event('fake-session-999'));
+    expect(res.status).toBe(200);
+    expect((res.body as { data: { settled: boolean } }).data.settled).toBe(false);
+  });
+  it('verify and webhook racing settle once and call the hook once', async () => {
+    const { id, sessionId } = await startPending();
+    gateway.settle(sessionId, 'success');
+    await Promise.all([verify(id), hook(event(sessionId)), verify(id)]);
+    expect(settledIds).toEqual([id]);
+  });
+  it('is not served under the client namespaces', async () => {
+    expect((await request(app).post('/customer/v1/webhooks/payments').send({})).status).toBe(404);
+  });
+});
+
+describe('payment reconciliation (polling fallback)', () => {
+  const service = (): ReturnType<typeof createPaymentsService> =>
+    createPaymentsService({
+      transactions: new TransactionsRepository(m.tx.model as never),
+      drafts: new BookingDraftsRepository(m.drafts.model as never),
+      customers: new CustomersRepository(m.customers.model as never),
+      provider: gateway,
+      providerName: 'fake',
+      logger,
+      now: () => clock,
+    });
+  const pendingAttempt = async (): Promise<{ id: string; sessionId: string }> => {
+    gateway.scenarioForNextSession('pending');
+    const started = bodyOf(await start(draft())).data;
+    return { id: started.transactionId, sessionId: started.sessionId ?? '' };
+  };
+
+  it('settles attempts that waited long enough and leaves recent or unfinished ones', async () => {
+    const old = await pendingAttempt();
+    gateway.settle(old.sessionId, 'success');
+    const unfinished = await pendingAttempt();
+    const recent = await pendingAttempt();
+    // The first two attempts are 3 minutes old by the time of the run; the last one is brand new.
+    const later = new Date(NOW.getTime() + 3 * 60_000);
+    for (const d of m.tx.docs) d['createdAt'] = String(d['_id']) === recent.id ? later : NOW;
+    clock = later;
+    expect(await service().reconcilePending()).toBe(1);
+    const status = (id: string): unknown =>
+      m.tx.docs.find((d) => String(d['_id']) === id)?.['status'];
+    expect(status(old.id)).toBe('SUCCEEDED');
+    expect(status(unfinished.id)).toBe('PENDING');
+    expect(status(recent.id)).toBe('PENDING');
+    expect(await service().reconcilePending()).toBe(0);
+  });
+  it('one unreachable answer does not stop the others', async () => {
+    const good = await pendingAttempt();
+    gateway.settle(good.sessionId, 'fail');
+    m.tx.docs.unshift({
+      _id: new Types.ObjectId(),
+      status: 'PENDING',
+      providerRef: 'missing-session',
+      createdAt: NOW,
+    });
+    for (const d of m.tx.docs) d['createdAt'] = NOW;
+    clock = new Date(NOW.getTime() + 3 * 60_000);
+    expect(await service().reconcilePending()).toBe(1);
+    expect(m.tx.docs.find((d) => String(d['_id']) === good.id)?.['status']).toBe('FAILED');
   });
 });

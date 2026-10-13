@@ -16,6 +16,16 @@ export class TransactionsRepository extends BaseRepository<TransactionRaw> {
     return this.findMany({ bookingDraftId: draftId }, { attempt: -1 });
   }
 
+  /** Attempts that have waited for a result since before `cutoff`, oldest first (reconciliation). */
+  async pendingBefore(cutoff: Date, limit: number): Promise<Entity<TransactionRaw>[]> {
+    const page = await this.findPage(
+      { status: 'PENDING', createdAt: { $lt: cutoff } },
+      { page: 1, pageSize: limit },
+      { createdAt: 1 },
+    );
+    return page.items;
+  }
+
   findByProviderRef(providerRef: string): Promise<Entity<TransactionRaw> | null> {
     return this.findOne({ providerRef });
   }

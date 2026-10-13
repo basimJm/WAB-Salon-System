@@ -102,9 +102,13 @@ describe('route ↔ OpenAPI coverage', () => {
 describe('OpenAPI documents', () => {
   const documents = buildOpenApiDocuments();
 
-  it('are OpenAPI 3.1 and describe health and readiness once, in common', () => {
+  it('are OpenAPI 3.1 and describe health, readiness and gateway callbacks once, in common', () => {
     for (const name of DOC_NAMES) expect(documents[name].openapi).toBe('3.1.0');
-    expect(Object.keys(documents.common.paths ?? {})).toEqual(['/health', '/ready']);
+    expect(Object.keys(documents.common.paths ?? {})).toEqual([
+      '/health',
+      '/ready',
+      '/webhooks/payments',
+    ]);
   });
 
   it('use the shared error envelope and error codes', () => {
@@ -252,7 +256,11 @@ describe('Swagger UI (outside production)', () => {
     const json = await request(app).get(`${DOCS_ROUTE}/common.json`);
     expect(json.status).toBe(200);
     expect((json.body as { openapi: string }).openapi).toBe('3.1.0');
-    expect(Object.keys((json.body as { paths: object }).paths)).toEqual(['/health', '/ready']);
+    expect(Object.keys((json.body as { paths: object }).paths)).toEqual([
+      '/health',
+      '/ready',
+      '/webhooks/payments',
+    ]);
   });
 
   it('answers an unknown document with the standard 404', async () => {

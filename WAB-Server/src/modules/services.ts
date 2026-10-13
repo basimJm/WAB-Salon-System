@@ -368,7 +368,12 @@ export const unavailableBookingAdmin: BookingAdminService = { changeStatus: unav
 
 export const unavailableBookingBulk: BookingBulkService = { cancelAffected: unavailable };
 
-export const unavailablePayments: PaymentsService = { start: unavailable, verify: unavailable };
+export const unavailablePayments: PaymentsService = {
+  start: unavailable,
+  verify: unavailable,
+  handleWebhook: unavailable,
+  reconcilePending: unavailable,
+};
 
 export const unavailableBookings: BookingCreationService = { create: unavailable };
 

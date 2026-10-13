@@ -1,4 +1,5 @@
-import express, { type Express, type Router } from 'express';
+import express, { type Express, type Request, type Router } from 'express';
+import { WEBHOOK_PREFIX } from './constants/payments';
 import { DEFAULT_TRUST_PROXY_HOPS } from './constants/security';
 import { JSON_BODY_LIMIT } from './constants/server';
 import { errorHandler } from './middlewares/errorHandler';
@@ -9,7 +10,7 @@ import { notFound } from './middlewares/notFound';
 import { requestId } from './middlewares/requestId';
 import { buildOpenApiDocuments } from './docs';
 import { createDocsRouter } from './docs/router';
-import { createRootRouter } from './routes';
+import { createRootRouter, defaultWebhooks } from './routes';
 import { createCustomerRouter } from './modules/customer';
 import { createMerchantRouter } from './modules/merchant';
 import { createAdminRouter } from './modules/admin';
@@ -51,7 +52,15 @@ export const createApp = ({
   app.use(language);
   app.use(securityMiddlewares({ corsAllowedOrigins: [], logger, ...security }));
   if (docs) app.use(createDocsRouter(buildOpenApiDocuments()));
-  app.use(express.json({ limit: JSON_BODY_LIMIT }));
+  app.use(
+    express.json({
+      limit: JSON_BODY_LIMIT,
+      verify: (req: Request, _res, buf) => {
+        // Webhook signatures cover the exact bytes, which the parsed body no longer has.
+        if (req.originalUrl.startsWith(WEBHOOK_PREFIX)) req.rawBody = buf.toString('utf8');
+      },
+    }),
+  );
   app.use(sanitizeRequest);
   app.use(
     router ??
@@ -62,6 +71,7 @@ export const createApp = ({
           admin: createAdminRouter(services),
         },
         createHealthRouter(readinessChecks),
+        [defaultWebhooks(services)],
       ),
   );
   app.use(notFound);
