@@ -362,6 +362,19 @@ describe('producers', () => {
     ]);
     expect(stored(ids.viewAll).map((n) => n['event'])).toEqual(['booking.auto_cancelled']);
   });
+  it('job events reach the right people once: reminders go to customer and assigned staff, the pending alert to responders', async () => {
+    const b = booking('APPROVED');
+    await producers.bookingJobEvent('booking.reminder_1h', b);
+    await producers.bookingJobEvent('booking.reminder_1h', b);
+    await producers.bookingJobEvent('booking.reminder_15m', b);
+    expect(stored(customer).map((n) => n['event'])).toEqual([
+      'booking.reminder_1h',
+      'booking.reminder_15m',
+    ]);
+    expect(stored(ids.staff).map((n) => n['event'])).toEqual(['booking.reminder_1h']);
+    await producers.bookingJobEvent('booking.pending_30m', booking('PENDING'));
+    expect(stored(ids.responder).map((n) => n['event'])).toContain('booking.pending_30m');
+  });
   it('a reassignment tells the customer and the old and new staff', async () => {
     await producers.bookingChanged.reassigned(booking('APPROVED'), {
       from: ids.staff.toHexString(),

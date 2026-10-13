@@ -41,8 +41,14 @@ type Params = Record<string, ParamValue>;
  * state) into notification events. Each adapter plugs into the hook or notifier interface its
  * domain service already offers, and none of them can break the business action: failures are logged.
  */
+/** The booking events that background jobs raise (SRV-096). */
+export type JobBookingEvent =
+  'booking.reminder_1h' | 'booking.reminder_15m' | 'booking.pending_30m';
+
 export interface NotificationProducers {
   readonly bookingCreated: BookingCreatedHook;
+  /** Sends a reminder / pending alert; one delivery per booking and event even if the job repeats. */
+  readonly bookingJobEvent: (event: JobBookingEvent, booking: Entity<BookingRaw>) => Promise<void>;
   readonly bookingChanged: Required<BookingChangedHook>;
   readonly refundHooks: Required<Pick<RefundHooks, 'started' | 'refunded' | 'failed'>>;
   readonly applicationNotifier: ApplicationNotifier;
@@ -137,6 +143,14 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
         key: `booking.reassigned:${booking.id}:${change.to}`,
       });
     }),
+  };
+
+  const bookingJobEvent: NotificationProducers['bookingJobEvent'] = async (event, booking) => {
+    await notifications.notify(event, {
+      ...bookingTarget(booking),
+      params: await bookingParams(booking),
+      key: `${event}:${booking.id}`,
+    });
   };
 
   const refundParams = async (refund: Entity<RefundRaw>): Promise<Params | null> => {
@@ -235,6 +249,7 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
 
   return {
     bookingCreated,
+    bookingJobEvent,
     bookingChanged,
     refundHooks,
     applicationNotifier,

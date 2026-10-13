@@ -50,3 +50,18 @@ export const ADMIN_BOOKING_AUDIT = {
 /** Bulk cancellation of the bookings a schedule/team change would break (SRV-079, §5.12). */
 export const MERCHANT_CANCEL_AFFECTED_ROUTE = '/cancel-affected';
 export const CANCEL_AFFECTED_MAX_BOOKINGS = 100;
+
+/** Background jobs of a booking (SRV-096, BUSINESS_DOMAIN.md §9). */
+export const AUTO_CANCEL_REASON = 'AUTO_CANCEL';
+export const BOOKING_JOB_NAMES = {
+  reminder: 'booking.reminder',
+  pendingAlert: 'booking.pending-alert',
+  autoCancel: 'booking.auto-cancel',
+} as const;
+/** The reminder minutes that have a message template; other values of the setting are ignored. */
+export const REMINDER_EVENT_BY_MINUTES = {
+  60: 'booking.reminder_1h',
+  15: 'booking.reminder_15m',
+} as const;
+/** Active bookings handed to the planner per database page when jobs are rebuilt. */
+export const JOB_RECONCILE_PAGE_SIZE = 200;

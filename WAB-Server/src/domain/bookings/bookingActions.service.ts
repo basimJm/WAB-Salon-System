@@ -1,5 +1,9 @@
 import type { Redis } from 'ioredis';
-import { STAFF_LOCK_SEGMENT, STAFF_LOCK_TTL_MS } from '../../constants/bookings';
+import {
+  AUTO_CANCEL_REASON,
+  STAFF_LOCK_SEGMENT,
+  STAFF_LOCK_TTL_MS,
+} from '../../constants/bookings';
 import type { BookingStatus } from '../../constants/enums';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import type { BookingRaw, StatusHistoryEntry } from '../../models/booking.model';
@@ -51,6 +55,8 @@ export interface BookingActionsService {
   complete(input: Target): Promise<BookingSummary>;
   noShow(input: Target): Promise<BookingSummary>;
   cancel(input: Target & Decision): Promise<BookingSummary>;
+  /** The system ends a PENDING booking nobody answered in time; everything paid is refunded. */
+  autoCancel(bookingId: string): Promise<BookingSummary>;
 }
 
 export interface BookingActionsDeps {
@@ -177,6 +183,38 @@ export const createBookingActionsService = (deps: BookingActionsDeps): BookingAc
           await Promise.all([...staffIds].map((id) => members.incrementCustomers(id)));
         },
       });
+    },
+    async autoCancel(bookingId) {
+      const booking = await bookings.findById(bookingId);
+      if (booking === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+      const at = now();
+      applyTransition({
+        facts: {
+          status: booking.status,
+          appointmentStart: booking.appointmentStart,
+          respondBy: booking.respondBy,
+          cancellationWindowHours: booking.policySnapshot.cancellationWindowHours,
+        },
+        to: 'AUTO_CANCELLED',
+        actor: { type: 'SYSTEM' },
+        now: at,
+      });
+      const history: StatusHistoryEntry = {
+        status: 'AUTO_CANCELLED',
+        actorType: 'SYSTEM',
+        reason: AUTO_CANCEL_REASON,
+        at,
+      };
+      const updated = await bookings.transition(booking.id, booking.status, {
+        set: {
+          status: 'AUTO_CANCELLED',
+          cancellation: { by: 'SYSTEM', reasonCode: AUTO_CANCEL_REASON, at },
+        },
+        history,
+      });
+      if (updated === null) throw new BusinessRuleError({ code: ERROR_CODES.ALREADY_HANDLED });
+      await hook.changed(updated, booking.status, { refundDue: fullRefund(booking) });
+      return toSummary(updated);
     },
     noShow(target) {
       return move(target, 'NO_SHOW', {

@@ -1630,6 +1630,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISION: ids use `.` not `:` (BullMQ rejects colons), so §9 names read `booking.reminder.<id>.60`. A job running when `remove` is called cannot be removed (handlers must re-check state). Not wired in `main()` (SRV-096). API docs: no change.
 
+### T-106 — SRV-096 Per-booking jobs: reminders, pending alert, auto-cancel
+
+- Project: `WAB-Server/` (`src/jobs/bookingJobs.ts`, `bookingActions.service.ts#autoCancel`, `producers.ts#bookingJobEvent`, `BookingsRepository.jobCandidates`, `src/server.ts`, `src/constants/bookings.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (CLAUDE.md §4.5; BUSINESS_DOMAIN §9, §5.7 PENDING→AUTO_CANCELLED by SYSTEM after respondBy, §5.10 full refund, §10 `booking.reminderMinutes`, `pendingAlertBeforeMinutes`; BE-35, BER-06):
+  - [x] PENDING: pending alert at start − 30 min + auto-cancel at `respondBy`; APPROVED: reminders at start − 60/15 min; final statuses: no jobs; every status change removes jobs that no longer apply (deterministic ids)
+  - [x] Late reminders/alerts are skipped; an overdue auto-cancel runs at once; planning twice queues once
+  - [x] Handlers re-check the booking at run time; reminders only for upcoming APPROVED, alert only for PENDING; one delivery per booking+event
+  - [x] Auto-cancel: state-machine SYSTEM transition, `cancellation.by = SYSTEM`, history entry, `refundDue = paidOnline` through the existing refund hook; a lost race is ignored, an early run retries
+  - [x] Start-up reconcile rebuilds jobs (Redis loss, downtime); hook failures are logged never thrown; worker started after the API, scheduler closed on shutdown
+- Tests: `tests/bookingJobs.test.ts` (17) + producer test; full gate green
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) only 60/15 minute reminders have templates; other `reminderMinutes` values are ignored with a warning; (2) `reconcile` loads all active bookings in pages of 200 (fine until volume grows; SRV-097 also runs it periodically); (3) the pending alert fires only if the start is still in the future. Not run against a real MongoDB. API docs: no change.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

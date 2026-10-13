@@ -31,6 +31,9 @@ import { createAdminSalonsService } from './domain/salons/adminSalons.service';
 import { createConflictFinder } from './domain/salons/conflicts';
 import { createSalonDetailsService } from './domain/salonDetails/salonDetails.service';
 import { createInboxService } from './domain/notifications/inbox.service';
+import { createBookingJobs } from './jobs/bookingJobs';
+import { createBullJobScheduler } from './jobs/bullmq';
+import type { JobHandler, JobScheduler } from './jobs/jobs';
 import { createFavoritesService } from './domain/favorites/favorites.service';
 import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
@@ -142,6 +145,15 @@ import {
   type ProcessLike,
 } from './utils/process/lifecycle';
 
+/** What the services need from the background-job system, and how they register their work. */
+interface JobRuntime {
+  readonly scheduler: JobScheduler;
+  /** Processors by job name; services add theirs while they are built. */
+  readonly handlers: Record<string, JobHandler>;
+  /** Rebuilds queued jobs from the database; run once the worker is up. */
+  readonly reconcilers: (() => Promise<number>)[];
+}
+
 export interface RunningServer {
   readonly server: Server;
   readonly shutdown: () => Promise<void>;
@@ -243,6 +255,7 @@ const buildServices = (
   logger: Logger,
   redis: Redis,
   relay: SocketRelay,
+  jobs: JobRuntime,
 ): ApiServices => {
   const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
   const otpGate = createOtpGate({ redis, settings });
@@ -456,8 +469,25 @@ const buildServices = (
     notifier: producers.payoutNotifier,
     logger,
   });
+  // Reminders, the pending alert and the auto-cancel follow every booking status change.
+  const bookingJobs = createBookingJobs({
+    scheduler: jobs.scheduler,
+    bookings: bookingsRepository,
+    // `bookingActions` is created below with the hooks that contain these jobs.
+    actions: { autoCancel: (bookingId) => bookingActions.autoCancel(bookingId) },
+    notify: producers.bookingJobEvent,
+    settings,
+    logger,
+  });
+  Object.assign(jobs.handlers, bookingJobs.handlers);
+  jobs.reconcilers.push(() => bookingJobs.reconcile());
   const bookingChanges = composeBookingHooks(
-    [bookingEvents, producers.bookingChanged, createRefundHook({ refunds: fullRefunds, logger })],
+    [
+      bookingEvents,
+      producers.bookingChanged,
+      createRefundHook({ refunds: fullRefunds, logger }),
+      bookingJobs.hook,
+    ],
     logger,
   );
   // A booking made from a payment books the charge in the ledger, then tells the apps.
@@ -470,6 +500,7 @@ const buildServices = (
       }
       await bookingEvents.created(booking);
       await producers.bookingCreated.created(booking);
+      await bookingJobs.hook.created(booking);
     },
   };
   const bookingCreation = createBookingCreationService({
@@ -796,9 +827,13 @@ const main = async (): Promise<void> => {
     redis = await connectRedis(config, logger);
     const connected = redis;
     const relay: SocketRelay = {};
+    const scheduler = createBullJobScheduler({ redis: connected, logger });
+    const jobs: JobRuntime = { scheduler, handlers: {}, reconcilers: [] };
+    const services = buildServices(config, logger, connected, relay, jobs);
     const running = await startServer(config, logger, {
       proc: process,
       closables: [
+        { name: 'jobs', close: () => scheduler.close() },
         { name: 'redis', close: () => disconnectRedis(connected) },
         { name: 'mongodb', close: disconnectMongo },
       ],
@@ -807,11 +842,21 @@ const main = async (): Promise<void> => {
         connected,
         `${REDIS_KEY_PREFIX.httpRateLimit}:global`,
       ),
-      services: buildServices(config, logger, connected, relay),
+      services,
       socket: { redis: connected, roomsFor: createRoomsFor(new MembersRepository()) },
     });
     // Booking services emit through the relay as soon as the hub exists.
     if (running.sockets !== undefined) relay.current = running.sockets;
+    // The worker starts after the API is up; jobs missed while the server was down are rebuilt first.
+    await scheduler.work(jobs.handlers);
+    for (const reconcile of jobs.reconcilers) {
+      try {
+        logger.info({ rebuilt: await reconcile() }, 'background jobs reconciled');
+      } catch (error) {
+        // The API is already serving: a failed rebuild is retried by the next reconcile run.
+        logger.error({ err: error }, 'background jobs could not be reconciled');
+      }
+    }
   } catch (error) {
     if (redis) await disconnectRedis(redis);
     await disconnectMongo();
