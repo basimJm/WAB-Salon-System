@@ -126,6 +126,17 @@ export class MembersRepository extends BaseRepository<MemberRaw> {
       .exec();
   }
 
+  /** One more customer served by this staff member (a completed booking). */
+  async incrementCustomers(id: string): Promise<void> {
+    if (!isValidId(id)) return;
+    await this.model
+      .findOneAndUpdate(
+        { _id: id, staff: { $exists: true } },
+        { $inc: { 'staff.customersCount': 1 } },
+      )
+      .exec();
+  }
+
   /** `$set` and `$unset` in one update (e.g. removing the photo). */
   async patch(
     id: string,
