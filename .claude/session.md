@@ -1175,6 +1175,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - pure function, no I/O; used by the draft (SRV-070). Whether the chosen option is allowed by the salon policy is checked in the draft, not here. API docs: no change.
 
+### T-079 — SRV-068 Availability core (pure)
+- Project: `WAB-Server/` (`src/domain/availability/availability.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.4; BE-30, BE-31; BER-02, BER-03):
+  - [x] Day check: past (before the Amman date), too far (> `maxDaysAhead`), closed (weekly day off or closure) -> no slots with a reason
+  - [x] Grid every `slotMinutes` from opening while start + duration <= closing; today drops starts before now + lead time
+  - [x] Eligible staff: active, provides services, works that weekday, no leave (inclusive), ALL selected services, bride-qualified for a bride, bride-only services only for brides, chosen staff restricts; custom hours only narrow the salon hours
+  - [x] Busy intervals are half-open (back-to-back is free); a slot is available if >=1 eligible staff is free for the whole duration; `eligibleStaffIds` lowest id first
+  - [x] `pickAnyStaff`: fewest bookings that day, tie -> lowest id
+- Tests: `tests/availability.test.ts` (29); mutation check on a copy (5 breakages all caught, file restored and diffed); full gate green, 1956 tests
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - pure function; the day start is converted once (plain minute arithmetic on 24 h days, zone rules on DST days). The endpoint, busy lookup and Redis holds are SRV-069. API docs: no change.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
