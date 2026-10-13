@@ -743,7 +743,7 @@
 ### T-047 — SRV-037 Public content: privacy/terms/about, FAQ
 - Project: `WAB-Server/` (`src/domain/content`, `src/modules/shared/content`, `src/models/{contentPage,faq}.model.ts`, `src/constants/content.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #54 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #55 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-65 data side; BUSINESS_DOMAIN §3.6 contentPages/faqs/contactInfo):
   - [x] Models `contentPages` (unique app+kind) and `faqs` (index app+order) in `ALL_MODELS`
   - [x] `GET /{customer|merchant}/v1/content/pages/{privacy|terms|about}`: own app's text in the request language, 404 if not written, 400 for an unknown slug
@@ -753,6 +753,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - contact info is not duplicated here: `GET /config` already returns it (SRV-035). FAQ list not paginated (small, admin-curated).
 - Notes: Next: SRV-038 (admin CRUD for reference data, content, versions, maintenance).
+
+### T-048 — SRV-030a Admin bootstrap script
+- Project: `WAB-Server/` (`src/seeds/{admin,runAdmin}.ts`, `src/constants/adminSeed.ts`, script `seed:admin`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #55 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE-02; Admin PRD §4 single admin; backlog row SRV-030a):
+  - [x] `seedAdmin` creates the admin (email trimmed + lower-cased, bcrypt via `hashPassword`); refuses an invalid email, a password under 12 characters, or when any admin exists (never overwrites)
+  - [x] `npm run seed:admin` reads `ADMIN_EMAIL`/`ADMIN_PASSWORD` from the environment only, never logs the password
+- Tests: `cd WAB-Server && npm test` - 1456 pass; format/lint/typecheck/build green; audit 0. `tests/adminSeed.test.ts` (7). API docs: no change.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - not run against a real MongoDB. The keys are intentionally not in `AppConfig`/`.env.example` (one-off script input).
+- Notes: Next: SRV-038 in parts (reference data admin, then content, then versions/maintenance).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
