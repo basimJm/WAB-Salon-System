@@ -31,6 +31,7 @@ import {
   registerMerchantContentDocs,
 } from '../modules/shared/content/content.openapi';
 import { registerMerchantGalleryDocs } from '../modules/merchant/gallery/gallery.openapi';
+import { registerMerchantTeamDocs } from '../modules/merchant/team/team.openapi';
 import { registerMerchantServicesDocs } from '../modules/merchant/services/services.openapi';
 import { registerMerchantHoursDocs } from '../modules/merchant/hours/hours.openapi';
 import { registerMerchantProfileDocs } from '../modules/merchant/salon/profile.openapi';
@@ -68,7 +69,7 @@ type Registrar = (registry: OpenAPIRegistry) => void;
 const REGISTRARS: Readonly<Record<DocName, readonly Registrar[]>> = {
   common: [registerHealthDocs],
   customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs, registerCustomerBannerDocs, registerCustomerCatalogDocs, registerCustomerUploadDocs],
-  merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs, registerMerchantCatalogDocs, registerMerchantSalonDocs, registerMerchantProfileDocs, registerMerchantUploadDocs, registerMerchantGalleryDocs, registerMerchantHoursDocs, registerMerchantServicesDocs, registerMerchantCatalogRequestDocs],
+  merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs, registerMerchantCatalogDocs, registerMerchantSalonDocs, registerMerchantProfileDocs, registerMerchantUploadDocs, registerMerchantGalleryDocs, registerMerchantHoursDocs, registerMerchantServicesDocs, registerMerchantCatalogRequestDocs, registerMerchantTeamDocs],
   admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs, registerAdminSalonStateDocs, registerAdminUploadDocs, registerAdminCatalogRequestDocs],
 };
 

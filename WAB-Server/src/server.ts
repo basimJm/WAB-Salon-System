@@ -25,6 +25,9 @@ import { loadMember } from './middlewares/permission';
 import { createImageVariants } from './domain/uploads/variants';
 import { createCatalogRequestsService } from './domain/catalog/catalogRequests.service';
 import { CatalogRequestsRepository } from './repositories/catalogRequests.repository';
+import { createAccountLifecycleService } from './domain/auth/accountLifecycle.service';
+import { createPhoneVerifier } from './domain/auth/phoneVerifier';
+import { createTeamService } from './domain/team/team.service';
 import { createSalonServicesService } from './domain/salonServices/salonServices.service';
 import { SalonServicesRepository } from './repositories/salonServices.repository';
 import { createHoursService } from './domain/salons/hoursService';
@@ -246,6 +249,22 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     otpGate,
     adminGuard,
     uploads,
+    team: createTeamService({
+      members: new MembersRepository(),
+      lifecycle: createAccountLifecycleService({
+        customers: new CustomersRepository(),
+        members: new MembersRepository(),
+        installations: new InstallationsRepository(),
+        refreshTokens: phoneServices.refreshTokens,
+        storage: providers.storage,
+        audit,
+        settings,
+        logger,
+      }),
+      phones: createPhoneVerifier(phoneServices),
+      storage: providers.storage,
+      uploads,
+    }),
     catalogRequests: createCatalogRequestsService({
       requests: new CatalogRequestsRepository(),
       salons: new SalonsRepository(),

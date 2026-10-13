@@ -960,7 +960,7 @@
 ### T-062 — SRV-050 Salon services CRUD + catalog requests (+ admin decision)
 - Project: `WAB-Server/` (`src/domain/salonServices/*`, `src/domain/catalog/catalogRequests.service.ts`, `src/modules/merchant/{services,catalogRequests}/*`, `src/modules/admin/catalogRequests/*`, models `salonService`/`catalogRequest`, `src/constants/salonServices.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #69 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #70 merged into `server`)
 - Acceptance criteria (Merchant PRD M16; BUSINESS_DOMAIN §3.3 salonServices, §3.2 catalogRequests, §5.2 SERVICE completeness, §6 SERVICES_MANAGE; Admin PRD "Catalog request decision"):
   - [x] `salonServices` (unique salon+catalog service, `{catalogServiceId, active}` index) and `catalogRequests` models in `ALL_MODELS`
   - [x] `GET/POST/PATCH /merchant/v1/salon/services` (`SERVICES_MANAGE`): paginated list with localized catalog name/image; add only an active catalog service of the salon's gender (`GENDER_MISMATCH`), once per salon (409), price as JOD string -> integer fils > 0, duration 5..1440 and a multiple of 5, bride-only only in women's salons, extra description <= 500, media = confirmed `SERVICE_MEDIA` uploads of this salon (<= 10, unique); patch changes any of these, `extraDescription: null` clears, `active:false` switches off (no delete); other salons' services are 404
@@ -971,6 +971,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M16), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) services are deactivated, never deleted (staff and bookings reference them); (2) the M16 warnings (upcoming bookings of a deactivated service, active service without qualified staff) need bookings/staff: with SRV-052/070; (3) price changes affect new bookings only (snapshots, SRV-067+); (4) approve claims the request first and reverts it if the catalog entry cannot be created; (5) the max duration (1440) and 10 media items are assumptions. Not run against a real MongoDB.
 - Notes: Next: SRV-051 (team members CRUD).
+
+### T-063 — SRV-051 Team members CRUD, roles, permission editor, deactivation
+- Project: `WAB-Server/` (`src/domain/team/team.service.ts`, `src/modules/merchant/team/*`, `src/constants/team.ts`, `MembersRepository.patch`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #70 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE-04, CLAUDE.md §4.2; Merchant PRD M17-M18; BUSINESS_DOMAIN §3.4 members, §6 permissions, `LAST_OWNER`/`PHONE_ALREADY_REGISTERED`):
+  - [x] `GET /merchant/v1/team/members` (+ `/:id`): needs `STAFF_MANAGE` (owner always); only the caller's salon (other salons' members are 404); permissions shown are the effective ones (OWNER = all); paginated (10)
+  - [x] `POST` (OWNER only, others 403 `OWNER_REQUIRED` even with every key): first/last name, phone as country + national number (country regex, normalized to E.164, unique across all salons -> 409 `PHONE_ALREADY_REGISTERED`, race handled by the unique index), role MANAGER|EMPLOYEE (OWNER not assignable), permissions default to the role template or an explicit grant through `normalizeGrant` (owner-only and unknown keys rejected), optional MEMBER_PHOTO (confirmed upload of this salon); starts active, `providesServices=false`
+  - [x] `PATCH /:id` (OWNER only): name, photo (`null` removes), role (resets to the new template unless permissions sent), permissions; effective immediately because every request re-reads the member; the OWNER's role/permissions cannot change (422 `LAST_OWNER`), name and photo can
+  - [x] `POST /:id/deactivate|reactivate` (OWNER only) reuse the account-lifecycle service: refresh tokens revoked, devices detached, the member's next request is 403 `MEMBER_INACTIVE`; the OWNER cannot be deactivated (422 `LAST_OWNER`)
+- Tests: `cd WAB-Server && npm test` - 1708 pass; format/lint/typecheck/build green; audit 0. `tests/team.test.ts` (17).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M17/M18), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) no SMS invite is sent (PRD assumption "optional"); (2) the permission-change notification (silent push + socket `permissions.updated`, §6) comes with sockets/notifications; (3) conflict handling on deactivation (upcoming bookings) needs bookings; (4) changing a member's own phone needs an OTP flow and is a separate task; (5) ownership transfer is not supported. Not run against a real MongoDB.
+- Notes: Next: SRV-052 (staff profile).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
