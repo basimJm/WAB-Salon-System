@@ -1,3 +1,4 @@
+import { createAdminTransactionsService } from './domain/finance/adminTransactions.service';
 import { createServer, type Server } from 'node:http';
 import type { Store } from 'express-rate-limit';
 import type { Redis } from 'ioredis';
@@ -644,6 +645,7 @@ const buildServices = (
     payments,
     adminRefunds: fullRefunds,
     adminPayouts,
+    adminTransactions: createAdminTransactionsService({ transactions: transactionsRepository }),
     ...(config.secrets.payoutEncryptionKey === undefined
       ? {}
       : {

@@ -18780,6 +18780,1193 @@
         }
       }
     },
+    "/admin/v1/transactions": {
+      "get": {
+        "tags": [
+          "Finance"
+        ],
+        "summary": "Payment attempts with gateway codes (filter by status, type, salon, customer, booking, dates)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            },
+            "required": false,
+            "name": "pageSize",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "SUCCEEDED",
+                "FAILED",
+                "CANCELLED"
+              ]
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DEPOSIT",
+                "FULL"
+              ]
+            },
+            "required": false,
+            "name": "type",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "salonId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "customerId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "bookingId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "to",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "bookingDraftId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "bookingId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "customerId": {
+                            "type": "string"
+                          },
+                          "salonId": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "DEPOSIT",
+                              "FULL"
+                            ]
+                          },
+                          "amount": {
+                            "type": "string",
+                            "description": "JOD decimal string"
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "attempt": {
+                            "type": "number"
+                          },
+                          "provider": {
+                            "type": "string"
+                          },
+                          "providerRef": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "PENDING",
+                              "SUCCEEDED",
+                              "FAILED",
+                              "CANCELLED"
+                            ]
+                          },
+                          "gatewayCode": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "gatewayMessage": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "gatewayFee": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "refundedAt": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "chargedAt": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "platform": {
+                            "type": "string"
+                          },
+                          "appVersion": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "bookingDraftId",
+                          "bookingId",
+                          "customerId",
+                          "salonId",
+                          "type",
+                          "amount",
+                          "currency",
+                          "attempt",
+                          "provider",
+                          "providerRef",
+                          "status",
+                          "gatewayCode",
+                          "gatewayMessage",
+                          "gatewayFee",
+                          "refundedAt",
+                          "chargedAt",
+                          "platform",
+                          "appVersion",
+                          "createdAt"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/transactions/{id}": {
+      "get": {
+        "tags": [
+          "Finance"
+        ],
+        "summary": "One attempt with the raw gateway answer and all attempts of the same checkout",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "bookingDraftId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "bookingId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "customerId": {
+                          "type": "string"
+                        },
+                        "salonId": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "DEPOSIT",
+                            "FULL"
+                          ]
+                        },
+                        "amount": {
+                          "type": "string",
+                          "description": "JOD decimal string"
+                        },
+                        "currency": {
+                          "type": "string"
+                        },
+                        "attempt": {
+                          "type": "number"
+                        },
+                        "provider": {
+                          "type": "string"
+                        },
+                        "providerRef": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "SUCCEEDED",
+                            "FAILED",
+                            "CANCELLED"
+                          ]
+                        },
+                        "gatewayCode": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "gatewayMessage": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "gatewayFee": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "refundedAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "chargedAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "platform": {
+                          "type": "string"
+                        },
+                        "appVersion": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "raw": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "additionalProperties": {}
+                        },
+                        "attempts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "bookingDraftId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "bookingId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "customerId": {
+                                "type": "string"
+                              },
+                              "salonId": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "DEPOSIT",
+                                  "FULL"
+                                ]
+                              },
+                              "amount": {
+                                "type": "string",
+                                "description": "JOD decimal string"
+                              },
+                              "currency": {
+                                "type": "string"
+                              },
+                              "attempt": {
+                                "type": "number"
+                              },
+                              "provider": {
+                                "type": "string"
+                              },
+                              "providerRef": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "PENDING",
+                                  "SUCCEEDED",
+                                  "FAILED",
+                                  "CANCELLED"
+                                ]
+                              },
+                              "gatewayCode": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "gatewayMessage": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "gatewayFee": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "refundedAt": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "chargedAt": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "platform": {
+                                "type": "string"
+                              },
+                              "appVersion": {
+                                "type": "string"
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "bookingDraftId",
+                              "bookingId",
+                              "customerId",
+                              "salonId",
+                              "type",
+                              "amount",
+                              "currency",
+                              "attempt",
+                              "provider",
+                              "providerRef",
+                              "status",
+                              "gatewayCode",
+                              "gatewayMessage",
+                              "gatewayFee",
+                              "refundedAt",
+                              "chargedAt",
+                              "platform",
+                              "appVersion",
+                              "createdAt"
+                            ]
+                          },
+                          "description": "Every attempt of the same checkout, newest first"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "bookingDraftId",
+                        "bookingId",
+                        "customerId",
+                        "salonId",
+                        "type",
+                        "amount",
+                        "currency",
+                        "attempt",
+                        "provider",
+                        "providerRef",
+                        "status",
+                        "gatewayCode",
+                        "gatewayMessage",
+                        "gatewayFee",
+                        "refundedAt",
+                        "chargedAt",
+                        "platform",
+                        "appVersion",
+                        "createdAt",
+                        "raw",
+                        "attempts"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/finance/reconciliation": {
+      "get": {
+        "tags": [
+          "Finance"
+        ],
+        "summary": "Payment problems: stuck pending, paid without booking, missing ledger charge",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reconciliation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "stuckPending": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "bookingDraftId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "bookingId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "customerId": {
+                                "type": "string"
+                              },
+                              "salonId": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "DEPOSIT",
+                                  "FULL"
+                                ]
+                              },
+                              "amount": {
+                                "type": "string",
+                                "description": "JOD decimal string"
+                              },
+                              "currency": {
+                                "type": "string"
+                              },
+                              "attempt": {
+                                "type": "number"
+                              },
+                              "provider": {
+                                "type": "string"
+                              },
+                              "providerRef": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "PENDING",
+                                  "SUCCEEDED",
+                                  "FAILED",
+                                  "CANCELLED"
+                                ]
+                              },
+                              "gatewayCode": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "gatewayMessage": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "gatewayFee": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "refundedAt": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "chargedAt": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "platform": {
+                                "type": "string"
+                              },
+                              "appVersion": {
+                                "type": "string"
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "bookingDraftId",
+                              "bookingId",
+                              "customerId",
+                              "salonId",
+                              "type",
+                              "amount",
+                              "currency",
+                              "attempt",
+                              "provider",
+                              "providerRef",
+                              "status",
+                              "gatewayCode",
+                              "gatewayMessage",
+                              "gatewayFee",
+                              "refundedAt",
+                              "chargedAt",
+                              "platform",
+                              "appVersion",
+                              "createdAt"
+                            ]
+                          },
+                          "description": "Still PENDING at the gateway after the polling delay"
+                        },
+                        "paidWithoutBooking": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "bookingDraftId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "bookingId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "customerId": {
+                                "type": "string"
+                              },
+                              "salonId": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "DEPOSIT",
+                                  "FULL"
+                                ]
+                              },
+                              "amount": {
+                                "type": "string",
+                                "description": "JOD decimal string"
+                              },
+                              "currency": {
+                                "type": "string"
+                              },
+                              "attempt": {
+                                "type": "number"
+                              },
+                              "provider": {
+                                "type": "string"
+                              },
+                              "providerRef": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "PENDING",
+                                  "SUCCEEDED",
+                                  "FAILED",
+                                  "CANCELLED"
+                                ]
+                              },
+                              "gatewayCode": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "gatewayMessage": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "gatewayFee": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "refundedAt": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "chargedAt": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "platform": {
+                                "type": "string"
+                              },
+                              "appVersion": {
+                                "type": "string"
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "bookingDraftId",
+                              "bookingId",
+                              "customerId",
+                              "salonId",
+                              "type",
+                              "amount",
+                              "currency",
+                              "attempt",
+                              "provider",
+                              "providerRef",
+                              "status",
+                              "gatewayCode",
+                              "gatewayMessage",
+                              "gatewayFee",
+                              "refundedAt",
+                              "chargedAt",
+                              "platform",
+                              "appVersion",
+                              "createdAt"
+                            ]
+                          },
+                          "description": "Paid, no booking and not refunded yet"
+                        },
+                        "missingLedger": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "bookingDraftId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "bookingId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "customerId": {
+                                "type": "string"
+                              },
+                              "salonId": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "DEPOSIT",
+                                  "FULL"
+                                ]
+                              },
+                              "amount": {
+                                "type": "string",
+                                "description": "JOD decimal string"
+                              },
+                              "currency": {
+                                "type": "string"
+                              },
+                              "attempt": {
+                                "type": "number"
+                              },
+                              "provider": {
+                                "type": "string"
+                              },
+                              "providerRef": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "PENDING",
+                                  "SUCCEEDED",
+                                  "FAILED",
+                                  "CANCELLED"
+                                ]
+                              },
+                              "gatewayCode": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "gatewayMessage": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "gatewayFee": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "refundedAt": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "chargedAt": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "platform": {
+                                "type": "string"
+                              },
+                              "appVersion": {
+                                "type": "string"
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "bookingDraftId",
+                              "bookingId",
+                              "customerId",
+                              "salonId",
+                              "type",
+                              "amount",
+                              "currency",
+                              "attempt",
+                              "provider",
+                              "providerRef",
+                              "status",
+                              "gatewayCode",
+                              "gatewayMessage",
+                              "gatewayFee",
+                              "refundedAt",
+                              "chargedAt",
+                              "platform",
+                              "appVersion",
+                              "createdAt"
+                            ]
+                          },
+                          "description": "Paid bookings without a ledger charge"
+                        }
+                      },
+                      "required": [
+                        "stuckPending",
+                        "paidWithoutBooking",
+                        "missingLedger"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/v1/subscriptions": {
       "get": {
         "tags": [

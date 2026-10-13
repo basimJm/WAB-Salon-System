@@ -1721,6 +1721,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - values are audited as stored (settings hold no secrets). Not run against MongoDB.
 
+### T-113 — SRV-104 Admin finance: transactions and reconciliation view
+
+- Project: `WAB-Server/` (`src/domain/finance`, `src/modules/admin/finance`, `src/constants/adminFinance.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (Admin PRD A16-A18; refunds, payouts, subscriptions, recommended already exist):
+  - [x] `GET /admin/v1/transactions` filtered (status, type, salon, customer, booking, dates), paginated 25, JOD strings; detail with raw gateway answer and all attempts of the checkout
+  - [x] `GET /admin/v1/finance/reconciliation`: stuck PENDING, paid without booking/refund, paid bookings without ledger charge; fresh or healthy rows ignored
+  - [x] Admin token only (401/403)
+- Tests: `tests/adminFinance.test.ts` (5); full gate green; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - read-only; the manual ADJUSTMENT ledger tool is not built (no PRD rule on amounts/limits) and is left for the owner to confirm.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
