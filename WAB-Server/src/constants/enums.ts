@@ -107,3 +107,6 @@ export type RefundSource = (typeof REFUND_SOURCES)[number];
 /** Kinds of salon balance movement (BUSINESS_DOMAIN.md §3.5 `ledgerEntries`). */
 export const LEDGER_TYPES = ['CHARGE', 'GATEWAY_FEE', 'REFUND', 'PAYOUT', 'ADJUSTMENT'] as const;
 export type LedgerType = (typeof LEDGER_TYPES)[number];
+
+export const PAYOUT_STATUSES = ['PENDING', 'TRANSFERRED'] as const;
+export type PayoutStatus = (typeof PAYOUT_STATUSES)[number];

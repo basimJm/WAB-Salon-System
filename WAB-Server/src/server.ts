@@ -45,6 +45,8 @@ import { createBookingAdminService } from './domain/bookings/bookingAdmin.servic
 import { createBookingQueriesService } from './domain/bookings/bookingQueries.service';
 import { createBookingReassignService } from './domain/bookings/bookingReassign.service';
 import { createBookingCancelService } from './domain/bookings/bookingCancel.service';
+import { createPayoutsService } from './domain/payouts/payouts.service';
+import { PayoutsRepository } from './repositories/payouts.repository';
 import { createLedgerService } from './domain/ledger/ledger.service';
 import { LedgerRepository } from './repositories/ledger.repository';
 import type { BookingCreatedHook } from './domain/bookings/bookingCreation.service';
@@ -387,8 +389,9 @@ const buildServices = (
   });
   const transactionsRepository = new TransactionsRepository();
   const refundsRepository = new RefundsRepository();
+  const ledgerRepository = new LedgerRepository();
   const ledger = createLedgerService({
-    entries: new LedgerRepository(),
+    entries: ledgerRepository,
     transactions: transactionsRepository,
     refunds: refundsRepository,
     logger,
@@ -413,6 +416,21 @@ const buildServices = (
     logger,
   });
   // Every booking status change tells the apps (sockets) and starts the refund it owes.
+  const adminPayouts = createPayoutsService({
+    payouts: new PayoutsRepository(),
+    ledgerEntries: ledgerRepository,
+    ledger,
+    salons: new SalonsRepository(),
+    audit,
+    // Placeholder until the notification core (SRV-093) tells the owner and FINANCE_VIEW members.
+    notifier: {
+      transferred: (payout) => {
+        logger.info({ payoutId: payout.id, salonId: payout.salonId }, 'payout transferred');
+        return Promise.resolve();
+      },
+    },
+    logger,
+  });
   const bookingChanges = composeBookingHooks(
     [bookingEvents, createRefundHook({ refunds: fullRefunds, logger })],
     logger,
@@ -525,6 +543,7 @@ const buildServices = (
     bookingCancel,
     payments,
     adminRefunds: fullRefunds,
+    adminPayouts,
     bookingAdmin,
     bookingBulk: createBookingBulkService({
       bookings: bookingsRepository,

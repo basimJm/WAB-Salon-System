@@ -1,7 +1,9 @@
 import { LEDGER_RECONCILE_BATCH_SIZE } from '../../constants/ledger';
+import { PAYOUT_LEDGER_NOTE } from '../../constants/payouts';
 import { RECONCILE_MIN_AGE_MS } from '../../constants/payments';
 import type { LedgerType } from '../../constants/enums';
 import type { LedgerEntryRaw } from '../../models/ledgerEntry.model';
+import type { PayoutRaw } from '../../models/payout.model';
 import type { RefundRaw } from '../../models/refund.model';
 import type { LedgerRepository } from '../../repositories/ledger.repository';
 import type { RefundsRepository } from '../../repositories/refunds.repository';
@@ -29,6 +31,8 @@ export interface LedgerService {
   recordChargeForBooking(bookingId: string): Promise<boolean>;
   /** Books a finished refund: REFUND −amount (the gateway fee is not returned). Idempotent. */
   recordRefund(refund: Entity<RefundRaw>): Promise<boolean>;
+  /** Books a transferred payout: PAYOUT −net. Idempotent. */
+  recordPayout(payout: Entity<PayoutRaw>): Promise<void>;
   /** The salon's balance and the sum per kind of entry. */
   totals(salonId: string): Promise<SalonTotals>;
   /** Job: books payments and refunds whose ledger write was missed; returns how many were booked. */
@@ -106,6 +110,19 @@ export const createLedgerService = (deps: {
   return {
     recordChargeForBooking: chargeFor,
     recordRefund: refundFor,
+
+    async recordPayout(payout) {
+      await appendOnce(
+        {
+          salonId: toObjectId(payout.salonId),
+          type: 'PAYOUT',
+          amount: -payout.net,
+          payoutId: toObjectId(payout.id),
+          note: PAYOUT_LEDGER_NOTE,
+        },
+        () => entries.findFor({ payoutId: payout.id }),
+      );
+    },
 
     async totals(salonId) {
       const sum = (type?: LedgerType): Promise<number> => entries.sum(salonId, type);
