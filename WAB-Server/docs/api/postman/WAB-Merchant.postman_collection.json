@@ -89,6 +89,166 @@
               }
             }
           }
+        },
+        {
+          "name": "Check a number before sending the OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/auth/check-phone",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "auth",
+                "check-phone"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "404 `PHONE_NOT_REGISTERED` when the number is not linked to a salon (the app offers to register one); 403 `MEMBER_INACTIVE` when the owner removed the member.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Log in with a Firebase ID token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "auth",
+                "login"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "The token must prove the phone. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `MEMBER_INACTIVE` (403), `PHONE_NOT_REGISTERED` (404). The profile carries role, salon and permissions for the app to cache.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"idToken\": \"string\",\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Rotate the refresh token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "auth",
+                "refresh"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Returns a new token pair and the current profile. Reusing an old refresh token ends every session of that login (401). A removed member gets 403 `MEMBER_INACTIVE` and all sessions end.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Log out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "auth",
+                "logout"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Revokes the refresh token and unlinks the device. Always succeeds for well-formed tokens.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         }
       ]
     }

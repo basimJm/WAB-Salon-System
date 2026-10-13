@@ -621,7 +621,7 @@
 ### T-039 — SRV-028 Customer register/login/refresh/logout/change-phone via Firebase ID token
 - Project: `WAB-Server/` (`src/domain/auth/customerAuth.service.ts`, `src/modules/customer/auth/*`, `src/constants/customerAuth.ts`, `src/repositories/identity.repository.ts`, `src/server.ts`, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #44 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #45 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-01, BE-04, NFR-01; BUSINESS_DOMAIN §3.1 customers/installations/refreshTokens, §4.2, §11 `PHONE_NOT_REGISTERED`/`PHONE_ALREADY_REGISTERED`/`ACCOUNT_BLOCKED`/`OTP_*`; Customer PRD S11, S12, S13, S22):
   - [x] `POST /customer/v1/auth/check-phone` (LOGIN: 404 not registered / 403 blocked; REGISTER: 409 taken)
   - [x] `register` (201) and `login` (200): number resolved from country code + national number (active country, country regex), Firebase ID token verified for that exact number via `OtpProvider`, invalid/expired/other-number -> 401 `OTP_INVALID`/`OTP_EXPIRED`, blocked number -> 429 `OTP_BLOCKED` before the provider is asked; platform JWT (ttl from `auth.accessTokenTtlSec`) + rotating refresh token (`auth.refreshTokenTtlDays`); gate reset on success
@@ -634,6 +634,22 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (matches PRD S11-S13, S22), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) booking-confirmation OTP is NOT in this PR: it belongs to the booking draft flow (no draft exists yet), the gate and provider are ready for it; (2) a DELETED customer keeps the phone unique index, so that number cannot register again until the deletion job anonymises it (SRV account deletion task); (3) `check-phone` reveals whether a number is registered, as the PRD flow requires, behind the per-IP route limit; (4) the phone is sent as `{countryCode, number}`, the server builds E.164 from the country's dial code. `RefreshTokenService.revoke` now returns the ended session.
 - Next: SRV-029 (merchant member login).
+
+### T-040 — SRV-029 Merchant member login via Firebase ID token
+- Project: `WAB-Server/` (`src/domain/auth/{merchantAuth.service,phoneVerifier,sessionTokens}.ts`, `src/modules/merchant/auth/*`, `src/modules/shared/auth/auth.schemas.ts`, `src/constants/merchantAuth.ts`, `src/repositories/identity.repository.ts`, `src/server.ts`, docs)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #45 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-01, BE-03, BE-04, NFR-01; BUSINESS_DOMAIN §3.1/§3.4 members, §4.2, §11 `PHONE_NOT_REGISTERED`/`MEMBER_INACTIVE`/`OTP_*`; Merchant PRD §4.3, §4.4, M02, M03):
+  - [x] `POST /merchant/v1/auth/check-phone`: active member passes; unknown number 404 `PHONE_NOT_REGISTERED` (app offers "Register a new salon"); deactivated member 403 `MEMBER_INACTIVE`
+  - [x] `login`: Firebase ID token verified for that exact number (`OTP_INVALID`/`OTP_EXPIRED` 401, blocked number 429 `OTP_BLOCKED` before the provider is asked), merchant-scope access token (subject MEMBER) + rotating refresh token, device linked as app MERCHANT with `memberId`, gate reset
+  - [x] Profile returned for the app cache: id, salonId, names, phone, role, permissions (OWNER = all 15, others as granted), providesServices, photoKey?
+  - [x] `refresh` rotates and returns the current profile (permission changes apply at once); a deactivated member gets 403 `MEMBER_INACTIVE` and loses every session; a removed member 401; `logout` revokes and unlinks the device (idempotent)
+  - [x] Shared code, no duplication: `createPhoneVerifier` (country regex, OTP gate + provider) and `createSessionTokens` (access + refresh pair from settings) now serve customer AND merchant auth; shared request schemas; installations `linkMember`/`unlinkMember`
+  - [x] Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1312 pass (42 suites); format:check/lint/typecheck/build green; audit 0; `npm run docs` regenerated. `tests/merchantAuth.test.ts` (20); the customer auth suite (38) still passes after the refactor.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (matches Merchant PRD §4.3-4.4, M02, M03), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) the backlog row says the token carries `salonId` + permissions; kept the SRV-025 decision instead (JWT = member + scope only; role/salon/permissions are returned in the profile and re-read from the database per request, so owner changes apply at once); (2) salon state (M05/M06 routing) is not in the profile yet: the salon model arrives with SRV-041; (3) no self-registration: an owner adds members, a new salon applies via SRV-041; (4) member change-phone (OTP to the new number) comes with the member profile task.
+- Next: SRV-030 (admin login).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

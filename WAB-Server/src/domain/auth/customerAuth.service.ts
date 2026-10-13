@@ -1,7 +1,6 @@
-import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
+import { ERROR_CODES } from '../../constants/errorCodes';
 import type { Gender, Language, Platform } from '../../constants/enums';
-import { FIELD_INVALID_CODE, type PhoneCheckPurpose } from '../../constants/customerAuth';
-import type { OtpPurpose } from '../../constants/providers';
+import type { PhoneCheckPurpose } from '../../constants/customerAuth';
 import type { OtpProvider } from '../../providers';
 import type {
   CustomersRepository,
@@ -12,12 +11,10 @@ import type {
   CitiesRepository,
   CountriesRepository,
 } from '../../repositories/locations.repository';
-import { signAccessToken } from '../../utils/auth/accessToken';
 import { isDuplicateKeyError } from '../../utils/database/errors';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
 import {
-  type ErrorDetail,
   ConflictError,
   ForbiddenError,
   NotFoundError,
@@ -27,14 +24,11 @@ import {
 import type { CustomerRaw } from '../../models/customer.model';
 import type { OtpGate } from '../otp/otpGate.service';
 import type { SettingsService } from '../settings';
+import { createPhoneVerifier, invalidField, type PhoneInput } from './phoneVerifier';
 import type { RefreshTokenService } from './refreshTokens.service';
+import { createSessionTokens, type TokenPair } from './sessionTokens';
 
-export interface PhoneInput {
-  /** ISO country code of the selected country (`JO`). */
-  readonly countryCode: string;
-  /** National number, digits only, as the country's regex expects it. */
-  readonly number: string;
-}
+export type { PhoneInput } from './phoneVerifier';
 
 export interface DeviceInput {
   readonly installationId: string;
@@ -80,11 +74,7 @@ export interface CustomerProfile {
   readonly avatarKey?: string;
 }
 
-export interface CustomerSession {
-  readonly accessToken: string;
-  readonly accessTokenExpiresAt: Date;
-  readonly refreshToken: string;
-  readonly refreshTokenExpiresAt: Date;
+export interface CustomerSession extends TokenPair {
   readonly customer: CustomerProfile;
 }
 
@@ -116,13 +106,6 @@ export interface CustomerAuthDeps {
   readonly now?: () => Date;
 }
 
-interface ResolvedPhone {
-  readonly countryCode: string;
-  readonly dialCode: string;
-  readonly number: string;
-  readonly e164: string;
-}
-
 const toProfile = (customer: Entity<CustomerRaw>): CustomerProfile => ({
   id: customer.id,
   firstName: customer.firstName,
@@ -135,12 +118,6 @@ const toProfile = (customer: Entity<CustomerRaw>): CustomerProfile => ({
   language: customer.language,
   pushEnabled: customer.pushEnabled,
   ...(customer.avatarKey === undefined ? {} : { avatarKey: customer.avatarKey }),
-});
-
-const invalidField = (field: string): ErrorDetail => ({
-  field,
-  code: FIELD_INVALID_CODE,
-  messageKey: errorMessageKey(ERROR_CODES.VALIDATION_ERROR),
 });
 
 const accountBlocked = (): ForbiddenError =>
@@ -159,84 +136,24 @@ export const createCustomerAuthService = (deps: CustomerAuthDeps): CustomerAuthS
   const { customers, installations, countries, cities, areas, otp, otpGate, refreshTokens } = deps;
   const now = deps.now ?? ((): Date => new Date());
 
-  /** Country lookup and the country's phone regex; the full number is dial code + national number. */
-  const resolvePhone = async (phone: PhoneInput, field = 'body.phone'): Promise<ResolvedPhone> => {
-    const country = await countries.findOne({ code: phone.countryCode, active: true });
-    if (country === null) {
-      throw new ValidationError({
-        details: [invalidField(`${field}.countryCode`)],
-      });
-    }
-    if (!new RegExp(country.phoneRegex).test(phone.number)) {
-      throw new ValidationError({
-        details: [invalidField(`${field}.number`)],
-      });
-    }
-    return {
-      countryCode: country.code,
-      dialCode: country.dialCode,
-      number: phone.number,
-      e164: `${country.dialCode}${phone.number}`,
-    };
-  };
-
-  /** Blocked numbers cannot try again; then the provider must confirm this very number. */
-  const verifyOwnership = async (
-    phone: ResolvedPhone,
-    idToken: string,
-    purpose: OtpPurpose,
-  ): Promise<void> => {
-    await otpGate.assertNotBlocked(phone.e164);
-    const result = await otp.verify({ proof: idToken, expectedPhone: phone.e164, purpose });
-    if (result.outcome === 'VERIFIED') return;
-    throw new UnauthorizedError({
-      code: result.outcome === 'EXPIRED' ? ERROR_CODES.OTP_EXPIRED : ERROR_CODES.OTP_INVALID,
-    });
-  };
+  const phones = createPhoneVerifier({ countries, otp, otpGate });
+  const resolvePhone = phones.resolve.bind(phones);
+  const verifyOwnership = phones.verify.bind(phones);
+  const tokens = createSessionTokens({
+    refreshTokens,
+    settings: deps.settings,
+    accessSecret: deps.accessSecret,
+    now,
+  });
 
   const openSession = async (
     customer: Entity<CustomerRaw>,
     device: DeviceInput,
     language: Language,
   ): Promise<CustomerSession> => {
-    const at = now();
-    const [accessTtlSec, refreshTtlDays] = await Promise.all([
-      settings('auth.accessTokenTtlSec'),
-      settings('auth.refreshTokenTtlDays'),
-    ]);
-    await installations.linkCustomer(customer.id, { ...device, language }, at);
-    const refresh = await refreshTokens.issue({
-      subjectType: 'CUSTOMER',
-      subjectId: customer.id,
-      installationId: device.installationId,
-      ttlDays: refreshTtlDays,
-    });
-    return buildSession(customer, refresh, accessTtlSec, at);
-  };
-
-  const settings = (key: 'auth.accessTokenTtlSec' | 'auth.refreshTokenTtlDays'): Promise<number> =>
-    deps.settings.get(key);
-
-  const buildSession = (
-    customer: Entity<CustomerRaw>,
-    refresh: { token: string; expiresAt: Date },
-    accessTtlSec: number,
-    at: Date,
-  ): CustomerSession => {
-    const access = signAccessToken({
-      secret: deps.accessSecret,
-      subjectType: 'CUSTOMER',
-      subjectId: customer.id,
-      ttlSec: accessTtlSec,
-      now: at,
-    });
-    return {
-      accessToken: access.token,
-      accessTokenExpiresAt: access.expiresAt,
-      refreshToken: refresh.token,
-      refreshTokenExpiresAt: refresh.expiresAt,
-      customer: toProfile(customer),
-    };
+    await installations.linkCustomer(customer.id, { ...device, language }, now());
+    const pair = await tokens.open('CUSTOMER', customer.id, device.installationId);
+    return { ...pair, customer: toProfile(customer) };
   };
 
   return {
@@ -306,18 +223,14 @@ export const createCustomerAuthService = (deps: CustomerAuthDeps): CustomerAuthS
     },
 
     async refresh({ refreshToken }) {
-      const [refreshTtlDays, accessTtlSec] = await Promise.all([
-        settings('auth.refreshTokenTtlDays'),
-        settings('auth.accessTokenTtlSec'),
-      ]);
-      const next = await refreshTokens.rotate({ token: refreshToken, ttlDays: refreshTtlDays });
+      const next = await tokens.rotate(refreshToken);
       const customer = await customers.findById(next.subjectId);
       if (customer === null || customer.status !== 'ACTIVE') {
         // The account was blocked or removed since the session began: end every session.
         await refreshTokens.revokeAll('CUSTOMER', next.subjectId);
         throw customer?.status === 'BLOCKED' ? accountBlocked() : new UnauthorizedError();
       }
-      return buildSession(customer, next, accessTtlSec, now());
+      return { ...next.tokens, customer: toProfile(customer) };
     },
 
     async logout({ refreshToken }) {

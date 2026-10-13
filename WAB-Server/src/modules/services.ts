@@ -1,5 +1,6 @@
 import type { RequestHandler } from 'express';
 import type { Store } from 'express-rate-limit';
+import type { MerchantAuthService } from '../domain/auth/merchantAuth.service';
 import type { CustomerAuthService } from '../domain/auth/customerAuth.service';
 import type { OtpGate } from '../domain/otp/otpGate.service';
 import { ExternalServiceError } from '../utils/errors';
@@ -7,6 +8,7 @@ import { ExternalServiceError } from '../utils/errors';
 /** Long-lived services the feature routers need. `server.ts` builds them once Redis is connected. */
 export interface ApiServices {
   readonly otpGate?: OtpGate;
+  readonly merchantAuth?: MerchantAuthService;
   readonly customerAuth?: {
     readonly service: CustomerAuthService;
     /** `requireAuth('customer', secret)`. */
@@ -37,4 +39,11 @@ export const unavailableCustomerAuth: CustomerAuthService = {
   refresh: unavailableCustomerAuthError,
   logout: unavailableCustomerAuthError,
   changePhone: unavailableCustomerAuthError,
+};
+
+export const unavailableMerchantAuth: MerchantAuthService = {
+  checkPhone: unavailableCustomerAuthError,
+  login: unavailableCustomerAuthError,
+  refresh: unavailableCustomerAuthError,
+  logout: unavailableCustomerAuthError,
 };

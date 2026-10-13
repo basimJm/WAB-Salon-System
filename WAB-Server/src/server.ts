@@ -3,12 +3,14 @@ import type { Store } from 'express-rate-limit';
 import type { Redis } from 'ioredis';
 import { createApp } from './app';
 import { createCustomerAuthService } from './domain/auth/customerAuth.service';
+import { createMerchantAuthService } from './domain/auth/merchantAuth.service';
 import { createRefreshTokenService } from './domain/auth/refreshTokens.service';
 import { requireAuth } from './middlewares/auth';
 import { createProviders } from './providers';
 import {
   CustomersRepository,
   InstallationsRepository,
+  MembersRepository,
   RefreshTokensRepository,
 } from './repositories/identity.repository';
 import {
@@ -109,20 +111,29 @@ export const startServer = async (
 const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServices => {
   const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
   const otpGate = createOtpGate({ redis, settings });
-  const customerAuthService = createCustomerAuthService({
-    customers: new CustomersRepository(),
-    installations: new InstallationsRepository(),
+  const phoneServices = {
     countries: new CountriesRepository(),
-    cities: new CitiesRepository(),
-    areas: new AreasRepository(),
     otp: createProviders(config.providers, config.isProduction).otp,
     otpGate,
     refreshTokens: createRefreshTokenService({ repository: new RefreshTokensRepository(), logger }),
     settings,
     accessSecret: config.auth.accessSecret,
+  };
+  const merchantAuthService = createMerchantAuthService({
+    ...phoneServices,
+    members: new MembersRepository(),
+    installations: new InstallationsRepository(),
+  });
+  const customerAuthService = createCustomerAuthService({
+    ...phoneServices,
+    customers: new CustomersRepository(),
+    installations: new InstallationsRepository(),
+    cities: new CitiesRepository(),
+    areas: new AreasRepository(),
   });
   return {
     otpGate,
+    merchantAuth: merchantAuthService,
     customerAuth: {
       service: customerAuthService,
       authenticate: requireAuth('customer', config.auth.accessSecret),

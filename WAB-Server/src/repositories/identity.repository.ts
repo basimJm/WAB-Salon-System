@@ -9,6 +9,16 @@ import { isValidId } from './base.repository';
 import { toEntity, type Entity } from '../utils/database/plain';
 import { BaseRepository } from './base.repository';
 
+/** The device behind a sign-in; optional parts may be `undefined`. */
+export type DeviceRecord = Pick<
+  InstallationRaw,
+  'installationId' | 'platform' | 'appVersion' | 'language'
+> & {
+  osVersion?: string | undefined;
+  deviceModel?: string | undefined;
+  fcmToken?: string | undefined;
+};
+
 export class CustomersRepository extends BaseRepository<CustomerRaw> {
   constructor(model: Model<CustomerRaw> = CustomerModel) {
     super(model);
@@ -59,14 +69,29 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
     return this.findOne({ app, installationId });
   }
 
-  /** Creates or updates the device record and links it to the account that just signed in. */
-  async linkCustomer(
-    customerId: string,
-    device: Pick<InstallationRaw, 'installationId' | 'platform' | 'appVersion' | 'language'> & {
-      osVersion?: string | undefined;
-      deviceModel?: string | undefined;
-      fcmToken?: string | undefined;
-    },
+  /** Creates or updates the device record and links it to the customer that just signed in. */
+  linkCustomer(customerId: string, device: DeviceRecord, now: Date): Promise<void> {
+    return this.link('CUSTOMER', { customerId }, device, now);
+  }
+
+  /** Creates or updates the device record and links it to the member that just signed in. */
+  linkMember(memberId: string, device: DeviceRecord, now: Date): Promise<void> {
+    return this.link('MERCHANT', { memberId }, device, now);
+  }
+
+  /** Logout: the device stays known (analytics, guest push) but is no longer an account's. */
+  unlinkCustomer(installationId: string): Promise<void> {
+    return this.unlink('CUSTOMER', installationId, 'customerId');
+  }
+
+  unlinkMember(installationId: string): Promise<void> {
+    return this.unlink('MERCHANT', installationId, 'memberId');
+  }
+
+  private async link(
+    app: AppKind,
+    owner: { customerId: string } | { memberId: string },
+    device: DeviceRecord,
     now: Date,
   ): Promise<void> {
     const { installationId, fcmToken, ...optional } = device;
@@ -74,14 +99,15 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
     const rest = Object.fromEntries(
       Object.entries(optional).filter(([, value]) => value !== undefined),
     );
+    const [field, id] = Object.entries(owner)[0] ?? [];
     await this.model
       .findOneAndUpdate(
-        { app: 'CUSTOMER', installationId },
+        { app, installationId },
         {
           $set: {
             ...rest,
             ...(fcmToken === undefined ? {} : { fcmToken, fcmTokenUpdatedAt: now }),
-            customerId: new Types.ObjectId(customerId),
+            [String(field)]: new Types.ObjectId(String(id)),
             lastSeenAt: now,
           },
         },
@@ -90,11 +116,12 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
       .exec();
   }
 
-  /** Logout: the device stays known (analytics, guest push) but is no longer an account's. */
-  async unlinkCustomer(installationId: string): Promise<void> {
-    await this.model
-      .findOneAndUpdate({ app: 'CUSTOMER', installationId }, { $unset: { customerId: 1 } })
-      .exec();
+  private async unlink(
+    app: AppKind,
+    installationId: string,
+    field: 'customerId' | 'memberId',
+  ): Promise<void> {
+    await this.model.findOneAndUpdate({ app, installationId }, { $unset: { [field]: 1 } }).exec();
   }
 }
 
