@@ -1787,6 +1787,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: analytics-only items (installs, DAU, funnels, retention, searches, response times, top services) wait for BigQuery (SRV-110); stored days are not refreshed after the nightly run; reports come from the real collections, not from `serverEvents` (nothing emits events yet); aggregates run only against stubs, not a real MongoDB.
 
+### T-118 — SRV-109 Async Excel / CSV / PDF exports
+
+- Project: `WAB-Server/` (`src/domain/exports`, `src/modules/admin/exports`, `src/models/export.model.ts`, `src/repositories/exports.repository.ts`, `src/constants/exports.ts`; deps exceljs, pdfkit)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (Admin PRD §3 table export, A26 reports export; BUSINESS_DOMAIN §3.7 `exports`):
+  - [x] `POST /admin/v1/exports` (admin only) for daily/weekly/monthly report, transactions, audit log in XLSX/CSV/PDF with validated filters; audited; queued as a job; list and get with status
+  - [x] Job builds the table from the same services as the screens (paged, 10 000-row cap → FAILED `TOO_MANY_ROWS`), writes a private file, DONE with row count; get returns a 5-minute signed link; failures never throw into the queue; a second run is a no-op
+  - [x] Files are real (xlsx parsed back, PDF header/pages, CSV with BOM and quoting); cells starting with = + - @ are neutralized
+  - [x] Restart safety: QUEUED and stale RUNNING exports are queued again
+- Tests: `tests/exports.test.ts` (17); full gate green; docs regenerated; `npm audit --omit=dev` 0 (with `overrides.uuid`)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: PDF is Latin-only (no Arabic shaping/bidi); finished files are kept (no expiry job yet); bookings/customers/salons tables are not exportable yet (builders to add per screen); the audit reason is a fixed text.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

@@ -32,6 +32,7 @@ import {
   unavailableAdminAnalytics,
   unavailableAdminAlerts,
   unavailableAdminReports,
+  unavailableAdminExports,
   unavailablePayoutDetails,
   unavailableAdminSubscriptions,
   unavailableAdminRefunds,
@@ -62,6 +63,8 @@ import {
   ADMIN_RECONCILIATION_ROUTES,
   ADMIN_TRANSACTION_ROUTES,
 } from '../../constants/adminFinance';
+import { createAdminExportsRouter } from './exports/exports.routes';
+import { ADMIN_EXPORT_ROUTES } from '../../constants/exports';
 import { createAdminReportsRouter } from './reports/reports.routes';
 import { ADMIN_REPORT_ROUTES } from '../../constants/reports';
 import { createAdminAlertsRouter } from './alerts/alerts.routes';
@@ -167,6 +170,11 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
       services.adminSubscriptions ?? unavailableAdminSubscriptions,
       guard,
     ),
+  );
+  mount(
+    router,
+    ADMIN_EXPORT_ROUTES.base,
+    createAdminExportsRouter(services.adminExports ?? unavailableAdminExports, guard),
   );
   mount(
     router,
