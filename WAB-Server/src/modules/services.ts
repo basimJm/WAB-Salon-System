@@ -9,6 +9,7 @@ import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
+import type { SalonApplicationService } from '../domain/salons/salonApplication.service';
 import type { CatalogServiceRaw } from '../models/catalogService.model';
 import type { CatalogService } from '../domain/catalog';
 import type { BannerRaw } from '../models/banner.model';
@@ -28,6 +29,11 @@ export interface ApiServices {
   readonly adminLocations?: AdminLocationServices;
   readonly adminContent?: AdminContentServices;
   readonly banners?: BannersService;
+  /** Salon application (M05-M06); the guard is `merchantRequired` of `installations`. */
+  readonly salonApplication?: {
+    readonly service: SalonApplicationService;
+    readonly guard: RequestHandler;
+  };
   readonly catalog?: CatalogService;
   readonly adminCatalog?: AdminCrudService<CatalogServiceRaw>;
   readonly adminBanners?: AdminCrudService<BannerRaw>;
@@ -143,3 +149,9 @@ export const unavailableAdminBanners: AdminCrudService<BannerRaw> = unavailableC
 
 export const unavailableCatalogService: CatalogService = { list: unavailable };
 export const unavailableAdminCatalog: AdminCrudService<CatalogServiceRaw> = unavailableCrud;
+
+export const unavailableSalonApplication: SalonApplicationService = {
+  apply: unavailable,
+  status: unavailable,
+  resubmit: unavailable,
+};

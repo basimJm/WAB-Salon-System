@@ -17,6 +17,8 @@ import { createAdminCrud } from './domain/adminCrud/adminCrud.service';
 import { createCatalogService } from './domain/catalog';
 import type { CatalogServiceRaw } from './models/catalogService.model';
 import { CatalogServicesRepository } from './repositories/catalog.repository';
+import { createSalonApplicationService } from './domain/salons/salonApplication.service';
+import { SalonsRepository } from './repositories/salons.repository';
 import { createAuditWriter } from './domain/audit/audit.service';
 import { createAdminContentServices } from './domain/adminCrud/content';
 import { createAdminLocationServices } from './domain/adminCrud/locations';
@@ -199,6 +201,17 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   return {
     otpGate,
     adminGuard,
+    salonApplication: {
+      service: createSalonApplicationService({
+        ...phoneServices,
+        salons: new SalonsRepository(),
+        members: new MembersRepository(),
+        installations: new InstallationsRepository(),
+        cities: new CitiesRepository(),
+        areas: new AreasRepository(),
+      }),
+      guard: requireAuth('merchant', config.auth.accessSecret),
+    },
     catalog: createCatalogService({
       catalog: new CatalogServicesRepository(),
       storage: providers.storage,
