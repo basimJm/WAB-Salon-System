@@ -1,0 +1,129 @@
+import { createAdapter } from '@socket.io/redis-adapter';
+import type { Redis } from 'ioredis';
+import type { Server as HttpServer } from 'node:http';
+import { Server, type Namespace, type Socket } from 'socket.io';
+import { AUTHORIZATION_HEADER, BEARER_PATTERN, type TokenScope } from '../constants/auth';
+import {
+  SOCKET_ADAPTER_KEY,
+  SOCKET_AUTH_FIELD,
+  SOCKET_ERRORS,
+  SOCKET_MAX_PAYLOAD_BYTES,
+  SOCKET_NAMESPACES,
+  SOCKET_PATH,
+  SOCKET_PING_INTERVAL_MS,
+  SOCKET_PING_TIMEOUT_MS,
+  SOCKET_ROOMS,
+} from '../constants/sockets';
+import { verifyAccessToken, type AccessTokenClaims } from '../utils/auth/accessToken';
+import { UnauthorizedError } from '../utils/errors';
+import type { Logger } from '../utils/logger';
+
+/** What a connected socket carries after the handshake. */
+export interface SocketIdentity {
+  readonly claims: AccessTokenClaims;
+}
+
+export interface SocketHub {
+  /** Sends an event to every socket in `room` of the scope's namespace, on every instance. */
+  emit(scope: TokenScope, room: string, event: string, payload: unknown): void;
+  /** Disconnects every socket in the room (e.g. access revoked). */
+  disconnect(scope: TokenScope, room: string): void;
+  close(): Promise<void>;
+}
+
+export interface SocketServerOptions {
+  readonly httpServer: HttpServer;
+  /** Publisher connection; the subscriber is a duplicate of it. */
+  readonly redis: Redis;
+  readonly accessSecret: string;
+  readonly corsAllowedOrigins: readonly string[];
+  readonly logger: Logger;
+  /** Called after the handshake: joins rooms, loads permissions (SRV-081/082). */
+  readonly onConnection?: (scope: TokenScope, socket: Socket, claims: AccessTokenClaims) => void;
+  readonly now?: () => Date;
+}
+
+const tokenOf = (socket: Socket): string | undefined => {
+  const fromAuth: unknown = (socket.handshake.auth as Record<string, unknown>)[SOCKET_AUTH_FIELD];
+  if (typeof fromAuth === 'string') return fromAuth;
+  const header = socket.handshake.headers[AUTHORIZATION_HEADER];
+  return typeof header === 'string' ? BEARER_PATTERN.exec(header)?.[1] : undefined;
+};
+
+const rejection = (code: string): Error => Object.assign(new Error(code), { data: { code } });
+
+/**
+ * Socket.IO on the HTTP server with the Redis adapter, so an event emitted by one instance reaches
+ * sockets connected to any other. A handshake needs a valid access token of the namespace's scope:
+ * no/invalid/expired token → `UNAUTHORIZED`, a token of another scope → `FORBIDDEN` (CLAUDE.md §4.2).
+ */
+export const createSocketServer = (options: SocketServerOptions): SocketHub => {
+  const { httpServer, redis, accessSecret, logger } = options;
+  const now = options.now ?? ((): Date => new Date());
+  const subscriber = redis.duplicate();
+  const io = new Server(httpServer, {
+    path: SOCKET_PATH,
+    serveClient: false,
+    cors: { origin: [...options.corsAllowedOrigins] },
+    pingInterval: SOCKET_PING_INTERVAL_MS,
+    pingTimeout: SOCKET_PING_TIMEOUT_MS,
+    maxHttpBufferSize: SOCKET_MAX_PAYLOAD_BYTES,
+    adapter: createAdapter(redis, subscriber, { key: SOCKET_ADAPTER_KEY }),
+  });
+
+  const namespaces = new Map<TokenScope, Namespace>();
+  for (const [scope, path] of Object.entries(SOCKET_NAMESPACES) as [TokenScope, string][]) {
+    const namespace = io.of(path);
+    namespace.use((socket, next) => {
+      const token = tokenOf(socket);
+      if (token === undefined) {
+        next(rejection(SOCKET_ERRORS.unauthorized));
+        return;
+      }
+      try {
+        const claims = verifyAccessToken(accessSecret, token, now());
+        if (claims.scope !== scope) {
+          next(rejection(SOCKET_ERRORS.forbidden));
+          return;
+        }
+        (socket.data as Partial<SocketIdentity>) = { claims };
+        next();
+      } catch (error) {
+        if (!(error instanceof UnauthorizedError))
+          logger.error({ err: error }, 'socket handshake failed');
+        next(rejection(SOCKET_ERRORS.unauthorized));
+      }
+    });
+    namespace.on('connection', (socket) => {
+      const { claims } = socket.data as SocketIdentity;
+      // Every account has its own room; salon and permission rooms are added by `onConnection`.
+      if (scope === 'customer') void socket.join(SOCKET_ROOMS.customer(claims.subjectId));
+      if (scope === 'merchant') void socket.join(SOCKET_ROOMS.member(claims.subjectId));
+      if (scope === 'admin') void socket.join(SOCKET_ROOMS.admin);
+      options.onConnection?.(scope, socket, claims);
+    });
+    namespaces.set(scope, namespace);
+  }
+
+  const namespaceOf = (scope: TokenScope): Namespace => {
+    const found = namespaces.get(scope);
+    if (found === undefined) throw new RangeError(`unknown socket scope ${scope}`);
+    return found;
+  };
+
+  return {
+    emit: (scope, room, event, payload) => {
+      namespaceOf(scope).to(room).emit(event, payload);
+    },
+    disconnect: (scope, room) => {
+      namespaceOf(scope).in(room).disconnectSockets(true);
+    },
+    // The HTTP server is closed by the caller; here only the sockets and the adapter's subscriber end.
+    close: () => {
+      for (const namespace of namespaces.values()) namespace.disconnectSockets(true);
+      io.engine.close();
+      subscriber.disconnect();
+      return Promise.resolve();
+    },
+  };
+};

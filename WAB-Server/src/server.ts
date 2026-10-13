@@ -109,6 +109,7 @@ import { ensureIndexes } from './utils/database/indexes';
 import { RedisRateLimitStore } from './utils/redis/rateLimitStore';
 import { connectRedis, createRedisReadinessCheck, disconnectRedis } from './utils/redis/client';
 import { createLogger, type Logger } from './utils/logger';
+import { createSocketServer, type SocketHub } from './sockets/socketServer';
 import {
   createShutdown,
   registerProcessHandlers,
@@ -119,6 +120,8 @@ import {
 export interface RunningServer {
   readonly server: Server;
   readonly shutdown: () => Promise<void>;
+  /** Present when started with `socket`: emit real-time events through it. */
+  readonly sockets?: SocketHub;
 }
 
 const closeHttpServer = (server: Server): Promise<void> =>
@@ -141,6 +144,8 @@ export interface StartOptions {
   readonly rateLimitStore?: Store;
   /** Services for the feature routers (OTP gate...). */
   readonly services?: ApiServices;
+  /** Starts Socket.IO (Redis adapter) on the HTTP server; needs the shared Redis connection. */
+  readonly socket?: { readonly redis: Redis };
 }
 
 /**
@@ -150,7 +155,14 @@ export interface StartOptions {
 export const startServer = async (
   config: AppConfig,
   logger: Logger,
-  { proc, closables = [], readinessChecks = [], rateLimitStore, services }: StartOptions = {},
+  {
+    proc,
+    closables = [],
+    readinessChecks = [],
+    rateLimitStore,
+    services,
+    socket,
+  }: StartOptions = {},
 ): Promise<RunningServer> => {
   const app = createApp({
     logger,
@@ -172,13 +184,28 @@ export const startServer = async (
       resolve(listening);
     });
   });
+  const sockets =
+    socket === undefined
+      ? undefined
+      : createSocketServer({
+          httpServer: server,
+          redis: socket.redis,
+          accessSecret: config.auth.accessSecret,
+          corsAllowedOrigins: config.corsAllowedOrigins,
+          logger,
+        });
   const shutdown = createShutdown(
-    [{ name: 'http', close: () => closeHttpServer(server) }, ...closables],
+    [
+      // Sockets first: open connections would keep the HTTP server from closing.
+      ...(sockets === undefined ? [] : [{ name: 'sockets', close: () => sockets.close() }]),
+      { name: 'http', close: () => closeHttpServer(server) },
+      ...closables,
+    ],
     logger,
   );
   if (proc) registerProcessHandlers(proc, logger, shutdown);
   logger.info({ port: config.port, env: config.env }, 'server listening');
-  return { server, shutdown };
+  return { server, shutdown, ...(sockets === undefined ? {} : { sockets }) };
 };
 
 /** Services the feature routers need; built once, after MongoDB and Redis are connected. */
@@ -628,6 +655,7 @@ const main = async (): Promise<void> => {
         `${REDIS_KEY_PREFIX.httpRateLimit}:global`,
       ),
       services: buildServices(config, logger, connected),
+      socket: { redis: connected },
     });
   } catch (error) {
     if (redis) await disconnectRedis(redis);

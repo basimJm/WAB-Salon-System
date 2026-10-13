@@ -1326,6 +1326,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - sequential processing (no lock storm); the client repeats the original change after cancelling.
 
+### T-091 — SRV-080 Socket.IO core
+- Project: `WAB-Server/` (`src/sockets/socketServer.ts`, `src/constants/sockets.ts`, `startServer` option `socket`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (CLAUDE.md §4.3, BUSINESS_DOMAIN §7, BE-03):
+  - [x] one namespace per scope; valid same-scope token connects; missing/malformed/expired/foreign-secret → `UNAUTHORIZED`; all 6 cross-scope combos → `FORBIDDEN`
+  - [x] own-account rooms (`customer:`, `member:`, `admin`); emit reaches only that room/namespace; delivery across instances through the Redis adapter; room disconnect (access revoked)
+  - [x] wired into `startServer`; shutdown closes sockets before HTTP
+- Tests: `tests/sockets.test.ts` (7, real Redis + socket.io-client), `tests/server.test.ts` (+1); full gate green, 2104 tests (3 consecutive full runs); docs: README section, no REST change. New deps: socket.io, @socket.io/redis-adapter, socket.io-client (dev).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (token in handshake), Architect ✔, QA ✔) - FOUND: Redis adapter subscribes asynchronously, so tests repeat the emit until received. Permission rooms, booking events: SRV-081; `permissions.updated`/`access.revoked`: SRV-082. The access token is checked only at the handshake (15 min lifetime): clients reconnect with a fresh token.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

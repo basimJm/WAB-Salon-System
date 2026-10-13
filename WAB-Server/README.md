@@ -34,3 +34,11 @@ OTP, file storage, push/email, payments and analytics sit behind interfaces in `
 ## Authentication
 
 Access tokens are HS256 JWTs signed with `JWT_ACCESS_SECRET` (required, at least 32 characters, never committed; set it in `.env.development`). Each token is valid for one namespace only (`customer`, `merchant` or `admin`); a token of another namespace gets `403`. Protect a route with `requireAuth(scope, secret)`.
+
+## Real-time (Socket.IO)
+
+One namespace per token scope: `/customer`, `/merchant`, `/admin` (path `/socket.io`). Connect with the access token:
+`io(baseUrl + '/customer', { auth: { token } })` (or an `Authorization: Bearer` header). A missing, invalid or
+expired token is refused with `connect_error` `data.code = UNAUTHORIZED`; a token of another scope with `FORBIDDEN`.
+Each account is placed in its own room (`customer:{id}`, `member:{id}`, `admin`); events are emitted through
+`SocketHub` (`src/sockets/socketServer.ts`) and reach every instance through the Redis adapter.

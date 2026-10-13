@@ -212,7 +212,7 @@ Roadmap SRV-08.
 
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
-| SRV-080 | Socket.IO server + Redis adapter + handshake auth per scope (reject cross-scope) | `feat/srv-080-socket-core` | SRV-025, SRV-013 | TODO |  |
+| SRV-080 | Socket.IO server + Redis adapter + handshake auth per scope (reject cross-scope) | `feat/srv-080-socket-core` | SRV-025, SRV-013 | DONE | `createSocketServer` (`src/sockets/socketServer.ts`, socket.io 4 + `@socket.io/redis-adapter`): namespaces `/customer`, `/merchant`, `/admin`; handshake token in `auth.token` or the Authorization header; none/invalid/expired → `connect_error` `UNAUTHORIZED`, other scope → `FORBIDDEN`; each account joins `customer:{id}` / `member:{id}` / `admin`; `SocketHub.emit/disconnect/close`; events reach all instances. `startServer({socket:{redis}})` attaches it (sockets close before HTTP) and returns `sockets`. Rooms by permission and booking events are SRV-081. |
 | SRV-081 | Rooms (`customer:`, `salon:{id}:respond|all`, `member:`, `admin`) + permission-filtered `booking.requested/updated/assigned` emitted from the state machine | `feat/srv-081-socket-booking` | SRV-080, SRV-072 | TODO | Test: member without BOOKINGS_RESPOND never receives `booking.requested`. |
 | SRV-082 | `notifications.unread`, `permissions.updated`, `access.revoked` events; room membership refresh on permission change | `feat/srv-082-socket-misc` | SRV-081, SRV-051 | TODO |  |
 
