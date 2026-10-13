@@ -8,6 +8,7 @@ import { createAdminAuthService } from './domain/auth/adminAuth.service';
 import { createMerchantAuthService } from './domain/auth/merchantAuth.service';
 import { createRefreshTokenService } from './domain/auth/refreshTokens.service';
 import { optionalAuth, requireAuth } from './middlewares/auth';
+import { createLocationsService } from './domain/locations';
 import { createAppConfigService } from './domain/appConfig';
 import {
   AppVersionsRepository,
@@ -172,9 +173,16 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     contactInfo: new ContactInfoRepository(),
     settings,
   });
+  const locations = createLocationsService({
+    countries: new CountriesRepository(),
+    cities: new CitiesRepository(),
+    areas: new AreasRepository(),
+    storage: providers.storage,
+  });
   return {
     otpGate,
     appConfig,
+    locations,
     installations: {
       service: installationService,
       customerOptional: optionalAuth('customer', config.auth.accessSecret),

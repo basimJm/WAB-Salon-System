@@ -3,11 +3,13 @@ import { CUSTOMER_AUTH_ROUTES } from '../../constants/customerAuth';
 import { OTP_ROUTES } from '../../constants/otp';
 import { INSTALLATION_ROUTES } from '../../constants/installations';
 import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
+import { LOCATION_ROUTES } from '../../constants/locations';
 import { mount } from '../../routes/mount';
 import { createCustomerAppConfigRouter } from '../shared/appConfig';
 import { createCustomerInstallationsRouter } from '../shared/installations';
 import { ExternalServiceError } from '../../utils/errors';
 import { unavailableCustomerAuth, type ApiServices } from '../services';
+import { createLocationsRouterFor } from '../shared/locations';
 import { createOtpRouteLimiter, createCustomerOtpRouter } from '../shared/otp';
 import { createCustomerAuthRouter } from './auth/auth.routes';
 
@@ -30,5 +32,6 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
   );
   mount(router, INSTALLATION_ROUTES.base, createCustomerInstallationsRouter(services));
   mount(router, APP_CONFIG_ROUTES.base, createCustomerAppConfigRouter(services));
+  mount(router, LOCATION_ROUTES.base, createLocationsRouterFor(services));
   return router;
 };
