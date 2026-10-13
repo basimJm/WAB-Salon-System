@@ -2080,6 +2080,102 @@
           }
         }
       ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Start (or resume) the online payment of a confirmed booking draft",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "payments"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "The draft must be unexpired and OTP-confirmed with an online payment option (else 422 `DRAFT_EXPIRED` / `OTP_INVALID` / `PAYMENT_OPTION_NOT_ALLOWED`). A running or successful attempt is returned again; after a failed or cancelled one a new attempt starts. The booking itself is created afterwards, only from a verified payment.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"draftId\": \"string\",\n  \"platform\": \"ANDROID\",\n  \"appVersion\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ask the server to verify the payment with the gateway (the app’s own word is never trusted)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/payments/:id/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "payments",
+                ":id",
+                "verify"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

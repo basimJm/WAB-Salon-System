@@ -43,3 +43,5 @@ export const ACCOUNT_SOCKET_EVENTS = {
 } as const;
 /** Gives the `access.revoked` message time to reach the client before its connection is closed. */
 export const ACCESS_REVOKED_GRACE_MS = 250;
+/** How long closing waits for the adapter's subscriber to finish connecting and subscribing. */
+export const SOCKET_ADAPTER_READY_TIMEOUT_MS = 2_000;
