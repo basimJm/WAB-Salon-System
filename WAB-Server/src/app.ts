@@ -59,7 +59,7 @@ export const createApp = ({
         {
           customer: createCustomerRouter(services),
           merchant: createMerchantRouter(services),
-          admin: createAdminRouter(),
+          admin: createAdminRouter(services),
         },
         createHealthRouter(readinessChecks),
       ),

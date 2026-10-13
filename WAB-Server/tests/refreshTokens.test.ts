@@ -63,6 +63,33 @@ describe('refresh tokens: issue', () => {
   });
 });
 
+describe('refresh tokens: lifetime in seconds (admin idle timeout)', () => {
+  const sessionOf = { subjectType: 'ADMIN', subjectId } as const;
+
+  it('issues a token that lives for the given seconds and rotates with a fresh window', async () => {
+    const { service, clock } = setup();
+    const first = await service.issue({ ...sessionOf, ttlSec: 1800 });
+    expect(first.expiresAt.getTime()).toBe(START.getTime() + 1_800_000);
+    clock.now = new Date(START.getTime() + 1_500_000);
+    const next = await service.rotate({ token: first.token, ttlSec: 1800 });
+    expect(next.expiresAt.getTime()).toBe(clock.now.getTime() + 1_800_000);
+  });
+
+  it('expires exactly at the limit', async () => {
+    const { service, clock } = setup();
+    const { token } = await service.issue({ ...sessionOf, ttlSec: 60 });
+    clock.now = new Date(START.getTime() + 60_000);
+    await expect(service.rotate({ token, ttlSec: 60 })).rejects.toBeInstanceOf(UnauthorizedError);
+  });
+
+  it.each([0, -5, 1.5, Number.NaN])('rejects ttlSec %s as a caller bug', async (ttlSec) => {
+    const { service } = setup();
+    await expect(service.issue({ ...sessionOf, ttlSec })).rejects.toBeInstanceOf(RangeError);
+    const { token } = await service.issue({ ...sessionOf, ttlDays: 1 });
+    await expect(service.rotate({ token, ttlSec })).rejects.toBeInstanceOf(RangeError);
+  });
+});
+
 describe('refresh tokens: rotate', () => {
   it('replaces the token, keeping family, subject and installation', async () => {
     const { service, docs } = setup();

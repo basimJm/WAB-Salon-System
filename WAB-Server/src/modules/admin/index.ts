@@ -1,4 +1,20 @@
 import { Router } from 'express';
+import { ADMIN_AUTH_ROUTES } from '../../constants/adminAuth';
+import { mount } from '../../routes/mount';
+import { unavailableAdminAuth, type ApiServices } from '../services';
+import { createOtpRouteLimiter } from '../shared/otp';
+import { createAdminAuthRouter } from './auth/auth.routes';
 
 /** Router for the /admin/v1 namespace. Feature routers are mounted here as they are built. */
-export const createAdminRouter = (): Router => Router();
+export const createAdminRouter = (services: ApiServices = {}): Router => {
+  const router = Router();
+  mount(
+    router,
+    ADMIN_AUTH_ROUTES.base,
+    createAdminAuthRouter({
+      service: services.adminAuth ?? unavailableAdminAuth,
+      limiter: createOtpRouteLimiter(services),
+    }),
+  );
+  return router;
+};

@@ -12,7 +12,7 @@ export type NamespaceRouters = Readonly<Record<ApiNamespace, Router>>;
 const defaultRouters = (services: ApiServices): NamespaceRouters => ({
   customer: createCustomerRouter(services),
   merchant: createMerchantRouter(services),
-  admin: createAdminRouter(),
+  admin: createAdminRouter(services),
 });
 
 /** Root router: each client namespace lives under its own prefix and token scope. */

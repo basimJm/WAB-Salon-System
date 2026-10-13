@@ -3,11 +3,13 @@ import type { Store } from 'express-rate-limit';
 import type { Redis } from 'ioredis';
 import { createApp } from './app';
 import { createCustomerAuthService } from './domain/auth/customerAuth.service';
+import { createAdminAuthService } from './domain/auth/adminAuth.service';
 import { createMerchantAuthService } from './domain/auth/merchantAuth.service';
 import { createRefreshTokenService } from './domain/auth/refreshTokens.service';
 import { requireAuth } from './middlewares/auth';
 import { createProviders } from './providers';
 import {
+  AdminsRepository,
   CustomersRepository,
   InstallationsRepository,
   MembersRepository,
@@ -124,6 +126,13 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     members: new MembersRepository(),
     installations: new InstallationsRepository(),
   });
+  const adminAuthService = createAdminAuthService({
+    admins: new AdminsRepository(),
+    refreshTokens: phoneServices.refreshTokens,
+    settings,
+    logger,
+    accessSecret: config.auth.accessSecret,
+  });
   const customerAuthService = createCustomerAuthService({
     ...phoneServices,
     customers: new CustomersRepository(),
@@ -134,6 +143,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   return {
     otpGate,
     merchantAuth: merchantAuthService,
+    adminAuth: adminAuthService,
     customerAuth: {
       service: customerAuthService,
       authenticate: requireAuth('customer', config.auth.accessSecret),
