@@ -14,6 +14,7 @@ export const MERCHANT_BOOKING_ROUTES = {
   complete: '/:id/complete',
   noShow: '/:id/no-show',
   cancel: '/:id/cancel',
+  reassign: '/:id/reassign',
 } as const;
 export const REASON_CODE_PATTERN = /^[A-Z][A-Z0-9_]{1,39}$/;
 export const REASON_TEXT_MAX_LENGTH = 300;

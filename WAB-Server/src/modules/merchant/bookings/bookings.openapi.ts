@@ -9,7 +9,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
-import { bookingParams, decisionBody } from './bookings.validation';
+import { bookingParams, decisionBody, reassignBody } from './bookings.validation';
 
 const summary = z.object({
   id: z.string(),
@@ -97,4 +97,29 @@ export const registerMerchantBookingDocs = (registry: OpenAPIRegistry): void => 
       },
     });
   }
+  registry.registerPath({
+    method: 'post',
+    path: `${API_PREFIXES.merchant}${MERCHANT_BOOKING_ROUTES.base}${MERCHANT_BOOKING_ROUTES.reassign.replace(':id', '{id}')}`,
+    tags: ['Bookings'],
+    summary: 'Move one person of an approved booking to another staff member',
+    description:
+      'Needs BOOKINGS_OPERATE. The new staff member must pass the availability rules for that person (skills, bride qualification, working day, leave) and be free for the whole duration: 422 `STAFF_NOT_ELIGIBLE` / `SLOT_UNAVAILABLE`, 409 `SLOT_TAKEN`. Only approved bookings that have not started (422 `INVALID_TRANSITION`).',
+    request: {
+      headers: z.object({ 'Accept-Language': acceptLanguageHeader }),
+      params: bookingParams,
+      body: { content: { 'application/json': { schema: reassignBody } } },
+    },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse('Booking', successResponseSchema(summary)),
+      ...errorResponses(
+        HTTP_STATUS.badRequest,
+        HTTP_STATUS.unauthorized,
+        HTTP_STATUS.forbidden,
+        HTTP_STATUS.notFound,
+        HTTP_STATUS.conflict,
+        HTTP_STATUS.unprocessableEntity,
+        HTTP_STATUS.serviceUnavailable,
+      ),
+    },
+  });
 };

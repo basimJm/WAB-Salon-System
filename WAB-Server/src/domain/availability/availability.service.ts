@@ -66,6 +66,8 @@ export interface AvailabilityService {
     salonId: string;
     persons: readonly PlanPersonInput[];
     draftId?: string | undefined;
+    /** For a booking that already exists (reassignment): the booking lead time no longer applies. */
+    ignoreLeadTime?: boolean;
   }): Promise<BookingPlan>;
 }
 
@@ -155,8 +157,9 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
     person: AvailabilityPerson;
     others: readonly BusyInterval[];
     draftId: string | undefined;
+    ignoreLeadTime?: boolean;
   }): Promise<{ result: AvailabilityResult; bookedCounts: Map<string, number> }> => {
-    const { salon, team, date, person, others, draftId } = input;
+    const { salon, team, date, person, others, draftId, ignoreLeadTime } = input;
     const [timeZone, slotMinutes, maxDaysAhead, minLeadMinutes] = await Promise.all([
       settings.get('timezone'),
       settings.get('booking.slotMinutes'),
@@ -186,7 +189,7 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
       timeZone,
       slotMinutes,
       maxDaysAhead,
-      minLeadMinutes,
+      minLeadMinutes: ignoreLeadTime === true ? 0 : minLeadMinutes,
       schedule: salon.weeklySchedule,
       closures: ranges,
       staff: team.map(toStaff),
@@ -250,7 +253,7 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
       };
     },
 
-    async plan({ salonId, persons, draftId }) {
+    async plan({ salonId, persons, draftId, ignoreLeadTime }) {
       const salon = await visibleSalon(salonId);
       if (salon === null) throw rule('SALON_NOT_BOOKABLE');
       const maxCompanions = await settings.get('booking.maxCompanions');
@@ -286,6 +289,7 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
           date,
           others: picks,
           draftId,
+          ...(ignoreLeadTime === undefined ? {} : { ignoreLeadTime }),
           person: {
             serviceIds: wanted,
             durationMinutes,

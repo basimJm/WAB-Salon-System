@@ -2564,6 +2564,62 @@
               }
             }
           }
+        },
+        {
+          "name": "Move one person of an approved booking to another staff member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/bookings/:id/reassign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "bookings",
+                ":id",
+                "reassign"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Needs BOOKINGS_OPERATE. The new staff member must pass the availability rules for that person (skills, bride qualification, working day, leave) and be free for the whole duration: 422 `STAFF_NOT_ELIGIBLE` / `SLOT_UNAVAILABLE`, 409 `SLOT_TAKEN`. Only approved bookings that have not started (422 `INVALID_TRANSITION`).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personIndex\": 0,\n  \"staffId\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         }
       ]
     }

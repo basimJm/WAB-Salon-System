@@ -1,18 +1,21 @@
 import { Router, type Request, type RequestHandler, type Response } from 'express';
 import type { z } from 'zod';
 import { MERCHANT_BOOKING_ROUTES } from '../../../constants/bookings';
+import type { BookingReassignService } from '../../../domain/bookings/bookingReassign.service';
 import type { BookingActionsService } from '../../../domain/bookings/bookingActions.service';
 import { requirePermission } from '../../../middlewares/permission';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { sendSuccess } from '../../../utils/response/successResponse';
+import { unavailableBookingReassign } from '../../services';
 import { presentSummary } from '../../customer/bookings/bookings.routes';
-import { bookingParams, decisionBody } from './bookings.validation';
+import { bookingParams, decisionBody, reassignBody } from './bookings.validation';
 
 /** Salon-side booking decisions; each needs the permission of its transition (§5.7). */
 export const createMerchantBookingsRouter = (
   service: BookingActionsService,
   guard: readonly RequestHandler[],
+  reassign?: BookingReassignService,
 ): Router => {
   const router = Router();
   const routes = MERCHANT_BOOKING_ROUTES;
@@ -71,5 +74,20 @@ export const createMerchantBookingsRouter = (
   simple(routes.complete, 'BOOKINGS_OPERATE', (t) => service.complete(t));
   simple(routes.noShow, 'BOOKINGS_OPERATE', (t) => service.noShow(t));
   withReason(routes.cancel, 'BOOKINGS_OPERATE', (t) => service.cancel(t));
+  router.post(
+    routes.reassign,
+    requirePermission(['BOOKINGS_OPERATE']),
+    validate({ params: bookingParams, body: reassignBody }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { personIndex, staffId } = (req.validated as { body: z.infer<typeof reassignBody> })
+        .body;
+      const result = await (reassign ?? unavailableBookingReassign).reassign({
+        ...target(req),
+        personIndex,
+        staffId,
+      });
+      sendSuccess(req, res, { data: presentSummary(result) });
+    }),
+  );
   return router;
 };

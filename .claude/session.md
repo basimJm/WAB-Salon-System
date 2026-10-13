@@ -1276,6 +1276,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - execution of refunds is SRV-086.
 
+### T-087 — SRV-076 Reassign staff for an approved booking
+- Project: `WAB-Server/` (`src/domain/bookings/bookingReassign.service.ts`, `BookingsRepository.reassign`, `AvailabilityService.plan({ignoreLeadTime})`, `/merchant/v1/bookings/:id/reassign`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §5.7 reassign, §5.4 eligibility):
+  - [x] BOOKINGS_OPERATE only; APPROVED and not started; same staff / unknown person / other salon refused
+  - [x] new staff passes skills, bride qualification, working day, leave, free for the duration (even inside the booking lead time); busy or ineligible → 422, lock busy → 409
+  - [x] atomic swap guarded by the old staff id; hook `reassigned` for old/new staff + customer notices
+- Tests: `tests/bookingReassign.test.ts` (8, real availability + Redis); full gate green, 2064 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - a hidden/offline salon cannot reassign (plan needs a bookable salon); notifications come with SRV-093.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

@@ -40,6 +40,8 @@ export interface BookingChangedHook {
     previous: BookingStatus,
     info?: { refundDue: number },
   ): Promise<void>;
+  /** A person of an approved booking moved to another staff member (notify old/new staff + customer). */
+  reassigned?(booking: Entity<BookingRaw>, change: { from: string; to: string }): Promise<void>;
 }
 export const noBookingChangedHook: BookingChangedHook = { changed: () => Promise.resolve() };
 

@@ -17,6 +17,7 @@ import type { ReviewsService } from '../domain/reviews/reviews.service';
 import type { CustomerProfileService } from '../domain/customers/customerProfile.service';
 import type { BookingActionsService } from '../domain/bookings/bookingActions.service';
 import type { BookingCancelService } from '../domain/bookings/bookingCancel.service';
+import type { BookingReassignService } from '../domain/bookings/bookingReassign.service';
 import type { BookingCreationService } from '../domain/bookings/bookingCreation.service';
 import type { BookingDraftService } from '../domain/bookings/bookingDraft.service';
 import type { AvailabilityService } from '../domain/availability/availability.service';
@@ -66,6 +67,7 @@ export interface ApiServices {
   readonly bookingDrafts?: BookingDraftService;
   readonly bookings?: BookingCreationService;
   readonly bookingCancel?: BookingCancelService;
+  readonly bookingReassign?: BookingReassignService;
   readonly bookingActions?: BookingActionsService;
   readonly customerProfile?: CustomerProfileService;
   readonly reviews?: ReviewsService;
@@ -345,6 +347,8 @@ export const unavailableBookingActions: BookingActionsService = {
 };
 
 export const unavailableBookingCancel: BookingCancelService = { cancel: unavailable };
+
+export const unavailableBookingReassign: BookingReassignService = { reassign: unavailable };
 
 export const unavailableBookings: BookingCreationService = { create: unavailable };
 
