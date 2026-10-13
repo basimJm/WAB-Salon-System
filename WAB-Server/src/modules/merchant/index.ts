@@ -25,6 +25,7 @@ import {
   unavailableGallery,
   unavailableHours,
   unavailableSalonServices,
+  unavailableLeaves,
   unavailableStaff,
   unavailableTeam,
   unavailableGuard,
@@ -38,6 +39,7 @@ import { createCatalogRouter } from '../shared/catalog/catalog.module';
 import { createLocationsRouterFor } from '../shared/locations';
 import { createMerchantOtpRouter, createOtpRouteLimiter } from '../shared/otp';
 import { createMerchantCatalogRequestsRouter } from './catalogRequests/requests.routes';
+import { createMerchantLeavesRouter } from './team/leaves.routes';
 import { createMerchantStaffRouter } from './team/staff.routes';
 import { createMerchantTeamRouter } from './team/team.routes';
 import { createMerchantServicesRouter } from './services/services.routes';
@@ -134,6 +136,14 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     MERCHANT_TEAM_ROUTES.base,
     createMerchantStaffRouter(
       services.staff ?? unavailableStaff,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_TEAM_ROUTES.base,
+    createMerchantLeavesRouter(
+      services.leaves ?? unavailableLeaves,
       services.salonProfile?.guard ?? [unavailableGuard],
     ),
   );

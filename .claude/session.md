@@ -989,7 +989,7 @@
 ### T-064 — SRV-052 Staff profile: providesServices, skills, bride qualification, working days
 - Project: `WAB-Server/` (`src/domain/team/staff.service.ts`, `src/modules/merchant/team/staff.*`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #71 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #72 merged into `server`)
 - Acceptance criteria (BUSINESS_DOMAIN §3.4 staff, §5.4 rule 4 staff eligibility, §5.2 STAFF completeness, §6 STAFF_MANAGE; Merchant PRD M17 staff profile section):
   - [x] `GET|PUT /merchant/v1/team/members/:id/staff` (STAFF_MANAGE; owner always; a STAFF_MANAGE holder cannot touch phone, role, permissions or activation); members of other salons are 404
   - [x] `PUT` saves the whole profile: `providesServices`, bio (<=1000), years (0-80), `serviceIds` (must be services of this salon, no duplicates), `brideQualified` (women's salons only), `workingDays` (each day once, only days the salon is open; optional custom `start`+`end` together, inside the salon's hours that day, `end` after `start`, on the slot grid)
@@ -1000,6 +1000,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M17), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) a staff member's working days are validated against the salon schedule when saved; a later salon-hours change that makes them invalid is not re-checked (the availability algorithm intersects them at booking time); (2) skills may point at inactive salon services (they just are not offered); (3) rating/customersCount are written by the review and booking tasks. Not run against a real MongoDB.
 - Notes: Next: SRV-053 (staff leaves).
+
+### T-065 — SRV-053 Staff leaves CRUD
+- Project: `WAB-Server/` (`src/domain/team/leaves.service.ts`, `src/modules/merchant/team/leaves.*`, `src/models/staffLeave.model.ts`, `src/repositories/leaves.repository.ts`, `src/constants/leaves.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #72 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.4 `staffLeaves`, §5.12 conflicts; Merchant PRD M17 "Leaves: list + add date range (+ note)" and conflict handling):
+  - [x] `staffLeaves` model (`{memberId, to}`, `{salonId, from}` indexes) in `ALL_MODELS`; dates are civil `YYYY-MM-DD` (salon calendar), `to` inclusive
+  - [x] `GET|POST /merchant/v1/team/members/:id/leaves`, `PATCH|DELETE .../leaves/:leaveId`: `STAFF_MANAGE`; the member must be in the caller's salon, a leave of another member/salon is 404
+  - [x] Add: real dates, `to` >= `from`, `from` today or later (Amman day from the `timezone` setting), note <= 300; list shows leaves that have not ended with `editable` (starts after today); edit/remove only before the start (422 `INVALID_TRANSITION`); note can be cleared with `null`
+  - [x] `LeaveConflicts` hook: a non-empty result answers 409 `SCHEDULE_CONFLICT` with booking ids and saves nothing (default none until bookings exist)
+- Tests: `cd WAB-Server && npm test` - 1742 pass; format/lint/typecheck/build green; audit 0. `tests/leaves.test.ts` (11).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M17), Architect ✔, QA ✔) - overlapping leaves of one member are allowed (harmless for availability); "on leave today" for the team list and the availability algorithm use `LeavesRepository.upcomingForSalon` later. Not run against a real MongoDB.
+- Notes: Next: SRV-054 (salon policies).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

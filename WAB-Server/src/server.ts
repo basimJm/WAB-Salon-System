@@ -27,6 +27,8 @@ import { createCatalogRequestsService } from './domain/catalog/catalogRequests.s
 import { CatalogRequestsRepository } from './repositories/catalogRequests.repository';
 import { createAccountLifecycleService } from './domain/auth/accountLifecycle.service';
 import { createPhoneVerifier } from './domain/auth/phoneVerifier';
+import { createLeavesService } from './domain/team/leaves.service';
+import { LeavesRepository } from './repositories/leaves.repository';
 import { createStaffService } from './domain/team/staff.service';
 import { createTeamService } from './domain/team/team.service';
 import { createSalonServicesService } from './domain/salonServices/salonServices.service';
@@ -250,6 +252,12 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     otpGate,
     adminGuard,
     uploads,
+    // No bookings exist yet, so the default "no conflicts" applies until the booking tasks.
+    leaves: createLeavesService({
+      leaves: new LeavesRepository(),
+      members: new MembersRepository(),
+      settings,
+    }),
     // No bookings exist yet, so the default "no conflicts" applies until the booking tasks.
     staff: createStaffService({
       members: new MembersRepository(),
