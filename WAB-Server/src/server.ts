@@ -1,3 +1,7 @@
+import { SOCKET_ROOMS } from './constants/sockets';
+import { createAlertsService } from './domain/alerts/alerts.service';
+import { AlertsRepository } from './repositories/alerts.repository';
+import { ALERT_SOCKET_EVENT } from './constants/alerts';
 import { createAnalyticsService } from './domain/analytics/analytics.service';
 import { createMongoAnalytics } from './providers/analytics';
 import { createServerEvents } from './domain/events';
@@ -567,6 +571,24 @@ const buildServices = (
     providerName: config.providers.payments,
     logger,
   });
+  const adminAlerts = createAlertsService({
+    alerts: new AlertsRepository(),
+    transactions: transactionsRepository,
+    refunds: refundsRepository,
+    salons: new SalonsRepository(),
+    reviews: new ReviewsRepository(),
+    catalogRequests: new CatalogRequestsRepository(),
+    settings,
+    onRaised: (alert) => {
+      relay.current?.emit('admin', SOCKET_ROOMS.admin, ALERT_SOCKET_EVENT, {
+        id: alert.id,
+        kind: alert.kind,
+        severity: alert.severity,
+        title: alert.title,
+      });
+    },
+    logger,
+  });
   // Daily and periodic chores: subscriptions, account purge, refund retries, reconciliations.
   const periodic = createPeriodicJobs({
     scheduler: jobs.scheduler,
@@ -577,7 +599,12 @@ const buildServices = (
     payments,
     ledger,
     bookingJobs,
-    notifySubscription: producers.subscriptionAlert,
+    notifySubscription: async (event, alert) => {
+      await producers.subscriptionAlert(event, alert);
+      await adminAlerts.subscription(event, alert);
+    },
+    evaluateAlerts: (now) => adminAlerts.evaluate(now),
+    onDelayedRefunds: (delayed) => adminAlerts.refundsDelayed(delayed),
     logger,
   });
   Object.assign(jobs.handlers, periodic.handlers);

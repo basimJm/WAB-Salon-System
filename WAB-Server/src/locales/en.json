@@ -118,5 +118,13 @@
   "notifications.salon.gender_changed.owner.title": "Salon audience changed",
   "notifications.salon.gender_changed.owner.body": "WAB changed the audience of {salon}. Please review your services and staff.",
   "notifications.decision.approved": "approved",
-  "notifications.decision.rejected": "rejected"
+  "notifications.decision.rejected": "rejected",
+  "alerts.PAYMENT_FAILURE_SPIKE.title": "Payment failures are spiking",
+  "alerts.REFUND_FAILED.title": "A refund failed",
+  "alerts.REFUND_DELAYED.title": "A refund is delayed",
+  "alerts.SUBSCRIPTION_ENDING.title": "A salon subscription ends soon",
+  "alerts.SUBSCRIPTION_EXPIRED.title": "A salon subscription has ended",
+  "alerts.SALON_APPLICATION.title": "New salon application",
+  "alerts.REVIEW_PENDING.title": "New review awaits moderation",
+  "alerts.CATALOG_REQUEST.title": "New catalog service request"
 }
