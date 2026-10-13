@@ -27,6 +27,7 @@ import { createCatalogRequestsService } from './domain/catalog/catalogRequests.s
 import { CatalogRequestsRepository } from './repositories/catalogRequests.repository';
 import { createAccountLifecycleService } from './domain/auth/accountLifecycle.service';
 import { createPhoneVerifier } from './domain/auth/phoneVerifier';
+import { createStaffService } from './domain/team/staff.service';
 import { createTeamService } from './domain/team/team.service';
 import { createSalonServicesService } from './domain/salonServices/salonServices.service';
 import { SalonServicesRepository } from './repositories/salonServices.repository';
@@ -249,6 +250,14 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     otpGate,
     adminGuard,
     uploads,
+    // No bookings exist yet, so the default "no conflicts" applies until the booking tasks.
+    staff: createStaffService({
+      members: new MembersRepository(),
+      salons: new SalonsRepository(),
+      salonServices,
+      settings,
+      state: salonState,
+    }),
     team: createTeamService({
       members: new MembersRepository(),
       lifecycle: createAccountLifecycleService({
