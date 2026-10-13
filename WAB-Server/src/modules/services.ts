@@ -1,3 +1,4 @@
+import type { AnalyticsService } from '../domain/analytics/analytics.service';
 import type { AdminTransactionsService } from '../domain/finance/adminTransactions.service';
 import type { RequestHandler } from 'express';
 import type { Store } from 'express-rate-limit';
@@ -88,6 +89,7 @@ export interface ApiServices {
   readonly adminRefunds?: RefundService;
   readonly adminPayouts?: PayoutsService;
   readonly adminTransactions?: AdminTransactionsService;
+  readonly adminAnalytics?: AnalyticsService;
   readonly payoutDetails?: PayoutDetailsService;
   readonly merchantFinance?: MerchantFinanceService;
   readonly adminSubscriptions?: SubscriptionsService;
@@ -433,6 +435,11 @@ export const unavailableAdminRefunds: RefundService = {
   get: unavailable,
   retry: unavailable,
   markManual: unavailable,
+};
+
+export const unavailableAdminAnalytics: AnalyticsService = {
+  events: unavailable,
+  overview: unavailable,
 };
 
 export const unavailableAdminTransactions: AdminTransactionsService = {

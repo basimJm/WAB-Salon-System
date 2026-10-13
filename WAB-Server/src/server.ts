@@ -1,3 +1,7 @@
+import { createAnalyticsService } from './domain/analytics/analytics.service';
+import { createMongoAnalytics } from './providers/analytics';
+import { createServerEvents } from './domain/events';
+import { ServerEventsRepository } from './repositories/serverEvents.repository';
 import { createAdminTransactionsService } from './domain/finance/adminTransactions.service';
 import { createServer, type Server } from 'node:http';
 import type { Store } from 'express-rate-limit';
@@ -267,6 +271,7 @@ const buildServices = (
   jobs: JobRuntime,
 ): ApiServices => {
   const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
+  const serverEventsRepository = new ServerEventsRepository();
   const otpGate = createOtpGate({ redis, settings });
   const providers = createProviders(config.providers, config.isProduction);
   const phoneServices = {
@@ -645,6 +650,15 @@ const buildServices = (
     payments,
     adminRefunds: fullRefunds,
     adminPayouts,
+    adminAnalytics: createAnalyticsService({
+      analytics: createMongoAnalytics({
+        events: createServerEvents({ store: serverEventsRepository, logger }),
+        counter: serverEventsRepository,
+      }),
+      settings,
+      redis,
+      logger,
+    }),
     adminTransactions: createAdminTransactionsService({ transactions: transactionsRepository }),
     ...(config.secrets.payoutEncryptionKey === undefined
       ? {}
