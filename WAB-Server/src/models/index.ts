@@ -32,6 +32,7 @@ import { CustomerModel } from './customer.model';
 import { InstallationModel } from './installation.model';
 import { MemberModel } from './member.model';
 import { RefreshTokenModel } from './refreshToken.model';
+import { PushCampaignModel } from './pushCampaign.model';
 import { ServerEventModel } from './serverEvent.model';
 import { SettingModel } from './setting.model';
 
@@ -76,4 +77,5 @@ export const ALL_MODELS = [
   LedgerEntryModel,
   PayoutModel,
   NotificationModel,
+  PushCampaignModel,
 ] as const;

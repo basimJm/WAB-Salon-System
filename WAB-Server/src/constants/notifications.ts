@@ -97,6 +97,8 @@ export const NOTIFICATION_EVENTS = {
     type: 'SYSTEM',
     audiences: [owner, { who: 'members', permissions: FINANCE }],
   },
+  // Promotional campaigns choose their recipients themselves (SRV-099), so the matrix has no audience.
+  'campaign.promotion': { type: 'PROMOTION', audiences: [] },
   'subscription.ending_7d': { type: 'SYSTEM', audiences: [owner] },
   'subscription.expired': { type: 'SYSTEM', audiences: [owner] },
   'salon.live': { type: 'SYSTEM', audiences: [owner] },

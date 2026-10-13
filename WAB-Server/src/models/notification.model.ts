@@ -64,5 +64,7 @@ const notificationSchema = new Schema<NotificationRaw>(
 notificationSchema.index({ recipientType: 1, recipientId: 1, createdAt: -1 });
 notificationSchema.index({ recipientType: 1, recipientId: 1, readAt: 1 });
 notificationSchema.index({ recipientType: 1, recipientId: 1, dedupeKey: 1 }, { unique: true });
+// Campaign statistics count the copies of one campaign (SRV-099).
+notificationSchema.index({ event: 1, dedupeKey: 1 });
 
 export const NotificationModel = model<NotificationRaw>('Notification', notificationSchema);
