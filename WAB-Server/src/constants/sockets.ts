@@ -12,11 +12,21 @@ export const SOCKET_AUTH_FIELD = 'token';
 export const SOCKET_ERRORS = {
   unauthorized: 'UNAUTHORIZED',
   forbidden: 'FORBIDDEN',
+  unavailable: 'UNAVAILABLE',
 } as const;
-export const SOCKET_EVENTS = { connection: 'connection' } as const;
+export const SOCKET_EVENTS = {
+  connection: 'connection',
+  bookingRequested: 'booking.requested',
+  bookingUpdated: 'booking.updated',
+  bookingAssigned: 'booking.assigned',
+} as const;
 export const SOCKET_ROOMS = {
   customer: (id: string): string => `customer:${id}`,
   member: (id: string): string => `member:${id}`,
+  /** Members who may answer booking requests (BOOKINGS_RESPOND). */
+  salonRespond: (salonId: string): string => `salon:${salonId}:respond`,
+  /** Members who see every booking of the salon (BOOKINGS_VIEW_ALL). */
+  salonAll: (salonId: string): string => `salon:${salonId}:all`,
   admin: 'admin',
 } as const;
 /** Redis channel prefix of the Socket.IO adapter (keeps its pub/sub apart from other keys). */
