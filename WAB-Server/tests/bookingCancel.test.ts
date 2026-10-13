@@ -2,7 +2,13 @@ import { Types } from 'mongoose';
 import request from 'supertest';
 import { createApp } from '../src/app';
 import { createBookingCancelService } from '../src/domain/bookings/bookingCancel.service';
-import { customerCancelRefund, fullRefund, type RefundFacts } from '../src/domain/bookings/refunds';
+import {
+  customerCancelRefund,
+  fullRefund,
+  noShowRefund,
+  type NoShowFacts,
+  type RefundFacts,
+} from '../src/domain/bookings/refunds';
 import { requireAuth } from '../src/middlewares/auth';
 import { BookingsRepository } from '../src/repositories/bookings.repository';
 import { signAccessToken } from '../src/utils/auth/accessToken';
@@ -190,5 +196,54 @@ describe('POST /customer/v1/bookings/:id/cancel', () => {
     expect((await cancel('nope')).status).toBe(400);
     const done = seed({ status: 'COMPLETED' });
     expect((await cancel(done)).status).toBe(422);
+  });
+});
+
+describe('no-show refund calculator §5.9', () => {
+  const noShow = (over: {
+    paymentMethod?: NoShowFacts['paymentMethod'];
+    money?: NoShowFacts['money'];
+    policy?: Partial<NoShowFacts['policy']>;
+  }): NoShowFacts => ({
+    paymentMethod: over.paymentMethod ?? 'DEPOSIT',
+    money: over.money ?? { total: 10_000, paidOnline: 2_000 },
+    policy: {
+      depositPercentage: 20,
+      noShowDeposit: 'KEEP',
+      noShowFullPayment: 'KEEP',
+      ...over.policy,
+    },
+  });
+  const full = {
+    paymentMethod: 'FULL_ONLINE',
+    money: { total: 10_001, paidOnline: 10_001 },
+  } as const;
+  it('deposit: KEEP returns 0, REFUND returns the deposit', () => {
+    expect(noShowRefund(noShow({}))).toBe(0);
+    expect(noShowRefund(noShow({ policy: { noShowDeposit: 'REFUND' } }))).toBe(2_000);
+  });
+  it('full payment: KEEP 0, REFUND_FULL total, REFUND_MINUS_DEPOSIT total − deposit', () => {
+    expect(noShowRefund(noShow(full))).toBe(0);
+    expect(noShowRefund(noShow({ ...full, policy: { noShowFullPayment: 'REFUND_FULL' } }))).toBe(
+      10_001,
+    );
+    expect(
+      noShowRefund(noShow({ ...full, policy: { noShowFullPayment: 'REFUND_MINUS_DEPOSIT' } })),
+    ).toBe(8_001);
+  });
+  it('pay on arrival and unpaid bookings return nothing', () => {
+    expect(noShowRefund(noShow({ paymentMethod: 'PAY_ON_ARRIVAL' }))).toBe(0);
+    expect(noShowRefund(noShow({ money: { total: 10_000, paidOnline: 0 } }))).toBe(0);
+  });
+  it('never exceeds what was paid', () => {
+    expect(
+      noShowRefund(
+        noShow({
+          ...full,
+          money: { total: 10_001, paidOnline: 100 },
+          policy: { noShowFullPayment: 'REFUND_FULL' },
+        }),
+      ),
+    ).toBe(100);
   });
 });
