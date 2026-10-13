@@ -28,6 +28,8 @@ export interface RefundRaw {
   /** When the next automatic attempt may run (exponential backoff). */
   nextAttemptAt?: Date;
   completedAt?: Date;
+  /** Set once the ledger holds this refund's REFUND entry. */
+  ledgeredAt?: Date;
   manual?: { by: Types.ObjectId; reference: string };
   createdAt: Date;
   updatedAt: Date;
@@ -50,6 +52,7 @@ const refundSchema = new Schema<RefundRaw>(
     lastError: { type: String },
     nextAttemptAt: { type: Date },
     completedAt: { type: Date },
+    ledgeredAt: { type: Date },
     manual: {
       type: new Schema(
         {

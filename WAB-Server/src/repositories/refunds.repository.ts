@@ -64,4 +64,23 @@ export class RefundsRepository extends BaseRepository<RefundRaw> {
       .exec();
     return updated === null ? null : toEntity<RefundRaw>(updated);
   }
+
+  /** Marks the refund as booked in the ledger; `false` when it already was. */
+  async markLedgered(id: string, at: Date): Promise<boolean> {
+    if (!isObjectIdString(id)) return false;
+    const updated = await this.model
+      .findOneAndUpdate({ _id: id, ledgeredAt: { $exists: false } }, { $set: { ledgeredAt: at } })
+      .exec();
+    return updated !== null;
+  }
+
+  /** Finished refunds older than `cutoff` that are not in the ledger yet (a missed write). */
+  async unledgered(cutoff: Date, limit: number): Promise<Entity<RefundRaw>[]> {
+    const page = await this.findPage(
+      { status: 'REFUNDED', ledgeredAt: { $exists: false }, completedAt: { $lt: cutoff } },
+      { page: 1, pageSize: limit },
+      { completedAt: 1 },
+    );
+    return page.items;
+  }
 }

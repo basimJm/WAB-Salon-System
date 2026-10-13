@@ -222,15 +222,18 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
         for (const key of Object.keys(update.$unset ?? {})) Reflect.deleteProperty(doc, key);
         return { ...doc };
       }),
-    aggregate: (pipeline: [{ $match: Filter }, unknown]) =>
+    aggregate: (pipeline: [{ $match: Filter }, { $group?: { sum?: { $sum?: unknown } } }]) =>
       new FakeQuery(() => {
         const found = select(pipeline[0].$match);
+        // `{ $group: { sum: { $sum: '$field' } } }` sums that field (reviews: `rating`).
+        const summed = pipeline[1].$group?.sum?.$sum;
+        const field = typeof summed === 'string' ? summed.slice(1) : 'rating';
         return found.length === 0
           ? []
           : [
               {
                 _id: null,
-                sum: found.reduce((total, doc) => total + Number(doc['rating']), 0),
+                sum: found.reduce((total, doc) => total + Number(doc[field]), 0),
                 count: found.length,
               },
             ];

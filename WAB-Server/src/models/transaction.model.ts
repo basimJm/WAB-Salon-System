@@ -33,6 +33,8 @@ export interface TransactionRaw {
   gatewayFee?: number;
   /** Set once the whole payment was handed back (slot lost, abandoned checkout): it can never back a booking. */
   refundedAt?: Date;
+  /** Set once the salon's ledger holds this payment's CHARGE (and fee). */
+  chargedAt?: Date;
   platform: Platform;
   appVersion: string;
   createdAt: Date;
@@ -58,6 +60,7 @@ const transactionSchema = new Schema<TransactionRaw>(
     raw: { type: Schema.Types.Mixed },
     gatewayFee: { type: Number, min: 0, validate: Number.isInteger },
     refundedAt: { type: Date },
+    chargedAt: { type: Date },
     platform: { type: String, enum: PLATFORMS, required: true },
     appVersion: { type: String, required: true },
   },
