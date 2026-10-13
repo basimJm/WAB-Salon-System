@@ -23,6 +23,7 @@ const card = z.object({
   isOpenNow: z.boolean(),
   todayHours: z.object({ open: z.string(), close: z.string() }).nullable(),
   isFavorite: z.boolean(),
+  distanceKm: z.number().nullable(),
 });
 
 export const registerCustomerSearchDocs = (registry: OpenAPIRegistry): void => {

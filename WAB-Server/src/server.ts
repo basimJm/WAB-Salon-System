@@ -29,6 +29,7 @@ import { createAccountLifecycleService } from './domain/auth/accountLifecycle.se
 import { createPhoneVerifier } from './domain/auth/phoneVerifier';
 import { createAdminSalonsService } from './domain/salons/adminSalons.service';
 import { createConflictFinder, noBookings } from './domain/salons/conflicts';
+import { createSalonDetailsService } from './domain/salonDetails/salonDetails.service';
 import { createSearchService } from './domain/search/search.service';
 import { createPolicyService } from './domain/salons/policy.service';
 import { createLeavesService } from './domain/team/leaves.service';
@@ -263,6 +264,17 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
       salons: new SalonsRepository(),
       salonServices,
       closures: new ClosuresRepository(),
+      storage: providers.storage,
+      settings,
+    }),
+    salonDetails: createSalonDetailsService({
+      salons: new SalonsRepository(),
+      members: new MembersRepository(),
+      salonServices,
+      catalog: new CatalogServicesRepository(),
+      gallery: new GalleryRepository(),
+      closures: new ClosuresRepository(),
+      leaves: new LeavesRepository(),
       storage: providers.storage,
       settings,
     }),

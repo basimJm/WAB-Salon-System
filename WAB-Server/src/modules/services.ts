@@ -9,6 +9,7 @@ import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
+import type { SalonDetailsService } from '../domain/salonDetails/salonDetails.service';
 import type { SearchService } from '../domain/search/search.service';
 import type { AdminSalonsService } from '../domain/salons/adminSalons.service';
 import type { PolicyService } from '../domain/salons/policy.service';
@@ -46,6 +47,7 @@ export interface ApiServices {
   readonly adminApplications?: SalonReviewService;
   readonly salonState?: SalonStateService;
   readonly adminSalons?: AdminSalonsService;
+  readonly salonDetails?: SalonDetailsService;
   readonly search?: SearchService;
   readonly uploads?: UploadsService;
   readonly gallery?: GalleryService;
@@ -262,6 +264,11 @@ export const unavailableAdminSalons: AdminSalonsService = {
   list: unavailable,
   detail: unavailable,
   changeGender: unavailable,
+};
+
+export const unavailableSalonDetails: SalonDetailsService = {
+  get: unavailable,
+  staff: unavailable,
 };
 
 export const unavailableSearch: SearchService = { search: unavailable, priceBounds: unavailable };
