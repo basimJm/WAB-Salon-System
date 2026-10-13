@@ -234,6 +234,15 @@ describe('GET /customer/v1/salons', () => {
     ).toBe(400);
   });
 
+  it('lists recommended salons in the order the admin set, not by rating', async () => {
+    const low = addSalon('Low', { rating: { avg: 1, count: 1 } });
+    const high = addSalon('High', { rating: { avg: 5, count: 9 } });
+    const mid = addSalon('Mid', { rating: { avg: 3, count: 3 } });
+    recommended.ids = [low, mid, high];
+    expect(await names('gender=FEMALE&general=RECOMMENDED')).toEqual(['Low', 'Mid', 'High']);
+    expect(await names('gender=FEMALE&general=RECOMMENDED&page=2&pageSize=2')).toEqual(['High']);
+  });
+
   it('paginates by 10 and reports the total', async () => {
     for (let i = 0; i < 12; i += 1)
       addSalon(`S${String(i).padStart(2, '0')}`, { rating: { avg: 3, count: i } });

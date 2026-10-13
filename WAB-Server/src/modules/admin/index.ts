@@ -14,6 +14,7 @@ import {
   unavailableAdminBanners,
   unavailableAdminSalons,
   unavailableCatalogRequests,
+  unavailableAdminPlacements,
   unavailableAdminReviews,
   unavailableSalonReview,
   unavailableSalonState,
@@ -29,6 +30,8 @@ import { createAdminAppConfigRouter, createAdminContentRouter } from './content/
 import { createAdminCatalogRequestsRouter } from './catalogRequests/requests.routes';
 import { createAdminSalonsRouter } from './salons/adminSalons.routes';
 import { createAdminSalonStateRouter } from './salons/salonState.routes';
+import { createAdminPlacementsRouter } from './placements/placements.routes';
+import { ADMIN_PLACEMENT_ROUTES } from '../../constants/placements';
 import { createAdminReviewsRouter } from './reviews/reviews.routes';
 import { ADMIN_REVIEW_ROUTES } from '../../constants/reviews';
 import { createAdminApplicationsRouter } from './applications/applications.routes';
@@ -75,6 +78,11 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     router,
     ADMIN_APPLICATION_ROUTES.base,
     createAdminApplicationsRouter(services.adminApplications ?? unavailableSalonReview, guard),
+  );
+  mount(
+    router,
+    ADMIN_PLACEMENT_ROUTES.base,
+    createAdminPlacementsRouter(services.adminPlacements ?? unavailableAdminPlacements, guard),
   );
   mount(
     router,

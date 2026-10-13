@@ -209,8 +209,10 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
           )
           .map(([salonId]) => salonId);
       }
+      let placementOrder: string[] | undefined;
       if (query.general === 'RECOMMENDED') {
         const ids = await recommended.salonIds(query.gender, now());
+        placementOrder = ids;
         allowed = allowed === undefined ? ids : allowed.filter((id) => ids.includes(id));
       }
       if (allowed !== undefined && allowed.length === 0) return empty;
@@ -258,6 +260,20 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
           items: all.slice(start, start + params.pageSize),
           meta: { page: params.page, pageSize: params.pageSize, total: all.length },
         };
+      } else if (placementOrder !== undefined) {
+        // The recommended section follows the order the admin set, not the rating.
+        const rank = new Map(placementOrder.map((id, index) => [id, index]));
+        const all = await salons.findMany(filter);
+        all.sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
+        const start = (params.page - 1) * params.pageSize;
+        page = {
+          items: all.slice(start, start + params.pageSize),
+          meta: { page: params.page, pageSize: params.pageSize, total: all.length },
+        };
+        for (const s of page.items) {
+          const d = distanceOf(s);
+          if (d !== null) distances.set(s.id, d);
+        }
       } else {
         page = await salons.findPage(filter, params, { 'rating.avg': -1, 'rating.count': -1 });
         for (const s of page.items) {
