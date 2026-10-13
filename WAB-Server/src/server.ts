@@ -23,6 +23,8 @@ import { createSalonStateService, createStaffFacts } from './domain/salons/salon
 import { createSalonProfileService } from './domain/salons/salonProfile.service';
 import { loadMember } from './middlewares/permission';
 import { createImageVariants } from './domain/uploads/variants';
+import { createHoursService } from './domain/salons/hoursService';
+import { ClosuresRepository } from './repositories/closures.repository';
 import { createGalleryService } from './domain/gallery/gallery.service';
 import { GalleryRepository } from './repositories/gallery.repository';
 import { createUploadsService } from './domain/uploads/uploads.service';
@@ -238,6 +240,13 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     otpGate,
     adminGuard,
     uploads,
+    // No bookings exist yet, so the default "no conflicts" applies until the booking tasks.
+    hours: createHoursService({
+      salons: new SalonsRepository(),
+      closures: new ClosuresRepository(),
+      settings,
+      state: salonState,
+    }),
     gallery: createGalleryService({
       gallery: new GalleryRepository(),
       storage: providers.storage,
