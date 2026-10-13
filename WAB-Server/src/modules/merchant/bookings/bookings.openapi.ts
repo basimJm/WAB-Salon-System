@@ -1,5 +1,8 @@
 import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
-import { MERCHANT_BOOKING_ROUTES } from '../../../constants/bookings';
+import {
+  MERCHANT_BOOKING_ROUTES,
+  MERCHANT_CANCEL_AFFECTED_ROUTE,
+} from '../../../constants/bookings';
 import { HTTP_STATUS } from '../../../constants/http';
 import { API_PREFIXES } from '../../../constants/server';
 import {
@@ -9,7 +12,12 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
-import { bookingParams, decisionBody, reassignBody } from './bookings.validation';
+import {
+  bookingParams,
+  cancelAffectedBody,
+  decisionBody,
+  reassignBody,
+} from './bookings.validation';
 
 const summary = z.object({
   id: z.string(),
@@ -118,6 +126,40 @@ export const registerMerchantBookingDocs = (registry: OpenAPIRegistry): void => 
         HTTP_STATUS.notFound,
         HTTP_STATUS.conflict,
         HTTP_STATUS.unprocessableEntity,
+        HTTP_STATUS.serviceUnavailable,
+      ),
+    },
+  });
+  registry.registerPath({
+    method: 'post',
+    path: `${API_PREFIXES.merchant}${MERCHANT_BOOKING_ROUTES.base}${MERCHANT_CANCEL_AFFECTED_ROUTE}`,
+    tags: ['Bookings'],
+    summary:
+      'Cancel the bookings a schedule, closure, leave or staff change would break (the ids come from the 409 SCHEDULE_CONFLICT)',
+    description:
+      'Pending bookings are rejected and approved ones cancelled by the salon, with the given reason; full refunds follow. Needs BOOKINGS_RESPOND (pending) and BOOKINGS_OPERATE (approved). The answer lists each booking: `DONE` with its new status, or `FAILED` with the domain error code (e.g. already started); one failure never stops the others. Then repeat the original change. To reassign instead, use the reassign endpoint per booking.',
+    request: {
+      headers: z.object({ 'Accept-Language': acceptLanguageHeader }),
+      body: { content: { 'application/json': { schema: cancelAffectedBody } } },
+    },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Per-booking outcome',
+        successResponseSchema(
+          z.array(
+            z.object({
+              bookingId: z.string(),
+              outcome: z.enum(['DONE', 'FAILED']),
+              status: z.string().optional(),
+              code: z.string().optional(),
+            }),
+          ),
+        ),
+      ),
+      ...errorResponses(
+        HTTP_STATUS.badRequest,
+        HTTP_STATUS.unauthorized,
+        HTTP_STATUS.forbidden,
         HTTP_STATUS.serviceUnavailable,
       ),
     },
