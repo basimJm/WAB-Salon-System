@@ -6,6 +6,7 @@ import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
 import { LOCATION_ROUTES } from '../../constants/locations';
 import { CONTENT_ROUTES } from '../../constants/content';
 import { CATALOG_ROUTES } from '../../constants/catalog';
+import { MERCHANT_GALLERY_ROUTES } from '../../constants/gallery';
 import { MERCHANT_SALON_ROUTES } from '../../constants/salon';
 import { UPLOAD_ROUTES } from '../../constants/uploads';
 import { mount } from '../../routes/mount';
@@ -14,6 +15,7 @@ import { createMerchantAppConfigRouter } from '../shared/appConfig';
 import { createMerchantInstallationsRouter } from '../shared/installations';
 import {
   unavailableCatalogService,
+  unavailableGallery,
   unavailableGuard,
   unavailableMerchantAuth,
   unavailableSalonApplication,
@@ -24,6 +26,7 @@ import { createMerchantContentRouter } from '../shared/content';
 import { createCatalogRouter } from '../shared/catalog/catalog.module';
 import { createLocationsRouterFor } from '../shared/locations';
 import { createMerchantOtpRouter, createOtpRouteLimiter } from '../shared/otp';
+import { createMerchantGalleryRouter } from './gallery/gallery.routes';
 import { createMerchantProfileRouter } from './salon/profile.routes';
 import { createMerchantSalonRouter } from './salon/salon.routes';
 import { createMerchantAuthRouter } from './auth/auth.routes';
@@ -70,5 +73,13 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     ),
   );
   mount(router, UPLOAD_ROUTES.base, createMerchantUploadsRouter(services));
+  mount(
+    router,
+    MERCHANT_GALLERY_ROUTES.base,
+    createMerchantGalleryRouter(
+      services.gallery ?? unavailableGallery,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
   return router;
 };

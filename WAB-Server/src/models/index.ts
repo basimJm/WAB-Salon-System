@@ -9,6 +9,7 @@ import { BannerModel } from './banner.model';
 import { SalonModel } from './salon.model';
 import { SubscriptionModel } from './subscription.model';
 import { UploadModel } from './upload.model';
+import { GalleryItemModel } from './galleryItem.model';
 import { AuditLogModel } from './auditLog.model';
 import { CatalogServiceModel } from './catalogService.model';
 import { CityModel } from './city.model';
@@ -41,6 +42,7 @@ export const ALL_MODELS = [
   MaintenanceModel,
   BannerModel,
   SalonModel,
+  GalleryItemModel,
   UploadModel,
   SubscriptionModel,
   ContactInfoModel,
