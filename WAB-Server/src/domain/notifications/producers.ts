@@ -20,6 +20,7 @@ import type { CatalogRequestNotifier } from '../catalog/catalogRequests.service'
 import type { PayoutNotifier } from '../payouts/payouts.service';
 import type { RefundHooks } from '../refunds/refunds.service';
 import type { ApplicationNotifier } from '../salons/salonReview.service';
+import type { SubscriptionAlert } from '../subscriptions/subscriptions.service';
 import type { SalonStateNotifier } from '../salons/salonState.service';
 import type { SettingsService } from '../settings';
 import type { NotificationService, ParamValue } from './notifications.service';
@@ -49,6 +50,11 @@ export interface NotificationProducers {
   readonly bookingCreated: BookingCreatedHook;
   /** Sends a reminder / pending alert; one delivery per booking and event even if the job repeats. */
   readonly bookingJobEvent: (event: JobBookingEvent, booking: Entity<BookingRaw>) => Promise<void>;
+  /** Tells a salon owner that the subscription is ending soon or has expired (once per end date). */
+  readonly subscriptionAlert: (
+    event: 'subscription.ending_7d' | 'subscription.expired',
+    alert: SubscriptionAlert,
+  ) => Promise<void>;
   readonly bookingChanged: Required<BookingChangedHook>;
   readonly refundHooks: Required<Pick<RefundHooks, 'started' | 'refunded' | 'failed'>>;
   readonly applicationNotifier: ApplicationNotifier;
@@ -153,6 +159,19 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
     });
   };
 
+  const subscriptionAlert: NotificationProducers['subscriptionAlert'] = async (event, alert) => {
+    const timeZone = await settings.get('timezone');
+    await notifications.notify(event, {
+      key: `${event}:${alert.subscriptionId}:${String(alert.endsAt.getTime())}`,
+      salonId: alert.salonId,
+      params: {
+        salon: await salonName(alert.salonId),
+        when: (language: Language) => formatDateTime(alert.endsAt, timeZone, language),
+      },
+      data: { salonId: alert.salonId, deepLink: DEEP_LINKS.subscription },
+    });
+  };
+
   const refundParams = async (refund: Entity<RefundRaw>): Promise<Params | null> => {
     if (refund.bookingId === undefined) return null;
     const booking = await bookings.findById(refund.bookingId);
@@ -250,6 +269,7 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
   return {
     bookingCreated,
     bookingJobEvent,
+    subscriptionAlert,
     bookingChanged,
     refundHooks,
     applicationNotifier,

@@ -375,6 +375,27 @@ describe('producers', () => {
     await producers.bookingJobEvent('booking.pending_30m', booking('PENDING'));
     expect(stored(ids.responder).map((n) => n['event'])).toContain('booking.pending_30m');
   });
+  it('a subscription alert reaches only the owner, once per end date, with the date in the owner language', async () => {
+    const alert = {
+      salonId: salon.toHexString(),
+      subscriptionId: new Types.ObjectId().toHexString(),
+      status: 'TRIAL' as const,
+      endsAt: new Date('2026-10-19T09:00:00Z'),
+    };
+    await producers.subscriptionAlert('subscription.ending_7d', alert);
+    await producers.subscriptionAlert('subscription.ending_7d', alert);
+    expect(stored(ids.owner).map((n) => n['event'])).toEqual(['subscription.ending_7d']);
+    expect(stored(ids.responder)).toEqual([]);
+    expect(stored(ids.owner)[0]?.['body']).toMatchObject({
+      en: expect.stringContaining('12:00 pm') as unknown,
+    });
+    // A renewed period that ends later is a new occurrence.
+    await producers.subscriptionAlert('subscription.ending_7d', {
+      ...alert,
+      endsAt: new Date('2026-11-19T09:00:00Z'),
+    });
+    expect(stored(ids.owner)).toHaveLength(2);
+  });
   it('a reassignment tells the customer and the old and new staff', async () => {
     await producers.bookingChanged.reassigned(booking('APPROVED'), {
       from: ids.staff.toHexString(),

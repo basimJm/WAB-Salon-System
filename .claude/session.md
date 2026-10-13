@@ -1645,6 +1645,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) only 60/15 minute reminders have templates; other `reminderMinutes` values are ignored with a warning; (2) `reconcile` loads all active bookings in pages of 200 (fine until volume grows; SRV-097 also runs it periodically); (3) the pending alert fires only if the start is still in the future. Not run against a real MongoDB. API docs: no change.
 
+### T-107 — SRV-097 Periodic jobs
+
+- Project: `WAB-Server/` (`src/jobs/periodicJobs.ts`, `src/constants/jobs.ts#PERIODIC_JOBS`, `producers.ts#subscriptionAlert`, `src/server.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (CLAUDE.md §4.5; BUSINESS_DOMAIN §9 daily/periodic jobs, §5.13 subscriptions, §5.15 purge, §5.10 refunds; Admin PRD subscription alerts):
+  - [x] Cron schedules in `settings.timezone` (09:00 subscriptions, 03:00 purge, 5-min refund retry and payment reconcile, hourly delayed-refund check and booking-job rebuild, nightly ledger reconcile); one handler per schedule
+  - [x] Subscription check: expire first, then warn; owners notified once per end date; one failed alert does not drop the others
+  - [x] Delayed refunds logged as errors and handed to an alert hook only when present
+  - [x] Handler failures reach the queue (retry/backoff); registration after the worker starts, non-fatal on failure
+  - [x] `draft:expire` and `placements:expire` intentionally not scheduled (TTL/expiry scores and derived status already do it)
+- Tests: `tests/periodicJobs.test.ts` (9) + producer test; full gate green
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) the two unscheduled jobs; (2) admin e-mail alerts for refund delay/subscription end wait for the alerts engine (SRV-106) and the notifier (SRV-100); (3) a changed `timezone` setting needs a restart. API docs: no change.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
