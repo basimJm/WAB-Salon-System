@@ -1,3 +1,7 @@
+import { createExportsService } from './domain/exports/exports.service';
+import { createTableBuilders } from './domain/exports/tableBuilders';
+import { ExportsRepository } from './repositories/exports.repository';
+import { EXPORT_JOB_NAME } from './constants/exports';
 import { createReportsService } from './domain/reports/reports.service';
 import { createMongoReportSource } from './domain/reports/reportSource';
 import { ReportsRepository } from './repositories/reports.repository';
@@ -609,6 +613,28 @@ const buildServices = (
     settings,
     logger,
   });
+  const adminSettingsService = createAdminSettingsService({
+    settings,
+    auditLogs: new AuditLogsRepository(),
+    audit,
+  });
+  const adminTransactionsService = createAdminTransactionsService({
+    transactions: transactionsRepository,
+  });
+  const exportsService = createExportsService({
+    exports: new ExportsRepository(),
+    builders: createTableBuilders({
+      reports: reportsService,
+      transactions: adminTransactionsService,
+      adminSettings: adminSettingsService,
+    }),
+    storage: providers.storage,
+    scheduler: jobs.scheduler,
+    audit,
+    logger,
+  });
+  jobs.handlers[EXPORT_JOB_NAME] = (job) => exportsService.run(String(job.data['exportId']));
+  jobs.reconcilers.push(() => exportsService.reconcile());
   const alertInbox = createAlertInbox({
     alerts: alertsRepository,
     admins: new AdminsRepository(),
@@ -707,6 +733,7 @@ const buildServices = (
     adminPayouts,
     adminAlerts: alertInbox,
     adminReports: reportsService,
+    adminExports: exportsService,
     adminAnalytics: createAnalyticsService({
       analytics: createMongoAnalytics({
         events: createServerEvents({ store: serverEventsRepository, logger }),
@@ -716,7 +743,7 @@ const buildServices = (
       redis,
       logger,
     }),
-    adminTransactions: createAdminTransactionsService({ transactions: transactionsRepository }),
+    adminTransactions: adminTransactionsService,
     ...(config.secrets.payoutEncryptionKey === undefined
       ? {}
       : {
@@ -846,11 +873,7 @@ const buildServices = (
     salonState,
     adminPlacements: placements,
     adminCampaigns: campaigns,
-    adminSettings: createAdminSettingsService({
-      settings,
-      auditLogs: new AuditLogsRepository(),
-      audit,
-    }),
+    adminSettings: adminSettingsService,
     adminCustomers: createAdminCustomersService({
       customers: new CustomersRepository(),
       installations: new InstallationsRepository(),

@@ -1,3 +1,4 @@
+import { ExportModel } from './export.model';
 import { ReportModel } from './report.model';
 import { AlertModel } from './alert.model';
 import { AdminModel } from './admin.model';
@@ -82,4 +83,5 @@ export const ALL_MODELS = [
   PushCampaignModel,
   AlertModel,
   ReportModel,
+  ExportModel,
 ] as const;
