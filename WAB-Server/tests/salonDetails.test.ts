@@ -90,6 +90,7 @@ const week = ['SAT', 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI'].map((day) => ({
 }));
 const salonId = id();
 const catalogId = id();
+const serviceId = id();
 
 const addSalon = (over: Record<string, unknown> = {}): void => {
   m.salons.docs.push({
@@ -122,7 +123,7 @@ const addStaff = (over: Record<string, unknown> = {}): Types.ObjectId => {
     staff: {
       bio: 'Colorist',
       yearsOfExperience: 5,
-      serviceIds: [catalogId],
+      serviceIds: [serviceId],
       workingDays: [{ day: 'MON' }],
       rating: { avg: 4, count: 2 },
       customersCount: 30,
@@ -301,7 +302,7 @@ describe('GET /customer/v1/salons/:salonId/staff/:memberId', () => {
     addSalon();
     const member = addStaff({ role: 'MANAGER' });
     m.services.docs.push({
-      _id: id(),
+      _id: serviceId,
       salonId,
       catalogServiceId: catalogId,
       price: 1000,
@@ -320,7 +321,7 @@ describe('GET /customer/v1/salons/:salonId/staff/:memberId', () => {
       yearsOfExperience: 5,
       customersCount: 30,
       status: 'ON_DUTY',
-      services: [{ name: 'Haircut' }],
+      services: [{ id: serviceId.toHexString(), name: 'Haircut' }],
       workingDays: [{ day: 'MON', start: null, end: null }],
     });
     expect(JSON.stringify(res.body)).not.toContain('Secret');

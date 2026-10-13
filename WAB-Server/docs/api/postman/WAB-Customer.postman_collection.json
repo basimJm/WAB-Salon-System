@@ -1617,6 +1617,67 @@
           }
         }
       ]
+    },
+    {
+      "name": "Availability",
+      "item": [
+        {
+          "name": "Slots of one person on one date with the free eligible staff per slot (a read; POST because of the body)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/salons/:salonId/availability",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "salons",
+                ":salonId",
+                "availability"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "salonId",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Ask once per person; send the times the earlier persons picked in `others` so the same staff member is not offered twice. `reason` explains a day without slots: PAST, TOO_FAR or CLOSED. A slot is available when at least one eligible staff member is free for the whole duration (existing PENDING/APPROVED bookings and live payment holds count as busy).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"string\",\n  \"person\": {\n    \"serviceIds\": [\n      \"string\"\n    ],\n    \"isBride\": false,\n    \"staffId\": \"string\"\n  },\n  \"others\": [\n    {\n      \"staffId\": \"string\",\n      \"start\": \"string\",\n      \"end\": \"string\"\n    }\n  ],\n  \"draftId\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [
