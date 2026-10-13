@@ -34,4 +34,16 @@ export class SalonServicesRepository extends BaseRepository<SalonServiceRaw> {
       .exec();
     return updated === null ? null : toEntity<SalonServiceRaw>(updated);
   }
+
+  /**
+   * Switches every service of a salon off and clears the bride-only flag (a gender change makes
+   * them belong to the wrong catalog). Returns how many services changed.
+   */
+  async deactivateAll(salonId: string): Promise<number> {
+    if (!isObjectIdString(salonId)) return 0;
+    const result = await this.model
+      .updateMany({ salonId }, { $set: { active: false, brideOnly: false } })
+      .exec();
+    return result.modifiedCount;
+  }
 }

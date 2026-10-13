@@ -12,6 +12,7 @@ import { createAdminUploadsRouter } from '../shared/uploads';
 import {
   unavailableAdminAuth,
   unavailableAdminBanners,
+  unavailableAdminSalons,
   unavailableCatalogRequests,
   unavailableSalonReview,
   unavailableSalonState,
@@ -25,6 +26,7 @@ import {
 import { createOtpRouteLimiter } from '../shared/otp';
 import { createAdminAppConfigRouter, createAdminContentRouter } from './content/content.routes';
 import { createAdminCatalogRequestsRouter } from './catalogRequests/requests.routes';
+import { createAdminSalonsRouter } from './salons/adminSalons.routes';
 import { createAdminSalonStateRouter } from './salons/salonState.routes';
 import { createAdminApplicationsRouter } from './applications/applications.routes';
 import { createAdminCatalogRouter } from './catalog/catalog.routes';
@@ -81,6 +83,11 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     router,
     ADMIN_CATALOG_REQUEST_ROUTES.base,
     createAdminCatalogRequestsRouter(services.catalogRequests ?? unavailableCatalogRequests, guard),
+  );
+  mount(
+    router,
+    ADMIN_SALON_STATE_ROUTES.base,
+    createAdminSalonsRouter(services.adminSalons ?? unavailableAdminSalons, guard),
   );
   return router;
 };

@@ -1018,7 +1018,7 @@
 ### T-066 — SRV-054 Salon policies
 - Project: `WAB-Server/` (`src/domain/salons/policy.service.ts`, `src/modules/merchant/policy/*`, `src/constants/salon.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #73 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #74 merged into `server`)
 - Acceptance criteria (BUSINESS_DOMAIN §3.3 SalonPolicy, §5.2 POLICY completeness, §6 POLICIES_MANAGE; Merchant PRD M19):
   - [x] `GET /merchant/v1/salon/policy` (null until set) and `PUT` (whole policy replaced): `POLICIES_MANAGE` only (owner always; a default MANAGER does not have it)
   - [x] Validation: cancellation window integer 0..720 hours (720 = assumption), payment options >= 1 and unique from PAY_ON_ARRIVAL/DEPOSIT/FULL_ONLINE, deposit percentage integer 1..100 required when DEPOSIT is offered (dropped when it is not), `depositRefundableOnCustomerCancel`, `fullPaymentRefundOnCustomerCancel` FULL|MINUS_DEPOSIT, `noShowDeposit` KEEP|REFUND, `noShowFullPayment` KEEP|REFUND_MINUS_DEPOSIT|REFUND_FULL, notes <= 1000 (empty/absent removes them)
@@ -1027,6 +1027,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M19), Architect ✔, QA ✔) - the customer "Salon rules" preview and the deposit example are client-side from this data; the policy has no version history (bookings keep their own snapshot). Not run against a real MongoDB.
 - Notes: This completes the merchant salon-setup block (SRV-041..054). Next in order: SRV-055 (check the backlog row).
+
+### T-067 — SRV-055 Admin salon list, overview and gender change
+- Project: `WAB-Server/` (`src/domain/salons/adminSalons.service.ts`, `src/modules/admin/salons/adminSalons.*`; fake model gained dotted `$set` and `$regex`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #74 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (Admin PRD A13; BUSINESS_DOMAIN §3.3 "gender immutable after approval except by admin", CLAUDE.md §5.12; Offline/Online already in SRV-043):
+  - [x] `GET /admin/v1/salons` (admin only): newest first, paginated (25), filters `state`, `gender`, `cityId`, `q` (name, regex-escaped, case-insensitive), with subscription status
+  - [x] `GET /admin/v1/salons/:id`: overview with completeness checklist, offline reason/time, owner, subscription summary (trial end, period end)
+  - [x] `PATCH /admin/v1/salons/:id/gender` {gender, reason}: same gender -> 422; changes it, switches every salon service off and clears bride-only flags, clears staff bride qualification when the salon becomes a men's salon, recomputes completeness, audit `SALON_CHANGE_GENDER` (before/after, reason), owner notified (`salon.gender_changed`, failure only logged)
+- Tests: `cd WAB-Server && npm test` - 1769 pass; format/lint/typecheck/build green; audit 0. `tests/adminSalons.test.ts` (9).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) upcoming bookings of the salon are not checked on a gender change (no bookings yet): SRV-056/booking tasks must add the guard; (2) services are switched off, not deleted, because staff and bookings point at them; (3) bookings/KPIs (30 d) columns of the PRD list come with the booking tasks. Not run against a real MongoDB.
+- Notes: Next: SRV-056 (conflict preview API) — depends on bookings; check whether it is runnable.
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
