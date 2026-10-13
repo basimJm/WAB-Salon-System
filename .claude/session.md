@@ -1054,6 +1054,17 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) the bulk resolution (cancel affected / reassign) is the later `conflict-resolve` task; (2) service deactivation only warns in the PRD and does not block: no hook there; (3) the real `BookingLookup` must exclude bookings that already ended and return only PENDING/APPROVED. Not run against a real MongoDB.
 - Notes: Next: SRV-057 (salon search basic).
 
+### T-069 — SRV-057 Salon search (basic)
+- Project: `WAB-Server/` (`src/domain/search`, `src/modules/customer/search`, `src/constants/search.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BE-15, BE-21; Customer PRD S04-S05):
+  - [x] Only LIVE + complete salons of the chosen gender; name search; all selected services offered; price range on the SUM; min rating; recommended filter; paginated; card has open-now and today's hours
+  - [x] `/salons/filters` returns price bounds; bad input 400; bad bearer 401; favorites flagged for signed-in customers
+- Tests: `tests/search.test.ts` (19); full gate green, 1807 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - recommended/favorites lookups are placeholders until SRV-066/062; nearest sorting is SRV-058.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

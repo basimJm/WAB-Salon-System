@@ -816,6 +816,117 @@
           }
         }
       ]
+    },
+    {
+      "name": "Salon search",
+      "item": [
+        {
+          "name": "Search LIVE salons of one gender: name text, ALL selected services offered, price range of their sum (JOD strings), minimum rating, recommended",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/salons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "salons"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "gender",
+                  "value": ""
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "serviceIds",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "minRating",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "general",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            },
+            "description": "Public; a valid customer token only adds `isFavorite`. Combined filters are all applied (AND). Ordered by rating."
+          }
+        },
+        {
+          "name": "Price slider bounds for the selected services (min/max of the sums over matching salons)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/salons/filters",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "salons",
+                "filters"
+              ],
+              "query": [
+                {
+                  "key": "gender",
+                  "value": ""
+                },
+                {
+                  "key": "serviceIds",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [
