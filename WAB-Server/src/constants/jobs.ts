@@ -20,3 +20,19 @@ export const JOB_SERVER_EVENTS = {
   failed: 'job.failed',
   exhausted: 'job.exhausted',
 } as const;
+
+/**
+ * Recurring jobs (SRV-097, BUSINESS_DOMAIN.md §9). Cron is evaluated in the business time zone
+ * (`settings.timezone`), so "09:00" is 09:00 Amman all year.
+ * Not scheduled on purpose: `draft:expire` (hold keys carry their own expiry and the draft TTL
+ * index deletes the rows) and `placements:expire` (a placement's status is derived from its dates).
+ */
+export const PERIODIC_JOBS = {
+  subscriptionsCheck: { name: 'periodic.subscriptions-check', cron: '0 9 * * *' },
+  accountsPurge: { name: 'periodic.accounts-purge', cron: '0 3 * * *' },
+  refundsRetry: { name: 'periodic.refunds-retry', cron: '*/5 * * * *' },
+  refundsDelayed: { name: 'periodic.refunds-delayed', cron: '0 * * * *' },
+  paymentsReconcile: { name: 'periodic.payments-reconcile', cron: '*/5 * * * *' },
+  ledgerReconcile: { name: 'periodic.ledger-reconcile', cron: '20 2 * * *' },
+  bookingJobsReconcile: { name: 'periodic.booking-jobs-reconcile', cron: '15 * * * *' },
+} as const;

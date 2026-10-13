@@ -32,6 +32,7 @@ import { createConflictFinder } from './domain/salons/conflicts';
 import { createSalonDetailsService } from './domain/salonDetails/salonDetails.service';
 import { createInboxService } from './domain/notifications/inbox.service';
 import { createBookingJobs } from './jobs/bookingJobs';
+import { createPeriodicJobs } from './jobs/periodicJobs';
 import { createBullJobScheduler } from './jobs/bullmq';
 import type { JobHandler, JobScheduler } from './jobs/jobs';
 import { createFavoritesService } from './domain/favorites/favorites.service';
@@ -152,6 +153,8 @@ interface JobRuntime {
   readonly handlers: Record<string, JobHandler>;
   /** Rebuilds queued jobs from the database; run once the worker is up. */
   readonly reconcilers: (() => Promise<number>)[];
+  /** Registers recurring schedules once the worker is up. */
+  readonly schedules: (() => Promise<void>)[];
 }
 
 export interface RunningServer {
@@ -553,6 +556,21 @@ const buildServices = (
     providerName: config.providers.payments,
     logger,
   });
+  // Daily and periodic chores: subscriptions, account purge, refund retries, reconciliations.
+  const periodic = createPeriodicJobs({
+    scheduler: jobs.scheduler,
+    settings,
+    subscriptions: subscriptionsService,
+    accounts: accountLifecycle,
+    refunds: fullRefunds,
+    payments,
+    ledger,
+    bookingJobs,
+    notifySubscription: producers.subscriptionAlert,
+    logger,
+  });
+  Object.assign(jobs.handlers, periodic.handlers);
+  jobs.schedules.push(() => periodic.register());
   const bookingCancel = createBookingCancelService({
     hook: bookingChanges,
     bookings: bookingsRepository,
@@ -828,7 +846,7 @@ const main = async (): Promise<void> => {
     const connected = redis;
     const relay: SocketRelay = {};
     const scheduler = createBullJobScheduler({ redis: connected, logger });
-    const jobs: JobRuntime = { scheduler, handlers: {}, reconcilers: [] };
+    const jobs: JobRuntime = { scheduler, handlers: {}, reconcilers: [], schedules: [] };
     const services = buildServices(config, logger, connected, relay, jobs);
     const running = await startServer(config, logger, {
       proc: process,
@@ -849,6 +867,13 @@ const main = async (): Promise<void> => {
     if (running.sockets !== undefined) relay.current = running.sockets;
     // The worker starts after the API is up; jobs missed while the server was down are rebuilt first.
     await scheduler.work(jobs.handlers);
+    for (const schedule of jobs.schedules) {
+      try {
+        await schedule();
+      } catch (error) {
+        logger.error({ err: error }, 'recurring jobs could not be registered');
+      }
+    }
     for (const reconcile of jobs.reconcilers) {
       try {
         logger.info({ rebuilt: await reconcile() }, 'background jobs reconciled');
