@@ -9,6 +9,8 @@ import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
+import type { BannerRaw } from '../models/banner.model';
+import type { BannersService } from '../domain/banners';
 import type { AdminContentServices } from '../domain/adminCrud/content';
 import type { AdminCrudService } from '../domain/adminCrud/adminCrud.service';
 import type { OtpGate } from '../domain/otp/otpGate.service';
@@ -23,6 +25,8 @@ export interface ApiServices {
   readonly adminGuard?: RequestHandler;
   readonly adminLocations?: AdminLocationServices;
   readonly adminContent?: AdminContentServices;
+  readonly banners?: BannersService;
+  readonly adminBanners?: AdminCrudService<BannerRaw>;
   readonly content?: { readonly customer: ContentService; readonly merchant: ContentService };
   readonly merchantAuth?: MerchantAuthService;
   readonly installations?: {
@@ -129,3 +133,6 @@ export const unavailableAdminContent: AdminContentServices = {
   appVersions: unavailableCrud,
   maintenance: unavailableCrud,
 };
+
+export const unavailableBannersService: BannersService = { live: unavailable };
+export const unavailableAdminBanners: AdminCrudService<BannerRaw> = unavailableCrud;

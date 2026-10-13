@@ -631,6 +631,42 @@
           }
         }
       ]
+    },
+    {
+      "name": "Banners",
+      "item": [
+        {
+          "name": "Live carousel banners for the selected gender tab",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/banners",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "banners"
+              ],
+              "query": [
+                {
+                  "key": "gender",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            },
+            "description": "Public. Active banners of that audience (or both) inside their date window, in display order."
+          }
+        }
+      ]
     }
   ],
   "variable": [

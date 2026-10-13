@@ -30,6 +30,8 @@ import {
   registerCustomerContentDocs,
   registerMerchantContentDocs,
 } from '../modules/shared/content/content.openapi';
+import { registerAdminBannerDocs } from '../modules/admin/banners/banners.openapi';
+import { registerCustomerBannerDocs } from '../modules/customer/banners/banners.openapi';
 import { registerAdminContentDocs } from '../modules/admin/content/content.openapi';
 import { registerAdminLocationDocs } from '../modules/admin/locations/locations.openapi';
 import { registerHealthDocs } from '../routes/health.openapi';
@@ -44,9 +46,9 @@ type Registrar = (registry: OpenAPIRegistry) => void;
  */
 const REGISTRARS: Readonly<Record<DocName, readonly Registrar[]>> = {
   common: [registerHealthDocs],
-  customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs],
+  customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs, registerCustomerBannerDocs],
   merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs],
-  admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs],
+  admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs],
 };
 
 const buildDocument = (name: DocName): ReturnType<OpenApiGeneratorV31['generateDocument']> => {
