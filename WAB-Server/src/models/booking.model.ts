@@ -24,6 +24,15 @@ export interface StatusHistoryEntry {
   at: Date;
 }
 
+/** Why a salon rejected or cancelled (BUSINESS_DOMAIN.md §3.5 `rejection` / `cancellation`). */
+export interface BookingDecision {
+  by?: ActorType;
+  actorId?: Types.ObjectId;
+  reasonCode: string;
+  reasonText?: string;
+  at: Date;
+}
+
 /** All amounts are integer fils. */
 export interface BookingMoney {
   total: number;
@@ -53,6 +62,8 @@ export interface BookingRaw {
   policySnapshot: SalonPolicy;
   /** A pending request is cancelled automatically when this passes. */
   respondBy: Date;
+  rejection?: BookingDecision;
+  cancellation?: BookingDecision;
   completedAt?: Date;
   noShowAt?: Date;
   ratingPromptSent: boolean;
@@ -82,6 +93,17 @@ const moneySchema = new Schema<BookingMoney>(
   { _id: false },
 );
 
+const decisionSchema = new Schema<BookingDecision>(
+  {
+    by: { type: String, enum: ACTOR_TYPES },
+    actorId: { type: Schema.Types.ObjectId },
+    reasonCode: { type: String, required: true },
+    reasonText: { type: String },
+    at: { type: Date, required: true },
+  },
+  { _id: false },
+);
+
 const bookingSchema = new Schema<BookingRaw>(
   {
     referenceNumber: { type: String, required: true },
@@ -100,6 +122,8 @@ const bookingSchema = new Schema<BookingRaw>(
     refundStatus: { type: String, enum: BOOKING_REFUND_STATUSES, required: true, default: 'NONE' },
     policySnapshot: { type: policySchema, required: true },
     respondBy: { type: Date, required: true },
+    rejection: { type: decisionSchema },
+    cancellation: { type: decisionSchema },
     completedAt: { type: Date },
     noShowAt: { type: Date },
     ratingPromptSent: { type: Boolean, required: true, default: false },

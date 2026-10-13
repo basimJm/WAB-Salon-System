@@ -1,8 +1,10 @@
 import type { Model } from 'mongoose';
-import { SLOT_HOLDING_STATUSES } from '../constants/enums';
+import { SLOT_HOLDING_STATUSES, type BookingStatus } from '../constants/enums';
 import type { BookingBusyLookup } from '../domain/availability/availability.service';
 import type { BookingLookup, UpcomingBooking } from '../domain/salons/conflicts';
-import { BookingModel, type BookingRaw } from '../models/booking.model';
+import { BookingModel, type BookingRaw, type StatusHistoryEntry } from '../models/booking.model';
+import { isObjectIdString, toObjectId } from '../utils/database/ids';
+import { toEntity, type Entity } from '../utils/database/plain';
 import { BaseRepository } from './base.repository';
 
 /** Bookings that occupy staff time: PENDING and APPROVED (BUSINESS_DOMAIN.md §5.6). */
@@ -39,11 +41,35 @@ export class BookingsRepository
   }
 
   /** Does this staff member already have a live booking overlapping `[start, end)`? */
-  overlapping(staffId: string, start: Date, end: Date): Promise<boolean> {
+  overlapping(staffId: string, start: Date, end: Date, exceptId?: string): Promise<boolean> {
     return this.exists({
+      ...(exceptId !== undefined && isObjectIdString(exceptId)
+        ? { _id: { $ne: toObjectId(exceptId) } }
+        : {}),
       status: holdingStatus,
       persons: { $elemMatch: { staffId, start: { $lt: end }, end: { $gt: start } } },
     });
+  }
+
+  /**
+   * Moves a booking from `from` to a new status in one atomic step and appends the history entry;
+   * `null` when it is no longer in `from` (someone else decided first) or does not exist.
+   */
+  async transition(
+    id: string,
+    from: BookingStatus,
+    change: { set: Record<string, unknown>; history: StatusHistoryEntry },
+  ): Promise<Entity<BookingRaw> | null> {
+    if (!isObjectIdString(id)) return null;
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: id, status: from },
+        { $set: change.set, $push: { statusHistory: change.history } },
+        { new: true },
+      )
+      .lean()
+      .exec();
+    return updated === null ? null : toEntity<BookingRaw>(updated);
   }
 
   /** Live bookings of a salon that have not ended yet, for the schedule-conflict checks. */

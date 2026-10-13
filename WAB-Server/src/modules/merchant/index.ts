@@ -22,6 +22,7 @@ import { createMerchantInstallationsRouter } from '../shared/installations';
 import {
   unavailableCatalogRequests,
   unavailableCatalogService,
+  unavailableBookingActions,
   unavailableGallery,
   unavailableHours,
   unavailableSalonServices,
@@ -46,6 +47,8 @@ import { createMerchantStaffRouter } from './team/staff.routes';
 import { createMerchantTeamRouter } from './team/team.routes';
 import { createMerchantServicesRouter } from './services/services.routes';
 import { createMerchantHoursRouter } from './hours/hours.routes';
+import { createMerchantBookingsRouter } from './bookings/bookings.routes';
+import { MERCHANT_BOOKING_ROUTES } from '../../constants/bookings';
 import { createMerchantGalleryRouter } from './gallery/gallery.routes';
 import { createMerchantProfileRouter } from './salon/profile.routes';
 import { createMerchantSalonRouter } from './salon/salon.routes';
@@ -93,6 +96,14 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     ),
   );
   mount(router, UPLOAD_ROUTES.base, createMerchantUploadsRouter(services));
+  mount(
+    router,
+    MERCHANT_BOOKING_ROUTES.base,
+    createMerchantBookingsRouter(
+      services.bookingActions ?? unavailableBookingActions,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
   mount(
     router,
     MERCHANT_GALLERY_ROUTES.base,

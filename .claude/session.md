@@ -1241,6 +1241,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - pure; SRV-073 persists transitions atomically (`transition` by expected status) and fires refunds/notifications.
 
+### T-084 — SRV-073 Merchant booking actions
+- Project: `WAB-Server/` (`src/domain/bookings/bookingActions.service.ts`, `src/modules/merchant/bookings/*`, `BookingsRepository.transition`, `MembersRepository.incrementCustomers`, booking `rejection`/`cancellation`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §5.7, §3.5; BE-35):
+  - [x] approve (BOOKINGS_RESPOND) re-checks the staff under per-staff locks (409 `SLOT_TAKEN`), reject needs `reasonCode`, complete/no-show/cancel need BOOKINGS_OPERATE and the clock rules of the state machine
+  - [x] persisted atomically by expected status with a pushed `statusHistory` entry; a lost race is 422 `ALREADY_HANDLED`; other salons' bookings are 404
+  - [x] complete: paymentStatus PAID, `completedAt`, staff `customersCount` +1; no-show: `noShowAt`
+- Tests: `tests/bookingActions.test.ts` (15, real Redis); full gate green, 2042 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - refunds, notifications, sockets and jobs are not fired yet (`BookingChangedHook` no-op).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

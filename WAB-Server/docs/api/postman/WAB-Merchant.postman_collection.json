@@ -2320,6 +2320,252 @@
           }
         }
       ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Approve a pending booking (staff are re-checked: 409 SLOT_TAKEN if no longer free)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/bookings/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "bookings",
+                ":id",
+                "approve"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Needs the BOOKINGS_RESPOND permission (owner always). A booking that already left the expected status answers 422 ALREADY_HANDLED; a move the state machine forbids answers 422 INVALID_TRANSITION."
+          }
+        },
+        {
+          "name": "Reject a pending booking (reason code required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/bookings/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "bookings",
+                ":id",
+                "reject"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Needs the BOOKINGS_RESPOND permission (owner always). A booking that already left the expected status answers 422 ALREADY_HANDLED; a move the state machine forbids answers 422 INVALID_TRANSITION.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"string\",\n  \"reasonText\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mark an approved booking completed (not before its start time)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/bookings/:id/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "bookings",
+                ":id",
+                "complete"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Needs the BOOKINGS_OPERATE permission (owner always). A booking that already left the expected status answers 422 ALREADY_HANDLED; a move the state machine forbids answers 422 INVALID_TRANSITION."
+          }
+        },
+        {
+          "name": "Mark an approved booking as a no-show (not before its start time)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/bookings/:id/no-show",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "bookings",
+                ":id",
+                "no-show"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Needs the BOOKINGS_OPERATE permission (owner always). A booking that already left the expected status answers 422 ALREADY_HANDLED; a move the state machine forbids answers 422 INVALID_TRANSITION."
+          }
+        },
+        {
+          "name": "Cancel an approved booking before its start time (reason code required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/bookings/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "bookings",
+                ":id",
+                "cancel"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Needs the BOOKINGS_OPERATE permission (owner always). A booking that already left the expected status answers 422 ALREADY_HANDLED; a move the state machine forbids answers 422 INVALID_TRANSITION.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"string\",\n  \"reasonText\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

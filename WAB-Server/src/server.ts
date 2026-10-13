@@ -34,6 +34,7 @@ import { createFavoritesService } from './domain/favorites/favorites.service';
 import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
 import { createCustomerProfileService } from './domain/customers/customerProfile.service';
+import { createBookingActionsService } from './domain/bookings/bookingActions.service';
 import { createBookingCreationService } from './domain/bookings/bookingCreation.service';
 import { BookingsRepository } from './repositories/bookings.repository';
 import { createBookingDraftService } from './domain/bookings/bookingDraft.service';
@@ -329,6 +330,12 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     customers: new CustomersRepository(),
     settings,
   });
+  const bookingActions = createBookingActionsService({
+    redis,
+    bookings: bookingsRepository,
+    members: new MembersRepository(),
+    settings,
+  });
   const favoritesRepository = new FavoritesRepository();
   const reviewsService = createReviewsService({
     reviews: new ReviewsRepository(),
@@ -368,6 +375,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     availability,
     bookingDrafts,
     bookings: bookingCreation,
+    bookingActions,
     customerProfile,
     salonDetails: createSalonDetailsService({
       favorites: favoritesRepository,
