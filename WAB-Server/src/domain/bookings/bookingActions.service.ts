@@ -13,6 +13,7 @@ import { withLocks } from '../../utils/redis/lock';
 import { localDateOf } from '../../utils/time';
 import type { SettingsService } from '../settings';
 import { toSummary, type BookingSummary } from './bookingCreation.service';
+import { fullRefund, noShowRefund } from './refunds';
 import { applyTransition } from './stateMachine';
 
 export interface MemberActor {
@@ -74,6 +75,7 @@ export const createBookingActionsService = (deps: BookingActionsDeps): BookingAc
       decision?: Decision;
       extra?: (at: Date, entry: StatusHistoryEntry) => Record<string, unknown>;
       afterwards?: (booking: Entity<BookingRaw>) => Promise<void>;
+      refundOf?: (booking: Entity<BookingRaw>) => number;
     } = {},
   ): Promise<BookingSummary> => {
     const booking = await bookings.findById(target.bookingId);
@@ -106,7 +108,12 @@ export const createBookingActionsService = (deps: BookingActionsDeps): BookingAc
     });
     if (updated === null) throw new BusinessRuleError({ code: ERROR_CODES.ALREADY_HANDLED });
     await options.afterwards?.(updated);
-    await hook.changed(updated, booking.status);
+    const refundDue = options.refundOf?.(booking);
+    await hook.changed(
+      updated,
+      booking.status,
+      refundDue === undefined ? undefined : { refundDue },
+    );
     return toSummary(updated);
   };
 
@@ -149,12 +156,14 @@ export const createBookingActionsService = (deps: BookingActionsDeps): BookingAc
     reject(target) {
       return move(target, 'REJECTED', {
         decision: target,
+        refundOf: fullRefund,
         extra: (at) => ({ rejection: decisionRecord(target, target.member, at) }),
       });
     },
     cancel(target) {
       return move(target, 'CANCELLED_BY_SALON', {
         decision: target,
+        refundOf: fullRefund,
         extra: (at) => ({ cancellation: decisionRecord(target, target.member, at) }),
       });
     },
@@ -168,7 +177,15 @@ export const createBookingActionsService = (deps: BookingActionsDeps): BookingAc
       });
     },
     noShow(target) {
-      return move(target, 'NO_SHOW', { extra: (at) => ({ noShowAt: at }) });
+      return move(target, 'NO_SHOW', {
+        extra: (at) => ({ noShowAt: at }),
+        refundOf: (b) =>
+          noShowRefund({
+            paymentMethod: b.paymentMethod,
+            money: b.money,
+            policy: b.policySnapshot,
+          }),
+      });
     },
   };
 };

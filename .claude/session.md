@@ -1265,6 +1265,17 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - refund execution/ledger is SRV-086; notifications/sockets later.
 
+### T-086 — SRV-075 No-show refund calculator
+- Project: `WAB-Server/` (`src/domain/bookings/{refunds,bookingActions.service}.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §5.9):
+  - [x] DEPOSIT: KEEP 0 / REFUND deposit; FULL: KEEP 0 / REFUND_MINUS_DEPOSIT total − deposit / REFUND_FULL total; pay on arrival and unpaid 0; capped at the paid amount
+  - [x] merchant no-show passes the amount to the hook; reject and salon cancel pass the full refund
+- Tests: `tests/bookingCancel.test.ts` (+4), `tests/bookingActions.test.ts` (+1); full gate green, 2056 tests. API docs: no change.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - execution of refunds is SRV-086.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

@@ -17,6 +17,7 @@ const HOUR = 3_600_000;
 let clock = new Date('2026-10-12T08:00:00Z');
 const m = { bookings: createFakeModel(), members: createFakeModel() };
 const changes: string[] = [];
+const refunds: (number | undefined)[] = [];
 let testRedis: TestRedis;
 let redis: Redis;
 let app: ReturnType<typeof createApp>;
@@ -51,8 +52,9 @@ beforeAll(async () => {
         members: new MembersRepository(m.members.model as never),
         settings,
         hook: {
-          changed: (booking, previous) => {
+          changed: (booking, previous, info) => {
             changes.push(`${previous}>${booking.status}`);
+            refunds.push(info?.refundDue);
             return Promise.resolve();
           },
         },
@@ -70,6 +72,7 @@ beforeEach(() => {
   m.bookings.docs.length = 0;
   m.members.docs.length = 0;
   changes.length = 0;
+  refunds.length = 0;
   clock = new Date('2026-10-12T08:00:00Z');
   m.members.docs.push({
     _id: staffId,
@@ -130,6 +133,7 @@ describe('approve', () => {
     expect(doc['status']).toBe('APPROVED');
     expect((doc['statusHistory'] as unknown[]).length).toBe(2);
     expect(changes).toEqual(['PENDING>APPROVED']);
+    expect(refunds).toEqual([undefined]);
   });
   it('needs BOOKINGS_RESPOND', async () => {
     const b = seed();
@@ -182,6 +186,7 @@ describe('reject and salon cancel', () => {
     const doc = stored(b);
     expect(doc['status']).toBe('REJECTED');
     expect(doc['rejection']).toMatchObject({ reasonCode: 'FULLY_BOOKED', by: 'MEMBER' });
+    expect(refunds).toEqual([0]);
   });
   it('requires a valid reason code', async () => {
     const b = seed();
@@ -233,6 +238,26 @@ describe('complete and no-show', () => {
     expect(stored(b)['status']).toBe('NO_SHOW');
     expect(stored(b)['noShowAt']).toEqual(clock);
     expect((m.members.docs[0]?.['staff'] as { customersCount: number }).customersCount).toBe(4);
+  });
+  it('hands the §5.9 no-show refund to the hook', async () => {
+    const b = seed(
+      {
+        status: 'APPROVED',
+        paymentMethod: 'DEPOSIT',
+        money: {
+          total: 10_000,
+          dueOnline: 2_000,
+          paidOnline: 2_000,
+          remaining: 8_000,
+          refunded: 0,
+        },
+        policySnapshot: { cancellationWindowHours: 2, noShowDeposit: 'REFUND' },
+      },
+      staffId,
+      past(),
+    );
+    await post(`${b}/no-show`, 'BOOKINGS_OPERATE');
+    expect(refunds).toEqual([2_000]);
   });
   it('needs BOOKINGS_OPERATE', async () => {
     const b = seed({ status: 'APPROVED' }, staffId, past());
