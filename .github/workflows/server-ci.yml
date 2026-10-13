@@ -1,4 +1,5 @@
 # WAB-Server CI (SRV-010). Runs only when the server (or this workflow) changes.
+# By owner decision it is the server build check only: no dependency audit, no secret scan.
 name: Server CI
 
 on:
@@ -61,25 +62,3 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
-      # Production dependencies only: dev-only advisories (test tooling) do not ship.
-      - name: Dependency audit (production)
-        run: npm audit --omit=dev --audit-level=high
-
-  secret-scan:
-    name: Secret scan
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    # gitleaks lists the pull request's commits to scan only the new ones.
-    permissions:
-      contents: read
-      pull-requests: read
-    defaults:
-      run:
-        working-directory: .
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

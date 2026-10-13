@@ -29,4 +29,7 @@ export const REVOKE_REASONS = {
   logout: 'LOGOUT',
   logoutAll: 'LOGOUT_ALL',
   reuseDetected: 'REUSE_DETECTED',
+  accountBlocked: 'ACCOUNT_BLOCKED',
+  accountDeletion: 'ACCOUNT_DELETION',
+  memberDeactivated: 'MEMBER_DEACTIVATED',
 } as const;

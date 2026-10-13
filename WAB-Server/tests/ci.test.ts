@@ -61,8 +61,10 @@ describe('server CI workflow (SRV-010)', () => {
     }
   });
 
-  it('audits production dependencies and fails on high severity', () => {
-    expect(commands(workflow.jobs['verify'])).toContain('npm audit --omit=dev --audit-level=high');
+  it('is the server build check only: no dependency audit and no secret scan', () => {
+    expect(Object.keys(workflow.jobs)).toEqual(['verify']);
+    expect(commands(workflow.jobs['verify']).some((c) => c.includes('npm audit'))).toBe(false);
+    expect(text).not.toContain('gitleaks');
   });
 
   it('provides a real Redis to the tests through REDIS_TEST_URL', () => {
@@ -85,18 +87,7 @@ describe('server CI workflow (SRV-010)', () => {
     expect(engines).toBe('>=22');
   });
 
-  it('scans the full history for secrets', () => {
-    const steps = workflow.jobs['secret-scan']?.steps ?? [];
-    expect(steps.some((s) => s.uses?.startsWith('gitleaks/gitleaks-action'))).toBe(true);
-    const checkout = steps.find((s) => s.uses?.startsWith('actions/checkout'));
-    expect(checkout?.with?.['fetch-depth']).toBe(0);
-  });
-
-  it('lets the secret scan read pull request commits and nothing more', () => {
-    expect(workflow.jobs['secret-scan']?.permissions).toEqual({
-      contents: 'read',
-      'pull-requests': 'read',
-    });
+  it('keeps the default read-only token on the build job', () => {
     expect(workflow.jobs['verify']?.permissions).toBeUndefined();
   });
 

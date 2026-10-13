@@ -670,7 +670,7 @@
 ### T-042 — SRV-031 Admin email OTP (2FA) and the two-step login routes
 - Project: `WAB-Server/` (`src/domain/auth/adminLogin.service.ts`, `src/domain/auth/adminAuth.service.ts`, `src/modules/admin/auth/*`, `src/constants/adminAuth.ts`, `src/locales/*`, `src/server.ts`, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #47 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #49 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-02, NFR-01 2FA + lockout; BUSINESS_DOMAIN §3.1 `admin:otp:{adminId}` hashed code TTL 300; Admin PRD §4 + decision "Email OTP"):
   - [x] `POST /admin/v1/auth/login` {email, password}: right password emails a numeric code (`otp.length`) and returns `{otpRequired, expiresAt, resendAfterSeconds}` WITHOUT tokens; wrong password / unknown email / locked account send nothing
   - [x] Code stored only as an HMAC-SHA256 (keyed with the server secret) for 300 s; a second `login` inside the resend countdown (`otp.resendAfterSec`) mails nothing new and the first code still works; later a new code replaces the old; a failed email removes the code and the cooldown so the admin can retry
@@ -681,6 +681,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) a wrong code is counted by the password lockout (not a separate OTP counter) so one limit covers both factors; (2) "new device" is approximated by "new IP address" because the admin record only keeps `lastLoginIp`; (3) the email is plain text for now (no HTML template). NOT sent through real SMTP: `NOTIFIER_PROVIDER=real` still throws until `wab-notifications` exists.
 - Next: SRV-032 (account lifecycle).
+
+### T-043 — SRV-032 Account lifecycle: blocking, deletion grace period, purge, member deactivation
+- Project: `WAB-Server/` (`src/domain/auth/accountLifecycle.service.ts`, `src/constants/accountLifecycle.ts`, `src/repositories/identity.repository.ts`, `.github/workflows/server-ci.yml` + `tests/ci.test.ts` (build-only CI, requested by the user; the commit missed PR #49 because it was merged first))
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #49 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-04, NFR-01, CLAUDE.md §5.12 admin actions with reason + audit; BUSINESS_DOMAIN §3.1 `refreshTokens` "Revoke all on logout-all, block, member deactivation, account deletion", §5.15 account deletion, §10 `account.deletionGraceDays`=30, §9 job `accounts:purge`):
+  - [x] `blockCustomer` (admin): reason + audit entry (`CUSTOMER_BLOCK`, before/after, ip, user agent), status BLOCKED with reason/time, every session revoked; blocking twice is a no-op (no second audit entry); a deleted account is refused; works on a customer waiting for deletion; `unblockCustomer` returns ACTIVE and drops the block/deletion fields (audited, 409 if not blocked)
+  - [x] `requestCustomerDeletion`: only an ACTIVE customer; DELETION_PENDING with `deletionScheduledAt` = now + `account.deletionGraceDays`; all sessions revoked, devices detached (push stops); atomic status transition (a race has one winner); login within the grace period restores the account (SRV-028)
+  - [x] `purgeDueCustomers`: anonymizes every DELETION_PENDING customer whose date has passed (exact boundary), in batches of 100, idempotent: name, email, phone become non-identifying (the phone value `deleted:<id>` can never match a real number and frees the number), avatar removed from storage (failure only logged), devices and sessions ended; bookings/transactions keep the (now anonymous) customer; blocked accounts are never purged
+  - [x] `deactivateMember` / `reactivateMember`: scoped to the salon (another salon's member = 404), the OWNER can never be deactivated (422 `LAST_OWNER`), sessions revoked and devices detached on deactivation, repeat is harmless
+  - [x] CI is now the single server build job (`Lint, types, tests, build`): audit and secret scan removed on request; `tests/ci.test.ts` updated
+- Tests: `cd WAB-Server && npm test` - 1387 pass (46 suites); format:check/lint/typecheck/build green; `npm audit --omit=dev` 0 (run locally since CI no longer does); `npm run docs` no diff. `tests/accountLifecycle.test.ts` (20).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) the audit entry is written AFTER the change (no transaction support in the test setup); if the audit write fails the call errors although the account is already blocked, and a repeat call is a no-op that writes no entry: a Mongo transaction (SRV-070 introduces them) should wrap block/unblock then; (2) a blocked customer who had asked for deletion is never purged until unblocked (unblocking cancels the deletion request); (3) the daily 03:00 Amman `accounts:purge` trigger, the admin block endpoint and the customer delete-account endpoint are separate tasks; reviews, favorites and notifications of a purged customer are handled when those collections exist. API docs: no change.
+- Next: SRV-033 (installations register/update).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
