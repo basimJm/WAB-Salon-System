@@ -1,13 +1,23 @@
 import { Router, type Request, type RequestHandler, type Response } from 'express';
 import type { z } from 'zod';
-import { MERCHANT_BOOKING_ROUTES } from '../../../constants/bookings';
+import {
+  MERCHANT_BOOKING_QUERY_ROUTES,
+  MERCHANT_BOOKING_ROUTES,
+} from '../../../constants/bookings';
+import type { BookingQueriesService } from '../../../domain/bookings/bookingQueries.service';
 import type { BookingReassignService } from '../../../domain/bookings/bookingReassign.service';
 import type { BookingActionsService } from '../../../domain/bookings/bookingActions.service';
 import { requirePermission } from '../../../middlewares/permission';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
-import { sendSuccess } from '../../../utils/response/successResponse';
+import { sendPaginated, sendSuccess } from '../../../utils/response/successResponse';
 import { unavailableBookingReassign } from '../../services';
+import {
+  bookingIdParams,
+  calendarQuery,
+  merchantBookingsQuery,
+} from '../../shared/bookings/bookingQuery.schemas';
+import { unavailableBookingQueries } from '../../services';
 import { presentSummary } from '../../customer/bookings/bookings.routes';
 import { bookingParams, decisionBody, reassignBody } from './bookings.validation';
 
@@ -16,6 +26,7 @@ export const createMerchantBookingsRouter = (
   service: BookingActionsService,
   guard: readonly RequestHandler[],
   reassign?: BookingReassignService,
+  queries?: BookingQueriesService,
 ): Router => {
   const router = Router();
   const routes = MERCHANT_BOOKING_ROUTES;
@@ -36,6 +47,63 @@ export const createMerchantBookingsRouter = (
   };
   const body = (req: Request): z.infer<typeof decisionBody> =>
     (req.validated as { body: z.infer<typeof decisionBody> }).body;
+
+  const reads = queries ?? unavailableBookingQueries;
+  const viewer = requirePermission(['BOOKINGS_VIEW_ALL', 'BOOKINGS_VIEW_OWN'], 'any');
+  const memberOf = (req: Request): { id: string; permissions: readonly string[] } => ({
+    id: req.member?.id ?? '',
+    permissions: req.member?.permissions ?? [],
+  });
+  router.get(
+    '/',
+    viewer,
+    validate({ query: merchantBookingsQuery }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { page, pageSize, staffId, status, ...query } = (
+        req.validated as { query: z.infer<typeof merchantBookingsQuery> }
+      ).query;
+      const result = await reads.list({
+        audience: { kind: 'MERCHANT', salonId: req.member?.salonId ?? '', member: memberOf(req) },
+        query: { ...query, staffIds: staffId, statuses: status },
+        params: { page, pageSize },
+        language: req.language,
+      });
+      sendPaginated(req, res, result.items, { page, pageSize }, result.total);
+    }),
+  );
+  router.get(
+    MERCHANT_BOOKING_QUERY_ROUTES.calendar,
+    viewer,
+    validate({ query: calendarQuery }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { from, to, staffId } = (req.validated as { query: z.infer<typeof calendarQuery> })
+        .query;
+      sendSuccess(req, res, {
+        data: await reads.calendar({
+          salonId: req.member?.salonId ?? '',
+          member: memberOf(req),
+          from,
+          to,
+          staffIds: staffId,
+        }),
+      });
+    }),
+  );
+  router.get(
+    MERCHANT_BOOKING_QUERY_ROUTES.byId,
+    viewer,
+    validate({ params: bookingIdParams }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { id } = (req.validated as { params: { id: string } }).params;
+      sendSuccess(req, res, {
+        data: await reads.detail({
+          audience: { kind: 'MERCHANT', salonId: req.member?.salonId ?? '', member: memberOf(req) },
+          bookingId: id,
+          language: req.language,
+        }),
+      });
+    }),
+  );
 
   const simple = (
     path: string,
