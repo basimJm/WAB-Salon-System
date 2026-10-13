@@ -45,4 +45,16 @@ export class NotificationsRepository extends BaseRepository<NotificationRaw> {
       .exec();
     return result.modifiedCount;
   }
+
+  /** How many recipients got the occurrence `dedupeKey` of `event`, and how many of them opened it. */
+  async countOccurrence(
+    event: string,
+    dedupeKey: string,
+  ): Promise<{ total: number; read: number }> {
+    const [total, read] = await Promise.all([
+      this.model.countDocuments({ event, dedupeKey }).exec(),
+      this.model.countDocuments({ event, dedupeKey, readAt: { $exists: true } }).exec(),
+    ]);
+    return { total, read };
+  }
 }

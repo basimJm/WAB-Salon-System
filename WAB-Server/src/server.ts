@@ -35,6 +35,9 @@ import { createBookingJobs } from './jobs/bookingJobs';
 import { createPeriodicJobs } from './jobs/periodicJobs';
 import { createBullJobScheduler } from './jobs/bullmq';
 import type { JobHandler, JobScheduler } from './jobs/jobs';
+import { CAMPAIGN_JOB_NAME } from './constants/campaigns';
+import { createCampaignsService } from './domain/campaigns/campaigns.service';
+import { CampaignsRepository } from './repositories/campaigns.repository';
 import { createFavoritesService } from './domain/favorites/favorites.service';
 import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
@@ -571,6 +574,21 @@ const buildServices = (
   });
   Object.assign(jobs.handlers, periodic.handlers);
   jobs.schedules.push(() => periodic.register());
+  const campaigns = createCampaignsService({
+    campaigns: new CampaignsRepository(),
+    customers: new CustomersRepository(),
+    members: new MembersRepository(),
+    installations: new InstallationsRepository(),
+    salons: new SalonsRepository(),
+    notifications: notificationService,
+    notificationsRepository,
+    notifier: providers.notifier,
+    scheduler: jobs.scheduler,
+    audit,
+    logger,
+  });
+  jobs.handlers[CAMPAIGN_JOB_NAME] = (job) => campaigns.send(String(job.data['campaignId']));
+  jobs.reconcilers.push(() => campaigns.reconcile());
   const bookingCancel = createBookingCancelService({
     hook: bookingChanges,
     bookings: bookingsRepository,
@@ -752,6 +770,7 @@ const buildServices = (
     },
     salonState,
     adminPlacements: placements,
+    adminCampaigns: campaigns,
     adminReviews: createAdminReviewsService({
       reviews: new ReviewsRepository(),
       salons: new SalonsRepository(),

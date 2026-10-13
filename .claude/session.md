@@ -1673,6 +1673,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M10), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) an Android device receives no system-drawn notification; the merchant app must show the heads-up notification itself from the data message (a notification message would bypass the app in the background); (2) the "handled by another member" dismissal for background overlays (silent data push) is not sent; open apps get the socket event; (3) channel id, category and sound names are constants the apps must match. API docs: no change.
 
+### T-109 — SRV-099 Promotional push campaigns
+
+- Project: `WAB-Server/` (`src/domain/campaigns`, `src/models/pushCampaign.model.ts`, `src/repositories/campaigns.repository.ts`, `src/modules/admin/campaigns`, `src/constants/campaigns.ts`, `NotificationService.deliverCampaign`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BE-55; BUSINESS_DOMAIN §3.6 pushCampaigns; Admin PRD A25; CLAUDE.md §5.12):
+  - [x] Compose (ar/en, app, audience by kind with required fields, link, now/scheduled <= 1 year), audience-size preview, list/detail, cancel before sending; reason + audit
+  - [x] Delivery as a resumable job, once per recipient: in-app PROMOTION copy + push in the recipient's language (push switch respected); guests push only; per-batch of 200
+  - [x] Stats: targeted/sent/failed stored, opened live from read copies; start-up reconcile
+- Tests: `tests/campaigns.test.ts` (12); full gate green; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: `status`/`cancelledAt` are extensions; `delivered` = `sent` until FCM receipts; saved analytics segments not built; guest tracking of opens impossible; a resumed run under-counts `sent`. Not run against MongoDB.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

@@ -1,4 +1,5 @@
 import type { Language, NotificationRecipientType, Platform } from '../../constants/enums';
+import { CAMPAIGN_EVENT } from '../../constants/campaigns';
 import { LANGUAGES } from '../../constants/i18n';
 import {
   NOTIFICATION_EVENTS,
@@ -46,6 +47,23 @@ export interface NotifyInput {
 export interface NotificationService {
   /** Delivers one event to every audience it defines. Never throws: a failed delivery is logged. */
   notify(event: NotificationEvent, input: NotifyInput): Promise<void>;
+  /**
+   * One promotional message to one account: the in-app copy (PROMOTION) plus the push, both once per
+   * `key`. A repeated key stores and sends nothing (`stored: false`).
+   */
+  deliverCampaign(input: {
+    key: string;
+    account: {
+      type: NotificationRecipientType;
+      id: string;
+      language: Language;
+      pushAllowed: boolean;
+      devices: readonly { token: string; platform: Platform }[];
+    };
+    title: NotificationText;
+    body: NotificationText;
+    data: NotifyInput['data'];
+  }): Promise<{ stored: boolean; sent: boolean }>;
   /** Unread notifications of an account: the bell badge. */
   unreadCount(recipientType: NotificationRecipientType, recipientId: string): Promise<number>;
 }
@@ -236,7 +254,6 @@ export const createNotificationService = (deps: NotificationDeps): NotificationS
     who: Audience['who'],
     input: NotifyInput,
   ): Promise<void> => {
-    const definition = NOTIFICATION_EVENTS[event];
     const render = (part: 'title' | 'body'): NotificationText => {
       const key = `notifications.${event}.${who}.${part}`;
       const [first, second] = LANGUAGES;
@@ -245,15 +262,25 @@ export const createNotificationService = (deps: NotificationDeps): NotificationS
         [second]: text(key, input.params, second),
       };
     };
-    const title = render('title');
-    const body = render('body');
+    await storeAndPush(recipient, event, render('title'), render('body'), input);
+  };
+
+  /** Stores the in-app copy once per occurrence, pushes it, and updates the live badge. */
+  const storeAndPush = async (
+    recipient: Recipient,
+    event: NotificationEvent,
+    title: NotificationText,
+    body: NotificationText,
+    input: NotifyInput,
+  ): Promise<{ stored: boolean; sent: boolean }> => {
+    const definition = NOTIFICATION_EVENTS[event];
     // The same occurrence was delivered before (a retried job, a repeated hook): nothing more to do.
     const already = await notifications.findOne({
       recipientType: recipient.type,
       recipientId: recipient.id,
       dedupeKey: input.key,
     });
-    if (already !== null) return;
+    if (already !== null) return { stored: false, sent: false };
     let stored: NotificationRaw & { id: string };
     try {
       stored = (await notifications.create({
@@ -269,7 +296,7 @@ export const createNotificationService = (deps: NotificationDeps): NotificationS
       })) as never;
     } catch (error) {
       // The same occurrence was delivered before (a retried job): nothing more to do.
-      if (isDuplicateKeyError(error)) return;
+      if (isDuplicateKeyError(error)) return { stored: false, sent: false };
       throw error;
     }
     const outcome = await push(recipient, event, stored.id, title, body, input);
@@ -280,9 +307,29 @@ export const createNotificationService = (deps: NotificationDeps): NotificationS
       { scope, id: recipient.id },
       await notifications.countUnread(recipient.type, recipient.id),
     );
+    return { stored: true, sent: outcome.sent };
   };
 
   return {
+    async deliverCampaign(input) {
+      const { account, title, body } = input;
+      return storeAndPush(
+        {
+          type: account.type,
+          id: account.id,
+          language: account.language,
+          app: account.type === 'CUSTOMER' ? 'CUSTOMER' : 'MERCHANT',
+          tokens: account.devices.map((d) => d.token),
+          platforms: new Map(account.devices.map((d) => [d.token, d.platform])),
+          pushAllowed: account.pushAllowed,
+        },
+        CAMPAIGN_EVENT,
+        title,
+        body,
+        { key: input.key, data: input.data ?? {} },
+      );
+    },
+
     async notify(event, input) {
       for (const audience of NOTIFICATION_EVENTS[event].audiences) {
         try {

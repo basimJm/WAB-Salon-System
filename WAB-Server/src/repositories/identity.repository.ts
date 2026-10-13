@@ -184,6 +184,29 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
     );
   }
 
+  /** Devices of many accounts at once (campaigns): one query instead of one per account. */
+  async devicesOfMany(
+    kind: 'customer' | 'member',
+    ids: readonly string[],
+  ): Promise<Map<string, { token: string; language: Language; platform: Platform }[]>> {
+    const valid = ids.filter((id) => isValidId(id));
+    const out = new Map<string, { token: string; language: Language; platform: Platform }[]>();
+    if (valid.length === 0) return out;
+    const field = kind === 'customer' ? 'customerId' : 'memberId';
+    const found = await this.findMany(
+      { [field]: { $in: valid }, fcmToken: { $exists: true } },
+      { lastSeenAt: -1 },
+    );
+    for (const device of found) {
+      const owner = kind === 'customer' ? device.customerId : device.memberId;
+      if (device.fcmToken === undefined || owner === undefined) continue;
+      const list = out.get(owner) ?? [];
+      list.push({ token: device.fcmToken, language: device.language, platform: device.platform });
+      out.set(owner, list);
+    }
+    return out;
+  }
+
   /** Forgets push tokens the provider reported as unregistered. */
   async dropTokens(tokens: readonly string[]): Promise<void> {
     if (tokens.length === 0) return;

@@ -12,6 +12,7 @@ import type { AdminLocationServices } from './admin/locations/locations.routes';
 import type { SalonDetailsService } from '../domain/salonDetails/salonDetails.service';
 import type { InboxService } from '../domain/notifications/inbox.service';
 import type { FavoritesService } from '../domain/favorites/favorites.service';
+import type { CampaignsService } from '../domain/campaigns/campaigns.service';
 import type { PlacementsService } from '../domain/placements/placements.service';
 import type { AdminReviewsService } from '../domain/reviews/adminReviews.service';
 import type { ReviewsService } from '../domain/reviews/reviews.service';
@@ -69,6 +70,7 @@ export interface ApiServices {
   readonly adminApplications?: SalonReviewService;
   readonly adminReviews?: AdminReviewsService;
   readonly adminPlacements?: PlacementsService;
+  readonly adminCampaigns?: CampaignsService;
   readonly salonState?: SalonStateService;
   readonly adminSalons?: AdminSalonsService;
   readonly salonDetails?: SalonDetailsService;
@@ -326,6 +328,16 @@ export const unavailableInbox: InboxService = {
   list: unavailable,
   unreadCount: unavailable,
   markRead: unavailable,
+};
+
+export const unavailableCampaigns: CampaignsService = {
+  create: unavailable,
+  list: unavailable,
+  get: unavailable,
+  cancel: unavailable,
+  audienceSize: unavailable,
+  send: unavailable,
+  reconcile: unavailable,
 };
 
 export const unavailableAdminPlacements: PlacementsService = {
