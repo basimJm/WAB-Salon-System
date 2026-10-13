@@ -2,6 +2,7 @@ import { AdminModel } from './admin.model';
 import { AppVersionModel } from './appVersion.model';
 import { ContactInfoModel } from './contactInfo.model';
 import { ContentPageModel } from './contentPage.model';
+import { RecommendedPlacementModel } from './recommendedPlacement.model';
 import { ReviewModel } from './review.model';
 import { FavoriteModel } from './favorite.model';
 import { FaqModel } from './faq.model';
@@ -60,4 +61,5 @@ export const ALL_MODELS = [
   FaqModel,
   FavoriteModel,
   ReviewModel,
+  RecommendedPlacementModel,
 ] as const;

@@ -34,6 +34,8 @@ import { createFavoritesService } from './domain/favorites/favorites.service';
 import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
 import { createCustomerProfileService } from './domain/customers/customerProfile.service';
+import { createPlacementsService } from './domain/placements/placements.service';
+import { PlacementsRepository } from './repositories/placements.repository';
 import { createReviewsService } from './domain/reviews/reviews.service';
 import { ReviewsRepository } from './repositories/reviews.repository';
 import { createHomeService } from './domain/home/home.service';
@@ -281,6 +283,11 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     lifecycle: accountLifecycle,
     logger,
   });
+  const placements = createPlacementsService({
+    placements: new PlacementsRepository(),
+    salons: new SalonsRepository(),
+    audit,
+  });
   const favoritesRepository = new FavoritesRepository();
   const reviewsService = createReviewsService({
     reviews: new ReviewsRepository(),
@@ -291,6 +298,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   });
   const search = createSearchService({
     favorites: favoritesRepository,
+    recommended: placements,
     salons: new SalonsRepository(),
     salonServices,
     closures: new ClosuresRepository(),
@@ -309,7 +317,6 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     otpGate,
     adminGuard,
     uploads,
-    // Placements (SRV-066) and favorites (SRV-062) plug in here later.
     search,
     favorites: createFavoritesService({
       favorites: favoritesRepository,
@@ -425,6 +432,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
       ],
     },
     salonState,
+    adminPlacements: placements,
     adminReviews: createAdminReviewsService({
       reviews: new ReviewsRepository(),
       salons: new SalonsRepository(),

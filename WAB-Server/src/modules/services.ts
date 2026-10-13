@@ -11,6 +11,7 @@ import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
 import type { SalonDetailsService } from '../domain/salonDetails/salonDetails.service';
 import type { FavoritesService } from '../domain/favorites/favorites.service';
+import type { PlacementsService } from '../domain/placements/placements.service';
 import type { AdminReviewsService } from '../domain/reviews/adminReviews.service';
 import type { ReviewsService } from '../domain/reviews/reviews.service';
 import type { CustomerProfileService } from '../domain/customers/customerProfile.service';
@@ -51,6 +52,7 @@ export interface ApiServices {
   readonly banners?: BannersService;
   readonly adminApplications?: SalonReviewService;
   readonly adminReviews?: AdminReviewsService;
+  readonly adminPlacements?: PlacementsService;
   readonly salonState?: SalonStateService;
   readonly adminSalons?: AdminSalonsService;
   readonly salonDetails?: SalonDetailsService;
@@ -285,6 +287,15 @@ export const unavailableFavorites: FavoritesService = {
   add: unavailable,
   remove: unavailable,
   list: unavailable,
+};
+
+export const unavailableAdminPlacements: PlacementsService = {
+  salonIds: unavailable,
+  list: unavailable,
+  create: unavailable,
+  update: unavailable,
+  end: unavailable,
+  reorder: unavailable,
 };
 
 export const unavailableAdminReviews: AdminReviewsService = {

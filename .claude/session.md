@@ -1150,6 +1150,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `accountLifecycle` is now a shared const in `buildServices`. The guest nickname/gender stay on the device (PRD). Push switch already exists under `/installations/push-enabled`.
 
+### T-077 — SRV-066 Recommended placements
+- Project: `WAB-Server/` (`src/models/recommendedPlacement.model.ts`, `src/repositories/placements.repository.ts`, `src/domain/placements`, `src/modules/admin/placements`, search ordering)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.6 `recommendedPlacements`, §5.13; Admin PRD A20; CLAUDE.md §5.12):
+  - [x] Model with documented fields and indexes, registered in `ALL_MODELS`
+  - [x] Admin list with derived status and filters; add (audience from the salon, unknown salon 404, end after start 400, overlap 409), edit (ended 422), end now (ended 422 `ALREADY_HANDLED`), reorder one audience; every write audited with a reason
+  - [x] Customer side: active = `startAt <= now < endAt`, ordered by `order`; the recommended filter/section shows exactly those salons that are also visible, in the admin's order
+- Tests: `tests/placements.test.ts` (17) + search ordering test; full gate green, 1903 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - `amountPaid` is JOD string at the API, fils in storage. Not done: the `recommended` flag on the admin salons list/detail (A19) and "Recommended clicks per salon" analytics.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
