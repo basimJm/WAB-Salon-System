@@ -341,6 +341,100 @@
           }
         }
       ]
+    },
+    {
+      "name": "Installations",
+      "item": [
+        {
+          "name": "Register or update this device",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/installations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "installations"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Firebase app-instance id, FCM token and versions. Works for guests; with a customer token the device is also linked to the account, which joins the guest analytics history to it. A push token belongs to one device: registering it here removes it from any other.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"installationId\": \"string\",\n  \"platform\": \"ANDROID\",\n  \"appVersion\": \"string\",\n  \"osVersion\": \"string\",\n  \"deviceModel\": \"string\",\n  \"fcmToken\": \"string\",\n  \"language\": \"ar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Turn push notifications on or off",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/installations/push-enabled",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "installations",
+                "push-enabled"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "One switch for the whole account. Off means no push is sent, but notifications still appear in the in-app list.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pushEnabled\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

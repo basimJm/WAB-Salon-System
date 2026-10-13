@@ -685,7 +685,7 @@
 ### T-043 — SRV-032 Account lifecycle: blocking, deletion grace period, purge, member deactivation
 - Project: `WAB-Server/` (`src/domain/auth/accountLifecycle.service.ts`, `src/constants/accountLifecycle.ts`, `src/repositories/identity.repository.ts`, `.github/workflows/server-ci.yml` + `tests/ci.test.ts` (build-only CI, requested by the user; the commit missed PR #49 because it was merged first))
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #49 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #50 merged into `server`; the CI removal followed in PR #51)
 - Acceptance criteria (BE/NFR: BE-04, NFR-01, CLAUDE.md §5.12 admin actions with reason + audit; BUSINESS_DOMAIN §3.1 `refreshTokens` "Revoke all on logout-all, block, member deactivation, account deletion", §5.15 account deletion, §10 `account.deletionGraceDays`=30, §9 job `accounts:purge`):
   - [x] `blockCustomer` (admin): reason + audit entry (`CUSTOMER_BLOCK`, before/after, ip, user agent), status BLOCKED with reason/time, every session revoked; blocking twice is a no-op (no second audit entry); a deleted account is refused; works on a customer waiting for deletion; `unblockCustomer` returns ACTIVE and drops the block/deletion fields (audited, 409 if not blocked)
   - [x] `requestCustomerDeletion`: only an ACTIVE customer; DELETION_PENDING with `deletionScheduledAt` = now + `account.deletionGraceDays`; all sessions revoked, devices detached (push stops); atomic status transition (a race has one winner); login within the grace period restores the account (SRV-028)
@@ -696,6 +696,22 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) the audit entry is written AFTER the change (no transaction support in the test setup); if the audit write fails the call errors although the account is already blocked, and a repeat call is a no-op that writes no entry: a Mongo transaction (SRV-070 introduces them) should wrap block/unblock then; (2) a blocked customer who had asked for deletion is never purged until unblocked (unblocking cancels the deletion request); (3) the daily 03:00 Amman `accounts:purge` trigger, the admin block endpoint and the customer delete-account endpoint are separate tasks; reviews, favorites and notifications of a purged customer are handled when those collections exist. API docs: no change.
 - Next: SRV-033 (installations register/update).
+
+### T-044 — SRV-033 Installations: register/update device, FCM token, push switch, identity link
+- Project: `WAB-Server/` (`src/domain/installations/installations.service.ts`, `src/modules/shared/installations/*`, `src/constants/installations.ts`, `src/middlewares/auth.ts` (`optionalAuth`), `src/repositories/identity.repository.ts`, `src/server.ts`, docs)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #51 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-04, BE-21 push registration, NFR-08; BUSINESS_DOMAIN §3.1 `installations`, CLAUDE.md §4.4 FCM and §4.7 "apps send the Firebase app-instance ID so guest history links to the account"; Customer PRD §3 + "FCM token registered with the backend, updated on login/logout/token refresh"):
+  - [x] `PUT /customer/v1/installations`: guests register without a token; a valid customer token also links the device to the account (`customerId`) and calls `AnalyticsProvider.linkIdentity` (best effort); an invalid token is 401, a member token 403; blocked/deleted/unknown customer 401; a guest call never unlinks a signed-in device
+  - [x] `PUT /merchant/v1/installations`: member token required; links `memberId`; deactivated member 403 `MEMBER_INACTIVE`, unknown 401; customer and merchant installations with the same id are separate records
+  - [x] Update keeps absent optional fields; language from the body, else `Accept-Language`; one record per `{app, installationId}`; a second account on the same device takes the link over
+  - [x] A push token belongs to exactly one installation: registering it removes it from every other (`releaseFcmToken`), other tokens untouched
+  - [x] `PATCH /customer/v1/installations/push-enabled` {pushEnabled}: customer token, boolean validated, sets `customers.pushEnabled` (the account-wide switch; push respects it in SRV-093)
+  - [x] New `optionalAuth(scope, secret)`: no header = guest, a present header must be valid; per-IP route limit; 503 when unconfigured; Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1404 pass (46 suites); format:check/lint/typecheck/build green; `npm audit --omit=dev` 0; `npm run docs` regenerated. `tests/installations.test.ts` (26). No server CI exists any more: the local gate is the only check.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (contract matches PRD), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) a guest request can overwrite the push token of an installation id it knows; ids are random Firebase instance ids (unguessable), so this is accepted, but a signed per-install secret would close it; (2) there is no separate "unregister token" route: logout already unlinks the account (SRV-028/029) and a refreshed token is a new PUT; (3) the push switch lives under `/installations` because the profile endpoints come with SRV-065.
+- Next: SRV-034 is PENDING (Firebase credentials); next runnable task in order: SRV-035.
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

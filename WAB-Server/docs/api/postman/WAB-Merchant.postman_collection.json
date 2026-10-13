@@ -251,6 +251,60 @@
           }
         }
       ]
+    },
+    {
+      "name": "Installations",
+      "item": [
+        {
+          "name": "Register or update this device",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/installations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "installations"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Firebase app-instance id, FCM token and versions. Links the device to the signed-in member so the salon's booking requests reach it.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"installationId\": \"string\",\n  \"platform\": \"ANDROID\",\n  \"appVersion\": \"string\",\n  \"osVersion\": \"string\",\n  \"deviceModel\": \"string\",\n  \"fcmToken\": \"string\",\n  \"language\": \"ar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [
