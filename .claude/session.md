@@ -1232,6 +1232,15 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) no Mongo transaction yet: the booking is one document, the draft deletion after it is best effort (TTL cleans it); the paid flow will wrap booking + transaction + ledger in one; (2) OTP is a separate endpoint (`verify-otp`) as in §5.6 order, so the paid flow can pay after it; (3) notifications/sockets/jobs are not fired yet (hook `BookingCreatedHook`). Not run against a real MongoDB (`$elemMatch` overlap query).
 
+### T-083 — SRV-072 Booking state machine core
+- Project: `WAB-Server/` (`src/domain/bookings/stateMachine.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.7; BE-35, BER-06): [x] transition table with actors/permissions/reasons/clock checks; [x] `INVALID_TRANSITION`, `ALREADY_HANDLED`, `CANCELLATION_WINDOW_PASSED`, `PERMISSION_DENIED`; [x] admin any move with a reason; [x] returns the history entry
+- Tests: `tests/stateMachine.test.ts` (9); full gate green, 2027 tests. API docs: no change.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - pure; SRV-073 persists transitions atomically (`transition` by expected status) and fires refunds/notifications.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

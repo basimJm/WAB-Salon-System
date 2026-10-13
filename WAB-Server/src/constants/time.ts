@@ -8,6 +8,7 @@ export const MINUTES_PER_HOUR = 60;
 export const HOURS_PER_DAY = 24;
 export const MS_PER_MINUTE = MS_PER_SECOND * SECONDS_PER_MINUTE;
 export const MINUTES_PER_DAY = MINUTES_PER_HOUR * HOURS_PER_DAY;
+export const MS_PER_HOUR = MS_PER_MINUTE * MINUTES_PER_HOUR;
 export const MS_PER_DAY = MS_PER_MINUTE * MINUTES_PER_DAY;
 
 /** Default of the `timezone` setting; services read the live value from settings (SRV-017). */
