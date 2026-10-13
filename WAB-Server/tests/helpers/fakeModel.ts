@@ -144,7 +144,7 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
       new FakeQuery(() => (select(filter)[0] ? { _id: select(filter)[0]?._id } : null)),
     findOneAndUpdate: (
       filter: Filter,
-      update: { $set?: Doc; $unset?: Doc },
+      update: { $set?: Doc; $unset?: Doc; $inc?: Record<string, number> },
       options: { upsert?: boolean } = {},
     ) =>
       new FakeQuery(() => {
@@ -165,6 +165,9 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
           docs.push(doc);
         }
         Object.assign(doc, update.$set ?? {}, { updatedAt: new Date() });
+        for (const [key, step] of Object.entries(update.$inc ?? {})) {
+          doc[key] = Number(doc[key] ?? 0) + step;
+        }
         for (const key of Object.keys(update.$unset ?? {})) Reflect.deleteProperty(doc, key);
         return { ...doc };
       }),

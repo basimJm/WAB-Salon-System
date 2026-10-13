@@ -7,19 +7,25 @@ import {
   TOKEN_HASH_ALGORITHM,
 } from '../../constants/auth';
 import type { SubjectType } from '../../constants/enums';
-import { MS_PER_DAY } from '../../constants/time';
+import { MS_PER_DAY, MS_PER_SECOND } from '../../constants/time';
 import type { RefreshTokensRepository } from '../../repositories/identity.repository';
 import { toObjectId } from '../../utils/database/ids';
 import { UnauthorizedError } from '../../utils/errors';
 import type { Logger } from '../../utils/logger';
 
-export interface IssueInput {
+/**
+ * How long a refresh token lives: whole days (`auth.refreshTokenTtlDays`, customers and members) or
+ * whole seconds (`admin.sessionIdleSec`: every rotation restarts it, so it is an idle timeout).
+ */
+export type RefreshLifetime =
+  | { readonly ttlDays: number; readonly ttlSec?: never }
+  | { readonly ttlSec: number; readonly ttlDays?: never };
+
+export type IssueInput = RefreshLifetime & {
   subjectType: SubjectType;
   subjectId: string;
   installationId?: string;
-  /** `auth.refreshTokenTtlDays` setting. */
-  ttlDays: number;
-}
+};
 
 export interface IssuedRefreshToken {
   token: string;
@@ -37,7 +43,7 @@ export interface RevokedSession {
 
 export interface RefreshTokenService {
   issue(input: IssueInput): Promise<IssuedRefreshToken>;
-  rotate(input: { token: string; ttlDays: number }): Promise<IssuedRefreshToken>;
+  rotate(input: RefreshLifetime & { token: string }): Promise<IssuedRefreshToken>;
   /** Logout: returns whose session ended, or `null` when the token was unknown or malformed. */
   revoke(token: string): Promise<RevokedSession | null>;
   revokeAll(subjectType: SubjectType, subjectId: string, reason?: string): Promise<number>;
@@ -53,10 +59,16 @@ export interface RefreshTokenServiceDeps {
 export const hashRefreshToken = (token: string): string =>
   createHash(TOKEN_HASH_ALGORITHM).update(token).digest('hex');
 
-const assertTtl = (ttlDays: number): void => {
-  if (!Number.isInteger(ttlDays) || ttlDays < 1) {
-    throw new RangeError('ttlDays must be a positive whole number');
+/** Lifetime in milliseconds; a bad value is a caller bug, never client input. */
+const lifetimeMs = (lifetime: RefreshLifetime): number => {
+  const [unit, amount, msPerUnit] =
+    lifetime.ttlSec === undefined
+      ? (['ttlDays', lifetime.ttlDays, MS_PER_DAY] as const)
+      : (['ttlSec', lifetime.ttlSec, MS_PER_SECOND] as const);
+  if (!Number.isInteger(amount) || amount < 1) {
+    throw new RangeError(`${unit} must be a positive whole number`);
   }
+  return amount * msPerUnit;
 };
 
 /** Refresh tokens: hashed at rest, rotated on every use, a reused token revokes its whole family. */
@@ -69,9 +81,9 @@ export const createRefreshTokenService = (deps: RefreshTokenServiceDeps): Refres
     input: IssueInput,
     familyId: string,
   ): Promise<{ issued: IssuedRefreshToken; id: string }> => {
-    assertTtl(input.ttlDays);
+    const ttlMs = lifetimeMs(input);
     const token = random(REFRESH_TOKEN_BYTES).toString('base64url');
-    const expiresAt = new Date(now().getTime() + input.ttlDays * MS_PER_DAY);
+    const expiresAt = new Date(now().getTime() + ttlMs);
     const created = await repository.create({
       subjectType: input.subjectType,
       subjectId: toObjectId(input.subjectId),
@@ -104,8 +116,9 @@ export const createRefreshTokenService = (deps: RefreshTokenServiceDeps): Refres
       return (await store(input, familyId)).issued;
     },
 
-    async rotate({ token, ttlDays }) {
-      assertTtl(ttlDays);
+    async rotate(input) {
+      const { token } = input;
+      lifetimeMs(input);
       if (!REFRESH_TOKEN_PATTERN.test(token)) throw new UnauthorizedError();
       const current = await repository.findByTokenHash(hashRefreshToken(token));
       if (current === null) throw new UnauthorizedError();
@@ -123,7 +136,7 @@ export const createRefreshTokenService = (deps: RefreshTokenServiceDeps): Refres
           ...(current.installationId === undefined
             ? {}
             : { installationId: current.installationId }),
-          ttlDays,
+          ...(input.ttlSec === undefined ? { ttlDays: input.ttlDays } : { ttlSec: input.ttlSec }),
         },
         current.familyId,
       );

@@ -1,7 +1,7 @@
 import type { SubjectType } from '../../constants/enums';
 import { signAccessToken } from '../../utils/auth/accessToken';
 import type { SettingsService } from '../settings';
-import type { RefreshTokenService } from './refreshTokens.service';
+import type { RefreshLifetime, RefreshTokenService } from './refreshTokens.service';
 
 export interface TokenPair {
   readonly accessToken: string;
@@ -29,6 +29,8 @@ export interface SessionTokensDeps {
   readonly settings: Pick<SettingsService, 'get'>;
   readonly accessSecret: string;
   readonly now?: () => Date;
+  /** Refresh-token lifetime; defaults to `auth.refreshTokenTtlDays`. The admin panel uses its idle timeout. */
+  readonly refreshLifetime?: () => Promise<RefreshLifetime>;
 }
 
 /** Issues the platform's access + refresh token pair; lifetimes come from the settings. */
@@ -37,9 +39,12 @@ export const createSessionTokens = ({
   settings,
   accessSecret,
   now = () => new Date(),
+  refreshLifetime = async (): Promise<RefreshLifetime> => ({
+    ttlDays: await settings.get('auth.refreshTokenTtlDays'),
+  }),
 }: SessionTokensDeps): SessionTokens => {
-  const lifetimes = (): Promise<[number, number]> =>
-    Promise.all([settings.get('auth.accessTokenTtlSec'), settings.get('auth.refreshTokenTtlDays')]);
+  const lifetimes = (): Promise<[number, RefreshLifetime]> =>
+    Promise.all([settings.get('auth.accessTokenTtlSec'), refreshLifetime()]);
 
   const pair = (
     subjectType: SubjectType,
@@ -64,19 +69,19 @@ export const createSessionTokens = ({
 
   return {
     async open(subjectType, subjectId, installationId) {
-      const [accessTtlSec, refreshTtlDays] = await lifetimes();
+      const [accessTtlSec, lifetime] = await lifetimes();
       const refresh = await refreshTokens.issue({
         subjectType,
         subjectId,
         ...(installationId === undefined ? {} : { installationId }),
-        ttlDays: refreshTtlDays,
+        ...lifetime,
       });
       return pair(subjectType, subjectId, refresh, accessTtlSec);
     },
 
     async rotate(refreshToken) {
-      const [accessTtlSec, refreshTtlDays] = await lifetimes();
-      const next = await refreshTokens.rotate({ token: refreshToken, ttlDays: refreshTtlDays });
+      const [accessTtlSec, lifetime] = await lifetimes();
+      const next = await refreshTokens.rotate({ token: refreshToken, ...lifetime });
       return {
         subjectType: next.subjectType,
         subjectId: next.subjectId,

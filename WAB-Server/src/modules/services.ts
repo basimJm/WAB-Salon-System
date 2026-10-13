@@ -1,5 +1,6 @@
 import type { RequestHandler } from 'express';
 import type { Store } from 'express-rate-limit';
+import type { AdminAuthService } from '../domain/auth/adminAuth.service';
 import type { MerchantAuthService } from '../domain/auth/merchantAuth.service';
 import type { CustomerAuthService } from '../domain/auth/customerAuth.service';
 import type { OtpGate } from '../domain/otp/otpGate.service';
@@ -9,6 +10,7 @@ import { ExternalServiceError } from '../utils/errors';
 export interface ApiServices {
   readonly otpGate?: OtpGate;
   readonly merchantAuth?: MerchantAuthService;
+  readonly adminAuth?: AdminAuthService;
   readonly customerAuth?: {
     readonly service: CustomerAuthService;
     /** `requireAuth('customer', secret)`. */
@@ -44,6 +46,13 @@ export const unavailableCustomerAuth: CustomerAuthService = {
 export const unavailableMerchantAuth: MerchantAuthService = {
   checkPhone: unavailableCustomerAuthError,
   login: unavailableCustomerAuthError,
+  refresh: unavailableCustomerAuthError,
+  logout: unavailableCustomerAuthError,
+};
+
+export const unavailableAdminAuth: AdminAuthService = {
+  verifyCredentials: unavailableCustomerAuthError,
+  openSession: unavailableCustomerAuthError,
   refresh: unavailableCustomerAuthError,
   logout: unavailableCustomerAuthError,
 };

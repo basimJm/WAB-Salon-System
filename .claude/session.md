@@ -638,7 +638,7 @@
 ### T-040 — SRV-029 Merchant member login via Firebase ID token
 - Project: `WAB-Server/` (`src/domain/auth/{merchantAuth.service,phoneVerifier,sessionTokens}.ts`, `src/modules/merchant/auth/*`, `src/modules/shared/auth/auth.schemas.ts`, `src/constants/merchantAuth.ts`, `src/repositories/identity.repository.ts`, `src/server.ts`, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #45 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #46 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-01, BE-03, BE-04, NFR-01; BUSINESS_DOMAIN §3.1/§3.4 members, §4.2, §11 `PHONE_NOT_REGISTERED`/`MEMBER_INACTIVE`/`OTP_*`; Merchant PRD §4.3, §4.4, M02, M03):
   - [x] `POST /merchant/v1/auth/check-phone`: active member passes; unknown number 404 `PHONE_NOT_REGISTERED` (app offers "Register a new salon"); deactivated member 403 `MEMBER_INACTIVE`
   - [x] `login`: Firebase ID token verified for that exact number (`OTP_INVALID`/`OTP_EXPIRED` 401, blocked number 429 `OTP_BLOCKED` before the provider is asked), merchant-scope access token (subject MEMBER) + rotating refresh token, device linked as app MERCHANT with `memberId`, gate reset
@@ -650,6 +650,22 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (matches Merchant PRD §4.3-4.4, M02, M03), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) the backlog row says the token carries `salonId` + permissions; kept the SRV-025 decision instead (JWT = member + scope only; role/salon/permissions are returned in the profile and re-read from the database per request, so owner changes apply at once); (2) salon state (M05/M06 routing) is not in the profile yet: the salon model arrives with SRV-041; (3) no self-registration: an owner adds members, a new salon applies via SRV-041; (4) member change-phone (OTP to the new number) comes with the member profile task.
 - Next: SRV-030 (admin login).
+
+### T-041 — SRV-030 Admin password check with lockout, idle-timeout sessions, refresh/logout
+- Project: `WAB-Server/` (`src/domain/auth/adminAuth.service.ts`, `src/utils/auth/password.ts`, `src/modules/admin/auth/*`, `src/constants/adminAuth.ts`, `src/repositories/identity.repository.ts`, refresh/session token lifetime in seconds, docs)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #46 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-02 admin email + password + 2FA, lockout and session timeout, NFR-01 bcrypt + lockout; BUSINESS_DOMAIN §3.1 `admins`, §10 `admin.maxFailedLogins`=5 / `admin.lockSec`=900 / `admin.sessionIdleSec`=1800; Admin PRD §4):
+  - [x] `hashPassword`/`verifyPassword` (bcryptjs, cost 12; empty, over 72 bytes and malformed hashes are refused/false, never truncated or thrown)
+  - [x] `verifyCredentials`: right password -> identity; wrong password and unknown email give the same 401 (an unknown email still pays one bcrypt comparison); failures counted atomically; the 5th wrong password locks for 15 minutes and restarts the count; while locked even the right password gets 429 and the password is not looked at; the lock ends exactly at `lockedUntil`; limits come from settings
+  - [x] The failure count is cleared only when the whole sign-in completes (`openSession`), so a stolen password cannot brute-force the second factor for free
+  - [x] `openSession`: admin-scope access token, records `lastLoginAt`/`lastLoginIp`, clears failures and any lock; refresh token lifetime = `admin.sessionIdleSec` and every rotation restarts it (idle timeout); `refresh` (reuse ends the session, deleted admin loses all sessions), `logout`
+  - [x] `POST /admin/v1/auth/refresh` and `/logout` (per-IP limit, 503 when unconfigured); refresh-token lifetime can be given in seconds (`RefreshLifetime`), customers/members keep days
+  - [x] Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1343 pass (44 suites); format:check/lint/typecheck/build green; `npm audit --omit=dev` 0 (new dependency `bcryptjs` 3, pure JS); `npm run docs` regenerated. `tests/adminAuth.test.ts` (20), `tests/password.test.ts` (5), 3 more in `tests/refreshTokens.test.ts`.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) the password-only login ROUTE is deliberately not added: it would open a session without the second factor (Admin PRD §4); `login` + `verify-otp` ship together in SRV-031, which calls `verifyCredentials` then `openSession`; (2) a locked account answers 429 `RATE_LIMITED` (no dedicated code in BUSINESS_DOMAIN §11); (3) "alert email on new-device login" needs the Notifier and joins SRV-031; (4) new backlog row SRV-030a: an admin bootstrap script, because nothing creates the single admin yet.
+- Next: SRV-031 (admin email OTP 2FA + login routes).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

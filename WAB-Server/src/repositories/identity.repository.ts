@@ -196,4 +196,42 @@ export class AdminsRepository extends BaseRepository<AdminRaw> {
   findByEmail(email: string): Promise<Entity<AdminRaw> | null> {
     return this.findOne({ email: email.trim().toLowerCase() });
   }
+
+  /**
+   * Counts a wrong password (atomically) and, when it reaches `maxFailures`, locks the account
+   * until `now + lockMs` and restarts the count. Returns the lock end, or `null` when not locked.
+   */
+  async recordFailedLogin(
+    id: string,
+    maxFailures: number,
+    lockMs: number,
+    now: Date,
+  ): Promise<Date | null> {
+    if (!isValidId(id)) return null;
+    const counted = await this.model
+      .findOneAndUpdate({ _id: id }, { $inc: { failedLoginCount: 1 } }, { new: true })
+      .lean()
+      .exec();
+    if (counted === null || counted.failedLoginCount < maxFailures) return null;
+    const lockedUntil = new Date(now.getTime() + lockMs);
+    await this.updateById(id, { lockedUntil, failedLoginCount: 0 });
+    return lockedUntil;
+  }
+
+  /** A completed sign-in: clears the failure count and any lock, records when and from where. */
+  async recordLogin(id: string, ip: string, now: Date): Promise<Entity<AdminRaw> | null> {
+    if (!isValidId(id)) return null;
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: id },
+        {
+          $set: { failedLoginCount: 0, lastLoginAt: now, lastLoginIp: ip },
+          $unset: { lockedUntil: 1 },
+        },
+        { new: true },
+      )
+      .lean()
+      .exec();
+    return updated === null ? null : toEntity<AdminRaw>(updated);
+  }
 }
