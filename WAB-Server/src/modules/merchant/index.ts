@@ -6,6 +6,10 @@ import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
 import { LOCATION_ROUTES } from '../../constants/locations';
 import { CONTENT_ROUTES } from '../../constants/content';
 import { CATALOG_ROUTES } from '../../constants/catalog';
+import {
+  MERCHANT_CATALOG_REQUEST_ROUTES,
+  MERCHANT_SERVICES_ROUTES,
+} from '../../constants/salonServices';
 import { MERCHANT_HOURS_ROUTES } from '../../constants/hours';
 import { MERCHANT_GALLERY_ROUTES } from '../../constants/gallery';
 import { MERCHANT_SALON_ROUTES } from '../../constants/salon';
@@ -15,9 +19,11 @@ import { createMerchantUploadsRouter } from '../shared/uploads';
 import { createMerchantAppConfigRouter } from '../shared/appConfig';
 import { createMerchantInstallationsRouter } from '../shared/installations';
 import {
+  unavailableCatalogRequests,
   unavailableCatalogService,
   unavailableGallery,
   unavailableHours,
+  unavailableSalonServices,
   unavailableGuard,
   unavailableMerchantAuth,
   unavailableSalonApplication,
@@ -28,6 +34,8 @@ import { createMerchantContentRouter } from '../shared/content';
 import { createCatalogRouter } from '../shared/catalog/catalog.module';
 import { createLocationsRouterFor } from '../shared/locations';
 import { createMerchantOtpRouter, createOtpRouteLimiter } from '../shared/otp';
+import { createMerchantCatalogRequestsRouter } from './catalogRequests/requests.routes';
+import { createMerchantServicesRouter } from './services/services.routes';
 import { createMerchantHoursRouter } from './hours/hours.routes';
 import { createMerchantGalleryRouter } from './gallery/gallery.routes';
 import { createMerchantProfileRouter } from './salon/profile.routes';
@@ -89,6 +97,22 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     MERCHANT_HOURS_ROUTES.base,
     createMerchantHoursRouter(
       services.hours ?? unavailableHours,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_SERVICES_ROUTES.base,
+    createMerchantServicesRouter(
+      services.salonServices ?? unavailableSalonServices,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_CATALOG_REQUEST_ROUTES.base,
+    createMerchantCatalogRequestsRouter(
+      services.catalogRequests ?? unavailableCatalogRequests,
       services.salonProfile?.guard ?? [unavailableGuard],
     ),
   );

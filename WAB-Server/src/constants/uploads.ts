@@ -101,7 +101,14 @@ export const UPLOAD_POLICIES: Readonly<Record<UploadPurpose, UploadPolicy>> = {
     scopes: ['guest', 'merchant'],
     ownerOnly: true,
   },
-  CATALOG_IMAGE: { kind: 'image', visibility: 'PUBLIC', prefix: 'catalog', scopes: ['admin'] },
+  CATALOG_IMAGE: {
+    kind: 'image',
+    visibility: 'PUBLIC',
+    prefix: 'catalog',
+    // Admins build the catalog; salons attach a picture to a catalog request.
+    scopes: ['admin', 'merchant'],
+    permission: 'SERVICES_MANAGE',
+  },
   BANNER_IMAGE: { kind: 'image', visibility: 'PUBLIC', prefix: 'banners', scopes: ['admin'] },
 };
 
