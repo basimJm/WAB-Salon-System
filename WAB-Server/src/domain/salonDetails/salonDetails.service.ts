@@ -1,3 +1,4 @@
+import { REVIEW_PREVIEW_COUNT } from '../../constants/reviews';
 import type { Language } from '../../constants/enums';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import type { StaffStatus } from '../../constants/salonDetails';
@@ -17,6 +18,7 @@ import { formatJod } from '../../utils/money';
 import { dayOfWeek, localDateOf } from '../../utils/time';
 import { todaysHours } from '../salons/hours';
 import type { SettingsService } from '../settings';
+import type { ReviewView, ReviewsService } from '../reviews/reviews.service';
 import { noFavorites, type FavoriteLookup } from '../search/search.service';
 
 export interface StaffSummary {
@@ -34,6 +36,7 @@ export interface StaffDetails extends StaffSummary {
   readonly customersCount: number;
   readonly workingDays: { day: string; start: string | null; end: string | null }[];
   readonly services: { catalogServiceId: string; name: string }[];
+  readonly reviews: { avg: number; count: number; latest: ReviewView[] };
 }
 
 export interface SalonDetails {
@@ -72,6 +75,8 @@ export interface SalonDetails {
     durationSec: number | null;
   }[];
   readonly isFavorite: boolean;
+  /** Average, count and the latest few approved reviews. */
+  readonly reviews: { avg: number; count: number; latest: ReviewView[] };
 }
 
 export interface SalonDetailsService {
@@ -94,6 +99,7 @@ export interface SalonDetailsDeps {
   readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly settings: Pick<SettingsService, 'get'>;
   readonly favorites?: FavoriteLookup;
+  readonly reviews?: Pick<ReviewsService, 'latest'>;
   readonly now?: () => Date;
 }
 
@@ -101,6 +107,8 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
   const { salons, members, salonServices, catalog, gallery, closures, leaves, storage, settings } =
     deps;
   const favorites = deps.favorites ?? noFavorites;
+  const latestReviews = (salonId: string, staffId?: string): Promise<ReviewView[]> =>
+    deps.reviews?.latest({ salonId, staffId, limit: REVIEW_PREVIEW_COUNT }) ?? Promise.resolve([]);
   const now = deps.now ?? ((): Date => new Date());
   const url = (key: string | undefined): string | null =>
     key === undefined ? null : storage.getPublicUrl(key);
@@ -144,7 +152,7 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
       const salon = await visible(salonId);
       const timeZone = await settings.get('timezone');
       const today = localDateOf(now(), timeZone);
-      const [ranges, team, onLeave, offered, items, saved] = await Promise.all([
+      const [ranges, team, onLeave, offered, items, saved, latest] = await Promise.all([
         closures.findMany({ salonId, to: { $gte: today } }, { from: 1 }),
         staffMembers(salonId),
         leavesToday(salonId, today),
@@ -153,6 +161,7 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
         customerId === undefined
           ? Promise.resolve(new Set<string>())
           : favorites.among(customerId, [salonId]),
+        latestReviews(salonId),
       ]);
       const entries =
         offered.length === 0
@@ -208,6 +217,7 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
           durationSec: g.durationSec ?? null,
         })),
         isFavorite: saved.has(salonId),
+        reviews: { avg: salon.rating.avg, count: salon.rating.count, latest },
       };
     },
 
@@ -221,7 +231,10 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
       });
       if (member?.staff === undefined) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       const today = localDateOf(now(), await settings.get('timezone'));
-      const onLeave = await leavesToday(salonId, today);
+      const [onLeave, latest] = await Promise.all([
+        leavesToday(salonId, today),
+        latestReviews(salonId, memberId),
+      ]);
       const wanted = member.staff.serviceIds;
       const offered = await salonServices.findMany({
         salonId,
@@ -247,6 +260,7 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
           end: d.end ?? null,
         })),
         services: entries.map((c) => ({ catalogServiceId: c.id, name: c.name[language] })),
+        reviews: { avg: member.staff.rating.avg, count: member.staff.rating.count, latest },
       };
     },
   };

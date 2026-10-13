@@ -1111,6 +1111,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `total` counts saved rows, so a page can hold fewer cards than `pageSize` when a salon went offline; customer deletion purge (SRV-032) does not yet delete favorites (follow-up with the purge wiring).
 
+### T-074 — SRV-063 Reviews: submit and list
+- Project: `WAB-Server/` (`src/models/review.model.ts`, `src/repositories/reviews.repository.ts`, `src/domain/reviews`, `src/modules/customer/reviews`, `src/constants/reviews.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.6 reviews, §5.11; Customer PRD S07-S09):
+  - [x] Model with the documented fields, enums and indexes, registered in `ALL_MODELS`
+  - [x] Submit: ACTIVE customer (else 403 `ACCOUNT_BLOCKED`), visible salon (404), STAFF target needs an active service provider of that salon (404); rating 1-5 integer; comment trimmed <= 1000; saved PENDING; salon and staff reviews independent; no booking needed
+  - [x] Rate limit: pending reviews per customer+target >= `reviews.maxPendingPerTargetPerCustomer` -> 429; a decided review frees the slot
+  - [x] List: public, approved only, target-specific, newest first, paginated 10, first name only, summary = stored rating; salon/staff details show the latest 3
+- Tests: `tests/reviews.test.ts` (14) + preview test; full gate green, 1857 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `rating` averages are maintained by SRV-064 (approve/reject/remove); until then summaries stay 0. Admin notification "review pending" comes with the notification core.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

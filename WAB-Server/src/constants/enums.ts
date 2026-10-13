@@ -47,3 +47,8 @@ export type Permission = (typeof PERMISSIONS)[number];
 /** Who a refresh token belongs to. */
 export const SUBJECT_TYPES = ['CUSTOMER', 'MEMBER', 'ADMIN'] as const;
 export type SubjectType = (typeof SUBJECT_TYPES)[number];
+
+export const REVIEW_TARGETS = ['SALON', 'STAFF'] as const;
+export type ReviewTarget = (typeof REVIEW_TARGETS)[number];
+export const REVIEW_STATUSES = ['PENDING', 'APPROVED', 'REJECTED', 'REMOVED'] as const;
+export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
