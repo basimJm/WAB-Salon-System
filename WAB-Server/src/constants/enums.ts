@@ -110,3 +110,9 @@ export type LedgerType = (typeof LEDGER_TYPES)[number];
 
 export const PAYOUT_STATUSES = ['PENDING', 'TRANSFERRED'] as const;
 export type PayoutStatus = (typeof PAYOUT_STATUSES)[number];
+
+/** In-app notifications (BUSINESS_DOMAIN.md §3.6). */
+export const NOTIFICATION_TYPES = ['BOOKING', 'PROMOTION', 'SYSTEM'] as const;
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
+export const NOTIFICATION_RECIPIENT_TYPES = ['CUSTOMER', 'MEMBER', 'ADMIN'] as const;
+export type NotificationRecipientType = (typeof NOTIFICATION_RECIPIENT_TYPES)[number];

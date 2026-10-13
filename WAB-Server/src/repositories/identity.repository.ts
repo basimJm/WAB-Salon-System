@@ -1,5 +1,5 @@
 import { Types, type Model } from 'mongoose';
-import type { AppKind, CustomerStatus, SubjectType } from '../constants/enums';
+import type { AppKind, CustomerStatus, Language, SubjectType } from '../constants/enums';
 import { AdminModel, type AdminRaw } from '../models/admin.model';
 import { CustomerModel, type CustomerRaw } from '../models/customer.model';
 import { InstallationModel, type InstallationRaw } from '../models/installation.model';
@@ -162,6 +162,35 @@ export class MembersRepository extends BaseRepository<MemberRaw> {
 export class InstallationsRepository extends BaseRepository<InstallationRaw> {
   constructor(model: Model<InstallationRaw> = InstallationModel) {
     super(model);
+  }
+
+  /** Push tokens and the language of the devices an account is signed in on, most recent first. */
+  async devicesOf(
+    account: { customerId: string } | { memberId: string },
+  ): Promise<{ token: string; language: Language }[]> {
+    const id = 'customerId' in account ? account.customerId : account.memberId;
+    if (!isValidId(id)) return [];
+    const found = await this.findMany(
+      {
+        ...('customerId' in account ? { customerId: id } : { memberId: id }),
+        fcmToken: { $exists: true },
+      },
+      { lastSeenAt: -1 },
+    );
+    return found.flatMap((d) =>
+      d.fcmToken === undefined ? [] : [{ token: d.fcmToken, language: d.language }],
+    );
+  }
+
+  /** Forgets push tokens the provider reported as unregistered. */
+  async dropTokens(tokens: readonly string[]): Promise<void> {
+    if (tokens.length === 0) return;
+    await this.model
+      .updateMany(
+        { fcmToken: { $in: [...tokens] } },
+        { $unset: { fcmToken: 1, fcmTokenUpdatedAt: 1 } },
+      )
+      .exec();
   }
 
   findByInstallation(

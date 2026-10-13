@@ -3,6 +3,7 @@ import { AppVersionModel } from './appVersion.model';
 import { ContactInfoModel } from './contactInfo.model';
 import { ContentPageModel } from './contentPage.model';
 import { RecommendedPlacementModel } from './recommendedPlacement.model';
+import { NotificationModel } from './notification.model';
 import { PayoutModel } from './payout.model';
 import { LedgerEntryModel } from './ledgerEntry.model';
 import { RefundModel } from './refund.model';
@@ -74,4 +75,5 @@ export const ALL_MODELS = [
   RefundModel,
   LedgerEntryModel,
   PayoutModel,
+  NotificationModel,
 ] as const;

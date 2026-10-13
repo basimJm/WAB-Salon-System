@@ -24,6 +24,8 @@ import type { SettingsService } from '../settings';
 import type { FullRefundPort, FullRefundReason } from './directRefunds';
 
 export interface RefundHooks {
+  /** A refund was created and is on its way (the customer is told). */
+  started?(refund: Entity<RefundRaw>): Promise<void>;
   /** A refund reached the customer: the ledger entry `REFUND −amount` is written here (SRV-087). */
   refunded?(refund: Entity<RefundRaw>): Promise<void>;
   /** Retries ran out: alert the admin. */
@@ -85,6 +87,14 @@ const SOURCE_OF_REASON: Record<FullRefundReason, RefundSource> = {
 export const createRefundService = (deps: RefundServiceDeps): RefundService => {
   const { refunds, transactions, bookings, provider, settings, audit, logger } = deps;
   const hooks = deps.hooks ?? {};
+  /** A hook (ledger, notification) must never undo or fail a refund: its errors are logged. */
+  const runHook = async (name: keyof RefundHooks, refund: Entity<RefundRaw>): Promise<void> => {
+    try {
+      await hooks[name]?.(refund);
+    } catch (error) {
+      logger.error({ err: error, refundId: refund.id, hook: name }, 'refund hook failed');
+    }
+  };
   const now = deps.now ?? ((): Date => new Date());
 
   const notFound = (): NotFoundError => new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
@@ -110,7 +120,7 @@ export const createRefundService = (deps: RefundServiceDeps): RefundService => {
     });
     if (done === null) return null;
     await syncBooking(done, 'REFUNDED', done.amount);
-    await hooks.refunded?.(done);
+    await runHook('refunded', done);
     return done;
   };
 
@@ -135,7 +145,7 @@ export const createRefundService = (deps: RefundServiceDeps): RefundService => {
       );
       if (given === null) return (await refunds.findById(refund.id)) ?? refund;
       await syncBooking(given, 'REFUND_FAILED');
-      await hooks.failed?.(given);
+      await runHook('failed', given);
       return given;
     }
     const delay = REFUND_RETRY_BASE_DELAY_MS * 2 ** (attempts - 1);
@@ -227,6 +237,7 @@ export const createRefundService = (deps: RefundServiceDeps): RefundService => {
     // A fully refunded payment can never back a booking.
     if (amount === payment.amount) await transactions.markRefunded(payment.id, now());
     await syncBooking(row, 'REFUND_PENDING');
+    await runHook('started', row);
     return (await attempt(row.id)) ?? row;
   };
 
