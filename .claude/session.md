@@ -1076,6 +1076,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - candidates are pruned by the 2dsphere index then sorted in memory (bounded by the radius); a `$geoNear` pipeline would need aggregation support in the repository layer.
 
+### T-071 — SRV-060 Salon details and staff sheet
+- Project: `WAB-Server/` (`src/domain/salonDetails`, `src/modules/customer/salonDetails`, `src/constants/salonDetails.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD S07; BUSINESS_DOMAIN §5.2/5.3):
+  - [x] Salon details for LIVE + complete salons only (404 `SALON_NOT_FOUND` otherwise); open/closed + today's hours/closure reason; weekly hours; upcoming closures; active services (JOD strings, localized names); gallery; contacts; `isFavorite` with optional auth
+  - [x] Staff list: active service providers, first name only, status ON_DUTY / ON_LEAVE / DAY_OFF; staff sheet with role, rating, bio, years, customers, working days, offered services
+  - [x] Swagger + Postman regenerated (search card also gets `distanceKm`)
+- Tests: `tests/salonDetails.test.ts` (10); full gate green, 1827 tests
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - last names never returned; reviews preview/staff reviews come with SRV-063; DAY_OFF means the staff member has no working day today.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

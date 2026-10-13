@@ -942,6 +942,80 @@
           }
         }
       ]
+    },
+    {
+      "name": "Salon details",
+      "item": [
+        {
+          "name": "Salon details (S07): hours, closures, staff, services, gallery",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/salons/:salonId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "salons",
+                ":salonId"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "salonId",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Public; a valid customer token only adds `isFavorite`. A salon that is not LIVE and complete is 404 `SALON_NOT_FOUND`."
+          }
+        },
+        {
+          "name": "Staff sheet of a salon member who provides services",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/salons/:salonId/staff/:memberId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "salons",
+                ":salonId",
+                "staff",
+                ":memberId"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "salonId",
+                  "value": ""
+                },
+                {
+                  "key": "memberId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

@@ -19,11 +19,14 @@ import {
   unavailableCatalogService,
   unavailableBannersService,
   unavailableGuard,
+  unavailableSalonDetails,
   unavailableSearch,
   unavailableCustomerAuth,
   type ApiServices,
 } from '../services';
 import { createCustomerBannersRouter } from './banners/banners.module';
+import { createSalonDetailsRouter } from './salonDetails/salonDetails.routes';
+import { SALON_DETAILS_ROUTES } from '../../constants/salonDetails';
 import { createSearchRouter } from './search/search.routes';
 import { createCustomerContentRouter } from '../shared/content';
 import { createCatalogRouter } from '../shared/catalog/catalog.module';
@@ -74,6 +77,18 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     SEARCH_ROUTES.base,
     createSearchRouter({
       service: services.search ?? unavailableSearch,
+      optionalAuth: services.installations?.customerOptional ?? unavailableGuard,
+      limiter: createRateLimiter({
+        ...SEARCH_ROUTE_RATE_LIMIT,
+        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
+      }),
+    }),
+  );
+  mount(
+    router,
+    SALON_DETAILS_ROUTES.base,
+    createSalonDetailsRouter({
+      service: services.salonDetails ?? unavailableSalonDetails,
       optionalAuth: services.installations?.customerOptional ?? unavailableGuard,
       limiter: createRateLimiter({
         ...SEARCH_ROUTE_RATE_LIMIT,
