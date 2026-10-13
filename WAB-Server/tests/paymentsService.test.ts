@@ -328,3 +328,55 @@ describe('payment reconciliation (polling fallback)', () => {
     expect(m.tx.docs.find((d) => String(d['_id']) === good.id)?.['status']).toBe('FAILED');
   });
 });
+
+describe('refunding abandoned payments', () => {
+  const orphanService = (
+    refunded: string[],
+    fail = false,
+  ): ReturnType<typeof createPaymentsService> =>
+    createPaymentsService({
+      transactions: new TransactionsRepository(m.tx.model as never),
+      drafts: new BookingDraftsRepository(m.drafts.model as never),
+      customers: new CustomersRepository(m.customers.model as never),
+      provider: gateway,
+      providerName: 'fake',
+      logger,
+      refunds: {
+        refundPayment: ({ transactionId }) => {
+          if (fail) return Promise.reject(new Error('gateway down'));
+          refunded.push(transactionId);
+          return Promise.resolve(true);
+        },
+      },
+      now: () => new Date(NOW.getTime() + 31 * 60_000),
+    });
+  const payment = (over: Record<string, unknown>): string => {
+    const _id = new Types.ObjectId();
+    m.tx.docs.push({ _id, status: 'SUCCEEDED', createdAt: NOW, ...over });
+    return _id.toHexString();
+  };
+
+  it('refunds only old successful payments that never became a booking', async () => {
+    const orphan = payment({});
+    payment({ bookingId: new Types.ObjectId() });
+    payment({ refundedAt: NOW });
+    payment({ status: 'PENDING' });
+    payment({ createdAt: new Date(NOW.getTime() + 20 * 60_000) });
+    const refunded: string[] = [];
+    expect(await orphanService(refunded).refundOrphans()).toBe(1);
+    expect(refunded).toEqual([orphan]);
+  });
+  it('one failure does not stop the rest and nothing happens without a refund service', async () => {
+    payment({});
+    expect(await orphanService([], true).refundOrphans()).toBe(0);
+    const plain = createPaymentsService({
+      transactions: new TransactionsRepository(m.tx.model as never),
+      drafts: new BookingDraftsRepository(m.drafts.model as never),
+      customers: new CustomersRepository(m.customers.model as never),
+      provider: gateway,
+      providerName: 'fake',
+      logger,
+    });
+    expect(await plain.refundOrphans()).toBe(0);
+  });
+});

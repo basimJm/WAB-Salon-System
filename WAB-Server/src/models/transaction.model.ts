@@ -31,6 +31,8 @@ export interface TransactionRaw {
   gatewayMessage?: string;
   raw?: Record<string, unknown>;
   gatewayFee?: number;
+  /** Set once the whole payment was handed back (slot lost, abandoned checkout): it can never back a booking. */
+  refundedAt?: Date;
   platform: Platform;
   appVersion: string;
   createdAt: Date;
@@ -55,6 +57,7 @@ const transactionSchema = new Schema<TransactionRaw>(
     gatewayMessage: { type: String },
     raw: { type: Schema.Types.Mixed },
     gatewayFee: { type: Number, min: 0, validate: Number.isInteger },
+    refundedAt: { type: Date },
     platform: { type: String, enum: PLATFORMS, required: true },
     appVersion: { type: String, required: true },
   },

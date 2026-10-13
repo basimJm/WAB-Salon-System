@@ -373,6 +373,7 @@ export const unavailablePayments: PaymentsService = {
   verify: unavailable,
   handleWebhook: unavailable,
   reconcilePending: unavailable,
+  refundOrphans: unavailable,
 };
 
 export const unavailableBookings: BookingCreationService = { create: unavailable };

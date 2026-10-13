@@ -1390,6 +1390,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: header name `X-Signature` and JSON bodies are assumptions until the real gateway (HyperPay candidate) is chosen: only `PAYMENT_WEBHOOK_SIGNATURE_HEADER` and the provider's `handleWebhook` change; no per-route rate limit beyond the global one.
 
+### T-096 — SRV-085 Paid booking flow
+- Project: `WAB-Server/` (`src/domain/bookings/bookingCreation.service.ts`, `src/domain/refunds/directRefunds.ts`, `TransactionsRepository.claimForBooking|releaseClaim|markRefunded|orphansBefore`, `PaymentsService.refundOrphans`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §5.6 steps 3-5, CLAUDE.md §5.10 "a failed payment never creates a booking"):
+  - [x] online draft books only from a SUCCEEDED, exact-amount, own, unused, not refunded payment; failed/cancelled/pending/none/wrong → 422 `PAYMENT_NOT_VERIFIED`, no booking
+  - [x] booking money: paidOnline = dueOnline, remaining = total − dueOnline, `DEPOSIT_PAID`/`FULLY_PAID`; payment linked to the booking id; one payment can never back two bookings (atomic claim; two parallel creates → one booking)
+  - [x] slot lost after payment → 409 `SLOT_TAKEN` + immediate full refund (retry cannot reuse it); expired draft with a paid checkout → refund + `DRAFT_EXPIRED`
+  - [x] abandoned paid checkouts refunded by `refundOrphans` (job in SRV-096)
+- Tests: `tests/bookings.test.ts` (+7), `tests/paymentsService.test.ts` (+2); full gate green, 2147 tests; docs text updated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS: (1) the booking insert is not in a Mongo transaction (claim/release compensation instead; transactions need a replica set in tests); (2) `createDirectRefunds` is the minimal immediate refund — SRV-086 adds refund records, retry/backoff and admin tools behind the same `FullRefundPort`; (3) ledger CHARGE + GATEWAY_FEE entries wait for SRV-087; (4) a late webhook success for an older attempt is not matched to the draft (draft points at the latest attempt) — orphan refund covers it. Not run against a real gateway or MongoDB.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

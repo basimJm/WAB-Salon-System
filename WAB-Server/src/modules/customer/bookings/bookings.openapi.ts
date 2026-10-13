@@ -34,9 +34,9 @@ export const registerCustomerBookingDocs = (registry: OpenAPIRegistry): void => 
     path: `${API_PREFIXES.customer}${BOOKING_ROUTES.base}`,
     tags: ['Bookings'],
     summary:
-      'Create the booking from a confirmed draft (status PENDING, waits for the salon). Pay-on-arrival drafts only for now; online payment arrives with the paid flow.',
+      'Create the booking from a confirmed draft (status PENDING, waits for the salon). Deposit and full-payment drafts are created from their verified payment (the booking then shows the paid amounts).',
     description:
-      'Needs the draft’s OTP confirmation (`verify-otp`), else 422 `OTP_INVALID`. The slots are re-validated under a lock per staff member and date: a slot that went away answers 409 `SLOT_TAKEN`. An expired draft is 422 `DRAFT_EXPIRED`; an online method without a verified payment is 422 `PAYMENT_NOT_VERIFIED`.',
+      'Needs the draft’s OTP confirmation (`verify-otp`), else 422 `OTP_INVALID`. The slots are re-validated under a lock per staff member and date: a slot that went away answers 409 `SLOT_TAKEN`. An expired draft is 422 `DRAFT_EXPIRED`; an online draft needs a verified payment (SUCCEEDED, exact amount, not used before) else 422 `PAYMENT_NOT_VERIFIED`; when the slot went away after payment the whole payment is refunded at once and the answer is 409 `SLOT_TAKEN`.',
     request: {
       headers: z.object({ 'Accept-Language': acceptLanguageHeader }),
       body: { content: { 'application/json': { schema: createBookingBody } } },
