@@ -47,6 +47,7 @@ import { createBookingReassignService } from './domain/bookings/bookingReassign.
 import { createBookingCancelService } from './domain/bookings/bookingCancel.service';
 import { createPayoutDetailsService } from './domain/salons/payoutDetails.service';
 import { createFieldEncryption } from './utils/crypto/aesGcm';
+import { createMerchantFinanceService } from './domain/finance/merchantFinance.service';
 import { createSubscriptionsService } from './domain/subscriptions/subscriptions.service';
 import { createPayoutsService } from './domain/payouts/payouts.service';
 import { PayoutsRepository } from './repositories/payouts.repository';
@@ -419,8 +420,15 @@ const buildServices = (
     logger,
   });
   // Every booking status change tells the apps (sockets) and starts the refund it owes.
+  const payoutsRepository = new PayoutsRepository();
+  const subscriptionsService = createSubscriptionsService({
+    subscriptions: new SubscriptionsRepository(),
+    salons: new SalonsRepository(),
+    settings,
+    audit,
+  });
   const adminPayouts = createPayoutsService({
-    payouts: new PayoutsRepository(),
+    payouts: payoutsRepository,
     ledgerEntries: ledgerRepository,
     ledger,
     salons: new SalonsRepository(),
@@ -559,11 +567,16 @@ const buildServices = (
             audit,
           }),
         }),
-    adminSubscriptions: createSubscriptionsService({
-      subscriptions: new SubscriptionsRepository(),
+    adminSubscriptions: subscriptionsService,
+    merchantFinance: createMerchantFinanceService({
+      payoutsService: adminPayouts,
+      transactions: transactionsRepository,
+      refunds: refundsRepository,
+      payouts: payoutsRepository,
+      bookings: bookingsRepository,
+      subscriptions: subscriptionsService,
       salons: new SalonsRepository(),
       settings,
-      audit,
     }),
     bookingAdmin,
     bookingBulk: createBookingBulkService({

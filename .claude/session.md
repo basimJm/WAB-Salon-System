@@ -1469,6 +1469,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M22), Architect ✔, QA ✔) - DECISIONS: key rotation needs a re-encryption job (values carry `v1:`); the OTP check reuses `PhoneVerifier.verify` with the owner's stored E.164; the admin "reveal" is a GET that writes an audit entry (reason fixed); a notification to the owner on change is left to SRV-093.
 
+### T-102 — SRV-091 Merchant finance + subscription views
+- Project: `WAB-Server/` (`src/domain/finance/merchantFinance.service.ts`, `src/modules/merchant/finance/*`, `PayoutsService.balanceOf`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (Merchant PRD M22, M23; BUSINESS_DOMAIN §6 FINANCE_VIEW / SUBSCRIPTION_VIEW):
+  - [x] balance card, transactions (with fee/net), refunds, payouts: own salon only, newest first, 10 per page, date range in Amman days (both ends inclusive, validated), JOD strings
+  - [x] only payments that became bookings are listed; other salons' and failed payments never show
+  - [x] each route needs its permission (403 `PERMISSION_DENIED` otherwise); subscription view hides bank references; ending-soon flag from `subscription.warnDaysBefore`; salon without subscription 404
+- Tests: `tests/merchantFinance.test.ts` (12); full gate green, 2220 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M22/M23), Architect ✔, QA ✔) - bank details are in SRV-090; "contact WAB" data is served by `GET /config`; the refund list shows every refund of the salon including pending ones.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

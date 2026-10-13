@@ -76,6 +76,8 @@ export interface PayoutsService {
     status?: PayoutStatus | undefined;
   }): Promise<{ items: Entity<PayoutRaw>[]; total: number }>;
   get(id: string): Promise<Entity<PayoutRaw>>;
+  /** One salon's balance, what is due now and its last payout (also the merchant's finance card). */
+  balanceOf(salonId: string): Promise<SalonBalance>;
   /** Balances of a page of salons (Admin PRD A18). */
   balances(params: PaginationParams): Promise<{ items: SalonBalance[]; total: number }>;
 }
@@ -153,6 +155,27 @@ export const createPayoutsService = (deps: {
       ip: actor.ip,
       userAgent: actor.userAgent,
     });
+
+  const balanceFor = async (salon: { id: string; name: string }): Promise<SalonBalance> => {
+    const [totals, last] = await Promise.all([
+      ledger.totals(salon.id),
+      payouts.latestFor(salon.id),
+    ]);
+    const periodFrom = last?.periodTo ?? EPOCH;
+    const sinceLast = await Promise.all(
+      (['CHARGE', 'GATEWAY_FEE', 'REFUND', 'ADJUSTMENT'] as const).map((type) =>
+        ledgerEntries.sumInPeriod(salon.id, type, periodFrom, now()),
+      ),
+    );
+    return {
+      salonId: salon.id,
+      name: salon.name,
+      totals,
+      dueNow: sinceLast.reduce((sum, v) => sum + v, 0),
+      lastPayout:
+        last === null ? null : { periodTo: last.periodTo, net: last.net, status: last.status },
+    };
+  };
 
   const requirePayout = async (id: string): Promise<Entity<PayoutRaw>> => {
     const found = await payouts.findById(id);
@@ -235,33 +258,15 @@ export const createPayoutsService = (deps: {
 
     get: requirePayout,
 
+    async balanceOf(salonId) {
+      const salon = await salons.findById(salonId);
+      if (salon === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      return balanceFor(salon);
+    },
+
     async balances(params) {
       const page = await salons.findPage({}, params, { name: 1 });
-      const items = await Promise.all(
-        page.items.map(async (salon): Promise<SalonBalance> => {
-          const [totals, last] = await Promise.all([
-            ledger.totals(salon.id),
-            payouts.latestFor(salon.id),
-          ]);
-          const periodFrom = last?.periodTo ?? EPOCH;
-          const sinceLast = await Promise.all(
-            (['CHARGE', 'GATEWAY_FEE', 'REFUND', 'ADJUSTMENT'] as const).map((type) =>
-              ledgerEntries.sumInPeriod(salon.id, type, periodFrom, now()),
-            ),
-          );
-          return {
-            salonId: salon.id,
-            name: salon.name,
-            totals,
-            dueNow: sinceLast.reduce((sum, v) => sum + v, 0),
-            lastPayout:
-              last === null
-                ? null
-                : { periodTo: last.periodTo, net: last.net, status: last.status },
-          };
-        }),
-      );
-      return { items, total: page.meta.total };
+      return { items: await Promise.all(page.items.map(balanceFor)), total: page.meta.total };
     },
   };
 };

@@ -13,6 +13,8 @@ import {
 } from '../../constants/salonServices';
 import { MERCHANT_HOURS_ROUTES } from '../../constants/hours';
 import { MERCHANT_GALLERY_ROUTES } from '../../constants/gallery';
+import { createMerchantFinanceRouter } from './finance/finance.routes';
+import { MERCHANT_FINANCE_ROUTES, MERCHANT_SUBSCRIPTION_ROUTES } from '../../constants/finance';
 import { createMerchantPayoutDetailsRouter } from './payoutDetails/payoutDetails.routes';
 import {
   MERCHANT_PAYOUT_DETAILS_ROUTES,
@@ -29,6 +31,7 @@ import {
   unavailableCatalogRequests,
   unavailableCatalogService,
   unavailableBookingActions,
+  unavailableMerchantFinance,
   unavailablePayoutDetails,
   unavailableGallery,
   unavailableHours,
@@ -170,6 +173,12 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       services.salonProfile?.guard ?? [unavailableGuard],
     ),
   );
+  const finance = createMerchantFinanceRouter(
+    services.merchantFinance ?? unavailableMerchantFinance,
+    services.salonProfile?.guard ?? [unavailableGuard],
+  );
+  mount(router, MERCHANT_FINANCE_ROUTES.base, finance.finance);
+  mount(router, MERCHANT_SUBSCRIPTION_ROUTES.base, finance.subscription);
   mount(
     router,
     MERCHANT_PAYOUT_DETAILS_ROUTES.base,
