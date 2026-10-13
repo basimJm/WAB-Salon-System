@@ -17,6 +17,13 @@ export interface UploadTarget {
   readonly expiresAt: Date;
 }
 
+export interface WriteObjectRequest {
+  readonly key: string;
+  readonly body: Buffer;
+  readonly contentType: string;
+  readonly visibility: StorageVisibility;
+}
+
 export interface ConfirmUploadRequest {
   readonly key: string;
   readonly visibility: StorageVisibility;
@@ -47,6 +54,10 @@ export interface StorageProvider {
   getPublicUrl(key: string): string;
   /** Short-lived URL to read a private object. */
   getSignedUrl(request: SignedUrlRequest): Promise<string>;
+  /** Bytes of a stored object (for server-side processing); `null` when it does not exist. */
+  read(key: string): Promise<Buffer | null>;
+  /** Stores an object written by the server itself (e.g. an image variant). */
+  write(request: WriteObjectRequest): Promise<void>;
   /** Deletes the objects; keys that do not exist are ignored. */
   delete(keys: readonly string[]): Promise<void>;
 }

@@ -115,3 +115,14 @@ export const UPLOAD_ROUTES = {
   licensePresign: '/license/presign',
   licenseConfirm: '/license/confirm',
 } as const;
+
+/** Smaller copies of public images, stored beside the original (SRV-047, BE-72, STO-07). */
+export const IMAGE_VARIANTS = [
+  { name: 'thumb', width: 320 },
+  { name: 'medium', width: 960 },
+] as const;
+export type ImageVariantName = (typeof IMAGE_VARIANTS)[number]['name'];
+export const VARIANT_CONTENT_TYPE = 'image/webp';
+export const VARIANT_EXTENSION = 'webp';
+export const VARIANT_QUALITY = 80;
+export const VARIANT_SEPARATOR = '_';

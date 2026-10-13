@@ -6,5 +6,6 @@ export type {
   StorageProvider,
   UploadTarget,
   UploadUrlRequest,
+  WriteObjectRequest,
 } from './types';
 export { assertObjectKey } from './validation';
