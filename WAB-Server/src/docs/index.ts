@@ -31,6 +31,7 @@ import {
   registerMerchantContentDocs,
 } from '../modules/shared/content/content.openapi';
 import { registerMerchantSalonDocs } from '../modules/merchant/salon/salon.openapi';
+import { registerAdminSalonStateDocs } from '../modules/admin/salons/salonState.openapi';
 import { registerAdminApplicationDocs } from '../modules/admin/applications/applications.openapi';
 import { registerAdminCatalogDocs } from '../modules/admin/catalog/catalog.openapi';
 import {
@@ -55,7 +56,7 @@ const REGISTRARS: Readonly<Record<DocName, readonly Registrar[]>> = {
   common: [registerHealthDocs],
   customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs, registerCustomerBannerDocs, registerCustomerCatalogDocs],
   merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs, registerMerchantCatalogDocs, registerMerchantSalonDocs],
-  admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs],
+  admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs, registerAdminSalonStateDocs],
 };
 
 const buildDocument = (name: DocName): ReturnType<OpenApiGeneratorV31['generateDocument']> => {

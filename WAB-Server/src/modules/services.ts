@@ -9,6 +9,7 @@ import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
+import type { SalonStateService } from '../domain/salons/salonState.service';
 import type { SalonReviewService } from '../domain/salons/salonReview.service';
 import type { SalonApplicationService } from '../domain/salons/salonApplication.service';
 import type { CatalogServiceRaw } from '../models/catalogService.model';
@@ -31,6 +32,7 @@ export interface ApiServices {
   readonly adminContent?: AdminContentServices;
   readonly banners?: BannersService;
   readonly adminApplications?: SalonReviewService;
+  readonly salonState?: SalonStateService;
   /** Salon application (M05-M06); the guard is `merchantRequired` of `installations`. */
   readonly salonApplication?: {
     readonly service: SalonApplicationService;
@@ -163,4 +165,11 @@ export const unavailableSalonReview: SalonReviewService = {
   detail: unavailable,
   approve: unavailable,
   reject: unavailable,
+};
+
+export const unavailableSalonState: SalonStateService = {
+  recompute: unavailable,
+  evaluate: unavailable,
+  setOffline: unavailable,
+  setOnline: unavailable,
 };

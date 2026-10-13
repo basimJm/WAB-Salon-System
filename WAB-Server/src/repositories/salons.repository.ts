@@ -24,12 +24,16 @@ export class SalonsRepository extends BaseRepository<SalonRaw> {
    */
   async transition(
     id: string,
-    from: SalonState,
+    from: SalonState | readonly SalonState[],
     set: Record<string, unknown>,
   ): Promise<Entity<SalonRaw> | null> {
     if (!isObjectIdString(id)) return null;
     const updated = await this.model
-      .findOneAndUpdate({ _id: id, state: from }, { $set: set }, { new: true })
+      .findOneAndUpdate(
+        { _id: id, state: { $in: typeof from === 'string' ? [from] : [...from] } },
+        { $set: set },
+        { new: true },
+      )
       .lean()
       .exec();
     return updated === null ? null : toEntity<SalonRaw>(updated);

@@ -837,7 +837,7 @@
 ### T-054 — SRV-042 Admin approve/reject salon applications + TRIAL subscription
 - Project: `WAB-Server/` (`src/domain/salons/salonReview.service.ts`, `src/modules/admin/applications/*`, `src/models/subscription.model.ts`, `src/repositories/{subscriptions,salons}.repository.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #61 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #62 merged into `server`)
 - Acceptance criteria (Admin PRD A14; BUSINESS_DOMAIN §3.5 subscriptions, §5.13 "on approval create TRIAL, trialEndsAt = approval + subscription.trialDays", CLAUDE.md §5.12):
   - [x] `GET /admin/v1/salons/applications` (admin only): pending by default, any `state` filter, oldest first, paginated (25), with owner name/phone, city, submitted at, resubmission count, rejection reason
   - [x] `GET .../:id`: detail with short-lived signed URLs of the private license documents
@@ -848,6 +848,22 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - the applications queue socket event (`application.created`) and admin email alert come with the sockets/alerts tasks. The completeness engine (SRV-043) moves APPROVED_INCOMPLETE to LIVE. Not run against a real MongoDB.
 - Notes: Next: SRV-043 (completeness engine + state machine).
+
+### T-055 — SRV-043 Completeness engine + salon state machine + SALON_NOT_BOOKABLE
+- Project: `WAB-Server/` (`src/domain/salons/{completeness,salonState.service,bookable}.ts`, `src/modules/admin/salons/*`, `src/constants/salon.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #62 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.2 completeness → state, §11 SALON_NOT_BOOKABLE; CLAUDE.md §5.2/§5.12):
+  - [x] `computeMissing`: COVER, PROFILE_IMAGE, NAME, DESCRIPTION, LOCATION, PHONE, WORKING_HOURS (>=1 open day), SERVICE (>=1), STAFF (>=1 qualified), POLICY (present, cancellation >= 0, >= 1 option, DEPOSIT needs 1-100) in domain order
+  - [x] `recompute(salonId)`: stores `completeness`; `APPROVED_INCOMPLETE` + complete -> `LIVE` (atomic, owner told "salon.live"); a LIVE salon that becomes incomplete stays LIVE, owner told once ("salon.not_bookable"); OFFLINE and application states never move; failed notification only logged
+  - [x] Approval (SRV-042) lands on `LIVE` when already complete, else `APPROVED_INCOMPLETE`, storing completeness
+  - [x] `POST /admin/v1/salons/:id/offline|online` (admin, reason, audit `SALON_SET_OFFLINE|ONLINE`, owner notified): offline only from LIVE/APPROVED_INCOMPLETE, online only from OFFLINE (back to LIVE if complete else APPROVED_INCOMPLETE), else 422 `INVALID_TRANSITION`
+  - [x] `isCustomerVisible` (LIVE + complete) and `assertSalonBookable` (422 `SALON_NOT_BOOKABLE`) for the booking/search tasks
+  - [x] `createStaffFacts`: counts active members who provide services with a service and a working day
+- Tests: `cd WAB-Server && npm test` - 1570 pass; format/lint/typecheck/build green; audit 0. `tests/salonState.test.ts` (30) + 1 more in `tests/salonReview.test.ts`.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) until salon services exist (SRV-050) the SERVICE fact is 0, so no salon can become complete yet; (2) `recompute` has to be called by every profile/service/staff write (SRV-045 onwards); (3) messages are logged only until SRV-093. Not run against a real MongoDB.
+- Notes: Next: SRV-044 (permission model + enforcement middleware).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
