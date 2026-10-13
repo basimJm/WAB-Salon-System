@@ -1363,6 +1363,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - the silent push part of "permission change" comes with the notification core (SRV-093); owner-triggered `access.revoked` for the admin deactivate/delete flows will reuse `AccessEvents`.
 
+### T-094 — SRV-083 Transactions, payment session, server-side verify
+- Project: `WAB-Server/` (`src/models/transaction.model.ts`, `src/repositories/transactions.repository.ts`, `src/domain/payments/payments.service.ts`, `src/modules/customer/payments/*`, `src/constants/payments.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §3.5 transactions, §5.6 step 3, CLAUDE.md §5.10 "payments use idempotency keys and server-side verification", BE-32):
+  - [x] model with documented fields + indexes in `ALL_MODELS`; `TransactionType`/`TransactionStatus` enums
+  - [x] start: ACTIVE customer, own unexpired OTP-confirmed draft with an online option (`PAYMENT_OPTION_NOT_ALLOWED`/`DRAFT_EXPIRED`/`OTP_INVALID`); amount = `dueOnline`; DEPOSIT/FULL type; idempotency key `<draftId>:<attempt>`; running attempt returned again; new attempt after FAILED/CANCELLED; duplicate-key race returns the first
+  - [x] verify: owner only; asks the provider; PENDING stays; SUCCEEDED/FAILED/CANCELLED settle atomically (one winner) with gateway code/message/fee/raw; settled attempts are final; amount mismatch → FAILED
+  - [x] fix: socket hub `close()` waits for the Redis adapter subscriber (flaky "Connection is closed" in tests)
+- Tests: `tests/paymentsService.test.ts` (12) + socket suites run 8× stable; full gate green, 2130 tests; docs regenerated. (I first overwrote the existing `tests/payments.test.ts` of the provider fakes by mistake and restored it from git before the gate.)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `attempt` is an extension of the domain record (needed for the key). Provider errors propagate as 502/503 `ExternalServiceError`; webhook (SRV-084) and the paid booking creation (SRV-085) use `TransactionsRepository.settle`. Not run against a real gateway.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

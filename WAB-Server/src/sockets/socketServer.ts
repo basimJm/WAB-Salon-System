@@ -5,6 +5,7 @@ import { Server, type Namespace, type Socket } from 'socket.io';
 import { AUTHORIZATION_HEADER, BEARER_PATTERN, type TokenScope } from '../constants/auth';
 import {
   SOCKET_ADAPTER_KEY,
+  SOCKET_ADAPTER_READY_TIMEOUT_MS,
   SOCKET_AUTH_FIELD,
   SOCKET_ERRORS,
   SOCKET_MAX_PAYLOAD_BYTES,
@@ -14,6 +15,7 @@ import {
   SOCKET_PING_TIMEOUT_MS,
   SOCKET_ROOMS,
 } from '../constants/sockets';
+import { withTimeout } from '../utils/async/timeout';
 import { verifyAccessToken, type AccessTokenClaims } from '../utils/auth/accessToken';
 import { UnauthorizedError } from '../utils/errors';
 import type { Logger } from '../utils/logger';
@@ -153,11 +155,25 @@ export const createSocketServer = (options: SocketServerOptions): SocketHub => {
       namespaceOf(scope).in(room).disconnectSockets(true);
     },
     // The HTTP server is closed by the caller; here only the sockets and the adapter's subscriber end.
-    close: () => {
+    close: async () => {
       for (const namespace of namespaces.values()) namespace.disconnectSockets(true);
       io.engine.close();
-      subscriber.disconnect();
-      return Promise.resolve();
+      // Let the adapter's subscribe commands finish first: closing a half-open subscriber rejects them.
+      try {
+        if (subscriber.status !== 'ready') {
+          await withTimeout(
+            new Promise<void>((resolve) =>
+              subscriber.once('ready', () => {
+                resolve();
+              }),
+            ),
+            SOCKET_ADAPTER_READY_TIMEOUT_MS,
+          );
+        }
+        await subscriber.quit();
+      } catch {
+        subscriber.disconnect();
+      }
     },
   };
 };

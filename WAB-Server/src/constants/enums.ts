@@ -86,3 +86,9 @@ export const BOOKING_REFUND_STATUSES = [
   'REFUND_FAILED',
 ] as const;
 export type BookingRefundStatus = (typeof BOOKING_REFUND_STATUSES)[number];
+
+/** What a payment attempt pays for (BUSINESS_DOMAIN.md §1 `TransactionType`). */
+export const TRANSACTION_TYPES = ['DEPOSIT', 'FULL'] as const;
+export type TransactionType = (typeof TRANSACTION_TYPES)[number];
+export const TRANSACTION_STATUSES = ['PENDING', 'SUCCEEDED', 'FAILED', 'CANCELLED'] as const;
+export type TransactionStatus = (typeof TRANSACTION_STATUSES)[number];

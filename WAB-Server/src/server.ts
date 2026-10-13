@@ -35,6 +35,8 @@ import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
 import { createCustomerProfileService } from './domain/customers/customerProfile.service';
 import { createBookingActionsService } from './domain/bookings/bookingActions.service';
+import { createPaymentsService } from './domain/payments/payments.service';
+import { TransactionsRepository } from './repositories/transactions.repository';
 import { createBookingBulkService } from './domain/bookings/bookingBulk.service';
 import { createBookingAdminService } from './domain/bookings/bookingAdmin.service';
 import { createBookingQueriesService } from './domain/bookings/bookingQueries.service';
@@ -416,6 +418,14 @@ const buildServices = (
     audit,
     settings,
   });
+  const payments = createPaymentsService({
+    transactions: new TransactionsRepository(),
+    drafts: bookingDraftsRepository,
+    customers: new CustomersRepository(),
+    provider: providers.payments,
+    providerName: config.providers.payments,
+    logger,
+  });
   const bookingCancel = createBookingCancelService({
     hook: bookingEvents,
     bookings: bookingsRepository,
@@ -461,6 +471,7 @@ const buildServices = (
     bookings: bookingCreation,
     bookingActions,
     bookingCancel,
+    payments,
     bookingAdmin,
     bookingBulk: createBookingBulkService({
       bookings: bookingsRepository,
