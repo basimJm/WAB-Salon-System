@@ -1,3 +1,4 @@
+import type { ReportsService } from '../domain/reports/reports.service';
 import type { AlertInbox } from '../domain/alerts/alertInbox.service';
 import type { AnalyticsService } from '../domain/analytics/analytics.service';
 import type { AdminTransactionsService } from '../domain/finance/adminTransactions.service';
@@ -92,6 +93,7 @@ export interface ApiServices {
   readonly adminTransactions?: AdminTransactionsService;
   readonly adminAnalytics?: AnalyticsService;
   readonly adminAlerts?: AlertInbox;
+  readonly adminReports?: ReportsService;
   readonly payoutDetails?: PayoutDetailsService;
   readonly merchantFinance?: MerchantFinanceService;
   readonly adminSubscriptions?: SubscriptionsService;
@@ -437,6 +439,13 @@ export const unavailableAdminRefunds: RefundService = {
   get: unavailable,
   retry: unavailable,
   markManual: unavailable,
+};
+
+export const unavailableAdminReports: ReportsService = {
+  daily: unavailable,
+  weekly: unavailable,
+  monthly: unavailable,
+  aggregateYesterday: unavailable,
 };
 
 export const unavailableAdminAlerts: AlertInbox = {

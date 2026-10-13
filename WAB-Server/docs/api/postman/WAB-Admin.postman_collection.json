@@ -4652,6 +4652,135 @@
       ]
     },
     {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "One business day (Asia/Amman): bookings, payments, refunds, registrations, reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/reports/daily",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "reports",
+                "daily"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            },
+            "description": "Finished days come from the nightly aggregate (computed once if missing); today is live. Installs, active users, funnels and retention need BigQuery (SRV-110) and are not included."
+          }
+        },
+        {
+          "name": "Seven days from `from`: the daily numbers added up plus top salons",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/reports/weekly",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "reports",
+                "weekly"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            }
+          }
+        },
+        {
+          "name": "One month: weekly content, payouts transferred, subscriptions, growth vs previous month",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/reports/monthly",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "reports",
+                "monthly"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": ""
+                }
+              ],
+              "variable": []
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Subscriptions",
       "item": [
         {
