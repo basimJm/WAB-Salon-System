@@ -8,6 +8,8 @@ import type { CustomerAuthService } from '../domain/auth/customerAuth.service';
 import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
+import type { AdminLocationServices } from './admin/locations/locations.routes';
+import type { AdminCrudService } from '../domain/adminCrud/adminCrud.service';
 import type { OtpGate } from '../domain/otp/otpGate.service';
 import { ExternalServiceError } from '../utils/errors';
 
@@ -16,6 +18,9 @@ export interface ApiServices {
   readonly otpGate?: OtpGate;
   readonly appConfig?: AppConfigService;
   readonly locations?: LocationsService;
+  /** `requireAuth('admin', secret)`: every admin resource route sits behind it. */
+  readonly adminGuard?: RequestHandler;
+  readonly adminLocations?: AdminLocationServices;
   readonly content?: { readonly customer: ContentService; readonly merchant: ContentService };
   readonly merchantAuth?: MerchantAuthService;
   readonly installations?: {
@@ -95,4 +100,22 @@ export const unavailableLocationsService: LocationsService = {
 export const unavailableContentService: ContentService = {
   page: unavailable,
   faqs: unavailable,
+};
+
+/** Stands in for `requireAuth` when the server has no auth wiring (tests): the route answers 503. */
+export const unavailableGuard: RequestHandler = (_req, _res, next) => {
+  next(new ExternalServiceError({ unavailable: true }));
+};
+
+const unavailableCrud: AdminCrudService<never> = {
+  list: unavailable,
+  get: unavailable,
+  create: unavailable,
+  update: unavailable,
+};
+
+export const unavailableAdminLocations: AdminLocationServices = {
+  countries: unavailableCrud,
+  cities: unavailableCrud,
+  areas: unavailableCrud,
 };

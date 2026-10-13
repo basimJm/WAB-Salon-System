@@ -757,7 +757,7 @@
 ### T-048 — SRV-030a Admin bootstrap script
 - Project: `WAB-Server/` (`src/seeds/{admin,runAdmin}.ts`, `src/constants/adminSeed.ts`, script `seed:admin`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #55 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #56 merged into `server`)
 - Acceptance criteria (BE-02; Admin PRD §4 single admin; backlog row SRV-030a):
   - [x] `seedAdmin` creates the admin (email trimmed + lower-cased, bcrypt via `hashPassword`); refuses an invalid email, a password under 12 characters, or when any admin exists (never overwrites)
   - [x] `npm run seed:admin` reads `ADMIN_EMAIL`/`ADMIN_PASSWORD` from the environment only, never logs the password
@@ -765,6 +765,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - not run against a real MongoDB. The keys are intentionally not in `AppConfig`/`.env.example` (one-off script input).
 - Notes: Next: SRV-038 in parts (reference data admin, then content, then versions/maintenance).
+
+### T-049 — SRV-038 part 1: admin CRUD for countries, cities, areas
+- Project: `WAB-Server/` (`src/domain/adminCrud/*`, `src/modules/admin/{crud,locations}/*`, `src/constants/adminCrud.ts`, `src/modules/{index,services}.ts`, `src/server.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #56 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE-65; Admin PRD locations; CLAUDE.md §5.12 admin writes with reason + audit + admin scope):
+  - [x] `GET/POST /admin/v1/locations/countries|cities|areas`, `GET/PATCH .../:id`: admin token only (401/403 otherwise), lists paginated (25) with both languages and inactive records
+  - [x] Every write needs a non-blank reason and writes one audit entry (`COUNTRY_CREATE`/`_UPDATE`, ...) with before/after, ip, user agent; invalid input or a missing reason writes nothing
+  - [x] No delete: `active=false`; country code immutable; empty patch rejected; city needs an existing country, area an existing city (400 with field)
+  - [x] Generic `createAdminCrud` + `createAdminCrudRouter` reused by parts 2-3; Swagger + Postman regenerated; 503 when unconfigured
+- Tests: `cd WAB-Server && npm test` - 1465 pass; format/lint/typecheck/build green; audit 0. `tests/adminLocations.test.ts` (9).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - audit is written after the change (same decision as T-043). Deactivating a country/city does not cascade to children. Not run against a real MongoDB.
+- Notes: Next: SRV-038 part 2 (content pages, FAQ, contact info).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
