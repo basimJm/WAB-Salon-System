@@ -101,4 +101,28 @@ export class TransactionsRepository extends BaseRepository<TransactionRaw> {
     );
     return page.items;
   }
+
+  /** Marks the payment as booked in the ledger; `false` when it already was. */
+  async markCharged(id: string, at: Date): Promise<boolean> {
+    if (!isObjectIdString(id)) return false;
+    const updated = await this.model
+      .findOneAndUpdate({ _id: id, chargedAt: { $exists: false } }, { $set: { chargedAt: at } })
+      .exec();
+    return updated !== null;
+  }
+
+  /** Payments older than `cutoff` that back a booking but are not in the ledger (a missed write), oldest first. */
+  async unchargedWithBooking(cutoff: Date, limit: number): Promise<Entity<TransactionRaw>[]> {
+    const page = await this.findPage(
+      {
+        status: 'SUCCEEDED',
+        bookingId: { $exists: true },
+        chargedAt: { $exists: false },
+        createdAt: { $lt: cutoff },
+      },
+      { page: 1, pageSize: limit },
+      { createdAt: 1 },
+    );
+    return page.items;
+  }
 }

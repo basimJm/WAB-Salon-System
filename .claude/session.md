@@ -1417,6 +1417,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: `bookingId` optional and `gatewayRound`/`nextAttemptAt` are extensions of the refunds record; if the refund row cannot be created after a cancellation (database down) it is only logged — the cancellation stays and an admin can issue the refund (no automatic repair job yet); the ledger entry `REFUND` is SRV-087 (`refunded` hook); jobs call `runDue`/`delayed` in SRV-096; the admin alert in SRV-100.
 
+### T-098 — SRV-087 Ledger and salon balance
+- Project: `WAB-Server/` (`src/models/ledgerEntry.model.ts`, `src/repositories/ledger.repository.ts`, `src/domain/ledger/ledger.service.ts`, server wiring)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §3.5 ledgerEntries, §5.6 step 4, §5.14; Merchant PRD M22 "gateway fees are deducted from your payouts"):
+  - [x] append-only collection of signed integer-fils entries (update/delete refused; fractional fils refused); indexes incl. partial unique ones so a payment is charged once and a refund booked once
+  - [x] paid booking → CHARGE +amount (+ GATEWAY_FEE −fee only when the gateway reported one); idempotent; pay on arrival / failed payments book nothing
+  - [x] finished refund → REFUND −amount (fee not returned); idempotent; refund of a payment without booking is not a movement
+  - [x] `totals(salonId)`: balance = Σ and per-kind sums; salons isolated
+  - [x] `reconcile()` books payments/refunds whose write was missed (not before they are 2 min old; late charge keeps a refund waiting)
+- Tests: `tests/ledgerService.test.ts` (11); fake aggregate generalised to sum any field; full gate green, 2176 tests. API docs: no change (no endpoint yet).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - ledger writes are best effort after the booking/refund is stored (logged on failure, repaired by `reconcile`); `chargedAt`/`ledgeredAt` are extension fields; the real aggregate path is not run against MongoDB.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

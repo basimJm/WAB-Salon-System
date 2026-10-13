@@ -45,6 +45,9 @@ import { createBookingAdminService } from './domain/bookings/bookingAdmin.servic
 import { createBookingQueriesService } from './domain/bookings/bookingQueries.service';
 import { createBookingReassignService } from './domain/bookings/bookingReassign.service';
 import { createBookingCancelService } from './domain/bookings/bookingCancel.service';
+import { createLedgerService } from './domain/ledger/ledger.service';
+import { LedgerRepository } from './repositories/ledger.repository';
+import type { BookingCreatedHook } from './domain/bookings/bookingCreation.service';
 import { createBookingCreationService } from './domain/bookings/bookingCreation.service';
 import { BookingsRepository } from './repositories/bookings.repository';
 import { createBookingDraftService } from './domain/bookings/bookingDraft.service';
@@ -383,8 +386,25 @@ const buildServices = (
     settings,
   });
   const transactionsRepository = new TransactionsRepository();
+  const refundsRepository = new RefundsRepository();
+  const ledger = createLedgerService({
+    entries: new LedgerRepository(),
+    transactions: transactionsRepository,
+    refunds: refundsRepository,
+    logger,
+  });
   const fullRefunds = createRefundService({
-    refunds: new RefundsRepository(),
+    hooks: {
+      // The money has left: book it. A missed write is repaired by `ledger.reconcile()` (job).
+      refunded: async (refund) => {
+        try {
+          await ledger.recordRefund(refund);
+        } catch (error) {
+          logger.error({ err: error, refundId: refund.id }, 'ledger refund entry failed');
+        }
+      },
+    },
+    refunds: refundsRepository,
     transactions: transactionsRepository,
     bookings: bookingsRepository,
     provider: providers.payments,
@@ -397,10 +417,21 @@ const buildServices = (
     [bookingEvents, createRefundHook({ refunds: fullRefunds, logger })],
     logger,
   );
+  // A booking made from a payment books the charge in the ledger, then tells the apps.
+  const bookingCreated: BookingCreatedHook = {
+    created: async (booking) => {
+      try {
+        await ledger.recordChargeForBooking(booking.id);
+      } catch (error) {
+        logger.error({ err: error, bookingId: booking.id }, 'ledger charge entry failed');
+      }
+      await bookingEvents.created(booking);
+    },
+  };
   const bookingCreation = createBookingCreationService({
     transactions: transactionsRepository,
     refunds: fullRefunds,
-    hook: bookingEvents,
+    hook: bookingCreated,
     redis,
     drafts: bookingDraftsRepository,
     bookings: bookingsRepository,
