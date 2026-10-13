@@ -3,14 +3,18 @@
 > Every task gets a block (template in `.claude/hooks.md` §3). Keep only the current and last few sessions here; move durable knowledge to `memory.md` and delete stale blocks.
 
 ## Current Session
+
 - Started: 2026-10-12
 - Goal: Set up repo-wide rules, roles, hooks, session and memory for Claude Code.
 
 ### Open / In Progress
+
 - (none)
 
 ### Completed
+
 ### T-001 — Repo-wide Claude rules, roles, hooks, session & memory
+
 - Project: repo root (`.claude/`, `CLAUDE.md`)
 - Branch: `chore/claude-rules-hooks`
 - Status: DONE
@@ -26,6 +30,7 @@
 - Notes: Per-project rules to be added next (user will provide).
 
 ### T-002 — Delivery roadmap & shared integration workflow
+
 - Project: repo root (`ROADMAP.md`, `INTEGRATION_WORKFLOW.md`, `CLAUDE.md`)
 - Branch: `docs/roadmap-integration`
 - Status: DONE
@@ -40,6 +45,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — consistent with CLAUDE.md §4–5 and PRDs.
 
 ### T-004 — Consolidated business domain spec
+
 - Project: repo root (`BUSINESS_DOMAIN.md`, `CLAUDE.md`, `ROADMAP.md`)
 - Branch: `docs/business-domain-spec`
 - Status: DONE
@@ -55,6 +61,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — consistent with PRDs; assumptions listed in §12.
 
 ### T-005 — WAB-Server project rules
+
 - Project: `WAB-Server/` (`WAB-Server/CLAUDE.md`; links in `CLAUDE.md`, `INTEGRATION_WORKFLOW.md`)
 - Branch: `docs/server-rules`
 - Status: DONE
@@ -73,6 +80,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — envelope change applied before contracts exist, so no client breakage.
 
 ### T-006 — WAB-Server task backlog
+
 - Project: `WAB-Server/docs/WAB_Server_Tasks.md`, root docs
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE (PR #5 merged)
@@ -90,6 +98,7 @@
 - Notes: Branch is the cloud-session pinned branch (exception to `<type>/<name>`); all later tasks use `feat/srv-NNN-*`. Next: SRV-001 after merge.
 
 ### T-007 — SRV-001 TypeScript strict project + lint/format/test + folder layout
+
 - Project: `WAB-Server/`
 - Branch: `claude/busy-johnson-2rch94` (cloud-pinned branch, restarted from `main` after PR #5 merged)
 - Status: DONE (PR #6 merged)
@@ -105,6 +114,7 @@
 - Notes: Next after merge: SRV-002.
 
 ### T-008 — SRV-002 Config/env loader + `.env.example`
+
 - Project: `WAB-Server/` (`src/config`, `src/constants/env.ts`, `.env.example`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #6 merged)
 - Status: DONE (PR #7 merged)
@@ -120,6 +130,7 @@
 - Notes: Next after merge: SRV-003.
 
 ### T-009 — SRV-003 Logger with redaction + request id
+
 - Project: `WAB-Server/` (`src/utils/logger`, `src/middlewares/requestId.ts`, `src/constants/logging.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #7 merged)
 - Status: DONE (PR #8 merged)
@@ -134,6 +145,7 @@
 - Notes: Next after merge: SRV-004.
 
 ### T-010 — SRV-004 Error model, error codes, AR/EN locales, Accept-Language
+
 - Project: `WAB-Server/` (`src/utils/errors`, `src/utils/i18n`, `src/middlewares/language.ts`, `src/locales/*.json`, `src/constants/{errorCodes,http,i18n}.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #8 merged)
 - Status: DONE (PR #9 merged)
@@ -149,6 +161,7 @@
 - Notes: Next after merge: SRV-004a (global error handler, process handlers).
 
 ### T-011 — SRV-004a Global error handler, notFound, async wrapper, process handlers
+
 - Project: `WAB-Server/` (`src/middlewares/{errorHandler,notFound}.ts`, `src/utils/{errors/normalize,response/errorResponse,async,process/lifecycle}`, `src/constants/errorMapping.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #9 merged)
 - Status: DONE (PR #10 merged)
@@ -164,6 +177,7 @@
 - Notes: Next after merge: SRV-005. Added dev dep `supertest`.
 
 ### T-012 — SRV-005 Express app factory, namespaces, validate middleware, server entry
+
 - Project: `WAB-Server/` (`src/app.ts`, `src/server.ts`, `src/routes/index.ts`, `src/modules/{customer,merchant,admin}/index.ts`, `src/middlewares/validate.ts`, `src/constants/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #10 merged)
 - Status: DONE (PR #11 merged)
@@ -179,6 +193,7 @@
 - Notes: Next: SRV-005a. User asked me to merge my own PRs from SRV-005 on.
 
 ### T-013 — SRV-005a Success response and pagination helpers
+
 - Project: `WAB-Server/` (`src/utils/response/successResponse.ts`, `src/utils/pagination`, `src/constants/{pagination,messages}.ts`, locales)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #11 merged)
 - Status: DONE (PR #12 merged)
@@ -193,6 +208,7 @@
 - Notes: Next: SRV-006.
 
 ### T-014 — SRV-006 Health and readiness endpoints
+
 - Project: `WAB-Server/` (`src/routes/health.ts`, `src/utils/health`, `src/utils/async/timeout.ts`, `src/constants/health.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #12 merged)
 - Status: DONE (PR #13 merged)
@@ -207,6 +223,7 @@
 - Notes: User said "complete": I merge my own PRs and continue the backlog. Next: SRV-007.
 
 ### T-015 — SRV-007 Security middleware
+
 - Project: `WAB-Server/` (`src/middlewares/{security,rateLimit,sanitize}.ts`, `src/utils/sanitize`, `src/constants/security.ts`, config `TRUST_PROXY_HOPS`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #13 merged)
 - Status: DONE (PR #14 merged)
@@ -222,6 +239,7 @@
 - Notes: Next: SRV-008.
 
 ### T-016 — SRV-008 Swagger + Postman generation and the "docs after every task" rule
+
 - Project: `WAB-Server/` (`CLAUDE.md` §11, `src/docs/*`, `src/routes/{mount,health.openapi}.ts`, `docs/api/**`, `tests/docs.test.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #14 merged)
 - Status: DONE (PR #15 merged)
@@ -237,6 +255,7 @@
 - Notes: User later said they will merge manually: I no longer merge PRs. Next: SRV-009 (Docker).
 
 ### T-017 — SRV-009 Dockerfile + docker-compose for local development
+
 - Project: `WAB-Server/` (`Dockerfile`, `.dockerignore`, `docker-compose.yml`, `docker/compose.env.example`, `README.md`, `tests/docker.test.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #15 merged)
 - Status: DONE (PR #16 merged by the user)
@@ -252,6 +271,7 @@
 - Notes: GitGuardian flagged 1 "Generic Password" on PR #16 (`docker-compose.yml` line 50: the `${MINIO_ROOT_PASSWORD:?…}` reference, no real secret). Shortened the required-variable message to `:?required`; the original text stays in an earlier commit of the PR, so the check may need to be marked a false positive in the GitGuardian dashboard. Next: SRV-010 (GitHub Actions CI) only after the user merges #16.
 
 ### T-018 — SRV-010 GitHub Actions CI for the server
+
 - Project: repo root `.github/workflows/server-ci.yml`, `WAB-Server/tests/ci.test.ts`
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #16 merged)
 - Status: DONE (PR #17 merged, all checks green)
@@ -266,6 +286,7 @@
 - Notes: First real run: `Secret scan` failed with 403 on `GET /pulls/17/commits` (gitleaks needs `pull-requests: read`); fixed with job-level permissions + test. Contract tests job joins when `contracts/` exists (SRV-111); deploy job is SRV-011 (PENDING on hosting). Next: SRV-012 (Mongo layer) — SRV-011 is PENDING.
 
 ### T-019 — SRV-012 MongoDB connection and base repository
+
 - Project: `WAB-Server/` (`src/utils/database/{connection,plain}.ts`, `src/repositories/base.repository.ts`, `src/constants/database.ts`, `src/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #17 merged)
 - Status: DONE (PR #18 merged)
@@ -281,6 +302,7 @@
 - Notes: Next: SRV-013 (Redis client + lock helper). User rule: merge my own PRs only after ALL CI checks completed and green.
 
 ### T-020 — SRV-013 Redis client and distributed lock helper
+
 - Project: `WAB-Server/` (`src/utils/redis/{client,keys,lock}.ts`, `src/constants/redis.ts`, `src/server.ts`, CI workflow)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #18 merged)
 - Status: DONE (PR #19 merged; CI green incl. the Redis service container: 22 suites / 303 tests)
@@ -296,6 +318,7 @@
 - Notes: Next: SRV-014 (Redis rate-limit helpers). Merge only after ALL CI checks green.
 
 ### T-021 — SRV-014 Redis counter/flag helpers, limiter and rate-limit store
+
 - Project: `WAB-Server/` (`src/utils/redis/{counter,limiter,rateLimitStore,keys}.ts`, `src/middlewares/{rateLimit,security}.ts`, `src/utils/errors/normalize.ts`, `src/constants/{redis,time,errorMapping}.ts`, `src/server.ts`, `src/app.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #19 merged)
 - Status: DONE (PR #20 merged; CI green: Server CI verify with the shared Redis container, Secret scan, GitGuardian)
@@ -312,6 +335,7 @@
 - Notes: Next: SRV-015 (money utils). Merge only after ALL CI checks green.
 
 ### T-022 — SRV-015 Money utils (integer fils, JOD strings, half-up rounding)
+
 - Project: `WAB-Server/` (`src/utils/money/*`, `src/constants/money.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #20 merged)
 - Status: DONE (PR #21 merged; CI green: Server CI verify, Secret scan, GitGuardian)
@@ -330,6 +354,7 @@
 - Next: SRV-016 (time utils). Merge only after ALL CI checks green.
 
 ### T-023 — SRV-016 Time utils (UTC instants, Asia/Amman days, `HH:mm`, DST-safe ranges)
+
 - Project: `WAB-Server/` (`src/utils/time/*`, `src/constants/time.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #21 merged)
 - Status: DONE (PR #22 merged by the user at 12:37:45Z while the verify job was still running; that job then finished green at 12:38:07Z and the push run on `main` was fully green too)
@@ -349,6 +374,7 @@
 - Next: SRV-017 (settings). Merge only after ALL CI checks green.
 
 ### T-024 — WAB-Mobile-Customer project rules
+
 - Project: `WAB-Mobile-Customer/` (`CLAUDE.md`; link in root `CLAUDE.md`)
 - Branch: `claude/amazing-cerf-vc5ja3`
 - Status: DONE
@@ -369,6 +395,7 @@
 - Notes: Branch is the cloud-pinned branch (restarted from `main` after PR #22 merged; exception to `<type>/<name>`). `AGENTS.md` is generated and points at a missing `PROJECT_STRUCTURE.md`; left untouched, CLAUDE.md §2 is the module map. Open: separate Firebase apps for dev (`applicationIdSuffix`) need the owner's Firebase dev project.
 
 ### T-025 — Customer app build variants + CI (Android, iOS, security, lint, hardcode, performance)
+
 - Project: `WAB-Mobile-Customer/` (`build-logic`, `androidApp`, `iosApp`, `core/common`, `core/network`, `composeApp`, `scripts/ci`, `config`) + `.github/workflows/customer-ci.yml`
 - Branch: `claude/amazing-cerf-vc5ja3`
 - Status: DONE (PR #23 merged)
@@ -387,6 +414,7 @@
 - Notes: Legacy debt is in `config/policy-baseline.json` and `config/detekt/baseline.xml`; T-029/T-030 remove the design-system entries. Local runs: `scripts/ci/run_local_checks.sh`.
 
 ### T-029 — Customer design system: tokens, fonts, theme, adaptive layout
+
 - Project: `WAB-Mobile-Customer/core/design-system` (`theme/*`), `composeApp` (App, SplashScreen)
 - Branch: `claude/amazing-cerf-vc5ja3`
 - Status: IN REVIEW
@@ -402,6 +430,7 @@
 - Notes: Template emerald theme, `AppIcons.kt` (1905 lines of hand-drawn vectors) and 40 template components removed.
 
 ### T-030 — Customer base components
+
 - Project: `WAB-Mobile-Customer/core/design-system` (`components/*`, `icons`, `preview`), `feature/sample`, `composeApp`
 - Branch: `claude/amazing-cerf-vc5ja3`
 - Status: IN REVIEW
@@ -417,7 +446,9 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (see T-029). Not built: calendar, country-code picker, salon/service cards, media viewer (feature-level, need data models). Legacy hardcode debt outside the design system stays in `config/policy-baseline.json` (ratchet).
 - Notes: UnstableCollections detekt rule disabled (strong skipping). First CI run found a real compile error (a KDoc containing a slash-star opened a nested comment, so the whole design system failed to compile); fixed, and policy rule Q008 + test now catch it. Loops/review re-run after the fix: policy tests 68 pass, detekt exit 0.
+
 ### T-026 — SRV-017 Settings: model, repository, typed registry, service with Redis cache
+
 - Project: `WAB-Server/` (`src/models/setting.model.ts`, `src/repositories/settings.repository.ts`, `src/domain/settings/*`, `src/constants/settings.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #22 merged)
 - Status: DONE (PR #24 merged by the user seconds after it was marked ready; CI result verified afterwards, see T-027 notes)
@@ -435,6 +466,7 @@
 - Next: SRV-017a (indexes at startup). Merge only after ALL CI checks green.
 
 ### T-027 — SRV-017a Create indexes at startup
+
 - Project: `WAB-Server/` (`src/models/index.ts`, `src/utils/database/indexes.ts`, `src/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #24 merged)
 - Status: DONE (PR #25 merged by the user; PR run and `main` run green — #24 verified green too)
@@ -450,6 +482,7 @@
 - Next: SRV-018 (reference-data seeds). Merge only after ALL CI checks green.
 
 ### T-028 — SRV-018 Reference-data seed: countries, cities, areas (Jordan)
+
 - Project: `WAB-Server/` (`src/models/{country,city,area}.model.ts`, `src/repositories/locations.repository.ts`, `src/seeds/*`, `src/constants/referenceData.ts`, `package.json` script `seed`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #25 merged)
 - Status: DONE (PR #26 merged; all 3 checks green on the head, merged by me)
@@ -466,6 +499,7 @@
 - Next: SRV-019 (demo catalog seed). Merge only after ALL CI checks green.
 
 ### T-029 — SRV-019 Demo catalog seed (dev only)
+
 - Project: `WAB-Server/` (`src/models/catalogService.model.ts`, `src/constants/{enums,demoCatalog}.ts`, `src/seeds/{demoCatalog,runDemo}.ts`, script `seed:demo`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #26 merged)
 - Status: DONE (PR #28 merged by the user)
@@ -481,6 +515,7 @@
 - Next: SRV-020 (audit log + server events writer). Merge only after ALL CI checks green.
 
 ### T-031 — SRV-020 Audit-log writer and server-events writer (append-only)
+
 - Project: `WAB-Server/` (`src/models/{appendOnly,auditLog.model,serverEvent.model}.ts`, `src/repositories/{appendOnly,auditLogs,serverEvents}.repository.ts`, `src/domain/{audit,events}/*`, `src/constants/{audit,enums}.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `main` after PR #28 merged)
 - Status: DONE (PR #30 merged into `server`)
@@ -497,6 +532,7 @@
 - Next: SRV-021 (booking reference number). Merge only after ALL CI checks green.
 
 ### T-024 — ADM-01 Admin foundation: rules, design system, theme, base components, infrastructure, CI
+
 - Project: `WAB-Admin-Dashboard/` (+ `.github/workflows/admin-ci.yml`, root docs)
 - Branch: `claude/keen-noether-jgokyc`
 - Status: IN REVIEW
@@ -513,6 +549,7 @@
 - Notes: Branch is the cloud-pinned branch (restarted from `main`). ASSUMPTIONS to confirm: (1) stack React 19 + Vite + TS (PRD §2.2 says stack TBD); (2) "android/ios" interpreted as Android-class Chromium and iOS-class WebKit browsers/viewports because the admin is a web app; (3) "debug/release" = unminified+source maps vs minified; mock data source excluded from all prod builds; (4) admin auth endpoints (`/admin/v1/auth/login|verify-otp|logout`) are assumed until `contracts/` (INT-01) exists. Not done here: global search, alerts bell data, real pages (ADM-02…05), Socket.IO client, Excel/PDF export. CI workflow itself has not run on GitHub yet.
 
 ### T-032 — SRV-021 Booking reference number and id utils
+
 - Project: `WAB-Server/` (`src/utils/reference/*`, `src/utils/database/{ids,errors}.ts`, `src/constants/reference.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #30 merged; PR targets `server`)
 - Status: DONE (PR #32 merged into `server`)
@@ -528,6 +565,7 @@
 - Next: SRV-022 (provider interfaces). PRs target `server`; merge only after ALL CI checks green.
 
 ### T-033 — SRV-022 Provider interfaces and fakes: OTP and storage
+
 - Project: `WAB-Server/` (`src/providers/{index.ts,otp/*,storage/*}`, `src/constants/providers.ts`, `src/config/*`, `.env.example`, `CLAUDE.md` §4, `README.md`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #32 merged; PR targets `server`)
 - Status: DONE (PR #33 merged into `server` by the user)
@@ -545,6 +583,7 @@
 - Next: SRV-023 (Notifier, PaymentProvider, AnalyticsProvider). PRs target `server`; merge only after ALL CI checks green.
 
 ### T-033 — Customer language and theme handling
+
 - Project: `WAB-Mobile-Customer/core/domain` (`AppLanguage`, `AppearanceSettings`), `core/storage`, `core/di`, `core/ui` (Android locale), `composeApp` (`MainViewModel`, `App`)
 - Branch: `claude/amazing-cerf-vc5ja3`
 - Status: IN REVIEW
@@ -560,6 +599,7 @@
 - Notes: Existing installs whose stored value is a platform tag (`en_US`) still resolve. Numerals-follow-language is a formatter concern (`NumberFormatter` baseline debt), not in this task.
 
 ### T-035 — SRV-024 Identity schemas: customers, members, installations, refreshTokens, admins
+
 - Project: `WAB-Server/` (`src/models/{customer,member,installation,refreshToken,admin}.model.ts`, `src/repositories/identity.repository.ts`, `src/constants/{enums,identity}.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #39 merged; PR targets `server`)
 - Status: DONE (PR #41 merged into `server`)
@@ -574,6 +614,7 @@
 - Next: SRV-025 (JWT + scope middleware).
 
 ### T-036 — SRV-025 JWT access tokens and per-scope auth middleware
+
 - Project: `WAB-Server/` (`src/utils/auth/accessToken.ts`, `src/middlewares/auth.ts`, `src/constants/auth.ts`, `src/config/*`, `src/types/express.d.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #41 merged; PR targets `server`)
 - Status: DONE (PR #42 merged into `server`)
@@ -589,6 +630,7 @@
 - Next: SRV-026 (refresh tokens: hashed storage, rotation, family revocation).
 
 ### T-037 — SRV-026 Refresh tokens: hashed storage, rotation, family revocation
+
 - Project: `WAB-Server/` (`src/domain/auth/refreshTokens.service.ts`, `src/repositories/identity.repository.ts`, `src/constants/auth.ts`, `tests/refreshTokens.test.ts`, `tests/helpers/fakeModel.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #42 merged; PR targets `server`)
 - Status: DONE (PR #43 merged into `server`; GitHub Actions had no runner, verified locally)
@@ -603,6 +645,7 @@
 - Next: SRV-027 (OTP pre-check endpoint).
 
 ### T-038 — SRV-027 OTP pre-check endpoint, platform limits, wrong-attempt report
+
 - Project: `WAB-Server/` (`src/domain/otp/otpGate.service.ts`, `src/modules/shared/otp/*`, `src/modules/services.ts`, `src/constants/otp.ts`, `src/app.ts`, `src/server.ts`, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #43 merged; PR targets `server`)
 - Status: DONE (PR #44 merged into `server`)
@@ -619,6 +662,7 @@
 - Next: SRV-028 (customer auth).
 
 ### T-039 — SRV-028 Customer register/login/refresh/logout/change-phone via Firebase ID token
+
 - Project: `WAB-Server/` (`src/domain/auth/customerAuth.service.ts`, `src/modules/customer/auth/*`, `src/constants/customerAuth.ts`, `src/repositories/identity.repository.ts`, `src/server.ts`, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #44 merged; PR targets `server`)
 - Status: DONE (PR #45 merged into `server`)
@@ -636,6 +680,7 @@
 - Next: SRV-029 (merchant member login).
 
 ### T-040 — SRV-029 Merchant member login via Firebase ID token
+
 - Project: `WAB-Server/` (`src/domain/auth/{merchantAuth.service,phoneVerifier,sessionTokens}.ts`, `src/modules/merchant/auth/*`, `src/modules/shared/auth/auth.schemas.ts`, `src/constants/merchantAuth.ts`, `src/repositories/identity.repository.ts`, `src/server.ts`, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #45 merged; PR targets `server`)
 - Status: DONE (PR #46 merged into `server`)
@@ -652,6 +697,7 @@
 - Next: SRV-030 (admin login).
 
 ### T-041 — SRV-030 Admin password check with lockout, idle-timeout sessions, refresh/logout
+
 - Project: `WAB-Server/` (`src/domain/auth/adminAuth.service.ts`, `src/utils/auth/password.ts`, `src/modules/admin/auth/*`, `src/constants/adminAuth.ts`, `src/repositories/identity.repository.ts`, refresh/session token lifetime in seconds, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #46 merged; PR targets `server`)
 - Status: DONE (PR #47 merged into `server`)
@@ -668,6 +714,7 @@
 - Next: SRV-031 (admin email OTP 2FA + login routes).
 
 ### T-042 — SRV-031 Admin email OTP (2FA) and the two-step login routes
+
 - Project: `WAB-Server/` (`src/domain/auth/adminLogin.service.ts`, `src/domain/auth/adminAuth.service.ts`, `src/modules/admin/auth/*`, `src/constants/adminAuth.ts`, `src/locales/*`, `src/server.ts`, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #47 merged; PR targets `server`)
 - Status: DONE (PR #49 merged into `server`)
@@ -683,6 +730,7 @@
 - Next: SRV-032 (account lifecycle).
 
 ### T-043 — SRV-032 Account lifecycle: blocking, deletion grace period, purge, member deactivation
+
 - Project: `WAB-Server/` (`src/domain/auth/accountLifecycle.service.ts`, `src/constants/accountLifecycle.ts`, `src/repositories/identity.repository.ts`, `.github/workflows/server-ci.yml` + `tests/ci.test.ts` (build-only CI, requested by the user; the commit missed PR #49 because it was merged first))
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #49 merged; PR targets `server`)
 - Status: DONE (PR #50 merged into `server`; the CI removal followed in PR #51)
@@ -698,6 +746,7 @@
 - Next: SRV-033 (installations register/update).
 
 ### T-044 — SRV-033 Installations: register/update device, FCM token, push switch, identity link
+
 - Project: `WAB-Server/` (`src/domain/installations/installations.service.ts`, `src/modules/shared/installations/*`, `src/constants/installations.ts`, `src/middlewares/auth.ts` (`optionalAuth`), `src/repositories/identity.repository.ts`, `src/server.ts`, docs)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #51 merged; PR targets `server`)
 - Status: IN REVIEW
@@ -714,6 +763,7 @@
 - Next: SRV-034 is PENDING (Firebase credentials); next runnable task in order: SRV-035.
 
 ### T-045 — SRV-035 App config endpoint (version policy, maintenance, contact info)
+
 - Project: `WAB-Server/` (`src/domain/appConfig`, `src/modules/shared/appConfig`, `src/models/{appVersion,maintenance,contactInfo}.model.ts`, `src/repositories/appConfig.repository.ts`, `src/utils/version.ts`, `src/constants/appConfig.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #52 merged; PR targets `server`)
 - Status: DONE (PR #53 merged into `server`)
@@ -728,6 +778,7 @@
 - Notes: Next: SRV-036 (public reference data).
 
 ### T-046 — SRV-036 Public countries, cities, areas
+
 - Project: `WAB-Server/` (`src/domain/locations`, `src/modules/shared/locations`, `src/constants/locations.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #53 merged; PR targets `server`)
 - Status: DONE (PR #54 merged into `server`)
@@ -741,6 +792,7 @@
 - Notes: Next: SRV-037 (public content).
 
 ### T-047 — SRV-037 Public content: privacy/terms/about, FAQ
+
 - Project: `WAB-Server/` (`src/domain/content`, `src/modules/shared/content`, `src/models/{contentPage,faq}.model.ts`, `src/constants/content.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #54 merged; PR targets `server`)
 - Status: DONE (PR #55 merged into `server`)
@@ -755,6 +807,7 @@
 - Notes: Next: SRV-038 (admin CRUD for reference data, content, versions, maintenance).
 
 ### T-048 — SRV-030a Admin bootstrap script
+
 - Project: `WAB-Server/` (`src/seeds/{admin,runAdmin}.ts`, `src/constants/adminSeed.ts`, script `seed:admin`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #55 merged; PR targets `server`)
 - Status: DONE (PR #56 merged into `server`)
@@ -767,6 +820,7 @@
 - Notes: Next: SRV-038 in parts (reference data admin, then content, then versions/maintenance).
 
 ### T-049 — SRV-038 part 1: admin CRUD for countries, cities, areas
+
 - Project: `WAB-Server/` (`src/domain/adminCrud/*`, `src/modules/admin/{crud,locations}/*`, `src/constants/adminCrud.ts`, `src/modules/{index,services}.ts`, `src/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #56 merged; PR targets `server`)
 - Status: DONE (PR #57 merged into `server`)
@@ -781,6 +835,7 @@
 - Notes: Next: SRV-038 part 2 (content pages, FAQ, contact info).
 
 ### T-050 — SRV-038 parts 2-3: admin CRUD for content pages, FAQ, contact info, app versions, maintenance
+
 - Project: `WAB-Server/` (`src/domain/adminCrud/content.ts`, `src/modules/admin/{crud,content}/*`, `src/constants/adminContent.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #57 merged; PR targets `server`)
 - Status: DONE (PR #58 merged into `server`)
@@ -795,6 +850,7 @@
 - Notes: LESSON: chain gate commands with `&&`/`set -e`; in PR #57 a `;`-chained gate let a lint failure through to a commit (fixed in the same PR before merge). Next: SRV-039 (banners).
 
 ### T-051 — SRV-039 Banners: admin CRUD + live-by-gender query
+
 - Project: `WAB-Server/` (`src/models/banner.model.ts`, `src/domain/{banners,adminCrud/banners.ts}`, `src/modules/{admin,customer}/banners/*`, `src/constants/banners.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #58 merged; PR targets `server`)
 - Status: DONE (PR #59 merged into `server`)
@@ -808,6 +864,7 @@
 - Notes: Next: SRV-040 (catalog services).
 
 ### T-052 — SRV-040 Catalog services: admin CRUD + list by gender
+
 - Project: `WAB-Server/` (`src/domain/catalog`, `src/modules/{shared,admin}/catalog/*`, `src/constants/catalog.ts`, `src/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #59 merged; PR targets `server`)
 - Status: DONE (PR #60 merged into `server`)
@@ -820,6 +877,7 @@
 - Notes: Next: SRV-041 (salon schema + owner application).
 
 ### T-053 — SRV-041 Salon schema + owner application (apply, status, resubmit)
+
 - Project: `WAB-Server/` (`src/models/salon.model.ts`, `src/domain/salons/salonApplication.service.ts`, `src/modules/merchant/salon/*`, `src/constants/salon.ts`, `src/repositories/salons.repository.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #60 merged; PR targets `server`)
 - Status: DONE (PR #61 merged into `server`)
@@ -835,6 +893,7 @@
 - Notes: LESSON: do not combine `set -e` with `grep ... || true` gates; use `&&` chains and print `exit=$?`. Next: SRV-042 (admin approve/reject).
 
 ### T-054 — SRV-042 Admin approve/reject salon applications + TRIAL subscription
+
 - Project: `WAB-Server/` (`src/domain/salons/salonReview.service.ts`, `src/modules/admin/applications/*`, `src/models/subscription.model.ts`, `src/repositories/{subscriptions,salons}.repository.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #61 merged; PR targets `server`)
 - Status: DONE (PR #62 merged into `server`)
@@ -850,6 +909,7 @@
 - Notes: Next: SRV-043 (completeness engine + state machine).
 
 ### T-055 — SRV-043 Completeness engine + salon state machine + SALON_NOT_BOOKABLE
+
 - Project: `WAB-Server/` (`src/domain/salons/{completeness,salonState.service,bookable}.ts`, `src/modules/admin/salons/*`, `src/constants/salon.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #62 merged; PR targets `server`)
 - Status: DONE (PR #63 merged into `server`)
@@ -866,6 +926,7 @@
 - Notes: Next: SRV-044 (permission model + enforcement middleware).
 
 ### T-056 — SRV-044 Permission model + enforcement middleware
+
 - Project: `WAB-Server/` (`src/constants/permissions.ts`, `src/domain/permissions/permissions.ts`, `src/middlewares/permission.ts`, `src/types/express.d.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #63 merged; PR targets `server`)
 - Status: DONE (PR #64 merged into `server`)
@@ -880,6 +941,7 @@
 - Notes: Next: SRV-045 (salon profile/location/contacts endpoints).
 
 ### T-057 — SRV-045 Salon profile / location / contacts endpoints
+
 - Project: `WAB-Server/` (`src/domain/salons/salonProfile.service.ts`, `src/domain/locations/place.ts`, `src/modules/merchant/salon/profile.*`, `src/repositories/salons.repository.ts` (`patch`))
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #64 merged; PR targets `server`)
 - Status: DONE (PR #65 merged into `server`)
@@ -896,6 +958,7 @@
 - Notes: Next: SRV-046 (uploads module).
 
 ### T-058 — SRV-046 Uploads module: presign, confirm, verification of used keys
+
 - Project: `WAB-Server/` (`src/domain/uploads/uploads.service.ts`, `src/modules/shared/uploads/*`, `src/models/upload.model.ts`, `src/repositories/uploads.repository.ts`, `src/constants/uploads.ts`, hooks in salon application/profile services)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #65 merged; PR targets `server`)
 - Status: DONE (PR #66 merged into `server`)
@@ -911,6 +974,7 @@
 - Notes: Next: SRV-047 (image size variants).
 
 ### T-059 — SRV-047 Image size variants (thumbnails) after upload confirmation
+
 - Project: `WAB-Server/` (`src/domain/uploads/variants.ts`, `src/providers/storage/*` (`read`, `write`), `src/constants/uploads.ts`, hook in `uploads.service.ts` and `server.ts`; new dependency `sharp`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #66 merged; PR targets `server`)
 - Status: DONE (PR #67 merged into `server`)
@@ -926,6 +990,7 @@
 - Notes: Next: SRV-048 (gallery).
 
 ### T-060 — SRV-048 Salon gallery CRUD + ordering
+
 - Project: `WAB-Server/` (`src/models/galleryItem.model.ts`, `src/domain/gallery/gallery.service.ts`, `src/modules/merchant/gallery/*`, `src/repositories/gallery.repository.ts`, `src/constants/gallery.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #67 merged; PR targets `server`)
 - Status: DONE (PR #68 merged into `server`)
@@ -942,13 +1007,14 @@
 - Notes: Next: SRV-049 (weekly schedule, closures, open/closed).
 
 ### T-061 — SRV-049 Weekly schedule, exceptional closures, open/closed and today's hours
+
 - Project: `WAB-Server/` (`src/domain/salons/{hours,hoursService}.ts`, `src/modules/merchant/hours/*`, `src/models/salonClosure.model.ts`, `src/repositories/closures.repository.ts`, `src/constants/hours.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #68 merged; PR targets `server`)
 - Status: DONE (PR #69 merged into `server`)
 - Acceptance criteria (NFR-12 Asia/Amman; BUSINESS_DOMAIN §3.3 weeklySchedule/salonClosures, §5.3 open/closed, §5.12 conflicts, §6 WORKING_HOURS_MANAGE; Merchant PRD M15):
   - [x] `todaysHours(schedule, closures, now, tz)`: local date of `now` (Amman day changes at 21:00 UTC), closed when a closure covers it (ends inclusive; reason returned) or the weekday is off, `isOpenNow` for [open, close); `closureOn(date, closures)`
   - [x] `GET /merchant/v1/salon/hours`: weekly schedule (Saturday→Friday), closures that have not ended (`editable` = starts after today), today's status
-  - [x] `PUT .../weekly`: exactly 7 distinct days, valid `HH:mm`, working days on the slot grid (`booking.slotMinutes`) with close after open; off days not validated for order; stored in canonical order; completeness recomputed (WORKING_HOURS) 
+  - [x] `PUT .../weekly`: exactly 7 distinct days, valid `HH:mm`, working days on the slot grid (`booking.slotMinutes`) with close after open; off days not validated for order; stored in canonical order; completeness recomputed (WORKING_HOURS)
   - [x] Closures: add (today or later, `to` >= `from`, real dates, reason <= 300), edit/delete only closures that start after today (else 422 `INVALID_TRANSITION`), own salon only (404 otherwise)
   - [x] `ScheduleConflicts` hook: a non-empty list answers 409 `SCHEDULE_CONFLICT` listing booking ids and saves nothing (default finds none until bookings exist)
   - [x] `salonClosures` model + `{salonId, to}` index in `ALL_MODELS`; Swagger + Postman regenerated
@@ -958,6 +1024,7 @@
 - Notes: Next: SRV-050 (salon services CRUD + catalog requests).
 
 ### T-062 — SRV-050 Salon services CRUD + catalog requests (+ admin decision)
+
 - Project: `WAB-Server/` (`src/domain/salonServices/*`, `src/domain/catalog/catalogRequests.service.ts`, `src/modules/merchant/{services,catalogRequests}/*`, `src/modules/admin/catalogRequests/*`, models `salonService`/`catalogRequest`, `src/constants/salonServices.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #69 merged; PR targets `server`)
 - Status: DONE (PR #70 merged into `server`)
@@ -973,6 +1040,7 @@
 - Notes: Next: SRV-051 (team members CRUD).
 
 ### T-063 — SRV-051 Team members CRUD, roles, permission editor, deactivation
+
 - Project: `WAB-Server/` (`src/domain/team/team.service.ts`, `src/modules/merchant/team/*`, `src/constants/team.ts`, `MembersRepository.patch`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #70 merged; PR targets `server`)
 - Status: DONE (PR #71 merged into `server`)
@@ -987,6 +1055,7 @@
 - Notes: Next: SRV-052 (staff profile).
 
 ### T-064 — SRV-052 Staff profile: providesServices, skills, bride qualification, working days
+
 - Project: `WAB-Server/` (`src/domain/team/staff.service.ts`, `src/modules/merchant/team/staff.*`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #71 merged; PR targets `server`)
 - Status: DONE (PR #72 merged into `server`)
@@ -1002,6 +1071,7 @@
 - Notes: Next: SRV-053 (staff leaves).
 
 ### T-065 — SRV-053 Staff leaves CRUD
+
 - Project: `WAB-Server/` (`src/domain/team/leaves.service.ts`, `src/modules/merchant/team/leaves.*`, `src/models/staffLeave.model.ts`, `src/repositories/leaves.repository.ts`, `src/constants/leaves.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #72 merged; PR targets `server`)
 - Status: DONE (PR #73 merged into `server`)
@@ -1016,6 +1086,7 @@
 - Notes: Next: SRV-054 (salon policies).
 
 ### T-066 — SRV-054 Salon policies
+
 - Project: `WAB-Server/` (`src/domain/salons/policy.service.ts`, `src/modules/merchant/policy/*`, `src/constants/salon.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #73 merged; PR targets `server`)
 - Status: DONE (PR #74 merged into `server`)
@@ -1029,6 +1100,7 @@
 - Notes: This completes the merchant salon-setup block (SRV-041..054). Next in order: SRV-055 (check the backlog row).
 
 ### T-067 — SRV-055 Admin salon list, overview and gender change
+
 - Project: `WAB-Server/` (`src/domain/salons/adminSalons.service.ts`, `src/modules/admin/salons/adminSalons.*`; fake model gained dotted `$set` and `$regex`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #74 merged; PR targets `server`)
 - Status: DONE (PR #75 merged into `server`)
@@ -1042,6 +1114,7 @@
 - Notes: Next: SRV-056 (conflict preview API) — depends on bookings; check whether it is runnable.
 
 ### T-068 — SRV-056 Conflict detection over upcoming bookings (wired into every schedule/team change)
+
 - Project: `WAB-Server/` (`src/domain/salons/conflicts.ts`, hooks in hours/staff/leaves/team/adminSalons services, `src/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #75 merged; PR targets `server`)
 - Status: IN REVIEW
@@ -1055,6 +1128,7 @@
 - Notes: Next: SRV-057 (salon search basic).
 
 ### T-069 — SRV-057 Salon search (basic)
+
 - Project: `WAB-Server/` (`src/domain/search`, `src/modules/customer/search`, `src/constants/search.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1066,6 +1140,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - recommended/favorites lookups are placeholders until SRV-066/062; nearest sorting is SRV-058.
 
 ### T-070 — SRV-058 Nearest sorting with distance
+
 - Project: `WAB-Server/` (`src/domain/search`, `src/modules/customer/search`, `src/constants/search.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1077,6 +1152,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - candidates are pruned by the 2dsphere index then sorted in memory (bounded by the radius); a `$geoNear` pipeline would need aggregation support in the repository layer.
 
 ### T-071 — SRV-060 Salon details and staff sheet
+
 - Project: `WAB-Server/` (`src/domain/salonDetails`, `src/modules/customer/salonDetails`, `src/constants/salonDetails.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1089,6 +1165,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - last names never returned; reviews preview/staff reviews come with SRV-063; DAY_OFF means the staff member has no working day today.
 
 ### T-072 — SRV-061 Home aggregate
+
 - Project: `WAB-Server/` (`src/domain/home`, `src/modules/customer/home`, `src/constants/home.ts`, `src/server.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1100,6 +1177,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - composes the banner, catalog and search services (no duplicated queries); unread count is a placeholder `UnreadLookup` until the notification core (SRV-093).
 
 ### T-073 — SRV-062 Favorites
+
 - Project: `WAB-Server/` (`src/models/favorite.model.ts`, `src/repositories/favorites.repository.ts`, `src/domain/favorites`, `src/modules/customer/favorites`, `SearchService.cards`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1112,6 +1190,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `total` counts saved rows, so a page can hold fewer cards than `pageSize` when a salon went offline; customer deletion purge (SRV-032) does not yet delete favorites (follow-up with the purge wiring).
 
 ### T-074 — SRV-063 Reviews: submit and list
+
 - Project: `WAB-Server/` (`src/models/review.model.ts`, `src/repositories/reviews.repository.ts`, `src/domain/reviews`, `src/modules/customer/reviews`, `src/constants/reviews.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1125,6 +1204,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `rating` averages are maintained by SRV-064 (approve/reject/remove); until then summaries stay 0. Admin notification "review pending" comes with the notification core.
 
 ### T-075 — SRV-064 Admin review moderation and rating recompute
+
 - Project: `WAB-Server/` (`src/domain/reviews/adminReviews.service.ts`, `src/modules/admin/reviews`, `ReviewsRepository.transition|approvedTotals`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1138,6 +1218,7 @@
 - API docs: updated.
 
 ### T-076 — SRV-065 Customer profile, avatar, delete account
+
 - Project: `WAB-Server/` (`src/domain/customers`, `src/modules/customer/profile`, `CustomersRepository.patch`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1151,6 +1232,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `accountLifecycle` is now a shared const in `buildServices`. The guest nickname/gender stay on the device (PRD). Push switch already exists under `/installations/push-enabled`.
 
 ### T-077 — SRV-066 Recommended placements
+
 - Project: `WAB-Server/` (`src/models/recommendedPlacement.model.ts`, `src/repositories/placements.repository.ts`, `src/domain/placements`, `src/modules/admin/placements`, search ordering)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1163,6 +1245,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - `amountPaid` is JOD string at the API, fils in storage. Not done: the `recommended` flag on the admin salons list/detail (A19) and "Recommended clicks per salon" analytics.
 
 ### T-078 — SRV-067 Pricing and deposit calculator
+
 - Project: `WAB-Server/` (`src/domain/pricing/pricing.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1176,6 +1259,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - pure function, no I/O; used by the draft (SRV-070). Whether the chosen option is allowed by the salon policy is checked in the draft, not here. API docs: no change.
 
 ### T-079 — SRV-068 Availability core (pure)
+
 - Project: `WAB-Server/` (`src/domain/availability/availability.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1190,6 +1274,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - pure function; the day start is converted once (plain minute arithmetic on 24 h days, zone rules on DST days). The endpoint, busy lookup and Redis holds are SRV-069. API docs: no change.
 
 ### T-080 — SRV-069 Availability endpoint and Redis holds
+
 - Project: `WAB-Server/` (`src/domain/availability/{availability.service,holds}.ts`, `src/modules/customer/availability`, `src/constants/availability.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1204,6 +1289,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) POST for a read because of the structured body; (2) customer token required (booking is for registered users); (3) holds are written by the draft task (SRV-070) with `HoldsStore.place`; bookings by SRV-071 (`BookingBusyLookup`). Not run against a real MongoDB.
 
 ### T-081 — SRV-070 Booking draft
+
 - Project: `WAB-Server/` (`src/domain/bookings/bookingDraft.service.ts`, `AvailabilityService.plan`, `src/models/{bookingDraft.model,bookingPerson}.ts`, `src/modules/customer/bookingDrafts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1218,6 +1304,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) `bookingDrafts.holdKeys` of the domain became structured `holds[]` (staff, date, start, end) because holds are sorted-set members; (2) the account holder's own gender is not checked against the salon (a mother may book for a bride); (3) slot not free = 422 `SLOT_UNAVAILABLE` at draft time, `SLOT_TAKEN` (409) is for the race at creation (SRV-071); (4) OTP verification and payment fields (`otpVerifiedAt`, `transactionId`) exist on the model but are set by SRV-071/083. Draft discard on `DELETE` frees holds immediately.
 
 ### T-082 — SRV-071 Atomic booking creation (pay on arrival) + OTP confirmation
+
 - Project: `WAB-Server/` (`src/domain/bookings/bookingCreation.service.ts`, `bookingDraft.service.ts#verifyOtp`, `src/models/booking.model.ts`, `src/repositories/bookings.repository.ts`, `src/modules/customer/bookings`, `withLocks`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1233,6 +1320,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) no Mongo transaction yet: the booking is one document, the draft deletion after it is best effort (TTL cleans it); the paid flow will wrap booking + transaction + ledger in one; (2) OTP is a separate endpoint (`verify-otp`) as in §5.6 order, so the paid flow can pay after it; (3) notifications/sockets/jobs are not fired yet (hook `BookingCreatedHook`). Not run against a real MongoDB (`$elemMatch` overlap query).
 
 ### T-083 — SRV-072 Booking state machine core
+
 - Project: `WAB-Server/` (`src/domain/bookings/stateMachine.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: IN REVIEW
@@ -1242,6 +1330,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - pure; SRV-073 persists transitions atomically (`transition` by expected status) and fires refunds/notifications.
 
 ### T-084 — SRV-073 Merchant booking actions
+
 - Project: `WAB-Server/` (`src/domain/bookings/bookingActions.service.ts`, `src/modules/merchant/bookings/*`, `BookingsRepository.transition`, `MembersRepository.incrementCustomers`, booking `rejection`/`cancellation`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1254,6 +1343,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - refunds, notifications, sockets and jobs are not fired yet (`BookingChangedHook` no-op).
 
 ### T-085 — SRV-074 Customer cancel + §5.8 refund calculator
+
 - Project: `WAB-Server/` (`src/domain/bookings/{refunds,bookingCancel.service}.ts`, `src/modules/customer/bookings/*`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1266,6 +1356,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - refund execution/ledger is SRV-086; notifications/sockets later.
 
 ### T-086 — SRV-075 No-show refund calculator
+
 - Project: `WAB-Server/` (`src/domain/bookings/{refunds,bookingActions.service}.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1277,6 +1368,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - execution of refunds is SRV-086.
 
 ### T-087 — SRV-076 Reassign staff for an approved booking
+
 - Project: `WAB-Server/` (`src/domain/bookings/bookingReassign.service.ts`, `BookingsRepository.reassign`, `AvailabilityService.plan({ignoreLeadTime})`, `/merchant/v1/bookings/:id/reassign`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1289,6 +1381,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - a hidden/offline salon cannot reassign (plan needs a bookable salon); notifications come with SRV-093.
 
 ### T-088 — SRV-077 Booking list/detail/calendar per actor
+
 - Project: `WAB-Server/` (`src/domain/bookings/bookingQueries.service.ts`, `src/modules/{customer,merchant,admin}/bookings`, `src/modules/shared/bookings/*`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1302,6 +1395,7 @@
 - Review: PASSED (SE ✔, Mobile ✔ (M08/M09/M11), Architect ✔, QA ✔) - search by customer is a bounded regex lookup (50 customers) — Atlas Search could replace it; closure/leave shading for the calendar is read from the hours/leaves endpoints; the "time since request / auto-cancel countdown" is derived from `createdAt`/`respondBy` by the client.
 
 ### T-089 — SRV-078 Admin booking status changes
+
 - Project: `WAB-Server/` (`src/domain/bookings/bookingAdmin.service.ts`, `src/modules/admin/bookings/*`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1315,6 +1409,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - audit is written after the change (same decision as T-043); admin reassign and manual refunds follow with SRV-086; notifications to both parties via the hook later.
 
 ### T-090 — SRV-079 Conflict resolution (bulk cancel affected bookings)
+
 - Project: `WAB-Server/` (`src/domain/bookings/bookingBulk.service.ts`, `POST /merchant/v1/bookings/cancel-affected`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1327,6 +1422,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - sequential processing (no lock storm); the client repeats the original change after cancelling.
 
 ### T-091 — SRV-080 Socket.IO core
+
 - Project: `WAB-Server/` (`src/sockets/socketServer.ts`, `src/constants/sockets.ts`, `startServer` option `socket`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1339,6 +1435,7 @@
 - Review: PASSED (SE ✔, Mobile ✔ (token in handshake), Architect ✔, QA ✔) - FOUND: Redis adapter subscribes asynchronously, so tests repeat the emit until received. Permission rooms, booking events: SRV-081; `permissions.updated`/`access.revoked`: SRV-082. The access token is checked only at the handshake (15 min lifetime): clients reconnect with a fresh token.
 
 ### T-092 — SRV-081 Booking rooms and events
+
 - Project: `WAB-Server/` (`src/sockets/{rooms,bookingEvents}.ts`, `socketServer.roomsFor`, `server.ts` wiring)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1351,6 +1448,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - rooms are decided at connect: a permission change applies to a live socket in SRV-082 (`permissions.updated` + room refresh). Staff permission check happens per emit (one member read per assigned staff).
 
 ### T-093 — SRV-082 Account socket events
+
 - Project: `WAB-Server/` (`src/domain/access/accessEvents.ts`, `src/sockets/{accessEvents,rooms}.ts`, `SocketHub.join/leave`, team + lifecycle triggers)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1364,6 +1462,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - the silent push part of "permission change" comes with the notification core (SRV-093); owner-triggered `access.revoked` for the admin deactivate/delete flows will reuse `AccessEvents`.
 
 ### T-094 — SRV-083 Transactions, payment session, server-side verify
+
 - Project: `WAB-Server/` (`src/models/transaction.model.ts`, `src/repositories/transactions.repository.ts`, `src/domain/payments/payments.service.ts`, `src/modules/customer/payments/*`, `src/constants/payments.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1377,6 +1476,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `attempt` is an extension of the domain record (needed for the key). Provider errors propagate as 502/503 `ExternalServiceError`; webhook (SRV-084) and the paid booking creation (SRV-085) use `TransactionsRepository.settle`. Not run against a real gateway.
 
 ### T-095 — SRV-084 Payment webhook + reconciliation
+
 - Project: `WAB-Server/` (`src/modules/webhooks/*`, `src/domain/payments/payments.service.ts` (`handleWebhook`, `reconcilePending`, `PaymentSettledHook`), `src/app.ts` raw body, `src/routes/index.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1391,6 +1491,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: header name `X-Signature` and JSON bodies are assumptions until the real gateway (HyperPay candidate) is chosen: only `PAYMENT_WEBHOOK_SIGNATURE_HEADER` and the provider's `handleWebhook` change; no per-route rate limit beyond the global one.
 
 ### T-096 — SRV-085 Paid booking flow
+
 - Project: `WAB-Server/` (`src/domain/bookings/bookingCreation.service.ts`, `src/domain/refunds/directRefunds.ts`, `TransactionsRepository.claimForBooking|releaseClaim|markRefunded|orphansBefore`, `PaymentsService.refundOrphans`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1404,6 +1505,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS: (1) the booking insert is not in a Mongo transaction (claim/release compensation instead; transactions need a replica set in tests); (2) `createDirectRefunds` is the minimal immediate refund — SRV-086 adds refund records, retry/backoff and admin tools behind the same `FullRefundPort`; (3) ledger CHARGE + GATEWAY_FEE entries wait for SRV-087; (4) a late webhook success for an older attempt is not matched to the draft (draft points at the latest attempt) — orphan refund covers it. Not run against a real gateway or MongoDB.
 
 ### T-097 — SRV-086 Refund service
+
 - Project: `WAB-Server/` (`src/models/refund.model.ts`, `src/repositories/refunds.repository.ts`, `src/domain/refunds/{refunds.service,refundHook}.ts`, `src/modules/admin/refunds/*`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1418,6 +1520,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: `bookingId` optional and `gatewayRound`/`nextAttemptAt` are extensions of the refunds record; if the refund row cannot be created after a cancellation (database down) it is only logged — the cancellation stays and an admin can issue the refund (no automatic repair job yet); the ledger entry `REFUND` is SRV-087 (`refunded` hook); jobs call `runDue`/`delayed` in SRV-096; the admin alert in SRV-100.
 
 ### T-098 — SRV-087 Ledger and salon balance
+
 - Project: `WAB-Server/` (`src/models/ledgerEntry.model.ts`, `src/repositories/ledger.repository.ts`, `src/domain/ledger/ledger.service.ts`, server wiring)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1432,6 +1535,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - ledger writes are best effort after the booking/refund is stored (logged on failure, repaired by `reconcile`); `chargedAt`/`ledgeredAt` are extension fields; the real aggregate path is not run against MongoDB.
 
 ### T-099 — SRV-088 Manual payouts
+
 - Project: `WAB-Server/` (`src/models/payout.model.ts`, `src/repositories/payouts.repository.ts`, `src/domain/payouts/payouts.service.ts`, `src/modules/admin/payouts/*`, `LedgerService.recordPayout`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1444,6 +1548,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: `adjustments` is an extension (net includes manual ADJUSTMENT entries; the admin tool to add them comes with the admin finance task SRV-104); amount must equal the net (a different sum = another payout); audit is written after the change (as before); notification is a logger until SRV-093; unique PENDING index not run against MongoDB.
 
 ### T-100 — SRV-089 Manual subscriptions
+
 - Project: `WAB-Server/` (`src/domain/subscriptions/subscriptions.service.ts`, `SubscriptionsRepository.addPayment|expire|markWarned`, `src/modules/admin/subscriptions/*`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1457,6 +1562,7 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - `warnedEnd` is an extension; the expiry job reads active subscriptions in one query (small table: one row per salon); the admin email/in-app alerts and the daily schedule come with SRV-096/100; not run against MongoDB (`$max`).
 
 ### T-101 — SRV-090 Salon bank details (AES-GCM, owner-only, OTP)
+
 - Project: `WAB-Server/` (`src/utils/crypto/aesGcm.ts`, `src/utils/iban.ts`, `src/domain/salons/payoutDetails.service.ts`, merchant + admin routes, config `PAYOUT_ENCRYPTION_KEY`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1470,6 +1576,7 @@
 - Review: PASSED (SE ✔, Mobile ✔ (M22), Architect ✔, QA ✔) - DECISIONS: key rotation needs a re-encryption job (values carry `v1:`); the OTP check reuses `PhoneVerifier.verify` with the owner's stored E.164; the admin "reveal" is a GET that writes an audit entry (reason fixed); a notification to the owner on change is left to SRV-093.
 
 ### T-102 — SRV-091 Merchant finance + subscription views
+
 - Project: `WAB-Server/` (`src/domain/finance/merchantFinance.service.ts`, `src/modules/merchant/finance/*`, `PayoutsService.balanceOf`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1482,6 +1589,7 @@
 - Review: PASSED (SE ✔, Mobile ✔ (M22/M23), Architect ✔, QA ✔) - bank details are in SRV-090; "contact WAB" data is served by `GET /config`; the refund list shows every refund of the salon including pending ones.
 
 ### T-103 — SRV-093 Notification core
+
 - Project: `WAB-Server/` (`src/models/notification.model.ts`, `src/constants/notifications.ts`, `src/domain/notifications/{notifications.service,producers}.ts`, locales, `src/utils/format/localized.ts`, `InstallationsRepository.devicesOf|dropTokens`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1496,6 +1604,7 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS: a member's language is that of their latest device (default ar); the high-priority merchant request message (Android overlay / iOS time-sensitive) is SRV-098 (`priority: HIGH` is already set for requests); `review.published` and subscription/reminder events are defined but their producers come with the review flow / jobs (SRV-096/097); promotions SRV-099.
 
 ### T-104 — SRV-094 Notification endpoints (list, unread count, mark read)
+
 - Project: `WAB-Server/` (`src/domain/notifications/inbox.service.ts`, `src/modules/shared/notifications/*`, `NotificationsRepository.markRead`, `src/constants/notifications.ts`)
 - Branch: `claude/busy-johnson-2rch94`
 - Status: DONE
@@ -1507,7 +1616,22 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - text search is a literal case-insensitive regex on the request language (no Atlas search); merchant list is per member (not per salon). Not run against a real MongoDB.
 
+### T-105 — SRV-095 BullMQ setup, deterministic ids, retry/backoff, dead-letter view
+
+- Project: `WAB-Server/` (`src/jobs/{jobs,bullmq}.ts`, `src/constants/jobs.ts`; dependency `bullmq`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (CLAUDE.md §4.5; BUSINESS_DOMAIN §9 deterministic job ids; server rules §8 jobs retry with backoff from constants and failures logged):
+  - [x] Port `JobScheduler` so domain code never imports BullMQ; adapter on the shared Redis
+  - [x] One job per deterministic id; remove waiting jobs; past time runs at once; id reusable after completion/failure
+  - [x] Retries with exponential backoff (constants), exhausted jobs stay visible (`failed`) and are logged as `job.exhausted`; unknown job name fails, not dropped
+  - [x] Cron schedules (`repeat`) in a time zone, replaced by id; one worker per process
+- Tests: `tests/jobs.test.ts` (11, real Redis, run 3x); full gate green
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISION: ids use `.` not `:` (BullMQ rejects colons), so §9 names read `booking.reminder.<id>.60`. A job running when `remove` is called cannot be removed (handlers must re-check state). Not wired in `main()` (SRV-096). API docs: no change.
+
 ### Pending (next)
+
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
 - INT-01 — Contracts v1 (`contracts/`) — first task of the roadmap.
