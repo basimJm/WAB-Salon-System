@@ -1,4 +1,4 @@
-import { ERROR_CODES } from '../../constants/errorCodes';
+import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { Gender } from '../../constants/enums';
 import type { SalonState } from '../../constants/salon';
 import type { SubscriptionStatus } from '../../constants/subscriptions';
@@ -8,11 +8,12 @@ import type { SalonServicesRepository } from '../../repositories/salonServices.r
 import type { SalonsRepository } from '../../repositories/salons.repository';
 import type { SubscriptionsRepository } from '../../repositories/subscriptions.repository';
 import type { Entity } from '../../utils/database/plain';
-import { BusinessRuleError, NotFoundError } from '../../utils/errors';
+import { BusinessRuleError, ConflictError, NotFoundError } from '../../utils/errors';
 import type { Logger } from '../../utils/logger';
 import type { PaginationMeta, PaginationParams } from '../../utils/pagination';
 import type { AuditWriter } from '../audit/audit.service';
 import type { AdminActor } from '../auth/accountLifecycle.service';
+import type { BookingConflict } from './hoursService';
 import type { SalonStateNotifier, SalonStateService } from './salonState.service';
 
 export interface AdminSalonRow {
@@ -75,12 +76,15 @@ export interface AdminSalonsDeps {
   readonly audit: AuditWriter;
   readonly notifier: SalonStateNotifier;
   readonly logger: Logger;
+  /** Upcoming bookings of the salon; the gender cannot change while any exist. */
+  readonly bookings?: { check(input: { salonId: string }): Promise<BookingConflict[]> };
 }
 
 const escapeRegex = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsService => {
   const { salons, members, subscriptions, salonServices, state, audit, notifier, logger } = deps;
+  const { bookings } = deps;
 
   const row = (s: Entity<SalonRaw>, status: SubscriptionStatus | null): AdminSalonRow => ({
     id: s.id,
@@ -162,6 +166,17 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
       const before = await find(salonId);
       if (before.gender === gender) {
         throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
+      }
+      const open = (await bookings?.check({ salonId })) ?? [];
+      if (open.length > 0) {
+        throw new ConflictError({
+          code: ERROR_CODES.SCHEDULE_CONFLICT,
+          details: open.map((c) => ({
+            field: c.bookingId,
+            code: ERROR_CODES.SCHEDULE_CONFLICT,
+            messageKey: errorMessageKey(ERROR_CODES.SCHEDULE_CONFLICT),
+          })),
+        });
       }
       const updated = await salons.patch(salonId, { set: { gender } });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });

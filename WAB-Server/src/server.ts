@@ -28,6 +28,7 @@ import { CatalogRequestsRepository } from './repositories/catalogRequests.reposi
 import { createAccountLifecycleService } from './domain/auth/accountLifecycle.service';
 import { createPhoneVerifier } from './domain/auth/phoneVerifier';
 import { createAdminSalonsService } from './domain/salons/adminSalons.service';
+import { createConflictFinder, noBookings } from './domain/salons/conflicts';
 import { createPolicyService } from './domain/salons/policy.service';
 import { createLeavesService } from './domain/team/leaves.service';
 import { LeavesRepository } from './repositories/leaves.repository';
@@ -234,6 +235,8 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     },
   });
   const salonServices = new SalonServicesRepository();
+  // Bookings come with the booking module (SRV-071); until then the checks find nothing.
+  const conflictFinder = createConflictFinder({ bookings: noBookings, settings });
   const salonState = createSalonStateService({
     salons: new SalonsRepository(),
     facts: createStaffFacts(new MembersRepository(), (salonId) =>
@@ -262,6 +265,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
       state: salonState,
       audit,
       logger,
+      bookings: conflictFinder.salon,
       // Placeholder until the notification core (SRV-093) sends the real message.
       notifier: {
         changed: (change) => {
@@ -271,19 +275,22 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
       },
     }),
     policy: createPolicyService({ salons: new SalonsRepository(), state: salonState }),
-    // No bookings exist yet, so the default "no conflicts" applies until the booking tasks.
     leaves: createLeavesService({
       leaves: new LeavesRepository(),
       members: new MembersRepository(),
       settings,
+      conflicts: conflictFinder.leave,
     }),
-    // No bookings exist yet, so the default "no conflicts" applies until the booking tasks.
     staff: createStaffService({
       members: new MembersRepository(),
       salons: new SalonsRepository(),
       salonServices,
       settings,
       state: salonState,
+      conflicts: {
+        check: ({ salonId, memberId, after }) =>
+          conflictFinder.staff.check({ salonId, memberId, after }),
+      },
     }),
     team: createTeamService({
       members: new MembersRepository(),
@@ -300,6 +307,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
       phones: createPhoneVerifier(phoneServices),
       storage: providers.storage,
       uploads,
+      deactivationConflicts: conflictFinder.deactivation,
     }),
     catalogRequests: createCatalogRequestsService({
       requests: new CatalogRequestsRepository(),
@@ -324,12 +332,12 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
       uploads,
       state: salonState,
     }),
-    // No bookings exist yet, so the default "no conflicts" applies until the booking tasks.
     hours: createHoursService({
       salons: new SalonsRepository(),
       closures: new ClosuresRepository(),
       settings,
       state: salonState,
+      conflicts: conflictFinder.schedule,
     }),
     gallery: createGalleryService({
       gallery: new GalleryRepository(),

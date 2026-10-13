@@ -1031,7 +1031,7 @@
 ### T-067 — SRV-055 Admin salon list, overview and gender change
 - Project: `WAB-Server/` (`src/domain/salons/adminSalons.service.ts`, `src/modules/admin/salons/adminSalons.*`; fake model gained dotted `$set` and `$regex`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #74 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #75 merged into `server`)
 - Acceptance criteria (Admin PRD A13; BUSINESS_DOMAIN §3.3 "gender immutable after approval except by admin", CLAUDE.md §5.12; Offline/Online already in SRV-043):
   - [x] `GET /admin/v1/salons` (admin only): newest first, paginated (25), filters `state`, `gender`, `cityId`, `q` (name, regex-escaped, case-insensitive), with subscription status
   - [x] `GET /admin/v1/salons/:id`: overview with completeness checklist, offline reason/time, owner, subscription summary (trial end, period end)
@@ -1040,6 +1040,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) upcoming bookings of the salon are not checked on a gender change (no bookings yet): SRV-056/booking tasks must add the guard; (2) services are switched off, not deleted, because staff and bookings point at them; (3) bookings/KPIs (30 d) columns of the PRD list come with the booking tasks. Not run against a real MongoDB.
 - Notes: Next: SRV-056 (conflict preview API) — depends on bookings; check whether it is runnable.
+
+### T-068 — SRV-056 Conflict detection over upcoming bookings (wired into every schedule/team change)
+- Project: `WAB-Server/` (`src/domain/salons/conflicts.ts`, hooks in hours/staff/leaves/team/adminSalons services, `src/server.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #75 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.12; Merchant PRD M15/M17 conflict handling; backlog: pure function + `SCHEDULE_CONFLICT` 409, booking repository interface empty until booking tasks):
+  - [x] Pure checks over `UpcomingBooking[]` (per person: staff, services, start, end) in the salon's time zone (Asia/Amman): new weekly schedule (day off, before open, after close, runs past midnight), closure (booked day inside the range, ends inclusive), staff leave (that member only), staff change (stops providing services, skill removed, working day removed, custom hours not covering the booking), member deactivation (all their bookings); result lists each affected booking once, soonest first, with status
+  - [x] `createConflictFinder({bookings, settings})` implements the `ScheduleConflicts`, staff, leave, deactivation and "whole salon" hooks; wired in `server.ts` into hours (weekly + closure), staff profile, leaves, member deactivation (new hook) and the admin gender change (new hook): each answers 409 `SCHEDULE_CONFLICT` listing booking ids and changes nothing
+  - [x] `BookingLookup` interface; `noBookings` default until the booking module provides upcoming PENDING/APPROVED bookings
+- Tests: `cd WAB-Server && npm test` - 1788 pass; format/lint/typecheck/build green; audit 0. `tests/conflicts.test.ts` (18) incl. Amman midnight and edge-touching cases; end-to-end through the real services; +1 in `tests/adminSalons.test.ts`.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) the bulk resolution (cancel affected / reassign) is the later `conflict-resolve` task; (2) service deactivation only warns in the PRD and does not block: no hook there; (3) the real `BookingLookup` must exclude bookings that already ended and return only PENDING/APPROVED. Not run against a real MongoDB.
+- Notes: Next: SRV-057 (salon search basic).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
