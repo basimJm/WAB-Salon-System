@@ -1,6 +1,7 @@
 # WAB — Memory (durable facts; keep short, replace instead of append)
 
 ## Repo
+
 - Monorepo: `github.com/basimJm/WAB-Salon-System`, default branch `main` (protected by hooks: work on branches + PRs).
 - Requirements live in `<project>/docs/` (PRD > BRD > Design Script); designs in `<project>/design/` (Claude Design export, `.dc.html` + `WAB Standalone/*.html`).
 - `WAB-Server/` code was intentionally deleted (commit "delete last project"); only `BRD.md`, `.gitignore` and `docs/` remain → backend will be rebuilt from scratch in **TypeScript** per `WAB-Server/docs/WAB_Backend_BRD.md`.
@@ -8,6 +9,7 @@
 - Customer app is a KMP template (`WAB-Mobile-Customer/AGENTS.md`, `TECHSTACK.md`): Kotlin 1.10, Compose MP 1.10.3, Ktor 3.4.2, Koin 4.2.0.
 
 ## Server backlog
+
 - BRANCHING (user rule, `.claude/rules.md` §3.8): `server` = master branch for server work, created from `main`. Server task branches start from `origin/server` and PRs target `server`; the user merges `server` → `main`. Restart the cloud branch `claude/busy-johnson-2rch94` from `origin/server` after each merge; sync `main` into `server` by PR when `main` moves (customer-app work lands there).
 - `WAB-Server/docs/WAB_Server_Tasks.md` = ordered small tasks SRV-001…116 (status TODO/PENDING/IN REVIEW/DONE). One task = one branch `feat/srv-NNN-<key>`; next task starts only after previous is merged to `main`; PENDING (owner info / missing SDK) tasks are skipped, not blocking.
 - `WAB-Server/BRD.md` is legacy and superseded (4-digit OTP, Cloudinary, old paths) — do not implement.
@@ -111,11 +113,13 @@
 - SRV-091 done: `createMerchantFinanceService` (`ApiServices.merchantFinance`) with routes `/merchant/v1/finance/*` (FINANCE_VIEW) and `/merchant/v1/subscription` (SUBSCRIPTION_VIEW); `PayoutsService.balanceOf(salonId)`.
 - SRV-093 done: `createNotificationService.notify(event, input)` (events and audiences in `constants/notifications.ts`; template keys `notifications.<event>.<who>.title|body`; `key` makes an occurrence idempotent) and `createNotificationProducers` (hooks/notifiers for bookings, refunds, payouts, applications, salon state, catalog requests) wired in `buildServices`. Jobs call `notify('booking.reminder_1h' | 'booking.pending_30m' | 'subscription.ending_7d' | ...)`; `RefundHooks.started` added. A new event = entry in `NOTIFICATION_EVENTS` + 2 locale keys per audience.
 - SRV-094 done: `createInboxService({notifications, settings, access})` (`domain/notifications/inbox.service.ts`: list/unreadCount/markRead) + shared router `modules/shared/notifications` (`createNotificationsRouter({service, recipientType:'CUSTOMER'|'MEMBER', guard, limiter})`) mounted in customer and merchant; `NotificationsRepository.markRead`; `ApiServices.inbox`; docs via `registerNotificationDocs(prefix, screen)`.
+- SRV-095 done: jobs = port `JobScheduler` (`src/jobs/jobs.ts`: `schedule/remove/repeat/failed/work/close`, `jobId(...parts)` joins with `.`) + `createBullJobScheduler({redis, logger, onFailure?, retry?})` (`src/jobs/bullmq.ts`, prefix `jobs`, queue `wab-jobs`; worker uses `redis.duplicate({maxRetriesPerRequest:null, commandTimeout:undefined})`). Constants `constants/jobs.ts`. Dep `bullmq` 6. NOT wired in `main()` yet: SRV-096 builds it, registers handlers with `work({...})` and closes it on shutdown. Tests with real Redis (`tests/jobs.test.ts`, retry override for speed).
 - MERGE RULE (user, latest): there are no server CI checks any more. After the full local gate is green I merge my own server PR (merge commit) into `server`, then start the next backlog task.
 - CI (user decision 2026-10-13): the server has NO GitHub Actions workflow any more (`server-ci.yml` and its guard test `tests/ci.test.ts` were deleted on request; customer/admin workflows are untouched). Nothing gates a server PR on GitHub except the GitGuardian app, so the local gate is the only gate: format:check, lint, typecheck, build, test, `npm audit --omit=dev`, `npm run docs` before every push.
 - LESSON: never run a mutation loop that can be interrupted without a restore guard: an interrupted run left a mutation in new (untracked) files, invisible to `git status` ' M'. Run mutations on a copy (`git worktree`/clone) or re-run the full suite and `git diff` after.
 
 ## Customer app (WAB-Mobile-Customer)
+
 - Rules: `WAB-Mobile-Customer/CLAUDE.md` (Clean Architecture + MVI by delegate, no hardcoding, AR+EN, all variants, CI, <=300-line files, portrait+landscape). Module map there is real; `AGENTS.md` is generated and partly wrong.
 - Variants: Android flavors `dev`/`prod` x `debug`/`release` (convention plugin `AndroidAppPlugin`, env values in `gradle.properties`, overridable in `local.properties`); iOS configs `Debug|Release-Dev|Prod`, schemes `iosApp-Dev|Prod`, `iosApp/Configuration/{Dev,Prod}.xcconfig` -> Info.plist -> `AppEnvironment` (Koin). Hosts are PLACEHOLDERS until the platform domain is decided. Dev uses the prod application id until a Firebase dev app exists (`DEV_APPLICATION_ID_SUFFIX`, `BUNDLE_ID_SUFFIX`).
 - CI: `.github/workflows/customer-ci.yml` (policy, detekt, secret-scan, Android matrix, iOS matrix, `Customer CI passed`). Local: `WAB-Mobile-Customer/scripts/ci/run_local_checks.sh`; policy scripts + tests in `scripts/ci`; `policy_checks.py <file-length|hardcoded|quality|localization|variants|security|budget|all>`. Legacy debt: `config/policy-baseline.json` + `config/detekt/baseline.xml` (ratchet: may only shrink; `--update-baseline` after fixing).
@@ -128,6 +132,7 @@
 - Appearance (T-033): inject `AppearanceSettings` (core/domain) for language/theme: `language: Flow<AppLanguage>` (Arabic default, `isRtl`, `fromCode` tolerates `ar_JO`), `themeMode`, `setLanguage`, `setThemeMode`, `toggleLanguage()`. `App.kt` takes direction and locale from it.
 
 ## Admin dashboard
+
 - `WAB-Admin-Dashboard/CLAUDE.md` = the rules (read first). React 19 + TS strict + Vite 8, Vitest, Playwright. Commands: `npm run verify` (typecheck, lint 0 warnings, format, tests, `check:hardcoded` incl. 300-line limit), `npm run build:<dev|prod>-<debug|release>`, `npm run check:size -- <variant>`, e2e: `E2E_CHROMIUM_ONLY=true PW_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome npm run e2e` (no WebKit on the runner; CI runs it).
 - Layers: `domain` (interfaces) → `data` (remote/mock repos) → `infrastructure` (config/http/errors/logger/i18n) → `design` (tokens → CSS vars; stylesheets use `var(--…)` only) → `presentation` (components/pages/layout/controllers = MVC) → `app` (container, providers, routes). New static value → `src/constants`/tokens; new text → both `locales/*.json`.
 - Variants = Vite mode `<dev|prod>-<debug|release>`; public env via `.env.dev|.env.prod` or real env (keys in `.env.example`); prod needs https URLs + remote source and compiles out the mock. Files imported by `vite.config.ts` must use relative imports with `.ts` extensions (no `@/` alias, no extensionless).
@@ -136,17 +141,21 @@
 - Android/iOS for the web panel = Chromium (Pixel/Galaxy Tab) and WebKit (iPhone/iPad) projects in `playwright.config.ts`, portrait + landscape.
 
 ## Business spec
+
 - `BUSINESS_DOMAIN.md` = single source for schemas, enums, rules, state machine, permissions, jobs, settings, error codes. Money = integer fils (1 JOD = 1000 fils). Booking draft → OTP → payment → booking (Redis holds 10 min).
 
 ## Server rules
+
 - `WAB-Server/CLAUDE.md`: layers route→middleware→controller→service→repository→schema; `modules/customer|merchant|admin`, shared logic `domain/`, helpers `utils/`; base envelope `{success,message,data,meta?}` / `{success:false,message,error:{code,details?,traceId}}`; AR+EN locales required.
 
 ## Delivery
+
 - Plan: `ROADMAP.md` (P0–P6, tracks SERVICE/SERVER/CUSTOMER/MERCHANT/ADMIN/INT; integration last in P5).
 - Unready dependency → code against `contracts/` fixtures behind an interface, mock switched by `DATA_SOURCE=mock|remote` config (`INTEGRATION_WORKFLOW.md`).
 - First task for any track: INT-01 contracts v1 (not created yet).
 
 ## Key decisions (see CLAUDE.md for full list)
+
 - OTP: Firebase Phone Auth (SMS); length from backend (6 now); backend verifies Firebase ID token.
 - Real-time: Socket.IO + Redis; push: FCM; jobs: BullMQ + cron.
 - Analytics: Firebase Analytics/Crashlytics → BigQuery; server events in MongoDB.
@@ -155,5 +164,6 @@
 - Packages (`wab-payments` Node+KMP; `wab-otp`, `wab-notifications`, `wab-analytics`, `wab-storage` Node only) — interfaces + provider implementations, no business rules.
 
 ## Gotchas
+
 - Tracked Firebase/iOS config files exist in `WAB-Mobile-Customer` (`google-services.json`, `GoogleService-Info.plist`, `Config.xcconfig`); review before making the repo public.
 - Hooks need `python3` on PATH.
