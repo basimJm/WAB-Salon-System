@@ -190,6 +190,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createBookingsRouter({
       service: services.bookings ?? unavailableBookings,
       ...(services.bookingCancel === undefined ? {} : { cancel: services.bookingCancel }),
+      ...(services.bookingQueries === undefined ? {} : { queries: services.bookingQueries }),
       guard: services.installations?.customerRequired ?? unavailableGuard,
       limiter: createRateLimiter({
         ...BOOKING_RATE_LIMIT,

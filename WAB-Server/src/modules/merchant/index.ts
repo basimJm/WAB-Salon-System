@@ -103,6 +103,7 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       services.bookingActions ?? unavailableBookingActions,
       services.salonProfile?.guard ?? [unavailableGuard],
       services.bookingReassign,
+      services.bookingQueries,
     ),
   );
   mount(

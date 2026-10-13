@@ -24,6 +24,7 @@ import {
   unavailableGuard,
   unavailableAdminLogin,
   type ApiServices,
+  unavailableBookingQueries,
 } from '../services';
 import { createOtpRouteLimiter } from '../shared/otp';
 import { createAdminAppConfigRouter, createAdminContentRouter } from './content/content.routes';
@@ -32,6 +33,8 @@ import { createAdminSalonsRouter } from './salons/adminSalons.routes';
 import { createAdminSalonStateRouter } from './salons/salonState.routes';
 import { createAdminPlacementsRouter } from './placements/placements.routes';
 import { ADMIN_PLACEMENT_ROUTES } from '../../constants/placements';
+import { createAdminBookingsRouter } from './bookings/bookings.routes';
+import { ADMIN_BOOKING_ROUTES } from '../../constants/bookings';
 import { createAdminReviewsRouter } from './reviews/reviews.routes';
 import { ADMIN_REVIEW_ROUTES } from '../../constants/reviews';
 import { createAdminApplicationsRouter } from './applications/applications.routes';
@@ -83,6 +86,11 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     router,
     ADMIN_PLACEMENT_ROUTES.base,
     createAdminPlacementsRouter(services.adminPlacements ?? unavailableAdminPlacements, guard),
+  );
+  mount(
+    router,
+    ADMIN_BOOKING_ROUTES.base,
+    createAdminBookingsRouter(services.bookingQueries ?? unavailableBookingQueries, guard),
   );
   mount(
     router,

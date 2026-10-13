@@ -1288,6 +1288,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - a hidden/offline salon cannot reassign (plan needs a bookable salon); notifications come with SRV-093.
 
+### T-088 — SRV-077 Booking list/detail/calendar per actor
+- Project: `WAB-Server/` (`src/domain/bookings/bookingQueries.service.ts`, `src/modules/{customer,merchant,admin}/bookings`, `src/modules/shared/bookings/*`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (Customer PRD bookings list, Merchant PRD M08/M09/M11, Admin A15, BUSINESS_DOMAIN §6 BOOKINGS_VIEW_ALL/OWN):
+  - [x] customer: own bookings only, tabs, search by reference/salon, detail with localized services, money, policy, history (no staff/customer data)
+  - [x] merchant: own salon only; tabs; search by customer name/phone/reference; filters; VIEW_OWN sees only bookings with the member as staff (detail 404 otherwise); no view permission 403; `actions` list; calendar (7 day max, staff filter, own column)
+  - [x] admin: all salons, filters (salon, customer, status, dates, payment, bride), 25 per page, detail
+  - [x] paginated with stable order (soonest first, past newest first); malformed ids/dates/ranges 400
+- Tests: `tests/bookingQueries.test.ts` (20); full gate green, 2084 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M08/M09/M11), Architect ✔, QA ✔) - search by customer is a bounded regex lookup (50 customers) — Atlas Search could replace it; closure/leave shading for the calendar is read from the hours/leaves endpoints; the "time since request / auto-cancel countdown" is derived from `createdAt`/`respondBy` by the client.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

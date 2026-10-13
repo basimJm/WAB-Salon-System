@@ -22,3 +22,19 @@ export const REASON_TEXT_MAX_LENGTH = 300;
 export const CUSTOMER_BOOKING_ROUTES = { cancel: '/:id/cancel' } as const;
 /** Reason code stored when the customer cancels (no code is asked in the app). */
 export const CUSTOMER_CANCEL_REASON_CODE = 'CUSTOMER_REQUEST';
+
+/** Booking queries (SRV-077): list tabs, calendar window, search limits. */
+export const BOOKING_TABS = ['PENDING', 'UPCOMING', 'TODAY', 'PAST'] as const;
+export type BookingTab = (typeof BOOKING_TABS)[number];
+export const CUSTOMER_BOOKING_TABS = ['UPCOMING', 'PAST'] as const;
+/** At most this many days per calendar request (week view). */
+export const CALENDAR_MAX_DAYS = 7;
+/** Free-text search looks at most this many customers/salons up. */
+export const BOOKING_SEARCH_LOOKUP_LIMIT = 50;
+export const BOOKING_SEARCH_MAX_LENGTH = 60;
+export const BOOKING_FILTER_MAX_ITEMS = 20;
+export const MERCHANT_BOOKING_QUERY_ROUTES = { calendar: '/calendar', byId: '/:id' } as const;
+export const ADMIN_BOOKING_ROUTES = { base: '/bookings', byId: '/:id' } as const;
+/** Calendar blocks show only bookings that occupy or occupied the staff member's time. */
+export const CALENDAR_STATUSES = ['PENDING', 'APPROVED', 'COMPLETED', 'NO_SHOW'] as const;
+export type BookingAction = 'APPROVE' | 'REJECT' | 'CANCEL' | 'REASSIGN' | 'COMPLETE' | 'NO_SHOW';
