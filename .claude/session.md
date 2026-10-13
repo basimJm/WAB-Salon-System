@@ -928,7 +928,7 @@
 ### T-060 — SRV-048 Salon gallery CRUD + ordering
 - Project: `WAB-Server/` (`src/models/galleryItem.model.ts`, `src/domain/gallery/gallery.service.ts`, `src/modules/merchant/gallery/*`, `src/repositories/gallery.repository.ts`, `src/constants/gallery.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #67 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #68 merged into `server`)
 - Acceptance criteria (Merchant PRD M14 (videos max 60 s / 50 MB, images 10 MB, reorder, delete), Customer PRD gallery grid S06; BUSINESS_DOMAIN §3.3 galleryItems, §6 GALLERY_MANAGE):
   - [x] `galleryItems` model (+ `{salonId, order}` index) in `ALL_MODELS`
   - [x] `GET/POST /merchant/v1/salon/gallery`, `PUT .../order`, `DELETE .../:id`: `GALLERY_MANAGE` only (owner always), strictly the caller's own salon
@@ -940,6 +940,22 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M14), Architect ✔, QA ✔) - the public/customer gallery list is returned inside the salon details endpoint (later task) using `GalleryService.list`. Reordering is not transactional (updates run in parallel); a crash mid-way could leave duplicate orders, which only affects tie order. Not run against a real MongoDB.
 - Notes: Next: SRV-049 (weekly schedule, closures, open/closed).
+
+### T-061 — SRV-049 Weekly schedule, exceptional closures, open/closed and today's hours
+- Project: `WAB-Server/` (`src/domain/salons/{hours,hoursService}.ts`, `src/modules/merchant/hours/*`, `src/models/salonClosure.model.ts`, `src/repositories/closures.repository.ts`, `src/constants/hours.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #68 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (NFR-12 Asia/Amman; BUSINESS_DOMAIN §3.3 weeklySchedule/salonClosures, §5.3 open/closed, §5.12 conflicts, §6 WORKING_HOURS_MANAGE; Merchant PRD M15):
+  - [x] `todaysHours(schedule, closures, now, tz)`: local date of `now` (Amman day changes at 21:00 UTC), closed when a closure covers it (ends inclusive; reason returned) or the weekday is off, `isOpenNow` for [open, close); `closureOn(date, closures)`
+  - [x] `GET /merchant/v1/salon/hours`: weekly schedule (Saturday→Friday), closures that have not ended (`editable` = starts after today), today's status
+  - [x] `PUT .../weekly`: exactly 7 distinct days, valid `HH:mm`, working days on the slot grid (`booking.slotMinutes`) with close after open; off days not validated for order; stored in canonical order; completeness recomputed (WORKING_HOURS) 
+  - [x] Closures: add (today or later, `to` >= `from`, real dates, reason <= 300), edit/delete only closures that start after today (else 422 `INVALID_TRANSITION`), own salon only (404 otherwise)
+  - [x] `ScheduleConflicts` hook: a non-empty list answers 409 `SCHEDULE_CONFLICT` listing booking ids and saves nothing (default finds none until bookings exist)
+  - [x] `salonClosures` model + `{salonId, to}` index in `ALL_MODELS`; Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1666 pass; format/lint/typecheck/build green; audit 0. `tests/hours.test.ts` (22), Amman boundaries 20:59:59Z/21:00Z, 08:59/09:00, 17:59:59/18:00.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M15), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) closure dates are civil `YYYY-MM-DD` strings (domain says Date): zone-free and sortable; (2) the "cancel affected bookings" option of the conflict dialog needs bookings (SRV-070+); (3) hours that pass midnight stay unsupported (assumption from SRV-016). Not run against a real MongoDB.
+- Notes: Next: SRV-050 (salon services CRUD + catalog requests).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
