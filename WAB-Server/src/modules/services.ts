@@ -9,6 +9,7 @@ import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
+import type { GalleryService } from '../domain/gallery/gallery.service';
 import type { UploadsService } from '../domain/uploads/uploads.service';
 import type { SalonProfileService } from '../domain/salons/salonProfile.service';
 import type { SalonStateService } from '../domain/salons/salonState.service';
@@ -36,6 +37,7 @@ export interface ApiServices {
   readonly adminApplications?: SalonReviewService;
   readonly salonState?: SalonStateService;
   readonly uploads?: UploadsService;
+  readonly gallery?: GalleryService;
   /** Salon profile; `guard` = `requireAuth('merchant')` then `loadMember`. */
   readonly salonProfile?: {
     readonly service: SalonProfileService;
@@ -188,3 +190,10 @@ export const unavailableSalonProfile: SalonProfileService = {
 };
 
 export const unavailableUploads: UploadsService = { presign: unavailable, confirm: unavailable };
+
+export const unavailableGallery: GalleryService = {
+  list: unavailable,
+  add: unavailable,
+  remove: unavailable,
+  reorder: unavailable,
+};

@@ -23,6 +23,8 @@ import { createSalonStateService, createStaffFacts } from './domain/salons/salon
 import { createSalonProfileService } from './domain/salons/salonProfile.service';
 import { loadMember } from './middlewares/permission';
 import { createImageVariants } from './domain/uploads/variants';
+import { createGalleryService } from './domain/gallery/gallery.service';
+import { GalleryRepository } from './repositories/gallery.repository';
 import { createUploadsService } from './domain/uploads/uploads.service';
 import { UploadsRepository } from './repositories/uploads.repository';
 import { createSalonReviewService } from './domain/salons/salonReview.service';
@@ -236,6 +238,12 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     otpGate,
     adminGuard,
     uploads,
+    gallery: createGalleryService({
+      gallery: new GalleryRepository(),
+      storage: providers.storage,
+      uploads,
+      settings,
+    }),
     salonProfile: {
       service: createSalonProfileService({
         salons: new SalonsRepository(),

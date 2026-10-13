@@ -913,7 +913,7 @@
 ### T-059 — SRV-047 Image size variants (thumbnails) after upload confirmation
 - Project: `WAB-Server/` (`src/domain/uploads/variants.ts`, `src/providers/storage/*` (`read`, `write`), `src/constants/uploads.ts`, hook in `uploads.service.ts` and `server.ts`; new dependency `sharp`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #66 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #67 merged into `server`)
 - Acceptance criteria (BE-72, wab-storage STO-07; backlog: sharp, async, keys beside the original, private docs excluded):
   - [x] `createImageVariants.generate(key)`: reads the confirmed original, writes `<name>_thumb.webp` (320 px) and `<name>_medium.webp` (960 px) next to it, WebP quality 80, never enlarged, EXIF rotation applied, metadata (location, camera) dropped
   - [x] `variantKey(key, name)` / `variantKeys(key)` naming helpers (also for deleting variants with the original)
@@ -924,6 +924,22 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) variants are WebP only; (2) there is no durable job: if the process dies right after confirming, no variants exist (clients use the original); a BullMQ retry job can replace the hook when jobs exist; (3) endpoints that return images do not expose variant URLs yet (feature tasks use `variantKey`); (4) `sharp` ships native binaries (prebuilt for linux glibc/musl); the Docker image check is unchanged. The real S3 provider (wab-storage) must implement `read`/`write`.
 - Notes: Next: SRV-048 (gallery).
+
+### T-060 — SRV-048 Salon gallery CRUD + ordering
+- Project: `WAB-Server/` (`src/models/galleryItem.model.ts`, `src/domain/gallery/gallery.service.ts`, `src/modules/merchant/gallery/*`, `src/repositories/gallery.repository.ts`, `src/constants/gallery.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #67 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (Merchant PRD M14 (videos max 60 s / 50 MB, images 10 MB, reorder, delete), Customer PRD gallery grid S06; BUSINESS_DOMAIN §3.3 galleryItems, §6 GALLERY_MANAGE):
+  - [x] `galleryItems` model (+ `{salonId, order}` index) in `ALL_MODELS`
+  - [x] `GET/POST /merchant/v1/salon/gallery`, `PUT .../order`, `DELETE .../:id`: `GALLERY_MANAGE` only (owner always), strictly the caller's own salon
+  - [x] Add: key must be a confirmed `GALLERY_IMAGE` / `GALLERY_VIDEO` upload of this salon (verifier), optional poster for videos (confirmed `GALLERY_IMAGE`), video `durationSec` <= `uploads.videoMaxSec`; images get their `_thumb.webp` key; appended after the highest `order`; at most 100 items (assumption)
+  - [x] Reorder: body must contain every item of the salon exactly once (missing, duplicate, foreign or extra ids -> 400, nothing changes); orders rewritten 0..n-1
+  - [x] Delete: record removed and files deleted (original + variants for images, poster for videos); other salons' items are 404
+  - [x] Items expose `url`, `thumbnailUrl` (client falls back to `url` if the variant is not ready), `durationSec`, `order`
+- Tests: `cd WAB-Server && npm test` - 1644 pass; format/lint/typecheck/build green; audit 0. `tests/gallery.test.ts` (13).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M14), Architect ✔, QA ✔) - the public/customer gallery list is returned inside the salon details endpoint (later task) using `GalleryService.list`. Reordering is not transactional (updates run in parallel); a crash mid-way could leave duplicate orders, which only affects tie order. Not run against a real MongoDB.
+- Notes: Next: SRV-049 (weekly schedule, closures, open/closed).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
