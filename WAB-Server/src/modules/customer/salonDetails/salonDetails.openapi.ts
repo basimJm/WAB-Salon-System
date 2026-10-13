@@ -83,7 +83,13 @@ const staffDetails = staffSummary.extend({
   workingDays: z.array(
     z.object({ day: z.string(), start: z.string().nullable(), end: z.string().nullable() }),
   ),
-  services: z.array(z.object({ catalogServiceId: z.string(), name: z.string() })),
+  services: z.array(
+    z.object({
+      id: z.string().describe('Salon service id (what bookings and availability take)'),
+      catalogServiceId: z.string(),
+      name: z.string(),
+    }),
+  ),
   reviews: reviewsPreview,
 });
 

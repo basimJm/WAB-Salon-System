@@ -4340,6 +4340,10 @@
                           "items": {
                             "type": "object",
                             "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "Salon service id (what bookings and availability take)"
+                              },
                               "catalogServiceId": {
                                 "type": "string"
                               },
@@ -4348,6 +4352,7 @@
                               }
                             },
                             "required": [
+                              "id",
                               "catalogServiceId",
                               "name"
                             ]
@@ -7040,6 +7045,269 @@
                         "language",
                         "pushEnabled",
                         "avatarUrl"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer/v1/salons/{salonId}/availability": {
+      "post": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "Slots of one person on one date with the free eligible staff per slot (a read; POST because of the body)",
+        "description": "Ask once per person; send the times the earlier persons picked in `others` so the same staff member is not offered twice. `reason` explains a day without slots: PAST, TOO_FAR or CLOSED. A slot is available when at least one eligible staff member is free for the whole duration (existing PENDING/APPROVED bookings and live payment holds count as busy).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "salonId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string"
+                  },
+                  "person": {
+                    "type": "object",
+                    "properties": {
+                      "serviceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{24}$/i"
+                        },
+                        "minItems": 1,
+                        "maxItems": 20
+                      },
+                      "isBride": {
+                        "type": "boolean",
+                        "default": false
+                      },
+                      "staffId": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{24}$/i"
+                      }
+                    },
+                    "required": [
+                      "serviceIds"
+                    ]
+                  },
+                  "others": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "staffId": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{24}$/i"
+                        },
+                        "start": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        },
+                        "end": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "staffId",
+                        "start",
+                        "end"
+                      ]
+                    },
+                    "maxItems": 20,
+                    "default": []
+                  },
+                  "draftId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
+                  }
+                },
+                "required": [
+                  "date",
+                  "person"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Slots",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "date": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "enum": [
+                            "PAST",
+                            "TOO_FAR",
+                            "CLOSED",
+                            null
+                          ]
+                        },
+                        "durationMinutes": {
+                          "type": "number"
+                        },
+                        "slots": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "start": {
+                                "type": "string"
+                              },
+                              "end": {
+                                "type": "string"
+                              },
+                              "available": {
+                                "type": "boolean"
+                              },
+                              "eligibleStaffIds": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "start",
+                              "end",
+                              "available",
+                              "eligibleStaffIds"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "date",
+                        "reason",
+                        "durationMinutes",
+                        "slots"
                       ]
                     },
                     "meta": {

@@ -35,7 +35,7 @@ export interface StaffDetails extends StaffSummary {
   readonly yearsOfExperience: number | null;
   readonly customersCount: number;
   readonly workingDays: { day: string; start: string | null; end: string | null }[];
-  readonly services: { catalogServiceId: string; name: string }[];
+  readonly services: { id: string; catalogServiceId: string; name: string }[];
   readonly reviews: { avg: number; count: number; latest: ReviewView[] };
 }
 
@@ -239,7 +239,7 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
       const offered = await salonServices.findMany({
         salonId,
         active: true,
-        catalogServiceId: { $in: wanted },
+        _id: { $in: wanted },
       });
       const entries =
         offered.length === 0
@@ -259,7 +259,12 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
           start: d.start ?? null,
           end: d.end ?? null,
         })),
-        services: entries.map((c) => ({ catalogServiceId: c.id, name: c.name[language] })),
+        services: offered.flatMap((s) => {
+          const entry = entries.find((c) => c.id === s.catalogServiceId);
+          return entry === undefined
+            ? []
+            : [{ id: s.id, catalogServiceId: s.catalogServiceId, name: entry.name[language] }];
+        }),
         reviews: { avg: member.staff.rating.avg, count: member.staff.rating.count, latest },
       };
     },

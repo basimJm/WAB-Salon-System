@@ -1189,6 +1189,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - pure function; the day start is converted once (plain minute arithmetic on 24 h days, zone rules on DST days). The endpoint, busy lookup and Redis holds are SRV-069. API docs: no change.
 
+### T-080 — SRV-069 Availability endpoint and Redis holds
+- Project: `WAB-Server/` (`src/domain/availability/{availability.service,holds}.ts`, `src/modules/customer/availability`, `src/constants/availability.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.4, §5.6 step 1; BE-30, BE-31, BE-34; Customer PRD S16 steps 2-3):
+  - [x] Customer-token endpoint returns slots with `available` + `eligibleStaffIds` and a `reason` for days without slots; only LIVE complete salons (404 otherwise)
+  - [x] Services are active services of that salon (no repeats), bride only at women's salons, chosen/picked staff must belong to the salon; duration = sum of durations; bride-only services only for brides; leaves, closures, hours from the data
+  - [x] Busy = bookings lookup + live holds + the other persons' picks; the caller's own draft holds are ignored
+  - [x] Holds store on Redis (real-Redis tests): per staff/date sorted set, expiry as score so expired holds stop counting at once, release per draft, key dies with its last hold
+  - [x] Fix SRV-060: staff skills are salon service ids
+- Tests: `tests/availabilityApi.test.ts` (16), `tests/holds.test.ts` (6, real Redis), `tests/salonDetails.test.ts` updated; full gate green, 1980 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) POST for a read because of the structured body; (2) customer token required (booking is for registered users); (3) holds are written by the draft task (SRV-070) with `HoldsStore.place`; bookings by SRV-071 (`BookingBusyLookup`). Not run against a real MongoDB.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
