@@ -2603,6 +2603,48 @@
           }
         },
         {
+          "name": "All members of a salon (active or not), owner first, with role and permissions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "members"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
           "name": "Change the salon’s gender (admin only, reason required, audited, owner notified). Its services are switched off (they belong to the old catalog) and bride flags are cleared for a men’s salon.",
           "request": {
             "method": "PATCH",

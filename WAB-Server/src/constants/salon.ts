@@ -88,6 +88,7 @@ export const ADMIN_SALON_STATE_ROUTES = {
   list: '/',
   byId: '/:id',
   gender: '/:id/gender',
+  members: '/:id/members',
   offline: '/:id/offline',
   online: '/:id/online',
 } as const;

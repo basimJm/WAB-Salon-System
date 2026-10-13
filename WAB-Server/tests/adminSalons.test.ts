@@ -182,6 +182,55 @@ describe('GET /admin/v1/salons/:id', () => {
   });
 });
 
+describe('GET /admin/v1/salons/:id/members', () => {
+  it('lists every member of that salon only, owner first, with effective permissions', async () => {
+    const id = addSalon('Glow');
+    const salonId = new Types.ObjectId(id);
+    const member = (over: Record<string, unknown>): void => {
+      membersM.docs.push({
+        _id: new Types.ObjectId(),
+        salonId,
+        firstName: 'A',
+        lastName: 'B',
+        phone: '+962791110000',
+        active: true,
+        providesServices: false,
+        permissions: [],
+        createdAt: new Date(),
+        ...over,
+      });
+    };
+    member({
+      role: 'EMPLOYEE',
+      firstName: 'Eva',
+      permissions: ['REVIEWS_VIEW'],
+      providesServices: true,
+    });
+    member({ role: 'OWNER', firstName: 'Sami' });
+    member({ role: 'MANAGER', firstName: 'Mo', active: false });
+    membersM.docs.push({ _id: new Types.ObjectId(), salonId: new Types.ObjectId(), role: 'OWNER' });
+    const res = await request(app).get(`/admin/v1/salons/${id}/members`).set(admin());
+    expect(res.status).toBe(200);
+    const rows = bodyOf(res).data as unknown as {
+      name: string;
+      role: string;
+      active: boolean;
+      permissions: string[];
+    }[];
+    expect(rows.map((r) => r.role)).toEqual(['OWNER', 'EMPLOYEE', 'MANAGER']);
+    expect(rows[0]?.permissions).toHaveLength(15);
+    expect(rows[1]?.permissions).toEqual(['REVIEWS_VIEW']);
+    expect(rows[2]?.active).toBe(false);
+  });
+  it('is 404 for an unknown salon and 401 without a token', async () => {
+    const unknown = new Types.ObjectId().toHexString();
+    expect(
+      (await request(app).get(`/admin/v1/salons/${unknown}/members`).set(admin())).status,
+    ).toBe(404);
+    expect((await request(app).get(`/admin/v1/salons/${unknown}/members`)).status).toBe(401);
+  });
+});
+
 describe('PATCH /admin/v1/salons/:id/gender', () => {
   const patch = async (id: string, body: object): Promise<{ status: number; body: unknown }> =>
     await request(app).patch(`/admin/v1/salons/${id}/gender`).set(admin()).send(body);

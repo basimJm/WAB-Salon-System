@@ -6,6 +6,7 @@ import type { SalonRaw } from '../../models/salon.model';
 import type { MembersRepository } from '../../repositories/identity.repository';
 import type { SalonServicesRepository } from '../../repositories/salonServices.repository';
 import type { SalonsRepository } from '../../repositories/salons.repository';
+import { effectivePermissions } from '../permissions/permissions';
 import type { SubscriptionsRepository } from '../../repositories/subscriptions.repository';
 import type { Entity } from '../../utils/database/plain';
 import { BusinessRuleError, ConflictError, NotFoundError } from '../../utils/errors';
@@ -49,7 +50,20 @@ export interface SalonListFilter {
   readonly q?: string | undefined;
 }
 
+export interface AdminSalonMember {
+  readonly id: string;
+  readonly name: string;
+  readonly phone: string;
+  readonly role: string;
+  readonly active: boolean;
+  readonly providesServices: boolean;
+  /** What the member can do (the owner has everything). */
+  readonly permissions: readonly string[];
+}
+
 export interface AdminSalonsService {
+  /** Every member of a salon, active or not, owner first. */
+  members(salonId: string): Promise<AdminSalonMember[]>;
   list(input: {
     filter: SalonListFilter;
     params: PaginationParams;
@@ -69,7 +83,7 @@ export interface AdminSalonsService {
 
 export interface AdminSalonsDeps {
   readonly salons: SalonsRepository;
-  readonly members: Pick<MembersRepository, 'findOne' | 'clearBrideQualification'>;
+  readonly members: Pick<MembersRepository, 'findOne' | 'findMany' | 'clearBrideQualification'>;
   readonly subscriptions: Pick<SubscriptionsRepository, 'findMany' | 'findOne'>;
   readonly salonServices: Pick<SalonServicesRepository, 'deactivateAll'>;
   readonly state: Pick<SalonStateService, 'recompute'>;
@@ -138,6 +152,22 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
   };
 
   return {
+    async members(salonId) {
+      await find(salonId);
+      const team = await members.findMany({ salonId }, { createdAt: 1 });
+      return team
+        .map((member) => ({
+          id: member.id,
+          name: `${member.firstName} ${member.lastName}`.trim(),
+          phone: member.phone,
+          role: member.role,
+          active: member.active,
+          providesServices: member.providesServices,
+          permissions: effectivePermissions(member),
+        }))
+        .sort((a, b) => Number(b.role === 'OWNER') - Number(a.role === 'OWNER'));
+    },
+
     async list({ filter, params }) {
       const page = await salons.findPage(
         {

@@ -63,6 +63,14 @@ export const createAdminSalonsRouter = (
       sendSuccess(req, res, { data: detailData(await service.detail(id)) });
     }),
   );
+  router.get(
+    routes.members,
+    validate({ params: salonParams }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { id } = part<typeof salonParams>(req, 'params');
+      sendSuccess(req, res, { data: await service.members(id) });
+    }),
+  );
   router.patch(
     routes.gender,
     validate({ params: salonParams, body: genderBody }),

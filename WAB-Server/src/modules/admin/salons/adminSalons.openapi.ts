@@ -86,6 +86,32 @@ export const registerAdminSalonsDocs = (registry: OpenAPIRegistry): void => {
     },
   });
   registry.registerPath({
+    method: 'get',
+    path: `${base}/{id}/members`,
+    tags,
+    summary: 'All members of a salon (active or not), owner first, with role and permissions',
+    request: { headers, params: salonParams },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Members',
+        successResponseSchema(
+          z.array(
+            z.object({
+              id: z.string(),
+              name: z.string(),
+              phone: z.string(),
+              role: z.string(),
+              active: z.boolean(),
+              providesServices: z.boolean(),
+              permissions: z.array(z.string()),
+            }),
+          ),
+        ),
+      ),
+      ...failures,
+    },
+  });
+  registry.registerPath({
     method: 'patch',
     path: `${base}/{id}/gender`,
     tags,
