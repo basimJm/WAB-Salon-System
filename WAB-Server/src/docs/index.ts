@@ -30,6 +30,7 @@ import {
   registerCustomerContentDocs,
   registerMerchantContentDocs,
 } from '../modules/shared/content/content.openapi';
+import { registerMerchantProfileDocs } from '../modules/merchant/salon/profile.openapi';
 import { registerMerchantSalonDocs } from '../modules/merchant/salon/salon.openapi';
 import { registerAdminSalonStateDocs } from '../modules/admin/salons/salonState.openapi';
 import { registerAdminApplicationDocs } from '../modules/admin/applications/applications.openapi';
@@ -55,7 +56,7 @@ type Registrar = (registry: OpenAPIRegistry) => void;
 const REGISTRARS: Readonly<Record<DocName, readonly Registrar[]>> = {
   common: [registerHealthDocs],
   customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs, registerCustomerBannerDocs, registerCustomerCatalogDocs],
-  merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs, registerMerchantCatalogDocs, registerMerchantSalonDocs],
+  merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs, registerMerchantCatalogDocs, registerMerchantSalonDocs, registerMerchantProfileDocs],
   admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs, registerAdminSalonStateDocs],
 };
 

@@ -868,7 +868,7 @@
 ### T-056 — SRV-044 Permission model + enforcement middleware
 - Project: `WAB-Server/` (`src/constants/permissions.ts`, `src/domain/permissions/permissions.ts`, `src/middlewares/permission.ts`, `src/types/express.d.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #63 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #64 merged into `server`)
 - Acceptance criteria (BE-04/BE-03, CLAUDE.md §4.2 "enforce on every merchant endpoint"; BUSINESS_DOMAIN §6 permissions matrix + default templates):
   - [x] 15 permission keys; owner-only capabilities (`TEAM_MANAGE`, `PAYOUT_DETAILS_MANAGE`, `SALON_DELETION`) are not keys and can never be granted (`normalizeGrant` -> 400 `OWNER_REQUIRED` detail; unknown keys 400)
   - [x] Templates: MANAGER = all except `FINANCE_VIEW`/`POLICIES_MANAGE` (13); EMPLOYEE = `BOOKINGS_VIEW_OWN`, `REVIEWS_VIEW`; copies handed out
@@ -878,6 +878,22 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - not yet applied to a route (merchant profile/team endpoints from SRV-045 on). Socket rooms/events and notification recipients use the same `hasAnyPermission` later. One extra DB read per merchant request is the price of instant permission changes. API docs: no change.
 - Notes: Next: SRV-045 (salon profile/location/contacts endpoints).
+
+### T-057 — SRV-045 Salon profile / location / contacts endpoints
+- Project: `WAB-Server/` (`src/domain/salons/salonProfile.service.ts`, `src/domain/locations/place.ts`, `src/modules/merchant/salon/profile.*`, `src/repositories/salons.repository.ts` (`patch`))
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #64 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE-04, Merchant PRD M12-M13 + "owner may prepare the profile during APPLICATION_PENDING"; BUSINESS_DOMAIN §3.3, §6 SALON_PROFILE_MANAGE):
+  - [x] `GET /merchant/v1/salon`: any active member of the salon; profile with public image URLs, location as lat/lng, completeness, rating
+  - [x] `PATCH /merchant/v1/salon/profile`: `SALON_PROFILE_MANAGE` (owner, granted managers; others 403 `PERMISSION_DENIED`); only the caller's own salon is touched (id comes from `req.member.salonId`)
+  - [x] Fields: name (1-80), description (<=1000), cover/profile storage keys (safe key pattern), location (lat -90..90, lng -180..180, stored as GeoJSON Point [lng, lat]), location text, city/area (active; area inside the city), phone (E.164, required so not clearable), WhatsApp (clearable); `null` clears optional fields; empty body / invalid values 400 and nothing changes
+  - [x] `searchText` rebuilt from name + location text; allowed in every state (also while the application is pending), state untouched by the edit itself
+  - [x] Completeness recomputed after every save: filling the last item moves APPROVED_INCOMPLETE to LIVE and tells the owner; clearing an item reports it as missing
+  - [x] City/area validation extracted to `domain/locations/place.ts` and shared with the application flow
+- Tests: `cd WAB-Server && npm test` - 1605 pass; format/lint/typecheck/build green; audit 0. `tests/salonProfile.test.ts` (19).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M13), Architect ✔, QA ✔) - image keys are format-checked, not verified to exist (uploads module SRV-046 adds confirmation); gender is not editable here (immutable after approval). Not run against a real MongoDB.
+- Notes: Next: SRV-046 (uploads module).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

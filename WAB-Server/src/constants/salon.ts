@@ -87,3 +87,9 @@ export const ADMIN_SALON_STATE_ROUTES = {
   offline: '/:id/offline',
   online: '/:id/online',
 } as const;
+
+/** Salon profile editing (SRV-045, Merchant PRD M12-M13). */
+export const MERCHANT_PROFILE_ROUTES = { root: '/', profile: '/profile' } as const;
+export const LATITUDE_LIMIT = 90;
+export const LONGITUDE_LIMIT = 180;
+export const LOCATION_TEXT_MAX_LENGTH = 300;

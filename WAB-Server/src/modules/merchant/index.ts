@@ -15,12 +15,14 @@ import {
   unavailableGuard,
   unavailableMerchantAuth,
   unavailableSalonApplication,
+  unavailableSalonProfile,
   type ApiServices,
 } from '../services';
 import { createMerchantContentRouter } from '../shared/content';
 import { createCatalogRouter } from '../shared/catalog/catalog.module';
 import { createLocationsRouterFor } from '../shared/locations';
 import { createMerchantOtpRouter, createOtpRouteLimiter } from '../shared/otp';
+import { createMerchantProfileRouter } from './salon/profile.routes';
 import { createMerchantSalonRouter } from './salon/salon.routes';
 import { createMerchantAuthRouter } from './auth/auth.routes';
 
@@ -56,6 +58,14 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       limiter: createOtpRouteLimiter(services),
       guard: services.salonApplication?.guard ?? unavailableGuard,
     }),
+  );
+  mount(
+    router,
+    MERCHANT_SALON_ROUTES.base,
+    createMerchantProfileRouter(
+      services.salonProfile?.service ?? unavailableSalonProfile,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
   );
   return router;
 };

@@ -22,12 +22,12 @@ import {
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
-  ValidationError,
 } from '../../utils/errors';
 import type { DeviceInput } from '../auth/customerAuth.service';
 import { toMemberProfile, type MemberProfile } from '../auth/merchantAuth.service';
 import type { OtpGate } from '../otp/otpGate.service';
-import { createPhoneVerifier, invalidField, type PhoneInput } from '../auth/phoneVerifier';
+import { assertPlace } from '../locations/place';
+import { createPhoneVerifier, type PhoneInput } from '../auth/phoneVerifier';
 import type { RefreshTokenService } from '../auth/refreshTokens.service';
 import { createSessionTokens, type TokenPair } from '../auth/sessionTokens';
 import type { SettingsService } from '../settings';
@@ -112,23 +112,6 @@ export const createSalonApplicationService = (
     now,
   });
 
-  /** The area must exist and belong to the city; both must be active. */
-  const assertPlace = async (cityId?: string, areaId?: string): Promise<void> => {
-    if (cityId === undefined && areaId === undefined) return;
-    const [city, area] = await Promise.all([
-      cityId === undefined ? null : cities.findOne({ _id: cityId, active: true }),
-      areaId === undefined ? null : areas.findOne({ _id: areaId, active: true }),
-    ]);
-    const details = [
-      ...(cityId !== undefined && city === null ? [invalidField('body.salon.cityId')] : []),
-      ...(areaId !== undefined &&
-      (area === null || (cityId !== undefined && area.cityId !== cityId))
-        ? [invalidField('body.salon.areaId')]
-        : []),
-    ];
-    if (details.length > 0) throw new ValidationError({ details });
-  };
-
   const toStatus = (salon: {
     id: string;
     state: SalonState;
@@ -164,7 +147,7 @@ export const createSalonApplicationService = (
   return {
     async apply(input) {
       const phone = await phones.resolve(input.phone);
-      await assertPlace(input.salon.cityId, input.salon.areaId);
+      await assertPlace({ cities, areas }, 'body.salon', input.salon.cityId, input.salon.areaId);
       await phones.verify(phone, input.idToken, 'REGISTER');
       if ((await members.findByPhone(phone.e164)) !== null) throw phoneTaken();
 
