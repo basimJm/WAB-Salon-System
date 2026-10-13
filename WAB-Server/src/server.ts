@@ -51,6 +51,9 @@ import { createMerchantFinanceService } from './domain/finance/merchantFinance.s
 import { createSubscriptionsService } from './domain/subscriptions/subscriptions.service';
 import { createPayoutsService } from './domain/payouts/payouts.service';
 import { PayoutsRepository } from './repositories/payouts.repository';
+import { createNotificationService } from './domain/notifications/notifications.service';
+import { createNotificationProducers } from './domain/notifications/producers';
+import { NotificationsRepository } from './repositories/notifications.repository';
 import { createLedgerService } from './domain/ledger/ledger.service';
 import { LedgerRepository } from './repositories/ledger.repository';
 import type { BookingCreatedHook } from './domain/bookings/bookingCreation.service';
@@ -323,6 +326,26 @@ const buildServices = (
     members: new MembersRepository(),
     logger,
   });
+  const accessEvents = createAccessEvents({ relay, members: new MembersRepository(), logger });
+  const notificationsRepository = new NotificationsRepository();
+  const notificationService = createNotificationService({
+    notifications: notificationsRepository,
+    customers: new CustomersRepository(),
+    members: new MembersRepository(),
+    installations: new InstallationsRepository(),
+    notifier: providers.notifier,
+    access: accessEvents,
+    logger,
+  });
+  const producers = createNotificationProducers({
+    notifications: notificationService,
+    salons: new SalonsRepository(),
+    customers: new CustomersRepository(),
+    members: new MembersRepository(),
+    bookings: bookingsRepository,
+    settings,
+    logger,
+  });
   const conflictFinder = createConflictFinder({ bookings: bookingsRepository, settings });
   const salonState = createSalonStateService({
     salons: new SalonsRepository(),
@@ -330,17 +353,10 @@ const buildServices = (
       salonServices.countActive(salonId),
     ),
     audit: createAuditWriter(new AuditLogsRepository()),
-    // Placeholder until the notification core (SRV-093) sends the real message.
-    notifier: {
-      changed: (change) => {
-        logger.info(change, 'salon state changed');
-        return Promise.resolve();
-      },
-    },
+    notifier: producers.salonStateNotifier,
     logger,
   });
   const audit = createAuditWriter(new AuditLogsRepository());
-  const accessEvents = createAccessEvents({ relay, members: new MembersRepository(), logger });
   const accountLifecycle = createAccountLifecycleService({
     access: accessEvents,
     customers: new CustomersRepository(),
@@ -402,6 +418,8 @@ const buildServices = (
   });
   const fullRefunds = createRefundService({
     hooks: {
+      started: producers.refundHooks.started,
+      failed: producers.refundHooks.failed,
       // The money has left: book it. A missed write is repaired by `ledger.reconcile()` (job).
       refunded: async (refund) => {
         try {
@@ -409,6 +427,7 @@ const buildServices = (
         } catch (error) {
           logger.error({ err: error, refundId: refund.id }, 'ledger refund entry failed');
         }
+        await producers.refundHooks.refunded(refund);
       },
     },
     refunds: refundsRepository,
@@ -433,17 +452,11 @@ const buildServices = (
     ledger,
     salons: new SalonsRepository(),
     audit,
-    // Placeholder until the notification core (SRV-093) tells the owner and FINANCE_VIEW members.
-    notifier: {
-      transferred: (payout) => {
-        logger.info({ payoutId: payout.id, salonId: payout.salonId }, 'payout transferred');
-        return Promise.resolve();
-      },
-    },
+    notifier: producers.payoutNotifier,
     logger,
   });
   const bookingChanges = composeBookingHooks(
-    [bookingEvents, createRefundHook({ refunds: fullRefunds, logger })],
+    [bookingEvents, producers.bookingChanged, createRefundHook({ refunds: fullRefunds, logger })],
     logger,
   );
   // A booking made from a payment books the charge in the ledger, then tells the apps.
@@ -455,6 +468,7 @@ const buildServices = (
         logger.error({ err: error, bookingId: booking.id }, 'ledger charge entry failed');
       }
       await bookingEvents.created(booking);
+      await producers.bookingCreated.created(booking);
     },
   };
   const bookingCreation = createBookingCreationService({
@@ -608,13 +622,7 @@ const buildServices = (
       audit,
       logger,
       bookings: conflictFinder.salon,
-      // Placeholder until the notification core (SRV-093) sends the real message.
-      notifier: {
-        changed: (change) => {
-          logger.info(change, 'salon state changed');
-          return Promise.resolve();
-        },
-      },
+      notifier: producers.salonStateNotifier,
     }),
     policy: createPolicyService({ salons: new SalonsRepository(), state: salonState }),
     leaves: createLeavesService({
@@ -650,13 +658,7 @@ const buildServices = (
       uploads,
       audit,
       logger,
-      // Placeholder until the notification core (SRV-093) sends the real message.
-      notifier: {
-        decided: (result) => {
-          logger.info(result, 'catalog request decided');
-          return Promise.resolve();
-        },
-      },
+      notifier: producers.catalogRequestNotifier,
     }),
     salonServices: createSalonServicesService({
       salons: new SalonsRepository(),
@@ -712,13 +714,7 @@ const buildServices = (
       storage: providers.storage,
       audit,
       logger,
-      // Placeholder until the notification core (SRV-093) sends the real push and in-app message.
-      notifier: {
-        reviewed: (result) => {
-          logger.info(result, 'salon application reviewed');
-          return Promise.resolve();
-        },
-      },
+      notifier: producers.applicationNotifier,
     }),
     salonApplication: {
       service: createSalonApplicationService({
@@ -745,6 +741,7 @@ const buildServices = (
       catalog: catalogService,
       search,
       customers: new CustomersRepository(),
+      unread: { count: (customerId) => notificationService.unreadCount('CUSTOMER', customerId) },
     }),
     adminBanners: createAdminBannerService(new BannersRepository(), audit),
     adminContent: createAdminContentServices({

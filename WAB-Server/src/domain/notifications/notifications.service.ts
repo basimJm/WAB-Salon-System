@@ -1,0 +1,252 @@
+import type { Language, NotificationRecipientType } from '../../constants/enums';
+import { LANGUAGES } from '../../constants/i18n';
+import {
+  NOTIFICATION_EVENTS,
+  PUSH_RESULTS,
+  type Audience,
+  type NotificationEvent,
+} from '../../constants/notifications';
+import type { PushApp } from '../../constants/providers';
+import type { NotificationRaw, NotificationText } from '../../models/notification.model';
+import type { Notifier } from '../../providers';
+import type {
+  CustomersRepository,
+  InstallationsRepository,
+  MembersRepository,
+} from '../../repositories/identity.repository';
+import type { NotificationsRepository } from '../../repositories/notifications.repository';
+import { isDuplicateKeyError } from '../../utils/database/errors';
+import { toObjectId } from '../../utils/database/ids';
+import { translate } from '../../utils/i18n';
+import type { Logger } from '../../utils/logger';
+import type { AccessEvents } from '../access/accessEvents';
+import { effectivePermissions } from '../permissions/permissions';
+
+/** A placeholder value: text, or a function that prints it in the recipient's language (dates, decisions). */
+export type ParamValue = string | number | ((language: Language) => string);
+
+export interface NotifyInput {
+  /** Identifies this one occurrence (`booking.approved:<bookingId>`): a repeat is stored and pushed once. */
+  readonly key: string;
+  readonly params?: Readonly<Record<string, ParamValue>>;
+  /** Opens the right screen: ids and a deep link, as strings (FCM data). */
+  readonly data?: { bookingId?: string; salonId?: string; deepLink?: string };
+  /** Customer audience: who. */
+  readonly customerId?: string;
+  /** Members audiences: the salon, and the staff named by the event (assigned / old / new). */
+  readonly salonId?: string;
+  readonly staffIds?: readonly string[];
+}
+
+export interface NotificationService {
+  /** Delivers one event to every audience it defines. Never throws: a failed delivery is logged. */
+  notify(event: NotificationEvent, input: NotifyInput): Promise<void>;
+  /** Unread notifications of an account: the bell badge. */
+  unreadCount(recipientType: NotificationRecipientType, recipientId: string): Promise<number>;
+}
+
+interface Recipient {
+  readonly type: NotificationRecipientType;
+  readonly id: string;
+  readonly language: Language;
+  readonly app: PushApp;
+  readonly tokens: readonly string[];
+  /** A customer can switch push off in the app; members cannot. */
+  readonly pushAllowed: boolean;
+}
+
+export interface NotificationDeps {
+  readonly notifications: NotificationsRepository;
+  readonly customers: Pick<CustomersRepository, 'findById'>;
+  readonly members: Pick<MembersRepository, 'findMany'>;
+  readonly installations: Pick<InstallationsRepository, 'devicesOf' | 'dropTokens'>;
+  readonly notifier: Notifier;
+  readonly access: Pick<AccessEvents, 'unreadChanged'>;
+  readonly logger: Logger;
+}
+
+const DEFAULT_LANGUAGE_FOR_MEMBERS: Language = 'ar';
+
+const text = (key: string, params: NotifyInput['params'], language: Language): string => {
+  const resolved = Object.fromEntries(
+    Object.entries(params ?? {}).map(([name, value]) => [
+      name,
+      typeof value === 'function' ? value(language) : value,
+    ]),
+  );
+  return translate(language, key, resolved);
+};
+
+export const createNotificationService = (deps: NotificationDeps): NotificationService => {
+  const { notifications, customers, members, installations, notifier, access, logger } = deps;
+
+  const customerRecipient = async (customerId: string): Promise<Recipient[]> => {
+    const customer = await customers.findById(customerId);
+    if (customer === null || customer.status === 'DELETED') return [];
+    const devices = await installations.devicesOf({ customerId });
+    return [
+      {
+        type: 'CUSTOMER',
+        id: customer.id,
+        language: customer.language,
+        app: 'CUSTOMER',
+        tokens: devices.map((d) => d.token),
+        pushAllowed: customer.pushEnabled,
+      },
+    ];
+  };
+
+  const memberRecipients = async (audience: Audience, input: NotifyInput): Promise<Recipient[]> => {
+    if (input.salonId === undefined) return [];
+    const team = await members.findMany({ salonId: input.salonId, active: true });
+    const chosen = team.filter((member) => {
+      if (audience.who === 'owner') return member.role === 'OWNER';
+      if (audience.who !== 'members') return false;
+      const permissions = effectivePermissions(member);
+      const byPermission = audience.permissions.some((p) => permissions.includes(p));
+      const assigned =
+        audience.assigned === true &&
+        (input.staffIds ?? []).includes(member.id) &&
+        (audience.permissions.length === 0 ||
+          permissions.includes('BOOKINGS_VIEW_OWN') ||
+          permissions.includes('BOOKINGS_VIEW_ALL'));
+      return byPermission || assigned;
+    });
+    return Promise.all(
+      chosen.map(async (member): Promise<Recipient> => {
+        const devices = await installations.devicesOf({ memberId: member.id });
+        return {
+          type: 'MEMBER',
+          id: member.id,
+          language: devices[0]?.language ?? DEFAULT_LANGUAGE_FOR_MEMBERS,
+          app: 'MERCHANT',
+          tokens: devices.map((d) => d.token),
+          pushAllowed: true,
+        };
+      }),
+    );
+  };
+
+  const recipientsOf = async (audience: Audience, input: NotifyInput): Promise<Recipient[]> =>
+    audience.who === 'customer'
+      ? input.customerId === undefined
+        ? []
+        : customerRecipient(input.customerId)
+      : memberRecipients(audience, input);
+
+  const push = async (
+    recipient: Recipient,
+    event: NotificationEvent,
+    id: string,
+    title: NotificationText,
+    body: NotificationText,
+    input: NotifyInput,
+  ): Promise<{ sent: boolean; result: string }> => {
+    if (!recipient.pushAllowed) return { sent: false, result: PUSH_RESULTS.pushOff };
+    if (recipient.tokens.length === 0) return { sent: false, result: PUSH_RESULTS.noToken };
+    const definition = NOTIFICATION_EVENTS[event];
+    try {
+      const result = await notifier.sendPush({
+        target: { tokens: recipient.tokens },
+        message: {
+          app: recipient.app,
+          kind: 'VISIBLE',
+          title: title[recipient.language],
+          body: body[recipient.language],
+          data: {
+            event,
+            notificationId: id,
+            ...(input.data?.bookingId === undefined ? {} : { bookingId: input.data.bookingId }),
+            ...(input.data?.salonId === undefined ? {} : { salonId: input.data.salonId }),
+            ...(input.data?.deepLink === undefined ? {} : { deepLink: input.data.deepLink }),
+          },
+          ...('priority' in definition ? { priority: definition.priority } : {}),
+        },
+        idempotencyKey: `${input.key}:${recipient.id}`,
+      });
+      if (result.invalidTokens.length > 0) await installations.dropTokens(result.invalidTokens);
+      return result.sent > 0
+        ? { sent: true, result: PUSH_RESULTS.sent }
+        : { sent: false, result: PUSH_RESULTS.failed };
+    } catch (error) {
+      logger.warn({ err: error, event, recipientId: recipient.id }, 'push delivery failed');
+      return { sent: false, result: PUSH_RESULTS.failed };
+    }
+  };
+
+  const deliver = async (
+    recipient: Recipient,
+    event: NotificationEvent,
+    who: Audience['who'],
+    input: NotifyInput,
+  ): Promise<void> => {
+    const definition = NOTIFICATION_EVENTS[event];
+    const render = (part: 'title' | 'body'): NotificationText => {
+      const key = `notifications.${event}.${who}.${part}`;
+      const [first, second] = LANGUAGES;
+      return {
+        [first]: text(key, input.params, first),
+        [second]: text(key, input.params, second),
+      };
+    };
+    const title = render('title');
+    const body = render('body');
+    // The same occurrence was delivered before (a retried job, a repeated hook): nothing more to do.
+    const already = await notifications.findOne({
+      recipientType: recipient.type,
+      recipientId: recipient.id,
+      dedupeKey: input.key,
+    });
+    if (already !== null) return;
+    let stored: NotificationRaw & { id: string };
+    try {
+      stored = (await notifications.create({
+        recipientType: recipient.type,
+        recipientId: toObjectId(recipient.id),
+        type: definition.type,
+        event,
+        title,
+        body,
+        data: input.data ?? {},
+        pushSent: false,
+        dedupeKey: input.key,
+      })) as never;
+    } catch (error) {
+      // The same occurrence was delivered before (a retried job): nothing more to do.
+      if (isDuplicateKeyError(error)) return;
+      throw error;
+    }
+    const outcome = await push(recipient, event, stored.id, title, body, input);
+    await notifications.recordPush(stored.id, outcome.sent, outcome.result);
+    // The badge is a live counter: tell the open app.
+    const scope = recipient.type === 'CUSTOMER' ? 'customer' : 'merchant';
+    await access.unreadChanged(
+      { scope, id: recipient.id },
+      await notifications.countUnread(recipient.type, recipient.id),
+    );
+  };
+
+  return {
+    async notify(event, input) {
+      for (const audience of NOTIFICATION_EVENTS[event].audiences) {
+        try {
+          for (const recipient of await recipientsOf(audience, input)) {
+            try {
+              await deliver(recipient, event, audience.who, input);
+            } catch (error) {
+              logger.error({ err: error, event, recipientId: recipient.id }, 'notification failed');
+            }
+          }
+        } catch (error) {
+          logger.error(
+            { err: error, event, audience: audience.who },
+            'notification audience failed',
+          );
+        }
+      }
+    },
+
+    unreadCount: (recipientType, recipientId) =>
+      notifications.countUnread(recipientType, recipientId),
+  };
+};

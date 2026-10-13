@@ -1481,6 +1481,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M22/M23), Architect ✔, QA ✔) - bank details are in SRV-090; "contact WAB" data is served by `GET /config`; the refund list shows every refund of the salon including pending ones.
 
+### T-103 — SRV-093 Notification core
+- Project: `WAB-Server/` (`src/models/notification.model.ts`, `src/constants/notifications.ts`, `src/domain/notifications/{notifications.service,producers}.ts`, locales, `src/utils/format/localized.ts`, `InstallationsRepository.devicesOf|dropTokens`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §3.6 notifications, §8 matrix; CLAUDE.md §7 notifications in the recipient's language; Customer/Merchant PRD notifications):
+  - [x] §8 matrix as data; every event/audience has a title+body in ar and en with identical placeholders (test)
+  - [x] recipients by permission/role: RESPOND, VIEW_ALL, assigned staff (only with a view permission), FINANCE_VIEW, REVIEWS_VIEW, SERVICES_MANAGE, owner; inactive members and other salons never; deleted/unknown customers skipped
+  - [x] in-app copy always (both languages stored); push in the recipient's language, respects the customer's `pushEnabled`, tokens, invalid tokens removed; outcome stored (`SENT|NO_TOKEN|PUSH_OFF|FAILED`)
+  - [x] idempotent per occurrence (`key`); unread counter pushed live and countable (home bell); push failure still stores the message; nothing throws into the business action
+  - [x] wired into booking created/changed/reassigned, refunds, payouts, applications, salon state, catalog requests (placeholders replaced); dates 12-hour Amman with the language's numerals
+- Tests: `tests/notifications.test.ts` (15); full gate green, 2235 tests; docs: no REST change
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS: a member's language is that of their latest device (default ar); the high-priority merchant request message (Android overlay / iOS time-sensitive) is SRV-098 (`priority: HIGH` is already set for requests); `review.published` and subscription/reminder events are defined but their producers come with the review flow / jobs (SRV-096/097); promotions SRV-099.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
