@@ -559,6 +559,20 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (Gradle blocked) and CI runners were unavailable at the time (jobs failed in seconds with no runner). The language/theme switch screens (Login, Register, Profile, Settings) are feature work: they inject `AppearanceSettings` and call `toggleLanguage()` / `setThemeMode()`.
 - Notes: Existing installs whose stored value is a platform tag (`en_US`) still resolve. Numerals-follow-language is a formatter concern (`NumberFormatter` baseline debt), not in this task.
 
+### T-034 — Customer shared-logic verification on the JVM and interceptor fix
+- Project: `WAB-Mobile-Customer/core/network` (`AuthRefreshInterceptor`, new `AuthRefreshInterceptorTest`), `gradle/libs.versions.toml`
+- Branch: `claude/amazing-cerf-vc5ja3`
+- Status: IN REVIEW
+- Acceptance criteria (user: "build and see what makes CI fail, fix it"; GitHub Actions runners were unavailable, every job failed in seconds with no runner, so the shared Kotlin logic of T-031..T-033 was compiled and tested on the JVM instead):
+  - [x] The real commonMain sources of `core/domain`, `core/network/auth`, `AuthRefreshInterceptor` and `core/ui/permission` compile with warnings as errors (scratch Gradle project reading the repo files in place; Kotlin 2.3.20, Ktor 3.4.2, Maven Central mirror)
+  - [x] FIXED a real compile error CI would have hit: wrong import `io.ktor.client.plugin` (Ktor 3: `io.ktor.client.plugins.plugin`)
+  - [x] `AuthRefreshInterceptorTest` (Ktor `MockEngine`, `expectSuccess = true` like the real client): 401 -> refresh -> repeated once with the new token; 5 simultaneous 401s -> 1 refresh; rejected refresh -> session ends and the original 401 surfaces; unreachable refresh -> user stays signed in; no stored token -> no refresh; success path untouched
+  - [x] The assumption that `expectSuccess` errors surface from `execute` (handled by catching `ResponseException`) is now proven
+- Tests: JVM run of 32 tests, 0 failures: `AppLanguageTest` 5, `AppearanceSettingsTest` 7, `TokenRefreshCoordinatorTest` 7, `AuthRefreshInterceptorTest` 6, `PermissionFlowTest` 7. Test dependency added with a reason: `ktor-client-mock` (the only way to test the HTTP interceptor).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — STILL NOT VERIFIED (platform code cannot run here): Android launcher/manager, the iOS UserNotifications/AVFoundation/CoreLocation interop, Compose UI, Android Lint, R8, `xcodebuild`, detekt (jar download rate-limited). Those need a real CI run.
+- Notes: Harness recipe is in memory.md.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-023 — next server task after T-033 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

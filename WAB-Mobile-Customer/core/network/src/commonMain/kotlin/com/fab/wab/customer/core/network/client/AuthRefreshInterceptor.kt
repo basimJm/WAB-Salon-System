@@ -6,9 +6,9 @@ import com.fab.wab.customer.core.domain.repository.SessionTimeOut
 import com.fab.wab.customer.core.network.auth.TokenRefreshCoordinator
 import io.ktor.client.HttpClient
 import io.ktor.client.call.HttpClientCall
-import io.ktor.client.plugin
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.plugin
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
