@@ -26,6 +26,8 @@ import { createRateLimiter } from '../../middlewares/rateLimit';
 import { mount } from '../../routes/mount';
 import { createMerchantUploadsRouter } from '../shared/uploads';
 import { createMerchantAppConfigRouter } from '../shared/appConfig';
+import { NOTIFICATION_ROUTES } from '../../constants/notifications';
+import { createNotificationsRouter } from '../shared/notifications/notifications.routes';
 import { createMerchantInstallationsRouter } from '../shared/installations';
 import {
   unavailableCatalogRequests,
@@ -41,6 +43,7 @@ import {
   unavailableStaff,
   unavailableTeam,
   unavailableGuard,
+  unavailableInbox,
   unavailableMerchantAuth,
   unavailableSalonApplication,
   unavailableSalonProfile,
@@ -104,6 +107,16 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       services.salonProfile?.service ?? unavailableSalonProfile,
       services.salonProfile?.guard ?? [unavailableGuard],
     ),
+  );
+  mount(
+    router,
+    NOTIFICATION_ROUTES.base,
+    createNotificationsRouter({
+      service: services.inbox ?? unavailableInbox,
+      recipientType: 'MEMBER',
+      guard: services.salonProfile?.guard ?? [unavailableGuard],
+      limiter: createOtpRouteLimiter(services),
+    }),
   );
   mount(router, UPLOAD_ROUTES.base, createMerchantUploadsRouter(services));
   mount(

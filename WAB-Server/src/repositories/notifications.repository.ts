@@ -1,7 +1,7 @@
 import type { Model } from 'mongoose';
 import type { NotificationRecipientType } from '../constants/enums';
 import { NotificationModel, type NotificationRaw } from '../models/notification.model';
-import { isObjectIdString } from '../utils/database/ids';
+import { isObjectIdString, toObjectId } from '../utils/database/ids';
 import { BaseRepository } from './base.repository';
 
 export class NotificationsRepository extends BaseRepository<NotificationRaw> {
@@ -21,5 +21,28 @@ export class NotificationsRepository extends BaseRepository<NotificationRaw> {
   async recordPush(id: string, pushSent: boolean, pushResult: string): Promise<void> {
     if (!isObjectIdString(id)) return;
     await this.model.findOneAndUpdate({ _id: id }, { $set: { pushSent, pushResult } }).exec();
+  }
+
+  /** Marks the account's own unread notifications among `ids` as read; returns how many changed. */
+  async markRead(
+    recipientType: NotificationRecipientType,
+    recipientId: string,
+    ids: readonly string[],
+    at: Date,
+  ): Promise<number> {
+    const valid = ids.filter((id) => isObjectIdString(id)).map((id) => toObjectId(id));
+    if (valid.length === 0 || !isObjectIdString(recipientId)) return 0;
+    const result = await this.model
+      .updateMany(
+        {
+          recipientType,
+          recipientId: toObjectId(recipientId),
+          _id: { $in: valid },
+          readAt: { $exists: false },
+        },
+        { $set: { readAt: at } },
+      )
+      .exec();
+    return result.modifiedCount;
   }
 }

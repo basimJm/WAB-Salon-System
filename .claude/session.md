@@ -1495,6 +1495,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS: a member's language is that of their latest device (default ar); the high-priority merchant request message (Android overlay / iOS time-sensitive) is SRV-098 (`priority: HIGH` is already set for requests); `review.published` and subscription/reminder events are defined but their producers come with the review flow / jobs (SRV-096/097); promotions SRV-099.
 
+### T-104 — SRV-094 Notification endpoints (list, unread count, mark read)
+- Project: `WAB-Server/` (`src/domain/notifications/inbox.service.ts`, `src/modules/shared/notifications/*`, `NotificationsRepository.markRead`, `src/constants/notifications.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §3.6 notifications; Customer PRD S19; Merchant PRD M24):
+  - [x] Paginated (10) own list, newest first, title/body in the request language, filters: Amman date range, text, unread only; bad dates/range 400
+  - [x] Unread count; mark read: own unread only, idempotent, foreign ids ignored, max 50 ids, badge pushed live only when something changed
+  - [x] Customer token and merchant member guard; 503 when unconfigured; Swagger + Postman regenerated
+- Tests: `tests/inbox.test.ts` (10); full gate green
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - text search is a literal case-insensitive regex on the request language (no Atlas search); merchant list is per member (not per salon). Not run against a real MongoDB.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

@@ -21,6 +21,7 @@ import {
   unavailableGuard,
   unavailableSalonDetails,
   unavailableFavorites,
+  unavailableInbox,
   unavailableCustomerProfile,
   unavailableAvailability,
   unavailableBookingDrafts,
@@ -35,6 +36,8 @@ import {
 import { createCustomerBannersRouter } from './banners/banners.module';
 import { createSalonDetailsRouter } from './salonDetails/salonDetails.routes';
 import { SALON_DETAILS_ROUTES } from '../../constants/salonDetails';
+import { NOTIFICATION_ROUTES } from '../../constants/notifications';
+import { createNotificationsRouter } from '../shared/notifications/notifications.routes';
 import { createFavoritesRouter } from './favorites/favorites.routes';
 import { FAVORITE_ROUTES } from '../../constants/favorites';
 import { createReviewsRouter } from './reviews/reviews.routes';
@@ -135,6 +138,19 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     FAVORITE_ROUTES.base,
     createFavoritesRouter({
       service: services.favorites ?? unavailableFavorites,
+      guard: services.installations?.customerRequired ?? unavailableGuard,
+      limiter: createRateLimiter({
+        ...SEARCH_ROUTE_RATE_LIMIT,
+        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
+      }),
+    }),
+  );
+  mount(
+    router,
+    NOTIFICATION_ROUTES.base,
+    createNotificationsRouter({
+      service: services.inbox ?? unavailableInbox,
+      recipientType: 'CUSTOMER',
       guard: services.installations?.customerRequired ?? unavailableGuard,
       limiter: createRateLimiter({
         ...SEARCH_ROUTE_RATE_LIMIT,
