@@ -207,6 +207,19 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
         for (const key of Object.keys(update.$unset ?? {})) Reflect.deleteProperty(doc, key);
         return { ...doc };
       }),
+    aggregate: (pipeline: [{ $match: Filter }, unknown]) =>
+      new FakeQuery(() => {
+        const found = select(pipeline[0].$match);
+        return found.length === 0
+          ? []
+          : [
+              {
+                _id: null,
+                sum: found.reduce((total, doc) => total + Number(doc['rating']), 0),
+                count: found.length,
+              },
+            ];
+      }),
     deleteOne: (filter: Filter) =>
       new FakeQuery(() => {
         const index = docs.findIndex((doc) => matches(doc, filter));

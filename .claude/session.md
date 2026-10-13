@@ -1124,6 +1124,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `rating` averages are maintained by SRV-064 (approve/reject/remove); until then summaries stay 0. Admin notification "review pending" comes with the notification core.
 
+### T-075 — SRV-064 Admin review moderation and rating recompute
+- Project: `WAB-Server/` (`src/domain/reviews/adminReviews.service.ts`, `src/modules/admin/reviews`, `ReviewsRepository.transition|approvedTotals`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.6, §5.11; Admin PRD A22; CLAUDE.md §5.12):
+  - [x] Queue/list with filters and author context; approve/reject (reason optional, default recorded in audit), remove (reason required), bulk up to 100
+  - [x] Each decision is atomic (one winner, else 422 `ALREADY_HANDLED`; unknown 404) and audited with before/after status
+  - [x] Salon `rating` / staff `staff.rating` = average of APPROVED reviews (1 decimal) + count, recomputed on every move into or out of APPROVED; 0/0 when none is left
+- Tests: `tests/adminReviews.test.ts` (14); full gate green, 1871 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - recompute uses an aggregate (no loading of all reviews). Decision to confirm: approve/reject default reasons are English strings stored only in the audit log. Admin email "review pending" alert and the owner notification wait for the notification core. Not run against a real MongoDB (aggregate path).
+- API docs: updated.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
