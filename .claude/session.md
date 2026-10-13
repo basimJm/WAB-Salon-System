@@ -1660,6 +1660,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) the two unscheduled jobs; (2) admin e-mail alerts for refund delay/subscription end wait for the alerts engine (SRV-106) and the notifier (SRV-100); (3) a changed `timezone` setting needs a restart. API docs: no change.
 
+### T-108 — SRV-098 High-priority merchant booking-request push
+
+- Project: `WAB-Server/` (`src/domain/notifications/{notifications.service,producers}.ts`, `src/constants/notifications.ts`, `src/providers/notifier/types.ts`, `InstallationsRepository.devicesOf`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (CLAUDE.md §4.3-4.4; Merchant PRD M10; BUSINESS_DOMAIN §8 booking.requested; backlog: dedupe by booking id):
+  - [x] New PENDING booking pushes a high-priority request to active members with `BOOKINGS_RESPOND` (owner included), in their language
+  - [x] Android: DATA_ONLY message with overlay / full-screen flags and the request details (customer, persons, services, staff, time, respondBy, total, payment method, bride badge, actions); iOS: visible TIME_SENSITIVE alert with the Accept/Reject action category and sound
+  - [x] Deduplicated: booking id as collapse key; a repeated hook sends nothing more; other events unchanged
+- Tests: `tests/notifications.test.ts` (+3; fixed a test helper that dropped the capture wrapper); full gate green
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M10), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) an Android device receives no system-drawn notification; the merchant app must show the heads-up notification itself from the data message (a notification message would bypass the app in the background); (2) the "handled by another member" dismissal for background overlays (silent data push) is not sent; open apps get the socket event; (3) channel id, category and sound names are constants the apps must match. API docs: no change.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

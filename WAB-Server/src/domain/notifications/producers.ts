@@ -117,9 +117,30 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
         ...base,
         key: `booking.created:${booking.id}`,
       });
+      const customer = await customers.findById(booking.customerId);
+      const timeZone = await settings.get('timezone');
+      const staff = await Promise.all(
+        base.staffIds.map(async (staffId) => (await members.findById(staffId))?.firstName ?? ''),
+      );
       await notifications.notify('booking.requested', {
         ...base,
         key: `booking.requested:${booking.id}`,
+        // What the merchant app draws in its overlay / alert without a round trip (Merchant PRD M10).
+        pushData: (language: Language) => ({
+          reference: booking.referenceNumber,
+          customer: customer?.firstName ?? '',
+          persons: String(booking.persons.length),
+          services: booking.persons
+            .flatMap((person) => person.services.map((service) => service.name[language]))
+            .join(', '),
+          staff: staff.filter((name) => name !== '').join(', '),
+          when: formatDateTime(booking.appointmentStart, timeZone, language),
+          startsAt: booking.appointmentStart.toISOString(),
+          respondBy: booking.respondBy.toISOString(),
+          total: formatJod(booking.money.total),
+          paymentMethod: booking.paymentMethod,
+          isBride: String(booking.hasBride),
+        }),
       });
     }),
   };

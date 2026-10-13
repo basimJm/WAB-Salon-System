@@ -1,5 +1,5 @@
 import { Types, type Model } from 'mongoose';
-import type { AppKind, CustomerStatus, Language, SubjectType } from '../constants/enums';
+import type { AppKind, CustomerStatus, Language, Platform, SubjectType } from '../constants/enums';
 import { AdminModel, type AdminRaw } from '../models/admin.model';
 import { CustomerModel, type CustomerRaw } from '../models/customer.model';
 import { InstallationModel, type InstallationRaw } from '../models/installation.model';
@@ -167,7 +167,7 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
   /** Push tokens and the language of the devices an account is signed in on, most recent first. */
   async devicesOf(
     account: { customerId: string } | { memberId: string },
-  ): Promise<{ token: string; language: Language }[]> {
+  ): Promise<{ token: string; language: Language; platform: Platform }[]> {
     const id = 'customerId' in account ? account.customerId : account.memberId;
     if (!isValidId(id)) return [];
     const found = await this.findMany(
@@ -178,7 +178,9 @@ export class InstallationsRepository extends BaseRepository<InstallationRaw> {
       { lastSeenAt: -1 },
     );
     return found.flatMap((d) =>
-      d.fcmToken === undefined ? [] : [{ token: d.fcmToken, language: d.language }],
+      d.fcmToken === undefined
+        ? []
+        : [{ token: d.fcmToken, language: d.language, platform: d.platform }],
     );
   }
 

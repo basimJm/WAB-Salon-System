@@ -1,14 +1,17 @@
-import type { Language, NotificationRecipientType } from '../../constants/enums';
+import type { Language, NotificationRecipientType, Platform } from '../../constants/enums';
 import { LANGUAGES } from '../../constants/i18n';
 import {
   NOTIFICATION_EVENTS,
   PUSH_RESULTS,
+  REQUEST_PUSH,
   type Audience,
+  type EventDefinition,
   type NotificationEvent,
 } from '../../constants/notifications';
 import type { PushApp } from '../../constants/providers';
 import type { NotificationRaw, NotificationText } from '../../models/notification.model';
 import type { Notifier } from '../../providers';
+import type { PushRequest } from '../../providers/notifier/types';
 import type {
   CustomersRepository,
   InstallationsRepository,
@@ -36,6 +39,8 @@ export interface NotifyInput {
   /** Members audiences: the salon, and the staff named by the event (assigned / old / new). */
   readonly salonId?: string;
   readonly staffIds?: readonly string[];
+  /** Extra FCM data in the recipient's language (the details of a booking request). */
+  readonly pushData?: (language: Language) => Record<string, string>;
 }
 
 export interface NotificationService {
@@ -51,6 +56,8 @@ interface Recipient {
   readonly language: Language;
   readonly app: PushApp;
   readonly tokens: readonly string[];
+  /** Platform of each token: merchant booking requests are sent differently to Android and iOS. */
+  readonly platforms: ReadonlyMap<string, Platform>;
   /** A customer can switch push off in the app; members cannot. */
   readonly pushAllowed: boolean;
 }
@@ -91,6 +98,7 @@ export const createNotificationService = (deps: NotificationDeps): NotificationS
         language: customer.language,
         app: 'CUSTOMER',
         tokens: devices.map((d) => d.token),
+        platforms: new Map(devices.map((d) => [d.token, d.platform])),
         pushAllowed: customer.pushEnabled,
       },
     ];
@@ -121,6 +129,7 @@ export const createNotificationService = (deps: NotificationDeps): NotificationS
           language: devices[0]?.language ?? DEFAULT_LANGUAGE_FOR_MEMBERS,
           app: 'MERCHANT',
           tokens: devices.map((d) => d.token),
+          platforms: new Map(devices.map((d) => [d.token, d.platform])),
           pushAllowed: true,
         };
       }),
@@ -144,28 +153,75 @@ export const createNotificationService = (deps: NotificationDeps): NotificationS
   ): Promise<{ sent: boolean; result: string }> => {
     if (!recipient.pushAllowed) return { sent: false, result: PUSH_RESULTS.pushOff };
     if (recipient.tokens.length === 0) return { sent: false, result: PUSH_RESULTS.noToken };
-    const definition = NOTIFICATION_EVENTS[event];
-    try {
-      const result = await notifier.sendPush({
-        target: { tokens: recipient.tokens },
-        message: {
-          app: recipient.app,
-          kind: 'VISIBLE',
-          title: title[recipient.language],
-          body: body[recipient.language],
-          data: {
-            event,
-            notificationId: id,
-            ...(input.data?.bookingId === undefined ? {} : { bookingId: input.data.bookingId }),
-            ...(input.data?.salonId === undefined ? {} : { salonId: input.data.salonId }),
-            ...(input.data?.deepLink === undefined ? {} : { deepLink: input.data.deepLink }),
+    const definition: EventDefinition = NOTIFICATION_EVENTS[event];
+    const data: Record<string, string> = {
+      event,
+      notificationId: id,
+      ...(input.data?.bookingId === undefined ? {} : { bookingId: input.data.bookingId }),
+      ...(input.data?.salonId === undefined ? {} : { salonId: input.data.salonId }),
+      ...(input.data?.deepLink === undefined ? {} : { deepLink: input.data.deepLink }),
+      ...(input.pushData?.(recipient.language) ?? {}),
+    };
+    const shown = { title: title[recipient.language], body: body[recipient.language] };
+    const priority = definition.priority === undefined ? {} : { priority: definition.priority };
+    const requests: PushRequest[] = [];
+    const isRequest = definition.request === true && recipient.app === 'MERCHANT';
+    if (isRequest) {
+      // Android: a data message wakes the app so it can draw the overlay / full-screen alert.
+      // iOS cannot run code for a visible alert: a time-sensitive notification with action buttons.
+      const android = recipient.tokens.filter((t) => recipient.platforms.get(t) !== 'IOS');
+      const ios = recipient.tokens.filter((t) => recipient.platforms.get(t) === 'IOS');
+      const collapse =
+        input.data?.bookingId === undefined ? {} : { collapseKey: input.data.bookingId };
+      if (android.length > 0) {
+        requests.push({
+          target: { tokens: android },
+          message: {
+            app: recipient.app,
+            kind: 'DATA_ONLY',
+            data: { ...data, ...shown, actions: REQUEST_PUSH.actions },
+            ...priority,
+            androidChannelId: REQUEST_PUSH.androidChannelId,
+            androidFullScreenIntent: true,
+            ...collapse,
           },
-          ...('priority' in definition ? { priority: definition.priority } : {}),
-        },
+          idempotencyKey: `${input.key}:${recipient.id}:android`,
+        });
+      }
+      if (ios.length > 0) {
+        requests.push({
+          target: { tokens: ios },
+          message: {
+            app: recipient.app,
+            kind: 'VISIBLE',
+            ...shown,
+            data: { ...data, actions: REQUEST_PUSH.actions },
+            ...priority,
+            interruption: 'TIME_SENSITIVE',
+            actionCategory: REQUEST_PUSH.iosActionCategory,
+            sound: REQUEST_PUSH.sound,
+            ...collapse,
+          },
+          idempotencyKey: `${input.key}:${recipient.id}:ios`,
+        });
+      }
+    } else {
+      requests.push({
+        target: { tokens: recipient.tokens },
+        message: { app: recipient.app, kind: 'VISIBLE', ...shown, data, ...priority },
         idempotencyKey: `${input.key}:${recipient.id}`,
       });
-      if (result.invalidTokens.length > 0) await installations.dropTokens(result.invalidTokens);
-      return result.sent > 0
+    }
+    try {
+      let sent = 0;
+      const invalid: string[] = [];
+      for (const request of requests) {
+        const result = await notifier.sendPush(request);
+        sent += result.sent;
+        invalid.push(...result.invalidTokens);
+      }
+      if (invalid.length > 0) await installations.dropTokens(invalid);
+      return sent > 0
         ? { sent: true, result: PUSH_RESULTS.sent }
         : { sent: false, result: PUSH_RESULTS.failed };
     } catch (error) {

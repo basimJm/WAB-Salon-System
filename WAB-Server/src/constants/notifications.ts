@@ -31,6 +31,8 @@ export interface EventDefinition {
   readonly type: NotificationType;
   readonly audiences: readonly Audience[];
   readonly priority?: PushPriority;
+  /** A booking request the merchant must answer: pushed as an overlay / time-sensitive alert (Merchant PRD M10). */
+  readonly request?: true;
 }
 
 const VIEW_ALL: readonly Permission[] = ['BOOKINGS_VIEW_ALL'];
@@ -46,6 +48,7 @@ export const NOTIFICATION_EVENTS = {
     type: 'BOOKING',
     audiences: [{ who: 'members', permissions: RESPOND }],
     priority: 'HIGH',
+    request: true,
   },
   'booking.approved': { type: 'BOOKING', audiences: [customer] },
   'booking.rejected': { type: 'BOOKING', audiences: [customer] },
@@ -135,3 +138,12 @@ export const NOTIFICATION_ROUTES = {
 /** Most ids one "mark as read" call may carry (a screen shows a page of 10, with room for scrolling). */
 export const MAX_READ_IDS = 50;
 export const INBOX_SEARCH_MAX_LENGTH = 100;
+
+/** How the merchant apps present a booking request outside the app (Merchant PRD M10). */
+export const REQUEST_PUSH = {
+  androidChannelId: 'booking_requests',
+  iosActionCategory: 'BOOKING_REQUEST',
+  sound: 'booking_request',
+  /** The buttons the apps show: Accept runs in the background, Reject opens the reason picker. */
+  actions: 'ACCEPT,REJECT,OPEN',
+} as const;
