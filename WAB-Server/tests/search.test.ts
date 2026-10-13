@@ -323,3 +323,58 @@ describe('GET /customer/v1/salons/filters', () => {
     );
   });
 });
+
+describe('nearest sorting', () => {
+  const at = (lat: number, lng: number): { location: object } => ({
+    location: { type: 'Point', coordinates: [lng, lat] },
+  });
+  // The customer stands at Amman centre (31.95, 35.93); 0.01 degrees is about 1.1 km.
+  const here = 'lat=31.95&lng=35.93';
+
+  it('orders by distance, shows km, and drops salons outside the discovery radius', async () => {
+    addSalon('Far', at(31.99, 35.93));
+    addSalon('Near', at(31.96, 35.93));
+    addSalon('Middle', at(31.97, 35.93));
+    addSalon('Outside', at(32.5, 35.93));
+    addSalon('NoLocation');
+    const res = await request(app).get(`/customer/v1/salons?gender=FEMALE&${here}`);
+    expect(res.status).toBe(200);
+    const cards = bodyOf(res).data as unknown as { name: string; distanceKm: number | null }[];
+    expect(cards.map((c) => c.name)).toEqual(['Near', 'Middle', 'Far']);
+    expect(cards.map((c) => c.distanceKm)).toEqual([1.1, 2.2, 4.4]);
+  });
+
+  it('paginates the distance order', async () => {
+    for (let i = 1; i <= 12; i += 1) addSalon(`S${String(i)}`, at(31.95 + i / 1000, 35.93));
+    const second = await request(app).get(`/customer/v1/salons?gender=FEMALE&${here}&page=2`);
+    expect(bodyOf(second).data.map((c) => c.name)).toEqual(['S11', 'S12']);
+    expect(bodyOf(second).meta?.total).toBe(12);
+  });
+
+  it('keeps the rating order when sort=RATING and still reports the distance', async () => {
+    addSalon('Close', { ...at(31.951, 35.93), rating: { avg: 3, count: 1 } });
+    addSalon('Best', { ...at(31.99, 35.93), rating: { avg: 5, count: 1 } });
+    const res = await request(app).get(`/customer/v1/salons?gender=FEMALE&${here}&sort=RATING`);
+    const cards = bodyOf(res).data as unknown as { name: string; distanceKm: number | null }[];
+    expect(cards.map((c) => c.name)).toEqual(['Best', 'Close']);
+    expect(cards[0]?.distanceKm).toBe(4.4);
+  });
+
+  it('has no distance without a position', async () => {
+    addSalon('Plain', at(31.96, 35.93));
+    const res = await request(app).get('/customer/v1/salons?gender=FEMALE');
+    expect((bodyOf(res).data as unknown as { distanceKm: null }[])[0]?.distanceKm).toBeNull();
+  });
+
+  it.each([
+    ['lat without lng', 'lat=31.9'],
+    ['lng without lat', 'lng=35.9'],
+    ['latitude out of range', 'lat=91&lng=35'],
+    ['longitude out of range', 'lat=31&lng=181'],
+    ['NEAREST without a position', 'sort=NEAREST'],
+    ['an unknown sort', 'sort=CHEAPEST'],
+  ])('rejects %s', async (_n, query) => {
+    const res = await request(app).get(`/customer/v1/salons?gender=FEMALE&${query}`);
+    expect(res.status).toBe(400);
+  });
+});

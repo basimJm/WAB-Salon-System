@@ -37,6 +37,17 @@ const matchesCondition = (actual: unknown, condition: unknown): boolean => {
           String(expected),
           typeof condition['$options'] === 'string' ? condition['$options'] : '',
         ).test(String(actual));
+      case '$geoWithin': {
+        const [[lng, lat], radians] = (expected as { $centerSphere: [[number, number], number] })
+          .$centerSphere;
+        const point = (actual as { coordinates?: [number, number] } | undefined)?.coordinates;
+        if (point === undefined) return false;
+        const rad = (d: number): number => (d * Math.PI) / 180;
+        const a =
+          Math.sin(rad(point[1] - lat) / 2) ** 2 +
+          Math.cos(rad(lat)) * Math.cos(rad(point[1])) * Math.sin(rad(point[0] - lng) / 2) ** 2;
+        return 2 * Math.asin(Math.min(1, Math.sqrt(a))) <= radians;
+      }
       case '$options':
         return true;
       default:

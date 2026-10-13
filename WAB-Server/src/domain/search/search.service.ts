@@ -1,5 +1,12 @@
+import type { QueryFilter } from 'mongoose';
 import type { Gender } from '../../constants/enums';
-import { SHORT_DESCRIPTION_LENGTH, type SearchGeneralFilter } from '../../constants/search';
+import {
+  DISTANCE_DECIMALS,
+  EARTH_RADIUS_KM,
+  SHORT_DESCRIPTION_LENGTH,
+  type SearchGeneralFilter,
+  type SearchSort,
+} from '../../constants/search';
 import type { SalonRaw } from '../../models/salon.model';
 import type { StorageProvider } from '../../providers/storage';
 import type { ClosuresRepository } from '../../repositories/closures.repository';
@@ -23,6 +30,8 @@ export interface SalonCard {
   /** Today's hours (`HH:mm`), or `null` when closed today. */
   readonly todayHours: { open: string; close: string } | null;
   readonly isFavorite: boolean;
+  /** Distance in km from the customer, `null` when no position was sent or the salon has none. */
+  readonly distanceKm: number | null;
 }
 
 export interface SearchQuery {
@@ -37,6 +46,10 @@ export interface SearchQuery {
   /** "X stars and above". */
   readonly minRating?: number | undefined;
   readonly general?: SearchGeneralFilter | undefined;
+  /** The customer's position; with `NEAREST` only salons inside the discovery radius are shown. */
+  readonly lat?: number | undefined;
+  readonly lng?: number | undefined;
+  readonly sort?: SearchSort | undefined;
 }
 
 /** Which salons are currently recommended for an audience (placements arrive with SRV-066). */
@@ -74,6 +87,21 @@ export interface SearchDeps {
   readonly favorites?: FavoriteLookup;
   readonly now?: () => Date;
 }
+
+const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
+
+/** Great-circle distance between two points, in km. */
+export const distanceKm = (
+  from: { lat: number; lng: number },
+  to: { lat: number; lng: number },
+): number => {
+  const dLat = toRadians(to.lat - from.lat);
+  const dLng = toRadians(to.lng - from.lng);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(from.lat)) * Math.cos(toRadians(to.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(a)));
+};
 
 const escapeRegex = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -117,6 +145,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
     ranges: { from: string; to: string; reason: string }[],
     timeZone: string,
     favorite: boolean,
+    distance: number | null,
   ): SalonCard => {
     const today = todaysHours(s.weeklySchedule, ranges, now(), timeZone);
     return {
@@ -134,6 +163,8 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
           ? null
           : { open: today.open, close: today.close },
       isFavorite: favorite,
+      distanceKm:
+        distance === null ? null : Math.round(distance * DISTANCE_DECIMALS) / DISTANCE_DECIMALS,
     };
   };
 
@@ -157,20 +188,56 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       }
       if (allowed !== undefined && allowed.length === 0) return empty;
 
-      const page = await salons.findPage(
-        {
-          state: 'LIVE',
-          'completeness.isComplete': true,
-          gender: query.gender,
-          ...(allowed === undefined ? {} : { _id: { $in: allowed } }),
-          ...(query.minRating === undefined ? {} : { 'rating.avg': { $gte: query.minRating } }),
-          ...(query.q === undefined || query.q === ''
-            ? {}
-            : { searchText: { $regex: escapeRegex(query.q), $options: 'i' } }),
-        },
-        params,
-        { 'rating.avg': -1, 'rating.count': -1 },
-      );
+      const here =
+        query.lat === undefined || query.lng === undefined
+          ? null
+          : { lat: query.lat, lng: query.lng };
+      const origin = (query.sort ?? 'NEAREST') === 'NEAREST' ? here : null;
+      const nearest = origin !== null;
+      const radiusKm = nearest ? await settings.get('discovery.nearbyRadiusKm') : 0;
+      const filter: QueryFilter<SalonRaw> = {
+        state: 'LIVE',
+        'completeness.isComplete': true,
+        gender: query.gender,
+        ...(allowed === undefined ? {} : { _id: { $in: allowed } }),
+        ...(query.minRating === undefined ? {} : { 'rating.avg': { $gte: query.minRating } }),
+        ...(query.q === undefined || query.q === ''
+          ? {}
+          : { searchText: { $regex: escapeRegex(query.q), $options: 'i' } }),
+        ...(origin !== null
+          ? {
+              location: {
+                $geoWithin: {
+                  $centerSphere: [[origin.lng, origin.lat], radiusKm / EARTH_RADIUS_KM],
+                },
+              },
+            }
+          : {}),
+      };
+      const distances = new Map<string, number>();
+      const distanceOf = (s: Entity<SalonRaw>): number | null => {
+        if (here === null || s.location === undefined) return null;
+        const [lng, lat] = s.location.coordinates;
+        if (lng === undefined || lat === undefined) return null;
+        return distanceKm(here, { lat, lng });
+      };
+      let page: { items: Entity<SalonRaw>[]; meta: PaginationMeta };
+      if (nearest) {
+        const all = await salons.findMany(filter, { 'rating.avg': -1, 'rating.count': -1 });
+        for (const s of all) distances.set(s.id, distanceOf(s) ?? Number.POSITIVE_INFINITY);
+        all.sort((a, b) => (distances.get(a.id) ?? 0) - (distances.get(b.id) ?? 0));
+        const start = (params.page - 1) * params.pageSize;
+        page = {
+          items: all.slice(start, start + params.pageSize),
+          meta: { page: params.page, pageSize: params.pageSize, total: all.length },
+        };
+      } else {
+        page = await salons.findPage(filter, params, { 'rating.avg': -1, 'rating.count': -1 });
+        for (const s of page.items) {
+          const d = distanceOf(s);
+          if (d !== null) distances.set(s.id, d);
+        }
+      }
       const ids = page.items.map((s) => s.id);
       const timeZone = await settings.get('timezone');
       const date = localDateOf(now(), timeZone);
@@ -187,6 +254,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
             ranges.filter((r) => r.salonId === s.id),
             timeZone,
             saved.has(s.id),
+            distances.get(s.id) ?? null,
           ),
         ),
         meta: page.meta,

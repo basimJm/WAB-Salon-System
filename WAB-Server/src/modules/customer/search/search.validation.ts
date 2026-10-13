@@ -3,7 +3,10 @@ import { OBJECT_ID_PATTERN } from '../../../constants/database';
 import { GENDERS } from '../../../constants/enums';
 import { APP_PAGE_SIZE } from '../../../constants/pagination';
 import {
+  LATITUDE_LIMIT,
+  LONGITUDE_LIMIT,
   SEARCH_GENERAL_FILTERS,
+  SEARCH_SORTS,
   SEARCH_MAX_SERVICE_FILTERS,
   SEARCH_RATING_MAX,
   SEARCH_RATING_MIN,
@@ -34,6 +37,17 @@ export const searchQuerySchema = paginationQuery(APP_PAGE_SIZE)
     maxPrice: jod.optional(),
     minRating: z.coerce.number().int().min(SEARCH_RATING_MIN).max(SEARCH_RATING_MAX).optional(),
     general: z.enum(SEARCH_GENERAL_FILTERS).optional(),
+    lat: z.coerce.number().min(-LATITUDE_LIMIT).max(LATITUDE_LIMIT).optional(),
+    lng: z.coerce.number().min(-LONGITUDE_LIMIT).max(LONGITUDE_LIMIT).optional(),
+    sort: z.enum(SEARCH_SORTS).optional(),
+  })
+  .refine((q) => (q.lat === undefined) === (q.lng === undefined), {
+    path: ['lat'],
+    message: 'lat and lng go together',
+  })
+  .refine((q) => q.sort !== 'NEAREST' || q.lat !== undefined, {
+    path: ['sort'],
+    message: 'NEAREST needs lat and lng',
   })
   .refine((q) => q.minPrice === undefined || q.maxPrice === undefined || q.minPrice <= q.maxPrice, {
     path: ['maxPrice'],
