@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { createNotificationService } from '../src/domain/notifications/notifications.service';
 import { createNotificationProducers } from '../src/domain/notifications/producers';
 import { NOTIFICATION_EVENTS } from '../src/constants/notifications';
+import type { Notifier } from '../src/providers';
 import { FakeNotifier } from '../src/providers/notifier/fake';
 import {
   CustomersRepository,
@@ -30,18 +31,39 @@ const sent: {
   title: string;
   body: string;
   data: Record<string, string>;
+  kind: string;
+  interruption?: string;
+  actionCategory?: string;
+  collapseKey?: string;
+  fullScreen?: boolean;
+  priority?: string;
 }[] = [];
 const realSend = notifier.sendPush.bind(notifier);
-notifier.sendPush = (request) => {
+const capturingSend: Notifier['sendPush'] = (request) => {
   const target = 'tokens' in request.target ? request.target.tokens : [];
   sent.push({
     tokens: target,
     title: request.message.title ?? '',
     body: request.message.body ?? '',
     data: { ...request.message.data },
+    kind: request.message.kind,
+    ...(request.message.interruption === undefined
+      ? {}
+      : { interruption: request.message.interruption }),
+    ...(request.message.actionCategory === undefined
+      ? {}
+      : { actionCategory: request.message.actionCategory }),
+    ...(request.message.collapseKey === undefined
+      ? {}
+      : { collapseKey: request.message.collapseKey }),
+    ...(request.message.androidFullScreenIntent === undefined
+      ? {}
+      : { fullScreen: request.message.androidFullScreenIntent }),
+    ...(request.message.priority === undefined ? {} : { priority: request.message.priority }),
   });
   return realSend(request);
 };
+notifier.sendPush = capturingSend;
 
 const service = createNotificationService({
   notifications: new NotificationsRepository(m.notifications.model as never),
@@ -90,11 +112,13 @@ const device = (
   owner: { customerId?: Types.ObjectId; memberId?: Types.ObjectId },
   token: string,
   language = 'ar',
+  platform = 'ANDROID',
 ): void => {
   m.installations.docs.push({
     _id: new Types.ObjectId(),
     fcmToken: token,
     language,
+    platform,
     lastSeenAt: new Date(),
     ...owner,
   });
@@ -189,9 +213,11 @@ describe('recipients and delivery', () => {
       pushResult: 'SENT',
     });
     const push = sent.find((p) => p.tokens.includes('tok-responder'));
-    expect(push?.title).toBe('New booking request');
-    expect(push?.body).toBe('Rana requested WAB-ABC234 for 11:00.');
-    expect(sent.find((p) => p.tokens.includes('tok-owner'))?.title).toBe('طلب حجز جديد');
+    // A request reaches Android as a data message, so the text travels inside `data`.
+    expect(push?.kind).toBe('DATA_ONLY');
+    expect(push?.data['title']).toBe('New booking request');
+    expect(push?.data['body']).toBe('Rana requested WAB-ABC234 for 11:00.');
+    expect(sent.find((p) => p.tokens.includes('tok-owner'))?.data['title']).toBe('طلب حجز جديد');
     expect(push?.data).toMatchObject({ event: 'booking.requested', bookingId: 'b1' });
   });
   it('the customer gets the message in their own language; push respects the switch and missing tokens', async () => {
@@ -296,7 +322,7 @@ describe('recipients and delivery', () => {
       params: {},
     });
     expect(stored(customer)[0]).toMatchObject({ pushSent: false, pushResult: 'FAILED' });
-    notifier.sendPush = realSend;
+    notifier.sendPush = capturingSend;
   });
   it('forgets push tokens the provider says are invalid', async () => {
     device({ customerId: customer }, 'dead-token');
@@ -335,7 +361,19 @@ describe('producers', () => {
       status,
       statusHistory: [{}, {}],
       appointmentStart: new Date('2026-10-12T08:00:00Z'),
-      persons: [{ staffId: staffId.toHexString() }],
+      respondBy: new Date('2026-10-12T09:00:00Z'),
+      paymentMethod: 'DEPOSIT',
+      hasBride: true,
+      money: { total: 12_500 },
+      persons: [
+        {
+          staffId: staffId.toHexString(),
+          services: [
+            { name: { ar: 'قص شعر', en: 'Haircut' } },
+            { name: { ar: 'صبغة', en: 'Colour' } },
+          ],
+        },
+      ],
     }) as never;
 
   it('a new booking tells the customer and the members who can respond', async () => {
@@ -374,6 +412,63 @@ describe('producers', () => {
     expect(stored(ids.staff).map((n) => n['event'])).toEqual(['booking.reminder_1h']);
     await producers.bookingJobEvent('booking.pending_30m', booking('PENDING'));
     expect(stored(ids.responder).map((n) => n['event'])).toContain('booking.pending_30m');
+  });
+  it('a booking request is a data message with overlay flags for Android and a time-sensitive alert with actions for iOS', async () => {
+    device({ memberId: ids.responder }, 'tok-responder-ios', 'en', 'IOS');
+    const b = booking('PENDING');
+    await producers.bookingCreated.created(b);
+    const forResponder = sent.filter(
+      (p) => p.tokens.includes('tok-responder') || p.tokens.includes('tok-responder-ios'),
+    );
+    const android = forResponder.find((p) => p.tokens.includes('tok-responder'));
+    const ios = forResponder.find((p) => p.tokens.includes('tok-responder-ios'));
+    expect(forResponder).toHaveLength(2);
+    expect(android).toMatchObject({
+      kind: 'DATA_ONLY',
+      priority: 'HIGH',
+      fullScreen: true,
+      collapseKey: (b as unknown as { id: string }).id,
+    });
+    expect(android?.tokens).toEqual(['tok-responder']);
+    // The data message carries what the overlay draws, in the member's language.
+    expect(android?.data).toMatchObject({
+      event: 'booking.requested',
+      reference: 'WAB-ABC234',
+      customer: 'Rana',
+      persons: '1',
+      services: 'Haircut, Colour',
+      total: '12.500',
+      paymentMethod: 'DEPOSIT',
+      isBride: 'true',
+      when: '12/10/2026, 11:00 am',
+      respondBy: '2026-10-12T09:00:00.000Z',
+      actions: 'ACCEPT,REJECT,OPEN',
+      title: 'New booking request',
+    });
+    expect(ios).toMatchObject({
+      kind: 'VISIBLE',
+      interruption: 'TIME_SENSITIVE',
+      actionCategory: 'BOOKING_REQUEST',
+      priority: 'HIGH',
+      collapseKey: (b as unknown as { id: string }).id,
+    });
+    expect(ios?.tokens).toEqual(['tok-responder-ios']);
+    expect(ios?.title).toBe('New booking request');
+    expect(ios?.fullScreen).toBeUndefined();
+  });
+  it('a booking request is pushed once per device group even if the hook repeats', async () => {
+    const b = booking('PENDING');
+    await producers.bookingCreated.created(b);
+    const before = sent.length;
+    await producers.bookingCreated.created(b);
+    expect(sent.length).toBe(before);
+  });
+  it('other events keep the normal visible push for merchants and customers', async () => {
+    await producers.bookingCreated.created(booking('PENDING'));
+    const toCustomer = sent.find((p) => p.tokens.includes('tok-customer'));
+    expect(toCustomer).toMatchObject({ kind: 'VISIBLE' });
+    expect(toCustomer?.interruption).toBeUndefined();
+    expect(toCustomer?.collapseKey).toBeUndefined();
   });
   it('a subscription alert reaches only the owner, once per end date, with the date in the owner language', async () => {
     const alert = {
