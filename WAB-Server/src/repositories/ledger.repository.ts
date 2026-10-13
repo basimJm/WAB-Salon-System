@@ -22,9 +22,21 @@ export class LedgerRepository extends AppendOnlyRepository<LedgerEntryRaw> {
     return row?.sum ?? 0;
   }
 
+  /** Σ amount of one kind of entry created after `from` and up to `to` (the payout period). */
+  async sumInPeriod(salonId: string, type: LedgerType, from: Date, to: Date): Promise<number> {
+    if (!isObjectIdString(salonId)) return 0;
+    const [row] = await this.model
+      .aggregate<{ sum: number }>([
+        { $match: { salonId, type, createdAt: { $gt: from, $lte: to } } },
+        { $group: { _id: null, sum: { $sum: '$amount' } } },
+      ])
+      .exec();
+    return row?.sum ?? 0;
+  }
+
   /** The entry of this kind for a payment / refund, if it was booked already. */
   async findFor(
-    key: { transactionId: string; type: LedgerType } | { refundId: string },
+    key: { transactionId: string; type: LedgerType } | { refundId: string } | { payoutId: string },
   ): Promise<Entity<LedgerEntryRaw> | null> {
     const filter = 'refundId' in key ? { refundId: key.refundId, type: 'REFUND' } : { ...key };
     const found = await this.model

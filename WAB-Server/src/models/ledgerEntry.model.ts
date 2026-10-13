@@ -56,6 +56,10 @@ ledgerSchema.index(
   { refundId: 1 },
   { unique: true, partialFilterExpression: { type: 'REFUND', refundId: { $exists: true } } },
 );
+ledgerSchema.index(
+  { payoutId: 1 },
+  { unique: true, partialFilterExpression: { type: 'PAYOUT', payoutId: { $exists: true } } },
+);
 makeAppendOnly(ledgerSchema);
 
 export const LedgerEntryModel = model<LedgerEntryRaw>('LedgerEntry', ledgerSchema);

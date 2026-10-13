@@ -1431,6 +1431,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - ledger writes are best effort after the booking/refund is stored (logged on failure, repaired by `reconcile`); `chargedAt`/`ledgeredAt` are extension fields; the real aggregate path is not run against MongoDB.
 
+### T-099 — SRV-088 Manual payouts
+- Project: `WAB-Server/` (`src/models/payout.model.ts`, `src/repositories/payouts.repository.ts`, `src/domain/payouts/payouts.service.ts`, `src/modules/admin/payouts/*`, `LedgerService.recordPayout`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §3.5 payouts, §5.14; Admin PRD A18; CLAUDE.md §5.12):
+  - [x] preview/create: computed from the ledger between the end of the salon's previous payout and `periodTo` (never future, never before the start); gross, fees, refunds, adjustments, net; payout entries are never counted; net ≤ 0 → 400; one open payout per salon (409, also by the unique partial index)
+  - [x] transfer: amount must equal net (400), date not in the future, reference + note required; atomic PENDING → TRANSFERRED (second call 422 `ALREADY_HANDLED`); ledger `PAYOUT −net` once; owner/FINANCE_VIEW notifier (failure only logged); audit with the note as reason
+  - [x] history with filters, details, per-salon balances page
+- Tests: `tests/payoutsService.test.ts` (10); full gate green, 2186 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: `adjustments` is an extension (net includes manual ADJUSTMENT entries; the admin tool to add them comes with the admin finance task SRV-104); amount must equal the net (a different sum = another payout); audit is written after the change (as before); notification is a logger until SRV-093; unique PENDING index not run against MongoDB.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

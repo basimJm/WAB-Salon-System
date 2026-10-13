@@ -24,6 +24,7 @@ import {
   unavailableGuard,
   unavailableAdminLogin,
   type ApiServices,
+  unavailableAdminPayouts,
   unavailableAdminRefunds,
   unavailableBookingQueries,
 } from '../services';
@@ -34,6 +35,8 @@ import { createAdminSalonsRouter } from './salons/adminSalons.routes';
 import { createAdminSalonStateRouter } from './salons/salonState.routes';
 import { createAdminPlacementsRouter } from './placements/placements.routes';
 import { ADMIN_PLACEMENT_ROUTES } from '../../constants/placements';
+import { createAdminPayoutsRouter } from './payouts/payouts.routes';
+import { ADMIN_PAYOUT_ROUTES } from '../../constants/payouts';
 import { createAdminRefundsRouter } from './refunds/refunds.routes';
 import { ADMIN_REFUND_ROUTES } from '../../constants/refunds';
 import { createAdminBookingsRouter } from './bookings/bookings.routes';
@@ -98,6 +101,11 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
       guard,
       services.bookingAdmin,
     ),
+  );
+  mount(
+    router,
+    ADMIN_PAYOUT_ROUTES.base,
+    createAdminPayoutsRouter(services.adminPayouts ?? unavailableAdminPayouts, guard),
   );
   mount(
     router,
