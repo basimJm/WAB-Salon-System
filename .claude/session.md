@@ -1088,6 +1088,17 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - last names never returned; reviews preview/staff reviews come with SRV-063; DAY_OFF means the staff member has no working day today.
 
+### T-072 — SRV-061 Home aggregate
+- Project: `WAB-Server/` (`src/domain/home`, `src/modules/customer/home`, `src/constants/home.ts`, `src/server.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD S03):
+  - [x] One request returns banners, services, recommended and nearest salons for the chosen gender; 10 items per section with `hasMore`
+  - [x] Guest: no name/bell; signed-in customer: first name, unread count, favorites; nearest only with `lat`+`lng`; bad input/token rejected
+- Tests: `tests/home.test.ts` (9); full gate green, 1836 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - composes the banner, catalog and search services (no duplicated queries); unread count is a placeholder `UnreadLookup` until the notification core (SRV-093).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

@@ -1016,6 +1016,52 @@
           }
         }
       ]
+    },
+    {
+      "name": "Home",
+      "item": [
+        {
+          "name": "Home (S03): banners, services, recommended and nearest salons in one request",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/home",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "home"
+              ],
+              "query": [
+                {
+                  "key": "gender",
+                  "value": ""
+                },
+                {
+                  "key": "lat",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "lng",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            },
+            "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent. Each section holds 10 items; `hasMore` shows See more / See all."
+          }
+        }
+      ]
     }
   ],
   "variable": [

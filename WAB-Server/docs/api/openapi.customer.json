@@ -4383,6 +4383,429 @@
           }
         }
       }
+    },
+    "/customer/v1/home": {
+      "get": {
+        "tags": [
+          "Home"
+        ],
+        "summary": "Home (S03): banners, services, recommended and nearest salons in one request",
+        "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent. Each section holds 10 items; `hasMore` shows See more / See all.",
+        "security": [],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MALE",
+                "FEMALE"
+              ]
+            },
+            "required": true,
+            "name": "gender",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": -90,
+              "maximum": 90
+            },
+            "required": false,
+            "name": "lat",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": -180,
+              "maximum": 180
+            },
+            "required": false,
+            "name": "lng",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Home",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "firstName": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "unreadCount": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "banners": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "imageUrl": {
+                                "type": "string"
+                              },
+                              "actionType": {
+                                "type": "string"
+                              },
+                              "actionValue": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "imageUrl",
+                              "actionType"
+                            ]
+                          }
+                        },
+                        "services": {
+                          "type": "object",
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "description": {
+                                    "type": "string"
+                                  },
+                                  "imageUrl": {
+                                    "type": "string"
+                                  },
+                                  "gender": {
+                                    "type": "string",
+                                    "enum": [
+                                      "MALE",
+                                      "FEMALE"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "description",
+                                  "imageUrl",
+                                  "gender"
+                                ]
+                              }
+                            },
+                            "hasMore": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "items",
+                            "hasMore"
+                          ]
+                        },
+                        "recommended": {
+                          "type": "object",
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "profileImageUrl": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "rating": {
+                                    "type": "number"
+                                  },
+                                  "reviewsCount": {
+                                    "type": "number"
+                                  },
+                                  "locationText": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "shortDescription": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "isOpenNow": {
+                                    "type": "boolean"
+                                  },
+                                  "todayHours": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "open": {
+                                        "type": "string"
+                                      },
+                                      "close": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "open",
+                                      "close"
+                                    ]
+                                  },
+                                  "isFavorite": {
+                                    "type": "boolean"
+                                  },
+                                  "distanceKm": {
+                                    "type": [
+                                      "number",
+                                      "null"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "profileImageUrl",
+                                  "rating",
+                                  "reviewsCount",
+                                  "locationText",
+                                  "shortDescription",
+                                  "isOpenNow",
+                                  "todayHours",
+                                  "isFavorite",
+                                  "distanceKm"
+                                ]
+                              }
+                            },
+                            "hasMore": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "items",
+                            "hasMore"
+                          ]
+                        },
+                        "nearest": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "profileImageUrl": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "rating": {
+                                    "type": "number"
+                                  },
+                                  "reviewsCount": {
+                                    "type": "number"
+                                  },
+                                  "locationText": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "shortDescription": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "isOpenNow": {
+                                    "type": "boolean"
+                                  },
+                                  "todayHours": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "open": {
+                                        "type": "string"
+                                      },
+                                      "close": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "open",
+                                      "close"
+                                    ]
+                                  },
+                                  "isFavorite": {
+                                    "type": "boolean"
+                                  },
+                                  "distanceKm": {
+                                    "type": [
+                                      "number",
+                                      "null"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "profileImageUrl",
+                                  "rating",
+                                  "reviewsCount",
+                                  "locationText",
+                                  "shortDescription",
+                                  "isOpenNow",
+                                  "todayHours",
+                                  "isFavorite",
+                                  "distanceKm"
+                                ]
+                              }
+                            },
+                            "hasMore": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "items",
+                            "hasMore"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "firstName",
+                        "unreadCount",
+                        "banners",
+                        "services",
+                        "recommended",
+                        "nearest"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}

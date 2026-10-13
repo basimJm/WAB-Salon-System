@@ -20,6 +20,7 @@ import {
   unavailableBannersService,
   unavailableGuard,
   unavailableSalonDetails,
+  unavailableHome,
   unavailableSearch,
   unavailableCustomerAuth,
   type ApiServices,
@@ -27,6 +28,8 @@ import {
 import { createCustomerBannersRouter } from './banners/banners.module';
 import { createSalonDetailsRouter } from './salonDetails/salonDetails.routes';
 import { SALON_DETAILS_ROUTES } from '../../constants/salonDetails';
+import { createHomeRouter } from './home/home.routes';
+import { HOME_ROUTES } from '../../constants/home';
 import { createSearchRouter } from './search/search.routes';
 import { createCustomerContentRouter } from '../shared/content';
 import { createCatalogRouter } from '../shared/catalog/catalog.module';
@@ -89,6 +92,18 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     SALON_DETAILS_ROUTES.base,
     createSalonDetailsRouter({
       service: services.salonDetails ?? unavailableSalonDetails,
+      optionalAuth: services.installations?.customerOptional ?? unavailableGuard,
+      limiter: createRateLimiter({
+        ...SEARCH_ROUTE_RATE_LIMIT,
+        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
+      }),
+    }),
+  );
+  mount(
+    router,
+    HOME_ROUTES.base,
+    createHomeRouter({
+      service: services.home ?? unavailableHome,
       optionalAuth: services.installations?.customerOptional ?? unavailableGuard,
       limiter: createRateLimiter({
         ...SEARCH_ROUTE_RATE_LIMIT,
