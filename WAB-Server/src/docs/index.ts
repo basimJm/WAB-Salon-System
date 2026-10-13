@@ -26,6 +26,10 @@ import {
   registerCustomerLocationDocs,
   registerMerchantLocationDocs,
 } from '../modules/shared/locations/locations.openapi';
+import {
+  registerCustomerContentDocs,
+  registerMerchantContentDocs,
+} from '../modules/shared/content/content.openapi';
 import { registerHealthDocs } from '../routes/health.openapi';
 import { errorResponseSchema, paginationMetaSchema } from './schemas';
 
@@ -38,8 +42,8 @@ type Registrar = (registry: OpenAPIRegistry) => void;
  */
 const REGISTRARS: Readonly<Record<DocName, readonly Registrar[]>> = {
   common: [registerHealthDocs],
-  customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs],
-  merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs],
+  customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs],
+  merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs],
   admin: [registerAdminAuthDocs],
 };
 

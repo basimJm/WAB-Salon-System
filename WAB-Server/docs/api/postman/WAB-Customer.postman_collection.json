@@ -568,6 +568,69 @@
           }
         }
       ]
+    },
+    {
+      "name": "Content",
+      "item": [
+        {
+          "name": "Privacy policy, terms or about text",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/content/pages/:slug",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "content",
+                "pages",
+                ":slug"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "FAQ in admin-defined order",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/content/faqs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "content",
+                "faqs"
+              ],
+              "query": [],
+              "variable": []
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

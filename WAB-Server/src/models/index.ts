@@ -1,6 +1,8 @@
 import { AdminModel } from './admin.model';
 import { AppVersionModel } from './appVersion.model';
 import { ContactInfoModel } from './contactInfo.model';
+import { ContentPageModel } from './contentPage.model';
+import { FaqModel } from './faq.model';
 import { MaintenanceModel } from './maintenance.model';
 import { AreaModel } from './area.model';
 import { AuditLogModel } from './auditLog.model';
@@ -34,4 +36,6 @@ export const ALL_MODELS = [
   AppVersionModel,
   MaintenanceModel,
   ContactInfoModel,
+  ContentPageModel,
+  FaqModel,
 ] as const;

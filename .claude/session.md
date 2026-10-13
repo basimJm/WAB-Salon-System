@@ -730,7 +730,7 @@
 ### T-046 — SRV-036 Public countries, cities, areas
 - Project: `WAB-Server/` (`src/domain/locations`, `src/modules/shared/locations`, `src/constants/locations.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #53 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #54 merged into `server`)
 - Acceptance criteria (BE/NFR: BE-65 data side; BUSINESS_DOMAIN §3.2; Customer PRD countries list):
   - [x] `GET /customer/v1/locations/countries|cities|areas` and the same under `/merchant/v1`: public, active entries only, `sortOrder` order, names in the request language, country has dial code, flag URL (storage `getPublicUrl`), phone regex
   - [x] `cities?countryCode` (2 upper-case letters) and `areas?cityId` (ObjectId) validated, 400 with field details; unknown parent = empty list; 503 when unconfigured
@@ -739,6 +739,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - lists are not paginated (small admin-curated data); the country list has no `name` in both languages (admin CRUD SRV-038 returns both).
 - Notes: Next: SRV-037 (public content).
+
+### T-047 — SRV-037 Public content: privacy/terms/about, FAQ
+- Project: `WAB-Server/` (`src/domain/content`, `src/modules/shared/content`, `src/models/{contentPage,faq}.model.ts`, `src/constants/content.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #54 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-65 data side; BUSINESS_DOMAIN §3.6 contentPages/faqs/contactInfo):
+  - [x] Models `contentPages` (unique app+kind) and `faqs` (index app+order) in `ALL_MODELS`
+  - [x] `GET /{customer|merchant}/v1/content/pages/{privacy|terms|about}`: own app's text in the request language, 404 if not written, 400 for an unknown slug
+  - [x] `GET .../content/faqs`: own app only, admin order, localized; 503 when unconfigured
+  - [x] Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1449 pass (49 suites); format:check/lint/typecheck/build green; audit 0. `tests/content.test.ts` (5).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - contact info is not duplicated here: `GET /config` already returns it (SRV-035). FAQ list not paginated (small, admin-curated).
+- Notes: Next: SRV-038 (admin CRUD for reference data, content, versions, maintenance).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
