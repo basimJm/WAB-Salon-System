@@ -32,10 +32,32 @@ const matchesCondition = (actual: unknown, condition: unknown): boolean => {
         return (actual as number) < (expected as number);
       case '$lte':
         return (actual as number) <= (expected as number);
+      case '$regex':
+        return new RegExp(
+          String(expected),
+          typeof condition['$options'] === 'string' ? condition['$options'] : '',
+        ).test(String(actual));
+      case '$options':
+        return true;
       default:
         throw new Error(`fake model does not support ${operator}`);
     }
   });
+};
+
+/** `$set` like MongoDB: a dotted key writes into the nested document. */
+const applySet = (doc: Doc, set: Doc): void => {
+  for (const [path, value] of Object.entries(set)) {
+    const parts = path.split('.');
+    const last = parts.pop() ?? path;
+    let target = doc;
+    for (const part of parts) {
+      const next = target[part];
+      if (typeof next !== 'object' || next === null) target[part] = {};
+      target = target[part] as Doc;
+    }
+    target[last] = value;
+  }
 };
 
 /** Reads `a.b` from nested documents, like a MongoDB dotted path. */
@@ -166,7 +188,8 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
           };
           docs.push(doc);
         }
-        Object.assign(doc, update.$set ?? {}, { updatedAt: new Date() });
+        applySet(doc, update.$set ?? {});
+        doc['updatedAt'] = new Date();
         for (const [key, step] of Object.entries(update.$inc ?? {})) {
           doc[key] = Number(doc[key] ?? 0) + step;
         }
@@ -183,7 +206,8 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
       new FakeQuery(() => {
         const found = select(filter);
         for (const doc of found) {
-          Object.assign(doc, update.$set ?? {}, { updatedAt: new Date() });
+          applySet(doc, update.$set ?? {});
+          doc['updatedAt'] = new Date();
           for (const key of Object.keys(update.$unset ?? {})) Reflect.deleteProperty(doc, key);
         }
         return { modifiedCount: found.length };

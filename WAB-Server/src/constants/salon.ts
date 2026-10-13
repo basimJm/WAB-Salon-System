@@ -80,10 +80,14 @@ export const SALON_STATE_EVENTS = [
   'salon.not_bookable',
   'salon.offline',
   'salon.online',
+  'salon.gender_changed',
 ] as const;
 export type SalonStateEvent = (typeof SALON_STATE_EVENTS)[number];
 export const ADMIN_SALON_STATE_ROUTES = {
   base: '/salons',
+  list: '/',
+  byId: '/:id',
+  gender: '/:id/gender',
   offline: '/:id/offline',
   online: '/:id/online',
 } as const;

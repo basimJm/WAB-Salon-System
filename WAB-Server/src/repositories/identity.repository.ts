@@ -94,6 +94,17 @@ export class MembersRepository extends BaseRepository<MemberRaw> {
     return this.updateById(id, { active });
   }
 
+  /** Removes the bride qualification from every staff profile of a salon (men's salons have none). */
+  async clearBrideQualification(salonId: string): Promise<void> {
+    if (!isValidId(salonId)) return;
+    await this.model
+      .updateMany(
+        { salonId, 'staff.brideQualified': true },
+        { $set: { 'staff.brideQualified': false } },
+      )
+      .exec();
+  }
+
   /** `$set` and `$unset` in one update (e.g. removing the photo). */
   async patch(
     id: string,

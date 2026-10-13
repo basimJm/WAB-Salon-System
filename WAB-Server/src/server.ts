@@ -27,6 +27,7 @@ import { createCatalogRequestsService } from './domain/catalog/catalogRequests.s
 import { CatalogRequestsRepository } from './repositories/catalogRequests.repository';
 import { createAccountLifecycleService } from './domain/auth/accountLifecycle.service';
 import { createPhoneVerifier } from './domain/auth/phoneVerifier';
+import { createAdminSalonsService } from './domain/salons/adminSalons.service';
 import { createPolicyService } from './domain/salons/policy.service';
 import { createLeavesService } from './domain/team/leaves.service';
 import { LeavesRepository } from './repositories/leaves.repository';
@@ -253,6 +254,22 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     otpGate,
     adminGuard,
     uploads,
+    adminSalons: createAdminSalonsService({
+      salons: new SalonsRepository(),
+      members: new MembersRepository(),
+      subscriptions: new SubscriptionsRepository(),
+      salonServices,
+      state: salonState,
+      audit,
+      logger,
+      // Placeholder until the notification core (SRV-093) sends the real message.
+      notifier: {
+        changed: (change) => {
+          logger.info(change, 'salon state changed');
+          return Promise.resolve();
+        },
+      },
+    }),
     policy: createPolicyService({ salons: new SalonsRepository(), state: salonState }),
     // No bookings exist yet, so the default "no conflicts" applies until the booking tasks.
     leaves: createLeavesService({
