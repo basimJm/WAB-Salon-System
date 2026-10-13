@@ -1350,6 +1350,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - rooms are decided at connect: a permission change applies to a live socket in SRV-082 (`permissions.updated` + room refresh). Staff permission check happens per emit (one member read per assigned staff).
 
+### T-093 — SRV-082 Account socket events
+- Project: `WAB-Server/` (`src/domain/access/accessEvents.ts`, `src/sockets/{accessEvents,rooms}.ts`, `SocketHub.join/leave`, team + lifecycle triggers)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BUSINESS_DOMAIN §6/§7 "permission change → socket permissions.updated", `access.revoked`, `notifications.unread`):
+  - [x] role/permission change: the member gets `permissions.updated` and their live socket's salon rooms are refreshed at once (loses RESPOND → no more requests; gains it → requests start), without reconnecting; a name-only change sends nothing
+  - [x] member deactivated / customer blocked / deletion requested → `access.revoked`, then disconnect; only that account
+  - [x] `notifications.unread {count}` to the account's own room
+  - [x] best effort: failures logged, nothing thrown into the business call; no-op before the hub exists
+- Tests: `tests/accessEvents.test.ts` (6), `tests/team.test.ts` (+1), `tests/accountLifecycle.test.ts` (3 asserts); full gate green, 2118 tests
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - the silent push part of "permission change" comes with the notification core (SRV-093); owner-triggered `access.revoked` for the admin deactivate/delete flows will reuse `AccessEvents`.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).

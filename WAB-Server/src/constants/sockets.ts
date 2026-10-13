@@ -34,3 +34,12 @@ export const SOCKET_ADAPTER_KEY = 'socket.io';
 export const SOCKET_PING_INTERVAL_MS = 25_000;
 export const SOCKET_PING_TIMEOUT_MS = 20_000;
 export const SOCKET_MAX_PAYLOAD_BYTES = 100_000;
+
+/** Account events (SRV-082, BUSINESS_DOMAIN.md §7). */
+export const ACCOUNT_SOCKET_EVENTS = {
+  permissionsUpdated: 'permissions.updated',
+  accessRevoked: 'access.revoked',
+  notificationsUnread: 'notifications.unread',
+} as const;
+/** Gives the `access.revoked` message time to reach the client before its connection is closed. */
+export const ACCESS_REVOKED_GRACE_MS = 250;

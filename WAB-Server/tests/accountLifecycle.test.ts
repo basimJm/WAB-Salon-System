@@ -36,6 +36,7 @@ interface Rig {
   audit: FakeModel;
   storage: FakeStorageProvider;
   clock: { now: Date };
+  revoked: string[];
   issue: (subjectType: 'CUSTOMER' | 'MEMBER', subjectId: string) => Promise<string>;
 }
 
@@ -47,6 +48,7 @@ const setup = (): Rig => {
   const tokens = createFakeModel();
   const audit = createFakeModel();
   const storage = new FakeStorageProvider();
+  const revoked: string[] = [];
   const refreshTokens = createRefreshTokenService({
     repository: new RefreshTokensRepository(tokens.model as never),
     logger,
@@ -61,6 +63,12 @@ const setup = (): Rig => {
     audit: createAuditWriter(new AuditLogsRepository(audit.model as never)),
     settings: { get: (key: string) => Promise.resolve(SETTING_DEFAULTS[key as never]) },
     logger,
+    access: {
+      accessRevoked: (account) => {
+        revoked.push(`${account.scope}:${account.id}`);
+        return Promise.resolve();
+      },
+    },
     now: () => clock.now,
   });
   return {
@@ -72,6 +80,7 @@ const setup = (): Rig => {
     audit,
     storage,
     clock,
+    revoked,
     issue: async (subjectType, subjectId) =>
       (await refreshTokens.issue({ subjectType, subjectId, ttlDays: 90 })).token,
   };
@@ -140,6 +149,7 @@ describe('account lifecycle: blocking', () => {
       blockedAt: NOW,
     });
     expect(allRevoked(rig, id)).toBe(true);
+    expect(rig.revoked).toEqual([`customer:${id}`]);
     expect(rig.tokens.docs.every((d) => d['revokedReason'] === 'ACCOUNT_BLOCKED')).toBe(true);
     expect(rig.audit.docs).toHaveLength(1);
     expect(rig.audit.docs[0]).toMatchObject({
@@ -257,6 +267,7 @@ describe('account lifecycle: deletion request', () => {
       deletionScheduledAt,
     });
     expect(allRevoked(rig, id)).toBe(true);
+    expect(rig.revoked).toEqual([`customer:${id}`]);
     expect(rig.installations.docs[0]?.['customerId']).toBeUndefined();
     expect(rig.installations.docs[1]?.['customerId']).toBeDefined();
   });
@@ -398,6 +409,7 @@ describe('account lifecycle: members', () => {
     await rig.service.deactivateMember({ memberId: id, salonId: salon.toHexString() });
     await rig.service.deactivateMember({ memberId: id, salonId: salon.toHexString() });
     expect(doc(rig.members, id)['active']).toBe(false);
+    expect(rig.revoked).toEqual([`merchant:${id}`]);
     expect(allRevoked(rig, id)).toBe(true);
     expect(rig.installations.docs[0]?.['memberId']).toBeUndefined();
   });

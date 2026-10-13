@@ -1,3 +1,4 @@
+import { noAccessEvents, type AccessEvents } from '../access/accessEvents';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { MemberRole, Permission } from '../../constants/enums';
 import type { AssignableRole } from '../../constants/team';
@@ -64,6 +65,8 @@ export interface TeamService {
 export interface TeamDeps {
   readonly members: MembersRepository;
   readonly lifecycle: Pick<AccountLifecycleService, 'deactivateMember' | 'reactivateMember'>;
+  /** Tells the member's live app about permission changes. */
+  readonly access?: Pick<AccessEvents, 'permissionsChanged'>;
   readonly phones: Pick<PhoneVerifier, 'resolve'>;
   readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly uploads: UploadVerifier;
@@ -80,6 +83,7 @@ export const createTeamService = ({
   storage,
   uploads,
   deactivationConflicts,
+  access = noAccessEvents,
 }: TeamDeps): TeamService => {
   const view = (m: Entity<MemberRaw>): TeamMemberView => ({
     id: m.id,
@@ -175,6 +179,7 @@ export const createTeamService = ({
         unset: patch.photoKey === null ? ['photoKey'] : [],
       });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+      if (touchesAccess) await access.permissionsChanged(id);
       return view(updated);
     },
 
