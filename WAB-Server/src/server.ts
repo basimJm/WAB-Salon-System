@@ -45,6 +45,7 @@ import { createBookingAdminService } from './domain/bookings/bookingAdmin.servic
 import { createBookingQueriesService } from './domain/bookings/bookingQueries.service';
 import { createBookingReassignService } from './domain/bookings/bookingReassign.service';
 import { createBookingCancelService } from './domain/bookings/bookingCancel.service';
+import { createSubscriptionsService } from './domain/subscriptions/subscriptions.service';
 import { createPayoutsService } from './domain/payouts/payouts.service';
 import { PayoutsRepository } from './repositories/payouts.repository';
 import { createLedgerService } from './domain/ledger/ledger.service';
@@ -544,6 +545,12 @@ const buildServices = (
     payments,
     adminRefunds: fullRefunds,
     adminPayouts,
+    adminSubscriptions: createSubscriptionsService({
+      subscriptions: new SubscriptionsRepository(),
+      salons: new SalonsRepository(),
+      settings,
+      audit,
+    }),
     bookingAdmin,
     bookingBulk: createBookingBulkService({
       bookings: bookingsRepository,

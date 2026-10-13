@@ -18604,6 +18604,887 @@
           }
         }
       }
+    },
+    "/admin/v1/subscriptions": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Subscriptions by salon (filter by status, or ending within N days)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            },
+            "required": false,
+            "name": "pageSize",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "TRIAL",
+                "ACTIVE",
+                "EXPIRED"
+              ]
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 365
+            },
+            "required": false,
+            "name": "endingInDays",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "salonId": {
+                            "type": "string"
+                          },
+                          "salonName": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "TRIAL",
+                              "ACTIVE",
+                              "EXPIRED"
+                            ]
+                          },
+                          "trialEndsAt": {
+                            "type": "string"
+                          },
+                          "currentPeriodEnd": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "endsAt": {
+                            "type": "string",
+                            "description": "Trial end for a trial, paid period end otherwise"
+                          },
+                          "daysRemaining": {
+                            "type": "number",
+                            "description": "Whole days left, negative once ended"
+                          },
+                          "lastPayment": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "amount": {
+                                "type": "string",
+                                "description": "JOD decimal string"
+                              },
+                              "paidAt": {
+                                "type": "string"
+                              },
+                              "periodFrom": {
+                                "type": "string"
+                              },
+                              "periodTo": {
+                                "type": "string"
+                              },
+                              "method": {
+                                "type": "string"
+                              },
+                              "reference": {
+                                "type": "string"
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "recordedBy": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "amount",
+                              "paidAt",
+                              "periodFrom",
+                              "periodTo",
+                              "method",
+                              "reference",
+                              "note",
+                              "recordedBy"
+                            ]
+                          },
+                          "payments": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "amount": {
+                                  "type": "string",
+                                  "description": "JOD decimal string"
+                                },
+                                "paidAt": {
+                                  "type": "string"
+                                },
+                                "periodFrom": {
+                                  "type": "string"
+                                },
+                                "periodTo": {
+                                  "type": "string"
+                                },
+                                "method": {
+                                  "type": "string"
+                                },
+                                "reference": {
+                                  "type": "string"
+                                },
+                                "note": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "recordedBy": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "amount",
+                                "paidAt",
+                                "periodFrom",
+                                "periodTo",
+                                "method",
+                                "reference",
+                                "note",
+                                "recordedBy"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "salonId",
+                          "salonName",
+                          "status",
+                          "trialEndsAt",
+                          "currentPeriodEnd",
+                          "endsAt",
+                          "daysRemaining",
+                          "lastPayment",
+                          "payments"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/subscriptions/{salonId}": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "One salon’s subscription with its payments",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "salonId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "salonId": {
+                          "type": "string"
+                        },
+                        "salonName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "TRIAL",
+                            "ACTIVE",
+                            "EXPIRED"
+                          ]
+                        },
+                        "trialEndsAt": {
+                          "type": "string"
+                        },
+                        "currentPeriodEnd": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "endsAt": {
+                          "type": "string",
+                          "description": "Trial end for a trial, paid period end otherwise"
+                        },
+                        "daysRemaining": {
+                          "type": "number",
+                          "description": "Whole days left, negative once ended"
+                        },
+                        "lastPayment": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            },
+                            "paidAt": {
+                              "type": "string"
+                            },
+                            "periodFrom": {
+                              "type": "string"
+                            },
+                            "periodTo": {
+                              "type": "string"
+                            },
+                            "method": {
+                              "type": "string"
+                            },
+                            "reference": {
+                              "type": "string"
+                            },
+                            "note": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "recordedBy": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "amount",
+                            "paidAt",
+                            "periodFrom",
+                            "periodTo",
+                            "method",
+                            "reference",
+                            "note",
+                            "recordedBy"
+                          ]
+                        },
+                        "payments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "amount": {
+                                "type": "string",
+                                "description": "JOD decimal string"
+                              },
+                              "paidAt": {
+                                "type": "string"
+                              },
+                              "periodFrom": {
+                                "type": "string"
+                              },
+                              "periodTo": {
+                                "type": "string"
+                              },
+                              "method": {
+                                "type": "string"
+                              },
+                              "reference": {
+                                "type": "string"
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "recordedBy": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "amount",
+                              "paidAt",
+                              "periodFrom",
+                              "periodTo",
+                              "method",
+                              "reference",
+                              "note",
+                              "recordedBy"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "salonId",
+                        "salonName",
+                        "status",
+                        "trialEndsAt",
+                        "currentPeriodEnd",
+                        "endsAt",
+                        "daysRemaining",
+                        "lastPayment",
+                        "payments"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/subscriptions/{salonId}/payments": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Record a payment made outside the app (audited): the salon becomes ACTIVE and its paid period is extended",
+        "description": "The paid period end becomes the later of the current end and `periodTo`. The same reference twice is 409. Putting an expired salon Offline stays a manual decision (`/admin/v1/salons/{id}/offline`).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "salonId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "string"
+                  },
+                  "paidAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "periodFrom": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "periodTo": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "method": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "reference": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "note": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "amount",
+                  "paidAt",
+                  "periodFrom",
+                  "periodTo",
+                  "method",
+                  "reference"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subscription",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "salonId": {
+                          "type": "string"
+                        },
+                        "salonName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "TRIAL",
+                            "ACTIVE",
+                            "EXPIRED"
+                          ]
+                        },
+                        "trialEndsAt": {
+                          "type": "string"
+                        },
+                        "currentPeriodEnd": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "endsAt": {
+                          "type": "string",
+                          "description": "Trial end for a trial, paid period end otherwise"
+                        },
+                        "daysRemaining": {
+                          "type": "number",
+                          "description": "Whole days left, negative once ended"
+                        },
+                        "lastPayment": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "JOD decimal string"
+                            },
+                            "paidAt": {
+                              "type": "string"
+                            },
+                            "periodFrom": {
+                              "type": "string"
+                            },
+                            "periodTo": {
+                              "type": "string"
+                            },
+                            "method": {
+                              "type": "string"
+                            },
+                            "reference": {
+                              "type": "string"
+                            },
+                            "note": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "recordedBy": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "amount",
+                            "paidAt",
+                            "periodFrom",
+                            "periodTo",
+                            "method",
+                            "reference",
+                            "note",
+                            "recordedBy"
+                          ]
+                        },
+                        "payments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "amount": {
+                                "type": "string",
+                                "description": "JOD decimal string"
+                              },
+                              "paidAt": {
+                                "type": "string"
+                              },
+                              "periodFrom": {
+                                "type": "string"
+                              },
+                              "periodTo": {
+                                "type": "string"
+                              },
+                              "method": {
+                                "type": "string"
+                              },
+                              "reference": {
+                                "type": "string"
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "recordedBy": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "amount",
+                              "paidAt",
+                              "periodFrom",
+                              "periodTo",
+                              "method",
+                              "reference",
+                              "note",
+                              "recordedBy"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "salonId",
+                        "salonName",
+                        "status",
+                        "trialEndsAt",
+                        "currentPeriodEnd",
+                        "endsAt",
+                        "daysRemaining",
+                        "lastPayment",
+                        "payments"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}
