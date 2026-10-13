@@ -1,3 +1,4 @@
+import type { AdminTransactionsService } from '../domain/finance/adminTransactions.service';
 import type { RequestHandler } from 'express';
 import type { Store } from 'express-rate-limit';
 import type { InstallationService } from '../domain/installations/installations.service';
@@ -86,6 +87,7 @@ export interface ApiServices {
   readonly payments?: PaymentsService;
   readonly adminRefunds?: RefundService;
   readonly adminPayouts?: PayoutsService;
+  readonly adminTransactions?: AdminTransactionsService;
   readonly payoutDetails?: PayoutDetailsService;
   readonly merchantFinance?: MerchantFinanceService;
   readonly adminSubscriptions?: SubscriptionsService;
@@ -431,6 +433,12 @@ export const unavailableAdminRefunds: RefundService = {
   get: unavailable,
   retry: unavailable,
   markManual: unavailable,
+};
+
+export const unavailableAdminTransactions: AdminTransactionsService = {
+  list: unavailable,
+  get: unavailable,
+  reconciliation: unavailable,
 };
 
 export const unavailableAdminPayouts: PayoutsService = {

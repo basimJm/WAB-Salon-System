@@ -28,6 +28,7 @@ import {
   unavailableAdminLogin,
   type ApiServices,
   unavailableAdminPayouts,
+  unavailableAdminTransactions,
   unavailablePayoutDetails,
   unavailableAdminSubscriptions,
   unavailableAdminRefunds,
@@ -50,6 +51,14 @@ import { createAdminPayoutDetailsRouter } from './payoutDetails/payoutDetails.ro
 import { ADMIN_PAYOUT_DETAILS_ROUTES } from '../../constants/payoutDetails';
 import { createAdminSubscriptionsRouter } from './subscriptions/subscriptions.routes';
 import { ADMIN_SUBSCRIPTION_ROUTES } from '../../constants/subscriptions';
+import {
+  createAdminReconciliationRouter,
+  createAdminTransactionsRouter,
+} from './finance/transactions.routes';
+import {
+  ADMIN_RECONCILIATION_ROUTES,
+  ADMIN_TRANSACTION_ROUTES,
+} from '../../constants/adminFinance';
 import { createAdminPayoutsRouter } from './payouts/payouts.routes';
 import { ADMIN_PAYOUT_ROUTES } from '../../constants/payouts';
 import { createAdminRefundsRouter } from './refunds/refunds.routes';
@@ -147,6 +156,22 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     ADMIN_SUBSCRIPTION_ROUTES.base,
     createAdminSubscriptionsRouter(
       services.adminSubscriptions ?? unavailableAdminSubscriptions,
+      guard,
+    ),
+  );
+  mount(
+    router,
+    ADMIN_TRANSACTION_ROUTES.base,
+    createAdminTransactionsRouter(
+      services.adminTransactions ?? unavailableAdminTransactions,
+      guard,
+    ),
+  );
+  mount(
+    router,
+    ADMIN_RECONCILIATION_ROUTES.base,
+    createAdminReconciliationRouter(
+      services.adminTransactions ?? unavailableAdminTransactions,
       guard,
     ),
   );

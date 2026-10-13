@@ -174,3 +174,4 @@
 
 - Tracked Firebase/iOS config files exist in `WAB-Mobile-Customer` (`google-services.json`, `GoogleService-Info.plist`, `Config.xcconfig`); review before making the repo public.
 - Hooks need `python3` on PATH.
+- SRV-104 done: `createAdminTransactionsService({transactions})` (`domain/finance`; `ApiServices.adminTransactions`): `list` (filters), `get` (+ attempts of the same draft), `reconciliation(now)` (stuck PENDING, paid without booking, missing ledger charge; uses the repository helpers + `RECONCILE_MIN_AGE_MS`). Routes `/admin/v1/transactions`, `/admin/v1/finance/reconciliation`. Manual ledger ADJUSTMENT endpoint NOT built (open assumption).
