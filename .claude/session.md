@@ -975,7 +975,7 @@
 ### T-063 — SRV-051 Team members CRUD, roles, permission editor, deactivation
 - Project: `WAB-Server/` (`src/domain/team/team.service.ts`, `src/modules/merchant/team/*`, `src/constants/team.ts`, `MembersRepository.patch`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #70 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #71 merged into `server`)
 - Acceptance criteria (BE-04, CLAUDE.md §4.2; Merchant PRD M17-M18; BUSINESS_DOMAIN §3.4 members, §6 permissions, `LAST_OWNER`/`PHONE_ALREADY_REGISTERED`):
   - [x] `GET /merchant/v1/team/members` (+ `/:id`): needs `STAFF_MANAGE` (owner always); only the caller's salon (other salons' members are 404); permissions shown are the effective ones (OWNER = all); paginated (10)
   - [x] `POST` (OWNER only, others 403 `OWNER_REQUIRED` even with every key): first/last name, phone as country + national number (country regex, normalized to E.164, unique across all salons -> 409 `PHONE_ALREADY_REGISTERED`, race handled by the unique index), role MANAGER|EMPLOYEE (OWNER not assignable), permissions default to the role template or an explicit grant through `normalizeGrant` (owner-only and unknown keys rejected), optional MEMBER_PHOTO (confirmed upload of this salon); starts active, `providesServices=false`
@@ -985,6 +985,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M17/M18), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) no SMS invite is sent (PRD assumption "optional"); (2) the permission-change notification (silent push + socket `permissions.updated`, §6) comes with sockets/notifications; (3) conflict handling on deactivation (upcoming bookings) needs bookings; (4) changing a member's own phone needs an OTP flow and is a separate task; (5) ownership transfer is not supported. Not run against a real MongoDB.
 - Notes: Next: SRV-052 (staff profile).
+
+### T-064 — SRV-052 Staff profile: providesServices, skills, bride qualification, working days
+- Project: `WAB-Server/` (`src/domain/team/staff.service.ts`, `src/modules/merchant/team/staff.*`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #71 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.4 staff, §5.4 rule 4 staff eligibility, §5.2 STAFF completeness, §6 STAFF_MANAGE; Merchant PRD M17 staff profile section):
+  - [x] `GET|PUT /merchant/v1/team/members/:id/staff` (STAFF_MANAGE; owner always; a STAFF_MANAGE holder cannot touch phone, role, permissions or activation); members of other salons are 404
+  - [x] `PUT` saves the whole profile: `providesServices`, bio (<=1000), years (0-80), `serviceIds` (must be services of this salon, no duplicates), `brideQualified` (women's salons only), `workingDays` (each day once, only days the salon is open; optional custom `start`+`end` together, inside the salon's hours that day, `end` after `start`, on the slot grid)
+  - [x] Switching `providesServices` off keeps the profile's rating and customers count
+  - [x] Completeness is recomputed after every save; the "qualified staff" fact counts active providers with a skill and a working day (checked end-to-end in the test)
+  - [x] `StaffConflicts` hook: a non-empty result answers 409 `SCHEDULE_CONFLICT` with the booking ids and saves nothing (default none until bookings exist)
+- Tests: `cd WAB-Server && npm test` - 1731 pass; format/lint/typecheck/build green; audit 0. `tests/staff.test.ts` (23).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (M17), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) a staff member's working days are validated against the salon schedule when saved; a later salon-hours change that makes them invalid is not re-checked (the availability algorithm intersects them at booking time); (2) skills may point at inactive salon services (they just are not offered); (3) rating/customersCount are written by the review and booking tasks. Not run against a real MongoDB.
+- Notes: Next: SRV-053 (staff leaves).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

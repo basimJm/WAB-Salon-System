@@ -8534,6 +8534,539 @@
           }
         }
       }
+    },
+    "/merchant/v1/team/members/{id}/staff": {
+      "get": {
+        "tags": [
+          "Staff"
+        ],
+        "summary": "Staff profile of a member (STAFF_MANAGE)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "memberId": {
+                          "type": "string"
+                        },
+                        "providesServices": {
+                          "type": "boolean"
+                        },
+                        "bio": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "yearsOfExperience": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "serviceIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "brideQualified": {
+                          "type": "boolean"
+                        },
+                        "workingDays": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": {
+                                "type": "string",
+                                "enum": [
+                                  "SUN",
+                                  "MON",
+                                  "TUE",
+                                  "WED",
+                                  "THU",
+                                  "FRI",
+                                  "SAT"
+                                ]
+                              },
+                              "start": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "end": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "day",
+                              "start",
+                              "end"
+                            ]
+                          }
+                        },
+                        "rating": {
+                          "type": "object",
+                          "properties": {
+                            "avg": {
+                              "type": "number"
+                            },
+                            "count": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "avg",
+                            "count"
+                          ]
+                        },
+                        "customersCount": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "memberId",
+                        "providesServices",
+                        "bio",
+                        "yearsOfExperience",
+                        "serviceIds",
+                        "brideQualified",
+                        "workingDays",
+                        "rating",
+                        "customersCount"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Staff"
+        ],
+        "summary": "Save the staff profile: skills are salon service ids, working days are open salon days (custom hours inside the salon hours, slot-aligned), bride qualification only in women’s salons. Completeness is recomputed.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "providesServices": {
+                    "type": "boolean"
+                  },
+                  "bio": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "yearsOfExperience": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 80
+                  },
+                  "serviceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{24}$/i"
+                    },
+                    "maxItems": 200
+                  },
+                  "brideQualified": {
+                    "type": "boolean"
+                  },
+                  "workingDays": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "day": {
+                          "type": "string",
+                          "enum": [
+                            "SUN",
+                            "MON",
+                            "TUE",
+                            "WED",
+                            "THU",
+                            "FRI",
+                            "SAT"
+                          ]
+                        },
+                        "start": {
+                          "type": "string"
+                        },
+                        "end": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "day"
+                      ]
+                    },
+                    "maxItems": 7
+                  }
+                },
+                "required": [
+                  "providesServices",
+                  "serviceIds",
+                  "brideQualified",
+                  "workingDays"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "memberId": {
+                          "type": "string"
+                        },
+                        "providesServices": {
+                          "type": "boolean"
+                        },
+                        "bio": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "yearsOfExperience": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "serviceIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "brideQualified": {
+                          "type": "boolean"
+                        },
+                        "workingDays": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": {
+                                "type": "string",
+                                "enum": [
+                                  "SUN",
+                                  "MON",
+                                  "TUE",
+                                  "WED",
+                                  "THU",
+                                  "FRI",
+                                  "SAT"
+                                ]
+                              },
+                              "start": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "end": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "day",
+                              "start",
+                              "end"
+                            ]
+                          }
+                        },
+                        "rating": {
+                          "type": "object",
+                          "properties": {
+                            "avg": {
+                              "type": "number"
+                            },
+                            "count": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "avg",
+                            "count"
+                          ]
+                        },
+                        "customersCount": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "memberId",
+                        "providesServices",
+                        "bio",
+                        "yearsOfExperience",
+                        "serviceIds",
+                        "brideQualified",
+                        "workingDays",
+                        "rating",
+                        "customersCount"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}

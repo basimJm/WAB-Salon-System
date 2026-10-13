@@ -1913,6 +1913,110 @@
           }
         }
       ]
+    },
+    {
+      "name": "Staff",
+      "item": [
+        {
+          "name": "Staff profile of a member (STAFF_MANAGE)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/team/members/:id/staff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "team",
+                "members",
+                ":id",
+                "staff"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save the staff profile: skills are salon service ids, working days are open salon days (custom hours inside the salon hours, slot-aligned), bride qualification only in women’s salons. Completeness is recomputed.",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/team/members/:id/staff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "team",
+                "members",
+                ":id",
+                "staff"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"providesServices\": false,\n  \"bio\": \"string\",\n  \"yearsOfExperience\": 0,\n  \"serviceIds\": [\n    \"string\"\n  ],\n  \"brideQualified\": false,\n  \"workingDays\": [\n    {\n      \"day\": \"SUN\",\n      \"start\": \"string\",\n      \"end\": \"string\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [
