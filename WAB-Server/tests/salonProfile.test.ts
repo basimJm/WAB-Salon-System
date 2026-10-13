@@ -4,6 +4,7 @@ import { createApp } from '../src/app';
 import { createAuditWriter } from '../src/domain/audit/audit.service';
 import { createSalonProfileService } from '../src/domain/salons/salonProfile.service';
 import { createSalonStateService } from '../src/domain/salons/salonState.service';
+import type { UploadVerifier } from '../src/domain/uploads/uploads.service';
 import { requireAuth } from '../src/middlewares/auth';
 import { loadMember } from '../src/middlewares/permission';
 import { FakeStorageProvider } from '../src/providers/storage';
@@ -276,5 +277,72 @@ describe('PATCH /merchant/v1/salon/profile', () => {
 
   it('answers 503 when unconfigured', async () => {
     expect((await request(createApp({ logger })).get('/merchant/v1/salon')).status).toBe(503);
+  });
+});
+
+describe('images must be confirmed uploads of this salon', () => {
+  const checks: Parameters<UploadVerifier['assertConfirmed']>[0][] = [];
+  const strict = createApp({
+    logger,
+    services: {
+      salonProfile: {
+        service: createSalonProfileService({
+          salons: salonRepo,
+          cities: new CitiesRepository(cities.model as never),
+          areas: new AreasRepository(areas.model as never),
+          storage: new FakeStorageProvider(),
+          state,
+          uploads: {
+            assertConfirmed: (input) => {
+              checks.push(input);
+              return input.keys.includes('salons/bad.jpg')
+                ? Promise.reject(new Error('UPLOAD_INVALID'))
+                : Promise.resolve();
+            },
+          },
+        }),
+        guard: [
+          requireAuth('merchant', SECRET),
+          loadMember(new MembersRepository(members.model as never)),
+        ],
+      },
+    },
+  });
+  const send = async (id: string, body: object): Promise<{ status: number }> =>
+    await request(strict)
+      .patch('/merchant/v1/salon/profile')
+      .set('Authorization', `Bearer ${token(id)}`)
+      .send(body);
+
+  it('verifies a changed cover/profile key with the right purpose and salon, and skips unchanged ones', async () => {
+    checks.length = 0;
+    addSalon('LIVE', { coverKey: 'salons/cover/old.jpg' });
+    const owner = addMember('OWNER', []);
+    expect(
+      (
+        await send(owner, {
+          coverKey: 'salons/cover/new.jpg',
+          profileKey: 'salons/profile/new.jpg',
+        })
+      ).status,
+    ).toBe(200);
+    expect(checks.map((c) => c.purpose)).toEqual(['SALON_COVER', 'SALON_PROFILE']);
+    expect(checks[0]?.accept?.({ salonId: salonId.toHexString() } as never)).toBe(true);
+    expect(checks[0]?.accept?.({ salonId: 'x' } as never)).toBe(false);
+    checks.length = 0;
+    expect((await send(owner, { coverKey: 'salons/cover/new.jpg' })).status).toBe(200);
+    expect(checks).toHaveLength(0);
+    expect((await send(owner, { coverKey: null })).status).toBe(200);
+    expect(checks).toHaveLength(0);
+  });
+
+  it('refuses an unconfirmed key and saves nothing', async () => {
+    addSalon('LIVE');
+    const res = await send(addMember('OWNER', []), {
+      coverKey: 'salons/bad.jpg',
+      description: 'changed',
+    });
+    expect(res.status).toBe(500);
+    expect(salons.docs[0]?.['description']).toBeUndefined();
   });
 });
