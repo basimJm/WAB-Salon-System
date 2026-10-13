@@ -7385,6 +7385,855 @@
           }
         }
       }
+    },
+    "/customer/v1/bookings/drafts": {
+      "post": {
+        "tags": [
+          "Booking drafts"
+        ],
+        "summary": "Validate and price a booking (summary step), hold the slots for `booking.paymentHoldMinutes` and snapshot prices and the salon policy. Replaces the customer’s earlier draft.",
+        "description": "Persons are checked in order and each pick blocks the next. Errors (422): SALON_NOT_BOOKABLE, TOO_MANY_COMPANIONS, GENDER_MISMATCH, SERVICE_UNAVAILABLE, BRIDE_ONLY_SERVICE, STAFF_NOT_ELIGIBLE, SALON_CLOSED, DATE_OUT_OF_RANGE, SLOT_UNAVAILABLE, PAYMENT_OPTION_NOT_ALLOWED.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "salonId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "enum": [
+                      "PAY_ON_ARRIVAL",
+                      "DEPOSIT",
+                      "FULL_ONLINE"
+                    ]
+                  },
+                  "persons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 50
+                        },
+                        "isBride": {
+                          "type": "boolean",
+                          "default": false
+                        },
+                        "serviceIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{24}$/i"
+                          },
+                          "minItems": 1,
+                          "maxItems": 20
+                        },
+                        "staffId": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{24}$/i"
+                        },
+                        "start": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "serviceIds",
+                        "start"
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 20
+                  }
+                },
+                "required": [
+                  "salonId",
+                  "paymentMethod",
+                  "persons"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Draft",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "salon": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ]
+                        },
+                        "expiresAt": {
+                          "type": "string"
+                        },
+                        "paymentMethod": {
+                          "type": "string",
+                          "enum": [
+                            "PAY_ON_ARRIVAL",
+                            "DEPOSIT",
+                            "FULL_ONLINE"
+                          ]
+                        },
+                        "persons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "isMain": {
+                                "type": "boolean"
+                              },
+                              "isBride": {
+                                "type": "boolean"
+                              },
+                              "services": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "salonServiceId": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "price": {
+                                      "type": "string"
+                                    },
+                                    "durationMinutes": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "salonServiceId",
+                                    "name",
+                                    "price",
+                                    "durationMinutes"
+                                  ]
+                                }
+                              },
+                              "staff": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "firstName": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "firstName"
+                                ]
+                              },
+                              "staffSelection": {
+                                "type": "string",
+                                "enum": [
+                                  "SPECIFIC",
+                                  "ANY"
+                                ]
+                              },
+                              "start": {
+                                "type": "string"
+                              },
+                              "end": {
+                                "type": "string"
+                              },
+                              "subtotal": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "isMain",
+                              "isBride",
+                              "services",
+                              "staff",
+                              "staffSelection",
+                              "start",
+                              "end",
+                              "subtotal"
+                            ]
+                          }
+                        },
+                        "money": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "string"
+                            },
+                            "deposit": {
+                              "type": "string"
+                            },
+                            "dueOnline": {
+                              "type": "string"
+                            },
+                            "remaining": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "deposit",
+                            "dueOnline",
+                            "remaining"
+                          ]
+                        },
+                        "policy": {
+                          "type": "object",
+                          "properties": {
+                            "cancellationWindowHours": {
+                              "type": "number"
+                            },
+                            "paymentOptions": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "depositPercentage": {
+                              "type": "number"
+                            },
+                            "depositRefundableOnCustomerCancel": {
+                              "type": "boolean"
+                            },
+                            "fullPaymentRefundOnCustomerCancel": {
+                              "type": "string"
+                            },
+                            "noShowDeposit": {
+                              "type": "string"
+                            },
+                            "noShowFullPayment": {
+                              "type": "string"
+                            },
+                            "notes": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "cancellationWindowHours",
+                            "paymentOptions",
+                            "depositRefundableOnCustomerCancel",
+                            "fullPaymentRefundOnCustomerCancel",
+                            "noShowDeposit",
+                            "noShowFullPayment"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "salon",
+                        "expiresAt",
+                        "paymentMethod",
+                        "persons",
+                        "money",
+                        "policy"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer/v1/bookings/drafts/{id}": {
+      "get": {
+        "tags": [
+          "Booking drafts"
+        ],
+        "summary": "My draft; an expired one is 422 `DRAFT_EXPIRED`",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Draft",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "salon": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ]
+                        },
+                        "expiresAt": {
+                          "type": "string"
+                        },
+                        "paymentMethod": {
+                          "type": "string",
+                          "enum": [
+                            "PAY_ON_ARRIVAL",
+                            "DEPOSIT",
+                            "FULL_ONLINE"
+                          ]
+                        },
+                        "persons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "isMain": {
+                                "type": "boolean"
+                              },
+                              "isBride": {
+                                "type": "boolean"
+                              },
+                              "services": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "salonServiceId": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "price": {
+                                      "type": "string"
+                                    },
+                                    "durationMinutes": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "salonServiceId",
+                                    "name",
+                                    "price",
+                                    "durationMinutes"
+                                  ]
+                                }
+                              },
+                              "staff": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "firstName": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "firstName"
+                                ]
+                              },
+                              "staffSelection": {
+                                "type": "string",
+                                "enum": [
+                                  "SPECIFIC",
+                                  "ANY"
+                                ]
+                              },
+                              "start": {
+                                "type": "string"
+                              },
+                              "end": {
+                                "type": "string"
+                              },
+                              "subtotal": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "isMain",
+                              "isBride",
+                              "services",
+                              "staff",
+                              "staffSelection",
+                              "start",
+                              "end",
+                              "subtotal"
+                            ]
+                          }
+                        },
+                        "money": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "string"
+                            },
+                            "deposit": {
+                              "type": "string"
+                            },
+                            "dueOnline": {
+                              "type": "string"
+                            },
+                            "remaining": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "deposit",
+                            "dueOnline",
+                            "remaining"
+                          ]
+                        },
+                        "policy": {
+                          "type": "object",
+                          "properties": {
+                            "cancellationWindowHours": {
+                              "type": "number"
+                            },
+                            "paymentOptions": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "depositPercentage": {
+                              "type": "number"
+                            },
+                            "depositRefundableOnCustomerCancel": {
+                              "type": "boolean"
+                            },
+                            "fullPaymentRefundOnCustomerCancel": {
+                              "type": "string"
+                            },
+                            "noShowDeposit": {
+                              "type": "string"
+                            },
+                            "noShowFullPayment": {
+                              "type": "string"
+                            },
+                            "notes": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "cancellationWindowHours",
+                            "paymentOptions",
+                            "depositRefundableOnCustomerCancel",
+                            "fullPaymentRefundOnCustomerCancel",
+                            "noShowDeposit",
+                            "noShowFullPayment"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "salon",
+                        "expiresAt",
+                        "paymentMethod",
+                        "persons",
+                        "money",
+                        "policy"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Booking drafts"
+        ],
+        "summary": "Discard my draft and free its held slots (idempotent)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Discarded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}

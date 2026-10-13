@@ -15,6 +15,7 @@ import type { PlacementsService } from '../domain/placements/placements.service'
 import type { AdminReviewsService } from '../domain/reviews/adminReviews.service';
 import type { ReviewsService } from '../domain/reviews/reviews.service';
 import type { CustomerProfileService } from '../domain/customers/customerProfile.service';
+import type { BookingDraftService } from '../domain/bookings/bookingDraft.service';
 import type { AvailabilityService } from '../domain/availability/availability.service';
 import type { HomeService } from '../domain/home/home.service';
 import type { SearchService } from '../domain/search/search.service';
@@ -59,6 +60,7 @@ export interface ApiServices {
   readonly salonDetails?: SalonDetailsService;
   readonly home?: HomeService;
   readonly availability?: AvailabilityService;
+  readonly bookingDrafts?: BookingDraftService;
   readonly customerProfile?: CustomerProfileService;
   readonly reviews?: ReviewsService;
   readonly favorites?: FavoritesService;
@@ -321,7 +323,16 @@ export const unavailableCustomerProfile: CustomerProfileService = {
   deleteAccount: unavailable,
 };
 
-export const unavailableAvailability: AvailabilityService = { slots: unavailable };
+export const unavailableBookingDrafts: BookingDraftService = {
+  create: unavailable,
+  get: unavailable,
+  discard: unavailable,
+};
+
+export const unavailableAvailability: AvailabilityService = {
+  slots: unavailable,
+  plan: unavailable,
+};
 
 export const unavailableHome: HomeService = { get: unavailable };
 
