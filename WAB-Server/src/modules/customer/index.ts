@@ -2,7 +2,9 @@ import { Router } from 'express';
 import { CUSTOMER_AUTH_ROUTES } from '../../constants/customerAuth';
 import { OTP_ROUTES } from '../../constants/otp';
 import { INSTALLATION_ROUTES } from '../../constants/installations';
+import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
 import { mount } from '../../routes/mount';
+import { createCustomerAppConfigRouter } from '../shared/appConfig';
 import { createCustomerInstallationsRouter } from '../shared/installations';
 import { ExternalServiceError } from '../../utils/errors';
 import { unavailableCustomerAuth, type ApiServices } from '../services';
@@ -27,5 +29,6 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     }),
   );
   mount(router, INSTALLATION_ROUTES.base, createCustomerInstallationsRouter(services));
+  mount(router, APP_CONFIG_ROUTES.base, createCustomerAppConfigRouter(services));
   return router;
 };

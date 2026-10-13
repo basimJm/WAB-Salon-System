@@ -8,6 +8,12 @@ import { createAdminAuthService } from './domain/auth/adminAuth.service';
 import { createMerchantAuthService } from './domain/auth/merchantAuth.service';
 import { createRefreshTokenService } from './domain/auth/refreshTokens.service';
 import { optionalAuth, requireAuth } from './middlewares/auth';
+import { createAppConfigService } from './domain/appConfig';
+import {
+  AppVersionsRepository,
+  ContactInfoRepository,
+  MaintenanceRepository,
+} from './repositories/appConfig.repository';
 import { createInstallationService } from './domain/installations/installations.service';
 import { createProviders } from './providers';
 import {
@@ -160,8 +166,15 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     analytics: providers.analytics,
     logger,
   });
+  const appConfig = createAppConfigService({
+    appVersions: new AppVersionsRepository(),
+    maintenance: new MaintenanceRepository(),
+    contactInfo: new ContactInfoRepository(),
+    settings,
+  });
   return {
     otpGate,
+    appConfig,
     installations: {
       service: installationService,
       customerOptional: optionalAuth('customer', config.auth.accessSecret),

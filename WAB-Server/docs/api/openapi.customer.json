@@ -1822,6 +1822,222 @@
           }
         }
       }
+    },
+    "/customer/v1/config": {
+      "get": {
+        "tags": [
+          "App config"
+        ],
+        "summary": "Version policy, maintenance, OTP and discovery settings",
+        "description": "Public. Called at launch with the installed version: tells the app whether it must or may update, whether maintenance is on, plus OTP length/resend and the nearby radius.",
+        "security": [],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ANDROID",
+                "IOS"
+              ]
+            },
+            "required": true,
+            "name": "platform",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{1,6}(\\.[0-9]{1,6}){0,3}$"
+            },
+            "required": true,
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "update": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "OK",
+                                "UPDATE_AVAILABLE",
+                                "UPDATE_REQUIRED"
+                              ]
+                            },
+                            "latest": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "minSupported": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "storeUrl": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "latest",
+                            "minSupported",
+                            "storeUrl"
+                          ]
+                        },
+                        "maintenance": {
+                          "type": "object",
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "message": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "In the request language; only while enabled."
+                            }
+                          },
+                          "required": [
+                            "enabled",
+                            "message"
+                          ]
+                        },
+                        "nearbyRadiusKm": {
+                          "type": "number"
+                        },
+                        "otp": {
+                          "type": "object",
+                          "properties": {
+                            "length": {
+                              "type": "number"
+                            },
+                            "resendAfterSeconds": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "length",
+                            "resendAfterSeconds"
+                          ]
+                        },
+                        "contact": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "phone": {
+                              "type": "string"
+                            },
+                            "whatsapp": {
+                              "type": "string"
+                            },
+                            "email": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "phone",
+                            "whatsapp",
+                            "email"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "update",
+                        "maintenance",
+                        "nearbyRadiusKm",
+                        "otp",
+                        "contact"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}

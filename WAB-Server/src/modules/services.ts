@@ -5,12 +5,14 @@ import type { AdminLoginService } from '../domain/auth/adminLogin.service';
 import type { AdminAuthService } from '../domain/auth/adminAuth.service';
 import type { MerchantAuthService } from '../domain/auth/merchantAuth.service';
 import type { CustomerAuthService } from '../domain/auth/customerAuth.service';
+import type { AppConfigService } from '../domain/appConfig';
 import type { OtpGate } from '../domain/otp/otpGate.service';
 import { ExternalServiceError } from '../utils/errors';
 
 /** Long-lived services the feature routers need. `server.ts` builds them once Redis is connected. */
 export interface ApiServices {
   readonly otpGate?: OtpGate;
+  readonly appConfig?: AppConfigService;
   readonly merchantAuth?: MerchantAuthService;
   readonly installations?: {
     readonly service: InstallationService;
@@ -77,3 +79,5 @@ export const unavailableInstallationService: InstallationService = {
   register: unavailableCustomerAuthError,
   setPushEnabled: unavailableCustomerAuthError,
 };
+
+export const unavailableAppConfigService: AppConfigService = { get: unavailable };

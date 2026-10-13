@@ -713,6 +713,20 @@
 - Review: PASSED (SE ✔, Mobile ✔ (contract matches PRD), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) a guest request can overwrite the push token of an installation id it knows; ids are random Firebase instance ids (unguessable), so this is accepted, but a signed per-install secret would close it; (2) there is no separate "unregister token" route: logout already unlinks the account (SRV-028/029) and a refreshed token is a new PUT; (3) the push switch lives under `/installations` because the profile endpoints come with SRV-065.
 - Next: SRV-034 is PENDING (Firebase credentials); next runnable task in order: SRV-035.
 
+### T-045 — SRV-035 App config endpoint (version policy, maintenance, contact info)
+- Project: `WAB-Server/` (`src/domain/appConfig`, `src/modules/shared/appConfig`, `src/models/{appVersion,maintenance,contactInfo}.model.ts`, `src/repositories/appConfig.repository.ts`, `src/utils/version.ts`, `src/constants/appConfig.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #52 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: BE-65; BUSINESS_DOMAIN §3.6 appVersions/maintenance/contactInfo, §10 `discovery.nearbyRadiusKm`, `otp.*`):
+  - [x] Models `appVersions` (unique app+platform, minSupported <= latest), `maintenance` (unique app, message ar/en), `contactInfo` (E.164 phone/whatsapp, email), registered in `ALL_MODELS`
+  - [x] `GET /customer/v1/config` and `/merchant/v1/config` (public, per-IP limited): `platform` ANDROID|IOS + `version` (dotted numbers) validated; update status UPDATE_REQUIRED (< minSupported), UPDATE_AVAILABLE (< latest and optionalUpdate), else OK; no policy row = OK
+  - [x] Maintenance message in the request language, only while enabled; nearby radius, OTP length/resend from settings; contact null when absent; 503 when unconfigured
+  - [x] Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1426 pass (47 suites); format:check/lint/typecheck/build green; audit 0. `tests/appConfig.test.ts` (24).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: enforcement middleware (MAINTENANCE / forced-update error codes on other routes) is not part of this task; version comparison is numeric part-wise (`1.10` > `1.9`).
+- Notes: Next: SRV-036 (public reference data).
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
