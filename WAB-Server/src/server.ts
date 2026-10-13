@@ -2,6 +2,20 @@ import { createServer, type Server } from 'node:http';
 import type { Store } from 'express-rate-limit';
 import type { Redis } from 'ioredis';
 import { createApp } from './app';
+import { createCustomerAuthService } from './domain/auth/customerAuth.service';
+import { createRefreshTokenService } from './domain/auth/refreshTokens.service';
+import { requireAuth } from './middlewares/auth';
+import { createProviders } from './providers';
+import {
+  CustomersRepository,
+  InstallationsRepository,
+  RefreshTokensRepository,
+} from './repositories/identity.repository';
+import {
+  AreasRepository,
+  CitiesRepository,
+  CountriesRepository,
+} from './repositories/locations.repository';
 import { createOtpGate } from './domain/otp/otpGate.service';
 import { createSettingsService } from './domain/settings';
 import type { ApiServices } from './modules/services';
@@ -91,6 +105,32 @@ export const startServer = async (
   return { server, shutdown };
 };
 
+/** Services the feature routers need; built once, after MongoDB and Redis are connected. */
+const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServices => {
+  const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
+  const otpGate = createOtpGate({ redis, settings });
+  const customerAuthService = createCustomerAuthService({
+    customers: new CustomersRepository(),
+    installations: new InstallationsRepository(),
+    countries: new CountriesRepository(),
+    cities: new CitiesRepository(),
+    areas: new AreasRepository(),
+    otp: createProviders(config.providers, config.isProduction).otp,
+    otpGate,
+    refreshTokens: createRefreshTokenService({ repository: new RefreshTokensRepository(), logger }),
+    settings,
+    accessSecret: config.auth.accessSecret,
+  });
+  return {
+    otpGate,
+    customerAuth: {
+      service: customerAuthService,
+      authenticate: requireAuth('customer', config.auth.accessSecret),
+    },
+    rateLimitStore: new RedisRateLimitStore(redis, `${REDIS_KEY_PREFIX.httpRateLimit}:otp`),
+  };
+};
+
 const main = async (): Promise<void> => {
   const config = loadConfig();
   const logger = createLogger({ level: config.logLevel });
@@ -111,17 +151,7 @@ const main = async (): Promise<void> => {
         connected,
         `${REDIS_KEY_PREFIX.httpRateLimit}:global`,
       ),
-      services: {
-        otpGate: createOtpGate({
-          redis: connected,
-          settings: createSettingsService({
-            store: new SettingsRepository(),
-            redis: connected,
-            logger,
-          }),
-        }),
-        rateLimitStore: new RedisRateLimitStore(connected, `${REDIS_KEY_PREFIX.httpRateLimit}:otp`),
-      },
+      services: buildServices(config, logger, connected),
     });
   } catch (error) {
     if (redis) await disconnectRedis(redis);

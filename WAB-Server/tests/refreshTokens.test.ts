@@ -166,8 +166,8 @@ describe('refresh tokens: logout', () => {
 
   it('ignores unknown and malformed tokens silently', async () => {
     const { service } = setup();
-    await expect(service.revoke('A'.repeat(43))).resolves.toBeUndefined();
-    await expect(service.revoke('nope')).resolves.toBeUndefined();
+    await expect(service.revoke('A'.repeat(43))).resolves.toBeNull();
+    await expect(service.revoke('nope')).resolves.toBeNull();
   });
 
   it('logout-all revokes only active tokens of that account', async () => {

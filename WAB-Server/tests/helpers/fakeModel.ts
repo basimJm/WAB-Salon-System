@@ -142,7 +142,11 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
     countDocuments: (filter: Filter) => new FakeQuery(() => select(filter).length),
     exists: (filter: Filter) =>
       new FakeQuery(() => (select(filter)[0] ? { _id: select(filter)[0]?._id } : null)),
-    findOneAndUpdate: (filter: Filter, update: { $set: Doc }, options: { upsert?: boolean } = {}) =>
+    findOneAndUpdate: (
+      filter: Filter,
+      update: { $set?: Doc; $unset?: Doc },
+      options: { upsert?: boolean } = {},
+    ) =>
       new FakeQuery(() => {
         let doc = select(filter)[0];
         if (!doc) {
@@ -160,7 +164,8 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
           };
           docs.push(doc);
         }
-        Object.assign(doc, update.$set, { updatedAt: new Date() });
+        Object.assign(doc, update.$set ?? {}, { updatedAt: new Date() });
+        for (const key of Object.keys(update.$unset ?? {})) Reflect.deleteProperty(doc, key);
         return { ...doc };
       }),
     updateMany: (filter: Filter, update: { $set: Doc }) =>
