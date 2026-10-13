@@ -22,6 +22,8 @@ import { SalonsRepository } from './repositories/salons.repository';
 import { createSalonStateService, createStaffFacts } from './domain/salons/salonState.service';
 import { createSalonProfileService } from './domain/salons/salonProfile.service';
 import { loadMember } from './middlewares/permission';
+import { createUploadsService } from './domain/uploads/uploads.service';
+import { UploadsRepository } from './repositories/uploads.repository';
 import { createSalonReviewService } from './domain/salons/salonReview.service';
 import { SubscriptionsRepository } from './repositories/subscriptions.repository';
 import { createAuditWriter } from './domain/audit/audit.service';
@@ -202,6 +204,11 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   const faqs = new FaqsRepository();
   const pages = new ContentPagesRepository();
   const adminGuard = requireAuth('admin', config.auth.accessSecret);
+  const uploads = createUploadsService({
+    uploads: new UploadsRepository(),
+    storage: providers.storage,
+    settings,
+  });
   const salonState = createSalonStateService({
     salons: new SalonsRepository(),
     // Salon services arrive with their own task (SRV-050); until then no salon counts as having one.
@@ -220,6 +227,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   return {
     otpGate,
     adminGuard,
+    uploads,
     salonProfile: {
       service: createSalonProfileService({
         salons: new SalonsRepository(),
@@ -227,6 +235,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
         areas: new AreasRepository(),
         storage: providers.storage,
         state: salonState,
+        uploads,
       }),
       guard: [
         requireAuth('merchant', config.auth.accessSecret),
@@ -254,6 +263,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     salonApplication: {
       service: createSalonApplicationService({
         ...phoneServices,
+        uploads,
         salons: new SalonsRepository(),
         members: new MembersRepository(),
         installations: new InstallationsRepository(),

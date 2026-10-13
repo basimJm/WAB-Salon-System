@@ -8,6 +8,7 @@ import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
 import { NotFoundError } from '../../utils/errors';
 import { assertPlace } from '../locations/place';
+import type { UploadVerifier } from '../uploads/uploads.service';
 import type { SalonStateService } from './salonState.service';
 
 export interface SalonProfile {
@@ -56,6 +57,8 @@ export interface SalonProfileDeps {
   readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   /** Recomputes completeness after every write (may promote the salon to LIVE). */
   readonly state: Pick<SalonStateService, 'recompute'>;
+  /** When set, images must be files this salon uploaded and confirmed. */
+  readonly uploads?: UploadVerifier;
 }
 
 export const createSalonProfileService = ({
@@ -64,6 +67,7 @@ export const createSalonProfileService = ({
   areas,
   storage,
   state,
+  uploads,
 }: SalonProfileDeps): SalonProfileService => {
   const toProfile = (s: Entity<SalonRaw>): SalonProfile => ({
     id: s.id,
@@ -104,6 +108,20 @@ export const createSalonProfileService = ({
       // A new area must belong to the (new or current) city.
       const cityId = patch.cityId ?? (patch.areaId === undefined ? undefined : current.cityId);
       await assertPlace({ cities, areas }, 'body', cityId, patch.areaId);
+
+      for (const [purpose, key, current_] of [
+        ['SALON_COVER', patch.coverKey, current.coverKey],
+        ['SALON_PROFILE', patch.profileKey, current.profileKey],
+      ] as const) {
+        if (typeof key === 'string' && key !== current_) {
+          await uploads?.assertConfirmed({
+            keys: [key],
+            purpose,
+            field: purpose === 'SALON_COVER' ? 'body.coverKey' : 'body.profileKey',
+            accept: (upload) => upload.salonId === salonId,
+          });
+        }
+      }
 
       const set: Record<string, unknown> = {};
       const unset: string[] = [];

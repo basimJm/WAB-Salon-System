@@ -882,7 +882,7 @@
 ### T-057 — SRV-045 Salon profile / location / contacts endpoints
 - Project: `WAB-Server/` (`src/domain/salons/salonProfile.service.ts`, `src/domain/locations/place.ts`, `src/modules/merchant/salon/profile.*`, `src/repositories/salons.repository.ts` (`patch`))
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #64 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #65 merged into `server`)
 - Acceptance criteria (BE-04, Merchant PRD M12-M13 + "owner may prepare the profile during APPLICATION_PENDING"; BUSINESS_DOMAIN §3.3, §6 SALON_PROFILE_MANAGE):
   - [x] `GET /merchant/v1/salon`: any active member of the salon; profile with public image URLs, location as lat/lng, completeness, rating
   - [x] `PATCH /merchant/v1/salon/profile`: `SALON_PROFILE_MANAGE` (owner, granted managers; others 403 `PERMISSION_DENIED`); only the caller's own salon is touched (id comes from `req.member.salonId`)
@@ -894,6 +894,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔ (M13), Architect ✔, QA ✔) - image keys are format-checked, not verified to exist (uploads module SRV-046 adds confirmation); gender is not editable here (immutable after approval). Not run against a real MongoDB.
 - Notes: Next: SRV-046 (uploads module).
+
+### T-058 — SRV-046 Uploads module: presign, confirm, verification of used keys
+- Project: `WAB-Server/` (`src/domain/uploads/uploads.service.ts`, `src/modules/shared/uploads/*`, `src/models/upload.model.ts`, `src/repositories/uploads.repository.ts`, `src/constants/uploads.ts`, hooks in salon application/profile services)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #65 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE-70, NFR-01; wab-storage BRD STO-02..05; BUSINESS_DOMAIN §3.7 `uploads`, §10 `uploads.*`, errors `UPLOAD_INVALID`/`UPLOAD_TOO_LARGE`):
+  - [x] `POST /customer|merchant|admin/v1/uploads/presign`: purpose policy (who may upload what: scope, merchant permission, owner-only), allowed content types per kind (images jpg/png/webp/heic, video mp4/mov, documents pdf + images), declared size within `uploads.imageMaxMb|videoMaxMb|docMaxMb` (`UPLOAD_TOO_LARGE`), server-generated key `<prefix>/<salon or owner>/<uuid>.<ext>`, 5-minute presigned PUT pinned to type and size, `uploads` row PENDING (extension: `salonId`)
+  - [x] `POST .../uploads/confirm {key}`: only the uploader (404 otherwise); real type and size checked by the storage provider; wrong file is deleted and the row REJECTED; a file that has not arrived yet stays PENDING and can be retried; CONFIRMED is idempotent; an expired window is `UPLOAD_INVALID`; public files return the CDN URL, private ones `null`
+  - [x] Public `POST /merchant/v1/uploads/license/presign|confirm` (per-IP limited): private license documents before registration; members need to be OWNER for `LICENSE_DOCUMENT`
+  - [x] `UploadVerifier.assertConfirmed` used by: apply (documents must be confirmed guest uploads), resubmit (old keys stay valid, new ones must come from this salon), profile edit (changed cover/profile key must be a confirmed upload of this salon with the right purpose)
+  - [x] `uploads` model: unique key, TTL on `expiresAt` only for PENDING rows; in `ALL_MODELS`; Swagger + Postman regenerated
+- Tests: `cd WAB-Server && npm test` - 1622 pass; format/lint/typecheck/build green; audit 0. `tests/uploads.test.ts` (13) + 4 verifier-wiring tests in salon application/profile suites.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) `uploads.salonId` is an extension of the domain record; (2) guest license uploads are tied to no person (a guest could reuse another guest's key if they guessed the uuid): accepted, keys are unguessable; (3) video duration (`uploads.videoMaxSec`) is not checked here: it needs media inspection, left to the gallery task; (4) image variants are SRV-047; the other purposes (gallery, service media, member photo, catalog/banner) get their verification when their endpoints are built. Not run against real S3.
+- Notes: Next: SRV-047 (image size variants).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

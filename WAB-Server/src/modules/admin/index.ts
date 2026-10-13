@@ -5,7 +5,9 @@ import { ADMIN_APPLICATION_ROUTES, ADMIN_SALON_STATE_ROUTES } from '../../consta
 import { ADMIN_CATALOG_ROUTES } from '../../constants/catalog';
 import { ADMIN_BANNER_ROUTES } from '../../constants/banners';
 import { ADMIN_LOCATION_ROUTES } from '../../constants/adminCrud';
+import { UPLOAD_ROUTES } from '../../constants/uploads';
 import { mount } from '../../routes/mount';
+import { createAdminUploadsRouter } from '../shared/uploads';
 import {
   unavailableAdminAuth,
   unavailableAdminBanners,
@@ -71,5 +73,6 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     ADMIN_SALON_STATE_ROUTES.base,
     createAdminSalonStateRouter(services.salonState ?? unavailableSalonState, guard),
   );
+  mount(router, UPLOAD_ROUTES.base, createAdminUploadsRouter(services));
   return router;
 };

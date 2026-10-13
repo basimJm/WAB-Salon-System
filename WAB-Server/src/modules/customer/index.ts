@@ -7,7 +7,9 @@ import { LOCATION_ROUTES } from '../../constants/locations';
 import { CONTENT_ROUTES } from '../../constants/content';
 import { BANNER_ROUTES } from '../../constants/banners';
 import { CATALOG_ROUTES } from '../../constants/catalog';
+import { UPLOAD_ROUTES } from '../../constants/uploads';
 import { mount } from '../../routes/mount';
+import { createCustomerUploadsRouter } from '../shared/uploads';
 import { createCustomerAppConfigRouter } from '../shared/appConfig';
 import { createCustomerInstallationsRouter } from '../shared/installations';
 import { ExternalServiceError } from '../../utils/errors';
@@ -61,5 +63,6 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
       createOtpRouteLimiter(services),
     ),
   );
+  mount(router, UPLOAD_ROUTES.base, createCustomerUploadsRouter(services));
   return router;
 };

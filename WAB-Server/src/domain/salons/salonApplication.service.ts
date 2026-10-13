@@ -31,6 +31,7 @@ import { createPhoneVerifier, type PhoneInput } from '../auth/phoneVerifier';
 import type { RefreshTokenService } from '../auth/refreshTokens.service';
 import { createSessionTokens, type TokenPair } from '../auth/sessionTokens';
 import type { SettingsService } from '../settings';
+import type { UploadVerifier } from '../uploads/uploads.service';
 
 export interface SalonDraft {
   readonly name: string;
@@ -92,6 +93,8 @@ export interface SalonApplicationDeps {
   readonly otpGate: OtpGate;
   readonly refreshTokens: RefreshTokenService;
   readonly settings: Pick<SettingsService, 'get'>;
+  /** When set, license documents must be files the server issued and confirmed. */
+  readonly uploads?: UploadVerifier;
   readonly accessSecret: string;
   readonly now?: () => Date;
 }
@@ -148,6 +151,12 @@ export const createSalonApplicationService = (
     async apply(input) {
       const phone = await phones.resolve(input.phone);
       await assertPlace({ cities, areas }, 'body.salon', input.salon.cityId, input.salon.areaId);
+      await deps.uploads?.assertConfirmed({
+        keys: input.documentKeys,
+        purpose: 'LICENSE_DOCUMENT',
+        field: 'body.documentKeys',
+        accept: (upload) => upload.ownerType === 'GUEST',
+      });
       await phones.verify(phone, input.idToken, 'REGISTER');
       if ((await members.findByPhone(phone.e164)) !== null) throw phoneTaken();
 
@@ -200,6 +209,16 @@ export const createSalonApplicationService = (
       const salon = await loadSalon(salonId);
       if (salon.state !== 'APPLICATION_REJECTED') {
         throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
+      }
+      if (changes.documentKeys !== undefined) {
+        await deps.uploads?.assertConfirmed({
+          keys: changes.documentKeys,
+          purpose: 'LICENSE_DOCUMENT',
+          field: 'body.documentKeys',
+          // Documents already on the application stay valid; new ones must come from this salon.
+          allow: salon.application.documentKeys,
+          accept: (upload) => upload.salonId === salonId,
+        });
       }
       const updated = await salons.updateById(salonId, {
         ...(changes.name === undefined ? {} : { name: changes.name, searchText: changes.name }),

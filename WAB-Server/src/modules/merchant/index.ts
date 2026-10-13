@@ -7,7 +7,9 @@ import { LOCATION_ROUTES } from '../../constants/locations';
 import { CONTENT_ROUTES } from '../../constants/content';
 import { CATALOG_ROUTES } from '../../constants/catalog';
 import { MERCHANT_SALON_ROUTES } from '../../constants/salon';
+import { UPLOAD_ROUTES } from '../../constants/uploads';
 import { mount } from '../../routes/mount';
+import { createMerchantUploadsRouter } from '../shared/uploads';
 import { createMerchantAppConfigRouter } from '../shared/appConfig';
 import { createMerchantInstallationsRouter } from '../shared/installations';
 import {
@@ -67,5 +69,6 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       services.salonProfile?.guard ?? [unavailableGuard],
     ),
   );
+  mount(router, UPLOAD_ROUTES.base, createMerchantUploadsRouter(services));
   return router;
 };

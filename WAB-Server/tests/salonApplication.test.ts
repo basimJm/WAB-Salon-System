@@ -4,6 +4,7 @@ import { createApp } from '../src/app';
 import { createRefreshTokenService } from '../src/domain/auth/refreshTokens.service';
 import type { OtpGate } from '../src/domain/otp/otpGate.service';
 import { createSalonApplicationService } from '../src/domain/salons/salonApplication.service';
+import type { UploadVerifier } from '../src/domain/uploads/uploads.service';
 import { requireAuth } from '../src/middlewares/auth';
 import { SalonModel } from '../src/models/salon.model';
 import { FakeOtpProvider, fakeOtpProof } from '../src/providers/otp';
@@ -54,7 +55,7 @@ interface Rig {
   resets: string[];
 }
 
-const setup = (): Rig => {
+const setup = (uploads?: UploadVerifier): Rig => {
   const countries = createFakeModel([
     { code: 'JO', dialCode: '+962', phoneRegex: '^7[789][0-9]{7}$', active: true },
   ]);
@@ -94,6 +95,7 @@ const setup = (): Rig => {
     }),
     settings: { get: (key: string) => Promise.resolve(SETTING_DEFAULTS[key as never]) },
     accessSecret: SECRET,
+    ...(uploads === undefined ? {} : { uploads }),
     now: () => NOW,
   });
   const app = createApp({
@@ -339,5 +341,56 @@ describe('application status and resubmission', () => {
       .get('/merchant/v1/salon/application')
       .set('Authorization', `Bearer ${memberToken(new Types.ObjectId().toHexString())}`);
     expect(stranger.status).toBe(401);
+  });
+});
+
+describe('license documents must be confirmed uploads', () => {
+  const verifier = (
+    fail: boolean,
+  ): { calls: Parameters<UploadVerifier['assertConfirmed']>[0][] } & UploadVerifier => ({
+    calls: [],
+    assertConfirmed(input) {
+      this.calls.push(input);
+      return fail ? Promise.reject(new Error('UPLOAD_INVALID')) : Promise.resolve();
+    },
+  });
+
+  it('apply checks the keys as guest-owned license documents and stops on a bad one', async () => {
+    const ok = verifier(false);
+    const rig = setup(ok);
+    expect((await apply(rig)).status).toBe(201);
+    expect(ok.calls[0]).toMatchObject({
+      keys: BODY.documentKeys,
+      purpose: 'LICENSE_DOCUMENT',
+      field: 'body.documentKeys',
+    });
+    expect(ok.calls[0]?.accept?.({ ownerType: 'GUEST' } as never)).toBe(true);
+    expect(ok.calls[0]?.accept?.({ ownerType: 'MEMBER' } as never)).toBe(false);
+    const bad = setup(verifier(true));
+    expect((await apply(bad)).status).toBe(500);
+    expect(bad.salons.docs).toHaveLength(0);
+    expect(bad.members.docs).toHaveLength(0);
+  });
+
+  it('resubmit keeps the keys already on the application and accepts new ones only from this salon', async () => {
+    const check = verifier(false);
+    const rig = setup(check);
+    const res = await apply(rig);
+    const data = bodyOf(res).data;
+    const token = memberToken(String(data.member['id']));
+    Object.assign(rig.salons.docs[0] ?? {}, { state: 'APPLICATION_REJECTED' });
+    check.calls.length = 0;
+    const again = await request(rig.app)
+      .post('/merchant/v1/salon/application/resubmit')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ documentKeys: ['licenses/doc-1.pdf', 'licenses/new.pdf'] });
+    expect(again.status).toBe(200);
+    expect(check.calls[0]).toMatchObject({
+      allow: ['licenses/doc-1.pdf'],
+      purpose: 'LICENSE_DOCUMENT',
+    });
+    const salonId = String(rig.salons.docs[0]?.['_id']);
+    expect(check.calls[0]?.accept?.({ salonId } as never)).toBe(true);
+    expect(check.calls[0]?.accept?.({ salonId: 'other' } as never)).toBe(false);
   });
 });
