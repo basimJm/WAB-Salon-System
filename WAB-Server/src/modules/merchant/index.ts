@@ -13,8 +13,14 @@ import {
 } from '../../constants/salonServices';
 import { MERCHANT_HOURS_ROUTES } from '../../constants/hours';
 import { MERCHANT_GALLERY_ROUTES } from '../../constants/gallery';
+import { createMerchantPayoutDetailsRouter } from './payoutDetails/payoutDetails.routes';
+import {
+  MERCHANT_PAYOUT_DETAILS_ROUTES,
+  PAYOUT_DETAILS_RATE_LIMIT,
+} from '../../constants/payoutDetails';
 import { MERCHANT_POLICY_ROUTES, MERCHANT_SALON_ROUTES } from '../../constants/salon';
 import { UPLOAD_ROUTES } from '../../constants/uploads';
+import { createRateLimiter } from '../../middlewares/rateLimit';
 import { mount } from '../../routes/mount';
 import { createMerchantUploadsRouter } from '../shared/uploads';
 import { createMerchantAppConfigRouter } from '../shared/appConfig';
@@ -23,6 +29,7 @@ import {
   unavailableCatalogRequests,
   unavailableCatalogService,
   unavailableBookingActions,
+  unavailablePayoutDetails,
   unavailableGallery,
   unavailableHours,
   unavailableSalonServices,
@@ -161,6 +168,18 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     createMerchantLeavesRouter(
       services.leaves ?? unavailableLeaves,
       services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_PAYOUT_DETAILS_ROUTES.base,
+    createMerchantPayoutDetailsRouter(
+      services.payoutDetails ?? unavailablePayoutDetails,
+      services.salonProfile?.guard ?? [unavailableGuard],
+      createRateLimiter({
+        ...PAYOUT_DETAILS_RATE_LIMIT,
+        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
+      }),
     ),
   );
   mount(

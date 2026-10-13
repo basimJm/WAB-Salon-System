@@ -45,6 +45,8 @@ import { createBookingAdminService } from './domain/bookings/bookingAdmin.servic
 import { createBookingQueriesService } from './domain/bookings/bookingQueries.service';
 import { createBookingReassignService } from './domain/bookings/bookingReassign.service';
 import { createBookingCancelService } from './domain/bookings/bookingCancel.service';
+import { createPayoutDetailsService } from './domain/salons/payoutDetails.service';
+import { createFieldEncryption } from './utils/crypto/aesGcm';
 import { createSubscriptionsService } from './domain/subscriptions/subscriptions.service';
 import { createPayoutsService } from './domain/payouts/payouts.service';
 import { PayoutsRepository } from './repositories/payouts.repository';
@@ -545,6 +547,18 @@ const buildServices = (
     payments,
     adminRefunds: fullRefunds,
     adminPayouts,
+    ...(config.secrets.payoutEncryptionKey === undefined
+      ? {}
+      : {
+          payoutDetails: createPayoutDetailsService({
+            salons: new SalonsRepository(),
+            members: new MembersRepository(),
+            phones: createPhoneVerifier(phoneServices),
+            otpGate,
+            encryption: createFieldEncryption(config.secrets.payoutEncryptionKey),
+            audit,
+          }),
+        }),
     adminSubscriptions: createSubscriptionsService({
       subscriptions: new SubscriptionsRepository(),
       salons: new SalonsRepository(),

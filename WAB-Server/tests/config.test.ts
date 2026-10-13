@@ -29,6 +29,9 @@ const ALL_FAKE_MODES = {
   analytics: 'fake',
 };
 
+/** Production also needs the field-encryption key (a valid base64 key of 32 bytes). */
+const PAYOUT_KEY = { PAYOUT_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64') };
+
 const validEnv = (overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv => ({
   [ENV_KEYS.mongoUri]: MONGO,
   [ENV_KEYS.redisUrl]: REDIS,
@@ -89,7 +92,7 @@ describe('loadConfig', () => {
   });
 
   it('requires production to name every provider as real, never defaulting or faking', () => {
-    const production = validEnv({ NODE_ENV: 'production' });
+    const production = validEnv({ NODE_ENV: 'production', ...PAYOUT_KEY });
     expect(invalidKeysOf(production)).toEqual([...PROVIDER_ENV_KEYS]);
     for (const key of PROVIDER_ENV_KEYS) {
       expect(invalidKeysOf({ ...production, ...REAL_PROVIDERS, [key]: 'fake' })).toEqual([key]);
@@ -109,9 +112,10 @@ describe('loadConfig', () => {
   });
 
   it('flags production', () => {
-    expect(loadConfig(validEnv({ ...REAL_PROVIDERS, NODE_ENV: 'production' })).isProduction).toBe(
-      true,
-    );
+    expect(
+      loadConfig(validEnv({ ...REAL_PROVIDERS, ...PAYOUT_KEY, NODE_ENV: 'production' }))
+        .isProduction,
+    ).toBe(true);
   });
 
   it('rejects unknown NODE_ENV and LOG_LEVEL', () => {

@@ -16,6 +16,7 @@ import type { AdminReviewsService } from '../domain/reviews/adminReviews.service
 import type { ReviewsService } from '../domain/reviews/reviews.service';
 import type { CustomerProfileService } from '../domain/customers/customerProfile.service';
 import type { BookingActionsService } from '../domain/bookings/bookingActions.service';
+import type { PayoutDetailsService } from '../domain/salons/payoutDetails.service';
 import type { SubscriptionsService } from '../domain/subscriptions/subscriptions.service';
 import type { PayoutsService } from '../domain/payouts/payouts.service';
 import type { RefundService } from '../domain/refunds/refunds.service';
@@ -77,6 +78,7 @@ export interface ApiServices {
   readonly payments?: PaymentsService;
   readonly adminRefunds?: RefundService;
   readonly adminPayouts?: PayoutsService;
+  readonly payoutDetails?: PayoutDetailsService;
   readonly adminSubscriptions?: SubscriptionsService;
   readonly bookingBulk?: BookingBulkService;
   readonly bookingAdmin?: BookingAdminService;
@@ -401,6 +403,13 @@ export const unavailableAdminSubscriptions: SubscriptionsService = {
   list: unavailable,
   expireDue: unavailable,
   endingSoon: unavailable,
+};
+
+export const unavailablePayoutDetails: PayoutDetailsService = {
+  getForOwner: unavailable,
+  setByOwner: unavailable,
+  revealForAdmin: unavailable,
+  setByAdmin: unavailable,
 };
 
 export const unavailablePayments: PaymentsService = {
