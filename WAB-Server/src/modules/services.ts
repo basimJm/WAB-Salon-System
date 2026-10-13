@@ -9,6 +9,7 @@ import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
+import type { AdminContentServices } from '../domain/adminCrud/content';
 import type { AdminCrudService } from '../domain/adminCrud/adminCrud.service';
 import type { OtpGate } from '../domain/otp/otpGate.service';
 import { ExternalServiceError } from '../utils/errors';
@@ -21,6 +22,7 @@ export interface ApiServices {
   /** `requireAuth('admin', secret)`: every admin resource route sits behind it. */
   readonly adminGuard?: RequestHandler;
   readonly adminLocations?: AdminLocationServices;
+  readonly adminContent?: AdminContentServices;
   readonly content?: { readonly customer: ContentService; readonly merchant: ContentService };
   readonly merchantAuth?: MerchantAuthService;
   readonly installations?: {
@@ -118,4 +120,12 @@ export const unavailableAdminLocations: AdminLocationServices = {
   countries: unavailableCrud,
   cities: unavailableCrud,
   areas: unavailableCrud,
+};
+
+export const unavailableAdminContent: AdminContentServices = {
+  pages: unavailableCrud,
+  faqs: unavailableCrud,
+  contactInfo: unavailableCrud,
+  appVersions: unavailableCrud,
+  maintenance: unavailableCrud,
 };

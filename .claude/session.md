@@ -769,7 +769,7 @@
 ### T-049 — SRV-038 part 1: admin CRUD for countries, cities, areas
 - Project: `WAB-Server/` (`src/domain/adminCrud/*`, `src/modules/admin/{crud,locations}/*`, `src/constants/adminCrud.ts`, `src/modules/{index,services}.ts`, `src/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #56 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #57 merged into `server`)
 - Acceptance criteria (BE-65; Admin PRD locations; CLAUDE.md §5.12 admin writes with reason + audit + admin scope):
   - [x] `GET/POST /admin/v1/locations/countries|cities|areas`, `GET/PATCH .../:id`: admin token only (401/403 otherwise), lists paginated (25) with both languages and inactive records
   - [x] Every write needs a non-blank reason and writes one audit entry (`COUNTRY_CREATE`/`_UPDATE`, ...) with before/after, ip, user agent; invalid input or a missing reason writes nothing
@@ -779,6 +779,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - audit is written after the change (same decision as T-043). Deactivating a country/city does not cascade to children. Not run against a real MongoDB.
 - Notes: Next: SRV-038 part 2 (content pages, FAQ, contact info).
+
+### T-050 — SRV-038 parts 2-3: admin CRUD for content pages, FAQ, contact info, app versions, maintenance
+- Project: `WAB-Server/` (`src/domain/adminCrud/content.ts`, `src/modules/admin/{crud,content}/*`, `src/constants/adminContent.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #57 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE-65, Admin PRD content/config; CLAUDE.md §5.12):
+  - [x] `/admin/v1/content/{pages,faqs,contact-info}` and `/admin/v1/app-config/{versions,maintenance}`: list/get/create/patch on the generic CRUD, admin token only, reason required, audit (`CONTENT_PAGE_*`, `FAQ_*`, `CONTACT_INFO_*`, `APP_VERSION_*`, `MAINTENANCE_*`)
+  - [x] Validation: https store URL, version pattern, E.164 phones, lower-cased email, localized text with limits; app/kind/platform cannot be changed
+  - [x] Version policy rule: `minSupported <= latest` on the merged values (create and update, 400 `minSupported`)
+  - [x] Shared `registerCrudDocs` used by locations and content; Swagger + Postman regenerated; 503 when unconfigured
+- Tests: `cd WAB-Server && npm test` - 1480 pass; format/lint/typecheck/build green; audit 0. `tests/adminContent.test.ts` (15).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - creating a duplicate key (app+kind) answers 409 via the unique index. Maintenance and version changes apply at once to `GET /config`. Not run against a real MongoDB.
+- Notes: LESSON: chain gate commands with `&&`/`set -e`; in PR #57 a `;`-chained gate let a lint failure through to a commit (fixed in the same PR before merge). Next: SRV-039 (banners).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

@@ -32,8 +32,8 @@ export interface AdminCrudDeps<TRaw extends object> {
   readonly entityType: string;
   readonly store: AdminCrudStore<TRaw>;
   readonly audit: AuditWriter;
-  /** Rejects data that points at something that does not exist (throws a typed error). */
-  readonly checkReferences?: (data: Patch<TRaw>) => Promise<void>;
+  /** Rejects data that points at something that does not exist or breaks a cross-field rule. */
+  readonly checkReferences?: (data: Patch<TRaw>, current?: Entity<TRaw>) => Promise<void>;
 }
 
 /**
@@ -86,7 +86,7 @@ export const createAdminCrud = <TRaw extends object>({
     },
     async update({ id, patch, reason, actor }) {
       const before = await get(id);
-      await checkReferences?.(patch);
+      await checkReferences?.(patch, before);
       const after = await store.updateById(id, patch);
       if (after === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       await audit.record(entry(ADMIN_CRUD_VERBS.update, id, reason, actor, before, after));

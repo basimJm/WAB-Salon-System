@@ -11,6 +11,7 @@ import { optionalAuth, requireAuth } from './middlewares/auth';
 import { createContentService } from './domain/content';
 import { ContentPagesRepository, FaqsRepository } from './repositories/content.repository';
 import { createAuditWriter } from './domain/audit/audit.service';
+import { createAdminContentServices } from './domain/adminCrud/content';
 import { createAdminLocationServices } from './domain/adminCrud/locations';
 import { AuditLogsRepository } from './repositories/auditLogs.repository';
 import { createLocationsService } from './domain/locations';
@@ -191,6 +192,14 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   return {
     otpGate,
     adminGuard,
+    adminContent: createAdminContentServices({
+      pages: new ContentPagesRepository(),
+      faqs,
+      contactInfo: new ContactInfoRepository(),
+      appVersions: new AppVersionsRepository(),
+      maintenance: new MaintenanceRepository(),
+      audit,
+    }),
     adminLocations: createAdminLocationServices({
       countries: new CountriesRepository(),
       cities: new CitiesRepository(),
