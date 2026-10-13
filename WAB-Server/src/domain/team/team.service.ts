@@ -1,4 +1,4 @@
-import { ERROR_CODES } from '../../constants/errorCodes';
+import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { MemberRole, Permission } from '../../constants/enums';
 import type { AssignableRole } from '../../constants/team';
 import type { MemberRaw } from '../../models/member.model';
@@ -16,6 +16,7 @@ import {
   effectivePermissions,
   normalizeGrant,
 } from '../permissions/permissions';
+import type { BookingConflict } from '../salons/hoursService';
 import type { UploadVerifier } from '../uploads/uploads.service';
 
 export interface TeamMemberView {
@@ -66,6 +67,10 @@ export interface TeamDeps {
   readonly phones: Pick<PhoneVerifier, 'resolve'>;
   readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly uploads: UploadVerifier;
+  /** Upcoming bookings of the member; deactivation is refused while any exist (SCHEDULE_CONFLICT). */
+  readonly deactivationConflicts?: {
+    check(input: { salonId: string; memberId: string }): Promise<BookingConflict[]>;
+  };
 }
 
 export const createTeamService = ({
@@ -74,6 +79,7 @@ export const createTeamService = ({
   phones,
   storage,
   uploads,
+  deactivationConflicts,
 }: TeamDeps): TeamService => {
   const view = (m: Entity<MemberRaw>): TeamMemberView => ({
     id: m.id,
@@ -173,6 +179,18 @@ export const createTeamService = ({
     },
 
     async deactivate({ salonId, id }) {
+      await find(salonId, id);
+      const found = (await deactivationConflicts?.check({ salonId, memberId: id })) ?? [];
+      if (found.length > 0) {
+        throw new ConflictError({
+          code: ERROR_CODES.SCHEDULE_CONFLICT,
+          details: found.map((c) => ({
+            field: c.bookingId,
+            code: ERROR_CODES.SCHEDULE_CONFLICT,
+            messageKey: errorMessageKey(ERROR_CODES.SCHEDULE_CONFLICT),
+          })),
+        });
+      }
       await lifecycle.deactivateMember({ memberId: id, salonId });
       return view(await find(salonId, id));
     },

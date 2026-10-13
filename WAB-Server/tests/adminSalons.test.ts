@@ -23,6 +23,7 @@ const audits: Record<string, unknown>[] = [];
 const events: Record<string, unknown>[] = [];
 const recomputes: string[] = [];
 const notifier = { fail: false };
+const upcoming = { list: [] as { bookingId: string; startsAt: Date; status: string }[] };
 const app = createApp({
   logger,
   services: {
@@ -51,6 +52,7 @@ const app = createApp({
         },
       },
       logger,
+      bookings: { check: () => Promise.resolve(upcoming.list) },
     }),
   },
 });
@@ -87,6 +89,7 @@ beforeEach(() => {
   events.length = 0;
   recomputes.length = 0;
   notifier.fail = false;
+  upcoming.list = [];
 });
 
 describe('GET /admin/v1/salons', () => {
@@ -250,6 +253,17 @@ describe('PATCH /admin/v1/salons/:id/gender', () => {
     expect(
       (await patch(new Types.ObjectId().toHexString(), { gender: 'MALE', reason: 'x' })).status,
     ).toBe(404);
+    expect(salonsM.docs[0]?.['gender']).toBe('FEMALE');
+    expect(audits).toHaveLength(0);
+  });
+
+  it('is refused with the bookings while the salon has upcoming ones, and changes nothing', async () => {
+    const id = addSalon('Glow');
+    upcoming.list = [{ bookingId: 'bk1', startsAt: new Date(), status: 'APPROVED' }];
+    const res = await patch(id, { gender: 'MALE', reason: 'x' });
+    expect(res.status).toBe(409);
+    expect(bodyOf(res).error.code).toBe('SCHEDULE_CONFLICT');
+    expect(bodyOf(res).error.details.map((d) => d.field)).toEqual(['bk1']);
     expect(salonsM.docs[0]?.['gender']).toBe('FEMALE');
     expect(audits).toHaveLength(0);
   });
