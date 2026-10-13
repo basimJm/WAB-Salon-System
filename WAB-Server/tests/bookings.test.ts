@@ -6,6 +6,9 @@ import { SETTING_DEFAULTS } from '../src/constants/settings';
 import { createAvailabilityService } from '../src/domain/availability/availability.service';
 import { createHoldsStore } from '../src/domain/availability/holds';
 import { createBookingCreationService } from '../src/domain/bookings/bookingCreation.service';
+import { createDirectRefunds } from '../src/domain/refunds/directRefunds';
+import { FakePaymentProvider } from '../src/providers/payments/fake';
+import { TransactionsRepository } from '../src/repositories/transactions.repository';
 import { createBookingDraftService } from '../src/domain/bookings/bookingDraft.service';
 import { requireAuth } from '../src/middlewares/auth';
 import { BookingDraftsRepository } from '../src/repositories/bookingDrafts.repository';
@@ -37,7 +40,9 @@ const m = {
   customers: createFakeModel(),
   drafts: createFakeModel(),
   bookings: createFakeModel(),
+  tx: createFakeModel(),
 };
+const gateway = new FakePaymentProvider();
 const created: string[] = [];
 let testRedis: TestRedis;
 let redis: Redis;
@@ -88,6 +93,13 @@ beforeAll(async () => {
         now,
       }),
       bookings: createBookingCreationService({
+        transactions: new TransactionsRepository(m.tx.model as never),
+        refunds: createDirectRefunds({
+          transactions: new TransactionsRepository(m.tx.model as never),
+          provider: gateway,
+          logger,
+          now,
+        }),
         redis,
         drafts,
         bookings,
@@ -338,7 +350,7 @@ describe('POST /customer/v1/bookings', () => {
     expect(bodyOf(again).error.code).toBe('SLOT_UNAVAILABLE');
   });
 
-  it('needs the OTP confirmation first and only pay-on-arrival drafts can be booked for now', async () => {
+  it('needs the OTP confirmation first and an online draft needs a verified payment', async () => {
     const draftId = await makeDraft();
     const early = await book(draftId);
     expect(early.status).toBe(422);
@@ -507,5 +519,126 @@ describe('bookings repository lookups', () => {
         new Date(amman(D, '11:30')),
       ),
     ).toBe(false);
+  });
+});
+
+describe('paid bookings (SRV-085)', () => {
+  /** A DEPOSIT draft with a payment attempt of the given status linked to it. */
+  const paidDraft = async (
+    status: string = 'SUCCEEDED',
+    over: Record<string, unknown> = {},
+  ): Promise<{ draftId: string; txId: string; due: number }> => {
+    const draftId = await makeDraft([person({ staffId: staffA.toHexString() })], 'DEPOSIT');
+    await confirm(draftId);
+    const draft = m.drafts.docs[0] ?? {};
+    const due = (draft['totals'] as { dueOnline: number }).dueOnline;
+    const session = await gateway.createSession({
+      idempotencyKey: `k:${draftId}:${String(m.tx.docs.length)}`,
+      amountFils: due,
+      reference: draftId,
+    });
+    const txId = id();
+    m.tx.docs.push({
+      _id: txId,
+      bookingDraftId: new Types.ObjectId(draftId),
+      customerId: me,
+      salonId,
+      status,
+      amount: due,
+      providerRef: session.sessionId,
+      ...over,
+    });
+    draft['transactionId'] = txId;
+    return { draftId, txId: txId.toHexString(), due };
+  };
+  const tx = (): Record<string, unknown> => m.tx.docs[0] ?? {};
+
+  it('creates the booking from a verified payment with the paid amounts and links the payment', async () => {
+    const { draftId, due } = await paidDraft();
+    const res = await book(draftId);
+    expect(res.status).toBe(201);
+    const stored = m.bookings.docs[0] ?? {};
+    expect(stored).toMatchObject({
+      status: 'PENDING',
+      paymentStatus: 'DEPOSIT_PAID',
+      money: { dueOnline: due, paidOnline: due, remaining: 20000 - due, refunded: 0 },
+    });
+    expect(String(tx()['bookingId'])).toBe(String(stored['_id']));
+    expect(tx()['refundedAt']).toBeUndefined();
+  });
+
+  it('a failed, cancelled or still pending payment never creates a booking', async () => {
+    for (const status of ['FAILED', 'CANCELLED', 'PENDING']) {
+      m.tx.docs.length = 0;
+      m.drafts.docs.length = 0;
+      await redis.flushdb();
+      const { draftId } = await paidDraft(status);
+      const res = await book(draftId);
+      expect(res.status).toBe(422);
+      expect(bodyOf(res).error.code).toBe('PAYMENT_NOT_VERIFIED');
+    }
+    expect(m.bookings.docs).toHaveLength(0);
+  });
+
+  it('refuses a payment that is the wrong amount, another customer’s, used or already refunded', async () => {
+    const cases: Record<string, unknown>[] = [
+      { amount: 1 },
+      { customerId: other },
+      { bookingId: id() },
+      { refundedAt: clock },
+    ];
+    for (const over of cases) {
+      m.tx.docs.length = 0;
+      m.drafts.docs.length = 0;
+      await redis.flushdb();
+      const { draftId } = await paidDraft('SUCCEEDED', over);
+      const res = await book(draftId);
+      expect(bodyOf(res).error.code).toBe('PAYMENT_NOT_VERIFIED');
+    }
+    expect(m.bookings.docs).toHaveLength(0);
+  });
+
+  it('a draft without any payment attempt is refused', async () => {
+    const draftId = await makeDraft([person({ staffId: staffA.toHexString() })], 'DEPOSIT');
+    await confirm(draftId);
+    expect(bodyOf(await book(draftId)).error.code).toBe('PAYMENT_NOT_VERIFIED');
+  });
+
+  it('slot taken after payment: 409 SLOT_TAKEN and the whole payment is refunded at once', async () => {
+    const { draftId } = await paidDraft();
+    const start = new Date(amman(D, '10:00'));
+    m.bookings.docs.push({
+      _id: id(),
+      salonId,
+      status: 'PENDING',
+      persons: [{ staffId: staffA, start, end: new Date(start.getTime() + 45 * 60_000) }],
+      appointmentStart: start,
+      appointmentEnd: new Date(start.getTime() + 45 * 60_000),
+    });
+    const res = await book(draftId);
+    expect(res.status).toBe(409);
+    expect(bodyOf(res).error.code).toBe('SLOT_TAKEN');
+    expect(m.bookings.docs).toHaveLength(1);
+    expect(tx()['refundedAt']).toEqual(clock);
+    expect(tx()['bookingId']).toBeUndefined();
+    // Retrying cannot turn the refunded payment into a booking later.
+    m.bookings.docs.length = 0;
+    expect(bodyOf(await book(draftId)).error.code).toBe('PAYMENT_NOT_VERIFIED');
+    expect(m.bookings.docs).toHaveLength(0);
+  });
+
+  it('an expired draft with a successful payment refunds it', async () => {
+    const { draftId } = await paidDraft();
+    clock = new Date(clock.getTime() + 11 * 60_000);
+    const res = await book(draftId);
+    expect(bodyOf(res).error.code).toBe('DRAFT_EXPIRED');
+    expect(tx()['refundedAt']).toEqual(clock);
+  });
+
+  it('two parallel creates from one payment make exactly one booking', async () => {
+    const { draftId } = await paidDraft();
+    const results = await Promise.all([book(draftId), book(draftId)]);
+    expect(results.filter((r) => r.status === 201)).toHaveLength(1);
+    expect(m.bookings.docs).toHaveLength(1);
   });
 });

@@ -16,3 +16,6 @@ export const PAYMENT_WEBHOOK_SIGNATURE_HEADER = 'x-signature';
 /** Polling fallback: attempts still PENDING after this long are asked about again. */
 export const RECONCILE_MIN_AGE_MS = 120_000;
 export const RECONCILE_BATCH_SIZE = 50;
+
+/** A successful payment without a booking this long after its checkout started is refunded (the draft lives 10 minutes). */
+export const ORPHAN_REFUND_AFTER_MS = 1_800_000;

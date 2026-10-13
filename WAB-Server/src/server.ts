@@ -35,6 +35,7 @@ import { FavoritesRepository } from './repositories/favorites.repository';
 import { createAdminReviewsService } from './domain/reviews/adminReviews.service';
 import { createCustomerProfileService } from './domain/customers/customerProfile.service';
 import { createBookingActionsService } from './domain/bookings/bookingActions.service';
+import { createDirectRefunds } from './domain/refunds/directRefunds';
 import { createPaymentsService } from './domain/payments/payments.service';
 import { TransactionsRepository } from './repositories/transactions.repository';
 import { createBookingBulkService } from './domain/bookings/bookingBulk.service';
@@ -379,7 +380,15 @@ const buildServices = (
     otpGate,
     settings,
   });
+  const transactionsRepository = new TransactionsRepository();
+  const fullRefunds = createDirectRefunds({
+    transactions: transactionsRepository,
+    provider: providers.payments,
+    logger,
+  });
   const bookingCreation = createBookingCreationService({
+    transactions: transactionsRepository,
+    refunds: fullRefunds,
     hook: bookingEvents,
     redis,
     drafts: bookingDraftsRepository,
@@ -419,10 +428,11 @@ const buildServices = (
     settings,
   });
   const payments = createPaymentsService({
-    transactions: new TransactionsRepository(),
+    transactions: transactionsRepository,
     drafts: bookingDraftsRepository,
     customers: new CustomersRepository(),
     provider: providers.payments,
+    refunds: fullRefunds,
     providerName: config.providers.payments,
     logger,
   });

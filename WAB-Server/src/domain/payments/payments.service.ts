@@ -2,12 +2,14 @@ import {
   AMOUNT_MISMATCH_CODE,
   IDEMPOTENCY_SEPARATOR,
   PAYMENT_CURRENCY,
+  ORPHAN_REFUND_AFTER_MS,
   RECONCILE_BATCH_SIZE,
   RECONCILE_MIN_AGE_MS,
 } from '../../constants/payments';
 import type { Platform, TransactionStatus, TransactionType } from '../../constants/enums';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import type { TransactionRaw } from '../../models/transaction.model';
+import type { FullRefundPort } from '../refunds/directRefunds';
 import type { PaymentProvider } from '../../providers/payments/types';
 import type { BookingDraftsRepository } from '../../repositories/bookingDrafts.repository';
 import type { CustomersRepository } from '../../repositories/identity.repository';
@@ -55,6 +57,11 @@ export interface PaymentsService {
   handleWebhook(input: { rawBody: string; signature: string }): Promise<{ settled: boolean }>;
   /** Polling fallback for lost webhooks: verifies attempts that stayed PENDING; returns how many settled. */
   reconcilePending(): Promise<number>;
+  /**
+   * Job helper: payments that succeeded but never became a booking (the app closed after paying) are
+   * refunded in full once the draft is long gone; returns how many were refunded.
+   */
+  refundOrphans(): Promise<number>;
 }
 
 /** Called once, by whoever settled an attempt first (verify, webhook or reconciliation). */
@@ -72,6 +79,8 @@ export interface PaymentsDeps {
   readonly providerName: string;
   readonly logger: Logger;
   readonly onSettled?: PaymentSettledHook;
+  /** Needed only for `refundOrphans`. */
+  readonly refunds?: FullRefundPort;
   readonly now?: () => Date;
 }
 
@@ -211,6 +220,23 @@ export const createPaymentsService = (deps: PaymentsDeps): PaymentsService => {
         return { settled: false };
       }
       return { settled: (await confirm(found)).settledNow };
+    },
+
+    async refundOrphans() {
+      const port = deps.refunds;
+      if (port === undefined) return 0;
+      const cutoff = new Date(now().getTime() - ORPHAN_REFUND_AFTER_MS);
+      let refunded = 0;
+      for (const payment of await transactions.orphansBefore(cutoff, RECONCILE_BATCH_SIZE)) {
+        try {
+          if (await port.refundPayment({ transactionId: payment.id, reason: 'NO_BOOKING' })) {
+            refunded += 1;
+          }
+        } catch (error) {
+          logger.warn({ err: error, transactionId: payment.id }, 'orphan payment refund failed');
+        }
+      }
+      return refunded;
     },
 
     async reconcilePending() {
