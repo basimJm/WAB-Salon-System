@@ -6,7 +6,8 @@ import { SETTING_DEFAULTS } from '../src/constants/settings';
 import { createAvailabilityService } from '../src/domain/availability/availability.service';
 import { createHoldsStore } from '../src/domain/availability/holds';
 import { createBookingCreationService } from '../src/domain/bookings/bookingCreation.service';
-import { createDirectRefunds } from '../src/domain/refunds/directRefunds';
+import { createRefundService } from '../src/domain/refunds/refunds.service';
+import { RefundsRepository } from '../src/repositories/refunds.repository';
 import { FakePaymentProvider } from '../src/providers/payments/fake';
 import { TransactionsRepository } from '../src/repositories/transactions.repository';
 import { createBookingDraftService } from '../src/domain/bookings/bookingDraft.service';
@@ -41,6 +42,7 @@ const m = {
   drafts: createFakeModel(),
   bookings: createFakeModel(),
   tx: createFakeModel(),
+  refunds: createFakeModel(),
 };
 const gateway = new FakePaymentProvider();
 const created: string[] = [];
@@ -94,9 +96,13 @@ beforeAll(async () => {
       }),
       bookings: createBookingCreationService({
         transactions: new TransactionsRepository(m.tx.model as never),
-        refunds: createDirectRefunds({
+        refunds: createRefundService({
+          refunds: new RefundsRepository(m.refunds.model as never),
           transactions: new TransactionsRepository(m.tx.model as never),
+          bookings,
           provider: gateway,
+          settings,
+          audit: { record: () => Promise.reject(new Error('unused')) },
           logger,
           now,
         }),
@@ -621,6 +627,12 @@ describe('paid bookings (SRV-085)', () => {
     expect(m.bookings.docs).toHaveLength(1);
     expect(tx()['refundedAt']).toEqual(clock);
     expect(tx()['bookingId']).toBeUndefined();
+    expect(m.refunds.docs).toHaveLength(1);
+    expect(m.refunds.docs[0]).toMatchObject({
+      source: 'SALON_REJECT',
+      reason: 'SLOT_UNAVAILABLE',
+      status: 'REFUNDED',
+    });
     // Retrying cannot turn the refunded payment into a booking later.
     m.bookings.docs.length = 0;
     expect(bodyOf(await book(draftId)).error.code).toBe('PAYMENT_NOT_VERIFIED');

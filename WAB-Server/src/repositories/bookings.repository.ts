@@ -1,5 +1,9 @@
 import type { Model } from 'mongoose';
-import { SLOT_HOLDING_STATUSES, type BookingStatus } from '../constants/enums';
+import {
+  SLOT_HOLDING_STATUSES,
+  type BookingRefundStatus,
+  type BookingStatus,
+} from '../constants/enums';
 import type { BookingBusyLookup } from '../domain/availability/availability.service';
 import type { BookingLookup, UpcomingBooking } from '../domain/salons/conflicts';
 import { BookingModel, type BookingRaw, type StatusHistoryEntry } from '../models/booking.model';
@@ -98,6 +102,25 @@ export class BookingsRepository
       .lean()
       .exec();
     return updated === null ? null : toEntity<BookingRaw>(updated);
+  }
+
+  /** Keeps the booking's refund summary in step with its refunds (`refundedDelta` fils just returned). */
+  async recordRefund(
+    id: string,
+    change: { status: BookingRefundStatus; refundedDelta?: number },
+  ): Promise<void> {
+    if (!isObjectIdString(id)) return;
+    await this.model
+      .findOneAndUpdate(
+        { _id: id },
+        {
+          $set: { refundStatus: change.status },
+          ...(change.refundedDelta === undefined || change.refundedDelta === 0
+            ? {}
+            : { $inc: { 'money.refunded': change.refundedDelta } }),
+        },
+      )
+      .exec();
   }
 
   /** Live bookings of a salon that have not ended yet, for the schedule-conflict checks. */
