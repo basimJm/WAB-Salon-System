@@ -1,4 +1,5 @@
 import type { Logger } from 'pino';
+import type { MemberRole, Permission } from '../constants/enums';
 import type { Language } from '../constants/i18n';
 import type { AccessTokenClaims } from '../utils/auth/accessToken';
 import type { MessageParams } from '../utils/errors';
@@ -18,6 +19,13 @@ declare global {
       validated: Record<string, unknown>;
       /** Set by `requireAuth`: who is calling and in which namespace. */
       auth?: AccessTokenClaims;
+      /** Set by `loadMember`: the signed-in merchant member with their effective permissions. */
+      member?: {
+        id: string;
+        salonId: string;
+        role: MemberRole;
+        permissions: readonly Permission[];
+      };
     }
   }
 }

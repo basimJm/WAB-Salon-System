@@ -852,7 +852,7 @@
 ### T-055 — SRV-043 Completeness engine + salon state machine + SALON_NOT_BOOKABLE
 - Project: `WAB-Server/` (`src/domain/salons/{completeness,salonState.service,bookable}.ts`, `src/modules/admin/salons/*`, `src/constants/salon.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #62 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #63 merged into `server`)
 - Acceptance criteria (BUSINESS_DOMAIN §5.2 completeness → state, §11 SALON_NOT_BOOKABLE; CLAUDE.md §5.2/§5.12):
   - [x] `computeMissing`: COVER, PROFILE_IMAGE, NAME, DESCRIPTION, LOCATION, PHONE, WORKING_HOURS (>=1 open day), SERVICE (>=1), STAFF (>=1 qualified), POLICY (present, cancellation >= 0, >= 1 option, DEPOSIT needs 1-100) in domain order
   - [x] `recompute(salonId)`: stores `completeness`; `APPROVED_INCOMPLETE` + complete -> `LIVE` (atomic, owner told "salon.live"); a LIVE salon that becomes incomplete stays LIVE, owner told once ("salon.not_bookable"); OFFLINE and application states never move; failed notification only logged
@@ -864,6 +864,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) until salon services exist (SRV-050) the SERVICE fact is 0, so no salon can become complete yet; (2) `recompute` has to be called by every profile/service/staff write (SRV-045 onwards); (3) messages are logged only until SRV-093. Not run against a real MongoDB.
 - Notes: Next: SRV-044 (permission model + enforcement middleware).
+
+### T-056 — SRV-044 Permission model + enforcement middleware
+- Project: `WAB-Server/` (`src/constants/permissions.ts`, `src/domain/permissions/permissions.ts`, `src/middlewares/permission.ts`, `src/types/express.d.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #63 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE-04/BE-03, CLAUDE.md §4.2 "enforce on every merchant endpoint"; BUSINESS_DOMAIN §6 permissions matrix + default templates):
+  - [x] 15 permission keys; owner-only capabilities (`TEAM_MANAGE`, `PAYOUT_DETAILS_MANAGE`, `SALON_DELETION`) are not keys and can never be granted (`normalizeGrant` -> 400 `OWNER_REQUIRED` detail; unknown keys 400)
+  - [x] Templates: MANAGER = all except `FINANCE_VIEW`/`POLICIES_MANAGE` (13); EMPLOYEE = `BOOKINGS_VIEW_OWN`, `REVIEWS_VIEW`; copies handed out
+  - [x] `loadMember`: member read from the database on every request (role/permission change or deactivation applies at once), 401 unknown, 403 `MEMBER_INACTIVE`, sets `req.member` with effective permissions (OWNER = all)
+  - [x] `requirePermission(keys, 'all'|'any')` -> 403 `PERMISSION_DENIED`; `requireOwner` -> 403 `OWNER_REQUIRED` (even a manager granted every key); without `loadMember` it answers 401, never allows
+- Tests: `cd WAB-Server && npm test` - 1586 pass; format/lint/typecheck/build green; audit 0. `tests/permissions.test.ts` (16).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - not yet applied to a route (merchant profile/team endpoints from SRV-045 on). Socket rooms/events and notification recipients use the same `hasAnyPermission` later. One extra DB read per merchant request is the price of instant permission changes. API docs: no change.
+- Notes: Next: SRV-045 (salon profile/location/contacts endpoints).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
