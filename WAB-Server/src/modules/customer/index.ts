@@ -21,6 +21,7 @@ import {
   unavailableGuard,
   unavailableSalonDetails,
   unavailableFavorites,
+  unavailableCustomerProfile,
   unavailableHome,
   unavailableReviews,
   unavailableSearch,
@@ -33,6 +34,8 @@ import { SALON_DETAILS_ROUTES } from '../../constants/salonDetails';
 import { createFavoritesRouter } from './favorites/favorites.routes';
 import { FAVORITE_ROUTES } from '../../constants/favorites';
 import { createReviewsRouter } from './reviews/reviews.routes';
+import { createCustomerProfileRouter } from './profile/profile.routes';
+import { CUSTOMER_PROFILE_ROUTES } from '../../constants/customerProfile';
 import { createHomeRouter } from './home/home.routes';
 import { HOME_ROUTES } from '../../constants/home';
 import { createSearchRouter } from './search/search.routes';
@@ -138,6 +141,15 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
         ...SEARCH_ROUTE_RATE_LIMIT,
         ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
       }),
+    }),
+  );
+  mount(
+    router,
+    CUSTOMER_PROFILE_ROUTES.base,
+    createCustomerProfileRouter({
+      service: services.customerProfile ?? unavailableCustomerProfile,
+      guard: services.installations?.customerRequired ?? unavailableGuard,
+      limiter: createOtpRouteLimiter(services),
     }),
   );
   return router;

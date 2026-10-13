@@ -1137,6 +1137,19 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - recompute uses an aggregate (no loading of all reviews). Decision to confirm: approve/reject default reasons are English strings stored only in the audit log. Admin email "review pending" alert and the owner notification wait for the notification core. Not run against a real MongoDB (aggregate path).
 - API docs: updated.
 
+### T-076 — SRV-065 Customer profile, avatar, delete account
+- Project: `WAB-Server/` (`src/domain/customers`, `src/modules/customer/profile`, `CustomersRepository.patch`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD S21-S22; BUSINESS_DOMAIN §3.1, §5.15):
+  - [x] Get my profile (avatar as URL, no internal fields); blocked -> 403 `ACCOUNT_BLOCKED`, removed -> 404
+  - [x] Partial update with validation; city and area must be active and belong together (also when only one is sent); the phone cannot be changed here
+  - [x] Avatar: only a confirmed CUSTOMER_AVATAR upload owned by this customer; replacing or deleting removes the old file (best effort); delete is idempotent
+  - [x] Delete account starts the grace period and ends all sessions through `AccountLifecycleService`
+- Tests: `tests/customerProfile.test.ts` (16); full gate green, 1887 tests; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - `accountLifecycle` is now a shared const in `buildServices`. The guest nickname/gender stay on the device (PRD). Push switch already exists under `/installations/push-enabled`.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-026 — next server task after T-036 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
