@@ -144,8 +144,8 @@ Roadmap SRV-04.
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
 | SRV-035 | App config endpoint: version policy (min/latest/optional), maintenance, nearby radius, contact info | `feat/srv-035-app-config` | SRV-017 | DONE | `GET /customer/v1/config` and `/merchant/v1/config` (public; `platform`, `version`): update status OK/UPDATE_AVAILABLE/UPDATE_REQUIRED + store URL, maintenance (localized), nearby radius, OTP length/resend, contact info. Enforcing maintenance/forced update on other routes is NOT included. |
-| SRV-036 | Public endpoints: countries, cities, areas (localized) | `feat/srv-036-ref-public` | SRV-018 | IN REVIEW | `GET /{customer|merchant}/v1/locations/countries`, `/cities?countryCode`, `/areas?cityId` (public, active only, admin order, localized; flag URL from storage). Lists are not paginated: small bounded admin-curated reference data. |
-| SRV-037 | Public content: privacy/terms/about, FAQ, contact info per app | `feat/srv-037-content-public` | SRV-005 | TODO |  |
+| SRV-036 | Public endpoints: countries, cities, areas (localized) | `feat/srv-036-ref-public` | SRV-018 | DONE | `GET /{customer|merchant}/v1/locations/countries`, `/cities?countryCode`, `/areas?cityId` (public, active only, admin order, localized; flag URL from storage). Lists are not paginated: small bounded admin-curated reference data. |
+| SRV-037 | Public content: privacy/terms/about, FAQ, contact info per app | `feat/srv-037-content-public` | SRV-005 | IN REVIEW | `GET /{customer|merchant}/v1/content/pages/{privacy|terms|about}` (404 until the admin writes it) and `/content/faqs` (admin order), localized. Contact info is already served by `GET /config` (SRV-035). |
 | SRV-038 | Admin CRUD: countries/cities/areas, content pages, FAQ, contact info, app versions, maintenance (with audit + reason) | `feat/srv-038-ref-admin` | SRV-020, SRV-030 | TODO |  |
 | SRV-039 | Banners: admin CRUD + active-by-gender query | `feat/srv-039-banners` | SRV-038 | TODO |  |
 

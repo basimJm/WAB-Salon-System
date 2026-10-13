@@ -8,6 +8,8 @@ import { createAdminAuthService } from './domain/auth/adminAuth.service';
 import { createMerchantAuthService } from './domain/auth/merchantAuth.service';
 import { createRefreshTokenService } from './domain/auth/refreshTokens.service';
 import { optionalAuth, requireAuth } from './middlewares/auth';
+import { createContentService } from './domain/content';
+import { ContentPagesRepository, FaqsRepository } from './repositories/content.repository';
 import { createLocationsService } from './domain/locations';
 import { createAppConfigService } from './domain/appConfig';
 import {
@@ -179,8 +181,14 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     areas: new AreasRepository(),
     storage: providers.storage,
   });
+  const faqs = new FaqsRepository();
+  const pages = new ContentPagesRepository();
   return {
     otpGate,
+    content: {
+      customer: createContentService({ app: 'CUSTOMER', pages, faqs }),
+      merchant: createContentService({ app: 'MERCHANT', pages, faqs }),
+    },
     appConfig,
     locations,
     installations: {

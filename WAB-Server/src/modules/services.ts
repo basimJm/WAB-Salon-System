@@ -7,6 +7,7 @@ import type { MerchantAuthService } from '../domain/auth/merchantAuth.service';
 import type { CustomerAuthService } from '../domain/auth/customerAuth.service';
 import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
+import type { ContentService } from '../domain/content';
 import type { OtpGate } from '../domain/otp/otpGate.service';
 import { ExternalServiceError } from '../utils/errors';
 
@@ -15,6 +16,7 @@ export interface ApiServices {
   readonly otpGate?: OtpGate;
   readonly appConfig?: AppConfigService;
   readonly locations?: LocationsService;
+  readonly content?: { readonly customer: ContentService; readonly merchant: ContentService };
   readonly merchantAuth?: MerchantAuthService;
   readonly installations?: {
     readonly service: InstallationService;
@@ -88,4 +90,9 @@ export const unavailableLocationsService: LocationsService = {
   countries: unavailable,
   cities: unavailable,
   areas: unavailable,
+};
+
+export const unavailableContentService: ContentService = {
+  page: unavailable,
+  faqs: unavailable,
 };
