@@ -9,6 +9,7 @@ import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
+import type { LeavesService } from '../domain/team/leaves.service';
 import type { StaffService } from '../domain/team/staff.service';
 import type { TeamService } from '../domain/team/team.service';
 import type { CatalogRequestsService } from '../domain/catalog/catalogRequests.service';
@@ -48,6 +49,7 @@ export interface ApiServices {
   readonly catalogRequests?: CatalogRequestsService;
   readonly team?: TeamService;
   readonly staff?: StaffService;
+  readonly leaves?: LeavesService;
   /** Salon profile; `guard` = `requireAuth('merchant')` then `loadMember`. */
   readonly salonProfile?: {
     readonly service: SalonProfileService;
@@ -240,3 +242,10 @@ export const unavailableTeam: TeamService = {
 };
 
 export const unavailableStaff: StaffService = { get: unavailable, set: unavailable };
+
+export const unavailableLeaves: LeavesService = {
+  list: unavailable,
+  add: unavailable,
+  update: unavailable,
+  remove: unavailable,
+};

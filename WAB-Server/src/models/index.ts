@@ -13,6 +13,7 @@ import { GalleryItemModel } from './galleryItem.model';
 import { SalonClosureModel } from './salonClosure.model';
 import { SalonServiceModel } from './salonService.model';
 import { CatalogRequestModel } from './catalogRequest.model';
+import { StaffLeaveModel } from './staffLeave.model';
 import { AuditLogModel } from './auditLog.model';
 import { CatalogServiceModel } from './catalogService.model';
 import { CityModel } from './city.model';
@@ -45,6 +46,7 @@ export const ALL_MODELS = [
   MaintenanceModel,
   BannerModel,
   SalonModel,
+  StaffLeaveModel,
   SalonServiceModel,
   CatalogRequestModel,
   SalonClosureModel,
