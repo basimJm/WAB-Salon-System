@@ -1734,6 +1734,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - read-only; the manual ADJUSTMENT ledger tool is not built (no PRD rule on amounts/limits) and is left for the owner to confirm.
 
+### T-114 — SRV-105 Analytics query endpoints from MongoDB server events
+
+- Project: `WAB-Server/` (`src/providers/analytics/mongo.ts`, `src/domain/analytics`, `src/modules/admin/analytics`, `src/constants/analytics.ts`, `ServerEventsRepository.countGrouped`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (Admin PRD A01, A07-A09; wab-analytics ANA; BE-61 data side):
+  - [x] Real `AnalyticsProvider` over the `serverEvents` collection: counts by name or Amman day, identity link stored as an event; bad range/zone refused; store failure is a 502
+  - [x] `GET /admin/v1/analytics/overview` and `/events` (admin token only), range max 92 days, bad input 400 without querying; answers cached 60 s in Redis, order-insensitive names, cache outage ignored
+  - [x] Pipeline checked (match range/names, group by `$name` or `$dateToString` with the zone)
+- Tests: `tests/analytics.test.ts` (10, real Redis); full gate green; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: no producer emits `payment.*`/`booking.*`/`api.error` events yet, so dashboards show zeros until they are added; funnels, cohorts, journeys, crashes wait for BigQuery (SRV-110). Aggregate not run against a real MongoDB.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

@@ -172,11 +172,10 @@ describe('append-only repositories', () => {
         ...Object.getOwnPropertyNames(Object.getPrototypeOf(repository)),
         ...Object.getOwnPropertyNames(Object.getPrototypeOf(Object.getPrototypeOf(repository))),
       ]);
-      expect([...methods].filter((name) => name !== 'constructor').sort()).toEqual([
-        'append',
-        'findById',
-        'findPage',
-      ]);
+      // `countGrouped` is a read-only aggregate on the server events (dashboards).
+      const allowed = ['append', 'findById', 'findPage'];
+      if (repository instanceof ServerEventsRepository) allowed.splice(1, 0, 'countGrouped');
+      expect([...methods].filter((name) => name !== 'constructor').sort()).toEqual(allowed);
     }
   });
 
