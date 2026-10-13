@@ -13,7 +13,7 @@ import {
 } from '../../constants/salonServices';
 import { MERCHANT_HOURS_ROUTES } from '../../constants/hours';
 import { MERCHANT_GALLERY_ROUTES } from '../../constants/gallery';
-import { MERCHANT_SALON_ROUTES } from '../../constants/salon';
+import { MERCHANT_POLICY_ROUTES, MERCHANT_SALON_ROUTES } from '../../constants/salon';
 import { UPLOAD_ROUTES } from '../../constants/uploads';
 import { mount } from '../../routes/mount';
 import { createMerchantUploadsRouter } from '../shared/uploads';
@@ -26,6 +26,7 @@ import {
   unavailableHours,
   unavailableSalonServices,
   unavailableLeaves,
+  unavailablePolicy,
   unavailableStaff,
   unavailableTeam,
   unavailableGuard,
@@ -39,6 +40,7 @@ import { createCatalogRouter } from '../shared/catalog/catalog.module';
 import { createLocationsRouterFor } from '../shared/locations';
 import { createMerchantOtpRouter, createOtpRouteLimiter } from '../shared/otp';
 import { createMerchantCatalogRequestsRouter } from './catalogRequests/requests.routes';
+import { createMerchantPolicyRouter } from './policy/policy.routes';
 import { createMerchantLeavesRouter } from './team/leaves.routes';
 import { createMerchantStaffRouter } from './team/staff.routes';
 import { createMerchantTeamRouter } from './team/team.routes';
@@ -144,6 +146,14 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     MERCHANT_TEAM_ROUTES.base,
     createMerchantLeavesRouter(
       services.leaves ?? unavailableLeaves,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_POLICY_ROUTES.base,
+    createMerchantPolicyRouter(
+      services.policy ?? unavailablePolicy,
       services.salonProfile?.guard ?? [unavailableGuard],
     ),
   );

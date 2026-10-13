@@ -9,6 +9,7 @@ import type { AppConfigService } from '../domain/appConfig';
 import type { LocationsService } from '../domain/locations';
 import type { ContentService } from '../domain/content';
 import type { AdminLocationServices } from './admin/locations/locations.routes';
+import type { PolicyService } from '../domain/salons/policy.service';
 import type { LeavesService } from '../domain/team/leaves.service';
 import type { StaffService } from '../domain/team/staff.service';
 import type { TeamService } from '../domain/team/team.service';
@@ -50,6 +51,7 @@ export interface ApiServices {
   readonly team?: TeamService;
   readonly staff?: StaffService;
   readonly leaves?: LeavesService;
+  readonly policy?: PolicyService;
   /** Salon profile; `guard` = `requireAuth('merchant')` then `loadMember`. */
   readonly salonProfile?: {
     readonly service: SalonProfileService;
@@ -249,3 +251,5 @@ export const unavailableLeaves: LeavesService = {
   update: unavailable,
   remove: unavailable,
 };
+
+export const unavailablePolicy: PolicyService = { get: unavailable, set: unavailable };
