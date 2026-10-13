@@ -3,6 +3,7 @@ import type { Store } from 'express-rate-limit';
 import type { Redis } from 'ioredis';
 import { createApp } from './app';
 import { createCustomerAuthService } from './domain/auth/customerAuth.service';
+import { createAdminLoginService } from './domain/auth/adminLogin.service';
 import { createAdminAuthService } from './domain/auth/adminAuth.service';
 import { createMerchantAuthService } from './domain/auth/merchantAuth.service';
 import { createRefreshTokenService } from './domain/auth/refreshTokens.service';
@@ -113,9 +114,10 @@ export const startServer = async (
 const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServices => {
   const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
   const otpGate = createOtpGate({ redis, settings });
+  const providers = createProviders(config.providers, config.isProduction);
   const phoneServices = {
     countries: new CountriesRepository(),
-    otp: createProviders(config.providers, config.isProduction).otp,
+    otp: providers.otp,
     otpGate,
     refreshTokens: createRefreshTokenService({ repository: new RefreshTokensRepository(), logger }),
     settings,
@@ -126,12 +128,22 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
     members: new MembersRepository(),
     installations: new InstallationsRepository(),
   });
+  const admins = new AdminsRepository();
   const adminAuthService = createAdminAuthService({
-    admins: new AdminsRepository(),
+    admins,
     refreshTokens: phoneServices.refreshTokens,
     settings,
     logger,
     accessSecret: config.auth.accessSecret,
+  });
+  const adminLoginService = createAdminLoginService({
+    auth: adminAuthService,
+    admins,
+    redis,
+    notifier: providers.notifier,
+    settings,
+    logger,
+    secret: config.auth.accessSecret,
   });
   const customerAuthService = createCustomerAuthService({
     ...phoneServices,
@@ -143,7 +155,7 @@ const buildServices = (config: AppConfig, logger: Logger, redis: Redis): ApiServ
   return {
     otpGate,
     merchantAuth: merchantAuthService,
-    adminAuth: adminAuthService,
+    adminAuth: { service: adminAuthService, login: adminLoginService },
     customerAuth: {
       service: customerAuthService,
       authenticate: requireAuth('customer', config.auth.accessSecret),

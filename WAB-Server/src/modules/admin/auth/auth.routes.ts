@@ -1,25 +1,43 @@
 import { Router, type RequestHandler } from 'express';
-import { ADMIN_AUTH_ROUTES } from '../../../constants/adminAuth';
+import { ADMIN_AUTH_ROUTES, ADMIN_LOGIN_ROUTES } from '../../../constants/adminAuth';
 import type { AdminAuthService } from '../../../domain/auth/adminAuth.service';
+import type { AdminLoginService } from '../../../domain/auth/adminLogin.service';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { createAdminAuthController } from './auth.controller';
-import { refreshSchema } from './auth.validation';
+import { loginSchema, refreshSchema, verifyOtpSchema } from './auth.validation';
 
 export interface AdminAuthRouterOptions {
   readonly service: AdminAuthService;
+  readonly login: AdminLoginService;
   /** Per-IP guard (fails closed). */
   readonly limiter: RequestHandler;
 }
 
 /**
- * Session routes of the admin panel. The two-step login (password, then email OTP) is added by
- * SRV-031: a password alone must never open a session.
+ * Sign-in routes of the admin panel: password (`login`), then the emailed code (`verify-otp`),
+ * which is the only way to get a session. A password alone never opens one.
  */
-export const createAdminAuthRouter = ({ service, limiter }: AdminAuthRouterOptions): Router => {
+export const createAdminAuthRouter = ({
+  service,
+  login,
+  limiter,
+}: AdminAuthRouterOptions): Router => {
   const router = Router();
-  const controller = createAdminAuthController(service);
-  const routes = ADMIN_AUTH_ROUTES;
+  const controller = createAdminAuthController(service, login);
+  const routes = { ...ADMIN_AUTH_ROUTES, ...ADMIN_LOGIN_ROUTES };
+  router.post(
+    routes.login,
+    limiter,
+    validate({ body: loginSchema }),
+    asyncHandler(controller.login),
+  );
+  router.post(
+    routes.verifyOtp,
+    limiter,
+    validate({ body: verifyOtpSchema }),
+    asyncHandler(controller.verifyOtp),
+  );
   router.post(
     routes.refresh,
     limiter,
