@@ -1814,6 +1814,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - the in-process tests prove correctness of the locks, not database throughput; Mongo-level uniqueness of overlapping bookings still relies on the Redis lock + atomic re-validation (no unique index can express overlap).
 
+### T-120 — SRV-114 Security checklist verification (NFR-01)
+
+- Project: `WAB-Server/` (`docs/SECURITY_CHECKLIST.md`, `tests/securityChecklist.test.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (BRD NFR-01, backlog: each control mapped to a test or config + dependency scan clean):
+  - [x] All 22 controls listed with implementation, status and proof; the checklist cannot name a missing file (test)
+  - [x] Every admin route (91 paths) refuses missing / garbage / wrong-secret / expired tokens with 401 and customer / merchant scope with 403; mutation check: removing a guard fails the test (file restored, diff clean)
+  - [x] `npm audit --omit=dev` = 0 vulnerabilities (full audit: moderate, Jest toolchain only, build-time)
+  - [ ] HTTPS only, daily backups: PLATFORM items, blocked on hosting decisions (SRV-011 / SRV-116)
+- Tests: `tests/securityChecklist.test.ts` (11); full gate green; API docs: no change
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - no security defect found; accepted risks and platform gaps are written in the checklist. Customer/merchant all-routes audit not built (guards differ per router).
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
