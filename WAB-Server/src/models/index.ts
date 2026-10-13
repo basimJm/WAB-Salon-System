@@ -6,6 +6,7 @@ import { FaqModel } from './faq.model';
 import { MaintenanceModel } from './maintenance.model';
 import { AreaModel } from './area.model';
 import { BannerModel } from './banner.model';
+import { SalonModel } from './salon.model';
 import { AuditLogModel } from './auditLog.model';
 import { CatalogServiceModel } from './catalogService.model';
 import { CityModel } from './city.model';
@@ -37,6 +38,7 @@ export const ALL_MODELS = [
   AppVersionModel,
   MaintenanceModel,
   BannerModel,
+  SalonModel,
   ContactInfoModel,
   ContentPageModel,
   FaqModel,

@@ -810,7 +810,7 @@
 ### T-052 — SRV-040 Catalog services: admin CRUD + list by gender
 - Project: `WAB-Server/` (`src/domain/catalog`, `src/modules/{shared,admin}/catalog/*`, `src/constants/catalog.ts`, `src/server.ts`)
 - Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #59 merged; PR targets `server`)
-- Status: IN REVIEW
+- Status: DONE (PR #60 merged into `server`)
 - Acceptance criteria (BE-65, Admin PRD A23, Merchant PRD service picking; BUSINESS_DOMAIN §3.2 catalogServices):
   - [x] `GET /customer/v1/catalog/services` and `/merchant/v1/catalog/services`: `gender` required, active only, `sortOrder` order, paginated (10), name/description in the request language, CDN image URL
   - [x] `/admin/v1/catalog/services` CRUD (admin token, reason + audit `CATALOG_SERVICE_*`): both languages, inactive included, filter by gender; gender cannot change; switch off with `active=false`
@@ -818,6 +818,21 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) - no text search yet (Atlas search is SRV-059). Not run against a real MongoDB.
 - Notes: Next: SRV-041 (salon schema + owner application).
+
+### T-053 — SRV-041 Salon schema + owner application (apply, status, resubmit)
+- Project: `WAB-Server/` (`src/models/salon.model.ts`, `src/domain/salons/salonApplication.service.ts`, `src/modules/merchant/salon/*`, `src/constants/salon.ts`, `src/repositories/salons.repository.ts`)
+- Branch: `claude/busy-johnson-2rch94` (restarted from `origin/server` after PR #60 merged; PR targets `server`)
+- Status: IN REVIEW
+- Acceptance criteria (BE-01/BE-04 salon accounts; BUSINESS_DOMAIN §3.3 salons, §3.4 members, SalonState; Merchant PRD M05-M06):
+  - [x] `salons` model exactly as §3.3 (state enum, 7-day schedule default all off, embedded policy/application/offline/completeness/rating, 2dsphere + state/gender + city/area indexes), in `ALL_MODELS`
+  - [x] `POST /merchant/v1/salon/applications` (public, per-IP limited): phone proven by Firebase token (REGISTER purpose, OTP gate), owner name, salon name/gender/description/city/area (area inside the city), 1-5 unique private document keys; creates salon `APPLICATION_PENDING` + OWNER member (no permissions needed) + installation link + merchant session; a number that already belongs to a member is 409; a failed owner insert (number race) removes the salon
+  - [x] `GET /merchant/v1/salon/application`: owner only; state, submittedAt, resubmissionCount, rejection reason
+  - [x] `POST /merchant/v1/salon/application/resubmit`: owner only, only from `APPLICATION_REJECTED` (else 422 `INVALID_TRANSITION`); may change name, gender, description, documents; back to pending, count +1, review fields cleared
+  - [x] Swagger + Postman regenerated; 503 when unconfigured
+- Tests: `cd WAB-Server && npm test` - 1530 pass; format/lint/typecheck/build green; audit 0. `tests/salonApplication.test.ts` (22).
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile ✔ (matches M05-M06), Architect ✔, QA ✔) - DECISIONS TO CONFIRM: (1) document keys are only format-checked (no existence check) until the uploads module SRV-046; (2) the application has no transaction: compensation deletes the salon when the owner insert fails; (3) the salon gender may be changed on resubmission only (immutable after approval except by admin: SRV-042+). Not run against a real MongoDB.
+- Notes: LESSON: do not combine `set -e` with `grep ... || true` gates; use `&&` chains and print `exit=$?`. Next: SRV-042 (admin approve/reject).
 
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

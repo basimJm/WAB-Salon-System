@@ -2200,6 +2200,716 @@
           }
         }
       }
+    },
+    "/merchant/v1/salon/applications": {
+      "post": {
+        "tags": [
+          "Salon application"
+        ],
+        "summary": "Apply with a new salon (creates the owner, signs them in)",
+        "description": "Public. The phone is proven by a Firebase ID token. The salon waits for admin approval; license documents are private storage keys.",
+        "security": [],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "type": "object",
+                    "properties": {
+                      "countryCode": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{2}$"
+                      },
+                      "number": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4,15}$"
+                      }
+                    },
+                    "required": [
+                      "countryCode",
+                      "number"
+                    ]
+                  },
+                  "idToken": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50
+                  },
+                  "salon": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "gender": {
+                        "type": "string",
+                        "enum": [
+                          "MALE",
+                          "FEMALE"
+                        ]
+                      },
+                      "description": {
+                        "type": "string",
+                        "maxLength": 1000
+                      },
+                      "cityId": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{24}$/i"
+                      },
+                      "areaId": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{24}$/i"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "gender"
+                    ]
+                  },
+                  "documentKeys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 1024,
+                      "pattern": "^[A-Za-z0-9_-]+(\\/[A-Za-z0-9._-]+)*$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 5
+                  },
+                  "installation": {
+                    "type": "object",
+                    "properties": {
+                      "installationId": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9._-]{8,128}$"
+                      },
+                      "platform": {
+                        "type": "string",
+                        "enum": [
+                          "ANDROID",
+                          "IOS",
+                          "WEB"
+                        ]
+                      },
+                      "appVersion": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 32
+                      },
+                      "osVersion": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "deviceModel": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "fcmToken": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      }
+                    },
+                    "required": [
+                      "installationId",
+                      "platform",
+                      "appVersion"
+                    ]
+                  }
+                },
+                "required": [
+                  "phone",
+                  "idToken",
+                  "firstName",
+                  "lastName",
+                  "salon",
+                  "documentKeys",
+                  "installation"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string"
+                        },
+                        "accessTokenExpiresAt": {
+                          "type": "string"
+                        },
+                        "refreshToken": {
+                          "type": "string"
+                        },
+                        "refreshTokenExpiresAt": {
+                          "type": "string"
+                        },
+                        "member": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "salonId": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "salonId",
+                            "role"
+                          ],
+                          "additionalProperties": {}
+                        },
+                        "application": {
+                          "type": "object",
+                          "properties": {
+                            "salonId": {
+                              "type": "string"
+                            },
+                            "state": {
+                              "type": "string",
+                              "enum": [
+                                "APPLICATION_PENDING",
+                                "APPLICATION_REJECTED",
+                                "APPROVED_INCOMPLETE",
+                                "LIVE",
+                                "OFFLINE"
+                              ]
+                            },
+                            "submittedAt": {
+                              "type": "string"
+                            },
+                            "resubmissionCount": {
+                              "type": "number"
+                            },
+                            "rejectionReason": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "salonId",
+                            "state",
+                            "submittedAt",
+                            "resubmissionCount",
+                            "rejectionReason"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "accessToken",
+                        "accessTokenExpiresAt",
+                        "refreshToken",
+                        "refreshTokenExpiresAt",
+                        "member",
+                        "application"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/merchant/v1/salon/application": {
+      "get": {
+        "tags": [
+          "Salon application"
+        ],
+        "summary": "State of the salon application (owner)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "salonId": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "APPLICATION_PENDING",
+                            "APPLICATION_REJECTED",
+                            "APPROVED_INCOMPLETE",
+                            "LIVE",
+                            "OFFLINE"
+                          ]
+                        },
+                        "submittedAt": {
+                          "type": "string"
+                        },
+                        "resubmissionCount": {
+                          "type": "number"
+                        },
+                        "rejectionReason": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "salonId",
+                        "state",
+                        "submittedAt",
+                        "resubmissionCount",
+                        "rejectionReason"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/merchant/v1/salon/application/resubmit": {
+      "post": {
+        "tags": [
+          "Salon application"
+        ],
+        "summary": "Send a rejected application again (owner)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "gender": {
+                    "type": "string",
+                    "enum": [
+                      "MALE",
+                      "FEMALE"
+                    ]
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "documentKeys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 1024,
+                      "pattern": "^[A-Za-z0-9_-]+(\\/[A-Za-z0-9._-]+)*$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 5
+                  }
+                },
+                "default": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "salonId": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "APPLICATION_PENDING",
+                            "APPLICATION_REJECTED",
+                            "APPROVED_INCOMPLETE",
+                            "LIVE",
+                            "OFFLINE"
+                          ]
+                        },
+                        "submittedAt": {
+                          "type": "string"
+                        },
+                        "resubmissionCount": {
+                          "type": "number"
+                        },
+                        "rejectionReason": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "salonId",
+                        "state",
+                        "submittedAt",
+                        "resubmissionCount",
+                        "rejectionReason"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}

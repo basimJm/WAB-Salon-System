@@ -6,14 +6,22 @@ import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
 import { LOCATION_ROUTES } from '../../constants/locations';
 import { CONTENT_ROUTES } from '../../constants/content';
 import { CATALOG_ROUTES } from '../../constants/catalog';
+import { MERCHANT_SALON_ROUTES } from '../../constants/salon';
 import { mount } from '../../routes/mount';
 import { createMerchantAppConfigRouter } from '../shared/appConfig';
 import { createMerchantInstallationsRouter } from '../shared/installations';
-import { unavailableCatalogService, unavailableMerchantAuth, type ApiServices } from '../services';
+import {
+  unavailableCatalogService,
+  unavailableGuard,
+  unavailableMerchantAuth,
+  unavailableSalonApplication,
+  type ApiServices,
+} from '../services';
 import { createMerchantContentRouter } from '../shared/content';
 import { createCatalogRouter } from '../shared/catalog/catalog.module';
 import { createLocationsRouterFor } from '../shared/locations';
 import { createMerchantOtpRouter, createOtpRouteLimiter } from '../shared/otp';
+import { createMerchantSalonRouter } from './salon/salon.routes';
 import { createMerchantAuthRouter } from './auth/auth.routes';
 
 /** Router for the /merchant/v1 namespace. Feature routers are mounted here as they are built. */
@@ -39,6 +47,15 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       services.catalog ?? unavailableCatalogService,
       createOtpRouteLimiter(services),
     ),
+  );
+  mount(
+    router,
+    MERCHANT_SALON_ROUTES.base,
+    createMerchantSalonRouter({
+      service: services.salonApplication?.service ?? unavailableSalonApplication,
+      limiter: createOtpRouteLimiter(services),
+      guard: services.salonApplication?.guard ?? unavailableGuard,
+    }),
   );
   return router;
 };

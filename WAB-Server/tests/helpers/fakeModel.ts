@@ -171,6 +171,12 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
         for (const key of Object.keys(update.$unset ?? {})) Reflect.deleteProperty(doc, key);
         return { ...doc };
       }),
+    deleteOne: (filter: Filter) =>
+      new FakeQuery(() => {
+        const index = docs.findIndex((doc) => matches(doc, filter));
+        if (index >= 0) docs.splice(index, 1);
+        return { deletedCount: index >= 0 ? 1 : 0 };
+      }),
     updateMany: (filter: Filter, update: { $set?: Doc; $unset?: Doc }) =>
       new FakeQuery(() => {
         const found = select(filter);
