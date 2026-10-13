@@ -1686,6 +1686,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - DECISIONS: `status`/`cancelledAt` are extensions; `delivered` = `sent` until FCM receipts; saved analytics segments not built; guest tracking of opens impossible; a resumed run under-counts `sent`. Not run against MongoDB.
 
+### T-110 — SRV-101 Admin customers
+
+- Project: `WAB-Server/` (`src/domain/customers/adminCustomers.service.ts`, `src/modules/admin/customers/*`, `src/constants/adminCustomers.ts`)
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE
+- Acceptance criteria (Admin PRD A12; BUSINESS_DOMAIN §3.1, §5.15; CLAUDE.md §5.12):
+  - [x] List/search/filter (status, gender, city; name or phone) with bookings count, detail with devices and journey id
+  - [x] Block / unblock / delete (grace period) / restore, each with a mandatory reason and an audit entry; sessions end on block and delete
+- Tests: `tests/adminCustomers.test.ts` (5); full gate green; docs regenerated
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - bookings count is one count per listed row (25 max); profile edit, per-customer tabs, export not built. Not run against MongoDB.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
