@@ -25,7 +25,7 @@
 7. **Zero runtime errors, compile errors and warnings.** `tsc` strict, `eslint --max-warnings 0`, no console output in tests/builds, no React/Vite warnings.
 8. **No file longer than 300 lines** (code, CSS, JSON, tests). Split instead. ESLint `max-lines` and the hardcoded scan enforce it.
 9. **Responsive everywhere:** phone, tablet, desktop; portrait and landscape; every size scales (rem tokens, fluid root font size, `minmax(0, …)` grids, no horizontal page scroll). New UI ships with an e2e check in `e2e/`.
-10. **One branch per task**, branched from an updated `main`. **Never push to `main`.** Open a PR and wait for green CI (root rules §3).
+10. **One branch per task**, branched from an updated `origin/admin` (the admin master branch, root rules §3.9). **Never push to `main`.** The PR targets `admin`; merge it only after every CI check is green.
 
 ## 2. Architecture — Clean Architecture with MVC
 
