@@ -690,6 +690,19 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — no new dependency. Hand-written auth DTOs stay until ADM-030. Open: server spec has no `operationId`s, ids are derived from method + path.
 - Notes: `hasMeta` = list response (array `data` with `meta`).
 
+### T-041 — ADM-007 Feature-sliced layers
+
+- Project: `WAB-Admin-Dashboard/` (`.dependency-cruiser.cjs`, `tests/layers.test.ts`, `docs/HOW_TO_ADD_A_MODULE.md`, `CLAUDE.md` §2)
+- Branch: `feat/adm-007-feature-slices`
+- Status: IN REVIEW
+- Acceptance criteria (Admin Tasks ADM-007):
+  - [x] A feature slice (`domain|data|presentation/<feature>`) cannot import another feature; shared dirs per layer are allowed; relative imports covered
+  - [x] Tests prove allowed, and rejected, imports per layer
+  - [x] "How to add a module" guide + checklist, linked from `CLAUDE.md`
+- Tests: `npm run verify`; no runtime code changed, so no browser/e2e run
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — nothing moved; current tree has no violations.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

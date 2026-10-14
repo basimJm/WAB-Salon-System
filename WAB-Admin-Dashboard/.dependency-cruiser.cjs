@@ -7,6 +7,28 @@ const LAYER_RULES = {
   presentation: ['data'],
 };
 
+/**
+ * Feature slices (ADM-007): `domain/<feature>`, `data/<feature>`, `presentation/<feature>`.
+ * A feature may import its own slice and the shared directories of its layer, never another feature.
+ * `$1` is the feature name captured from the importing file's path.
+ */
+const SHARED = {
+  domain: ['shared'],
+  data: ['shared', 'contract', 'mock'],
+  presentation: ['shared', 'components', 'layout', 'hooks', 'controllers', 'pages', 'utils'],
+};
+
+const featureRule = (layer) => ({
+  name: `feature-isolation-${layer}`,
+  severity: 'error',
+  comment: `A ${layer} feature must not import another ${layer} feature (shared: ${SHARED[layer].join(', ')}).`,
+  from: { path: `^src/${layer}/([^/]+)/`, pathNot: `^src/${layer}/(${SHARED[layer].join('|')})/` },
+  to: {
+    path: `^src/${layer}/[^/]+/`,
+    pathNot: `^src/${layer}/($1|${SHARED[layer].join('|')})/`,
+  },
+});
+
 module.exports = {
   forbidden: [
     {
@@ -22,6 +44,7 @@ module.exports = {
       from: {},
       to: { couldNotResolve: true },
     },
+    ...Object.keys(SHARED).map(featureRule),
     ...Object.entries(LAYER_RULES).map(([layer, forbidden]) => ({
       name: `layer-${layer}`,
       severity: 'error',
