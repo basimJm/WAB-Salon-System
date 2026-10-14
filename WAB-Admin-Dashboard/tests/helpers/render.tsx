@@ -15,6 +15,10 @@ import { STORAGE_KEYS } from '@/constants/storage';
 import type { Language } from '@/constants/i18n';
 import { createLogger } from '@/infrastructure/logger/logger';
 import { ApiClient } from '@/data/api/ApiClient';
+import { createMockRoutes } from '@/data/mock/fixtures';
+import { createMockTransport } from '@/data/mock/mockTransport';
+import { createScenarioStore } from '@/data/mock/scenarios';
+import { RemoteSettingsRepository } from '@/data/settings/RemoteSettingsRepository';
 import { FakeRealtimeClient } from '@/data/realtime/FakeRealtimeClient';
 import { HttpClient } from '@/infrastructure/http/HttpClient';
 
@@ -24,20 +28,29 @@ export function makeContainer(
 ): Container {
   const session = createSessionStore();
   const logger = createLogger('silent');
+  // Every API call goes through the real client stack into the contract-typed mock server (instant answers).
+  const scenarios = createScenarioStore();
+  const api = new ApiClient(
+    new HttpClient({
+      baseUrl: 'http://localhost',
+      getToken: () => null,
+      getLanguage: () => 'en',
+      fetchFn: createMockTransport({
+        routes: createMockRoutes(),
+        scenarios,
+        sleep: () => Promise.resolve(),
+      }),
+    }),
+  );
   return {
     config: buildAppConfig({}, variant),
     logger,
     session,
     sessionManager: createSessionManager({ store: session, auth: () => auth, logger }),
-    api: new ApiClient(
-      new HttpClient({
-        baseUrl: 'http://localhost',
-        getToken: () => null,
-        getLanguage: () => 'en',
-      }),
-    ),
+    api,
+    mock: { scenarios },
     realtime: new FakeRealtimeClient(),
-    repositories: { auth },
+    repositories: { auth, settings: new RemoteSettingsRepository(api) },
     queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }),
   };
 }

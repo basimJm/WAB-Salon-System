@@ -4,7 +4,7 @@ import { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
 import { getSettingsDataSchema } from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
-import { MOCK_ROUTES } from '@/data/mock/fixtures';
+import { createMockRoutes } from '@/data/mock/fixtures';
 import { createMockTransport } from '@/data/mock/mockTransport';
 import { createScenarioStore, isMockScenario } from '@/data/mock/scenarios';
 import { AppError } from '@/infrastructure/errors/AppError';
@@ -15,7 +15,7 @@ const endpoint = defineEndpoint(OPERATIONS.getSettings, { data: getSettingsDataS
 function setup(scenario: MockScenario = 'success', language: 'ar' | 'en' = 'en') {
   const scenarios = createScenarioStore(scenario);
   const sleep = vi.fn((_ms: number) => Promise.resolve());
-  const fetchFn = createMockTransport({ routes: MOCK_ROUTES, scenarios, sleep });
+  const fetchFn = createMockTransport({ routes: createMockRoutes(), scenarios, sleep });
   const http = new HttpClient({
     baseUrl: 'https://api.example.test',
     fetchFn,
@@ -36,7 +36,7 @@ describe('mock transport', () => {
 
   it('every fixture route exists in the contract with the same method and path', () => {
     const known = new Set(Object.values(OPERATIONS).map((o) => `${o.method} ${o.path}`));
-    for (const r of MOCK_ROUTES) expect(known.has(`${r.method} ${r.path}`)).toBe(true);
+    for (const r of createMockRoutes()) expect(known.has(`${r.method} ${r.path}`)).toBe(true);
   });
 
   it('empty returns an empty page', async () => {

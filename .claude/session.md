@@ -15,18 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-065 — ADM-029 API-consumption doc generator
-
-- Project: `WAB-Admin-Dashboard/` (`scripts/{docs-api.ts,lib/apiDoc.ts,api-exemptions.json}`, `docs/API_CONSUMED.md`, `package.json` scripts, `verify`)
-- Branch: `feat/adm-029-api-doc`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-029):
-  - [x] `npm run docs:api` writes `docs/API_CONSUMED.md`: every contract operation with its id, planned task (Appendix A), implementing source files (`OPERATIONS.<id>` uses outside generated/mock code) and status
-  - [x] `npm run docs:api:check` (part of `verify`) fails when the file is stale, when an operation has no task, no code consumer and no exemption, or when an exemption names no operation
-- Tests: `sh scripts/gate.sh` all PASS (6 new unit tests); script/docs only, no UI
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — 116 operations, 0 implemented yet (login still uses hand-written endpoints until ADM-030). Rerun `npm run docs:api` after any task that consumes an operation, or `verify` fails as stale.
-
 ### T-066 — ADM-030 Auth module on the real contract
 
 - Project: `WAB-Admin-Dashboard/` (`domain/auth`, `data/auth/RemoteAuthRepository.ts` on `ApiClient`, `Endpoint.noRefresh`, `useLoginController`, `OtpStep`, `.dependency-cruiser.cjs`, tests)
@@ -40,6 +28,20 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); mock mode still uses `MockAuthRepository` (updated to the new shape) instead of auth fixtures on the transport mock — moving it is a small follow-up; `data/api` and `data/realtime` added to the shared data dirs of the layer rules.
 - Notes: Admin display name is the email (the API has no name field).
+
+### T-067 — ADM-031 Settings page (discovery, booking rules, OTP)
+
+- Project: `WAB-Admin-Dashboard/` (`domain/settings/*`, `data/settings/RemoteSettingsRepository.ts`, `presentation/settings/*`, stateful mock settings, `locales/*/settings.json`, `routes.tsx` FEATURE_PAGES, test helper on the mock stack)
+- Branch: `feat/adm-031-settings`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-031; PRD A28; BUSINESS_DOMAIN §10):
+  - [x] `GET /settings` + `PUT /settings/{key}` (value + mandatory reason) through the generated contract; page shows the 15 core keys in three groups with effective value, default, "Changed/Default" badge and "Use default"
+  - [x] Validation as you type (whole numbers, bounds, lists comma separated/sorted/no repeats) blocks saving; save asks for a reason, sends only changed keys, reloads, toasts; failures show the localized error with retry
+  - [x] AR+EN labels for every key (test), phone single column / desktop grid, no horizontal scroll
+- Tests: `sh scripts/gate.sh` all PASS (17 new tests; the page tests run the full stack page -> repository -> ApiClient -> HttpClient -> mock server); browser check dev-debug: 3 groups, 15 fields, no console errors, phone width 324 px single column
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATIONS: no e2e (user decision); ranges are sanity bounds (server validates structure only); DECISION: total JS budget raised 200 -> 280 KB gzip (entry 40 and chunk 80 unchanged) because the lazy module chunks of the whole backlog count in it; prod-release stayed within 200 until this task.
+- Notes: ADM-032 adds the remaining key groups (alerts objects, grace days, retention...) to the same registry; sections for the three groups use `CORE_SETTING_GROUPS`.
 
 ### Pending (next)
 

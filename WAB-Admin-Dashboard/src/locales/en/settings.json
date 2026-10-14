@@ -1,0 +1,48 @@
+{
+  "settings": {
+    "subtitle": "Platform rules that apply to every app at once. Each change needs a reason and is recorded in the audit log.",
+    "default": "Default: {{value}}",
+    "isDefault": "Default",
+    "overridden": "Changed",
+    "useDefault": "Use default",
+    "saved": "Settings saved",
+    "confirmTitle": "Save {{count}} changed settings",
+    "confirmText": "Changes apply to all apps immediately. Write why you are changing them.",
+    "group": {
+      "discovery": "Discovery",
+      "booking": "Booking rules",
+      "otp": "Verification code (OTP)"
+    },
+    "unit": {
+      "km": "km",
+      "minutes": "minutes",
+      "seconds": "seconds",
+      "days": "days",
+      "digits": "digits"
+    },
+    "error": {
+      "required": "Enter a value",
+      "integer": "Whole numbers only",
+      "min": "Must be at least {{min}}",
+      "max": "Must be at most {{max}}",
+      "list": "Do not repeat a value"
+    },
+    "key": {
+      "discovery_nearbyRadiusKm": "Nearby search radius",
+      "booking_slotMinutes": "Time slot interval",
+      "booking_maxDaysAhead": "How far ahead customers can book",
+      "booking_maxCompanions": "Companions per booking",
+      "booking_minLeadMinutes": "Minimum notice before an appointment",
+      "booking_paymentHoldMinutes": "Slot hold while paying",
+      "booking_autoCancelAfterStartMinutes": "Auto-cancel a pending request after the start time",
+      "booking_pendingAlertBeforeMinutes": "Alert salon before a pending appointment",
+      "booking_reminderMinutes": "Reminders before the appointment (comma separated)",
+      "otp_length": "Code length",
+      "otp_resendAfterSec": "Wait before resending",
+      "otp_maxRequests": "Code requests allowed",
+      "otp_requestWindowSec": "Request counting window",
+      "otp_maxWrong": "Wrong attempts allowed",
+      "otp_blockSec": "Block duration after too many attempts"
+    }
+  }
+}
