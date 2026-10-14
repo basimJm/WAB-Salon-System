@@ -7,6 +7,8 @@ import { Suspense } from 'react';
 import { Spinner } from '../components/feedback/Spinner';
 import { useSession } from '../controllers/useSession';
 import { useViewport } from '../hooks/useViewport';
+import { IdleWarningDialog } from '../components/feedback/IdleWarningDialog';
+import { useIdleTimeout } from '../hooks/useIdleTimeout';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import { useBreadcrumbs } from '../controllers/useBreadcrumbs';
 import { Sidebar } from './Sidebar';
@@ -17,7 +19,7 @@ const TRUE = 'true';
 /** Sidebar is docked (collapsible) on wide screens and a slide-in drawer on tablets/phones. */
 export function AppShell() {
   const { breakpoint } = useViewport();
-  const { repositories, session, logger } = useContainer();
+  const { sessionManager } = useContainer();
   const current = useSession();
   const location = useLocation();
   const crumbs = useBreadcrumbs();
@@ -52,11 +54,13 @@ export function AppShell() {
   }, [docked, drawerOpen, setDrawerOpen]);
 
   const onLogout = useCallback(() => {
-    repositories.auth
-      .logout()
-      .catch((e: unknown) => logger.warn('logout.failed', { message: String(e) }));
-    session.clear();
-  }, [repositories, session, logger]);
+    void sessionManager.signOut();
+  }, [sessionManager]);
+
+  const { status: idle, stay } = useIdleTimeout({
+    onExpire: () => void sessionManager.signOut('idle'),
+    enabled: current !== null,
+  });
 
   return (
     <div className="wab-shell" data-docked={docked} data-collapsed={docked && collapsed}>
@@ -75,6 +79,12 @@ export function AppShell() {
           onClick={() => setDrawerOpen(false)}
         />
       ) : null}
+      <IdleWarningDialog
+        open={idle.state === 'warning'}
+        secondsLeft={idle.secondsLeft}
+        onStay={stay}
+        onSignOut={onLogout}
+      />
       <div className="wab-shell__main">
         <Topbar
           adminName={current?.admin.name ?? ''}

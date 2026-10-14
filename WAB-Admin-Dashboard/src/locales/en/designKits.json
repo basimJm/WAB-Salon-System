@@ -136,7 +136,8 @@
       "forbiddenTitle": "Status page",
       "forbiddenText": "Used for 403, 404 and 500.",
       "crash": "Break the section below",
-      "boundaryOk": "Error boundary: no error"
+      "boundaryOk": "Error boundary: no error",
+      "idle": "Show the idle warning"
     }
   }
 }

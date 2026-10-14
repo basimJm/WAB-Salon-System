@@ -8,5 +8,6 @@ export const ENDPOINTS = {
   login: `${ADMIN_API_PREFIX}/auth/login`,
   verifyOtp: `${ADMIN_API_PREFIX}/auth/verify-otp`,
   resendOtp: `${ADMIN_API_PREFIX}/auth/resend-otp`,
+  refresh: `${ADMIN_API_PREFIX}/auth/refresh`,
   logout: `${ADMIN_API_PREFIX}/auth/logout`,
 } as const;

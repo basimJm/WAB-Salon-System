@@ -8,6 +8,7 @@ import { Icon } from '../../components/core/Icon';
 import { IconButton } from '../../components/core/IconButton';
 import { AsyncView } from '../../components/feedback/AsyncView';
 import { ErrorBoundary } from '../../components/feedback/ErrorBoundary';
+import { IdleWarningDialog } from '../../components/feedback/IdleWarningDialog';
 import { InlineAlert } from '../../components/feedback/InlineAlert';
 import { Skeleton } from '../../components/feedback/Skeleton';
 import { Spinner } from '../../components/feedback/Spinner';
@@ -28,6 +29,7 @@ export function BasicsSection() {
   const k = (key: string) => t(`designKits.basics.${key}`);
   const [view, setView] = useState<View>('ready');
   const [crash, setCrash] = useState(false);
+  const [idleOpen, setIdleOpen] = useState(false);
   return (
     <Card className="wab-stack" aria-label={k('title')}>
       <Heading level={2}>{k('title')}</Heading>
@@ -61,6 +63,10 @@ export function BasicsSection() {
       >
         <p>{k('content')}</p>
       </AsyncView>
+      <button type="button" className="wab-btn wab-btn--secondary wab-btn--sm" onClick={() => setIdleOpen(true)}>
+        {k('idle')}
+      </button>
+      <IdleWarningDialog open={idleOpen} secondsLeft={45} onStay={() => setIdleOpen(false)} onSignOut={() => setIdleOpen(false)} />
       <TextArea label={k('notes')} rows={3} />
       <StatusPage code="403" title={k('forbiddenTitle')} text={k('forbiddenText')} icon="shield" />
       <button type="button" className="wab-btn wab-btn--secondary wab-btn--sm" onClick={() => setCrash(true)}>

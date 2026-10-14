@@ -161,5 +161,10 @@
     "title": "Something went wrong",
     "text": "The page failed to load. Try again, and contact support with the trace id if it keeps happening.",
     "retry": "Try again"
+  },
+  "session": {
+    "idleTitle": "Still there?",
+    "idleText": "For your security the session ends in {{seconds}} seconds because there was no activity.",
+    "stay": "Stay signed in"
   }
 }
