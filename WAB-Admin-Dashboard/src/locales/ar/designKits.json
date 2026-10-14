@@ -138,6 +138,20 @@
       "crash": "أفسد القسم التالي",
       "boundaryOk": "حدّ الأخطاء: لا يوجد خطأ",
       "idle": "إظهار تنبيه الخمول"
+    },
+    "scenario": "سيناريو المحاكاة",
+    "scenarios": {
+      "success": "نجاح",
+      "empty": "فارغ",
+      "validation": "خطأ تحقق",
+      "unauthorized": "401 انتهت الجلسة",
+      "forbidden": "403 ممنوع",
+      "notFound": "404 غير موجود",
+      "conflict": "409 تعارض",
+      "unprocessable": "422 قاعدة عمل",
+      "serverError": "500 خطأ خادم",
+      "timeout": "انتهاء المهلة",
+      "slow": "بطيء"
     }
   }
 }

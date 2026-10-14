@@ -967,3 +967,17 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — jsdom cannot measure colour contrast; the real-Chrome pass found 5 token defects the unit suite could not see.
 - Notes: Pixel-diff baselines are not committed (would add MBs); screenshots are artifacts for manual review.
 
+
+### T-060 — ADM-024 Typed API client (endpoint registry)
+
+- Project: `WAB-Admin-Dashboard/` (`data/api/{endpoint,ApiClient,idempotency,queryKeys}.ts`, `HttpClient` headers + list query values, `Container.api`, `docs/HOW_TO_ADD_A_MODULE.md`, `tests/api-client.test.ts`)
+- Branch: `feat/adm-024-endpoint-client`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-024):
+  - [x] `defineEndpoint(OPERATIONS.x, {data, body?, query?})` ties a generated operation to its generated schemas and throws when they disagree with the contract flags; paths come only from the contract; `buildPath` fills and encodes `{params}`
+  - [x] `ApiClient.execute/executePage`: body and query checked before sending (failure = `AppError` validation with `body.<field>` details, nothing fetched), list query values sent as repeated parameters, caller `signal` passed (unmount aborts), response validated, `executePage` = items + meta (missing meta = contract break)
+  - [x] Server `details[]` and `traceId` reach the UI as before (`fieldErrorsFrom`, ErrorState shows the trace id); `queryKey(endpoint, args)` stable key factory; `idempotent` endpoints send a fresh `Idempotency-Key`
+- Tests: `sh scripts/gate.sh` all PASS (23 new unit tests); no UI change so no browser/e2e run
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — OPEN ITEM for the server owner: the admin OpenAPI defines no `Idempotency-Key` header yet.
+

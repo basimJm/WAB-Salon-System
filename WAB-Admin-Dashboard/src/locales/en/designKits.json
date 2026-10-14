@@ -138,6 +138,20 @@
       "crash": "Break the section below",
       "boundaryOk": "Error boundary: no error",
       "idle": "Show the idle warning"
+    },
+    "scenario": "Mock scenario",
+    "scenarios": {
+      "success": "Success",
+      "empty": "Empty",
+      "validation": "Validation error",
+      "unauthorized": "401 Session expired",
+      "forbidden": "403 Forbidden",
+      "notFound": "404 Not found",
+      "conflict": "409 Conflict",
+      "unprocessable": "422 Business rule",
+      "serverError": "500 Server error",
+      "timeout": "Timeout",
+      "slow": "Slow"
     }
   }
 }

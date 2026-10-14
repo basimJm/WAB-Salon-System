@@ -1,12 +1,13 @@
 import { QueryClient } from '@tanstack/react-query';
 import { QUERY_GC_TIME_MS, QUERY_MAX_RETRIES, QUERY_STALE_TIME_MS } from '@/constants/query';
 import type { Language } from '@/constants/i18n';
+import type { ScenarioStore } from '@/data/mock/scenarios';
 import { ApiClient } from '@/data/api/ApiClient';
 import { createRepositories, type Repositories } from '@/data/repositories';
 import type { AppConfig } from '@/infrastructure/config/appConfig';
 import { AppError } from '@/infrastructure/errors/AppError';
 import { normalizeError } from '@/infrastructure/errors/normalize';
-import { HttpClient } from '@/infrastructure/http/HttpClient';
+import { HttpClient, type FetchFn } from '@/infrastructure/http/HttpClient';
 import { createLogger, type Logger } from '@/infrastructure/logger/logger';
 import { createSessionManager, type SessionManager } from './sessionManager';
 import { createSessionStore, type SessionStore } from './session';
@@ -17,6 +18,8 @@ export interface Container {
   readonly session: SessionStore;
   readonly sessionManager: SessionManager;
   readonly api: ApiClient;
+  /** Present only when the mock data source is active (dev builds). */
+  readonly mock?: { scenarios: ScenarioStore };
   readonly repositories: Repositories;
   readonly queryClient: QueryClient;
 }
@@ -33,7 +36,20 @@ export async function createContainer(
   const session = createSessionStore();
   // The manager needs the repositories, which need the HTTP client, which needs the manager: tie the knot lazily.
   const manager: { current?: SessionManager } = {};
+  let fetchFn: FetchFn | undefined;
+  let mock: Container['mock'];
+  if (__ALLOW_MOCK__ && config.dataSource === 'mock') {
+    const [{ createMockTransport }, { createScenarioStore }, { MOCK_ROUTES }] = await Promise.all([
+      import('@/data/mock/mockTransport'),
+      import('@/data/mock/scenarios'),
+      import('@/data/mock/fixtures'),
+    ]);
+    const scenarios = createScenarioStore();
+    fetchFn = createMockTransport({ routes: MOCK_ROUTES, scenarios });
+    mock = { scenarios };
+  }
   const http = new HttpClient({
+    ...(fetchFn ? { fetchFn } : {}),
     baseUrl: config.apiBaseUrl || window.location.origin,
     getToken: () => session.get()?.accessToken ?? null,
     getLanguage,
@@ -65,6 +81,7 @@ export async function createContainer(
     session,
     sessionManager,
     api: new ApiClient(http),
+    ...(mock ? { mock } : {}),
     repositories,
     queryClient,
   };
