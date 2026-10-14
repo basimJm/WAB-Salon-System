@@ -1,12 +1,18 @@
 # WAB-Admin-Dashboard — Rules for AI Agents
 
 > These rules add to the root `CLAUDE.md` and `.claude/*.md`. They never relax them. If two rules conflict, the stricter one wins. If documents conflict, stop and ask.
+>
+> **Admin-level rules and role live in this project's own `.claude/` folder — mandatory, read and apply both:**
+>
+> - Rules: @.claude/rules.md
+> - Role (senior web developer: React, JS, TS): @.claude/roles.md
 
 ## 0. Read Before Every Task (mandatory)
 
 1. Root `CLAUDE.md` and **every** `.md` file in the root `.claude/` folder (`rules.md`, `roles.md`, `hooks.md`, `session.md`, `memory.md`), plus the root files `BUSINESS_DOMAIN.md`, `ROADMAP.md`, `INTEGRATION_WORKFLOW.md`.
 2. `docs/WAB_Admin_PRD.md` (behavior, source of truth), `docs/WAB_Admin_BRD.md`, `docs/WAB_Admin_Design_Script.md`, and the matching file in `design/` (visual reference).
-3. `docs/WAB_Admin_Tasks.md` — the ordered task backlog (strict order, one task per branch, layer recipe in its §3, proposed API contract in its Appendix A). Pick the first `TODO` task whose *Needs* are `DONE`.
+3. `.claude/rules.md` and `.claude/roles.md` of this project (performance, tests for every function, no hardcoding, dev/prod, clean architecture, build before every commit, no deprecated APIs).
+4. `docs/WAB_Admin_Tasks.md` — the ordered task backlog (strict order, one task per branch, layer recipe in its §3, real admin API operations in its Appendix A). Pick the first `TODO` task whose _Needs_ are `DONE`.
 
 ## 1. The Rules (non-negotiable)
 

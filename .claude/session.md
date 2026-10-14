@@ -628,6 +628,18 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only. FINDINGS: the existing admin login (T-031) uses a contract the server does not have (`challengeId`, `resend-otp`); fixed by the auth task. 15 of 83 tasks are PENDING (hosting, error tracking, dev URL, and the server gaps).
 - Notes: Server `contracts/` (INT-01) still does not exist; the server OpenAPI is the contract of record.
 
+### T-037 — WAB-Admin-Dashboard `.claude/` rules and role
+- Project: `WAB-Admin-Dashboard/` (`.claude/rules.md`, `.claude/roles.md`, `CLAUDE.md`)
+- Branch: `docs/admin-claude-rules`
+- Status: IN REVIEW
+- Acceptance criteria (user request: admin-level role and rules inside a `.claude` folder):
+  - [x] Role: senior web developer expert in React, JS, TS
+  - [x] Rules: performance first; tests for every function; no hardcoding; dev and prod envs; clean code and architecture; build before every commit; no build/runtime errors; no deprecated or outdated library versions
+  - [x] Rules live in `WAB-Admin-Dashboard/.claude/` and are imported by `WAB-Admin-Dashboard/CLAUDE.md` (§0 reading list updated)
+- Tests: docs only (no source code); commands and file names in the rules checked against `package.json` scripts and the repo
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only; consistent with root rules and existing admin CLAUDE.md. `@typescript-eslint/no-deprecated` is referenced as part of the quality-gates backlog task, not added here.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
