@@ -9,15 +9,7 @@ import { applyFormat, type FormatKind } from '../../utils/textFormat';
 import { Button } from '../core/Button';
 import { Field } from './Field';
 
-const TOOLS: readonly { kind: FormatKind; text: string }[] = [
-  { kind: 'bold', text: 'B' },
-  { kind: 'italic', text: 'I' },
-  { kind: 'h2', text: 'H2' },
-  { kind: 'h3', text: 'H3' },
-  { kind: 'ul', text: '•' },
-  { kind: 'ol', text: '1.' },
-  { kind: 'link', text: '🔗' },
-];
+const TOOLS: readonly FormatKind[] = ['bold', 'italic', 'h2', 'h3', 'ul', 'ol', 'link'];
 
 export interface RichTextEditorProps {
   label: string;
@@ -86,14 +78,8 @@ export function RichTextEditor({
         <div className="wab-richtext">
           <div className="wab-row" role="toolbar" aria-label={t('richText.toolbar')}>
             {TOOLS.map((tool) => (
-              <Button
-                key={tool.kind}
-                size="sm"
-                variant="secondary"
-                aria-label={t(`richText.tool.${tool.kind}`)}
-                onClick={() => format(tool.kind)}
-              >
-                {tool.text}
+              <Button key={tool} size="sm" variant="secondary" onClick={() => format(tool)}>
+                {t(`richText.tool.${tool}`)}
               </Button>
             ))}
           </div>
