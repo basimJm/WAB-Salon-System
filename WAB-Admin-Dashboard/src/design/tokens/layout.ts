@@ -44,6 +44,11 @@ export const SIZES = {
   badgeDot: '0.5rem',
   logo: '2.5rem',
   tableCellMin: '8rem',
+  avatarSm: '2rem',
+  avatar: '2.5rem',
+  avatarLg: '3.5rem',
+  tooltipMax: '18rem',
+  keyValueLabel: '10rem',
 } as const;
 
 export const FONT_FAMILIES = {
@@ -72,7 +77,7 @@ export const MOTION = {
   easing: 'ease-out',
 } as const;
 
-export const Z_INDEX = { sidebar: '30', topbar: '20', overlay: '40', modal: '50', toast: '60', ribbon: '70' } as const;
+export const Z_INDEX = { sidebar: '30', topbar: '20', overlay: '40', popover: '45', modal: '50', toast: '60', ribbon: '70' } as const;
 
 export const SHADOWS = {
   light: {
