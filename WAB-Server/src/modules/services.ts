@@ -66,6 +66,8 @@ import { ExternalServiceError } from '../utils/errors';
 
 /** Long-lived services the feature routers need. `server.ts` builds them once Redis is connected. */
 export interface ApiServices {
+  /** Closes provider connections (SMTP pool, push client) on shutdown. */
+  readonly providersClose?: () => Promise<void>;
   readonly otpGate?: OtpGate;
   readonly appConfig?: AppConfigService;
   readonly locations?: LocationsService;

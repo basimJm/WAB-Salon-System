@@ -68,7 +68,9 @@ services:
   api:
     profiles: ['app']
     build:
-      context: .
+      # Repository root: the image also needs the sibling wab-notifications package.
+      context: ..
+      dockerfile: WAB-Server/Dockerfile
     depends_on:
       mongo:
         condition: service_healthy
