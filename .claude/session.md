@@ -15,22 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-063 — ADM-027 Realtime client, invalidation bus, live indicator
-
-- Project: `WAB-Admin-Dashboard/` (`domain/realtime`, `data/realtime/*`, `constants/realtime.ts`, `useRealtime*` hooks, `LiveIndicator`, container, `scripts/lib/budget.ts`)
-- Branch: `feat/adm-027-realtime`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-027):
-  - [x] `RealtimeClient` interface; Socket.IO implementation on `/admin` with the token in `auth.token`, re-read on every reconnect; `UNAUTHORIZED`/`FORBIDDEN` connect errors stop retrying and report `denied`; backoff with jitter from constants
-  - [x] Fake emitter for mock mode (compiled out of prod); real client is a lazy chunk (`socket.io-client` added)
-  - [x] Invalidation bus: each server event marks the matching cached queries stale (rules in constants, test checks every rule names a real operation)
-  - [x] `useRealtime(event, handler)`, `useRealtimeStatus`, connection follows sign-in/out; "مباشر/Live" indicator in the top bar (AR+EN)
-  - [x] Budget script excludes mock-only chunks from the size budget and bans them from prod builds
-- Tests: `sh scripts/gate.sh` all PASS (17 new unit tests incl. a mocked socket.io client); browser check dev-debug: after sign-in the top bar shows Live (green), no horizontal scroll
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); not run against a real server socket. Only `booking.updated` and `alert.created` are emitted by the server today (G10).
-- Notes: Dependency added: `socket.io-client` 4.8.
-
 ### T-064 — ADM-028 List state in the URL
 
 - Project: `WAB-Admin-Dashboard/` (`domain/shared/listState.ts`, `presentation/controllers/useListController.ts`, `constants/ui.ts`, `docs/HOW_TO_ADD_A_MODULE.md`)
@@ -43,6 +27,18 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e/browser check (no UI mounted; user decision). Mapping state -> API query parameter names is left to each feature (server names differ).
 - Notes: pass the options object as a module-level constant.
+
+### T-065 — ADM-029 API-consumption doc generator
+
+- Project: `WAB-Admin-Dashboard/` (`scripts/{docs-api.ts,lib/apiDoc.ts,api-exemptions.json}`, `docs/API_CONSUMED.md`, `package.json` scripts, `verify`)
+- Branch: `feat/adm-029-api-doc`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-029):
+  - [x] `npm run docs:api` writes `docs/API_CONSUMED.md`: every contract operation with its id, planned task (Appendix A), implementing source files (`OPERATIONS.<id>` uses outside generated/mock code) and status
+  - [x] `npm run docs:api:check` (part of `verify`) fails when the file is stale, when an operation has no task, no code consumer and no exemption, or when an exemption names no operation
+- Tests: `sh scripts/gate.sh` all PASS (6 new unit tests); script/docs only, no UI
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — 116 operations, 0 implemented yet (login still uses hand-written endpoints until ADM-030). Rerun `npm run docs:api` after any task that consumes an operation, or `verify` fails as stale.
 
 ### Pending (next)
 
