@@ -52,3 +52,7 @@ useQuery({ queryKey: queryKey(listSalons, { query }), queryFn: ({ signal }) => .
 6. **Tests:** unit per layer, page test, e2e smoke; coverage floor holds (`npm run test:coverage`).
 7. **Gate:** `npm run verify`, four variant builds, `npm run check:size`, e2e, browser check in AR/EN, light/dark, phone/tablet/desktop (`.claude/rules.md` §6, §8).
 8. **Docs:** task row to `DONE`, `.claude/session.md` block with `Loops: 3/3` and `Review: PASSED`, durable facts to `.claude/memory.md`.
+
+## List screens: state in the URL
+
+Use `useListController(OPTIONS)` (`presentation/controllers`) with a module-level `OPTIONS = { filterKeys, sortKeys, defaultSort }`. It keeps page, page size, search (500 ms debounce), sort and filters in the query string, so links and back/forward work. Map `controller.state` to the endpoint's query parameters in the feature's controller.
