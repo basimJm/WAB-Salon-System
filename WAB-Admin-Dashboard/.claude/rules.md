@@ -10,7 +10,9 @@
 - Run e2e once per task, alone (one Playwright run at a time), through the terminal tool, and read only the pass/fail summary line and the failing test names; open the error context of a failing test only.
 - Before reading or listing anything, search for the symbol or file you need; read only the needed range of a file; do not re-read files you just wrote; do not re-run a passing step unless code changed after it.
 - Keep browser checks to one script that returns a compact JSON of measurements, not screenshots or page dumps.
-- Do not close terminal tabs one by one with long output: keep at most one e2e tab open and reuse it by closing it before the next run.
+- Terminal tabs echo their whole screen when closed: open one e2e tab per run, close only when the tab limit is reached, and always pipe e2e output through `grep -E "passed|failed"` / `tail -3`.
+- Fail early: write each component with its tests together and run `npm run lint` plus the new test file before the gate; run the new e2e spec alone (`--project=desktop`) first and the full suite once per task.
+- Keep `.claude/session.md` to the last 3 task blocks and `.claude/memory.md` to durable facts: both are loaded into every turn. Older history goes to `docs/history/`.
 
 ## 1. Performance first
 
