@@ -744,6 +744,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — facts checked against the code (container, HttpClient, scripts).
 
+### T-045 — ADM-011 Design audit
+
+- Project: `WAB-Admin-Dashboard/docs/DESIGN_AUDIT.md`
+- Branch: `feat/adm-011-design-audit`
+- Status: IN REVIEW
+- Acceptance criteria (Admin Tasks ADM-011):
+  - [x] Every design frame group mapped to PRD pages and owning tasks
+  - [x] Kit helpers and Blocks vocabulary mapped to existing components or to the task that builds them
+  - [x] Token deltas recorded (colors, tones, chart palette compared with `src/design/tokens`: none)
+  - [x] Ordered gap list for ADM-012…023
+- Tests: `npm run verify` — 284 tests (docs test now covers the audit); docs only
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — page ids checked against the frames' own labels.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
