@@ -9,3 +9,9 @@ export const SIDEBAR_DRAWER_ID = 'wab-sidebar';
 export const STARTUP_ERROR_FALLBACK = 'Startup error';
 /** Sample external link shown in the dev-only design gallery. */
 export const GALLERY_EXTERNAL_LINK = 'https://example.com/docs';
+/** Debounce of every search box (Admin PRD §2, same as the apps). */
+export const SEARCH_DEBOUNCE_MS = 500;
+/** Longest free-text value accepted by the generic text validators. */
+export const MAX_TEXT_LENGTH = 500;
+/** Sample timestamp shown by the gallery's save bar. */
+export const GALLERY_UPDATED_AT = '2026-10-12T09:30:00Z';
