@@ -5,6 +5,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { buildRoutes } from '@/app/routes';
 import { AppProviders } from '@/app/AppProviders';
 import type { Container } from '@/app/container';
+import { createSessionManager } from '@/app/sessionManager';
 import { createSessionStore } from '@/app/session';
 import { MockAuthRepository } from '@/data/auth/MockAuthRepository';
 import type { AuthRepository } from '@/domain/auth/auth';
@@ -20,10 +21,13 @@ export function makeContainer(
   auth: AuthRepository = new MockAuthRepository(0),
   variant = 'dev-debug',
 ): Container {
+  const session = createSessionStore();
+  const logger = createLogger('silent');
   return {
     config: buildAppConfig({}, variant),
-    logger: createLogger('silent'),
-    session: createSessionStore(),
+    logger,
+    session,
+    sessionManager: createSessionManager({ store: session, auth: () => auth, logger }),
     api: new ApiClient(
       new HttpClient({
         baseUrl: 'http://localhost',

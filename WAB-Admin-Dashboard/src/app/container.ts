@@ -8,12 +8,14 @@ import { AppError } from '@/infrastructure/errors/AppError';
 import { normalizeError } from '@/infrastructure/errors/normalize';
 import { HttpClient } from '@/infrastructure/http/HttpClient';
 import { createLogger, type Logger } from '@/infrastructure/logger/logger';
+import { createSessionManager, type SessionManager } from './sessionManager';
 import { createSessionStore, type SessionStore } from './session';
 
 export interface Container {
   readonly config: AppConfig;
   readonly logger: Logger;
   readonly session: SessionStore;
+  readonly sessionManager: SessionManager;
   readonly api: ApiClient;
   readonly repositories: Repositories;
   readonly queryClient: QueryClient;
@@ -29,14 +31,24 @@ export async function createContainer(
 ): Promise<Container> {
   const logger = createLogger(config.logLevel);
   const session = createSessionStore();
+  // The manager needs the repositories, which need the HTTP client, which needs the manager: tie the knot lazily.
+  const manager: { current?: SessionManager } = {};
   const http = new HttpClient({
     baseUrl: config.apiBaseUrl || window.location.origin,
     getToken: () => session.get()?.accessToken ?? null,
     getLanguage,
-    onUnauthorized: () => session.clear(),
+    onUnauthorized: () => session.clear('expired'),
+    ensureFresh: () => manager.current?.ensureFresh() ?? Promise.resolve(),
+    refreshSession: () => manager.current?.refresh() ?? Promise.resolve(false),
     logger,
   });
   const repositories = await createRepositories(config, http);
+  const sessionManager = createSessionManager({
+    store: session,
+    auth: () => repositories.auth,
+    logger,
+  });
+  manager.current = sessionManager;
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -47,5 +59,13 @@ export async function createContainer(
       },
     },
   });
-  return { config, logger, session, api: new ApiClient(http), repositories, queryClient };
+  return {
+    config,
+    logger,
+    session,
+    sessionManager,
+    api: new ApiClient(http),
+    repositories,
+    queryClient,
+  };
 }

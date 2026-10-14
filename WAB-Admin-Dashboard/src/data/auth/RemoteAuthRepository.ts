@@ -9,6 +9,22 @@ const sessionSchema = z.object({
   admin: z.object({ id: z.string(), name: z.string(), email: z.string() }),
 });
 const emptySchema = z.null();
+const tokensSchema = z.object({
+  accessToken: z.string(),
+  accessTokenExpiresAt: z.iso.datetime({ offset: true }),
+  refreshToken: z.string(),
+  refreshTokenExpiresAt: z.iso.datetime({ offset: true }),
+  admin: z.object({ id: z.string(), email: z.string() }),
+});
+
+/** Maps the server's token answer (verify-otp and refresh share it) to the in-memory session. */
+export const sessionFromTokens = (data: z.infer<typeof tokensSchema>): Session => ({
+  accessToken: data.accessToken,
+  admin: { id: data.admin.id, email: data.admin.email, name: data.admin.email },
+  accessExpiresAt: Date.parse(data.accessTokenExpiresAt),
+  refreshToken: data.refreshToken,
+  refreshExpiresAt: Date.parse(data.refreshTokenExpiresAt),
+});
 
 export class RemoteAuthRepository implements AuthRepository {
   private readonly http: HttpClient;
@@ -37,7 +53,21 @@ export class RemoteAuthRepository implements AuthRepository {
     await this.http.post(ENDPOINTS.resendOtp, { schema: emptySchema, body: { challengeId } });
   }
 
-  async logout(): Promise<void> {
-    await this.http.post(ENDPOINTS.logout, { schema: emptySchema });
+  async refresh(refreshToken: string): Promise<Session> {
+    const res = await this.http.post(ENDPOINTS.refresh, {
+      schema: tokensSchema,
+      body: { refreshToken },
+      noRefresh: true,
+    });
+    return sessionFromTokens(res.data);
+  }
+
+  async logout(refreshToken?: string): Promise<void> {
+    if (!refreshToken) return;
+    await this.http.post(ENDPOINTS.logout, {
+      schema: emptySchema,
+      body: { refreshToken },
+      noRefresh: true,
+    });
   }
 }

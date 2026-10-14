@@ -15,36 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-058 — Trim the always-loaded session and memory files
-
-- Project: repo root (`.claude/session.md`, `.claude/memory.md`, `docs/history/*`)
-- Branch: `docs/trim-session-memory`
-- Status: DONE
-- Acceptance criteria:
-  - [x] Finished task blocks (T-001..T-054) moved to `docs/history/session-archive.md`; the last 3 + this block stay
-  - [x] Server and customer notes of `memory.md` moved to `docs/history/memory-server-customer.md`; admin, repo, delivery and decision facts stay
-  - [x] Both loaded files are far shorter; hooks still pass (`python3 .claude/hooks/test_hooks.py`)
-- Tests: docs only; hook tests
-- Loops: 3/3
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — content moved, not deleted.
-- Notes: When a block is older than the last 3, move it to the archive file.
-
-### T-059 — ADM-023 Gallery completeness, accessibility with real contrast, visual snapshots
-
-- Project: `WAB-Admin-Dashboard/` (`pages/design/BasicsSection`, `tests/{gallery-coverage,contrast}.test.ts`, `e2e/gallery.spec.ts`, `design/tokens/colors.ts`, `charts.css`, `IconButton`, `RichTextEditor`)
-- Branch: `feat/adm-023-gallery`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-023: gallery covers every kit and state; visual and accessibility regression checks, local since there is no CI):
-  - [x] A test fails when a shared component is neither shown in the gallery nor named as shown through its parent; a test fails when a section is not mounted; new `BasicsSection` (icons, icon buttons, spinners, alert, async states, error boundary, status page, text area)
-  - [x] e2e on real Chrome runs axe (serious/critical, including real colour contrast) over the whole gallery in ar/en x light/dark and saves a screenshot per section to `reports/gallery/<lang>-<theme>/` (git-ignored; compare by eye or with an image diff tool)
-  - [x] Real contrast defects found and fixed: light `faint`/`success` text, green/rose badges, dark `faint`, heatmap cells in dark mode; unit test `contrast.test.ts` locks WCAG AA 4.5:1 for every text colour on every surface and every badge tone
-  - [x] Name-in-label defects fixed: rich text toolbar shows its names, icon button with a badge includes the count in its accessible name
-- Tests: `sh scripts/gate.sh` all PASS; e2e 112/112 on the real Chrome (desktop, Pixel portrait/landscape, tablet), gallery pass 4/4 with contrast
-- Browser check: real Chrome through Playwright (axe + 48 screenshots); no console errors
-- Loops: 3/3
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — jsdom cannot measure colour contrast; the real-Chrome pass found 5 token defects the unit suite could not see.
-- Notes: Pixel-diff baselines are not committed (would add MBs); screenshots are artifacts for manual review.
-
 ### T-060 — ADM-024 Typed API client (endpoint registry)
 
 - Project: `WAB-Admin-Dashboard/` (`data/api/{endpoint,ApiClient,idempotency,queryKeys}.ts`, `HttpClient` headers + list query values, `Container.api`, `docs/HOW_TO_ADD_A_MODULE.md`, `tests/api-client.test.ts`)
@@ -57,6 +27,21 @@
 - Tests: `sh scripts/gate.sh` all PASS (23 new unit tests); no UI change so no browser/e2e run
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — OPEN ITEM for the server owner: the admin OpenAPI defines no `Idempotency-Key` header yet.
+
+### T-061 — ADM-025 Session lifecycle (refresh, idle timeout)
+
+- Project: `WAB-Admin-Dashboard/` (`app/sessionManager.ts`, `domain/auth/sessionRules.ts`, `HttpClient` refresh-once, `useIdleTimeout`, `IdleWarningDialog`, mock/remote auth `refresh`/`logout`)
+- Branch: `feat/adm-025-session`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-025):
+  - [x] Single-flight token refresh before expiry and once after a 401; failed refresh ends the session with reason `expired`
+  - [x] Idle timeout 30 min with a 60 s warning (stay / sign out); sign-out revokes the refresh token; login shows why the session ended
+  - [x] Gallery shows the idle dialog (coverage guard)
+  - [x] e2e / browser check skipped on the user's instruction
+- Tests: `sh scripts/gate.sh` all PASS (session 33, session-http 8, idle 11 new unit tests)
+- Loops: 1/1 (user decision 2026-10-14: one loop is enough; e2e and full browser matrix skipped on request)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e, no in-browser check for this task (user stopped them); covered by 52 unit tests and the green gate.
+- Notes: split `session.test.ts` (>300 lines) into `session-http.test.ts`; data-layer tests now pass a refresh token to `logout`.
 
 ### Pending (next)
 

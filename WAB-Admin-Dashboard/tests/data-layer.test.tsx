@@ -44,7 +44,7 @@ describe('data layer', () => {
     const repo = new RemoteAuthRepository(http);
     expect(await repo.login('a@b.co', PASSWORD)).toEqual({ challengeId: 'c1' });
     expect((await repo.verifyOtp('c1', MOCK_OTP_CODE)).accessToken).toBe('t');
-    await repo.logout();
+    await repo.logout('r1');
     expect(fetchFn.mock.calls.map((c) => new URL(c[0]).pathname)).toEqual([
       '/admin/v1/auth/login',
       '/admin/v1/auth/verify-otp',
@@ -69,7 +69,7 @@ describe('data layer', () => {
       getLanguage: () => 'ar',
       onUnauthorized: session.clear,
     });
-    await expect(new RemoteAuthRepository(http).logout()).rejects.toBeInstanceOf(AppError);
+    await expect(new RemoteAuthRepository(http).logout('r1')).rejects.toBeInstanceOf(AppError);
     expect(session.get()).toBeNull();
   });
 

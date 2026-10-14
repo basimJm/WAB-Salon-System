@@ -14,6 +14,8 @@
 - Fail early: write each component with its tests together and run `npm run lint` plus the new test file before the gate; run the new e2e spec alone (`--project=desktop`) first and the full suite once per task.
 - Keep `.claude/session.md` to the last 3 task blocks and `.claude/memory.md` to durable facts: both are loaded into every turn. Older history goes to `docs/history/`.
 
+- **User decisions (2026-10-14):** read the rules and roles files once at the start of a session, not on every task; no e2e runs (unit tests + gate + one browser check only); one verification loop is enough; keep only the last 2 task blocks in `.claude/session.md`. These override the e2e and three-loop wording elsewhere in this admin folder; record the deviation in each task block.
+
 ## 1. Performance first
 
 - Every route is lazy-loaded; the entry chunk stays small and vendors are split (`scripts/budget.json` is enforced by `npm run check:size`).
