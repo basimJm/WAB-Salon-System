@@ -717,6 +717,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — mirrors server `utils/money` and `utils/time`. Open: currency name is added by callers from `common.currency`.
 
+### T-043 — ADM-009 Error catalog
+
+- Project: `WAB-Admin-Dashboard/` (`src/constants/errorCatalog.ts`, `src/infrastructure/errors/*`, `src/locales/*`, `tests/errorCatalog.test.ts`)
+- Branch: `feat/adm-009-error-catalog`
+- Status: IN REVIEW
+- Acceptance criteria (Admin Tasks ADM-009; BUSINESS_DOMAIN §11):
+  - [x] Every server error code mapped to an `ErrorKind`; the kind is chosen by code before HTTP status
+  - [x] AR + EN message for each code (`errors.codes.*`), Arabic script, same placeholders
+  - [x] `details[]` -> per-field form errors (`fieldErrorsFrom`)
+  - [x] A test keeps the list equal to BUSINESS_DOMAIN §11 and to the OpenAPI enum
+- Tests: `npm run verify` — 276 tests; 4 variants build, `check:size` OK; error screens covered by unit tests (no layout change, so no e2e)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — removed the now-unused `API_ERROR_CODES`. Arabic copy needs a native-speaker check.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
