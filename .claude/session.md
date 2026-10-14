@@ -703,6 +703,20 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — nothing moved; current tree has no violations.
 
+### T-042 — ADM-008 Shared kernel
+
+- Project: `WAB-Admin-Dashboard/src/domain/shared`, `src/constants/kernel.ts`, `tests/domain/kernel.test.ts`
+- Branch: `feat/adm-008-kernel`
+- Status: IN REVIEW
+- Acceptance criteria (Admin Tasks ADM-008; BUSINESS_DOMAIN conventions: integer fils, JOD 3-decimal strings, UTC + Asia/Amman, 12-hour):
+  - [x] `Page`/`PageQuery`/`pageCount`/`clampPage`, `Result`, branded ids
+  - [x] Money: strict JOD string parse, fils round-trip, exact sums, no floats, safe-integer bounds, negatives only on request
+  - [x] Time: UTC instants, Amman day rollover at 21:00Z, wall time -> UTC, half-open day ranges, DST-aware for other zones, no hardcoded offset
+  - [x] Formatters: language digits, grouped 3-decimal JOD, 12-hour Amman time/date
+- Tests: `npm run verify` — 267 tests (37 new), coverage 92.5% statements; 4 variants build, `check:size` OK; no UI change
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — mirrors server `utils/money` and `utils/time`. Open: currency name is added by callers from `common.currency`.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
