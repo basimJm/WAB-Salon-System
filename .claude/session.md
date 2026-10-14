@@ -630,7 +630,7 @@
 
 ### T-037 — WAB-Admin-Dashboard `.claude/` rules and role
 - Project: `WAB-Admin-Dashboard/` (`.claude/rules.md`, `.claude/roles.md`, `CLAUDE.md`)
-- Branch: `docs/admin-claude-rules`
+- Branch: `docs/admin-branch-flow`
 - Status: IN REVIEW
 - Acceptance criteria (user request: admin-level role and rules inside a `.claude` folder):
   - [x] Role: senior web developer expert in React, JS, TS
