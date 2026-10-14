@@ -69,6 +69,27 @@ describe('SettingsPage', () => {
     expect(screen.getByText('Do not repeat a value')).toBeInTheDocument();
   });
 
+  it('security and limits tabs hold the other groups; object settings save as one value', async () => {
+    await setup();
+    await userEvent.click(screen.getByRole('tab', { name: 'Accounts and security' }));
+    expect(await box(/Grace period before an account is deleted/)).toHaveValue('30');
+    await userEvent.click(screen.getByRole('tab', { name: 'Limits and alerts' }));
+    const failures = await box(/Payment failures that raise an alert/);
+    expect(failures).toHaveValue('5');
+    expect(screen.getByText('Asia/Amman')).toBeInTheDocument();
+    expect(screen.getByText('JOD')).toBeInTheDocument();
+    await userEvent.clear(failures);
+    await userEvent.type(failures, '8');
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    const dialog = await screen.findByRole('dialog');
+    await userEvent.type(within(dialog).getByRole('textbox'), 'More tolerance');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(await box(/Payment failures that raise an alert/)).toHaveValue('8');
+    // the other members of the object kept their values
+    expect(await box(/Payment failure rate that raises an alert/)).toHaveValue('20');
+  });
+
   it('shows the error state with retry when settings cannot be loaded', async () => {
     const container = makeContainer();
     container.mock?.scenarios.set('serverError');
