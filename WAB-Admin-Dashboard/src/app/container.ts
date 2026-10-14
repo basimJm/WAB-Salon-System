@@ -1,6 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { QUERY_GC_TIME_MS, QUERY_MAX_RETRIES, QUERY_STALE_TIME_MS } from '@/constants/query';
 import type { Language } from '@/constants/i18n';
+import { ApiClient } from '@/data/api/ApiClient';
 import { createRepositories, type Repositories } from '@/data/repositories';
 import type { AppConfig } from '@/infrastructure/config/appConfig';
 import { AppError } from '@/infrastructure/errors/AppError';
@@ -13,6 +14,7 @@ export interface Container {
   readonly config: AppConfig;
   readonly logger: Logger;
   readonly session: SessionStore;
+  readonly api: ApiClient;
   readonly repositories: Repositories;
   readonly queryClient: QueryClient;
 }
@@ -45,5 +47,5 @@ export async function createContainer(
       },
     },
   });
-  return { config, logger, session, repositories, queryClient };
+  return { config, logger, session, api: new ApiClient(http), repositories, queryClient };
 }

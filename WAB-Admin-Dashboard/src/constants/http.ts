@@ -21,6 +21,7 @@ export const HTTP_HEADERS = {
   authorization: 'Authorization',
   contentType: 'Content-Type',
   requestId: 'X-Request-Id',
+  idempotencyKey: 'Idempotency-Key',
 } as const;
 
 export const BEARER_PREFIX = 'Bearer';

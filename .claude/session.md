@@ -15,39 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-056 — ADM-021 RichTextEditor (ar/en tabs) and SchedulePicker
-
-- Project: `WAB-Admin-Dashboard/` (`infrastructure/richText/{sanitize,markdown}.ts`, `constants/richText.ts`, `utils/{textFormat,htmlToReact}`, `components/form/{RichTextEditor,LocalizedRichTextEditor,SchedulePicker}`, `docs/adr/0006-rich-text.md`, gallery `RichTextSection`, tests `rich-text`, `rich-text-ui`, `e2e/richtext.spec.ts`)
-- Branch: `feat/adm-021-rich-text`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-021: Arabic/English tabs, sanitized HTML output, RTL aware; SchedulePicker end after start; library choice as an ADR):
-  - [x] ADR-0006: Markdown-subset editor emitting sanitized HTML. DECISION TO CONFIRM: differs from Appendix C (Tiptap) because Tiptap (~70 KB gzip) does not fit the 200 KB budget (~27 KB headroom) and `execCommand` is deprecated
-  - [x] Allow-list sanitizer (`p h2 h3 ul ol li strong em a br`, links https/http/mailto only, forced rel/target, scripts/styles/frames dropped with content), Markdown <-> HTML for the subset, toolbar transforms (bold, italic, headings, lists, link) as pure functions; preview built as React elements (no `dangerouslySetInnerHTML`, project XSS rule)
-  - [x] Arabic and English tabs, each with its own direction/lang; value replaced from outside is shown without losing typing
-  - [x] `SchedulePicker`: each date limits the other (end >= start + 1 day), order error shown, form errors passed through
-- Tests: `sh scripts/gate.sh` all PASS; e2e 100/100 on the real Chrome (desktop, Pixel portrait/landscape, tablet)
-- Browser check: built dev-debug in the built-in browser: Arabic editor rtl, malicious link/script input stays inert text, preview inside the viewport, console clean
-- Loops: 3/3
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — lint blocked `dangerouslySetInnerHTML` (good); e2e found Ctrl+A is not select-all on macOS (use `selectText()`).
-- Notes: Existing server HTML outside the allow-list is flattened to text when a page is opened for edit (documented in ADR-0006).
-
-### T-057 — ADM-022 Shell design completion
-
-- Project: `WAB-Admin-Dashboard/` (`constants/nav.ts` tree + `NAV_PAGES`, `layout/{Sidebar,Topbar,AppShell}`, `components/layout/{Breadcrumbs,GlobalSearch}`, `controllers/useBreadcrumbs`, `components/feedback/StatusPage`, `pages/{Forbidden,ServerError,NotFound}Page`, routes `/forbidden` `/error`, gallery `ShellSection`, tests `shell`, `e2e/shell.spec.ts`)
-- Branch: `feat/adm-022-shell-design`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-022; PRD §6 sidebar, §2 top bar):
-  - [x] Sidebar sub-menus for Analytics (9), Salons (2), Finance (5), Catalog (2), Content (5); the group of the current page is open, toggles by hand, hidden when the sidebar is collapsed; every sub-page has a (placeholder) route
-  - [x] Counter slots by nav id (`counters` prop; sub-page value, module shows the sum, `99+`, Arabic digits, nothing for 0); live data is attached by the shell-live task
-  - [x] Breadcrumbs from the nav tree (Module > Sub-page, hidden on module pages)
-  - [x] `GlobalSearch` UI: 2+ characters, 500 ms debounce, results grouped (customers, salons, bookings, members), arrows/Enter/Escape, loading, empty and error lines; shown in the top bar only when a `search` source is given (global-search task)
-  - [x] Admin menu (About this build, Sign out) replaces the name + button; 403 and 500 pages next to the 404, one `StatusPage` layout
-- Tests: `sh scripts/gate.sh` all PASS (700 unit tests); e2e 108/108 on the real Chrome (desktop, Pixel portrait/landscape, tablet)
-- Browser check: built dev-debug in the built-in browser: breadcrumbs Finance > Refunds, Finance group open with 5 sub-pages and Refunds active (after expanding the collapsed sidebar), admin menu inside the viewport with About/Sign out, console clean
-- Loops: 3/3
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — the browser check showed the saved "collapsed sidebar" preference hides groups by design (covered by a test).
-- Notes: Search box is not in the live top bar yet (no data source: SRV gap G2 global search); counters are empty until live data exists.
-
 ### T-058 — Trim the always-loaded session and memory files
 
 - Project: repo root (`.claude/session.md`, `.claude/memory.md`, `docs/history/*`)
@@ -77,6 +44,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — jsdom cannot measure colour contrast; the real-Chrome pass found 5 token defects the unit suite could not see.
 - Notes: Pixel-diff baselines are not committed (would add MBs); screenshots are artifacts for manual review.
+
+### T-060 — ADM-024 Typed API client (endpoint registry)
+
+- Project: `WAB-Admin-Dashboard/` (`data/api/{endpoint,ApiClient,idempotency,queryKeys}.ts`, `HttpClient` headers + list query values, `Container.api`, `docs/HOW_TO_ADD_A_MODULE.md`, `tests/api-client.test.ts`)
+- Branch: `feat/adm-024-endpoint-client`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-024):
+  - [x] `defineEndpoint(OPERATIONS.x, {data, body?, query?})` ties a generated operation to its generated schemas and throws when they disagree with the contract flags; paths come only from the contract; `buildPath` fills and encodes `{params}`
+  - [x] `ApiClient.execute/executePage`: body and query checked before sending (failure = `AppError` validation with `body.<field>` details, nothing fetched), list query values sent as repeated parameters, caller `signal` passed (unmount aborts), response validated, `executePage` = items + meta (missing meta = contract break)
+  - [x] Server `details[]` and `traceId` reach the UI as before (`fieldErrorsFrom`, ErrorState shows the trace id); `queryKey(endpoint, args)` stable key factory; `idempotent` endpoints send a fresh `Idempotency-Key`
+- Tests: `sh scripts/gate.sh` all PASS (23 new unit tests); no UI change so no browser/e2e run
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — OPEN ITEM for the server owner: the admin OpenAPI defines no `Idempotency-Key` header yet.
 
 ### Pending (next)
 

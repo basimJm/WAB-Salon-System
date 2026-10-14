@@ -25,6 +25,23 @@ e2e/<feature>.spec.ts         smoke test of the screen
 
 Two features that need the same thing move it to the shared directory of the layer (for example `domain/shared`) instead of importing each other. Cross-feature navigation goes through `constants/routes.ts`; cross-feature data is read through the container's repositories, not through the other feature's files.
 
+## Calling the API (`src/data/api`)
+
+A repository never builds URLs or parses responses itself. It defines each endpoint once from the generated contract and runs it through `ApiClient`:
+
+```ts
+const listSalons = defineEndpoint(OPERATIONS.getSalons, { data: getSalonsDataSchema, query: getSalonsQuerySchema });
+const approve = defineEndpoint(OPERATIONS.postSalonsApplicationsByIdApprove, { data: ..., body: ... }, { idempotent: true });
+
+api.executePage(listSalons, { query, signal });          // Page<Item> = items + meta
+api.execute(approve, { params: { id }, body });          // body/query are checked before anything is sent
+useQuery({ queryKey: queryKey(listSalons, { query }), queryFn: ({ signal }) => ... });  // unmount aborts
+```
+
+- `defineEndpoint` throws when the schemas disagree with the contract (body/query present or missing), so a contract change fails the first test that imports the endpoint.
+- Server errors arrive as `AppError` with `traceId` and `details[]` (`fieldErrorsFrom` maps them onto form fields); a failed local check uses the same shape with `body.<field>` names.
+- `idempotent: true` adds a fresh `Idempotency-Key` per call (reuse the key when retrying the same command). OPEN: the admin OpenAPI does not define this header yet; the server must accept it before the client relies on it.
+
 ## Checklist (copy into the task block in `.claude/session.md`)
 
 1. **Read** the PRD page, the BRD ids, the task row, the Design Script and `design/*.dc.html`; list the admin operations the task consumes (`src/data/contract/generated/operations.ts`, `docs/WAB_Admin_Tasks.md` Appendix A). If the server lacks one, the task is `PENDING` with the gap id — do not invent endpoints.
