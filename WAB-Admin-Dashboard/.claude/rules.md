@@ -55,6 +55,8 @@
 - Before adding or upgrading a dependency: check it is maintained and not marked deprecated on npm, run `npm outdated` and `npm audit --omit=dev`, prefer the version that matches the other tools' peer ranges, commit the lockfile. If an install prints a deprecation warning, fix it (replace the package) instead of ignoring it.
 - Lint enforces what it can (`@typescript-eslint/no-deprecated` is part of the quality-gates task); the rest is on you in review.
 
-## 8. Workflow (unchanged from the root rules)
+## 8. Workflow
 
-One branch per task from an updated `main`, never push to `main`, three verification loops, four-role review, PR, CI green before merge, `.claude/session.md` and `.claude/memory.md` (root) kept current.
+- **Branching:** `admin` is the master branch for admin work (created from `main`). Every task branches from the latest `origin/admin` as `feat/adm-NNN-<key>` and its PR targets `admin`, never `main`. After each merge, branch the next task from the updated `origin/admin`. If `admin` is behind `main`, merge `main` into `admin` through a PR first. The user merges `admin` into `main`.
+- **No GitHub CI (user decision):** the gate is local. Before every push run the local gate on the developer machine: `npm ci`, `npm run verify`, the four variant builds (`npm run build:dev-debug`, `build:dev-release`, `build:prod-debug`, `build:prod-release`) with `VITE_API_BASE_URL`/`VITE_SOCKET_URL` set to https placeholders, `npm run check:size -- dev-debug dev-release prod-debug prod-release`, and `npm run e2e` for screens. Push only when everything is green and say what you ran. Merge a task PR into `admin` only after that gate; the user also runs the branch on their own device before merging `admin` into `main`.
+- Also from the root rules: never push to `main`, three verification loops, four-role review, `.claude/session.md` and `.claude/memory.md` (root) kept current.
