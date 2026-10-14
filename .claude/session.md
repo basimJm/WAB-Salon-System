@@ -760,16 +760,16 @@
 
 ### T-046 — ADM-012 Typography and primitives
 
-- Project: `WAB-Admin-Dashboard/` (`components/core/{Text,Heading,Link,Divider,Avatar,Chip,Tooltip,KeyValue}`, `design/styles/primitives.css`, gallery section, `tests/primitives.test.tsx`)
+- Project: `WAB-Admin-Dashboard/` (`components/core/{Text,Heading,Link,Divider,Avatar,Chip,Tooltip,KeyValue}`, `design/styles/primitives.css`, gallery section, `tests/primitives.test.tsx`, `e2e/primitives.spec.ts`)
 - Branch: `feat/adm-012-primitives`
-- Status: IN REVIEW (not merged: browser check and e2e still to run)
+- Status: DONE
 - Acceptance criteria (Admin Tasks ADM-012):
   - [x] Text, Heading, Link (safe external links), Divider, Avatar (initials), Chip (removable), Tooltip (hover/focus/Esc), KeyValue; tokens only; AR+EN gallery strings
-  - [x] Unit + axe tests; `npm run verify` 307 tests; 4 variants build, `check:size` OK
-  - [ ] Browser check of `/design-system` (the browser pane was not displayed) and e2e on Chrome
-- Tests: see above
+  - [x] Unit + axe tests; e2e for tooltip, removable chip, AR/EN, light/dark, no horizontal scroll
+  - [x] Browser check of `/design-system` (built-in browser, mock login): console clean, Arabic RTL default, tooltip shows on focus/hover and hides on leave/Esc, no horizontal scroll
+- Tests: `npm run verify` green; 4 variants build; `check:size` OK; e2e 32/32 on Chrome (desktop, Pixel portrait/landscape, tablet)
 - Loops: 3/3
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — pending the browser check above before merge.
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — primitives only, no new dependency.
 
 ### Pending (next)
 
