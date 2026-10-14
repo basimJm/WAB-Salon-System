@@ -1,0 +1,47 @@
+{
+  "designKits": {
+    "templates": {
+      "title": "Page templates",
+      "listTitle": "Bookings",
+      "listSubtitle": "All bookings across salons",
+      "create": "New booking",
+      "colRef": "Reference",
+      "colCustomer": "Customer",
+      "colStatus": "Status",
+      "pagination": "Bookings pagination",
+      "detailSubtitle": "Booking details",
+      "reject": "Reject",
+      "tabs": "Booking sections",
+      "tabOverview": "Overview",
+      "tabHistory": "Status history",
+      "tabPayload": "Raw data",
+      "overviewBody": "Booking summary",
+      "noHistory": "No changes yet",
+      "empty": "Not set",
+      "salon": "Salon",
+      "salonName": "Layla Beauty",
+      "amount": "Amount (JOD)",
+      "note": "Note",
+      "customer": {
+        "a": "Dana Saleh",
+        "b": "Omar Khaled",
+        "c": "Rana Ahmad"
+      },
+      "history": {
+        "h3": {
+          "title": "Marked as no-show",
+          "actor": "Salon: Layla",
+          "reason": "Customer did not arrive within 30 minutes"
+        },
+        "h2": {
+          "title": "Approved",
+          "actor": "Salon: Layla"
+        },
+        "h1": {
+          "title": "Booking requested",
+          "actor": "Customer"
+        }
+      }
+    }
+  }
+}

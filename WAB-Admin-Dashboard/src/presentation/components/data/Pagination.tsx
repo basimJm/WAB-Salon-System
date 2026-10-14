@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { PAGE_SIZE_OPTIONS } from '@/constants/ui';
+import { formatNumber } from '@/domain/shared/format';
+import { useLanguage } from '../../hooks/useLanguage';
 import { Select } from '../form/Select';
 import { IconButton } from '../core/IconButton';
 
@@ -25,12 +27,16 @@ export function Pagination({
   ariaLabel,
 }: PaginationProps) {
   const { t } = useTranslation();
+  const { language } = useLanguage();
+  const num = (value: number) => formatNumber(value, language);
   const pages = pageCount(total, pageSize);
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
   return (
     <nav className="wab-pagination" aria-label={ariaLabel ?? t('table.pagination')}>
-      <span className="wab-pagination__range">{t('table.range', { from, to, total })}</span>
+      <span className="wab-pagination__range">
+        {t('table.range', { from: num(from), to: num(to), total: num(total) })}
+      </span>
       <Select
         label={t('table.pageSize')}
         value={String(pageSize)}

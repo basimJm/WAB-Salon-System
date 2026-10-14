@@ -63,3 +63,54 @@
 .wab-about__row:last-child { padding-block-end: 0; border-block-end: 0; }
 .wab-about__label { color: var(--c-muted); }
 .wab-about__value { font-weight: var(--fw-medium); overflow-wrap: anywhere; }
+
+.wab-page { min-width: 0; }
+.wab-detail { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.wab-detail__aside {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--size-hairline) solid var(--c-line);
+  border-radius: var(--radius-lg);
+  background: var(--c-card);
+}
+[data-bp='expanded'] .wab-detail { grid-template-columns: minmax(0, 1fr) var(--size-aside); }
+
+.wab-timeline { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.wab-timeline__item { position: relative; display: flex; gap: var(--space-3); }
+.wab-timeline__dot {
+  flex: none;
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+  margin-top: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--c-faint);
+}
+.wab-timeline__dot--green { background: var(--tone-green-fg); }
+.wab-timeline__dot--amber { background: var(--tone-amber-fg); }
+.wab-timeline__dot--rose { background: var(--tone-rose-fg); }
+.wab-timeline__dot--purple { background: var(--tone-purple-fg); }
+.wab-timeline__dot--violet { background: var(--tone-violet-fg); }
+.wab-timeline__body { display: grid; gap: var(--space-1); min-width: 0; }
+.wab-timeline__title, .wab-timeline__meta, .wab-timeline__reason, .wab-timeline__empty { margin: 0; }
+.wab-timeline__title { font-weight: var(--fw-medium); }
+.wab-timeline__meta, .wab-timeline__empty { color: var(--c-muted); font-size: var(--fs-sm); }
+.wab-timeline__reason { overflow-wrap: anywhere; }
+
+.wab-json {
+  overflow: auto;
+  max-height: 24rem;
+  padding: var(--space-3);
+  border: var(--size-hairline) solid var(--c-line);
+  border-radius: var(--radius-md);
+  background: var(--c-surface);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--fs-sm);
+}
+.wab-json__children { margin-inline-start: var(--space-4); }
+.wab-json__row, .wab-json__node > summary { overflow-wrap: anywhere; }
+.wab-json__key { color: var(--c-muted); }
+.wab-json__string { color: var(--tone-green-fg); }
+.wab-json__scalar { color: var(--tone-purple-fg); }
+.wab-json__null { color: var(--c-faint); }
+.wab-json__summary { color: var(--c-faint); }

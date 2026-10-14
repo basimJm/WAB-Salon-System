@@ -25,6 +25,7 @@ import { OverlaysSection } from './design/OverlaysSection';
 import { PrimitivesSection } from './design/PrimitivesSection';
 import { StatusSection } from './design/StatusSection';
 import { TableSection } from './design/TableSection';
+import { TemplatesSection } from './design/TemplatesSection';
 
 interface DemoRow {
   id: string;
@@ -81,6 +82,7 @@ export default function DesignSystemPage() {
       <TableSection />
       <FiltersSection />
       <OverlaysSection />
+      <TemplatesSection />
       <Card className="wab-stack">
         <div className="wab-row">
           <Button>{t('design.primary')}</Button>

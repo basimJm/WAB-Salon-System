@@ -103,5 +103,12 @@
       "ar": "Arabic",
       "en": "English"
     }
+  },
+  "detail": {
+    "backTo": "Back to {{list}}"
+  },
+  "json": {
+    "items": "{{count}} items",
+    "fields": "{{count}} fields"
   }
 }

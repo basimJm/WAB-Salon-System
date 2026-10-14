@@ -28,7 +28,7 @@ test('design-system gallery renders in both languages and themes without overflo
   page,
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
-  await expect(page.locator('h1')).toBeVisible();
+  await expect(page.locator('h1').first()).toBeVisible();
   expect(await noHorizontalScroll(page)).toBe(true);
   await page.getByRole('button', { name: /switch language|تبديل اللغة/i }).click();
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');

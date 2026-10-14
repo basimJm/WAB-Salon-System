@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { ColumnPicker } from '@/presentation/components/data/ColumnPicker';
 import { DataTable, type Column } from '@/presentation/components/data/DataTable';
 import { DensityToggle } from '@/presentation/components/data/DensityToggle';
+import { Pagination } from '@/presentation/components/data/Pagination';
 import { TableToolbar } from '@/presentation/components/data/TableToolbar';
 import { useColumnVisibility } from '@/presentation/hooks/useColumnVisibility';
 import { TableSection } from '@/presentation/pages/design/TableSection';
@@ -264,5 +265,27 @@ describe('TableSection (gallery)', () => {
     await userEvent.click(screen.getByRole('checkbox', { name: 'City' }));
     expect(screen.queryByRole('columnheader', { name: 'City' })).toBeNull();
     expect(await axeViolations()).toEqual([]);
+  });
+});
+
+describe('numerals follow the language', () => {
+  it('shows Arabic-Indic digits in the selection count and the page range', () => {
+    renderWithApp(<TableToolbar selectedCount={12} />, undefined, 'ar');
+    expect(screen.getByRole('status')).toHaveTextContent('محدد: ١٢');
+  });
+
+  it('formats the pagination range with the language digits', () => {
+    renderWithApp(
+      <Pagination
+        page={2}
+        pageSize={10}
+        total={23}
+        onPageChange={() => undefined}
+        onPageSizeChange={() => undefined}
+      />,
+      undefined,
+      'ar',
+    );
+    expect(screen.getByText(/١١.*٢٠.*٢٣/)).toBeVisible();
   });
 });
