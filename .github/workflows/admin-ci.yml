@@ -1,7 +1,6 @@
-# WAB-Admin-Dashboard CI. Runs only when the admin panel (or this workflow) changes.
-# Gates: types, lint, unit tests, hardcoded-value + file-length scan, all 4 build variants,
-# bundle/performance budget, dependency + secret scan, and responsive e2e on Android-class
-# (Chromium) and iOS-class (WebKit) browsers in portrait and landscape.
+# WAB-Admin-Dashboard CI. Runs on every PR (task branches target `admin`) and on pushes to `admin`/`main`
+# when the admin panel (or this workflow) changes. One job: install, verify (types, lint, format, unit tests,
+# hardcoded + 300-line scan) and build all four variants. A PR merges into `admin` only when this is green.
 name: Admin CI
 
 on:
@@ -32,37 +31,10 @@ env:
   VITE_SOCKET_URL: https://socket.ci.invalid
 
 jobs:
-  quality:
-    name: Types, lint, tests, hardcoded scan
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: WAB-Admin-Dashboard/package-lock.json
-      - run: npm ci
-      - name: Type check
-        run: npm run typecheck
-      - name: Lint (zero warnings)
-        run: npm run lint
-      - name: Format check
-        run: npm run format:check
-      - name: Unit tests
-        run: npm test
-      - name: Hardcoded values and 300-line limit
-        run: npm run check:hardcoded
-
   build:
-    name: Build ${{ matrix.variant }}
+    name: Admin build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        variant: [dev-debug, dev-release, prod-debug, prod-release]
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -71,82 +43,13 @@ jobs:
           cache: npm
           cache-dependency-path: WAB-Admin-Dashboard/package-lock.json
       - run: npm ci
-      - name: Build
-        run: npm run build:${{ matrix.variant }}
-      # Performance + security gate: size budgets (release), no source maps in release, no mock code in prod.
-      - name: Bundle budget and artifact safety
-        run: npm run check:size -- ${{ matrix.variant }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: admin-${{ matrix.variant }}
-          path: WAB-Admin-Dashboard/dist/${{ matrix.variant }}
-          retention-days: 7
-
-  e2e:
-    name: E2E ${{ matrix.platform }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Android-class: Chrome on Pixel / Galaxy Tab, plus desktop Chrome.
-          - platform: android
-            browser: chromium
-            projects: --project=desktop --project=android-portrait --project=android-landscape --project=tablet-portrait
-          # iOS-class: Safari on iPhone / iPad (WebKit), portrait and landscape.
-          - platform: ios
-            browser: webkit
-            projects: --project=ios-portrait --project=ios-landscape --project=ipad-portrait
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: WAB-Admin-Dashboard/package-lock.json
-      - run: npm ci
-      - name: Install browser
-        run: npx playwright install --with-deps ${{ matrix.browser }}
-      - name: Responsive e2e
-        run: npx playwright test ${{ matrix.projects }}
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report-${{ matrix.platform }}
-          path: WAB-Admin-Dashboard/playwright-report
-          retention-days: 7
-
-  security:
-    name: Dependency audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: WAB-Admin-Dashboard/package-lock.json
-      - run: npm ci
-      # Everything in `dependencies` ships to the browser, so high advisories block; dev-only ones do not ship.
-      - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
-
-  secret-scan:
-    name: Secret scan
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      pull-requests: read
-    defaults:
-      run:
-        working-directory: .
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify (types, lint, format, tests, hardcoded scan)
+        run: npm run verify
+      - name: Build dev-debug
+        run: npm run build:dev-debug
+      - name: Build dev-release
+        run: npm run build:dev-release
+      - name: Build prod-debug
+        run: npm run build:prod-debug
+      - name: Build prod-release
+        run: npm run build:prod-release

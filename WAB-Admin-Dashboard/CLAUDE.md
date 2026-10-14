@@ -69,7 +69,7 @@ src/
 
 - Pick one with `npm run build:<variant>` (Vite `--mode <variant>`); `npm run dev` uses `dev-debug`.
 - Public, non-secret values come from `.env.dev` / `.env.prod` (git-ignored; keys in `.env.example`) or real env vars. Missing/invalid values fail the build and the app start with a `ConfigError` that names keys only. Prod requires `https` URLs and the `remote` data source.
-- **"Android and iOS" for this web panel** means the browsers and viewports those platforms use: Chrome on Android (Chromium, Pixel/Galaxy Tab) and Safari on iOS (WebKit, iPhone/iPad), each in portrait and landscape. CI runs both (`.github/workflows/admin-ci.yml`).
+- **"Android and iOS" for this web panel** means the browsers and viewports those platforms use: Chrome on Android (Chromium, Pixel/Galaxy Tab) and Safari on iOS (WebKit, iPhone/iPad), each in portrait and landscape. e2e on both runs locally (`npm run e2e`; the CI workflow `.github/workflows/admin-ci.yml` runs install, `npm run verify` and the four builds).
 
 ## 5. Errors
 

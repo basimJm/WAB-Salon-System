@@ -5,8 +5,6 @@ import { BUILD_VARIANTS } from '@/constants/env';
 import pkg from '../package.json';
 
 const workflow = readFileSync(join(process.cwd(), '..', '.github/workflows/admin-ci.yml'), 'utf8');
-const playwrightConfig = readFileSync(join(process.cwd(), 'playwright.config.ts'), 'utf8');
-const projectNames = [...playwrightConfig.matchAll(/name: '([\w-]+)'/g)].map((m) => m[1] as string);
 
 describe('admin CI workflow', () => {
   it('runs on pull requests and pushes to main and admin, only for admin changes, with a read-only token', () => {
@@ -22,45 +20,18 @@ describe('admin CI workflow', () => {
     expect((jobs.match(/timeout-minutes:/g) ?? []).length).toBe(jobCount);
   });
 
-  it('builds exactly the four variants and checks the bundle for each', () => {
-    for (const v of BUILD_VARIANTS) expect(workflow).toContain(v);
-    expect(workflow).toContain('npm run build:${{ matrix.variant }}');
-    expect(workflow).toContain('npm run check:size -- ${{ matrix.variant }}');
-    for (const v of BUILD_VARIANTS) expect(pkg.scripts).toHaveProperty(`build:${v}`);
-  });
-
-  it('runs every quality gate from package.json', () => {
-    for (const step of ['typecheck', 'lint', 'format:check', 'check:hardcoded']) {
-      expect(workflow).toContain(`npm run ${step}`);
-      expect(pkg.scripts).toHaveProperty(step);
+  it('installs from the lockfile, runs verify and builds exactly the four variants', () => {
+    expect(workflow).toContain('npm ci');
+    expect(workflow).toContain('npm run verify');
+    expect(pkg.scripts).toHaveProperty('verify');
+    for (const v of BUILD_VARIANTS) {
+      expect(workflow).toContain(`npm run build:${v}`);
+      expect(pkg.scripts).toHaveProperty(`build:${v}`);
     }
-    expect(workflow).toContain('npm test');
-    expect(workflow).toContain('npm audit --omit=dev --audit-level=high');
-    expect(workflow).toContain('gitleaks/gitleaks-action');
   });
 
-  it('e2e covers Android-class (chromium) and iOS-class (webkit), portrait and landscape', () => {
-    expect(workflow).toContain('browser: chromium');
-    expect(workflow).toContain('browser: webkit');
-    const used = [...workflow.matchAll(/--project=([\w-]+)/g)].map((m) => m[1]);
-    expect([...new Set(used)].sort()).toEqual([...projectNames].sort());
-    expect(projectNames).toEqual(
-      expect.arrayContaining([
-        'android-portrait',
-        'android-landscape',
-        'ios-portrait',
-        'ios-landscape',
-      ]),
-    );
-  });
-
-  it('references no secrets other than the built-in token and no real hosts', () => {
-    const secrets = [...workflow.matchAll(/secrets\.(\w+)/g)].map((m) => m[1]);
-    expect(new Set(secrets)).toEqual(new Set(['GITHUB_TOKEN']));
+  it('references no secrets and no real hosts', () => {
+    expect(workflow).not.toMatch(/secrets\./);
     expect(workflow).not.toMatch(/https?:\/\/(?!(?:api|socket)\.ci\.invalid)/);
-  });
-
-  it('requires Node 22 like the server', () => {
-    expect(pkg.engines.node).toBe('>=22');
   });
 });

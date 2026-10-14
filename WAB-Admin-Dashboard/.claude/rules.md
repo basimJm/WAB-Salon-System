@@ -58,5 +58,5 @@
 ## 8. Workflow
 
 - **Branching:** `admin` is the master branch for admin work (created from `main`). Every task branches from the latest `origin/admin` as `feat/adm-NNN-<key>` and its PR targets `admin`, never `main`. After each merge, branch the next task from the updated `origin/admin`. If `admin` is behind `main`, merge `main` into `admin` through a PR first. The user merges `admin` into `main`.
-- **CI gate:** Admin CI builds all four variants and runs every check on each PR and each push to `admin`. Merge a task PR into `admin` only when every check on its head commit has completed green; if a check fails, fix the cause, push to the same PR and repeat until green.
+- **CI gate:** Admin CI (one job) runs `npm ci`, `npm run verify` and the four variant builds on each PR and each push to `admin`. Merge a task PR into `admin` only when every check on its head commit has completed green; if a check fails, fix the cause, push to the same PR and repeat until green.
 - Also from the root rules: never push to `main`, three verification loops, four-role review, `.claude/session.md` and `.claude/memory.md` (root) kept current.

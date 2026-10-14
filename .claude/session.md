@@ -636,6 +636,7 @@
   - [x] Role: senior web developer expert in React, JS, TS
   - [x] Rules: performance first; tests for every function; no hardcoding; dev and prod envs; clean code and architecture; build before every commit; no build/runtime errors; no deprecated or outdated library versions
   - [x] `admin` branch is the master for admin work; PRs target it; Admin CI also runs on pushes to `admin`; merge only when green
+  - [x] Admin CI simplified to one job (install, verify, four builds); e2e/audit/size/secret-scan jobs removed on request
   - [x] Rules live in `WAB-Admin-Dashboard/.claude/` and are imported by `WAB-Admin-Dashboard/CLAUDE.md` (§0 reading list updated)
 - Tests: docs only (no source code); commands and file names in the rules checked against `package.json` scripts and the repo
 - Loops: 3/3
