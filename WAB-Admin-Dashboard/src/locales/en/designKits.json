@@ -121,6 +121,22 @@
       "picked": "Picked: {{label}}",
       "crumbModule": "Finance",
       "crumbPage": "Refunds"
+    },
+    "basics": {
+      "title": "Basics",
+      "icons": "Icons",
+      "bell": "Alerts",
+      "gear": "Settings (disabled)",
+      "state": "Async state",
+      "loading": "Loading",
+      "error": "Error",
+      "ready": "Ready",
+      "content": "Loaded content",
+      "notes": "Notes",
+      "forbiddenTitle": "Status page",
+      "forbiddenText": "Used for 403, 404 and 500.",
+      "crash": "Break the section below",
+      "boundaryOk": "Error boundary: no error"
     }
   }
 }

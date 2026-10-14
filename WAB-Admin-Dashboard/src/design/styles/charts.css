@@ -26,8 +26,9 @@
 .wab-heatmap th, .wab-heat { padding: var(--space-2) var(--space-3); text-align: center; border: var(--size-hairline) solid var(--c-card); }
 .wab-heatmap tbody th { text-align: start; color: var(--c-muted); font-weight: var(--fw-medium); }
 .wab-heat--none { background: var(--c-surface); }
-.wab-heat--0 { background: color-mix(in srgb, var(--chart-1) 12%, var(--c-card)); }
-.wab-heat--1 { background: color-mix(in srgb, var(--chart-1) 30%, var(--c-card)); }
-.wab-heat--2 { background: color-mix(in srgb, var(--chart-1) 50%, var(--c-card)); }
-.wab-heat--3 { background: color-mix(in srgb, var(--chart-1) 72%, var(--c-card)); color: var(--c-on-primary); }
-.wab-heat--4 { background: var(--chart-1); color: var(--c-on-primary); }
+.wab-heatmap .wab-heat { color: var(--c-ink); }
+.wab-heat--0 { background: color-mix(in srgb, var(--chart-1) 10%, var(--c-card)); }
+.wab-heat--1 { background: color-mix(in srgb, var(--chart-1) 22%, var(--c-card)); }
+.wab-heat--2 { background: color-mix(in srgb, var(--chart-1) 34%, var(--c-card)); }
+.wab-heat--3 { background: color-mix(in srgb, var(--chart-1) 46%, var(--c-card)); }
+.wab-heat--4 { background: color-mix(in srgb, var(--chart-1) 58%, var(--c-card)); }

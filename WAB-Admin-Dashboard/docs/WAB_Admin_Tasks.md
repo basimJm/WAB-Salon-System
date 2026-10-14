@@ -95,7 +95,7 @@ Item 3: button, card, text, inputs and the rest of the kit the 30 pages need. To
 | ADM-020 | Media kit: `ImageUploader` (ar/en variants, presigned upload then confirm), `DocumentViewer` (zoom, rotate, download; private signed URLs only), `PhonePreview` frame | `feat/adm-020-media-kit` | ADM-013, ADM-017 | — | DONE | UI only here; the upload calls (`POST /uploads/presign`, `/uploads/confirm`) are wired in the banners task. |
 | ADM-021 | `RichTextEditor` (Arabic / English tabs, sanitized HTML output, RTL aware) and `SchedulePicker` (start–end, end after start) | `feat/adm-021-rich-text` | ADM-013 | — | DONE | Library choice recorded as an ADR (Appendix C). |
 | ADM-022 | Shell design completion: sidebar sub-menus with counter slots, breadcrumbs, topbar global-search UI (grouped results layout), admin menu, 403 / 404 / 500 pages | `feat/adm-022-shell-design` | ADM-017, ADM-013 | — | DONE | Data for counters/search is attached in Phase 4 (shell-live, global-search). |
-| ADM-023 | Design-system gallery covers every kit and state; visual and accessibility regression checks (screenshots as CI artifacts) | `feat/adm-023-gallery` | ADM-012, ADM-013, ADM-014, ADM-015, ADM-016, ADM-017, ADM-018, ADM-019, ADM-020, ADM-021, ADM-022 | — | TODO | Dev-only route `/design-system` (compiled out of prod). |
+| ADM-023 | Design-system gallery covers every kit and state; visual and accessibility regression checks (screenshots as CI artifacts) | `feat/adm-023-gallery` | ADM-012, ADM-013, ADM-014, ADM-015, ADM-016, ADM-017, ADM-018, ADM-019, ADM-020, ADM-021, ADM-022 | — | DONE | Dev-only route `/design-system` (compiled out of prod). |
 
 ---
 

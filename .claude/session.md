@@ -15,22 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-055 — ADM-020 Media kit: ImageUploader, DocumentViewer, PhonePreview
-
-- Project: `WAB-Admin-Dashboard/` (`components/media/*`, `hooks/useImageUpload.ts`, `domain/shared/upload.ts`, `utils/{mediaMath,safeHref}.ts`, `constants/media.ts`, `locales/*/media.json`, gallery `MediaSection`, tests `media-logic`, `media`, `e2e/media.spec.ts`)
-- Branch: `feat/adm-020-media-kit`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-020; UI only, the real presign/confirm calls are wired in the banners task):
-  - [x] `ImageUploader` + `LocalizedImageUploader` (Arabic and English): file checked before upload (type, size, empty), progress 0..1, preview, replace/remove, failure kept for retry, drag and drop, disabled state; the upload round trip is an injected function
-  - [x] `DocumentViewer`: zoom 50-300%, rotate both ways, download with `rel=noopener`, PDFs via `<object>`; only https signed URLs or local `blob:` previews are shown (http, javascript:, data: refused)
-  - [x] `PhonePreview`: frame with its own `lang`/`dir`, so an Arabic and an English preview sit side by side on any page direction
-  - [x] AR + EN strings (new `media` area), tokens only, gallery section with a fake upload (a file named "fail" simulates a failure)
-- Tests: `sh scripts/gate.sh` all PASS; e2e 92/92 on the real Chrome (desktop, Pixel portrait/landscape, tablet) incl. `e2e/media.spec.ts` with real file inputs
-- Browser check: built dev-debug in the built-in browser: upload progress 0.4 mid-way then preview, phone previews rtl/ltr inside the viewport, no overflow, console clean
-- Loops: 3/3
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — the quiet gate surfaced a lint rule (complexity) and a hardcoded rem that were fixed (state machine moved to `useImageUpload`, size to a token).
-- Notes: Keyboard shortcuts on the viewer were dropped (lint rules forbid handlers on static regions); every action is a toolbar button.
-
 ### T-056 — ADM-021 RichTextEditor (ar/en tabs) and SchedulePicker
 
 - Project: `WAB-Admin-Dashboard/` (`infrastructure/richText/{sanitize,markdown}.ts`, `constants/richText.ts`, `utils/{textFormat,htmlToReact}`, `components/form/{RichTextEditor,LocalizedRichTextEditor,SchedulePicker}`, `docs/adr/0006-rich-text.md`, gallery `RichTextSection`, tests `rich-text`, `rich-text-ui`, `e2e/richtext.spec.ts`)
@@ -77,6 +61,22 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — content moved, not deleted.
 - Notes: When a block is older than the last 3, move it to the archive file.
+
+### T-059 — ADM-023 Gallery completeness, accessibility with real contrast, visual snapshots
+
+- Project: `WAB-Admin-Dashboard/` (`pages/design/BasicsSection`, `tests/{gallery-coverage,contrast}.test.ts`, `e2e/gallery.spec.ts`, `design/tokens/colors.ts`, `charts.css`, `IconButton`, `RichTextEditor`)
+- Branch: `feat/adm-023-gallery`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-023: gallery covers every kit and state; visual and accessibility regression checks, local since there is no CI):
+  - [x] A test fails when a shared component is neither shown in the gallery nor named as shown through its parent; a test fails when a section is not mounted; new `BasicsSection` (icons, icon buttons, spinners, alert, async states, error boundary, status page, text area)
+  - [x] e2e on real Chrome runs axe (serious/critical, including real colour contrast) over the whole gallery in ar/en x light/dark and saves a screenshot per section to `reports/gallery/<lang>-<theme>/` (git-ignored; compare by eye or with an image diff tool)
+  - [x] Real contrast defects found and fixed: light `faint`/`success` text, green/rose badges, dark `faint`, heatmap cells in dark mode; unit test `contrast.test.ts` locks WCAG AA 4.5:1 for every text colour on every surface and every badge tone
+  - [x] Name-in-label defects fixed: rich text toolbar shows its names, icon button with a badge includes the count in its accessible name
+- Tests: `sh scripts/gate.sh` all PASS; e2e 112/112 on the real Chrome (desktop, Pixel portrait/landscape, tablet), gallery pass 4/4 with contrast
+- Browser check: real Chrome through Playwright (axe + 48 screenshots); no console errors
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — jsdom cannot measure colour contrast; the real-Chrome pass found 5 token defects the unit suite could not see.
+- Notes: Pixel-diff baselines are not committed (would add MBs); screenshots are artifacts for manual review.
 
 ### Pending (next)
 
