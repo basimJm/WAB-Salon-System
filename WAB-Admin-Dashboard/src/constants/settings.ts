@@ -1,5 +1,12 @@
+import type { SettingGroup } from '@/domain/settings/registry';
+
 /** Query key of the settings list (first element = operation id, so realtime/invalidations match). */
 export const SETTINGS_QUERY_KEY = ['getSettings'] as const;
-/** Settings groups shown by the editor (the rest are added by ADM-032). */
-export const CORE_SETTING_GROUPS = ['discovery', 'booking', 'otp'] as const;
 export const SETTING_LIST_SEPARATOR = ',';
+
+/** Editor tabs and the groups (cards) each one holds. */
+export const SETTING_TABS: ReadonlyArray<{ id: string; groups: readonly SettingGroup[] }> = [
+  { id: 'rules', groups: ['discovery', 'booking', 'otp', 'reviews'] },
+  { id: 'security', groups: ['adminAuth', 'tokens', 'accounts', 'subscription', 'refunds'] },
+  { id: 'limits', groups: ['pagination', 'uploads', 'alerts'] },
+];

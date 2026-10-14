@@ -39,7 +39,8 @@ export function parseSetting(text: string, def: SettingDefinition): SettingParse
 /** Text shown in the field for a stored value. */
 export function settingToText(value: unknown): string {
   if (Array.isArray(value)) return value.join(`${SETTING_LIST_SEPARATOR} `);
-  return typeof value === 'number' ? String(value) : '';
+  if (typeof value === 'number' || typeof value === 'string') return String(value);
+  return '';
 }
 
 export const sameSettingValue = (a: unknown, b: unknown): boolean =>

@@ -8,15 +8,15 @@ import type { SettingRow } from './useSettingsDraft';
 
 export interface SettingRowFieldProps {
   row: SettingRow;
-  onText: (key: string, text: string) => void;
-  onUseDefault: (key: string) => void;
+  onText: (id: string, text: string) => void;
+  onUseDefault: (id: string) => void;
 }
 
 /** One setting: label with unit, the value box, its default, whether it is overridden, and "use default". */
 export function SettingRowField({ row, onText, onUseDefault }: SettingRowFieldProps) {
   const { t } = useTranslation();
-  const { def, entry } = row;
-  const id = settingId(def.key);
+  const { def } = row;
+  const id = settingId(row.id);
   const unit = def.unit ? ` (${t(`settings.unit.${def.unit}`)})` : '';
   return (
     <div className="wab-setting">
@@ -25,21 +25,21 @@ export function SettingRowField({ row, onText, onUseDefault }: SettingRowFieldPr
         value={row.text}
         inputMode={def.kind === 'int' ? 'numeric' : 'text'}
         dir="ltr"
-        onChange={(e) => onText(def.key, e.target.value)}
+        onChange={(e) => onText(row.id, e.target.value)}
         error={
           row.error ? t(`settings.error.${row.error}`, { min: def.min, max: def.max }) : undefined
         }
-        hint={t('settings.default', { value: settingToText(entry.default) })}
+        hint={t('settings.default', { value: settingToText(row.fallback) })}
       />
       <div className="wab-row wab-setting__meta">
-        <Badge tone={entry.isDefault ? 'grey' : 'amber'}>
-          {t(entry.isDefault ? 'settings.isDefault' : 'settings.overridden')}
+        <Badge tone={row.canReset ? 'amber' : 'grey'}>
+          {t(row.canReset ? 'settings.overridden' : 'settings.isDefault')}
         </Badge>
         <Button
           variant="ghost"
           size="sm"
           disabled={!row.canReset}
-          onClick={() => onUseDefault(def.key)}
+          onClick={() => onUseDefault(row.id)}
         >
           {t('settings.useDefault')}
         </Button>

@@ -1057,3 +1057,18 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — 116 operations, 0 implemented yet (login still uses hand-written endpoints until ADM-030). Rerun `npm run docs:api` after any task that consumes an operation, or `verify` fails as stale.
 
+
+### T-066 — ADM-030 Auth module on the real contract
+
+- Project: `WAB-Admin-Dashboard/` (`domain/auth`, `data/auth/RemoteAuthRepository.ts` on `ApiClient`, `Endpoint.noRefresh`, `useLoginController`, `OtpStep`, `.dependency-cruiser.cjs`, tests)
+- Branch: `feat/adm-030-auth`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-030; PRD §4; SRV-030/031):
+  - [x] Login/verify-otp/refresh/logout use the generated operations and DTOs through `ApiClient` (body and response validated); session-less calls never trigger a token refresh (`noRefresh`)
+  - [x] Step 1 returns `{otpRequired, expiresAt, resendAfterSeconds}`; step 2 sends `{email, code}`; resend = repeating step 1 with the password kept in memory only while the code step is open (cleared on success/back); resend timer uses the server's seconds
+  - [x] Old assumed contract removed (`challengeId`, `resend-otp`, `constants/endpoints.ts`); wrong code / lockout / rate limit show the localized error catalog messages
+- Tests: `sh scripts/gate.sh` all PASS (login, data-layer, session, idle tests migrated); browser check dev-debug: code step shows Resend in 1:00, wrong code shows the validation alert, correct code signs in and shows Live
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); mock mode still uses `MockAuthRepository` (updated to the new shape) instead of auth fixtures on the transport mock — moving it is a small follow-up; `data/api` and `data/realtime` added to the shared data dirs of the layer rules.
+- Notes: Admin display name is the email (the API has no name field).
+

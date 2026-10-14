@@ -1,34 +1,62 @@
-export type SettingGroup = 'discovery' | 'booking' | 'otp';
+export type SettingGroup =
+  | 'discovery'
+  | 'booking'
+  | 'otp'
+  | 'adminAuth'
+  | 'tokens'
+  | 'accounts'
+  | 'subscription'
+  | 'refunds'
+  | 'reviews'
+  | 'pagination'
+  | 'uploads'
+  | 'alerts';
 export type SettingKind = 'int' | 'intList';
+export type SettingUnit =
+  'km' | 'minutes' | 'seconds' | 'days' | 'hours' | 'digits' | 'percent' | 'mb';
 
 export interface SettingDefinition {
   readonly key: string;
+  /** Set when the stored value is an object and this row edits one of its integer members. */
+  readonly field?: string;
   readonly group: SettingGroup;
   readonly kind: SettingKind;
-  /** Unit label key (`settings.unit.<unit>`), absent for plain counts. */
-  readonly unit?: 'km' | 'minutes' | 'seconds' | 'days' | 'digits';
+  readonly unit?: SettingUnit;
   /** Sanity bounds (the server validates structure only: BUSINESS_DOMAIN §10). */
   readonly min: number;
   readonly max: number;
 }
 
-const int = (
+type Bounds = readonly [number, number];
+const row = (
   key: string,
   group: SettingGroup,
-  [min, max]: readonly [number, number],
-  unit?: SettingDefinition['unit'],
+  [min, max]: Bounds,
+  unit?: SettingUnit,
 ): SettingDefinition => ({ key, group, kind: 'int', min, max, ...(unit ? { unit } : {}) });
+const member = (
+  key: string,
+  field: string,
+  bounds: Bounds,
+  unit?: SettingUnit,
+): SettingDefinition => ({
+  ...row(key, 'alerts', bounds, unit),
+  field,
+});
 
-/** Keys of BUSINESS_DOMAIN §10 edited by the core settings sections (ADM-031). */
-export const CORE_SETTINGS: readonly SettingDefinition[] = [
-  int('discovery.nearbyRadiusKm', 'discovery', [1, 200], 'km'),
-  int('booking.slotMinutes', 'booking', [5, 120], 'minutes'),
-  int('booking.maxDaysAhead', 'booking', [1, 365], 'days'),
-  int('booking.maxCompanions', 'booking', [0, 20]),
-  int('booking.minLeadMinutes', 'booking', [0, 1440], 'minutes'),
-  int('booking.paymentHoldMinutes', 'booking', [1, 60], 'minutes'),
-  int('booking.autoCancelAfterStartMinutes', 'booking', [1, 1440], 'minutes'),
-  int('booking.pendingAlertBeforeMinutes', 'booking', [1, 1440], 'minutes'),
+const PERCENT: Bounds = [0, 100];
+const PAYMENT_ALERTS = 'alerts.paymentFailures';
+
+/** Every editable key of BUSINESS_DOMAIN §10 (timezone and currency are shown read-only). */
+export const SETTING_DEFINITIONS: readonly SettingDefinition[] = [
+  row('discovery.nearbyRadiusKm', 'discovery', [1, 200], 'km'),
+  row('booking.slotMinutes', 'booking', [5, 120], 'minutes'),
+  row('booking.maxDaysAhead', 'booking', [1, 365], 'days'),
+  row('booking.maxCompanions', 'booking', [0, 20]),
+  row('booking.minLeadMinutes', 'booking', [0, 1440], 'minutes'),
+  row('booking.paymentHoldMinutes', 'booking', [1, 60], 'minutes'),
+  row('booking.autoCancelAfterStartMinutes', 'booking', [1, 1440], 'minutes'),
+  row('booking.pendingAlertBeforeMinutes', 'booking', [1, 1440], 'minutes'),
   {
     key: 'booking.reminderMinutes',
     group: 'booking',
@@ -37,16 +65,47 @@ export const CORE_SETTINGS: readonly SettingDefinition[] = [
     min: 1,
     max: 10080,
   },
-  int('otp.length', 'otp', [4, 10], 'digits'),
-  int('otp.resendAfterSec', 'otp', [10, 3600], 'seconds'),
-  int('otp.maxRequests', 'otp', [1, 100]),
-  int('otp.requestWindowSec', 'otp', [30, 86400], 'seconds'),
-  int('otp.maxWrong', 'otp', [1, 100]),
-  int('otp.blockSec', 'otp', [30, 86400], 'seconds'),
+  row('otp.length', 'otp', [4, 10], 'digits'),
+  row('otp.resendAfterSec', 'otp', [10, 3600], 'seconds'),
+  row('otp.maxRequests', 'otp', [1, 100]),
+  row('otp.requestWindowSec', 'otp', [30, 86400], 'seconds'),
+  row('otp.maxWrong', 'otp', [1, 100]),
+  row('otp.blockSec', 'otp', [30, 86400], 'seconds'),
+  row('admin.maxFailedLogins', 'adminAuth', [1, 20]),
+  row('admin.lockSec', 'adminAuth', [30, 86400], 'seconds'),
+  row('admin.sessionIdleSec', 'adminAuth', [60, 86400], 'seconds'),
+  row('auth.accessTokenTtlSec', 'tokens', [60, 86400], 'seconds'),
+  row('auth.refreshTokenTtlDays', 'tokens', [1, 365], 'days'),
+  row('account.deletionGraceDays', 'accounts', [0, 365], 'days'),
+  row('subscription.trialDays', 'subscription', [0, 365], 'days'),
+  row('subscription.warnDaysBefore', 'subscription', [0, 90], 'days'),
+  row('refund.maxRetries', 'refunds', [0, 20]),
+  row('refund.delayAlertHours', 'refunds', [1, 720], 'hours'),
+  row('reviews.maxPendingPerTargetPerCustomer', 'reviews', [1, 10]),
+  row('pagination.appPageSize', 'pagination', [5, 100]),
+  row('pagination.adminPageSize', 'pagination', [5, 100]),
+  row('uploads.imageMaxMb', 'uploads', [1, 100], 'mb'),
+  row('uploads.videoMaxMb', 'uploads', [1, 500], 'mb'),
+  row('uploads.videoMaxSec', 'uploads', [1, 600], 'seconds'),
+  row('uploads.docMaxMb', 'uploads', [1, 100], 'mb'),
+  row('uploads.docMaxFiles', 'uploads', [1, 20]),
+  member(PAYMENT_ALERTS, 'count', [1, 1000]),
+  member(PAYMENT_ALERTS, 'windowMin', [1, 1440], 'minutes'),
+  member(PAYMENT_ALERTS, 'ratePct', PERCENT, 'percent'),
+  member(PAYMENT_ALERTS, 'rateWindowMin', [1, 1440], 'minutes'),
+  row('alerts.api5xxRatePct', 'alerts', PERCENT, 'percent'),
+  row('alerts.crashesPerHour', 'alerts', [1, 10000]),
 ];
 
-export const definitionsOf = (group: SettingGroup): readonly SettingDefinition[] =>
-  CORE_SETTINGS.filter((d) => d.group === group);
+/** Read-only platform facts shown next to the editable ones. */
+export const READ_ONLY_SETTING_KEYS = ['timezone', 'currency'] as const;
+
+/** Stable id of a row: the key, plus the member name for object settings. */
+export const rowIdOf = (def: SettingDefinition): string =>
+  def.field ? `${def.key}.${def.field}` : def.key;
 
 /** i18n keys cannot contain dots: `booking.slotMinutes` -> `booking_slotMinutes`. */
-export const settingId = (key: string): string => key.replace(/\./g, '_');
+export const settingId = (idOrKey: string): string => idOrKey.replace(/\./g, '_');
+
+export const definitionsOf = (group: SettingGroup): readonly SettingDefinition[] =>
+  SETTING_DEFINITIONS.filter((d) => d.group === group);
