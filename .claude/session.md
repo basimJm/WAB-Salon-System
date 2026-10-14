@@ -15,21 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-061 — ADM-025 Session lifecycle (refresh, idle timeout)
-
-- Project: `WAB-Admin-Dashboard/` (`app/sessionManager.ts`, `domain/auth/sessionRules.ts`, `HttpClient` refresh-once, `useIdleTimeout`, `IdleWarningDialog`, mock/remote auth `refresh`/`logout`)
-- Branch: `feat/adm-025-session`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-025):
-  - [x] Single-flight token refresh before expiry and once after a 401; failed refresh ends the session with reason `expired`
-  - [x] Idle timeout 30 min with a 60 s warning (stay / sign out); sign-out revokes the refresh token; login shows why the session ended
-  - [x] Gallery shows the idle dialog (coverage guard)
-  - [x] e2e / browser check skipped on the user's instruction
-- Tests: `sh scripts/gate.sh` all PASS (session 33, session-http 8, idle 11 new unit tests)
-- Loops: 1/1 (user decision 2026-10-14: one loop is enough; e2e and full browser matrix skipped on request)
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e, no in-browser check for this task (user stopped them); covered by 52 unit tests and the green gate.
-- Notes: split `session.test.ts` (>300 lines) into `session-http.test.ts`; data-layer tests now pass a refresh token to `logout`.
-
 ### T-062 — ADM-026 Transport-level mock with scenario switcher
 
 - Project: `WAB-Admin-Dashboard/` (`data/mock/{mockTransport,mockRoute,fixtures,scenarios,messages}.ts`, `constants/mock.ts`, `ScenarioSwitcher`, container wiring)
@@ -44,6 +29,22 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). `MockAuthRepository` still exists; moving login onto transport fixtures belongs to ADM-030 (auth module).
 - Notes: Branch name differs from the backlog row (`feat/adm-026-mock-transport`).
+
+### T-063 — ADM-027 Realtime client, invalidation bus, live indicator
+
+- Project: `WAB-Admin-Dashboard/` (`domain/realtime`, `data/realtime/*`, `constants/realtime.ts`, `useRealtime*` hooks, `LiveIndicator`, container, `scripts/lib/budget.ts`)
+- Branch: `feat/adm-027-realtime`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-027):
+  - [x] `RealtimeClient` interface; Socket.IO implementation on `/admin` with the token in `auth.token`, re-read on every reconnect; `UNAUTHORIZED`/`FORBIDDEN` connect errors stop retrying and report `denied`; backoff with jitter from constants
+  - [x] Fake emitter for mock mode (compiled out of prod); real client is a lazy chunk (`socket.io-client` added)
+  - [x] Invalidation bus: each server event marks the matching cached queries stale (rules in constants, test checks every rule names a real operation)
+  - [x] `useRealtime(event, handler)`, `useRealtimeStatus`, connection follows sign-in/out; "مباشر/Live" indicator in the top bar (AR+EN)
+  - [x] Budget script excludes mock-only chunks from the size budget and bans them from prod builds
+- Tests: `sh scripts/gate.sh` all PASS (17 new unit tests incl. a mocked socket.io client); browser check dev-debug: after sign-in the top bar shows Live (green), no horizontal scroll
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); not run against a real server socket. Only `booking.updated` and `alert.created` are emitted by the server today (G10).
+- Notes: Dependency added: `socket.io-client` 4.8.
 
 ### Pending (next)
 

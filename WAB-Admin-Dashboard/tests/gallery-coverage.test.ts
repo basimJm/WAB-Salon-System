@@ -16,6 +16,7 @@ const SHOWN_THROUGH_PARENT: Readonly<Record<string, string>> = {
   TableRow: 'DataTable',
   OptionList: 'Combobox / MultiSelect',
   Field: 'every form field',
+  LiveIndicator: 'Topbar (every signed-in page)',
   RichTextEditor: 'LocalizedRichTextEditor',
   Popover: 'Menu / ExportMenu / ColumnPicker',
   Modal: 'ConfirmDialog / ReasonDialog / Drawer behaviour',

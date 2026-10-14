@@ -9,6 +9,7 @@ import { useSession } from '../controllers/useSession';
 import { useViewport } from '../hooks/useViewport';
 import { IdleWarningDialog } from '../components/feedback/IdleWarningDialog';
 import { useIdleTimeout } from '../hooks/useIdleTimeout';
+import { useRealtimeConnection } from '../hooks/useRealtime';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import { useBreadcrumbs } from '../controllers/useBreadcrumbs';
 import { Sidebar } from './Sidebar';
@@ -57,6 +58,7 @@ export function AppShell() {
     void sessionManager.signOut();
   }, [sessionManager]);
 
+  useRealtimeConnection(current !== null);
   const { status: idle, stay } = useIdleTimeout({
     onExpire: () => void sessionManager.signOut('idle'),
     enabled: current !== null,

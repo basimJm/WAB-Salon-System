@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
 import { GlobalSearch, type GlobalSearchProps } from '../components/layout/GlobalSearch';
+import { LiveIndicator } from '../components/feedback/LiveIndicator';
 import { Menu } from '../components/overlay/Menu';
 import { IconButton } from '../components/core/IconButton';
 import { useTheme } from '@/design/theme/useTheme';
@@ -43,6 +44,7 @@ export function Topbar({
       ) : null}
       {search ? <GlobalSearch search={search} onSelect={(hit) => void navigate(hit.to)} /> : null}
       <span className="wab-topbar__spacer" />
+      <LiveIndicator />
       <IconButton icon="bell" label={t('topbar.alerts')} />
       <IconButton icon="globe" label={t('topbar.language')} onClick={toggleLanguage} />
       <IconButton

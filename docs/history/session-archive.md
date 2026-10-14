@@ -981,3 +981,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — OPEN ITEM for the server owner: the admin OpenAPI defines no `Idempotency-Key` header yet.
 
+
+### T-061 — ADM-025 Session lifecycle (refresh, idle timeout)
+
+- Project: `WAB-Admin-Dashboard/` (`app/sessionManager.ts`, `domain/auth/sessionRules.ts`, `HttpClient` refresh-once, `useIdleTimeout`, `IdleWarningDialog`, mock/remote auth `refresh`/`logout`)
+- Branch: `feat/adm-025-session`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-025):
+  - [x] Single-flight token refresh before expiry and once after a 401; failed refresh ends the session with reason `expired`
+  - [x] Idle timeout 30 min with a 60 s warning (stay / sign out); sign-out revokes the refresh token; login shows why the session ended
+  - [x] Gallery shows the idle dialog (coverage guard)
+  - [x] e2e / browser check skipped on the user's instruction
+- Tests: `sh scripts/gate.sh` all PASS (session 33, session-http 8, idle 11 new unit tests)
+- Loops: 1/1 (user decision 2026-10-14: one loop is enough; e2e and full browser matrix skipped on request)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e, no in-browser check for this task (user stopped them); covered by 52 unit tests and the green gate.
+- Notes: split `session.test.ts` (>300 lines) into `session-http.test.ts`; data-layer tests now pass a refresh token to `logout`.
+

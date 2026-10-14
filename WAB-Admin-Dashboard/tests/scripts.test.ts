@@ -123,8 +123,8 @@ describe('bundle gate', () => {
 
   it('prod builds must not ship the design-system gallery chunk or its strings; dev builds may', () => {
     const chunk = [file('index-abc.js', 10), file('DesignSystemPage-x1.js', 10)];
-    expect(run(chunk, 'prod-release').join()).toContain('design-system gallery');
-    expect(run(chunk, 'prod-debug').join()).toContain('design-system gallery');
+    expect(run(chunk, 'prod-release').join()).toContain('dev-only chunk');
+    expect(run(chunk, 'prod-debug').join()).toContain('dev-only chunk');
     const strings = [file('index-abc.js', 10, '{designKits:{charts:1}}')];
     expect(run(strings, 'prod-release').join()).toContain('gallery strings');
     expect(run(strings, 'prod-debug')).toEqual([]);
@@ -134,5 +134,13 @@ describe('bundle gate', () => {
   it('the dev-only gallery chunk does not count against the release size budget', () => {
     const big = [file('index-abc.js', 10), file('DesignSystemPage-x1.js', 300 * 1024)];
     expect(run(big, 'dev-release')).toEqual([]);
+  });
+
+  it('mock-source chunks are free in dev, size-exempt, and forbidden in prod', () => {
+    const mock = [file('index-abc.js', 10), file('mockTransport-x1.js', 300 * 1024)];
+    expect(run(mock, 'dev-release')).toEqual([]);
+    expect(run(mock, 'prod-release').join()).toContain('dev-only chunk');
+    const fake = [file('index-abc.js', 10), file('FakeRealtimeClient-x1.js', 10)];
+    expect(run(fake, 'prod-debug').join()).toContain('dev-only chunk');
   });
 });
