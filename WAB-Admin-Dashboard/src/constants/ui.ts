@@ -28,3 +28,13 @@ export const GALLERY_SAMPLE_REF = 'WAB-7K2M9Q';
 export const MAX_COUNTER = 99;
 /** Characters needed before the global search runs, and how many results it shows per group. */
 export const SEARCH_MIN_CHARS = 2;
+
+/** Query-string names of the list state kept in the URL (shareable, bookmarkable, back/forward safe). */
+export const LIST_PARAMS = {
+  page: 'page',
+  pageSize: 'pageSize',
+  search: 'q',
+  sort: 'sort',
+} as const;
+export const LIST_SORT_SEPARATOR = ':';
+export const LIST_SEARCH_MAX_LENGTH = 100;

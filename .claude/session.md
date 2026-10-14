@@ -15,21 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-062 — ADM-026 Transport-level mock with scenario switcher
-
-- Project: `WAB-Admin-Dashboard/` (`data/mock/{mockTransport,mockRoute,fixtures,scenarios,messages}.ts`, `constants/mock.ts`, `ScenarioSwitcher`, container wiring)
-- Branch: `feat/adm-026-transport-mock`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-026):
-  - [x] Mock is a `fetch` replacement under the real `HttpClient`: same URLs, envelopes, error shapes, Accept-Language-localized messages (AR+EN)
-  - [x] Fixtures built with `mockRoute(endpoint, ...)`, typed by the generated contract; test checks every route exists in the contract and validates through `ApiClient`
-  - [x] Scenarios success / empty / validation / 401 / 403 / 404 / 409 / 422 / 500 / timeout / slow, switchable at runtime by a dev-only select
-  - [x] Compiled out of prod: `__ALLOW_MOCK__` gate, dev-only locale strings; prod bundles contain no mock code or text (checked)
-- Tests: `sh scripts/gate.sh` all PASS (18 new unit tests); browser check on dev-debug: switcher present with 11 options, no horizontal scroll
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). `MockAuthRepository` still exists; moving login onto transport fixtures belongs to ADM-030 (auth module).
-- Notes: Branch name differs from the backlog row (`feat/adm-026-mock-transport`).
-
 ### T-063 — ADM-027 Realtime client, invalidation bus, live indicator
 
 - Project: `WAB-Admin-Dashboard/` (`domain/realtime`, `data/realtime/*`, `constants/realtime.ts`, `useRealtime*` hooks, `LiveIndicator`, container, `scripts/lib/budget.ts`)
@@ -45,6 +30,19 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); not run against a real server socket. Only `booking.updated` and `alert.created` are emitted by the server today (G10).
 - Notes: Dependency added: `socket.io-client` 4.8.
+
+### T-064 — ADM-028 List state in the URL
+
+- Project: `WAB-Admin-Dashboard/` (`domain/shared/listState.ts`, `presentation/controllers/useListController.ts`, `constants/ui.ts`, `docs/HOW_TO_ADD_A_MODULE.md`)
+- Branch: `feat/adm-028-url-list-state`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-028; PRD §3 saved filter in URL):
+  - [x] Page, page size (10/25/50/100), search, sort and multi-value filters parsed from and written to the query string; invalid/unknown values fall back to defaults; defaults are left out; equal states give equal URLs
+  - [x] `useListController(options)`: search debounced 500 ms and written with `replace`; page/sort/filter changes are history entries; any change except the page restarts at page 1; the box follows URL changes (back/forward, pasted link, clear all) without a stale debounce undoing them
+- Tests: `sh scripts/gate.sh` all PASS (22 new unit tests incl. back navigation); no screen uses it yet, so no browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e/browser check (no UI mounted; user decision). Mapping state -> API query parameter names is left to each feature (server names differ).
+- Notes: pass the options object as a module-level constant.
 
 ### Pending (next)
 

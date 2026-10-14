@@ -997,3 +997,19 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e, no in-browser check for this task (user stopped them); covered by 52 unit tests and the green gate.
 - Notes: split `session.test.ts` (>300 lines) into `session-http.test.ts`; data-layer tests now pass a refresh token to `logout`.
 
+
+### T-062 — ADM-026 Transport-level mock with scenario switcher
+
+- Project: `WAB-Admin-Dashboard/` (`data/mock/{mockTransport,mockRoute,fixtures,scenarios,messages}.ts`, `constants/mock.ts`, `ScenarioSwitcher`, container wiring)
+- Branch: `feat/adm-026-transport-mock`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-026):
+  - [x] Mock is a `fetch` replacement under the real `HttpClient`: same URLs, envelopes, error shapes, Accept-Language-localized messages (AR+EN)
+  - [x] Fixtures built with `mockRoute(endpoint, ...)`, typed by the generated contract; test checks every route exists in the contract and validates through `ApiClient`
+  - [x] Scenarios success / empty / validation / 401 / 403 / 404 / 409 / 422 / 500 / timeout / slow, switchable at runtime by a dev-only select
+  - [x] Compiled out of prod: `__ALLOW_MOCK__` gate, dev-only locale strings; prod bundles contain no mock code or text (checked)
+- Tests: `sh scripts/gate.sh` all PASS (18 new unit tests); browser check on dev-debug: switcher present with 11 options, no horizontal scroll
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). `MockAuthRepository` still exists; moving login onto transport fixtures belongs to ADM-030 (auth module).
+- Notes: Branch name differs from the backlog row (`feat/adm-026-mock-transport`).
+
