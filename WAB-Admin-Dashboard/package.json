@@ -25,7 +25,9 @@
     "test:coverage": "vitest run --coverage",
     "check:layers": "depcruise src --config .dependency-cruiser.cjs",
     "graph:layers": "mkdir -p reports && depcruise src --config .dependency-cruiser.cjs --include-only \"^src\" --collapse \"^src/[^/]+\" --output-type mermaid > reports/layers.mmd",
-    "preview:dev-debug": "vite preview --mode dev-debug --outDir dist/dev-debug --port 4173 --strictPort"
+    "preview:dev-debug": "vite preview --mode dev-debug --outDir dist/dev-debug --port 4173 --strictPort",
+    "api:sync": "node scripts/api-sync.ts",
+    "api:check": "node scripts/api-sync.ts --check"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans-arabic": "^5.3.0",

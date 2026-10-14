@@ -10,7 +10,12 @@ import { readPackageVersion, resolveBuildId } from './scripts/lib/buildInfo.ts';
 const SOURCE_DIR = fileURLToPath(new URL('./src', import.meta.url));
 const SETUP_FILE = './tests/setup.ts';
 const PACKAGE_FILE = fileURLToPath(new URL('./package.json', import.meta.url));
-const COVERAGE_EXCLUDE = ['src/main.tsx', 'src/vite-env.d.ts', 'src/**/*.d.ts'];
+const COVERAGE_EXCLUDE = [
+  'src/main.tsx',
+  'src/vite-env.d.ts',
+  'src/**/*.d.ts',
+  'src/data/contract/generated/**',
+];
 /** Floor, not target: a task that lowers coverage below this fails `npm run test:coverage`. */
 const COVERAGE_THRESHOLDS = { statements: 85, branches: 80, functions: 80, lines: 85 };
 const BUILD_TARGET = 'es2022';

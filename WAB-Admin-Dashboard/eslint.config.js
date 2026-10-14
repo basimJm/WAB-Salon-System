@@ -32,6 +32,7 @@ export default tseslint.config(
       'test-results',
       'design',
       'docs',
+      'src/data/contract/generated',
     ],
   },
   js.configs.recommended,

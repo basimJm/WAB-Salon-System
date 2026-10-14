@@ -675,6 +675,21 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — no UI change besides a type. `vitest-axe` rejected (last release 2023): axe-core is used directly. No CI artifact because admin CI is removed: graph is a local command.
 - Notes: ADM-002 set to PENDING (admin CI removed). Added `.claude/launch.json` + `preview:dev-debug` so the built-in browser can serve the build.
 
+### T-040 — ADM-004 API contract tooling
+
+- Project: `WAB-Admin-Dashboard/` (`scripts/{api-sync.ts,lib/contract.ts,lib/jsonSchemaToZod.ts,lib/contractFiles.ts}`, `contract/`, `src/data/contract/`, `tests/{contract,jsonSchemaToZod}`)
+- Branch: `feat/adm-004-contract-tooling`
+- Status: IN REVIEW
+- Acceptance criteria (Admin Tasks ADM-004):
+  - [x] `npm run api:sync` snapshots `WAB-Server/docs/api/openapi.admin.json` into `contract/` and generates zod DTOs + inferred types and operation metadata from it
+  - [x] A test (and `npm run api:check`) fails when the snapshot or generated files are older than the server file
+  - [x] Every operation of the spec has a unique id and a success DTO (116 of 116); converter refuses unknown constructs
+  - [x] Generated code is lazy (tree-shakable), compiles under strict TypeScript, and is exempt only from size/format scans
+- Tests: `npm run verify` — 226 tests; 4 variants build, `check:size` OK; no UI change so no browser/e2e run
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — no new dependency. Hand-written auth DTOs stay until ADM-030. Open: server spec has no `operationId`s, ids are derived from method + path.
+- Notes: `hasMeta` = list response (array `data` with `meta`).
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
