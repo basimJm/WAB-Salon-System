@@ -9,6 +9,7 @@ const IGNORED_PREFIXES = ['reports/'];
 const docs = [
   join(ROOT, 'docs/ADMIN_ARCHITECTURE.md'),
   join(ROOT, 'docs/HOW_TO_ADD_A_MODULE.md'),
+  join(ROOT, 'docs/DESIGN_AUDIT.md'),
   ...listFiles(join(ROOT, 'docs/adr'), /\.md$/),
 ];
 
