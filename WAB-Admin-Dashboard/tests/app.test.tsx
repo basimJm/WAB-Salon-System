@@ -15,7 +15,7 @@ import {
   validateCode,
   validateCredentials,
 } from '@/presentation/controllers/loginValidation';
-import en from '@/locales/en.json';
+import en from '@/locales/en';
 import { makeContainer, renderWithApp } from './helpers/render';
 
 const PASSWORD = 'p'.repeat(MIN_PASSWORD_LENGTH);

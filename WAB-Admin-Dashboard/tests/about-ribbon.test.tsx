@@ -4,8 +4,8 @@ import { EnvRibbon } from '@/presentation/layout/EnvRibbon';
 import { ENV_KEYS } from '@/constants/env';
 import { ROUTES } from '@/constants/routes';
 import { buildAppConfig } from '@/infrastructure/config/appConfig';
-import ar from '@/locales/ar.json';
-import en from '@/locales/en.json';
+import ar from '@/locales/ar';
+import en from '@/locales/en';
 import { makeContainer, renderRoutes, renderWithApp, signInContainer } from './helpers/render';
 
 const BUILD = { version: '3.4.5', buildId: 'c0ffee1' };

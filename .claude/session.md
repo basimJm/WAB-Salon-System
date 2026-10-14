@@ -800,6 +800,22 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — QA found: a setState-in-effect in NumberField (now derived state), an over-broad e2e locator (native select options), tests over 300 lines (split). Fields are react-hook-form-agnostic.
 - Notes: Deps added: react-hook-form, @hookform/resolvers. The first real form (settings, ADM-0xx) should use these as is.
 
+### T-049 — ADM-014 Status badge registry (+ locale files split by area)
+
+- Project: `WAB-Admin-Dashboard/` (`constants/status.ts`, `domain/shared/status.ts`, `components/core/StatusBadge.tsx`, gallery `StatusSection`, `locales/{ar,en}/*.json` + `locales/{ar,en}.ts`, `tests/status.test.tsx`, `tests/i18n.test.ts`, `e2e/status.spec.ts`)
+- Branch: `feat/adm-014-status-badges`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-014; BUSINESS_DOMAIN §2 enums; "test fails if an enum value has no tone or no AR+EN label"):
+  - [x] One registry `STATUS_TONES` for 15 kinds (booking, payment, refund, transaction, review, customer, salon, subscription, payout, catalogRequest, campaign, placement, alert, alertSeverity, export); `StatusBadge` is the only way to show a status; unknown values show as is in the neutral tone
+  - [x] Tests read the admin OpenAPI query enums: every contract value has a tone, the registry has no extras, every value has an AR and EN label, no stale labels, Arabic script in AR
+  - [x] AR + EN labels under `status.<kind>.<VALUE>`; gallery section renders the registry
+  - [x] Locale files exceeded the 300-line rule: split into `src/locales/<lang>/<area>.json` merged by `locales/<lang>.ts`; tests keep both languages' file sets equal and fully merged
+- Tests: `npm run verify` — 409 unit tests, coverage 93.9% statements; 4 variants build, `check:size` OK; e2e 44/44 on the real Chrome (desktop, Pixel portrait/landscape, tablet)
+- Browser check: built dev-debug in the built-in browser, Arabic RTL: 15 kinds, 57 badges, Arabic labels and tones as designed, no horizontal scroll, console clean; English dark covered by e2e
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — QA/lint found a domain-to-design import (tone type now comes from constants) and the locale 300-line breach.
+- Notes: Meaning of tones is a design choice (amber waiting, green ok, rose failed, grey closed/neutral, violet scheduled/trial, purple completed); change in one place.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

@@ -1,0 +1,96 @@
+{
+  "app": {
+    "name": "WAB Admin",
+    "adminLabel": "Admin"
+  },
+  "common": {
+    "loading": "Loading",
+    "retry": "Retry",
+    "close": "Close",
+    "cancel": "Cancel",
+    "back": "Back",
+    "currency": "JOD"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "liveOverview": "Live overview",
+    "analytics": "Analytics",
+    "userJourney": "User journey",
+    "customers": "Customers",
+    "salons": "Salons",
+    "bookings": "Bookings",
+    "finance": "Finance",
+    "reviews": "Reviews",
+    "catalog": "Catalog",
+    "content": "Content",
+    "push": "Push notifications",
+    "reports": "Reports",
+    "alerts": "Alerts",
+    "settings": "Settings",
+    "auditLog": "Audit log"
+  },
+  "topbar": {
+    "alerts": "Alerts",
+    "language": "Switch language",
+    "lightTheme": "Switch to light theme",
+    "darkTheme": "Switch to dark theme",
+    "logout": "Sign out",
+    "toggleSidebar": "Collapse or expand the sidebar",
+    "openMenu": "Open menu"
+  },
+  "module": {
+    "comingSoon": "This section is coming soon",
+    "comingSoonText": "It will be built in an upcoming task."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "The page you are looking for does not exist.",
+    "home": "Back to the panel"
+  },
+  "table": {
+    "empty": "No results",
+    "pagination": "Pagination",
+    "range": "{{from}}–{{to}} of {{total}}",
+    "pageSize": "Rows per page",
+    "previous": "Previous page",
+    "next": "Next page",
+    "pageOf": "Page {{page}} of {{pages}}"
+  },
+  "reason": {
+    "label": "Reason (required)",
+    "required": "Enter a reason of at least {{min}} characters."
+  },
+  "prefs": {
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "env": {
+    "devRibbon": "DEV"
+  },
+  "about": {
+    "title": "About this build",
+    "subtitle": "Version and environment of this admin panel",
+    "version": "Version",
+    "buildId": "Build ID",
+    "environment": "Environment",
+    "variant": "Build variant",
+    "dataSource": "Data source",
+    "language": "Default language",
+    "env": {
+      "dev": "Development",
+      "prod": "Production"
+    },
+    "source": {
+      "mock": "Mock data",
+      "remote": "Live API"
+    },
+    "link": "About",
+    "languageName": {
+      "ar": "Arabic",
+      "en": "English"
+    }
+  }
+}

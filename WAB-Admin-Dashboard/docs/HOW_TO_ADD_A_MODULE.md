@@ -10,7 +10,7 @@ src/data/<feature>/           mapper (DTO -> entity), Remote<Feature>Repository,
 src/data/mock/fixtures/       <feature>.ts  (typed by the generated DTOs)
 src/presentation/<feature>/   use<Feature>Controller.ts, <Feature>Page.tsx, components/
 src/app/routes.tsx            lazy route          src/constants/nav.ts   nav entry
-src/locales/{ar,en}.json      every new string, same keys
+src/locales/{ar,en}/<area>.json every new string, same keys (files stay under 300 lines)
 tests/<feature>/              domain, mapper/repository, controller + page tests
 e2e/<feature>.spec.ts         smoke test of the screen
 ```

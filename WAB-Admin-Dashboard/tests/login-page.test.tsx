@@ -9,8 +9,8 @@ import { MockAuthRepository } from '@/data/auth/MockAuthRepository';
 import { AppError } from '@/infrastructure/errors/AppError';
 import { maskEmail } from '@/presentation/controllers/maskEmail';
 import { formatClock, useCountdown } from '@/presentation/hooks/useCountdown';
-import ar from '@/locales/ar.json';
-import en from '@/locales/en.json';
+import ar from '@/locales/ar';
+import en from '@/locales/en';
 import { App } from '@/app/App';
 import { makeContainer, renderRoutes, renderWithApp } from './helpers/render';
 
