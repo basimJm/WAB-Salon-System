@@ -847,6 +847,23 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — QA found: refs lint (focus return now by id), duplicate "ملف ملف" wording, and adding gallery sections broke older page-wide e2e selectors (every e2e spec now scopes to its own gallery card).
 - Notes: URL-persisted filter state is ADM-028; the picker is controlled (parent owns the value).
 
+### T-052 — ADM-017 Overlay kit
+
+- Project: `WAB-Admin-Dashboard/` (`hooks/useDialogBehavior.ts`, `components/overlay/{Drawer,ConfirmDialog,Menu,Popover,Modal,Toast}`, `design/styles/overlay.css`, gallery `OverlaysSection`, tests `overlays`, `toast-queue`, `e2e/overlays.spec.ts`)
+- Branch: `feat/adm-017-overlays`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-017: Drawer, ConfirmDialog, Menu/Popover, toast queue, destructive and neutral reason-dialog variants; focus trap, Esc and focus return reused from Modal):
+  - [x] `useDialogBehavior` (focus in, Tab trap, Escape, focus restore) extracted from `Modal` and shared by `Modal` and `Drawer`
+  - [x] `Drawer` slides in from the end edge (left in Arabic, 28rem, stretched), `ConfirmDialog` neutral/destructive, `ReasonDialog` both variants tested (reason mandatory, trimmed)
+  - [x] `Menu` on `Popover(panelRole="menu")`: `aria-haspopup`, first enabled item focused, arrows wrap, Home/End, disabled skipped, Enter selects and closes, Escape returns focus, danger items
+  - [x] Toast queue: at most 3 visible (oldest dropped), per-toast timers cleared on dismiss/unmount, close button, `dismiss(id)`, errors announced as `alert`
+  - [x] AR + EN strings, tokens only, gallery section
+- Tests: `npm run verify` — 494 unit tests, coverage 94.3% statements; 4 variants build, `check:size` OK; e2e 68/68 on the real Chrome (desktop, Pixel portrait/landscape, tablet)
+- Browser check: built dev-debug in the built-in browser, Arabic RTL: drawer 430 px flush to the left edge with its title and focus on the close button, Escape closes, reason dialog requires a reason, toast queue capped at 3, console clean; English LTR, Arabic dark and phones in e2e
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — the browser check found a real layout bug the unit tests could not see (drawer only 185 px wide because the base overlay centred and shrank it); fixed with a sized grid track + `justify-items: stretch`, and the e2e now asserts the width.
+- Notes: Focus return in `Popover` uses an element id, not a ref passed during render (react-hooks/refs).
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

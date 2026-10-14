@@ -11,6 +11,8 @@ export interface PopoverProps {
   disabled?: boolean;
   /** Shows the trigger as busy (an action started from the panel is still running). */
   loading?: boolean;
+  /** `menu` for a list of actions (the content must then be `menuitem`s), `group` for any other content. */
+  panelRole?: 'group' | 'menu';
 }
 
 /** Button + floating panel. Closes on Escape and when focus leaves; stays inside the viewport. */
@@ -20,6 +22,7 @@ export function Popover({
   variant = 'secondary',
   disabled,
   loading,
+  panelRole = 'group',
 }: PopoverProps) {
   const panelId = useId();
   const [open, setOpen] = useState(false);
@@ -49,6 +52,7 @@ export function Popover({
         size="sm"
         disabled={disabled}
         loading={loading}
+        aria-haspopup={panelRole === 'menu' ? 'menu' : undefined}
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         onClick={() => setOpen((v) => !v)}
@@ -59,7 +63,7 @@ export function Popover({
         <div
           ref={panelRef}
           id={panelId}
-          role="group"
+          role={panelRole}
           aria-label={label}
           className="wab-popover__panel"
         >

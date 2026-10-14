@@ -121,6 +121,37 @@
         "irbid": "Irbid",
         "zarqa": "Zarqa"
       }
+    },
+    "overlays": {
+      "title": "Overlay kit",
+      "openConfirm": "Confirm dialog",
+      "openConfirmDanger": "Destructive confirm",
+      "openReason": "Reason dialog",
+      "openReasonDanger": "Destructive reason",
+      "openDrawer": "Drawer",
+      "menu": "Actions menu",
+      "menuView": "View",
+      "menuEdit": "Edit (disabled)",
+      "menuBlock": "Block",
+      "last": "Last action: {{what}}",
+      "confirmTitle": "Save changes?",
+      "confirmText": "Your edits will be applied now.",
+      "confirmDangerTitle": "Discard changes?",
+      "confirmDangerText": "Unsaved edits will be lost.",
+      "yes": "Confirm",
+      "discard": "Discard",
+      "reasonTitle": "Approve with a reason",
+      "reasonDangerTitle": "Block this account",
+      "reasonDangerText": "The customer is signed out and notified.",
+      "block": "Block",
+      "drawerTitle": "Details",
+      "drawerText": "Side panel content goes here.",
+      "close": "Close",
+      "toast": {
+        "info": "Info toast",
+        "success": "Success toast",
+        "error": "Error toast"
+      }
     }
   }
 }

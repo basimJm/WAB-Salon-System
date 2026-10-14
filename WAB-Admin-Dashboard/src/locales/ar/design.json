@@ -121,6 +121,37 @@
         "irbid": "إربد",
         "zarqa": "الزرقاء"
       }
+    },
+    "overlays": {
+      "title": "عناصر النوافذ",
+      "openConfirm": "نافذة تأكيد",
+      "openConfirmDanger": "تأكيد لإجراء خطير",
+      "openReason": "نافذة سبب",
+      "openReasonDanger": "سبب لإجراء خطير",
+      "openDrawer": "لوحة جانبية",
+      "menu": "قائمة الإجراءات",
+      "menuView": "عرض",
+      "menuEdit": "تعديل (معطّل)",
+      "menuBlock": "حظر",
+      "last": "آخر إجراء: {{what}}",
+      "confirmTitle": "حفظ التغييرات؟",
+      "confirmText": "سيتم تطبيق تعديلاتك الآن.",
+      "confirmDangerTitle": "تجاهل التغييرات؟",
+      "confirmDangerText": "ستفقد التعديلات غير المحفوظة.",
+      "yes": "تأكيد",
+      "discard": "تجاهل",
+      "reasonTitle": "الموافقة مع ذكر السبب",
+      "reasonDangerTitle": "حظر هذا الحساب",
+      "reasonDangerText": "سيتم تسجيل خروج العميل وإشعاره.",
+      "block": "حظر",
+      "drawerTitle": "التفاصيل",
+      "drawerText": "يوضع محتوى اللوحة الجانبية هنا.",
+      "close": "إغلاق",
+      "toast": {
+        "info": "إشعار معلومة",
+        "success": "إشعار نجاح",
+        "error": "إشعار خطأ"
+      }
     }
   }
 }
