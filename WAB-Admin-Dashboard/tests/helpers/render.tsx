@@ -15,6 +15,7 @@ import { STORAGE_KEYS } from '@/constants/storage';
 import type { Language } from '@/constants/i18n';
 import { createLogger } from '@/infrastructure/logger/logger';
 import { ApiClient } from '@/data/api/ApiClient';
+import { FakeRealtimeClient } from '@/data/realtime/FakeRealtimeClient';
 import { HttpClient } from '@/infrastructure/http/HttpClient';
 
 export function makeContainer(
@@ -35,6 +36,7 @@ export function makeContainer(
         getLanguage: () => 'en',
       }),
     ),
+    realtime: new FakeRealtimeClient(),
     repositories: { auth },
     queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }),
   };

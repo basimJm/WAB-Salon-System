@@ -14,6 +14,16 @@ export interface Budget {
 
 const KB = 1024;
 const GALLERY_CHUNK = 'DesignSystemPage';
+/** Chunks that exist only in dev builds (mock data source and fake realtime): excluded from the budget, banned from prod. */
+const MOCK_CHUNKS = [
+  'mockTransport',
+  'fixtures',
+  'scenarios',
+  'FakeRealtimeClient',
+  'MockAuthRepository',
+];
+const DEV_ONLY_CHUNKS = [GALLERY_CHUNK, ...MOCK_CHUNKS];
+const isDevOnlyChunk = (name: string): boolean => DEV_ONLY_CHUNKS.some((c) => name.includes(c));
 /** Strings that must never reach a production bundle, with what each one gives away. */
 export const PROD_FORBIDDEN_MARKERS: ReadonlyArray<{
   marker: string;
@@ -37,9 +47,9 @@ export interface BuildCheckInput {
 const kb = (n: number) => (n / KB).toFixed(1);
 const gzipSum = (files: readonly BuildFile[]) => files.reduce((sum, f) => sum + f.gzip, 0);
 
-/** What users download: the dev-only gallery chunk is excluded (prod builds are proven not to contain it). */
+/** What users download: dev-only chunks are excluded (prod builds are proven not to contain them). */
 const shipped = (js: readonly BuildFile[]): BuildFile[] =>
-  js.filter((f) => !f.name.includes(GALLERY_CHUNK));
+  js.filter((f) => !isDevOnlyChunk(f.name));
 
 /** Size budgets (release builds only: debug builds are unminified on purpose). */
 function sizeProblems(
@@ -78,11 +88,11 @@ function prodMarkerProblems(js: readonly BuildFile[], isRelease: boolean): strin
   });
 }
 
-/** The design-system gallery is a dev tool: no emitted file of a prod build may be its page chunk. */
+/** The gallery and the mock data source are dev tools: no emitted file of a prod build may be one of their chunks. */
 function prodGalleryProblems(js: readonly BuildFile[]): string[] {
   return js
-    .filter((f) => f.name.includes(GALLERY_CHUNK))
-    .map((f) => `prod build ships the design-system gallery (${f.name})`);
+    .filter((f) => isDevOnlyChunk(f.name))
+    .map((f) => `prod build ships a dev-only chunk (${f.name})`);
 }
 
 /** Performance + security gate for one built variant. Returns human-readable problems. */

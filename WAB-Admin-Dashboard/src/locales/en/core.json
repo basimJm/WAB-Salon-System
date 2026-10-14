@@ -166,5 +166,12 @@
     "idleTitle": "Still there?",
     "idleText": "For your security the session ends in {{seconds}} seconds because there was no activity.",
     "stay": "Stay signed in"
+  },
+  "realtime": {
+    "live": "Live",
+    "connecting": "Connecting",
+    "reconnecting": "Reconnecting",
+    "denied": "Live updates unavailable",
+    "label": "Live updates"
   }
 }

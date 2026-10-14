@@ -3,6 +3,9 @@ import { QUERY_GC_TIME_MS, QUERY_MAX_RETRIES, QUERY_STALE_TIME_MS } from '@/cons
 import type { Language } from '@/constants/i18n';
 import type { ScenarioStore } from '@/data/mock/scenarios';
 import { ApiClient } from '@/data/api/ApiClient';
+import { createRealtime } from '@/data/realtime/createRealtime';
+import { startInvalidationBus } from '@/data/realtime/invalidationBus';
+import type { RealtimeClient } from '@/domain/realtime/realtime';
 import { createRepositories, type Repositories } from '@/data/repositories';
 import type { AppConfig } from '@/infrastructure/config/appConfig';
 import { AppError } from '@/infrastructure/errors/AppError';
@@ -18,6 +21,7 @@ export interface Container {
   readonly session: SessionStore;
   readonly sessionManager: SessionManager;
   readonly api: ApiClient;
+  readonly realtime: RealtimeClient;
   /** Present only when the mock data source is active (dev builds). */
   readonly mock?: { scenarios: ScenarioStore };
   readonly repositories: Repositories;
@@ -75,12 +79,15 @@ export async function createContainer(
       },
     },
   });
+  const realtime = await createRealtime(config, logger);
+  startInvalidationBus(realtime, queryClient);
   return {
     config,
     logger,
     session,
     sessionManager,
     api: new ApiClient(http),
+    realtime,
     ...(mock ? { mock } : {}),
     repositories,
     queryClient,
