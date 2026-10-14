@@ -52,6 +52,7 @@ export default defineConfig(({ mode }) => {
       __APP_VERSION__: JSON.stringify(build.version),
       __BUILD_ID__: JSON.stringify(build.buildId),
       __SHOW_ENV_RIBBON__: JSON.stringify(variant.appEnv === 'dev'),
+      __SHOW_DESIGN_SYSTEM__: JSON.stringify(variant.appEnv === 'dev'),
     },
     build: {
       outDir: `dist/${variant.name}`,

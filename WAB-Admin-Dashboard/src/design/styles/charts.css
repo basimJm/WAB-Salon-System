@@ -1,0 +1,33 @@
+.wab-chart { display: grid; gap: var(--space-3); margin: 0; min-width: 0; }
+.wab-chart__head { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: var(--space-3); }
+.wab-chart__svg, .wab-sparkline { direction: ltr; }
+.wab-chart__svg { width: 100%; height: auto; max-height: var(--size-chart-max); }
+.wab-chart__svg--donut { max-width: var(--size-donut-max); margin-inline: auto; }
+.wab-chart__grid { stroke: var(--c-line); stroke-width: 1; }
+.wab-chart__tick { fill: var(--c-muted); font-size: var(--fs-xs); }
+.wab-chart__total { fill: var(--c-ink); font-size: var(--fs-xl); font-weight: var(--fw-semibold); }
+.wab-chart__empty { fill: none; stroke: var(--c-line2); stroke-width: 12; }
+.wab-chart__line { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.wab-chart__dot { fill: currentColor; }
+
+.wab-legend { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.wab-legend__item { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--c-muted); }
+.wab-legend__swatch { width: var(--size-icon-sm); height: var(--size-icon-sm); border-radius: var(--radius-sm); }
+
+.wab-sparkline { width: var(--size-sparkline-width); height: var(--size-sparkline-height); }
+
+.wab-funnel { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.wab-funnel__step { display: grid; grid-template-columns: minmax(0, var(--size-funnel-label)) minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); }
+.wab-funnel__track { height: var(--size-icon); border-radius: var(--radius-sm); background: var(--c-soft); overflow: hidden; }
+.wab-funnel__bar { display: block; height: 100%; border-radius: var(--radius-sm); }
+.wab-funnel__rate { color: var(--c-muted); }
+
+.wab-heatmap { width: 100%; border-collapse: collapse; }
+.wab-heatmap th, .wab-heat { padding: var(--space-2) var(--space-3); text-align: center; border: var(--size-hairline) solid var(--c-card); }
+.wab-heatmap tbody th { text-align: start; color: var(--c-muted); font-weight: var(--fw-medium); }
+.wab-heat--none { background: var(--c-surface); }
+.wab-heat--0 { background: color-mix(in srgb, var(--chart-1) 12%, var(--c-card)); }
+.wab-heat--1 { background: color-mix(in srgb, var(--chart-1) 30%, var(--c-card)); }
+.wab-heat--2 { background: color-mix(in srgb, var(--chart-1) 50%, var(--c-card)); }
+.wab-heat--3 { background: color-mix(in srgb, var(--chart-1) 72%, var(--c-card)); color: var(--c-on-primary); }
+.wab-heat--4 { background: var(--chart-1); color: var(--c-on-primary); }

@@ -19,6 +19,7 @@ import { Tabs } from '../components/data/Tabs';
 import { ReasonDialog } from '../components/overlay/ReasonDialog';
 import { useToast } from '../components/overlay/Toast';
 import { DEFAULT_PAGE_SIZE } from '@/constants/ui';
+import { ChartsSection } from './design/ChartsSection';
 import { FiltersSection } from './design/FiltersSection';
 import { FormsSection } from './design/FormsSection';
 import { OverlaysSection } from './design/OverlaysSection';
@@ -83,6 +84,7 @@ export default function DesignSystemPage() {
       <FiltersSection />
       <OverlaysSection />
       <TemplatesSection />
+      <ChartsSection />
       <Card className="wab-stack">
         <div className="wab-row">
           <Button>{t('design.primary')}</Button>

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { DESIGN_SYSTEM_PATH } from '../src/app/routes.tsx';
+import { DESIGN_SYSTEM_PATH } from '../src/constants/routes.ts';
 import { noHorizontalScroll, signIn } from './helpers.ts';
 
 test('filter kit (English): chips, presets, custom range validation, compare, export menu', async ({

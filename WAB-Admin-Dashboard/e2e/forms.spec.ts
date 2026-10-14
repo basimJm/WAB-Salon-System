@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { DESIGN_SYSTEM_PATH } from '../src/app/routes.tsx';
+import { DESIGN_SYSTEM_PATH } from '../src/constants/routes.ts';
 import { SEARCH_DEBOUNCE_MS } from '../src/constants/ui.ts';
 import { noHorizontalScroll, signIn } from './helpers.ts';
 

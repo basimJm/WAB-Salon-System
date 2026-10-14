@@ -13,11 +13,18 @@ export interface Budget {
 }
 
 const KB = 1024;
+const GALLERY_CHUNK = 'DesignSystemPage';
 /** Strings that must never reach a production bundle, with what each one gives away. */
-export const PROD_FORBIDDEN_MARKERS: ReadonlyArray<{ marker: string; what: string }> = [
+export const PROD_FORBIDDEN_MARKERS: ReadonlyArray<{
+  marker: string;
+  what: string;
+  /** Only release builds are minified and tree-shaken, so debug builds may still hold dead code. */
+  releaseOnly?: boolean;
+}> = [
   { marker: 'MockAuthRepository', what: 'mock code' },
   { marker: 'mock-access-token', what: 'mock code' },
   { marker: 'wab-env-ribbon', what: 'the DEV ribbon' },
+  { marker: 'designKits', what: 'design-system gallery strings', releaseOnly: true },
 ];
 
 export interface BuildCheckInput {
@@ -29,6 +36,10 @@ export interface BuildCheckInput {
 
 const kb = (n: number) => (n / KB).toFixed(1);
 const gzipSum = (files: readonly BuildFile[]) => files.reduce((sum, f) => sum + f.gzip, 0);
+
+/** What users download: the dev-only gallery chunk is excluded (prod builds are proven not to contain it). */
+const shipped = (js: readonly BuildFile[]): BuildFile[] =>
+  js.filter((f) => !f.name.includes(GALLERY_CHUNK));
 
 /** Size budgets (release builds only: debug builds are unminified on purpose). */
 function sizeProblems(
@@ -58,11 +69,20 @@ function sizeProblems(
 }
 
 /** Strings that must never reach a production bundle. */
-function prodMarkerProblems(js: readonly BuildFile[]): string[] {
+function prodMarkerProblems(js: readonly BuildFile[], isRelease: boolean): string[] {
   return js.flatMap((f) => {
-    const hit = PROD_FORBIDDEN_MARKERS.find(({ marker }) => f.content?.includes(marker));
+    const hit = PROD_FORBIDDEN_MARKERS.find(
+      ({ marker, releaseOnly }) => (isRelease || !releaseOnly) && f.content?.includes(marker),
+    );
     return hit ? [`prod build contains ${hit.what} ("${hit.marker}" in ${f.name})`] : [];
   });
+}
+
+/** The design-system gallery is a dev tool: no emitted file of a prod build may be its page chunk. */
+function prodGalleryProblems(js: readonly BuildFile[]): string[] {
+  return js
+    .filter((f) => f.name.includes(GALLERY_CHUNK))
+    .map((f) => `prod build ships the design-system gallery (${f.name})`);
 }
 
 /** Performance + security gate for one built variant. Returns human-readable problems. */
@@ -74,10 +94,11 @@ export function checkBuild({ files, indexHtml, variant, budget }: BuildCheckInpu
 
   return [
     ...(entry ? [] : ['no entry script referenced by index.html']),
-    ...(isRelease ? sizeProblems(js, css, entry, budget) : []),
+    ...(isRelease ? sizeProblems(shipped(js), css, entry, budget) : []),
     ...(isRelease && files.some((f) => f.name.endsWith('.map'))
       ? ['release build ships source maps']
       : []),
-    ...(variant.startsWith('prod') ? prodMarkerProblems(js) : []),
+    ...(variant.startsWith('prod') ? prodMarkerProblems(js, isRelease) : []),
+    ...(variant.startsWith('prod') ? prodGalleryProblems(js) : []),
   ];
 }

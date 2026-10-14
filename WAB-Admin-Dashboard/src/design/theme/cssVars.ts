@@ -1,5 +1,5 @@
 import type { Direction } from '@/constants/i18n';
-import { BRAND, PALETTES, TONES, type ThemeName } from '../tokens/colors';
+import { BRAND, CHART_PALETTES, PALETTES, TONES, type ThemeName } from '../tokens/colors';
 import {
   FONT_FAMILIES,
   FONT_SIZES,
@@ -29,6 +29,9 @@ export function buildCssVars(theme: ThemeName, direction: Direction): CssVars {
     tones[`--tone-${name}-fg`] = fg;
     tones[`--tone-${name}-bg`] = bg;
   }
+  const chart: CssVars = Object.fromEntries(
+    CHART_PALETTES[theme].map((color, i) => [`--chart-${String(i + 1)}`, color]),
+  );
   return {
     '--root-font-size': ROOT_FONT_SIZE,
     ...prefixed('c', PALETTES[theme]),
@@ -36,6 +39,7 @@ export function buildCssVars(theme: ThemeName, direction: Direction): CssVars {
     '--c-primary-end': BRAND.primaryEnd,
     '--c-on-primary': BRAND.onPrimary,
     ...tones,
+    ...chart,
     ...prefixed('space', SPACING),
     ...prefixed('radius', RADIUS),
     ...prefixed('size', SIZES),

@@ -32,5 +32,10 @@
       "CSV": "ملف CSV",
       "PDF": "ملف PDF"
     }
+  },
+  "chart": {
+    "viewData": "عرض البيانات",
+    "hideData": "إخفاء البيانات",
+    "exportCsv": "تصدير CSV"
   }
 }

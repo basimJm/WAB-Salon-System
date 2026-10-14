@@ -32,5 +32,10 @@
       "CSV": "CSV",
       "PDF": "PDF"
     }
+  },
+  "chart": {
+    "viewData": "View data",
+    "hideData": "Hide data",
+    "exportCsv": "Export CSV"
   }
 }

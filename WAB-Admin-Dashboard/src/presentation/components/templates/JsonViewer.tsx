@@ -11,7 +11,7 @@ const isContainer = (v: unknown): v is Record<string, unknown> | unknown[] =>
   typeof v === 'object' && v !== null;
 
 function Leaf({ value }: { value: unknown }) {
-  if (value === null) return <span className="wab-json__null">null</span>;
+  if (value === null) return <span className="wab-json__null">{String(value)}</span>;
   if (typeof value === 'string')
     return <span className="wab-json__string">&quot;{value}&quot;</span>;
   if (typeof value === 'number' || typeof value === 'boolean')

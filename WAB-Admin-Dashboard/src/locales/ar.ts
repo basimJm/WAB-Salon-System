@@ -8,13 +8,19 @@ import forms from './ar/forms.json';
 import status from './ar/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
+/**
+ * Gallery strings (areas `design`, `designKits`) exist only in dev builds: the flag is a compile-time constant,
+ * so prod bundles drop them. The type stays complete for the code that renders the gallery.
+ */
+const gallery = (__SHOW_DESIGN_SYSTEM__ ? { ...design, ...designKits } : {}) as typeof design &
+  typeof designKits;
+
 const ar = {
   ...core,
   ...login,
   ...errors,
   ...filters,
-  ...design,
-  ...designKits,
+  ...gallery,
   ...forms,
   ...status,
 };

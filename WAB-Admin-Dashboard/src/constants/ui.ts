@@ -22,3 +22,5 @@ export const MAX_VISIBLE_TOASTS = 3;
 /** JSON viewer: levels expanded at first, and the deepest level drawn (deeper values show an ellipsis). */
 export const JSON_OPEN_DEPTH = 2;
 export const JSON_MAX_DEPTH = 12;
+/** Sample booking reference shown by the gallery's detail page. */
+export const GALLERY_SAMPLE_REF = 'WAB-7K2M9Q';

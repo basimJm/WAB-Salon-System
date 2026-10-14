@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { GALLERY_SAMPLE_REF } from '@/constants/ui';
 import { Button } from '../../components/core/Button';
 import { Card } from '../../components/core/Card';
 import { Heading } from '../../components/core/Heading';
@@ -72,7 +73,7 @@ export function TemplatesSection() {
         }}
       />
       <DetailPage
-        title="WAB-7K2M9Q"
+        title={GALLERY_SAMPLE_REF}
         subtitle={k('detailSubtitle')}
         status={<StatusBadge kind="booking" value="PENDING" />}
         actions={<Button variant="danger">{k('reject')}</Button>}
