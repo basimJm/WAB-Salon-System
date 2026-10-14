@@ -559,6 +559,21 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — NOT compiled locally (Gradle blocked) and CI runners were unavailable at the time (jobs failed in seconds with no runner). The language/theme switch screens (Login, Register, Profile, Settings) are feature work: they inject `AppearanceSettings` and call `toggleLanguage()` / `setThemeMode()`.
 - Notes: Existing installs whose stored value is a platform tag (`en_US`) still resolve. Numerals-follow-language is a formatter concern (`NumberFormatter` baseline debt), not in this task.
 
+### T-032 — Admin backlog (ADM-001…086) written as product owner + technical writer
+- Project: `WAB-Admin-Dashboard/docs/WAB_Admin_Tasks.md` (+ links in root `CLAUDE.md`, `ROADMAP.md`, `WAB-Admin-Dashboard/CLAUDE.md`)
+- Branch: `claude/keen-noether-jgokyc`
+- Status: IN REVIEW
+- Acceptance criteria (user request: backlog tasks for WAB-Admin-Dashboard covering dev/prod envs, clean architecture + clean code, base components, layer separation, and API implementation in the data / domain / presentation layers; read the server admin API docs):
+  - [x] One md backlog in the style of `WAB_Server_Tasks.md`: legend, working rules, layer recipe + Definition of Done, stage overview mapped to ROADMAP ADM-01…05 + integration, ordered task tables (ID, branch, needs, server SRV ids, status, notes)
+  - [x] Env/build tasks (Stage 1A) and Appendix B env matrix; layers, shared kernel and clean-code gates (1B); API foundation: endpoint registry, session, transport-level mock, realtime, URL list state, API doc generator (1C); base components: primitives, forms, badges, tables, filters, overlays, templates, charts, media, rich text, shell, gallery (1D)
+  - [x] Every feature task written as domain / data / presentation slices with endpoint ids; 86 tasks, 6 PENDING (hosting, deploy, CSP, contract drift, dev remote switch, error tracking, go-live need owner input or missing server work)
+  - [x] Traceability matrix: all PRD pages A00–A29, PRD global sections, every ABR id → tasks (script-checked)
+  - [x] Appendix A proposed admin API contract (109 endpoints, conventions, server task per endpoint); Appendix C decisions; Appendix D server gaps
+- Tests: docs only; script checks — every `SRV-` id exists in `WAB_Server_Tasks.md`, task ids unique and every *Needs* id precedes its task, every PRD page and ABR id has a task, every endpoint is consumed by a task
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only. FINDINGS to act on: `openapi.admin.json` has no paths and `contracts/` does not exist, so Appendix A is a PROPOSAL for the server/contract owners; 8 server gaps (global search, admin profile, customer devices/notifications, admin variants of salon edit endpoints, deletion-request decision, salon KPIs, journey data = SRV-110 PENDING, scheduled report emails) are listed in Appendix D.
+- Notes: Pending on owner: hosting/domain, error-tracking tool. Recommendations for the open library decisions are in Appendix C.
+
 ### Pending (next)
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
 - SRV-024 — next server task after T-034 is merged (see `WAB-Server/docs/WAB_Server_Tasks.md`).
