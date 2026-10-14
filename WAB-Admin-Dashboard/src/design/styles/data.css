@@ -67,3 +67,11 @@
   box-shadow: var(--shadow-overlay);
 }
 .wab-popover__panel[data-align='start'] { inset-inline-start: 0; inset-inline-end: auto; }
+
+.wab-filterbar { display: grid; gap: var(--space-3); }
+.wab-filterbar__controls { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-3); }
+.wab-filterbar__chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+
+.wab-daterange { display: grid; gap: var(--space-2); min-width: 0; }
+.wab-daterange__custom { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.wab-daterange__summary { margin: 0; color: var(--c-muted); font-size: var(--fs-sm); }

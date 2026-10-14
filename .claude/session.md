@@ -831,6 +831,22 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — QA/e2e found 3 real defects: visually hidden checkboxes (absolute) escaped the scroll box and widened the page (fixed: `.wab-table-wrap { position: relative }`), the column panel opened off-screen on phones (fixed: viewport-aware alignment), two Pagination navs on one page shared a landmark name (fixed: `ariaLabel` prop).
 - Notes: No plural keys in locales (`table.selected` is a plain `{{count}}` key) because the parity test needs identical key sets.
 
+### T-051 — ADM-016 Filters: FilterBar, DateRangePicker, ExportMenu
+
+- Project: `WAB-Admin-Dashboard/` (`constants/dateRange.ts`, `domain/shared/dateRange.ts`, `components/data/{FilterBar,DateRangePicker,ExportMenu}`, `components/overlay/Popover.tsx` (ColumnPicker now uses it), `locales/*/filters.json`, gallery `FiltersSection`, tests `date-range`, `filters`, `e2e/filters.spec.ts`)
+- Branch: `feat/adm-016-filters`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-016; Admin PRD §2 date range picker + export):
+  - [x] Presets Today, Yesterday, Last 7/30 days, This/Last month, This year, Custom with Asia/Amman day boundaries (day changes at 21:00Z), month/leap-year/year edges tested; optional comparison with the previous period of the same length
+  - [x] Custom range is reported only when valid (from <= to), otherwise shows "end must be after start"; Arabic digits in Arabic
+  - [x] `FilterBar` with removable active-filter chips and clear-all; `ExportMenu` (Excel/CSV/PDF) with started/done/failed toasts, busy state, Escape returns focus; popovers stay inside the viewport
+  - [x] AR + EN strings (new `filters` locale area), tokens only, gallery section
+- Tests: `npm run verify` — 474 unit tests, coverage 94.5% statements; 4 variants build, `check:size` OK; e2e 60/60 on the real Chrome (desktop, Pixel portrait/landscape, tablet)
+- Browser check: built dev-debug in the built-in browser, Arabic RTL: presets resolve (last month 09-01..09-30), compare range 08-02..08-31, chips, export panel inside the viewport, toasts, console clean; English LTR, Arabic dark and phones in e2e
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — QA found: refs lint (focus return now by id), duplicate "ملف ملف" wording, and adding gallery sections broke older page-wide e2e selectors (every e2e spec now scopes to its own gallery card).
+- Notes: URL-persisted filter state is ADM-028; the picker is controlled (parent owns the value).
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

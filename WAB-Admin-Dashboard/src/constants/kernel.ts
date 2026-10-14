@@ -19,6 +19,7 @@ export const INTL_LOCALES: Readonly<Record<Language, string>> = {
 };
 
 export const MS_PER_MINUTE = 60_000;
+export const MS_PER_DAY = 86_400_000;
 export const MINUTES_PER_DAY = 1_440;
 /** `YYYY-MM-DD`: a calendar day with no time zone attached. */
 export const LOCAL_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
