@@ -8,8 +8,9 @@ test('gallery primitives: tooltip opens on hover and focus, closes on Escape; ch
   page,
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
-  const tooltip = page.locator(TOOLTIP);
-  const trigger = page.locator('[aria-describedby]').first();
+  const card = page.locator('.wab-card[aria-label="العناصر الأساسية"]');
+  const tooltip = card.locator(TOOLTIP);
+  const trigger = card.locator('[aria-describedby]').first();
   await expect(tooltip).toBeHidden();
 
   await trigger.hover();
@@ -22,7 +23,7 @@ test('gallery primitives: tooltip opens on hover and focus, closes on Escape; ch
   await page.keyboard.press('Escape');
   await expect(tooltip).toBeHidden();
 
-  const removable = page.locator('.wab-chip button');
+  const removable = card.locator('.wab-chip button');
   await expect(removable).toHaveCount(1);
   await removable.click();
   await expect(removable).toHaveCount(0);

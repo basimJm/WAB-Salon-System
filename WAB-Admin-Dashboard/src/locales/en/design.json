@@ -110,6 +110,17 @@
         "aqaba": "Aqaba"
       },
       "pagination": "Data table v2 pagination"
+    },
+    "filters": {
+      "title": "Filter kit",
+      "city": "City",
+      "anyCity": "Any city",
+      "exported": "Exports requested: {{list}}",
+      "cities": {
+        "amman": "Amman",
+        "irbid": "Irbid",
+        "zarqa": "Zarqa"
+      }
     }
   }
 }

@@ -15,3 +15,5 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const MAX_TEXT_LENGTH = 500;
 /** Sample timestamp shown by the gallery's save bar. */
 export const GALLERY_UPDATED_AT = '2026-10-12T09:30:00Z';
+/** Fixed "now" of the gallery's date pickers so screenshots and tests are stable (2026-10-14 12:00 Amman). */
+export const GALLERY_NOW = '2026-10-14T09:00:00Z';
