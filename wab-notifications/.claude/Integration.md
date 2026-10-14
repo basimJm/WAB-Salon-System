@@ -81,6 +81,8 @@ Invalid options throw `NotificationError(NOTIFY_CONFIG_INVALID)` at creation, na
 
 **Firebase projects (owner decision):** two separate projects — dev `wab-dev-397ab`, prod `wab-prod-9c58f` — each with its own service-account key. Keys live in the consumer's secret store, **never in git** (`*firebase-adminsdk*.json` and `*service-account*.json` are git-ignored repo-wide).
 
+**Email sender (owner decision):** WAB sends from `basim.abusnaimeh@gmail.com` (Gmail SMTP). It is consumer config (`EMAIL_FROM_ADDRESS`), never hardcoded in the SDK. On Gmail `SMTP_USER` must be this same account (Gmail rewrites any other From), and `SMTP_PASS` must be a Google **App Password** for it (2-Step Verification on; Google Account → Security → App passwords). Never put the password in git or in chat — set it as an environment variable or secret. Limits: 500 messages per rolling 24 h, 100 recipients per message.
+
 **Suggested WAB-Server env keys** (when `NOTIFIER_PROVIDER=real` is wired): `FCM_SERVICE_ACCOUNT_JSON`, `FCM_PROJECT_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS`.
 
 ## 5. Status and result mapping (every vendor status handled)

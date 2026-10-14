@@ -2,7 +2,10 @@
  * Real-vendor smoke test (never part of CI). Reads credentials from the environment only:
  *   FIREBASE_CREDENTIALS_FILE  path to a service-account JSON (kept outside the repo)
  *   FIREBASE_PROJECT_ID        expected project id (guards against a dev/prod key mix-up)
- *   SMTP_HOST / SMTP_PORT      optional: a local sink such as Mailpit (localhost:1025)
+ *   SMTP_HOST / SMTP_PORT      optional: a local sink such as Mailpit (localhost:1025) or smtp.gmail.com:587
+ *   SMTP_USER / SMTP_PASS      optional: SMTP login (Gmail: the account + an App Password)
+ *   EMAIL_FROM_ADDRESS         sender address (must equal SMTP_USER on Gmail)
+ *   EMAIL_TO                   optional: where the smoke email goes (default: the sender)
  * FCM is called with `dryRun`: Google validates the message and the credentials, nothing is delivered.
  */
 /* eslint-disable no-console */
@@ -39,8 +42,13 @@ const main = async (): Promise<void> => {
         ? { provider: 'fake' }
         : {
             provider: 'smtp',
-            from: { name: 'WAB smoke', address: 'smoke@example.com' },
-            smtp: { host: smtpHost, port: Number(process.env.SMTP_PORT ?? '1025') },
+            from: { name: 'WAB', address: required('EMAIL_FROM_ADDRESS') },
+            smtp: {
+              host: smtpHost,
+              port: Number(process.env.SMTP_PORT ?? '1025'),
+              ...(process.env.SMTP_USER === undefined ? {} : { user: process.env.SMTP_USER }),
+              ...(process.env.SMTP_PASS === undefined ? {} : { pass: process.env.SMTP_PASS }),
+            },
           },
   });
 
@@ -70,7 +78,7 @@ const main = async (): Promise<void> => {
     params: { code: '123456', minutes: '5' },
   });
   const sent = await notifier.sendEmail({
-    to: ['admin@example.com'],
+    to: [process.env.EMAIL_TO ?? process.env.EMAIL_FROM_ADDRESS ?? 'admin@example.com'],
     ...mail,
     idempotencyKey: `smoke:mail:${String(Date.now())}`,
   });
