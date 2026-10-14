@@ -27,7 +27,35 @@
     "reports": "Reports",
     "alerts": "Alerts",
     "settings": "Settings",
-    "auditLog": "Audit log"
+    "auditLog": "Audit log",
+    "sub": {
+      "traffic": "Traffic & users",
+      "screens": "Screens & events",
+      "funnels": "Funnels",
+      "search": "Search & discovery",
+      "retention": "Retention",
+      "bookingsAnalytics": "Bookings",
+      "payments": "Payments",
+      "errors": "Errors & issues",
+      "merchants": "Merchants",
+      "allSalons": "All salons",
+      "applications": "Applications",
+      "transactions": "Transactions",
+      "refunds": "Refunds",
+      "payouts": "Payouts",
+      "subscriptions": "Subscriptions",
+      "reconciliation": "Reconciliation",
+      "services": "Services",
+      "requests": "Requests",
+      "banners": "Banners",
+      "recommended": "Recommended",
+      "legal": "Legal pages",
+      "faq": "FAQ",
+      "contact": "Contact info"
+    },
+    "breadcrumbs": "Breadcrumbs",
+    "expand": "Expand {{name}}",
+    "collapse": "Collapse {{name}}"
   },
   "topbar": {
     "alerts": "Alerts",
@@ -36,7 +64,20 @@
     "darkTheme": "Switch to dark theme",
     "logout": "Sign out",
     "toggleSidebar": "Collapse or expand the sidebar",
-    "openMenu": "Open menu"
+    "openMenu": "Open menu",
+    "search": "Search customers, salons, bookings and members",
+    "adminMenu": "Admin menu",
+    "about": "About this build",
+    "noResults": "No results",
+    "searching": "Searching…",
+    "searchFailed": "Search failed. Try again.",
+    "minChars": "Type at least {{min}} characters",
+    "groups": {
+      "customers": "Customers",
+      "salons": "Salons",
+      "bookings": "Bookings",
+      "members": "Members"
+    }
   },
   "module": {
     "comingSoon": "This section is coming soon",
@@ -110,5 +151,15 @@
   "json": {
     "items": "{{count}} items",
     "fields": "{{count}} fields"
+  },
+  "forbidden": {
+    "title": "You do not have access",
+    "text": "Your account cannot open this page. Ask a super admin if you need it.",
+    "home": "Back to the dashboard"
+  },
+  "serverError": {
+    "title": "Something went wrong",
+    "text": "The page failed to load. Try again, and contact support with the trace id if it keeps happening.",
+    "retry": "Try again"
   }
 }

@@ -127,7 +127,8 @@ describe('routing & auth guard', () => {
       </Suspense>,
       container,
     );
-    await userEvent.click(await screen.findByRole('button', { name: en.topbar.logout }));
+    await userEvent.click(await screen.findByRole('button', { name: /admin|@|test/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: en.topbar.logout }));
     await screen.findByRole('heading', { name: en.login.title });
     expect(container.session.get()).toBeNull();
   });

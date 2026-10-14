@@ -24,3 +24,7 @@ export const JSON_OPEN_DEPTH = 2;
 export const JSON_MAX_DEPTH = 12;
 /** Sample booking reference shown by the gallery's detail page. */
 export const GALLERY_SAMPLE_REF = 'WAB-7K2M9Q';
+/** Nav counters above this show as "99+". */
+export const MAX_COUNTER = 99;
+/** Characters needed before the global search runs, and how many results it shows per group. */
+export const SEARCH_MIN_CHARS = 2;
