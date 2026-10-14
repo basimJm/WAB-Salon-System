@@ -55,6 +55,8 @@
 - Before adding or upgrading a dependency: check it is maintained and not marked deprecated on npm, run `npm outdated` and `npm audit --omit=dev`, prefer the version that matches the other tools' peer ranges, commit the lockfile. If an install prints a deprecation warning, fix it (replace the package) instead of ignoring it.
 - Lint enforces what it can (`@typescript-eslint/no-deprecated` is part of the quality-gates task); the rest is on you in review.
 
-## 8. Workflow (unchanged from the root rules)
+## 8. Workflow
 
-One branch per task from an updated `main`, never push to `main`, three verification loops, four-role review, PR, CI green before merge, `.claude/session.md` and `.claude/memory.md` (root) kept current.
+- **Branching:** `admin` is the master branch for admin work (created from `main`). Every task branches from the latest `origin/admin` as `feat/adm-NNN-<key>` and its PR targets `admin`, never `main`. After each merge, branch the next task from the updated `origin/admin`. If `admin` is behind `main`, merge `main` into `admin` through a PR first. The user merges `admin` into `main`.
+- **CI gate:** Admin CI builds all four variants and runs every check on each PR and each push to `admin`. Merge a task PR into `admin` only when every check on its head commit has completed green; if a check fails, fix the cause, push to the same PR and repeat until green.
+- Also from the root rules: never push to `main`, three verification loops, four-role review, `.claude/session.md` and `.claude/memory.md` (root) kept current.

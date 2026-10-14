@@ -10,7 +10,7 @@ on:
       - "WAB-Admin-Dashboard/**"
       - ".github/workflows/admin-ci.yml"
   push:
-    branches: [main]
+    branches: [main, admin]
     paths:
       - "WAB-Admin-Dashboard/**"
       - ".github/workflows/admin-ci.yml"

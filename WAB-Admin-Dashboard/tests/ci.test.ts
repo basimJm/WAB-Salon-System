@@ -9,9 +9,9 @@ const playwrightConfig = readFileSync(join(process.cwd(), 'playwright.config.ts'
 const projectNames = [...playwrightConfig.matchAll(/name: '([\w-]+)'/g)].map((m) => m[1] as string);
 
 describe('admin CI workflow', () => {
-  it('runs on pull requests and main, only for admin changes, with a read-only token', () => {
+  it('runs on pull requests and pushes to main and admin, only for admin changes, with a read-only token', () => {
     expect(workflow).toMatch(/pull_request:\s+paths:\s+- "WAB-Admin-Dashboard\/\*\*"/);
-    expect(workflow).toMatch(/push:\s+branches: \[main\]/);
+    expect(workflow).toMatch(/push:\s+branches: \[main, admin\]/);
     expect(workflow).toMatch(/^permissions:\s+contents: read/m);
     expect(workflow).toContain('cancel-in-progress: true');
   });
