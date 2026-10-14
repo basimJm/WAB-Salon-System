@@ -1,5 +1,6 @@
 import core from './ar/core.json';
 import login from './ar/login.json';
+import media from './ar/media.json';
 import filters from './ar/filters.json';
 import errors from './ar/errors.json';
 import designKits from './ar/designKits.json';
@@ -20,6 +21,7 @@ const ar = {
   ...login,
   ...errors,
   ...filters,
+  ...media,
   ...gallery,
   ...forms,
   ...status,

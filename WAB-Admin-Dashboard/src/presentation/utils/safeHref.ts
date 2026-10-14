@@ -8,3 +8,14 @@ export function isSafeExternalHref(href: string): boolean {
     return false;
   }
 }
+
+const FILE_PROTOCOLS: readonly string[] = ['https:', 'blob:'];
+
+/** Private files (licenses, IDs) are only shown from signed https URLs, or from a local `blob:` preview. */
+export function isPrivateFileUrl(url: string): boolean {
+  try {
+    return FILE_PROTOCOLS.includes(new URL(url).protocol);
+  } catch {
+    return false;
+  }
+}

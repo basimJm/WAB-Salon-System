@@ -22,6 +22,7 @@ import { DEFAULT_PAGE_SIZE } from '@/constants/ui';
 import { ChartsSection } from './design/ChartsSection';
 import { FiltersSection } from './design/FiltersSection';
 import { FormsSection } from './design/FormsSection';
+import { MediaSection } from './design/MediaSection';
 import { OverlaysSection } from './design/OverlaysSection';
 import { PrimitivesSection } from './design/PrimitivesSection';
 import { StatusSection } from './design/StatusSection';
@@ -85,6 +86,7 @@ export default function DesignSystemPage() {
       <OverlaysSection />
       <TemplatesSection />
       <ChartsSection />
+      <MediaSection />
       <Card className="wab-stack">
         <div className="wab-row">
           <Button>{t('design.primary')}</Button>
