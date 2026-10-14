@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OTP_LENGTH } from '@/constants/auth';
@@ -25,7 +25,7 @@ export default function LoginPage() {
     key ? t(key, { length: OTP_LENGTH }) : undefined;
   const first = ctrl.step === 'credentials';
 
-  const onSubmit = async (e: FormEvent) => {
+  const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
     if (first) {
       await ctrl.submitCredentials(email, password);

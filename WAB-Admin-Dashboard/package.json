@@ -21,7 +21,11 @@
     "check:hardcoded": "node scripts/check-hardcoded.ts",
     "check:size": "node scripts/check-bundle-size.ts",
     "e2e": "playwright test",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run check:env && npm run check:hardcoded"
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test:coverage && npm run check:env && npm run check:hardcoded && npm run check:layers",
+    "test:coverage": "vitest run --coverage",
+    "check:layers": "depcruise src --config .dependency-cruiser.cjs",
+    "graph:layers": "mkdir -p reports && depcruise src --config .dependency-cruiser.cjs --include-only \"^src\" --collapse \"^src/[^/]+\" --output-type mermaid > reports/layers.mmd",
+    "preview:dev-debug": "vite preview --mode dev-debug --outDir dist/dev-debug --port 4173 --strictPort"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans-arabic": "^5.3.0",
@@ -44,6 +48,9 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "@vitest/coverage-v8": "^5.0.4",
+    "axe-core": "^4.14.0",
+    "dependency-cruiser": "^18.6.0",
     "eslint": "^9.39.5",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",

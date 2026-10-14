@@ -659,6 +659,22 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — layers kept (scripts read constants only; ribbon/About use config from the container).
 - Notes: Branched from `origin/admin`, PR targets `admin`. ASSUMPTIONS: `/about` needs sign-in and exists in prod; ribbon is keyed on the environment (`dev-*`). The ribbon CSS class stays in the shared stylesheet (a few bytes); only the JS/markup is removed from prod. Prod `/about` cannot be browsed locally (remote source, no API); covered by unit tests. ADM-002 (CI per environment) is moot while admin CI is removed.
 
+### T-039 — ADM-003 Quality gates (coverage, accessibility, complexity, layer graph)
+
+- Project: `WAB-Admin-Dashboard/` (`eslint.config.js`, `vite.config.ts`, `.dependency-cruiser.cjs`, `tests/{a11y,layers,lint-rules}`, `scripts/lib/budget.ts`, `src/infrastructure/config/envSchema.ts`)
+- Branch: `feat/adm-003-quality-gates`
+- Status: IN REVIEW
+- Acceptance criteria (Admin Tasks ADM-003; root rules §3.9 local gate instead of CI):
+  - [x] Coverage floor (statements 85, branches 80, functions 80, lines 85) enforced by `npm run test:coverage`, which `verify` runs
+  - [x] Accessibility tests with axe-core on login, about, gallery, a module page and 404, in Arabic and English; a sanity test proves axe reports real violations
+  - [x] Lint errors (not warnings): complexity 15, max-params 4, max-depth 4, `@typescript-eslint/no-deprecated`; code that broke them fixed (`parsePublicEnv`, `checkBuild` split; `FormEvent` -> `SyntheticEvent`)
+  - [x] dependency-cruiser: layer rules + no circular imports + no unresolvable imports; `npm run check:layers` in `verify`; `npm run graph:layers` writes a layer graph to git-ignored `reports/layers.mmd`; tests prove clean/violating/circular trees
+- Tests: `npm run verify` — 206 tests, coverage 91.6/87.7/88.2/92.6; 4 variants build, `check:size` OK; e2e 24/24 on the real Chrome (`PW_CHROMIUM_PATH`, run in the user terminal because the sandbox blocks local ports)
+- Browser check: dev-debug preview in the built-in browser: login, OTP step (Arabic RTL, dark), sign-in to `/live`, reload redirects to `/login?next=` by design; console clean
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — no UI change besides a type. `vitest-axe` rejected (last release 2023): axe-core is used directly. No CI artifact because admin CI is removed: graph is a local command.
+- Notes: ADM-002 set to PENDING (admin CI removed). Added `.claude/launch.json` + `preview:dev-debug` so the built-in browser can serve the build.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
