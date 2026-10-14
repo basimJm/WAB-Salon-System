@@ -31,7 +31,12 @@ export interface HttpClientOptions {
 
 export interface RequestOptions<T> {
   schema: z.ZodType<T>;
-  query?: Readonly<Record<string, string | number | boolean | undefined>>;
+  /** A list value is sent as repeated parameters (`status=A&status=B`). */
+  query?: Readonly<
+    Record<string, string | number | boolean | readonly (string | number | boolean)[] | undefined>
+  >;
+  /** Extra request headers (e.g. `Idempotency-Key`). */
+  headers?: Readonly<Record<string, string>>;
   body?: unknown;
   signal?: AbortSignal;
 }
@@ -98,13 +103,16 @@ export class HttpClient {
   private buildUrl(path: string, query: RequestOptions<unknown>['query']): string {
     const url = new URL(path, this.opts.baseUrl);
     for (const [key, value] of Object.entries(query ?? {})) {
-      if (value !== undefined) url.searchParams.set(key, String(value));
+      if (value === undefined) continue;
+      if (Array.isArray(value)) value.forEach((item) => url.searchParams.append(key, String(item)));
+      else url.searchParams.set(key, String(value));
     }
     return url.toString();
   }
 
   private buildInit(method: HttpMethod, o: RequestOptions<unknown>): RequestInit {
     const headers: Record<string, string> = {
+      ...o.headers,
       [HTTP_LANGUAGE_HEADER]: this.opts.getLanguage(),
     };
     const token = this.opts.getToken();

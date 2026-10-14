@@ -13,6 +13,8 @@ import { MIN_PASSWORD_LENGTH, MOCK_OTP_CODE } from '@/constants/auth';
 import { STORAGE_KEYS } from '@/constants/storage';
 import type { Language } from '@/constants/i18n';
 import { createLogger } from '@/infrastructure/logger/logger';
+import { ApiClient } from '@/data/api/ApiClient';
+import { HttpClient } from '@/infrastructure/http/HttpClient';
 
 export function makeContainer(
   auth: AuthRepository = new MockAuthRepository(0),
@@ -22,6 +24,13 @@ export function makeContainer(
     config: buildAppConfig({}, variant),
     logger: createLogger('silent'),
     session: createSessionStore(),
+    api: new ApiClient(
+      new HttpClient({
+        baseUrl: 'http://localhost',
+        getToken: () => null,
+        getLanguage: () => 'en',
+      }),
+    ),
     repositories: { auth },
     queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }),
   };
