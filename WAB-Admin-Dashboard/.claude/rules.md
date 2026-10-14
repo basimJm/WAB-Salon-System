@@ -64,7 +64,7 @@ Green unit tests are not enough for a UI project. **Before every commit** (not o
 - Use the current stable major of React, TypeScript, Vite, React Router, TanStack Query, zod, i18next and every other package; do not pin an old version to avoid a migration, and do not copy examples written for old versions.
 - No deprecated API of any library or of the platform (examples to avoid: `ReactDOM.render`, `defaultProps` on function components, `findDOMNode`, legacy context, string refs, `String.prototype.substr`, `document.execCommand`, `new Buffer`, `moment`-style unmaintained packages). Read the library's changelog/migration guide when you touch it.
 - Before adding or upgrading a dependency: check it is maintained and not marked deprecated on npm, run `npm outdated` and `npm audit --omit=dev`, prefer the version that matches the other tools' peer ranges, commit the lockfile. If an install prints a deprecation warning, fix it (replace the package) instead of ignoring it.
-- Lint enforces what it can (`@typescript-eslint/no-deprecated` is part of the quality-gates task); the rest is on you in review.
+- Lint enforces what it can (`@typescript-eslint/no-deprecated`, complexity, max-params and max-depth are errors); the rest is on you in review.
 
 ## 8. Workflow
 
