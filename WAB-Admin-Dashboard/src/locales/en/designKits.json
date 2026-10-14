@@ -42,6 +42,56 @@
           "actor": "Customer"
         }
       }
+    },
+    "charts": {
+      "title": "Charts kit",
+      "trend": "Bookings trend",
+      "trendLabel": "Bookings, last 7 days",
+      "day": "Day",
+      "created": "Created",
+      "cancelled": "Cancelled",
+      "lineTitle": "Bookings per day",
+      "barTitle": "Created vs cancelled",
+      "stackedTitle": "Bookings per day (stacked)",
+      "donutTitle": "Bookings by status",
+      "status": "Status",
+      "count": "Count",
+      "share": "Share",
+      "bookings": "bookings",
+      "funnelTitle": "Customer funnel",
+      "step": "Step",
+      "ofFirst": "Of first step",
+      "ofPrevious": "Of previous step",
+      "heatTitle": "Weekly retention",
+      "cohort": "Cohort",
+      "week": "Week",
+      "days": {
+        "d1": "Sat",
+        "d2": "Sun",
+        "d3": "Mon",
+        "d4": "Tue",
+        "d5": "Wed",
+        "d6": "Thu",
+        "d7": "Fri"
+      },
+      "statuses": {
+        "approved": "Approved",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      },
+      "steps": {
+        "installs": "Installs",
+        "registered": "Registered",
+        "searched": "Searched",
+        "booked": "Booked",
+        "paid": "Paid"
+      },
+      "cohorts": {
+        "w1": "Week of 5 Oct",
+        "w2": "Week of 12 Oct",
+        "w3": "Week of 19 Oct"
+      }
     }
   }
 }

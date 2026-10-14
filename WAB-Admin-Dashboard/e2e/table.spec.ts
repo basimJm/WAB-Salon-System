@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { DESIGN_SYSTEM_PATH } from '../src/app/routes.tsx';
+import { DESIGN_SYSTEM_PATH } from '../src/constants/routes.ts';
 import { noHorizontalScroll, signIn } from './helpers.ts';
 
 test('table v2 (English): select page, bulk bar, columns, density, paging, export', async ({

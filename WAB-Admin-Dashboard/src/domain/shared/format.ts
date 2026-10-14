@@ -68,3 +68,7 @@ export function formatInstant(
     instant,
   );
 }
+
+/** `0.256` -> "26%" (Arabic digits in Arabic); rounds to a whole percent. */
+export const formatPercent = (ratio: number, language: Language): string =>
+  `${formatNumber(Math.round(ratio * 100), language)}%`;

@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { Suspense } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { buildRoutes, DESIGN_SYSTEM_PATH } from '@/app/routes';
+import { buildRoutes } from '@/app/routes';
+import { DESIGN_SYSTEM_PATH } from '@/constants/routes';
 
 import { MIN_PASSWORD_LENGTH, MOCK_OTP_CODE, OTP_LENGTH } from '@/constants/auth';
 import { NAV_ITEMS } from '@/constants/nav';

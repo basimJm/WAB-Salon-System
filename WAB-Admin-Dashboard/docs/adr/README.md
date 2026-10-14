@@ -8,3 +8,4 @@ One file per decision: `NNNN-short-title.md` with Status, Context, Decision, Con
 | [0002](0002-local-gate-no-ci.md) | No GitHub CI for the admin panel; a local gate protects `admin` |
 | [0003](0003-money-and-time.md) | Money as JOD strings / integer fils, time as UTC instants shown in Asia/Amman |
 | [0004](0004-form-library.md) | Forms use react-hook-form validated by zod; messages are i18n keys |
+| [0005](0005-charts-svg.md) | Charts are hand-written SVG components with a View data table and CSV export |

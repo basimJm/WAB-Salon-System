@@ -99,7 +99,7 @@
 
 .wab-json {
   overflow: auto;
-  max-height: 24rem;
+  max-height: var(--size-json-max);
   padding: var(--space-3);
   border: var(--size-hairline) solid var(--c-line);
   border-radius: var(--radius-md);

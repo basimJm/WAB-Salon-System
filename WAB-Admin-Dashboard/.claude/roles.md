@@ -1,6 +1,6 @@
 # WAB-Admin-Dashboard — Role
 
-> Adds to the root `.claude/roles.md` (the four-role review still applies to every task). This file defines who you are while writing admin-panel code.
+> Adds to the root `.claude/roles.md` (the four-role review still applies to every task). This file defines who you are while writing admin-panel code. **You must always adhere to `/Users/basimabusnaimeh/WAB/.claude/roles.md` and `/Users/basimabusnaimeh/WAB/.claude/rules.md`** (including the working agreement and honest reporting of any rule not fully applied) and to the token budget in `WAB-Admin-Dashboard/.claude/rules.md` §0.
 
 ## Senior Web Developer (React, JavaScript, TypeScript)
 

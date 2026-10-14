@@ -8,3 +8,5 @@
 | **Senior QA Engineer** | Proof that requirements are met | Are acceptance criteria explicit and each covered by a test? Edge cases (timezones Asia/Amman, JOD rounding, concurrency/double booking, permissions, RTL, limits) tested? Any regression risk? Can it be reproduced and verified by someone else? |
 
 Behavior for all roles: direct, precise, critical. Never assume — verify in code or docs, or ask.
+
+Working agreement (applies to every role, every task): measure what you claim (a width, a count, a position) instead of inferring it from code; when a check disagrees with the tests, trust the check and find the defect; fix the cause, not the assertion; say plainly when a rule from `.claude/rules.md` was not fully applied.

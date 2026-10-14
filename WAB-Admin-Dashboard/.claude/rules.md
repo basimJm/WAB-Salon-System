@@ -1,6 +1,16 @@
 # WAB-Admin-Dashboard — Rules (mandatory for every task)
 
 > These rules add to the root `CLAUDE.md`, the root `.claude/*.md` and `WAB-Admin-Dashboard/CLAUDE.md`. They never relax them; if two rules conflict, the stricter one wins. **This `.claude/` folder is where admin-level rules live: add or change admin rules here, not in scattered notes.**
+>
+> **Always adhere to the WAB-level files, in every admin task, without exception:** `/Users/basimabusnaimeh/WAB/.claude/rules.md` (token efficiency, requirements first, delivery rules 1-14: tests, branch from `origin/admin` checked before the first edit, no hardcoding, three real verification loops, four-role review, honest reporting of deviations) and `/Users/basimabusnaimeh/WAB/.claude/roles.md` (the four roles and the working agreement). Read both at the start of every session; the admin rules below only add to them.
+
+## 0. Token budget (applies to every admin task; root `rules.md` §1 stays the parent rule)
+
+- Run the whole local gate with ONE quiet command and read only its summary: `sh scripts/gate.sh` (typecheck, lint, format, unit tests with coverage, hardcoded/layer checks, the four variant builds, `check:size`). It prints one line per step and the first failing step's tail. Do not run `npm run verify`, the builds and `check:size` separately, and never paste their full output.
+- Run e2e once per task, alone (one Playwright run at a time), through the terminal tool, and read only the pass/fail summary line and the failing test names; open the error context of a failing test only.
+- Before reading or listing anything, search for the symbol or file you need; read only the needed range of a file; do not re-read files you just wrote; do not re-run a passing step unless code changed after it.
+- Keep browser checks to one script that returns a compact JSON of measurements, not screenshots or page dumps.
+- Do not close terminal tabs one by one with long output: keep at most one e2e tab open and reuse it by closing it before the next run.
 
 ## 1. Performance first
 

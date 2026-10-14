@@ -12,3 +12,5 @@ declare const __APP_VERSION__: string;
 declare const __BUILD_ID__: string;
 /** True only in dev builds; false lets the bundler drop the DEV ribbon from prod builds. */
 declare const __SHOW_ENV_RIBBON__: boolean;
+/** True only in dev builds; false lets the bundler drop the design-system gallery (route, page and its strings) from prod builds. */
+declare const __SHOW_DESIGN_SYSTEM__: boolean;
