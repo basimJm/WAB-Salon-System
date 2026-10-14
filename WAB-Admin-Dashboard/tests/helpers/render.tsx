@@ -9,6 +9,7 @@ import { createSessionStore } from '@/app/session';
 import { MockAuthRepository } from '@/data/auth/MockAuthRepository';
 import type { AuthRepository } from '@/domain/auth/auth';
 import { buildAppConfig } from '@/infrastructure/config/appConfig';
+import { MIN_PASSWORD_LENGTH, MOCK_OTP_CODE } from '@/constants/auth';
 import { STORAGE_KEYS } from '@/constants/storage';
 import type { Language } from '@/constants/i18n';
 import { createLogger } from '@/infrastructure/logger/logger';
@@ -55,4 +56,13 @@ export function renderRoutes(
     options.language ?? 'en',
   );
   return { router, ...view };
+}
+
+const TEST_EMAIL = 'admin@example.test';
+
+/** Signs the mock admin in through the repository, like the login controller does. */
+export async function signInContainer(container: Container): Promise<void> {
+  const { auth } = container.repositories;
+  const { challengeId } = await auth.login(TEST_EMAIL, 'p'.repeat(MIN_PASSWORD_LENGTH));
+  container.session.set(await auth.verifyOtp(challengeId, MOCK_OTP_CODE));
 }

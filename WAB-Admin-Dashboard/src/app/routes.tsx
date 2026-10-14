@@ -8,6 +8,7 @@ import { ModulePage } from '@/presentation/pages/ModulePage';
 
 const LoginPage = lazy(() => import('@/presentation/pages/LoginPage'));
 const NotFoundPage = lazy(() => import('@/presentation/pages/NotFoundPage'));
+const AboutPage = lazy(() => import('@/presentation/pages/AboutPage'));
 const DesignSystemPage = lazy(() => import('@/presentation/pages/DesignSystemPage'));
 
 export const DESIGN_SYSTEM_PATH = '/design-system';
@@ -29,6 +30,7 @@ export function buildRoutes(showDesignSystem: boolean): RouteObject[] {
       children: [
         { index: true, element: <Navigate to={ROUTES.liveOverview} replace /> },
         ...NAV_ITEMS.map((item) => ({ path: item.path, element: <ModulePage path={item.path} /> })),
+        { path: ROUTES.about, element: <AboutPage /> },
         ...(showDesignSystem ? [{ path: DESIGN_SYSTEM_PATH, element: <DesignSystemPage /> }] : []),
         { path: '*', element: <NotFoundPage /> },
       ],

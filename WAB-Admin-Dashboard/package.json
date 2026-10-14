@@ -17,10 +17,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "check:env": "node scripts/check-env.ts",
     "check:hardcoded": "node scripts/check-hardcoded.ts",
     "check:size": "node scripts/check-bundle-size.ts",
     "e2e": "playwright test",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run check:hardcoded"
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run check:env && npm run check:hardcoded"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans-arabic": "^5.3.0",

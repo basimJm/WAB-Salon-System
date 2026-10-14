@@ -160,5 +160,31 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "env": {
+    "devRibbon": "DEV"
+  },
+  "about": {
+    "title": "About this build",
+    "subtitle": "Version and environment of this admin panel",
+    "version": "Version",
+    "buildId": "Build ID",
+    "environment": "Environment",
+    "variant": "Build variant",
+    "dataSource": "Data source",
+    "language": "Default language",
+    "env": {
+      "dev": "Development",
+      "prod": "Production"
+    },
+    "source": {
+      "mock": "Mock data",
+      "remote": "Live API"
+    },
+    "link": "About",
+    "languageName": {
+      "ar": "Arabic",
+      "en": "English"
+    }
   }
 }

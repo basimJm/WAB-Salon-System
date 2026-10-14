@@ -31,3 +31,21 @@ export const DEFAULT_DATA_SOURCE: Readonly<Record<AppEnv, DataSource>> = {
   dev: 'mock',
   prod: 'remote',
 };
+
+/** Build-time values injected by vite.config.ts (declared in vite-env.d.ts); not VITE_* env keys. */
+export const BUILD_INFO_KEYS = {
+  version: '__APP_VERSION__',
+  buildId: '__BUILD_ID__',
+} as const;
+
+/** Optional build-machine variable that overrides the git sha (for builds outside a git checkout). */
+export const BUILD_ID_ENV_VAR = 'BUILD_ID';
+export const BUILD_ID_UNKNOWN = 'unknown';
+export const BUILD_ID_SHA_LENGTH = 7;
+export const BUILD_ID_PATTERN = /^[A-Za-z0-9._-]{1,64}$/;
+/** Loose semver: MAJOR.MINOR.PATCH with an optional pre-release/build suffix. */
+export const APP_VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+export const FALLBACK_VERSION = '0.0.0';
+
+/** `.env.example` is parsed by `npm run check:env`: the keys listed there must equal ENV_KEYS. */
+export const ENV_EXAMPLE_FILE = '.env.example';

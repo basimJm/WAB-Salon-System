@@ -1,25 +1,7 @@
-import { expect, test, type Page } from '@playwright/test';
-import { MIN_PASSWORD_LENGTH, MOCK_OTP_CODE } from '../src/constants/auth.ts';
+import { expect, test } from '@playwright/test';
 import { DESIGN_SYSTEM_PATH } from '../src/app/routes.tsx';
 import { ROUTES } from '../src/constants/routes.ts';
-
-const EMAIL = 'admin@example.com';
-const PASSWORD = 'x'.repeat(MIN_PASSWORD_LENGTH);
-
-/** Visits `target` signed out, so the guard sends us to login and back (the session is in memory only). */
-async function signIn(page: Page, target: string = ROUTES.root): Promise<void> {
-  await page.goto(target);
-  await expect(page).toHaveURL(new RegExp(ROUTES.login));
-  await page.locator('input[type="email"]').fill(EMAIL);
-  await page.locator('input[type="password"]').fill(PASSWORD);
-  await page.locator('button[type="submit"]').click();
-  await page.locator('input[autocomplete="one-time-code"]').fill(MOCK_OTP_CODE);
-  await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(new RegExp(target === ROUTES.root ? ROUTES.liveOverview : target));
-}
-
-const noHorizontalScroll = (page: Page) =>
-  page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+import { noHorizontalScroll, signIn } from './helpers.ts';
 
 test('login screen fits the viewport and is RTL Arabic by default', async ({ page }) => {
   await page.goto(ROUTES.login);
