@@ -864,6 +864,23 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — the browser check found a real layout bug the unit tests could not see (drawer only 185 px wide because the base overlay centred and shrank it); fixed with a sized grid track + `justify-items: stretch`, and the e2e now asserts the width.
 - Notes: Focus return in `Popover` uses an element id, not a ref passed during render (react-hooks/refs).
 
+### T-053 — ADM-018 Page templates: ListPage, DetailPage, Timeline, JsonViewer
+
+- Project: `WAB-Admin-Dashboard/` (`components/templates/{ListPage,DetailPage,Timeline,JsonViewer}`, `design/styles/surfaces.css`, `locales/*/designKits.json` (new area), gallery `TemplatesSection`, `Pagination`/`TableToolbar` numerals, tests `templates`, `table-v2`, `e2e/templates.spec.ts`)
+- Branch: `feat/adm-018-page-templates`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-018: every module page is composed from these):
+  - [x] `ListPage` = header + filter bar + toolbar + DataTable (loading/empty/error) + server pagination (hidden while loading/empty/failed)
+  - [x] `DetailPage` = back link, header with status and actions, tabs, side info panel (beside the body when `data-bp=expanded`, below otherwise), loading skeleton and error with retry
+  - [x] `Timeline` for status history: given order, actor, Amman 12-hour time with language digits, reason, tone dot; `JsonViewer`: collapsible, always left-to-right, depth guard
+  - [x] AR + EN strings; tokens only; gallery section
+  - [x] Found while checking in the browser: pagination range and selection count used Latin digits in Arabic; now follow the language (PRD numerals rule)
+- Tests: `npm run verify` — 511 unit tests, coverage 94.3% statements; 4 variants build, `check:size` OK; e2e 76/76 on the real Chrome (desktop, Pixel portrait/landscape, tablet)
+- Browser check: built dev-debug in the built-in browser, Arabic RTL: list + detail + timeline (13:05Z shown as 4:05 م, Arabic digits) + JSON, aside beside the tabs at the expanded breakpoint, console clean; English LTR, Arabic dark, phones/tablet in e2e
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — axe found a heading jump (h1 -> h3) in the demo, fixed. Gallery strings of new sections go to `designKits.json` (keeps `design.json` under 300 lines).
+- Notes: The templates are layout only; data fetching/state stays in controllers (feature tasks).
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

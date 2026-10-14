@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatNumber } from '@/domain/shared/format';
+import { useLanguage } from '../../hooks/useLanguage';
 import { Button } from '../core/Button';
 
 export interface TableToolbarProps {
@@ -22,11 +24,12 @@ export function TableToolbar({
   onExport,
 }: TableToolbarProps) {
   const { t } = useTranslation();
+  const { language } = useLanguage();
   return (
     <div className="wab-table-toolbar">
       {selectedCount > 0 ? (
         <div className="wab-row wab-table-toolbar__bulk" role="status">
-          <span>{t('table.selected', { count: selectedCount })}</span>
+          <span>{t('table.selected', { count: formatNumber(selectedCount, language) })}</span>
           {bulkActions}
           {onClearSelection ? (
             <Button variant="ghost" size="sm" onClick={onClearSelection}>

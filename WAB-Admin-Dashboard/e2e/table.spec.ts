@@ -52,6 +52,6 @@ test('table v2 (Arabic dark): popover stays inside the viewport, table scrolls i
   await page.keyboard.press('Escape');
   await expect(panel).toBeHidden();
   await card.getByRole('checkbox', { name: 'تحديد صالون 3', exact: true }).check();
-  await expect(card.getByText('محدد: 1')).toBeVisible();
+  await expect(card.getByText('محدد: ١')).toBeVisible();
   expect(await noHorizontalScroll(page)).toBe(true);
 });

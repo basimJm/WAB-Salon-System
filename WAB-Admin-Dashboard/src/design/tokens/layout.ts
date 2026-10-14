@@ -33,6 +33,7 @@ export const SIZES = {
   modal: '32rem',
   modalMax: '90dvh',
   drawer: '28rem',
+  aside: '20rem',
   toast: '22rem',
   popupMax: '16rem',
   popupMin: '12rem',
