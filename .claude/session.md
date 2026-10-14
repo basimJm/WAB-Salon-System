@@ -816,6 +816,21 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — QA/lint found a domain-to-design import (tone type now comes from constants) and the locale 300-line breach.
 - Notes: Meaning of tones is a design choice (amber waiting, green ok, rose failed, grey closed/neutral, violet scheduled/trial, purple completed); change in one place.
 
+### T-050 — ADM-015 DataTable v2
+
+- Project: `WAB-Admin-Dashboard/` (`components/data/{DataTable,TableHead,TableRow,SelectBox,ColumnPicker,DensityToggle,TableToolbar,tableTypes}`, `hooks/{useColumnVisibility,usePopoverAlign}`, `utils/selection.ts`, gallery `TableSection`, `design/styles/data.css`, `Pagination` aria label, tests `table-logic`, `table-v2`, `popover-align`, `e2e/table.spec.ts`)
+- Branch: `feat/adm-015-table-v2`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-015):
+  - [x] Bulk select by row key (page select-all with mixed state, other pages' keys kept), bulk toolbar with count, clear, bulk actions; row checkbox/action clicks never trigger the row click; Enter on a control inside a row does not open the row
+  - [x] Column visibility (`useColumnVisibility`, last column protected), density (comfortable/compact), per-row actions column, export hook button, sticky header kept, empty/error states kept, server pagination reuses `Pagination` (own aria label per table)
+  - [x] Popover stays inside the viewport (`usePopoverAlign` flips end/start); AR + EN strings; tokens only
+- Tests: `npm run verify` — 437 unit tests, coverage 94.3% statements; 4 variants build, `check:size` OK; e2e 52/52 on the real Chrome (desktop, Pixel portrait/landscape, tablet) incl. `e2e/table.spec.ts`
+- Browser check: built dev-debug in the built-in browser, Arabic RTL: select page (25 rows, bulk bar), column panel in view, hidden column removed, compact density, console clean; English LTR and Arabic dark + phone sizes in e2e
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — QA/e2e found 3 real defects: visually hidden checkboxes (absolute) escaped the scroll box and widened the page (fixed: `.wab-table-wrap { position: relative }`), the column panel opened off-screen on phones (fixed: viewport-aware alignment), two Pagination navs on one page shared a landmark name (fixed: `ariaLabel` prop).
+- Notes: No plural keys in locales (`table.selected` is a plain `{{count}}` key) because the parity test needs identical key sets.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

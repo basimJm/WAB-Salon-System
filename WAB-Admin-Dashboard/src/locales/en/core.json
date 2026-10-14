@@ -54,7 +54,18 @@
     "pageSize": "Rows per page",
     "previous": "Previous page",
     "next": "Next page",
-    "pageOf": "Page {{page}} of {{pages}}"
+    "pageOf": "Page {{page}} of {{pages}}",
+    "selectAll": "Select all rows on this page",
+    "selectRow": "Select {{name}}",
+    "rowActions": "Row actions",
+    "clearSelection": "Clear selection",
+    "columns": "Columns",
+    "resetColumns": "Show all columns",
+    "density": "Row density",
+    "comfortable": "Comfortable",
+    "compact": "Compact",
+    "export": "Export",
+    "selected": "{{count}} selected"
   },
   "reason": {
     "label": "Reason (required)",
