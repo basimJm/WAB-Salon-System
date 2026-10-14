@@ -195,6 +195,25 @@
       "grey": "Draft",
       "purple": "Completed",
       "violet": "Recommended"
+    },
+    "primitives": {
+      "title": "Primitives",
+      "text": "Body text",
+      "muted": "Muted text",
+      "danger": "Error text",
+      "heading": "Heading",
+      "avatar": "Layth Al-Hasan",
+      "link": "Open salons",
+      "external": "Documentation",
+      "chip": "Amman",
+      "chipRemovable": "Active filter",
+      "removeChip": "Remove filter",
+      "tooltipTrigger": "Hover or focus me",
+      "tooltip": "Extra explanation shown on hover and focus",
+      "phone": "Phone",
+      "created": "Created",
+      "status": "Status",
+      "empty": "Not set"
     }
   },
   "prefs": {

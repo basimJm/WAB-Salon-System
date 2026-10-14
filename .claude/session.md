@@ -758,6 +758,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — page ids checked against the frames' own labels.
 
+### T-046 — ADM-012 Typography and primitives
+
+- Project: `WAB-Admin-Dashboard/` (`components/core/{Text,Heading,Link,Divider,Avatar,Chip,Tooltip,KeyValue}`, `design/styles/primitives.css`, gallery section, `tests/primitives.test.tsx`)
+- Branch: `feat/adm-012-primitives`
+- Status: IN REVIEW (not merged: browser check and e2e still to run)
+- Acceptance criteria (Admin Tasks ADM-012):
+  - [x] Text, Heading, Link (safe external links), Divider, Avatar (initials), Chip (removable), Tooltip (hover/focus/Esc), KeyValue; tokens only; AR+EN gallery strings
+  - [x] Unit + axe tests; `npm run verify` 307 tests; 4 variants build, `check:size` OK
+  - [ ] Browser check of `/design-system` (the browser pane was not displayed) and e2e on Chrome
+- Tests: see above
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — pending the browser check above before merge.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
