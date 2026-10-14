@@ -48,6 +48,17 @@
   (use placeholder URLs from the workflow, never real ones in code). New or changed screens also pass `npm run e2e`.
 - Zero compile errors, zero lint/React/Vite/console warnings, zero runtime errors in the browser console. A red or skipped check is a blocker; never use `--no-verify`, never disable or skip a test to get green.
 
+### Run it and look at it before every commit (browser UI check)
+
+Green unit tests are not enough for a UI project. **Before every commit** (not only before the push):
+
+1. **Build and run the project:** build the variant the change affects, serve it (`npm run dev`, or `vite preview --mode <variant> --outDir dist/<variant>` for a built variant) and open it in a real browser (the preinstalled Chromium through Playwright; locally `PW_CHROMIUM_PATH=<chromium>`).
+2. **Use it like an admin:** click through every screen, state and behaviour the change touches, in Arabic RTL and English LTR, light and dark, phone / tablet / desktop widths, portrait and landscape. Exercise loading, empty, error, validation and success states.
+3. **Console and network clean:** zero errors and zero warnings in the browser console, no failed or unexpected requests.
+4. **Match the requirements, not just the code:** compare what you see with the PRD page (A00–A29), the BRD ids, the task row in `docs/WAB_Admin_Tasks.md`, the Design Script and the matching file in `design/`, and with `BUSINESS_DOMAIN.md` (field names, enums, state machines, permissions, error codes, JOD and Asia/Amman rules). Behaviour follows the PRD (PRD wins over the design). Fix every mismatch or record it as an open item in `session.md`; never silently accept it.
+5. **Make it repeatable:** turn what you verified by hand into Playwright e2e assertions (`e2e/`), and keep screenshots of the checked screens in the scratchpad.
+6. **Say it:** the commit/PR body states what was opened and compared (screens, widths, languages, themes) and the result. A UI change committed without this check is not done.
+
 ## 7. Never use deprecated APIs or outdated versions
 
 - Use the current stable major of React, TypeScript, Vite, React Router, TanStack Query, zod, i18next and every other package; do not pin an old version to avoid a migration, and do not copy examples written for old versions.
@@ -58,5 +69,5 @@
 ## 8. Workflow
 
 - **Branching:** `admin` is the master branch for admin work (created from `main`). Every task branches from the latest `origin/admin` as `feat/adm-NNN-<key>` and its PR targets `admin`, never `main`. After each merge, branch the next task from the updated `origin/admin`. If `admin` is behind `main`, merge `main` into `admin` through a PR first. The user merges `admin` into `main`.
-- **No GitHub CI (user decision):** the gate is local. Before every push run the local gate on the developer machine: `npm ci`, `npm run verify`, the four variant builds (`npm run build:dev-debug`, `build:dev-release`, `build:prod-debug`, `build:prod-release`) with `VITE_API_BASE_URL`/`VITE_SOCKET_URL` set to https placeholders, `npm run check:size -- dev-debug dev-release prod-debug prod-release`, and `npm run e2e` for screens. Push only when everything is green and say what you ran. Merge a task PR into `admin` only after that gate; the user also runs the branch on their own device before merging `admin` into `main`.
+- **No GitHub CI (user decision):** the gate is local. Before every push run the local gate on the developer machine: `npm ci`, `npm run verify`, the four variant builds (`npm run build:dev-debug`, `build:dev-release`, `build:prod-debug`, `build:prod-release`) with `VITE_API_BASE_URL`/`VITE_SOCKET_URL` set to https placeholders, `npm run check:size -- dev-debug dev-release prod-debug prod-release`, and `npm run e2e` for screens, after the browser UI check of §6 (build, run, click through, match PRD/BRD/tasks/domain). Push only when everything is green and say what you ran. Merge a task PR into `admin` only after that gate; the user also runs the branch on their own device before merging `admin` into `main`.
 - Also from the root rules: never push to `main`, three verification loops, four-role review, `.claude/session.md` and `.claude/memory.md` (root) kept current.
