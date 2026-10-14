@@ -731,6 +731,19 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — removed the now-unused `API_ERROR_CODES`. Arabic copy needs a native-speaker check.
 
+### T-044 — ADM-010 Architecture guide and ADRs
+
+- Project: `WAB-Admin-Dashboard/docs/{ADMIN_ARCHITECTURE.md,adr/*}`, `tests/docs.test.ts`, `CLAUDE.md`
+- Branch: `feat/adm-010-arch-guide`
+- Status: IN REVIEW
+- Acceptance criteria (Admin Tasks ADM-010):
+  - [x] `ADMIN_ARCHITECTURE.md`: layers, MVC mapping, data flow, contract tooling, error model, kernel, env/variants, gates
+  - [x] ADRs for decisions made so far (contract source, local gate, money/time) with an index
+  - [x] A test fails when a doc names a missing file or an ADR is not indexed
+- Tests: `npm run verify` — 283 tests; docs only, no build/UI impact
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — facts checked against the code (container, HttpClient, scripts).
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
