@@ -92,6 +92,16 @@
         "w2": "Week of 12 Oct",
         "w3": "Week of 19 Oct"
       }
+    },
+    "media": {
+      "title": "Media kit",
+      "banner": "Banner image",
+      "failHint": "Tip: a file whose name contains “fail” simulates a failed upload.",
+      "license": "License document",
+      "previewAr": "Arabic phone preview",
+      "previewEn": "English phone preview",
+      "previewEmptyAr": "No Arabic image yet",
+      "previewEmptyEn": "No English image yet"
     }
   }
 }

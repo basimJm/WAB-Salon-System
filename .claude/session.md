@@ -898,6 +898,22 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATIONS (honest): (1) my earlier filtered gate output hid a failing `check:hardcoded` (9 findings in the charts work) until the quiet gate showed it; fixed with tokens/strings/constants. (2) The previous ADM tasks' "3 loops / 4-role review" were repeated fix-and-recheck cycles plus a self-review, not three separately documented passes. (3) ADM-015/016 work started on the local `admin` branch before its task branch existed (nothing committed on `admin`).
 - Notes: `prod-debug` may still contain dead gallery strings (unminified); the strings marker is release-only on purpose.
 
+### T-055 — ADM-020 Media kit: ImageUploader, DocumentViewer, PhonePreview
+
+- Project: `WAB-Admin-Dashboard/` (`components/media/*`, `hooks/useImageUpload.ts`, `domain/shared/upload.ts`, `utils/{mediaMath,safeHref}.ts`, `constants/media.ts`, `locales/*/media.json`, gallery `MediaSection`, tests `media-logic`, `media`, `e2e/media.spec.ts`)
+- Branch: `feat/adm-020-media-kit`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-020; UI only, the real presign/confirm calls are wired in the banners task):
+  - [x] `ImageUploader` + `LocalizedImageUploader` (Arabic and English): file checked before upload (type, size, empty), progress 0..1, preview, replace/remove, failure kept for retry, drag and drop, disabled state; the upload round trip is an injected function
+  - [x] `DocumentViewer`: zoom 50-300%, rotate both ways, download with `rel=noopener`, PDFs via `<object>`; only https signed URLs or local `blob:` previews are shown (http, javascript:, data: refused)
+  - [x] `PhonePreview`: frame with its own `lang`/`dir`, so an Arabic and an English preview sit side by side on any page direction
+  - [x] AR + EN strings (new `media` area), tokens only, gallery section with a fake upload (a file named "fail" simulates a failure)
+- Tests: `sh scripts/gate.sh` all PASS; e2e 92/92 on the real Chrome (desktop, Pixel portrait/landscape, tablet) incl. `e2e/media.spec.ts` with real file inputs
+- Browser check: built dev-debug in the built-in browser: upload progress 0.4 mid-way then preview, phone previews rtl/ltr inside the viewport, no overflow, console clean
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — the quiet gate surfaced a lint rule (complexity) and a hardcoded rem that were fixed (state machine moved to `useImageUpload`, size to a token).
+- Notes: Keyboard shortcuts on the viewer were dropped (lint rules forbid handlers on static regions); every action is a toolbar button.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

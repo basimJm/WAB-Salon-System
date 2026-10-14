@@ -1,5 +1,6 @@
 import core from './en/core.json';
 import login from './en/login.json';
+import media from './en/media.json';
 import filters from './en/filters.json';
 import errors from './en/errors.json';
 import designKits from './en/designKits.json';
@@ -20,6 +21,7 @@ const en = {
   ...login,
   ...errors,
   ...filters,
+  ...media,
   ...gallery,
   ...forms,
   ...status,
