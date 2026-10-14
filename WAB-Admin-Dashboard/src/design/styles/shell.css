@@ -147,3 +147,20 @@
 .wab-gsearch__hit { display: grid; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); cursor: pointer; }
 .wab-gsearch__hit--active, .wab-gsearch__hit:hover { background: var(--c-hover); }
 .wab-gsearch__hint { color: var(--c-muted); font-size: var(--fs-sm); }
+
+.wab-scenario {
+  position: fixed;
+  inset-block-end: var(--space-3);
+  inset-inline-start: var(--space-3);
+  z-index: var(--z-ribbon);
+}
+
+.wab-scenario__select {
+  padding: var(--space-1) var(--space-3);
+  border: var(--size-hairline) solid var(--tone-amber-fg);
+  border-radius: var(--radius-pill);
+  background: var(--c-card);
+  color: var(--tone-amber-fg);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}

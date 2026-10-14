@@ -15,19 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-060 — ADM-024 Typed API client (endpoint registry)
-
-- Project: `WAB-Admin-Dashboard/` (`data/api/{endpoint,ApiClient,idempotency,queryKeys}.ts`, `HttpClient` headers + list query values, `Container.api`, `docs/HOW_TO_ADD_A_MODULE.md`, `tests/api-client.test.ts`)
-- Branch: `feat/adm-024-endpoint-client`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-024):
-  - [x] `defineEndpoint(OPERATIONS.x, {data, body?, query?})` ties a generated operation to its generated schemas and throws when they disagree with the contract flags; paths come only from the contract; `buildPath` fills and encodes `{params}`
-  - [x] `ApiClient.execute/executePage`: body and query checked before sending (failure = `AppError` validation with `body.<field>` details, nothing fetched), list query values sent as repeated parameters, caller `signal` passed (unmount aborts), response validated, `executePage` = items + meta (missing meta = contract break)
-  - [x] Server `details[]` and `traceId` reach the UI as before (`fieldErrorsFrom`, ErrorState shows the trace id); `queryKey(endpoint, args)` stable key factory; `idempotent` endpoints send a fresh `Idempotency-Key`
-- Tests: `sh scripts/gate.sh` all PASS (23 new unit tests); no UI change so no browser/e2e run
-- Loops: 3/3
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — OPEN ITEM for the server owner: the admin OpenAPI defines no `Idempotency-Key` header yet.
-
 ### T-061 — ADM-025 Session lifecycle (refresh, idle timeout)
 
 - Project: `WAB-Admin-Dashboard/` (`app/sessionManager.ts`, `domain/auth/sessionRules.ts`, `HttpClient` refresh-once, `useIdleTimeout`, `IdleWarningDialog`, mock/remote auth `refresh`/`logout`)
@@ -42,6 +29,21 @@
 - Loops: 1/1 (user decision 2026-10-14: one loop is enough; e2e and full browser matrix skipped on request)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e, no in-browser check for this task (user stopped them); covered by 52 unit tests and the green gate.
 - Notes: split `session.test.ts` (>300 lines) into `session-http.test.ts`; data-layer tests now pass a refresh token to `logout`.
+
+### T-062 — ADM-026 Transport-level mock with scenario switcher
+
+- Project: `WAB-Admin-Dashboard/` (`data/mock/{mockTransport,mockRoute,fixtures,scenarios,messages}.ts`, `constants/mock.ts`, `ScenarioSwitcher`, container wiring)
+- Branch: `feat/adm-026-transport-mock`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-026):
+  - [x] Mock is a `fetch` replacement under the real `HttpClient`: same URLs, envelopes, error shapes, Accept-Language-localized messages (AR+EN)
+  - [x] Fixtures built with `mockRoute(endpoint, ...)`, typed by the generated contract; test checks every route exists in the contract and validates through `ApiClient`
+  - [x] Scenarios success / empty / validation / 401 / 403 / 404 / 409 / 422 / 500 / timeout / slow, switchable at runtime by a dev-only select
+  - [x] Compiled out of prod: `__ALLOW_MOCK__` gate, dev-only locale strings; prod bundles contain no mock code or text (checked)
+- Tests: `sh scripts/gate.sh` all PASS (18 new unit tests); browser check on dev-debug: switcher present with 11 options, no horizontal scroll
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). `MockAuthRepository` still exists; moving login onto transport fixtures belongs to ADM-030 (auth module).
+- Notes: Branch name differs from the backlog row (`feat/adm-026-mock-transport`).
 
 ### Pending (next)
 
