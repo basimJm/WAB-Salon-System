@@ -36,6 +36,9 @@ const rawSchema = z.object({
   [ENV_KEYS.defaultLanguage]: z.preprocess(blankToUndefined, z.enum(LANGUAGES).optional()),
 });
 
+/** Keys the schema reads; `npm run check:env` keeps them equal to ENV_KEYS and `.env.example`. */
+export const ENV_SCHEMA_KEYS: readonly string[] = Object.keys(rawSchema.shape);
+
 /** Validates the public (browser-visible) env for a build variant. Throws ConfigError naming keys only. */
 export function parsePublicEnv(
   raw: Readonly<Record<string, string | undefined>>,

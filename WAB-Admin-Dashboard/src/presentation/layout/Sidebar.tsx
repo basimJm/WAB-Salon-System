@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { NAV_ITEMS } from '@/constants/nav';
+import { ROUTES } from '@/constants/routes';
 import { BRAND_MARK, SIDEBAR_DRAWER_ID } from '@/constants/ui';
 import { cx } from '../utils/cx';
 import { Icon } from '../components/core/Icon';
@@ -46,6 +47,17 @@ export function Sidebar({ mode, collapsed, open, onNavigate }: SidebarProps) {
           </NavLink>
         ))}
       </nav>
+      <NavLink
+        to={ROUTES.about}
+        onClick={onNavigate}
+        className={({ isActive }) =>
+          cx('wab-navitem', 'wab-sidebar__about', isActive && 'wab-navitem--active')
+        }
+        title={shrink ? t('about.link') : undefined}
+      >
+        <Icon name="info" />
+        {!shrink ? <span className="wab-navitem__label">{t('about.link')}</span> : null}
+      </NavLink>
     </aside>
   );
 }

@@ -642,6 +642,23 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only; consistent with root rules and existing admin CLAUDE.md. `@typescript-eslint/no-deprecated` is referenced as part of the quality-gates backlog task, not added here.
 
+### T-038 — ADM-001 Env contract, build info, DEV ribbon, `/about`
+
+- Project: `WAB-Admin-Dashboard/` (`scripts/{check-env.ts,lib/env.ts,lib/buildInfo.ts}`, `src/infrastructure/config/buildInfo.ts`, `src/presentation/{layout/EnvRibbon,pages/AboutPage}.tsx`, `.env.example`, `vite.config.ts`, `.claude/rules.md` §6)
+- Branch: `feat/adm-001-env-contract`
+- Status: IN REVIEW
+- Acceptance criteria (Admin Tasks ADM-001; Admin PRD §2 env/build; user rule: build, run in a browser and UI-test before every commit):
+  - [x] New rule `WAB-Admin-Dashboard/.claude/rules.md` §6: build, run, click through (AR/EN, light/dark, sizes), console clean, compare with PRD/BRD/task/Design Script/`BUSINESS_DOMAIN.md`, e2e for it, state it in the commit/PR; linked from admin `CLAUDE.md`, root rules §3.9, memory
+  - [x] `.env.example` documents every key (a comment each, no values); `npm run check:env` (part of `verify`) fails when `.env.example`, `ENV_KEYS` and the zod schema disagree, naming keys only
+  - [x] App version (package.json), build id (`BUILD_ID` override, else short git sha, else `unknown`) and environment injected at build and validated (`parseBuildInfo`); a missing/invalid value fails the build naming keys only
+  - [x] DEV ribbon in dev variants only; compiled out of prod JS (`__SHOW_ENV_RIBBON__`), and `check:size` fails a prod bundle containing it
+  - [x] `/about` (inside the signed-in shell, sidebar footer link): version, build id, environment, variant, data source, default language; AR + EN; no URLs shown
+- Tests: `npm run verify` — 17 files; e2e 24/24 on Chromium (desktop, Pixel portrait/landscape, tablet); WebKit projects run on the user's device; four variants build, `check:size` OK
+- Browser check (new rule): dev-debug and prod-release served with `vite preview` and driven in Chromium at 390x844, 844x390, 820x1180, 1440x900, Arabic light and English dark: console clean, no horizontal scroll, ribbon on login and `/about` in dev, zero ribbon in prod, values match package.json and git sha
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — layers kept (scripts read constants only; ribbon/About use config from the container).
+- Notes: Branched from `origin/admin`, PR targets `admin`. ASSUMPTIONS: `/about` needs sign-in and exists in prod; ribbon is keyed on the environment (`dev-*`). The ribbon CSS class stays in the shared stylesheet (a few bytes); only the JS/markup is removed from prod. Prod `/about` cannot be browsed locally (remote source, no API); covered by unit tests. ADM-002 (CI per environment) is moot while admin CI is removed.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

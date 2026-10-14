@@ -72,7 +72,7 @@ export const MOTION = {
   easing: 'ease-out',
 } as const;
 
-export const Z_INDEX = { sidebar: '30', topbar: '20', overlay: '40', modal: '50', toast: '60' } as const;
+export const Z_INDEX = { sidebar: '30', topbar: '20', overlay: '40', modal: '50', toast: '60', ribbon: '70' } as const;
 
 export const SHADOWS = {
   light: {

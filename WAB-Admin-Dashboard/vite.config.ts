@@ -1,12 +1,15 @@
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
-import { ENV_KEYS, PUBLIC_ENV_PREFIX } from './src/constants/env.ts';
+import { ENV_KEYS, FALLBACK_VERSION, PUBLIC_ENV_PREFIX } from './src/constants/env.ts';
+import { parseBuildInfo } from './src/infrastructure/config/buildInfo.ts';
 import { parsePublicEnv } from './src/infrastructure/config/envSchema.ts';
 import { resolveVariant } from './src/infrastructure/config/variant.ts';
+import { readPackageVersion, resolveBuildId } from './scripts/lib/buildInfo.ts';
 
 const SOURCE_DIR = fileURLToPath(new URL('./src', import.meta.url));
 const SETUP_FILE = './tests/setup.ts';
+const PACKAGE_FILE = fileURLToPath(new URL('./package.json', import.meta.url));
 const BUILD_TARGET = 'es2022';
 const VENDOR_GROUPS: ReadonlyArray<readonly [string, RegExp]> = [
   ['vendor-react', /node_modules\/(react|react-dom|scheduler)\//],
@@ -26,6 +29,10 @@ export default defineConfig(({ mode }) => {
   for (const key of Object.values(ENV_KEYS)) publicEnv[key] = process.env[key] ?? fileEnv[key];
   // Fail the build early (keys only, never values) instead of shipping a broken bundle.
   parsePublicEnv(publicEnv, variant);
+  const build = parseBuildInfo({
+    version: readPackageVersion(PACKAGE_FILE) ?? FALLBACK_VERSION,
+    buildId: resolveBuildId(process.env),
+  });
 
   return {
     plugins: [react()],
@@ -34,6 +41,9 @@ export default defineConfig(({ mode }) => {
       __WAB_ENV__: JSON.stringify(publicEnv),
       __BUILD_VARIANT__: JSON.stringify(variant.name),
       __ALLOW_MOCK__: JSON.stringify(variant.allowMock),
+      __APP_VERSION__: JSON.stringify(build.version),
+      __BUILD_ID__: JSON.stringify(build.buildId),
+      __SHOW_ENV_RIBBON__: JSON.stringify(variant.appEnv === 'dev'),
     },
     build: {
       outDir: `dist/${variant.name}`,

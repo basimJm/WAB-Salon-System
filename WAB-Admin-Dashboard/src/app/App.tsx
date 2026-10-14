@@ -1,5 +1,6 @@
 import { Suspense, useMemo } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { EnvRibbon } from '@/presentation/layout/EnvRibbon';
 import { Spinner } from '@/presentation/components/feedback/Spinner';
 import { useViewport } from '@/presentation/hooks/useViewport';
 import { useContainer } from './ContainerContext';
@@ -16,6 +17,7 @@ export function App() {
   return (
     <Suspense fallback={<Spinner />}>
       <RouterProvider router={router} />
+      <EnvRibbon />
     </Suspense>
   );
 }

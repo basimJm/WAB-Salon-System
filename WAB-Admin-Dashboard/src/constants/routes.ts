@@ -16,6 +16,7 @@ export const ROUTES = {
   alerts: '/alerts',
   settings: '/settings',
   auditLog: '/audit-log',
+  about: '/about',
 } as const;
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 

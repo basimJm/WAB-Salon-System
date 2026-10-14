@@ -13,8 +13,12 @@ export interface Budget {
 }
 
 const KB = 1024;
-/** Strings that must never reach a production bundle. */
-export const MOCK_MARKERS = ['MockAuthRepository', 'mock-access-token'];
+/** Strings that must never reach a production bundle, with what each one gives away. */
+export const PROD_FORBIDDEN_MARKERS: ReadonlyArray<{ marker: string; what: string }> = [
+  { marker: 'MockAuthRepository', what: 'mock code' },
+  { marker: 'mock-access-token', what: 'mock code' },
+  { marker: 'wab-env-ribbon', what: 'the DEV ribbon' },
+];
 
 export interface BuildCheckInput {
   files: readonly BuildFile[];
@@ -55,8 +59,8 @@ export function checkBuild({ files, indexHtml, variant, budget }: BuildCheckInpu
     problems.push('release build ships source maps');
   if (variant.startsWith('prod')) {
     for (const f of js) {
-      const hit = MOCK_MARKERS.find((m) => f.content?.includes(m));
-      if (hit) problems.push(`prod build contains mock code ("${hit}" in ${f.name})`);
+      const hit = PROD_FORBIDDEN_MARKERS.find(({ marker }) => f.content?.includes(marker));
+      if (hit) problems.push(`prod build contains ${hit.what} ("${hit.marker}" in ${f.name})`);
     }
   }
   return problems;

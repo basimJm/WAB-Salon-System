@@ -21,7 +21,7 @@
 3. **Arabic and English for every string.** Add each key to both `src/locales/ar.json` and `en.json`; `tests/i18n.test.ts` fails on a missing key, empty value, or placeholder mismatch. Arabic (RTL) is the default.
 4. **Performance first.** Lazy-load every route, keep the entry small, split vendors, paginate every list server-side, memoize only where measured, no layout thrash. `scripts/budget.json` sets gzip budgets; `npm run check:size` enforces them on release builds.
 5. **All four build variants must build:** `dev-debug`, `dev-release`, `prod-debug`, `prod-release` (§4).
-6. **Run the full local gate before every push** (there is no GitHub CI for the admin panel): `npm run verify`, all four variant builds, `check:size`, and e2e for screens. The user also runs the branch on their own device before it reaches `main`.
+6. **Run the full local gate before every push** (there is no GitHub CI for the admin panel): `npm run verify`, all four variant builds, `check:size`, and e2e for screens. Before **every commit** also build and run the app in a browser, test the UI and check it against the PRD, BRD, task and `BUSINESS_DOMAIN.md` (`.claude/rules.md` §6). The user also runs the branch on their own device before it reaches `main`.
 7. **Zero runtime errors, compile errors and warnings.** `tsc` strict, `eslint --max-warnings 0`, no console output in tests/builds, no React/Vite warnings.
 8. **No file longer than 300 lines** (code, CSS, JSON, tests). Split instead. ESLint `max-lines` and the hardcoded scan enforce it.
 9. **Responsive everywhere:** phone, tablet, desktop; portrait and landscape; every size scales (rem tokens, fluid root font size, `minmax(0, …)` grids, no horizontal page scroll). New UI ships with an e2e check in `e2e/`.

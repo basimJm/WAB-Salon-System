@@ -50,3 +50,16 @@
   white-space: nowrap;
 }
 .wab-tabs__tab[aria-selected='true'] { color: var(--c-accent); border-block-end-color: var(--c-accent); }
+
+.wab-about { display: grid; gap: var(--space-3); }
+.wab-about__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-block-end: var(--space-3);
+  border-block-end: var(--size-hairline) solid var(--c-line);
+}
+.wab-about__row:last-child { padding-block-end: 0; border-block-end: 0; }
+.wab-about__label { color: var(--c-muted); }
+.wab-about__value { font-weight: var(--fw-medium); overflow-wrap: anywhere; }

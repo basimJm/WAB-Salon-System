@@ -58,6 +58,9 @@
 .wab-navitem--active { background: var(--c-soft); color: var(--c-accent); }
 .wab-sidebar--collapsed .wab-navitem { justify-content: center; padding-inline: 0; }
 
+/* Pushes the About link to the bottom of the sidebar, away from the module list. */
+.wab-sidebar__about { margin: var(--space-3); margin-block-start: auto; }
+
 .wab-topbar {
   position: sticky;
   top: 0;
@@ -101,3 +104,19 @@
 .wab-auth__card { width: 100%; max-width: var(--size-auth-card); display: grid; gap: var(--space-4); }
 .wab-auth__title { font-size: var(--fs-lg); font-weight: var(--fw-semibold); }
 .wab-auth__form { display: grid; gap: var(--space-4); }
+
+.wab-env-ribbon {
+  position: fixed;
+  inset-block-end: var(--space-3);
+  inset-inline-end: var(--space-3);
+  z-index: var(--z-ribbon);
+  padding: var(--space-1) var(--space-3);
+  border: var(--size-hairline) solid var(--tone-amber-fg);
+  border-radius: var(--radius-pill);
+  /* Tinted over the card color so the ribbon stays readable over any content. */
+  background: linear-gradient(var(--tone-amber-bg), var(--tone-amber-bg)), var(--c-card);
+  color: var(--tone-amber-fg);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  pointer-events: none;
+}
