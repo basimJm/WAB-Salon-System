@@ -645,7 +645,7 @@
 ### T-038 — ADM-001 Env contract, build info, DEV ribbon, `/about`
 
 - Project: `WAB-Admin-Dashboard/` (`scripts/{check-env.ts,lib/env.ts,lib/buildInfo.ts}`, `src/infrastructure/config/buildInfo.ts`, `src/presentation/{layout/EnvRibbon,pages/AboutPage}.tsx`, `.env.example`, `vite.config.ts`, `.claude/rules.md` §6)
-- Branch: `feat/adm-001-env-contract` (from `origin/admin`; PR targets `admin`)
+- Branch: `feat/adm-001-env-contract`
 - Status: IN REVIEW
 - Acceptance criteria (Admin Tasks ADM-001; Admin PRD §2 env/build; user rule: build, run in a browser and UI-test before every commit):
   - [x] New rule `WAB-Admin-Dashboard/.claude/rules.md` §6: build, run, click through (AR/EN, light/dark, sizes), console clean, compare with PRD/BRD/task/Design Script/`BUSINESS_DOMAIN.md`, e2e for it, state it in the commit/PR; linked from admin `CLAUDE.md`, root rules §3.9, memory
@@ -657,7 +657,7 @@
 - Browser check (new rule): dev-debug and prod-release served with `vite preview` and driven in Chromium at 390x844, 844x390, 820x1180, 1440x900, Arabic light and English dark: console clean, no horizontal scroll, ribbon on login and `/about` in dev, zero ribbon in prod, values match package.json and git sha
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — layers kept (scripts read constants only; ribbon/About use config from the container).
-- Notes: ASSUMPTIONS: `/about` needs sign-in and exists in prod; ribbon is keyed on the environment (`dev-*`). The ribbon CSS class stays in the shared stylesheet (a few bytes); only the JS/markup is removed from prod. Prod `/about` cannot be browsed locally (remote source, no API); covered by unit tests. ADM-002 (CI per environment) is moot while admin CI is removed.
+- Notes: Branched from `origin/admin`, PR targets `admin`. ASSUMPTIONS: `/about` needs sign-in and exists in prod; ribbon is keyed on the environment (`dev-*`). The ribbon CSS class stays in the shared stylesheet (a few bytes); only the JS/markup is removed from prod. Prod `/about` cannot be browsed locally (remote source, no API); covered by unit tests. ADM-002 (CI per environment) is moot while admin CI is removed.
 
 ### Pending (next)
 
