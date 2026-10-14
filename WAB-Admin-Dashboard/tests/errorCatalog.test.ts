@@ -5,8 +5,8 @@ import { ERROR_KINDS } from '@/constants/errors';
 import { AppError } from '@/infrastructure/errors/AppError';
 import { fieldErrorsFrom } from '@/infrastructure/errors/fieldErrors';
 import { kindFromResponse } from '@/infrastructure/errors/normalize';
-import ar from '@/locales/ar.json';
-import en from '@/locales/en.json';
+import ar from '@/locales/ar';
+import en from '@/locales/en';
 import { components } from '@/data/contract/generated/dto';
 import { ROOT } from './helpers/files';
 

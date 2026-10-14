@@ -1,0 +1,96 @@
+{
+  "app": {
+    "name": "لوحة تحكم WAB",
+    "adminLabel": "لوحة التحكم"
+  },
+  "common": {
+    "loading": "جارٍ التحميل",
+    "retry": "إعادة المحاولة",
+    "close": "إغلاق",
+    "cancel": "إلغاء",
+    "back": "رجوع",
+    "currency": "د.أ"
+  },
+  "nav": {
+    "label": "التنقل الرئيسي",
+    "liveOverview": "نظرة مباشرة",
+    "analytics": "التحليلات",
+    "userJourney": "رحلة المستخدم",
+    "customers": "العملاء",
+    "salons": "الصالونات",
+    "bookings": "الحجوزات",
+    "finance": "المالية",
+    "reviews": "التقييمات",
+    "catalog": "الكتالوج",
+    "content": "المحتوى",
+    "push": "الإشعارات",
+    "reports": "التقارير",
+    "alerts": "التنبيهات",
+    "settings": "الإعدادات",
+    "auditLog": "سجل الأفعال"
+  },
+  "topbar": {
+    "alerts": "التنبيهات",
+    "language": "تبديل اللغة",
+    "lightTheme": "التبديل إلى الوضع الفاتح",
+    "darkTheme": "التبديل إلى الوضع الداكن",
+    "logout": "تسجيل الخروج",
+    "toggleSidebar": "طي أو توسيع القائمة الجانبية",
+    "openMenu": "فتح القائمة"
+  },
+  "module": {
+    "comingSoon": "هذا القسم قادم قريبًا",
+    "comingSoonText": "سيتم بناؤه في مهمة قادمة."
+  },
+  "notFound": {
+    "title": "الصفحة غير موجودة",
+    "text": "الصفحة التي تبحث عنها غير موجودة.",
+    "home": "العودة إلى اللوحة"
+  },
+  "table": {
+    "empty": "لا توجد نتائج",
+    "pagination": "تقسيم الصفحات",
+    "range": "{{from}}–{{to}} من {{total}}",
+    "pageSize": "عدد الصفوف",
+    "previous": "الصفحة السابقة",
+    "next": "الصفحة التالية",
+    "pageOf": "صفحة {{page}} من {{pages}}"
+  },
+  "reason": {
+    "label": "السبب (مطلوب)",
+    "required": "أدخل سببًا لا يقل عن {{min}} أحرف."
+  },
+  "prefs": {
+    "language": "اللغة",
+    "theme": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام"
+  },
+  "env": {
+    "devRibbon": "تطوير"
+  },
+  "about": {
+    "title": "حول هذا الإصدار",
+    "subtitle": "إصدار وبيئة لوحة الإدارة هذه",
+    "version": "الإصدار",
+    "buildId": "معرّف البناء",
+    "environment": "البيئة",
+    "variant": "نوع البناء",
+    "dataSource": "مصدر البيانات",
+    "language": "اللغة الافتراضية",
+    "env": {
+      "dev": "تطوير",
+      "prod": "إنتاج"
+    },
+    "source": {
+      "mock": "بيانات تجريبية",
+      "remote": "الواجهة الفعلية"
+    },
+    "link": "حول",
+    "languageName": {
+      "ar": "العربية",
+      "en": "الإنجليزية"
+    }
+  }
+}

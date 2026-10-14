@@ -21,6 +21,7 @@ import { useToast } from '../components/overlay/Toast';
 import { DEFAULT_PAGE_SIZE } from '@/constants/ui';
 import { FormsSection } from './design/FormsSection';
 import { PrimitivesSection } from './design/PrimitivesSection';
+import { StatusSection } from './design/StatusSection';
 
 interface DemoRow {
   id: string;
@@ -73,6 +74,7 @@ export default function DesignSystemPage() {
       </section>
       <PrimitivesSection />
       <FormsSection />
+      <StatusSection />
       <Card className="wab-stack">
         <div className="wab-row">
           <Button>{t('design.primary')}</Button>
