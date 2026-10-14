@@ -613,6 +613,21 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only. FINDINGS to act on: `openapi.admin.json` has no paths and `contracts/` does not exist, so Appendix A is a PROPOSAL for the server/contract owners; 8 server gaps (global search, admin profile, customer devices/notifications, admin variants of salon edit endpoints, deletion-request decision, salon KPIs, journey data = SRV-110 PENDING, scheduled report emails) are listed in Appendix D.
 - Notes: Pending on owner: hosting/domain, error-tracking tool. Recommendations for the open library decisions are in Appendix C.
 
+### T-036 — Admin backlog v2 after the server merged (ADM-001…083)
+- Project: `WAB-Admin-Dashboard/docs/WAB_Admin_Tasks.md` (+ `ROADMAP.md` count, `.claude/memory.md`)
+- Branch: `claude/keen-noether-jgokyc`
+- Status: IN REVIEW
+- Acceptance criteria (user request: branch from `main` after the server PR merged, update the backlog after reading the real server APIs; order: project setup, project structure and architecture, design, then business logic and API implementation):
+  - [x] Backlog reordered into Phase 1 setup, Phase 2 structure and architecture, Phase 3 design, Phase 4 business logic and API (4A foundation, 4B modules, 4C blocked by server gaps), Phase 5 integration and release
+  - [x] Appendix A generated from `openapi.admin.json` (116 operations); every operation is consumed by a task (build check); the old proposed contract and its 109 endpoints are removed
+  - [x] Tasks rewritten to the real API: contract tooling (generated types), real auth flow, settings via `PUT /settings/{key}`, single booking status endpoint, campaigns, recommended reorder/end, exports, alerts, reports, audit log
+  - [x] Server gaps G1–G11 listed (Appendix D) with PENDING tasks in Phase 4C; Appendix F lists what changed from v1
+  - [x] Traceability matrix (PRD pages A00–A29, global sections, every ABR id) still complete
+- Tests: docs only; script checks — every `SRV-` id exists, task ids unique, every *Needs* precedes its task, every PRD page and ABR id traced, every OpenAPI operation consumed
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only. FINDINGS: the existing admin login (T-031) uses a contract the server does not have (`challengeId`, `resend-otp`); fixed by the auth task. 15 of 83 tasks are PENDING (hosting, error tracking, dev URL, and the server gaps).
+- Notes: Server `contracts/` (INT-01) still does not exist; the server OpenAPI is the contract of record.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
