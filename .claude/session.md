@@ -1828,6 +1828,18 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - no security defect found; accepted risks and platform gaps are written in the checklist. Customer/merchant all-routes audit not built (guards differ per router).
 
+### T-121 — `wab-*` SDK rules: `.claude/{CLAUDE,Rules,Integration}.md` in all five packages
+
+- Project: `wab-otp`, `wab-storage`, `wab-notifications`, `wab-payments`, `wab-analytics`
+- Branch: `claude/busy-johnson-2rch94`
+- Status: DONE (docs only; SDK code is the next tasks)
+- Acceptance criteria (owner rules; roles: backend, architect, integration, implementation engineer):
+  - [x] Each package has `.claude/CLAUDE.md`, `Rules.md` (owner rules + definition of done) and `Integration.md` (technical design: ports/adapters, config dev/prod, status mapping, errors, tests/loop test, adoption, open questions, status, changelog)
+  - [x] Port signatures match the WAB-Server provider interfaces; BRD requirements reflected; assumed-missing requirements listed
+- Tests: docs only (no source code)
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - Integration.md describes the TARGET design (v0.0.0); each SDK task updates it. Suggested order: storage, notifications, otp, payments, analytics.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
