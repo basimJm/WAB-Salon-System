@@ -18,7 +18,11 @@
     "seed:demo": "node dist/seeds/runDemo.js",
     "seed:admin": "node dist/seeds/runAdmin.js",
     "docs": "npm run build && node dist/docs/generate.js",
-    "loadtest": "node dist/utils/loadtest/cli.js"
+    "loadtest": "node dist/utils/loadtest/cli.js",
+    "ensure-sdks": "node scripts/ensure-sdks.cjs",
+    "prebuild": "npm run ensure-sdks",
+    "pretypecheck": "npm run ensure-sdks",
+    "pretest": "npm run ensure-sdks"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
@@ -59,6 +63,7 @@
     "sharp": "^0.35.5",
     "socket.io": "^4.8.4",
     "swagger-ui-express": "^5.0.1",
+    "wab-notifications": "file:../wab-notifications",
     "zod": "^4.6.6"
   },
   "overrides": {
