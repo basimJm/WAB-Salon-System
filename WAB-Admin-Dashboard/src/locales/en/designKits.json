@@ -109,6 +109,18 @@
       "start": "Starts",
       "end": "Ends",
       "saved": "Schedule: {{start}} to {{end}}"
+    },
+    "shell": {
+      "title": "Shell: global search and breadcrumbs",
+      "customer": "Dana Saleh",
+      "salon": "Layla Beauty",
+      "salon2": "Layla Hair",
+      "city": "Amman",
+      "pending": "Pending",
+      "hint": "Type 2+ characters (a query containing “x” finds nothing)",
+      "picked": "Picked: {{label}}",
+      "crumbModule": "Finance",
+      "crumbPage": "Refunds"
     }
   }
 }

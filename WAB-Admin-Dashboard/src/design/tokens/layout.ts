@@ -47,6 +47,7 @@ export const SIZES = {
   toast: '22rem',
   popupMax: '16rem',
   popupMin: '12rem',
+  searchMax: '28rem',
   tableMin: '40rem',
   skeletonLine: '1rem',
   spinner: '1.5rem',

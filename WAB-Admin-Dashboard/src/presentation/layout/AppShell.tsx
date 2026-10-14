@@ -7,6 +7,8 @@ import { Suspense } from 'react';
 import { Spinner } from '../components/feedback/Spinner';
 import { useSession } from '../controllers/useSession';
 import { useViewport } from '../hooks/useViewport';
+import { Breadcrumbs } from '../components/layout/Breadcrumbs';
+import { useBreadcrumbs } from '../controllers/useBreadcrumbs';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
@@ -18,6 +20,7 @@ export function AppShell() {
   const { repositories, session, logger } = useContainer();
   const current = useSession();
   const location = useLocation();
+  const crumbs = useBreadcrumbs();
   const docked = breakpoint === 'expanded';
   const [collapsed, setCollapsed] = useState(
     () => safeStorage.get(STORAGE_KEYS.sidebarCollapsed) === TRUE,
@@ -82,6 +85,7 @@ export function AppShell() {
           onLogout={onLogout}
         />
         <main id="main" className="wab-content">
+          <Breadcrumbs crumbs={crumbs} />
           <Suspense fallback={<Spinner />}>
             <Outlet />
           </Suspense>

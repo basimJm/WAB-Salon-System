@@ -1,13 +1,15 @@
 import { lazy } from 'react';
 import { Navigate, useLocation, type RouteObject } from 'react-router-dom';
 import { DESIGN_SYSTEM_PATH, LOGIN_REDIRECT_PARAM, ROUTES } from '@/constants/routes';
-import { NAV_ITEMS } from '@/constants/nav';
+import { NAV_PAGES } from '@/constants/nav';
 import { AppShell } from '@/presentation/layout/AppShell';
 import { useSession } from '@/presentation/controllers/useSession';
 import { ModulePage } from '@/presentation/pages/ModulePage';
 
 const LoginPage = lazy(() => import('@/presentation/pages/LoginPage'));
 const NotFoundPage = lazy(() => import('@/presentation/pages/NotFoundPage'));
+const ForbiddenPage = lazy(() => import('@/presentation/pages/ForbiddenPage'));
+const ServerErrorPage = lazy(() => import('@/presentation/pages/ServerErrorPage'));
 const AboutPage = lazy(() => import('@/presentation/pages/AboutPage'));
 /** Compile-time: `__SHOW_DESIGN_SYSTEM__` is false in prod builds, so the whole gallery chunk is dropped. */
 const DesignSystemPage = __SHOW_DESIGN_SYSTEM__
@@ -30,7 +32,9 @@ export function buildRoutes(showDesignSystem: boolean): RouteObject[] {
       element: <RequireAuth />,
       children: [
         { index: true, element: <Navigate to={ROUTES.liveOverview} replace /> },
-        ...NAV_ITEMS.map((item) => ({ path: item.path, element: <ModulePage path={item.path} /> })),
+        ...NAV_PAGES.map((item) => ({ path: item.path, element: <ModulePage path={item.path} /> })),
+        { path: ROUTES.forbidden, element: <ForbiddenPage /> },
+        { path: ROUTES.serverError, element: <ServerErrorPage /> },
         { path: ROUTES.about, element: <AboutPage /> },
         ...(showDesignSystem && DesignSystemPage
           ? [{ path: DESIGN_SYSTEM_PATH, element: <DesignSystemPage /> }]

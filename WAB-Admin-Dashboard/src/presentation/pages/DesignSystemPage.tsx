@@ -27,6 +27,7 @@ import { OverlaysSection } from './design/OverlaysSection';
 import { PrimitivesSection } from './design/PrimitivesSection';
 import { StatusSection } from './design/StatusSection';
 import { RichTextSection } from './design/RichTextSection';
+import { ShellSection } from './design/ShellSection';
 import { TableSection } from './design/TableSection';
 import { TemplatesSection } from './design/TemplatesSection';
 
@@ -89,6 +90,7 @@ export default function DesignSystemPage() {
       <ChartsSection />
       <MediaSection />
       <RichTextSection />
+      <ShellSection />
       <Card className="wab-stack">
         <div className="wab-row">
           <Button>{t('design.primary')}</Button>
