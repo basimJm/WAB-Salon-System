@@ -32,6 +32,7 @@ export const SIZES = {
   contentMax: '90rem',
   modal: '32rem',
   modalMax: '90dvh',
+  drawer: '28rem',
   toast: '22rem',
   popupMax: '16rem',
   popupMin: '12rem',

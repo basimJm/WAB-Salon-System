@@ -17,3 +17,5 @@ export const MAX_TEXT_LENGTH = 500;
 export const GALLERY_UPDATED_AT = '2026-10-12T09:30:00Z';
 /** Fixed "now" of the gallery's date pickers so screenshots and tests are stable (2026-10-14 12:00 Amman). */
 export const GALLERY_NOW = '2026-10-14T09:00:00Z';
+/** Most toasts on screen at once; a newer one pushes the oldest out. */
+export const MAX_VISIBLE_TOASTS = 3;
