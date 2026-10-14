@@ -1,0 +1,48 @@
+{
+  "settings": {
+    "subtitle": "قواعد المنصة التي تنطبق على كل التطبيقات فورًا. كل تعديل يتطلب سببًا ويُسجَّل في سجل التدقيق.",
+    "default": "الافتراضي: {{value}}",
+    "isDefault": "افتراضي",
+    "overridden": "معدّل",
+    "useDefault": "استخدام الافتراضي",
+    "saved": "تم حفظ الإعدادات",
+    "confirmTitle": "حفظ {{count}} إعدادات معدّلة",
+    "confirmText": "تُطبَّق التغييرات على كل التطبيقات فورًا. اكتب سبب التعديل.",
+    "group": {
+      "discovery": "الاكتشاف",
+      "booking": "قواعد الحجز",
+      "otp": "رمز التحقق (OTP)"
+    },
+    "unit": {
+      "km": "كم",
+      "minutes": "دقيقة",
+      "seconds": "ثانية",
+      "days": "يوم",
+      "digits": "خانات"
+    },
+    "error": {
+      "required": "أدخل قيمة",
+      "integer": "أعداد صحيحة فقط",
+      "min": "يجب ألا تقل عن {{min}}",
+      "max": "يجب ألا تزيد عن {{max}}",
+      "list": "لا تكرر القيمة"
+    },
+    "key": {
+      "discovery_nearbyRadiusKm": "نطاق البحث القريب",
+      "booking_slotMinutes": "الفاصل بين المواعيد",
+      "booking_maxDaysAhead": "أبعد يوم يمكن الحجز إليه",
+      "booking_maxCompanions": "عدد المرافقين في الحجز",
+      "booking_minLeadMinutes": "الحد الأدنى للإشعار قبل الموعد",
+      "booking_paymentHoldMinutes": "مدة حجز الموعد أثناء الدفع",
+      "booking_autoCancelAfterStartMinutes": "إلغاء الطلب المعلّق تلقائيًا بعد وقت البدء",
+      "booking_pendingAlertBeforeMinutes": "تنبيه الصالون قبل الموعد المعلّق",
+      "booking_reminderMinutes": "التذكيرات قبل الموعد (مفصولة بفاصلة)",
+      "otp_length": "طول الرمز",
+      "otp_resendAfterSec": "مدة الانتظار قبل إعادة الإرسال",
+      "otp_maxRequests": "عدد طلبات الرمز المسموحة",
+      "otp_requestWindowSec": "نافذة احتساب الطلبات",
+      "otp_maxWrong": "عدد المحاولات الخاطئة المسموحة",
+      "otp_blockSec": "مدة الحظر بعد تجاوز المحاولات"
+    }
+  }
+}

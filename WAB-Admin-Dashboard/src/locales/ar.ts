@@ -6,6 +6,7 @@ import errors from './ar/errors.json';
 import designKits from './ar/designKits.json';
 import design from './ar/design.json';
 import forms from './ar/forms.json';
+import settings from './ar/settings.json';
 import status from './ar/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -25,6 +26,7 @@ const ar = {
   ...gallery,
   ...forms,
   ...status,
+  ...settings,
 };
 
 export default ar;

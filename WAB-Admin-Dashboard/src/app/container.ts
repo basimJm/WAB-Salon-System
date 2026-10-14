@@ -43,13 +43,14 @@ export async function createContainer(
   let fetchFn: FetchFn | undefined;
   let mock: Container['mock'];
   if (__ALLOW_MOCK__ && config.dataSource === 'mock') {
-    const [{ createMockTransport }, { createScenarioStore }, { MOCK_ROUTES }] = await Promise.all([
-      import('@/data/mock/mockTransport'),
-      import('@/data/mock/scenarios'),
-      import('@/data/mock/fixtures'),
-    ]);
+    const [{ createMockTransport }, { createScenarioStore }, { createMockRoutes }] =
+      await Promise.all([
+        import('@/data/mock/mockTransport'),
+        import('@/data/mock/scenarios'),
+        import('@/data/mock/fixtures'),
+      ]);
     const scenarios = createScenarioStore();
-    fetchFn = createMockTransport({ routes: MOCK_ROUTES, scenarios });
+    fetchFn = createMockTransport({ routes: createMockRoutes(), scenarios });
     mock = { scenarios };
   }
   const http = new HttpClient({

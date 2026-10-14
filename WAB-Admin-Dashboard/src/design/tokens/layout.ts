@@ -34,6 +34,7 @@ export const SIZES = {
   modalMax: '90dvh',
   drawer: '28rem',
   aside: '20rem',
+  fieldMin: '16rem',
   chartMax: '20rem',
   donutMax: '14rem',
   sparklineWidth: '6rem',

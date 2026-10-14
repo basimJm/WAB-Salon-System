@@ -1044,3 +1044,16 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e/browser check (no UI mounted; user decision). Mapping state -> API query parameter names is left to each feature (server names differ).
 - Notes: pass the options object as a module-level constant.
 
+
+### T-065 — ADM-029 API-consumption doc generator
+
+- Project: `WAB-Admin-Dashboard/` (`scripts/{docs-api.ts,lib/apiDoc.ts,api-exemptions.json}`, `docs/API_CONSUMED.md`, `package.json` scripts, `verify`)
+- Branch: `feat/adm-029-api-doc`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-029):
+  - [x] `npm run docs:api` writes `docs/API_CONSUMED.md`: every contract operation with its id, planned task (Appendix A), implementing source files (`OPERATIONS.<id>` uses outside generated/mock code) and status
+  - [x] `npm run docs:api:check` (part of `verify`) fails when the file is stale, when an operation has no task, no code consumer and no exemption, or when an exemption names no operation
+- Tests: `sh scripts/gate.sh` all PASS (6 new unit tests); script/docs only, no UI
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — 116 operations, 0 implemented yet (login still uses hand-written endpoints until ADM-030). Rerun `npm run docs:api` after any task that consumes an operation, or `verify` fails as stale.
+

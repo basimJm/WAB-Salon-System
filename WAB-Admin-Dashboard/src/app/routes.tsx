@@ -1,4 +1,4 @@
-import { lazy } from 'react';
+import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 import { Navigate, useLocation, type RouteObject } from 'react-router-dom';
 import { DESIGN_SYSTEM_PATH, LOGIN_REDIRECT_PARAM, ROUTES } from '@/constants/routes';
 import { NAV_PAGES } from '@/constants/nav';
@@ -10,11 +10,20 @@ const LoginPage = lazy(() => import('@/presentation/pages/LoginPage'));
 const NotFoundPage = lazy(() => import('@/presentation/pages/NotFoundPage'));
 const ForbiddenPage = lazy(() => import('@/presentation/pages/ForbiddenPage'));
 const ServerErrorPage = lazy(() => import('@/presentation/pages/ServerErrorPage'));
+/** Feature pages that replace the placeholder of their nav entry (one line per finished module task). */
+const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>> = {
+  [ROUTES.settings]: lazy(() => import('@/presentation/settings/SettingsPage')),
+};
 const AboutPage = lazy(() => import('@/presentation/pages/AboutPage'));
 /** Compile-time: `__SHOW_DESIGN_SYSTEM__` is false in prod builds, so the whole gallery chunk is dropped. */
 const DesignSystemPage = __SHOW_DESIGN_SYSTEM__
   ? lazy(() => import('@/presentation/pages/DesignSystemPage'))
   : null;
+
+function pageFor(path: string) {
+  const Feature = FEATURE_PAGES[path];
+  return Feature ? <Feature /> : <ModulePage path={path} />;
+}
 
 function RequireAuth() {
   const session = useSession();
@@ -32,7 +41,7 @@ export function buildRoutes(showDesignSystem: boolean): RouteObject[] {
       element: <RequireAuth />,
       children: [
         { index: true, element: <Navigate to={ROUTES.liveOverview} replace /> },
-        ...NAV_PAGES.map((item) => ({ path: item.path, element: <ModulePage path={item.path} /> })),
+        ...NAV_PAGES.map((item) => ({ path: item.path, element: pageFor(item.path) })),
         { path: ROUTES.forbidden, element: <ForbiddenPage /> },
         { path: ROUTES.serverError, element: <ServerErrorPage /> },
         { path: ROUTES.about, element: <AboutPage /> },
