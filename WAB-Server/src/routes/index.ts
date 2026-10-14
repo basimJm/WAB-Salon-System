@@ -5,24 +5,35 @@ import { createCustomerRouter } from '../modules/customer';
 import { createHealthRouter } from './health';
 import { mount } from './mount';
 import { createMerchantRouter } from '../modules/merchant';
+import { unavailablePayments, type ApiServices } from '../modules/services';
+import { createWebhooksRouter } from '../modules/webhooks/webhooks.routes';
+import { WEBHOOK_PREFIX } from '../constants/payments';
 
 export type NamespaceRouters = Readonly<Record<ApiNamespace, Router>>;
 
-const defaultRouters = (): NamespaceRouters => ({
-  customer: createCustomerRouter(),
-  merchant: createMerchantRouter(),
-  admin: createAdminRouter(),
+const defaultRouters = (services: ApiServices): NamespaceRouters => ({
+  customer: createCustomerRouter(services),
+  merchant: createMerchantRouter(services),
+  admin: createAdminRouter(services),
+});
+
+/** Routes outside the client namespaces: gateway callbacks. */
+export const defaultWebhooks = (services: ApiServices): { path: string; router: Router } => ({
+  path: WEBHOOK_PREFIX,
+  router: createWebhooksRouter(services.payments ?? unavailablePayments),
 });
 
 /** Root router: each client namespace lives under its own prefix and token scope. */
 export const createRootRouter = (
-  routers: NamespaceRouters = defaultRouters(),
+  routers: NamespaceRouters = defaultRouters({}),
   health: Router = createHealthRouter(),
+  extra: readonly { path: string; router: Router }[] = [defaultWebhooks({})],
 ): Router => {
   const root = Router();
   mount(root, '', health);
   mount(root, API_PREFIXES.customer, routers.customer);
   mount(root, API_PREFIXES.merchant, routers.merchant);
   mount(root, API_PREFIXES.admin, routers.admin);
+  for (const { path, router } of extra) mount(root, path, router);
   return root;
 };

@@ -22,6 +22,8 @@ const matchesCondition = (actual: unknown, condition: unknown): boolean => {
         return (expected as unknown[]).some((item) => same(actual, item));
       case '$nin':
         return !(expected as unknown[]).some((item) => same(actual, item));
+      case '$exists':
+        return (actual !== undefined && actual !== null) === expected;
       case '$gt':
         return (actual as number) > (expected as number);
       case '$gte':
@@ -30,10 +32,47 @@ const matchesCondition = (actual: unknown, condition: unknown): boolean => {
         return (actual as number) < (expected as number);
       case '$lte':
         return (actual as number) <= (expected as number);
+      case '$regex':
+        return new RegExp(
+          String(expected),
+          typeof condition['$options'] === 'string' ? condition['$options'] : '',
+        ).test(String(actual));
+      case '$geoWithin': {
+        const [[lng, lat], radians] = (expected as { $centerSphere: [[number, number], number] })
+          .$centerSphere;
+        const point = (actual as { coordinates?: [number, number] } | undefined)?.coordinates;
+        if (point === undefined) return false;
+        const rad = (d: number): number => (d * Math.PI) / 180;
+        const a =
+          Math.sin(rad(point[1] - lat) / 2) ** 2 +
+          Math.cos(rad(lat)) * Math.cos(rad(point[1])) * Math.sin(rad(point[0] - lng) / 2) ** 2;
+        return 2 * Math.asin(Math.min(1, Math.sqrt(a))) <= radians;
+      }
+      case '$elemMatch':
+        return (
+          Array.isArray(actual) && actual.some((item) => matches(item as Doc, expected as Filter))
+        );
+      case '$options':
+        return true;
       default:
         throw new Error(`fake model does not support ${operator}`);
     }
   });
+};
+
+/** `$set` like MongoDB: a dotted key writes into the nested document. */
+const applySet = (doc: Doc, set: Doc): void => {
+  for (const [path, value] of Object.entries(set)) {
+    const parts = path.split('.');
+    const last = parts.pop() ?? path;
+    let target = doc;
+    for (const part of parts) {
+      const next = target[part];
+      if (typeof next !== 'object' || next === null) target[part] = {};
+      target = target[part] as Doc;
+    }
+    target[last] = value;
+  }
 };
 
 /** Reads `a.b` from nested documents, like a MongoDB dotted path. */
@@ -90,9 +129,11 @@ class FakeQuery<T> implements PromiseLike<T> {
     const keys = Object.entries(this.sortSpec);
     const sorted = [...docs].sort((a, b) => {
       for (const [key, direction] of keys) {
-        const left = String(a[key] instanceof Date ? a[key].getTime() : a[key]);
-        const right = String(b[key] instanceof Date ? b[key].getTime() : b[key]);
-        const numeric = typeof a[key] === 'number' || a[key] instanceof Date;
+        const first = valueAt(a, key);
+        const second = valueAt(b, key);
+        const left = String(first instanceof Date ? first.getTime() : first);
+        const right = String(second instanceof Date ? second.getTime() : second);
+        const numeric = typeof first === 'number' || first instanceof Date;
         const order = numeric
           ? Number(left) - Number(right)
           : left < right
@@ -140,7 +181,17 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
     countDocuments: (filter: Filter) => new FakeQuery(() => select(filter).length),
     exists: (filter: Filter) =>
       new FakeQuery(() => (select(filter)[0] ? { _id: select(filter)[0]?._id } : null)),
-    findOneAndUpdate: (filter: Filter, update: { $set: Doc }, options: { upsert?: boolean } = {}) =>
+    findOneAndUpdate: (
+      filter: Filter,
+      update: {
+        $set?: Doc;
+        $unset?: Doc;
+        $inc?: Record<string, number>;
+        $push?: Doc;
+        $max?: Doc;
+      },
+      options: { upsert?: boolean } = {},
+    ) =>
       new FakeQuery(() => {
         let doc = select(filter)[0];
         if (!doc) {
@@ -158,8 +209,57 @@ export const createFakeModel = (initial: Doc[] = []): FakeModel => {
           };
           docs.push(doc);
         }
-        Object.assign(doc, update.$set, { updatedAt: new Date() });
+        applySet(doc, update.$set ?? {});
+        doc['updatedAt'] = new Date();
+        for (const [key, step] of Object.entries(update.$inc ?? {})) {
+          applySet(doc, { [key]: Number(valueAt(doc, key) ?? 0) + step });
+        }
+        for (const [key, candidate] of Object.entries(update.$max ?? {})) {
+          const current = valueAt(doc, key);
+          if (current === undefined || (candidate as number) > (current as number)) {
+            applySet(doc, { [key]: candidate });
+          }
+        }
+        for (const [key, item] of Object.entries(update.$push ?? {})) {
+          const current = valueAt(doc, key);
+          applySet(doc, {
+            [key]: [...(Array.isArray(current) ? (current as unknown[]) : []), item],
+          });
+        }
+        for (const key of Object.keys(update.$unset ?? {})) Reflect.deleteProperty(doc, key);
         return { ...doc };
+      }),
+    aggregate: (pipeline: [{ $match: Filter }, { $group?: { sum?: { $sum?: unknown } } }]) =>
+      new FakeQuery(() => {
+        const found = select(pipeline[0].$match);
+        // `{ $group: { sum: { $sum: '$field' } } }` sums that field (reviews: `rating`).
+        const summed = pipeline[1].$group?.sum?.$sum;
+        const field = typeof summed === 'string' ? summed.slice(1) : 'rating';
+        return found.length === 0
+          ? []
+          : [
+              {
+                _id: null,
+                sum: found.reduce((total, doc) => total + Number(doc[field]), 0),
+                count: found.length,
+              },
+            ];
+      }),
+    deleteOne: (filter: Filter) =>
+      new FakeQuery(() => {
+        const index = docs.findIndex((doc) => matches(doc, filter));
+        if (index >= 0) docs.splice(index, 1);
+        return { deletedCount: index >= 0 ? 1 : 0 };
+      }),
+    updateMany: (filter: Filter, update: { $set?: Doc; $unset?: Doc }) =>
+      new FakeQuery(() => {
+        const found = select(filter);
+        for (const doc of found) {
+          applySet(doc, update.$set ?? {});
+          doc['updatedAt'] = new Date();
+          for (const key of Object.keys(update.$unset ?? {})) Reflect.deleteProperty(doc, key);
+        }
+        return { modifiedCount: found.length };
       }),
   };
   return { model: model as unknown as Model<never>, docs, calls };

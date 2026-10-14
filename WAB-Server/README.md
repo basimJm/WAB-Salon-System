@@ -30,3 +30,34 @@ npm run build && npm start            # API on the PORT from .env.development
 ## External providers
 
 OTP, file storage, push/email, payments and analytics sit behind interfaces in `src/providers`. `OTP_PROVIDER`, `STORAGE_PROVIDER`, `NOTIFIER_PROVIDER`, `PAYMENT_PROVIDER` and `ANALYTICS_PROVIDER` choose `fake` (in-repo stand-in, the default outside production) or `real`. Production must set every provider to `real`; the config check refuses anything else. The real integrations arrive with the `wab-*` packages, until then `real` fails at start-up with a clear error.
+
+## Authentication
+
+Access tokens are HS256 JWTs signed with `JWT_ACCESS_SECRET` (required, at least 32 characters, never committed; set it in `.env.development`). Each token is valid for one namespace only (`customer`, `merchant` or `admin`); a token of another namespace gets `403`. Protect a route with `requireAuth(scope, secret)`.
+
+`PAYOUT_ENCRYPTION_KEY` (base64 of 32 random bytes, e.g. `openssl rand -base64 32`; required in production, optional in development) encrypts salons' bank details at rest with AES-256-GCM. Without it the bank-details endpoints answer 503. Rotating the key needs a re-encryption of the stored values (they carry a `v1:` version prefix).
+
+## Real-time (Socket.IO)
+
+One namespace per token scope: `/customer`, `/merchant`, `/admin` (path `/socket.io`). Connect with the access token:
+`io(baseUrl + '/customer', { auth: { token } })` (or an `Authorization: Bearer` header). A missing, invalid or
+expired token is refused with `connect_error` `data.code = UNAUTHORIZED`; a token of another scope with `FORBIDDEN`.
+Each account is placed in its own room (`customer:{id}`, `member:{id}`, `admin`); events are emitted through
+`SocketHub` (`src/sockets/socketServer.ts`) and reach every instance through the Redis adapter.
+
+## Load test
+
+`npm run build && npm run loadtest` drives the read endpoints of a running server (home, search, salon details, availability) from several workers and fails (exit code 1) when a target's p95 is above 300 ms (BRD NFR-03) or more than 1 % of requests fail. It needs a deployed or local server with real data:
+
+| Variable                  | Meaning                                         |
+| ------------------------- | ----------------------------------------------- |
+| `LOADTEST_BASE_URL`       | Server root, e.g. `https://api.example.test`    |
+| `LOADTEST_CUSTOMER_TOKEN` | A customer access token                         |
+| `LOADTEST_SALON_ID`       | A LIVE salon                                    |
+| `LOADTEST_SERVICE_ID`     | One of that salon's service ids                 |
+| `LOADTEST_DATE`           | Salon-local day to ask slots for (`YYYY-MM-DD`) |
+| `LOADTEST_GENDER`         | `FEMALE` (default) or `MALE`                    |
+| `LOADTEST_CONCURRENCY`    | Workers (default 20)                            |
+| `LOADTEST_DURATION_SEC`   | Run time (default 30)                           |
+
+The no-double-booking guarantee under concurrency is covered by `tests/bookings.test.ts` ("under load": 40 customers on one slot, 5 slots × 8 contenders, overlapping neighbours, 24 parallel different slots) against a real Redis lock.

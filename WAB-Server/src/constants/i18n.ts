@@ -11,3 +11,9 @@ export const LANGUAGE_SUBTAG_SEPARATOR = '-';
 export const LANGUAGE_WILDCARD = '*';
 export const DEFAULT_QUALITY = 1;
 export const QUALITY_PREFIX = 'q=';
+
+/** ICU locale used to print dates and times: Arabic uses Arabic-Indic digits and ص/م (PRD "numerals follow the language"). */
+export const LOCALE_TAGS: Readonly<Record<Language, string>> = {
+  ar: 'ar-JO-u-nu-arab',
+  en: 'en-GB',
+};

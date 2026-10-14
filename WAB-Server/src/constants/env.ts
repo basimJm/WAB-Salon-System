@@ -28,6 +28,9 @@ export const ENV_KEYS = {
   trustProxyHops: 'TRUST_PROXY_HOPS',
   mongoUri: 'MONGODB_URI',
   redisUrl: 'REDIS_URL',
+  jwtAccessSecret: 'JWT_ACCESS_SECRET',
+  /** Base64 of 32 random bytes: encrypts salon bank details at rest (AES-256-GCM). */
+  payoutEncryptionKey: 'PAYOUT_ENCRYPTION_KEY',
   otpProvider: 'OTP_PROVIDER',
   storageProvider: 'STORAGE_PROVIDER',
   notifierProvider: 'NOTIFIER_PROVIDER',

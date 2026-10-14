@@ -22,6 +22,9 @@ export interface AppConfig {
   readonly trustProxyHops: number;
   readonly mongo: { readonly uri: string };
   readonly redis: { readonly url: string };
+  readonly auth: { readonly accessSecret: string };
+  /** Encryption keys for fields at rest; absent keys switch the dependent features off. */
+  readonly secrets: { readonly payoutEncryptionKey?: string };
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
   readonly providers: {
     readonly otp: ProviderMode;
@@ -70,6 +73,7 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   }
   const values = parsed.data;
   const env = values[ENV_KEYS.nodeEnv];
+  const payoutKey = values[ENV_KEYS.payoutEncryptionKey];
   return Object.freeze({
     env,
     isProduction: env === 'production',
@@ -79,6 +83,8 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
     trustProxyHops: values[ENV_KEYS.trustProxyHops],
     mongo: Object.freeze({ uri: values[ENV_KEYS.mongoUri] }),
     redis: Object.freeze({ url: values[ENV_KEYS.redisUrl] }),
+    auth: Object.freeze({ accessSecret: values[ENV_KEYS.jwtAccessSecret] }),
+    secrets: Object.freeze(payoutKey === undefined ? {} : { payoutEncryptionKey: payoutKey }),
     providers: Object.freeze({
       otp: values[ENV_KEYS.otpProvider] ?? DEFAULT_PROVIDER_MODE,
       storage: values[ENV_KEYS.storageProvider] ?? DEFAULT_PROVIDER_MODE,

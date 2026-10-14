@@ -15,6 +15,8 @@ export const REDIS_KEY_PREFIX = {
   /** Shared HTTP rate-limit counters (one sub-prefix per limiter). */
   httpRateLimit: 'rate:http',
   settings: 'settings',
+  /** Slots held for a booking draft while the customer confirms and pays (SRV-069/070). */
+  hold: 'hold',
 } as const;
 export const REDIS_KEY_SEPARATOR = ':';
 /** Added to a limiter's counter prefix to name its block flag when no `blockPrefix` is given. */

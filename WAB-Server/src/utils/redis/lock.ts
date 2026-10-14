@@ -82,3 +82,20 @@ export const withLock = async <T>(
     await lock.release();
   }
 };
+
+/**
+ * Runs `task` while holding every lock in `keys`. Keys are de-duplicated and always taken in
+ * sorted order, so two callers that need overlapping sets can never wait for each other forever.
+ */
+export const withLocks = <T>(
+  redis: Redis,
+  keys: readonly string[],
+  task: () => Promise<T>,
+  options: LockOptions & { readonly busyError?: () => Error } = {},
+): Promise<T> =>
+  [...new Set(keys)]
+    .sort()
+    .reduceRight<() => Promise<T>>(
+      (next, key) => () => withLock(redis, key, next, options),
+      task,
+    )();

@@ -13,6 +13,8 @@ import {
   PORT_MIN,
   REDIS_URL_PATTERN,
 } from '../constants/env';
+import { JWT_SECRET_MIN_LENGTH } from '../constants/auth';
+import { isEncryptionKey } from '../utils/crypto/aesGcm';
 import { PROVIDER_MODES, REAL_PROVIDER_MODE } from '../constants/providers';
 import {
   DEFAULT_TRUST_PROXY_HOPS,
@@ -43,6 +45,10 @@ export const envSchema = z
       .default(DEFAULT_TRUST_PROXY_HOPS),
     [ENV_KEYS.mongoUri]: z.string().regex(MONGO_URI_PATTERN),
     [ENV_KEYS.redisUrl]: z.string().regex(REDIS_URL_PATTERN),
+    // Signs access tokens: a secret with no default, long enough for HS256.
+    [ENV_KEYS.jwtAccessSecret]: z.string().min(JWT_SECRET_MIN_LENGTH),
+    // Optional outside production (bank-details endpoints answer 503 without it); never has a default.
+    [ENV_KEYS.payoutEncryptionKey]: z.string().refine(isEncryptionKey).optional(),
     [ENV_KEYS.otpProvider]: providerMode,
     [ENV_KEYS.storageProvider]: providerMode,
     [ENV_KEYS.notifierProvider]: providerMode,
@@ -52,6 +58,13 @@ export const envSchema = z
   // Production never runs on fakes, and never guesses: every provider must be named `real`.
   .superRefine((env, context) => {
     if (env[ENV_KEYS.nodeEnv] !== 'production') return;
+    if (env[ENV_KEYS.payoutEncryptionKey] === undefined) {
+      context.addIssue({
+        code: 'custom',
+        path: [ENV_KEYS.payoutEncryptionKey],
+        message: ENV_KEYS.payoutEncryptionKey,
+      });
+    }
     for (const key of PROVIDER_ENV_KEYS) {
       if (env[key] !== REAL_PROVIDER_MODE)
         context.addIssue({ code: 'custom', path: [key], message: key });

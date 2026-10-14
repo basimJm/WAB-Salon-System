@@ -24,6 +24,8 @@ export interface PushMessage {
   readonly badge?: number;
   readonly androidChannelId?: string;
   readonly androidFullScreenIntent?: boolean;
+  /** Messages with the same key replace each other on the device (FCM collapse key / apns-collapse-id). */
+  readonly collapseKey?: string;
 }
 
 export type PushTarget = { readonly tokens: readonly string[] } | { readonly topic: string };
