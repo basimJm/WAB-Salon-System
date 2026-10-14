@@ -56,3 +56,17 @@
 }
 .wab-form-actions__meta { color: var(--c-faint); font-size: var(--fs-sm); }
 .wab-form-actions__buttons { margin-inline-start: auto; }
+
+.wab-richtext { display: grid; gap: var(--space-2); min-width: 0; }
+.wab-richtext__preview-label { color: var(--c-muted); font-size: var(--fs-sm); }
+.wab-richtext__preview {
+  padding: var(--space-3);
+  border: var(--size-hairline) dashed var(--c-line2);
+  border-radius: var(--radius-md);
+  background: var(--c-surface);
+  overflow-wrap: anywhere;
+}
+.wab-richtext__preview h2 { font-size: var(--fs-lg); font-weight: var(--fw-semibold); }
+.wab-richtext__preview h3 { font-size: var(--fs-md); font-weight: var(--fw-semibold); }
+.wab-richtext__preview ul, .wab-richtext__preview ol { padding-inline-start: var(--space-5); }
+.wab-richtext__preview a { color: var(--c-accent); text-decoration: underline; }

@@ -9,3 +9,4 @@ One file per decision: `NNNN-short-title.md` with Status, Context, Decision, Con
 | [0003](0003-money-and-time.md) | Money as JOD strings / integer fils, time as UTC instants shown in Asia/Amman |
 | [0004](0004-form-library.md) | Forms use react-hook-form validated by zod; messages are i18n keys |
 | [0005](0005-charts-svg.md) | Charts are hand-written SVG components with a View data table and CSV export |
+| [0006](0006-rich-text.md) | Rich text is a Markdown-subset editor emitting sanitized HTML (no Tiptap) |
