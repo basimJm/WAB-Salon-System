@@ -34,6 +34,7 @@ export const SIZES = {
   modalMax: '90dvh',
   toast: '22rem',
   popupMax: '16rem',
+  popupMin: '12rem',
   tableMin: '40rem',
   skeletonLine: '1rem',
   spinner: '1.5rem',

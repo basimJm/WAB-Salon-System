@@ -92,6 +92,24 @@
     },
     "statuses": {
       "title": "Status badges"
+    },
+    "table2": {
+      "title": "Data table v2",
+      "colId": "ID",
+      "colName": "Salon",
+      "colCity": "City",
+      "colState": "State",
+      "salon": "Salon",
+      "open": "Open",
+      "bulkApprove": "Approve selected",
+      "exported": "Export requested ({{count}})",
+      "city": {
+        "amman": "Amman",
+        "irbid": "Irbid",
+        "zarqa": "Zarqa",
+        "aqaba": "Aqaba"
+      },
+      "pagination": "Data table v2 pagination"
     }
   }
 }

@@ -54,7 +54,18 @@
     "pageSize": "عدد الصفوف",
     "previous": "الصفحة السابقة",
     "next": "الصفحة التالية",
-    "pageOf": "صفحة {{page}} من {{pages}}"
+    "pageOf": "صفحة {{page}} من {{pages}}",
+    "selectAll": "تحديد كل صفوف هذه الصفحة",
+    "selectRow": "تحديد {{name}}",
+    "rowActions": "إجراءات الصف",
+    "clearSelection": "إلغاء التحديد",
+    "columns": "الأعمدة",
+    "resetColumns": "إظهار كل الأعمدة",
+    "density": "كثافة الصفوف",
+    "comfortable": "مريحة",
+    "compact": "مضغوطة",
+    "export": "تصدير",
+    "selected": "محدد: {{count}}"
   },
   "reason": {
     "label": "السبب (مطلوب)",
