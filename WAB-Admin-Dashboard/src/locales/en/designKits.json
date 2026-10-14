@@ -102,6 +102,13 @@
       "previewEn": "English phone preview",
       "previewEmptyAr": "No Arabic image yet",
       "previewEmptyEn": "No English image yet"
+    },
+    "richText": {
+      "title": "Rich text and schedule",
+      "page": "Privacy page",
+      "start": "Starts",
+      "end": "Ends",
+      "saved": "Schedule: {{start}} to {{end}}"
     }
   }
 }

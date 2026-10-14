@@ -914,6 +914,22 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — the quiet gate surfaced a lint rule (complexity) and a hardcoded rem that were fixed (state machine moved to `useImageUpload`, size to a token).
 - Notes: Keyboard shortcuts on the viewer were dropped (lint rules forbid handlers on static regions); every action is a toolbar button.
 
+### T-056 — ADM-021 RichTextEditor (ar/en tabs) and SchedulePicker
+
+- Project: `WAB-Admin-Dashboard/` (`infrastructure/richText/{sanitize,markdown}.ts`, `constants/richText.ts`, `utils/{textFormat,htmlToReact}`, `components/form/{RichTextEditor,LocalizedRichTextEditor,SchedulePicker}`, `docs/adr/0006-rich-text.md`, gallery `RichTextSection`, tests `rich-text`, `rich-text-ui`, `e2e/richtext.spec.ts`)
+- Branch: `feat/adm-021-rich-text`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-021: Arabic/English tabs, sanitized HTML output, RTL aware; SchedulePicker end after start; library choice as an ADR):
+  - [x] ADR-0006: Markdown-subset editor emitting sanitized HTML. DECISION TO CONFIRM: differs from Appendix C (Tiptap) because Tiptap (~70 KB gzip) does not fit the 200 KB budget (~27 KB headroom) and `execCommand` is deprecated
+  - [x] Allow-list sanitizer (`p h2 h3 ul ol li strong em a br`, links https/http/mailto only, forced rel/target, scripts/styles/frames dropped with content), Markdown <-> HTML for the subset, toolbar transforms (bold, italic, headings, lists, link) as pure functions; preview built as React elements (no `dangerouslySetInnerHTML`, project XSS rule)
+  - [x] Arabic and English tabs, each with its own direction/lang; value replaced from outside is shown without losing typing
+  - [x] `SchedulePicker`: each date limits the other (end >= start + 1 day), order error shown, form errors passed through
+- Tests: `sh scripts/gate.sh` all PASS; e2e 100/100 on the real Chrome (desktop, Pixel portrait/landscape, tablet)
+- Browser check: built dev-debug in the built-in browser: Arabic editor rtl, malicious link/script input stays inert text, preview inside the viewport, console clean
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — lint blocked `dangerouslySetInnerHTML` (good); e2e found Ctrl+A is not select-all on macOS (use `selectText()`).
+- Notes: Existing server HTML outside the allow-list is flattened to text when a page is opened for edit (documented in ADR-0006).
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
