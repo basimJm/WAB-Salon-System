@@ -61,3 +61,47 @@ describe('dependency-cruiser layer rules', () => {
     ).not.toThrow();
   });
 });
+
+describe('feature slices', () => {
+  const ok = 'export const x = 1;';
+
+  it('lets a feature use its own slice and the shared directories', () => {
+    expect(
+      cruise({
+        'src/domain/shared/money.ts': ok,
+        'src/domain/salons/salon.ts': ok,
+        'src/domain/salons/rules.ts':
+          "import { x } from './salon'; import { x as y } from '../shared/money'; export const z = x + y;",
+        'src/data/mock/fixtures.ts': ok,
+        'src/data/salons/repo.ts':
+          "import { x } from '../../domain/salons/salon'; import { x as m } from '../mock/fixtures'; export const r = x + m;",
+        'src/presentation/components/Button.ts': ok,
+        'src/presentation/salons/Page.ts':
+          "import { x } from '../components/Button'; export const p = x;",
+      }),
+    ).toBe(0);
+  });
+
+  it.each([
+    [
+      'domain',
+      'src/domain/salons/a.ts',
+      "import { x } from '../bookings/b'; export const a = x;",
+      'src/domain/bookings/b.ts',
+    ],
+    [
+      'data',
+      'src/data/salons/a.ts',
+      "import { x } from '../bookings/b'; export const a = x;",
+      'src/data/bookings/b.ts',
+    ],
+    [
+      'presentation',
+      'src/presentation/salons/a.ts',
+      "import { x } from '../bookings/b'; export const a = x;",
+      'src/presentation/bookings/b.ts',
+    ],
+  ])('rejects one %s feature importing another', (_layer, from, code, to) => {
+    expect(cruise({ [from]: code, [to]: ok })).not.toBe(0);
+  });
+});

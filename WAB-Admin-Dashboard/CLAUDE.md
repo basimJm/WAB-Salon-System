@@ -48,6 +48,7 @@ src/
 
 - **Model** = `domain` + `data`. **View** = `presentation/components|pages|layout`. **Controller** = `presentation/controllers` (and the `app` composition root).
 - Allowed imports: `domain` → nothing; `infrastructure` → constants; `data` → domain, infrastructure; `design` → constants, infrastructure/storage; `presentation` → everything except `data` (it reaches repositories only through `useContainer()`); `app` wires everything.
+- New feature = vertical slice (`domain/<f>`, `data/<f>`, `presentation/<f>`); features never import each other (`npm run check:layers`). Checklist: `docs/HOW_TO_ADD_A_MODULE.md`.
 - Pages never call `fetch`; they use a controller. Controllers never touch the DOM or JSX. Components never fetch.
 - Every cross-project dependency (API, socket) sits behind a domain interface with a real and a mock implementation, selected only by `VITE_DATA_SOURCE` (`INTEGRATION_WORKFLOW.md` §3). The mock is compiled out of prod builds.
 
