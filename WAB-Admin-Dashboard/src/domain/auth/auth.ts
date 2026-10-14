@@ -4,8 +4,12 @@ export interface AdminProfile {
   readonly email: string;
 }
 
+/** Step 1 answer: the emailed code is required until `expiresAt`; a new one can be asked after `resendAfterSeconds`. */
 export interface LoginChallenge {
-  readonly challengeId: string;
+  readonly otpRequired: boolean;
+  /** Epoch ms when the emailed code stops working. */
+  readonly expiresAt: number;
+  readonly resendAfterSeconds: number;
 }
 
 export interface Session {
@@ -21,8 +25,7 @@ export interface Session {
 /** Domain contract. Remote and mock implementations live in `data/`; the UI only sees this. */
 export interface AuthRepository {
   login(email: string, password: string): Promise<LoginChallenge>;
-  verifyOtp(challengeId: string, code: string): Promise<Session>;
-  resendOtp(challengeId: string): Promise<void>;
+  verifyOtp(email: string, code: string): Promise<Session>;
   /** Exchanges the refresh token for a new session (the old refresh token stops working). */
   refresh(refreshToken: string): Promise<Session>;
   /** Revokes the refresh token on the server. */

@@ -52,6 +52,7 @@ export class ApiClient {
         ...(query !== undefined ? { query: query as QueryValue } : {}),
         ...(body !== undefined ? { body } : {}),
         ...(args.signal ? { signal: args.signal } : {}),
+        ...(endpoint.noRefresh ? { noRefresh: true } : {}),
         ...(key ? { headers: { [HTTP_HEADERS.idempotencyKey]: key } } : {}),
       },
     );

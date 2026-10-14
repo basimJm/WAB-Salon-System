@@ -35,8 +35,8 @@ function renderRoutes(path: string, showDesignSystem = true) {
 
 async function signIn(container: ReturnType<typeof makeContainer>) {
   const { auth } = container.repositories;
-  const { challengeId } = await auth.login('admin@example.test', PASSWORD);
-  container.session.set(await auth.verifyOtp(challengeId, MOCK_OTP_CODE));
+  await auth.login('admin@example.test', PASSWORD);
+  container.session.set(await auth.verifyOtp('admin@example.test', MOCK_OTP_CODE));
 }
 
 describe('login validation', () => {

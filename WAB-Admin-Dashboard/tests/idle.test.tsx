@@ -122,8 +122,8 @@ describe('shell sign out and login notice', () => {
     const auth = new MockAuthRepository(0);
     const container = makeContainer(auth);
     const logout = vi.spyOn(auth, 'logout');
-    const { challengeId } = await auth.login('a@b.co');
-    container.session.set(await auth.verifyOtp(challengeId, '123456'));
+    await auth.login('a@b.co');
+    container.session.set(await auth.verifyOtp('a@b.co', '123456'));
     const token = container.session.get()?.refreshToken;
     renderRoutes('/bookings', { container });
     await userEvent.click(await screen.findByRole('button', { name: /WAB Admin|a@b/ }));

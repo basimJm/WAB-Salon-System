@@ -78,6 +78,6 @@ const TEST_EMAIL = 'admin@example.test';
 /** Signs the mock admin in through the repository, like the login controller does. */
 export async function signInContainer(container: Container): Promise<void> {
   const { auth } = container.repositories;
-  const { challengeId } = await auth.login(TEST_EMAIL, 'p'.repeat(MIN_PASSWORD_LENGTH));
-  container.session.set(await auth.verifyOtp(challengeId, MOCK_OTP_CODE));
+  await auth.login(TEST_EMAIL, 'p'.repeat(MIN_PASSWORD_LENGTH));
+  container.session.set(await auth.verifyOtp(TEST_EMAIL, MOCK_OTP_CODE));
 }

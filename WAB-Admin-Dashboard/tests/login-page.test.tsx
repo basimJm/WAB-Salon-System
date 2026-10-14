@@ -148,7 +148,7 @@ describe('login form details', () => {
 
   it('resend becomes available after the wait, calls the repository and restarts the timer', async () => {
     const auth = new MockAuthRepository(0);
-    const resend = vi.spyOn(auth, 'resendOtp');
+    const resend = vi.spyOn(auth, 'login');
     vi.useFakeTimers({ shouldAdvanceTime: true });
     renderRoutes(ROUTES.login, { container: makeContainer(auth) });
     await toCodeStep();
@@ -158,7 +158,7 @@ describe('login form details', () => {
       const button = screen.getByRole('button', { name: en.login.resend });
       await userEvent.click(button);
       await act(() => vi.advanceTimersByTimeAsync(50));
-      expect(resend).toHaveBeenCalledTimes(1);
+      expect(resend).toHaveBeenCalledTimes(2); // step 1, then once more to resend
       expect(screen.getByText(`Resend in ${formatClock(RESEND_SECONDS)}`)).toBeInTheDocument();
     } finally {
       vi.useRealTimers();
@@ -167,7 +167,13 @@ describe('login form details', () => {
 
   it('a failed resend shows a localized alert and keeps the button', async () => {
     const auth = new MockAuthRepository(0);
-    vi.spyOn(auth, 'resendOtp').mockRejectedValue(new AppError({ kind: 'rateLimited' }));
+    vi.spyOn(auth, 'login')
+      .mockResolvedValueOnce({
+        otpRequired: true,
+        expiresAt: Date.now() + 600_000,
+        resendAfterSeconds: RESEND_SECONDS,
+      })
+      .mockRejectedValue(new AppError({ kind: 'rateLimited' }));
     vi.useFakeTimers({ shouldAdvanceTime: true });
     renderRoutes(ROUTES.login, { container: makeContainer(auth) });
     await toCodeStep();

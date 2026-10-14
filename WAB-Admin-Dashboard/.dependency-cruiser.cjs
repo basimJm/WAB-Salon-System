@@ -14,7 +14,7 @@ const LAYER_RULES = {
  */
 const SHARED = {
   domain: ['shared'],
-  data: ['shared', 'contract', 'mock'],
+  data: ['shared', 'contract', 'mock', 'api', 'realtime'],
   presentation: ['shared', 'components', 'layout', 'hooks', 'controllers', 'pages', 'utils'],
 };
 
