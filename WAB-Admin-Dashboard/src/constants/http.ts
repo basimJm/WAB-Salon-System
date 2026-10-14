@@ -34,13 +34,3 @@ export const HTTP_RETRY = {
   maxDelayMs: 3_000,
   retryableStatuses: [502, 503, 504],
 } as const;
-
-/** Server error codes the panel branches on (BUSINESS_DOMAIN.md §11). */
-export const API_ERROR_CODES = {
-  unauthorized: 'UNAUTHORIZED',
-  forbidden: 'FORBIDDEN',
-  notFound: 'NOT_FOUND',
-  validation: 'VALIDATION_ERROR',
-  rateLimited: 'RATE_LIMITED',
-  internal: 'INTERNAL',
-} as const;
