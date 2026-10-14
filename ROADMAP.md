@@ -50,7 +50,7 @@ P0 Foundations & Contracts ─▶ P1 Core Domain ─▶ P2 Booking Engine ─▶
 | SVC-01 | SERVICE | Package template (TS strict, tests, build, semantic release, README) applied to all 5 packages | 5 package skeletons | — |
 | CUS-01 | CUSTOMER | Align template to PRD: env flavors (dev/prod), `DATA_SOURCE` switch, network layer with contract models, mock repositories from `contracts/fixtures`, design system tokens (theme, RTL, AR/EN) | App foundation | Mocks |
 | MER-01 | MERCHANT | Create KMP project from the customer template, env flavors, `DATA_SOURCE` switch, design system, permission-driven navigation shell | App foundation | Mocks |
-| ADM-01 | ADMIN | React app skeleton (RTL/LTR, theme from design, routing, auth shell, API client generated from contracts, mock API layer, table/chart components), env (dev/prod), CI | Panel foundation | Mock API |
+| ADM-01 | ADMIN | *(fine-grained, ordered tasks ADM-001…086 for the whole admin track: `WAB-Admin-Dashboard/docs/WAB_Admin_Tasks.md`; the ADM-0x ids in this roadmap are its stages)* React app skeleton (RTL/LTR, theme from design, routing, auth shell, API client generated from contracts, mock API layer, table/chart components), env (dev/prod), CI | Panel foundation | Mock API |
 
 ### P1 — Core Domain
 | ID | Track | Task | If not ready |

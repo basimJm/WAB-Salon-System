@@ -6,6 +6,7 @@
 
 1. Root `CLAUDE.md` and **every** `.md` file in the root `.claude/` folder (`rules.md`, `roles.md`, `hooks.md`, `session.md`, `memory.md`), plus the root files `BUSINESS_DOMAIN.md`, `ROADMAP.md`, `INTEGRATION_WORKFLOW.md`.
 2. `docs/WAB_Admin_PRD.md` (behavior, source of truth), `docs/WAB_Admin_BRD.md`, `docs/WAB_Admin_Design_Script.md`, and the matching file in `design/` (visual reference).
+3. `docs/WAB_Admin_Tasks.md` — the ordered task backlog (strict order, one task per branch, layer recipe in its §3, proposed API contract in its Appendix A). Pick the first `TODO` task whose *Needs* are `DONE`.
 
 ## 1. The Rules (non-negotiable)
 
