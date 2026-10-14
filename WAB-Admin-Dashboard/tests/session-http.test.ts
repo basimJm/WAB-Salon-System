@@ -22,8 +22,8 @@ const session = (over: Partial<Session> = {}): Session => ({
 describe('mock auth repository rotation', () => {
   it('a refresh token works once; logout revokes it', async () => {
     const repo = new MockAuthRepository(0);
-    const { challengeId } = await repo.login('a@b.co');
-    const first = await repo.verifyOtp(challengeId, '123456');
+    await repo.login('a@b.co');
+    const first = await repo.verifyOtp('a@b.co', '123456');
     expect(first.refreshToken).toBeDefined();
     expect(first.accessExpiresAt).toBeGreaterThan(Date.now());
     const second = await repo.refresh(first.refreshToken ?? '');
@@ -130,8 +130,8 @@ describe('HttpClient with a session', () => {
     const store = createSessionStore();
     store.set(session());
     const repo = new MockAuthRepository(0);
-    const { challengeId } = await repo.login('a@b.co');
-    const live = await repo.verifyOtp(challengeId, '123456');
+    await repo.login('a@b.co');
+    const live = await repo.verifyOtp('a@b.co', '123456');
     store.set(live);
     const manager = createSessionManager({ store, auth: () => repo, logger });
     const spy = vi.spyOn(repo, 'refresh');

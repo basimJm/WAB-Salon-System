@@ -72,6 +72,7 @@ export default function LoginPage() {
                 error={fieldError(ctrl.fieldErrors.code)}
                 busy={ctrl.busy}
                 onCode={setCode}
+                resendSeconds={ctrl.resendSeconds}
                 onResend={ctrl.resend}
               />
             )}

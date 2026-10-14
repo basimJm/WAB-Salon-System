@@ -1030,3 +1030,17 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); not run against a real server socket. Only `booking.updated` and `alert.created` are emitted by the server today (G10).
 - Notes: Dependency added: `socket.io-client` 4.8.
 
+
+### T-064 — ADM-028 List state in the URL
+
+- Project: `WAB-Admin-Dashboard/` (`domain/shared/listState.ts`, `presentation/controllers/useListController.ts`, `constants/ui.ts`, `docs/HOW_TO_ADD_A_MODULE.md`)
+- Branch: `feat/adm-028-url-list-state`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-028; PRD §3 saved filter in URL):
+  - [x] Page, page size (10/25/50/100), search, sort and multi-value filters parsed from and written to the query string; invalid/unknown values fall back to defaults; defaults are left out; equal states give equal URLs
+  - [x] `useListController(options)`: search debounced 500 ms and written with `replace`; page/sort/filter changes are history entries; any change except the page restarts at page 1; the box follows URL changes (back/forward, pasted link, clear all) without a stale debounce undoing them
+- Tests: `sh scripts/gate.sh` all PASS (22 new unit tests incl. back navigation); no screen uses it yet, so no browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e/browser check (no UI mounted; user decision). Mapping state -> API query parameter names is left to each feature (server names differ).
+- Notes: pass the options object as a module-level constant.
+

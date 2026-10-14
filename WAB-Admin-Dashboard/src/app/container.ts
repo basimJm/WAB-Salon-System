@@ -62,7 +62,8 @@ export async function createContainer(
     refreshSession: () => manager.current?.refresh() ?? Promise.resolve(false),
     logger,
   });
-  const repositories = await createRepositories(config, http);
+  const api = new ApiClient(http);
+  const repositories = await createRepositories(config, api);
   const sessionManager = createSessionManager({
     store: session,
     auth: () => repositories.auth,
@@ -86,7 +87,7 @@ export async function createContainer(
     logger,
     session,
     sessionManager,
-    api: new ApiClient(http),
+    api,
     realtime,
     ...(mock ? { mock } : {}),
     repositories,

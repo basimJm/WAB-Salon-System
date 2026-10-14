@@ -20,7 +20,7 @@ e2e/<feature>.spec.ts         smoke test of the screen
 | From | May import | Never imports |
 | --- | --- | --- |
 | `domain/<f>` | itself, `domain/shared` | another `domain/<g>`, any other layer |
-| `data/<f>` | itself, `domain/*`, `data/shared`, `data/contract`, `data/mock`, `infrastructure`, `constants` | another `data/<g>`, `presentation`, `app` |
+| `data/<f>` | itself, `domain/*`, `data/shared`, `data/contract`, `data/mock`, `data/api`, `data/realtime`, `infrastructure`, `constants` | another `data/<g>`, `presentation`, `app` |
 | `presentation/<f>` | itself, `components`, `layout`, `hooks`, `controllers`, `pages`, `utils`, `shared`, `domain`, `design`, `infrastructure` | another `presentation/<g>`, `data` (use `useContainer()`) |
 
 Two features that need the same thing move it to the shared directory of the layer (for example `domain/shared`) instead of importing each other. Cross-feature navigation goes through `constants/routes.ts`; cross-feature data is read through the container's repositories, not through the other feature's files.

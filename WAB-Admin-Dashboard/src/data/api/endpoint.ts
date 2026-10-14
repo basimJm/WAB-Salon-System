@@ -11,12 +11,15 @@ export interface EndpointSchemas<TData, TBody, TQuery> {
 export interface EndpointOptions {
   /** Money or state-changing command: the client adds a fresh `Idempotency-Key` unless the caller passes one. */
   idempotent?: boolean;
+  /** Session-less call (sign-in, refresh, sign-out): a 401 must not trigger a token refresh. */
+  noRefresh?: boolean;
 }
 
 export interface Endpoint<TData, TBody = undefined, TQuery = undefined> {
   readonly op: OperationInfo;
   readonly schemas: EndpointSchemas<TData, TBody, TQuery>;
   readonly idempotent: boolean;
+  readonly noRefresh: boolean;
 }
 
 /**
@@ -37,7 +40,12 @@ export function defineEndpoint<TData, TBody = undefined, TQuery = undefined>(
     throw new RangeError(
       `${op.id}: query schema does not match the contract (hasQuery=${String(op.hasQuery)})`,
     );
-  return { op, schemas, idempotent: options.idempotent ?? false };
+  return {
+    op,
+    schemas,
+    idempotent: options.idempotent ?? false,
+    noRefresh: options.noRefresh ?? false,
+  };
 }
 
 const PLACEHOLDER = /\{([A-Za-z0-9_]+)\}/g;
