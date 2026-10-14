@@ -7,3 +7,4 @@ One file per decision: `NNNN-short-title.md` with Status, Context, Decision, Con
 | [0001](0001-contract-source.md) | The server's OpenAPI is the API contract; zod DTOs are generated from it |
 | [0002](0002-local-gate-no-ci.md) | No GitHub CI for the admin panel; a local gate protects `admin` |
 | [0003](0003-money-and-time.md) | Money as JOD strings / integer fils, time as UTC instants shown in Asia/Amman |
+| [0004](0004-form-library.md) | Forms use react-hook-form validated by zod; messages are i18n keys |

@@ -771,6 +771,35 @@
 - Loops: 3/3
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — primitives only, no new dependency.
 
+### T-047 — Merge ADM-012 into `admin`
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `admin`
+- Status: DONE (PR #143 merged into `admin`; no new code on this branch)
+- Acceptance criteria:
+  - [x] ADM-012 (T-046) passed the full local gate before the merge: verify, 4 variant builds, `check:size`, e2e 32/32, browser check
+  - [x] Local `admin` fast-forwarded to `origin/admin`; no uncommitted changes
+- Tests: see T-046 (unit + axe + `e2e/primitives.spec.ts`); nothing changed since
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — review recorded in T-046; this block only covers the merge on the master branch.
+- Notes: Next: ADM-013 (form kit, adds react-hook-form + ADR) on `feat/adm-013-form-kit` from `origin/admin`.
+
+### T-048 — ADM-013 Form kit
+
+- Project: `WAB-Admin-Dashboard/` (`components/form/{Field,NumberField,JodField,DateField,SearchField,Combobox,MultiSelect,OptionList,FormActions}`, `hooks/{useZodForm,useCombobox,useDebouncedValue}`, `domain/shared/validation.ts`, `utils/{numericInput,filterOptions,formErrors}`, `design/styles/form-kit.css`, gallery `FormsSection`, `docs/adr/0004-form-library.md`)
+- Branch: `feat/adm-013-form-kit`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-013; Admin PRD §2-3: validation identical to the mobile apps, last updated by/at; ADR for the library):
+  - [x] `useZodForm` (react-hook-form + zod resolver) is the one way to build a form; schema messages are i18n keys translated by `errorText`; server `details[]` applied with `applyServerFieldErrors`
+  - [x] Fields: `Field` wrapper, `NumberField`, `JodField` (JOD string, max 3 decimals, Arabic digits accepted), `DateField` (`YYYY-MM-DD`), `SearchField` (500 ms debounce, clear, Esc), `Combobox`, `MultiSelect` (ARIA combobox keyboard pattern), `FormActions` (Save/Cancel, busy, "last updated by/at" in Asia/Amman 12 h, language digits)
+  - [x] Reusable rules: `requiredText`, `jodAmount({positive})`, `localDateString`, `endAfterStart` (banner/recommended/subscription periods)
+  - [x] AR + EN strings, tokens only, gallery section doubles as the reference usage; ADR-0004 indexed
+- Tests: `npm run verify` — 367 unit tests, coverage 93.8/89.3/91.7/94.7; 4 variants build, `check:size` OK; `npm audit --omit=dev` checked; e2e 40/40 on the real Chrome (desktop, Pixel portrait/landscape, tablet) incl. `e2e/forms.spec.ts`
+- Browser check: built dev-debug in the built-in browser, Arabic RTL: labels, Arabic-digit input normalised, debounced search text, translated required errors, no horizontal scroll, console clean; English LTR + Arabic dark covered by e2e
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — QA found: a setState-in-effect in NumberField (now derived state), an over-broad e2e locator (native select options), tests over 300 lines (split). Fields are react-hook-form-agnostic.
+- Notes: Deps added: react-hook-form, @hookform/resolvers. The first real form (settings, ADM-0xx) should use these as is.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.
