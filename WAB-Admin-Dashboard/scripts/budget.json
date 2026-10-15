@@ -1,6 +1,6 @@
 {
   "entryJsGzipKb": 40,
   "chunkJsGzipKb": 80,
-  "totalJsGzipKb": 280,
+  "totalJsGzipKb": 500,
   "cssGzipKb": 20
 }

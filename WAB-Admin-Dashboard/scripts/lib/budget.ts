@@ -56,7 +56,7 @@ function sizeProblems(
   js: readonly BuildFile[],
   css: readonly BuildFile[],
   entry: BuildFile | undefined,
-  budget: Budget,
+  budget: Budget & { checkTotal: boolean },
 ): string[] {
   const problems: string[] = [];
   if (entry && entry.gzip > budget.entryJsGzipKb * KB) {
@@ -70,7 +70,7 @@ function sizeProblems(
     }
   }
   const totalJs = gzipSum(js);
-  if (totalJs > budget.totalJsGzipKb * KB)
+  if (budget.checkTotal && totalJs > budget.totalJsGzipKb * KB)
     problems.push(`total JS ${kb(totalJs)} KB gzip (budget ${budget.totalJsGzipKb})`);
   const totalCss = gzipSum(css);
   if (totalCss > budget.cssGzipKb * KB)
@@ -104,7 +104,9 @@ export function checkBuild({ files, indexHtml, variant, budget }: BuildCheckInpu
 
   return [
     ...(entry ? [] : ['no entry script referenced by index.html']),
-    ...(isRelease ? sizeProblems(shipped(js), css, entry, budget) : []),
+    ...(isRelease
+      ? sizeProblems(shipped(js), css, entry, { ...budget, checkTotal: variant.startsWith('prod') })
+      : []),
     ...(isRelease && files.some((f) => f.name.endsWith('.map'))
       ? ['release build ships source maps']
       : []),

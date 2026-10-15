@@ -7,6 +7,7 @@ import { customersRoutes } from './customersRoutes';
 import { contentRoutes } from './contentRoutes';
 import { locationsRoutes } from './locationsRoutes';
 import { salonsRoutes } from './salonsRoutes';
+import { reviewsRoutes } from './reviewsRoutes';
 import { settingsRoutes } from './settingsRoutes';
 import type { MockRoute } from './mockTransport';
 
@@ -26,5 +27,6 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...applicationsRoutes(),
     ...customersRoutes(),
     ...bookingsRoutes(),
+    ...reviewsRoutes(),
   ];
 }
