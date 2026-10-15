@@ -1241,3 +1241,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). No separate browser check (same dialog/drawer patterns).
 
+
+### T-080 — ADM-043 salon applications
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-043-applications`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-043):
+  - [x] Applications queue (pending/rejected, oldest first, resubmission counts) and review page: submitted data, license documents through short-lived signed links (never cached), approve (starts the trial) / reject with a mandatory reason shown to the owner
+- Tests: 4 new tests through the mock stack; mock transport now prefers fixed paths over parameter paths
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). No separate browser check (same list/detail patterns).
+

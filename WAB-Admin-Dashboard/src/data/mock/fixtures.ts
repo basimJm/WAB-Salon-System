@@ -1,6 +1,7 @@
 import { appConfigRoutes } from './appConfigRoutes';
 import { applicationsRoutes } from './applicationsRoutes';
 import { bannersRoutes } from './bannersRoutes';
+import { bookingsRoutes } from './bookingsRoutes';
 import { catalogRoutes } from './catalogRoutes';
 import { customersRoutes } from './customersRoutes';
 import { contentRoutes } from './contentRoutes';
@@ -24,5 +25,6 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...salonsRoutes(),
     ...applicationsRoutes(),
     ...customersRoutes(),
+    ...bookingsRoutes(),
   ];
 }

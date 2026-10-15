@@ -15,6 +15,7 @@ import catalog from './en/catalog.json';
 import salons from './en/salons.json';
 import applications from './en/applications.json';
 import customers from './en/customers.json';
+import bookings from './en/bookings.json';
 import status from './en/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -34,6 +35,7 @@ const en = {
   ...gallery,
   ...forms,
   ...status,
+  ...bookings,
   ...customers,
   ...applications,
   ...salons,

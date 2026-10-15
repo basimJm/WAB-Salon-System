@@ -25,6 +25,7 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
   [ROUTES.salons]: lazy(() => import('@/presentation/salons/SalonsPage')),
   '/salons/applications': lazy(() => import('@/presentation/applications/ApplicationsPage')),
   [ROUTES.customers]: lazy(() => import('@/presentation/customers/CustomersPage')),
+  [ROUTES.bookings]: lazy(() => import('@/presentation/bookings/BookingsPage')),
   '/settings/versions': lazy(() => import('@/presentation/appconfig/VersionsPage')),
   '/settings/maintenance': lazy(() => import('@/presentation/appconfig/MaintenancePage')),
 };
@@ -34,6 +35,7 @@ const DETAIL_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>>
     () => import('@/presentation/applications/ApplicationReviewPage'),
   ),
   [`${ROUTES.customers}/:id`]: lazy(() => import('@/presentation/customers/CustomerDetailsPage')),
+  [`${ROUTES.bookings}/:id`]: lazy(() => import('@/presentation/bookings/BookingDetailsPage')),
   [`${ROUTES.salons}/:id`]: lazy(() => import('@/presentation/salons/SalonDetailsPage')),
 };
 const AboutPage = lazy(() => import('@/presentation/pages/AboutPage'));

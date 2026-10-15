@@ -103,3 +103,4 @@
 - ADM-042 done: salon actions in SalonActions.tsx; payout details read = explicit click, gcTime 0; IBAN helpers isIban/normalizeIban in domain/salons. LESSON: after prettier, string replace anchors break silently - assert that a replacement happened.
 - ADM-043 done: applications = repositories.applications {list,get,approve,reject}; review page opens /salons/applications/:id; signed document URLs: query gcTime 0
 - ADM-044 done: customers = repositories.customers {list,get,act(id,action,reason)}; actionsFor(status) decides the buttons
+- ADM-047 done: bookings = repositories.bookings {list,get,changeStatus}; filter mapping in presentation/bookings/bookingFilters.ts (URL -> API query)

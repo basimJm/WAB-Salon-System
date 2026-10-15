@@ -1,0 +1,49 @@
+{
+  "bookings": {
+    "subtitle": "Every booking on the platform, live.",
+    "tabs": "Booking tabs",
+    "tab": {
+      "PENDING": "Pending",
+      "UPCOMING": "Upcoming",
+      "TODAY": "Today",
+      "PAST": "Past"
+    },
+    "reference": "Reference",
+    "customer": "Customer",
+    "salon": "Salon",
+    "appointment": "Appointment",
+    "persons": "Persons",
+    "person": "Person",
+    "services": "Services",
+    "staff": "Staff",
+    "bride": "Bride",
+    "brideOnly": "Bride bookings",
+    "payment": "Payment",
+    "method": "Payment method",
+    "refund": "Refund",
+    "total": "Total",
+    "from": "From day",
+    "to": "To day (included)",
+    "search": "Search reference, customer or salon",
+    "empty": "No bookings match",
+    "respondBy": "Salon must answer by",
+    "dueOnline": "Due online",
+    "paidOnline": "Paid online",
+    "remaining": "Remaining",
+    "refunded": "Refunded",
+    "details": "Details",
+    "history": "Status history",
+    "noHistory": "No history",
+    "changeStatus": "Change status",
+    "newStatus": "New status",
+    "statusWarning": "Moves outside the normal flow are allowed but flagged. The customer and salon are told.",
+    "statusChanged": "Status changed",
+    "irregular": "Status changed (outside the normal flow, recorded)",
+    "paymentStatus": {
+      "PAY_ON_ARRIVAL": "Pay on arrival",
+      "DEPOSIT_PAID": "Deposit paid",
+      "FULLY_PAID": "Fully paid",
+      "PAID": "Paid"
+    }
+  }
+}
