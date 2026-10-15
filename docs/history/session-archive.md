@@ -1157,3 +1157,15 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). ADR-0006 (Markdown subset instead of Tiptap) still awaits the owner's confirmation.
 - Notes: ADM-036 adds FAQ and contact info to `ContentRepository`.
 
+
+### T-073 — ADM-036 content FAQ and contact info
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-036-faq-contact`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-036):
+  - [x] FAQ per app (AR+EN question/answer, order) and contact info (phone/WhatsApp E.164, email) lists with side-panel create/edit, validation and mandatory reason; drawer shell moved to shared components
+- Tests: 9 new tests through the mock stack; browser check: FAQ and Contact pages load rows, no horizontal scroll
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
+

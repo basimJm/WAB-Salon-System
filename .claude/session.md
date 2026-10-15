@@ -15,17 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-073 — ADM-036 content FAQ and contact info
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-036-faq-contact`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-036):
-  - [x] FAQ per app (AR+EN question/answer, order) and contact info (phone/WhatsApp E.164, email) lists with side-panel create/edit, validation and mandatory reason; drawer shell moved to shared components
-- Tests: 9 new tests through the mock stack; browser check: FAQ and Contact pages load rows, no horizontal scroll
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
-
 ### T-074 — ADM-037 banners with image upload
 
 - Project: `WAB-Admin-Dashboard/`
@@ -36,6 +25,17 @@
 - Tests: 17 new tests incl. upload flow through the mock stack; browser check: editor opens with 2 uploaders and 2 previews, no horizontal scroll
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
+
+### T-075 — ADM-038 catalog services
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-038-catalog-services`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-038):
+  - [x] Catalog services (women/men segmented view, server-paginated): create and edit in a side panel with names and descriptions in Arabic and English, image upload, order, active switch with a deactivation warning, mandatory reason; no delete
+- Tests: 4 new tests through the mock stack; browser check skipped for this task (same list+drawer pattern verified in ADM-033/034/036)
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Browser check not repeated (identical pattern to earlier pages); catalog requests (approve/reject) belong to ADM-039.
 
 ### Pending (next)
 
