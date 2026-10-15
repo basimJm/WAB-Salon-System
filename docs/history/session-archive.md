@@ -1265,3 +1265,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-044, ADM-045 and ADM-046 were built and merged as ONE task/branch (one repository and one pair of pages) instead of three; tabs for bookings/payments reuse later modules.
 
+
+### T-082 — ADM-047 bookings list, details and status change (ADM-047..049)
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-047-bookings-list`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-047):
+  - [x] Bookings list (tabs, status/payment/bride/day filters in the URL as Amman days, search, salon/customer deep-link filters, JOD totals, refreshes on booking.updated), booking page (facts, persons and services, money, history) and an admin status change with a mandatory reason that flags irregular moves
+- Tests: 6 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-047, 048 and 049 built as ONE task. Reassign staff / arbitrary refunds are not server operations; transactions/refunds tabs come with the finance modules.
+
