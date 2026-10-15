@@ -15,17 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-076 — ADM-039 catalog requests
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-039-catalog-requests`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-039):
-  - [x] Pending queue of salon service suggestions (status filter): approve in a side panel (translate name/description, reason) which creates the catalog service, reject with a mandatory reason; empty state; AR+EN
-- Tests: 3 new tests through the mock stack; no separate browser check (same list+drawer pattern as ADM-033..038)
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Browser check not repeated (identical pattern).
-
 ### T-077 — ADM-040 salons list
 
 - Project: `WAB-Admin-Dashboard/`
@@ -36,6 +25,17 @@
 - Tests: 4 new tests through the mock stack; no separate browser check (same list pattern)
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Missing on the server (G4): recommended and bookings(30d) columns, subscription filter.
+
+### T-078 — ADM-041 salon details
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-041-salon-overview`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-041):
+  - [x] Salon page /salons/:id opened from a list row: overview (audience, city, phone, rating, completeness checklist, offline reason), members tab, side panel with owner and subscription; error state; AR+EN
+- Tests: 6 new tests through the mock stack
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Shortcut tabs to bookings/reviews/transactions/payouts come with those modules; salon editing is blocked on the server (G-salon-edit).
 
 ### Pending (next)
 

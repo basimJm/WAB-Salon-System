@@ -99,3 +99,4 @@
 - ADM-038 done: catalog services = repositories.catalog.services (AdminResource, filter gender); pages with a required audience use SegmentedControl in the header actions
 - ADM-039 done: catalog requests = repositories.catalog.requests {list, approve(id,input,reason), reject(id,reason)}; approve always creates a service (no map-to-existing option on the server)
 - ADM-040 done: salons list = repositories.salons.list(query); shared hook useLocationOptions('cities'|'countries'); SearchField pages use list.setSearch(value) (immediate URL write)
+- ADM-041 done: record pages with a path param go in DETAIL_PAGES (app/routes.tsx); salons = repositories.salons.{list,get,members}
