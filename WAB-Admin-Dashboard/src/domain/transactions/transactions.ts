@@ -45,7 +45,24 @@ export interface TransactionQuery extends PageQuery {
   to?: string;
 }
 
+/** Payment problems the admin must look at: each list holds attempts, never totals. */
+export interface Reconciliation {
+  /** Still PENDING long after the customer left the checkout. */
+  readonly stuckPending: readonly Transaction[];
+  /** The gateway took the money but no booking exists (refund or fix). */
+  readonly paidWithoutBooking: readonly Transaction[];
+  /** A booking exists but the ledger has no charge entry for it. */
+  readonly missingLedger: readonly Transaction[];
+}
+export const RECONCILIATION_KINDS = [
+  'stuckPending',
+  'paidWithoutBooking',
+  'missingLedger',
+] as const;
+export type ReconciliationKind = (typeof RECONCILIATION_KINDS)[number];
+
 export interface TransactionsRepository {
+  reconciliation(): Promise<Reconciliation>;
   list(query: TransactionQuery): Promise<Page<Transaction>>;
   get(id: string): Promise<TransactionDetails>;
 }
