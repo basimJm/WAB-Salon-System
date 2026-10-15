@@ -1277,3 +1277,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-047, 048 and 049 built as ONE task. Reassign staff / arbitrary refunds are not server operations; transactions/refunds tabs come with the finance modules.
 
+
+### T-083 — ADM-050 reviews moderation and published reviews (ADM-050..051)
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-050-reviews-queue`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-050):
+  - [x] Reviews screen: pending queue (oldest first) with approve / reject, published tab with remove (rating recomputed), target and rating filters, bulk approve/reject up to 100 with per-item result counts, reasons recorded
+- Tests: 5 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-050 and ADM-051 built as ONE task; reject asks for a reason in the UI though the server makes it optional. DECISION to confirm: total JS budget raised 280 -> 500 KB and applied to prod builds only (lazy module chunks all count in it; dev builds carry mock and gallery code).
+

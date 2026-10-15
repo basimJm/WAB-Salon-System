@@ -9,6 +9,7 @@ import { locationsRoutes } from './locationsRoutes';
 import { salonsRoutes } from './salonsRoutes';
 import { reviewsRoutes } from './reviewsRoutes';
 import { transactionsRoutes } from './transactionsRoutes';
+import { refundsRoutes } from './refundsRoutes';
 import { settingsRoutes } from './settingsRoutes';
 import type { MockRoute } from './mockTransport';
 
@@ -30,5 +31,6 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...bookingsRoutes(),
     ...reviewsRoutes(),
     ...transactionsRoutes(),
+    ...refundsRoutes(),
   ];
 }
