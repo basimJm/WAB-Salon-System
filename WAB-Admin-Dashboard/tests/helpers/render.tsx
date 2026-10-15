@@ -20,6 +20,9 @@ import { createMockTransport } from '@/data/mock/mockTransport';
 import { createScenarioStore } from '@/data/mock/scenarios';
 import { RemoteAppConfigRepository } from '@/data/appconfig/RemoteAppConfigRepository';
 import { RemoteContentRepository } from '@/data/content/RemoteContentRepository';
+import { RemoteBannersRepository } from '@/data/banners/RemoteBannersRepository';
+import { RemoteUploadsRepository } from '@/data/uploads/RemoteUploadsRepository';
+import { fakePutFile } from '@/data/uploads/putFile';
 import { RemoteLocationsRepository } from '@/data/locations/RemoteLocationsRepository';
 import { RemoteSettingsRepository } from '@/data/settings/RemoteSettingsRepository';
 import { FakeRealtimeClient } from '@/data/realtime/FakeRealtimeClient';
@@ -59,6 +62,8 @@ export function makeContainer(
       locations: new RemoteLocationsRepository(api),
       appConfig: new RemoteAppConfigRepository(api),
       content: new RemoteContentRepository(api),
+      banners: new RemoteBannersRepository(api),
+      uploads: new RemoteUploadsRepository(api, fakePutFile),
     },
     queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }),
   };

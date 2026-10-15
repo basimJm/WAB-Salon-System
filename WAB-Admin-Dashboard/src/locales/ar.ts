@@ -10,6 +10,7 @@ import settings from './ar/settings.json';
 import locations from './ar/locations.json';
 import appConfig from './ar/appConfig.json';
 import content from './ar/content.json';
+import banners from './ar/banners.json';
 import status from './ar/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -29,6 +30,7 @@ const ar = {
   ...gallery,
   ...forms,
   ...status,
+  ...banners,
   ...content,
   ...appConfig,
   ...locations,

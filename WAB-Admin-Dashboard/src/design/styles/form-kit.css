@@ -91,3 +91,9 @@
   margin-block-start: var(--space-2);
   justify-content: space-between;
 }
+
+.wab-banner-preview {
+  inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--radius-md);
+}
