@@ -1115,3 +1115,16 @@
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). SERVER DEFECT to report: the OpenAPI pattern for area `cityId` is `"^[a-f0-9]{24}$/i"` (flag inside the string) so no real id matches; the repository overrides that one schema with a correct id pattern.
 - Notes: `ChildLocationPage` carries an inline `hardcoded-ok` marker (a TypeScript generic is read as JSX text by the scanner).
 
+
+### T-070 — Merge ADM-033 into `admin`
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `admin`
+- Status: DONE (PR #166 merged into `admin`; no new code on this branch)
+- Acceptance criteria:
+  - [x] ADM-033 (T-069) passed the local gate before the merge (`sh scripts/gate.sh` all PASS) and the browser check; local `admin` is on `origin/admin` with no uncommitted changes
+- Tests: see T-069; nothing changed since
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — review recorded in T-069; this block only covers the merge on the master branch. DEVIATION: no e2e (user decision).
+- Notes: Next: ADM-034 on `feat/adm-034-app-config` from `origin/admin`.
+

@@ -19,6 +19,7 @@ import { createMockRoutes } from '@/data/mock/fixtures';
 import { createMockTransport } from '@/data/mock/mockTransport';
 import { createScenarioStore } from '@/data/mock/scenarios';
 import { RemoteAppConfigRepository } from '@/data/appconfig/RemoteAppConfigRepository';
+import { RemoteContentRepository } from '@/data/content/RemoteContentRepository';
 import { RemoteLocationsRepository } from '@/data/locations/RemoteLocationsRepository';
 import { RemoteSettingsRepository } from '@/data/settings/RemoteSettingsRepository';
 import { FakeRealtimeClient } from '@/data/realtime/FakeRealtimeClient';
@@ -57,6 +58,7 @@ export function makeContainer(
       settings: new RemoteSettingsRepository(api),
       locations: new RemoteLocationsRepository(api),
       appConfig: new RemoteAppConfigRepository(api),
+      content: new RemoteContentRepository(api),
     },
     queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }),
   };

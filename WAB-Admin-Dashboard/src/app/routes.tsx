@@ -16,6 +16,7 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
   '/settings/countries': lazy(() => import('@/presentation/locations/CountriesPage')),
   '/settings/cities': lazy(() => import('@/presentation/locations/CitiesPage')),
   '/settings/areas': lazy(() => import('@/presentation/locations/AreasPage')),
+  '/content/pages': lazy(() => import('@/presentation/content/LegalPagesPage')),
   '/settings/versions': lazy(() => import('@/presentation/appconfig/VersionsPage')),
   '/settings/maintenance': lazy(() => import('@/presentation/appconfig/MaintenancePage')),
 };
