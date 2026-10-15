@@ -13,6 +13,7 @@ import content from './en/content.json';
 import banners from './en/banners.json';
 import catalog from './en/catalog.json';
 import salons from './en/salons.json';
+import applications from './en/applications.json';
 import status from './en/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -32,6 +33,7 @@ const en = {
   ...gallery,
   ...forms,
   ...status,
+  ...applications,
   ...salons,
   ...catalog,
   ...banners,

@@ -1217,3 +1217,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Missing on the server (G4): recommended and bookings(30d) columns, subscription filter.
 
+
+### T-078 — ADM-041 salon details
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-041-salon-overview`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-041):
+  - [x] Salon page /salons/:id opened from a list row: overview (audience, city, phone, rating, completeness checklist, offline reason), members tab, side panel with owner and subscription; error state; AR+EN
+- Tests: 6 new tests through the mock stack
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Shortcut tabs to bookings/reviews/transactions/payouts come with those modules; salon editing is blocked on the server (G-salon-edit).
+

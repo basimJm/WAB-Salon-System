@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-078 — ADM-041 salon details
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-041-salon-overview`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-041):
-  - [x] Salon page /salons/:id opened from a list row: overview (audience, city, phone, rating, completeness checklist, offline reason), members tab, side panel with owner and subscription; error state; AR+EN
-- Tests: 6 new tests through the mock stack
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Shortcut tabs to bookings/reviews/transactions/payouts come with those modules; salon editing is blocked on the server (G-salon-edit).
-
 ### T-079 — ADM-042 salon actions
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 4 new tests through the mock stack
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). No separate browser check (same dialog/drawer patterns).
+
+### T-080 — ADM-043 salon applications
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-043-applications`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-043):
+  - [x] Applications queue (pending/rejected, oldest first, resubmission counts) and review page: submitted data, license documents through short-lived signed links (never cached), approve (starts the trial) / reject with a mandatory reason shown to the owner
+- Tests: 4 new tests through the mock stack; mock transport now prefers fixed paths over parameter paths
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). No separate browser check (same list/detail patterns).
 
 ### Pending (next)
 
