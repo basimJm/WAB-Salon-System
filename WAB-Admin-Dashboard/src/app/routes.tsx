@@ -13,6 +13,9 @@ const ServerErrorPage = lazy(() => import('@/presentation/pages/ServerErrorPage'
 /** Feature pages that replace the placeholder of their nav entry (one line per finished module task). */
 const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>> = {
   [ROUTES.settings]: lazy(() => import('@/presentation/settings/SettingsPage')),
+  '/settings/countries': lazy(() => import('@/presentation/locations/CountriesPage')),
+  '/settings/cities': lazy(() => import('@/presentation/locations/CitiesPage')),
+  '/settings/areas': lazy(() => import('@/presentation/locations/AreasPage')),
 };
 const AboutPage = lazy(() => import('@/presentation/pages/AboutPage'));
 /** Compile-time: `__SHOW_DESIGN_SYSTEM__` is false in prod builds, so the whole gallery chunk is dropped. */

@@ -94,7 +94,18 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'push', labelKey: 'nav.push', path: ROUTES.push, icon: 'send' },
   { id: 'reports', labelKey: 'nav.reports', path: ROUTES.reports, icon: 'file' },
   { id: 'alerts', labelKey: 'nav.alerts', path: ROUTES.alerts, icon: 'bell' },
-  { id: 'settings', labelKey: 'nav.settings', path: ROUTES.settings, icon: 'gear' },
+  {
+    id: 'settings',
+    labelKey: 'nav.settings',
+    path: ROUTES.settings,
+    icon: 'gear',
+    children: [
+      { id: 'general', labelKey: 'nav.sub.general', path: ROUTES.settings },
+      { id: 'countries', labelKey: 'nav.sub.countries', path: '/settings/countries' },
+      { id: 'cities', labelKey: 'nav.sub.cities', path: '/settings/cities' },
+      { id: 'areas', labelKey: 'nav.sub.areas', path: '/settings/areas' },
+    ],
+  },
   { id: 'audit', labelKey: 'nav.auditLog', path: ROUTES.auditLog, icon: 'shield' },
 ];
 

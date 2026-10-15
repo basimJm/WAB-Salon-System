@@ -51,7 +51,11 @@
       "recommended": "Recommended",
       "legal": "Legal pages",
       "faq": "FAQ",
-      "contact": "Contact info"
+      "contact": "Contact info",
+      "general": "General",
+      "countries": "Countries",
+      "cities": "Cities",
+      "areas": "Areas"
     },
     "breadcrumbs": "Breadcrumbs",
     "expand": "Expand {{name}}",
