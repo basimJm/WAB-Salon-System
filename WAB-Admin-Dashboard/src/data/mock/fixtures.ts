@@ -11,6 +11,7 @@ import { reviewsRoutes } from './reviewsRoutes';
 import { transactionsRoutes } from './transactionsRoutes';
 import { refundsRoutes } from './refundsRoutes';
 import { payoutsRoutes } from './payoutsRoutes';
+import { subscriptionsRoutes } from './subscriptionsRoutes';
 import { settingsRoutes } from './settingsRoutes';
 import type { MockRoute } from './mockTransport';
 
@@ -34,5 +35,6 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...transactionsRoutes(),
     ...refundsRoutes(),
     ...payoutsRoutes(),
+    ...subscriptionsRoutes(),
   ];
 }

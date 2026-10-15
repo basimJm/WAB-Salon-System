@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-086 — ADM-055 payouts balances, creation and transfer (ADM-055..056)
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-054-payouts`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-055):
-  - [x] Payouts screen: per-salon balances (collected, gateway fees, refunds, paid out, due now), create a payout up to the end of an Amman day after a ledger preview, payout history with status filter, record the manual bank transfer (net amount, day, bank reference, note); AR+EN
-- Tests: 4 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-055 and ADM-056 built as ONE task on branch feat/adm-054-payouts (name differs from the backlog); ADM-054 reconciliation is still open.
-
 ### T-087 — ADM-054 reconciliation
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 2 new tests through the mock stack; no separate browser check
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). The server returns problems, not period totals (backlog note).
+
+### T-088 — ADM-057 subscriptions
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-057-subscriptions`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-057):
+  - [x] Subscriptions list (status and ending-within-N-days filters, days left, last payment), payments of a salon, and recording a payment made outside the app (amount, paid day, covered period, method, reference, note) which activates and extends the subscription
+- Tests: 4 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
 
 ### Pending (next)
 
