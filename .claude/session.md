@@ -15,20 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-067 — ADM-031 Settings page (discovery, booking rules, OTP)
-
-- Project: `WAB-Admin-Dashboard/` (`domain/settings/*`, `data/settings/RemoteSettingsRepository.ts`, `presentation/settings/*`, stateful mock settings, `locales/*/settings.json`, `routes.tsx` FEATURE_PAGES, test helper on the mock stack)
-- Branch: `feat/adm-031-settings`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-031; PRD A28; BUSINESS_DOMAIN §10):
-  - [x] `GET /settings` + `PUT /settings/{key}` (value + mandatory reason) through the generated contract; page shows the 15 core keys in three groups with effective value, default, "Changed/Default" badge and "Use default"
-  - [x] Validation as you type (whole numbers, bounds, lists comma separated/sorted/no repeats) blocks saving; save asks for a reason, sends only changed keys, reloads, toasts; failures show the localized error with retry
-  - [x] AR+EN labels for every key (test), phone single column / desktop grid, no horizontal scroll
-- Tests: `sh scripts/gate.sh` all PASS (17 new tests; the page tests run the full stack page -> repository -> ApiClient -> HttpClient -> mock server); browser check dev-debug: 3 groups, 15 fields, no console errors, phone width 324 px single column
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATIONS: no e2e (user decision); ranges are sanity bounds (server validates structure only); DECISION: total JS budget raised 200 -> 280 KB gzip (entry 40 and chunk 80 unchanged) because the lazy module chunks of the whole backlog count in it; prod-release stayed within 200 until this task.
-- Notes: ADM-032 adds the remaining key groups (alerts objects, grace days, retention...) to the same registry; sections for the three groups use `CORE_SETTING_GROUPS`.
-
 ### T-068 — ADM-032 Settings: every remaining key group
 
 - Project: `WAB-Admin-Dashboard/` (`domain/settings/registry.ts`, `useSettingsDraft`, `SettingsPage` tabs, `constants/settings.ts`, settings locales, mock defaults)
@@ -41,6 +27,19 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATIONS: no e2e (user decision). NOT BUILT because the server has no setting for them: alert RECIPIENTS and the payout frequency NOTE (Admin PRD A28) — open items for the server owner (new keys or endpoints needed); app versions and maintenance belong to ADM-034.
 - Notes: the "Changed/Default" badge now compares with the default value (it is per row; object settings have one flag for the whole key).
+
+### T-069 — ADM-033 Locations: countries, cities, areas
+
+- Project: `WAB-Admin-Dashboard/` (`domain/locations`, `data/locations/RemoteLocationsRepository.ts`, `presentation/locations/*`, mock `locationsRoutes`, nav children under Settings, locales)
+- Branch: `feat/adm-033-locations`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-033; PRD A28 locations):
+  - [x] Three pages (`/settings/countries|cities|areas`) with server-paginated lists, parent filter (country for cities, city for areas), create/edit in a side panel (names ar+en, sort order, active switch, mandatory reason); no delete (switch off with `active=false`); country code/dial code/flag/phone regex; parent chosen at creation only
+  - [x] Typed through the generated contract; AR+EN; list state in the URL (ADM-028)
+- Tests: `sh scripts/gate.sh` all PASS (7 page tests through the full mock stack); browser check dev-debug: all three pages load their rows, no horizontal scroll
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). SERVER DEFECT to report: the OpenAPI pattern for area `cityId` is `"^[a-f0-9]{24}$/i"` (flag inside the string) so no real id matches; the repository overrides that one schema with a correct id pattern.
+- Notes: `ChildLocationPage` carries an inline `hardcoded-ok` marker (a TypeScript generic is read as JSX text by the scanner).
 
 ### Pending (next)
 

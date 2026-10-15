@@ -18,6 +18,7 @@ import { ApiClient } from '@/data/api/ApiClient';
 import { createMockRoutes } from '@/data/mock/fixtures';
 import { createMockTransport } from '@/data/mock/mockTransport';
 import { createScenarioStore } from '@/data/mock/scenarios';
+import { RemoteLocationsRepository } from '@/data/locations/RemoteLocationsRepository';
 import { RemoteSettingsRepository } from '@/data/settings/RemoteSettingsRepository';
 import { FakeRealtimeClient } from '@/data/realtime/FakeRealtimeClient';
 import { HttpClient } from '@/infrastructure/http/HttpClient';
@@ -50,7 +51,11 @@ export function makeContainer(
     api,
     mock: { scenarios },
     realtime: new FakeRealtimeClient(),
-    repositories: { auth, settings: new RemoteSettingsRepository(api) },
+    repositories: {
+      auth,
+      settings: new RemoteSettingsRepository(api),
+      locations: new RemoteLocationsRepository(api),
+    },
     queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }),
   };
 }

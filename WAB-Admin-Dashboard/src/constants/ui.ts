@@ -2,6 +2,8 @@ export const BRAND_MARK = 'WAB';
 export const BRAND_TAGLINE = 'WEDDING & BEAUTY';
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 export const DEFAULT_PAGE_SIZE = 25;
+/** The largest page the admin API serves (lookups load one full page). */
+export const MAX_PAGE_SIZE = 100;
 export const SKELETON_ROWS = 6;
 export const MIN_REASON_LENGTH = 3;
 export const TOAST_DURATION_MS = 4_000;
