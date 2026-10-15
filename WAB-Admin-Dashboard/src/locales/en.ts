@@ -10,6 +10,7 @@ import settings from './en/settings.json';
 import locations from './en/locations.json';
 import appConfig from './en/appConfig.json';
 import content from './en/content.json';
+import banners from './en/banners.json';
 import status from './en/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -29,6 +30,7 @@ const en = {
   ...gallery,
   ...forms,
   ...status,
+  ...banners,
   ...content,
   ...appConfig,
   ...locations,

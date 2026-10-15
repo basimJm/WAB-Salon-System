@@ -1,0 +1,41 @@
+{
+  "banners": {
+    "subtitle": "Home banners shown to customers in the app.",
+    "add": "Add a banner",
+    "edit": "Edit banner",
+    "image": "Artwork",
+    "action": "When tapped",
+    "gender": "Audience",
+    "start": "Shows from",
+    "end": "Shows until (included)",
+    "order": "Order",
+    "active": "Active",
+    "schedule": "Schedule",
+    "noImage": "No image yet",
+    "actions": {
+      "NONE": "Nothing",
+      "SALON": "Open a salon",
+      "EXTERNAL_URL": "Open a link"
+    },
+    "value": {
+      "SALON": "Salon id",
+      "EXTERNAL_URL": "Link (https)"
+    },
+    "genders": {
+      "MALE": "Men",
+      "FEMALE": "Women",
+      "BOTH": "Everyone"
+    },
+    "preview": {
+      "ar": "Banner preview in Arabic",
+      "en": "Banner preview in English"
+    },
+    "error": {
+      "imageAr": "Upload the Arabic image",
+      "imageEn": "Upload the English image",
+      "schedule": "The end day must be after the start day",
+      "actionValue": "Enter a valid value for this action",
+      "order": "Whole number from 0"
+    }
+  }
+}

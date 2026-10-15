@@ -19,6 +19,7 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
   '/content/pages': lazy(() => import('@/presentation/content/LegalPagesPage')),
   '/content/faq': lazy(() => import('@/presentation/content/FaqPage')),
   '/content/contact': lazy(() => import('@/presentation/content/ContactPage')),
+  [ROUTES.content]: lazy(() => import('@/presentation/banners/BannersPage')),
   '/settings/versions': lazy(() => import('@/presentation/appconfig/VersionsPage')),
   '/settings/maintenance': lazy(() => import('@/presentation/appconfig/MaintenancePage')),
 };
