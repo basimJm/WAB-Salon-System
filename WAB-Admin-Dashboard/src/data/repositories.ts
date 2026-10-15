@@ -6,6 +6,7 @@ import type { ApplicationsRepository } from '@/domain/applications/applications'
 import type { CustomersRepository } from '@/domain/customers/customers';
 import type { BookingsRepository } from '@/domain/bookings/bookings';
 import type { ReviewsRepository } from '@/domain/reviews/reviews';
+import type { TransactionsRepository } from '@/domain/transactions/transactions';
 import type { SalonsRepository } from '@/domain/salons/salons';
 import type { CatalogRepository } from '@/domain/catalog/catalog';
 import type { ContentRepository } from '@/domain/content/content';
@@ -22,6 +23,7 @@ import { RemoteApplicationsRepository } from './applications/RemoteApplicationsR
 import { RemoteCustomersRepository } from './customers/RemoteCustomersRepository';
 import { RemoteBookingsRepository } from './bookings/RemoteBookingsRepository';
 import { RemoteReviewsRepository } from './reviews/RemoteReviewsRepository';
+import { RemoteTransactionsRepository } from './transactions/RemoteTransactionsRepository';
 import { RemoteSalonsRepository } from './salons/RemoteSalonsRepository';
 import { RemoteCatalogRepository } from './catalog/RemoteCatalogRepository';
 import { RemoteContentRepository } from './content/RemoteContentRepository';
@@ -37,6 +39,7 @@ export interface Repositories {
   readonly banners: BannersRepository;
   readonly catalog: CatalogRepository;
   readonly salons: SalonsRepository;
+  readonly transactions: TransactionsRepository;
   readonly reviews: ReviewsRepository;
   readonly bookings: BookingsRepository;
   readonly customers: CustomersRepository;
@@ -53,6 +56,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
   const banners = new RemoteBannersRepository(api);
   const catalog = new RemoteCatalogRepository(api);
   const salons = new RemoteSalonsRepository(api);
+  const transactions = new RemoteTransactionsRepository(api);
   const reviews = new RemoteReviewsRepository(api);
   const bookings = new RemoteBookingsRepository(api);
   const customers = new RemoteCustomersRepository(api);
@@ -70,6 +74,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
       banners,
       catalog,
       salons,
+      transactions,
       reviews,
       bookings,
       customers,
@@ -86,6 +91,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
     banners,
     catalog,
     salons,
+    transactions,
     reviews,
     bookings,
     customers,

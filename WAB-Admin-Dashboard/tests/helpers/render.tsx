@@ -28,6 +28,7 @@ import { RemoteApplicationsRepository } from '@/data/applications/RemoteApplicat
 import { RemoteCustomersRepository } from '@/data/customers/RemoteCustomersRepository';
 import { RemoteBookingsRepository } from '@/data/bookings/RemoteBookingsRepository';
 import { RemoteReviewsRepository } from '@/data/reviews/RemoteReviewsRepository';
+import { RemoteTransactionsRepository } from '@/data/transactions/RemoteTransactionsRepository';
 import { RemoteSalonsRepository } from '@/data/salons/RemoteSalonsRepository';
 import { RemoteLocationsRepository } from '@/data/locations/RemoteLocationsRepository';
 import { RemoteSettingsRepository } from '@/data/settings/RemoteSettingsRepository';
@@ -71,6 +72,7 @@ export function makeContainer(
       banners: new RemoteBannersRepository(api),
       catalog: new RemoteCatalogRepository(api),
       salons: new RemoteSalonsRepository(api),
+      transactions: new RemoteTransactionsRepository(api),
       reviews: new RemoteReviewsRepository(api),
       bookings: new RemoteBookingsRepository(api),
       customers: new RemoteCustomersRepository(api),

@@ -105,3 +105,5 @@
 - ADM-044 done: customers = repositories.customers {list,get,act(id,action,reason)}; actionsFor(status) decides the buttons
 - ADM-047 done: bookings = repositories.bookings {list,get,changeStatus}; filter mapping in presentation/bookings/bookingFilters.ts (URL -> API query)
 - ADM-050 done: reviews = repositories.reviews {list,approve,reject,remove,bulk}; page parts split into reviewFilters/reviewColumns/reviewParts/useReviewActions (complexity limit 15). BUDGET: total JS is now checked for PROD builds only and raised to 500 KB gzip (entry 40 / chunk 80 unchanged)
+- STOP HOOK (user decision 2026-10-15): `Loops: 1/1 (user decision)` is accepted next to `Loops: 3/3` (regex LOOPS_DONE in .claude/hooks/_common.py); a bare `1/1` is not. finish.py writes the accepted form.
+- ADM-052 done: transactions = repositories.transactions {list,get}; details route /finance/transactions/:id (DETAIL_PAGES). Stop hook now accepts 'Loops: 1/1 (user decision)'.
