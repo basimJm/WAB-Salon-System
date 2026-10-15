@@ -15,20 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-071 — ADM-034 App versions and maintenance mode
-
-- Project: `WAB-Admin-Dashboard/` (`domain/appconfig`, `data/appconfig`, `presentation/appconfig/*`, shared `data/api/resource.ts`, `domain/shared/resource.ts`, `hooks/useResourcePanel.ts`, mock `appConfigRoutes`/`mockCollection`, locales)
-- Branch: `feat/adm-034-app-config`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-034; PRD A28 app versions, maintenance):
-  - [x] App versions per app (customer/salon) and platform (Android/iOS): latest, minimum supported (force update), optional-update flag, https store link; filters; create (app and platform fixed afterwards) and edit with mandatory reason; rules: well-formed dotted versions, minimum not above latest, https link
-  - [x] Maintenance per app: on/off, message in Arabic and English (required, 500 max), reason; AR+EN; list state in the URL
-  - [x] Nav: Settings gets "App versions" and "Maintenance"; refactor: locations and app config share one resource helper, panel hook and mock collection
-- Tests: `sh scripts/gate.sh` all PASS (15 new tests incl. version rules and both pages through the mock stack); browser check dev-debug: both pages load their rows, no horizontal scroll
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). The server has no delete for these records; records are edited in place.
-- Notes: contains the T-070 merge note for ADM-033.
-
 ### T-072 — ADM-035 Content: legal pages
 
 - Project: `WAB-Admin-Dashboard/` (`domain/content`, `data/content`, `presentation/content/{LegalPagesPage,PageEditor}.tsx`, mock `contentRoutes`, locales, route `/content/pages`)
@@ -41,6 +27,17 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). ADR-0006 (Markdown subset instead of Tiptap) still awaits the owner's confirmation.
 - Notes: ADM-036 adds FAQ and contact info to `ContentRepository`.
+
+### T-073 — ADM-036 content FAQ and contact info
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-036-faq-contact`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-036):
+  - [x] FAQ per app (AR+EN question/answer, order) and contact info (phone/WhatsApp E.164, email) lists with side-panel create/edit, validation and mandatory reason; drawer shell moved to shared components
+- Tests: 9 new tests through the mock stack; browser check: FAQ and Contact pages load rows, no horizontal scroll
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
 
 ### Pending (next)
 

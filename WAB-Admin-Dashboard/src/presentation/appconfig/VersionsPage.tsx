@@ -17,12 +17,12 @@ import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useResourcePanel } from '../hooks/useResourcePanel';
 import {
-  AppConfigDrawer,
+  ResourceDrawer,
   appOptions,
   platformOptions,
   reasonError,
   Select,
-} from './AppConfigDrawer';
+} from '../components/overlay/ResourceDrawer';
 
 const OPTIONS = { filterKeys: ['app', 'platform'] };
 const pick = <T extends string>(all: readonly T[], v: string | undefined): T | undefined =>
@@ -59,7 +59,7 @@ function VersionDrawer({
   const err = (k: string) =>
     errors.includes(`appConfig.error.${k}`) ? t(`appConfig.error.${k}`) : undefined;
   return (
-    <AppConfigDrawer
+    <ResourceDrawer
       title={t(item ? 'appConfig.editVersion' : 'appConfig.addVersion')}
       reason={v.reason}
       reasonErr={errors.includes('appConfig.error.reason') ? 'appConfig.error.reason' : undefined}
@@ -111,7 +111,7 @@ function VersionDrawer({
         checked={v.optionalUpdate}
         onChange={(e) => setV({ ...v, optionalUpdate: e.target.checked })}
       />
-    </AppConfigDrawer>
+    </ResourceDrawer>
   );
 }
 

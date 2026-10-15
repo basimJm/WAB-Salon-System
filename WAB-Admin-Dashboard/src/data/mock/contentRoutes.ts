@@ -27,7 +27,77 @@ export function contentRoutes(): readonly MockRoute[] {
     ],
     nextId,
   );
+  const faqs = collection(
+    [
+      {
+        id: '64c000000000000000000011',
+        app: 'CUSTOMER' as const,
+        question: { ar: 'كيف أحجز؟', en: 'How do I book?' },
+        answer: { ar: 'اختر الصالون ثم الموعد.', en: 'Pick a salon, then a time.' },
+        order: 1,
+      },
+    ],
+    nextId,
+    { order: 0 },
+  );
+  const contact = collection(
+    [
+      {
+        id: '64c000000000000000000021',
+        app: 'CUSTOMER' as const,
+        phone: '+962790000000',
+        whatsapp: '+962790000001',
+        email: 'help@example.test', // hardcoded-ok: mock data
+      },
+    ],
+    nextId,
+  );
+  const extra = [
+    mockRoute(
+      defineEndpoint(ops.getContentFaqs, {
+        data: dto.getContentFaqsDataSchema,
+        query: dto.getContentFaqsQuerySchema,
+      }),
+      faqs.list,
+    ),
+    mockRoute(
+      defineEndpoint(ops.postContentFaqs, {
+        data: dto.postContentFaqsDataSchema,
+        body: dto.postContentFaqsBodySchema,
+      }),
+      faqs.create,
+    ),
+    mockRoute(
+      defineEndpoint(ops.patchContentFaqsById, {
+        data: dto.patchContentFaqsByIdDataSchema,
+        body: dto.patchContentFaqsByIdBodySchema,
+      }),
+      faqs.update,
+    ),
+    mockRoute(
+      defineEndpoint(ops.getContentContactInfo, {
+        data: dto.getContentContactInfoDataSchema,
+        query: dto.getContentContactInfoQuerySchema,
+      }),
+      contact.list,
+    ),
+    mockRoute(
+      defineEndpoint(ops.postContentContactInfo, {
+        data: dto.postContentContactInfoDataSchema,
+        body: dto.postContentContactInfoBodySchema,
+      }),
+      contact.create,
+    ),
+    mockRoute(
+      defineEndpoint(ops.patchContentContactInfoById, {
+        data: dto.patchContentContactInfoByIdDataSchema,
+        body: dto.patchContentContactInfoByIdBodySchema,
+      }),
+      contact.update,
+    ),
+  ];
   return [
+    ...extra,
     mockRoute(
       defineEndpoint(ops.getContentPages, {
         data: dto.getContentPagesDataSchema,
