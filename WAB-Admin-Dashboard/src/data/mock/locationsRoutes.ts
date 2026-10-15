@@ -1,69 +1,14 @@
 import { OPERATIONS } from '../contract/generated/operations';
 import * as dto from '../contract/generated/dto';
 import { defineEndpoint } from '../api/endpoint';
-import { mockRoute, type TypedAnswer } from './mockRoute';
-import type { MockRequest, MockRoute } from './mockTransport';
+import { collection } from './mockCollection';
+import { mockRoute } from './mockRoute';
+import type { MockRoute } from './mockTransport';
 
-interface Row {
-  id: string;
-  name: { ar: string; en: string };
-  active: boolean;
-  sortOrder: number;
-}
-
-const withoutReason = (body: unknown): Record<string, unknown> =>
-  Object.fromEntries(
-    Object.entries(body as Record<string, unknown>).filter(([k]) => k !== 'reason'),
-  );
-
+const LOCATION_DEFAULTS = { active: true, sortOrder: 0 };
 const name = (ar: string, en: string) => ({ ar, en });
 const AMMAN_ID = '64a000000000000000000001';
 const IRBID_ID = '64a000000000000000000002';
-
-const page = <T>(rows: T[], q: URLSearchParams): TypedAnswer<T[]> => {
-  const pageSize = Number(q.get('pageSize') ?? 25);
-  const current = Number(q.get('page') ?? 1);
-  const start = (current - 1) * pageSize;
-  return {
-    data: rows.slice(start, start + pageSize),
-    meta: {
-      page: current,
-      pageSize,
-      total: rows.length,
-      totalPages: Math.max(1, Math.ceil(rows.length / pageSize)),
-    },
-    empty: [],
-  };
-};
-
-/** In-memory collection with list (filterable), create and patch, shared by the three location resources. */
-function collection<T extends Row>(seed: T[], idOf: () => string, filterKey?: keyof T) {
-  const rows = [...seed];
-  return {
-    list: ({ query }: MockRequest) => {
-      const filter = filterKey ? query.get(String(filterKey)) : null;
-      return page(
-        rows.filter((r) => !filter || r[filterKey as keyof T] === filter),
-        query,
-      );
-    },
-    create: ({ body }: MockRequest) => {
-      const input = withoutReason(body);
-      const row = { id: idOf(), active: true, sortOrder: 0, ...input } as unknown as T;
-      rows.push(row);
-      return { data: row, status: 201 };
-    },
-    update: ({ params, body }: MockRequest) => {
-      const patch = withoutReason(body);
-      const index = rows.findIndex((r) => r.id === params['id']);
-      const current = rows[index];
-      if (!current) return { data: seed[0] as T };
-      const next = { ...current, ...patch } as T;
-      rows[index] = next;
-      return { data: next };
-    },
-  };
-}
 
 export function locationsRoutes(): readonly MockRoute[] {
   let counter = 100;
@@ -82,6 +27,7 @@ export function locationsRoutes(): readonly MockRoute[] {
       },
     ],
     nextId,
+    LOCATION_DEFAULTS,
   );
   const cities = collection(
     [
@@ -89,7 +35,7 @@ export function locationsRoutes(): readonly MockRoute[] {
       { id: IRBID_ID, countryCode: 'JO', name: name('إربد', 'Irbid'), active: true, sortOrder: 2 },
     ],
     nextId,
-    'countryCode',
+    LOCATION_DEFAULTS,
   );
   const areas = collection(
     [
@@ -109,7 +55,7 @@ export function locationsRoutes(): readonly MockRoute[] {
       },
     ],
     nextId,
-    'cityId',
+    LOCATION_DEFAULTS,
   );
   const ops = OPERATIONS;
   return [

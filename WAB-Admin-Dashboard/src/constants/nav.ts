@@ -104,6 +104,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
       { id: 'countries', labelKey: 'nav.sub.countries', path: '/settings/countries' },
       { id: 'cities', labelKey: 'nav.sub.cities', path: '/settings/cities' },
       { id: 'areas', labelKey: 'nav.sub.areas', path: '/settings/areas' },
+      { id: 'versions', labelKey: 'nav.sub.versions', path: '/settings/versions' },
+      { id: 'maintenance', labelKey: 'nav.sub.maintenance', path: '/settings/maintenance' },
     ],
   },
   { id: 'audit', labelKey: 'nav.auditLog', path: ROUTES.auditLog, icon: 'shield' },

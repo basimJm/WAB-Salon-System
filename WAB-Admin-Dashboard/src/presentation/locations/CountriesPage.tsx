@@ -6,7 +6,7 @@ import { TextField } from '../components/form/TextField';
 import { LocationDrawer } from './LocationDrawer';
 import { LocationsTable } from './LocationsTable';
 import { toName, useLocationForm } from './useLocationForm';
-import { useLocationResource } from './useLocationResource';
+import { useResourcePanel } from '../hooks/useResourcePanel';
 import { useState } from 'react';
 
 const OPTIONS = { filterKeys: [] as string[] };
@@ -120,7 +120,7 @@ type CountryValues = Extras & {
 function useCountryResource(state: ReturnType<typeof useListController>['state']) {
   const { repositories } = useContainer();
   const repo = repositories.locations.countries;
-  return useLocationResource<Country, CountryValues>(state, {
+  return useResourcePanel<Country, CountryValues>(state, {
     queryName: 'getLocationsCountries',
     load: (s) => repo.list({ page: s.page, pageSize: s.pageSize }),
     save: (editing, v, reason) => {

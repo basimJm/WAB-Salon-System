@@ -1,0 +1,45 @@
+{
+  "appConfig": {
+    "versionsSubtitle": "فرض أو اقتراح تحديث التطبيق لكل تطبيق ومنصة.",
+    "maintenanceSubtitle": "تحويل تطبيق إلى وضع الصيانة مع رسالة يراها العملاء.",
+    "all": "الكل",
+    "edit": "تعديل",
+    "reason": "السبب",
+    "reasonHint": "يُسجَّل في سجل التدقيق.",
+    "appLabel": "التطبيق",
+    "platformLabel": "المنصة",
+    "app": {
+      "CUSTOMER": "تطبيق العملاء",
+      "MERCHANT": "تطبيق الصالون"
+    },
+    "platform": {
+      "ANDROID": "أندرويد",
+      "IOS": "آي أو إس"
+    },
+    "latest": "أحدث إصدار",
+    "minSupported": "أقل إصدار مدعوم",
+    "minSupportedHint": "التطبيقات الأقدم يجب أن تُحدَّث.",
+    "storeUrl": "رابط المتجر (https)",
+    "optionalUpdate": "التحديث اختياري",
+    "optional": "اختياري",
+    "forced": "مطلوب أسفل الحد الأدنى",
+    "addVersion": "إضافة إصدار",
+    "editVersion": "تعديل الإصدار",
+    "maintenanceOn": "الصيانة مفعّلة",
+    "maintenanceOff": "متوقفة",
+    "maintenanceStatus": "الحالة",
+    "message": "الرسالة",
+    "messageAr": "الرسالة (بالعربية)",
+    "messageEn": "الرسالة (بالإنجليزية)",
+    "addMaintenance": "إضافة سجل صيانة",
+    "editMaintenance": "تعديل الصيانة",
+    "error": {
+      "reason": "اكتب السبب (3 أحرف على الأقل)",
+      "latest": "استخدم إصدارًا مثل 1.4.0",
+      "minSupported": "استخدم إصدارًا مثل 1.2.0",
+      "order": "الحد الأدنى لا يتجاوز أحدث إصدار",
+      "storeUrl": "أدخل رابط https",
+      "message": "مطلوب وبحد أقصى {{max}} حرفًا"
+    }
+  }
+}

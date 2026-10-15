@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { Page } from '@/domain/shared/page';
 import type { ListState } from '@/domain/shared/listState';
 
-export interface LocationResourceOptions<T, V> {
+export interface ResourcePanelOptions<T, V> {
   /** First element of the query key (the operation id of the list endpoint). */
   queryName: string;
   load: (state: ListState) => Promise<Page<T>>;
@@ -11,10 +11,10 @@ export interface LocationResourceOptions<T, V> {
   save: (editing: T | null, values: V, reason: string) => Promise<unknown>;
 }
 
-/** List loading, and the open/edit/save life cycle of the side panel, shared by the three location pages. */
-export function useLocationResource<T, V>(
+/** List loading, and the open/edit/save life cycle of the side panel, shared by every admin resource page (locations, app config...). */
+export function useResourcePanel<T, V>(
   state: ListState,
-  { queryName, load, save }: LocationResourceOptions<T, V>,
+  { queryName, load, save }: ResourcePanelOptions<T, V>,
 ) {
   const queryClient = useQueryClient();
   const [panel, setPanel] = useState<{ editing: T | null } | null>(null);
