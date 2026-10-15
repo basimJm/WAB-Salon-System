@@ -22,6 +22,7 @@ import refunds from './en/refunds.json';
 import payouts from './en/payouts.json';
 import reconciliation from './en/reconciliation.json';
 import subscriptions from './en/subscriptions.json';
+import placements from './en/placements.json';
 import status from './en/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -41,6 +42,7 @@ const en = {
   ...gallery,
   ...forms,
   ...status,
+  ...placements,
   ...subscriptions,
   ...reconciliation,
   ...payouts,

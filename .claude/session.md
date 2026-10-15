@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-087 — ADM-054 reconciliation
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-054-reconciliation`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-054):
-  - [x] Payment problems screen: stuck pending, paid without a booking, missing ledger charge — each a list that opens the payment attempt, with a clean/needs-review badge; error state
-- Tests: 2 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). The server returns problems, not period totals (backlog note).
-
 ### T-088 — ADM-057 subscriptions
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 4 new tests through the mock stack; no separate browser check
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
+
+### T-089 — ADM-058 recommended salons
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-058-recommended`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-058):
+  - [x] Recommended placements per audience: ordered list with period, amount paid and status; add a live salon, edit period/order/amount/note, end now with a reason, move up/down (saved through the reorder endpoint); AR+EN
+- Tests: 6 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: reorder is up/down buttons (accessible, one request) instead of drag and drop; the drag library ADR (Appendix C) stays open. The reorder request carries a fixed reason from the locale.
 
 ### Pending (next)
 
