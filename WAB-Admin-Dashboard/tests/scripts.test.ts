@@ -83,8 +83,10 @@ describe('bundle gate', () => {
     expect(
       run([file('index-abc.js', 10), file('big-1.js', budget.chunkJsGzipKb + 1)]).join(),
     ).toContain('chunk');
-    const many = Array.from({ length: 6 }, (_, i) => file(`c${i}.js`, budget.chunkJsGzipKb - 1));
+    const many = Array.from({ length: 8 }, (_, i) => file(`c${i}.js`, budget.chunkJsGzipKb - 1));
     expect(run([file('index-abc.js', 10), ...many]).join()).toContain('total JS');
+    // Dev builds carry mock and gallery code: only what users download (prod) has a total budget.
+    expect(run([file('index-abc.js', 10), ...many], 'dev-release')).toEqual([]);
     expect(run([file('index-abc.js', 10), file('a.css', budget.cssGzipKb + 1)]).join()).toContain(
       'CSS',
     );

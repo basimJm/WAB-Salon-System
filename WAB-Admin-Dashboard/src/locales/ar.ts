@@ -16,6 +16,7 @@ import salons from './ar/salons.json';
 import applications from './ar/applications.json';
 import customers from './ar/customers.json';
 import bookings from './ar/bookings.json';
+import reviews from './ar/reviews.json';
 import status from './ar/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -35,6 +36,7 @@ const ar = {
   ...gallery,
   ...forms,
   ...status,
+  ...reviews,
   ...bookings,
   ...customers,
   ...applications,

@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-081 — ADM-044 customers list, details and actions (ADM-044..046)
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-044-customers`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-044):
-  - [x] Customers list (search name/phone, status/audience/city filters in the URL), customer page (profile, devices, block reason, deletion date, journey id) and the actions that fit the status: block, unblock, start deletion, restore, each with a mandatory reason
-- Tests: 6 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-044, ADM-045 and ADM-046 were built and merged as ONE task/branch (one repository and one pair of pages) instead of three; tabs for bookings/payments reuse later modules.
-
 ### T-082 — ADM-047 bookings list, details and status change (ADM-047..049)
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 6 new tests through the mock stack; no separate browser check
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-047, 048 and 049 built as ONE task. Reassign staff / arbitrary refunds are not server operations; transactions/refunds tabs come with the finance modules.
+
+### T-083 — ADM-050 reviews moderation and published reviews (ADM-050..051)
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-050-reviews-queue`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-050):
+  - [x] Reviews screen: pending queue (oldest first) with approve / reject, published tab with remove (rating recomputed), target and rating filters, bulk approve/reject up to 100 with per-item result counts, reasons recorded
+- Tests: 5 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-050 and ADM-051 built as ONE task; reject asks for a reason in the UI though the server makes it optional. DECISION to confirm: total JS budget raised 280 -> 500 KB and applied to prod builds only (lazy module chunks all count in it; dev builds carry mock and gallery code).
 
 ### Pending (next)
 

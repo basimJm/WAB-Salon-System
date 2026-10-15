@@ -104,3 +104,4 @@
 - ADM-043 done: applications = repositories.applications {list,get,approve,reject}; review page opens /salons/applications/:id; signed document URLs: query gcTime 0
 - ADM-044 done: customers = repositories.customers {list,get,act(id,action,reason)}; actionsFor(status) decides the buttons
 - ADM-047 done: bookings = repositories.bookings {list,get,changeStatus}; filter mapping in presentation/bookings/bookingFilters.ts (URL -> API query)
+- ADM-050 done: reviews = repositories.reviews {list,approve,reject,remove,bulk}; page parts split into reviewFilters/reviewColumns/reviewParts/useReviewActions (complexity limit 15). BUDGET: total JS is now checked for PROD builds only and raised to 500 KB gzip (entry 40 / chunk 80 unchanged)

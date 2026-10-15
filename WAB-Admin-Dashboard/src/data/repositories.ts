@@ -5,6 +5,7 @@ import type { UploadsRepository } from '@/domain/uploads/uploads';
 import type { ApplicationsRepository } from '@/domain/applications/applications';
 import type { CustomersRepository } from '@/domain/customers/customers';
 import type { BookingsRepository } from '@/domain/bookings/bookings';
+import type { ReviewsRepository } from '@/domain/reviews/reviews';
 import type { SalonsRepository } from '@/domain/salons/salons';
 import type { CatalogRepository } from '@/domain/catalog/catalog';
 import type { ContentRepository } from '@/domain/content/content';
@@ -20,6 +21,7 @@ import { fakePutFile, putFileWithProgress } from './uploads/putFile';
 import { RemoteApplicationsRepository } from './applications/RemoteApplicationsRepository';
 import { RemoteCustomersRepository } from './customers/RemoteCustomersRepository';
 import { RemoteBookingsRepository } from './bookings/RemoteBookingsRepository';
+import { RemoteReviewsRepository } from './reviews/RemoteReviewsRepository';
 import { RemoteSalonsRepository } from './salons/RemoteSalonsRepository';
 import { RemoteCatalogRepository } from './catalog/RemoteCatalogRepository';
 import { RemoteContentRepository } from './content/RemoteContentRepository';
@@ -35,6 +37,7 @@ export interface Repositories {
   readonly banners: BannersRepository;
   readonly catalog: CatalogRepository;
   readonly salons: SalonsRepository;
+  readonly reviews: ReviewsRepository;
   readonly bookings: BookingsRepository;
   readonly customers: CustomersRepository;
   readonly applications: ApplicationsRepository;
@@ -50,6 +53,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
   const banners = new RemoteBannersRepository(api);
   const catalog = new RemoteCatalogRepository(api);
   const salons = new RemoteSalonsRepository(api);
+  const reviews = new RemoteReviewsRepository(api);
   const bookings = new RemoteBookingsRepository(api);
   const customers = new RemoteCustomersRepository(api);
   const applications = new RemoteApplicationsRepository(api);
@@ -66,6 +70,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
       banners,
       catalog,
       salons,
+      reviews,
       bookings,
       customers,
       applications,
@@ -81,6 +86,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
     banners,
     catalog,
     salons,
+    reviews,
     bookings,
     customers,
     applications,

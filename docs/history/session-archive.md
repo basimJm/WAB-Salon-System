@@ -1253,3 +1253,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). No separate browser check (same list/detail patterns).
 
+
+### T-081 — ADM-044 customers list, details and actions (ADM-044..046)
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-044-customers`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-044):
+  - [x] Customers list (search name/phone, status/audience/city filters in the URL), customer page (profile, devices, block reason, deletion date, journey id) and the actions that fit the status: block, unblock, start deletion, restore, each with a mandatory reason
+- Tests: 6 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-044, ADM-045 and ADM-046 were built and merged as ONE task/branch (one repository and one pair of pages) instead of three; tabs for bookings/payments reuse later modules.
+
