@@ -55,7 +55,9 @@
       "general": "General",
       "countries": "Countries",
       "cities": "Cities",
-      "areas": "Areas"
+      "areas": "Areas",
+      "versions": "App versions",
+      "maintenance": "Maintenance"
     },
     "breadcrumbs": "Breadcrumbs",
     "expand": "Expand {{name}}",

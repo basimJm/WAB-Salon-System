@@ -1,4 +1,4 @@
-import type { Page, PageQuery } from '@/domain/shared/page';
+import type { AdminResource } from '@/domain/shared/resource';
 
 export interface LocalizedName {
   readonly ar: string;
@@ -47,12 +47,12 @@ export type CountryPatch = Partial<Omit<CountryInput, 'code'>>;
 export type CityPatch = Partial<Omit<CityInput, 'countryCode'>>;
 export type AreaPatch = Partial<Omit<AreaInput, 'cityId'>>;
 
-/** The three resources share one shape: list (paginated), create and update (both audited with a reason). */
-export interface LocationResource<T, TInput, TPatch, TFilter = object> {
-  list(query: PageQuery & TFilter): Promise<Page<T>>;
-  create(input: TInput, reason: string): Promise<T>;
-  update(id: string, patch: TPatch, reason: string): Promise<T>;
-}
+export type LocationResource<T, TInput, TPatch, TFilter = object> = AdminResource<
+  T,
+  TInput,
+  TPatch,
+  TFilter
+>;
 
 export interface LocationsRepository {
   readonly countries: LocationResource<Country, CountryInput, CountryPatch>;

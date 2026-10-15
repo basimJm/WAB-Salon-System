@@ -7,7 +7,7 @@ import type { ListController } from '../controllers/useListController';
 import { LocationDrawer } from './LocationDrawer';
 import { LocationsTable } from './LocationsTable';
 import { toName, useLocationForm } from './useLocationForm';
-import { useLocationResource } from './useLocationResource';
+import { useResourcePanel } from '../hooks/useResourcePanel';
 import { useParentOptions } from './useParentOptions';
 
 interface Child {
@@ -44,7 +44,7 @@ export function ChildLocationPage<T extends Child /* hardcoded-ok: generic, not 
   const { list, filterKey, parentKind } = props;
   const options = useParentOptions(parentKind);
   const parent = list.state.filters[filterKey]?.[0];
-  const resource = useLocationResource<T, ChildValues>(list.state, {
+  const resource = useResourcePanel<T, ChildValues>(list.state, {
     queryName: props.queryName,
     load: (s) => props.load(parent, s.page, s.pageSize),
     save: props.save,

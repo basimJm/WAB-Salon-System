@@ -16,6 +16,8 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
   '/settings/countries': lazy(() => import('@/presentation/locations/CountriesPage')),
   '/settings/cities': lazy(() => import('@/presentation/locations/CitiesPage')),
   '/settings/areas': lazy(() => import('@/presentation/locations/AreasPage')),
+  '/settings/versions': lazy(() => import('@/presentation/appconfig/VersionsPage')),
+  '/settings/maintenance': lazy(() => import('@/presentation/appconfig/MaintenancePage')),
 };
 const AboutPage = lazy(() => import('@/presentation/pages/AboutPage'));
 /** Compile-time: `__SHOW_DESIGN_SYSTEM__` is false in prod builds, so the whole gallery chunk is dropped. */

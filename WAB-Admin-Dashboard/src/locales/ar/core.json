@@ -55,7 +55,9 @@
       "general": "عام",
       "countries": "الدول",
       "cities": "المدن",
-      "areas": "المناطق"
+      "areas": "المناطق",
+      "versions": "إصدارات التطبيق",
+      "maintenance": "الصيانة"
     },
     "breadcrumbs": "مسار التنقل",
     "expand": "توسيع {{name}}",
