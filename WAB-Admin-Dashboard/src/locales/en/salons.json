@@ -28,6 +28,30 @@
       "OWNER": "Owner",
       "MANAGER": "Manager",
       "EMPLOYEE": "Employee"
+    },
+    "takeOffline": "Take offline",
+    "putOnline": "Put online",
+    "changeGender": "Change audience",
+    "actionDone": "Done",
+    "offlineTitle": "Take {{name}} offline",
+    "onlineTitle": "Put {{name}} online",
+    "offlineText": "The salon disappears from the apps and its owner is told why. Write the reason.",
+    "onlineText": "The salon becomes visible again (if its profile is complete) and its owner is told.",
+    "genderWarning": "All the salon services are switched off and the owner must choose new ones for the new audience.",
+    "genderSame": "Choose a different audience",
+    "payout": "Payout details",
+    "payoutAudit": "Reading the full IBAN is recorded in the audit log. Nothing is cached.",
+    "showPayout": "Show bank details",
+    "replacePayout": "Replace bank details",
+    "payoutSaved": "Bank details saved",
+    "noPayout": "No bank details yet",
+    "bankName": "Bank",
+    "accountHolderName": "Account holder",
+    "iban": "IBAN",
+    "error": {
+      "bankName": "Enter the bank name",
+      "accountHolderName": "Enter the account holder",
+      "iban": "Enter a valid IBAN"
     }
   }
 }

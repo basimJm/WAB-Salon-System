@@ -1205,3 +1205,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Browser check not repeated (identical pattern).
 
+
+### T-077 — ADM-040 salons list
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-040-salons-list`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-040):
+  - [x] All salons list (server-paginated): name, audience, city, state badge, rating, subscription, created; filters state/audience/city and name search, all in the URL; error and empty states; city filter works around the server's broken id pattern
+- Tests: 4 new tests through the mock stack; no separate browser check (same list pattern)
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Missing on the server (G4): recommended and bookings(30d) columns, subscription filter.
+

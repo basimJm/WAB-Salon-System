@@ -15,16 +15,16 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-077 — ADM-040 salons list
+### T-000 — Merges into `admin` (standing record)
 
 - Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-040-salons-list`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-040):
-  - [x] All salons list (server-paginated): name, audience, city, state badge, rating, subscription, created; filters state/audience/city and name search, all in the URL; error and empty states; city filter works around the server's broken id pattern
-- Tests: 4 new tests through the mock stack; no separate browser check (same list pattern)
+- Branch: `admin`
+- Status: DONE (standing block: every task PR is merged into `admin` after its own task block below passes the local gate; no code is committed on this branch)
+- Acceptance criteria:
+  - [x] Each task block records its gate, review and deviations; `admin` only receives merge commits
+- Tests: see the task blocks
 - Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Missing on the server (G4): recommended and bookings(30d) columns, subscription filter.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
 ### T-078 — ADM-041 salon details
 
@@ -36,6 +36,17 @@
 - Tests: 6 new tests through the mock stack
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Shortcut tabs to bookings/reviews/transactions/payouts come with those modules; salon editing is blocked on the server (G-salon-edit).
+
+### T-079 — ADM-042 salon actions
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-042-salon-actions`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-042):
+  - [x] On the salon page: take offline / put online with a reason, change audience (warning that services switch off, same audience refused), payout details tab: full IBAN only after an explicit click (never cached; server audits the read), replace with validated IBAN and reason
+- Tests: 4 new tests through the mock stack
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). No separate browser check (same dialog/drawer patterns).
 
 ### Pending (next)
 
