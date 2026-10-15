@@ -53,8 +53,67 @@ export const MOCK_SALONS = [
   }),
 ];
 
+const details = (s: (typeof MOCK_SALONS)[number]) => ({
+  ...s,
+  description: 'Hair, nails and bridal packages',
+  phone: '+962790000100',
+  completeness:
+    s.state === 'APPROVED_INCOMPLETE'
+      ? { missing: ['GALLERY', 'HOURS'], isComplete: false }
+      : { missing: [], isComplete: true },
+  offline:
+    s.state === 'OFFLINE' ? { reason: 'Owner request', at: '2026-10-01T09:00:00.000Z' } : null,
+  owner: {
+    id: '64f0000000000000000000a1',
+    firstName: 'Maha',
+    lastName: 'Haddad',
+    phone: '+962790000101',
+  },
+  subscription: s.subscriptionStatus
+    ? {
+        status: s.subscriptionStatus,
+        trialEndsAt: '2026-12-01T00:00:00.000Z',
+        currentPeriodEnd: null,
+      }
+    : null,
+});
+
 export function salonsRoutes(): readonly MockRoute[] {
   return [
+    mockRoute(
+      defineEndpoint(OPERATIONS.getSalonsById, { data: dto.getSalonsByIdDataSchema }),
+      ({ params }) => ({
+        data: details(
+          MOCK_SALONS.find((s) => s.id === params['id']) ??
+            (MOCK_SALONS[0] as (typeof MOCK_SALONS)[number]),
+        ),
+      }),
+    ),
+    mockRoute(
+      defineEndpoint(OPERATIONS.getSalonsByIdMembers, { data: dto.getSalonsByIdMembersDataSchema }),
+      () => ({
+        data: [
+          {
+            id: '64f0000000000000000000a1',
+            name: 'Maha Haddad',
+            phone: '+962790000101',
+            role: 'OWNER',
+            active: true,
+            providesServices: false,
+            permissions: ['BOOKINGS_VIEW_ALL', 'FINANCE_VIEW'],
+          },
+          {
+            id: '64f0000000000000000000a2',
+            name: 'Sara Ali',
+            phone: '+962790000102',
+            role: 'EMPLOYEE',
+            active: true,
+            providesServices: true,
+            permissions: [],
+          },
+        ],
+      }),
+    ),
     mockRoute(
       defineEndpoint(OPERATIONS.getSalons, {
         data: dto.getSalonsDataSchema,

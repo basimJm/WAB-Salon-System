@@ -9,6 +9,25 @@
     "subscription": "Subscription",
     "created": "Created",
     "search": "Search by name",
-    "empty": "No salons match"
+    "empty": "No salons match",
+    "none": "Not set",
+    "phone": "Phone",
+    "description": "Description",
+    "overview": "Overview",
+    "members": "Members",
+    "tabs": "Salon sections",
+    "completeness": "Profile completeness",
+    "complete": "Complete",
+    "missingPart": "Missing: {{part}}",
+    "offlineInfo": "Taken offline",
+    "role": "Role",
+    "permissions": "Permissions",
+    "owner": "Owner",
+    "trialEnds": "Trial ends",
+    "roles": {
+      "OWNER": "Owner",
+      "MANAGER": "Manager",
+      "EMPLOYEE": "Employee"
+    }
   }
 }

@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/constants/routes';
 import { useContainer } from '@/app/ContainerContext';
 import {
   SALON_GENDERS,
@@ -25,6 +27,7 @@ const pick = <T extends string>(all: readonly T[], v: string | undefined): T | u
 /** Admin PRD A13 · All salons: state, gender, city, rating, subscription, created; filters and name search. */
 export default function SalonsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const { repositories } = useContainer();
   const list = useListController(OPTIONS);
@@ -161,6 +164,7 @@ export default function SalonsPage() {
         error: query.error,
         onRetry: () => void query.refetch(),
         emptyTitle: t('salons.empty'),
+        onRowClick: (r) => void navigate(`${ROUTES.salons}/${r.id}`),
       }}
       pagination={
         data

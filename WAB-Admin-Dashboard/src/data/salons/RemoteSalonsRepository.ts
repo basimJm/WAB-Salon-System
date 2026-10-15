@@ -14,6 +14,11 @@ const listSalons = defineEndpoint(OPERATIONS.getSalons, {
   query: () => dto.getSalonsQuerySchema().extend({ cityId: OBJECT_ID.optional() }),
 });
 
+const getSalon = defineEndpoint(OPERATIONS.getSalonsById, { data: dto.getSalonsByIdDataSchema });
+const getMembers = defineEndpoint(OPERATIONS.getSalonsByIdMembers, {
+  data: dto.getSalonsByIdMembersDataSchema,
+});
+
 export class RemoteSalonsRepository implements SalonsRepository {
   constructor(private readonly api: ApiClient) {}
 
@@ -28,5 +33,13 @@ export class RemoteSalonsRepository implements SalonsRepository {
         q: q.q,
       }),
     });
+  }
+
+  async get(id: string) {
+    return (await this.api.execute(getSalon, { params: { id } })).data;
+  }
+
+  async members(id: string) {
+    return (await this.api.execute(getMembers, { params: { id } })).data;
   }
 }

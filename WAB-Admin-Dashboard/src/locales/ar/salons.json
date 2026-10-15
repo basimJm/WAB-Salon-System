@@ -9,6 +9,25 @@
     "subscription": "الاشتراك",
     "created": "تاريخ الإنشاء",
     "search": "بحث بالاسم",
-    "empty": "لا توجد صالونات مطابقة"
+    "empty": "لا توجد صالونات مطابقة",
+    "none": "غير محدد",
+    "phone": "الهاتف",
+    "description": "الوصف",
+    "overview": "نظرة عامة",
+    "members": "الأعضاء",
+    "tabs": "أقسام الصالون",
+    "completeness": "اكتمال الملف",
+    "complete": "مكتمل",
+    "missingPart": "ناقص: {{part}}",
+    "offlineInfo": "تم إيقافه",
+    "role": "الدور",
+    "permissions": "الصلاحيات",
+    "owner": "المالك",
+    "trialEnds": "انتهاء الفترة التجريبية",
+    "roles": {
+      "OWNER": "مالك",
+      "MANAGER": "مدير",
+      "EMPLOYEE": "موظف"
+    }
   }
 }

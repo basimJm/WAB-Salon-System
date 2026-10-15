@@ -26,6 +26,10 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
   '/settings/versions': lazy(() => import('@/presentation/appconfig/VersionsPage')),
   '/settings/maintenance': lazy(() => import('@/presentation/appconfig/MaintenancePage')),
 };
+/** Record pages with a path parameter (opened from a list row). */
+const DETAIL_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>> = {
+  [`${ROUTES.salons}/:id`]: lazy(() => import('@/presentation/salons/SalonDetailsPage')),
+};
 const AboutPage = lazy(() => import('@/presentation/pages/AboutPage'));
 /** Compile-time: `__SHOW_DESIGN_SYSTEM__` is false in prod builds, so the whole gallery chunk is dropped. */
 const DesignSystemPage = __SHOW_DESIGN_SYSTEM__
@@ -54,6 +58,7 @@ export function buildRoutes(showDesignSystem: boolean): RouteObject[] {
       children: [
         { index: true, element: <Navigate to={ROUTES.liveOverview} replace /> },
         ...NAV_PAGES.map((item) => ({ path: item.path, element: pageFor(item.path) })),
+        ...Object.entries(DETAIL_PAGES).map(([path, Page]) => ({ path, element: <Page /> })),
         { path: ROUTES.forbidden, element: <ForbiddenPage /> },
         { path: ROUTES.serverError, element: <ServerErrorPage /> },
         { path: ROUTES.about, element: <AboutPage /> },

@@ -1193,3 +1193,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Browser check not repeated (identical pattern to earlier pages); catalog requests (approve/reject) belong to ADM-039.
 
+
+### T-076 — ADM-039 catalog requests
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-039-catalog-requests`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-039):
+  - [x] Pending queue of salon service suggestions (status filter): approve in a side panel (translate name/description, reason) which creates the catalog service, reject with a mandatory reason; empty state; AR+EN
+- Tests: 3 new tests through the mock stack; no separate browser check (same list+drawer pattern as ADM-033..038)
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Browser check not repeated (identical pattern).
+
