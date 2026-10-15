@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useContainer } from '@/app/ContainerContext';
 import { MAX_PAGE_SIZE } from '@/constants/ui';
-import { useLanguage } from '../hooks/useLanguage';
+import { useLanguage } from './useLanguage';
 
 export interface ParentOption {
   value: string;
@@ -9,7 +9,7 @@ export interface ParentOption {
 }
 
 /** Countries (by code) or cities (by id) for the parent select and the list filter, in the current language. */
-export function useParentOptions(kind: 'countries' | 'cities'): ParentOption[] {
+export function useLocationOptions(kind: 'countries' | 'cities'): ParentOption[] {
   const { repositories } = useContainer();
   const { language } = useLanguage();
   const { data } = useQuery({

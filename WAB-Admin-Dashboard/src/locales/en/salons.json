@@ -1,0 +1,14 @@
+{
+  "salons": {
+    "subtitle": "Every salon on the platform and where it stands.",
+    "name": "Salon",
+    "gender": "Audience",
+    "city": "City",
+    "state": "State",
+    "rating": "Rating",
+    "subscription": "Subscription",
+    "created": "Created",
+    "search": "Search by name",
+    "empty": "No salons match"
+  }
+}

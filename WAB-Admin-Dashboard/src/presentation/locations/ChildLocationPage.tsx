@@ -8,7 +8,7 @@ import { LocationDrawer } from './LocationDrawer';
 import { LocationsTable } from './LocationsTable';
 import { toName, useLocationForm } from './useLocationForm';
 import { useResourcePanel } from '../hooks/useResourcePanel';
-import { useParentOptions } from './useParentOptions';
+import { useLocationOptions } from '../hooks/useLocationOptions';
 
 interface Child {
   id: string;
@@ -42,7 +42,7 @@ export function ChildLocationPage<T extends Child /* hardcoded-ok: generic, not 
 ) {
   const { t } = useTranslation();
   const { list, filterKey, parentKind } = props;
-  const options = useParentOptions(parentKind);
+  const options = useLocationOptions(parentKind);
   const parent = list.state.filters[filterKey]?.[0];
   const resource = useResourcePanel<T, ChildValues>(list.state, {
     queryName: props.queryName,
