@@ -30,6 +30,7 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
   '/finance/transactions': lazy(() => import('@/presentation/transactions/TransactionsPage')),
   '/finance/refunds': lazy(() => import('@/presentation/refunds/RefundsPage')),
   '/finance/payouts': lazy(() => import('@/presentation/payouts/PayoutsPage')),
+  '/finance/reconciliation': lazy(() => import('@/presentation/transactions/ReconciliationPage')),
   '/settings/versions': lazy(() => import('@/presentation/appconfig/VersionsPage')),
   '/settings/maintenance': lazy(() => import('@/presentation/appconfig/MaintenancePage')),
 };

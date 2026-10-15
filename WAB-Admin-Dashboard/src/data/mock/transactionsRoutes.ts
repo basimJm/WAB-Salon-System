@@ -41,6 +41,16 @@ export function transactionsRoutes(): readonly MockRoute[] {
   const O = OPERATIONS;
   return [
     mockRoute(
+      defineEndpoint(O.getFinanceReconciliation, { data: dto.getFinanceReconciliationDataSchema }),
+      () => ({
+        data: {
+          stuckPending: [MOCK_TRANSACTIONS[2]!],
+          paidWithoutBooking: [],
+          missingLedger: [MOCK_TRANSACTIONS[1]!],
+        },
+      }),
+    ),
+    mockRoute(
       defineEndpoint(O.getTransactions, {
         data: dto.getTransactionsDataSchema,
         query: dto.getTransactionsQuerySchema,

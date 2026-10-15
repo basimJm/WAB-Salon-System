@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-085 — ADM-053 refunds
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-053-refunds`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-053):
-  - [x] Refunds list (status filter, attempts, next attempt, last error, overdue highlight), retry a refund with a reason, mark as refunded manually with a bank reference and reason; refreshes on refund.updated
-- Tests: 5 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
-
 ### T-086 — ADM-055 payouts balances, creation and transfer (ADM-055..056)
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 4 new tests through the mock stack; no separate browser check
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-055 and ADM-056 built as ONE task on branch feat/adm-054-payouts (name differs from the backlog); ADM-054 reconciliation is still open.
+
+### T-087 — ADM-054 reconciliation
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-054-reconciliation`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-054):
+  - [x] Payment problems screen: stuck pending, paid without a booking, missing ledger charge — each a list that opens the payment attempt, with a clean/needs-review badge; error state
+- Tests: 2 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). The server returns problems, not period totals (backlog note).
 
 ### Pending (next)
 

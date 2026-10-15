@@ -23,6 +23,10 @@ const get = defineEndpoint(OPERATIONS.getTransactionsById, {
   data: dto.getTransactionsByIdDataSchema,
 });
 
+const reconcile = defineEndpoint(OPERATIONS.getFinanceReconciliation, {
+  data: dto.getFinanceReconciliationDataSchema,
+});
+
 export class RemoteTransactionsRepository implements TransactionsRepository {
   constructor(private readonly api: ApiClient) {}
 
@@ -40,6 +44,9 @@ export class RemoteTransactionsRepository implements TransactionsRepository {
         to: q.to,
       }),
     });
+
+  reconciliation: TransactionsRepository['reconciliation'] = async () =>
+    (await this.api.execute(reconcile)).data;
 
   get: TransactionsRepository['get'] = async (id) =>
     (await this.api.execute(get, { params: { id } })).data;

@@ -20,6 +20,7 @@ import reviews from './en/reviews.json';
 import transactions from './en/transactions.json';
 import refunds from './en/refunds.json';
 import payouts from './en/payouts.json';
+import reconciliation from './en/reconciliation.json';
 import status from './en/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -39,6 +40,7 @@ const en = {
   ...gallery,
   ...forms,
   ...status,
+  ...reconciliation,
   ...payouts,
   ...refunds,
   ...transactions,

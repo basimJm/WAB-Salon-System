@@ -1301,3 +1301,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Reconciliation endpoint (getFinanceReconciliation) is consumed by the finance overview task.
 
+
+### T-085 — ADM-053 refunds
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-053-refunds`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-053):
+  - [x] Refunds list (status filter, attempts, next attempt, last error, overdue highlight), retry a refund with a reason, mark as refunded manually with a bank reference and reason; refreshes on refund.updated
+- Tests: 5 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
+
