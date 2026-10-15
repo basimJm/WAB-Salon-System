@@ -15,18 +15,6 @@
 
 > Older task blocks: `docs/history/session-archive.md` (not auto-loaded). Keep only the last 3 task blocks here.
 
-### T-070 — Merge ADM-033 into `admin`
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `admin`
-- Status: DONE (PR #166 merged into `admin`; no new code on this branch)
-- Acceptance criteria:
-  - [x] ADM-033 (T-069) passed the local gate before the merge (`sh scripts/gate.sh` all PASS) and the browser check; local `admin` is on `origin/admin` with no uncommitted changes
-- Tests: see T-069; nothing changed since
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — review recorded in T-069; this block only covers the merge on the master branch. DEVIATION: no e2e (user decision).
-- Notes: Next: ADM-034 on `feat/adm-034-app-config` from `origin/admin`.
-
 ### T-071 — ADM-034 App versions and maintenance mode
 
 - Project: `WAB-Admin-Dashboard/` (`domain/appconfig`, `data/appconfig`, `presentation/appconfig/*`, shared `data/api/resource.ts`, `domain/shared/resource.ts`, `hooks/useResourcePanel.ts`, mock `appConfigRoutes`/`mockCollection`, locales)
@@ -40,6 +28,19 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). The server has no delete for these records; records are edited in place.
 - Notes: contains the T-070 merge note for ADM-033.
+
+### T-072 — ADM-035 Content: legal pages
+
+- Project: `WAB-Admin-Dashboard/` (`domain/content`, `data/content`, `presentation/content/{LegalPagesPage,PageEditor}.tsx`, mock `contentRoutes`, locales, route `/content/pages`)
+- Branch: `feat/adm-035-content-pages`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-035; PRD A24 legal pages):
+  - [x] List of Privacy / Terms / About pages per app (filter by app); create a missing page; edit opens a full-width editor with the Arabic and English rich text tabs (Markdown subset, sanitized HTML out) and live preview
+  - [x] Both languages required (max 50,000 characters), mandatory reason, errors per language tab; app and kind fixed after creation; AR+EN; error state with retry
+- Tests: `sh scripts/gate.sh` all PASS (4 new tests through the mock stack); browser check dev-debug: list loads, edit opens the editor with preview, no horizontal scroll
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). ADR-0006 (Markdown subset instead of Tiptap) still awaits the owner's confirmation.
+- Notes: ADM-036 adds FAQ and contact info to `ContentRepository`.
 
 ### Pending (next)
 

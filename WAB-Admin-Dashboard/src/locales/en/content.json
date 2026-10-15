@@ -1,0 +1,17 @@
+{
+  "content": {
+    "subtitle": "Privacy, terms and about pages shown in the apps.",
+    "addPage": "Add a page",
+    "editPage": "Edit page",
+    "kind": "Page",
+    "body": "Page text",
+    "kinds": {
+      "PRIVACY": "Privacy policy",
+      "TERMS": "Terms of use",
+      "ABOUT": "About"
+    },
+    "error": {
+      "body": "Write the text (up to 50,000 characters)"
+    }
+  }
+}

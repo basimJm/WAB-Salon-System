@@ -1,4 +1,5 @@
 import { appConfigRoutes } from './appConfigRoutes';
+import { contentRoutes } from './contentRoutes';
 import { locationsRoutes } from './locationsRoutes';
 import { settingsRoutes } from './settingsRoutes';
 import type { MockRoute } from './mockTransport';
@@ -8,5 +9,5 @@ import type { MockRoute } from './mockTransport';
  * (and every test) gets its own copy. Each feature task adds its routes file here.
  */
 export function createMockRoutes(): readonly MockRoute[] {
-  return [...settingsRoutes(), ...locationsRoutes(), ...appConfigRoutes()];
+  return [...settingsRoutes(), ...locationsRoutes(), ...appConfigRoutes(), ...contentRoutes()];
 }
