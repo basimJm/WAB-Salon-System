@@ -1313,3 +1313,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
 
+
+### T-086 — ADM-055 payouts balances, creation and transfer (ADM-055..056)
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-054-payouts`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-055):
+  - [x] Payouts screen: per-salon balances (collected, gateway fees, refunds, paid out, due now), create a payout up to the end of an Amman day after a ledger preview, payout history with status filter, record the manual bank transfer (net amount, day, bank reference, note); AR+EN
+- Tests: 4 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-055 and ADM-056 built as ONE task on branch feat/adm-054-payouts (name differs from the backlog); ADM-054 reconciliation is still open.
+

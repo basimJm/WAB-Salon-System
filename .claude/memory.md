@@ -110,3 +110,4 @@
 - ADM-053 done: refunds = repositories.refunds {list,retry,markManual}; isOverdue/canAct pure rules in domain/refunds
 - ADM-055 done: payouts = repositories.payouts {balances,preview,list,create,transfer}; ResourceDrawer accepts reasonLabel/reasonHint when its text field is a note
 - ADM-054 done: reconciliation = repositories.transactions.reconciliation(); page /finance/reconciliation
+- ADM-057 done: subscriptions = repositories.subscriptions {list,recordPayment}; days are Amman day starts
