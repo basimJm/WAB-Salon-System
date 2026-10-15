@@ -22,6 +22,9 @@ export interface ResourceDrawerProps {
   children: ReactNode;
   reason: string;
   reasonErr: string | undefined;
+  /** Overrides the field's name and hint when it holds a note instead of an audit reason. */
+  reasonLabel?: string;
+  reasonHint?: string;
   onReason: (value: string) => void;
   saving: boolean;
   error: unknown;
@@ -41,8 +44,8 @@ export function ResourceDrawer(p: ResourceDrawerProps) {
       <form className="wab-drawer-form" onSubmit={submit} noValidate>
         {p.children}
         <TextField
-          label={t('appConfig.reason')}
-          hint={t('appConfig.reasonHint')}
+          label={p.reasonLabel ?? t('appConfig.reason')}
+          hint={p.reasonHint ?? t('appConfig.reasonHint')}
           value={p.reason}
           error={p.reasonErr ? t(p.reasonErr) : undefined}
           onChange={(e) => p.onReason(e.target.value)}

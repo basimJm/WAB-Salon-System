@@ -29,6 +29,7 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
   [ROUTES.reviews]: lazy(() => import('@/presentation/reviews/ReviewsPage')),
   '/finance/transactions': lazy(() => import('@/presentation/transactions/TransactionsPage')),
   '/finance/refunds': lazy(() => import('@/presentation/refunds/RefundsPage')),
+  '/finance/payouts': lazy(() => import('@/presentation/payouts/PayoutsPage')),
   '/settings/versions': lazy(() => import('@/presentation/appconfig/VersionsPage')),
   '/settings/maintenance': lazy(() => import('@/presentation/appconfig/MaintenancePage')),
 };

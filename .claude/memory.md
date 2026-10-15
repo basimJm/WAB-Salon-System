@@ -108,3 +108,4 @@
 - STOP HOOK (user decision 2026-10-15): `Loops: 1/1 (user decision)` is accepted next to `Loops: 3/3` (regex LOOPS_DONE in .claude/hooks/_common.py); a bare `1/1` is not. finish.py writes the accepted form.
 - ADM-052 done: transactions = repositories.transactions {list,get}; details route /finance/transactions/:id (DETAIL_PAGES). Stop hook now accepts 'Loops: 1/1 (user decision)'.
 - ADM-053 done: refunds = repositories.refunds {list,retry,markManual}; isOverdue/canAct pure rules in domain/refunds
+- ADM-055 done: payouts = repositories.payouts {balances,preview,list,create,transfer}; ResourceDrawer accepts reasonLabel/reasonHint when its text field is a note

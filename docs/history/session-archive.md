@@ -1289,3 +1289,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-050 and ADM-051 built as ONE task; reject asks for a reason in the UI though the server makes it optional. DECISION to confirm: total JS budget raised 280 -> 500 KB and applied to prod builds only (lazy module chunks all count in it; dev builds carry mock and gallery code).
 
+
+### T-084 — ADM-052 transactions
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-052-transactions`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-052):
+  - [x] Payment attempts list (status, type, Amman-day filters in the URL; gateway code, fee, attempt) and details with the raw gateway answer and every attempt of the checkout, linking to the booking; AR+EN; error state
+- Tests: 5 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Reconciliation endpoint (getFinanceReconciliation) is consumed by the finance overview task.
+
