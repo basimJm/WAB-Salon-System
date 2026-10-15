@@ -78,17 +78,83 @@ const details = (s: (typeof MOCK_SALONS)[number]) => ({
     : null,
 });
 
+type Mock = (typeof MOCK_SALONS)[number];
+
 export function salonsRoutes(): readonly MockRoute[] {
+  const changes = new Map<string, Partial<Mock>>();
+  let payout: { bankName: string; accountHolderName: string; iban: string } | null = null;
+  const find = (id: string | undefined): Mock => {
+    const base = MOCK_SALONS.find((s) => s.id === id) ?? MOCK_SALONS[0];
+    if (!base) throw new Error('no mock salons');
+    return { ...base, ...changes.get(base.id) };
+  };
+  const setState = (id: string | undefined, state: Mock['state']) => {
+    const salon = find(id);
+    changes.set(salon.id, { ...changes.get(salon.id), state });
+    return { data: { salonId: salon.id, state, missing: [], isComplete: true } };
+  };
+  const O = OPERATIONS;
   return [
     mockRoute(
-      defineEndpoint(OPERATIONS.getSalonsById, { data: dto.getSalonsByIdDataSchema }),
-      ({ params }) => ({
-        data: details(
-          MOCK_SALONS.find((s) => s.id === params['id']) ??
-            (MOCK_SALONS[0] as (typeof MOCK_SALONS)[number]),
-        ),
+      defineEndpoint(O.postSalonsByIdOffline, {
+        data: dto.postSalonsByIdOfflineDataSchema,
+        body: dto.postSalonsByIdOfflineBodySchema,
+      }),
+      ({ params }) => setState(params['id'], 'OFFLINE'),
+    ),
+    mockRoute(
+      defineEndpoint(O.postSalonsByIdOnline, {
+        data: dto.postSalonsByIdOnlineDataSchema,
+        body: dto.postSalonsByIdOnlineBodySchema,
+      }),
+      ({ params }) => setState(params['id'], 'LIVE'),
+    ),
+    mockRoute(
+      defineEndpoint(O.patchSalonsByIdGender, {
+        data: dto.patchSalonsByIdGenderDataSchema,
+        body: dto.patchSalonsByIdGenderBodySchema,
+      }),
+      ({ params, body }) => {
+        const salon = find(params['id']);
+        changes.set(salon.id, {
+          ...changes.get(salon.id),
+          gender: (body as { gender: 'MALE' | 'FEMALE' }).gender,
+        });
+        return { data: details(find(params['id'])) };
+      },
+    ),
+    mockRoute(
+      defineEndpoint(O.getSalonsByIdPayoutDetails, {
+        data: dto.getSalonsByIdPayoutDetailsDataSchema,
+      }),
+      () => ({
+        data: payout ? { ...payout, ibanLast4: payout.iban.slice(-4) } : null,
       }),
     ),
+    mockRoute(
+      defineEndpoint(O.putSalonsByIdPayoutDetails, {
+        data: dto.putSalonsByIdPayoutDetailsDataSchema,
+        body: dto.putSalonsByIdPayoutDetailsBodySchema,
+      }),
+      ({ body }) => {
+        const b = body as { bankName: string; accountHolderName: string; iban: string };
+        payout = { bankName: b.bankName, accountHolderName: b.accountHolderName, iban: b.iban };
+        return {
+          data: {
+            bankName: b.bankName,
+            accountHolderName: b.accountHolderName,
+            ibanLast4: b.iban.slice(-4),
+          },
+        };
+      },
+    ),
+    mockRoute(
+      defineEndpoint(O.getSalonsById, { data: dto.getSalonsByIdDataSchema }),
+      ({ params }) => ({
+        data: details(find(params['id'])),
+      }),
+    ),
+
     mockRoute(
       defineEndpoint(OPERATIONS.getSalonsByIdMembers, { data: dto.getSalonsByIdMembersDataSchema }),
       () => ({

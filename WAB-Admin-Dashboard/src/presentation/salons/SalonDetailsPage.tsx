@@ -14,8 +14,10 @@ import type { Column } from '../components/data/tableTypes';
 import { DetailPage } from '../components/templates/DetailPage';
 import { useLanguage } from '../hooks/useLanguage';
 import { useLocationOptions } from '../hooks/useLocationOptions';
+import { PayoutDetailsPanel } from './PayoutDetailsPanel';
+import { SalonActions } from './SalonActions';
 
-const TABS = ['overview', 'members'] as const;
+const TABS = ['overview', 'members', 'payout'] as const;
 
 function Overview({ salon }: { salon: SalonDetails }) {
   const { t } = useTranslation();
@@ -141,8 +143,10 @@ export default function SalonDetailsPage() {
       title={s?.name ?? t('nav.sub.allSalons')}
       back={{ to: ROUTES.salons, label: t('nav.sub.allSalons') }}
       status={s ? <StatusBadge kind="salon" value={s.state} /> : null}
+      actions={s ? <SalonActions salon={s} /> : null}
       tabs={[
         { id: 'overview', label: t('salons.overview'), content: s ? <Overview salon={s} /> : null },
+        { id: 'payout', label: t('salons.payout'), content: <PayoutDetailsPanel salonId={id} /> },
         {
           id: 'members',
           label: t('salons.members'),
