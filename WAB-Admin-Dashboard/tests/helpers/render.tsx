@@ -23,6 +23,7 @@ import { RemoteContentRepository } from '@/data/content/RemoteContentRepository'
 import { RemoteBannersRepository } from '@/data/banners/RemoteBannersRepository';
 import { RemoteUploadsRepository } from '@/data/uploads/RemoteUploadsRepository';
 import { fakePutFile } from '@/data/uploads/putFile';
+import { RemoteCatalogRepository } from '@/data/catalog/RemoteCatalogRepository';
 import { RemoteLocationsRepository } from '@/data/locations/RemoteLocationsRepository';
 import { RemoteSettingsRepository } from '@/data/settings/RemoteSettingsRepository';
 import { FakeRealtimeClient } from '@/data/realtime/FakeRealtimeClient';
@@ -63,6 +64,7 @@ export function makeContainer(
       appConfig: new RemoteAppConfigRepository(api),
       content: new RemoteContentRepository(api),
       banners: new RemoteBannersRepository(api),
+      catalog: new RemoteCatalogRepository(api),
       uploads: new RemoteUploadsRepository(api, fakePutFile),
     },
     queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }),

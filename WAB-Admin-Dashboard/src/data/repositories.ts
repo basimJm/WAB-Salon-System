@@ -2,6 +2,7 @@ import type { AppConfigRepository } from '@/domain/appconfig/appConfig';
 import type { AuthRepository } from '@/domain/auth/auth';
 import type { BannersRepository } from '@/domain/banners/banners';
 import type { UploadsRepository } from '@/domain/uploads/uploads';
+import type { CatalogRepository } from '@/domain/catalog/catalog';
 import type { ContentRepository } from '@/domain/content/content';
 import type { LocationsRepository } from '@/domain/locations/locations';
 import type { SettingsRepository } from '@/domain/settings/settings';
@@ -12,6 +13,7 @@ import { RemoteAuthRepository } from './auth/RemoteAuthRepository';
 import { RemoteBannersRepository } from './banners/RemoteBannersRepository';
 import { RemoteUploadsRepository } from './uploads/RemoteUploadsRepository';
 import { fakePutFile, putFileWithProgress } from './uploads/putFile';
+import { RemoteCatalogRepository } from './catalog/RemoteCatalogRepository';
 import { RemoteContentRepository } from './content/RemoteContentRepository';
 import { RemoteLocationsRepository } from './locations/RemoteLocationsRepository';
 import { RemoteSettingsRepository } from './settings/RemoteSettingsRepository';
@@ -23,6 +25,7 @@ export interface Repositories {
   readonly appConfig: AppConfigRepository;
   readonly content: ContentRepository;
   readonly banners: BannersRepository;
+  readonly catalog: CatalogRepository;
   readonly uploads: UploadsRepository;
 }
 
@@ -33,6 +36,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
   const appConfig = new RemoteAppConfigRepository(api);
   const content = new RemoteContentRepository(api);
   const banners = new RemoteBannersRepository(api);
+  const catalog = new RemoteCatalogRepository(api);
   const mock = __ALLOW_MOCK__ && config.dataSource === 'mock';
   const uploads = new RemoteUploadsRepository(api, mock ? fakePutFile : putFileWithProgress);
   if (__ALLOW_MOCK__ && config.dataSource === 'mock') {
@@ -44,6 +48,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
       appConfig,
       content,
       banners,
+      catalog,
       uploads,
     };
   }
@@ -54,6 +59,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
     appConfig,
     content,
     banners,
+    catalog,
     uploads,
   };
 }

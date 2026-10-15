@@ -1,0 +1,29 @@
+{
+  "catalog": {
+    "subtitle": "Services salons pick from when they set up their menu.",
+    "add": "Add a service",
+    "edit": "Edit service",
+    "audience": "Audience",
+    "name": "Name",
+    "nameAr": "Name (Arabic)",
+    "nameEn": "Name (English)",
+    "descAr": "Description (Arabic)",
+    "descEn": "Description (English)",
+    "image": "Image",
+    "order": "Order",
+    "active": "Active",
+    "deactivateWarning": "Salons that already offer it keep it; new salons will no longer see it.",
+    "genders": {
+      "FEMALE": "Women",
+      "MALE": "Men"
+    },
+    "error": {
+      "nameAr": "Required, up to {{max}} characters",
+      "nameEn": "Required, up to {{max}} characters",
+      "descAr": "Required, up to {{max}} characters",
+      "descEn": "Required, up to {{max}} characters",
+      "image": "Upload an image",
+      "order": "Whole number from 0"
+    }
+  }
+}

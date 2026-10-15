@@ -96,3 +96,4 @@
 - ADM-035 done: `repositories.content.pages` (AdminResource, filter app); full-width editor pattern for long text = `useResourcePanel` panel state swaps the list for `PageEditor`; ADM-036 extends `ContentRepository` with faqs and contactInfo.
 - ADM-036 done: content.faqs / content.contactInfo (AdminResource, filter app); shared ResourceDrawer (reason + errors + buttons) lives in components/overlay
 - ADM-037 done: uploads kit: repositories.uploads.upload(purpose, file, onProgress) = presign -> PUT (fakePutFile in mock) -> confirm; banners = repositories.banners.banners; date helpers dateToInstant/endDateToInstant (Amman days, end day included)
+- ADM-038 done: catalog services = repositories.catalog.services (AdminResource, filter gender); pages with a required audience use SegmentedControl in the header actions
