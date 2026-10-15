@@ -16,6 +16,8 @@ export interface ListController {
   /** What the search box shows right now (updates on every key; the URL follows after the debounce). */
   searchInput: string;
   setSearchInput: (value: string) => void;
+  /** For boxes that debounce themselves (`SearchField`): write the search to the URL now. */
+  setSearch: (value: string) => void;
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
   setSort: (sort: ListSort | null) => void;
@@ -69,6 +71,7 @@ export function useListController(options: ListStateOptions): ListController {
     state,
     searchInput,
     setSearchInput,
+    setSearch: useCallback((value: string) => commit({ search: value.trim() }, true), [commit]),
     setPage: useCallback((page) => commit({ page }), [commit]),
     setPageSize: useCallback((pageSize) => commit({ pageSize }), [commit]),
     setSort: useCallback((sort) => commit({ sort }), [commit]),
