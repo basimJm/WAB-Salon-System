@@ -1,0 +1,38 @@
+{
+  "payouts": {
+    "subtitle": "What each salon is owed and the transfers you made by hand.",
+    "tabs": "Payout sections",
+    "balances": "Balances",
+    "history": "Payout history",
+    "empty": "Nothing here yet",
+    "collected": "Collected",
+    "fees": "Gateway fees",
+    "refunds": "Refunds",
+    "paidOut": "Paid out",
+    "dueNow": "Due now",
+    "create": "Create payout",
+    "createFor": "Payout for {{name}}",
+    "upTo": "Up to the end of day",
+    "gross": "Collected",
+    "adjustments": "Adjustments",
+    "net": "Net to transfer",
+    "note": "Note (optional)",
+    "noteHint": "Shown in the payout history.",
+    "created": "Payout created",
+    "period": "Period",
+    "reference": "Bank reference",
+    "recordTransfer": "Record transfer",
+    "transferTitle": "Record the bank transfer",
+    "amount": "Amount transferred",
+    "transferDay": "Transfer day",
+    "transferNote": "Note",
+    "transferNoteHint": "Required: what was transferred and how.",
+    "transferred": "Transfer recorded",
+    "error": {
+      "day": "Choose a valid day",
+      "amount": "The amount must equal the net ({{net}})",
+      "reference": "Required, up to 100 characters",
+      "note": "Required, up to 300 characters"
+    }
+  }
+}
