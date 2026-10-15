@@ -16,7 +16,12 @@ import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useLanguage } from '../hooks/useLanguage';
 import { useResourcePanel } from '../hooks/useResourcePanel';
-import { AppConfigDrawer, appOptions, reasonError, Select } from './AppConfigDrawer';
+import {
+  ResourceDrawer,
+  appOptions,
+  reasonError,
+  Select,
+} from '../components/overlay/ResourceDrawer';
 
 const OPTIONS = { filterKeys: ['app'] };
 const MAX_MESSAGE = 500;
@@ -53,7 +58,7 @@ function MaintenanceDrawer({
   const err = (k: string) =>
     bad.has(k) ? t('appConfig.error.message', { max: MAX_MESSAGE }) : undefined;
   return (
-    <AppConfigDrawer
+    <ResourceDrawer
       title={t(item ? 'appConfig.editMaintenance' : 'appConfig.addMaintenance')}
       reason={v.reason}
       reasonErr={bad.has('reason') ? 'appConfig.error.reason' : undefined}
@@ -92,7 +97,7 @@ function MaintenanceDrawer({
         error={err('en')}
         onChange={(e) => setV({ ...v, en: e.target.value })}
       />
-    </AppConfigDrawer>
+    </ResourceDrawer>
   );
 }
 

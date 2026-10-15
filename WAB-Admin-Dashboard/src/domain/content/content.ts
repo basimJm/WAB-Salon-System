@@ -21,7 +21,51 @@ export interface ContentPageInput {
 }
 export type ContentPagePatch = { body?: PageBody };
 
+export interface Faq {
+  readonly id: string;
+  readonly app: AppKind;
+  readonly question: LocalizedName;
+  readonly answer: LocalizedName;
+  readonly order: number;
+}
+export interface FaqInput {
+  app: AppKind;
+  question: LocalizedName;
+  answer: LocalizedName;
+  order?: number;
+}
+export type FaqPatch = Partial<Omit<FaqInput, 'app'>>;
+
+export interface ContactInfo {
+  readonly id: string;
+  readonly app: AppKind;
+  readonly phone: string;
+  readonly whatsapp: string;
+  readonly email: string;
+}
+export interface ContactInfoInput {
+  app: AppKind;
+  phone: string;
+  whatsapp: string;
+  email: string;
+}
+export type ContactInfoPatch = Partial<Omit<ContactInfoInput, 'app'>>;
+
+export const MAX_FAQ_TEXT = 2000;
+const E164 = /^\+[1-9][0-9]{6,14}$/;
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_EMAIL = 254;
+export const isPhone = (v: string): boolean => E164.test(v);
+export const isEmail = (v: string): boolean => EMAIL.test(v) && v.length <= MAX_EMAIL;
+
 export interface ContentRepository {
+  readonly faqs: AdminResource<Faq, FaqInput, FaqPatch, { app?: AppKind }>;
+  readonly contactInfo: AdminResource<
+    ContactInfo,
+    ContactInfoInput,
+    ContactInfoPatch,
+    { app?: AppKind }
+  >;
   readonly pages: AdminResource<ContentPage, ContentPageInput, ContentPagePatch, { app?: AppKind }>;
 }
 

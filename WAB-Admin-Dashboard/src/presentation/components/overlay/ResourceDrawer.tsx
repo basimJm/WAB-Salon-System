@@ -2,11 +2,11 @@ import type { ReactNode, SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MIN_REASON_LENGTH } from '@/constants/ui';
 import { APP_KINDS, PLATFORMS } from '@/domain/appconfig/appConfig';
-import { Button } from '../components/core/Button';
-import { InlineAlert } from '../components/feedback/InlineAlert';
-import { Select } from '../components/form/Select';
-import { TextField } from '../components/form/TextField';
-import { Drawer } from '../components/overlay/Drawer';
+import { Button } from '../core/Button';
+import { InlineAlert } from '../feedback/InlineAlert';
+import { Select } from '../form/Select';
+import { TextField } from '../form/TextField';
+import { Drawer } from './Drawer';
 
 export const appOptions = (t: (k: string) => string) =>
   APP_KINDS.map((value) => ({ value, label: t(`appConfig.app.${value}`) }));
@@ -17,7 +17,7 @@ export const platformOptions = (t: (k: string) => string) =>
 export const reasonError = (reason: string): string | undefined =>
   reason.trim().length < MIN_REASON_LENGTH ? 'appConfig.error.reason' : undefined;
 
-export interface AppConfigDrawerProps {
+export interface ResourceDrawerProps {
   title: string;
   children: ReactNode;
   reason: string;
@@ -30,7 +30,7 @@ export interface AppConfigDrawerProps {
 }
 
 /** Side panel shell: the form fields, the mandatory reason, the save error and the buttons. */
-export function AppConfigDrawer(p: AppConfigDrawerProps) {
+export function ResourceDrawer(p: ResourceDrawerProps) {
   const { t } = useTranslation();
   const submit = (event: SyntheticEvent) => {
     event.preventDefault();
