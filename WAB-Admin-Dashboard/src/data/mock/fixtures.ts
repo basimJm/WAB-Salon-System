@@ -2,6 +2,7 @@ import { appConfigRoutes } from './appConfigRoutes';
 import { applicationsRoutes } from './applicationsRoutes';
 import { bannersRoutes } from './bannersRoutes';
 import { catalogRoutes } from './catalogRoutes';
+import { customersRoutes } from './customersRoutes';
 import { contentRoutes } from './contentRoutes';
 import { locationsRoutes } from './locationsRoutes';
 import { salonsRoutes } from './salonsRoutes';
@@ -22,5 +23,6 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...catalogRoutes(),
     ...salonsRoutes(),
     ...applicationsRoutes(),
+    ...customersRoutes(),
   ];
 }

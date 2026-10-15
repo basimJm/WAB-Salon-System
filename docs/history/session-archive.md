@@ -1229,3 +1229,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Shortcut tabs to bookings/reviews/transactions/payouts come with those modules; salon editing is blocked on the server (G-salon-edit).
 
+
+### T-079 — ADM-042 salon actions
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-042-salon-actions`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-042):
+  - [x] On the salon page: take offline / put online with a reason, change audience (warning that services switch off, same audience refused), payout details tab: full IBAN only after an explicit click (never cached; server audits the read), replace with validated IBAN and reason
+- Tests: 4 new tests through the mock stack
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). No separate browser check (same dialog/drawer patterns).
+

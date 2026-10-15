@@ -3,6 +3,7 @@ import type { AuthRepository } from '@/domain/auth/auth';
 import type { BannersRepository } from '@/domain/banners/banners';
 import type { UploadsRepository } from '@/domain/uploads/uploads';
 import type { ApplicationsRepository } from '@/domain/applications/applications';
+import type { CustomersRepository } from '@/domain/customers/customers';
 import type { SalonsRepository } from '@/domain/salons/salons';
 import type { CatalogRepository } from '@/domain/catalog/catalog';
 import type { ContentRepository } from '@/domain/content/content';
@@ -16,6 +17,7 @@ import { RemoteBannersRepository } from './banners/RemoteBannersRepository';
 import { RemoteUploadsRepository } from './uploads/RemoteUploadsRepository';
 import { fakePutFile, putFileWithProgress } from './uploads/putFile';
 import { RemoteApplicationsRepository } from './applications/RemoteApplicationsRepository';
+import { RemoteCustomersRepository } from './customers/RemoteCustomersRepository';
 import { RemoteSalonsRepository } from './salons/RemoteSalonsRepository';
 import { RemoteCatalogRepository } from './catalog/RemoteCatalogRepository';
 import { RemoteContentRepository } from './content/RemoteContentRepository';
@@ -31,6 +33,7 @@ export interface Repositories {
   readonly banners: BannersRepository;
   readonly catalog: CatalogRepository;
   readonly salons: SalonsRepository;
+  readonly customers: CustomersRepository;
   readonly applications: ApplicationsRepository;
   readonly uploads: UploadsRepository;
 }
@@ -44,6 +47,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
   const banners = new RemoteBannersRepository(api);
   const catalog = new RemoteCatalogRepository(api);
   const salons = new RemoteSalonsRepository(api);
+  const customers = new RemoteCustomersRepository(api);
   const applications = new RemoteApplicationsRepository(api);
   const mock = __ALLOW_MOCK__ && config.dataSource === 'mock';
   const uploads = new RemoteUploadsRepository(api, mock ? fakePutFile : putFileWithProgress);
@@ -58,6 +62,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
       banners,
       catalog,
       salons,
+      customers,
       applications,
       uploads,
     };
@@ -71,6 +76,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
     banners,
     catalog,
     salons,
+    customers,
     applications,
     uploads,
   };
