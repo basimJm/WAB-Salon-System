@@ -23,11 +23,15 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
   [ROUTES.catalog]: lazy(() => import('@/presentation/catalog/CatalogPage')),
   '/catalog/requests': lazy(() => import('@/presentation/catalog/RequestsPage')),
   [ROUTES.salons]: lazy(() => import('@/presentation/salons/SalonsPage')),
+  '/salons/applications': lazy(() => import('@/presentation/applications/ApplicationsPage')),
   '/settings/versions': lazy(() => import('@/presentation/appconfig/VersionsPage')),
   '/settings/maintenance': lazy(() => import('@/presentation/appconfig/MaintenancePage')),
 };
 /** Record pages with a path parameter (opened from a list row). */
 const DETAIL_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>> = {
+  [`${ROUTES.salons}/applications/:id`]: lazy(
+    () => import('@/presentation/applications/ApplicationReviewPage'),
+  ),
   [`${ROUTES.salons}/:id`]: lazy(() => import('@/presentation/salons/SalonDetailsPage')),
 };
 const AboutPage = lazy(() => import('@/presentation/pages/AboutPage'));

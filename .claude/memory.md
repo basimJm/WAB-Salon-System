@@ -101,3 +101,4 @@
 - ADM-040 done: salons list = repositories.salons.list(query); shared hook useLocationOptions('cities'|'countries'); SearchField pages use list.setSearch(value) (immediate URL write)
 - ADM-041 done: record pages with a path param go in DETAIL_PAGES (app/routes.tsx); salons = repositories.salons.{list,get,members}
 - ADM-042 done: salon actions in SalonActions.tsx; payout details read = explicit click, gcTime 0; IBAN helpers isIban/normalizeIban in domain/salons. LESSON: after prettier, string replace anchors break silently - assert that a replacement happened.
+- ADM-043 done: applications = repositories.applications {list,get,approve,reject}; review page opens /salons/applications/:id; signed document URLs: query gcTime 0

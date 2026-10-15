@@ -131,11 +131,14 @@ function findRoute(compiled: CompiledRoute[], method: string, pathname: string) 
 export function createMockTransport(options: MockTransportOptions): FetchFn {
   const sleep = options.sleep ?? defaultSleep;
   const latency = options.latencyMs ?? MOCK_LATENCY_MS;
-  const compiled = options.routes.map((route) => ({
-    route,
-    matcher: toMatcher(route.path),
-    names: namesOf(route.path),
-  }));
+  // Like a real router, a fixed path (`/salons/applications`) wins over a parameter path (`/salons/{id}`).
+  const compiled = options.routes
+    .map((route) => ({
+      route,
+      matcher: toMatcher(route.path),
+      names: namesOf(route.path),
+    }))
+    .sort((x, y) => x.names.length - y.names.length);
   let calls = 0;
 
   return async (input, init) => {
