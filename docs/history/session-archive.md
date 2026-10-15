@@ -1169,3 +1169,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
 
+
+### T-074 — ADM-037 banners with image upload
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-037-banners`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-037):
+  - [x] Banners list (gender filter) and full-width editor: Arabic and English artwork uploaded through presign + PUT + confirm, action (none/salon/https link) with value rules, audience, Amman-day schedule with included end day, order, active, phone previews, mandatory reason
+- Tests: 17 new tests incl. upload flow through the mock stack; browser check: editor opens with 2 uploaders and 2 previews, no horizontal scroll
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
+

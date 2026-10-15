@@ -24,6 +24,23 @@
       "descEn": "مطلوب وبحد أقصى {{max}} حرفًا",
       "image": "ارفع صورة",
       "order": "عدد صحيح من 0"
+    },
+    "requestsSubtitle": "خدمات طلبت الصالونات إضافتها إلى الكتالوج.",
+    "noRequests": "لا توجد طلبات",
+    "salon": "الصالون",
+    "description": "الوصف",
+    "requestedAt": "تاريخ الطلب",
+    "approve": "قبول",
+    "reject": "رفض",
+    "approveTitle": "قبول وإضافة إلى الكتالوج",
+    "approveHint": "ستُنشأ الخدمة \"{{name}}\" للجميع. ترجم النصوص أولًا.",
+    "rejectTitle": "رفض \"{{name}}\"",
+    "rejectText": "يُبلَّغ الصالون بالسبب. اكتب السبب.",
+    "rejected": "تم رفض الطلب",
+    "requestStatus": {
+      "PENDING": "قيد المراجعة",
+      "APPROVED": "مقبول",
+      "REJECTED": "مرفوض"
     }
   }
 }
