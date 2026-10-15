@@ -1,0 +1,34 @@
+{
+  "placements": {
+    "subtitle": "Paid \"Recommended\" slots shown first in the customer app.",
+    "audience": "Audience",
+    "add": "Add a salon",
+    "edit": "Edit placement",
+    "salon": "Salon",
+    "chooseSalon": "Choose a live salon",
+    "start": "Starts",
+    "end": "Ends (included)",
+    "endHint": "Leave empty for no end date.",
+    "period": "Period",
+    "amount": "Amount paid (JOD)",
+    "order": "Order",
+    "orderHint": "Empty puts it last.",
+    "note": "Note",
+    "empty": "No placements for this audience",
+    "endNow": "End now",
+    "endTitle": "End the placement of {{name}}",
+    "endText": "It disappears from the app now and stays in the history. Write the reason.",
+    "ended": "Placement ended",
+    "saved": "Placement saved",
+    "moveUp": "Move {{name}} up",
+    "moveDown": "Move {{name}} down",
+    "reorderReason": "Reordered from the admin panel",
+    "error": {
+      "salonId": "Choose a salon",
+      "amount": "Enter an amount like 150.000",
+      "period": "The end day cannot be before the start day",
+      "order": "Whole number",
+      "note": "Up to 500 characters"
+    }
+  }
+}

@@ -1325,3 +1325,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-055 and ADM-056 built as ONE task on branch feat/adm-054-payouts (name differs from the backlog); ADM-054 reconciliation is still open.
 
+
+### T-087 — ADM-054 reconciliation
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-054-reconciliation`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-054):
+  - [x] Payment problems screen: stuck pending, paid without a booking, missing ledger charge — each a list that opens the payment attempt, with a clean/needs-review badge; error state
+- Tests: 2 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). The server returns problems, not period totals (backlog note).
+

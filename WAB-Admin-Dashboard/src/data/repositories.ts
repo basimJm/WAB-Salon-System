@@ -10,6 +10,7 @@ import type { TransactionsRepository } from '@/domain/transactions/transactions'
 import type { RefundsRepository } from '@/domain/refunds/refunds';
 import type { PayoutsRepository } from '@/domain/payouts/payouts';
 import type { SubscriptionsRepository } from '@/domain/subscriptions/subscriptions';
+import type { PlacementsRepository } from '@/domain/placements/placements';
 import type { SalonsRepository } from '@/domain/salons/salons';
 import type { CatalogRepository } from '@/domain/catalog/catalog';
 import type { ContentRepository } from '@/domain/content/content';
@@ -30,6 +31,7 @@ import { RemoteTransactionsRepository } from './transactions/RemoteTransactionsR
 import { RemoteRefundsRepository } from './refunds/RemoteRefundsRepository';
 import { RemotePayoutsRepository } from './payouts/RemotePayoutsRepository';
 import { RemoteSubscriptionsRepository } from './subscriptions/RemoteSubscriptionsRepository';
+import { RemotePlacementsRepository } from './placements/RemotePlacementsRepository';
 import { RemoteSalonsRepository } from './salons/RemoteSalonsRepository';
 import { RemoteCatalogRepository } from './catalog/RemoteCatalogRepository';
 import { RemoteContentRepository } from './content/RemoteContentRepository';
@@ -45,6 +47,7 @@ export interface Repositories {
   readonly banners: BannersRepository;
   readonly catalog: CatalogRepository;
   readonly salons: SalonsRepository;
+  readonly placements: PlacementsRepository;
   readonly subscriptions: SubscriptionsRepository;
   readonly payouts: PayoutsRepository;
   readonly refunds: RefundsRepository;
@@ -65,6 +68,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
   const banners = new RemoteBannersRepository(api);
   const catalog = new RemoteCatalogRepository(api);
   const salons = new RemoteSalonsRepository(api);
+  const placements = new RemotePlacementsRepository(api);
   const subscriptions = new RemoteSubscriptionsRepository(api);
   const payouts = new RemotePayoutsRepository(api);
   const refunds = new RemoteRefundsRepository(api);
@@ -86,6 +90,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
       banners,
       catalog,
       salons,
+      placements,
       subscriptions,
       payouts,
       refunds,
@@ -106,6 +111,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
     banners,
     catalog,
     salons,
+    placements,
     subscriptions,
     payouts,
     refunds,

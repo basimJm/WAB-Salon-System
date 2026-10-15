@@ -12,6 +12,7 @@ import { transactionsRoutes } from './transactionsRoutes';
 import { refundsRoutes } from './refundsRoutes';
 import { payoutsRoutes } from './payoutsRoutes';
 import { subscriptionsRoutes } from './subscriptionsRoutes';
+import { placementsRoutes } from './placementsRoutes';
 import { settingsRoutes } from './settingsRoutes';
 import type { MockRoute } from './mockTransport';
 
@@ -36,5 +37,6 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...refundsRoutes(),
     ...payoutsRoutes(),
     ...subscriptionsRoutes(),
+    ...placementsRoutes(),
   ];
 }
