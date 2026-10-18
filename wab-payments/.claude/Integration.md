@@ -113,19 +113,22 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 | Item | Status |
 |---|---|
 | Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ |
-| Shared kernel (errors, config, http/retry, logger) | ⬜ |
-| Adapter: fake — scenario-driven (success/fail/cancel/pending) for dev/tests | ⬜ |
-| Adapter: mock-gateway — local HTTP gateway simulator on localhost (OPP-compatible) | ✅ |
-| Adapter: hyperpay — checkout + verify done, refunds/webhooks next | 🚧 |
-| Adapter: <next gateway> — any other gateway: implement PaymentGateway port + register | ⬜ |
-| Adapter: kmp-launcher — Android/iOS payment UI wrapper | ⬜ |
-| Unit tests + coverage gate | ⬜ |
-| Loop test | ⬜ |
-| README + consumer smoke test | ⬜ |
+| Shared kernel (errors, config, retry, logger, money, http) | ✅ |
+| Adapter: fake — scenario-driven (success/fail/cancel/pending) for dev/tests | ✅ |
+| Adapter: mock-gateway — OPP-compatible HTTP simulator on localhost | ✅ |
+| Adapter: hyperpay — checkout, verify, refunds, webhooks (UNVERIFIED against the real gateway) | ✅ |
+| Adapter: <next gateway> — implement `PaymentGateway` + `provider: 'custom'` | ✅ (port ready, no second gateway yet) |
+| Phase 2 port fields (destinations, subMerchantId, capability flags) | ✅ (no HyperPay split implementation) |
+| KMP library: ports, fake/mock launchers, native bridge launcher | ✅ (JVM-verified common code) |
+| KMP Android HyperPay bridge / iOS Swift bridge | ✅ written, NOT compiled |
+| Unit tests + coverage gate / loop test / README / consumer smoke test | ✅ |
+| WAB-Server integration (`PAYMENT_PROVIDER=real`, SRV-092) | ✅ |
+| Registry publish (npm `@wab/payments`, Maven `com.wab:payments*`) | ⬜ prepared, owner runs it (`CHANGELOG.md`, `kmp/PUBLISHING.md`) |
 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-18 | 0.1.0 | PAY-015: Maven publication config + docs. |
 | 2026-10-18 | 0.1.0 | PAY-014: iOS bridge contract + Swift reference. |
 | 2026-10-18 | 0.1.0 | PAY-013: Android HyperPay bridge + SdkResult mapping. |
 | 2026-10-18 | 0.1.0 | PAY-012: publish prep + clientCheckout + server integration. |

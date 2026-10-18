@@ -119,3 +119,11 @@
 - Tests: common KMP tests (27) unchanged and green on the JVM harness; iOS targets, Swift bridge and OPPWAMobile NOT built (no macOS/Xcode)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Swift file is a reference to copy: symbol names from the OPPWAMobile docs need a real build to confirm.
+
+### PAY-015 — KMP Maven publication prepared
+- Branch: `feat/pay-015-publish-kmp`
+- Status: IN REVIEW
+- Acceptance: maven-publish config for com.wab:payments (KMP, all targets) and payments-hyperpay-android (release), POM metadata, private repo via properties/env credentials, PUBLISHING.md with consuming snippet for the customer app, kmp README/CHANGELOG; NOT published.
+- Tests: gradle files unverified (no Google Maven/OPP SDK); common KMP tests (27) still green on the JVM harness
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Owner runs publish (registry URL + token + OPP SDK version/repository). The customer app has no in-repo payments module, so the switch is a dependency line (see PUBLISHING.md).
