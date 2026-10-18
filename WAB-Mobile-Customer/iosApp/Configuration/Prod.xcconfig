@@ -6,5 +6,6 @@ APP_DISPLAY_NAME = WAB
 // PLACEHOLDER host until the platform domain is decided. In xcconfig '//' starts a comment, so the
 // scheme separator is written as ':/$()/'.
 API_BASE_URL = https:/$()/api.template.app
+DATA_SOURCE = remote
 BUNDLE_ID_SUFFIX =
 PRODUCT_BUNDLE_IDENTIFIER = com.fab.wab.customer$(BUNDLE_ID_SUFFIX)$(TEAM_ID)

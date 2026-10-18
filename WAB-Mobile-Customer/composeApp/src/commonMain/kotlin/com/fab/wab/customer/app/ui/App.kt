@@ -27,6 +27,7 @@ import com.fab.wab.customer.app.navigation.rootNavItems
 import com.fab.wab.customer.app.navigation.switchRootTab
 import com.fab.wab.customer.app.resources.Res
 import com.fab.wab.customer.app.resources.unauthorized_logout_message
+import com.fab.wab.customer.core.data.mock.di.mockDataModule
 import com.fab.wab.customer.core.di.coreDiModule
 import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.navigation.route.Graph
@@ -51,6 +52,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 val appModules = listOf(
     coreDiModule,
+    mockDataModule,
     notificationModule,
     viewModelModule,
     platformFirebaseModule(),

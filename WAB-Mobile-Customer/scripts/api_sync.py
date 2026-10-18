@@ -136,10 +136,78 @@ class Renderer:
         return files
 
 
+TEXT_FIELD_HINTS = ("name", "description", "title", "body", "message", "comment", "text", "address", "bio", "reason", "label")
+TEXT_MARKER = "__TEXT__"
+SAMPLE_ITEMS = 3
+SAMPLE_DATE = "2026-10-18T10:00:00.000Z"
+SAMPLE_URL = "https://example.invalid/sample.jpg"
+SAMPLE_ID = "id-1"
+
+
+def sample_value(schema: dict | None, field: str, components: dict, depth: int = 0):
+    """A realistic-looking value for a schema node; text fields carry a marker the mock localizes per language."""
+    if not schema or depth > 12:
+        return None
+    if "$ref" in schema:
+        return sample_value(components.get(schema["$ref"].rsplit("/", 1)[-1]), field, components, depth + 1)
+    kind = schema.get("type")
+    if isinstance(kind, list):
+        kind = next((k for k in kind if k != "null"), "null")
+    if "enum" in schema:
+        return schema["enum"][0]
+    if kind == "object":
+        return {prop: sample_value(sub, prop, components, depth + 1) for prop, sub in schema.get("properties", {}).items()} if schema.get("properties") else {}
+    if kind == "array":
+        return [sample_value(schema.get("items"), field, components, depth + 1) for _ in range(SAMPLE_ITEMS)]
+    if kind == "string":
+        lower = field.lower()
+        if schema.get("format") == "date-time":
+            return SAMPLE_DATE
+        if lower.endswith("url") or lower.endswith("urls"):
+            return SAMPLE_URL
+        if lower == "id" or lower.endswith("id"):
+            return SAMPLE_ID
+        return TEXT_MARKER if any(h in lower for h in TEXT_FIELD_HINTS) else field
+    if kind == "integer":
+        return 1
+    if kind == "number":
+        return 1.5
+    if kind == "boolean":
+        return True
+    return None
+
+
+def render_fixtures(spec: dict, head: str) -> str:
+    components = spec.get("components", {}).get("schemas", {})
+    entries = []
+    for path, methods in spec.get("paths", {}).items():
+        for method, op in methods.items():
+            if method not in METHODS:
+                continue
+            op_id = operation_id(method, path)
+            data = None
+            for code in SUCCESS_CODES:
+                response = op.get("responses", {}).get(code, {}).get("content", {}).get("application/json", {}).get("schema")
+                if response and "properties" in response:
+                    data = sample_value(response["properties"].get("data"), "data", components)
+                    break
+            body = json.dumps({"success": True, "message": "", "data": data}, ensure_ascii=False)
+            escaped = body.replace("\\", "\\\\").replace('"', '\\"').replace("$", "\\$")
+            entries.append(f'    "{op_id}" to "{escaped}",')
+    return (
+        f"{head}package {PACKAGE}\n\n"
+        "/** Success-envelope JSON per operation id, derived from the response schema; `MockTransport` serves and localizes it. */\n"
+        "object MockFixtures {\n    const val TEXT_MARKER = \"" + TEXT_MARKER + "\"\n\n    val byOperationId: Map<String, String> = mapOf(\n"
+        + "\n".join(entries) + "\n    )\n}\n"
+    )
+
+
 def generate(spec_path: Path) -> tuple[dict[str, str], str]:
     text = spec_path.read_text(encoding="utf-8")
     sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
-    files = Renderer(json.loads(text)).render(spec_path.name, sha)
+    spec = json.loads(text)
+    files = Renderer(spec).render(spec_path.name, sha)
+    files["MockFixtures.kt"] = render_fixtures(spec, HEADER.format(name=spec_path.name, sha=sha))
     files["openapi.snapshot.json"] = text
     return files, sha
 

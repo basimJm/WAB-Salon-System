@@ -6,6 +6,7 @@ import com.fab.wab.customer.core.domain.repository.SessionTimeOut
 import com.fab.wab.customer.core.network.client.createHttpClient
 import com.fab.wab.customer.core.network.config.ApiConfig
 import com.fab.wab.customer.core.network.config.getAuthToken
+import com.fab.wab.customer.core.network.client.HttpEngineProvider
 import org.koin.dsl.module
 
 val networkModule = module {
@@ -17,5 +18,5 @@ val networkModule = module {
             isDebug = environment.isDebug,
         )
     }
-    single { createHttpClient(get(), get<AppSettings>(), get<SessionTimeOut>()) }
+    single { createHttpClient(get(), get<AppSettings>(), get<SessionTimeOut>(), get<HttpEngineProvider>()) }
 }

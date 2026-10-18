@@ -74,6 +74,17 @@ class ApiSyncTest(unittest.TestCase):
         self.assertIn("        getSalonsBySalonId,\n        putFavoritesBySalonId,\n", ops)
         self.assertIn(self.sha, ops)
 
+    def test_fixtures_follow_the_response_schema(self) -> None:
+        fixtures = self.files["MockFixtures.kt"]
+        self.assertIn('"GetSalonsBySalonId" to "', fixtures)
+        decoded = api_sync.sample_value(SPEC["paths"]["/customer/v1/salons/{salonId}"]["get"]["responses"]["200"]["content"]["application/json"]["schema"]["properties"]["data"], "data", {})
+        self.assertEqual("id-1", decoded["id"])
+        self.assertEqual("MALE", decoded["gender"])
+        self.assertEqual(3, len(decoded["staff"]))
+        self.assertEqual(api_sync.TEXT_MARKER, decoded["staff"][0]["name"])
+        self.assertEqual(1.5, decoded["rating"])
+        self.assertIn('"PutFavoritesBySalonId" to "', fixtures)
+
     def test_check_mode_detects_stale_and_extra_files(self) -> None:
         self.assertEqual(1, api_sync.main(["--check", "--spec", str(self.spec), "--out", str(self.out)]))
         self.assertEqual(0, api_sync.main(["--spec", str(self.spec), "--out", str(self.out)]))
