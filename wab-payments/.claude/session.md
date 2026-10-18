@@ -23,3 +23,11 @@
 - Tests: npm run verify green (45 unit tests, gate 100/95/95)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found card regex swallowing a trailing space and duplicate config field names (fixed).
+
+### PAY-003 — Port, facade, fake adapter, idempotency
+- Branch: `feat/pay-003-port-fake`
+- Status: IN REVIEW
+- Acceptance: PaymentProvider port + PaymentGateway adapter port; facade with validation, idempotency (memory/Redis), bounded retries (never for refunds), webhook replay flag; scriptable FakeGateway; createPayments factory.
+- Tests: npm run verify green (92 unit tests, gate 100/95/95, loop test, packed smoke)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA fixed lint/type findings; refunds are never blind-retried (adapter must find an earlier refund by key).

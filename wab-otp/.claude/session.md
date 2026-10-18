@@ -7,10 +7,10 @@
 
 ## Current task
 
-### OTP-004 — Limits engine and `createOtpService`
-- Branch: `feat/otp-004-limits`
-- Acceptance: request limit (default 5 / 5 min → 15 min block), wrong-code limit (5 → 15 min block), resend cooldown (60 s), `blockedUntil`, `resendAfterSeconds`; all values from options; the request that reaches a limit is allowed and starts the block, later ones are denied (same semantics as the WAB-Server gate); requests and wrong codes share one block; success resets; only `WRONG_CODE` counts; `verify` answers `BLOCKED` while blocked; prod needs an injected shared store.
-- Assumed missing: per-device/IP limits (`deviceId`/`ip` accepted but not limited yet; open question in Integration.md).
-- Tests: `npm run verify` green (62 unit tests).
+### OTP-005 — Redis `LimitStore`
+- Branch: `feat/otp-005-redis-store`
+- Acceptance: one atomic Lua script per hit (INCR + PEXPIRE, block on reaching the limit, counter healed if it lost its TTL), atomic cooldown (`SET NX PX`), shared block key, reset; works with any injected ioredis-shaped client; outages → retryable `OTP_STORE_UNAVAILABLE` without leaking server text; malformed replies → `OTP_MALFORMED_RESPONSE`.
+- Assumed missing: Redis Cluster key slots (counter and block keys of a phone are not hash-tagged; fine on single-node/managed primary, noted in Integration.md).
+- Tests: real `redis-server` on localhost in `tests/helpers/redis.ts` (or `REDIS_TEST_URL`); 40-way concurrent hit proves exactly `limit` hits pass; `npm run verify` green (75 tests).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — added `LimitStore.countOf` so non-counting failure reports can still return `attemptsRemaining`.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found a real bug: `resendAfterSec: 0` made Redis reject `SET PX 0`; the limits engine now skips the cooldown when it is 0 (regression test through the real store).

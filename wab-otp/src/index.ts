@@ -15,6 +15,7 @@ export type * from './ports';
 export { createOtpVerifier, type OtpVerifier } from './verifier';
 export { createFakeVerifier, fakeProof } from './adapters/fake';
 export { MemoryLimitStore } from './adapters/memory-store';
+export { RedisLimitStore, type RedisClientLike } from './adapters/redis-store';
 export { FAKE_PROOF_KINDS, type FakeProofKind } from './constants/fake';
 export { isE164 } from './validation';
 export { createOtpService } from './service';
