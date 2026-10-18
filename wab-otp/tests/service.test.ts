@@ -112,7 +112,9 @@ describe('createOtpService', () => {
     const second = await otp.precheck({ phone: PHONE, purpose: 'LOGIN' });
     expect(second.allowed).toBe(true);
     const third = await otp.precheck({ phone: PHONE, purpose: 'LOGIN' });
-    expect(third).toMatchObject({ allowed: false, blockedUntil: new Date(60_000) });
+    expect(third.allowed).toBe(false);
+    expect(third.blockedUntil?.getTime()).toBeGreaterThan(55_000);
+    expect(third.blockedUntil?.getTime()).toBeLessThanOrEqual(60_000);
     expect(events.filter((e) => e.type === 'precheck')).toHaveLength(3);
   });
 

@@ -7,10 +7,10 @@
 
 ## Current task
 
-### OTP-005 — Redis `LimitStore`
-- Branch: `feat/otp-005-redis-store`
-- Acceptance: one atomic Lua script per hit (INCR + PEXPIRE, block on reaching the limit, counter healed if it lost its TTL), atomic cooldown (`SET NX PX`), shared block key, reset; works with any injected ioredis-shaped client; outages → retryable `OTP_STORE_UNAVAILABLE` without leaking server text; malformed replies → `OTP_MALFORMED_RESPONSE`.
-- Assumed missing: Redis Cluster key slots (counter and block keys of a phone are not hash-tagged; fine on single-node/managed primary, noted in Integration.md).
-- Tests: real `redis-server` on localhost in `tests/helpers/redis.ts` (or `REDIS_TEST_URL`); 40-way concurrent hit proves exactly `limit` hits pass; `npm run verify` green (75 tests).
+### OTP-006 — Firebase ID-token adapter
+- Branch: `feat/otp-006-firebase`
+- Acceptance: verify Firebase Phone Auth ID tokens with `jose` (no firebase-admin; vendor-neutral `ProofVerifier`): RS256 only, signature against Google's JWK endpoint, issuer `https://securetoken.google.com/<project>`, audience = project id, exp/iat/sub required, clock-skew tolerance from options, `auth_time` freshness window, `firebase.sign_in_provider == phone`, E.164 `phone_number`, then phone match. Outcomes: VERIFIED / PHONE_MISMATCH / EXPIRED (expired token or stale sign-in) / INVALID_PROOF (everything else incl. alg none, forged key, unknown kid). Key cache honours Cache-Control (floor 60 s), one download for concurrent callers, re-fetch on unknown kid (rotation, at most once per minute), stale keys served up to 24 h when Google is down; every status / network / timeout / bad body mapped to a typed error with retry only where retryable; proxy support by injecting `fetch`.
+- Assumed missing: purpose cannot be bound by Firebase tokens; `maxAuthAgeSec` default 600 s is my assumption (confirm); jose 5 (dual CJS/ESM) chosen because jose 6 is ESM-only and breaks the CJS build.
+- Tests: locally generated RSA keys sign test tokens against a stubbed key endpoint; real-Firebase check NOT run (no network/credentials here). `npm run verify` green.
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found a real bug: `resendAfterSec: 0` made Redis reject `SET PX 0`; the limits engine now skips the cooldown when it is 0 (regression test through the real store).
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found three real bugs before merge: HTTP 5xx/429 from the key endpoint were not retried, a `null` JSON body crashed with TypeError, and aborting in `finally` would have cut the response body; also a time-dependent flaky assertion from OTP-004 fixed.

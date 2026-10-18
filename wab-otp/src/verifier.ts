@@ -1,4 +1,5 @@
 import { createFakeVerifier } from './adapters/fake';
+import { createFirebaseVerifier } from './adapters/firebase';
 import { resolveOptions, type OtpOptions, type ResolvedOptions } from './config/options';
 import { ERROR_CODES } from './constants/codes';
 import { VERIFY_OUTCOMES } from './constants/defaults';
@@ -23,7 +24,7 @@ const selectAdapter = (resolved: ResolvedOptions): ProofVerifier => {
       if (resolved.verifier === undefined) throw configError('provider "custom" needs a verifier');
       return resolved.verifier;
     case 'firebase':
-      throw configError('The firebase adapter is not available in this build');
+      return createFirebaseVerifier(resolved);
   }
 };
 

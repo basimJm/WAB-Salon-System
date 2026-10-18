@@ -37,7 +37,7 @@
     "verify": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build && npm run test:smoke-package && npm run test:loop"
   },
   "dependencies": {
-    "jose": "^6.1.0",
+    "jose": "^5.10.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
