@@ -7,14 +7,14 @@
 
 ## Current task
 
-### ANA-003 — `AnalyticsProvider` port + memory adapter
-- Branch: `feat/ana-003-port-memory`
+### ANA-005 — Query layer: count, funnel, cohorts, journey, overview
+- Branch: `feat/ana-005-queries`
 - Status: IN REVIEW
-- Acceptance: stable port (`track`, `linkIdentity`, `countEvents`, `funnel`, `cohorts`, `journey`, `overview`) + lifecycle (`init`, `close`); ports `EventStore`, `IdentityStore`, `WarehouseQuery`; memory adapters; `createAnalytics(options, overrides)` factory (custom adapter = one override); `track` never throws and retries only retryable store errors; invalid events/links named by path only; count query validation (range, names, groupBy, time zone); `source: 'APP'` needs a warehouse.
-- Assumed missing: the four richer queries answer `ANALYTICS_NOT_CONFIGURED` until ANA-005; actor type/id/installation formats are generic patterns (overridable) because the BRD defines no format.
-- Tests: `npm run verify` green (47 tests; gate met).
+- Acceptance: `countEvents` by name / Amman day (ANA-003); `funnel` (ordered steps, window, best attempt per actor incl. restart, users, conversion from previous/first, drop-off, median time, drop-off user lists, `truncated` when more than `maxScannedEvents`); `cohorts` (first start event in range, DAY or Monday-WEEK periods in the business zone, retention k+1 periods later); `journey` (server events + app events + crashes of every linked installation, ordered, sessions by inactivity gap, paged); `overview` (totals, unique actors, installations, top events, daily series); all validate range/names/limits; `source: 'APP'` reads the warehouse; `MemoryWarehouse` for dev/tests.
+- Assumed missing: funnels/cohorts run per source (server events subject = `TYPE:id`, app events `user:<id>` else `inst:<installation>`); guest/registered subject merge is ANA-008. Weeks start on Monday. Funnel step repeats restart the attempt only before step 2.
+- Tests: `npm run verify` green (86 tests): hand-computed funnels/cohorts incl. Amman day change at 21:00Z, restart, window, truncation, paging.
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA: DAY grouping verified at Amman midnight (21:00Z), half-open range, desc tie order.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA caught two wrong expectations in the first draft of the tests (window default and Amman cohort day) by recomputing by hand; code was right.
 
-### ANA-002 — Shared kernel
-- Status: DONE (PR #208)
+### ANA-004 — Mongo adapter
+- Status: DONE (PR #216)

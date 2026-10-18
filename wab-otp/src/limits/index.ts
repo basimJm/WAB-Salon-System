@@ -60,14 +60,16 @@ export const createLimits = (store: LimitStore, config: LimitsConfig, prefix: st
       const blockLeft = await store.blockTtlMs(k.block);
       if (blockLeft > 0)
         return { allowed: false, blocked: true, resendAfterSeconds: 0, retryAfterMs: blockLeft };
-      const cooldown = await store.startCooldown(k.resend, config.resendAfterSec * MS_PER_SECOND);
-      if (!cooldown.started)
-        return {
-          allowed: false,
-          blocked: false,
-          resendAfterSeconds: toSeconds(cooldown.retryAfterMs),
-          retryAfterMs: cooldown.retryAfterMs,
-        };
+      if (config.resendAfterSec > 0) {
+        const cooldown = await store.startCooldown(k.resend, config.resendAfterSec * MS_PER_SECOND);
+        if (!cooldown.started)
+          return {
+            allowed: false,
+            blocked: false,
+            resendAfterSeconds: toSeconds(cooldown.retryAfterMs),
+            retryAfterMs: cooldown.retryAfterMs,
+          };
+      }
       const hit = await store.hit({
         counterKey: k.req,
         blockKey: k.block,

@@ -20,6 +20,7 @@ export const DEFAULT_LIMITS = {
   maxScannedEvents: 50_000,
   maxFunnelSteps: 10,
   minFunnelSteps: 2,
+  maxDropOffUsers: 100,
   maxCohortPeriods: 12,
   maxJourneyItems: 500,
   maxNames: 20,
@@ -80,3 +81,12 @@ export const SENSITIVE_KEY_PATTERN =
   /pass(word)?|secret|token|otp|authorization|cookie|iban|card|cvv/i;
 export const REDACTED = '[redacted]';
 export const MAX_PARAM_DEPTH = 4;
+
+/** Mongo adapter bounds. */
+export const MONGO_RULES = {
+  /** Links read per lookup. */
+  maxLinks: 1000,
+  /** Actors one `find` may filter on. */
+  maxActorsPerFind: 200,
+  dayFormat: '%Y-%m-%d',
+} as const;

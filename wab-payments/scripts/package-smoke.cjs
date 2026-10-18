@@ -21,7 +21,14 @@ try {
 
   const body = `
     const run = async (lib) => {
-      if (lib.PACKAGE_NAME !== '@wab/payments') throw new Error('smoke failed');
+      if (lib.PACKAGE_NAME !== '@wab/payments' || typeof lib.createPayments !== 'function') throw new Error('smoke failed: exports');
+      const payments = lib.createPayments({ environment: 'dev', provider: 'fake' });
+      const request = { idempotencyKey: 'smoke:session:0001', amountFils: 12500, reference: 'draft-1' };
+      const session = await payments.createSession(request);
+      const again = await payments.createSession(request);
+      const verified = await payments.verify(session.sessionId);
+      if (session.sessionId !== again.sessionId || verified.status !== 'SUCCEEDED' || typeof lib.PaymentSdkError !== 'function') throw new Error('smoke failed');
+      await payments.close();
     };
   `;
   writeFileSync(
