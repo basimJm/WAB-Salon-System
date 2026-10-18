@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-092 — ADM-063 live overview and server-event analytics (ADM-063..064)
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-063-analytics`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-063):
-  - [x] Live overview: KPI cards (payments, refunds, bookings, errors) for a chosen range with change vs the previous period, per-day trend chart, refreshed by realtime; bookings / payments / errors analytics pages chart event counts by name and by day
-- Tests: 6 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-063 and ADM-064 built as ONE task. Active users, installs and the live feed are not offered by the server (G7); event producers may not emit yet (SRV-105 note), so the numbers need a check against the real server.
-
 ### T-093 — ADM-065 reports
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 4 new tests through the mock stack (plus month validation); no separate browser check
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Installs, active users, funnels and retention are not in the server reports (SRV-110). Top salons show ids (names come with the salon lookup in a later task).
+
+### T-094 — ADM-066 audit log
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-066-audit-log`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-066):
+  - [x] Audit log table (time, action, entity, reason, IP) with action search and entity/admin/day filters in the URL, a drawer with full details and the before/after values, read-only by design; AR+EN
+- Tests: 5 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Entity links are not added (entity type names differ per module).
 
 ### Pending (next)
 

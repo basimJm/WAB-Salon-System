@@ -1385,3 +1385,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-061 and ADM-062 built as ONE task.
 
+
+### T-092 — ADM-063 live overview and server-event analytics (ADM-063..064)
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-063-analytics`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-063):
+  - [x] Live overview: KPI cards (payments, refunds, bookings, errors) for a chosen range with change vs the previous period, per-day trend chart, refreshed by realtime; bookings / payments / errors analytics pages chart event counts by name and by day
+- Tests: 6 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-063 and ADM-064 built as ONE task. Active users, installs and the live feed are not offered by the server (G7); event producers may not emit yet (SRV-105 note), so the numbers need a check against the real server.
+

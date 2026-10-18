@@ -116,3 +116,4 @@
 - ADM-061 done: alerts = repositories.alerts {list,count,acknowledge}; useShellCounters(enabled) feeds Sidebar counters (ids alerts/applications/reviews) and the Topbar bell; alertLink(entity) maps subjects to pages
 - ADM-063 done: analytics = repositories.analytics {overview,events}; useAnalyticsRange gives instants (and the previous period when comparing); EventsAnalyticsPage(prefix) is the shared event-family page
 - ADM-065 done: reports = repositories.reports {daily(date),weekly(from),monthly(YYYY-MM)}; ReportBody renders any of them
+- ADM-066 done: audit = repositories.audit.list(query); humanizeAction/hasDiff pure helpers
