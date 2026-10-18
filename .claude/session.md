@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-091 — ADM-061 alerts and live shell counters (ADM-061..062)
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-061-alerts`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-061):
-  - [x] Alerts list (severity, kind, link to the subject, status filters, acknowledge) plus live numbers in the shell: the bell shows NEW alerts and opens the page, sidebar counters for pending applications, pending reviews and alerts; all refresh through the realtime invalidation bus
-- Tests: 4 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-061 and ADM-062 built as ONE task.
-
 ### T-092 — ADM-063 live overview and server-event analytics (ADM-063..064)
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 6 new tests through the mock stack; no separate browser check
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-063 and ADM-064 built as ONE task. Active users, installs and the live feed are not offered by the server (G7); event producers may not emit yet (SRV-105 note), so the numbers need a check against the real server.
+
+### T-093 — ADM-065 reports
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-065-reports`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-065):
+  - [x] Reports screen with daily, weekly and monthly tabs and a period picker: bookings with a status chart, collected money, registrations, reviews, payments and refunds, and the weekly/monthly extras (top salons, payouts, growth, live snapshot); AR+EN
+- Tests: 4 new tests through the mock stack (plus month validation); no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Installs, active users, funnels and retention are not in the server reports (SRV-110). Top salons show ids (names come with the salon lookup in a later task).
 
 ### Pending (next)
 
