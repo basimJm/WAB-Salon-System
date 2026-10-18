@@ -7,6 +7,7 @@ import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
 import com.fab.wab.customer.feature.auth.domain.model.PhoneCheck
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
+import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
 import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
 
 interface AuthRepository {
@@ -17,4 +18,6 @@ interface AuthRepository {
     suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult>
 
     suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession>
+
+    suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession>
 }

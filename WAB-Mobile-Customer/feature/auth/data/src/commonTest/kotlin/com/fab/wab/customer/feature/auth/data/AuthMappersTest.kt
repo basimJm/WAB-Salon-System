@@ -5,8 +5,11 @@ import com.fab.wab.customer.core.data.contract.generated.CustomerProfilePhone
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestData
 import com.fab.wab.customer.core.domain.session.Gender
+import com.fab.wab.customer.feature.auth.data.repository.toBody
 import com.fab.wab.customer.feature.auth.data.repository.toDomain
+import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
+import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
 import com.fab.wab.customer.feature.auth.domain.model.toE164
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -40,5 +43,18 @@ class AuthMappersTest {
         assertEquals("Omar", session.user.firstName)
         assertEquals(Gender.MALE, session.user.gender)
         assertEquals("+962791234567", PhoneNumber("JO", "791234567").toE164("+962"))
+    }
+
+    @Test
+    fun registerRequestBecomesTheContractBody() {
+        val phone = PhoneNumber("JO", "791234567")
+        val request = RegisterRequest("Sara", "H", "s@example.invalid", Gender.FEMALE, "amman", "a1", phone, "proof")
+        val body = request.toBody(InstallationInfo("inst", "ANDROID", "1.0", fcmToken = "fcm"))
+        assertEquals("FEMALE", body.gender)
+        assertEquals("JO", body.phone.countryCode)
+        assertEquals("791234567", body.phone.number)
+        assertEquals("proof", body.idToken)
+        assertEquals("inst", body.installation.installationId)
+        assertEquals("fcm", body.installation.fcmToken)
     }
 }

@@ -9,19 +9,7 @@
 
 ## Current task
 
-- Next: CUS-030 register S12, CUS-031…; task branches start from `origin/customer`.
-
-### CUS-027 — Locations and reference data: countries, cities, areas (cached per language)
-- Branch: `feat/cus-027-locations`
-- Status: IN REVIEW
-- Acceptance criteria (PRD §3.11, S11 default Jordan, S12 city → area; operations `GET /locations/countries|cities?countryCode|areas?cityId`):
-  - [x] Domain `core/domain/locations`: `Country` (code, name, dial code, flag URL, phone regex), `City`, `Area`, `LocationsRepository` (`countries`, `cities(countryCode)`, `areas(cityId)`, `refresh` flag), `defaultCountry()` (Jordan else first)
-  - [x] Data `core/data/locations`: `LocationsApi` from `CustomerOperations` paths + query params, mappers, `LocationsRepositoryImpl` with an in-memory cache keyed by language (+ parent id), errors never cached, refresh bypasses; bound in `dataModule` with the settings language flow
-  - [x] Tests: `LocationsTest` (1), `LocationsRepositoryTest` (2, MockEngine: per-language cache, parent-keyed cache, error not cached, refresh)
-- Tests: `:core:domain` + `:core:data` host tests green (3 new); `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — repository built on the generated operations; cache keyed by the same language source as the Accept-Language header so a language switch refetches; errors never cached; no UI.
-- Notes: no UI in this task (consumers: S11/S12 CUS-028, profile CUS-053); the Accept-Language header is added by the shared client, the cache key mirrors it.
+- Next: CUS-031 session + installations, CUS-032…; task branches start from `origin/customer`.
 
 ### CUS-028 — Login S11: phone + country, check-phone, not-registered / blocked, language + theme, legal links
 - Branch: `feat/cus-028-login`
@@ -53,3 +41,18 @@
 - Loops: 1/1 — the loop found the fixture OTP policy (1 box, resend 1 s, not allowed) and the placeholder-config crash in the Firebase providers; both fixed
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — Firebase only through the `core/firebase` port (fake in mock mode), OTP length and resend timing from the backend with the config fallback, wrong attempts reported, block/countdown driven by the server timestamp through the injectable clock, proof hand-off for the other purposes is single-use, nothing phone-related in analytics.
 - Notes: with `DATA_SOURCE=mock` the auth module binds `FakePhoneAuthGateway` (no SMS can be sent against fixtures; any code verifies), so the whole login flow runs on the emulator without Firebase; the real gateway stays bound for `remote`. FOUND by the emulator check: the OTP fixture sampled `otpLength = 1`, `resendAfterSeconds = 1`, `allowed = false` → generator hints (`otpLength` 6, `resendAfterSeconds` 60, `attemptsRemaining` 5, `allowed` true), fixtures regenerated. Second finding: with placeholder Firebase keys the Android app-instance-id / FCM token lookups throw `IllegalArgumentException` ("set a valid API key") → the Android providers now answer null for it too (login still proceeds with the unknown-installation marker).
+
+### CUS-030 — Register S12: all fields, guest prefill, city → area, OTP (REGISTER), `POST /auth/register` → Home
+- Branch: `feat/cus-030-register`
+- Status: IN REVIEW
+- Acceptance criteria (PRD S12, §11 validation; operations `POST /auth/check-phone` (REGISTER), `POST /auth/register`):
+  - [x] Domain: `RegisterRequest`, `AuthRepository.register`, `RegisterUseCase` (stores tokens + first name + gender); data mappers (`toBody`, `PostAuthRegisterData.toDomain`); `AuthMappersTest` (+1)
+  - [x] `RegisterViewModel`: first name + gender prefilled from the guest profile, country + number from the login hand-off; all seven fields required (email pattern of the contract, phone with the country regex); inline errors once touched or after submit; Register disabled until valid; city → areas loaded, area disabled until a city is chosen; submit → check-phone (REGISTER) → OTP route (purpose REGISTER); the OTP proof returns through `PendingOtpVerification` → register → Home; already registered / blocked → error from the catalog; language + theme icons; legal links; "I already have an account – Log in"
+  - [x] `RegisterScreen` + `RegisterForm` (design-system fields / dropdowns / phone field), shared `AuthTopIcons` + `AuthLegalLinks` (Login refactored to use them); `AuthNavigation` hosts Register; placeholder removed
+  - [x] AR + EN texts from the prototype
+  - [x] Tests: `RegisterViewModelTest` (4), `AuthMappersTest` (+1)
+  - [x] Emulator (AR): Login → "سجّل الآن" → Register prefilled (Sara, woman, +962 791234567), area disabled until a city is chosen, errors after submit, filled → OTP → Verify → Home
+- Tests: auth data/presentation + composeApp host tests green (5 new); `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0; emulator (Pixel, AR): Login → Register prefilled (Sara, امرأة, +962), area disabled until a city is chosen, city → areas, filled form enables Register → OTP (REGISTER) → Verify → Home
+- Loops: 1/1 — the loop caught the detekt complexity of `onEvent` (split into text / selection handlers)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — register goes through the same check-phone → OTP → proof path as login; names / email / phone never reach analytics; the OTP proof is single-use; shared auth chrome removes the Login duplication; AR + EN strings.
+- Notes: cities are loaded for Jordan (PRD §1 market) regardless of the phone's country; the register call reuses the installation record of login.

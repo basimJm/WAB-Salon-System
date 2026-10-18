@@ -18,6 +18,7 @@ import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
 import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
 import com.fab.wab.customer.feature.auth.domain.model.PhoneCheck
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
+import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
 import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
 import com.fab.wab.customer.feature.auth.domain.usecase.CheckPhoneUseCase
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.LegalSlugs
@@ -60,6 +61,8 @@ private class FakeAuth(var result: AppResult<PhoneCheck> = AppResult.Success(Pho
     override suspend fun requestOtp(phoneE164: String, purpose: AuthPurpose): AppResult<OtpPolicy> = AppResult.Loading
     override suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult> = AppResult.Loading
     override suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession> =
+        AppResult.Loading
+    override suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession> =
         AppResult.Loading
 }
 

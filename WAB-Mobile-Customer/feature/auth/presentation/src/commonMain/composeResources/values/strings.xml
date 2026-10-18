@@ -31,4 +31,21 @@
     <string name="otp_expired_ok">OK</string>
     <string name="otp_blocked">Too many attempts. Please try again later</string>
     <string name="otp_remaining">Time remaining %1$s</string>
+    <string name="register_title">Create account</string>
+    <string name="register_subtitle">Complete your details to start booking.</string>
+    <string name="register_first_name">First name</string>
+    <string name="register_last_name">Last name</string>
+    <string name="register_email">Email</string>
+    <string name="register_gender">Gender</string>
+    <string name="guest_gender_man_option">Man</string>
+    <string name="guest_gender_woman_option">Woman</string>
+    <string name="register_city">City</string>
+    <string name="register_area">Area</string>
+    <string name="register_choose">Select</string>
+    <string name="register_area_hint">Select a city first</string>
+    <string name="register_required">This field is required</string>
+    <string name="register_email_error">Invalid email address</string>
+    <string name="register_button">Register</string>
+    <string name="register_have_account">I already have an account –</string>
+    <string name="register_login_link">Log in</string>
 </resources>

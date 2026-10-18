@@ -9,6 +9,8 @@ import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptData
+import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterBody
+import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterData
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -28,4 +30,7 @@ class AuthApi(private val client: HttpClient) {
 
     suspend fun login(body: PostAuthLoginBody): BaseResponse<PostAuthLoginData> =
         client.post(CustomerOperations.postAuthLogin.path) { setBody(body) }.body()
+
+    suspend fun register(body: PostAuthRegisterBody): BaseResponse<PostAuthRegisterData> =
+        client.post(CustomerOperations.postAuthRegister.path) { setBody(body) }.body()
 }

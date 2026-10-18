@@ -8,6 +8,7 @@ import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.customer.feature.auth.domain.model.AuthSession
 import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
+import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
 import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
 import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
 import com.fab.wab.customer.feature.auth.domain.repository.InstallationInfoProvider
@@ -29,6 +30,19 @@ class LoginWithIdTokenUseCase(
 ) {
     suspend operator fun invoke(phone: PhoneNumber, idToken: String): AppResult<AuthSession> {
         val result = repository.login(phone, idToken, installation.current())
+        if (result is AppResult.Success) sessionStore.signIn(result.data.tokens, result.data.user)
+        return result
+    }
+}
+
+/** Register with the Firebase proof, then persist the session (PRD S12 "store tokens, first name, gender → Home"). */
+class RegisterUseCase(
+    private val repository: AuthRepository,
+    private val installation: InstallationInfoProvider,
+    private val sessionStore: SessionStore,
+) {
+    suspend operator fun invoke(request: RegisterRequest): AppResult<AuthSession> {
+        val result = repository.register(request, installation.current())
         if (result is AppResult.Success) sessionStore.signIn(result.data.tokens, result.data.user)
         return result
     }

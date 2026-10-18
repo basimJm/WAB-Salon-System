@@ -17,7 +17,6 @@ import com.fab.wab.customer.app.resources.nav_bookings
 import com.fab.wab.customer.app.resources.nav_favorites
 import com.fab.wab.customer.app.resources.nav_profile
 import com.fab.wab.customer.app.resources.placeholder_content_page
-import com.fab.wab.customer.app.resources.placeholder_register
 import com.fab.wab.customer.app.resources.profile_login_button
 import com.fab.wab.customer.core.navigation.route.Graph
 import com.fab.wab.customer.core.navigation.route.Screen
@@ -52,9 +51,8 @@ fun NavGraphBuilder.registerPlaceholderRoots(navController: NavHostController) {
     }
 }
 
-/** Auth destinations still to come (Register CUS-030, legal pages CUS-05x); Login navigates to them. */
+/** Legal / support pages still to come (CUS-05x); Login and Register link to them. */
 fun NavGraphBuilder.registerPlaceholderAuthScreens() {
-    composable<Screen.Register> { PlaceholderRootScreen(Res.string.placeholder_register) }
     composable<Screen.ContentPage> { entry ->
         PlaceholderRootScreen(Res.string.placeholder_content_page, detail = entry.toRoute<Screen.ContentPage>().slug)
     }

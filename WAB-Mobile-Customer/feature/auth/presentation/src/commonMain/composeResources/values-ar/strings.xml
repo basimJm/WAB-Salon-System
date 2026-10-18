@@ -31,4 +31,21 @@
     <string name="otp_expired_ok">حسناً</string>
     <string name="otp_blocked">تم تجاوز عدد المحاولات، يرجى المحاولة لاحقاً</string>
     <string name="otp_remaining">الوقت المتبقي %1$s</string>
+    <string name="register_title">إنشاء حساب</string>
+    <string name="register_subtitle">أكمل بياناتك لتبدأ الحجز.</string>
+    <string name="register_first_name">الاسم الأول</string>
+    <string name="register_last_name">الاسم الأخير</string>
+    <string name="register_email">البريد الإلكتروني</string>
+    <string name="register_gender">الجنس</string>
+    <string name="guest_gender_man_option">رجل</string>
+    <string name="guest_gender_woman_option">امرأة</string>
+    <string name="register_city">المدينة</string>
+    <string name="register_area">المنطقة</string>
+    <string name="register_choose">اختر</string>
+    <string name="register_area_hint">اختر المدينة أولاً</string>
+    <string name="register_required">هذا الحقل مطلوب</string>
+    <string name="register_email_error">البريد الإلكتروني غير صحيح</string>
+    <string name="register_button">تسجيل</string>
+    <string name="register_have_account">لدي حساب،</string>
+    <string name="register_login_link">تسجيل الدخول</string>
 </resources>
