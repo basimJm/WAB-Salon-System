@@ -1,0 +1,190 @@
+import { z } from 'zod';
+import { ENVIRONMENTS, PROVIDERS, type Environment, type ProviderName } from '../constants/codes';
+import {
+  DEFAULT_READ_MAX_BYTES,
+  DEFAULT_RETRY,
+  DEFAULT_SIGNED_URL_MAX_TTL_SEC,
+  DEFAULT_TIMEOUT_MS,
+  DEFAULT_UPLOAD_MAX_TTL_SEC,
+  DEFAULT_VARIANTS,
+  MAX_PRESIGN_TTL_SEC,
+} from '../constants/defaults';
+import { configError } from '../errors';
+import { noopLogger, redactingLogger, type Logger } from '../logger';
+
+const text = z.string().trim().min(1);
+const positiveInt = z.number().int().positive();
+
+const credentialsSchema = z
+  .object({
+    accessKeyId: text,
+    secretAccessKey: text,
+    sessionToken: text.optional(),
+  })
+  .strict();
+
+const s3Schema = z
+  .object({
+    region: text,
+    publicBucket: text,
+    privateBucket: text,
+    /** S3-compatible endpoint (MinIO, DigitalOcean Spaces); unset for AWS. */
+    endpoint: z.url().optional(),
+    forcePathStyle: z.boolean().optional(),
+    /** Unset = the SDK's default provider chain (IAM role). */
+    credentials: credentialsSchema.optional(),
+  })
+  .strict();
+
+const localFsSchema = z.object({ rootDir: text, baseUrl: z.url() }).strict();
+
+const retrySchema = z
+  .object({
+    maxAttempts: positiveInt.max(10),
+    baseDelayMs: positiveInt,
+    maxDelayMs: positiveInt,
+    jitterRatio: z.number().min(0).max(1),
+  })
+  .partial()
+  .strict();
+
+const variantsSchema = z
+  .object({
+    thumbWidth: positiveInt,
+    mediumWidth: positiveInt,
+    quality: positiveInt.max(100),
+  })
+  .partial()
+  .strict();
+
+const ttlSchema = z.object({ maxTtlSec: positiveInt.max(MAX_PRESIGN_TTL_SEC) }).strict();
+
+const optionsSchema = z
+  .object({
+    environment: z.enum(ENVIRONMENTS),
+    provider: z.enum(PROVIDERS),
+    s3: s3Schema.optional(),
+    localFs: localFsSchema.optional(),
+    /** Base URL public objects are served from (CDN domain). */
+    cdn: z.object({ baseUrl: z.url() }).strict(),
+    upload: ttlSchema.partial().optional(),
+    signedUrl: ttlSchema.partial().optional(),
+    readMaxBytes: positiveInt.optional(),
+    timeoutMs: positiveInt.optional(),
+    retry: retrySchema.optional(),
+    variants: variantsSchema.optional(),
+  })
+  .strict();
+
+export interface StorageOptions extends z.input<typeof optionsSchema> {
+  readonly logger?: Logger;
+}
+
+export interface S3Config {
+  readonly region: string;
+  readonly publicBucket: string;
+  readonly privateBucket: string;
+  readonly endpoint?: string | undefined;
+  readonly forcePathStyle: boolean;
+  readonly credentials?: z.infer<typeof credentialsSchema> | undefined;
+}
+
+export interface VariantConfig {
+  readonly thumbWidth: number;
+  readonly mediumWidth: number;
+  readonly quality: number;
+  readonly thumbSuffix: string;
+  readonly mediumSuffix: string;
+  readonly extension: string;
+  readonly contentType: string;
+}
+
+export interface ResolvedConfig {
+  readonly environment: Environment;
+  readonly provider: ProviderName;
+  readonly s3?: S3Config | undefined;
+  readonly localFs?: z.infer<typeof localFsSchema> | undefined;
+  readonly cdnBaseUrl: string;
+  readonly uploadMaxTtlSec: number;
+  readonly signedUrlMaxTtlSec: number;
+  readonly readMaxBytes: number;
+  readonly timeoutMs: number;
+  readonly retry: Required<z.infer<typeof retrySchema>>;
+  readonly variants: VariantConfig;
+  readonly logger: Logger;
+}
+
+const isHttps = (url: string): boolean => new URL(url).protocol === 'https:';
+const trimSlash = (url: string): string => url.replace(/\/+$/, '');
+
+/** Cross-field rules: what each provider needs, and what production refuses. */
+const crossFieldIssues = (
+  o: z.infer<typeof optionsSchema>,
+): { path: string; message: string }[] => {
+  const issues: { path: string; message: string }[] = [];
+  const add = (path: string, message: string): void => {
+    issues.push({ path, message });
+  };
+  if (o.provider === 's3' && !o.s3) add('s3', 'required for provider s3');
+  if (o.provider === 'local-fs' && !o.localFs) add('localFs', 'required for provider local-fs');
+  if (o.s3 && o.s3.publicBucket === o.s3.privateBucket && o.environment === 'prod')
+    add('s3.privateBucket', 'must differ from publicBucket in prod');
+  if (o.environment === 'prod') {
+    if (o.provider !== 's3') add('provider', 'prod requires the s3 provider');
+    if (!isHttps(o.cdn.baseUrl)) add('cdn.baseUrl', 'prod requires https');
+    if (o.s3?.endpoint !== undefined && !isHttps(o.s3.endpoint))
+      add('s3.endpoint', 'prod requires https');
+  }
+  return issues;
+};
+
+/** Validates the options once; the error names fields only, never values. */
+export const resolveConfig = (options: StorageOptions): ResolvedConfig => {
+  const { logger, ...plain } = options;
+  const parsed = optionsSchema.safeParse(plain);
+  if (!parsed.success) {
+    const fields = [...new Set(parsed.error.issues.map((issue) => issue.path.join('.')))];
+    throw configError(`Invalid storage options: ${fields.join(', ')}`, { fields });
+  }
+  const o = parsed.data;
+  const issues = crossFieldIssues(o);
+  if (issues.length > 0) {
+    const fields = issues.map((issue) => issue.path);
+    throw configError(
+      `Invalid storage options: ${issues.map((i) => `${i.path} (${i.message})`).join(', ')}`,
+      { fields },
+    );
+  }
+  const retry = {
+    maxAttempts: o.retry?.maxAttempts ?? DEFAULT_RETRY.maxAttempts,
+    baseDelayMs: o.retry?.baseDelayMs ?? DEFAULT_RETRY.baseDelayMs,
+    maxDelayMs: o.retry?.maxDelayMs ?? DEFAULT_RETRY.maxDelayMs,
+    jitterRatio: o.retry?.jitterRatio ?? DEFAULT_RETRY.jitterRatio,
+  };
+  return {
+    environment: o.environment,
+    provider: o.provider,
+    s3: o.s3 && {
+      region: o.s3.region,
+      publicBucket: o.s3.publicBucket,
+      privateBucket: o.s3.privateBucket,
+      endpoint: o.s3.endpoint,
+      forcePathStyle: o.s3.forcePathStyle ?? false,
+      credentials: o.s3.credentials,
+    },
+    localFs: o.localFs && { ...o.localFs, baseUrl: trimSlash(o.localFs.baseUrl) },
+    cdnBaseUrl: trimSlash(o.cdn.baseUrl),
+    uploadMaxTtlSec: o.upload?.maxTtlSec ?? DEFAULT_UPLOAD_MAX_TTL_SEC,
+    signedUrlMaxTtlSec: o.signedUrl?.maxTtlSec ?? DEFAULT_SIGNED_URL_MAX_TTL_SEC,
+    readMaxBytes: o.readMaxBytes ?? DEFAULT_READ_MAX_BYTES,
+    timeoutMs: o.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    retry,
+    variants: {
+      ...DEFAULT_VARIANTS,
+      thumbWidth: o.variants?.thumbWidth ?? DEFAULT_VARIANTS.thumbWidth,
+      mediumWidth: o.variants?.mediumWidth ?? DEFAULT_VARIANTS.mediumWidth,
+      quality: o.variants?.quality ?? DEFAULT_VARIANTS.quality,
+    },
+    logger: redactingLogger(logger ?? noopLogger),
+  };
+};
