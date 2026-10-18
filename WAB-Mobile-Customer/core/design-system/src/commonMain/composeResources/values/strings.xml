@@ -11,4 +11,16 @@
     <string name="rating_description">Rating %1$s out of %2$s</string>
     <string name="step_description">Step %1$d of %2$d</string>
     <string name="otp_description">Verification code, %1$d of %2$d digits entered</string>
+    <string name="card_more">more</string>
+    <string name="card_see_more">See more</string>
+    <string name="card_see_less">See less</string>
+    <string name="salon_open">Open</string>
+    <string name="salon_closed_today">Closed today</string>
+    <string name="salon_hours_separator"> · </string>
+    <string name="favorite_add">Add to favorites</string>
+    <string name="favorite_remove">Remove from favorites</string>
+    <string name="staff_on_duty">On duty today</string>
+    <string name="staff_on_leave">On leave</string>
+    <string name="service_duration_minutes">%1$d min</string>
+    <string name="price_jod">%1$s JOD</string>
 </resources>
