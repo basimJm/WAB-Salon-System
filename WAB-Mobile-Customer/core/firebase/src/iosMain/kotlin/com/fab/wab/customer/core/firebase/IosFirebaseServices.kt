@@ -84,6 +84,10 @@ class IosFirebaseAnalyticsBackend : AnalyticsBackend {
     }
 }
 
+class IosAppInstanceIdProvider : AppInstanceIdProvider {
+    override suspend fun appInstanceId(): String? = FirebaseBridges.analytics?.appInstanceId()
+}
+
 internal fun Map<String, AnalyticsValue>.toBridgeParams(): Map<String, Any> = mapValues { (_, value) ->
     when (value) {
         is AnalyticsValue.Text -> value.value

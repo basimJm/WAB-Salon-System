@@ -94,4 +94,8 @@ final class SwiftAnalyticsBridge: AnalyticsBridge {
     func setUserProperty(key: String, value: String?) {
         Analytics.setUserProperty(value, forName: key)
     }
+
+    func appInstanceId() -> String? {
+        Analytics.appInstanceID()
+    }
 }

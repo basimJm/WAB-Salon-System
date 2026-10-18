@@ -8,8 +8,9 @@ data class GuestProfile(
     val isEmpty: Boolean get() = nickname == null && gender == null
 }
 
-/** Registered customer facts kept locally (PRD §5 `user_first_name`, `user_gender`). */
+/** Registered customer facts kept locally (PRD §5 `user_first_name`, `user_gender`; the id keys analytics and crash reports, PRD §14). */
 data class UserProfile(
+    val id: String,
     val firstName: String,
     val gender: Gender?,
 )

@@ -46,6 +46,14 @@ class FirebaseFacadeTest {
     }
 
     @Test
+    fun fakeAppInstanceIdIsScriptable() = runTest {
+        val provider = FakeAppInstanceIdProvider()
+        assertEquals(FakeAppInstanceIdProvider.DEFAULT_APP_INSTANCE_ID, provider.appInstanceId())
+        provider.id = null
+        assertEquals(null, provider.appInstanceId())
+    }
+
+    @Test
     fun fakeCrashReporterKeepsEverything() {
         val reporter = FakeCrashReporter()
         reporter.log("opened salon")

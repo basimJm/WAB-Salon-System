@@ -22,7 +22,7 @@ class SessionStateTest {
         assertEquals(Gender.FEMALE, guest.genderScope)
         assertFalse(guest.isSignedIn)
         assertTrue(GuestProfile().isEmpty)
-        val user = SessionState.SignedIn(UserProfile(firstName = "Omar", gender = Gender.MALE))
+        val user = SessionState.SignedIn(UserProfile(id = "c1", firstName = "Omar", gender = Gender.MALE))
         assertEquals(Gender.MALE, user.genderScope)
         assertTrue(user.isSignedIn)
     }

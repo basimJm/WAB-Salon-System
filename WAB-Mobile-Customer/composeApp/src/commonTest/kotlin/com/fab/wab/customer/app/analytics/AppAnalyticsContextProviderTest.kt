@@ -52,7 +52,7 @@ class AppAnalyticsContextProviderTest {
         val guest = provider().current()
         assertEquals(AnalyticsUserType.GUEST, guest.userType)
         assertEquals("female", guest.genderScope)
-        session.value = SessionState.SignedIn(UserProfile(firstName = "Omar", gender = Gender.MALE))
+        session.value = SessionState.SignedIn(UserProfile(id = "c1", firstName = "Omar", gender = Gender.MALE))
         val registered = provider().current()
         assertEquals(AnalyticsUserType.REGISTERED, registered.userType)
         assertEquals("male", registered.genderScope)

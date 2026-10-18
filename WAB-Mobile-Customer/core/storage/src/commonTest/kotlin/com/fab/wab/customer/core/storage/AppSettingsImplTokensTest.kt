@@ -21,7 +21,7 @@ class AppSettingsImplTokensTest {
 
     @Test
     fun networkAndSessionStoreShareTheSameTokenPair() = runTest {
-        sessionStore.signIn(AuthTokens("a1", "r1"), UserProfile("Omar", Gender.MALE))
+        sessionStore.signIn(AuthTokens("a1", "r1"), UserProfile("c1", "Omar", Gender.MALE))
         assertEquals("a1", settings.token.first())
         assertEquals("r1", settings.refreshToken.first())
         settings.setToken("a2")
@@ -32,7 +32,7 @@ class AppSettingsImplTokensTest {
     @Test
     fun clearSessionSignsOutButKeepsLanguage() = runTest {
         settings.setLanguage("en")
-        sessionStore.signIn(AuthTokens("a1", "r1"), UserProfile("Omar", Gender.MALE))
+        sessionStore.signIn(AuthTokens("a1", "r1"), UserProfile("c1", "Omar", Gender.MALE))
         settings.clearSession()
         assertNull(settings.token.first())
         assertEquals(SessionState.Guest(), sessionStore.state.first())

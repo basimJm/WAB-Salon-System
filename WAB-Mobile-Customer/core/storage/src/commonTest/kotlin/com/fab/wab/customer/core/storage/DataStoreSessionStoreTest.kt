@@ -21,7 +21,7 @@ class DataStoreSessionStoreTest {
     private val secure = InMemorySecureKeyValueStore()
     private val store = DataStoreSessionStore(dataStore, secure)
     private val tokens = AuthTokens(accessToken = "access-1", refreshToken = "refresh-1")
-    private val user = UserProfile(firstName = "Omar", gender = Gender.MALE)
+    private val user = UserProfile(id = "c1", firstName = "Omar", gender = Gender.MALE)
 
     @Test
     fun freshInstallIsAGuestWithDefaults() = runTest {

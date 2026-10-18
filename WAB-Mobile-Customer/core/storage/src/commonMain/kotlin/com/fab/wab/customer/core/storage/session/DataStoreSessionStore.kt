@@ -68,6 +68,7 @@ class DataStoreSessionStore(
         writeTokens(null)
         dataStore.edit { prefs ->
             prefs.remove(SessionKeys.SIGNED_IN)
+            prefs.remove(SessionKeys.USER_ID)
             prefs.remove(SessionKeys.USER_FIRST_NAME)
             prefs.remove(SessionKeys.USER_GENDER)
         }
@@ -84,6 +85,7 @@ class DataStoreSessionStore(
     }
 
     private fun MutablePreferences.putUser(user: UserProfile) {
+        this[SessionKeys.USER_ID] = user.id
         this[SessionKeys.USER_FIRST_NAME] = user.firstName
         putOrRemove(SessionKeys.USER_GENDER, user.gender?.code)
     }
@@ -97,6 +99,7 @@ class DataStoreSessionStore(
             SessionKeys.ONBOARDING_SEEN,
             SessionKeys.GUEST_NICKNAME,
             SessionKeys.GUEST_GENDER,
+            SessionKeys.USER_ID,
             SessionKeys.USER_FIRST_NAME,
             SessionKeys.USER_GENDER,
             SessionKeys.PUSH_ENABLED,
@@ -105,11 +108,12 @@ class DataStoreSessionStore(
     }
 }
 
-/** Pure: a signed-in marker plus a first name is a registered session; anything else is a guest. */
+/** Pure: a signed-in marker plus the user id and first name is a registered session; anything else is a guest. */
 fun stateOf(prefs: Preferences): SessionState {
+    val id = prefs[SessionKeys.USER_ID]
     val firstName = prefs[SessionKeys.USER_FIRST_NAME]
-    return if (prefs[SessionKeys.SIGNED_IN] == true && firstName != null) {
-        SessionState.SignedIn(UserProfile(firstName, Gender.fromCode(prefs[SessionKeys.USER_GENDER])))
+    return if (prefs[SessionKeys.SIGNED_IN] == true && id != null && firstName != null) {
+        SessionState.SignedIn(UserProfile(id, firstName, Gender.fromCode(prefs[SessionKeys.USER_GENDER])))
     } else {
         SessionState.Guest(GuestProfile(prefs[SessionKeys.GUEST_NICKNAME], Gender.fromCode(prefs[SessionKeys.GUEST_GENDER])))
     }

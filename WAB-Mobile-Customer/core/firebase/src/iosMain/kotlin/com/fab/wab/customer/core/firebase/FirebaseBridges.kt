@@ -25,6 +25,7 @@ interface AnalyticsBridge {
     fun logEvent(name: String, params: Map<String, Any>)
     fun setUserId(userId: String?)
     fun setUserProperty(key: String, value: String?)
+    fun appInstanceId(): String?
 }
 
 /** Registration point for Swift: `FirebaseBridges.shared.register(...)`. Unset bridges answer `Unavailable`. */

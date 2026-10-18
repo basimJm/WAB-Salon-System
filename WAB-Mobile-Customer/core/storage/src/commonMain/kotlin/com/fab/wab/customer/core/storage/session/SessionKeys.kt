@@ -9,6 +9,7 @@ object SessionKeys {
     val ONBOARDING_SEEN: Key<Boolean> = booleanPreferencesKey("onboarding_seen")
     val GUEST_NICKNAME: Key<String> = stringPreferencesKey("guest_nickname")
     val GUEST_GENDER: Key<String> = stringPreferencesKey("guest_gender")
+    val USER_ID: Key<String> = stringPreferencesKey("user_id")
     val USER_FIRST_NAME: Key<String> = stringPreferencesKey("user_first_name")
     val USER_GENDER: Key<String> = stringPreferencesKey("user_gender")
     val PUSH_ENABLED: Key<Boolean> = booleanPreferencesKey("push_enabled")

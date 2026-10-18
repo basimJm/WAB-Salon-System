@@ -8,6 +8,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+private const val GRACE_MS = 50L
+
 private val CONTEXT = AnalyticsContext(
     userType = AnalyticsUserType.GUEST,
     genderScope = "women",
@@ -78,6 +80,39 @@ class DefaultAnalyticsTrackerTest {
         assertEquals(mapOf("gender" to "women"), backend.userProperties)
         tracker.setUserId(null)
         assertNull(backend.userId)
+    }
+
+    @Test
+    fun actionsCarryTheCurrentScreen() = runTest(UnconfinedTestDispatcher()) {
+        val tracker = tracker(this)
+        tracker.trackAction(AnalyticsAction("onboarding_skip"))
+        assertNull(backend.events.single().params[AnalyticsKeys.SCREEN_NAME])
+        tracker.trackScreen(AnalyticsScreen("home"))
+        tracker.trackAction(AnalyticsAction("banner_click"))
+        assertEquals(AnalyticsValue.Text("home"), backend.events.last().params[AnalyticsKeys.SCREEN_NAME])
+        tracker.trackAction(AnalyticsAction("gender_tab_switch", analyticsParams { text(AnalyticsKeys.SCREEN_NAME, "other") }))
+        assertEquals(AnalyticsValue.Text("other"), backend.events.last().params[AnalyticsKeys.SCREEN_NAME])
+    }
+
+    @Test
+    fun routeViewIsSentUnlessTheScreenReportsItselfFirst() = runTest {
+        val tracker = DefaultAnalyticsTracker(backend, { CONTEXT }, backgroundScope, routeViewGraceMs = GRACE_MS)
+        tracker.trackRoute("route.Screen.Favorites")
+        testScheduler.advanceTimeBy(GRACE_MS + 1)
+        testScheduler.runCurrent()
+        assertEquals(AnalyticsValue.Text("favorites"), backend.events.single().params[AnalyticsKeys.SCREEN_NAME])
+
+        tracker.trackRoute("route.Screen.SalonDetails/{salonId}")
+        tracker.trackScreen(AnalyticsScreen("salon_details", analyticsParams { text(AnalyticsKeys.SALON_ID, "s1") }))
+        testScheduler.advanceTimeBy(GRACE_MS + 1)
+        testScheduler.runCurrent()
+        assertEquals(2, backend.events.size)
+        assertEquals(AnalyticsValue.Text("s1"), backend.events.last().params[AnalyticsKeys.SALON_ID])
+
+        tracker.trackRoute(null)
+        tracker.trackAction(AnalyticsAction("salon_share"))
+        testScheduler.runCurrent()
+        assertEquals(AnalyticsValue.Text("salon_details"), backend.events.last().params[AnalyticsKeys.SCREEN_NAME])
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.fab.wab.customer.app.controller.vm
 
 import androidx.lifecycle.viewModelScope
+import com.fab.wab.customer.app.analytics.SessionAnalyticsSync
 import com.fab.wab.customer.app.controller.contract.MainContract.SideEffect
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.contract.MainContract.UiState
@@ -29,9 +30,11 @@ class MainViewModel(
     private val applicationSettingsRepository: ApplicationSettingsRepository,
     private val sessionTimeOut: SessionTimeOut,
     private val environment: AppEnvironment,
+    sessionAnalyticsSync: SessionAnalyticsSync,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState()) {
 
     init {
+        sessionAnalyticsSync.start(scope)
         scope.launch {
             loadRemoteApplicationSettings()
         }

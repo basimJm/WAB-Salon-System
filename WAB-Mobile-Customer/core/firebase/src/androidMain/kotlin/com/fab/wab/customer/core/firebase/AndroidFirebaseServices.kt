@@ -42,6 +42,18 @@ class AndroidFirebaseAnalyticsBackend(context: Context) : AnalyticsBackend {
     override suspend fun setUserProperty(key: String, value: String?) = analytics.setUserProperty(key, value)
 }
 
+class AndroidAppInstanceIdProvider(context: Context) : AppInstanceIdProvider {
+    private val analytics: FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
+
+    override suspend fun appInstanceId(): String? = try {
+        analytics.appInstanceId.awaitResult()
+    } catch (expected: IOException) {
+        null
+    } catch (expected: IllegalStateException) {
+        null
+    }
+}
+
 internal fun Map<String, AnalyticsValue>.toBundle(): Bundle = Bundle().also { bundle ->
     forEach { (key, value) ->
         when (value) {

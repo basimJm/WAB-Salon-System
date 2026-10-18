@@ -42,3 +42,11 @@ interface CrashReporter {
     fun recordNonFatal(throwable: Throwable)
     fun setUserId(userId: String?)
 }
+
+/**
+ * The Firebase Analytics app-instance id (PRD §14): sent to the backend on login so guest history is linked to the
+ * account; null when Analytics is unavailable (no Firebase config, collection disabled).
+ */
+interface AppInstanceIdProvider {
+    suspend fun appInstanceId(): String?
+}
