@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-089 — ADM-058 recommended salons
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-058-recommended`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-058):
-  - [x] Recommended placements per audience: ordered list with period, amount paid and status; add a live salon, edit period/order/amount/note, end now with a reason, move up/down (saved through the reorder endpoint); AR+EN
-- Tests: 6 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: reorder is up/down buttons (accessible, one request) instead of drag and drop; the drag library ADR (Appendix C) stays open. The reorder request carries a fixed reason from the locale.
-
 ### T-090 — ADM-059 push campaigns: compose and history (ADM-059..060)
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 6 new tests through the mock stack; no separate browser check
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-059 and ADM-060 built as ONE task; live stats are the list's stats column (no polling page); CITY audience takes one city in the form (API allows up to 50).
+
+### T-091 — ADM-061 alerts and live shell counters (ADM-061..062)
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-061-alerts`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-061):
+  - [x] Alerts list (severity, kind, link to the subject, status filters, acknowledge) plus live numbers in the shell: the bell shows NEW alerts and opens the page, sidebar counters for pending applications, pending reviews and alerts; all refresh through the realtime invalidation bus
+- Tests: 4 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-061 and ADM-062 built as ONE task.
 
 ### Pending (next)
 
