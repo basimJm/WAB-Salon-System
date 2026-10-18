@@ -36,6 +36,21 @@ export interface OtpSettings {
   };
 }
 
+export interface StorageSettings {
+  readonly region: string;
+  readonly publicBucket: string;
+  readonly privateBucket: string;
+  readonly endpoint?: string;
+  readonly forcePathStyle: boolean;
+  readonly credentials?: { readonly accessKeyId: string; readonly secretAccessKey: string };
+  readonly cdnBaseUrl: string;
+  readonly cloudfront?: {
+    readonly baseUrl: string;
+    readonly keyPairId: string;
+    readonly privateKey: string;
+  };
+}
+
 export interface AppConfig {
   readonly env: Environment;
   readonly isProduction: boolean;
@@ -51,6 +66,8 @@ export interface AppConfig {
   readonly secrets: { readonly payoutEncryptionKey?: string };
   /** Credentials of the real notifier (FCM + SMTP); present only when the notifier is `real`. */
   readonly notifier?: NotifierSettings;
+  /** S3 + CDN settings of the real storage; present only when the storage is `real`. */
+  readonly storage?: StorageSettings;
   /** Firebase project of the real OTP provider; present only when the OTP provider is `real`. */
   readonly otp?: OtpSettings;
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
@@ -130,6 +147,41 @@ const buildOtpSettings = (values: RawEnv): OtpSettings | undefined => {
   });
 };
 
+const buildStorageSettings = (values: RawEnv): StorageSettings | undefined => {
+  if (values[ENV_KEYS.storageProvider] !== 'real') return undefined;
+  const region = values[ENV_KEYS.s3Region];
+  const publicBucket = values[ENV_KEYS.s3PublicBucket];
+  const privateBucket = values[ENV_KEYS.s3PrivateBucket];
+  const cdnBaseUrl = values[ENV_KEYS.cdnBaseUrl];
+  if (
+    region === undefined ||
+    publicBucket === undefined ||
+    privateBucket === undefined ||
+    cdnBaseUrl === undefined
+  )
+    return undefined;
+  const endpoint = values[ENV_KEYS.s3Endpoint];
+  const accessKeyId = values[ENV_KEYS.s3AccessKeyId];
+  const secretAccessKey = values[ENV_KEYS.s3SecretAccessKey];
+  const baseUrl = values[ENV_KEYS.cloudfrontBaseUrl];
+  const keyPairId = values[ENV_KEYS.cloudfrontKeyPairId];
+  const privateKey = values[ENV_KEYS.cloudfrontPrivateKey];
+  return Object.freeze({
+    region,
+    publicBucket,
+    privateBucket,
+    ...(endpoint === undefined ? {} : { endpoint }),
+    forcePathStyle: values[ENV_KEYS.s3ForcePathStyle],
+    ...(accessKeyId === undefined || secretAccessKey === undefined
+      ? {}
+      : { credentials: Object.freeze({ accessKeyId, secretAccessKey }) }),
+    cdnBaseUrl,
+    ...(baseUrl === undefined || keyPairId === undefined || privateKey === undefined
+      ? {}
+      : { cloudfront: Object.freeze({ baseUrl, keyPairId, privateKey }) }),
+  });
+};
+
 /** Validates the environment and returns an immutable, typed config. Fails fast. */
 export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppConfig => {
   const parsed = envSchema.safeParse(source);
@@ -141,9 +193,11 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   const env = values[ENV_KEYS.nodeEnv];
   const payoutKey = values[ENV_KEYS.payoutEncryptionKey];
   const notifier = buildNotifierSettings(values);
+  const storage = buildStorageSettings(values);
   const otp = buildOtpSettings(values);
   return Object.freeze({
     ...(notifier === undefined ? {} : { notifier }),
+    ...(storage === undefined ? {} : { storage }),
     ...(otp === undefined ? {} : { otp }),
     env,
     isProduction: env === 'production',

@@ -1,4 +1,4 @@
-# Build context = repository root; only the two packages the image needs are allowed in.
+# Build context = repository root; only the packages the image needs are allowed in.
 *
 !wab-notifications/package.json
 !wab-notifications/package-lock.json
@@ -10,6 +10,11 @@
 !wab-otp/tsconfig.json
 !wab-otp/tsup.config.ts
 !wab-otp/src
+!wab-storage/package.json
+!wab-storage/package-lock.json
+!wab-storage/tsconfig.json
+!wab-storage/tsup.config.ts
+!wab-storage/src
 !WAB-Server/package.json
 !WAB-Server/package-lock.json
 !WAB-Server/tsconfig.json

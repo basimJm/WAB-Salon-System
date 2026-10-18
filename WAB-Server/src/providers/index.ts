@@ -10,6 +10,7 @@ import { FakeOtpProvider, type OtpProvider } from './otp';
 import { createRealOtp } from './otp/real';
 import { FakePaymentProvider, type PaymentProvider } from './payments';
 import { FakeStorageProvider, type StorageProvider } from './storage';
+import { createRealStorage } from './storage/real';
 
 /** What the real integrations need from the running process. */
 export interface ProviderDeps {
@@ -79,7 +80,17 @@ export const createProviders = (
         return real;
       },
     ),
-    storage: pick('storage', providers.storage, () => new FakeStorageProvider()),
+    storage: pick(
+      'storage',
+      providers.storage,
+      () => new FakeStorageProvider(),
+      () => {
+        const settings = deps?.config.storage;
+        if (deps === undefined || settings === undefined)
+          throw new ProviderUnavailableError('storage', 'S3 or CDN settings missing');
+        return createRealStorage({ settings, isProduction, logger: deps.logger });
+      },
+    ),
     notifier: pick(
       'notifier',
       providers.notifier,
