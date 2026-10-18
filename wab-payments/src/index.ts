@@ -16,3 +16,16 @@ export { isPaymentSdkError, PaymentSdkError, type PaymentSdkErrorOptions } from 
 export { decimalToFils, filsToDecimal } from './money';
 export { createRedactingLogger, redact, silentLogger, type Logger, type LogFields } from './logger';
 export type { HyperPayOptions, MockGatewayOptions, PaymentsOptionsBase } from './config/options';
+export { createPayments, type PaymentsOptions } from './factory';
+export { MemoryIdempotencyStore, RedisIdempotencyStore } from './idempotency';
+export type { IdempotencyStore, RedisLike } from './idempotency';
+export {
+  FAKE_GATEWAY_CODES,
+  FAKE_WEBHOOK_SIGNATURE,
+  FakeGateway,
+  fakeWebhook,
+  type FakeRefundScenario,
+  type FakeScenario,
+} from './adapters/fake';
+export type { RetryDeps, RetryPolicy } from './retry';
+export type * from './types';
