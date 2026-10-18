@@ -20,6 +20,7 @@ class KmpFeaturePresentationPlugin : Plugin<Project> {
                     implementation(project(":core:domain"))
                     implementation(project(":core:ui"))
                     implementation(project(":core:mvi"))
+                    implementation(project(":core:analytics"))
                     implementation(project(":core:design-system"))
                     implementation(project(":core:navigation"))
                 }

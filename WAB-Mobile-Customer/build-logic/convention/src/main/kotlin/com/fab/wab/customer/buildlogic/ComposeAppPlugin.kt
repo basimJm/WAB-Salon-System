@@ -39,6 +39,7 @@ class ComposeAppPlugin : Plugin<Project> {
                     implementation(project(":core:navigation"))
                     implementation(project(":core:ui"))
                     implementation(project(":core:mvi"))
+                    implementation(project(":core:analytics"))
                     implementation(project(":core:notification"))
                     implementation(project(":core:security"))
                     implementation(project(":core:design-system"))
@@ -70,6 +71,7 @@ class ComposeAppPlugin : Plugin<Project> {
 
                 sourceSets.commonTest.dependencies {
                     implementation(libs.findLibrary("kotlin-test").get())
+                    implementation(libs.findLibrary("kotlinx-coroutines-test").get())
                 }
             }
 

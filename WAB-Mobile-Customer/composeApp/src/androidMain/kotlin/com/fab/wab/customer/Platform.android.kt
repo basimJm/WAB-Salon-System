@@ -9,6 +9,7 @@ import kotlin.system.exitProcess
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
+    override val analyticsName: String = PlatformNames.ANDROID
 }
 
 actual fun getPlatform(): Platform = AndroidPlatform()
