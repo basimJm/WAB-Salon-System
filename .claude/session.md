@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-094 — ADM-066 audit log
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-066-audit-log`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-066):
-  - [x] Audit log table (time, action, entity, reason, IP) with action search and entity/admin/day filters in the URL, a drawer with full details and the before/after values, read-only by design; AR+EN
-- Tests: 5 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Entity links are not added (entity type names differ per module).
-
 ### T-095 — ADM-067 exports
 
 - Project: `WAB-Admin-Dashboard/`
@@ -45,6 +34,17 @@
 - Acceptance criteria (Admin Tasks ADM-067):
   - [x] Export history page (Reports > Exports) refreshing while a file is generated with a download link and failure reason; an Export button (Excel / CSV / PDF) on transactions, audit log and reports that asks for the file, waits for it and opens the short-lived link; waitForExport helper with a timeout
 - Tests: 5 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
+
+### T-096 — ADM-078 fixture tests
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-078-fixture-tests`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-078):
+  - [x] A test fails when an operation of the contract has no mock fixture and no written reason (the list of exemptions can only shrink), when a fixture names an operation the contract lacks, and when a readable fixture answers with anything its generated schema forbids; the mock answers 404 when a fixture cannot find a record
+- Tests: 3 new tests; gate green
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
 
