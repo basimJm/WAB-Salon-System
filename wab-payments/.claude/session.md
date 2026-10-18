@@ -111,3 +111,11 @@
 - Tests: 27 KMP unit tests pass on the JVM harness (common mapping included); the Android module itself is NOT compiled (Google Maven and the OPP SDK repository unreachable)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — OPP class and constant names are from the vendor documentation: verify on a device with sandbox credentials (owner input).
+
+### PAY-014 — KMP HyperPay launcher for iOS
+- Branch: `feat/pay-014-kmp-hyperpay-ios`
+- Status: IN REVIEW
+- Acceptance: iosMain hyperPayIosLauncher + IosOutcomes (Swift-friendly), static framework WabPayments, Swift reference bridge over OPPWAMobile with 3-DS return handling, iOS guide; shared mapping reused.
+- Tests: common KMP tests (27) unchanged and green on the JVM harness; iOS targets, Swift bridge and OPPWAMobile NOT built (no macOS/Xcode)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Swift file is a reference to copy: symbol names from the OPPWAMobile docs need a real build to confirm.
