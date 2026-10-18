@@ -115,6 +115,11 @@ class StopReview(unittest.TestCase):
         reason = evaluate(["WAB-Server/src/a.ts", "WAB-Server/src/a.test.ts"], "feat/open", lookup("feat/open"))
         self.assertIn("Loops: 1/1", reason)
 
+    def test_master_branches_are_exempt_even_with_source_changes(self):
+        masters = {"main", "master", "customer", "server", "admin", "merchant"}
+        self.assertIsNone(evaluate(["WAB-Server/src/a.ts"], "customer", "", masters))
+        self.assertIsNotNone(evaluate(["WAB-Server/src/a.ts"], "feat/x", "", masters))
+
     def test_verified_with_tests_passes(self):
         self.assertIsNone(evaluate(["WAB-Server/src/a.ts", "WAB-Server/src/a.test.ts"], "feat/done", lookup("feat/done")))
 
