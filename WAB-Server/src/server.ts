@@ -285,7 +285,11 @@ const buildServices = (
   const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
   const serverEventsRepository = new ServerEventsRepository();
   const otpGate = createOtpGate({ redis, settings });
-  const providers = createProviders(config.providers, config.isProduction);
+  const providers = createProviders(config.providers, config.isProduction, {
+    redis,
+    logger,
+    config,
+  });
   const phoneServices = {
     countries: new CountriesRepository(),
     otp: providers.otp,
@@ -961,6 +965,7 @@ const buildServices = (
       authenticate: requireAuth('customer', config.auth.accessSecret),
     },
     rateLimitStore: new RedisRateLimitStore(redis, `${REDIS_KEY_PREFIX.httpRateLimit}:otp`),
+    providersClose: providers.close,
   };
 };
 
@@ -981,6 +986,7 @@ const main = async (): Promise<void> => {
       proc: process,
       closables: [
         { name: 'jobs', close: () => scheduler.close() },
+        { name: 'providers', close: () => services.providersClose?.() ?? Promise.resolve() },
         { name: 'redis', close: () => disconnectRedis(connected) },
         { name: 'mongodb', close: disconnectMongo },
       ],

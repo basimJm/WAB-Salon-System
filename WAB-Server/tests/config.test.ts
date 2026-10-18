@@ -20,6 +20,9 @@ const REAL_PROVIDERS = {
   NOTIFIER_PROVIDER: 'real',
   PAYMENT_PROVIDER: 'real',
   ANALYTICS_PROVIDER: 'real',
+  FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
+  SMTP_HOST: 'smtp.example.test',
+  EMAIL_FROM_ADDRESS: 'noreply@example.test',
 };
 const ALL_FAKE_MODES = {
   otp: 'fake',
@@ -78,7 +81,15 @@ describe('loadConfig', () => {
     [ENV_KEYS.paymentProvider, 'payments'],
     [ENV_KEYS.analyticsProvider, 'analytics'],
   ] as const)('maps %s to providers.%s and nothing else', (key, field) => {
-    expect(loadConfig(validEnv({ [key]: 'real' })).providers).toEqual({
+    const credentials =
+      key === ENV_KEYS.notifierProvider
+        ? {
+            FCM_SERVICE_ACCOUNT_JSON: '{}',
+            SMTP_HOST: 'smtp.example.test',
+            EMAIL_FROM_ADDRESS: 'noreply@example.test',
+          }
+        : {};
+    expect(loadConfig(validEnv({ [key]: 'real', ...credentials })).providers).toEqual({
       ...ALL_FAKE_MODES,
       [field]: 'real',
     });
@@ -108,6 +119,70 @@ describe('loadConfig', () => {
       notifier: 'real',
       payments: 'real',
       analytics: 'real',
+    });
+  });
+
+  describe('real notifier settings', () => {
+    const base = validEnv({ NOTIFIER_PROVIDER: 'real' });
+    const creds = {
+      FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
+      SMTP_HOST: 'smtp.example.test',
+      EMAIL_FROM_ADDRESS: 'noreply@example.test',
+    };
+
+    it('names every missing credential key, never a value', () => {
+      expect([...invalidKeysOf(base)].sort()).toEqual(
+        ['EMAIL_FROM_ADDRESS', 'FCM_SERVICE_ACCOUNT_JSON', 'SMTP_HOST'].sort(),
+      );
+    });
+
+    it('builds typed settings with defaults', () => {
+      const config = loadConfig({ ...base, ...creds });
+      expect(config.notifier).toEqual({
+        fcm: { serviceAccountJson: creds.FCM_SERVICE_ACCOUNT_JSON, dryRun: false },
+        smtp: { host: creds.SMTP_HOST, port: 587, secure: false },
+        from: { address: creds.EMAIL_FROM_ADDRESS, name: 'WAB' },
+      });
+    });
+
+    it('reads optional values and requires SMTP user and password together', () => {
+      const full = loadConfig({
+        ...base,
+        ...creds,
+        FCM_PROJECT_ID: 'proj',
+        FCM_DRY_RUN: 'true',
+        SMTP_PORT: '465',
+        SMTP_SECURE: 'true',
+        SMTP_USER: 'u@example.test',
+        SMTP_PASS: 'pw',
+        EMAIL_FROM_NAME: 'Salon',
+      });
+      expect(full.notifier).toEqual({
+        fcm: {
+          serviceAccountJson: creds.FCM_SERVICE_ACCOUNT_JSON,
+          projectId: 'proj',
+          dryRun: true,
+        },
+        smtp: {
+          host: creds.SMTP_HOST,
+          port: 465,
+          secure: true,
+          user: 'u@example.test',
+          pass: 'pw',
+        },
+        from: { address: creds.EMAIL_FROM_ADDRESS, name: 'Salon' },
+      });
+      expect(invalidKeysOf({ ...base, ...creds, SMTP_USER: 'u@example.test' })).toEqual([
+        'SMTP_PASS',
+      ]);
+    });
+
+    it('rejects bad values and is absent for the fake notifier', () => {
+      expect(invalidKeysOf({ ...base, ...creds, FCM_DRY_RUN: 'yes' })).toEqual(['FCM_DRY_RUN']);
+      expect(invalidKeysOf({ ...base, ...creds, EMAIL_FROM_ADDRESS: 'nope' })).toEqual([
+        'EMAIL_FROM_ADDRESS',
+      ]);
+      expect(loadConfig(validEnv()).notifier).toBeUndefined();
     });
   });
 

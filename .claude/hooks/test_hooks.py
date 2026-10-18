@@ -13,7 +13,7 @@ from stop_review import evaluate  # noqa: E402
 SESSION = """# Log
 ### T-001 — done task
 - Branch: `feat/done`
-- Loops: 3/3
+- Loops: 1/1
 - Review: PASSED (SE ✔)
 ### T-002 — open task
 - Branch: `feat/open`
@@ -33,6 +33,13 @@ class SessionParsing(unittest.TestCase):
     def test_verified_requires_loops_and_review(self):
         self.assertTrue(task_verified(lookup("feat/done")))
         self.assertFalse(task_verified(lookup("feat/open")))
+
+
+class SessionParsingLegacy(unittest.TestCase):
+    def test_old_three_loop_blocks_stay_valid_and_bare_one_of_three_does_not(self):
+        self.assertTrue(task_verified("- Loops: 3/3\n- Review: PASSED"))
+        self.assertTrue(task_verified("- Loops: 1/1 (user decision)\n- Review: PASSED"))
+        self.assertFalse(task_verified("- Loops: 1/3\n- Review: PASSED"))
 
 
 class GuardGit(unittest.TestCase):
@@ -106,7 +113,7 @@ class StopReview(unittest.TestCase):
 
     def test_unverified_task_blocks(self):
         reason = evaluate(["WAB-Server/src/a.ts", "WAB-Server/src/a.test.ts"], "feat/open", lookup("feat/open"))
-        self.assertIn("Loops: 3/3", reason)
+        self.assertIn("Loops: 1/1", reason)
 
     def test_verified_with_tests_passes(self):
         self.assertIsNone(evaluate(["WAB-Server/src/a.ts", "WAB-Server/src/a.test.ts"], "feat/done", lookup("feat/done")))

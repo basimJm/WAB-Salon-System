@@ -1,12 +1,14 @@
 # wab-notifications — Guide for AI Agents
 
-> Read this first in every session, then `.claude/Rules.md` and `.claude/Integration.md`. Then read the BRD: `docs/WAB_Package_Notifications_BRD.md`.
+> Auto-loaded with this file (never read them with a tool): the rules, the technical document, the session and the memory below. Per task: `python3 scripts/tasks.py next notifications` → the task row; read only the BRD section (`docs/WAB_Package_*_BRD.md`) it names. Branch `feat/not-NNN-<key>` from `origin/server`; PR into `server`.
 
-**Mandatory reading (all of it, every session):**
+**Auto-loaded (every session):**
 - Rules: @.claude/Rules.md
 - Technical implementation document (keep it current): @.claude/Integration.md
+- Session (current task): @.claude/session.md
+- Memory (durable facts): @.claude/memory.md
 - Business requirements: `docs/WAB_Package_Notifications_BRD.md`
-- Repo-wide context: `../CLAUDE.md`, `../BUSINESS_DOMAIN.md` (only for names/enums the consumer uses), `../.claude/rules.md`
+- Repo-wide context already in context: root `CLAUDE.md`, `.claude/rules.md`; `../BUSINESS_DOMAIN.md` only for names/enums the consumer uses; `../INTEGRATION.md` §3 for the server port this package must satisfy
 
 ## What this package is
 Delivers push (FCM, customer + merchant apps) and email (Nodemailer + SMTP) through one interface: visible/data-only/high-priority/time-sensitive/actionable push, multicast batches and topics, per-token results with invalid-token detection, branded ar/en email templates, retry with backoff and per-notification idempotency.
@@ -21,25 +23,23 @@ Act as all four at once and challenge your own work from each angle:
 ## Non-negotiables (summary of Rules.md)
 Clean code · swap any third party by adding an adapter · easy to adopt · dev + prod · dev on localhost · nothing hardcoded · performance first · all response statuses · all error cases · build before commit/push · assume requirements are missing · unit tests for every file and function · loop test before every push · update Integration.md after every change.
 
-## Layout (target)
+## Layout
 ```
 src/
-  index.ts  constants/  config/  errors/
-  ports/             # PushChannel, EmailChannel, IdempotencyStore
-  adapters/fcm/      # firebase-admin messaging
-  adapters/smtp/     # nodemailer
-  adapters/fake/     # dev/tests (+ local sink: Mailpit)
-  templates/         # ar/en email templates
-  idempotency/ retry/
-tests/  loop/
+  index.ts  notifier.ts  validation.ts  types.ts
+  constants/ errors/ config/ retry/ idempotency/ templates/
+  adapters/push/   # fcm (+ message mapping, error mapping), fake
+  adapters/email/  # smtp (+ error mapping), fake
+  adapters/vendors.ts  # only file touching firebase-admin / nodemailer
+tests/  (one file per source file)  tests/loop/  scripts/{smoke.ts,package-smoke.cjs}
 ```
 
-## Commands (target)
-`npm run build` · `npm run typecheck` · `npm run lint` · `npm run format:check` · `npm test` (coverage gate) · `npm run test:loop` · `npm run verify` (all of the above; run before every commit).
+## Commands
+`npm run build` · `npm run typecheck` · `npm run lint` · `npm run format:check` · `npm test` (coverage gate) · `npm run test:loop` · `npm run test:smoke-package` · `npm run verify` (all of the above; run before every commit) · `npm run smoke` (manual, real FCM dry-run; needs `FIREBASE_CREDENTIALS_FILE` + `FIREBASE_PROJECT_ID`, keys stay outside the repo).
 
 ## Working agreement
 1. Read Rules.md + Integration.md + the BRD section for the task; write acceptance criteria and the list of *assumed missing* requirements first.
 2. Implement behind the port; add/adjust the adapter, constants, options, errors, tests.
 3. Run `npm run verify`, then `npm run test:loop`.
 4. Update `Integration.md` (and the changelog table in it).
-5. Commit, push the branch, open a PR.
+5. Record `Loops: 1/1` + `Review: PASSED` in `.claude/session.md`, `tasks.py set <ID> <STATUS>`, commit, push the branch, open the PR into `server`.

@@ -3,19 +3,20 @@
 > **Purpose:** every task needed to build the admin panel, small and ordered, each with a status. One task = one branch = one PR.
 > **Order of work (requested):** **Phase 1 project setup → Phase 2 project structure and architecture → Phase 3 design → Phase 4 business logic and API implementation → Phase 5 integration and release.**
 > **Written by:** product owner + technical writer. Rules for how code is written live in [`../CLAUDE.md`](../CLAUDE.md) and win over this file on conventions.
-> **Sources read:** root `CLAUDE.md` and `.claude/*`, `BUSINESS_DOMAIN.md`, `ROADMAP.md`, `INTEGRATION_WORKFLOW.md`, `docs/WAB_Admin_PRD.md` (A00–A29), `docs/WAB_Admin_BRD.md` (ABR-xx), `docs/WAB_Admin_Design_Script.md`, `design/WAB Admin 0x *.dc.html`, `WAB-Server/docs/WAB_Server_Tasks.md` and **`WAB-Server/docs/api/openapi.admin.json` (the real admin API: 116 operations)**.
-> **Totals:** 83 numbered tasks. 15 are `PENDING` (owner input, or a server API that does not exist yet); the rest are `TODO` and buildable today.
+> **Sources read:** root `CLAUDE.md` and `.claude/*`, `BUSINESS_DOMAIN.md`, `INTEGRATION.md`, `docs/WAB_Admin_PRD.md` (A00–A29), `docs/WAB_Admin_BRD.md` (ABR-xx), `docs/WAB_Admin_Design_Script.md`, `design/WAB Admin 0x *.dc.html`, `WAB-Server/docs/WAB_Server_Tasks.md` and **`WAB-Server/docs/api/openapi.admin.json` (the real admin API: 116 operations)**.
+> **Totals:** 83 numbered tasks. Status counts: `python3 scripts/tasks.py board`; next task: `python3 scripts/tasks.py next admin`; never read this file whole.
+> **Refreshed 2026-10-18:** Phase 4C rows are `BLOCKED` on the new server tasks SRV-117…SRV-127 (one per gap), owner-input rows are `PENDING`, ADM-080 recorded as an owner decision.
 > **Version 2 (after the server merged to `main`):** the first version of this backlog proposed an API contract; the server now provides one. Appendix A is generated from the real OpenAPI, every operation is consumed by a task, and the features the server does not offer are listed as gaps (Appendix D). See Appendix F for what changed.
 
 ---
 
 ## 1. Status legend
-`TODO` ready to start · `IN PROGRESS` branch open · `IN REVIEW` PR open · `DONE` merged to `main` · `PENDING` blocked by **information from the owner** or by **a server API/service that does not exist yet** (the *Notes* column names it). A task is never `PENDING` only because it is large.
+`TODO` ready to start · `IN PROGRESS` branch open · `IN REVIEW` PR open · `DONE` merged to `admin` · `PENDING` waits for **information or an action from the owner** (the *Notes* column names it) · `BLOCKED` waits for the server task named in the *Server (SRV)* column (managed by `scripts/tasks.py`). A task is never `PENDING` only because it is large.
 
 ## 2. Working rules
-1. **Strict order, one at a time.** Take the first `TODO` task in ID order whose *Needs* are `DONE`. Do not start the next task until the previous task's PR is merged. `PENDING` tasks are skipped.
-2. **One task = one branch = one PR**, branch `feat/adm-NNN-<key>` from an updated `main`. Never commit or push to `main`; never force-push; never `--no-verify`. The cloud session branch is the documented exception.
-3. **Done means:** `npm run verify` green (typecheck, lint with zero warnings, format, unit tests, hardcoded-value and 300-line scan), all four build variants build, bundle budget holds, e2e green for new screens, three verification loops and the four-role review in `.claude/session.md`, **CI green before merge**.
+1. **Strict order, one at a time.** `python3 scripts/tasks.py next admin` gives the first `TODO` task whose *Needs* and *Server* dependencies are `DONE`. Do not start the next task until the previous task's PR is merged into `admin`. `PENDING` and `BLOCKED` tasks are skipped.
+2. **One task = one branch = one PR**, branch `feat/adm-NNN-<key>` from the freshly fetched `origin/admin` (the admin master branch); the PR targets `admin`. Never commit or push to `main` or `admin` directly; never force-push; never `--no-verify`.
+3. **Done means:** `npm run verify` green (typecheck, lint with zero warnings, format, unit tests, hardcoded-value and 300-line scan), all four build variants build, bundle budget holds, e2e green for new screens, one verification loop (`Loops: 1/1`) and the four-role review in `WAB-Admin-Dashboard/.claude/session.md`, **local gate green before merge** (there is no admin CI).
 4. **No hardcoding.** URLs, routes, limits, colors, sizes, texts, storage keys and timings come from `src/constants/`, `src/design/tokens/`, env config or `src/locales/` (Arabic **and** English, same keys).
 5. **Layers.** A feature task touches `domain`, `data` and `presentation` in that order (Section 3). Pages are composed from base components only.
 6. **Reasons and audit.** Every impactful admin action has a mandatory reason (`ReasonDialog`); the server writes the audit log and notifies affected parties (PRD §3, §9).
@@ -38,7 +39,7 @@ tests/<feature>/            domain unit tests · mapper/repository tests against
 Every feature task has three slices, written in its block: **Domain** (entities, enums, repository interface, pure rules), **Data** (generated DTOs, mappers, remote repository, fixtures), **Presentation** (controller hook and pages with loading, empty, error-with-retry, forbidden and realtime states). Definition of Done: acceptance criteria in the `session.md` block · unit tests per layer · e2e smoke for new screens · AR+EN keys · `docs:api` up to date (after ADM-029) · `memory.md` updated.
 
 ## 4. Phases
-| Phase | ROADMAP stage | Content | Tasks |
+| Phase | Stage | Content | Tasks |
 |---|---|---|---|
 | Phase 1 | ADM-01 | Project setup | ADM-001 … ADM-006 |
 | Phase 2 | ADM-01 | Project structure and architecture | ADM-007 … ADM-010 |
@@ -201,33 +202,33 @@ Every task is a vertical slice through the three layers (Section 3). Operation l
 ---
 
 ## Phase 4C — Features blocked by missing server APIs
-The admin PRD asks for these, the server does not offer them yet (Appendix D). They stay `PENDING` until the gap is added to the server backlog and delivered; the first four rows are the ones the admin team needs soonest.
+The admin PRD asks for these, the server does not offer them yet (Appendix D). Since 2026-10-18 every gap has a server task (SRV-117…SRV-127, Stage N of the server backlog); these rows are `BLOCKED` and flip to `TODO` automatically when `tasks.py set SRV-1xx DONE` runs.
 
 | ID | Task | Branch | Needs | Server (SRV) | Status | Notes |
 |---|---|---|---|---|---|---|
-| ADM-068 | Admin profile (PRD §4): change password, change email with verification, alert-email recipients | `feat/adm-068-admin-profile` | ADM-030, ADM-013 | SRV-030, SRV-031 | PENDING | Server gap G1: no profile endpoints (alert recipients are a setting key). |
-| ADM-069 | Global search (PRD §3): customers, salons, bookings, members grouped; wire the topbar search UI | `feat/adm-069-global-search` | ADM-022, ADM-028 | — | PENDING | Server gap G2: no search endpoint. |
-| ADM-070 | Salon editing by admin (A13): profile and location, gallery, working hours and closures, services, staff, policies | `feat/adm-070-salon-edit` | ADM-041, ADM-020 | SRV-045, SRV-048, SRV-049, SRV-050, SRV-052, SRV-054 | PENDING | Server gap G3: those endpoints are merchant-scoped; admin variants (with reason + audit) are missing. |
-| ADM-071 | Booking extras (A15): reassign staff with eligible list, issue a refund of a chosen amount, explicit cancel modes, related notifications and events, bookings export | `feat/adm-071-booking-extras` | ADM-049 | SRV-076, SRV-086 | PENDING | Server gap G6. |
-| ADM-072 | Customer extras (A12): edit profile, reviews written by the customer, notifications sent, immediate force delete, push to one customer from the profile | `feat/adm-072-customer-extras` | ADM-046, ADM-059 | SRV-101 | PENDING | Server gap G5 (push to one customer works through a campaign with `SPECIFIC_USERS`). |
-| ADM-073 | Salon list columns and insights (A13): subscription filter, recommended flag, bookings (30d), per-salon KPIs, analytics and activity tabs, deletion-request decision | `feat/adm-073-salon-insights` | ADM-041, ADM-058 | SRV-102, SRV-055 | PENDING | Server gaps G4: not returned or not offered today. |
-| ADM-074 | Analytics — Traffic & Users (A02) and Screens & Events explorer (A03) with raw events | `feat/adm-074-analytics-traffic` | ADM-064 | SRV-110 | PENDING | Needs BigQuery-backed analytics (SRV-110, **user input**); UI can be prototyped on fixtures. |
-| ADM-075 | Analytics — Funnels (A04) with drop-off users and custom builder; Retention (A06) | `feat/adm-075-analytics-funnels` | ADM-064 | SRV-110 | PENDING | SRV-110. |
-| ADM-076 | Analytics — Search & Discovery (A05) and Merchants analytics (A10) | `feat/adm-076-analytics-search-merchants` | ADM-064 | SRV-110 | PENDING | SRV-110 (merchant counts partly derivable from salons and subscriptions lists). |
-| ADM-077 | User Journey (A11): search by phone, name, ids or booking reference; identity header; timeline with Guest marker, highlighted errors and payments; export | `feat/adm-077-journey` | ADM-018, ADM-045 | SRV-110, SRV-101 | PENDING | SRV-110; the customer detail already returns `journeyUserId`. |
+| ADM-068 | Admin profile (PRD §4): change password, change email with verification, alert-email recipients | `feat/adm-068-admin-profile` | ADM-030, ADM-013 | SRV-117 | BLOCKED | Server gap G1: no profile endpoints (alert recipients are a setting key). |
+| ADM-069 | Global search (PRD §3): customers, salons, bookings, members grouped; wire the topbar search UI | `feat/adm-069-global-search` | ADM-022, ADM-028 | SRV-118 | BLOCKED | Server gap G2: no search endpoint. |
+| ADM-070 | Salon editing by admin (A13): profile and location, gallery, working hours and closures, services, staff, policies | `feat/adm-070-salon-edit` | ADM-041, ADM-020 | SRV-119, SRV-120 | BLOCKED | Server gap G3: those endpoints are merchant-scoped; admin variants (with reason + audit) are missing. |
+| ADM-071 | Booking extras (A15): reassign staff with eligible list, issue a refund of a chosen amount, explicit cancel modes, related notifications and events, bookings export | `feat/adm-071-booking-extras` | ADM-049 | SRV-123 | BLOCKED | Server gap G6. |
+| ADM-072 | Customer extras (A12): edit profile, reviews written by the customer, notifications sent, immediate force delete, push to one customer from the profile | `feat/adm-072-customer-extras` | ADM-046, ADM-059 | SRV-122 | BLOCKED | Server gap G5 (push to one customer works through a campaign with `SPECIFIC_USERS`). |
+| ADM-073 | Salon list columns and insights (A13): subscription filter, recommended flag, bookings (30d), per-salon KPIs, analytics and activity tabs, deletion-request decision | `feat/adm-073-salon-insights` | ADM-041, ADM-058 | SRV-121 | BLOCKED | Server gaps G4: not returned or not offered today. |
+| ADM-074 | Analytics — Traffic & Users (A02) and Screens & Events explorer (A03) with raw events | `feat/adm-074-analytics-traffic` | ADM-064 | SRV-110, SRV-127 | BLOCKED | Needs BigQuery-backed analytics (SRV-110, **user input**); UI can be prototyped on fixtures. |
+| ADM-075 | Analytics — Funnels (A04) with drop-off users and custom builder; Retention (A06) | `feat/adm-075-analytics-funnels` | ADM-064 | SRV-110 | BLOCKED | SRV-110. |
+| ADM-076 | Analytics — Search & Discovery (A05) and Merchants analytics (A10) | `feat/adm-076-analytics-search-merchants` | ADM-064 | SRV-110 | BLOCKED | SRV-110 (merchant counts partly derivable from salons and subscriptions lists). |
+| ADM-077 | User Journey (A11): search by phone, name, ids or booking reference; identity header; timeline with Guest marker, highlighted errors and payments; export | `feat/adm-077-journey` | ADM-018, ADM-045 | SRV-110, SRV-122 | BLOCKED | SRV-110; the customer detail already returns `journeyUserId`. |
 
 ---
 
 ## Phase 5 — Integration, quality and release
-ROADMAP INT-05 and REL-01…03 for the admin panel.
+Integration and release tasks for the admin panel (`INTEGRATION.md` §6).
 
 | ID | Task | Branch | Needs | Server (SRV) | Status | Notes |
 |---|---|---|---|---|---|---|
 | ADM-078 | Fixture tests: every fixture of the mock transport is validated against the generated types in CI; adding an operation without a fixture fails the build | `feat/adm-078-fixture-tests` | ADM-026, ADM-004 | — | DONE | Works against the committed contract snapshot. |
-| ADM-079 | Switch to `remote` on dev (INT-05): per-module gap list and fixes, socket events verified against the real server | `feat/adm-079-remote-dev` | ADM-078, ADM-061, ADM-063, ADM-047, ADM-030 | SRV-011 | PENDING | Needs the dev API URL (hosting, SRV-011 PENDING) — **user input**. |
-| ADM-080 | PRD §3 / Design Script §3 flows as Playwright e2e on the mock transport (login to overview, application approval, booking status change, refund retry, payout creation, subscription expiry to Offline, bulk review approval, campaign scheduling, monthly report export; flows needing blocked features join later) | `feat/adm-080-flows-e2e` | ADM-043, ADM-049, ADM-053, ADM-056, ADM-057, ADM-050, ADM-059, ADM-065, ADM-067 | — | TODO | Chromium locally, Chromium + WebKit in CI. |
+| ADM-079 | Switch to `remote` on dev (INT-05): per-module gap list and fixes, socket events verified against the real server | `feat/adm-079-remote-dev` | ADM-078, ADM-061, ADM-063, ADM-047, ADM-030 | SRV-011 | BLOCKED | Needs the dev API URL (hosting, SRV-011 PENDING) — **user input**. |
+| ADM-080 | PRD §3 / Design Script §3 flows as Playwright e2e on the mock transport (login to overview, application approval, booking status change, refund retry, payout creation, subscription expiry to Offline, bulk review approval, campaign scheduling, monthly report export; flows needing blocked features join later) | `feat/adm-080-flows-e2e` | ADM-043, ADM-049, ADM-053, ADM-056, ADM-057, ADM-050, ADM-059, ADM-065, ADM-067 | — | PENDING | Chromium locally, Chromium + WebKit in CI. Owner decision 2026-10-14: no e2e runs for now; revisit before release (ADM-083). |
 | ADM-081 | RTL, accessibility and performance pass over all pages: keyboard paths, contrast in both themes, bundle budget per route chunk, 2-second load on a 30-day range with mock latency | `feat/adm-081-qa-pass` | ADM-080 | — | DONE | REL-01; budgets recorded in `scripts/budget.json`. |
-| ADM-082 | Error tracking and source-map upload for release builds | `feat/adm-082-error-tracking` | ADM-005 | SRV-115 | PENDING | Tool selection (open item #4) and DSN — **user input**. |
+| ADM-082 | Error tracking and source-map upload for release builds | `feat/adm-082-error-tracking` | ADM-005 | SRV-115 | BLOCKED | Tool selection (open item #4) and DSN — **user input**. |
 | ADM-083 | Prod go-live checklist for the admin panel (env values, domain, CSP, rollback, smoke tests) | `feat/adm-083-go-live` | ADM-081, ADM-005, ADM-006, ADM-079 | — | PENDING | Hosting, domain and the pending tasks above (REL-03). |
 
 ---

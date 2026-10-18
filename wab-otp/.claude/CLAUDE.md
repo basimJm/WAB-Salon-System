@@ -1,12 +1,14 @@
 # wab-otp — Guide for AI Agents
 
-> Read this first in every session, then `.claude/Rules.md` and `.claude/Integration.md`. Then read the BRD: `docs/WAB_Package_OTP_BRD.md`.
+> Auto-loaded with this file (never read them with a tool): the rules, the technical document, the session and the memory below. Per task: `python3 scripts/tasks.py next otp` → the task row; read only the BRD section (`docs/WAB_Package_*_BRD.md`) it names. Branch `feat/otp-NNN-<key>` from `origin/server`; PR into `server`.
 
-**Mandatory reading (all of it, every session):**
+**Auto-loaded (every session):**
 - Rules: @.claude/Rules.md
 - Technical implementation document (keep it current): @.claude/Integration.md
+- Session (current task): @.claude/session.md
+- Memory (durable facts): @.claude/memory.md
 - Business requirements: `docs/WAB_Package_OTP_BRD.md`
-- Repo-wide context: `../CLAUDE.md`, `../BUSINESS_DOMAIN.md` (only for names/enums the consumer uses), `../.claude/rules.md`
+- Repo-wide context already in context: root `CLAUDE.md`, `.claude/rules.md`; `../BUSINESS_DOMAIN.md` only for names/enums the consumer uses; `../INTEGRATION.md` §3 for the server port this package must satisfy
 
 ## What this package is
 Server-side OTP verification behind a provider-independent interface. Phase 1: verify a Firebase Phone Auth ID token (client sends/confirms the SMS code, server verifies the proof). Also owns OTP limits (5 requests/5 min → 15 min block; 5 wrong codes → 15 min block; resend after 60 s, all configurable) and exposes `otpLength`/resend config to apps.
@@ -44,4 +46,4 @@ tests/ (mirrors src)  loop/
 2. Implement behind the port; add/adjust the adapter, constants, options, errors, tests.
 3. Run `npm run verify`, then `npm run test:loop`.
 4. Update `Integration.md` (and the changelog table in it).
-5. Commit, push the branch, open a PR.
+5. Record `Loops: 1/1` + `Review: PASSED` in `.claude/session.md`, `tasks.py set <ID> <STATUS>`, commit, push the branch, open the PR into `server`.
