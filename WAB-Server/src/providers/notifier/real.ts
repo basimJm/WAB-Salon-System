@@ -6,9 +6,9 @@ import {
   type Logger as SdkLogger,
   type NotifierOptions,
   type RedisLike,
-} from 'wab-notifications';
+} from '@wab/notifications';
 import type { NotifierSettings } from '../../config';
-import { ERROR_CODES as SDK_ERRORS } from 'wab-notifications';
+import { ERROR_CODES as SDK_ERRORS } from '@wab/notifications';
 import { ExternalServiceError } from '../../utils/errors';
 import type { Logger } from '../../utils/logger';
 import type { EmailRequest, EmailResult, Notifier, PushRequest, PushResult } from './types';

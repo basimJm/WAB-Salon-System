@@ -112,7 +112,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 ## 12. Implementation status
 | Item | Status |
 |---|---|
-| Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ⬜ |
+| Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ |
 | Shared kernel (errors, config, http/retry, logger) | ⬜ |
 | Adapter: fake — scenario-driven (success/fail/cancel/pending) for dev/tests | ⬜ |
 | Adapter: mock-gateway — local HTTP gateway simulator on localhost | ⬜ |
@@ -126,4 +126,5 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-18 | 0.1.0 | PAY-001 scaffold (`@wab/payments`). Gateway decided: HyperPay (OPP/COPYandPAY). |
 | 2026-10-14 | 0.0.0 | Design document created from the BRD; no code yet. |

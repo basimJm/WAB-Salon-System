@@ -31,11 +31,11 @@ try {
   `;
   writeFileSync(
     join(work, 'cjs.cjs'),
-    `${body}\nrun(require('wab-notifications')).then(() => console.log('cjs ok'));`,
+    `${body}\nrun(require('@wab/notifications')).then(() => console.log('cjs ok'));`,
   );
   writeFileSync(
     join(work, 'esm.mjs'),
-    `import * as lib from 'wab-notifications';\n${body}\nrun(lib).then(() => console.log('esm ok'));`,
+    `import * as lib from '@wab/notifications';\n${body}\nrun(lib).then(() => console.log('esm ok'));`,
   );
   process.stdout.write(run('node', ['cjs.cjs'], work));
   process.stdout.write(run('node', ['esm.mjs'], work));
