@@ -126,6 +126,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-18 | 0.1.0 | PAY-011: mock launcher + platform in-app browsers. |
 | 2026-10-18 | 0.1.0 | PAY-010: KMP ports, fake launcher, shared native launcher, tests. |
 | 2026-10-18 | 0.1.0 | PAY-009: quality gate, README, Integration reference, webhook event id fix. |
 | 2026-10-18 | 0.1.0 | PAY-008: Phase 2 port fields + capability flags. |
@@ -193,3 +194,6 @@ when (val r = launcher.launch(session)) {
 Ports: `PaymentLauncher` (alias `CheckoutLauncher`), `DelegatingPaymentLauncher`, `FakePaymentLauncher` (tests/previews), `NativeCheckoutBridge` + `NativeCheckoutLauncher` (shared half of the Android and iOS HyperPay launchers), `ShopperResult` (return-URL parsing), `PaymentError`/`PaymentErrorCode`, `Redaction.scrub`.
 
 Verification done here: commonMain + commonTest compile with warnings-as-errors and the unit tests pass on a JVM-only harness (`kotlin("jvm")` over the same source dirs). NOT verified here: the Android/iOS targets (Google Maven and Xcode are unavailable in the sandbox): CI/mac must run `./gradlew :payments:allTests`.
+
+### Dev launcher (PAY-011)
+`MockGatewayLauncher(browser: InAppBrowser)` opens `CheckoutSession.checkoutUrl` (the OPP mock's hosted page, returned by the server in dev as `client.checkoutUrl`) and parses the redirect to `shopperResultUrl`. Browsers: Android `WebViewInAppBrowser(context)` (WebView activity declared in the library manifest; a debug network-security-config must allow the cleartext mock host), iOS `WebAuthInAppBrowser()` (`ASWebAuthenticationSession`; the return URL must use a custom scheme such as `wab://payment/result`). Bind it for provider `mock-gateway` in `DelegatingPaymentLauncher`. The Android and iOS browser classes are NOT compiled here.

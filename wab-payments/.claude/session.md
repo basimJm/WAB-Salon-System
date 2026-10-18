@@ -87,3 +87,11 @@
 - Tests: commonMain+commonTest compiled (warnings as errors) and all KMP unit tests pass on a JVM-only harness; Android/iOS Gradle targets NOT built (Google Maven/Xcode unreachable)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Client result is never final: ClientCompleted means the UI returned, server verify decides. Gradle build files unverified.
+
+### PAY-011 — KMP mock-gateway launcher
+- Branch: `feat/pay-011-kmp-mock`
+- Status: IN REVIEW
+- Acceptance: MockGatewayLauncher + InAppBrowser port (common, tested); Android WebView activity browser and iOS ASWebAuthenticationSession browser.
+- Tests: 24 KMP unit tests pass on the JVM harness (commonMain+commonTest, warnings as errors); androidMain/iosMain sources NOT compiled here
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Browser results are never trusted: redirect only yields ClientCompleted, server verify decides. Platform browsers unverified.
