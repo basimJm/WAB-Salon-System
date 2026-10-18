@@ -7,6 +7,8 @@ echo "== Policy script tests"
 python3 -m unittest discover -s scripts/ci/tests -p 'test_*.py'
 echo "== Policy checks (hardcoded, file length, localization, variants, quality, security)"
 python3 scripts/ci/policy_checks.py all
+echo "== Contract (generated DTOs match the server OpenAPI)"
+python3 scripts/api_sync.py --check
 echo "== detekt + Compose rules"
 scripts/ci/run_detekt.sh
 

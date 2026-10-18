@@ -33,7 +33,8 @@ composeApp/            Shared app shell: App(), theme wiring, navigation host, D
 core/common            Platform-free helpers (formatters, validators, AppInfoProvider)
 core/domain            Result/error types, settings contracts, shared models
 core/data, storage     Repositories' shared plumbing, DataStore-backed settings
-core/network           Ktor client, env-driven ApiConfig, safeApiCall
+core/network           Ktor client, env-driven ApiConfig, safeApiCall (WAB envelope → AppError.ServerError)
+core/data/contract     GENERATED DTOs + `CustomerOperations` from `WAB-Server/docs/api/openapi.customer.json` (`./gradlew apiSync`; `apiSyncCheck` in the gate; never edit by hand)
 core/navigation        Typed routes (Graph/Screen), Navigator
 core/notification      In-app toast host + push handling
 core/security          Security helpers (keep secrets out of logs, secure storage seam)
