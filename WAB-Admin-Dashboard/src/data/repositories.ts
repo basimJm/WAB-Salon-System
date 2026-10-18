@@ -15,6 +15,7 @@ import type { CampaignsRepository } from '@/domain/campaigns/campaigns';
 import type { AlertsRepository } from '@/domain/alerts/alerts';
 import type { AnalyticsRepository } from '@/domain/analytics/analytics';
 import type { ReportsRepository } from '@/domain/reports/reports';
+import type { AuditRepository } from '@/domain/audit/audit';
 import type { SalonsRepository } from '@/domain/salons/salons';
 import type { CatalogRepository } from '@/domain/catalog/catalog';
 import type { ContentRepository } from '@/domain/content/content';
@@ -40,6 +41,7 @@ import { RemoteCampaignsRepository } from './campaigns/RemoteCampaignsRepository
 import { RemoteAlertsRepository } from './alerts/RemoteAlertsRepository';
 import { RemoteAnalyticsRepository } from './analytics/RemoteAnalyticsRepository';
 import { RemoteReportsRepository } from './reports/RemoteReportsRepository';
+import { RemoteAuditRepository } from './audit/RemoteAuditRepository';
 import { RemoteSalonsRepository } from './salons/RemoteSalonsRepository';
 import { RemoteCatalogRepository } from './catalog/RemoteCatalogRepository';
 import { RemoteContentRepository } from './content/RemoteContentRepository';
@@ -55,6 +57,7 @@ export interface Repositories {
   readonly banners: BannersRepository;
   readonly catalog: CatalogRepository;
   readonly salons: SalonsRepository;
+  readonly audit: AuditRepository;
   readonly reports: ReportsRepository;
   readonly analytics: AnalyticsRepository;
   readonly alerts: AlertsRepository;
@@ -80,6 +83,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
   const banners = new RemoteBannersRepository(api);
   const catalog = new RemoteCatalogRepository(api);
   const salons = new RemoteSalonsRepository(api);
+  const audit = new RemoteAuditRepository(api);
   const reports = new RemoteReportsRepository(api);
   const analytics = new RemoteAnalyticsRepository(api);
   const alerts = new RemoteAlertsRepository(api);
@@ -106,6 +110,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
       banners,
       catalog,
       salons,
+      audit,
       reports,
       analytics,
       alerts,
@@ -131,6 +136,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
     banners,
     catalog,
     salons,
+    audit,
     reports,
     analytics,
     alerts,

@@ -27,6 +27,7 @@ import campaigns from './ar/campaigns.json';
 import alerts from './ar/alerts.json';
 import overview from './ar/overview.json';
 import reports from './ar/reports.json';
+import audit from './ar/audit.json';
 import status from './ar/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -46,6 +47,7 @@ const ar = {
   ...gallery,
   ...forms,
   ...status,
+  ...audit,
   ...reports,
   ...overview,
   ...alerts,
