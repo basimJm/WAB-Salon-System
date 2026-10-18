@@ -278,13 +278,13 @@ describe('createProviders with the real storage', () => {
     expect(() => createProviders(FAKES, false, depsWith())).toThrow(ProviderUnavailableError);
     expect(() => createProviders(FAKES, false)).toThrow(ProviderUnavailableError);
   });
-  it('rejects invalid SDK configuration at start-up (production needs https)', () => {
+  it('rejects invalid SDK configuration at start-up (production needs an https CDN)', () => {
     expect(() =>
-      createProviders(
-        { ...FAKES, otp: 'fake' },
-        true,
-        depsWith({ ...SETTINGS, cdnBaseUrl: 'http://cdn.example.test' }),
-      ),
+      createRealStorage({
+        settings: { ...SETTINGS, cdnBaseUrl: 'http://cdn.example.test' },
+        isProduction: true,
+        logger,
+      }),
     ).toThrow(StorageError);
   });
 });
