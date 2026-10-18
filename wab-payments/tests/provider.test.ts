@@ -310,15 +310,6 @@ describe('factory', () => {
       createPayments({ environment: 'prod', provider: 'custom', gateway: new FakeGateway() }),
     ).toThrow('invalid payments options');
   });
-  it('has no adapter for providers that are not built in', () => {
-    expect(() =>
-      createPayments({
-        environment: 'dev',
-        provider: 'hyperpay',
-        hyperpay: { entityId: 'e', accessToken: 't', shopperResultUrl: 'https://x.example.com/r' },
-      }),
-    ).toThrow('not available');
-  });
   it('counts pending refunds against the captured amount and closes the fake', async () => {
     const { payments, gateway } = withFake();
     const { sessionId } = await payments.createSession(SESSION);

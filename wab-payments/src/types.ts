@@ -44,8 +44,10 @@ export interface ClientCheckout {
   readonly brands: readonly string[];
   /** Where the checkout returns the shopper (app scheme or https). */
   readonly shopperResultUrl: string;
-  /** Hosted widget/checkout URL for web views and the mock gateway. */
+  /** Hosted pay page (only the local mock gateway has one; real HyperPay uses its SDK/widget). */
   readonly checkoutUrl?: string;
+  /** COPYandPAY widget script for web views. */
+  readonly widgetScriptUrl?: string;
   /** Subresource-integrity hash of the widget script when the gateway provides one. */
   readonly integrity?: string;
 }
