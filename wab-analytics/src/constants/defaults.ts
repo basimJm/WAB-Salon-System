@@ -70,6 +70,7 @@ export const EVENT_RULES = {
   idPattern: /^[A-Za-z0-9._:-]{1,128}$/,
   installationPattern: /^[A-Za-z0-9._-]{8,128}$/,
   appVersionMaxLength: 32,
+  maxParamsBytes: 8192,
   platformPattern: /^[A-Z][A-Z0-9_]{0,15}$/,
   identifierPattern: /^[A-Za-z0-9_-]{1,128}$/,
 } as const;
