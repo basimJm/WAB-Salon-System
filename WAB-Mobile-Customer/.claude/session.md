@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Next: CUS-006 network kernel (then CUS-009 contract tooling, CUS-010 mock, CUS-011 session store, CUS-012, CUS-013, then features from CUS-024); task branches start from `origin/customer`.
+- Next: CUS-009 contract tooling, then CUS-010 mock, CUS-011 session store, CUS-012, CUS-013, then features from CUS-024; task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -138,3 +138,16 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — nothing Firebase-typed leaves the module; error codes/timeouts are named constants; Android Task bridging without the play-services coroutine artifact.
 - Notes: DECISION (CLAUDE.md §1.12): native SDKs behind ports instead of GitLive — the iOS app already links Firebase from Swift; Firebase Android 34.2.0 train (analytics 23.0.0, auth 24.0.1, crashlytics 20.0.1). NOT verified at runtime: real SMS / token / Crashlytics calls need the real Firebase dev configs (placeholders today). Crashlytics Gradle plugin + mapping upload deferred to CUS-067.
+
+### CUS-006 — Network kernel: envelope, error-code catalog, retry/timeouts
+- Branch: `feat/cus-006-network-kernel`
+- Status: DONE
+- Acceptance criteria (server CLAUDE.md §6–8, BUSINESS_DOMAIN §11, PRD §3.4, CLAUDE.md §3):
+  - [x] `ErrorEnvelopeDto` → `AppError.ServerError(code: ErrorCode, statusCode, message, details, traceId)`; `ErrorCode` = 41 BUSINESS_DOMAIN §11 codes + `UNKNOWN`; non-envelope HTTP → `HttpError`; transport → `NetworkError`; the template's `ApiErrorDto` removed
+  - [x] 42 AR + EN strings (`error_code_*`), `ERROR_CODE_STRINGS` table + `errorResource`, `appErrorMessage` (composable) and `appErrorText` (ViewModels); main + sample ViewModels use the catalog
+  - [x] `NetworkDefaults` constants; GET-only `HttpRequestRetry` with exponential backoff; `BaseResponse.meta` (`PaginationMetaDto.hasMore`); `AuthEndpoints` confirmed against `openapi.customer.json`
+  - [x] Tests: `ErrorCodeTest` (2), `SafeApiCallTest` (6, MockEngine), `ErrorTextTest` (2, every code has its own string)
+- Tests: `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — clients branch on `code`; writes are never retried; bodies never logged; baseline shrank (removed `println`).
+- Notes: owner instruction 2026-10-18: continue task after task without stopping. `PageableDto` (Laravel-style) stays until CUS-009/010 rebuild the paging source on `BaseResponse.meta`.

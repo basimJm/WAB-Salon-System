@@ -6,6 +6,7 @@ import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.contract.MainContract.UiState
 import com.fab.wab.customer.core.common.AppEnvironment
 import com.fab.wab.customer.core.domain.AppError
+import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.AppSettings
@@ -45,10 +46,11 @@ class MainViewModel(
         applicationSettingsRepository.applicationSettings().collectLatest { result ->
             when (result) {
                 is AppResult.Error -> {
+                    val message = extractErrorMessage(result.appError)
                     updateState {
                         copy(
                             splashScreenState = state.value.splashScreenState.copy(
-                                splashErrorMsg = extractErrorMessage(result.appError),
+                                splashErrorMsg = message,
                                 showSplashScreen = false
                             )
                         )
@@ -172,12 +174,5 @@ class MainViewModel(
     val sessionTimeOutState = sessionTimeOut.sessionEventTimeOut.receiveAsFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
-    private fun extractErrorMessage(error: AppError): String {
-        return when (error) {
-            is AppError.NetworkError -> error.errorMsg
-            is AppError.HttpError -> error.message ?: "Unknown error"
-            is AppError.ParseError -> error.message ?: "Unknown error"
-            is AppError.UnknownError -> error.errorMsg
-        }
-    }
+    private suspend fun extractErrorMessage(error: AppError): String = appErrorText(error)
 }

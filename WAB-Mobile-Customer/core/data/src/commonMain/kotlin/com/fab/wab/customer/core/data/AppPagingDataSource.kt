@@ -39,6 +39,7 @@ abstract class AppPagingDataSource<T : Any, D : Any>(
                 is AppResult.Error -> {
                     val message = onError?.invoke(result.appError)
                         ?: when (val error = result.appError) {
+                            is AppError.ServerError -> error.message ?: error.code.name
                             is AppError.HttpError -> error.message
                             is AppError.ParseError -> error.message
                             is AppError.NetworkError -> error.errorMsg
