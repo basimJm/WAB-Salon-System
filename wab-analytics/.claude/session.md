@@ -7,4 +7,11 @@
 
 ## Current task
 
-- (none) — run `python3 scripts/tasks.py next analytics`; task branches start from `origin/server`.
+### ANA-001 — Project scaffold
+- Branch: `feat/ana-001-scaffold`
+- Status: IN REVIEW
+- Acceptance: TS strict, eslint (no any/console), prettier, jest with coverage gate 100/95/95, tsup ESM+CJS+d.ts, `verify`, loop-test config, package smoke (CJS + ESM) — same as `wab-notifications`.
+- Assumed missing: package name `@wab/analytics` (scoped, GitHub Packages) already from the start so the server dependency name never changes; `private: true` until ANA-010.
+- Tests: `npm run verify` green.
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling only; mirrors the proven notifications setup.
