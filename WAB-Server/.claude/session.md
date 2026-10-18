@@ -5,7 +5,7 @@
 ## Integration status (one glance)
 
 - Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (116) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
-- Providers: notifier **real** (`wab-notifications`); analytics **real** (`@wab/analytics`, SRV-110); otp / storage / payments on in-repo fakes until SRV-034 / SRV-112 / SRV-092 (other SDK tasks).
+- Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); analytics **real** (`@wab/analytics`, SRV-110); storage / payments on in-repo fakes until SRV-112 / SRV-092 (other SDK tasks).
 - Open work: SRV-111 contract guard, Stage N (SRV-117…128, admin gaps), Stage O (SRV-129…134, merchant gaps). Deployment SRV-011/116 and SRV-059/115: owner (PENDING).
 
 ## Current task
@@ -25,6 +25,15 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: a real MongoDB write/read through the package, a real BigQuery dataset or credentials, the Docker build (no daemon). API docs: no change.
 
 ## Last blocks
+
+### SRV-034 — Real Firebase ID-token verification via `wab-otp`
+
+- Branch: `feat/otp-010-publish` (shared PR with OTP-010)
+- Status: DONE
+- Acceptance criteria: `@wab/otp` `file:` dependency + `ensure-sdks` + Docker; env `FIREBASE_PROJECT_ID` (required for `OTP_PROVIDER=real`), `FIREBASE_AUTH_EMULATOR_HOST` (dev only, refused in production); `providers/otp/real.ts` maps SDK outcomes (anything unexpected is an invalid proof, never success) and errors (outage -> `ExternalServiceError`, caller bug -> `RangeError`); closed on shutdown
+- Tests: `tests/otpReal.test.ts` (9, includes the real SDK on emulator-shaped tokens) + config tests; full gate green
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: real Firebase ID tokens from the dev/prod projects, Docker build (no daemon). API docs: no change.
 
 ### T-123 — Wire `wab-notifications` into WAB-Server (`NOTIFIER_PROVIDER=real`)
 

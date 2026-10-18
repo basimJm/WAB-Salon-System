@@ -51,6 +51,8 @@
     "@socket.io/redis-adapter": "^8.3.0",
     "@wab/analytics": "file:../wab-analytics",
     "@wab/notifications": "file:../wab-notifications",
+    "@wab/otp": "file:../wab-otp",
+    "@wab/storage": "file:../wab-storage",
     "bcryptjs": "^3.0.3",
     "bullmq": "^6.3.14",
     "cors": "^2.8.6",

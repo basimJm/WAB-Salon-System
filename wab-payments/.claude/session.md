@@ -71,3 +71,27 @@
 - Tests: npm run verify green (236 tests)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — No HyperPay split implementation (needs marketplace product + KYC fields: owner decision); only the port and capability flags.
+
+### PAY-009 — Quality: loop test, smoke, README, Integration
+- Branch: `feat/pay-009-quality`
+- Status: IN REVIEW
+- Acceptance: Loop test (200 flows, 20 concurrent, duplicate keys, injected 503/502/429, over-refund, webhook redelivery) against the OPP mock; packed smoke incl. mock-gateway subpath; README; Integration.md section 14; stable webhook event id; read-only refund steps retried.
+- Tests: npm run verify green (236 unit tests, coverage gate, loop test 8s)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Loop found timestamps in the payload broke replay detection: event id now hashes stable fields only.
+
+### PAY-010 — KMP library scaffold and ports
+- Branch: `feat/pay-010-kmp-port`
+- Status: IN REVIEW
+- Acceptance: kmp/ Gradle build with customer toolchain; PaymentLauncher port (CheckoutSession in, PaymentResult/PaymentError out), Delegating/Fake launchers, NativeCheckoutBridge shared launcher, ShopperResult URL parsing, card-number redaction; commonMain/commonTest only.
+- Tests: commonMain+commonTest compiled (warnings as errors) and all KMP unit tests pass on a JVM-only harness; Android/iOS Gradle targets NOT built (Google Maven/Xcode unreachable)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Client result is never final: ClientCompleted means the UI returned, server verify decides. Gradle build files unverified.
+
+### PAY-011 — KMP mock-gateway launcher
+- Branch: `feat/pay-011-kmp-mock`
+- Status: IN REVIEW
+- Acceptance: MockGatewayLauncher + InAppBrowser port (common, tested); Android WebView activity browser and iOS ASWebAuthenticationSession browser.
+- Tests: 24 KMP unit tests pass on the JVM harness (commonMain+commonTest, warnings as errors); androidMain/iosMain sources NOT compiled here
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Browser results are never trusted: redirect only yields ClientCompleted, server verify decides. Platform browsers unverified.

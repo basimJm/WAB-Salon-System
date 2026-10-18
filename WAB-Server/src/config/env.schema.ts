@@ -12,6 +12,10 @@ import {
   DEFAULT_EMAIL_FROM_NAME,
   NOTIFIER_REAL_REQUIRED_KEYS,
   ANALYTICS_PRODUCTION_REQUIRED_KEYS,
+  OTP_REAL_REQUIRED_KEYS,
+  FIREBASE_EMULATOR_HOST_PATTERN,
+  STORAGE_REAL_REQUIRED_KEYS,
+  CLOUDFRONT_KEYS,
   MONGO_URI_PATTERN,
   PORT_MAX,
   PORT_MIN,
@@ -71,6 +75,11 @@ export const envSchema = z
     [ENV_KEYS.analyticsProvider]: providerMode,
     [ENV_KEYS.fcmServiceAccountJson]: z.string().min(1).optional(),
     [ENV_KEYS.fcmProjectId]: z.string().min(1).optional(),
+    [ENV_KEYS.firebaseProjectId]: z.string().min(1).optional(),
+    [ENV_KEYS.firebaseAuthEmulatorHost]: z
+      .string()
+      .regex(FIREBASE_EMULATOR_HOST_PATTERN)
+      .optional(),
     [ENV_KEYS.fcmDryRun]: booleanText.default(false),
     [ENV_KEYS.smtpHost]: z.string().min(1).optional(),
     [ENV_KEYS.smtpPort]: z.coerce
@@ -84,6 +93,17 @@ export const envSchema = z
     [ENV_KEYS.smtpPass]: z.string().min(1).optional(),
     [ENV_KEYS.emailFromAddress]: z.email().optional(),
     [ENV_KEYS.emailFromName]: z.string().min(1).default(DEFAULT_EMAIL_FROM_NAME),
+    [ENV_KEYS.s3Region]: z.string().min(1).optional(),
+    [ENV_KEYS.s3PublicBucket]: z.string().min(1).optional(),
+    [ENV_KEYS.s3PrivateBucket]: z.string().min(1).optional(),
+    [ENV_KEYS.s3Endpoint]: z.url().optional(),
+    [ENV_KEYS.s3ForcePathStyle]: booleanText.default(false),
+    [ENV_KEYS.s3AccessKeyId]: z.string().min(1).optional(),
+    [ENV_KEYS.s3SecretAccessKey]: z.string().min(1).optional(),
+    [ENV_KEYS.cdnBaseUrl]: z.url().optional(),
+    [ENV_KEYS.cloudfrontBaseUrl]: z.url().optional(),
+    [ENV_KEYS.cloudfrontKeyPairId]: z.string().min(1).optional(),
+    [ENV_KEYS.cloudfrontPrivateKey]: z.string().min(1).optional(),
     [ENV_KEYS.analyticsBigqueryProjectId]: z.string().min(1).optional(),
     [ENV_KEYS.analyticsBigqueryDataset]: z.string().min(1).optional(),
     [ENV_KEYS.analyticsBigqueryLocation]: z.string().min(1).optional(),
@@ -93,6 +113,22 @@ export const envSchema = z
   })
   // Production never runs on fakes, and never guesses: every provider must be named `real`.
   .superRefine((env, context) => {
+    // A real OTP provider needs the Firebase project; the emulator is for development only.
+    if (env[ENV_KEYS.otpProvider] === REAL_PROVIDER_MODE) {
+      for (const key of OTP_REAL_REQUIRED_KEYS) {
+        if (env[key] === undefined) context.addIssue({ code: 'custom', path: [key], message: key });
+      }
+    }
+    if (
+      env[ENV_KEYS.nodeEnv] === 'production' &&
+      env[ENV_KEYS.firebaseAuthEmulatorHost] !== undefined
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: [ENV_KEYS.firebaseAuthEmulatorHost],
+        message: ENV_KEYS.firebaseAuthEmulatorHost,
+      });
+    }
     // A real notifier needs its credentials; the error names keys only, never values.
     if (env[ENV_KEYS.notifierProvider] === REAL_PROVIDER_MODE) {
       for (const key of NOTIFIER_REAL_REQUIRED_KEYS) {
@@ -102,6 +138,28 @@ export const envSchema = z
       const pass = env[ENV_KEYS.smtpPass];
       if ((user === undefined) !== (pass === undefined)) {
         context.addIssue({ code: 'custom', path: [ENV_KEYS.smtpPass], message: ENV_KEYS.smtpPass });
+      }
+    }
+    // A real storage needs its buckets and CDN; credentials are optional (IAM role) but come in pairs.
+    if (env[ENV_KEYS.storageProvider] === REAL_PROVIDER_MODE) {
+      for (const key of STORAGE_REAL_REQUIRED_KEYS) {
+        if (env[key] === undefined) context.addIssue({ code: 'custom', path: [key], message: key });
+      }
+      const id = env[ENV_KEYS.s3AccessKeyId];
+      const secret = env[ENV_KEYS.s3SecretAccessKey];
+      if ((id === undefined) !== (secret === undefined)) {
+        context.addIssue({
+          code: 'custom',
+          path: [ENV_KEYS.s3SecretAccessKey],
+          message: ENV_KEYS.s3SecretAccessKey,
+        });
+      }
+      const given = CLOUDFRONT_KEYS.filter((key) => env[key] !== undefined);
+      if (given.length > 0 && given.length < CLOUDFRONT_KEYS.length) {
+        for (const key of CLOUDFRONT_KEYS) {
+          if (env[key] === undefined)
+            context.addIssue({ code: 'custom', path: [key], message: key });
+        }
       }
     }
     // BigQuery needs project and dataset together; production needs the whole group.
