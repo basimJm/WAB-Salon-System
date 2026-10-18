@@ -11,6 +11,11 @@ export class MemoryCache implements ResultCache {
     private readonly now: () => number = Date.now,
   ) {}
 
+  /** Entries currently held (bounded by `maxEntries`). */
+  get size(): number {
+    return this.entries.size;
+  }
+
   get(key: string): Promise<string | undefined> {
     const entry = this.entries.get(key);
     if (entry === undefined) return Promise.resolve(undefined);

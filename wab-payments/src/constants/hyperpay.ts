@@ -49,8 +49,6 @@ export const HYPERPAY_WEBHOOK = {
   tagHeader: 'x-authentication-tag',
   keyHexLength: 64,
   authTagBytes: 16,
-  /** Notification types that carry a payment object. */
-  paymentTypes: ['PAYMENT', 'REGISTRATION', 'RISK', 'SCHEDULE'] as const,
 } as const;
 export const HEX_PATTERN = /^(?:[0-9a-fA-F]{2})+$/;
 /** The number of decimals OPP expects when the integrator did not choose (assumption). */

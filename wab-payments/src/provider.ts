@@ -17,6 +17,8 @@ import type {
 } from './types';
 import {
   assertCurrency,
+  assertDestinations,
+  assertSubMerchantRefund,
   assertRefundRequest,
   assertSessionId,
   assertSessionRequest,
@@ -67,10 +69,12 @@ export const createPaymentProvider = (deps: ProviderDeps): PaymentProvider => {
   const cancel = gateway.cancelSession?.bind(gateway);
 
   return {
+    capabilities: gateway.capabilities,
     createSession: (request: CreateSessionRequest): Promise<PaymentSession> =>
       safe(async () => {
         assertSessionRequest(request);
         assertCurrency(request.currency, config.currency);
+        assertDestinations(request.destinations, request.amountFils, gateway.capabilities);
         const method = resolveMethod(request.method, config.methods);
         const { idempotencyKey, ...rest } = request;
         const fingerprint = fingerprintOf({ ...rest, currency: config.currency, method });
@@ -111,6 +115,7 @@ export const createPaymentProvider = (deps: ProviderDeps): PaymentProvider => {
     refund: (request: RefundRequest): Promise<RefundResult> =>
       safe(async () => {
         assertRefundRequest(request);
+        assertSubMerchantRefund(request.subMerchantId, gateway.capabilities);
         const { idempotencyKey, ...rest } = request;
         // Never blind-retried: the adapter finds an earlier refund with this key before sending.
         const result = await store.run(
@@ -130,17 +135,22 @@ export const createPaymentProvider = (deps: ProviderDeps): PaymentProvider => {
 
     handleWebhook: (input: WebhookInput): Promise<PaymentWebhookEvent> =>
       safe(async () => {
+        // Authenticate first (throws on a forged or corrupt notification), then dedupe by event id.
+        const parsed = await gateway.parseWebhook(input);
         const state = { fresh: false };
         const event = await store.run(
-          `${WEBHOOK_SCOPE}${fingerprintOf(input.rawBody)}`,
-          fingerprintOf(input.rawBody),
-          async () => {
-            const parsed = await gateway.parseWebhook(input);
+          `${WEBHOOK_SCOPE}${parsed.eventId}`,
+          fingerprintOf(parsed.eventId),
+          () => {
             state.fresh = true;
-            return { ...parsed, replayed: false };
+            return Promise.resolve({ ...parsed, replayed: false });
           },
         );
-        logger.info('payment.webhook', { sessionId: event.sessionId, replayed: !state.fresh });
+        logger.info('payment.webhook', {
+          sessionId: event.sessionId,
+          kind: event.kind,
+          replayed: !state.fresh,
+        });
         return state.fresh ? event : { ...event, replayed: true };
       }),
 
