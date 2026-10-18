@@ -7,10 +7,10 @@
 
 ## Current task
 
-### OTP-006 — Firebase ID-token adapter
-- Branch: `feat/otp-006-firebase`
-- Acceptance: verify Firebase Phone Auth ID tokens with `jose` (no firebase-admin; vendor-neutral `ProofVerifier`): RS256 only, signature against Google's JWK endpoint, issuer `https://securetoken.google.com/<project>`, audience = project id, exp/iat/sub required, clock-skew tolerance from options, `auth_time` freshness window, `firebase.sign_in_provider == phone`, E.164 `phone_number`, then phone match. Outcomes: VERIFIED / PHONE_MISMATCH / EXPIRED (expired token or stale sign-in) / INVALID_PROOF (everything else incl. alg none, forged key, unknown kid). Key cache honours Cache-Control (floor 60 s), one download for concurrent callers, re-fetch on unknown kid (rotation, at most once per minute), stale keys served up to 24 h when Google is down; every status / network / timeout / bad body mapped to a typed error with retry only where retryable; proxy support by injecting `fetch`.
-- Assumed missing: purpose cannot be bound by Firebase tokens; `maxAuthAgeSec` default 600 s is my assumption (confirm); jose 5 (dual CJS/ESM) chosen because jose 6 is ESM-only and breaks the CJS build.
-- Tests: locally generated RSA keys sign test tokens against a stubbed key endpoint; real-Firebase check NOT run (no network/credentials here). `npm run verify` green.
+### OTP-007 — Firebase Auth emulator dev mode
+- Branch: `feat/otp-007-emulator`
+- Acceptance: with `firebase.authEmulatorHost` (dev) the unsigned (`alg: none`) tokens the Auth emulator issues are accepted with every claim check of the real verifier and no network call; the same tokens are rejected by the real verifier; prod refuses the host in the options and again in the emulator verifier; `createEmulatorToken` builds the emulator token shape for dev tooling and consumer tests.
+- Assumed missing: emulator token shape is taken from Firebase docs/behaviour (claims `iss/aud/sub/user_id/auth_time/phone_number/firebase.sign_in_provider`), not captured from a running emulator (none available here); CI availability of the emulator stays an open question.
+- Tests: `npm run verify` green (103 tests).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found three real bugs before merge: HTTP 5xx/429 from the key endpoint were not retried, a `null` JSON body crashed with TypeError, and aborting in `finally` would have cut the response body; also a time-dependent flaky assertion from OTP-004 fixed.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — dual guard against emulator use in prod; shared `finishVerification` avoids duplicating claim logic.
