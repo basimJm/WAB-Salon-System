@@ -27,4 +27,22 @@
     <string name="country_search_placeholder">ابحث بالدولة أو الرمز</string>
     <string name="country_change_description">تغيير رمز الدولة</string>
     <string name="country_empty">لا توجد دولة تطابق بحثك</string>
+    <string name="dialog_cancel">إلغاء</string>
+    <string name="dialog_auth_title">يجب تسجيل الدخول للمتابعة</string>
+    <string name="dialog_auth_confirm">تسجيل الدخول</string>
+    <string name="dialog_session_expired_title">انتهت الجلسة، يرجى تسجيل الدخول مجدداً</string>
+    <string name="dialog_session_expired_confirm">حسناً</string>
+    <string name="dialog_update_title">يتوفر إصدار جديد من التطبيق</string>
+    <string name="dialog_update_confirm">تحديث</string>
+    <string name="dialog_update_later">لاحقاً</string>
+    <string name="dialog_location_title">فعّل خدمات الموقع لعرض الصالونات القريبة منك</string>
+    <string name="dialog_location_confirm">تفعيل</string>
+    <string name="dialog_location_denied_title">الوصول إلى الموقع متوقف. فعّله من إعدادات الجهاز</string>
+    <string name="dialog_location_denied_confirm">الإعدادات</string>
+    <string name="dialog_logout_title">هل تريد تسجيل الخروج؟</string>
+    <string name="dialog_logout_confirm">تسجيل الخروج</string>
+    <string name="dialog_delete_account_title">حذف حسابك؟</string>
+    <string name="dialog_delete_account_message">سيتم تعطيل حسابك لمدة 30 يوماً. تسجيل الدخول خلال هذه الفترة يعيد تفعيله، وبعدها يُحذف نهائياً.</string>
+    <string name="dialog_delete_account_confirm">حذف الحساب</string>
+    <string name="filter_remove_description">إزالة الفلتر %1$s</string>
 </resources>

@@ -9,7 +9,7 @@
 
 ## Current task
 
-- CUS-021 next (sheets and dialogs); task branches start from `origin/customer`.
+- CUS-022 next (media); task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -87,3 +87,15 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — rules live in `core/common` (shared by ViewModels), UI only renders errors the caller passes; regex from the server never crashes; no literals.
 - Notes: UI checked through Compose previews only. `AppOtpInput`, `AppDropdownField`, `AppTextField` already existed.
+
+### CUS-021 — Sheets and dialogs: global dialogs, active filter chips
+- Branch: `feat/cus-021-sheets-dialogs`
+- Status: DONE
+- Acceptance criteria (PRD §3.12, S03 nearest, S04 chips, S21 logout/delete, §4.3 session; Design Script §1.2–1.3):
+  - [x] `AppGlobalDialog(kind)` for auth required, session expired (no cancel, no outside dismiss), optional update (Update / Later), location explanation, location permanently denied (Settings), logout, delete account (30-day message); AR + EN texts; pure `globalDialogSpec` tested
+  - [x] `AppFilterChipRow(chips: List<ActiveFilterChip>, onRemove)` wrapping row with localized remove description
+  - [x] Existing `AppBottomSheet`, `AppFullScreenSheet`, `AppSheetHeader`, `AppStepIndicator`, `AppStickyActionBar` confirmed; `OverlaysGalleryPreviews` (sheet header, chips, step indicator, sticky bar) AR/EN, light/dark, portrait/landscape, tablet
+- Tests: `OverlaysTest` (3); `WAB_SKIP_IOS=1 scripts/ci/run_local_checks.sh` → GATE-EXIT=0; `scripts/ci/run_ios_checks.sh` → IOS-GATE-EXIT=0
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one dialog composable with a data-driven spec; the feature owns when/what, the kit owns how; no literals.
+- Notes: dialog windows cannot be previewed, so their look was verified through the shared `AppDialog` (already in the component gallery). The CUS-021 session block was first appended to the root session file by mistake (network failure mid-command) and removed.
