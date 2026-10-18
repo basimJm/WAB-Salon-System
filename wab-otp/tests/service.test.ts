@@ -234,6 +234,23 @@ describe('createOtpService', () => {
     expect(closeVerifier).toHaveBeenCalledTimes(1);
   });
 
+  it('resets a blocked phone (admin unblock) and validates the phone', async () => {
+    const otp = build();
+    await otp.reportFailure({ phone: PHONE, purpose: 'LOGIN', reason: 'WRONG_CODE' });
+    const blocked = await otp.reportFailure({
+      phone: PHONE,
+      purpose: 'LOGIN',
+      reason: 'WRONG_CODE',
+    });
+    expect(blocked.blocked).toBe(true);
+    await otp.resetLimits(PHONE);
+    expect(await otp.reportFailure({ phone: PHONE, purpose: 'LOGIN', reason: 'EXPIRED' })).toEqual({
+      blocked: false,
+      attemptsRemaining: 2,
+    });
+    await expect(otp.resetLimits('x')).rejects.toMatchObject({ code: 'OTP_INPUT_INVALID' });
+  });
+
   it('closes cleanly with no hooks', async () => {
     await expect(build().close()).resolves.toBeUndefined();
   });
