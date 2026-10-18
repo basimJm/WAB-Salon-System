@@ -51,3 +51,6 @@ data class OtpVerified(
 
 /** `+962791234567` from the country's dial code and the national number. */
 fun PhoneNumber.toE164(dialCode: String): String = dialCode.trim() + number.trim()
+
+/** Answer of `PUT /installations`: whether the backend linked the device to the signed-in customer. */
+data class InstallationLink(val installationId: String, val linked: Boolean)

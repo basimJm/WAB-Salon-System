@@ -5,6 +5,7 @@ import com.fab.wab.customer.core.data.contract.generated.CustomerOperations
 import com.fab.wab.customer.core.data.contract.generated.PostAuthCheckPhoneBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginData
+import com.fab.wab.customer.core.data.contract.generated.PostAuthLogoutBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptBody
@@ -33,4 +34,7 @@ class AuthApi(private val client: HttpClient) {
 
     suspend fun register(body: PostAuthRegisterBody): BaseResponse<PostAuthRegisterData> =
         client.post(CustomerOperations.postAuthRegister.path) { setBody(body) }.body()
+
+    suspend fun logout(body: PostAuthLogoutBody): BaseResponse<JsonElement?> =
+        client.post(CustomerOperations.postAuthLogout.path) { setBody(body) }.body()
 }

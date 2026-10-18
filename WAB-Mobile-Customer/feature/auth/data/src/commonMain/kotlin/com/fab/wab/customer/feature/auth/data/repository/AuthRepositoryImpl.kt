@@ -4,6 +4,7 @@ import com.fab.wab.customer.core.data.contract.generated.PostAuthCheckPhoneBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthCheckPhoneBodyPhone
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBodyPhone
+import com.fab.wab.customer.core.data.contract.generated.PostAuthLogoutBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptBody
 import com.fab.wab.customer.core.domain.AppError
@@ -52,6 +53,9 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
         val body = request.toBody(installation ?: InstallationInfo.UNKNOWN_INSTALLATION)
         return safeApiCall { api.register(body) }.mapSuccess { it.data.toDomain() }
     }
+
+    override suspend fun logout(refreshToken: String): AppResult<Unit> =
+        safeApiCall { api.logout(PostAuthLogoutBody(refreshToken = refreshToken)) }.mapSuccess { }
 }
 
 /** The contract answers the expected outcomes as error codes (404 / 403 / 409); anything else stays an error. */

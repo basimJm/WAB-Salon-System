@@ -1,6 +1,12 @@
 package com.fab.wab.customer.app.controller
 
 import com.fab.wab.customer.app.analytics.SessionAnalyticsSync
+import com.fab.wab.customer.app.auth.InstallationSyncer
+import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
+import com.fab.wab.customer.feature.auth.domain.model.InstallationLink
+import com.fab.wab.customer.feature.auth.domain.repository.InstallationsRepository
+import com.fab.wab.customer.feature.auth.domain.usecase.SyncInstallationUseCase
+import kotlinx.coroutines.flow.MutableSharedFlow
 import com.fab.wab.customer.app.controller.contract.MainContract.SideEffect
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.vm.MainViewModel
@@ -84,6 +90,12 @@ private class FakeSessionStore(seen: Boolean, initial: SessionState = SessionSta
     override suspend fun clearAll() = Unit
 }
 
+private object NoInstallations : InstallationsRepository {
+    override suspend fun register(info: InstallationInfo, language: String): AppResult<InstallationLink> =
+        AppResult.Success(InstallationLink(info.installationId, false))
+    override suspend fun setPushEnabled(enabled: Boolean): AppResult<Unit> = AppResult.Success(Unit)
+}
+
 private class FakeSessionTimeOut : SessionTimeOut {
     override val sessionEventTimeOut: Channel<Boolean> = Channel(Channel.BUFFERED)
     override suspend fun sendSessionTimeOut(isTimeOut: Boolean) = sessionEventTimeOut.send(isTimeOut)
@@ -138,6 +150,12 @@ class MainViewModelTest {
         sessionStore = sessionStore,
         environment = environment,
         sessionAnalyticsSync = SessionAnalyticsSync(MutableStateFlow(SessionState.Guest()), NoOpAnalyticsTracker, FakeCrashReporter()),
+        installationSyncer = InstallationSyncer(
+            sync = SyncInstallationUseCase(NoInstallations, { null }, MutableStateFlow("ar")),
+            session = MutableStateFlow(SessionState.Guest()),
+            language = MutableStateFlow("ar"),
+            pushTokens = MutableSharedFlow(),
+        ),
         errorText = { "failed" },
         testScope = backgroundScope,
     )

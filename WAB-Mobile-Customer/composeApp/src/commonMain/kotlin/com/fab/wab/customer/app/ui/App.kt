@@ -18,6 +18,7 @@ import com.fab.wab.customer.app.controller.vm.MainViewModel
 import com.fab.wab.customer.app.analytics.TrackNavigationScreens
 import com.fab.wab.customer.app.di.analyticsAppModule
 import com.fab.wab.customer.app.di.appPlatformModule
+import com.fab.wab.customer.app.di.installationSyncModule
 import com.fab.wab.customer.app.ui.system.ForceUpdateScreen
 import com.fab.wab.customer.app.ui.system.MaintenanceScreen
 import com.fab.wab.customer.core.domain.config.LaunchGate
@@ -73,6 +74,7 @@ val appModules = listOf(
     notificationModule,
     viewModelModule,
     appPlatformModule,
+    installationSyncModule,
     platformFirebaseModule(),
     analyticsModule(),
     analyticsAppModule,
