@@ -9,20 +9,7 @@
 
 ## Current task
 
-- Next: CUS-011 session store, CUS-012, CUS-013, then features from CUS-024; task branches start from `origin/customer`.
-
-### CUS-006 — Network kernel: envelope, error-code catalog, retry/timeouts
-- Branch: `feat/cus-006-network-kernel`
-- Status: DONE
-- Acceptance criteria (server CLAUDE.md §6–8, BUSINESS_DOMAIN §11, PRD §3.4, CLAUDE.md §3):
-  - [x] `ErrorEnvelopeDto` → `AppError.ServerError(code: ErrorCode, statusCode, message, details, traceId)`; `ErrorCode` = 41 BUSINESS_DOMAIN §11 codes + `UNKNOWN`; non-envelope HTTP → `HttpError`; transport → `NetworkError`; the template's `ApiErrorDto` removed
-  - [x] 42 AR + EN strings (`error_code_*`), `ERROR_CODE_STRINGS` table + `errorResource`, `appErrorMessage` (composable) and `appErrorText` (ViewModels); main + sample ViewModels use the catalog
-  - [x] `NetworkDefaults` constants; GET-only `HttpRequestRetry` with exponential backoff; `BaseResponse.meta` (`PaginationMetaDto.hasMore`); `AuthEndpoints` confirmed against `openapi.customer.json`
-  - [x] Tests: `ErrorCodeTest` (2), `SafeApiCallTest` (6, MockEngine), `ErrorTextTest` (2, every code has its own string)
-- Tests: `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — clients branch on `code`; writes are never retried; bodies never logged; baseline shrank (removed `println`).
-- Notes: owner instruction 2026-10-18: continue task after task without stopping. `PageableDto` (Laravel-style) stays until CUS-009/010 rebuild the paging source on `BaseResponse.meta`.
+- Next: CUS-012, CUS-013, then features from CUS-024; task branches start from `origin/customer`.
 
 ### CUS-009 — Contract tooling: generated DTOs + operation registry from the server OpenAPI
 - Branch: `feat/cus-009-api-sync`
@@ -48,3 +35,17 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — fixture keys derived from method+path exactly like the generator (no index coupling); error envelopes carry only `code` (clients never show mock text); mock refused in prod by `AppEnvironment`; `ktor-client-mock` ships in the main source set so the engine choice stays a runtime config (prod binaries carry it unused).
 - Notes: the scenario switcher UI lands with the profile screen (CUS-053); until then `MockScenarios.set` is called from code/tests. No visible screen changed → no simulator UI check. Dev builds now serve fixtures by default (`DEV_DATA_SOURCE=mock`); CUS-060 flips dev to `remote` once the dev API exists.
+
+### CUS-011 — Session store: PRD §5 keys, secure tokens (Keystore / Keychain)
+- Branch: `feat/cus-011-session-store`
+- Status: IN REVIEW
+- Acceptance criteria (PRD §5, §15; BUSINESS_DOMAIN enums; CLAUDE.md §2 core/security seam):
+  - [x] `core/domain/session`: `Gender`, `GuestProfile`, `UserProfile`, `SessionState` (Guest / SignedIn with `genderScope`), one `SessionStore` interface (state, onboardingSeen, pushEnabled flows; `tokens()` on demand; signIn / updateTokens / updateUser / setOnboardingSeen / setGuestProfile / setPushEnabled / signOut / clearAll)
+  - [x] `core/security`: `SecureKeyValueStore` + `StringCipher` ports, `SecurePayload` (iv:cipher base64 framing), Android `KeystoreCipher` (AES-256-GCM, non-exportable Keystore key), iOS `KeychainSecureStore` (generic password, after-first-unlock-this-device-only); `InMemorySecureKeyValueStore` for tests
+  - [x] `core/storage`: `DataStoreSessionStore` (plain keys in DataStore, tokens in the secure store, non-secret `signed_in` marker so the state is a flow), `EncryptedPreferencesSecureStore`, `createSecureKeyValueStore` expect/actual, `AppSettingsImpl` tokens delegated to the same secure entries (refresh interceptor unchanged), `clearSession` → `signOut`
+  - [x] Analytics context: user type + gender scope from `SessionStore.state` (only the scope leaves the device)
+  - [x] Tests: `SessionStateTest` (2), `SecurePayloadTest` (2), `DataStoreSessionStoreTest` (5), `EncryptedPreferencesSecureStoreTest` (2), `AppSettingsImplTokensTest` (2), `AppAnalyticsContextProviderTest` (3)
+- Tests: JVM host tests of domain/security/storage/composeApp green; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0 (4 Android variants + lint, 4 iOS configurations + K/N tests)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one `SessionStore` port in `core/domain`, platform crypto behind `core/security` ports, DataStore never holds a plain token (test asserts it), the network refresh path reads the same secure entries, no literals beyond named key constants.
+- Notes: tokens are never logged or exposed as flows; guest nickname/gender never leave the device. `push_enabled` defaults to true (PRD gives no default; OS permission still gates delivery). The Keystore/Keychain actuals are exercised by the device builds, not by unit tests (JVM host has no AndroidKeyStore).
