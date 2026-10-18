@@ -9,23 +9,7 @@
 
 ## Current task
 
-- Next: CUS-029 OTP S13, CUS-030 register…; task branches start from `origin/customer`.
-
-### CUS-026 — Nickname & gender S02 + launch router (PRD §4.2)
-- Branch: `feat/cus-026-launch-router`
-- Status: IN REVIEW
-- Acceptance criteria (PRD §4.1–4.3, S02, §15; Design Script S02; prototype texts):
-  - [x] Pure `launchDestinationOf(onboardingSeen, session)` → Onboarding / GuestProfile / Home (onboarding first; registered → Home; guest with nickname + gender → Home; else S02); `GuestProfile.isComplete`
-  - [x] `MainViewModel` routes after the gate and re-routes after onboarding, after S02 and after a session expiry (guest without profile → S02); `UiState.launch`
-  - [x] S02 in `feature/onboarding`: `SaveGuestProfileUseCase` (trimmed nickname + gender, local only), `GuestProfileViewModel` (Continue disabled until both valid, blank nickname error, `nickname_saved` with gender only), `GuestProfileScreen` (logo, title/subtitle, nickname field, Man / Woman choice cards, Continue), `GuestProfileRoute`
-  - [x] Design system: `AppChoiceCard` (selected = accent border + soft fill), icons Man / Woman, size token `choiceCardHeight`
-  - [x] AR + EN texts from the prototype
-  - [x] Tests: `LaunchDestinationTest` (3), `GuestProfileViewModelTest` (3), `MainViewModelTest` (+3: first launch chain, registered skips S02, expired session → S02)
-  - [x] Emulator: fresh install → onboarding → S02 (empty disabled, error, filled) → Home; relaunch before completing → S02 again; landscape
-- Tests: domain + onboarding presentation + composeApp host tests green (9 new/updated); `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0; emulator (Pixel, AR): fresh install → onboarding → S02 empty (Continue disabled) → nickname + gender (card highlighted, Continue enabled) → Home; relaunch before saving shows S02 again, after saving goes straight to Home; landscape scrolls
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — router is one pure function; guest values never leave the device and the analytics event carries only the gender; Continue disabled state matches the design script; S02 built from design-system parts (`AppChoiceCard` new).
-- Notes: S02 lives in `feature/onboarding` (same launch flow, no data module).
+- Next: CUS-030 register S12, CUS-031…; task branches start from `origin/customer`.
 
 ### CUS-027 — Locations and reference data: countries, cities, areas (cached per language)
 - Branch: `feat/cus-027-locations`
@@ -53,3 +37,19 @@
 - Loops: 1/1 — the loop found three defects (duplicate-key crash from mock fixtures, clipped legal links, literal apostrophe escapes) and fixed them
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — outcomes mapped from contract codes in one pure function; the number is normalized before it leaves the screen and never logged/tracked; auth graph hides the tab bar; strings AR + EN; no literals (slugs, purposes, analytics names are constants).
 - Notes: the not-registered and blocked popups cannot be reached with the mock transport (always 200) and are verified by unit tests; `Screen.Otp` carries the purpose + national number for CUS-029. FOUND by the emulator check: mock list fixtures repeated identical ids/codes → duplicate `LazyColumn` key crash in the country picker; `api_sync.py` now varies ids/codes per item and emits Jordan phone samples (regenerated), the view model de-duplicates by code; legal links overflowed → `FlowRow`; `\'` in Compose string resources renders literally (unlike Android XML) → typographic apostrophes in the login and onboarding EN strings.
+
+### CUS-029 — OTP S13 (shared): pre-check, Firebase verification, ID token to the backend, wrong attempts, countdown
+- Branch: `feat/cus-029-otp`
+- Status: IN REVIEW
+- Acceptance criteria (PRD S13, §14 names; root CLAUDE.md §4.2; operations `POST /auth/otp/request`, `POST /auth/otp/wrong-attempt`, `POST /auth/login`):
+  - [x] Domain: `OtpPolicy`, `WrongAttemptResult`, `AuthSession`, `InstallationInfo`, `OtpVerified`, `PhoneNumber.toE164`; `AuthRepository.requestOtp / reportWrongAttempt / login`; `InstallationInfoProvider` (app binds it); `PendingOtpVerification` (proof hand-off for register / change phone / booking); use cases `RequestOtp`, `ReportWrongOtpAttempt`, `LoginWithIdToken` (stores the session), `ResolveDialCode`
+  - [x] Data: `AuthApi` + mappers (lenient `blockedUntil`), `AuthRepositoryImpl`; `AuthMappersTest` (2)
+  - [x] Screen: `OtpViewModel` (pre-check → Firebase `startVerification` → N boxes from the policy (`otpLength`, config fallback), resend countdown from `resendAfterSeconds`, `allowed=false` → blocked remaining time, confirm → LOGIN logs in + stores tokens/first name/gender → Home; other purposes publish the proof and go back; Firebase invalid → wrong-attempt report (+ block), expired → popup, throttling / network → error catalog), `OtpScreen` (title by purpose, "sent to {phone}", `AppOtpInput`, Verify, resend / countdown / block), `AuthNavigation` (Login + OTP in `Graph.Auth`), Koin factory with route params
+  - [x] App: `Platform.osVersion / deviceModel`, `AppInstallationInfoProvider` (Firebase app-instance id, FCM token) bound in `appPlatformModule`; `AppInstallationInfoProviderTest` (2)
+  - [x] AR + EN texts from the prototype; `formatCountdown` (`0:45`)
+  - [x] Tests: `OtpViewModelTest` (6, virtual time), `AuthMappersTest` (2), `AppInstallationInfoProviderTest` (2)
+  - [x] Emulator (AR): Login → OTP shows the E.164 number, 6 boxes (mock policy), countdown 0:54; filled boxes enable Verify; Verify → login through the mock API → Home, no fatal exception
+- Tests: auth data/presentation + composeApp host tests green (10 new); policy suite 76 OK; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
+- Loops: 1/1 — the loop found the fixture OTP policy (1 box, resend 1 s, not allowed) and the placeholder-config crash in the Firebase providers; both fixed
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — Firebase only through the `core/firebase` port (fake in mock mode), OTP length and resend timing from the backend with the config fallback, wrong attempts reported, block/countdown driven by the server timestamp through the injectable clock, proof hand-off for the other purposes is single-use, nothing phone-related in analytics.
+- Notes: with `DATA_SOURCE=mock` the auth module binds `FakePhoneAuthGateway` (no SMS can be sent against fixtures; any code verifies), so the whole login flow runs on the emulator without Firebase; the real gateway stays bound for `remote`. FOUND by the emulator check: the OTP fixture sampled `otpLength = 1`, `resendAfterSeconds = 1`, `allowed = false` → generator hints (`otpLength` 6, `resendAfterSeconds` 60, `attemptsRemaining` 5, `allowed` true), fixtures regenerated. Second finding: with placeholder Firebase keys the Android app-instance-id / FCM token lookups throw `IllegalArgumentException` ("set a valid API key") → the Android providers now answer null for it too (login still proceeds with the unknown-installation marker).

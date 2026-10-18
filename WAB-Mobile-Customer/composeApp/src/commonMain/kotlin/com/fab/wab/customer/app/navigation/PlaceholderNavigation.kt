@@ -17,7 +17,6 @@ import com.fab.wab.customer.app.resources.nav_bookings
 import com.fab.wab.customer.app.resources.nav_favorites
 import com.fab.wab.customer.app.resources.nav_profile
 import com.fab.wab.customer.app.resources.placeholder_content_page
-import com.fab.wab.customer.app.resources.placeholder_otp
 import com.fab.wab.customer.app.resources.placeholder_register
 import com.fab.wab.customer.app.resources.profile_login_button
 import com.fab.wab.customer.core.navigation.route.Graph
@@ -53,13 +52,9 @@ fun NavGraphBuilder.registerPlaceholderRoots(navController: NavHostController) {
     }
 }
 
-/** Auth destinations still to come (Register CUS-030, OTP CUS-029, legal pages CUS-05x); Login navigates to them. */
+/** Auth destinations still to come (Register CUS-030, legal pages CUS-05x); Login navigates to them. */
 fun NavGraphBuilder.registerPlaceholderAuthScreens() {
     composable<Screen.Register> { PlaceholderRootScreen(Res.string.placeholder_register) }
-    composable<Screen.Otp> { entry ->
-        val route = entry.toRoute<Screen.Otp>()
-        PlaceholderRootScreen(Res.string.placeholder_otp, detail = route.number)
-    }
     composable<Screen.ContentPage> { entry ->
         PlaceholderRootScreen(Res.string.placeholder_content_page, detail = entry.toRoute<Screen.ContentPage>().slug)
     }

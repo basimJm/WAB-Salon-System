@@ -14,11 +14,14 @@ import java.io.IOException
 class AndroidPushTokenProvider(
     private val messaging: FirebaseMessaging = FirebaseMessaging.getInstance(),
 ) : PushTokenProvider {
+    // A placeholder Firebase config (no valid API key yet) raises IllegalArgumentException: no token, no crash.
     override suspend fun currentToken(): String? = try {
         messaging.token.awaitResult()
     } catch (expected: IOException) {
         null
     } catch (expected: IllegalStateException) {
+        null
+    } catch (expected: IllegalArgumentException) {
         null
     }
 
@@ -50,6 +53,8 @@ class AndroidAppInstanceIdProvider(context: Context) : AppInstanceIdProvider {
     } catch (expected: IOException) {
         null
     } catch (expected: IllegalStateException) {
+        null
+    } catch (expected: IllegalArgumentException) {
         null
     }
 }
