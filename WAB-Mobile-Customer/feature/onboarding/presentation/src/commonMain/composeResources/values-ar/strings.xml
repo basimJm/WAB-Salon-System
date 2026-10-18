@@ -11,4 +11,13 @@
     <string name="onboarding_bride_text">باقات VIP للعرائس مع خبيرات مؤهلات لليلتك الأجمل.</string>
     <string name="onboarding_pay_title">ادفع كما يناسبك</string>
     <string name="onboarding_pay_text">ادفع عند الوصول أو عربوناً أو كامل المبلغ أونلاين.</string>
+    <string name="guest_title">كيف نناديك؟</string>
+    <string name="guest_subtitle">سيساعدنا ذلك في تخصيص تجربتك داخل التطبيق.</string>
+    <string name="guest_nickname_label">الاسم المستعار</string>
+    <string name="guest_nickname_placeholder">مثال: سارة</string>
+    <string name="guest_nickname_error">الرجاء إدخال الاسم المستعار</string>
+    <string name="guest_gender_label">الجنس</string>
+    <string name="guest_gender_man">رجل</string>
+    <string name="guest_gender_woman">امرأة</string>
+    <string name="guest_continue">متابعة</string>
 </resources>

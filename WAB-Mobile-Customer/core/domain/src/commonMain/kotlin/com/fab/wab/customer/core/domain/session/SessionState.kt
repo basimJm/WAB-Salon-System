@@ -6,6 +6,9 @@ data class GuestProfile(
     val gender: Gender? = null,
 ) {
     val isEmpty: Boolean get() = nickname == null && gender == null
+
+    /** S02 done: both values saved (PRD §4.1 "Guest (complete)"). */
+    val isComplete: Boolean get() = !nickname.isNullOrBlank() && gender != null
 }
 
 /** Registered customer facts kept locally (PRD §5 `user_first_name`, `user_gender`; the id keys analytics and crash reports, PRD §14). */

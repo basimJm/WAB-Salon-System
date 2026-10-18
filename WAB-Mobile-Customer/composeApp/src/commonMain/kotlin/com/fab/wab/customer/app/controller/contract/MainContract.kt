@@ -1,6 +1,7 @@
 package com.fab.wab.customer.app.controller.contract
 
 import com.fab.wab.customer.core.domain.config.LaunchGate
+import com.fab.wab.customer.core.domain.session.LaunchDestination
 
 sealed interface MainContract {
     /**
@@ -12,11 +13,12 @@ sealed interface MainContract {
         val gate: LaunchGate? = null,
         val error: String? = null,
         val appVersion: String? = null,
-        /** PRD §4.2 / S01: decided once per launch from `onboarding_seen`; null until the gate is known. */
-        val onboardingRequired: Boolean? = null,
+        /** PRD §4.2 router after the gate: onboarding → S02 → Home; null until the gate is known. */
+        val launch: LaunchDestination? = null,
     ) {
         val showSplash: Boolean get() = gate == null
-        val showOnboarding: Boolean get() = onboardingRequired == true
+        val showOnboarding: Boolean get() = launch == LaunchDestination.Onboarding
+        val showGuestProfile: Boolean get() = launch == LaunchDestination.GuestProfile
     }
 
     sealed interface UiAction {
@@ -24,6 +26,7 @@ sealed interface MainContract {
         data object OnOptionalUpdateDismissed : UiAction
         data object OnRetryClicked : UiAction
         data object OnOnboardingFinished : UiAction
+        data object OnGuestProfileSaved : UiAction
         data object OnSessionTimeOut : UiAction
     }
 
