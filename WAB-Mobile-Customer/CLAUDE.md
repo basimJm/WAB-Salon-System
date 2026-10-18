@@ -45,7 +45,7 @@ core/analytics         AnalyticsTracker port (screens + actions, user id/propert
 core/ui                Locale/dark-mode locals, permission flow
 core/design-system     Theme, tokens, adaptive layout, base components, icons, string resources
 core/di                Koin aggregation
-feature/<name>/{domain,data,presentation,di}   One folder per feature (see `feature/sample`)
+feature/<name>/{domain,data,presentation,di}   One folder per feature (see `feature/sample`; `feature/onboarding` = first product feature, no data module: it reads `SessionStore`)
 build-logic/convention Convention plugins: KMP library, Android app, feature layers, core.library / core.compose (namespace from the path, SDK levels from `AndroidSdk.kt`)
 scripts/ci, config/    Policy checks (with tests) and linter configuration used by CI
 ```

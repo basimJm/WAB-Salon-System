@@ -1,0 +1,14 @@
+package com.fab.wab.customer.feature.onboarding.presentation.analytics
+
+import com.fab.wab.customer.core.analytics.AnalyticsScreen
+
+/** PRD §14 names: `onboarding_skip`, `onboarding_complete`; the page index rides along as a parameter. */
+object OnboardingAnalytics {
+    private const val SCREEN_NAME = "onboarding"
+    const val ACTION_SKIP = "onboarding_skip"
+    const val ACTION_COMPLETE = "onboarding_complete"
+    const val ACTION_NEXT = "onboarding_next"
+    const val PARAM_PAGE = "page"
+
+    val SCREEN = AnalyticsScreen(SCREEN_NAME)
+}

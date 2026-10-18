@@ -52,6 +52,9 @@ class ComposeAppPlugin : Plugin<Project> {
                     implementation(project(":feature:sample:data"))
                     implementation(project(":feature:sample:domain"))
                     implementation(project(":feature:sample:di"))
+                    implementation(project(":feature:onboarding:presentation"))
+                    implementation(project(":feature:onboarding:domain"))
+                    implementation(project(":feature:onboarding:di"))
 
                     implementation(libs.findBundle("compose").get())
                     implementation(libs.findLibrary("compose-uiToolingPreview").get())

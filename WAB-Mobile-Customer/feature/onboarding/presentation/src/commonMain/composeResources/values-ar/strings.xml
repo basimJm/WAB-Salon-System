@@ -1,0 +1,14 @@
+<resources>
+    <string name="onboarding_skip">تخطي</string>
+    <string name="onboarding_next">التالي</string>
+    <string name="onboarding_start">ابدأ الآن</string>
+    <string name="onboarding_image_description">صورة توضيحية</string>
+    <string name="onboarding_discover_title">اكتشف أفضل الصالونات</string>
+    <string name="onboarding_discover_text">صالونات رجالية ونسائية في جميع أنحاء الأردن بين يديك.</string>
+    <string name="onboarding_book_title">احجز بسهولة</string>
+    <string name="onboarding_book_text">اختر الخدمة والموظف والموعد المناسب لك في ثوانٍ.</string>
+    <string name="onboarding_bride_title">إطلالة العروس</string>
+    <string name="onboarding_bride_text">باقات VIP للعرائس مع خبيرات مؤهلات لليلتك الأجمل.</string>
+    <string name="onboarding_pay_title">ادفع كما يناسبك</string>
+    <string name="onboarding_pay_text">ادفع عند الوصول أو عربوناً أو كامل المبلغ أونلاين.</string>
+</resources>

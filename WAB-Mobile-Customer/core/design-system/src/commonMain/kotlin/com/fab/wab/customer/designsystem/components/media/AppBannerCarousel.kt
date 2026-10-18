@@ -1,18 +1,14 @@
 package com.fab.wab.customer.designsystem.components.media
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,9 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import com.fab.wab.customer.designsystem.components.image.AppImage
+import com.fab.wab.customer.designsystem.components.pager.AppPageIndicator
 import com.fab.wab.customer.designsystem.resources.Res
 import com.fab.wab.customer.designsystem.resources.banner_description
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -71,23 +66,10 @@ fun AppBannerCarousel(
             )
         }
         if (banners.size > 1) {
-            PageDots(count = banners.size, selected = pagerState.currentPage)
-        }
-    }
-}
-
-@Composable
-private fun PageDots(count: Int, selected: Int, modifier: Modifier = Modifier) {
-    val colors = AppTheme.colors
-    Row(
-        modifier = modifier.padding(top = AppTheme.spacing.space8).semantics { contentDescription = "" },
-        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
-    ) {
-        repeat(count) { index ->
-            Box(
-                Modifier
-                    .size(AppTheme.sizes.statusDot)
-                    .background(if (index == selected) colors.accent else colors.faint, CircleShape),
+            AppPageIndicator(
+                count = banners.size,
+                selected = pagerState.currentPage,
+                modifier = Modifier.padding(top = AppTheme.spacing.space8),
             )
         }
     }

@@ -1,0 +1,14 @@
+<resources>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start">Get started</string>
+    <string name="onboarding_image_description">Illustration</string>
+    <string name="onboarding_discover_title">Discover top salons</string>
+    <string name="onboarding_discover_text">Men\'s and women\'s salons across Jordan, all in one place.</string>
+    <string name="onboarding_book_title">Book in seconds</string>
+    <string name="onboarding_book_text">Pick your service, stylist and a time that suits you.</string>
+    <string name="onboarding_bride_title">Bridal glow</string>
+    <string name="onboarding_bride_text">VIP bridal packages with qualified experts for your big day.</string>
+    <string name="onboarding_pay_title">Pay your way</string>
+    <string name="onboarding_pay_text">Pay on arrival, a deposit, or in full online.</string>
+</resources>

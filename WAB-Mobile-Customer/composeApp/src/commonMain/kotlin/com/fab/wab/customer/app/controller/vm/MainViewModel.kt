@@ -16,10 +16,12 @@ import com.fab.wab.customer.core.domain.config.AppConfigRepository
 import com.fab.wab.customer.core.domain.config.LaunchGate
 import com.fab.wab.customer.core.domain.config.launchGateOf
 import com.fab.wab.customer.core.domain.repository.SessionTimeOut
+import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -32,6 +34,7 @@ class MainViewModel(
     private val appearanceSettings: AppearanceSettings,
     private val appConfigRepository: AppConfigRepository,
     private val sessionTimeOut: SessionTimeOut,
+    private val sessionStore: SessionStore,
     private val environment: AppEnvironment,
     sessionAnalyticsSync: SessionAnalyticsSync,
     private val errorText: suspend (AppError) -> String = ::appErrorText,
@@ -50,6 +53,7 @@ class MainViewModel(
             UiAction.OnUpdateClicked -> emitSideEffect(SideEffect.OpenStore(storeUrl))
             UiAction.OnOptionalUpdateDismissed -> updateState { copy(gate = LaunchGate.Ready) }
             UiAction.OnRetryClicked -> loadConfig()
+            UiAction.OnOnboardingFinished -> updateState { copy(onboardingRequired = false) }
             UiAction.OnSessionTimeOut -> scope.launch { handleSessionTimeOut() }
         }
     }
@@ -61,7 +65,8 @@ class MainViewModel(
                 is AppResult.Success -> {
                     val gate = launchGateOf(result.data)
                     storeUrl = result.data.update.storeUrl
-                    updateState { copy(loading = false, gate = gate, error = null) }
+                    val onboarding = state.value.onboardingRequired ?: !sessionStore.onboardingSeen.first()
+                    updateState { copy(loading = false, gate = gate, error = null, onboardingRequired = onboarding) }
                 }
                 is AppResult.Error -> {
                     val message = errorText(result.appError)
