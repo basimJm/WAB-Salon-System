@@ -21,7 +21,12 @@ try {
 
   const body = `
     const run = async (lib) => {
-      if (lib.SDK_NAME !== 'wab-storage') throw new Error('smoke failed');
+      const store = lib.createStorage({ environment: 'dev', provider: 'memory', cdn: { baseUrl: 'http://localhost:9000/cdn' } });
+      const target = await store.createUploadUrl({ key: 'smoke/a.jpg', visibility: 'PUBLIC', contentType: 'image/jpeg', maxBytes: 100, expiresInSec: 30 });
+      const missing = await store.confirmUpload({ key: 'smoke/a.jpg', visibility: 'PUBLIC', contentType: 'image/jpeg', maxBytes: 100 });
+      let rejected = false;
+      try { await store.createUploadUrl({ key: '../x', visibility: 'PUBLIC', contentType: 'image/jpeg', maxBytes: 1, expiresInSec: 1 }); } catch (e) { rejected = e instanceof lib.StorageError; }
+      if (target.method !== 'PUT' || missing.reason !== 'NOT_FOUND' || !rejected || store.variantKey('a/b.jpg', 'thumb') !== 'a/b_thumb.webp' || lib.SDK_NAME !== 'wab-storage') throw new Error('smoke failed');
     };
   `;
   writeFileSync(
