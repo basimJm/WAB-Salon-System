@@ -7,10 +7,10 @@
 
 ## Current task
 
-### STO-007 — Image variants
-- Branch: `feat/sto-007-variants`
+### STO-008 — MinIO dev mode and rejection fixtures
+- Branch: `feat/sto-008-minio`
 - Status: IN REVIEW
-- Acceptance criteria: thumb 320 / medium 960 WebP via sharp (lazy), EXIF rotated + stripped, never enlarged, keys beside the original (matches WAB-Server variants.ts), unreadable images skipped, ImageProcessor port
+- Acceptance criteria: ensureDevBuckets (dev only, idempotent, race tolerant), path-style endpoint support, shipped upload fixtures (valid/missing/mismatch/empty/too large) run on memory, local-fs and the real SDK for adapter parity
 - Tests: `npm run verify` green (typecheck, lint, format, jest coverage gate 100/95/95, build, package smoke, loop)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — variant naming identical to the server (_thumb.webp/_medium.webp); createStorage now returns Storage = port + createVariants/variantKey(s); jest timeout raised for loaded runners
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — bucket bootstrap refuses prod; fixtures prove identical confirm behaviour on all adapters; not run against a real MinIO container (docker unavailable) - the wire emulator stands in
