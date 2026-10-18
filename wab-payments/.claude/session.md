@@ -39,3 +39,11 @@
 - Tests: npm run verify green (123 tests; real localhost HTTP round trips)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Mock speaks OPP, so the HyperPay adapter runs unchanged against it in dev (mock-gateway provider = hyperpay adapter + local base URL).
+
+### PAY-005 — HyperPay adapter: checkout + verify
+- Branch: `feat/pay-005-hyperpay-session`
+- Status: IN REVIEW
+- Acceptance: HyperPay createCheckout (form POST /v1/checkouts, JOD decimals 2/3, merchantTransactionId, customer fields, integrity, test mode) and verify (GET /v1/checkouts/{id}/payment) with the full result-code table, HTTP status mapping, redacted raw, mock-gateway provider reusing the adapter; global fetch HTTP client with timeout.
+- Tests: npm run verify green (187 tests; HTTP fixtures + real localhost round trips against the OPP mock)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Result-code regexes are from memory of the OPP docs (docs host unreachable here): UNVERIFIED against the live reference. PA (pre-auth) option removed: capture is not built.

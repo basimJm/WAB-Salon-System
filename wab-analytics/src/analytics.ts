@@ -1,5 +1,6 @@
 import { MemoryEventStore } from './adapters/memory/eventStore';
 import { MemoryIdentityStore } from './adapters/memory/identityStore';
+import { createBigQueryWarehouse } from './adapters/bigquery';
 import { MemoryCache, RedisCache } from './cache/stores';
 import { MemoryWarehouse } from './adapters/memory/warehouse';
 import { MongoEventStore } from './adapters/mongo/eventStore';
@@ -25,8 +26,12 @@ const buildCache = (options: ResolvedOptions): { cache?: ResultCache } => {
   return {};
 };
 
-const buildWarehouse = (options: ResolvedOptions): { warehouse?: WarehouseQuery } =>
-  options.warehouse.provider === 'memory' ? { warehouse: new MemoryWarehouse() } : {};
+const buildWarehouse = (options: ResolvedOptions): { warehouse?: WarehouseQuery } => {
+  const { provider } = options.warehouse;
+  if (provider === 'memory') return { warehouse: new MemoryWarehouse() };
+  if (provider === 'bigquery') return { warehouse: createBigQueryWarehouse(options) };
+  return {};
+};
 
 /** Chooses the adapters named by the options. Adding a vendor = one more branch here. */
 export const buildAdapters = (options: ResolvedOptions): Adapters => {

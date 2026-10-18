@@ -161,7 +161,17 @@ describe('MemoryStorage urls, read, write, delete', () => {
 });
 
 describe('createStorage', () => {
-  it('builds the memory provider', () => {
-    expect(createStorage(memoryOptions())).toBeInstanceOf(MemoryStorage);
+  it('builds the memory provider', async () => {
+    const store = createStorage(memoryOptions());
+    expect(typeof store.createVariants).toBe('function');
+    await expect(
+      store.createUploadUrl({
+        key: 'a/b',
+        visibility: 'PUBLIC',
+        contentType: 'image/png',
+        maxBytes: 1,
+        expiresInSec: 1,
+      }),
+    ).resolves.toMatchObject({ url: expect.stringContaining('__upload') as string });
   });
 });

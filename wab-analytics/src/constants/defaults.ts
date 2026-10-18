@@ -95,3 +95,22 @@ export const MONGO_RULES = {
   maxActorsPerFind: 200,
   dayFormat: '%Y-%m-%d',
 } as const;
+
+/** BigQuery export layout (Firebase Analytics / Crashlytics) and query constants. */
+export const BIGQUERY_RULES = {
+  /** Days added on both sides of the suffix range (export dates use the property time zone). */
+  suffixPadDays: 1,
+  screenParam: 'firebase_screen',
+  microsPerMs: 1000,
+  jobLabels: { app: 'wab-analytics' },
+} as const;
+
+/** Network error codes that mean "could not reach the service". */
+export const NETWORK_ERROR_CODES: readonly string[] = [
+  'ECONNRESET',
+  'ECONNREFUSED',
+  'ENOTFOUND',
+  'EAI_AGAIN',
+  'ETIMEDOUT',
+  'EPIPE',
+];
