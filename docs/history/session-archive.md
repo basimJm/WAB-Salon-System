@@ -1409,3 +1409,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Installs, active users, funnels and retention are not in the server reports (SRV-110). Top salons show ids (names come with the salon lookup in a later task).
 
+
+### T-094 — ADM-066 audit log
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-066-audit-log`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-066):
+  - [x] Audit log table (time, action, entity, reason, IP) with action search and entity/admin/day filters in the URL, a drawer with full details and the before/after values, read-only by design; AR+EN
+- Tests: 5 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Entity links are not added (entity type names differ per module).
+

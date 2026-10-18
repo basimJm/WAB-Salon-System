@@ -223,7 +223,7 @@ ROADMAP INT-05 and REL-01…03 for the admin panel.
 
 | ID | Task | Branch | Needs | Server (SRV) | Status | Notes |
 |---|---|---|---|---|---|---|
-| ADM-078 | Fixture tests: every fixture of the mock transport is validated against the generated types in CI; adding an operation without a fixture fails the build | `feat/adm-078-fixture-tests` | ADM-026, ADM-004 | — | TODO | Works against the committed contract snapshot. |
+| ADM-078 | Fixture tests: every fixture of the mock transport is validated against the generated types in CI; adding an operation without a fixture fails the build | `feat/adm-078-fixture-tests` | ADM-026, ADM-004 | — | DONE | Works against the committed contract snapshot. |
 | ADM-079 | Switch to `remote` on dev (INT-05): per-module gap list and fixes, socket events verified against the real server | `feat/adm-079-remote-dev` | ADM-078, ADM-061, ADM-063, ADM-047, ADM-030 | SRV-011 | PENDING | Needs the dev API URL (hosting, SRV-011 PENDING) — **user input**. |
 | ADM-080 | PRD §3 / Design Script §3 flows as Playwright e2e on the mock transport (login to overview, application approval, booking status change, refund retry, payout creation, subscription expiry to Offline, bulk review approval, campaign scheduling, monthly report export; flows needing blocked features join later) | `feat/adm-080-flows-e2e` | ADM-043, ADM-049, ADM-053, ADM-056, ADM-057, ADM-050, ADM-059, ADM-065, ADM-067 | — | TODO | Chromium locally, Chromium + WebKit in CI. |
 | ADM-081 | RTL, accessibility and performance pass over all pages: keyboard paths, contrast in both themes, bundle budget per route chunk, 2-second load on a 30-day range with mock latency | `feat/adm-081-qa-pass` | ADM-080 | — | TODO | REL-01; budgets recorded in `scripts/budget.json`. |

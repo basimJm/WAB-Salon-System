@@ -123,6 +123,18 @@ function findRoute(compiled: CompiledRoute[], method: string, pathname: string) 
   return null;
 }
 
+/** The success envelope of an answer; the `empty` scenario swaps the data for its empty form. */
+function successResponse(answer: MockAnswer, empty: boolean, language: Language): Response {
+  const data = empty ? (answer.empty ?? (answer.meta ? [] : null)) : answer.data;
+  const meta = answer.meta && empty ? { ...answer.meta, total: 0, totalPages: 0 } : answer.meta;
+  return json(answer.status ?? HTTP_STATUS.ok, {
+    success: true,
+    message: mockMessage(language, 'ok'),
+    data,
+    ...(meta ? { meta } : {}),
+  });
+}
+
 /**
  * A `fetch` replacement for the real `HttpClient`: same URLs, headers, envelopes and error shapes as the server,
  * so every repository, validator and error path is exercised exactly as in production. The scenario store
@@ -155,17 +167,13 @@ export function createMockTransport(options: MockTransportOptions): FetchFn {
     if (!found) return errorResponse('notFound', language, calls);
     const body: unknown =
       typeof init.body === 'string' && init.body ? JSON.parse(init.body) : undefined;
-    const answer = found.route.respond({ params: found.params, query: url.searchParams, body });
-    const data = scenario === 'empty' ? (answer.empty ?? (answer.meta ? [] : null)) : answer.data;
-    const meta =
-      answer.meta && scenario === 'empty'
-        ? { ...answer.meta, total: 0, totalPages: 0 }
-        : answer.meta;
-    return json(answer.status ?? HTTP_STATUS.ok, {
-      success: true,
-      message: mockMessage(language, 'ok'),
-      data,
-      ...(meta ? { meta } : {}),
-    });
+    let answer: MockAnswer;
+    try {
+      answer = found.route.respond({ params: found.params, query: url.searchParams, body });
+    } catch {
+      // A fixture that cannot find the record answers like the server: not found.
+      return errorResponse('notFound', language, calls);
+    }
+    return successResponse(answer, scenario === 'empty', language);
   };
 }
