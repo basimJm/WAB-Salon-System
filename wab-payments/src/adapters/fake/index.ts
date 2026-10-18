@@ -15,6 +15,7 @@ import type {
   GatewayRefundRequest,
   GatewayWebhookEvent,
   PaymentGateway,
+  PaymentDestination,
   PaymentSession,
   PaymentVerification,
   RefundResult,
@@ -96,16 +97,23 @@ export const fakeWebhook = (
  */
 export class FakeGateway implements PaymentGateway {
   readonly name = 'fake';
-  readonly capabilities: GatewayCapabilities = {
-    partialRefunds: true,
-    splitPayments: false,
-    webhooks: true,
-    cancelSession: true,
-  };
+  readonly capabilities: GatewayCapabilities;
+  /** Phase 2 records: what was split per session and which refunds hit a sub-merchant. */
+  readonly destinations = new Map<string, readonly PaymentDestination[]>();
+  readonly refundSubMerchants = new Map<string, string>();
   readonly sessions = new Map<string, StoredSession>();
   readonly refunds = new Map<string, RefundResult>();
   /** Counts of gateway calls, so tests can prove idempotency (one charge per key). */
   readonly calls = { createCheckout: 0, refund: 0 };
+  constructor(options: { readonly splitPayments?: boolean } = {}) {
+    this.capabilities = {
+      partialRefunds: true,
+      splitPayments: options.splitPayments ?? false,
+      webhooks: true,
+      cancelSession: true,
+    };
+  }
+
   private nextSession: FakeScenario = 'success';
   private nextRefund: FakeRefundScenario = 'success';
   private failures: PaymentSdkError[] = [];
@@ -156,6 +164,8 @@ export class FakeGateway implements PaymentGateway {
         refundedFils: 0,
       };
       this.sessions.set(stored.sessionId, stored);
+      if (request.destinations !== undefined)
+        this.destinations.set(stored.sessionId, request.destinations);
       return {
         sessionId: stored.sessionId,
         status: stored.outcome.status,
@@ -213,6 +223,8 @@ export class FakeGateway implements PaymentGateway {
       const result = this.refundOutcome(base, this.nextRefund);
       if (result.status === 'REFUNDED') session.refundedFils += request.amountFils;
       this.refunds.set(refundId, result);
+      if (request.subMerchantId !== undefined)
+        this.refundSubMerchants.set(refundId, request.subMerchantId);
       return result;
     });
   }

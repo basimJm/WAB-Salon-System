@@ -7,10 +7,10 @@
 
 ## Current task
 
-### STO-008 — MinIO dev mode and rejection fixtures
-- Branch: `feat/sto-008-minio`
+### STO-010 — Publish preparation @wab/storage
+- Branch: `feat/sto-010-publish`
 - Status: IN REVIEW
-- Acceptance criteria: ensureDevBuckets (dev only, idempotent, race tolerant), path-style endpoint support, shipped upload fixtures (valid/missing/mismatch/empty/too large) run on memory, local-fs and the real SDK for adapter parity
+- Acceptance criteria: package renamed @wab/storage 0.1.0, files, publishConfig (GitHub Packages, restricted), .npmrc scope, CHANGELOG, prepublishOnly=verify, npm pack dry-run lists 9 files (dist, README, CHANGELOG, package.json); NOT published
 - Tests: `npm run verify` green (typecheck, lint, format, jest coverage gate 100/95/95, build, package smoke, loop)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — bucket bootstrap refuses prod; fixtures prove identical confirm behaviour on all adapters; not run against a real MinIO container (docker unavailable) - the wire emulator stands in
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — owner runs npm publish with a registry token; consumers use file:../wab-storage until then (same as @wab/notifications)

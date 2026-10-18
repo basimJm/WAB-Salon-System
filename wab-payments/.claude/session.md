@@ -55,3 +55,19 @@
 - Tests: npm run verify green (211 tests incl. restart-with-same-key against the OPP mock)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Refund is never blind-retried; a failed lookup aborts rather than risking a double refund. Real OPP behaviour of /v1/query and RF is unverified.
+
+### PAY-007 — HyperPay webhooks
+- Branch: `feat/pay-007-webhooks`
+- Status: IN REVIEW
+- Acceptance: AES-256-GCM notification decryption + authentication (IV/tag headers, hex or JSON-wrapped body), event normalization (PAYMENT, REFUND, IGNORED), checkout resolution via ndc/directory, replay protection by event id (facade), forged/corrupt notifications throw PAYMENT_WEBHOOK_INVALID and are never cached.
+- Tests: npm run verify green (226 tests incl. end-to-end mock webhook delivery)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Assumed (unverified): body is the hex ciphertext or {encryptedBody}; payload carries ndc = checkout id. Replay dedupe now happens after authentication.
+
+### PAY-008 — Phase 2 port readiness
+- Branch: `feat/pay-008-phase2-port`
+- Status: IN REVIEW
+- Acceptance: Optional destinations on createSession and subMerchantId on refund, validated and refused with PAYMENT_FEATURE_UNSUPPORTED on gateways without splitPayments; provider.capabilities exposed; Phase 1 behaviour unchanged.
+- Tests: npm run verify green (236 tests)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — No HyperPay split implementation (needs marketplace product + KYC fields: owner decision); only the port and capability flags.

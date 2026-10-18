@@ -1,6 +1,5 @@
 import { createPayments, type PaymentProvider } from '../src';
 import { startMockGateway, type MockGateway } from '../src/mock-gateway';
-import { HyperPayGateway } from '../src/hyperpay/gateway';
 import { ENTITY, TOKEN, WEBHOOK_KEY } from './hyperpayHelpers';
 import { SESSION } from './helpers';
 
@@ -61,9 +60,5 @@ describe('mock-gateway provider (HyperPay adapter against the local OPP mock)', 
   it('survives injected gateway outages through retries', async () => {
     mock.injectHttpFailures(503, 502);
     await expect(payments.createSession(SESSION)).resolves.toMatchObject({ status: 'PENDING' });
-  });
-  it('has not built webhooks yet (PAY-007)', async () => {
-    const gateway = new HyperPayGateway({} as never);
-    await expect(gateway.parseWebhook()).rejects.toThrow('not available yet');
   });
 });

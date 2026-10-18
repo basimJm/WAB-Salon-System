@@ -82,6 +82,8 @@ export interface RefundRequest {
   readonly sessionId: string;
   /** Integer fils; partial refunds add up to at most the captured amount. */
   readonly amountFils: number;
+  /** Phase 2: charge the refund to this sub-merchant's balance (needs `splitPayments`). */
+  readonly subMerchantId?: string;
 }
 
 export interface RefundResult {
@@ -104,7 +106,8 @@ export interface WebhookInput {
 }
 
 export interface PaymentWebhookEvent {
-  readonly kind: 'PAYMENT' | 'REFUND';
+  /** `IGNORED`: an authentic notification of a type this SDK does not handle (acknowledge it). */
+  readonly kind: 'PAYMENT' | 'REFUND' | 'IGNORED';
   readonly sessionId: string;
   readonly status: PaymentStatus;
   readonly gatewayCode: string;
@@ -129,6 +132,8 @@ export type GatewayWebhookEvent = Omit<PaymentWebhookEvent, 'replayed'>;
  * `PAYMENT_REFUND_EXCEEDS`; a gateway outage throws a retryable `PaymentSdkError`.
  */
 export interface PaymentProvider {
+  /** What the configured gateway can do (Phase 2 features are `false` in Phase 1). */
+  readonly capabilities: GatewayCapabilities;
   readonly createSession: (request: CreateSessionRequest) => Promise<PaymentSession>;
   readonly verify: (sessionId: string) => Promise<PaymentVerification>;
   readonly refund: (request: RefundRequest) => Promise<RefundResult>;
@@ -163,6 +168,7 @@ export interface GatewayRefundRequest {
   readonly sessionId: string;
   readonly amountFils: number;
   readonly currency: CurrencyCode;
+  readonly subMerchantId?: string;
 }
 
 /** What an adapter implements. Validation, idempotency, retries and logging live in the facade. */

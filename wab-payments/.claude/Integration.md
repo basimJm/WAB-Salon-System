@@ -126,6 +126,8 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-18 | 0.1.0 | PAY-008: Phase 2 port fields + capability flags. |
+| 2026-10-18 | 0.1.0 | PAY-007: webhook decryption/normalization + replay flag. |
 | 2026-10-18 | 0.1.0 | PAY-006: HyperPay refund + getRefund + SessionDirectory (prod requires a shared directory). |
 | 2026-10-18 | 0.1.0 | PAY-005: HyperPay adapter part 1 (checkout, verify, result codes), HTTP client, mock-gateway provider. |
 | 2026-10-18 | 0.1.0 | PAY-004: mock OPP gateway on localhost + notification crypto (encrypt/decrypt AES-256-GCM). |
