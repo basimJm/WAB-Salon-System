@@ -9,21 +9,7 @@
 
 ## Current task
 
-- Next: CUS-025 onboarding, CUS-026 launch router…; task branches start from `origin/customer`.
-
-### CUS-012 — Analytics tracker: route screen views, action screen context, user id sync, app-instance id
-- Branch: `feat/cus-012-analytics-tracker`
-- Status: IN REVIEW
-- Acceptance criteria (PRD §14; CLAUDE.md §3 analytics rule):
-  - [x] `track(screen)` on every route: `TrackNavigationScreens(navController)` in the app shell → `AnalyticsTracker.trackRoute(route)`; `AnalyticsScreenNames.fromRoute` derives snake_case names from typed routes; a route view waits one grace window so a screen's own `TrackScreen` (with ids) replaces it instead of doubling
-  - [x] Every action carries the current `screen_name` (event params win); common fields already merged by the tracker
-  - [x] Firebase user id set on login / cleared on logout on analytics and Crashlytics (`SessionAnalyticsSync` over `SessionStore.state`, started by `MainViewModel`); user properties `user_type`, `gender_scope`; `UserProfile.id` stored under `user_id`
-  - [x] App-instance id exposed for the backend: `AppInstanceIdProvider` port (Android `FirebaseAnalytics.appInstanceId`, iOS `AnalyticsBridge.appInstanceId()` → `Analytics.appInstanceID()`), fake for tests; consumed by CUS-058 installations
-  - [x] Tests: `AnalyticsScreenNamesTest` (2), `DefaultAnalyticsTrackerTest` (+2: action screen context, route view claim), `SessionAnalyticsSyncTest` (1), `FirebaseFacadeTest` (+1), storage/domain tests updated for the user id
-- Tests: JVM host tests of analytics/firebase/storage/domain/composeApp green; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — route views deduped by a tested grace window instead of per-screen wiring; screen context attached synchronously at call time (no cross-thread state); user id sync is one flow collector on the session state; app-instance id stays behind the `core/firebase` port; nothing analytics-related goes to the backend.
-- Notes: apps never send analytics to the backend (unchanged); only the user id and gender scope leave the device.
+- Next: CUS-026 nickname & gender + launch router, then CUS-027…; task branches start from `origin/customer`.
 
 ### CUS-013 — Realtime client: Socket.IO over Ktor WebSockets, fake, foreground reconnect
 - Branch: `feat/cus-013-realtime-client`
@@ -54,3 +40,18 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — gate decision is a pure function with tests; store URL comes from the backend (template literals removed, baseline shrank); config read through the generated operation; the ViewModel's error-text seam keeps tests free of resource loading; system screens built from design-system parts only.
 - Notes: PLUGIN ADDED (CLAUDE.md §1.12): `com.google.firebase.crashlytics` 3.0.6 in the Android app convention plugin — the emulator check found the app aborting at startup since CUS-004 (`Crashlytics build ID is missing`); the plugin generates the id (mapping upload stays CUS-067). `viewModelOf(::MainViewModel)` cannot resolve the lambda/test-scope seams → explicit `viewModel { MainViewModel(...) }`. Unused template strings removed (optional update now uses the design-system global dialog). The blocking screens cannot be reached from the mock fixture (status OK, maintenance off) so they are verified through previews; the launch path (splash → home) is checked on the emulator.
+
+### CUS-025 — Onboarding S01: 4-page pager, skip/next, `onboarding_seen` on display
+- Branch: `feat/cus-025-onboarding`
+- Status: IN REVIEW
+- Acceptance criteria (PRD S01 + §4.3 onboarding rules; Design Script S01; prototype texts):
+  - [x] `feature/onboarding` (domain: `OnboardingPage` ×4, `MarkOnboardingSeenUseCase`, `ObserveOnboardingSeenUseCase` over `SessionStore`; presentation: contract, `OnboardingViewModel` (marks seen in `onStart`, next → scroll, last → complete, skip → finished, analytics `onboarding_next/skip/complete` with page), `OnboardingScreen` (pager, dots, Skip always visible, Next / Get started), `OnboardingRoute`; di modules)
+  - [x] Design system: `AppPageIndicator` (selected dot stretches, localized description) shared with the banner carousel; icons Discover / Booking / Bride / Payment; size tokens `pageIndicatorActive`, `onboardingIllustration`
+  - [x] App shell: `MainViewModel` decides `onboardingRequired` once per launch from `onboarding_seen` (after the config gate); `OnboardingRoute` renders before the tab scaffold; `OnOnboardingFinished` continues to Home (S02 lands with CUS-026)
+  - [x] AR + EN texts from the prototype (4 titles + 4 texts, skip/next/start)
+  - [x] Tests: `OnboardingPageTest` (1), `OnboardingViewModelTest` (3), `MainViewModelTest` (+1 first launch)
+  - [x] Emulator: fresh install shows onboarding (AR, RTL), swipe + Next + Get started reach Home; relaunch skips it (`onboarding_seen`); landscape layout
+- Tests: onboarding domain/presentation + composeApp + design-system host tests green; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0; emulator (Pixel, AR): onboarding on fresh install, Next ×3, Get started → Home, relaunch skips, landscape re-checked after the fix
+- Loops: 1/1 — the loop caught two things: detekt `ParameterNaming` (`onFinished` → `onFinish`) and landscape clipping (texts pushed off-screen) → compact-height pages use a Row layout
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — feature follows the sample layout (domain/presentation/di), `onboarding_seen` written on display (PRD), page indicator reused by the carousel, texts in resources (AR first), analytics constants, no literals.
+- Notes: illustrations are icon placeholders inside a tinted circle (the prototype has image slots only; owner art pending).

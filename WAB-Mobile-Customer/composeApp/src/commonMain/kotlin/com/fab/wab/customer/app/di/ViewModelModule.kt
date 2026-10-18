@@ -12,6 +12,7 @@ val viewModelModule = module {
             appearanceSettings = get(),
             appConfigRepository = get(),
             sessionTimeOut = get(),
+            sessionStore = get(),
             environment = get(),
             sessionAnalyticsSync = get(),
         )

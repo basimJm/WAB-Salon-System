@@ -12,14 +12,18 @@ sealed interface MainContract {
         val gate: LaunchGate? = null,
         val error: String? = null,
         val appVersion: String? = null,
+        /** PRD §4.2 / S01: decided once per launch from `onboarding_seen`; null until the gate is known. */
+        val onboardingRequired: Boolean? = null,
     ) {
         val showSplash: Boolean get() = gate == null
+        val showOnboarding: Boolean get() = onboardingRequired == true
     }
 
     sealed interface UiAction {
         data object OnUpdateClicked : UiAction
         data object OnOptionalUpdateDismissed : UiAction
         data object OnRetryClicked : UiAction
+        data object OnOnboardingFinished : UiAction
         data object OnSessionTimeOut : UiAction
     }
 

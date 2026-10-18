@@ -54,4 +54,7 @@ include(
     ":feature:sample:data",
     ":feature:sample:presentation",
     ":feature:sample:di",
+    ":feature:onboarding:domain",
+    ":feature:onboarding:presentation",
+    ":feature:onboarding:di",
 )

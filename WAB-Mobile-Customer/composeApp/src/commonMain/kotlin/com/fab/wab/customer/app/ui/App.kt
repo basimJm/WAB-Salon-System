@@ -53,6 +53,9 @@ import com.fab.wab.customer.designsystem.components.image.LocalImageLoader
 import com.fab.wab.customer.designsystem.components.image.rememberImageLoader
 import com.fab.wab.customer.designsystem.components.navigation.AppNavScaffold
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.feature.onboarding.di.onboardingModule
+import com.fab.wab.customer.feature.onboarding.presentation.di.onboardingPresentationModule
+import com.fab.wab.customer.feature.onboarding.presentation.screen.OnboardingRoute
 import com.fab.wab.customer.feature.sample.di.sampleModule
 import com.fab.wab.customer.feature.sample.presentation.di.samplePresentationModule
 import com.fab.wab.customer.openStoreLink
@@ -74,6 +77,8 @@ val appModules = listOf(
     //feature modules
     sampleModule,
     samplePresentationModule,
+    onboardingModule,
+    onboardingPresentationModule,
 )
 
 @Composable
@@ -124,6 +129,10 @@ fun App(androidContext: Any?) {
                 is LaunchGate.ForceUpdate ->
                     AppTheme { ForceUpdateScreen(onUpdate = { mainViewModel.onEvent(UiAction.OnUpdateClicked) }) }
                 is LaunchGate.OptionalUpdate, LaunchGate.Ready -> AppTheme {
+                    if (state.showOnboarding) {
+                        OnboardingRoute(onFinish = { mainViewModel.onEvent(UiAction.OnOnboardingFinished) })
+                        return@AppTheme
+                    }
                     if (gate is LaunchGate.OptionalUpdate) {
                         AppGlobalDialog(
                             kind = GlobalDialogKind.OptionalUpdate,

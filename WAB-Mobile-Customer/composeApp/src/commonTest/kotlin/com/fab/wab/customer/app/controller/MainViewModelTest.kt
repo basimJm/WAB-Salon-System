@@ -20,7 +20,11 @@ import com.fab.wab.customer.core.domain.config.OtpConfig
 import com.fab.wab.customer.core.domain.config.UpdatePolicy
 import com.fab.wab.customer.core.domain.config.UpdateStatus
 import com.fab.wab.customer.core.domain.repository.SessionTimeOut
+import com.fab.wab.customer.core.domain.auth.AuthTokens
+import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionState
+import com.fab.wab.customer.core.domain.session.SessionStore
+import com.fab.wab.customer.core.domain.session.UserProfile
 import com.fab.wab.customer.core.firebase.FakeCrashReporter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -53,6 +57,24 @@ private class FakeConfigRepository(var result: AppResult<AppConfig>) : AppConfig
         calls += 1
         return result
     }
+}
+
+private class FakeSessionStore(seen: Boolean) : SessionStore {
+    private val seenState = MutableStateFlow(seen)
+    override val state: Flow<SessionState> = MutableStateFlow(SessionState.Guest())
+    override val onboardingSeen: Flow<Boolean> = seenState
+    override val pushEnabled: Flow<Boolean> = MutableStateFlow(true)
+    override suspend fun tokens(): AuthTokens? = null
+    override suspend fun signIn(tokens: AuthTokens, user: UserProfile) = Unit
+    override suspend fun updateTokens(tokens: AuthTokens) = Unit
+    override suspend fun updateUser(user: UserProfile) = Unit
+    override suspend fun setOnboardingSeen(seen: Boolean) {
+        seenState.value = seen
+    }
+    override suspend fun setGuestProfile(profile: GuestProfile) = Unit
+    override suspend fun setPushEnabled(enabled: Boolean) = Unit
+    override suspend fun signOut() = Unit
+    override suspend fun clearAll() = Unit
 }
 
 private class FakeSessionTimeOut : SessionTimeOut {
@@ -98,11 +120,12 @@ class MainViewModelTest {
     private val settings = MinimalAppSettings()
     private val sessionTimeOut = FakeSessionTimeOut()
 
-    private fun TestScope.viewModel(repository: AppConfigRepository) = MainViewModel(
+    private fun TestScope.viewModel(repository: AppConfigRepository, onboardingSeen: Boolean = true) = MainViewModel(
         appSettings = settings,
         appearanceSettings = AppearanceSettings(settings),
         appConfigRepository = repository,
         sessionTimeOut = sessionTimeOut,
+        sessionStore = FakeSessionStore(onboardingSeen),
         environment = environment,
         sessionAnalyticsSync = SessionAnalyticsSync(MutableStateFlow(SessionState.Guest()), NoOpAnalyticsTracker, FakeCrashReporter()),
         errorText = { "failed" },
@@ -116,6 +139,18 @@ class MainViewModelTest {
         assertEquals(LaunchGate.Ready, state.gate)
         assertEquals("1.2.3", state.appVersion)
         assertNull(state.error)
+        assertEquals(false, state.showOnboarding)
+    }
+
+    @Test
+    fun firstLaunchShowsOnboardingUntilFinished() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel(FakeConfigRepository(AppResult.Success(CONFIG)), onboardingSeen = false)
+        val state = viewModel.state.first { !it.loading }
+        assertTrue(state.showOnboarding)
+        viewModel.onEvent(UiAction.OnOnboardingFinished)
+        assertEquals(false, viewModel.state.first { it.onboardingRequired == false }.showOnboarding)
+        viewModel.onEvent(UiAction.OnRetryClicked)
+        assertEquals(false, viewModel.state.first { !it.loading }.showOnboarding)
     }
 
     @Test

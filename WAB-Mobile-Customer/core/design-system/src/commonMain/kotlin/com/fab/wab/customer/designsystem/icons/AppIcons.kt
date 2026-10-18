@@ -4,6 +4,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.EventAvailable
+import androidx.compose.material.icons.rounded.Payments
+import androidx.compose.material.icons.rounded.Storefront
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Call
@@ -58,5 +62,9 @@ object AppIcons {
     val Offline: ImageVector = Icons.Rounded.CloudOff
     val ExpandMore: ImageVector = Icons.Rounded.KeyboardArrowDown
     val Play: ImageVector = Icons.Rounded.PlayArrow
+    val Discover: ImageVector = Icons.Rounded.Storefront
+    val Booking: ImageVector = Icons.Rounded.EventAvailable
+    val Bride: ImageVector = Icons.Rounded.AutoAwesome
+    val Payment: ImageVector = Icons.Rounded.Payments
     val Image: ImageVector = Icons.Rounded.Image
 }
