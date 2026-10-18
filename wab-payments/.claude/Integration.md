@@ -115,7 +115,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 | Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ |
 | Shared kernel (errors, config, http/retry, logger) | ⬜ |
 | Adapter: fake — scenario-driven (success/fail/cancel/pending) for dev/tests | ⬜ |
-| Adapter: mock-gateway — local HTTP gateway simulator on localhost | ⬜ |
+| Adapter: mock-gateway — local HTTP gateway simulator on localhost (OPP-compatible) | ✅ |
 | Adapter: hyperpay — FIRST real candidate (not final) | ⬜ |
 | Adapter: <next gateway> — any other gateway: implement PaymentGateway port + register | ⬜ |
 | Adapter: kmp-launcher — Android/iOS payment UI wrapper | ⬜ |
@@ -126,6 +126,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-18 | 0.1.0 | PAY-004: mock OPP gateway on localhost + notification crypto (encrypt/decrypt AES-256-GCM). |
 | 2026-10-18 | 0.1.0 | PAY-003: port + facade + fake + idempotency store + createPayments. |
 | 2026-10-18 | 0.1.0 | PAY-002: kernel: PaymentSdkError, options + prod rules, redacting logger, money, retry. |
 | 2026-10-18 | 0.1.0 | PAY-001 scaffold (`@wab/payments`). Gateway decided: HyperPay (OPP/COPYandPAY). |
