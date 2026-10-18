@@ -103,3 +103,11 @@
 - Tests: wab-payments npm run verify green (238 tests); WAB-Server full gate (see SRV-092 block)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Owner publishes with a registry token; until then both projects use the file: dependency.
+
+### PAY-013 — KMP HyperPay launcher for Android
+- Branch: `feat/pay-013-kmp-hyperpay-android`
+- Status: IN REVIEW
+- Acceptance: payments-hyperpay-android module: HyperPayAndroidBridge (OPP CheckoutActivity, TEST/LIVE, shopperResultUrl, language), ActivityResultRegistryHost, common sdkOutcome mapping (tested), manifest/intent-filter guide, no card data logged.
+- Tests: 27 KMP unit tests pass on the JVM harness (common mapping included); the Android module itself is NOT compiled (Google Maven and the OPP SDK repository unreachable)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — OPP class and constant names are from the vendor documentation: verify on a device with sandbox credentials (owner input).

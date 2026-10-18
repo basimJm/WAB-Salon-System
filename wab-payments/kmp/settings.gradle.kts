@@ -31,4 +31,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "wab-payments-kmp"
 
-include(":payments")
+include(":payments", ":payments-hyperpay-android")
