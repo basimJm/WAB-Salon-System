@@ -28,6 +28,14 @@ export interface NotifierSettings {
   readonly from: { readonly address: string; readonly name: string };
 }
 
+/** Firebase settings of the real OTP provider (wab-otp). */
+export interface OtpSettings {
+  readonly firebase: {
+    readonly projectId: string;
+    readonly authEmulatorHost?: string;
+  };
+}
+
 export interface AppConfig {
   readonly env: Environment;
   readonly isProduction: boolean;
@@ -43,6 +51,8 @@ export interface AppConfig {
   readonly secrets: { readonly payoutEncryptionKey?: string };
   /** Credentials of the real notifier (FCM + SMTP); present only when the notifier is `real`. */
   readonly notifier?: NotifierSettings;
+  /** Firebase project of the real OTP provider; present only when the OTP provider is `real`. */
+  readonly otp?: OtpSettings;
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
   readonly providers: {
     readonly otp: ProviderMode;
@@ -107,6 +117,19 @@ const buildNotifierSettings = (values: RawEnv): NotifierSettings | undefined => 
   });
 };
 
+const buildOtpSettings = (values: RawEnv): OtpSettings | undefined => {
+  if (values[ENV_KEYS.otpProvider] !== 'real') return undefined;
+  const projectId = values[ENV_KEYS.firebaseProjectId];
+  if (projectId === undefined) return undefined;
+  const emulatorHost = values[ENV_KEYS.firebaseAuthEmulatorHost];
+  return Object.freeze({
+    firebase: Object.freeze({
+      projectId,
+      ...(emulatorHost === undefined ? {} : { authEmulatorHost: emulatorHost }),
+    }),
+  });
+};
+
 /** Validates the environment and returns an immutable, typed config. Fails fast. */
 export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppConfig => {
   const parsed = envSchema.safeParse(source);
@@ -118,8 +141,10 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   const env = values[ENV_KEYS.nodeEnv];
   const payoutKey = values[ENV_KEYS.payoutEncryptionKey];
   const notifier = buildNotifierSettings(values);
+  const otp = buildOtpSettings(values);
   return Object.freeze({
     ...(notifier === undefined ? {} : { notifier }),
+    ...(otp === undefined ? {} : { otp }),
     env,
     isProduction: env === 'production',
     port: values[ENV_KEYS.port],
