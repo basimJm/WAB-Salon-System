@@ -9,7 +9,7 @@
 
 ## Current task
 
-- CUS-005c next (variants check); task branches start from `origin/customer`.
+- Design phase next (CUS-018 universal states); task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -36,3 +36,15 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — vendor-neutral port, nothing Firebase in common code, no literals at call sites (names in `*Analytics` objects / `AnalyticsKeys`), events validated before leaving the app.
 - Notes: Firebase backend is CUS-004; user type / gender scope come from the session store (CUS-011) — until then the provider reports GUEST and no gender. No visible UI change → no browser/simulator UI check (sample screen behaviour unchanged).
+
+### CUS-005c — Build variants verified locally
+- Branch: `feat/cus-005c-variants-check`
+- Status: DONE
+- Acceptance criteria (owner request 2026-10-18; CLAUDE.md §1.5, §5):
+  - [x] Android `assembleDevDebug/DevRelease/ProdDebug/ProdRelease` + lint green on the owner's Mac (CUS-005a/b gates, BUILD SUCCESSFUL)
+  - [x] iOS `iosApp-Dev` Debug-Dev / Release-Dev and `iosApp-Prod` Debug-Prod / Release-Prod build for the simulator (`CODE_SIGNING_ALLOWED=NO`); `iosSimulatorArm64Test` green; SwiftLint not installed locally (CI runs it)
+  - [x] `scripts/ci/run_ios_checks.sh` mirrors the CI matrix (`test_ios_checks.py` compares its dry-run with `customer-ci.yml`) and `run_local_checks.sh` runs it when Xcode exists (`WAB_SKIP_IOS=1` skips)
+- Tests: `python3 -m unittest discover -s scripts/ci/tests` (71 incl. 3 new) OK; `scripts/ci/run_ios_checks.sh` → IOS-GATE-EXIT=0; policy all ok
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — gate script is data-driven (matrix list), no hardcoded paths beyond the project file CI also names; nothing in app code changed.
+- Notes: the full `run_local_checks.sh` now takes ~15 min with iOS; use `WAB_SKIP_IOS=1` for Android-only iterations and run iOS once before the push.

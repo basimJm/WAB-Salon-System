@@ -98,6 +98,6 @@ feature/<name>/di             Koin module that binds data → domain
 
 ## 8. Definition of Done (per task)
 1. Acceptance criteria written in `.claude/session.md` before coding; each covered by a unit test.
-2. `scripts/ci/run_local_checks.sh` green (policy checks, detekt, unit tests) and, where the toolchain exists, `./gradlew` build/lint for all four variants. Android/iOS builds that cannot run in the current environment run in CI; the PR is not done until CI is green.
+2. `scripts/ci/run_local_checks.sh` green (policy checks, detekt, unit tests, the four Android variants + lint when the SDK exists, and `scripts/ci/run_ios_checks.sh` = the four iOS configurations + Kotlin/Native tests when Xcode exists; `WAB_SKIP_IOS=1` skips iOS). Android/iOS builds that cannot run in the current environment run in CI; the PR is not done until CI is green.
 3. One verification loop and the four-role review recorded in `.claude/session.md` (`Loops: 1/1`, `Review: PASSED`); `python3 scripts/tasks.py set CUS-NNN <STATUS>` at start, PR and merge.
 4. Branch pushed (never `main`), draft PR opened, `memory.md` updated with durable facts.
