@@ -104,7 +104,8 @@ export interface WebhookInput {
 }
 
 export interface PaymentWebhookEvent {
-  readonly kind: 'PAYMENT' | 'REFUND';
+  /** `IGNORED`: an authentic notification of a type this SDK does not handle (acknowledge it). */
+  readonly kind: 'PAYMENT' | 'REFUND' | 'IGNORED';
   readonly sessionId: string;
   readonly status: PaymentStatus;
   readonly gatewayCode: string;

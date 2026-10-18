@@ -1,20 +1,17 @@
-import { ERROR_CODES } from '../constants/codes';
-import { PaymentSdkError } from '../errors';
 import type {
   GatewayCapabilities,
   GatewayCheckoutRequest,
   GatewayRefundRequest,
   GatewayWebhookEvent,
+  WebhookInput,
   PaymentGateway,
   PaymentSession,
   PaymentVerification,
   RefundResult,
 } from '../types';
 import { fetchRefund, refund } from './refunds';
+import { parseWebhook } from './webhook';
 import { createCheckout, fetchPayment, type HyperPayContext } from './session';
-
-const notBuilt = (what: string): PaymentSdkError =>
-  new PaymentSdkError(ERROR_CODES.UNKNOWN, `${what} is not available yet`);
 
 /** HyperPay (ACI OPP / COPYandPAY) behind the stable gateway port. */
 export class HyperPayGateway implements PaymentGateway {
@@ -44,7 +41,7 @@ export class HyperPayGateway implements PaymentGateway {
     return fetchRefund(this.ctx, refundId);
   }
 
-  parseWebhook(): Promise<GatewayWebhookEvent> {
-    return Promise.reject(notBuilt('webhook handling'));
+  parseWebhook(input: WebhookInput): Promise<GatewayWebhookEvent> {
+    return parseWebhook(this.ctx, input);
   }
 }
