@@ -7,10 +7,10 @@
 
 ## Current task
 
-### STO-010 — Publish preparation @wab/storage
-- Branch: `feat/sto-010-publish`
+### FIX-STO-CJS — Fix: lazy vendor SDK loading under CommonJS
+- Branch: `fix/storage-cjs-vendor-loading`
 - Status: IN REVIEW
-- Acceptance criteria: package renamed @wab/storage 0.1.0, files, publishConfig (GitHub Packages, restricted), .npmrc scope, CHANGELOG, prepublishOnly=verify, npm pack dry-run lists 9 files (dist, README, CHANGELOG, package.json); NOT published
+- Acceptance criteria: CJS build turns lazy import() into require() (esbuild dynamic-import off for cjs only); ESM keeps native import(); package smoke now loads the AWS SDK and sharp through both module systems
 - Tests: `npm run verify` green (typecheck, lint, format, jest coverage gate 100/95/95, build, package smoke, loop)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — owner runs npm publish with a registry token; consumers use file:../wab-storage until then (same as @wab/notifications)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — found by WAB-Server's Jest run: the CJS bundle kept native import(), which Jest/ts-node cannot execute, so every real S3 call failed with 'AWS SDK could not be loaded'
