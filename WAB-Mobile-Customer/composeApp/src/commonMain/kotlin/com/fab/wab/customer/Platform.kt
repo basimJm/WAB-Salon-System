@@ -5,6 +5,10 @@ interface Platform {
 
     /** Stable lowercase id for analytics (`android` / `ios`), never the human-readable [name]. */
     val analyticsName: String
+
+    /** OS version and device model as the installation record reports them (PRD §14 installations). */
+    val osVersion: String
+    val deviceModel: String
 }
 
 object PlatformNames {

@@ -12,6 +12,10 @@ import com.fab.wab.customer.core.domain.locations.City
 import com.fab.wab.customer.core.domain.locations.Country
 import com.fab.wab.customer.core.domain.locations.LocationsRepository
 import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
+import com.fab.wab.customer.feature.auth.domain.model.AuthSession
+import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
+import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
+import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
 import com.fab.wab.customer.feature.auth.domain.model.PhoneCheck
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
 import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
@@ -53,6 +57,10 @@ private class FakeAuth(var result: AppResult<PhoneCheck> = AppResult.Success(Pho
         checked += phone
         return result
     }
+    override suspend fun requestOtp(phoneE164: String, purpose: AuthPurpose): AppResult<OtpPolicy> = AppResult.Loading
+    override suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult> = AppResult.Loading
+    override suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession> =
+        AppResult.Loading
 }
 
 private class SettingsFake : AppSettings {

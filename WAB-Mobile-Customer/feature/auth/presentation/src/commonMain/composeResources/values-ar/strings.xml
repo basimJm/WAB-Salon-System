@@ -19,4 +19,16 @@
     <string name="login_blocked_title">تم إيقاف حسابك</string>
     <string name="login_blocked_body">تم إيقاف حسابك، يرجى التواصل معنا لمزيد من المعلومات.</string>
     <string name="login_blocked_contact">تواصل معنا</string>
+    <string name="otp_title">تحقق من رقمك</string>
+    <string name="otp_title_booking">تأكيد الحجز</string>
+    <string name="otp_sent_to">أرسلنا رمزاً إلى %1$s</string>
+    <string name="otp_verify">تحقق</string>
+    <string name="otp_resend_in">إعادة الإرسال خلال %1$s</string>
+    <string name="otp_resend">إعادة إرسال الرمز</string>
+    <string name="otp_wrong">الرمز غير صحيح، حاول مجدداً</string>
+    <string name="otp_expired_title">انتهت صلاحية الرمز</string>
+    <string name="otp_expired_body">انتهت صلاحية الرمز، يرجى طلب رمز جديد.</string>
+    <string name="otp_expired_ok">حسناً</string>
+    <string name="otp_blocked">تم تجاوز عدد المحاولات، يرجى المحاولة لاحقاً</string>
+    <string name="otp_remaining">الوقت المتبقي %1$s</string>
 </resources>

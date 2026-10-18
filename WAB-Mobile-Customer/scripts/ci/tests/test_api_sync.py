@@ -87,6 +87,8 @@ class ApiSyncTest(unittest.TestCase):
         self.assertIn('"PutFavoritesBySalonId" to "', fixtures)
         country = api_sync.sample_value({"type": "object", "properties": {"code": {"type": "string"}, "dialCode": {"type": "string"}, "phoneRegex": {"type": "string"}}}, "c", {})
         self.assertEqual({"code": "JO", "dialCode": "+962", "phoneRegex": "^7[789][0-9]{7}$"}, country)
+        otp = api_sync.sample_value({"type": "object", "properties": {"allowed": {"type": "boolean"}, "otpLength": {"type": "integer"}, "enabled": {"type": "boolean"}}}, "o", {})
+        self.assertEqual({"allowed": True, "otpLength": 6, "enabled": False}, otp)
 
     def test_check_mode_detects_stale_and_extra_files(self) -> None:
         self.assertEqual(1, api_sync.main(["--check", "--spec", str(self.spec), "--out", str(self.out)]))

@@ -9,6 +9,8 @@ class IOSPlatform : Platform {
     override val name: String =
         UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
     override val analyticsName: String = PlatformNames.IOS
+    override val osVersion: String = UIDevice.currentDevice.systemVersion
+    override val deviceModel: String = UIDevice.currentDevice.model
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()
