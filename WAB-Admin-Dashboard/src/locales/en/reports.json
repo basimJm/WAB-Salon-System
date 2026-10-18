@@ -1,0 +1,34 @@
+{
+  "reports": {
+    "subtitle": "Daily, weekly and monthly numbers.",
+    "kinds": "Report period",
+    "kind": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "day": "Day",
+    "weekStart": "Week starts on",
+    "month": "Month",
+    "bookings": "Bookings",
+    "collected": "Collected",
+    "registrations": "New customers",
+    "reviews": "Reviews submitted",
+    "byStatus": "Bookings by status",
+    "payments": "Payments and refunds",
+    "attempts": "Payment attempts",
+    "succeeded": "Succeeded",
+    "failed": "Failed",
+    "refunds": "Refunds (done / created)",
+    "payouts": "Payouts",
+    "topSalons": "Top salons (bookings, completed, lost)",
+    "snapshot": "Right now",
+    "reviewsPending": "Reviews waiting",
+    "refundsPending": "Refunds pending",
+    "applicationsPending": "Applications waiting",
+    "subscriptions": "Subscriptions (trial / active / expired)",
+    "error": {
+      "month": "Use the form YYYY-MM"
+    }
+  }
+}

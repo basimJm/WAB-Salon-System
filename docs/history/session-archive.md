@@ -1373,3 +1373,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-059 and ADM-060 built as ONE task; live stats are the list's stats column (no polling page); CITY audience takes one city in the form (API allows up to 50).
 
+
+### T-091 — ADM-061 alerts and live shell counters (ADM-061..062)
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-061-alerts`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-061):
+  - [x] Alerts list (severity, kind, link to the subject, status filters, acknowledge) plus live numbers in the shell: the bell shows NEW alerts and opens the page, sidebar counters for pending applications, pending reviews and alerts; all refresh through the realtime invalidation bus
+- Tests: 4 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-061 and ADM-062 built as ONE task.
+
