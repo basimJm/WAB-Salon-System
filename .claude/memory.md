@@ -112,3 +112,4 @@
 - ADM-054 done: reconciliation = repositories.transactions.reconciliation(); page /finance/reconciliation
 - ADM-057 done: subscriptions = repositories.subscriptions {list,recordPayment}; days are Amman day starts
 - ADM-058 done: placements = repositories.placements {list,create,update,end,reorder}; moveId pure helper; page /content/recommended
+- ADM-059 done: campaigns = repositories.campaigns {list,create,audienceSize,cancel}; compose pattern = list page swaps to CampaignEditor; domain validateCampaign/audienceValid/parseIds

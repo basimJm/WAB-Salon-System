@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-088 — ADM-057 subscriptions
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-057-subscriptions`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-057):
-  - [x] Subscriptions list (status and ending-within-N-days filters, days left, last payment), payments of a salon, and recording a payment made outside the app (amount, paid day, covered period, method, reference, note) which activates and extends the subscription
-- Tests: 4 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
-
 ### T-089 — ADM-058 recommended salons
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 6 new tests through the mock stack; no separate browser check
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: reorder is up/down buttons (accessible, one request) instead of drag and drop; the drag library ADR (Appendix C) stays open. The reorder request carries a fixed reason from the locale.
+
+### T-090 — ADM-059 push campaigns: compose and history (ADM-059..060)
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-059-campaigns`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-059):
+  - [x] Campaigns screen: history with delivery stats and status filter, cancel a scheduled campaign with a reason, compose a campaign (texts in both languages, app, audience kinds with an estimate, link, now or scheduled time in Amman, phone previews, reason); AR+EN
+- Tests: 6 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-059 and ADM-060 built as ONE task; live stats are the list's stats column (no polling page); CITY audience takes one city in the form (API allows up to 50).
 
 ### Pending (next)
 
