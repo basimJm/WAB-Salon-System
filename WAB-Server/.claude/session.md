@@ -5,23 +5,24 @@
 ## Integration status (one glance)
 
 - Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (116) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
-- Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); storage / payments / analytics on in-repo fakes until SRV-112 / SRV-092 / SRV-110 (BLOCKED on the SDK publish tasks; owner integrates).
+- Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); analytics **real** (`@wab/analytics`, SRV-110); storage / payments on in-repo fakes until SRV-112 / SRV-092 (other SDK tasks).
 - Open work: SRV-111 contract guard, Stage N (SRV-117…128, admin gaps), Stage O (SRV-129…134, merchant gaps). Deployment SRV-011/116 and SRV-059/115: owner (PENDING).
 
 ## Current task
 
-### SRV-112 (storage part) — Wire `@wab/storage` into WAB-Server (`STORAGE_PROVIDER=real`)
+### SRV-110 — `ANALYTICS_PROVIDER=real` through `@wab/analytics`
 
-- Branch: `feat/srv-112-storage-real`
-- Status: IN REVIEW (SRV-112 itself stays BLOCKED on the other SDKs and the publish; this is the storage slice, owner grant 2026-10-18 "assume everything is ready")
-- Acceptance criteria (BE-70 presigned uploads, NFR-01 secrets only in env, server rules §2 externals behind interfaces, §5 no hardcoding, §8 provider errors):
-  - [x] `file:../wab-storage` dependency (`@wab/storage`), `ensure-sdks` builds it, Docker image + `Dockerfile.dockerignore` include it
-  - [x] Env keys S3_* / CDN_BASE_URL / CLOUDFRONT_* in constants, schema (required when `STORAGE_PROVIDER=real`, credentials and CloudFront keys only complete) and `.env.example`; typed `config.storage`
-  - [x] `providers/storage/real.ts` maps settings to SDK options (dev/prod, TTL ceilings from existing constants), SDK errors to 502/503 `ExternalServiceError`, caller errors to `RangeError`, `EMPTY` rejection to `TYPE_MISMATCH`
-  - [x] `createProviders` builds it; missing settings or invalid SDK config fail at start-up
-- Tests: `tests/storageReal.test.ts` (mapping, delegation, wiring, real SDK presigning offline), config and docker tests extended
+- Branch: `feat/ana-010-publish` (shared with ANA-010: package prep and the server wiring in one PR)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: ANA-03, ANA-04 via the package; server rules §2 externals behind interfaces, §5 no hardcoding, §8 provider errors):
+  - [x] `@wab/analytics` dependency (`file:../wab-analytics`, built by `ensure-sdks`, Dockerfile + dockerignore), `@google-cloud/bigquery` for the warehouse
+  - [x] Env keys `ANALYTICS_BIGQUERY_PROJECT_ID|DATASET|LOCATION|CREDENTIALS_JSON|CRASH_TABLE|MAX_BYTES_BILLED` in constants, schema, `.env.example`; project and dataset together; credentials must be a JSON object (never echoed); production requires project, dataset and credentials
+  - [x] `providers/analytics/real.ts`: SDK over `serverEvents` (ObjectId codec) and `identityLinks`, Redis result cache, BigQuery when configured; caller errors -> `RangeError`, vendor errors -> `ExternalServiceError`; indexes created on start (failure logged); closed on shutdown; `sdk` exposed for funnels/cohorts/journey/overview
+  - [x] `createProviders` builds it with `mongoose.connection`; without a connection or deps it fails loudly
+  - [x] The existing Mongo-backed admin analytics (SRV-105) is untouched; admin gap tasks (SRV-117+) are NOT done here
+- Tests: `tests/analyticsReal.test.ts` (19: options, codec, error mapping, stubbed SDK, real SDK over fake collections, createProviders) + config tests (analytics settings, production requirements)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: real S3/CloudFront/CDN calls and the Docker build (no daemon). The SDK is verified against a wire emulator inside `wab-storage` tests. API docs: no change.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: a real MongoDB write/read through the package, a real BigQuery dataset or credentials, the Docker build (no daemon). API docs: no change.
 
 ## Last blocks
 

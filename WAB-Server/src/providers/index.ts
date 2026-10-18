@@ -1,7 +1,12 @@
 import type { AppConfig } from '../config';
 import { REAL_PROVIDER_MODE } from '../constants/providers';
 import { InternalError } from '../utils/errors';
-import { FakeAnalyticsProvider, type AnalyticsProvider } from './analytics';
+import {
+  FakeAnalyticsProvider,
+  createRealAnalytics,
+  type AnalyticsProvider,
+  type CollectionSource,
+} from './analytics';
 import { FakeNotifier, type Notifier } from './notifier';
 import { createRealNotifier, type ClosableNotifier } from './notifier/real';
 import type { Redis } from 'ioredis';
@@ -17,6 +22,8 @@ export interface ProviderDeps {
   readonly redis: Redis;
   readonly logger: Logger;
   readonly config: AppConfig;
+  /** MongoDB connection the real analytics provider reads its collections from. */
+  readonly mongo?: CollectionSource;
 }
 
 export interface Providers {
@@ -114,7 +121,25 @@ export const createProviders = (
       },
     ),
     payments: pick('payments', providers.payments, () => new FakePaymentProvider()),
-    analytics: pick('analytics', providers.analytics, () => new FakeAnalyticsProvider()),
+    analytics: pick(
+      'analytics',
+      providers.analytics,
+      (): AnalyticsProvider => new FakeAnalyticsProvider(),
+      () => {
+        if (deps?.mongo === undefined) {
+          throw new ProviderUnavailableError('analytics', 'database connection missing');
+        }
+        const real = createRealAnalytics({
+          settings: deps.config.analytics ?? {},
+          mongo: deps.mongo,
+          redis: deps.redis,
+          logger: deps.logger,
+          isProduction,
+        });
+        closers.push(() => real.close());
+        return real;
+      },
+    ),
   };
   return {
     ...built,

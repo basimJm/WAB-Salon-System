@@ -99,3 +99,6 @@ export const ANALYTICS_GROUPINGS = ['NAME', 'DAY'] as const;
 export type AnalyticsGrouping = (typeof ANALYTICS_GROUPINGS)[number];
 export const ANALYTICS_IDENTITY_ACTORS = ['CUSTOMER', 'MEMBER'] as const;
 export const INSTALLATION_ID_PATTERN = /^[A-Za-z0-9._-]{8,128}$/;
+
+/** Collection of installation-to-account links kept by the analytics package. */
+export const IDENTITY_LINKS_COLLECTION = 'identityLinks';

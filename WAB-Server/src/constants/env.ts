@@ -56,6 +56,16 @@ export const ENV_KEYS = {
   smtpPass: 'SMTP_PASS',
   emailFromAddress: 'EMAIL_FROM_ADDRESS',
   emailFromName: 'EMAIL_FROM_NAME',
+  /** BigQuery project/dataset of the Firebase Analytics export (ANALYTICS_PROVIDER=real). */
+  analyticsBigqueryProjectId: 'ANALYTICS_BIGQUERY_PROJECT_ID',
+  analyticsBigqueryDataset: 'ANALYTICS_BIGQUERY_DATASET',
+  analyticsBigqueryLocation: 'ANALYTICS_BIGQUERY_LOCATION',
+  /** Service-account key as JSON text (secret). */
+  analyticsBigqueryCredentialsJson: 'ANALYTICS_BIGQUERY_CREDENTIALS_JSON',
+  /** Crashlytics export table (optional). */
+  analyticsBigqueryCrashTable: 'ANALYTICS_BIGQUERY_CRASH_TABLE',
+  /** Cost guard: most bytes one query may bill. */
+  analyticsBigqueryMaxBytesBilled: 'ANALYTICS_BIGQUERY_MAX_BYTES_BILLED',
   /** S3 (or S3-compatible) storage; needed when STORAGE_PROVIDER=real. */
   s3Region: 'S3_REGION',
   s3PublicBucket: 'S3_PUBLIC_BUCKET',
@@ -106,3 +116,10 @@ export const CLOUDFRONT_KEYS = [
 ] as const;
 export const DEFAULT_SMTP_PORT = 587;
 export const DEFAULT_EMAIL_FROM_NAME = 'WAB';
+
+/** Keys production needs when the analytics provider is `real` (BigQuery is part of production). */
+export const ANALYTICS_PRODUCTION_REQUIRED_KEYS = [
+  ENV_KEYS.analyticsBigqueryProjectId,
+  ENV_KEYS.analyticsBigqueryDataset,
+  ENV_KEYS.analyticsBigqueryCredentialsJson,
+] as const;
