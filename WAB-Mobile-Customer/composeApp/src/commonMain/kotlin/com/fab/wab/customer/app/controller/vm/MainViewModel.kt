@@ -16,7 +16,9 @@ import com.fab.wab.customer.core.domain.config.AppConfigRepository
 import com.fab.wab.customer.core.domain.config.LaunchGate
 import com.fab.wab.customer.core.domain.config.launchGateOf
 import com.fab.wab.customer.core.domain.repository.SessionTimeOut
+import com.fab.wab.customer.core.domain.session.LaunchDestination
 import com.fab.wab.customer.core.domain.session.SessionStore
+import com.fab.wab.customer.core.domain.session.launchDestinationOf
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import kotlinx.coroutines.CoroutineScope
@@ -53,7 +55,7 @@ class MainViewModel(
             UiAction.OnUpdateClicked -> emitSideEffect(SideEffect.OpenStore(storeUrl))
             UiAction.OnOptionalUpdateDismissed -> updateState { copy(gate = LaunchGate.Ready) }
             UiAction.OnRetryClicked -> loadConfig()
-            UiAction.OnOnboardingFinished -> updateState { copy(onboardingRequired = false) }
+            UiAction.OnOnboardingFinished, UiAction.OnGuestProfileSaved -> scope.launch { route() }
             UiAction.OnSessionTimeOut -> scope.launch { handleSessionTimeOut() }
         }
     }
@@ -65,8 +67,8 @@ class MainViewModel(
                 is AppResult.Success -> {
                     val gate = launchGateOf(result.data)
                     storeUrl = result.data.update.storeUrl
-                    val onboarding = state.value.onboardingRequired ?: !sessionStore.onboardingSeen.first()
-                    updateState { copy(loading = false, gate = gate, error = null, onboardingRequired = onboarding) }
+                    val launch = state.value.launch ?: launchDestination()
+                    updateState { copy(loading = false, gate = gate, error = null, launch = launch) }
                 }
                 is AppResult.Error -> {
                     val message = errorText(result.appError)
@@ -77,10 +79,20 @@ class MainViewModel(
         }
     }
 
+    /** PRD §4.3: after an expired session the app continues as guest; an incomplete guest profile goes back to S02. */
     private suspend fun handleSessionTimeOut() {
         appSettings.clearSession()
         sessionTimeOut.sendSessionTimeOut(false)
+        route()
     }
+
+    private suspend fun route() {
+        val destination = launchDestination()
+        updateState { copy(launch = destination) }
+    }
+
+    private suspend fun launchDestination(): LaunchDestination =
+        launchDestinationOf(onboardingSeen = sessionStore.onboardingSeen.first(), session = sessionStore.state.first())
 
     val languageState = appearanceSettings.language.stateIn(
         viewModelScope,

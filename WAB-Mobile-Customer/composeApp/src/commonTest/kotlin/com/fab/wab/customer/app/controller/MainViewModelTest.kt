@@ -21,7 +21,9 @@ import com.fab.wab.customer.core.domain.config.UpdatePolicy
 import com.fab.wab.customer.core.domain.config.UpdateStatus
 import com.fab.wab.customer.core.domain.repository.SessionTimeOut
 import com.fab.wab.customer.core.domain.auth.AuthTokens
+import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.GuestProfile
+import com.fab.wab.customer.core.domain.session.LaunchDestination
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.domain.session.UserProfile
@@ -59,9 +61,10 @@ private class FakeConfigRepository(var result: AppResult<AppConfig>) : AppConfig
     }
 }
 
-private class FakeSessionStore(seen: Boolean) : SessionStore {
+private class FakeSessionStore(seen: Boolean, initial: SessionState = SessionState.Guest()) : SessionStore {
     private val seenState = MutableStateFlow(seen)
-    override val state: Flow<SessionState> = MutableStateFlow(SessionState.Guest())
+    val sessionState = MutableStateFlow(initial)
+    override val state: Flow<SessionState> = sessionState
     override val onboardingSeen: Flow<Boolean> = seenState
     override val pushEnabled: Flow<Boolean> = MutableStateFlow(true)
     override suspend fun tokens(): AuthTokens? = null
@@ -71,9 +74,13 @@ private class FakeSessionStore(seen: Boolean) : SessionStore {
     override suspend fun setOnboardingSeen(seen: Boolean) {
         seenState.value = seen
     }
-    override suspend fun setGuestProfile(profile: GuestProfile) = Unit
+    override suspend fun setGuestProfile(profile: GuestProfile) {
+        sessionState.value = SessionState.Guest(profile)
+    }
     override suspend fun setPushEnabled(enabled: Boolean) = Unit
-    override suspend fun signOut() = Unit
+    override suspend fun signOut() {
+        sessionState.value = SessionState.Guest()
+    }
     override suspend fun clearAll() = Unit
 }
 
@@ -120,12 +127,15 @@ class MainViewModelTest {
     private val settings = MinimalAppSettings()
     private val sessionTimeOut = FakeSessionTimeOut()
 
-    private fun TestScope.viewModel(repository: AppConfigRepository, onboardingSeen: Boolean = true) = MainViewModel(
+    private val completeGuest = SessionState.Guest(GuestProfile(nickname = "Lina", gender = Gender.FEMALE))
+    private var sessionStore = FakeSessionStore(seen = true, initial = completeGuest)
+
+    private fun TestScope.viewModel(repository: AppConfigRepository) = MainViewModel(
         appSettings = settings,
         appearanceSettings = AppearanceSettings(settings),
         appConfigRepository = repository,
         sessionTimeOut = sessionTimeOut,
-        sessionStore = FakeSessionStore(onboardingSeen),
+        sessionStore = sessionStore,
         environment = environment,
         sessionAnalyticsSync = SessionAnalyticsSync(MutableStateFlow(SessionState.Guest()), NoOpAnalyticsTracker, FakeCrashReporter()),
         errorText = { "failed" },
@@ -139,18 +149,40 @@ class MainViewModelTest {
         assertEquals(LaunchGate.Ready, state.gate)
         assertEquals("1.2.3", state.appVersion)
         assertNull(state.error)
-        assertEquals(false, state.showOnboarding)
+        assertEquals(LaunchDestination.Home, state.launch)
     }
 
     @Test
-    fun firstLaunchShowsOnboardingUntilFinished() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = viewModel(FakeConfigRepository(AppResult.Success(CONFIG)), onboardingSeen = false)
-        val state = viewModel.state.first { !it.loading }
-        assertTrue(state.showOnboarding)
+    fun firstLaunchShowsOnboardingThenTheGuestProfileThenHome() = runTest(UnconfinedTestDispatcher()) {
+        sessionStore = FakeSessionStore(seen = false, initial = SessionState.Guest())
+        val viewModel = viewModel(FakeConfigRepository(AppResult.Success(CONFIG)))
+        assertEquals(LaunchDestination.Onboarding, viewModel.state.first { !it.loading }.launch)
+        sessionStore.setOnboardingSeen(true)
         viewModel.onEvent(UiAction.OnOnboardingFinished)
-        assertEquals(false, viewModel.state.first { it.onboardingRequired == false }.showOnboarding)
+        assertEquals(LaunchDestination.GuestProfile, viewModel.state.first { it.launch != LaunchDestination.Onboarding }.launch)
+        sessionStore.setGuestProfile(GuestProfile("Lina", Gender.FEMALE))
+        viewModel.onEvent(UiAction.OnGuestProfileSaved)
+        assertEquals(LaunchDestination.Home, viewModel.state.first { it.launch == LaunchDestination.Home }.launch)
         viewModel.onEvent(UiAction.OnRetryClicked)
-        assertEquals(false, viewModel.state.first { !it.loading }.showOnboarding)
+        assertEquals(LaunchDestination.Home, viewModel.state.first { !it.loading }.launch)
+    }
+
+    @Test
+    fun registeredUsersNeverSeeTheGuestProfile() = runTest(UnconfinedTestDispatcher()) {
+        sessionStore = FakeSessionStore(seen = true, initial = SessionState.SignedIn(UserProfile("c1", "Omar", Gender.MALE)))
+        val viewModel = viewModel(FakeConfigRepository(AppResult.Success(CONFIG)))
+        assertEquals(LaunchDestination.Home, viewModel.state.first { !it.loading }.launch)
+    }
+
+    @Test
+    fun expiredSessionWithoutGuestProfileGoesBackToS02() = runTest(UnconfinedTestDispatcher()) {
+        sessionStore = FakeSessionStore(seen = true, initial = SessionState.SignedIn(UserProfile("c1", "Omar", Gender.MALE)))
+        val viewModel = viewModel(FakeConfigRepository(AppResult.Success(CONFIG)))
+        assertEquals(LaunchDestination.Home, viewModel.state.first { !it.loading }.launch)
+        sessionStore.signOut()
+        viewModel.onEvent(UiAction.OnSessionTimeOut)
+        assertEquals(false, sessionTimeOut.sessionEventTimeOut.receive())
+        assertEquals(LaunchDestination.GuestProfile, viewModel.state.first { it.launch == LaunchDestination.GuestProfile }.launch)
     }
 
     @Test

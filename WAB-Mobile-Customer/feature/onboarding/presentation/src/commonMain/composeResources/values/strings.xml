@@ -11,4 +11,13 @@
     <string name="onboarding_bride_text">VIP bridal packages with qualified experts for your big day.</string>
     <string name="onboarding_pay_title">Pay your way</string>
     <string name="onboarding_pay_text">Pay on arrival, a deposit, or in full online.</string>
+    <string name="guest_title">What should we call you?</string>
+    <string name="guest_subtitle">This helps us personalize your experience.</string>
+    <string name="guest_nickname_label">Nickname</string>
+    <string name="guest_nickname_placeholder">e.g. Sara</string>
+    <string name="guest_nickname_error">Please enter a nickname</string>
+    <string name="guest_gender_label">Gender</string>
+    <string name="guest_gender_man">Man</string>
+    <string name="guest_gender_woman">Woman</string>
+    <string name="guest_continue">Continue</string>
 </resources>

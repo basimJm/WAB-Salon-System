@@ -9,22 +9,7 @@
 
 ## Current task
 
-- Next: CUS-026 nickname & gender + launch router, then CUS-027…; task branches start from `origin/customer`.
-
-### CUS-013 — Realtime client: Socket.IO over Ktor WebSockets, fake, foreground reconnect
-- Branch: `feat/cus-013-realtime-client`
-- Status: IN REVIEW
-- Acceptance criteria (PRD §3.15; BUSINESS_DOMAIN §7; server `constants/sockets.ts`: `/socket.io`, namespace `/customer`, `auth.token`, ping 25 s / timeout 20 s):
-  - [x] `core/realtime`: `RealtimeClient` (status StateFlow, events SharedFlow, connect / disconnect), `RealtimeEvents` constants (`booking.updated`, `booking.requested`, `booking.assigned`, `notifications.unread`), `RealtimeEvent(name, payload)`, `RealtimeStatus`
-  - [x] `SocketIoProtocol` codec (Engine.IO v4 + Socket.IO v4 text frames: open / ping / pong / close, namespace connect with the token, connected, disconnect, event, connect error code) — pure, tested
-  - [x] `SocketIoRealtimeClient`: handshake with the session's access token, pong on ping, silent server (ping budget) or close → reconnect with capped exponential backoff, `UNAUTHORIZED` → stop until the next `connect()`; transport behind `RealtimeTransport` (Ktor WebSockets on the platform engine; in-memory fake in tests)
-  - [x] `FakeRealtimeClient` bound when `DATA_SOURCE=mock`; `realtimeModule` registered in `App.kt`
-  - [x] Foreground rule: `RealtimeConnectionEffect(client, isSignedIn)` in the app shell connects when resumed + signed in, disconnects on pause / sign-out
-  - [x] Tests: `SocketIoProtocolTest` (3), `RealtimeConfigTest` (2), `SocketIoRealtimeClientTest` (4), `RealtimeConnectionRuleTest` (1)
-- Tests: `:core:realtime:testAndroidHostTest` + composeApp green (10 new tests, virtual time); `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — protocol codec pure and tested against socket.io v4 framing; client state machine tested with an in-memory transport under virtual time (handshake, pong, event, unauthorized stop, drop + silence reconnect, backoff); token read on every attempt (rotations picked up); no literals (defaults mirror the server constants); not exercised against a live server (owner deployment pending).
-- Notes: LIBRARY ADDED (CLAUDE.md §1.12): `io.ktor:ktor-client-websockets` (same Ktor 3.4.2 version) — the Socket.IO v4 protocol is implemented in common code over Ktor WebSockets instead of two native Socket.IO SDKs (one codebase, testable without a server, no Swift bridge). The socket URL derives from the API base URL (same host; no new env key).
+- Next: CUS-027 locations repositories, CUS-028…; task branches start from `origin/customer`.
 
 ### CUS-024 — App config + system screens: launch gate, force update, optional update, maintenance (S24)
 - Branch: `feat/cus-024-config-system-screens`
@@ -55,3 +40,19 @@
 - Loops: 1/1 — the loop caught two things: detekt `ParameterNaming` (`onFinished` → `onFinish`) and landscape clipping (texts pushed off-screen) → compact-height pages use a Row layout
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — feature follows the sample layout (domain/presentation/di), `onboarding_seen` written on display (PRD), page indicator reused by the carousel, texts in resources (AR first), analytics constants, no literals.
 - Notes: illustrations are icon placeholders inside a tinted circle (the prototype has image slots only; owner art pending).
+
+### CUS-026 — Nickname & gender S02 + launch router (PRD §4.2)
+- Branch: `feat/cus-026-launch-router`
+- Status: IN REVIEW
+- Acceptance criteria (PRD §4.1–4.3, S02, §15; Design Script S02; prototype texts):
+  - [x] Pure `launchDestinationOf(onboardingSeen, session)` → Onboarding / GuestProfile / Home (onboarding first; registered → Home; guest with nickname + gender → Home; else S02); `GuestProfile.isComplete`
+  - [x] `MainViewModel` routes after the gate and re-routes after onboarding, after S02 and after a session expiry (guest without profile → S02); `UiState.launch`
+  - [x] S02 in `feature/onboarding`: `SaveGuestProfileUseCase` (trimmed nickname + gender, local only), `GuestProfileViewModel` (Continue disabled until both valid, blank nickname error, `nickname_saved` with gender only), `GuestProfileScreen` (logo, title/subtitle, nickname field, Man / Woman choice cards, Continue), `GuestProfileRoute`
+  - [x] Design system: `AppChoiceCard` (selected = accent border + soft fill), icons Man / Woman, size token `choiceCardHeight`
+  - [x] AR + EN texts from the prototype
+  - [x] Tests: `LaunchDestinationTest` (3), `GuestProfileViewModelTest` (3), `MainViewModelTest` (+3: first launch chain, registered skips S02, expired session → S02)
+  - [x] Emulator: fresh install → onboarding → S02 (empty disabled, error, filled) → Home; relaunch before completing → S02 again; landscape
+- Tests: domain + onboarding presentation + composeApp host tests green (9 new/updated); `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0; emulator (Pixel, AR): fresh install → onboarding → S02 empty (Continue disabled) → nickname + gender (card highlighted, Continue enabled) → Home; relaunch before saving shows S02 again, after saving goes straight to Home; landscape scrolls
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — router is one pure function; guest values never leave the device and the analytics event carries only the gender; Continue disabled state matches the design script; S02 built from design-system parts (`AppChoiceCard` new).
+- Notes: S02 lives in `feature/onboarding` (same launch flow, no data module).

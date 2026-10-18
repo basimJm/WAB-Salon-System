@@ -26,6 +26,7 @@ data class SizeTokens(
     val avatarLarge: Dp = 96.dp,
     val statusDot: Dp = 10.dp,
     val pageIndicatorActive: Dp = 24.dp,
+    val choiceCardHeight: Dp = 96.dp,
     val onboardingIllustration: Dp = 200.dp,
     val badgeHeight: Dp = 24.dp,
     val countBadge: Dp = 18.dp,

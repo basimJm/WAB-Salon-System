@@ -6,6 +6,8 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.EventAvailable
+import androidx.compose.material.icons.rounded.Face
+import androidx.compose.material.icons.rounded.Face3
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Storefront
 import androidx.compose.material.icons.rounded.Build
@@ -66,5 +68,7 @@ object AppIcons {
     val Booking: ImageVector = Icons.Rounded.EventAvailable
     val Bride: ImageVector = Icons.Rounded.AutoAwesome
     val Payment: ImageVector = Icons.Rounded.Payments
+    val Man: ImageVector = Icons.Rounded.Face
+    val Woman: ImageVector = Icons.Rounded.Face3
     val Image: ImageVector = Icons.Rounded.Image
 }

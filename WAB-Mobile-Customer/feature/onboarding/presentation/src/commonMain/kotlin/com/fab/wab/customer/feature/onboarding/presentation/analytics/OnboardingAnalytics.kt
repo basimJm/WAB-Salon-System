@@ -12,3 +12,12 @@ object OnboardingAnalytics {
 
     val SCREEN = AnalyticsScreen(SCREEN_NAME)
 }
+
+/** S02 names (PRD §14 `nickname_saved`); the gender travels as the scope, never the nickname. */
+object GuestProfileAnalytics {
+    private const val SCREEN_NAME = "nickname_gender"
+    const val ACTION_SAVED = "nickname_saved"
+    const val PARAM_GENDER = "gender"
+
+    val SCREEN = AnalyticsScreen(SCREEN_NAME)
+}
