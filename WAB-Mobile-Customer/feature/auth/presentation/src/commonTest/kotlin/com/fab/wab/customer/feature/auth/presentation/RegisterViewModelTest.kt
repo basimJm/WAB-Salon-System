@@ -73,6 +73,7 @@ private class RegisterFakeAuth : AuthRepository {
         registered = request
         return AppResult.Success(AuthSession(AuthTokens("a", "r"), UserProfile("c1", request.firstName, request.gender)))
     }
+    override suspend fun logout(refreshToken: String): AppResult<Unit> = AppResult.Success(Unit)
 }
 
 private class GuestSessionStore : SessionStore {

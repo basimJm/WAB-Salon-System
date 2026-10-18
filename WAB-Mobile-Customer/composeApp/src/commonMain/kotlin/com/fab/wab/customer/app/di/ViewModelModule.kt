@@ -15,6 +15,7 @@ val viewModelModule = module {
             sessionStore = get(),
             environment = get(),
             sessionAnalyticsSync = get(),
+            installationSyncer = get(),
         )
     }
 }

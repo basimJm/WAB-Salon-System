@@ -13,5 +13,6 @@ kotlin {
         implementation(projects.feature.auth.domain)
         implementation(projects.feature.auth.data)
         implementation(projects.core.domain)
+        implementation(libs.kotlinx.coroutines.core)
     }
 }

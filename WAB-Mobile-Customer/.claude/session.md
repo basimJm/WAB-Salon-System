@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Next: CUS-031 session + installations, CUS-032…; task branches start from `origin/customer`.
+- Next: CUS-032…; task branches start from `origin/customer`.
 
 ### CUS-028 — Login S11: phone + country, check-phone, not-registered / blocked, language + theme, legal links
 - Branch: `feat/cus-028-login`
@@ -56,3 +56,17 @@
 - Loops: 1/1 — the loop caught the detekt complexity of `onEvent` (split into text / selection handlers)
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — register goes through the same check-phone → OTP → proof path as login; names / email / phone never reach analytics; the OTP proof is single-use; shared auth chrome removes the Login duplication; AR + EN strings.
 - Notes: cities are loaded for Jordan (PRD §1 market) regardless of the phone's country; the register call reuses the installation record of login.
+
+### CUS-031 — Session: logout, installations (`PUT /installations`, `PATCH /installations/push-enabled`)
+- Branch: `feat/cus-031-session-installations`
+- Status: IN REVIEW
+- Acceptance criteria (PRD §10.2, §14, §5 `push_enabled`; BUSINESS_DOMAIN installations; operations `POST /auth/logout`, `PUT /installations`, `PATCH /installations/push-enabled`; `POST /auth/login` and `/auth/refresh` already covered by CUS-029 / CUS-003):
+  - [x] Domain: `InstallationsRepository` (register, setPushEnabled), `InstallationLink`, `AuthRepository.logout`; use cases `LogoutUseCase` (revoke + unlink on the backend, always clears the local session), `SyncInstallationUseCase` (device facts + language; skipped without an app-instance id), `SetPushEnabledUseCase` (local flag, synced to the account when signed in)
+  - [x] Data: `InstallationsApi`, `InstallationsRepositoryImpl`, `AuthApi.logout`; mapper `toPutBody(language)`
+  - [x] App: `InstallationSyncer` re-registers at launch, on sign-in / sign-out (link / unlink), on language change and on every FCM token refresh (`PushTokenProvider.tokenUpdates`); serialized, silent on failure; started by `MainViewModel`
+  - [x] Tests: `InstallationSyncerTest` (2), `SessionUseCasesTest` (3), `InstallationMapperTest` (1); `MainViewModelTest` updated
+  - [x] Emulator (dev debug, mock): at launch the app sends `PUT /customer/v1/installations` (real app-instance id, `Accept-Language: ar`) and the mock answers `{installationId, linked:false}`; no fatal exception / Koin error in logcat
+- Tests: auth data/presentation + composeApp host tests green (6 new); policy suite OK; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0; emulator smoke launch clean
+- Loops: 1/1 — the loop found the auth `di` module missing the coroutines dependency (`Flow` not on its classpath) and the syncer exposing a mutable history; both fixed
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — the device record is one `PUT` body built by a pure mapper; triggers are a pure flow composition (launch, sign-in/out, language, FCM token) serialized by a mutex and silent on failure; logout always clears the local session even when the backend call fails; the push switch stays local for guests; refresh tokens are read on demand and never logged or tracked.
+- Notes: a replayed FCM token at startup causes a second `PUT` right after the launch one (same facts; harmless). If `PATCH /installations/push-enabled` fails the local flag already changed; the profile UI (CUS-053) surfaces that error. No screen in this task (logout and the push switch get their UI with the profile, CUS-053); the Home tab still shows the template's sample screen error (`/api/sample/items` is not a contract route → mock 404), pre-existing until CUS-040 replaces it.

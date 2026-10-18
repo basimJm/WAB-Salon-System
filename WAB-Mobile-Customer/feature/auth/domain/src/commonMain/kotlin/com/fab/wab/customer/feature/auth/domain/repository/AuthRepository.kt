@@ -20,4 +20,7 @@ interface AuthRepository {
     suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession>
 
     suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession>
+
+    /** `POST /auth/logout`: revokes the refresh token and unlinks the device. */
+    suspend fun logout(refreshToken: String): AppResult<Unit>
 }

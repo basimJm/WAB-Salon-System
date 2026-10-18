@@ -64,6 +64,7 @@ private class FakeAuth(var result: AppResult<PhoneCheck> = AppResult.Success(Pho
         AppResult.Loading
     override suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession> =
         AppResult.Loading
+    override suspend fun logout(refreshToken: String): AppResult<Unit> = AppResult.Success(Unit)
 }
 
 private class SettingsFake : AppSettings {

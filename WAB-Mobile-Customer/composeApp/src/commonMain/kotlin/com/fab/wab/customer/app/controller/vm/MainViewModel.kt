@@ -2,6 +2,7 @@ package com.fab.wab.customer.app.controller.vm
 
 import androidx.lifecycle.viewModelScope
 import com.fab.wab.customer.app.analytics.SessionAnalyticsSync
+import com.fab.wab.customer.app.auth.InstallationSyncer
 import com.fab.wab.customer.app.controller.contract.MainContract.SideEffect
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.contract.MainContract.UiState
@@ -39,6 +40,7 @@ class MainViewModel(
     private val sessionStore: SessionStore,
     private val environment: AppEnvironment,
     sessionAnalyticsSync: SessionAnalyticsSync,
+    installationSyncer: InstallationSyncer,
     private val errorText: suspend (AppError) -> String = ::appErrorText,
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(appVersion = environment.appVersion), testScope) {
@@ -47,6 +49,7 @@ class MainViewModel(
 
     init {
         sessionAnalyticsSync.start(scope)
+        installationSyncer.start(scope)
         loadConfig()
     }
 

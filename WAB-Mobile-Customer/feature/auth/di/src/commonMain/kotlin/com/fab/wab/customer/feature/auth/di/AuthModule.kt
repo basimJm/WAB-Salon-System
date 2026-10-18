@@ -3,7 +3,11 @@ package com.fab.wab.customer.feature.auth.di
 import com.fab.wab.customer.feature.auth.data.di.authDataModule
 import com.fab.wab.customer.feature.auth.domain.repository.PendingOtpVerification
 import com.fab.wab.customer.feature.auth.domain.usecase.CheckPhoneUseCase
+import com.fab.wab.customer.core.domain.AppSettings
 import com.fab.wab.customer.feature.auth.domain.usecase.LoginWithIdTokenUseCase
+import com.fab.wab.customer.feature.auth.domain.usecase.LogoutUseCase
+import com.fab.wab.customer.feature.auth.domain.usecase.SetPushEnabledUseCase
+import com.fab.wab.customer.feature.auth.domain.usecase.SyncInstallationUseCase
 import com.fab.wab.customer.feature.auth.domain.usecase.RegisterUseCase
 import com.fab.wab.customer.feature.auth.domain.usecase.ReportWrongOtpAttemptUseCase
 import com.fab.wab.customer.feature.auth.domain.usecase.RequestOtpUseCase
@@ -21,4 +25,7 @@ val authModule = module {
     singleOf(::RegisterUseCase)
     singleOf(::ResolveDialCodeUseCase)
     singleOf(::PendingOtpVerification)
+    singleOf(::LogoutUseCase)
+    singleOf(::SetPushEnabledUseCase)
+    single { SyncInstallationUseCase(installations = get(), installationInfo = get(), language = get<AppSettings>().language) }
 }

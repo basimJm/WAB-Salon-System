@@ -86,6 +86,7 @@ private class FakeAuthRepository : AuthRepository {
     }
     override suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession> = loginResult
     override suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession> = loginResult
+    override suspend fun logout(refreshToken: String): AppResult<Unit> = AppResult.Success(Unit)
 }
 
 private class FakeSessionStore : SessionStore {
