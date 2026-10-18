@@ -89,6 +89,7 @@ describe('configuration', () => {
     NOTIFIER_PROVIDER: 'real',
     PAYMENT_PROVIDER: 'real',
     ANALYTICS_PROVIDER: 'real',
+    FIREBASE_PROJECT_ID: 'wab-prod-test',
     FCM_SERVICE_ACCOUNT_JSON: '{}',
     SMTP_HOST: 'smtp.example.test',
     EMAIL_FROM_ADDRESS: 'noreply@example.test',

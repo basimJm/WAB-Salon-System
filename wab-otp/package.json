@@ -1,9 +1,8 @@
 {
-  "name": "wab-otp",
+  "name": "@wab/otp",
   "version": "0.1.0",
   "description": "Provider-independent phone OTP proof verification and abuse limits for WAB projects.",
   "license": "UNLICENSED",
-  "private": true,
   "engines": {
     "node": ">=22"
   },
@@ -34,7 +33,9 @@
     "test": "jest --coverage",
     "test:loop": "jest --config jest.loop.config.js --runInBand",
     "test:smoke-package": "node scripts/package-smoke.cjs",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build && npm run test:smoke-package && npm run test:loop"
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build && npm run test:smoke-package && npm run test:loop",
+    "prepublishOnly": "npm run verify",
+    "pack:check": "npm pack --dry-run"
   },
   "dependencies": {
     "jose": "^5.10.0",
@@ -53,5 +54,14 @@
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/basimJm/WAB-Salon-System.git",
+    "directory": "wab-otp"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }
