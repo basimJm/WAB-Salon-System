@@ -1,3 +1,4 @@
+import { MemorySessionDirectory } from '../src/directory';
 import { MemoryIdempotencyStore } from '../src/idempotency';
 import {
   resolveConfig,
@@ -25,6 +26,7 @@ const prod = (extra: Partial<HyperPayOptions> = {}): PaymentsOptionsBase => ({
   provider: 'hyperpay',
   hyperpay: hyperpay(extra),
   idempotency: { store: new MemoryIdempotencyStore() },
+  directory: new MemorySessionDirectory(),
 });
 const fieldsOf = (options: PaymentsOptionsBase): unknown => {
   try {

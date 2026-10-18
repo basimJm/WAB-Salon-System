@@ -62,10 +62,8 @@ describe('mock-gateway provider (HyperPay adapter against the local OPP mock)', 
     mock.injectHttpFailures(503, 502);
     await expect(payments.createSession(SESSION)).resolves.toMatchObject({ status: 'PENDING' });
   });
-  it('has not built refunds and webhooks yet (PAY-006/007)', async () => {
+  it('has not built webhooks yet (PAY-007)', async () => {
     const gateway = new HyperPayGateway({} as never);
-    await expect(gateway.refund()).rejects.toThrow('not available yet');
-    await expect(gateway.fetchRefund()).rejects.toThrow('not available yet');
     await expect(gateway.parseWebhook()).rejects.toThrow('not available yet');
   });
 });

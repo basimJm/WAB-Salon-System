@@ -12,7 +12,13 @@ export {
 export { StorageError, isStorageError } from './errors';
 export { resolveConfig, type ResolvedConfig, type StorageOptions } from './config/options';
 export { noopLogger, type Logger, type LogFields } from './logger';
-export { createLocalFsStorage, createStorage, withVariants, type Storage } from './storage';
+export {
+  createLocalFsStorage,
+  createStorage,
+  ensureDevBuckets,
+  withVariants,
+  type Storage,
+} from './storage';
 export {
   createSharpProcessor,
   variantKey,
@@ -35,3 +41,4 @@ export type {
   UploadUrlRequest,
   WriteObjectRequest,
 } from './types';
+export { SAMPLE_FILES, UPLOAD_FIXTURES, type UploadFixture } from './fixtures';

@@ -1,5 +1,6 @@
 import { FakeGateway } from './adapters/fake';
 import { resolveConfig, type PaymentsOptionsBase, type ResolvedConfig } from './config/options';
+import { MemorySessionDirectory } from './directory';
 import { fetchHttpClient, type HttpClient } from './http';
 import { createHyperPayClient } from './hyperpay/client';
 import { HyperPayGateway } from './hyperpay/gateway';
@@ -31,6 +32,7 @@ const buildGateway = (config: ResolvedConfig, options: PaymentsOptions): Payment
         currency: config.currency,
         settings,
         client: createHyperPayClient(settings, options.http ?? fetchHttpClient, config.timeoutMs),
+        directory: options.directory ?? new MemorySessionDirectory(),
       });
     }
   }

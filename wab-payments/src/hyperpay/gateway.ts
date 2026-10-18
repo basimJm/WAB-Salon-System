@@ -3,12 +3,14 @@ import { PaymentSdkError } from '../errors';
 import type {
   GatewayCapabilities,
   GatewayCheckoutRequest,
+  GatewayRefundRequest,
   GatewayWebhookEvent,
   PaymentGateway,
   PaymentSession,
   PaymentVerification,
   RefundResult,
 } from '../types';
+import { fetchRefund, refund } from './refunds';
 import { createCheckout, fetchPayment, type HyperPayContext } from './session';
 
 const notBuilt = (what: string): PaymentSdkError =>
@@ -34,12 +36,12 @@ export class HyperPayGateway implements PaymentGateway {
     return fetchPayment(this.ctx, sessionId);
   }
 
-  refund(): Promise<RefundResult> {
-    return Promise.reject(notBuilt('refund'));
+  refund(request: GatewayRefundRequest): Promise<RefundResult> {
+    return refund(this.ctx, request);
   }
 
-  fetchRefund(): Promise<RefundResult> {
-    return Promise.reject(notBuilt('refund status'));
+  fetchRefund(refundId: string): Promise<RefundResult> {
+    return fetchRefund(this.ctx, refundId);
   }
 
   parseWebhook(): Promise<GatewayWebhookEvent> {

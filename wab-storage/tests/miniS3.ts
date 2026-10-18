@@ -64,6 +64,12 @@ export class MiniS3 {
       res.end(method === 'HEAD' ? undefined : errorXml(failure[1]));
       return;
     }
+    if (key === '' && (method === 'PUT' || method === 'HEAD')) {
+      const exists = this.buckets.has(bucketName);
+      if (method === 'PUT') this.bucket(bucketName);
+      res.writeHead(method === 'PUT' || exists ? 200 : 404).end();
+      return;
+    }
     const bucket = this.bucket(bucketName);
     if (method === 'PUT') {
       bucket.set(key, {

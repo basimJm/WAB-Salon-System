@@ -23,6 +23,8 @@ export interface S3Deps {
     readonly Head: CommandClass;
     readonly Get: CommandClass;
     readonly DeleteObjects: CommandClass;
+    readonly HeadBucket: CommandClass;
+    readonly CreateBucket: CommandClass;
   };
 }
 
@@ -61,6 +63,8 @@ export const createAwsDeps = async (config: S3Config, timeoutMs: number): Promis
       Head: sdk.HeadObjectCommand as unknown as CommandClass,
       Get: sdk.GetObjectCommand as unknown as CommandClass,
       DeleteObjects: sdk.DeleteObjectsCommand as unknown as CommandClass,
+      HeadBucket: sdk.HeadBucketCommand as unknown as CommandClass,
+      CreateBucket: sdk.CreateBucketCommand as unknown as CommandClass,
     },
   };
 };
