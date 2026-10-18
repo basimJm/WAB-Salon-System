@@ -79,11 +79,14 @@ class ApiSyncTest(unittest.TestCase):
         self.assertIn('"GetSalonsBySalonId" to "', fixtures)
         decoded = api_sync.sample_value(SPEC["paths"]["/customer/v1/salons/{salonId}"]["get"]["responses"]["200"]["content"]["application/json"]["schema"]["properties"]["data"], "data", {})
         self.assertEqual("id-1", decoded["id"])
+        self.assertEqual(["id-1", "id-2", "id-3"], [item["id"] for item in api_sync.sample_value({"type": "array", "items": {"type": "object", "properties": {"id": {"type": "string"}}}}, "items", {})])
         self.assertEqual("MALE", decoded["gender"])
         self.assertEqual(3, len(decoded["staff"]))
         self.assertEqual(api_sync.TEXT_MARKER, decoded["staff"][0]["name"])
         self.assertEqual(1.5, decoded["rating"])
         self.assertIn('"PutFavoritesBySalonId" to "', fixtures)
+        country = api_sync.sample_value({"type": "object", "properties": {"code": {"type": "string"}, "dialCode": {"type": "string"}, "phoneRegex": {"type": "string"}}}, "c", {})
+        self.assertEqual({"code": "JO", "dialCode": "+962", "phoneRegex": "^7[789][0-9]{7}$"}, country)
 
     def test_check_mode_detects_stale_and_extra_files(self) -> None:
         self.assertEqual(1, api_sync.main(["--check", "--spec", str(self.spec), "--out", str(self.out)]))

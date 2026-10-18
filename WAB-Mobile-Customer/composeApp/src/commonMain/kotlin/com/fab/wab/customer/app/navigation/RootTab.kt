@@ -24,7 +24,10 @@ enum class RootTab(val id: String, val graph: Graph, val icon: ImageVector) {
          * The tab that owns the current destination: the first route in the back-stack hierarchy
          * (destination first, then its parents) that is a root graph; Home when nothing matches.
          */
-        fun forRoutes(hierarchyRoutes: List<String?>): RootTab =
-            hierarchyRoutes.firstNotNullOfOrNull { route -> entries.firstOrNull { it.routeName == route } } ?: DEFAULT
+        fun forRoutes(hierarchyRoutes: List<String?>): RootTab = forRoutesOrNull(hierarchyRoutes) ?: DEFAULT
+
+        /** Null when the destination belongs to no tab (auth, full-screen flows): the tab bar hides. */
+        fun forRoutesOrNull(hierarchyRoutes: List<String?>): RootTab? =
+            hierarchyRoutes.firstNotNullOfOrNull { route -> entries.firstOrNull { it.routeName == route } }
     }
 }

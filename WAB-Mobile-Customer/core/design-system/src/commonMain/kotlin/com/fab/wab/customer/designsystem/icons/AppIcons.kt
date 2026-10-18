@@ -15,6 +15,9 @@ import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.LightMode
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Favorite
@@ -69,6 +72,9 @@ object AppIcons {
     val Bride: ImageVector = Icons.Rounded.AutoAwesome
     val Payment: ImageVector = Icons.Rounded.Payments
     val Man: ImageVector = Icons.Rounded.Face
+    val Language: ImageVector = Icons.Rounded.Translate
+    val ThemeDark: ImageVector = Icons.Rounded.DarkMode
+    val ThemeLight: ImageVector = Icons.Rounded.LightMode
     val Woman: ImageVector = Icons.Rounded.Face3
     val Image: ImageVector = Icons.Rounded.Image
 }

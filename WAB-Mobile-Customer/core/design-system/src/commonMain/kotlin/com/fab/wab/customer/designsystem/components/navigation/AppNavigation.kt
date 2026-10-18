@@ -123,10 +123,15 @@ fun AppNavScaffold(
     selectedId: String,
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
+    navigationVisible: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     // One content instance moves between the two layouts, so its state survives a rotation.
     val body = remember(content) { movableContentOf { content() } }
+    if (!navigationVisible) {
+        Box(modifier.fillMaxSize()) { body() }
+        return
+    }
     when (AppTheme.adaptive.navigation) {
         NavigationStyle.BottomBar -> Column(modifier.fillMaxSize()) {
             Box(Modifier.weight(1f)) { body() }

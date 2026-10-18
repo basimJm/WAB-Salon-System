@@ -1,0 +1,22 @@
+<resources>
+    <string name="login_welcome">أهلاً بعودتك</string>
+    <string name="login_subtitle">سجّل دخولك برقم هاتفك للمتابعة.</string>
+    <string name="login_phone_label">رقم الهاتف</string>
+    <string name="login_phone_error">رقم الهاتف غير صحيح</string>
+    <string name="login_button">تسجيل الدخول</string>
+    <string name="login_no_account">ليس لديك حساب؟</string>
+    <string name="login_register_now">سجّل الآن</string>
+    <string name="login_privacy">سياسة الخصوصية</string>
+    <string name="login_terms">الشروط والأحكام</string>
+    <string name="login_contact">تواصل معنا</string>
+    <string name="login_language">تغيير اللغة</string>
+    <string name="login_theme">تغيير المظهر</string>
+    <string name="login_back">رجوع</string>
+    <string name="login_not_registered_title">هذا الرقم غير مسجل</string>
+    <string name="login_not_registered_body">أنشئ حساباً جديداً باستخدام هذا الرقم للمتابعة.</string>
+    <string name="login_not_registered_register">إنشاء حساب</string>
+    <string name="login_dialog_cancel">إلغاء</string>
+    <string name="login_blocked_title">تم إيقاف حسابك</string>
+    <string name="login_blocked_body">تم إيقاف حسابك، يرجى التواصل معنا لمزيد من المعلومات.</string>
+    <string name="login_blocked_contact">تواصل معنا</string>
+</resources>

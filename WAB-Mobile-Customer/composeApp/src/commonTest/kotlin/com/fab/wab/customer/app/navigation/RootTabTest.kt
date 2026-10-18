@@ -32,4 +32,11 @@ class RootTabTest {
         assertEquals(RootTab.Home, RootTab.forRoutes(listOf("unknown", null)))
         assertEquals(RootTab.Home, RootTab.forRoutes(emptyList()))
     }
+
+    @Test
+    fun destinationsOutsideTheTabsHideTheBar() {
+        assertEquals(null, RootTab.forRoutesOrNull(listOf("com.fab.wab.customer.core.navigation.route.Screen.Login", null)))
+        assertEquals(RootTab.Profile, RootTab.forRoutesOrNull(listOf("x", RootTab.Profile.routeName)))
+        assertEquals(RootTab.Home, RootTab.forRoutes(listOf("x")))
+    }
 }

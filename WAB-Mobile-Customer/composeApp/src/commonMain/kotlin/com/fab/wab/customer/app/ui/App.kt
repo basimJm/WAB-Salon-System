@@ -53,6 +53,8 @@ import com.fab.wab.customer.designsystem.components.image.LocalImageLoader
 import com.fab.wab.customer.designsystem.components.image.rememberImageLoader
 import com.fab.wab.customer.designsystem.components.navigation.AppNavScaffold
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.feature.auth.di.authModule
+import com.fab.wab.customer.feature.auth.presentation.di.authPresentationModule
 import com.fab.wab.customer.feature.onboarding.di.onboardingModule
 import com.fab.wab.customer.feature.onboarding.presentation.di.onboardingPresentationModule
 import com.fab.wab.customer.feature.onboarding.presentation.screen.GuestProfileRoute
@@ -80,6 +82,8 @@ val appModules = listOf(
     samplePresentationModule,
     onboardingModule,
     onboardingPresentationModule,
+    authModule,
+    authPresentationModule,
 )
 
 @Composable
@@ -151,11 +155,12 @@ fun App(androidContext: Any?) {
                     val tabs = rootNavItems()
                     val backStackEntry by navController.currentBackStackEntryAsState()
                     val hierarchyRoutes = backStackEntry?.destination?.hierarchy?.map { it.route }?.toList().orEmpty()
-                    val selectedTab = RootTab.forRoutes(hierarchyRoutes)
+                    val currentTab = RootTab.forRoutesOrNull(hierarchyRoutes)
                     AppNavScaffold(
                         items = tabs,
-                        selectedId = selectedTab.id,
+                        selectedId = (currentTab ?: RootTab.DEFAULT).id,
                         onSelect = { id -> navController.switchRootTab(RootTab.fromId(id)) },
+                        navigationVisible = currentTab != null,
                     ) {
                         NotificationHost {
                             val notificationManager = rememberNotificationManager()

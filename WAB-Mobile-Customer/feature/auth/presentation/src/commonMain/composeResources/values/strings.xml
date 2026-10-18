@@ -1,0 +1,22 @@
+<resources>
+    <string name="login_welcome">Welcome back</string>
+    <string name="login_subtitle">Log in with your mobile number to continue.</string>
+    <string name="login_phone_label">Mobile number</string>
+    <string name="login_phone_error">Invalid mobile number</string>
+    <string name="login_button">Log in</string>
+    <string name="login_no_account">Don’t have an account?</string>
+    <string name="login_register_now">Register</string>
+    <string name="login_privacy">Privacy Policy</string>
+    <string name="login_terms">Terms &amp; Conditions</string>
+    <string name="login_contact">Contact us</string>
+    <string name="login_language">Change language</string>
+    <string name="login_theme">Change theme</string>
+    <string name="login_back">Back</string>
+    <string name="login_not_registered_title">This number is not registered</string>
+    <string name="login_not_registered_body">Create a new account with this number to continue.</string>
+    <string name="login_not_registered_register">Create account</string>
+    <string name="login_dialog_cancel">Cancel</string>
+    <string name="login_blocked_title">Account suspended</string>
+    <string name="login_blocked_body">Your account has been suspended. Please contact us for more information.</string>
+    <string name="login_blocked_contact">Contact us</string>
+</resources>
