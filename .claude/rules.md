@@ -1,48 +1,35 @@
 # WAB — Mandatory Rules (all projects, every task)
 
-> Enforced by `CLAUDE.md` imports and `.claude/settings.json` hooks. Project folders may add stricter rules; they never relax these.
+> Enforced by `CLAUDE.md` imports and `.claude/settings.json` hooks. Project folders may add stricter rules; they never relax these. Updated 2026-10-18 (one verification loop, per-project session/memory, backlog tool).
 
-## 1. Token Efficiency
-- Use the minimum context, tool calls, and output necessary to complete the task correctly.
-- Never scan the entire repository unless the task explicitly requires it.
-- Start by inspecting `git status`, the relevant files, and the existing implementation.
-- Search for specific symbols, classes, functions, and usages before opening files.
-- Read only relevant sections of large files, logs, and documentation.
-- Never reread files or repeat searches unless new information justifies it.
-- Avoid dumping full build logs, dependency trees, generated files, or unrelated code into context.
-- Prefer concise summaries and targeted command output.
-- Do not explain obvious code or produce lengthy progress updates.
-- Use the existing project structure and abstractions instead of inventing new ones.
-- Avoid unnecessary agents, parallel investigations, and repeated planning.
-- Use the simplest suitable model for routine tasks; reserve stronger reasoning for complex architectural decisions.
-- Use `/clear` between unrelated tasks and `/compact` when continuing a long task with useful context.
-- Check `.claude/memory.md` before investigating; it may already hold the answer.
+## 1. Token Efficiency (read once, work from the task row)
+- **Auto-loaded files are never read with a tool.** Root `CLAUDE.md`, `.claude/{rules,roles,hooks,session,memory}.md` and the project's `CLAUDE.md` + `.claude/{session,memory}.md` are already in context on every turn. Do not `cat`/Read them; do not re-read them "to be sure".
+- **Backlogs are read only through the tool.** `python3 scripts/tasks.py next <project>` gives the one task to do (ID, title, branch, needs, notes, session file); `show <ID>`, `blocked`, `board`, `check`. Never open a `*_Tasks.md` file whole; never list all tasks.
+- **Requirements by section.** A task row names its PRD screens/sections and OpenAPI operations; read only those headings (`grep -n "^### S07"` then `sed -n`), never a PRD/BRD/design script whole. `design/*.dc.html` are visual reference only, opened for UI tasks.
+- **One project per session.** Work inside one project folder so only its `CLAUDE.md`/session/memory load. Cross-project facts live in `INTEGRATION.md` (read §1–§5 once when a task touches two projects) and in root `memory.md`.
+- Start by inspecting `git status`, the relevant files and the existing implementation; search for symbols before opening files; read only needed ranges; never re-read files you just wrote.
+- Avoid dumping build logs, dependency trees or generated files into context. Prefer one quiet gate command (`sh scripts/gate.sh` admin, `npm run verify` server/SDKs, `scripts/ci/run_local_checks.sh` apps) and read only its summary.
+- Keep each project's `.claude/session.md` to the current task + the last 2 blocks and `.claude/memory.md` to durable facts (both are loaded on every turn in that project). Root `session.md` is an index only.
+- Use `/clear` between unrelated tasks and `/compact` when continuing a long task.
 
 ## 2. Understand Requirements Before Coding
-- Identify the exact requested outcome before modifying code.
-- Inspect the relevant implementation, its callers, dependencies, and existing tests.
-- Convert the request into explicit acceptance criteria (write them into `.claude/session.md`).
-- Identify constraints, edge cases, and potential regressions.
-- Distinguish explicit requirements from assumptions.
-- If a missing detail materially affects correctness, ask a concise clarifying question before proceeding.
-- Do not ask questions that can be answered by inspecting the repository.
-- For complex or multi-file changes, provide a short implementation plan and list the expected files before editing.
-- For straightforward changes, skip unnecessary planning and proceed directly.
-- Do not expand the scope, refactor unrelated code, or introduce additional features without justification.
-- Requirements source of truth: the project's PRD > BRD > Design Script > design files (see `CLAUDE.md` §3).
+- Identify the exact requested outcome; inspect the implementation, callers, dependencies and existing tests.
+- Convert the request into explicit acceptance criteria in the **project's** `.claude/session.md` task block, naming the PRD/BRD/BUSINESS_DOMAIN sections and OpenAPI operations touched.
+- Identify constraints, edge cases, regressions. Distinguish requirements from assumptions. Ask a concise question only when a missing detail materially affects correctness and the repo cannot answer it.
+- Do not expand scope, refactor unrelated code or add features without justification.
+- Source of truth: PRD > BRD > Design Script > design files (`CLAUDE.md` §3). Wire format: the server OpenAPI snapshot (`INTEGRATION.md` §3).
 
 ## 3. Delivery Rules
-1. **Unit tests for every task.** Every code change ships with unit tests covering the acceptance criteria, edge cases and the regression it fixes. Run them; all must pass. No tests → task not done.
-2. **Never commit or push to `main`.** Always: `git checkout main && git pull --ff-only` → `git checkout -b <type>/<short-name>` (types: `feat`, `fix`, `chore`, `refactor`, `test`, `docs`) → commit on the branch → push the branch → open a PR. Never force-push, never `--no-verify`.
-3. **No hardcoded values anywhere.** No hardcoded URLs, hosts, ports, keys, secrets, IDs, user-visible strings, colors, sizes, limits, timeouts or magic numbers in code. Use config/env, constants files, localization resources, theme/design tokens, or server-driven settings.
-4. **Three verification loops before push.** Re-check the work against every acceptance criterion three separate times (loop 1: requirements coverage; loop 2: edge cases, errors, security, no-hardcode; loop 3: tests/build/lint green + PRD/BRD consistency). Record each loop in `.claude/session.md` (`Loops: 3/3`).
-5. **Four-role review before push** (see `.claude/hooks.md`). Record `Review: PASSED` in `.claude/session.md`. Fix every blocking finding first.
-6. **Keep `session.md` and `memory.md` current** (see `.claude/hooks.md` §3).
-7. Never commit secrets; never edit `.env*` files without explicit permission.
-8. **Server work uses the `server` branch as its master.** All WAB-Server tasks branch from the latest `origin/server` and their PRs target `server` (never `main`); `server` is created from `main` and the user merges `server` into `main` when they decide. After each merge, restart the working branch from `origin/server`. If `server` is behind `main`, merge `main` into `server` first (pull request, never a force-push). Other projects keep using `main`.
-9. **Admin work uses the `admin` branch as its master and has NO GitHub CI.** All WAB-Admin-Dashboard tasks branch from the latest `origin/admin` and their PRs target `admin` (never `main`). Because Actions is switched off for the admin panel, the gate is local: before every push run the local gate on the developer machine: `npm ci`, `npm run verify`, the four variant builds (`npm run build:dev-debug`, `build:dev-release`, `build:prod-debug`, `build:prod-release`) with `VITE_API_BASE_URL`/`VITE_SOCKET_URL` set to https placeholders, `npm run check:size -- dev-debug dev-release prod-debug prod-release`, and `npm run e2e` for screens; push only when all of it is green, and report what ran. Before every commit the admin app is also built, run in a browser and UI-tested against the BRD, PRD, task row and `BUSINESS_DOMAIN.md` (`WAB-Admin-Dashboard/.claude/rules.md` §6). I may merge a task PR into `admin` only after that gate is green. The user pulls the branch and runs the project on their own device before merging `admin` into `main`. If `admin` is behind `main`, merge `main` into `admin` by pull request first (never force-push).
-10. **One task = one branch from the master branch, checked before the first edit.** Run `git branch --show-current` before editing: it must be the task branch (`feat/<project>-<id>-<key>`), never the master branch (`admin`, `server`) and never `main`. Create the branch from the freshly fetched `origin/<master>` (use `git branch --no-track <name> origin/<master>` then `git checkout <name>` when the sandbox cannot write `.git/config`). The PR always targets the master branch, never `main`.
-11. **Autonomous backlog flow (user grant, 2026-10-14).** The user gave full access to the device and to merging my own PRs. After the local gate is green I push, open the PR into the master branch, merge it (merge commit), return to the updated master branch and start the next backlog task at once, without waiting for approval, until the whole backlog is done. I stop only for tasks marked PENDING or blocked by missing owner input, and I report them. If the user says stop, I stop.
-12. **Run the project in Chrome before every commit** (every project with a UI): build it, open it in a real browser (the built-in browser and the real Chrome through e2e), use the screens the change touches in Arabic and English, light and dark, phone and desktop, keep the console clean, check widths and positions with measurements (unit tests cannot see CSS layout), and state in the commit/PR what was opened and found. A UI change committed without this is not done.
-13. **Pushes and merges made through the Terminal panel do not pass the Bash guard hook.** The `Loops: 3/3` and `Review: PASSED` block in `.claude/session.md` must therefore be written (and be true) before any push or merge made that way; do not rely on the hook to catch a missing one.
-14. **Report deviations honestly.** When a rule above was not fully applied (a step skipped, done in a shortened form, or done late), say so in the task block of `session.md` and in the final answer, with what was done instead. Never record `Loops: 3/3` or `Review: PASSED` for a pass that did not happen.
+1. **Unit tests for every task.** Every code change ships with unit tests covering the acceptance criteria, edge cases and the regression it fixes. All must pass. No tests → task not done.
+2. **Branch per task from the project's master, checked before the first edit.** Masters: `server` (WAB-Server + all `wab-*`), `admin`, `customer`, `merchant` (`INTEGRATION.md` §1). `git fetch origin && git branch --no-track feat/<prefix>-NNN-<key> origin/<master> && git checkout feat/...`; `git branch --show-current` must show the task branch before editing. PRs target the master, never `main`. Never commit or push to `main` or a master; never force-push; never `--no-verify`. The owner merges masters into `main`; if a master is behind `main`, merge `main` into it by PR first.
+3. **No hardcoded values anywhere.** No URLs, hosts, ports, keys, secrets, IDs, user-visible strings, colors, sizes, limits, timeouts or magic numbers in code. Use config/env, constants, localization resources, design tokens or server-driven settings.
+4. **One verification loop before push** (`Loops: 1/1`, owner decision 2026-10-18): re-check every acceptance criterion once, covering requirements coverage, edge cases/errors/security/no-hardcode, and tests/build/lint green + PRD/BRD consistency. Record it in the project's `session.md`.
+5. **Four-role review before push** (`.claude/hooks.md` §2). Record `Review: PASSED`. Fix every blocking finding first.
+6. **Status through the tool, both sides at once.** When a task starts: `python3 scripts/tasks.py set <ID> "IN PROGRESS"`; PR open: `IN REVIEW`; merged: `DONE`. The tool unblocks dependents in other projects and rebuilds the board in `INTEGRATION.md`; commit those file changes with the task. A contract change names the affected client tasks in the task block.
+7. **Keep the project's `session.md` and `memory.md` current** (`.claude/hooks.md` §3); root `session.md` index line updated when a project's current task changes; root `memory.md` only for cross-project facts.
+8. Never commit secrets; never edit `.env*` files without explicit permission.
+9. **Admin gate is local (no admin CI):** before every push `sh scripts/gate.sh` (verify, four variant builds, `check:size`) green, plus the browser UI check of `WAB-Admin-Dashboard/.claude/rules.md` §6 before every commit; e2e only when the owner asks (decision 2026-10-14).
+10. **Autonomous backlog flow (owner grant 2026-10-14).** After the gate is green: push, open the PR into the master, merge it (merge commit), return to the updated master and start the next backlog task, until the backlog has no ready task. Stop only on `PENDING`/`BLOCKED` tasks and report them. If the owner says stop, stop.
+11. **Run every UI project in a browser/simulator before committing** (`WAB-Admin-Dashboard/.claude/rules.md` §6; apps: previews + local build): use the changed screens in AR and EN, light and dark, phone and desktop/tablet; console clean; measure widths/positions. State what was opened in the commit/PR body.
+12. **Pushes and merges through the Terminal panel bypass the Bash guard hook**: the `Loops: 1/1` and `Review: PASSED` lines must be written (and true) in the project's `session.md` before any push or merge made that way.
+13. **Report deviations honestly.** When a rule was not fully applied, say so in the task block and in the final answer. Never record `Loops: 1/1` or `Review: PASSED` for a pass that did not happen.

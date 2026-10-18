@@ -1,12 +1,14 @@
 # wab-notifications — Guide for AI Agents
 
-> Read this first in every session, then `.claude/Rules.md` and `.claude/Integration.md`. Then read the BRD: `docs/WAB_Package_Notifications_BRD.md`.
+> Auto-loaded with this file (never read them with a tool): the rules, the technical document, the session and the memory below. Per task: `python3 scripts/tasks.py next notifications` → the task row; read only the BRD section (`docs/WAB_Package_*_BRD.md`) it names. Branch `feat/not-NNN-<key>` from `origin/server`; PR into `server`.
 
-**Mandatory reading (all of it, every session):**
+**Auto-loaded (every session):**
 - Rules: @.claude/Rules.md
 - Technical implementation document (keep it current): @.claude/Integration.md
+- Session (current task): @.claude/session.md
+- Memory (durable facts): @.claude/memory.md
 - Business requirements: `docs/WAB_Package_Notifications_BRD.md`
-- Repo-wide context: `../CLAUDE.md`, `../BUSINESS_DOMAIN.md` (only for names/enums the consumer uses), `../.claude/rules.md`
+- Repo-wide context already in context: root `CLAUDE.md`, `.claude/rules.md`; `../BUSINESS_DOMAIN.md` only for names/enums the consumer uses; `../INTEGRATION.md` §3 for the server port this package must satisfy
 
 ## What this package is
 Delivers push (FCM, customer + merchant apps) and email (Nodemailer + SMTP) through one interface: visible/data-only/high-priority/time-sensitive/actionable push, multicast batches and topics, per-token results with invalid-token detection, branded ar/en email templates, retry with backoff and per-notification idempotency.
@@ -40,4 +42,4 @@ tests/  (one file per source file)  tests/loop/  scripts/{smoke.ts,package-smoke
 2. Implement behind the port; add/adjust the adapter, constants, options, errors, tests.
 3. Run `npm run verify`, then `npm run test:loop`.
 4. Update `Integration.md` (and the changelog table in it).
-5. Commit, push the branch, open a PR.
+5. Record `Loops: 1/1` + `Review: PASSED` in `.claude/session.md`, `tasks.py set <ID> <STATUS>`, commit, push the branch, open the PR into `server`.

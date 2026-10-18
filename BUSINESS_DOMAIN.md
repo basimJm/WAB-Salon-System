@@ -1,7 +1,7 @@
 # WAB — Business Domain Specification (single source for server schemas & business logic)
 
 > **What this is:** the whole business consolidated into one implementable spec: entities and fields, enums, relations, indexes, state machines, algorithms, money rules, permissions, notifications, jobs, settings and error codes.
-> **Who uses it:** WAB-Server (schemas, services, rules), the `contracts/` author (INT-01), and all clients for shared enums/rules.
+> **Who uses it:** WAB-Server (schemas, services, rules), the generated OpenAPI contract (`INTEGRATION.md` §3), and all clients for shared enums/rules.
 > **Sources:** consolidated from the Customer, Merchant and Admin PRDs and BRDs, the Backend BRD, the package BRDs and `CLAUDE.md`. If this file conflicts with a PRD on **screen behavior**, the PRD wins. If it conflicts on **data/rules**, raise it and fix both.
 > **Conventions:** MongoDB + Mongoose; `_id` ObjectId; timestamps `createdAt`/`updatedAt` (UTC) on every collection; money stored as **integer fils** (1 JOD = 1000 fils) to avoid float errors and exposed in the API as a decimal string with 3 decimals; localized admin-managed text as `{ ar, en }`; files stored as **storage keys** (never full URLs); soft-delete via status fields, not physical deletes, unless stated.
 
