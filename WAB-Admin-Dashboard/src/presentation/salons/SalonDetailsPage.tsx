@@ -1,0 +1,205 @@
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { useContainer } from '@/app/ContainerContext';
+import { ROUTES } from '@/constants/routes';
+import type { SalonDetails, SalonMember } from '@/domain/salons/salons';
+import { formatInstant, formatNumber } from '@/domain/shared/format';
+import { Badge } from '../components/core/Badge';
+import { KeyValue } from '../components/core/KeyValue';
+import { StatusBadge } from '../components/core/StatusBadge';
+import { DataTable } from '../components/data/DataTable';
+import type { Column } from '../components/data/tableTypes';
+import { DetailPage } from '../components/templates/DetailPage';
+import { useLanguage } from '../hooks/useLanguage';
+import { useLocationOptions } from '../hooks/useLocationOptions';
+import { PayoutDetailsPanel } from './PayoutDetailsPanel';
+import { SalonActions } from './SalonActions';
+
+const TABS = ['overview', 'members', 'payout'] as const;
+
+function Overview({ salon }: { salon: SalonDetails }) {
+  const { t } = useTranslation();
+  const { language } = useLanguage();
+  const cities = useLocationOptions('cities');
+  const placeholder = t('salons.none');
+  const items = [
+    { key: 'gender', label: t('salons.gender'), value: t(`catalog.genders.${salon.gender}`) },
+    {
+      key: 'city',
+      label: t('salons.city'),
+      value: cities.find((c) => c.value === salon.cityId)?.label,
+    },
+    { key: 'phone', label: t('salons.phone'), value: salon.phone, ltr: true },
+    { key: 'description', label: t('salons.description'), value: salon.description },
+    {
+      key: 'rating',
+      label: t('salons.rating'),
+      value: `${formatNumber(salon.rating.avg, language)} (${formatNumber(salon.rating.count, language)})`,
+      ltr: true,
+    },
+    {
+      key: 'created',
+      label: t('salons.created'),
+      value: formatInstant(salon.createdAt, language, 'date'),
+      ltr: true,
+    },
+  ];
+  return (
+    <div className="wab-stack">
+      <KeyValue items={items} placeholder={placeholder} />
+      <section aria-label={t('salons.completeness')}>
+        <h2 className="wab-settings__title">{t('salons.completeness')}</h2>
+        {salon.completeness.isComplete ? (
+          <Badge tone="green">{t('salons.complete')}</Badge>
+        ) : (
+          <ul>
+            {salon.completeness.missing.map((m) => (
+              <li key={m}>{t('salons.missingPart', { part: m })}</li>
+            ))}
+          </ul>
+        )}
+      </section>
+      {salon.offline ? (
+        <section aria-label={t('salons.offlineInfo')}>
+          <h2 className="wab-settings__title">{t('salons.offlineInfo')}</h2>
+          <p>{salon.offline.reason}</p>
+          <p className="wab-muted">{formatInstant(salon.offline.at, language, 'date')}</p>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+function Members({
+  members,
+  loading,
+  error,
+  onRetry,
+}: {
+  members: readonly SalonMember[];
+  loading: boolean;
+  error: unknown;
+  onRetry: () => void;
+}) {
+  const { t } = useTranslation();
+  const columns: Column<SalonMember>[] = [
+    { key: 'name', header: t('salons.name'), render: (m) => m.name },
+    { key: 'phone', header: t('salons.phone'), ltr: true, render: (m) => m.phone },
+    {
+      key: 'role',
+      header: t('salons.role'),
+      render: (m) => t(`salons.roles.${m.role}`, { defaultValue: m.role }),
+    },
+    {
+      key: 'perm',
+      header: t('salons.permissions'),
+      ltr: true,
+      render: (m) => m.permissions.length,
+    },
+    {
+      key: 'active',
+      header: t('locations.status'),
+      render: (m) => (
+        <Badge tone={m.active ? 'green' : 'grey'}>
+          {t(m.active ? 'locations.active' : 'locations.inactive')}
+        </Badge>
+      ),
+    },
+  ];
+  return (
+    <DataTable
+      columns={columns}
+      rows={members}
+      rowKey={(m) => m.id}
+      caption={t('salons.members')}
+      loading={loading}
+      error={error}
+      onRetry={onRetry}
+    />
+  );
+}
+
+/** Admin PRD A13 · One salon: overview (profile facts, completeness, offline reason) and its members. */
+export default function SalonDetailsPage() {
+  const { t } = useTranslation();
+  const { language } = useLanguage();
+  const { id = '' } = useParams();
+  const { repositories } = useContainer();
+  const [tab, setTab] = useState<string>(TABS[0]);
+  const salon = useQuery({
+    queryKey: ['getSalonsById', { id }],
+    queryFn: () => repositories.salons.get(id),
+  });
+  const members = useQuery({
+    queryKey: ['getSalonsByIdMembers', { id }],
+    queryFn: () => repositories.salons.members(id),
+    enabled: tab === 'members',
+  });
+  const s = salon.data;
+  return (
+    <DetailPage
+      title={s?.name ?? t('nav.sub.allSalons')}
+      back={{ to: ROUTES.salons, label: t('nav.sub.allSalons') }}
+      status={s ? <StatusBadge kind="salon" value={s.state} /> : null}
+      actions={s ? <SalonActions salon={s} /> : null}
+      tabs={[
+        { id: 'overview', label: t('salons.overview'), content: s ? <Overview salon={s} /> : null },
+        { id: 'payout', label: t('salons.payout'), content: <PayoutDetailsPanel salonId={id} /> },
+        {
+          id: 'members',
+          label: t('salons.members'),
+          content: (
+            <Members
+              members={members.data ?? []}
+              loading={members.isPending}
+              error={members.error}
+              onRetry={() => void members.refetch()}
+            />
+          ),
+        },
+      ]}
+      activeTab={tab}
+      onTabChange={setTab}
+      tabsLabel={t('salons.tabs')}
+      aside={s ? <Aside salon={s} language={language} /> : null}
+      loading={salon.isPending}
+      error={salon.error}
+      onRetry={() => void salon.refetch()}
+    />
+  );
+}
+
+function Aside({ salon, language }: { salon: SalonDetails; language: 'ar' | 'en' }) {
+  const { t } = useTranslation();
+  const placeholder = t('salons.none');
+  return (
+    <KeyValue
+      placeholder={placeholder}
+      items={[
+        {
+          key: 'owner',
+          label: t('salons.owner'),
+          value: salon.owner ? `${salon.owner.firstName} ${salon.owner.lastName}` : null,
+        },
+        { key: 'ownerPhone', label: t('salons.phone'), value: salon.owner?.phone, ltr: true },
+        {
+          key: 'sub',
+          label: t('salons.subscription'),
+          value: salon.subscription ? (
+            <StatusBadge kind="subscription" value={salon.subscription.status} />
+          ) : null,
+        },
+        {
+          key: 'trial',
+          label: t('salons.trialEnds'),
+          value: salon.subscription
+            ? formatInstant(salon.subscription.trialEndsAt, language, 'date')
+            : null,
+          ltr: true,
+        },
+      ]}
+    />
+  );
+}

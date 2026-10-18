@@ -1,10 +1,12 @@
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ERROR_KINDS } from '@/constants/errors';
 import { LANGUAGES } from '@/constants/i18n';
 import { NAV_ITEMS } from '@/constants/nav';
 import { createI18n, directionOf } from '@/infrastructure/i18n/i18n';
-import ar from '@/locales/ar.json';
-import en from '@/locales/en.json';
+import ar from '@/locales/ar';
+import en from '@/locales/en';
 import { listFiles, read, SRC } from './helpers/files';
 
 type Tree = { [key: string]: string | Tree };
@@ -18,6 +20,37 @@ const arFlat = flatten(ar);
 const enFlat = flatten(en);
 const placeholders = (s: string) => (s.match(/{{\s*\w+\s*}}/g) ?? []).sort().join();
 const ARABIC = /[؀-ۿ]/;
+
+describe('locale area files', () => {
+  const areas = (lang: string) =>
+    readdirSync(join(SRC, 'locales', lang))
+      .filter((f) => f.endsWith('.json'))
+      .sort();
+
+  it('exist under the same names in both languages', () => {
+    expect(areas('ar')).toEqual(areas('en'));
+    expect(areas('en').length).toBeGreaterThan(0);
+  });
+
+  it('are all merged into the language module (nothing is left unloaded)', () => {
+    for (const [lang, merged] of [
+      ['ar', ar],
+      ['en', en],
+    ] as const) {
+      const fromDisk = areas(lang).flatMap((file) =>
+        Object.keys(JSON.parse(read(join(SRC, 'locales', lang, file))) as object),
+      );
+      expect(Object.keys(merged).sort()).toEqual(fromDisk.sort());
+    }
+  });
+
+  it('use each top-level key once (no area overwrites another)', () => {
+    const keys = areas('en').flatMap((file) =>
+      Object.keys(JSON.parse(read(join(SRC, 'locales', 'en', file))) as object),
+    );
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+});
 
 describe('locale files', () => {
   it('have exactly the same keys', () => {

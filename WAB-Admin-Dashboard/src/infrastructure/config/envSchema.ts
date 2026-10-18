@@ -36,6 +36,35 @@ const rawSchema = z.object({
   [ENV_KEYS.defaultLanguage]: z.preprocess(blankToUndefined, z.enum(LANGUAGES).optional()),
 });
 
+/** Keys the schema reads; `npm run check:env` keeps them equal to ENV_KEYS and `.env.example`. */
+export const ENV_SCHEMA_KEYS: readonly string[] = Object.keys(rawSchema.shape);
+
+type UrlValues = Readonly<{ apiBaseUrl: string; socketUrl: string }>;
+
+/** Keys that make the chosen data source unusable for this variant (mock in prod, remote without URLs). */
+function invalidDataSourceKeys(
+  dataSource: DataSource,
+  variant: BuildVariant,
+  urls: UrlValues,
+): string[] {
+  if (dataSource === 'mock') return variant.allowMock ? [] : [ENV_KEYS.dataSource];
+  return [
+    ...(urls.apiBaseUrl ? [] : [ENV_KEYS.apiBaseUrl]),
+    ...(urls.socketUrl ? [] : [ENV_KEYS.socketUrl]),
+  ];
+}
+
+/** Keys whose URL is set but not https (prod only). */
+function insecureUrlKeys(urls: UrlValues): string[] {
+  const entries = [
+    [ENV_KEYS.apiBaseUrl, urls.apiBaseUrl],
+    [ENV_KEYS.socketUrl, urls.socketUrl],
+  ] as const;
+  return entries
+    .filter(([, value]) => value && new URL(value).protocol !== HTTPS_PROTOCOL)
+    .map(([key]) => key);
+}
+
 /** Validates the public (browser-visible) env for a build variant. Throws ConfigError naming keys only. */
 export function parsePublicEnv(
   raw: Readonly<Record<string, string | undefined>>,
@@ -49,21 +78,10 @@ export function parsePublicEnv(
   const dataSource = v[ENV_KEYS.dataSource] ?? DEFAULT_DATA_SOURCE[variant.appEnv];
   const apiBaseUrl = v[ENV_KEYS.apiBaseUrl] ?? '';
   const socketUrl = v[ENV_KEYS.socketUrl] ?? '';
-  const bad: string[] = [];
-
-  if (dataSource === 'mock' && !variant.allowMock) bad.push(ENV_KEYS.dataSource);
-  if (dataSource === 'remote') {
-    if (!apiBaseUrl) bad.push(ENV_KEYS.apiBaseUrl);
-    if (!socketUrl) bad.push(ENV_KEYS.socketUrl);
-  }
-  if (variant.appEnv === 'prod') {
-    for (const [key, value] of [
-      [ENV_KEYS.apiBaseUrl, apiBaseUrl],
-      [ENV_KEYS.socketUrl, socketUrl],
-    ] as const) {
-      if (value && new URL(value).protocol !== HTTPS_PROTOCOL) bad.push(key);
-    }
-  }
+  const bad = [
+    ...invalidDataSourceKeys(dataSource, variant, { apiBaseUrl, socketUrl }),
+    ...(variant.appEnv === 'prod' ? insecureUrlKeys({ apiBaseUrl, socketUrl }) : []),
+  ];
   if (bad.length > 0) throw new ConfigError([...new Set(bad)]);
 
   return {

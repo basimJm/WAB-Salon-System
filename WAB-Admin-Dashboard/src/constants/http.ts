@@ -21,6 +21,7 @@ export const HTTP_HEADERS = {
   authorization: 'Authorization',
   contentType: 'Content-Type',
   requestId: 'X-Request-Id',
+  idempotencyKey: 'Idempotency-Key',
 } as const;
 
 export const BEARER_PREFIX = 'Bearer';
@@ -33,14 +34,4 @@ export const HTTP_RETRY = {
   baseDelayMs: 300,
   maxDelayMs: 3_000,
   retryableStatuses: [502, 503, 504],
-} as const;
-
-/** Server error codes the panel branches on (BUSINESS_DOMAIN.md §11). */
-export const API_ERROR_CODES = {
-  unauthorized: 'UNAUTHORIZED',
-  forbidden: 'FORBIDDEN',
-  notFound: 'NOT_FOUND',
-  validation: 'VALIDATION_ERROR',
-  rateLimited: 'RATE_LIMITED',
-  internal: 'INTERNAL',
 } as const;

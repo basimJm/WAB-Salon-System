@@ -1,0 +1,21 @@
+{
+  "applications": {
+    "subtitle": "New salons waiting for a decision, oldest first.",
+    "empty": "No applications",
+    "submitted": "Submitted",
+    "resubmissions": "Resubmissions",
+    "lastRejection": "Last rejection reason",
+    "documents": "License documents",
+    "noDocuments": "No documents were uploaded",
+    "document": "License document {{n}} of {{name}}",
+    "review": "Review",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveTitle": "Approve {{name}}",
+    "approveText": "The salon is approved and its free trial starts. The owner is told.",
+    "rejectTitle": "Reject {{name}}",
+    "rejectText": "The owner sees this reason and can fix and resubmit.",
+    "approved": "Salon approved",
+    "rejected": "Application rejected"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "catalog": {
+    "subtitle": "Services salons pick from when they set up their menu.",
+    "add": "Add a service",
+    "edit": "Edit service",
+    "audience": "Audience",
+    "name": "Name",
+    "nameAr": "Name (Arabic)",
+    "nameEn": "Name (English)",
+    "descAr": "Description (Arabic)",
+    "descEn": "Description (English)",
+    "image": "Image",
+    "order": "Order",
+    "active": "Active",
+    "deactivateWarning": "Salons that already offer it keep it; new salons will no longer see it.",
+    "genders": {
+      "FEMALE": "Women",
+      "MALE": "Men"
+    },
+    "error": {
+      "nameAr": "Required, up to {{max}} characters",
+      "nameEn": "Required, up to {{max}} characters",
+      "descAr": "Required, up to {{max}} characters",
+      "descEn": "Required, up to {{max}} characters",
+      "image": "Upload an image",
+      "order": "Whole number from 0"
+    },
+    "requestsSubtitle": "Services salons asked to add to the catalog.",
+    "noRequests": "No requests",
+    "salon": "Salon",
+    "description": "Description",
+    "requestedAt": "Requested",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveTitle": "Approve and add to the catalog",
+    "approveHint": "The service \"{{name}}\" will be created for everyone. Translate the texts first.",
+    "rejectTitle": "Reject \"{{name}}\"",
+    "rejectText": "The salon is told why. Write the reason.",
+    "rejected": "Request rejected",
+    "requestStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    }
+  }
+}

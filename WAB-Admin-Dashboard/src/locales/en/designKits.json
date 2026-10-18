@@ -1,0 +1,157 @@
+{
+  "designKits": {
+    "templates": {
+      "title": "Page templates",
+      "listTitle": "Bookings",
+      "listSubtitle": "All bookings across salons",
+      "create": "New booking",
+      "colRef": "Reference",
+      "colCustomer": "Customer",
+      "colStatus": "Status",
+      "pagination": "Bookings pagination",
+      "detailSubtitle": "Booking details",
+      "reject": "Reject",
+      "tabs": "Booking sections",
+      "tabOverview": "Overview",
+      "tabHistory": "Status history",
+      "tabPayload": "Raw data",
+      "overviewBody": "Booking summary",
+      "noHistory": "No changes yet",
+      "empty": "Not set",
+      "salon": "Salon",
+      "salonName": "Layla Beauty",
+      "amount": "Amount (JOD)",
+      "note": "Note",
+      "customer": {
+        "a": "Dana Saleh",
+        "b": "Omar Khaled",
+        "c": "Rana Ahmad"
+      },
+      "history": {
+        "h3": {
+          "title": "Marked as no-show",
+          "actor": "Salon: Layla",
+          "reason": "Customer did not arrive within 30 minutes"
+        },
+        "h2": {
+          "title": "Approved",
+          "actor": "Salon: Layla"
+        },
+        "h1": {
+          "title": "Booking requested",
+          "actor": "Customer"
+        }
+      }
+    },
+    "charts": {
+      "title": "Charts kit",
+      "trend": "Bookings trend",
+      "trendLabel": "Bookings, last 7 days",
+      "day": "Day",
+      "created": "Created",
+      "cancelled": "Cancelled",
+      "lineTitle": "Bookings per day",
+      "barTitle": "Created vs cancelled",
+      "stackedTitle": "Bookings per day (stacked)",
+      "donutTitle": "Bookings by status",
+      "status": "Status",
+      "count": "Count",
+      "share": "Share",
+      "bookings": "bookings",
+      "funnelTitle": "Customer funnel",
+      "step": "Step",
+      "ofFirst": "Of first step",
+      "ofPrevious": "Of previous step",
+      "heatTitle": "Weekly retention",
+      "cohort": "Cohort",
+      "week": "Week",
+      "days": {
+        "d1": "Sat",
+        "d2": "Sun",
+        "d3": "Mon",
+        "d4": "Tue",
+        "d5": "Wed",
+        "d6": "Thu",
+        "d7": "Fri"
+      },
+      "statuses": {
+        "approved": "Approved",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      },
+      "steps": {
+        "installs": "Installs",
+        "registered": "Registered",
+        "searched": "Searched",
+        "booked": "Booked",
+        "paid": "Paid"
+      },
+      "cohorts": {
+        "w1": "Week of 5 Oct",
+        "w2": "Week of 12 Oct",
+        "w3": "Week of 19 Oct"
+      }
+    },
+    "media": {
+      "title": "Media kit",
+      "banner": "Banner image",
+      "failHint": "Tip: a file whose name contains “fail” simulates a failed upload.",
+      "license": "License document",
+      "previewAr": "Arabic phone preview",
+      "previewEn": "English phone preview",
+      "previewEmptyAr": "No Arabic image yet",
+      "previewEmptyEn": "No English image yet"
+    },
+    "richText": {
+      "title": "Rich text and schedule",
+      "page": "Privacy page",
+      "start": "Starts",
+      "end": "Ends",
+      "saved": "Schedule: {{start}} to {{end}}"
+    },
+    "shell": {
+      "title": "Shell: global search and breadcrumbs",
+      "customer": "Dana Saleh",
+      "salon": "Layla Beauty",
+      "salon2": "Layla Hair",
+      "city": "Amman",
+      "pending": "Pending",
+      "hint": "Type 2+ characters (a query containing “x” finds nothing)",
+      "picked": "Picked: {{label}}",
+      "crumbModule": "Finance",
+      "crumbPage": "Refunds"
+    },
+    "basics": {
+      "title": "Basics",
+      "icons": "Icons",
+      "bell": "Alerts",
+      "gear": "Settings (disabled)",
+      "state": "Async state",
+      "loading": "Loading",
+      "error": "Error",
+      "ready": "Ready",
+      "content": "Loaded content",
+      "notes": "Notes",
+      "forbiddenTitle": "Status page",
+      "forbiddenText": "Used for 403, 404 and 500.",
+      "crash": "Break the section below",
+      "boundaryOk": "Error boundary: no error",
+      "idle": "Show the idle warning"
+    },
+    "scenario": "Mock scenario",
+    "scenarios": {
+      "success": "Success",
+      "empty": "Empty",
+      "validation": "Validation error",
+      "unauthorized": "401 Session expired",
+      "forbidden": "403 Forbidden",
+      "notFound": "404 Not found",
+      "conflict": "409 Conflict",
+      "unprocessable": "422 Business rule",
+      "serverError": "500 Server error",
+      "timeout": "Timeout",
+      "slow": "Slow"
+    }
+  }
+}

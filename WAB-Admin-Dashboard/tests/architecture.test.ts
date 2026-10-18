@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { GENERATED_DIR } from '../scripts/lib/contractFiles.ts';
 import { listFiles, read, rel, ROOT, SRC } from './helpers/files';
 
 const MAX_LINES = 300;
@@ -19,7 +20,10 @@ describe('architecture', () => {
       ...listFiles(`${ROOT}/tests`, /\.(ts|tsx)$/),
       ...listFiles(`${ROOT}/scripts`, /\.ts$/),
     ];
-    const tooLong = files.filter((f) => read(f).split('\n').length > MAX_LINES + 1).map(rel);
+    const tooLong = files
+      .filter((f) => !rel(f).startsWith(GENERATED_DIR))
+      .filter((f) => read(f).split('\n').length > MAX_LINES + 1)
+      .map(rel);
     expect(tooLong).toEqual([]);
   });
 

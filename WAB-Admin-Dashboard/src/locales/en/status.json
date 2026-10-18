@@ -1,0 +1,91 @@
+{
+  "status": {
+    "booking": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "CANCELLED_BY_CUSTOMER": "Cancelled by customer",
+      "CANCELLED_BY_SALON": "Cancelled by salon",
+      "AUTO_CANCELLED": "Auto-cancelled",
+      "COMPLETED": "Completed",
+      "NO_SHOW": "No-show"
+    },
+    "payment": {
+      "PAY_ON_ARRIVAL": "Pay on arrival",
+      "DEPOSIT_PAID": "Deposit paid",
+      "FULLY_PAID": "Fully paid",
+      "PAID": "Paid"
+    },
+    "refund": {
+      "NONE": "No refund",
+      "REFUND_PENDING": "Refund pending",
+      "REFUNDED": "Refunded",
+      "REFUND_FAILED": "Refund failed"
+    },
+    "transaction": {
+      "PENDING": "Processing",
+      "SUCCEEDED": "Succeeded",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
+    },
+    "review": {
+      "PENDING": "Awaiting review",
+      "APPROVED": "Published",
+      "REJECTED": "Rejected",
+      "REMOVED": "Removed"
+    },
+    "customer": {
+      "ACTIVE": "Active",
+      "BLOCKED": "Blocked",
+      "DELETION_PENDING": "Deletion pending",
+      "DELETED": "Deleted"
+    },
+    "salon": {
+      "APPLICATION_PENDING": "Application pending",
+      "APPLICATION_REJECTED": "Application rejected",
+      "APPROVED_INCOMPLETE": "Approved, profile incomplete",
+      "LIVE": "Live",
+      "OFFLINE": "Offline"
+    },
+    "subscription": {
+      "TRIAL": "Trial",
+      "ACTIVE": "Active",
+      "EXPIRED": "Expired"
+    },
+    "payout": {
+      "PENDING": "Awaiting transfer",
+      "TRANSFERRED": "Transferred"
+    },
+    "catalogRequest": {
+      "PENDING": "Under review",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "campaign": {
+      "SCHEDULED": "Scheduled",
+      "SENDING": "Sending",
+      "SENT": "Sent",
+      "CANCELLED": "Cancelled"
+    },
+    "placement": {
+      "SCHEDULED": "Scheduled",
+      "ACTIVE": "Active",
+      "ENDED": "Ended"
+    },
+    "alert": {
+      "NEW": "New",
+      "ACKNOWLEDGED": "Acknowledged"
+    },
+    "alertSeverity": {
+      "INFO": "Info",
+      "WARNING": "Warning",
+      "CRITICAL": "Critical"
+    },
+    "export": {
+      "QUEUED": "Queued",
+      "RUNNING": "Running",
+      "DONE": "Ready",
+      "FAILED": "Failed"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+declare const brand: unique symbol;
+
+/** Nominal typing: a `SalonId` cannot be passed where a `CustomerId` is expected. */
+export type Brand<T, Name extends string> = T & { readonly [brand]: Name };
+
+/** Server ids are opaque non-empty strings (Mongo ObjectIds today). */
+export type Id<Name extends string> = Brand<string, Name>;
+
+export type AdminId = Id<'Admin'>;
+export type SalonId = Id<'Salon'>;
+export type CustomerId = Id<'Customer'>;
+export type BookingId = Id<'Booking'>;
+export type MemberId = Id<'Member'>;
+
+/** Marks a string from the server as an id of kind `Name`; empty strings are a programmer error. */
+export function toId<Name extends string>(value: string): Id<Name> {
+  if (value.trim() === '') throw new RangeError('id must be a non-empty string');
+  return value as Id<Name>;
+}

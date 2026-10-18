@@ -16,7 +16,13 @@ export const ROUTES = {
   alerts: '/alerts',
   settings: '/settings',
   auditLog: '/audit-log',
+  about: '/about',
+  forbidden: '/forbidden',
+  serverError: '/error',
 } as const;
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 
 export const LOGIN_REDIRECT_PARAM = 'next';
+
+/** Dev-only gallery route (compiled out of prod builds). */
+export const DESIGN_SYSTEM_PATH = '/design-system';

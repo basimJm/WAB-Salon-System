@@ -1,0 +1,18 @@
+{
+  "overview": {
+    "subtitle": "What is happening on the platform, from server events.",
+    "groups": {
+      "payments": "Payment events",
+      "refunds": "Refund events",
+      "bookings": "Booking events",
+      "errors": "Errors"
+    },
+    "vsPrevious": "vs previous period",
+    "trend": "Events per day",
+    "day": "Day",
+    "events": "Events",
+    "byName": "Events by name",
+    "event": "Event",
+    "noEvents": "No events in this range"
+  }
+}
