@@ -52,6 +52,7 @@ describe('stores', () => {
     await cache.set('a', '1', 10);
     await cache.set('b', '2', 10);
     await cache.set('c', '3', 10);
+    expect(cache.size).toBe(2);
     expect(await cache.get('a')).toBeUndefined();
     expect(await cache.get('b')).toBe('2');
     await cache.set('b', '2b', 10);
