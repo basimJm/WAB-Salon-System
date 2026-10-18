@@ -24,8 +24,8 @@ import {
   assertSignedRequest,
   assertUploadRequest,
   assertWriteRequest,
-  encodeKey,
 } from '../../validation';
+import { createCloudFrontSigner, publicUrlOf } from '../../urls';
 import { createAwsDeps, type S3Command, type S3Deps, type S3Output } from './deps';
 import { isNotFound, mapS3Error } from './errors';
 
@@ -37,6 +37,7 @@ const ALREADY_GONE = 'NoSuchKey';
 type S3Settings = Pick<
   ResolvedConfig,
   | 'cdnBaseUrl'
+  | 'cloudFront'
   | 'uploadMaxTtlSec'
   | 'signedUrlMaxTtlSec'
   | 'readMaxBytes'
@@ -59,6 +60,7 @@ export class S3Storage implements StorageProvider {
   private readonly loadDeps: () => Promise<S3Deps>;
   private readonly retryDeps: RetryDeps;
   private readonly now: () => Date;
+  private readonly cloudFrontSigner: ((key: string, expiresInSec: number) => string) | undefined;
 
   constructor(
     private readonly settings: S3Settings,
@@ -67,6 +69,8 @@ export class S3Storage implements StorageProvider {
     this.loadDeps = overrides.loadDeps ?? (() => createAwsDeps(settings.s3, settings.timeoutMs));
     this.retryDeps = overrides.retryDeps ?? realRetryDeps;
     this.now = overrides.now ?? (() => new Date());
+    this.cloudFrontSigner =
+      settings.cloudFront && createCloudFrontSigner(settings.cloudFront, this.now);
   }
 
   async createUploadUrl(request: UploadUrlRequest): Promise<UploadTarget> {
@@ -112,12 +116,12 @@ export class S3Storage implements StorageProvider {
   }
 
   getPublicUrl(key: string): string {
-    assertKey(key);
-    return `${this.settings.cdnBaseUrl}/${encodeKey(key)}`;
+    return publicUrlOf(this.settings.cdnBaseUrl, key);
   }
 
   async getSignedUrl(request: SignedUrlRequest): Promise<string> {
     assertSignedRequest(request, this.settings.signedUrlMaxTtlSec);
+    if (this.cloudFrontSigner) return this.cloudFrontSigner(request.key, request.expiresInSec);
     const deps = await this.getDeps();
     const command = new deps.commands.Get({
       Bucket: this.settings.s3.privateBucket,

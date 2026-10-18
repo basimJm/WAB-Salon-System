@@ -31,3 +31,6 @@ export type RejectionReason = (typeof REJECTION_REASONS)[number];
 
 export const UPLOAD_METHOD = 'PUT';
 export const CONTENT_TYPE_HEADER = 'Content-Type';
+
+export const SIGNED_URL_MODES = ['s3', 'cloudfront'] as const;
+export type SignedUrlMode = (typeof SIGNED_URL_MODES)[number];
