@@ -7,11 +7,14 @@
 
 ## Current task
 
-### ANA-001 — Project scaffold
-- Branch: `feat/ana-001-scaffold`
+### ANA-002 — Shared kernel
+- Branch: `feat/ana-002-kernel`
 - Status: IN REVIEW
-- Acceptance: TS strict, eslint (no any/console), prettier, jest with coverage gate 100/95/95, tsup ESM+CJS+d.ts, `verify`, loop-test config, package smoke (CJS + ESM) — same as `wab-notifications`.
-- Assumed missing: package name `@wab/analytics` (scoped, GitHub Packages) already from the start so the server dependency name never changes; `private: true` until ANA-010.
-- Tests: `npm run verify` green.
+- Acceptance: typed `AnalyticsError` + 14 codes (retryable by code); zod options (environment, provider, time zone, limits, timeouts, retry, cache, bigquery identifiers) with prod rules (memory refused, mongo + bigquery credentials required) naming only option paths; redacting logger; range guard (valid dates, to > from, max days); capped backoff retry; constants for every default.
+- Assumed missing: BUSINESS_DOMAIN event schema is mirrored generically (name pattern, upper-case actor type, id/installation patterns overridable); injected clients (`mongo`, `redis`, BigQuery `client`) are typed `object` here and narrowed by the adapter tasks; sensitive-key redaction list (password/secret/token/otp/iban/card…) leaves gateway `code` readable.
+- Tests: `npm run verify` green (24 tests, coverage 100%).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling only; mirrors the proven notifications setup.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found zod `.default()` of nested objects mis-typed (switched to `.prefault`) and verified secrets never appear in config errors.
+
+### ANA-001 — Project scaffold
+- Status: DONE (PR #203)
