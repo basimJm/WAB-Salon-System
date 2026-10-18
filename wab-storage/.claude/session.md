@@ -7,10 +7,10 @@
 
 ## Current task
 
-### STO-004 — Local-filesystem adapter + HTTP helper
-- Branch: `feat/sto-004-local-fs`
+### STO-005 — S3 adapter
+- Branch: `feat/sto-005-s3`
 - Status: IN REVIEW
-- Acceptance criteria: Disk adapter, atomic writes, HMAC-signed private links, PUT upload + static serving handler for dev on localhost
+- Acceptance criteria: Presigned PUT (content-type signed), confirm by HEAD+ranged GET magic bytes, read/write/delete (batched, both buckets), every S3 error code/status mapped, retries, lazy AWS SDK; verified with the real SDK against a local S3 wire emulator
 - Tests: `npm run verify` green (typecheck, lint, format, jest coverage gate 100/95/95, build, package smoke, loop)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — dev only (prod refuses); path traversal blocked by key pattern; fs errors mapped; tests use a real HTTP server on a temp dir
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — real AWS SDK exercised on localhost (found: Jest-wrapped socket errors lose code -> classify by message too); size cannot be enforced at PUT presign (checked at confirm); not run against real AWS

@@ -31,3 +31,11 @@
 - Tests: npm run verify green (92 unit tests, gate 100/95/95, loop test, packed smoke)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA fixed lint/type findings; refunds are never blind-retried (adapter must find an earlier refund by key).
+
+### PAY-004 — Local mock gateway
+- Branch: `feat/pay-004-mock-gateway`
+- Status: IN REVIEW
+- Acceptance: HTTP server emulating the HyperPay OPP wire format on localhost (checkouts, payment status, refunds RF, query by merchantTransactionId, hosted pay page, AES-GCM encrypted notifications, failure injection); published as subpath @wab/payments/mock-gateway and npm run mock-gateway.
+- Tests: npm run verify green (123 tests; real localhost HTTP round trips)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Mock speaks OPP, so the HyperPay adapter runs unchanged against it in dev (mock-gateway provider = hyperpay adapter + local base URL).
