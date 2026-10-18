@@ -129,3 +129,4 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/otp` real mode (`*_P
 | 2026-10-18 | 0.1.0 | OTP-004 limits engine + createOtpService (precheck/verify/reportFailure/getConfig). |
 | 2026-10-18 | 0.1.0 | OTP-005 Redis LimitStore (Lua scripts, ioredis-shaped client). |
 | 2026-10-18 | 0.1.0 | OTP-006 Firebase ID-token adapter on jose (JWK cache, rotation, stale keys, claim checks). |
+| 2026-10-18 | 0.1.0 | OTP-007 Firebase Auth emulator mode (dev only) + createEmulatorToken. |
