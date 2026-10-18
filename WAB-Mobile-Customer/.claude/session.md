@@ -9,7 +9,7 @@
 
 ## Current task
 
-- CUS-020 next (form kit); task branches start from `origin/customer`.
+- CUS-021 next (sheets and dialogs); task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -74,3 +74,16 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — `AppText` gained `onTextLayout` for overflow detection; all texts localized by the caller or resources; `@Immutable` models; no literals.
 - Notes: UI checked through Compose previews only; no feature screen uses the cards yet.
+
+### CUS-020 — Form kit: phone + country picker, validators, keyboard presets
+- Branch: `feat/cus-020-form-kit`
+- Status: DONE
+- Acceptance criteria (PRD §11, S11–S13; Design Script §1.2):
+  - [x] `AppPhoneField` (country chip with flag URL + dial code opening the picker, digits only, LTR text direction, inline error) and `AppCountryPicker` (full-screen sheet, search by name or dial code via pure `filterCountries`, empty state, selected check); `CountryUi` mirrors `GET /locations/countries`
+  - [x] `FormValidators` in `core/common`: `normalizeNationalNumber`, `isValidPhone(raw, serverRegex)` (malformed regex fails closed), `isRequiredText`, `isValidEmail`, `isValidOtp(code, otpLength)`
+  - [x] `AppKeyboards.phone/email/name/number`; `AppTextField` gains `textDirection`
+  - [x] AR + EN strings (`country_*`); `FormGalleryPreviews` (phone empty/filled/error, email, name, city/area dropdowns incl. disabled, OTP filling/error, disabled submit) in AR/EN, light/dark, portrait/landscape, tablet
+- Tests: `FormValidatorsTest` (6), `FormKitTest` (3); `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — rules live in `core/common` (shared by ViewModels), UI only renders errors the caller passes; regex from the server never crashes; no literals.
+- Notes: UI checked through Compose previews only. `AppOtpInput`, `AppDropdownField`, `AppTextField` already existed.

@@ -23,4 +23,8 @@
     <string name="staff_on_leave">في إجازة</string>
     <string name="service_duration_minutes">%1$d دقيقة</string>
     <string name="price_jod">%1$s د.أ</string>
+    <string name="country_picker_title">اختر الدولة</string>
+    <string name="country_search_placeholder">ابحث بالدولة أو الرمز</string>
+    <string name="country_change_description">تغيير رمز الدولة</string>
+    <string name="country_empty">لا توجد دولة تطابق بحثك</string>
 </resources>
