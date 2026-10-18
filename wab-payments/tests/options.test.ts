@@ -79,13 +79,22 @@ describe('resolveConfig', () => {
     expect(fieldsOf({ environment: 'dev', provider: 'mock-gateway' })).toEqual([
       'mockGateway.baseUrl',
     ]);
-    expect(
-      resolveConfig({
-        environment: 'dev',
-        provider: 'mock-gateway',
-        mockGateway: { baseUrl: 'http://localhost:4010' },
-      }).options.provider,
-    ).toBe('mock-gateway');
+    const resolved = resolveConfig({
+      environment: 'dev',
+      provider: 'mock-gateway',
+      mockGateway: {
+        baseUrl: 'http://localhost:4010/',
+        entityId: 'e',
+        accessToken: 't',
+        shopperResultUrl: 'wab://payment/result',
+        webhookDecryptionKey: KEY,
+      },
+    }).hyperpay;
+    expect(resolved).toMatchObject({
+      baseUrl: 'http://localhost:4010',
+      checkoutPageUrl: 'http://localhost:4010/checkout/',
+      webhookDecryptionKey: KEY,
+    });
   });
 });
 
@@ -112,7 +121,6 @@ describe('resolveConfig hyperpay', () => {
       hyperpay: hyperpay({
         baseUrl: 'http://localhost:4010///',
         testMode: 'EXTERNAL',
-        paymentType: 'PA',
         amountDecimals: 2,
         integrity: false,
         brands: { CARD: 'MADA' },
@@ -122,7 +130,6 @@ describe('resolveConfig hyperpay', () => {
       baseUrl: 'http://localhost:4010',
       webhookDecryptionKey: KEY,
       testMode: 'EXTERNAL',
-      paymentType: 'PA',
       amountDecimals: 2,
       integrity: false,
       brands: { CARD: 'MADA' },

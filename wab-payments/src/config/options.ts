@@ -42,8 +42,6 @@ export interface HyperPayOptions {
   readonly webhookDecryptionKey?: string;
   /** Where the checkout sends the shopper back (https URL or the app's custom scheme). */
   readonly shopperResultUrl: string;
-  /** `DB` debit (default) or `PA` pre-authorisation. */
-  readonly paymentType?: 'DB' | 'PA';
   /** Sandbox behaviour switch; refused in prod. */
   readonly testMode?: HyperPayTestMode;
   /** Payment brands per method, e.g. `{ CARD: 'VISA MASTER' }`. */
@@ -54,9 +52,13 @@ export interface HyperPayOptions {
   readonly integrity?: boolean;
 }
 
+/** Local mock gateway (speaks the OPP wire format); credentials must match the mock's. */
 export interface MockGatewayOptions {
-  /** Local mock gateway, e.g. `http://localhost:4010`. */
   readonly baseUrl: string;
+  readonly entityId: string;
+  readonly accessToken: string;
+  readonly shopperResultUrl: string;
+  readonly webhookDecryptionKey?: string;
 }
 
 export interface PaymentsOptionsBase {
@@ -88,7 +90,6 @@ const hyperpaySchema = z.object({
     .regex(HEX_PATTERN)
     .optional(),
   shopperResultUrl: url,
-  paymentType: z.enum([HYPERPAY_PAYMENT_TYPES.debit, HYPERPAY_PAYMENT_TYPES.preAuth]).optional(),
   testMode: z.enum(HYPERPAY_TEST_MODES).optional(),
   brands: z.record(z.string().min(1), z.string().min(1)).optional(),
   amountDecimals: z.union([z.literal(2), z.literal(3)]).optional(),
@@ -118,7 +119,9 @@ export interface ResolvedHyperPay {
   readonly accessToken: string;
   readonly webhookDecryptionKey?: string;
   readonly shopperResultUrl: string;
-  readonly paymentType: 'DB' | 'PA';
+  readonly paymentType: typeof HYPERPAY_PAYMENT_TYPES.debit;
+  /** Hosted pay page of the local mock gateway (undefined for the real gateway). */
+  readonly checkoutPageUrl?: string;
   readonly testMode?: HyperPayTestMode;
   readonly brands: Readonly<Record<string, string>>;
   readonly amountDecimals: GatewayAmountDecimals;
@@ -160,8 +163,11 @@ const checkPlain = (options: PaymentsOptionsBase): void => {
   }
 };
 
-const resolveHyperPay = (options: PaymentsOptionsBase): ResolvedHyperPay => {
-  const input = options.hyperpay;
+const resolveHyperPay = (
+  environment: Environment,
+  input: HyperPayOptions | undefined,
+  checkoutPageUrl?: string,
+): ResolvedHyperPay => {
   if (input === undefined) return reject('hyperpay');
   const parsed = hyperpaySchema.safeParse(input);
   if (!parsed.success) {
@@ -169,8 +175,8 @@ const resolveHyperPay = (options: PaymentsOptionsBase): ResolvedHyperPay => {
       fields: fieldsOf(parsed.error.issues, 'hyperpay.'),
     });
   }
-  const prod = options.environment === 'prod';
-  const baseUrl = input.baseUrl ?? HYPERPAY_HOSTS[options.environment];
+  const prod = environment === 'prod';
+  const baseUrl = input.baseUrl ?? HYPERPAY_HOSTS[environment];
   if (prod) {
     if (!baseUrl.startsWith('https://')) reject('hyperpay.baseUrl (https is required in prod)');
     if (HYPERPAY_TEST_HOST_PATTERN.test(new URL(baseUrl).hostname)) {
@@ -192,7 +198,8 @@ const resolveHyperPay = (options: PaymentsOptionsBase): ResolvedHyperPay => {
       ? {}
       : { webhookDecryptionKey: input.webhookDecryptionKey.toLowerCase() }),
     shopperResultUrl: input.shopperResultUrl,
-    paymentType: input.paymentType ?? HYPERPAY_PAYMENT_TYPES.debit,
+    paymentType: HYPERPAY_PAYMENT_TYPES.debit,
+    ...(checkoutPageUrl === undefined ? {} : { checkoutPageUrl }),
     ...(input.testMode === undefined ? {} : { testMode: input.testMode }),
     brands: input.brands ?? HYPERPAY_DEFAULT_BRANDS,
     amountDecimals: input.amountDecimals ?? HYPERPAY_DEFAULT_AMOUNT_DECIMALS,
@@ -211,8 +218,23 @@ const checkProvider = (options: PaymentsOptionsBase): ResolvedHyperPay | undefin
   if (options.provider === 'mock-gateway') {
     const mock = options.mockGateway;
     if (mock === undefined || !URL.canParse(mock.baseUrl)) reject('mockGateway.baseUrl');
+    const { baseUrl, entityId, accessToken, shopperResultUrl, webhookDecryptionKey } =
+      mock as MockGatewayOptions;
+    return resolveHyperPay(
+      'dev',
+      {
+        baseUrl,
+        entityId,
+        accessToken,
+        shopperResultUrl,
+        ...(webhookDecryptionKey === undefined ? {} : { webhookDecryptionKey }),
+      },
+      `${baseUrl.replace(/\/+$/, '')}/checkout/`,
+    );
   }
-  return options.provider === 'hyperpay' ? resolveHyperPay(options) : undefined;
+  return options.provider === 'hyperpay'
+    ? resolveHyperPay(options.environment, options.hyperpay)
+    : undefined;
 };
 
 /** Validates every option once, at start-up, naming bad keys only (never their values). */

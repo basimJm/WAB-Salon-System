@@ -83,3 +83,16 @@ export interface WarehouseQuery extends Lifecycle {
   findCrashes(query: Omit<WarehouseFindQuery, 'names'>): Promise<CrashEvent[]>;
   countAppActors(query: { names?: readonly string[]; from: Date; to: Date }): Promise<number>;
 }
+
+/** Stores serialized query results. Failures are never fatal: the query just runs again. */
+export interface ResultCache {
+  get(key: string): Promise<string | undefined>;
+  /** Stores `value` for `ttlSec` seconds. */
+  set(key: string, value: string, ttlSec: number): Promise<void>;
+}
+
+/** The two Redis commands the cache adapter needs (ioredis and node-redis wrappers fit). */
+export interface RedisLike {
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string, mode: 'EX', seconds: number): Promise<unknown>;
+}
