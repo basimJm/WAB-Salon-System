@@ -23,4 +23,8 @@
     <string name="staff_on_leave">On leave</string>
     <string name="service_duration_minutes">%1$d min</string>
     <string name="price_jod">%1$s JOD</string>
+    <string name="country_picker_title">Select country</string>
+    <string name="country_search_placeholder">Search by country or code</string>
+    <string name="country_change_description">Change country code</string>
+    <string name="country_empty">No country matches your search</string>
 </resources>
