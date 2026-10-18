@@ -16,6 +16,9 @@ export { assertRange, type DateRange } from './range';
 export { withRetry, type RetryPolicy } from './retry';
 export { MemoryEventStore } from './adapters/memory/eventStore';
 export { MemoryIdentityStore } from './adapters/memory/identityStore';
+export { MemoryCache, RedisCache } from './cache/stores';
+export { cacheKey, stableStringify } from './cache/keys';
+export { createQueryCache, type QueryCache } from './cache/queryCache';
 export { MemoryWarehouse } from './adapters/memory/warehouse';
 export { MongoEventStore } from './adapters/mongo/eventStore';
 export { MongoIdentityStore } from './adapters/mongo/identityStore';
@@ -32,6 +35,8 @@ export type {
   EventStore,
   IdentityStore,
   Lifecycle,
+  RedisLike,
+  ResultCache,
   ParamValue,
   StoreCountQuery,
   StoreFindQuery,

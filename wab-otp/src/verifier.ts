@@ -1,4 +1,5 @@
 import { createFakeVerifier } from './adapters/fake';
+import { createEmulatorVerifier } from './adapters/firebase/emulator';
 import { createFirebaseVerifier } from './adapters/firebase';
 import { resolveOptions, type OtpOptions, type ResolvedOptions } from './config/options';
 import { ERROR_CODES } from './constants/codes';
@@ -24,7 +25,9 @@ const selectAdapter = (resolved: ResolvedOptions): ProofVerifier => {
       if (resolved.verifier === undefined) throw configError('provider "custom" needs a verifier');
       return resolved.verifier;
     case 'firebase':
-      return createFirebaseVerifier(resolved);
+      return resolved.firebase.authEmulatorHost === undefined
+        ? createFirebaseVerifier(resolved)
+        : createEmulatorVerifier(resolved);
   }
 };
 

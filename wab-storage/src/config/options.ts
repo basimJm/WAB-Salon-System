@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { ENVIRONMENTS, PROVIDERS, type Environment, type ProviderName } from '../constants/codes';
+import {
+  ENVIRONMENTS,
+  PROVIDERS,
+  SIGNED_URL_MODES,
+  type Environment,
+  type ProviderName,
+} from '../constants/codes';
 import {
   DEFAULT_PUBLIC_CACHE_CONTROL,
   DEFAULT_READ_MAX_BYTES,
@@ -12,6 +18,7 @@ import {
 } from '../constants/defaults';
 import { configError } from '../errors';
 import type { RetryPolicy } from '../retry';
+import type { CloudFrontSigning } from '../urls';
 import { noopLogger, redactingLogger, type Logger } from '../logger';
 
 const text = z.string().trim().min(1);
@@ -61,6 +68,8 @@ const variantsSchema = z
 
 const ttlSchema = z.object({ maxTtlSec: positiveInt.max(MAX_PRESIGN_TTL_SEC) }).strict();
 
+const cloudFrontSchema = z.object({ baseUrl: z.url(), keyPairId: text, privateKey: text }).strict();
+
 const optionsSchema = z
   .object({
     environment: z.enum(ENVIRONMENTS),
@@ -70,7 +79,15 @@ const optionsSchema = z
     /** Base URL public objects are served from (CDN domain). */
     cdn: z.object({ baseUrl: z.url() }).strict(),
     upload: ttlSchema.partial().optional(),
-    signedUrl: ttlSchema.partial().optional(),
+    signedUrl: ttlSchema
+      .extend({
+        /** `s3` = presigned S3 GET; `cloudfront` = CloudFront signed URL on a private distribution. */
+        mode: z.enum(SIGNED_URL_MODES),
+        cloudfront: cloudFrontSchema,
+      })
+      .partial()
+      .strict()
+      .optional(),
     readMaxBytes: positiveInt.optional(),
     /** Cache-Control for public objects written by the server (variants); keys are immutable. */
     publicCacheControl: text.optional(),
@@ -111,6 +128,7 @@ export interface ResolvedConfig {
   readonly cdnBaseUrl: string;
   readonly uploadMaxTtlSec: number;
   readonly signedUrlMaxTtlSec: number;
+  readonly cloudFront?: CloudFrontSigning | undefined;
   readonly readMaxBytes: number;
   readonly publicCacheControl: string;
   readonly timeoutMs: number;
@@ -134,6 +152,16 @@ const crossFieldIssues = (
   if (o.provider === 'local-fs' && !o.localFs) add('localFs', 'required for provider local-fs');
   if (o.s3 && o.s3.publicBucket === o.s3.privateBucket && o.environment === 'prod')
     add('s3.privateBucket', 'must differ from publicBucket in prod');
+  if (o.signedUrl?.mode === 'cloudfront') {
+    if (!o.signedUrl.cloudfront) add('signedUrl.cloudfront', 'required for mode cloudfront');
+    if (o.provider !== 's3') add('signedUrl.mode', 'cloudfront needs the s3 provider');
+    if (
+      o.environment === 'prod' &&
+      o.signedUrl.cloudfront &&
+      !isHttps(o.signedUrl.cloudfront.baseUrl)
+    )
+      add('signedUrl.cloudfront.baseUrl', 'prod requires https');
+  }
   if (o.environment === 'prod') {
     if (o.provider !== 's3') add('provider', 'prod requires the s3 provider');
     if (!isHttps(o.cdn.baseUrl)) add('cdn.baseUrl', 'prod requires https');
@@ -181,6 +209,7 @@ export const resolveConfig = (options: StorageOptions): ResolvedConfig => {
     cdnBaseUrl: trimSlash(o.cdn.baseUrl),
     uploadMaxTtlSec: o.upload?.maxTtlSec ?? DEFAULT_UPLOAD_MAX_TTL_SEC,
     signedUrlMaxTtlSec: o.signedUrl?.maxTtlSec ?? DEFAULT_SIGNED_URL_MAX_TTL_SEC,
+    cloudFront: o.signedUrl?.mode === 'cloudfront' ? o.signedUrl.cloudfront : undefined,
     readMaxBytes: o.readMaxBytes ?? DEFAULT_READ_MAX_BYTES,
     publicCacheControl: o.publicCacheControl ?? DEFAULT_PUBLIC_CACHE_CONTROL,
     timeoutMs: o.timeoutMs ?? DEFAULT_TIMEOUT_MS,

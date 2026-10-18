@@ -1,11 +1,12 @@
 import { MemoryEventStore } from './adapters/memory/eventStore';
 import { MemoryIdentityStore } from './adapters/memory/identityStore';
+import { MemoryCache, RedisCache } from './cache/stores';
 import { MemoryWarehouse } from './adapters/memory/warehouse';
 import { MongoEventStore } from './adapters/mongo/eventStore';
 import { MongoIdentityStore } from './adapters/mongo/identityStore';
 import type { IdCodec, MongoCollectionLike } from './adapters/mongo/types';
 import { resolveOptions, type AnalyticsOptions, type ResolvedOptions } from './config/options';
-import type { EventStore, IdentityStore, WarehouseQuery } from './ports';
+import type { EventStore, IdentityStore, RedisLike, ResultCache, WarehouseQuery } from './ports';
 import { createService } from './service';
 import type { Analytics } from './types';
 
@@ -13,14 +14,23 @@ export interface Adapters {
   readonly events: EventStore;
   readonly identity: IdentityStore;
   readonly warehouse?: WarehouseQuery;
+  readonly cache?: ResultCache;
 }
+
+const buildCache = (options: ResolvedOptions): { cache?: ResultCache } => {
+  const { cache } = options;
+  if (cache.store === 'memory') return { cache: new MemoryCache(cache.maxEntries) };
+  if (cache.store === 'redis') return { cache: new RedisCache(cache.redis as RedisLike) };
+  if (cache.store === 'custom') return { cache: cache.custom as ResultCache };
+  return {};
+};
 
 const buildWarehouse = (options: ResolvedOptions): { warehouse?: WarehouseQuery } =>
   options.warehouse.provider === 'memory' ? { warehouse: new MemoryWarehouse() } : {};
 
 /** Chooses the adapters named by the options. Adding a vendor = one more branch here. */
 export const buildAdapters = (options: ResolvedOptions): Adapters => {
-  const warehouse = buildWarehouse(options);
+  const warehouse = { ...buildWarehouse(options), ...buildCache(options) };
   if (options.provider === 'memory' || options.mongo === undefined) {
     return { events: new MemoryEventStore(), identity: new MemoryIdentityStore(), ...warehouse };
   }

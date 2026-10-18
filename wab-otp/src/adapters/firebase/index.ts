@@ -58,6 +58,25 @@ export const checkClaims = (
   return nowSec - authTime > maxAuthAgeSec + skewSec ? EXPIRED : null;
 };
 
+/** Claims + phone comparison shared by the real and the emulator verifier. */
+export const finishVerification = (
+  payload: JWTPayload,
+  expectedPhone: string,
+  resolved: ResolvedOptions,
+): VerifyResult => {
+  const { firebase } = resolved;
+  const claimsOutcome = checkClaims(
+    payload,
+    resolved.now(),
+    firebase.clockSkewSec,
+    firebase.maxAuthAgeSec,
+  );
+  if (claimsOutcome !== null) return claimsOutcome;
+  const phone = payload[DEFAULT_FIREBASE.claims.phone];
+  if (!isE164(phone)) return INVALID;
+  return phone === expectedPhone ? { outcome: 'VERIFIED', phone } : { outcome: 'PHONE_MISMATCH' };
+};
+
 /**
  * Verifies a Firebase Phone Auth ID token on the server: RS256 signature against Google's rotating
  * public keys, issuer, audience (project id), expiry, subject, sign-in freshness and provider, then
@@ -101,18 +120,7 @@ export const createFirebaseVerifier = (
         if (error instanceof errors.JOSEError) return INVALID;
         throw error;
       }
-      const claimsOutcome = checkClaims(
-        payload,
-        resolved.now(),
-        firebase.clockSkewSec,
-        firebase.maxAuthAgeSec,
-      );
-      if (claimsOutcome !== null) return claimsOutcome;
-      const phone = payload[DEFAULT_FIREBASE.claims.phone];
-      if (!isE164(phone)) return INVALID;
-      return phone === expectedPhone
-        ? { outcome: 'VERIFIED', phone }
-        : { outcome: 'PHONE_MISMATCH' };
+      return finishVerification(payload, expectedPhone, resolved);
     },
   };
 };

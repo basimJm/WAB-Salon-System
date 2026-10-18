@@ -35,4 +35,5 @@ export const DEFAULT_VARIANTS = {
 } as const;
 
 export const REDACTED = '[redacted]';
-export const SECRET_KEY_PATTERN = /secret|password|token|credential|authorization|signature/i;
+export const SECRET_KEY_PATTERN =
+  /secret|password|token|credential|authorization|signature|private.?key/i;

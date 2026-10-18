@@ -83,6 +83,8 @@ const cacheSchema = z
   .object({
     store: z.enum(CACHE_STORES).default('none'),
     ttlSec: positiveInt.default(DEFAULT_CACHE.ttlSec),
+    staleSec: nonNegativeInt.default(DEFAULT_CACHE.staleSec),
+    maxEntries: positiveInt.default(DEFAULT_CACHE.maxEntries),
     keyPrefix: z.string().min(1).max(64).default(DEFAULT_CACHE.keyPrefix),
     /** Redis-like client (`get`, `set` with expiry). */
     redis: injected.optional(),
@@ -166,6 +168,9 @@ export const resolveOptions = (input: AnalyticsOptions): ResolvedOptions => {
   if (!isValidTimeZone(data.timeZone)) fail('unknown time zone', ['timeZone']);
   if (data.cache.store === 'redis' && data.cache.redis === undefined) {
     fail('redis cache requires a redis client', ['cache.redis']);
+  }
+  if (data.cache.store === 'custom' && data.cache.custom === undefined) {
+    fail('custom cache requires an adapter', ['cache.custom']);
   }
   const provider = data.provider ?? (data.environment === 'dev' ? 'memory' : 'mongo');
   if (provider === 'mongo' && data.mongo === undefined) {
