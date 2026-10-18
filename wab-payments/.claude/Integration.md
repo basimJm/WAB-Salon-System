@@ -126,6 +126,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-18 | 0.1.0 | PAY-013: Android HyperPay bridge + SdkResult mapping. |
 | 2026-10-18 | 0.1.0 | PAY-012: publish prep + clientCheckout + server integration. |
 | 2026-10-18 | 0.1.0 | PAY-011: mock launcher + platform in-app browsers. |
 | 2026-10-18 | 0.1.0 | PAY-010: KMP ports, fake launcher, shared native launcher, tests. |
@@ -198,3 +199,6 @@ Verification done here: commonMain + commonTest compile with warnings-as-errors 
 
 ### Dev launcher (PAY-011)
 `MockGatewayLauncher(browser: InAppBrowser)` opens `CheckoutSession.checkoutUrl` (the OPP mock's hosted page, returned by the server in dev as `client.checkoutUrl`) and parses the redirect to `shopperResultUrl`. Browsers: Android `WebViewInAppBrowser(context)` (WebView activity declared in the library manifest; a debug network-security-config must allow the cleartext mock host), iOS `WebAuthInAppBrowser()` (`ASWebAuthenticationSession`; the return URL must use a custom scheme such as `wab://payment/result`). Bind it for provider `mock-gateway` in `DelegatingPaymentLauncher`. The Android and iOS browser classes are NOT compiled here.
+
+### Android HyperPay bridge (PAY-013)
+Module `:payments-hyperpay-android` (`com.wab:payments-hyperpay-android`): `HyperPayAndroidBridge(context, CheckoutActivityHost)` opens the OPP ready-to-use `CheckoutActivity` with `CheckoutSettings(checkoutId, brands, TEST|LIVE)` + `shopperResultUrl` and maps the activity result through the platform-neutral `sdkOutcome(...)` (common, tested). `ActivityResultRegistryHost(registry)` is the stock `CheckoutActivityHost`. The OPP SDK is `compileOnly` (version/repository are owner inputs in `kmp/gradle.properties`); the app declares the 3-DS return intent filter (`kmp/docs/android.md`). UNVERIFIED: the module is not compiled here and the OPP class/constant names come from the vendor documentation.
