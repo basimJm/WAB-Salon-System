@@ -21,5 +21,13 @@ export { isE164 } from './validation';
 export { createFirebaseVerifier } from './adapters/firebase';
 export { createEmulatorToken, type EmulatorTokenInput } from './adapters/firebase/emulator';
 export { createKeyProvider, type KeyProvider } from './adapters/firebase/keys';
+export {
+  createSmsOtp,
+  type CodeStore,
+  type SmsOtp,
+  type SmsOtpOptions,
+  type SmsVendor,
+} from './adapters/sms';
+export { FakeSmsVendor, MemoryCodeStore } from './adapters/sms/fake';
 export { createOtpService } from './service';
 export { createLimits, type Limits, type LimitsConfig } from './limits';

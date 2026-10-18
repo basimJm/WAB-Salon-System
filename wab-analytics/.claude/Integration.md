@@ -131,3 +131,4 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/analytics` real mode
 | 2026-10-18 | 0.1.0 | ANA-005 queries: funnel, cohorts, journey, overview on the ports; MemoryWarehouse. |
 | 2026-10-18 | 0.1.0 | ANA-006 result cache (memory, Redis, custom), SWR, single-flight. |
 | 2026-10-18 | 0.1.0 | ANA-007 BigQuery warehouse: parameterized SQL, pruning, cost guard, error mapping, lazy client. |
+| 2026-10-18 | 0.1.0 | ANA-008 identity merge in funnels/cohorts (`source: ALL`), shared-device rule. |

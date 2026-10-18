@@ -1,4 +1,4 @@
-import { EVENT_RULES, GROUPINGS } from './constants/defaults';
+import { EVENT_RULES, EVENT_SOURCES, GROUPINGS } from './constants/defaults';
 import type { ResolvedOptions } from './config/options';
 import { notConfiguredError, validationError } from './errors';
 import type { EventStore, StoreCountQuery, WarehouseQuery } from './ports';
@@ -30,7 +30,15 @@ export const toStoreQuery = (query: CountQuery, options: ResolvedOptions): Store
   };
 };
 
-/** Counts server events (default) or app events (warehouse). */
+const mergeRows = (lists: readonly CountRow[][]): CountRow[] => {
+  const totals = new Map<string, number>();
+  for (const row of lists.flat()) totals.set(row.key, (totals.get(row.key) ?? 0) + row.count);
+  return [...totals.entries()]
+    .map(([key, count]) => ({ key, count }))
+    .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+};
+
+/** Counts server events (default), app events (`APP`) or both added together (`ALL`). */
 export const countEvents = async (
   query: CountQuery,
   options: ResolvedOptions,
@@ -38,9 +46,15 @@ export const countEvents = async (
   warehouse: WarehouseQuery | undefined,
 ): Promise<CountRow[]> => {
   const storeQuery = toStoreQuery(query, options);
-  if (query.source === 'APP') {
-    if (warehouse === undefined) throw notConfiguredError('no warehouse is configured');
-    return (await warehouse.countAppEvents(storeQuery)).slice(0, options.limits.maxCountRows);
+  const source = query.source ?? 'SERVER';
+  if (!EVENT_SOURCES.includes(source)) throw validationError('unknown source');
+  if (source !== 'SERVER' && warehouse === undefined) {
+    throw notConfiguredError('no warehouse is configured');
   }
-  return (await events.count(storeQuery)).slice(0, options.limits.maxCountRows);
+  const lists: CountRow[][] = [];
+  if (source !== 'APP') lists.push(await events.count(storeQuery));
+  if (source !== 'SERVER' && warehouse !== undefined) {
+    lists.push(await warehouse.countAppEvents(storeQuery));
+  }
+  return mergeRows(lists).slice(0, options.limits.maxCountRows);
 };
