@@ -7,10 +7,10 @@
 
 ## Current task
 
-### OTP-008 — Quality: loop test, smoke, README, docs
-- Branch: `feat/otp-008-quality`
-- Acceptance: every source file has tests and the gate (100 % functions, >= 95 % lines/branches) is enforced; loop test of 1 000 flows (50 phones x 20 rounds, 20 in flight) on the memory store and a real Redis with real RS256 tokens (block after exactly the configured count, success resets, nothing left behind, flat heap); packaged-tarball smoke over CJS + ESM using the service and the emulator verifier; README quick start; Integration.md updated (API, config, status mapping, errors, open questions).
-- Added `resetLimits(phone)` (admin unblock) to `OtpProvider` so the loop and consumers can clear a phone.
-- Tests: `npm run verify` green (104 unit tests + 2 loop tests).
+### OTP-009 — Server-verified SMS skeleton
+- Branch: `feat/otp-009-sms-skeleton`
+- Acceptance: `createSmsOtp` sends a code through an `SmsVendor` port and verifies it through the same `ProofVerifier` port (so it plugs into `createOtpService({provider: 'custom'})`); only an HMAC of the code is stored (secret >= 32 chars), constant-time comparison, single use, TTL, bound to phone + purpose; vendor failure removes the stored code and throws a retryable `OtpError`; fake vendor and process-local code store are refused in production.
+- Assumed missing: no vendor chosen (owner decision), no shared `CodeStore` implementation yet (a Redis one is a few lines on the same port), wrong-code counting stays in the limits engine.
+- Tests: `npm run verify` green (113 unit tests).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — the first loop run exposed a test clock mismatch (tokens issued for a fixed `NOW`, service on the real clock), fixed by injecting `now`. Real Firebase still unverified (listed in Integration.md §11).
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — skeleton only; no real vendor or secrets in the repo.

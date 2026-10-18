@@ -4,7 +4,7 @@ export const STORE_PROVIDERS = ['memory', 'mongo'] as const;
 export const WAREHOUSE_PROVIDERS = ['none', 'memory', 'bigquery'] as const;
 export const CACHE_STORES = ['none', 'memory', 'redis', 'custom'] as const;
 export const GROUPINGS = ['NAME', 'DAY'] as const;
-export const EVENT_SOURCES = ['SERVER', 'APP'] as const;
+export const EVENT_SOURCES = ['SERVER', 'APP', 'ALL'] as const;
 export const COHORT_UNITS = ['DAY', 'WEEK'] as const;
 export const JOURNEY_SOURCES = ['SERVER', 'APP', 'CRASH'] as const;
 

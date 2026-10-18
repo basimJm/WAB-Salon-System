@@ -132,7 +132,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/otp` real mode (`*_P
 | Adapter: firebase — Firebase Admin `verifyIdToken` → verified phone | ✅ |
 | Adapter: memory-store — LimitStore for dev/tests | ✅ |
 | Adapter: redis-store — LimitStore for prod (atomic Lua counters, TTL) | ✅ |
-| Adapter: sms-server-verified — FUTURE: server sends + checks code | ⬜ |
+| Adapter: sms-server-verified — FUTURE: server sends + checks code | 🚧 |
 | Unit tests + coverage gate | ✅ |
 | Loop test | ✅ |
 | README + consumer smoke test | ✅ |
@@ -149,3 +149,4 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/otp` real mode (`*_P
 | 2026-10-18 | 0.1.0 | OTP-006 Firebase ID-token adapter on jose (JWK cache, rotation, stale keys, claim checks). |
 | 2026-10-18 | 0.1.0 | OTP-007 Firebase Auth emulator mode (dev only) + createEmulatorToken. |
 | 2026-10-18 | 0.1.0 | OTP-008 quality: loop test (memory + real Redis), richer package smoke, README, docs. |
+| 2026-10-18 | 0.1.0 | OTP-009 server-verified SMS skeleton (fake vendor, HMAC code store). |
