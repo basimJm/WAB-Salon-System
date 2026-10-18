@@ -213,8 +213,8 @@ The admin PRD asks for these, the server does not offer them yet (Appendix D). S
 | ADM-072 | Customer extras (A12): edit profile, reviews written by the customer, notifications sent, immediate force delete, push to one customer from the profile | `feat/adm-072-customer-extras` | ADM-046, ADM-059 | SRV-122 | BLOCKED | Server gap G5 (push to one customer works through a campaign with `SPECIFIC_USERS`). |
 | ADM-073 | Salon list columns and insights (A13): subscription filter, recommended flag, bookings (30d), per-salon KPIs, analytics and activity tabs, deletion-request decision | `feat/adm-073-salon-insights` | ADM-041, ADM-058 | SRV-121 | BLOCKED | Server gaps G4: not returned or not offered today. |
 | ADM-074 | Analytics — Traffic & Users (A02) and Screens & Events explorer (A03) with raw events | `feat/adm-074-analytics-traffic` | ADM-064 | SRV-110, SRV-127 | BLOCKED | Needs BigQuery-backed analytics (SRV-110, **user input**); UI can be prototyped on fixtures. |
-| ADM-075 | Analytics — Funnels (A04) with drop-off users and custom builder; Retention (A06) | `feat/adm-075-analytics-funnels` | ADM-064 | SRV-110 | BLOCKED | SRV-110. |
-| ADM-076 | Analytics — Search & Discovery (A05) and Merchants analytics (A10) | `feat/adm-076-analytics-search-merchants` | ADM-064 | SRV-110 | BLOCKED | SRV-110 (merchant counts partly derivable from salons and subscriptions lists). |
+| ADM-075 | Analytics — Funnels (A04) with drop-off users and custom builder; Retention (A06) | `feat/adm-075-analytics-funnels` | ADM-064 | SRV-110 | TODO | SRV-110. unblocked by SRV-110 on 2026-10-18 |
+| ADM-076 | Analytics — Search & Discovery (A05) and Merchants analytics (A10) | `feat/adm-076-analytics-search-merchants` | ADM-064 | SRV-110 | TODO | SRV-110 (merchant counts partly derivable from salons and subscriptions lists). unblocked by SRV-110 on 2026-10-18 |
 | ADM-077 | User Journey (A11): search by phone, name, ids or booking reference; identity header; timeline with Guest marker, highlighted errors and payments; export | `feat/adm-077-journey` | ADM-018, ADM-045 | SRV-110, SRV-122 | BLOCKED | SRV-110; the customer detail already returns `journeyUserId`. |
 
 ---

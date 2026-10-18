@@ -27,10 +27,17 @@ const REAL_PROVIDERS = {
   NOTIFIER_PROVIDER: 'real',
   PAYMENT_PROVIDER: 'real',
   ANALYTICS_PROVIDER: 'real',
+  ANALYTICS_BIGQUERY_PROJECT_ID: 'wab-prod',
+  ANALYTICS_BIGQUERY_DATASET: 'analytics_1',
+  ANALYTICS_BIGQUERY_CREDENTIALS_JSON: '{"client_email":"a@b.c"}',
   FIREBASE_PROJECT_ID: 'wab-prod-test',
   FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
   SMTP_HOST: 'smtp.example.test',
   EMAIL_FROM_ADDRESS: 'noreply@example.test',
+  S3_REGION: 'eu-central-1',
+  S3_PUBLIC_BUCKET: 'wab-public',
+  S3_PRIVATE_BUCKET: 'wab-private',
+  CDN_BASE_URL: 'https://cdn.example.test',
   ...PAYMENT_CREDENTIALS,
   HYPERPAY_WEBHOOK_KEY: WEBHOOK_KEY,
 };
@@ -98,11 +105,18 @@ describe('loadConfig', () => {
             SMTP_HOST: 'smtp.example.test',
             EMAIL_FROM_ADDRESS: 'noreply@example.test',
           }
-        : key === ENV_KEYS.otpProvider
-          ? { FIREBASE_PROJECT_ID: 'wab-dev-test' }
-          : key === ENV_KEYS.paymentProvider
-            ? PAYMENT_CREDENTIALS
-            : {};
+        : key === ENV_KEYS.storageProvider
+          ? {
+              S3_REGION: 'eu-central-1',
+              S3_PUBLIC_BUCKET: 'wab-public',
+              S3_PRIVATE_BUCKET: 'wab-private',
+              CDN_BASE_URL: 'https://cdn.example.test',
+            }
+          : key === ENV_KEYS.otpProvider
+            ? { FIREBASE_PROJECT_ID: 'wab-dev-test' }
+            : key === ENV_KEYS.paymentProvider
+              ? PAYMENT_CREDENTIALS
+              : {};
     expect(loadConfig(validEnv({ [key]: 'real', ...credentials })).providers).toEqual({
       ...ALL_FAKE_MODES,
       [field]: 'real',
@@ -133,6 +147,80 @@ describe('loadConfig', () => {
       notifier: 'real',
       payments: 'real',
       analytics: 'real',
+    });
+  });
+
+  describe('real analytics settings', () => {
+    const base = validEnv({ ANALYTICS_PROVIDER: 'real' });
+    const bigquery = {
+      ANALYTICS_BIGQUERY_PROJECT_ID: 'wab-prod',
+      ANALYTICS_BIGQUERY_DATASET: 'analytics_1',
+    };
+
+    it('works without BigQuery outside production', () => {
+      expect(loadConfig(base).analytics).toEqual({});
+      expect(loadConfig(validEnv()).analytics).toBeUndefined();
+    });
+
+    it('builds typed BigQuery settings with the optional values', () => {
+      const config = loadConfig({
+        ...base,
+        ...bigquery,
+        ANALYTICS_BIGQUERY_LOCATION: 'EU',
+        ANALYTICS_BIGQUERY_CREDENTIALS_JSON: '{"client_email":"a@b.c"}',
+        ANALYTICS_BIGQUERY_CRASH_TABLE: 'com_wab_ANDROID',
+        ANALYTICS_BIGQUERY_MAX_BYTES_BILLED: '5000000000',
+      });
+      expect(config.analytics).toEqual({
+        bigquery: {
+          projectId: 'wab-prod',
+          dataset: 'analytics_1',
+          location: 'EU',
+          credentialsJson: '{"client_email":"a@b.c"}',
+          crashTable: 'com_wab_ANDROID',
+          maxBytesBilled: 5_000_000_000,
+        },
+      });
+      expect(loadConfig({ ...base, ...bigquery }).analytics).toEqual({
+        bigquery: { ...{ projectId: 'wab-prod', dataset: 'analytics_1' } },
+      });
+    });
+
+    it('needs project and dataset together and a JSON object as credentials', () => {
+      expect(invalidKeysOf({ ...base, ANALYTICS_BIGQUERY_PROJECT_ID: 'p' })).toEqual([
+        'ANALYTICS_BIGQUERY_DATASET',
+      ]);
+      expect(invalidKeysOf({ ...base, ANALYTICS_BIGQUERY_DATASET: 'd' })).toEqual([
+        'ANALYTICS_BIGQUERY_DATASET',
+      ]);
+      for (const bad of ['not json', '[1]', 'null', '"text"']) {
+        expect(
+          invalidKeysOf({ ...base, ...bigquery, ANALYTICS_BIGQUERY_CREDENTIALS_JSON: bad }),
+        ).toEqual(['ANALYTICS_BIGQUERY_CREDENTIALS_JSON']);
+      }
+      expect(invalidKeysOf({ ...base, ANALYTICS_BIGQUERY_MAX_BYTES_BILLED: '0' })).toEqual([
+        'ANALYTICS_BIGQUERY_MAX_BYTES_BILLED',
+      ]);
+    });
+
+    it('requires the whole BigQuery group in production', () => {
+      const production = validEnv({
+        NODE_ENV: 'production',
+        ...PAYOUT_KEY,
+        ...REAL_PROVIDERS,
+      });
+      const withoutCredentials = Object.fromEntries(
+        Object.entries(production).filter(([key]) => key !== 'ANALYTICS_BIGQUERY_CREDENTIALS_JSON'),
+      );
+      expect(invalidKeysOf(withoutCredentials)).toEqual(['ANALYTICS_BIGQUERY_CREDENTIALS_JSON']);
+      const bare = Object.fromEntries(
+        Object.entries(production).filter(([key]) => !key.startsWith('ANALYTICS_BIGQUERY')),
+      );
+      expect([...invalidKeysOf(bare)].sort()).toEqual([
+        'ANALYTICS_BIGQUERY_CREDENTIALS_JSON',
+        'ANALYTICS_BIGQUERY_DATASET',
+        'ANALYTICS_BIGQUERY_PROJECT_ID',
+      ]);
     });
   });
 
@@ -197,6 +285,73 @@ describe('loadConfig', () => {
         'EMAIL_FROM_ADDRESS',
       ]);
       expect(loadConfig(validEnv()).notifier).toBeUndefined();
+    });
+  });
+
+  describe('real storage settings', () => {
+    const base = validEnv({ STORAGE_PROVIDER: 'real' });
+    const settings = {
+      S3_REGION: 'eu-central-1',
+      S3_PUBLIC_BUCKET: 'wab-public',
+      S3_PRIVATE_BUCKET: 'wab-private',
+      CDN_BASE_URL: 'https://cdn.example.test',
+    };
+
+    it('names every missing key, never a value', () => {
+      expect([...invalidKeysOf(base)].sort()).toEqual(
+        ['CDN_BASE_URL', 'S3_PRIVATE_BUCKET', 'S3_PUBLIC_BUCKET', 'S3_REGION'].sort(),
+      );
+    });
+
+    it('builds typed settings with defaults (IAM role: no credentials)', () => {
+      expect(loadConfig({ ...base, ...settings }).storage).toEqual({
+        region: 'eu-central-1',
+        publicBucket: 'wab-public',
+        privateBucket: 'wab-private',
+        forcePathStyle: false,
+        cdnBaseUrl: 'https://cdn.example.test',
+      });
+    });
+
+    it('reads endpoint, credentials and CloudFront signing', () => {
+      const config = loadConfig({
+        ...base,
+        ...settings,
+        S3_ENDPOINT: 'http://localhost:9000',
+        S3_FORCE_PATH_STYLE: 'true',
+        S3_ACCESS_KEY_ID: 'id',
+        S3_SECRET_ACCESS_KEY: 'value',
+        CLOUDFRONT_PRIVATE_BASE_URL: 'https://private.example.test',
+        CLOUDFRONT_KEY_PAIR_ID: 'K1',
+        CLOUDFRONT_PRIVATE_KEY: 'pem',
+      });
+      expect(config.storage).toEqual({
+        region: 'eu-central-1',
+        publicBucket: 'wab-public',
+        privateBucket: 'wab-private',
+        endpoint: 'http://localhost:9000',
+        forcePathStyle: true,
+        credentials: { accessKeyId: 'id', secretAccessKey: 'value' },
+        cdnBaseUrl: 'https://cdn.example.test',
+        cloudfront: { baseUrl: 'https://private.example.test', keyPairId: 'K1', privateKey: 'pem' },
+      });
+    });
+
+    it('requires credentials and CloudFront settings to come complete', () => {
+      expect(invalidKeysOf({ ...base, ...settings, S3_ACCESS_KEY_ID: 'id' })).toEqual([
+        'S3_SECRET_ACCESS_KEY',
+      ]);
+      expect(
+        [...invalidKeysOf({ ...base, ...settings, CLOUDFRONT_KEY_PAIR_ID: 'K1' })].sort(),
+      ).toEqual(['CLOUDFRONT_PRIVATE_BASE_URL', 'CLOUDFRONT_PRIVATE_KEY']);
+    });
+
+    it('rejects bad URLs and is absent for the fake storage', () => {
+      expect(invalidKeysOf({ ...base, ...settings, CDN_BASE_URL: 'nope' })).toEqual([
+        'CDN_BASE_URL',
+      ]);
+      expect(invalidKeysOf({ ...base, ...settings, S3_ENDPOINT: 'nope' })).toEqual(['S3_ENDPOINT']);
+      expect(loadConfig(validEnv()).storage).toBeUndefined();
     });
   });
 

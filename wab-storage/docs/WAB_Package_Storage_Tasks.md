@@ -13,4 +13,4 @@
 | STO-007 | Image variants: thumb 320 px, medium 960 px, WebP, EXIF stripped, via sharp; variant keys derived from the original key | `feat/sto-007-variants` | STO-005 | DONE | Matches `WAB-Server` `domain/uploads/variants.ts` (SRV-047) so the server can delegate |
 | STO-008 | MinIO dev mode (path-style endpoint, bucket bootstrap) + rejection fixtures (type mismatch, too large, missing) | `feat/sto-008-minio` | STO-005 | DONE | Rules §2.6 |
 | STO-009 | Unit tests per file + coverage gate, loop test (upload → confirm → variants → delete, ≥ 50 iterations), package smoke, README, `Integration.md` | `feat/sto-009-quality` | STO-006, STO-007, STO-008 | DONE | Rules §4.11–14 |
-| STO-010 | Publish `@wab/storage`; `WAB-Server` switches `STORAGE_PROVIDER=real` to the package | `feat/sto-010-publish` | STO-009 | IN REVIEW | Owner runs the publish; unblocks SRV-112. AWS bucket/CDN values are env only |
+| STO-010 | Publish `@wab/storage`; `WAB-Server` switches `STORAGE_PROVIDER=real` to the package | `feat/sto-010-publish` | STO-009 | PENDING | Owner runs the publish; unblocks SRV-112. AWS bucket/CDN values are env only |

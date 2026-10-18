@@ -12,5 +12,5 @@
 | ANA-006 | Result cache: memory + Redis adapters, key = query hash, TTL from options; stale-while-revalidate optional | `feat/ana-006-cache` | ANA-005 | DONE | Rules §1.4 performance |
 | ANA-007 | BigQuery adapter: Firebase Analytics export schema (events_*, user_pseudo_id, app_instance_id), Crashlytics export, date-partition pruning, `maximumBytesBilled` guard, dry-run cost check, every BigQuery error mapped | `feat/ana-007-bigquery` | ANA-005 | DONE | SRV-110 consumer; dataset/credentials are env only |
 | ANA-008 | Identity linking: `app_instance_id` ↔ customer/member id merge for journeys and funnels across guest and registered history | `feat/ana-008-identity` | ANA-007 | DONE | Customer PRD §14, Merchant PRD §14 |
-| ANA-009 | Unit tests per file + coverage gate, loop test (track → query, ≥ 50 iterations, concurrent), package smoke, README, `Integration.md` | `feat/ana-009-quality` | ANA-006, ANA-008 | IN REVIEW | Rules §4.11–14 |
-| ANA-010 | Publish `@wab/analytics`; `WAB-Server` switches `ANALYTICS_PROVIDER=real` to the package | `feat/ana-010-publish` | ANA-009 | TODO | Owner runs the publish; unblocks SRV-110 and SRV-112 |
+| ANA-009 | Unit tests per file + coverage gate, loop test (track → query, ≥ 50 iterations, concurrent), package smoke, README, `Integration.md` | `feat/ana-009-quality` | ANA-006, ANA-008 | DONE | Rules §4.11–14 |
+| ANA-010 | Publish `@wab/analytics`; `WAB-Server` switches `ANALYTICS_PROVIDER=real` to the package | `feat/ana-010-publish` | ANA-009 | PENDING | Owner runs the publish; unblocks SRV-110 and SRV-112 |

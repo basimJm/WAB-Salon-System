@@ -1,3 +1,6 @@
+import { EXPORT_URL_TTL_SEC } from './exports';
+import { LICENSE_URL_TTL_SEC } from './salon';
+
 /** External-provider constants (SRV-022): how providers are selected and their static rules. */
 export const PROVIDER_MODES = ['fake', 'real'] as const;
 export type ProviderMode = (typeof PROVIDER_MODES)[number];
@@ -28,6 +31,9 @@ export const FAKE_OTP_PROOF_PREFIX = 'fake-otp';
 export const FAKE_OTP_PROOF_SEPARATOR = ':';
 export const FAKE_OTP_PROOF_KINDS = ['valid', 'expired', 'invalid', 'provider-error'] as const;
 export type FakeOtpProofKind = (typeof FAKE_OTP_PROOF_KINDS)[number];
+
+/** Longest signed-URL lifetime the storage SDK accepts: the longest the server ever asks for. */
+export const STORAGE_SIGNED_URL_MAX_TTL_SEC = Math.max(LICENSE_URL_TTL_SEC, EXPORT_URL_TTL_SEC);
 
 export const STORAGE_VISIBILITIES = ['PUBLIC', 'PRIVATE'] as const;
 export type StorageVisibility = (typeof STORAGE_VISIBILITIES)[number];
@@ -100,3 +106,6 @@ export const ANALYTICS_GROUPINGS = ['NAME', 'DAY'] as const;
 export type AnalyticsGrouping = (typeof ANALYTICS_GROUPINGS)[number];
 export const ANALYTICS_IDENTITY_ACTORS = ['CUSTOMER', 'MEMBER'] as const;
 export const INSTALLATION_ID_PATTERN = /^[A-Za-z0-9._-]{8,128}$/;
+
+/** Collection of installation-to-account links kept by the analytics package. */
+export const IDENTITY_LINKS_COLLECTION = 'identityLinks';

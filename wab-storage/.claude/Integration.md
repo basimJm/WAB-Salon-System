@@ -103,7 +103,7 @@ Reuse one S3 client; presigning is local (no network); stream large bodies; bulk
 const storage = createStorage({ environment: "dev", provider: "s3", s3: { endpoint, region, publicBucket, privateBucket, credentials }, cdn: { baseUrl } });
 const t = await storage.createUploadUrl({ key, visibility: "PUBLIC", contentType: "image/jpeg", maxBytes, expiresInSec });
 ```
-How WAB-Server adopts it: replace `WAB-Server/src/providers/storage` real mode (`*_PROVIDER=real`) with this package; the interface is already compatible (see §3).
+How WAB-Server adopts it (done, branch `feat/srv-112-storage-real`): dependency `"@wab/storage": "file:../wab-storage"`, adapter `WAB-Server/src/providers/storage/real.ts` (settings -> SDK options; SDK errors -> `ExternalServiceError` 502/503, caller errors -> `RangeError`; the SDK's `EMPTY` rejection maps to the server's `TYPE_MISMATCH`), env keys `S3_*`, `CDN_BASE_URL`, `CLOUDFRONT_*`. The server keeps its own sharp-based variants (same `_thumb.webp` / `_medium.webp` naming), so `createVariants` is optional for it.
 
 ## 11. Open questions / assumed-missing requirements
 - Video duration limit (60 s) needs media probing — not available from S3 metadata.
@@ -149,3 +149,4 @@ Implementation notes: `createStorage(options)` returns `Storage` = port + `creat
 | 2026-10-18 | 0.1.0 | STO-009: loop test, package smoke, README, Integration.md status |
 | 2026-10-18 | 0.1.0 | STO-010: prepared for publish as @wab/storage (package.json, .npmrc, CHANGELOG); not published |
 | 2026-10-18 | 0.1.0 | FIX-STO-CJS: CJS builds load AWS SDK/sharp via require; smoke covers both formats |
+| 2026-10-18 | 0.1.0 | Fix: the CJS build now loads the AWS SDK and sharp with `require()` (a native `import()` cannot run under Jest/ts-node); ESM keeps `import()`; package smoke covers both. Found while wiring WAB-Server. |

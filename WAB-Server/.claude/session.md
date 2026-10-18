@@ -5,12 +5,24 @@
 ## Integration status (one glance)
 
 - Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (116) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
-- Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); payments **real** (`@wab/payments`, HyperPay, SRV-092); storage / analytics on in-repo fakes until SRV-112 / SRV-110 (BLOCKED on the SDK publish tasks; owner integrates).
+- Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); analytics **real** (`@wab/analytics`, SRV-110); payments **real** (`@wab/payments`, HyperPay, SRV-092); storage on the in-repo S3 code until SRV-112.
 - Open work: SRV-111 contract guard, Stage N (SRV-117…128, admin gaps), Stage O (SRV-129…134, merchant gaps). Deployment SRV-011/116 and SRV-059/115: owner (PENDING).
 
 ## Current task
 
-- (none) — run `python3 scripts/tasks.py next server`; task branches start from `origin/server`.
+### SRV-110 — `ANALYTICS_PROVIDER=real` through `@wab/analytics`
+
+- Branch: `feat/ana-010-publish` (shared with ANA-010: package prep and the server wiring in one PR)
+- Status: IN REVIEW
+- Acceptance criteria (BE/NFR: ANA-03, ANA-04 via the package; server rules §2 externals behind interfaces, §5 no hardcoding, §8 provider errors):
+  - [x] `@wab/analytics` dependency (`file:../wab-analytics`, built by `ensure-sdks`, Dockerfile + dockerignore), `@google-cloud/bigquery` for the warehouse
+  - [x] Env keys `ANALYTICS_BIGQUERY_PROJECT_ID|DATASET|LOCATION|CREDENTIALS_JSON|CRASH_TABLE|MAX_BYTES_BILLED` in constants, schema, `.env.example`; project and dataset together; credentials must be a JSON object (never echoed); production requires project, dataset and credentials
+  - [x] `providers/analytics/real.ts`: SDK over `serverEvents` (ObjectId codec) and `identityLinks`, Redis result cache, BigQuery when configured; caller errors -> `RangeError`, vendor errors -> `ExternalServiceError`; indexes created on start (failure logged); closed on shutdown; `sdk` exposed for funnels/cohorts/journey/overview
+  - [x] `createProviders` builds it with `mongoose.connection`; without a connection or deps it fails loudly
+  - [x] The existing Mongo-backed admin analytics (SRV-105) is untouched; admin gap tasks (SRV-117+) are NOT done here
+- Tests: `tests/analyticsReal.test.ts` (19: options, codec, error mapping, stubbed SDK, real SDK over fake collections, createProviders) + config tests (analytics settings, production requirements)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: a real MongoDB write/read through the package, a real BigQuery dataset or credentials, the Docker build (no daemon). API docs: no change.
 
 ## Last blocks
 

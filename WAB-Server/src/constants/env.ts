@@ -69,6 +69,32 @@ export const ENV_KEYS = {
   hyperpayReturnUrl: 'HYPERPAY_RETURN_URL',
   /** Sandbox switch (`EXTERNAL` | `INTERNAL`); refused in production. */
   hyperpayTestMode: 'HYPERPAY_TEST_MODE',
+  /** BigQuery project/dataset of the Firebase Analytics export (ANALYTICS_PROVIDER=real). */
+  analyticsBigqueryProjectId: 'ANALYTICS_BIGQUERY_PROJECT_ID',
+  analyticsBigqueryDataset: 'ANALYTICS_BIGQUERY_DATASET',
+  analyticsBigqueryLocation: 'ANALYTICS_BIGQUERY_LOCATION',
+  /** Service-account key as JSON text (secret). */
+  analyticsBigqueryCredentialsJson: 'ANALYTICS_BIGQUERY_CREDENTIALS_JSON',
+  /** Crashlytics export table (optional). */
+  analyticsBigqueryCrashTable: 'ANALYTICS_BIGQUERY_CRASH_TABLE',
+  /** Cost guard: most bytes one query may bill. */
+  analyticsBigqueryMaxBytesBilled: 'ANALYTICS_BIGQUERY_MAX_BYTES_BILLED',
+  /** S3 (or S3-compatible) storage; needed when STORAGE_PROVIDER=real. */
+  s3Region: 'S3_REGION',
+  s3PublicBucket: 'S3_PUBLIC_BUCKET',
+  s3PrivateBucket: 'S3_PRIVATE_BUCKET',
+  /** Dev only: MinIO or another emulator. Unset for AWS. */
+  s3Endpoint: 'S3_ENDPOINT',
+  s3ForcePathStyle: 'S3_FORCE_PATH_STYLE',
+  /** Unset = the platform's IAM role / default credential chain. */
+  s3AccessKeyId: 'S3_ACCESS_KEY_ID',
+  s3SecretAccessKey: 'S3_SECRET_ACCESS_KEY',
+  /** Public media base URL (the CDN domain). */
+  cdnBaseUrl: 'CDN_BASE_URL',
+  /** CloudFront signing for private files; all three together, or none (then S3 presigned GET is used). */
+  cloudfrontBaseUrl: 'CLOUDFRONT_PRIVATE_BASE_URL',
+  cloudfrontKeyPairId: 'CLOUDFRONT_KEY_PAIR_ID',
+  cloudfrontPrivateKey: 'CLOUDFRONT_PRIVATE_KEY',
 } as const;
 
 /** Keys that pick `fake` or `real` for an external provider; production must set them to `real`. */
@@ -89,6 +115,18 @@ export const NOTIFIER_REAL_REQUIRED_KEYS = [
   ENV_KEYS.smtpHost,
   ENV_KEYS.emailFromAddress,
 ] as const;
+/** Keys that must be present when the storage provider is `real`. */
+export const STORAGE_REAL_REQUIRED_KEYS = [
+  ENV_KEYS.s3Region,
+  ENV_KEYS.s3PublicBucket,
+  ENV_KEYS.s3PrivateBucket,
+  ENV_KEYS.cdnBaseUrl,
+] as const;
+export const CLOUDFRONT_KEYS = [
+  ENV_KEYS.cloudfrontBaseUrl,
+  ENV_KEYS.cloudfrontKeyPairId,
+  ENV_KEYS.cloudfrontPrivateKey,
+] as const;
 /** Keys that must be present when the payment provider is `real`. */
 export const PAYMENT_REAL_REQUIRED_KEYS = [
   ENV_KEYS.hyperpayEntityId,
@@ -102,3 +140,10 @@ export const HYPERPAY_TEST_MODES = ['EXTERNAL', 'INTERNAL'] as const;
 export const HYPERPAY_WEBHOOK_KEY_PATTERN = /^[0-9a-fA-F]{64}$/;
 export const DEFAULT_SMTP_PORT = 587;
 export const DEFAULT_EMAIL_FROM_NAME = 'WAB';
+
+/** Keys production needs when the analytics provider is `real` (BigQuery is part of production). */
+export const ANALYTICS_PRODUCTION_REQUIRED_KEYS = [
+  ENV_KEYS.analyticsBigqueryProjectId,
+  ENV_KEYS.analyticsBigqueryDataset,
+  ENV_KEYS.analyticsBigqueryCredentialsJson,
+] as const;
