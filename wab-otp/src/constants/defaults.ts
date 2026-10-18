@@ -41,6 +41,13 @@ export const DEFAULT_LIMITS = {
 
 export const DEFAULT_OTP = { otpLength: 6, resendAfterSec: 60 } as const;
 
+/** Server-verified (SMS) model. */
+export const DEFAULT_SMS = {
+  ttlSec: 300,
+  minSecretLength: 32,
+  secondsPerMinute: 60,
+} as const;
+
 export const DEFAULT_RETRY = {
   maxAttempts: 3,
   baseDelayMs: 200,
