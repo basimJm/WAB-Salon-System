@@ -48,6 +48,36 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-080 e2e flows skipped (user decision); performance is covered by check:size budgets only, no Lighthouse run.
 
+### T-122 — `wab-notifications` SDK: FCM push + SMTP email behind one interface
+
+- Project: `wab-notifications/` (new package) + repo `.gitignore` (Firebase service-account keys)
+- Branch: `claude/busy-johnson-2rch94` (PR targets `server`, see T-121)
+- Status: DONE (SDK built and verified; WAB-Server wiring is a separate task)
+- Acceptance criteria (BRD NOT-01…14, NNF-03/04; owner rules in `wab-notifications/.claude/Rules.md`):
+  - [x] `createNotifier` with validation, idempotency (memory / Redis), retry with backoff, push + email channels, `close()`; custom channels = swap any vendor
+  - [x] FCM: single, multicast (batched, partial retry), topic; visible / data-only / high-priority / time-sensitive / actionable; per-token results + `invalidTokens`; every FCM code classified (incl. real-FCM malformed-token answer); auth/payload/rate/timeouts typed
+  - [x] SMTP (nodemailer): all transport/reply codes mapped (auth, quota 5.4.5, timeouts, network, 4xx temporary, 5xx, recipient refusals); ar/en templates (2FA, alert, report ready), HTML-escaped, https-only links
+  - [x] dev (fake / Mailpit / dev Firebase `dryRun`) and prod (real adapters, shared store, no fakes/dryRun, SMTP auth) rules enforced at start-up; nothing hardcoded (constants + options)
+  - [x] Keys never in git: repo-wide ignore for `*firebase-adminsdk*.json` / `*service-account*.json`; secret scan of the tree clean
+- Tests: `cd wab-notifications && npm run verify` green: typecheck, lint, prettier, 200 unit tests (coverage 100 % functions / 100 % lines / 98 % branches, gate 100/95/95), build (ESM + CJS + d.ts), package smoke (require + import), loop test (500 flows, 20 concurrent, failures injected). Real FCM check (`npm run smoke`) against the dev project `wab-dev-397ab`: credentials OK, fake token → `INVALID_TOKEN`, topic dry-run OK.
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - FOUND AND FIXED: package smoke caught wrong `exports` file names; real FCM showed `invalid-argument` is also the answer for a malformed token (now `INVALID_TOKEN`, not a payload error) and that FCM's default HTTP/2 transport cannot use a proxy (`httpAgent` + `legacyHttpTransport` options). NOT verified: real SMTP send (no Mailpit/Gmail in the sandbox), the prod Firebase key (provided, deliberately not used), end-to-end push to a real device. NNF-01 latency not benchmarked. DIGEST (NOT-09) is left to the caller. Both service-account keys were pasted in chat: rotate if the transcript is not private.
+- Next: wire the SDK into WAB-Server (`NOTIFIER_PROVIDER=real`), then the next SDK (suggested: `wab-storage`).
+
+### T-123 — Wire `wab-notifications` into WAB-Server (`NOTIFIER_PROVIDER=real`)
+
+- Project: `WAB-Server/` (`src/providers/notifier/real.ts`, `src/providers/index.ts`, `src/config/*`, `src/server.ts`, `scripts/ensure-sdks.cjs`, Dockerfile/compose)
+- Branch: `claude/busy-johnson-2rch94` (PR #129)
+- Status: IN REVIEW
+- Acceptance criteria (BE-21 push, admin email alerts; server rules §2 externals behind interfaces, §5 no hardcoding, §8 provider errors):
+  - [x] `file:../wab-notifications` dependency; `ensure-sdks` builds it when `dist` is missing (pre-build/typecheck/test)
+  - [x] Env keys FCM_*/SMTP_*/EMAIL_FROM_*; `real` notifier without credentials fails at startup naming keys only; SMTP user/pass together; `.env.example` updated
+  - [x] Adapter: ioredis -> idempotency store, pino bridge, SDK errors -> 502/503 `ExternalServiceError`, caller errors -> `RangeError`; closed on shutdown
+  - [x] Docker image builds from repo root with both packages (not executable here)
+- Tests: `npm test` 2420 (after fixing one older test env); lint/format/typecheck/build green; audit 0; `tests/notifierReal.test.ts` (16) + config/docker tests
+- Loops: 3/3
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) - NOT verified: real SMTP send (App Password pending), Docker build (no daemon). API docs: no change.
+
 ### Pending (next)
 
 - T-003 — Per-project rules for the remaining folders (customer, merchant, admin, packages) — awaiting user input.

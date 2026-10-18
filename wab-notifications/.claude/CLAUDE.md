@@ -21,21 +21,19 @@ Act as all four at once and challenge your own work from each angle:
 ## Non-negotiables (summary of Rules.md)
 Clean code · swap any third party by adding an adapter · easy to adopt · dev + prod · dev on localhost · nothing hardcoded · performance first · all response statuses · all error cases · build before commit/push · assume requirements are missing · unit tests for every file and function · loop test before every push · update Integration.md after every change.
 
-## Layout (target)
+## Layout
 ```
 src/
-  index.ts  constants/  config/  errors/
-  ports/             # PushChannel, EmailChannel, IdempotencyStore
-  adapters/fcm/      # firebase-admin messaging
-  adapters/smtp/     # nodemailer
-  adapters/fake/     # dev/tests (+ local sink: Mailpit)
-  templates/         # ar/en email templates
-  idempotency/ retry/
-tests/  loop/
+  index.ts  notifier.ts  validation.ts  types.ts
+  constants/ errors/ config/ retry/ idempotency/ templates/
+  adapters/push/   # fcm (+ message mapping, error mapping), fake
+  adapters/email/  # smtp (+ error mapping), fake
+  adapters/vendors.ts  # only file touching firebase-admin / nodemailer
+tests/  (one file per source file)  tests/loop/  scripts/{smoke.ts,package-smoke.cjs}
 ```
 
-## Commands (target)
-`npm run build` · `npm run typecheck` · `npm run lint` · `npm run format:check` · `npm test` (coverage gate) · `npm run test:loop` · `npm run verify` (all of the above; run before every commit).
+## Commands
+`npm run build` · `npm run typecheck` · `npm run lint` · `npm run format:check` · `npm test` (coverage gate) · `npm run test:loop` · `npm run test:smoke-package` · `npm run verify` (all of the above; run before every commit) · `npm run smoke` (manual, real FCM dry-run; needs `FIREBASE_CREDENTIALS_FILE` + `FIREBASE_PROJECT_ID`, keys stay outside the repo).
 
 ## Working agreement
 1. Read Rules.md + Integration.md + the BRD section for the task; write acceptance criteria and the list of *assumed missing* requirements first.
