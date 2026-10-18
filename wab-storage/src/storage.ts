@@ -85,3 +85,15 @@ export const createLocalFsStorage = (options: StorageOptions): LocalFsStorage =>
     throw configError('provider must be local-fs', { fields: ['provider'] });
   return buildLocalFs(config);
 };
+
+/**
+ * Dev bootstrap for MinIO and other emulators: creates the two buckets when missing and returns
+ * the names it created. Refuses production and non-S3 providers.
+ */
+export const ensureDevBuckets = async (options: StorageOptions): Promise<string[]> => {
+  const config = resolveConfig(options);
+  if (config.environment === 'prod')
+    throw configError('Bucket bootstrap is dev only', { fields: ['environment'] });
+  if (config.provider !== 's3') throw configError('provider must be s3', { fields: ['provider'] });
+  return buildS3(config).ensureBuckets();
+};

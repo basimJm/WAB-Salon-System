@@ -33,6 +33,7 @@ const MS_PER_SECOND = 1_000;
 const VISIBILITY_ORDER: readonly Visibility[] = ['PUBLIC', 'PRIVATE'];
 const RANGE_HEADER_BYTES = `bytes=0-${String(MAGIC_BYTES_LENGTH - 1)}`;
 const ALREADY_GONE = 'NoSuchKey';
+const ALREADY_OWNED = 'BucketAlreadyOwnedByYou';
 
 type S3Settings = Pick<
   ResolvedConfig,
@@ -184,6 +185,27 @@ export class S3Storage implements StorageProvider {
       throw new StorageError(ERROR_CODES.VENDOR_ERROR, 'Some objects could not be deleted', {
         details: { failed: failures.length, codes: [...new Set(failures)] },
       });
+  }
+
+  /**
+   * Dev bootstrap: creates the public and private buckets when they do not exist (MinIO starts
+   * empty). Returns the names it created. Never call it in production (the factory refuses).
+   */
+  async ensureBuckets(): Promise<string[]> {
+    const deps = await this.getDeps();
+    const created: string[] = [];
+    for (const bucket of [this.settings.s3.publicBucket, this.settings.s3.privateBucket]) {
+      const exists = await this.exec(new deps.commands.HeadBucket({ Bucket: bucket }), true);
+      if (exists !== null) continue;
+      try {
+        await this.exec(new deps.commands.CreateBucket({ Bucket: bucket }));
+        created.push(bucket);
+      } catch (error) {
+        // Another instance created it between our check and our create: that is fine.
+        if ((error as StorageError).details['vendorName'] !== ALREADY_OWNED) throw error;
+      }
+    }
+    return created;
   }
 
   private bucketOf(visibility: Visibility): string {

@@ -10,6 +10,7 @@ import { decimalToFils, filsToDecimal } from '../money';
 import type { GatewayCheckoutRequest, PaymentSession, PaymentVerification } from '../types';
 import { classifyResult, paymentStatusOf, requestErrorOf } from './codes';
 import type { HyperPayClient, HyperPayResponse } from './client';
+import type { SessionDirectory } from '../directory';
 
 export interface HyperPayContext {
   readonly provider: ProviderName;
@@ -17,6 +18,7 @@ export interface HyperPayContext {
   readonly currency: CurrencyCode;
   readonly settings: ResolvedHyperPay;
   readonly client: HyperPayClient;
+  readonly directory: SessionDirectory;
 }
 
 const resultSchema = z.object({ code: z.string().min(1), description: z.string().default('') });
@@ -163,5 +165,18 @@ export const toVerification = (
 export const fetchPayment = async (
   ctx: HyperPayContext,
   sessionId: string,
-): Promise<PaymentVerification> =>
-  toVerification(ctx, sessionId, await ctx.client.get(HYPERPAY_PATHS.checkoutPayment(sessionId)));
+): Promise<PaymentVerification> => {
+  const verification = toVerification(
+    ctx,
+    sessionId,
+    await ctx.client.get(HYPERPAY_PATHS.checkoutPayment(sessionId)),
+  );
+  // A captured payment is remembered so a refund weeks later still finds it.
+  if (verification.status === 'SUCCEEDED' && verification.paymentId !== undefined) {
+    await ctx.directory.put(sessionId, {
+      paymentId: verification.paymentId,
+      ...(verification.reference === undefined ? {} : { reference: verification.reference }),
+    });
+  }
+  return verification;
+};

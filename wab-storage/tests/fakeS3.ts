@@ -55,6 +55,14 @@ export class FakeS3 {
     this.calls.push({ type, input });
     const failure = this.failures.get(type)?.shift();
     if (failure !== undefined) throw failure as Error;
+    if (type === 'HeadBucket') {
+      if (this.buckets.has(String(input['Bucket']))) return {};
+      throw notFound();
+    }
+    if (type === 'CreateBucket') {
+      this.bucket(String(input['Bucket']));
+      return {};
+    }
     const bucket = this.bucket(String(input['Bucket']));
     const key = String(input['Key']);
     if (type === 'Put') {
@@ -107,6 +115,8 @@ export class FakeS3 {
         Head: this.command('Head'),
         Get: this.command('Get'),
         DeleteObjects: this.command('DeleteObjects'),
+        HeadBucket: this.command('HeadBucket'),
+        CreateBucket: this.command('CreateBucket'),
       },
     };
   }

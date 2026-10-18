@@ -7,10 +7,10 @@
 
 ## Current task
 
-### OTP-007 — Firebase Auth emulator dev mode
-- Branch: `feat/otp-007-emulator`
-- Acceptance: with `firebase.authEmulatorHost` (dev) the unsigned (`alg: none`) tokens the Auth emulator issues are accepted with every claim check of the real verifier and no network call; the same tokens are rejected by the real verifier; prod refuses the host in the options and again in the emulator verifier; `createEmulatorToken` builds the emulator token shape for dev tooling and consumer tests.
-- Assumed missing: emulator token shape is taken from Firebase docs/behaviour (claims `iss/aud/sub/user_id/auth_time/phone_number/firebase.sign_in_provider`), not captured from a running emulator (none available here); CI availability of the emulator stays an open question.
-- Tests: `npm run verify` green (103 tests).
+### OTP-009 — Server-verified SMS skeleton
+- Branch: `feat/otp-009-sms-skeleton`
+- Acceptance: `createSmsOtp` sends a code through an `SmsVendor` port and verifies it through the same `ProofVerifier` port (so it plugs into `createOtpService({provider: 'custom'})`); only an HMAC of the code is stored (secret >= 32 chars), constant-time comparison, single use, TTL, bound to phone + purpose; vendor failure removes the stored code and throws a retryable `OtpError`; fake vendor and process-local code store are refused in production.
+- Assumed missing: no vendor chosen (owner decision), no shared `CodeStore` implementation yet (a Redis one is a few lines on the same port), wrong-code counting stays in the limits engine.
+- Tests: `npm run verify` green (113 unit tests).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — dual guard against emulator use in prod; shared `finishVerification` avoids duplicating claim logic.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — skeleton only; no real vendor or secrets in the repo.
