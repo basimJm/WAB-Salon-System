@@ -18,7 +18,11 @@ import androidx.navigation.compose.rememberNavController
 import com.fab.wab.customer.app.controller.contract.MainContract
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.vm.MainViewModel
+import com.fab.wab.customer.app.di.analyticsAppModule
 import com.fab.wab.customer.app.di.viewModelModule
+import com.fab.wab.customer.core.analytics.AnalyticsTracker
+import com.fab.wab.customer.core.analytics.compose.LocalAnalyticsTracker
+import com.fab.wab.customer.core.analytics.di.analyticsModule
 import com.fab.wab.customer.app.navigation.MainNavigation
 import com.fab.wab.customer.app.resources.Res
 import com.fab.wab.customer.app.resources.unauthorized_logout_message
@@ -45,12 +49,15 @@ import com.fab.wab.customer.feature.sample.di.sampleModule
 import com.fab.wab.customer.feature.sample.presentation.di.samplePresentationModule
 import com.fab.wab.customer.openStoreLink
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 val appModules = listOf(
     coreDiModule,
     notificationModule,
     viewModelModule,
+    analyticsModule(),
+    analyticsAppModule,
 
     //feature modules
     sampleModule,
@@ -102,6 +109,7 @@ fun App(androidContext: Any?) {
                 LocalImageLoader provides imageLoader,
                 LocalAppLocale provides languageState.code,
                 LocalDarkTheme provides isDarkTheme,
+                LocalAnalyticsTracker provides koinInject<AnalyticsTracker>(),
             ) {
                 AppTheme {
                     val homeLabel = stringResource(Res.string.nav_home)

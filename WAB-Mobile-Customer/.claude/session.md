@@ -9,7 +9,7 @@
 
 ## Current task
 
-- CUS-005b next (`core/analytics`); task branches start from `origin/customer`.
+- CUS-005c next (variants check); task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -23,3 +23,16 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — core/mvi depends only on Compose runtime + lifecycle; no literals in the new build files (SDK levels in `AndroidSdk.kt`); plugin behaviour proven by the full build rather than plugin unit tests.
 - Notes: outside the nominal scope but required for the local gate on this Mac: `from __future__ import annotations` in 4 policy scripts (system Python 3.9), detekt `SwallowedException` in `RemoteTokenRefreshApi` fixed by naming the intentionally ignored exceptions `ignored`, the 5000 ms subscription timeout named (`STATE_SUBSCRIPTION_TIMEOUT_MS`) and its baseline entry removed. No UI change → no browser/simulator UI check.
+
+### CUS-005b — `core/analytics` module
+- Branch: `feat/cus-005b-core-analytics`
+- Status: DONE
+- Acceptance criteria (owner request 2026-10-18; PRD §14 common fields; CLAUDE.md §3):
+  - [x] `core/analytics`: `AnalyticsTracker` port, `AnalyticsBackend` vendor port, typed params + builder, `AnalyticsLimits`/`AnalyticsValidation` (Firebase-safe names, 25 params, 100-char values), `AnalyticsContext` (user type, gender scope, language, app version, platform, environment), `DefaultAnalyticsTracker` (context merge with event precedence, validate, sanitize, async, issues reported never thrown), no-op / recording / composite backends, `TrackScreen` + `LocalAnalyticsTracker` (resume-aware), Koin `analyticsModule(backend, issueReporter)`
+  - [x] Feature-presentation and compose-app plugins add `:core:analytics`; app binds `AnalyticsContextProvider` (`AppAnalyticsContextProvider` from `AppEnvironment` + `AppearanceSettings.language` + `Platform.analyticsName`), `LocalAnalyticsTracker` provided in `App`; sample screen `TrackScreen(SampleAnalytics.SCREEN)`, sample ViewModel tracks refresh / item open
+  - [x] Unit tests: `AnalyticsValidationTest` (5), `DefaultAnalyticsTrackerTest` (7), `AppAnalyticsContextProviderTest` (2)
+  - [x] Policy + detekt green (`LocalAnalyticsTracker` added to the detekt composition-local allowlist); 4 Android variants + lint; iOS simulator framework
+- Tests: `scripts/ci/run_local_checks.sh` → GATE-EXIT=0 (BUILD SUCCESSFUL 1m37s); `linkDebugFrameworkIosSimulatorArm64` ok
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — vendor-neutral port, nothing Firebase in common code, no literals at call sites (names in `*Analytics` objects / `AnalyticsKeys`), events validated before leaving the app.
+- Notes: Firebase backend is CUS-004; user type / gender scope come from the session store (CUS-011) — until then the provider reports GUEST and no gender. No visible UI change → no browser/simulator UI check (sample screen behaviour unchanged).

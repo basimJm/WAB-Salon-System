@@ -8,6 +8,7 @@ import platform.posix.exit
 class IOSPlatform : Platform {
     override val name: String =
         UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
+    override val analyticsName: String = PlatformNames.IOS
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()

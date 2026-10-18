@@ -1,0 +1,18 @@
+package com.fab.wab.customer.app.di
+
+import com.fab.wab.customer.app.analytics.AppAnalyticsContextProvider
+import com.fab.wab.customer.core.analytics.AnalyticsContextProvider
+import com.fab.wab.customer.core.domain.AppearanceSettings
+import com.fab.wab.customer.getPlatform
+import org.koin.dsl.module
+
+/** App-side analytics bindings: the context provider the core tracker needs (backend stays no-op until CUS-004). */
+val analyticsAppModule = module {
+    single<AnalyticsContextProvider> {
+        AppAnalyticsContextProvider(
+            environment = get(),
+            language = get<AppearanceSettings>().language,
+            platform = getPlatform().analyticsName,
+        )
+    }
+}

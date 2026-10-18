@@ -44,6 +44,7 @@ include(
     ":core:navigation",
     ":core:ui",
     ":core:mvi",
+    ":core:analytics",
     ":core:notification",
     ":core:security",
     ":core:design-system",
