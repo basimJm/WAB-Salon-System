@@ -7,14 +7,14 @@
 
 ## Current task
 
-### ANA-008 — Identity linking across guest and registered history
-- Branch: `feat/ana-008-identity`
+### ANA-009 — Quality: loop test, package smoke, README, Integration.md
+- Branch: `feat/ana-009-quality`
 - Status: IN REVIEW
-- Acceptance: an installation linked with `linkIdentity` takes the account's subject (`TYPE:id`) in funnels and cohorts, so guest app events and registered server events are ONE actor; several accounts on one device split by the event's Firebase user id (else the smallest account key, deterministic); unlinked installations stay separate guests (`inst:` / `user:`); new `source: 'ALL'` (server + app) for count, funnel and cohorts, per-source scan limit with `truncated`; journeys already merge every installation of the actor.
-- Assumed missing: Firebase `user_id` equals our account id (apps set it at login); the account type of an unlinked app user is unknown, so such users cannot be merged until a link exists (the apps send the instance id at login, Customer/Merchant PRD §14); a device used by several accounts shows in each account's journey.
-- Tests: `npm run verify` green (152 tests).
+- Acceptance: loop test with 1 000 iterations of track -> link -> count -> funnel -> journey, concurrency 20, injected retryable store failure on every 7th event, asserting exact counts, cached = fresh, bounded cache and that `track` never throws with a dead store; package smoke runs the real API through `require` and `import` and checks the typed prod config error; README (quick start, prod setup, API, vendor swap, errors); Integration.md rewritten to the real API, options, mapping tables, event contract (ANA-16), open questions, status.
+- Assumed missing: the event contract in the README/Integration is a proposal derived from `WAB-Server/src/constants/analytics.ts` and the PRD sections 14, to be confirmed with the app teams.
+- Tests: `npm run verify` green (unit tests with the gate, build, smoke, loop).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA: ALL needs a warehouse in count/funnel/cohorts, unknown source rejected, truncation if either source overflows.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found the loop test racing on timestamps (parallel tracks of one actor) and a range beyond the 92-day cap; both were test defects, fixed.
 
-### ANA-007 — BigQuery adapter
-- Status: DONE (PR #228)
+### ANA-008 — Identity linking
+- Status: DONE (PR #233)

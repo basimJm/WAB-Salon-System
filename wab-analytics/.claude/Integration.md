@@ -4,131 +4,153 @@
 
 | Field | Value |
 |---|---|
-| Package | `wab-analytics` |
+| Package | `@wab/analytics` (folder `wab-analytics`) |
 | Type | Node.js package (TypeScript, npm), server only |
 | BRD | `docs/WAB_Package_Analytics_BRD.md` |
-| Version | 0.1.0 (in development) |
-| Node | >= 22, TypeScript strict, ESM + CJS builds |
-| Server counterpart in WAB | `WAB-Server/src/providers/analytics` (interface already in WAB-Server, fake only today) |
+| Version | 0.1.0 (feature complete; publish = ANA-010, owner) |
+| Node | >= 22, TypeScript strict, ESM + CJS builds with `.d.ts` |
+| Server counterpart in WAB | `WAB-Server/src/providers/analytics` (port `AnalyticsProvider`: `track`, `linkIdentity`, `countEvents`) |
 
 ## 1. Purpose and boundaries
-Server events recorded with a common schema; analytics queries for admin APIs with date-range limits and max-bytes-billed guards; installation↔user identity linking so journeys merge guest and registered history; cached results.
+Server events recorded with a common schema; analytics queries for admin APIs with date-range limits and max-bytes-billed guards; installation↔account identity links so journeys, funnels and cohorts merge guest and registered history; cached results.
 
-**Not in this package:** Client-side tracking (apps use Firebase directly), chart rendering, file export (backend).
+**Not in this package:** client-side tracking (apps use Firebase directly), chart rendering, file export, alert delivery.
 
 ## 2. Architecture
-Ports and adapters:
 ```
-consumer ──> createAnalytics(options) ──> AnalyticsProvider (port, stable interface)
-                                       ├── adapters/memory   (dev: local/fake)
-                                       ├── adapters/mongo
-                                       ├── adapters/bigquery
-                                       ├── adapters/cache-memory
-                                       ├── adapters/cache-redis
+consumer ──> createAnalytics(options, overrides?) ──> Analytics (AnalyticsProvider + init/close)
+                 service (validation, retry, cache) ── queries (count, funnel, cohorts, journey, overview)
+                                   ├── EventStore      : adapters/memory, adapters/mongo
+                                   ├── IdentityStore   : adapters/memory, adapters/mongo
+                                   ├── WarehouseQuery  : adapters/memory, adapters/bigquery (lazy @google-cloud/bigquery)
+                                   └── ResultCache     : cache/stores (memory, redis) or custom
 ```
-- The factory picks the adapter from `options.provider` (+ `options.environment`). Unknown provider → `ConfigError`.
-- Adapters never leak vendor types through the port; vendor responses are normalized (§5).
-- Shared kernel: `errors/`, `config/` (zod-validated options), `http/` (timeouts, retry with backoff + jitter), `logger` (injected, redacting), `events` (optional hook for analytics).
+- `buildAdapters(options)` picks the adapters; `overrides` replaces any port (custom vendor = one object).
+- Adapters never leak vendor types; vendor failures become `AnalyticsError` (§6). Vendor text stays in `cause`.
+- Kernel: `errors/`, `config/options.ts` (zod), `logger.ts` (redacting), `retry.ts` (capped backoff + jitter), `range.ts`, `time.ts` (Intl day keys).
 
-## 3. Public API (port)
+## 3. Public API
 ```ts
 interface AnalyticsProvider {
-  track(event: ServerEventInput): Promise<boolean>;            // never throws
-  linkIdentity(link:{installationId; actorType:"CUSTOMER"|"MEMBER"; actorId}): Promise<void>;
-  countEvents(q:{names?; from; to; groupBy:"NAME"|"DAY"; timeZone}): Promise<{key;count}[]>;
-  funnel(def): Promise<FunnelResult>;  cohorts(def): Promise<CohortResult>;
-  journey(actor, range): Promise<JourneyItem[]>;  overview(range): Promise<Overview>;
+  track(event: ServerEventInput): Promise<boolean>;                 // NEVER throws
+  linkIdentity(link: {installationId; actorType; actorId}): Promise<void>;
+  countEvents(q: {names?; from; to; groupBy: 'NAME'|'DAY'; timeZone?; source?: 'SERVER'|'APP'|'ALL'}): Promise<{key; count}[]>;
+  funnel(def: {steps; from; to; windowMs?; source?; dropOffUsers?}): Promise<FunnelResult>;
+  cohorts(def: {startEvent; returnEvent; from; to; unit: 'DAY'|'WEEK'; periods; timeZone?; source?}): Promise<CohortResult>;
+  journey(actor, {from; to}, page?: {limit?; offset?}): Promise<JourneyItem[]>;
+  overview({from; to}): Promise<Overview>;
 }
-createAnalytics(options): AnalyticsProvider
+interface Analytics extends AnalyticsProvider { init(): Promise<void>; close(): Promise<void> }
+createAnalytics(options: AnalyticsOptions, overrides?: {events?; identity?; warehouse?; cache?}): Analytics
 ```
+Ranges are half-open `[from, to)`, at most `limits.maxRangeDays` (92). `DAY` groups use the business time zone (default `Asia/Amman`). Results are JSON-safe (timestamps are ISO strings).
 
 ## 4. Configuration
-| Option / env key | Dev | Prod | Notes |
+| Option | Dev | Prod | Notes |
 |---|---|---|---|
-| `provider` | `memory` | `mongo`+`bigquery` | |
-| `environment` | `dev` | `prod` | prod refuses memory |
-| `mongo.uri` / collection names | localhost | secret | URI never logged |
-| `bigquery.projectId/dataset/location` | emulator or fixtures | real | |
-| `bigquery.credentials` | none | service account (secret) | |
-| `limits.maxBytesBilled`, `limits.maxRangeDays` | small | configured | cost guard |
-| `cache.ttlSec`, `cache.store` | memory | redis | order-insensitive keys |
-| `timeZone` | Asia/Amman | Asia/Amman | consumer-supplied |
+| `environment` | `dev` | `prod` | prod refuses the memory store and the memory warehouse |
+| `provider` | `memory` (default) | `mongo` (required) | `mongo` needs `mongo: {events, identityLinks, ids?, ensureIndexes?}` (native collections) |
+| `mongo.ids` | — | optional codec `{encode, decode}` | WAB-Server stores ids as ObjectId |
+| `warehouse.provider` | `none` / `memory` / `bigquery` | `none` / `bigquery` | |
+| `warehouse.bigquery` | `projectId`, `dataset` (+ `client` injected) | + `credentials` (service-account JSON, text or object) | `location`, `eventsPrefix` (`events_`), `intradayPrefix` (`events_intraday_`), `crashTable`, `dryRunFirst` (true) |
+| `limits` | defaults | defaults | `maxRangeDays 92`, `maxScannedEvents 50000`, `maxFunnelSteps 10`, `maxCohortPeriods 12`, `maxJourneyItems 500`, `maxNames 20`, `topEvents 10`, `maxCountRows 1000`, `maxBytesBilled 10 GB` |
+| `queryTimeoutMs` | 30000 | 30000 | Mongo `maxTimeMS`, BigQuery deadline |
+| `retry` | `attempts 3`, `baseDelayMs 200`, `maxDelayMs 5000` | same | only retryable errors |
+| `cache` | `none` / `memory` | `redis` (injected client) / `custom` | `ttlSec 60`, `staleSec 0`, `maxEntries 500`, `keyPrefix` |
+| `timeZone` | `Asia/Amman` | `Asia/Amman` | IANA name |
+| `sessionGapMs` | 30 min | 30 min | journey sessions |
+| `idPattern`, `installationPattern` | defaults | defaults | formats of ids |
+| `trackIdentityEvent` | true | true | also records `identity.linked` when a link is stored |
+| `logger` | none | pino/winston adapter `(message, fields)` | fields are redacted |
 
-Rules: values come from the consumer (options/env), defaults live in `constants/`, prod refuses the fake adapter and missing secrets (`ConfigError` naming the key only).
+Secrets (BigQuery credentials, Mongo URI) are supplied by the consumer from its own env/secret store; config errors name option paths only.
 
-## 5. Status and result mapping (every vendor status handled)
+## 5. Status and result mapping
 | Source result | Normalized |
 |---|---|
 | event stored | `true` |
-| invalid event / store failure | `false` + logged (track never throws) |
-| BigQuery job complete | rows |
-| `rateLimitExceeded`, `backendError` | retried, then `ANALYTICS_UNAVAILABLE` |
-| `bytesBilledLimitExceeded` | `ANALYTICS_QUERY_TOO_EXPENSIVE` |
-| `notFound` table/dataset | `ANALYTICS_NOT_CONFIGURED` |
-| empty result | empty array (never null) |
-
-Unknown vendor value → `UNKNOWN` + raw response logged (redacted), never success.
+| invalid event / store failure | `false` + warning (track never throws) |
+| BigQuery job complete | rows (empty = `[]`, never null) |
+| `rateLimitExceeded`, `quotaExceeded`, HTTP 429 | `RATE_LIMITED`, retried |
+| `backendError`, `internalError`, 5xx | `ANALYTICS_UNAVAILABLE`, retried |
+| `bytesBilledLimitExceeded` / dry-run estimate over `maxBytesBilled` | `ANALYTICS_QUERY_TOO_EXPENSIVE` |
+| `notFound`, 404 | `ANALYTICS_NOT_CONFIGURED` |
+| `accessDenied`, 401, 403 | `AUTH_FAILED` |
+| `invalidQuery`, other 4xx | `VENDOR_ERROR` |
+| network codes (`ECONNRESET`, `ENOTFOUND`...) | `NETWORK_ERROR`, retried |
+| own deadline / Mongo `maxTimeMS` | `TIMEOUT`, retried |
+| Mongo network / server selection | `ANALYTICS_UNAVAILABLE` |
+| Mongo 13 / 18 | `AUTH_FAILED` |
+| malformed document or row | `MALFORMED_RESPONSE` |
+| anything else | `UNKNOWN` (cause kept) |
 
 ## 6. Error model
-All failures extend `AnalyticsError` with `code`, `retryable`, `cause`, `details` (no secrets).
-| Code | When | Retryable |
-|---|---|---|
-| `ANALYTICS_UNAVAILABLE` | store/warehouse down | yes |
-| `ANALYTICS_QUERY_TOO_EXPENSIVE` | cost guard | no |
-| `ANALYTICS_RANGE_INVALID` | to<=from or beyond max range | no |
-| `ANALYTICS_NOT_CONFIGURED` | missing dataset/credentials | no |
-| `ANALYTICS_EVENT_INVALID` | schema violation (track returns false) | no |
-Common codes for every package: `CONFIG_INVALID`, `VALIDATION_FAILED`, `AUTH_FAILED`, `NETWORK_ERROR`, `TIMEOUT`, `RATE_LIMITED`, `VENDOR_ERROR`, `MALFORMED_RESPONSE`, `UNKNOWN`.
+`AnalyticsError { code, retryable, cause, details }` (no secrets). Codes: `ANALYTICS_UNAVAILABLE`, `ANALYTICS_QUERY_TOO_EXPENSIVE`, `ANALYTICS_RANGE_INVALID`, `ANALYTICS_NOT_CONFIGURED`, `ANALYTICS_EVENT_INVALID`, `CONFIG_INVALID`, `VALIDATION_FAILED`, `AUTH_FAILED`, `NETWORK_ERROR`, `TIMEOUT`, `RATE_LIMITED`, `VENDOR_ERROR`, `MALFORMED_RESPONSE`, `UNKNOWN`. Retryable: unavailable, network, timeout, rate limited.
 
 ## 7. Environments
-- **dev (localhost):** `memory` adapter with seed fixtures, or Mongo on localhost; BigQuery replaced by fixtures.
-- **prod:** Mongo (Atlas) + BigQuery with service account; Redis cache; memory refused.
+- **dev (localhost):** `memory` store + `MemoryWarehouse` (add fixtures with `addAppEvent` / `addCrash`), or Mongo on localhost; no credentials.
+- **prod:** Mongo collections (Atlas) + BigQuery with a service account; Redis cache; memory refused.
 
 ## 8. Performance notes
-Partitioned/clustered BigQuery tables with date filters mandatory; scheduled aggregation tables for dashboards; Redis result cache; Mongo indexes on `{name, ts}`, actor, booking; batch writes where possible.
+Partitioned BigQuery access with `_TABLE_SUFFIX` pruning and a precise microsecond window; dry-run cost check and `maximumBytesBilled` on every job; Mongo indexes `{ts}`, `{name, ts}`, `{actorId, ts}`, `{bookingId, ts}` (same as WAB-Server); bounded scans (`maxScannedEvents`, flagged `truncated`); result cache with single flight and optional stale-while-revalidate; the BigQuery client is loaded lazily and reused.
 
 ## 9. Testing
-- Unit tests: one test file per source file, every exported function: success, each error code, each status mapping, boundaries, idempotent replay. Vendor SDK/HTTP mocked. Coverage gate: 100 % functions, >= 95 % lines/branches.
-- Loop test (`npm run test:loop`): 1 000 iterations of track → count → funnel → journey with concurrency 20 and injected store failures; asserts track never throws, counts exact, cache hits identical to misses, no leaks.
-- Consumer smoke test: install the built tarball into a temp project and call the factory.
+- `npm test`: 150+ unit tests, one suite per area, coverage gate 100 % functions / ≥ 95 % lines and branches. Fakes: in-memory ports, a fake Mongo collection that interprets the exact filters/pipelines the adapter sends, a fake BigQuery client that records every job (parameters, types, dry run, cap).
+- `npm run test:loop`: 1 000 iterations of track → link → count → funnel → journey, 20 concurrent, with an injected retryable store failure on every 7th event; asserts exact counts, cached = fresh, bounded cache, and that `track` never throws even when the store is down.
+- `npm run test:smoke-package`: packs the tarball, installs it in a temp project and runs the dev flow through `require` and `import`.
+- NOT verified here: a real MongoDB, a real BigQuery dataset (SQL is parameterized and reviewed, not executed).
 
 ## 10. Adoption guide (any project)
 ```ts
-const analytics = createAnalytics({ environment: "dev", provider: "memory", timeZone: "Asia/Amman" });
-await analytics.track({ name: "payment.failed", actorType: "CUSTOMER", actorId, params: { code } });
+const analytics = createAnalytics({ environment: 'dev', timeZone: 'Asia/Amman' });
+await analytics.track({ name: 'payment.failed', actorType: 'CUSTOMER', actorId, params: { code } });
+const rows = await analytics.countEvents({ from, to, groupBy: 'DAY' });
 ```
-How WAB-Server adopts it: replace `WAB-Server/src/providers/analytics` real mode (`*_PROVIDER=real`) with this package; the interface is already compatible (see §3).
+**WAB-Server:** `ANALYTICS_PROVIDER=real` builds the package with `provider: 'mongo'` over the `serverEvents` collection (ObjectId codec) and, when `ANALYTICS_BIGQUERY_*` is set, the BigQuery warehouse (`WAB-Server/src/providers/analytics/real.ts`). The server keeps its own Mongo `AnalyticsProvider` port (`track`, `linkIdentity`, `countEvents`); funnels/cohorts/journey/overview are reachable through `sdk` for the admin analytics tasks.
+
+### Event contract (ANA-16)
+Names are dotted lower case (`family.action`), at most 80 characters. Params carry IDs and codes only — never phone numbers, names, tokens, OTPs, card data (keys that look secret are redacted; 8 KB limit).
+| Family | Events (examples) | Typical params |
+|---|---|---|
+| OTP | `otp.requested`, `otp.failed`, `otp.blocked` | `purpose`, `reason` |
+| Payments | `payment.started`, `payment.succeeded`, `payment.failed`, `payment.cancelled` | `code` (gateway code), `bookingId` |
+| Refunds | `refund.created`, `refund.completed`, `refund.failed` | `code` |
+| Bookings | `booking.created`, `booking.approved`, `booking.rejected`, `booking.cancelled`, `booking.completed`, `booking.no_show`, `booking.auto_cancelled` | `salonId`, `bookingId` |
+| Jobs | `job.reminder_sent`, `job.auto_cancelled` | `bookingId` |
+| Errors | `api.error` | `endpoint`, `status`, `latencyMs` |
+| Push | `push.sent`, `push.failed` | `code` |
+| Identity | `identity.linked` | `installationId` |
+Common fields: `actorType` (`CUSTOMER`, `MEMBER`, `ADMIN`, `SYSTEM`), `actorId`, `salonId`, `bookingId`, `platform`, `appVersion`.
 
 ## 11. Open questions / assumed-missing requirements
-- Mongo time-series vs plain collection (needs real MongoDB to verify; WAB-Server uses a plain indexed collection today).
-- Firebase→BigQuery export dataset/table names and schema versions.
-- Event retention (none specified) and PII handling.
-- Funnel/cohort definitions beyond the predefined list.
-- Which producers must emit `payment.*`, `booking.*`, `api.error` events (none do yet).
+- Mongo time-series vs plain collection (needs a real MongoDB; WAB-Server uses a plain indexed collection).
+- Firebase→BigQuery export: dataset id (`analytics_<propertyId>`), streaming export enabled, Blaze plan, monthly budget, daily vs intraday overlap around the daily export.
+- Crashlytics export table name; `installation_uuid` differs from the Firebase app-instance id, so crashes join mainly by user id.
+- Firebase `user_id` equals our account id (apps set it at login); unlinked installations stay separate guests until the app sends the link.
+- Event retention (none specified), PII review of params, archival strategy.
+- Funnel/cohort definitions beyond the predefined list: callers pass step names; predefined funnels live in the consumer.
+- Which producers emit `payment.*`, `booking.*`, `api.error` (WAB-Server must add the `track` calls).
+- Scheduled aggregation tables in BigQuery (ANA-14) are not created by this package; the result cache is the first line of speed.
 
 ## 12. Implementation status
 | Item | Status |
 |---|---|
 | Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ |
-| Shared kernel (errors, config, http/retry, logger) | ✅ |
-| Adapter: memory — in-memory events + identity links for dev/tests | ✅ |
-| Adapter: mongo — event store: write events, count/group queries, identity links | ✅ (unverified against a real MongoDB) |
+| Shared kernel (errors, config, retry, logger) | ✅ |
+| Port + adapter: memory — events, identity links, warehouse | ✅ |
+| Adapter: mongo — event store, identity links | ✅ (unverified against a real MongoDB) |
+| Queries: count, funnel, cohorts, journey, overview | ✅ |
 | Adapter: bigquery — Firebase Analytics/Crashlytics export queries | ✅ (unverified against a real dataset) |
-| Adapter: cache-memory — dev cache | ✅ |
-| Adapter: cache-redis — prod cache (injected client) | ✅ |
-| Unit tests + coverage gate | ⬜ |
-| Loop test | ⬜ |
-| README + consumer smoke test | ⬜ |
+| Result cache: memory, redis, custom, stale-while-revalidate | ✅ |
+| Identity merge in funnels/cohorts/journeys | ✅ |
+| Unit tests + coverage gate | ✅ |
+| Loop test | ✅ |
+| README + consumer smoke test | ✅ |
+| Publish `@wab/analytics` (ANA-010, owner) | ⬜ |
 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
 | 2026-10-14 | 0.0.0 | Design document created from the BRD; no code yet. |
-| 2026-10-18 | 0.1.0 | ANA-001 scaffold: tooling, package `@wab/analytics`, smoke and loop harness. |
-| 2026-10-18 | 0.1.0 | ANA-002 kernel: AnalyticsError + codes, zod options with prod rules, redacting logger, range guard, retry. |
-| 2026-10-18 | 0.1.0 | ANA-003 port + memory adapters + `createAnalytics(options, overrides)`; funnel/cohorts/journey/overview pending (ANA-005). |
-| 2026-10-18 | 0.1.0 | ANA-004 Mongo adapters (event store + identity links) over an injected native collection with id codec. |
-| 2026-10-18 | 0.1.0 | ANA-005 queries: funnel, cohorts, journey, overview on the ports; MemoryWarehouse. |
-| 2026-10-18 | 0.1.0 | ANA-006 result cache (memory, Redis, custom), SWR, single-flight. |
-| 2026-10-18 | 0.1.0 | ANA-007 BigQuery warehouse: parameterized SQL, pruning, cost guard, error mapping, lazy client. |
-| 2026-10-18 | 0.1.0 | ANA-008 identity merge in funnels/cohorts (`source: ALL`), shared-device rule. |
+| 2026-10-18 | 0.1.0 | ANA-001…008: scaffold, kernel, port + memory, Mongo, queries, cache, BigQuery, identity merge. |
+| 2026-10-18 | 0.1.0 | ANA-009: loop test (1 000 iterations, concurrency 20, injected failures), package smoke on the real API, README, event contract. |

@@ -22,7 +22,21 @@ try {
 
   const body = `
     const run = async (lib) => {
-      if (lib.PACKAGE_NAME !== '${PACKAGE}') throw new Error('smoke failed');
+      if (lib.PACKAGE_NAME !== '${PACKAGE}') throw new Error('smoke: package name');
+      const analytics = lib.createAnalytics({ environment: 'dev' });
+      const stored = await analytics.track({ name: 'payment.failed', actorType: 'CUSTOMER', actorId: 'u1', params: { code: '05' } });
+      const rows = await analytics.countEvents({
+        from: new Date(Date.now() - 60000), to: new Date(Date.now() + 60000), groupBy: 'NAME',
+      });
+      const funnel = await analytics.funnel({
+        steps: ['payment.failed', 'payment.succeeded'], from: new Date(Date.now() - 60000), to: new Date(Date.now() + 60000),
+      });
+      await analytics.close();
+      let typed = false;
+      try { lib.createAnalytics({ environment: 'prod' }); } catch (error) { typed = lib.isAnalyticsError(error) && error.code === 'CONFIG_INVALID'; }
+      if (!stored || rows.length !== 1 || rows[0].count !== 1 || funnel.steps[0].users !== 1 || !typed) {
+        throw new Error('smoke failed');
+      }
     };
   `;
   writeFileSync(
