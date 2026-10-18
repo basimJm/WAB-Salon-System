@@ -8,9 +8,18 @@
 ## Current task
 
 ### PAY-001 — Node scaffold
-- Branch: `feat/pay-001-scaffold` · Status: IN REVIEW
+- Branch: `feat/pay-001-scaffold`
+- Status: IN REVIEW
 - Acceptance: strict TS, eslint, prettier, jest (gate 100/95/95), tsup ESM+CJS+d.ts, `verify`, loop config, package smoke; name `@wab/payments`.
 - Tests: `npm run verify` green (scaffold test + loop test + packed-tarball smoke in CJS and ESM).
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling only, copied from wab-notifications.
 - Decision (owner grant 2026-10-18): gateway = HyperPay (OPP/COPYandPAY).
+
+### PAY-002 — Shared kernel
+- Branch: `feat/pay-002-kernel`
+- Status: IN REVIEW
+- Acceptance: PaymentSdkError + codes; zod options with prod rules; redacting logger; fils to decimal money; retry/timeout helpers; constants.
+- Tests: npm run verify green (45 unit tests, gate 100/95/95)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found card regex swallowing a trailing space and duplicate config field names (fixed).

@@ -7,10 +7,10 @@
 
 ## Current task
 
-### OTP-001 — Project scaffold
-- Branch: `feat/otp-001-scaffold`
-- Acceptance: TS strict + eslint + prettier + jest (coverage gate 100/95/95) + tsup ESM/CJS/d.ts + `verify` + loop config + package smoke, same as `wab-notifications`.
-- Assumed missing: package name stays `wab-otp` (consumers use a `file:` dependency); renamed to `@wab/otp` only in OTP-010.
-- Tests: `npm run verify` green (scaffold test, build, smoke, loop).
+### OTP-003 — Port, fake adapter, memory store, verifier
+- Branch: `feat/otp-003-port-fake`
+- Acceptance: `createOtpVerifier(options)` validates input (E.164, purpose, proof size) with `OTP_INPUT_INVALID`; fake adapter (same proof format as the WAB-Server fake); `MemoryLimitStore` (process-local, same semantics as Redis, refused in prod); adapter answers are checked (unknown/incomplete answer = `OTP_MALFORMED_RESPONSE`, mismatching verified phone = `PHONE_MISMATCH`); unexpected throws = `OTP_UNKNOWN` with cause; event hook failures never break a verification; logs carry no proof or full phone.
+- Assumed missing: outcomes `PURPOSE_MISMATCH`/`BLOCKED` are only produced by custom adapters/the service; `precheck`/`reportFailure` land with OTP-004.
+- Tests: `npm run verify` green (48 unit tests).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling only, mirrors the proven SDK setup.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA added the malformed-answer and wrong-phone downgrade cases; the `custom` guard in the adapter selector is defensive (options already refuse it).
