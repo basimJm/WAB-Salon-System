@@ -1,6 +1,8 @@
 import { MemoryEventStore } from './adapters/memory/eventStore';
 import { MemoryIdentityStore } from './adapters/memory/identityStore';
-import { notConfiguredError } from './errors';
+import { MongoEventStore } from './adapters/mongo/eventStore';
+import { MongoIdentityStore } from './adapters/mongo/identityStore';
+import type { IdCodec, MongoCollectionLike } from './adapters/mongo/types';
 import { resolveOptions, type AnalyticsOptions, type ResolvedOptions } from './config/options';
 import type { EventStore, IdentityStore, WarehouseQuery } from './ports';
 import { createService } from './service';
@@ -14,8 +16,22 @@ export interface Adapters {
 
 /** Chooses the adapters named by the options. Adding a vendor = one more branch here. */
 export const buildAdapters = (options: ResolvedOptions): Adapters => {
-  if (options.provider !== 'memory') throw notConfiguredError('this adapter is not available yet');
-  return { events: new MemoryEventStore(), identity: new MemoryIdentityStore() };
+  if (options.provider === 'memory' || options.mongo === undefined) {
+    return { events: new MemoryEventStore(), identity: new MemoryIdentityStore() };
+  }
+  const { mongo } = options;
+  const common = { maxTimeMs: options.queryTimeoutMs, ensureIndexes: mongo.ensureIndexes };
+  return {
+    events: new MongoEventStore({
+      ...common,
+      collection: mongo.events as MongoCollectionLike,
+      ...(mongo.ids === undefined ? {} : { ids: mongo.ids as IdCodec }),
+    }),
+    identity: new MongoIdentityStore({
+      ...common,
+      collection: mongo.identityLinks as MongoCollectionLike,
+    }),
+  };
 };
 
 /** The one factory consumers call. Throws `CONFIG_INVALID` for bad options. */
