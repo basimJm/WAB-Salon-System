@@ -12,7 +12,15 @@ export {
 export { StorageError, isStorageError } from './errors';
 export { resolveConfig, type ResolvedConfig, type StorageOptions } from './config/options';
 export { noopLogger, type Logger, type LogFields } from './logger';
-export { createLocalFsStorage, createStorage } from './storage';
+export { createLocalFsStorage, createStorage, withVariants, type Storage } from './storage';
+export {
+  createSharpProcessor,
+  variantKey,
+  variantKeys,
+  type ImageProcessor,
+  type VariantName,
+  type VariantResult,
+} from './variants';
 export { LocalFsStorage } from './adapters/localFs';
 export { createLocalFsHandler, type LocalFsHandler } from './adapters/localFsHttp';
 export { MemoryStorage } from './adapters/memory';
