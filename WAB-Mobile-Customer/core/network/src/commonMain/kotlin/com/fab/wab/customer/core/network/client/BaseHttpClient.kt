@@ -9,7 +9,11 @@ import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CancellationException
+import com.fab.wab.customer.core.network.NetworkDefaults
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -77,6 +81,21 @@ class BaseHttpClient(
 
         install(AcceptLanguagePlugin) {
             languageProvider = { appSettings.language.first() }
+        }
+
+        // Only idempotent reads are retried; writes (bookings, payments) must never be replayed by the client.
+        install(HttpRequestRetry) {
+            maxRetries = NetworkDefaults.MAX_RETRIES
+            retryIf { request, response ->
+                request.method == HttpMethod.Get && response.status.value >= NetworkDefaults.SERVER_ERROR_RANGE_START
+            }
+            retryOnExceptionIf { request, cause ->
+                request.method == HttpMethod.Get && cause !is CancellationException
+            }
+            exponentialDelay(
+                baseDelayMs = NetworkDefaults.RETRY_BASE_DELAY_MS,
+                maxDelayMs = NetworkDefaults.RETRY_MAX_DELAY_MS,
+            )
         }
     }
 

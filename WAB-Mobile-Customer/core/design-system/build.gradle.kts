@@ -22,6 +22,7 @@ kotlin {
         implementation(libs.bundles.compose)
         api(libs.compose.uiToolingPreview)
         implementation(projects.core.ui)
+        implementation(projects.core.domain)
         api(libs.material.icons.extended)
     }
     sourceSets.androidMain.dependencies {

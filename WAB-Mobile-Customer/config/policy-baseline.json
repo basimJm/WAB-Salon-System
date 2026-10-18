@@ -5,9 +5,6 @@
   "composeApp/src/androidMain/kotlin/com/fab/wab/customer/Platform.android.kt": {
     "H004": 1
   },
-  "composeApp/src/commonMain/kotlin/com/fab/wab/customer/app/controller/vm/MainViewModel.kt": {
-    "H003": 2
-  },
   "composeApp/src/iosMain/kotlin/com/fab/wab/customer/Platform.ios.kt": {
     "H004": 1
   },
@@ -24,8 +21,8 @@
     "H003": 1
   },
   "core/data/src/androidMain/kotlin/com/fab/wab/customer/core/data/location/DeviceLocationProvider.android.kt": {
-    "Q001": 1,
-    "H006": 2
+    "H006": 2,
+    "Q001": 1
   },
   "core/data/src/commonMain/kotlin/com/fab/wab/customer/core/data/AppPagingDataSource.kt": {
     "H003": 1
@@ -40,21 +37,14 @@
     "H004": 3,
     "H006": 1
   },
-  "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/config/ApiConfig.kt": {
-    "H006": 3
-  },
-  "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/safeApiCall.kt": {
-    "Q002": 1,
-    "H003": 5
-  },
   "core/network/src/iosMain/kotlin/com/fab/wab/customer/core/network/client/NetworkLog.ios.kt": {
     "Q002": 1
   },
   "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/composable/NotificationDisplay.kt": {
-    "P002": 1,
     "H002": 8,
     "H003": 1,
-    "H006": 2
+    "H006": 2,
+    "P002": 1
   },
   "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/composable/NotificationHost.kt": {
     "P002": 1
@@ -80,8 +70,5 @@
   },
   "core/ui/src/iosMain/kotlin/com/fab/wab/customer/core/ui/utils/getDefaultLocale.ios.kt": {
     "H003": 1
-  },
-  "feature/sample/presentation/src/commonMain/kotlin/com/fab/wab/customer/feature/sample/presentation/controller/vm/SampleViewModel.kt": {
-    "H003": 2
   }
 }
