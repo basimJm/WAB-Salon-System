@@ -24,6 +24,8 @@ export const DEFAULT_RETRY = {
   jitterRatio: 0.2,
 } as const;
 
+/** Between the original name and the variant name: `x_thumb.webp`. */
+export const VARIANT_SEPARATOR = '_';
 export const DEFAULT_VARIANTS = {
   thumbWidth: 320,
   mediumWidth: 960,

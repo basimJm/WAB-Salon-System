@@ -14,7 +14,7 @@ import {
   type MockStateOptions,
 } from './state';
 
-export interface MockGatewayOptions {
+export interface MockServerOptions {
   /** 0 picks a free port. */
   readonly port?: number;
   readonly host?: string;
@@ -59,7 +59,7 @@ const send = (res: ServerResponse, status: number, body: unknown, type = JSON_TY
   res.end(typeof body === 'string' ? body : JSON.stringify(body));
 };
 
-export const startMockGateway = async (options: MockGatewayOptions): Promise<MockGateway> => {
+export const startMockGateway = async (options: MockServerOptions): Promise<MockGateway> => {
   const state = new MockState(options.state);
   const failures: number[] = [];
   const host = options.host ?? MOCK_GATEWAY_DEFAULTS.host;

@@ -321,6 +321,7 @@ describe('createStorage with s3', () => {
     const provider = createStorage(
       memoryOptions({ provider: 's3', s3: { region: 'r', publicBucket: 'a', privateBucket: 'b' } }),
     );
-    expect(provider).toBeInstanceOf(S3Storage);
+    expect(typeof provider.createVariants).toBe('function');
+    expect(provider.getPublicUrl('a/b.jpg')).toBe('http://localhost:9000/cdn/a/b.jpg');
   });
 });
