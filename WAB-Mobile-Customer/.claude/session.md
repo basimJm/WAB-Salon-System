@@ -9,22 +9,7 @@
 
 ## Current task
 
-- Next: CUS-032…; task branches start from `origin/customer`.
-
-### CUS-028 — Login S11: phone + country, check-phone, not-registered / blocked, language + theme, legal links
-- Branch: `feat/cus-028-login`
-- Status: IN REVIEW
-- Acceptance criteria (PRD S11, §3.12 entry, §14 names; Design Script S11; operation `POST /auth/check-phone` → 200 / 404 PHONE_NOT_REGISTERED / 403 ACCOUNT_BLOCKED / 409 PHONE_ALREADY_REGISTERED):
-  - [x] `feature/auth` (domain: `PhoneNumber`, `AuthPurpose`, `PhoneCheck`, `AuthRepository`, `CheckPhoneUseCase`; data: `AuthApi` on the generated operation, `AuthRepositoryImpl` + pure `phoneCheckOf` mapping the contract's error codes to outcomes; presentation: `LoginViewModel`, `LoginScreen` + `LoginOverlays`, `LoginNavigation` registering `Graph.Auth`; di)
-  - [x] S11 behaviour: countries from `LocationsRepository` (default Jordan), number validated with the selected country's regex (error under the field once touched, button disabled until valid), loading spinner on submit; registered → OTP route; not registered → popup → Register route prefilled; blocked → suspended message with Contact action; errors as toast; language + theme icons persist through `AppearanceSettings`; legal links → `Screen.ContentPage(slug)`
-  - [x] Shell: `Graph.Auth` + `Screen.Login/Register/Otp/ContentPage` routes; `AppNavScaffold(navigationVisible)` hides the tab bar outside the root tabs (`RootTab.forRoutesOrNull`); Profile placeholder carries the "Log in" entry; Register / OTP / content placeholders until CUS-029/030/05x; icons Language / ThemeDark / ThemeLight
-  - [x] AR + EN texts from the prototype
-  - [x] Tests: `PhoneCheckMapperTest` (2), `LoginViewModelTest` (6), `RootTabTest` (+1)
-  - [x] Emulator (AR): Profile → Log in → empty / invalid / valid / loading, country picker, language toggle to EN, theme toggle, OTP placeholder after a registered number (mock answers 200)
-- Tests: auth data/presentation + composeApp host tests green (9 new); policy suite 76 OK; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0; emulator (Pixel): Profile → Log in, empty (disabled) / invalid (error) / valid (enabled), country picker, submit → OTP placeholder with the number, English LTR, dark mode, back to Arabic
-- Loops: 1/1 — the loop found three defects (duplicate-key crash from mock fixtures, clipped legal links, literal apostrophe escapes) and fixed them
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — outcomes mapped from contract codes in one pure function; the number is normalized before it leaves the screen and never logged/tracked; auth graph hides the tab bar; strings AR + EN; no literals (slugs, purposes, analytics names are constants).
-- Notes: the not-registered and blocked popups cannot be reached with the mock transport (always 200) and are verified by unit tests; `Screen.Otp` carries the purpose + national number for CUS-029. FOUND by the emulator check: mock list fixtures repeated identical ids/codes → duplicate `LazyColumn` key crash in the country picker; `api_sync.py` now varies ids/codes per item and emits Jordan phone samples (regenerated), the view model de-duplicates by code; legal links overflowed → `FlowRow`; `\'` in Compose string resources renders literally (unlike Android XML) → typographic apostrophes in the login and onboarding EN strings.
+- Next: finish CUS-032 (see block), then CUS-033…; task branches start from `origin/customer`.
 
 ### CUS-029 — OTP S13 (shared): pre-check, Firebase verification, ID token to the backend, wrong attempts, countdown
 - Branch: `feat/cus-029-otp`
@@ -70,3 +55,18 @@
 - Loops: 1/1 — the loop found the auth `di` module missing the coroutines dependency (`Flow` not on its classpath) and the syncer exposing a mutable history; both fixed
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — the device record is one `PUT` body built by a pure mapper; triggers are a pure flow composition (launch, sign-in/out, language, FCM token) serialized by a mutex and silent on failure; logout always clears the local session even when the backend call fails; the push switch stays local for guests; refresh tokens are read on demand and never logged or tracked.
 - Notes: a replayed FCM token at startup causes a second `PUT` right after the launch one (same facts; harmless). If `PATCH /installations/push-enabled` fails the local flag already changed; the profile UI (CUS-053) surfaces that error. No screen in this task (logout and the push switch get their UI with the profile, CUS-053); the Home tab still shows the template's sample screen error (`/api/sample/items` is not a contract route → mock 404), pre-existing until CUS-040 replaces it.
+
+### CUS-032 — Home S03: `GET /home`, header + badge, banners, search bar, gender tabs, sections, nearest permission states
+- Branch: `feat/cus-032-home`
+- Status: IN PROGRESS (code + host tests done; gate, emulator check, loop and review still pending — session ended on the usage limit)
+- Acceptance criteria (PRD S03 + 8.0, Design Script S03; operations `GET /home?gender=&lat=&lng=`, `PUT/DELETE /favorites/{salonId}`; realtime `notifications.unread {count}`):
+  - [x] Core: `SalonSummary`/`OpeningHours` (core/domain `salon/`), `FavoritesRepository` (+ impl in core/data `favorites/`, bound in `dataModule`), `Operation.pathWith`, `TimeFormat.to12Hour/range12Hour` (core/common), routes `Screen.SalonDetails/AllSalons/AllServices/Notifications` + `SalonListFilter`, strings `time_am/pm/range_separator`, icons `Location/LocationOff`
+  - [x] `feature/home` domain (`HomeContent`, `BannerAction` + `bannerActionOf`, `HomeRepository`, `LoadHomeUseCase`, `GetCurrentLocationUseCase` with timeout) · data (`HomeApi`, mappers, `HomeRepositoryImpl`) · presentation (`HomeViewModel`: gender from session, one request per tab, coordinates only when permission + service on, nearest LocationOff/Empty/Salons, explanation → system request → denied-permanently → settings, resume reload, live unread badge from the socket, favorites auth-gated + optimistic; `HomeScreen`/`HomeSections`/`HomeUiMappers`; `HomeNavigation` with `openUrl`) · di
+  - [x] App: modules registered (settings, `ComposeAppPlugin`, `App.kt`), `MainNavigation` uses `HomeNavigation` (sample graph no longer registered), placeholders for S04/S06/S07/S19; fixture hints (`open/close` "HH:mm", `actionType` NONE) + regenerated
+  - [x] Tests green: `TimeFormatTest` (3), `OperationPathTest` (2), `HomeMappersTest` (2), `HomeViewModelTest` (9)
+  - [ ] Gate `scripts/ci/run_local_checks.sh` (detekt, 4 variants, iOS) — NOT RUN YET
+  - [ ] Emulator check AR/EN, light/dark, portrait/landscape (guest + registered, tabs, nearest states) — NOT DONE YET
+- Tests: host tests of core/common, core/data, feature/home data+presentation, composeApp green
+- Loops: 0/1
+- Review: PENDING
+- Notes: `HomeViewModel` must read `uiState.value` (delegate), not `state.value`, inside `onStart`-launched work: the derived `state` lags and the first load was skipped. Welcome name/gender come from the session store, not the server's `firstName`.

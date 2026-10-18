@@ -61,4 +61,8 @@ include(
     ":feature:auth:data",
     ":feature:auth:presentation",
     ":feature:auth:di",
+    ":feature:home:domain",
+    ":feature:home:data",
+    ":feature:home:presentation",
+    ":feature:home:di",
 )

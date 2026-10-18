@@ -16,7 +16,11 @@ import com.fab.wab.customer.app.resources.Res
 import com.fab.wab.customer.app.resources.nav_bookings
 import com.fab.wab.customer.app.resources.nav_favorites
 import com.fab.wab.customer.app.resources.nav_profile
+import com.fab.wab.customer.app.resources.placeholder_all_salons
+import com.fab.wab.customer.app.resources.placeholder_all_services
 import com.fab.wab.customer.app.resources.placeholder_content_page
+import com.fab.wab.customer.app.resources.placeholder_notifications
+import com.fab.wab.customer.app.resources.placeholder_salon_details
 import com.fab.wab.customer.app.resources.profile_login_button
 import com.fab.wab.customer.core.navigation.route.Graph
 import com.fab.wab.customer.core.navigation.route.Screen
@@ -56,6 +60,19 @@ fun NavGraphBuilder.registerPlaceholderAuthScreens() {
     composable<Screen.ContentPage> { entry ->
         PlaceholderRootScreen(Res.string.placeholder_content_page, detail = entry.toRoute<Screen.ContentPage>().slug)
     }
+}
+
+/** Destinations Home links to before their tasks land (S07 CUS-036, S04 CUS-033, S06 CUS-035, S19 CUS-050). */
+fun NavGraphBuilder.registerPlaceholderHomeScreens() {
+    composable<Screen.SalonDetails> { entry ->
+        PlaceholderRootScreen(Res.string.placeholder_salon_details, detail = entry.toRoute<Screen.SalonDetails>().salonId)
+    }
+    composable<Screen.AllSalons> { entry ->
+        val route = entry.toRoute<Screen.AllSalons>()
+        PlaceholderRootScreen(Res.string.placeholder_all_salons, detail = route.serviceId ?: route.filter)
+    }
+    composable<Screen.AllServices> { PlaceholderRootScreen(Res.string.placeholder_all_services) }
+    composable<Screen.Notifications> { PlaceholderRootScreen(Res.string.placeholder_notifications) }
 }
 
 @Composable

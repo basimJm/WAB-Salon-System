@@ -58,6 +58,9 @@ class ComposeAppPlugin : Plugin<Project> {
                     implementation(project(":feature:auth:presentation"))
                     implementation(project(":feature:auth:domain"))
                     implementation(project(":feature:auth:di"))
+                    implementation(project(":feature:home:presentation"))
+                    implementation(project(":feature:home:domain"))
+                    implementation(project(":feature:home:di"))
 
                     implementation(libs.findBundle("compose").get())
                     implementation(libs.findLibrary("compose-uiToolingPreview").get())

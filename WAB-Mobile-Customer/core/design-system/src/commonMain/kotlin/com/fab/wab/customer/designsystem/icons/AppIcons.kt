@@ -7,6 +7,8 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.EventAvailable
 import androidx.compose.material.icons.rounded.Face
+import androidx.compose.material.icons.rounded.LocationOff
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Face3
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Storefront
@@ -76,5 +78,7 @@ object AppIcons {
     val ThemeDark: ImageVector = Icons.Rounded.DarkMode
     val ThemeLight: ImageVector = Icons.Rounded.LightMode
     val Woman: ImageVector = Icons.Rounded.Face3
+    val Location: ImageVector = Icons.Rounded.LocationOn
+    val LocationOff: ImageVector = Icons.Rounded.LocationOff
     val Image: ImageVector = Icons.Rounded.Image
 }
