@@ -63,7 +63,7 @@
     "sharp": "^0.35.5",
     "socket.io": "^4.8.4",
     "swagger-ui-express": "^5.0.1",
-    "wab-notifications": "file:../wab-notifications",
+    "@wab/notifications": "file:../wab-notifications",
     "zod": "^4.6.6"
   },
   "overrides": {
