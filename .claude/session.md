@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-095 — ADM-067 exports
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-067-exports`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-067):
-  - [x] Export history page (Reports > Exports) refreshing while a file is generated with a download link and failure reason; an Export button (Excel / CSV / PDF) on transactions, audit log and reports that asks for the file, waits for it and opens the short-lived link; waitForExport helper with a timeout
-- Tests: 5 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
-
 ### T-096 — ADM-078 fixture tests
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 3 new tests; gate green
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
+
+### T-097 — ADM-081 QA pass: accessibility and RTL
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-081-qa-pass`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-081):
+  - [x] axe finds no violations on any of the 29 module screens in Arabic (RTL) and English; chart titles no longer skip heading levels
+- Tests: tests/pages-a11y.test.tsx (58 tests); gate PASS; no browser check (user decision)
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-080 e2e flows skipped (user decision); performance is covered by check:size budgets only, no Lighthouse run.
 
 ### Pending (next)
 
