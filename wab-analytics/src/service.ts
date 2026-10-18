@@ -2,7 +2,12 @@ import type { ResolvedOptions } from './config/options';
 import { countEvents } from './count';
 import { IDENTITY_LINKED_EVENT } from './constants/defaults';
 import { assertLink, buildEvent } from './event';
-import { notConfiguredError, toAnalyticsError } from './errors';
+import { toAnalyticsError } from './errors';
+import { cohorts } from './queries/cohorts';
+import type { QueryContext } from './queries/context';
+import { funnel } from './queries/funnel';
+import { journey } from './queries/journey';
+import { overview } from './queries/overview';
 import type { EventStore, IdentityStore, WarehouseQuery } from './ports';
 import { withRetry, type RetryHooks } from './retry';
 import type { Analytics, IdentityLink, ServerEventInput } from './types';
@@ -16,11 +21,10 @@ export interface ServiceDeps {
   readonly retryHooks?: RetryHooks;
 }
 
-const PENDING = 'query is not available yet';
-
 /** Builds the public provider from its ports. Adapters are chosen by the factory, not here. */
 export const createService = (deps: ServiceDeps): Analytics => {
   const { options, events, identity, warehouse } = deps;
+  const context: QueryContext = { options, events, identity, warehouse };
   const now = deps.now ?? ((): Date => new Date());
   const run = <T>(task: () => Promise<T>): Promise<T> =>
     withRetry(task, options.retry, deps.retryHooks).catch((error: unknown) => {
@@ -56,10 +60,10 @@ export const createService = (deps: ServiceDeps): Analytics => {
     },
 
     countEvents: (query) => run(() => countEvents(query, options, events, warehouse)),
-    funnel: () => Promise.reject(notConfiguredError(PENDING)),
-    cohorts: () => Promise.reject(notConfiguredError(PENDING)),
-    journey: () => Promise.reject(notConfiguredError(PENDING)),
-    overview: () => Promise.reject(notConfiguredError(PENDING)),
+    funnel: (definition) => run(() => funnel(definition, context)),
+    cohorts: (definition) => run(() => cohorts(definition, context)),
+    journey: (actor, range, page) => run(() => journey(actor, range, page, context)),
+    overview: (range) => run(() => overview(range, context)),
 
     async init(): Promise<void> {
       await Promise.all([events.init?.(), identity.init?.(), warehouse?.init?.()]);
