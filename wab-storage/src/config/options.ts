@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { ENVIRONMENTS, PROVIDERS, type Environment, type ProviderName } from '../constants/codes';
 import {
+  DEFAULT_PUBLIC_CACHE_CONTROL,
   DEFAULT_READ_MAX_BYTES,
   DEFAULT_RETRY,
   DEFAULT_SIGNED_URL_MAX_TTL_SEC,
@@ -10,6 +11,7 @@ import {
   MAX_PRESIGN_TTL_SEC,
 } from '../constants/defaults';
 import { configError } from '../errors';
+import type { RetryPolicy } from '../retry';
 import { noopLogger, redactingLogger, type Logger } from '../logger';
 
 const text = z.string().trim().min(1);
@@ -70,6 +72,8 @@ const optionsSchema = z
     upload: ttlSchema.partial().optional(),
     signedUrl: ttlSchema.partial().optional(),
     readMaxBytes: positiveInt.optional(),
+    /** Cache-Control for public objects written by the server (variants); keys are immutable. */
+    publicCacheControl: text.optional(),
     timeoutMs: positiveInt.optional(),
     retry: retrySchema.optional(),
     variants: variantsSchema.optional(),
@@ -108,8 +112,9 @@ export interface ResolvedConfig {
   readonly uploadMaxTtlSec: number;
   readonly signedUrlMaxTtlSec: number;
   readonly readMaxBytes: number;
+  readonly publicCacheControl: string;
   readonly timeoutMs: number;
-  readonly retry: Required<z.infer<typeof retrySchema>>;
+  readonly retry: RetryPolicy;
   readonly variants: VariantConfig;
   readonly logger: Logger;
 }
@@ -177,6 +182,7 @@ export const resolveConfig = (options: StorageOptions): ResolvedConfig => {
     uploadMaxTtlSec: o.upload?.maxTtlSec ?? DEFAULT_UPLOAD_MAX_TTL_SEC,
     signedUrlMaxTtlSec: o.signedUrl?.maxTtlSec ?? DEFAULT_SIGNED_URL_MAX_TTL_SEC,
     readMaxBytes: o.readMaxBytes ?? DEFAULT_READ_MAX_BYTES,
+    publicCacheControl: o.publicCacheControl ?? DEFAULT_PUBLIC_CACHE_CONTROL,
     timeoutMs: o.timeoutMs ?? DEFAULT_TIMEOUT_MS,
     retry,
     variants: {
