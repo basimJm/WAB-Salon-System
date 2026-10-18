@@ -2,12 +2,14 @@
 
 > These rules add to the root `CLAUDE.md` and `.claude/*.md`. They never relax them. If two rules conflict, the stricter one wins. If documents conflict, stop and ask (PRD > BRD > Design Script > design files).
 
-## 0. Read Before Every Task (mandatory)
-1. Root `CLAUDE.md` and **every** `.md` file in the root `.claude/` folder: `rules.md`, `roles.md`, `hooks.md`, `session.md`, `memory.md`.
-2. `AGENTS.md`, `TECHSTACK.md` and this file. The module lists in `AGENTS.md` are generated from a template and partly wrong; the real modules are in §2 below.
-3. `docs/WAB_Customer_App_PRD.md` (behaviour), `docs/WAB_Customer_BRD.md`, `docs/WAB_Customer_Design_Script.md` (screens and states).
-4. For UI work: the matching `design/WAB 0x *.dc.html` file (visual reference only; the PRD wins on behaviour; the 4-box OTP in the prototype is wrong, the PRD says `otpLength` from the backend, currently 6).
-5. `BUSINESS_DOMAIN.md` and `INTEGRATION_WORKFLOW.md` for anything that touches the API or business rules.
+**Auto-loaded with this file (never read them with a tool):**
+- Session (current task, integration status): @.claude/session.md
+- Memory (durable customer-app facts): @.claude/memory.md
+
+## 0. Per task (nothing else is read up front)
+1. `python3 scripts/tasks.py next customer` → the task row (ID, branch from `origin/customer`, needs, PRD screens, operations). Root rules/roles/hooks and this file are already in context; `TECHSTACK.md` only when adding a library (`AGENTS.md` module lists are generated and partly wrong; §2 below is real).
+2. Only the `docs/WAB_Customer_App_PRD.md` screens/sections and the `openapi.customer.json` operations the row names (grep the heading, read that range); `docs/WAB_Customer_Design_Script.md` section and the matching `design/*.dc.html` for UI work (visual reference only; the PRD wins; the 4-box OTP in the prototype is wrong: `otpLength` comes from the backend).
+3. `.claude/Integration.md` when the task touches the API, Firebase, payments, realtime or the mock; `BUSINESS_DOMAIN.md` sections the row names.
 
 ## 1. Non-Negotiable Rules
 1. **Clean Architecture + MVI by delegate.** Every screen follows §3. No business logic in composables, no Android/iOS types in `commonMain` domain code.
@@ -19,7 +21,7 @@
 7. **No runtime errors, no compile errors, no warnings.** `allWarningsAsErrors` is on for Kotlin; Android Lint runs with `warningsAsErrors`; Swift builds with warnings treated as errors. Do not use `!!`, unchecked casts, `@Suppress` without a one-line reason comment, empty `catch`, `GlobalScope`, `runBlocking`, `TODO()`, or `println`/`printStackTrace` (logs go through the logging abstraction and never contain tokens or personal data). Failures are modeled as `AppResult`/`AppError`, never thrown to the UI.
 8. **No source file longer than 300 lines** (Kotlin, Swift, Gradle, XML, Python). Split by responsibility. CI fails above the limit.
 9. **Portrait and landscape, phone to tablet.** Every screen and component works in portrait and landscape, on small phones, large phones, foldables and tablets/iPads, with system font scaling up to 200 %, RTL and LTR, light and dark. See §7.
-10. **Branching.** One new branch per task (`feat/cust-NNN-<name>`, `fix/…`, `chore/…`, from an up-to-date `main`). **Never commit or push to `main`.** Cloud sessions pinned to a branch (for example `claude/<name>`) use that branch and restart it from `main` after its PR merges. Open a draft PR after the first push.
+10. **Branching.** One new branch per task (`feat/cus-NNN-<key>` as named in the backlog) from the freshly fetched `origin/customer` (the customer master branch); the PR targets `customer`; the owner merges `customer` into `main`. **Never commit or push to `main` or `customer` directly.** Cloud sessions pinned to a branch (for example `claude/<name>`) use that branch and restart it from `origin/customer` after its PR merges.
 11. Never commit secrets (API keys, keystores, `local.properties`, signing configs). Do not edit `iosApp/iosApp/GoogleService-Info.plist` or `androidApp/google-services.json` without the owner.
 12. Do not add a library or change a version without a reason recorded in the task; use `gradle/libs.versions.toml`.
 
@@ -94,5 +96,5 @@ feature/<name>/di             Koin module that binds data → domain
 ## 8. Definition of Done (per task)
 1. Acceptance criteria written in `.claude/session.md` before coding; each covered by a unit test.
 2. `scripts/ci/run_local_checks.sh` green (policy checks, detekt, unit tests) and, where the toolchain exists, `./gradlew` build/lint for all four variants. Android/iOS builds that cannot run in the current environment run in CI; the PR is not done until CI is green.
-3. Three verification loops and the four-role review recorded (`Loops: 3/3`, `Review: PASSED`).
+3. One verification loop and the four-role review recorded in `.claude/session.md` (`Loops: 1/1`, `Review: PASSED`); `python3 scripts/tasks.py set CUS-NNN <STATUS>` at start, PR and merge.
 4. Branch pushed (never `main`), draft PR opened, `memory.md` updated with durable facts.

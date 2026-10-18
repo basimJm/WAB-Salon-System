@@ -2,7 +2,7 @@
 
 > These rules add to the root `CLAUDE.md`, the root `.claude/*.md` and `WAB-Admin-Dashboard/CLAUDE.md`. They never relax them; if two rules conflict, the stricter one wins. **This `.claude/` folder is where admin-level rules live: add or change admin rules here, not in scattered notes.**
 >
-> **Always adhere to the WAB-level files, in every admin task, without exception:** `/Users/basimabusnaimeh/WAB/.claude/rules.md` (token efficiency, requirements first, delivery rules 1-14: tests, branch from `origin/admin` checked before the first edit, no hardcoding, three real verification loops, four-role review, honest reporting of deviations) and `/Users/basimabusnaimeh/WAB/.claude/roles.md` (the four roles and the working agreement). Read both at the start of every session; the admin rules below only add to them.
+> **Always adhere to the WAB-level files, in every admin task, without exception:** `/Users/basimabusnaimeh/WAB/.claude/rules.md` (token efficiency, requirements first, delivery rules 1-14: tests, branch from `origin/admin` checked before the first edit, no hardcoding, one real verification loop, four-role review, honest reporting of deviations) and `/Users/basimabusnaimeh/WAB/.claude/roles.md` (the four roles and the working agreement). Read both at the start of every session; the admin rules below only add to them.
 
 ## 0. Token budget (applies to every admin task; root `rules.md` §1 stays the parent rule)
 
@@ -12,7 +12,7 @@
 - Keep browser checks to one script that returns a compact JSON of measurements, not screenshots or page dumps.
 - Terminal tabs echo their whole screen when closed: open one e2e tab per run, close only when the tab limit is reached, and always pipe e2e output through `grep -E "passed|failed"` / `tail -3`.
 - Fail early: write each component with its tests together and run `npm run lint` plus the new test file before the gate; run the new e2e spec alone (`--project=desktop`) first and the full suite once per task.
-- Keep `.claude/session.md` to the last 3 task blocks and `.claude/memory.md` to durable facts: both are loaded into every turn. Older history goes to `docs/history/`.
+- Keep this project's `.claude/session.md` to the current + last 2 task blocks and its `.claude/memory.md` to durable facts: both are loaded into every turn in this folder. Backlog only through `python3 scripts/tasks.py`.
 
 - **User decisions (2026-10-14):** read the rules and roles files once at the start of a session, not on every task; no e2e runs (unit tests + gate + one browser check only); one verification loop is enough; keep only the last 2 task blocks in `.claude/session.md`. These override the e2e and three-loop wording elsewhere in this admin folder; record the deviation in each task block.
 
@@ -84,4 +84,4 @@ Green unit tests are not enough for a UI project. **Before every commit** (not o
 
 - **Branching:** `admin` is the master branch for admin work (created from `main`). Every task branches from the latest `origin/admin` as `feat/adm-NNN-<key>` and its PR targets `admin`, never `main`. After each merge, branch the next task from the updated `origin/admin`. If `admin` is behind `main`, merge `main` into `admin` through a PR first. The user merges `admin` into `main`.
 - **No GitHub CI (user decision):** the gate is local. Before every push run the local gate on the developer machine: `npm ci`, `npm run verify`, the four variant builds (`npm run build:dev-debug`, `build:dev-release`, `build:prod-debug`, `build:prod-release`) with `VITE_API_BASE_URL`/`VITE_SOCKET_URL` set to https placeholders, `npm run check:size -- dev-debug dev-release prod-debug prod-release`, and `npm run e2e` for screens, after the browser UI check of §6 (build, run, click through, match PRD/BRD/tasks/domain). Push only when everything is green and say what you ran. Merge a task PR into `admin` only after that gate; the user also runs the branch on their own device before merging `admin` into `main`.
-- Also from the root rules: never push to `main`, three verification loops, four-role review, `.claude/session.md` and `.claude/memory.md` (root) kept current.
+- Also from the root rules: never push to `main`, one verification loop (`Loops: 1/1`), four-role review, this project's `.claude/session.md` and `.claude/memory.md` kept current, root `.claude/session.md` index line updated.

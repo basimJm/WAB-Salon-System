@@ -12,7 +12,7 @@ export interface BuildVariant {
   readonly appEnv: AppEnv;
   /** debug = readable bundle + source maps + verbose logs; release = minified, silent. */
   readonly debug: boolean;
-  /** Mock data source code is shipped only in dev builds (INTEGRATION_WORKFLOW.md §4). */
+  /** Mock data source code is shipped only in dev builds (INTEGRATION.md §4). */
   readonly allowMock: boolean;
 }
 
