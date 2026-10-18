@@ -10,6 +10,7 @@ import { useViewport } from '../hooks/useViewport';
 import { IdleWarningDialog } from '../components/feedback/IdleWarningDialog';
 import { useIdleTimeout } from '../hooks/useIdleTimeout';
 import { useRealtimeConnection } from '../hooks/useRealtime';
+import { useShellCounters } from '../hooks/useShellCounters';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import { useBreadcrumbs } from '../controllers/useBreadcrumbs';
 import { Sidebar } from './Sidebar';
@@ -59,6 +60,7 @@ export function AppShell() {
   }, [sessionManager]);
 
   useRealtimeConnection(current !== null);
+  const counters = useShellCounters(current !== null);
   const { status: idle, stay } = useIdleTimeout({
     onExpire: () => void sessionManager.signOut('idle'),
     enabled: current !== null,
@@ -71,6 +73,7 @@ export function AppShell() {
         collapsed={collapsed}
         open={drawerOpen}
         onNavigate={() => setDrawerOpen(false)}
+        counters={counters.sidebar}
       />
       {drawerOpen && !docked ? (
         <button
@@ -95,6 +98,7 @@ export function AppShell() {
           menuExpanded={docked ? !collapsed : drawerOpen}
           onMenu={onMenu}
           onLogout={onLogout}
+          alertCount={counters.alerts}
         />
         <main id="main" className="wab-content">
           <Breadcrumbs crumbs={crumbs} />

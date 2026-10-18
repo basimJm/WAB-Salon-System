@@ -17,6 +17,8 @@ export interface TopbarProps {
   onLogout: () => void;
   /** Global search; the box is shown only when the data source for it exists (global-search task). */
   search?: GlobalSearchProps['search'];
+  /** Alerts still NEW: shown on the bell, which opens the alerts page. */
+  alertCount?: number;
 }
 
 export function Topbar({
@@ -27,6 +29,7 @@ export function Topbar({
   onMenu,
   onLogout,
   search,
+  alertCount,
 }: TopbarProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -45,7 +48,12 @@ export function Topbar({
       {search ? <GlobalSearch search={search} onSelect={(hit) => void navigate(hit.to)} /> : null}
       <span className="wab-topbar__spacer" />
       <LiveIndicator />
-      <IconButton icon="bell" label={t('topbar.alerts')} />
+      <IconButton
+        icon="bell"
+        label={t('topbar.alerts')}
+        {...(alertCount !== undefined ? { badge: alertCount } : {})}
+        onClick={() => void navigate(ROUTES.alerts)}
+      />
       <IconButton icon="globe" label={t('topbar.language')} onClick={toggleLanguage} />
       <IconButton
         icon={theme === 'dark' ? 'sun' : 'moon'}

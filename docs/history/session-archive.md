@@ -1349,3 +1349,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
 
+
+### T-089 — ADM-058 recommended salons
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-058-recommended`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-058):
+  - [x] Recommended placements per audience: ordered list with period, amount paid and status; add a live salon, edit period/order/amount/note, end now with a reason, move up/down (saved through the reorder endpoint); AR+EN
+- Tests: 6 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: reorder is up/down buttons (accessible, one request) instead of drag and drop; the drag library ADR (Appendix C) stays open. The reorder request carries a fixed reason from the locale.
+

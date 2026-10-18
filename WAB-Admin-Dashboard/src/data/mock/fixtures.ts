@@ -14,6 +14,7 @@ import { payoutsRoutes } from './payoutsRoutes';
 import { subscriptionsRoutes } from './subscriptionsRoutes';
 import { placementsRoutes } from './placementsRoutes';
 import { campaignsRoutes } from './campaignsRoutes';
+import { alertsRoutes } from './alertsRoutes';
 import { settingsRoutes } from './settingsRoutes';
 import type { MockRoute } from './mockTransport';
 
@@ -39,6 +40,7 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...payoutsRoutes(),
     ...subscriptionsRoutes(),
     ...placementsRoutes(),
+    ...alertsRoutes(),
     ...campaignsRoutes(),
   ];
 }

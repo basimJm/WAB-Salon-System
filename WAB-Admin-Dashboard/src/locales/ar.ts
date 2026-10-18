@@ -24,6 +24,7 @@ import reconciliation from './ar/reconciliation.json';
 import subscriptions from './ar/subscriptions.json';
 import placements from './ar/placements.json';
 import campaigns from './ar/campaigns.json';
+import alerts from './ar/alerts.json';
 import status from './ar/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -43,6 +44,7 @@ const ar = {
   ...gallery,
   ...forms,
   ...status,
+  ...alerts,
   ...campaigns,
   ...placements,
   ...subscriptions,
