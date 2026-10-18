@@ -130,3 +130,4 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/storage` real mode (
 | Date | Version | Change |
 |---|---|---|
 | 2026-10-14 | 0.0.0 | Design document created from the BRD; no code yet. |
+| 2026-10-18 | 0.1.0 | STO-002: kernel: errors, config/options (prod rules), logger redaction, retry/timeout, constants |
