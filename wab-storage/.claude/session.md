@@ -7,10 +7,10 @@
 
 ## Current task
 
-### STO-005 — S3 adapter
-- Branch: `feat/sto-005-s3`
+### STO-006 — CDN URLs and signed GET URLs
+- Branch: `feat/sto-006-urls`
 - Status: IN REVIEW
-- Acceptance criteria: Presigned PUT (content-type signed), confirm by HEAD+ranged GET magic bytes, read/write/delete (batched, both buckets), every S3 error code/status mapped, retries, lazy AWS SDK; verified with the real SDK against a local S3 wire emulator
+- Acceptance criteria: publicUrlOf, S3 presigned GET or CloudFront canned-policy signed URLs (RSA-SHA1 via node:crypto, verified in tests), option validation with prod https
 - Tests: `npm run verify` green (typecheck, lint, format, jest coverage gate 100/95/95, build, package smoke, loop)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — real AWS SDK exercised on localhost (found: Jest-wrapped socket errors lose code -> classify by message too); size cannot be enforced at PUT presign (checked at confirm); not run against real AWS
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — CloudFront signing implemented without a dependency and verified against its public key; not tested against a real distribution
