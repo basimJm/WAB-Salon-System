@@ -7,4 +7,10 @@
 
 ## Current task
 
-- (none) — run `python3 scripts/tasks.py next payments`; task branches start from `origin/server`.
+### PAY-001 — Node scaffold
+- Branch: `feat/pay-001-scaffold` · Status: IN REVIEW
+- Acceptance: strict TS, eslint, prettier, jest (gate 100/95/95), tsup ESM+CJS+d.ts, `verify`, loop config, package smoke; name `@wab/payments`.
+- Tests: `npm run verify` green (scaffold test + loop test + packed-tarball smoke in CJS and ESM).
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling only, copied from wab-notifications.
+- Decision (owner grant 2026-10-18): gateway = HyperPay (OPP/COPYandPAY).

@@ -1,6 +1,6 @@
 import { generateKeyPairSync } from 'node:crypto';
 import type { Redis } from 'ioredis';
-import { NotificationError, ERROR_CODES, type NotifierOptions } from 'wab-notifications';
+import { NotificationError, ERROR_CODES, type NotifierOptions } from '@wab/notifications';
 import type { NotifierSettings } from '../src/config';
 import { createProviders, ProviderUnavailableError } from '../src/providers';
 import {
