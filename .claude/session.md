@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-090 — ADM-059 push campaigns: compose and history (ADM-059..060)
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-059-campaigns`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-059):
-  - [x] Campaigns screen: history with delivery stats and status filter, cancel a scheduled campaign with a reason, compose a campaign (texts in both languages, app, audience kinds with an estimate, link, now or scheduled time in Amman, phone previews, reason); AR+EN
-- Tests: 6 new tests through the mock stack; no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATIONS: ADM-059 and ADM-060 built as ONE task; live stats are the list's stats column (no polling page); CITY audience takes one city in the form (API allows up to 50).
-
 ### T-091 — ADM-061 alerts and live shell counters (ADM-061..062)
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 4 new tests through the mock stack; no separate browser check
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-061 and ADM-062 built as ONE task.
+
+### T-092 — ADM-063 live overview and server-event analytics (ADM-063..064)
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-063-analytics`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-063):
+  - [x] Live overview: KPI cards (payments, refunds, bookings, errors) for a chosen range with change vs the previous period, per-day trend chart, refreshed by realtime; bookings / payments / errors analytics pages chart event counts by name and by day
+- Tests: 6 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-063 and ADM-064 built as ONE task. Active users, installs and the live feed are not offered by the server (G7); event producers may not emit yet (SRV-105 note), so the numbers need a check against the real server.
 
 ### Pending (next)
 

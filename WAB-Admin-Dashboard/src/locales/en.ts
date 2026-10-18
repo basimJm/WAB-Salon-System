@@ -25,6 +25,7 @@ import subscriptions from './en/subscriptions.json';
 import placements from './en/placements.json';
 import campaigns from './en/campaigns.json';
 import alerts from './en/alerts.json';
+import overview from './en/overview.json';
 import status from './en/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -44,6 +45,7 @@ const en = {
   ...gallery,
   ...forms,
   ...status,
+  ...overview,
   ...alerts,
   ...campaigns,
   ...placements,
