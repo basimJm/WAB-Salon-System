@@ -120,6 +120,8 @@ private fun ApplicationProductFlavor.environment(id: String, prefix: String, pro
     versionNameSuffix = "-$id"
     buildConfigField("String", "ENVIRONMENT", quoted(id))
     buildConfigField("String", "API_BASE_URL", quoted(baseUrl))
+    val dataSource = requireNotNull(property("${prefix}_DATA_SOURCE")) { missing("${prefix}_DATA_SOURCE") }
+    buildConfigField("String", "DATA_SOURCE", quoted(dataSource))
 }
 
 private fun quoted(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""

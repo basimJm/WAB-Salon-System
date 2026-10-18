@@ -24,10 +24,20 @@ import kotlinx.serialization.json.Json
 
 expect fun provideHttpClientEngine(): HttpClientEngine
 
+/** Who creates the transport: the platform engine, or the fixture engine of `core/data` in mock builds. */
+fun interface HttpEngineProvider {
+    fun create(): HttpClientEngine
+}
+
+object PlatformEngineProvider : HttpEngineProvider {
+    override fun create(): HttpClientEngine = provideHttpClientEngine()
+}
+
 class BaseHttpClient(
     private val config: ApiConfig,
     private val appSettings: AppSettings,
-    private val sessionTimeOut: SessionTimeOut
+    private val sessionTimeOut: SessionTimeOut,
+    private val engineProvider: HttpEngineProvider = PlatformEngineProvider,
 ) {
     private fun HttpClientConfig<*>.installCommon(logRequests: Boolean) {
         if (logRequests) {
@@ -56,7 +66,8 @@ class BaseHttpClient(
             url {
                 val base = config.baseUrl.trim()
                 require(base.isNotBlank()) {
-                    "API base URL is blank. Set DEV_API_BASE_URL / PROD_API_BASE_URL (Android) or API_BASE_URL in the environment xcconfig (iOS)."
+                    "API base URL is blank. Set DEV_API_BASE_URL / PROD_API_BASE_URL (Android) " +
+                        "or API_BASE_URL in the environment xcconfig (iOS)."
                 }
                 val withoutScheme = base.removePrefix("https://").removePrefix("http://").trim()
                 val hostPart = withoutScheme.split("/").firstOrNull()?.trim() ?: ""
@@ -103,14 +114,14 @@ class BaseHttpClient(
      * Client for the refresh call: no token interceptor (it can never recurse into another refresh) and no
      * request logger (its body carries the refresh token).
      */
-    private fun buildRefreshClient() = HttpClient(provideHttpClientEngine()) {
+    private fun buildRefreshClient() = HttpClient(engineProvider.create()) {
         installCommon(logRequests = false)
         expectSuccess = false
     }
 
     fun buildHttpClient(): HttpClient {
         val coordinator = TokenRefreshCoordinator(appSettings, RemoteTokenRefreshApi(buildRefreshClient()))
-        return HttpClient(provideHttpClientEngine()) {
+        return HttpClient(engineProvider.create()) {
             installCommon(logRequests = true)
             expectSuccess = true
         }.also { it.installAuthRefresh(appSettings, coordinator, sessionTimeOut) }

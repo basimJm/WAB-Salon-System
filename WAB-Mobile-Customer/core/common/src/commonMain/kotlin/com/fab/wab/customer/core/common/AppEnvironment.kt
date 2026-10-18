@@ -1,5 +1,19 @@
 package com.fab.wab.customer.core.common
 
+/** Where repositories get their data (INTEGRATION.md §4): fixtures in dev builds, the real API otherwise. */
+enum class DataSource(val configValue: String) {
+    MOCK("mock"),
+    REMOTE("remote"),
+    ;
+
+    companion object {
+        /** Build config / Info.plist value → source; anything unknown is a configuration error, never a silent default. */
+        fun fromConfig(value: String): DataSource =
+            entries.firstOrNull { it.configValue.equals(value.trim(), ignoreCase = true) }
+                ?: error("DATA_SOURCE must be one of ${entries.map { it.configValue }}, was '$value'")
+    }
+}
+
 /**
  * Values that differ per build variant (dev/prod, debug/release).
  *
@@ -13,16 +27,19 @@ data class AppEnvironment(
     val appVersion: String,
     val appVersionCode: Int,
     val isDebug: Boolean,
+    val dataSource: DataSource = DataSource.REMOTE,
 ) {
     init {
         require(name.isNotBlank()) { "Environment name must not be blank" }
         require(apiBaseUrl.isNotBlank()) { "API base URL must not be blank for environment '$name'" }
         require(appVersion.isNotBlank()) { "App version must not be blank for environment '$name'" }
         require(appVersionCode >= 0) { "App version code must not be negative" }
+        require(!(isProd && dataSource == DataSource.MOCK)) { "The prod environment must use the remote data source" }
     }
 
     val isDev: Boolean get() = name == AppEnvironmentNames.DEV
     val isProd: Boolean get() = name == AppEnvironmentNames.PROD
+    val usesMock: Boolean get() = dataSource == DataSource.MOCK
 }
 
 object AppEnvironmentNames {

@@ -79,6 +79,7 @@ feature/<name>/di             Koin module that binds data → domain
 |---|---|---|
 | Dev | flavor `dev`: `assembleDevDebug`, `assembleDevRelease` | configs `Debug-Dev`, `Release-Dev`, scheme `iosApp-Dev` |
 | Prod | flavor `prod`: `assembleProdDebug`, `assembleProdRelease` | configs `Debug-Prod`, `Release-Prod`, scheme `iosApp-Prod` |
+- `DATA_SOURCE` (`mock` | `remote`) is part of the environment: Android `DEV_DATA_SOURCE` / `PROD_DATA_SOURCE` in `gradle.properties`, iOS `DATA_SOURCE` in the xcconfig; `mock` serves the generated fixtures through `core/data/mock` (scenarios: success, empty, 401, 404, 500, timeout, offline via `MockScenarios`); prod refuses `mock` at startup.
 - Environment values (API base URL, display name, environment label) are config, not code: Android `gradle.properties` keys `DEV_API_BASE_URL` / `PROD_API_BASE_URL` → `BuildConfig`; iOS `iosApp/Configuration/<Env>.xcconfig` → `Info.plist`. Shared code reads them through `core/network` `ApiConfig`, never a literal.
 - Release builds are minified and shrunk (R8) with explicit keep rules; every reflective lookup needs a rule and a test.
 - Secrets (maps key, signing) come from `local.properties` / CI secrets; CI builds release variants unsigned.

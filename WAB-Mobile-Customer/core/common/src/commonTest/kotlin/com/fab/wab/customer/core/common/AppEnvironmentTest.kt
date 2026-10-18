@@ -55,4 +55,13 @@ class AppEnvironmentTest {
         const val TEST_VERSION_CODE = 7
         const val NEGATIVE_VERSION_CODE = -1
     }
+
+    @Test
+    fun dataSourceComesFromConfigAndProdRefusesMock() {
+        assertEquals(DataSource.MOCK, DataSource.fromConfig(" Mock "))
+        assertEquals(DataSource.REMOTE, DataSource.fromConfig("remote"))
+        assertFailsWith<IllegalStateException> { DataSource.fromConfig("fixtures") }
+        assertTrue(environment().copy(dataSource = DataSource.MOCK).usesMock)
+        assertFailsWith<IllegalArgumentException> { environment(name = AppEnvironmentNames.PROD).copy(dataSource = DataSource.MOCK) }
+    }
 }

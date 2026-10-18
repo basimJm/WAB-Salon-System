@@ -1,6 +1,7 @@
 package com.fab.wab.customer
 
 import com.fab.wab.customer.core.common.AppEnvironment
+import com.fab.wab.customer.core.common.DataSource
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.Platform
 import org.koin.core.module.Module
@@ -11,6 +12,7 @@ import platform.Foundation.NSBundle
 internal object InfoPlistKeys {
     const val ENVIRONMENT = "APP_ENV"
     const val API_BASE_URL = "API_BASE_URL"
+    const val DATA_SOURCE = "DATA_SOURCE"
     const val VERSION_NAME = "CFBundleShortVersionString"
     const val VERSION_CODE = "CFBundleVersion"
 }
@@ -28,6 +30,7 @@ internal fun readIosAppEnvironment(bundle: NSBundle = NSBundle.mainBundle): AppE
     appVersionCode = bundle.requireInfoString(InfoPlistKeys.VERSION_CODE).toIntOrNull()
         ?: error("Info.plist key ${InfoPlistKeys.VERSION_CODE} must be a number"),
     isDebug = Platform.isDebugBinary,
+    dataSource = DataSource.fromConfig(bundle.requireInfoString(InfoPlistKeys.DATA_SOURCE)),
 )
 
 private fun NSBundle.requireInfoString(key: String): String =
