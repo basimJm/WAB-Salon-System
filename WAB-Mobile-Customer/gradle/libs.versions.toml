@@ -135,6 +135,8 @@ androidx-room = { id = "androidx.room", version.ref = "room" }
 com-fab-wab-customer-kotlin-multiplatform-library = { id = "com.fab.wab.customer.kotlin.multiplatform.library" }
 com-fab-wab-customer-compose-app = { id = "com.fab.wab.customer.compose.app" }
 com-fab-wab-customer-android-app = { id = "com.fab.wab.customer.android.app" }
+com-fab-wab-customer-core-library = { id = "com.fab.wab.customer.core.library" }
+com-fab-wab-customer-core-compose = { id = "com.fab.wab.customer.core.compose" }
 com-fab-wab-customer-feature-domain = { id = "com.fab.wab.customer.feature.domain" }
 com-fab-wab-customer-feature-data = { id = "com.fab.wab.customer.feature.data" }
 com-fab-wab-customer-feature-presentation = { id = "com.fab.wab.customer.feature.presentation" }

@@ -1,4 +1,4 @@
-package com.fab.wab.customer.core.ui.mvi
+package com.fab.wab.customer.core.mvi
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

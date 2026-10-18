@@ -43,6 +43,7 @@ include(
     ":core:data",
     ":core:navigation",
     ":core:ui",
+    ":core:mvi",
     ":core:notification",
     ":core:security",
     ":core:design-system",

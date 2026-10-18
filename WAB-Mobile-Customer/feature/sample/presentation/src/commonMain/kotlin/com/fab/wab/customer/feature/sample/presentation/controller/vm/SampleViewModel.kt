@@ -2,7 +2,7 @@ package com.fab.wab.customer.feature.sample.presentation.controller.vm
 
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
-import com.fab.wab.customer.core.ui.mvi.BaseViewModel
+import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.feature.sample.domain.usecase.GetSampleItemsUseCase
 import com.fab.wab.customer.feature.sample.presentation.controller.contract.SampleContract.SideEffect
 import com.fab.wab.customer.feature.sample.presentation.controller.contract.SampleContract.UiAction

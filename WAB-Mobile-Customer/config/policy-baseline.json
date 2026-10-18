@@ -24,8 +24,8 @@
     "H003": 1
   },
   "core/data/src/androidMain/kotlin/com/fab/wab/customer/core/data/location/DeviceLocationProvider.android.kt": {
-    "H006": 2,
-    "Q001": 1
+    "Q001": 1,
+    "H006": 2
   },
   "core/data/src/commonMain/kotlin/com/fab/wab/customer/core/data/AppPagingDataSource.kt": {
     "H003": 1
@@ -47,17 +47,17 @@
     "H006": 3
   },
   "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/safeApiCall.kt": {
-    "H003": 5,
-    "Q002": 1
+    "Q002": 1,
+    "H003": 5
   },
   "core/network/src/iosMain/kotlin/com/fab/wab/customer/core/network/client/NetworkLog.ios.kt": {
     "Q002": 1
   },
   "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/composable/NotificationDisplay.kt": {
+    "P002": 1,
     "H002": 8,
     "H003": 1,
-    "H006": 2,
-    "P002": 1
+    "H006": 2
   },
   "core/notification/src/commonMain/kotlin/com/fab/wab/customer/core/notification/composable/NotificationHost.kt": {
     "P002": 1
@@ -80,9 +80,6 @@
   },
   "core/storage/src/commonMain/kotlin/com/fab/wab/customer/core/storage/db/AppDatabase.kt": {
     "Q006": 1
-  },
-  "core/ui/src/commonMain/kotlin/com/fab/wab/customer/core/ui/mvi/BaseViewModel.kt": {
-    "H006": 1
   },
   "core/ui/src/iosMain/kotlin/com/fab/wab/customer/core/ui/utils/getDefaultLocale.ios.kt": {
     "H003": 1

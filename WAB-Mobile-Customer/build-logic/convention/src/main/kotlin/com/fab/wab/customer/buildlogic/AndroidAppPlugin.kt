@@ -33,12 +33,12 @@ class AndroidAppPlugin : Plugin<Project> {
             val property = { name: String -> projectProperty(localProperties, name) }
 
             extensions.configure<ApplicationExtension> {
-                namespace = "com.fab.wab.customer"
-                compileSdk = 36
+                namespace = AndroidSdk.NAMESPACE_ROOT
+                compileSdk = AndroidSdk.COMPILE_SDK
                 defaultConfig {
-                    applicationId = "com.fab.wab.customer"
-                    minSdk = 26
-                    targetSdk = 36
+                    applicationId = AndroidSdk.NAMESPACE_ROOT
+                    minSdk = AndroidSdk.MIN_SDK
+                    targetSdk = AndroidSdk.TARGET_SDK
                     versionCode = requireNotNull(property("APP_VERSION_CODE")) { missing("APP_VERSION_CODE") }.toInt()
                     versionName = requireNotNull(property("APP_VERSION_NAME")) { missing("APP_VERSION_NAME") }
 
@@ -94,6 +94,7 @@ class AndroidAppPlugin : Plugin<Project> {
                 add("implementation", project(":core:domain"))
                 add("implementation", project(":core:storage"))
                 add("implementation", project(":core:ui"))
+                add("implementation", project(":core:mvi"))
                 add("implementation", libs.findLibrary("androidx-activity-compose").get())
                 add("implementation", libs.findBundle("koin-android").get())
                 add("implementation", libs.findBundle("lifecycle").get())

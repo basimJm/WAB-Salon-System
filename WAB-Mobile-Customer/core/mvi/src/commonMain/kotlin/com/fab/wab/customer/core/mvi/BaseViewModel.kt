@@ -1,4 +1,4 @@
-package com.fab.wab.customer.core.ui.mvi
+package com.fab.wab.customer.core.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+
+/** How long the state keeps flowing after the last collector leaves (configuration changes, back navigation). */
+private const val STATE_SUBSCRIPTION_TIMEOUT_MS = 5_000L
 
 abstract class BaseViewModel<UiState, UiEvent, SideEffect>(
     initialState: UiState,
@@ -21,7 +24,7 @@ abstract class BaseViewModel<UiState, UiEvent, SideEffect>(
         }
         .stateIn(
             scope = scope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(STATE_SUBSCRIPTION_TIMEOUT_MS),
             initialValue = initialState,
         )
 
