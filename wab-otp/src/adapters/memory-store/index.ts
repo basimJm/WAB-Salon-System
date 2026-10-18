@@ -75,6 +75,10 @@ export class MemoryLimitStore implements LimitStore {
     });
   }
 
+  countOf(counterKey: string): Promise<number> {
+    return Promise.resolve(this.liveCounter(counterKey)?.count ?? 0);
+  }
+
   blockTtlMs(blockKey: string): Promise<number> {
     return Promise.resolve(this.flagTtl(blockKey));
   }

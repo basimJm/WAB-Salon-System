@@ -5,6 +5,7 @@ const verifier: ProofVerifier = { verify: () => Promise.resolve({ outcome: 'INVA
 const store = (scope: 'local' | 'shared'): LimitStore => ({
   scope,
   hit: () => Promise.resolve({ allowed: true, blocked: false, count: 1, retryAfterMs: 0 }),
+  countOf: () => Promise.resolve(0),
   blockTtlMs: () => Promise.resolve(0),
   startCooldown: () => Promise.resolve({ started: true, retryAfterMs: 0 }),
   reset: () => Promise.resolve(),
