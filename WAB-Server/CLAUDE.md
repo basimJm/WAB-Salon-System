@@ -2,11 +2,14 @@
 
 > These rules add to the root `CLAUDE.md` and `.claude/*.md`. They never relax them. If two rules conflict, the stricter one wins. If documents conflict, stop and ask.
 
-## 0. Read Before Every Task (mandatory)
-1. Root `CLAUDE.md` and **every** `.md` file in the root `.claude/` folder: `rules.md`, `roles.md`, `hooks.md`, `session.md`, `memory.md`.
-2. `BUSINESS_DOMAIN.md`: the data model, enums, business rules, state machine, permissions, jobs, settings and error codes.
-3. `WAB-Server/docs/WAB_Backend_BRD.md`, plus the PRD section of every client the endpoint serves (Customer, Merchant or Admin PRD).
-4. `INTEGRATION_WORKFLOW.md` and the matching contract in `contracts/`.
+**Auto-loaded with this file (never read them with a tool):**
+- Session (current task, integration status): @.claude/session.md
+- Memory (durable server facts): @.claude/memory.md
+
+## 0. Per task (nothing else is read up front)
+1. `python3 scripts/tasks.py next server` → the task row (ID, branch from `origin/server`, needs, notes). Root rules/roles/hooks and this file are already in context.
+2. Only the `BUSINESS_DOMAIN.md` sections and `docs/WAB_Backend_BRD.md` ids (BE-xx, NFR-xx) the row names, plus the PRD section of the client the endpoint serves (grep the heading, read that range).
+3. `.claude/Integration.md` when the task changes a contract or a provider; root `INTEGRATION.md` §3 for the contract rules (the generated `docs/api/openapi.*.json` IS the contract; there is no `contracts/` folder).
 
 ## 1. Business Domain First (double-check rule)
 - Every schema, enum, rule, status transition, permission, job, setting and error code comes from `BUSINESS_DOMAIN.md`. Do not invent fields or behaviour.
@@ -118,8 +121,8 @@ Every endpoint returns one of two shapes, built only by the helpers in `utils/re
 
 ## 10. Tests and Delivery
 - Every task ships with unit tests: services and domain rules first (availability, state machine, refunds, permissions, pricing), plus the error handler, the response helpers and the locale-completeness check. All tests, lint, type-check and build must pass.
-- Every endpoint change updates its OpenAPI contract in `contracts/`, Swagger and the Postman collection in the same PR (see §11).
-- Follow the root workflow, but server tasks branch from an updated `server` (the server master branch, `.claude/rules.md` §3.8) and their PRs target `server`: run three verification loops (loop 1 includes the business-domain double-check), do the four-role review, then open a PR. Never push to `main`.
+- Every endpoint change regenerates Swagger (OpenAPI) and the Postman collection in the same PR (see §11) and names the client tasks that must re-sync in the task block.
+- Follow the root workflow: server tasks branch from the freshly fetched `origin/server` and their PRs target `server`; run the one verification loop (`Loops: 1/1`, including the business-domain double-check), do the four-role review, record both in `.claude/session.md`, `tasks.py set SRV-NNN <STATUS>`, then open the PR. Never push to `main`.
 
 ## 11. Swagger and Postman: updated after every task (mandatory)
 - The API docs are generated from code and live in the repo. Do not edit the generated files by hand.

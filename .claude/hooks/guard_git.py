@@ -41,10 +41,10 @@ def segment_violation(cmd, branch, block_lookup):
             return "Pushing to main/master is forbidden. Push your feature branch and open a PR."
         block = block_lookup(branch)
         if not block:
-            return f"No task block for branch '{branch}' in .claude/session.md. Add it (template in .claude/hooks.md)."
+            return f"No task block for branch '{branch}' in the project's .claude/session.md. Add it (template in .claude/hooks.md)."
         if not task_verified(block):
-            return ("Before pushing: complete 3 verification loops ('Loops: 3/3') and the 4-role review "
-                    "('Review: PASSED') in .claude/session.md (see .claude/hooks.md §2).")
+            return ("Before pushing: complete the verification loop ('Loops: 1/1') and the 4-role review "
+                    "('Review: PASSED') in the project's .claude/session.md (see .claude/hooks.md §2).")
     return None
 
 def main():

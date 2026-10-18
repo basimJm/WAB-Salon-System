@@ -7,7 +7,9 @@ import sys
 
 PROTECTED_BRANCHES = ("main", "master")
 SESSION_FILE = os.path.join(".claude", "session.md")
-LOOPS_DONE = re.compile(r"Loops:\s*(3\s*/\s*3|1\s*/\s*1\s*\(user decision)", re.IGNORECASE)
+REGISTRY_FILE = os.path.join(".claude", "projects.json")
+# One verification loop is the rule (owner decision 2026-10-18); older blocks with 3/3 stay valid.
+LOOPS_DONE = re.compile(r"Loops:\s*(1\s*/\s*1|3\s*/\s*3)", re.IGNORECASE)
 REVIEW_DONE = re.compile(r"Review:\s*PASSED", re.IGNORECASE)
 DOC_EXTENSIONS = (".md", ".txt", ".html", ".png", ".jpg", ".jpeg", ".svg", ".mp4", ".pdf", ".json", ".yml", ".yaml")
 SOURCE_EXTENSIONS = (".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".kt", ".kts", ".swift", ".py")
@@ -61,15 +63,34 @@ def is_source_file(path):
     return path.endswith(SOURCE_EXTENSIONS) and not is_test_file(path)
 
 
-def task_block(branch, session_text=None):
-    """Return the session.md task block that references this branch, or ''."""
-    if session_text is None:
-        path = os.path.join(project_dir(), SESSION_FILE)
+def session_files():
+    """Root session.md plus every project/SDK session file listed in .claude/projects.json."""
+    root = project_dir()
+    paths = [os.path.join(root, SESSION_FILE)]
+    try:
+        with open(os.path.join(root, REGISTRY_FILE), encoding="utf-8") as fh:
+            registry = json.load(fh)
+        paths += [os.path.join(root, p["session"]) for p in registry.get("projects", {}).values() if p.get("session")]
+    except (OSError, ValueError):
+        pass
+    return paths
+
+
+def read_sessions():
+    texts = []
+    for path in session_files():
         try:
             with open(path, encoding="utf-8") as fh:
-                session_text = fh.read()
+                texts.append(fh.read())
         except OSError:
-            return ""
+            continue
+    return "\n".join(texts)
+
+
+def task_block(branch, session_text=None):
+    """Return the task block (from any session file) that references this branch, or ''."""
+    if session_text is None:
+        session_text = read_sessions()
     blocks = re.split(r"(?m)^###\s+", session_text)
     for block in blocks:
         if re.search(r"Branch:\s*`?" + re.escape(branch) + r"`?\s*$", block, re.MULTILINE):
