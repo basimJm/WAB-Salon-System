@@ -26,6 +26,10 @@ export default tseslint.config(
       'no-console': 'error',
     },
   },
+  {
+    files: ['src/mock-gateway/**', 'tests/**'],
+    rules: { '@typescript-eslint/no-confusing-void-expression': 'off' },
+  },
   { files: ['**/*.mjs', '**/*.js'], ...tseslint.configs.disableTypeChecked },
   prettier,
 );
