@@ -40,6 +40,7 @@ include(
     ":core:domain",
     ":core:storage",
     ":core:network",
+    ":core:realtime",
     ":core:data",
     ":core:navigation",
     ":core:ui",
