@@ -71,3 +71,11 @@
 - Tests: npm run verify green (236 tests)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — No HyperPay split implementation (needs marketplace product + KYC fields: owner decision); only the port and capability flags.
+
+### PAY-009 — Quality: loop test, smoke, README, Integration
+- Branch: `feat/pay-009-quality`
+- Status: IN REVIEW
+- Acceptance: Loop test (200 flows, 20 concurrent, duplicate keys, injected 503/502/429, over-refund, webhook redelivery) against the OPP mock; packed smoke incl. mock-gateway subpath; README; Integration.md section 14; stable webhook event id; read-only refund steps retried.
+- Tests: npm run verify green (236 unit tests, coverage gate, loop test 8s)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Loop found timestamps in the payload broke replay detection: event id now hashes stable fields only.
