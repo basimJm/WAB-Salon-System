@@ -4,6 +4,7 @@ import com.fab.wab.customer.feature.auth.data.di.authDataModule
 import com.fab.wab.customer.feature.auth.domain.repository.PendingOtpVerification
 import com.fab.wab.customer.feature.auth.domain.usecase.CheckPhoneUseCase
 import com.fab.wab.customer.feature.auth.domain.usecase.LoginWithIdTokenUseCase
+import com.fab.wab.customer.feature.auth.domain.usecase.RegisterUseCase
 import com.fab.wab.customer.feature.auth.domain.usecase.ReportWrongOtpAttemptUseCase
 import com.fab.wab.customer.feature.auth.domain.usecase.RequestOtpUseCase
 import com.fab.wab.customer.feature.auth.domain.usecase.ResolveDialCodeUseCase
@@ -17,6 +18,7 @@ val authModule = module {
     singleOf(::RequestOtpUseCase)
     singleOf(::ReportWrongOtpAttemptUseCase)
     singleOf(::LoginWithIdTokenUseCase)
+    singleOf(::RegisterUseCase)
     singleOf(::ResolveDialCodeUseCase)
     singleOf(::PendingOtpVerification)
 }

@@ -3,8 +3,6 @@ package com.fab.wab.customer.feature.auth.presentation.screen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,9 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
-import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.ui.utils.LocalDarkTheme
-import com.fab.wab.customer.designsystem.components.button.AppIconButton
 import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
 import com.fab.wab.customer.designsystem.components.button.AppTextButton
 import com.fab.wab.customer.designsystem.components.card.AppCard
@@ -27,25 +23,17 @@ import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
 import com.fab.wab.customer.designsystem.components.form.AppPhoneField
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
 import com.fab.wab.customer.designsystem.components.text.AppText
-import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.auth.presentation.analytics.LoginAnalytics
-import com.fab.wab.customer.feature.auth.presentation.controller.contract.LegalSlugs
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.LoginContract.UiAction
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.LoginContract.UiState
 import com.fab.wab.customer.feature.auth.presentation.resources.Res
-import com.fab.wab.customer.feature.auth.presentation.resources.login_back
 import com.fab.wab.customer.feature.auth.presentation.resources.login_button
-import com.fab.wab.customer.feature.auth.presentation.resources.login_contact
-import com.fab.wab.customer.feature.auth.presentation.resources.login_language
 import com.fab.wab.customer.feature.auth.presentation.resources.login_no_account
 import com.fab.wab.customer.feature.auth.presentation.resources.login_phone_error
 import com.fab.wab.customer.feature.auth.presentation.resources.login_phone_label
-import com.fab.wab.customer.feature.auth.presentation.resources.login_privacy
 import com.fab.wab.customer.feature.auth.presentation.resources.login_register_now
 import com.fab.wab.customer.feature.auth.presentation.resources.login_subtitle
-import com.fab.wab.customer.feature.auth.presentation.resources.login_terms
-import com.fab.wab.customer.feature.auth.presentation.resources.login_theme
 import com.fab.wab.customer.feature.auth.presentation.resources.login_welcome
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -70,38 +58,24 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(spacing.space16),
         ) {
-            TopIcons(state.themeMode, onAction, onBack)
+            AuthTopIcons(
+                themeMode = state.themeMode,
+                onLanguageToggle = { onAction(UiAction.OnLanguageToggle) },
+                onThemeToggle = { onAction(UiAction.OnThemeToggle) },
+                onBack = onBack,
+            )
             Image(painter = painterResource(logo), contentDescription = null, modifier = Modifier.size(AppTheme.sizes.logo))
             LoginCard(state, onAction, Modifier.widthIn(max = AppTheme.sizes.sheetMaxWidth))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AppText(text = stringResource(Res.string.login_no_account), color = AppTheme.colors.muted)
                 AppTextButton(text = stringResource(Res.string.login_register_now), onClick = { onAction(UiAction.OnRegisterClick) })
             }
-            LegalLinks(onAction)
+            AuthLegalLinks(onLegalClick = { onAction(UiAction.OnLegalClick(it)) })
         }
     }
     LoginOverlays(state, onAction)
 }
 
-@Composable
-private fun TopIcons(themeMode: ThemeMode, onAction: (UiAction) -> Unit, onBack: (() -> Unit)?, modifier: Modifier = Modifier) {
-    Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        if (onBack != null) {
-            AppIconButton(icon = AppIcons.Back, contentDescription = stringResource(Res.string.login_back), onClick = onBack)
-        }
-        androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
-        AppIconButton(
-            icon = AppIcons.Language,
-            contentDescription = stringResource(Res.string.login_language),
-            onClick = { onAction(UiAction.OnLanguageToggle) },
-        )
-        AppIconButton(
-            icon = if (themeMode == ThemeMode.DARK) AppIcons.ThemeLight else AppIcons.ThemeDark,
-            contentDescription = stringResource(Res.string.login_theme),
-            onClick = { onAction(UiAction.OnThemeToggle) },
-        )
-    }
-}
 
 @Composable
 private fun LoginCard(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
@@ -134,12 +108,3 @@ private fun LoginCard(state: UiState, onAction: (UiAction) -> Unit, modifier: Mo
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun LegalLinks(onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
-    FlowRow(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-        AppTextButton(text = stringResource(Res.string.login_privacy), onClick = { onAction(UiAction.OnLegalClick(LegalSlugs.PRIVACY)) })
-        AppTextButton(text = stringResource(Res.string.login_terms), onClick = { onAction(UiAction.OnLegalClick(LegalSlugs.TERMS)) })
-        AppTextButton(text = stringResource(Res.string.login_contact), onClick = { onAction(UiAction.OnLegalClick(LegalSlugs.CONTACT)) })
-    }
-}

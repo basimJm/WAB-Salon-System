@@ -19,6 +19,7 @@ import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
 import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
 import com.fab.wab.customer.feature.auth.domain.model.PhoneCheck
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
+import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
 import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
 
 class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
@@ -45,6 +46,11 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
             installation = (installation ?: InstallationInfo.UNKNOWN_INSTALLATION).toLoginBody(),
         )
         return safeApiCall { api.login(body) }.mapSuccess { it.data.toDomain() }
+    }
+
+    override suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession> {
+        val body = request.toBody(installation ?: InstallationInfo.UNKNOWN_INSTALLATION)
+        return safeApiCall { api.register(body) }.mapSuccess { it.data.toDomain() }
     }
 }
 

@@ -21,6 +21,5 @@
     <string name="nav_bookings">الحجوزات</string>
     <string name="nav_profile">الملف الشخصي</string>
     <string name="profile_login_button">تسجيل الدخول</string>
-    <string name="placeholder_register">إنشاء حساب (قريباً)</string>
     <string name="placeholder_content_page">الصفحة (قريباً)</string>
 </resources>

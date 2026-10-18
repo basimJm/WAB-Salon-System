@@ -4,12 +4,17 @@ import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBodyInstal
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptData
+import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterBody
+import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterBodyInstallation
+import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterBodyPhone
+import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterData
 import com.fab.wab.customer.core.domain.auth.AuthTokens
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.UserProfile
 import com.fab.wab.customer.feature.auth.domain.model.AuthSession
 import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
+import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
 import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
 import kotlin.time.Instant
 
@@ -42,4 +47,30 @@ fun InstallationInfo.toLoginBody(): PostAuthLoginBodyInstallation = PostAuthLogi
     osVersion = osVersion,
     deviceModel = deviceModel,
     fcmToken = fcmToken,
+)
+
+fun PostAuthRegisterData.toDomain(): AuthSession = AuthSession(
+    tokens = AuthTokens(accessToken = accessToken, refreshToken = refreshToken),
+    user = UserProfile(id = customer.id, firstName = customer.firstName, gender = Gender.fromCode(customer.gender)),
+)
+
+fun InstallationInfo.toRegisterBody(): PostAuthRegisterBodyInstallation = PostAuthRegisterBodyInstallation(
+    installationId = installationId,
+    platform = platform,
+    appVersion = appVersion,
+    osVersion = osVersion,
+    deviceModel = deviceModel,
+    fcmToken = fcmToken,
+)
+
+fun RegisterRequest.toBody(installation: InstallationInfo): PostAuthRegisterBody = PostAuthRegisterBody(
+    firstName = firstName,
+    lastName = lastName,
+    email = email,
+    gender = gender.code,
+    cityId = cityId,
+    areaId = areaId,
+    phone = PostAuthRegisterBodyPhone(countryCode = phone.countryCode, number = phone.number),
+    idToken = idToken,
+    installation = installation.toRegisterBody(),
 )
