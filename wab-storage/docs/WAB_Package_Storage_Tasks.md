@@ -4,8 +4,8 @@
 
 | ID | Task | Branch | Needs | Status | Sources / notes |
 |---|---|---|---|---|---|
-| STO-001 | Project scaffold (copy the `wab-notifications` setup): TS strict, eslint, prettier, jest, tsup, `verify`, loop-test config | `feat/sto-001-scaffold` | — | IN REVIEW | Rules §4.12 |
-| STO-002 | Shared kernel: errors, zod options (`environment`, `provider`, bucket, region, CDN base, limits), prod rules (https, real adapter, credentials), redacting logger, constants (visibilities, variant sizes, rejection reasons) | `feat/sto-002-kernel` | STO-001 | TODO | Rules §2, §3 |
+| STO-001 | Project scaffold (copy the `wab-notifications` setup): TS strict, eslint, prettier, jest, tsup, `verify`, loop-test config | `feat/sto-001-scaffold` | — | DONE | Rules §4.12 |
+| STO-002 | Shared kernel: errors, zod options (`environment`, `provider`, bucket, region, CDN base, limits), prod rules (https, real adapter, credentials), redacting logger, constants (visibilities, variant sizes, rejection reasons) | `feat/sto-002-kernel` | STO-001 | IN REVIEW | Rules §2, §3 |
 | STO-003 | `StorageProvider` port (`createUploadUrl`, `confirmUpload`, `getPublicUrl`, `getSignedUrl`, `read`, `write`, `delete`, `deleteMany`) + memory adapter | `feat/sto-003-port-memory` | STO-002 | TODO | Integration.md §3 |
 | STO-004 | Local-filesystem adapter for dev on localhost (PUT endpoint helper + static serving helper) so apps can upload without AWS | `feat/sto-004-local-fs` | STO-003 | TODO | Rules §2.6 |
 | STO-005 | S3 adapter: presigned PUT (content-type + size conditions, server-generated keys), `confirmUpload` (HEAD, real type by magic bytes, size, empty → `REJECTED` + delete), read/write/delete/bulk delete; every AWS error mapped | `feat/sto-005-s3` | STO-003 | TODO | BRD presign/confirm flow; MinIO in `docker-compose` for local tests |

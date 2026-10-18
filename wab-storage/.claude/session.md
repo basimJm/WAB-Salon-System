@@ -7,10 +7,10 @@
 
 ## Current task
 
-### STO-001 — Project scaffold
-- Branch: `feat/sto-001-scaffold`
+### STO-002 — Shared kernel
+- Branch: `feat/sto-002-kernel`
 - Status: IN REVIEW
-- Acceptance criteria: TS strict, eslint, prettier, jest + coverage gate, tsup ESM+CJS+d.ts, `verify`, loop config, package smoke (copied from `wab-notifications`)
-- Tests: `npm run verify` green (placeholder test + loop; real ones come with later tasks)
+- Acceptance criteria: StorageError + codes, zod options with prod rules (https, s3 only, distinct buckets), redacting logger, retry/timeout, constants
+- Tests: `npm run verify` green (typecheck, lint, format, jest coverage gate 100/95/95, build, package smoke, loop)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling only; vendor SDKs (`@aws-sdk/*`, `sharp`) declared external in tsup, added as dependencies by the tasks that use them.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — no I/O; prod refuses memory/local-fs/http; errors name fields only
