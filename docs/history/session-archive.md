@@ -1337,3 +1337,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). The server returns problems, not period totals (backlog note).
 
+
+### T-088 — ADM-057 subscriptions
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-057-subscriptions`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-057):
+  - [x] Subscriptions list (status and ending-within-N-days filters, days left, last payment), payments of a salon, and recording a payment made outside the app (amount, paid day, covered period, method, reference, note) which activates and extends the subscription
+- Tests: 4 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
+
