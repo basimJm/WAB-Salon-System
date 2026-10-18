@@ -113,7 +113,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/analytics` real mode
 | Shared kernel (errors, config, http/retry, logger) | ✅ |
 | Adapter: memory — in-memory events + identity links for dev/tests | ✅ |
 | Adapter: mongo — event store: write events, count/group queries, identity links | ✅ (unverified against a real MongoDB) |
-| Adapter: bigquery — Firebase Analytics/Crashlytics export queries | ⬜ |
+| Adapter: bigquery — Firebase Analytics/Crashlytics export queries | ✅ (unverified against a real dataset) |
 | Adapter: cache-memory — dev cache | ✅ |
 | Adapter: cache-redis — prod cache (injected client) | ✅ |
 | Unit tests + coverage gate | ⬜ |
@@ -130,3 +130,4 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/analytics` real mode
 | 2026-10-18 | 0.1.0 | ANA-004 Mongo adapters (event store + identity links) over an injected native collection with id codec. |
 | 2026-10-18 | 0.1.0 | ANA-005 queries: funnel, cohorts, journey, overview on the ports; MemoryWarehouse. |
 | 2026-10-18 | 0.1.0 | ANA-006 result cache (memory, Redis, custom), SWR, single-flight. |
+| 2026-10-18 | 0.1.0 | ANA-007 BigQuery warehouse: parameterized SQL, pruning, cost guard, error mapping, lazy client. |

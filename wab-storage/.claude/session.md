@@ -7,10 +7,10 @@
 
 ## Current task
 
-### STO-006 — CDN URLs and signed GET URLs
-- Branch: `feat/sto-006-urls`
+### STO-007 — Image variants
+- Branch: `feat/sto-007-variants`
 - Status: IN REVIEW
-- Acceptance criteria: publicUrlOf, S3 presigned GET or CloudFront canned-policy signed URLs (RSA-SHA1 via node:crypto, verified in tests), option validation with prod https
+- Acceptance criteria: thumb 320 / medium 960 WebP via sharp (lazy), EXIF rotated + stripped, never enlarged, keys beside the original (matches WAB-Server variants.ts), unreadable images skipped, ImageProcessor port
 - Tests: `npm run verify` green (typecheck, lint, format, jest coverage gate 100/95/95, build, package smoke, loop)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — CloudFront signing implemented without a dependency and verified against its public key; not tested against a real distribution
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — variant naming identical to the server (_thumb.webp/_medium.webp); createStorage now returns Storage = port + createVariants/variantKey(s); jest timeout raised for loaded runners

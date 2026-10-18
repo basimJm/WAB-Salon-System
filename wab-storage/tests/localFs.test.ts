@@ -228,7 +228,7 @@ describe('factory', () => {
     localFs: { rootDir: '/tmp/wab-x', baseUrl: 'http://localhost:3000' },
   });
   it('builds local-fs through createStorage and createLocalFsStorage', () => {
-    expect(createStorage(local)).toBeInstanceOf(LocalFsStorage);
+    expect(typeof createStorage(local).createVariants).toBe('function');
     expect(createLocalFsStorage(local)).toBeInstanceOf(LocalFsStorage);
   });
   it('createLocalFsStorage refuses other providers', () => {

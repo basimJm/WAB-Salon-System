@@ -82,6 +82,11 @@ export const createOtpService = (options: OtpOptions): OtpProvider => {
       };
     },
 
+    async resetLimits(phone: string): Promise<void> {
+      assertPhone(phone, 'phone');
+      await limits.reset(phone);
+    },
+
     close: async () => {
       await verifier.close?.();
       await store.close?.();

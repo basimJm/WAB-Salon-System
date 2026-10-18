@@ -21,7 +21,16 @@ try {
 
   const body = `
     const run = async (lib) => {
-      if (lib.SDK_NAME !== 'wab-otp') throw new Error('smoke failed');
+      const phone = '+962791234567';
+      const otp = lib.createOtpService({ environment: 'dev', provider: 'fake', limits: { requestMax: 2 }, resendAfterSec: 0 });
+      const pre = await otp.precheck({ phone, purpose: 'LOGIN' });
+      const ok = await otp.verify({ proof: lib.fakeProof(phone), expectedPhone: phone, purpose: 'LOGIN' });
+      const emu = lib.createOtpService({ environment: 'dev', provider: 'firebase', firebase: { projectId: 'p', authEmulatorHost: 'localhost:9099' } });
+      const viaEmulator = await emu.verify({ proof: lib.createEmulatorToken({ projectId: 'p', phone }), expectedPhone: phone, purpose: 'LOGIN' });
+      await otp.close();
+      await emu.close();
+      if (lib.SDK_NAME !== 'wab-otp' || !pre.allowed || ok.outcome !== 'VERIFIED' || viaEmulator.outcome !== 'VERIFIED' || typeof lib.OtpError !== 'function')
+        throw new Error('smoke failed');
     };
   `;
   writeFileSync(

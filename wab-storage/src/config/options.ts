@@ -19,6 +19,7 @@ import {
 import { configError } from '../errors';
 import type { RetryPolicy } from '../retry';
 import type { CloudFrontSigning } from '../urls';
+import type { ImageProcessor } from '../variants';
 import { noopLogger, redactingLogger, type Logger } from '../logger';
 
 const text = z.string().trim().min(1);
@@ -99,6 +100,8 @@ const optionsSchema = z
 
 export interface StorageOptions extends z.input<typeof optionsSchema> {
   readonly logger?: Logger;
+  /** Image processing adapter; defaults to `sharp` (loaded lazily). */
+  readonly imageProcessor?: ImageProcessor;
 }
 
 export interface S3Config {
@@ -137,6 +140,9 @@ export interface ResolvedConfig {
   readonly logger: Logger;
 }
 
+/** Injected objects (not plain data), validated by type rather than by the schema. */
+const NON_SCHEMA_OPTIONS = ['logger', 'imageProcessor'];
+
 const isHttps = (url: string): boolean => new URL(url).protocol === 'https:';
 const trimSlash = (url: string): string => url.replace(/\/+$/, '');
 
@@ -173,7 +179,10 @@ const crossFieldIssues = (
 
 /** Validates the options once; the error names fields only, never values. */
 export const resolveConfig = (options: StorageOptions): ResolvedConfig => {
-  const { logger, ...plain } = options;
+  const { logger } = options;
+  const plain = Object.fromEntries(
+    Object.entries(options).filter(([name]) => !NON_SCHEMA_OPTIONS.includes(name)),
+  );
   const parsed = optionsSchema.safeParse(plain);
   if (!parsed.success) {
     const fields = [...new Set(parsed.error.issues.map((issue) => issue.path.join('.')))];
