@@ -26,8 +26,10 @@ import {
   type HyperPayTestMode,
 } from '../constants/hyperpay';
 import { configError } from '../errors';
+import type { IdempotencyStore } from '../idempotency';
 import type { Logger } from '../logger';
-import type { RetryPolicy } from '../retry';
+import type { RetryDeps, RetryPolicy } from '../retry';
+import type { PaymentGateway } from '../types';
 
 /** HyperPay credentials and behaviour. Secrets are injected by the consumer, never stored here. */
 export interface HyperPayOptions {
@@ -67,8 +69,11 @@ export interface PaymentsOptionsBase {
   readonly mockGateway?: MockGatewayOptions;
   readonly timeoutMs?: number;
   readonly retry?: Partial<RetryPolicy>;
-  readonly idempotency?: { readonly ttlSec?: number };
+  readonly idempotency?: { readonly store?: IdempotencyStore; readonly ttlSec?: number };
+  /** The adapter when `provider` is `custom` (any gateway implementing the port). */
+  readonly gateway?: PaymentGateway;
   readonly logger?: Logger;
+  readonly retryDeps?: RetryDeps;
 }
 
 const positive = z.number().int().positive();
@@ -199,6 +204,10 @@ const checkProvider = (options: PaymentsOptionsBase): ResolvedHyperPay | undefin
   if (options.environment === 'prod' && NON_PRODUCTION_PROVIDERS.includes(options.provider)) {
     reject('provider (fake and mock-gateway are refused in prod)');
   }
+  if (options.environment === 'prod' && options.idempotency?.store === undefined) {
+    reject('idempotency.store (a shared store is required in prod)');
+  }
+  if (options.provider === 'custom' && options.gateway === undefined) reject('gateway');
   if (options.provider === 'mock-gateway') {
     const mock = options.mockGateway;
     if (mock === undefined || !URL.canParse(mock.baseUrl)) reject('mockGateway.baseUrl');

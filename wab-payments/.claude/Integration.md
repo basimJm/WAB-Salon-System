@@ -126,6 +126,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-18 | 0.1.0 | PAY-003: port + facade + fake + idempotency store + createPayments. |
 | 2026-10-18 | 0.1.0 | PAY-002: kernel: PaymentSdkError, options + prod rules, redacting logger, money, retry. |
 | 2026-10-18 | 0.1.0 | PAY-001 scaffold (`@wab/payments`). Gateway decided: HyperPay (OPP/COPYandPAY). |
 | 2026-10-14 | 0.0.0 | Design document created from the BRD; no code yet. |
