@@ -2,7 +2,7 @@
 export const ENVIRONMENTS = ['dev', 'prod'] as const;
 export const STORE_PROVIDERS = ['memory', 'mongo'] as const;
 export const WAREHOUSE_PROVIDERS = ['none', 'memory', 'bigquery'] as const;
-export const CACHE_STORES = ['none', 'memory', 'redis'] as const;
+export const CACHE_STORES = ['none', 'memory', 'redis', 'custom'] as const;
 export const GROUPINGS = ['NAME', 'DAY'] as const;
 export const EVENT_SOURCES = ['SERVER', 'APP'] as const;
 export const COHORT_UNITS = ['DAY', 'WEEK'] as const;
@@ -43,6 +43,11 @@ export const DEFAULT_RETRY = {
 
 export const DEFAULT_CACHE = {
   ttlSec: 60,
+  /** Extra time a stale answer may be served while it refreshes in the background (0 = off). */
+  staleSec: 0,
+  /** Entries the in-memory cache keeps. */
+  maxEntries: 500,
+  hashLength: 32,
   keyPrefix: 'wab-analytics',
 } as const;
 

@@ -8,7 +8,8 @@ import type { QueryContext } from './queries/context';
 import { funnel } from './queries/funnel';
 import { journey } from './queries/journey';
 import { overview } from './queries/overview';
-import type { EventStore, IdentityStore, WarehouseQuery } from './ports';
+import { createQueryCache } from './cache/queryCache';
+import type { EventStore, IdentityStore, ResultCache, WarehouseQuery } from './ports';
 import { withRetry, type RetryHooks } from './retry';
 import type { Analytics, IdentityLink, ServerEventInput } from './types';
 
@@ -17,6 +18,7 @@ export interface ServiceDeps {
   readonly events: EventStore;
   readonly identity: IdentityStore;
   readonly warehouse?: WarehouseQuery;
+  readonly cache?: ResultCache;
   readonly now?: () => Date;
   readonly retryHooks?: RetryHooks;
 }
@@ -25,6 +27,13 @@ export interface ServiceDeps {
 export const createService = (deps: ServiceDeps): Analytics => {
   const { options, events, identity, warehouse } = deps;
   const context: QueryContext = { options, events, identity, warehouse };
+  const queries = createQueryCache({
+    cache: deps.cache,
+    ttlSec: options.cache.ttlSec,
+    staleSec: options.cache.staleSec,
+    keyPrefix: options.cache.keyPrefix,
+    logger: options.logger,
+  });
   const now = deps.now ?? ((): Date => new Date());
   const run = <T>(task: () => Promise<T>): Promise<T> =>
     withRetry(task, options.retry, deps.retryHooks).catch((error: unknown) => {
@@ -59,11 +68,17 @@ export const createService = (deps: ServiceDeps): Analytics => {
       }
     },
 
-    countEvents: (query) => run(() => countEvents(query, options, events, warehouse)),
-    funnel: (definition) => run(() => funnel(definition, context)),
-    cohorts: (definition) => run(() => cohorts(definition, context)),
-    journey: (actor, range, page) => run(() => journey(actor, range, page, context)),
-    overview: (range) => run(() => overview(range, context)),
+    countEvents: (query) =>
+      queries.wrap('count', query, () => run(() => countEvents(query, options, events, warehouse))),
+    funnel: (definition) =>
+      queries.wrap('funnel', definition, () => run(() => funnel(definition, context))),
+    cohorts: (definition) =>
+      queries.wrap('cohorts', definition, () => run(() => cohorts(definition, context))),
+    journey: (actor, range, page) =>
+      queries.wrap('journey', { actor, range, page }, () =>
+        run(() => journey(actor, range, page, context)),
+      ),
+    overview: (range) => queries.wrap('overview', range, () => run(() => overview(range, context))),
 
     async init(): Promise<void> {
       await Promise.all([events.init?.(), identity.init?.(), warehouse?.init?.()]);
