@@ -40,3 +40,7 @@ export const LIST_PARAMS = {
 } as const;
 export const LIST_SORT_SEPARATOR = ':';
 export const LIST_SEARCH_MAX_LENGTH = 100;
+
+/** An export is asked again every 2 seconds, for at most 2 minutes, before the screen stops waiting for it. */
+export const EXPORT_POLL_INTERVAL_MS = 2_000;
+export const EXPORT_POLL_TIMEOUT_MS = 120_000;

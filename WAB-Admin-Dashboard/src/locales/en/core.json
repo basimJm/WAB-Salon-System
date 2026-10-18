@@ -57,7 +57,9 @@
       "cities": "Cities",
       "areas": "Areas",
       "versions": "App versions",
-      "maintenance": "Maintenance"
+      "maintenance": "Maintenance",
+      "reportsMain": "Reports",
+      "exports": "Exports"
     },
     "breadcrumbs": "Breadcrumbs",
     "expand": "Expand {{name}}",

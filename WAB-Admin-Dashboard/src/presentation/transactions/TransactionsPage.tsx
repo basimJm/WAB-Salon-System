@@ -13,9 +13,11 @@ import { isLocalDate, localDayRange } from '@/domain/shared/time';
 import { StatusBadge } from '../components/core/StatusBadge';
 import type { Column } from '../components/data/tableTypes';
 import { DateField } from '../components/form/DateField';
+import { ExportMenu } from '../components/data/ExportMenu';
 import { Select } from '../components/form/Select';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
+import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
 
 const OPTIONS = { filterKeys: ['status', 'type', 'from', 'to', 'salon', 'customer', 'booking'] };
@@ -45,6 +47,13 @@ function queryOf(
   };
 }
 
+/** The filters of the screen, without paging, as export parameters. */
+const exportParams = ({
+  page: _page,
+  pageSize: _size,
+  ...filters
+}: TransactionQuery): Record<string, unknown> => filters;
+
 /** Admin PRD A16 · Payment attempts with the gateway code and fee; open one for the raw answer and all attempts. */
 export default function TransactionsPage() {
   const { t } = useTranslation();
@@ -53,6 +62,7 @@ export default function TransactionsPage() {
   const { repositories } = useContainer();
   const list = useListController(OPTIONS);
   const { state } = list;
+  const runner = useExportRunner();
   const f = (k: string) => state.filters[k]?.[0] ?? '';
   const query = useQuery({
     queryKey: ['getTransactions', state],
@@ -112,6 +122,14 @@ export default function TransactionsPage() {
     <ListPage
       title={title}
       subtitle={t('transactions.subtitle')}
+      actions={
+        <ExportMenu
+          onExport={runner(
+            'TRANSACTIONS',
+            exportParams(queryOf(state.filters, state.page, state.pageSize)),
+          )}
+        />
+      }
       filters={{
         active: chips,
         onClearAll: list.clearFilters,

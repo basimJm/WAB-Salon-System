@@ -26,17 +26,6 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — covered by the task blocks. DEVIATION: no e2e (user decision).
 
-### T-093 — ADM-065 reports
-
-- Project: `WAB-Admin-Dashboard/`
-- Branch: `feat/adm-065-reports`
-- Status: DONE
-- Acceptance criteria (Admin Tasks ADM-065):
-  - [x] Reports screen with daily, weekly and monthly tabs and a period picker: bookings with a status chart, collected money, registrations, reviews, payments and refunds, and the weekly/monthly extras (top salons, payouts, growth, live snapshot); AR+EN
-- Tests: 4 new tests through the mock stack (plus month validation); no separate browser check
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Installs, active users, funnels and retention are not in the server reports (SRV-110). Top salons show ids (names come with the salon lookup in a later task).
-
 ### T-094 — ADM-066 audit log
 
 - Project: `WAB-Admin-Dashboard/`
@@ -47,6 +36,17 @@
 - Tests: 5 new tests through the mock stack; no separate browser check
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Entity links are not added (entity type names differ per module).
+
+### T-095 — ADM-067 exports
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-067-exports`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-067):
+  - [x] Export history page (Reports > Exports) refreshing while a file is generated with a download link and failure reason; an Export button (Excel / CSV / PDF) on transactions, audit log and reports that asks for the file, waits for it and opens the short-lived link; waitForExport helper with a timeout
+- Tests: 5 new tests through the mock stack; no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). 
 
 ### Pending (next)
 

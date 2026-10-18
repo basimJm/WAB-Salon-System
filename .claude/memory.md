@@ -117,3 +117,4 @@
 - ADM-063 done: analytics = repositories.analytics {overview,events}; useAnalyticsRange gives instants (and the previous period when comparing); EventsAnalyticsPage(prefix) is the shared event-family page
 - ADM-065 done: reports = repositories.reports {daily(date),weekly(from),monthly(YYYY-MM)}; ReportBody renders any of them
 - ADM-066 done: audit = repositories.audit.list(query); humanizeAction/hasDiff pure helpers
+- ADM-067 done: exports = repositories.exports {list,request,get}; useExportRunner()(kind, params) -> onExport(format) for ExportMenu; only REPORT_*, TRANSACTIONS and AUDIT_LOGS exist on the server
