@@ -26,6 +26,7 @@ export default tseslint.config(
       'no-console': 'error',
     },
   },
+  { files: ['tests/**/*.ts'], rules: { '@typescript-eslint/no-confusing-void-expression': 'off' } },
   { files: ['**/*.mjs', '**/*.js'], ...tseslint.configs.disableTypeChecked },
   prettier,
 );

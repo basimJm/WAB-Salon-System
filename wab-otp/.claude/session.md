@@ -7,10 +7,10 @@
 
 ## Current task
 
-### OTP-002 — Shared kernel
-- Branch: `feat/otp-002-kernel`
-- Acceptance: typed `OtpError` (code, retryable, cause, details); zod options with defaults from `constants/`; prod refuses fake / missing project / emulator / http key URL / process-local store; custom needs a verifier; redacting logger (secrets removed, phones masked to last 3 digits); retry with capped backoff + jitter and timeout helper; ports (`OtpProvider`, `ProofVerifier`, `LimitStore`) typed.
-- Assumed missing: `PURPOSE_MISMATCH` and `BLOCKED` outcomes exist in the SDK enum although Firebase cannot bind purpose; per-device/IP limits are out (needs device id source).
-- Tests: `npm run verify` green (22 unit tests, gate met).
+### OTP-003 — Port, fake adapter, memory store, verifier
+- Branch: `feat/otp-003-port-fake`
+- Acceptance: `createOtpVerifier(options)` validates input (E.164, purpose, proof size) with `OTP_INPUT_INVALID`; fake adapter (same proof format as the WAB-Server fake); `MemoryLimitStore` (process-local, same semantics as Redis, refused in prod); adapter answers are checked (unknown/incomplete answer = `OTP_MALFORMED_RESPONSE`, mismatching verified phone = `PHONE_MISMATCH`); unexpected throws = `OTP_UNKNOWN` with cause; event hook failures never break a verification; logs carry no proof or full phone.
+- Assumed missing: outcomes `PURPOSE_MISMATCH`/`BLOCKED` are only produced by custom adapters/the service; `precheck`/`reportFailure` land with OTP-004.
+- Tests: `npm run verify` green (48 unit tests).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found my own wrong mask-length expectation (fixed in tests); lint-driven test cleanups only.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA added the malformed-answer and wrong-phone downgrade cases; the `custom` guard in the adapter selector is defensive (options already refuse it).
