@@ -17,3 +17,10 @@ if [ -n "${ANDROID_HOME:-}${ANDROID_SDK_ROOT:-}" ] && [ -x ./gradlew ]; then
 else
   echo "Android SDK not found: Gradle checks are skipped here; CI runs them."
 fi
+
+if [ "${WAB_SKIP_IOS:-}" != "1" ] && command -v xcodebuild >/dev/null 2>&1; then
+  echo "== iOS: every configuration for the simulator + Kotlin/Native tests"
+  scripts/ci/run_ios_checks.sh
+else
+  echo "xcodebuild not found or WAB_SKIP_IOS=1: iOS checks are skipped here; CI runs them."
+fi
