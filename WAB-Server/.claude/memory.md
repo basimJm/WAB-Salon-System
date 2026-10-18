@@ -10,6 +10,8 @@
 
 - OTP wired (SRV-034): `OTP_PROVIDER=real` needs `FIREBASE_PROJECT_ID` (+ dev-only `FIREBASE_AUTH_EMULATOR_HOST`, refused in production); server depends on `file:../wab-otp` as `@wab/otp` (`ensure-sdks`, Docker); `providers/otp/real.ts` uses `createOtpVerifier` (verification only; limits stay in `domain/otp`). Dev tokens: `createEmulatorToken` from the SDK.
 
+- Payments wired (SRV-092): `PAYMENT_PROVIDER=real` -> `providers/payments/real.ts` over `@wab/payments` (`file:../wab-payments`; Docker + ensure-sdks updated; the KMP folder is never in the Docker context). Env `HYPERPAY_ENTITY_ID|ACCESS_TOKEN|RETURN_URL` required, `HYPERPAY_WEBHOOK_KEY` required in production, `PAYMENT_GATEWAY=mock-gateway` (dev, local OPP mock via `@wab/payments/mock-gateway`, needs `HYPERPAY_BASE_URL`). `PaymentView.checkout` = data the app opens the gateway UI with (rebuilt from config via `provider.clientCheckout`, null once not PENDING); webhook route reads `x-authentication-tag` (HyperPay) or `x-signature` (fake), passes all headers; REFUND/IGNORED notifications settle nothing. SDK UNKNOWN statuses map to PENDING / REFUND_PENDING.
+
 ## Per-task facts (SRV-xxx)
 
 - BRANCHING (user rule, `.claude/rules.md` §3.8): `server` = master branch for server work, created from `main`. Server task branches start from `origin/server` and PRs target `server`; the user merges `server` → `main`. Restart the cloud branch `claude/busy-johnson-2rch94` from `origin/server` after each merge; sync `main` into `server` by PR when `main` moves (customer-app work lands there).

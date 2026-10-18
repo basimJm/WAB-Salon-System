@@ -289,6 +289,7 @@ describe('webhooks and cancel', () => {
       name: 'minimal',
       capabilities: fake.capabilities,
       createCheckout: (r) => fake.createCheckout(r),
+      clientCheckout: (id) => fake.clientCheckout(id),
       fetchPayment: (id) => fake.fetchPayment(id),
       refund: (r) => fake.refund(r),
       fetchRefund: (id) => fake.fetchRefund(id),
@@ -297,6 +298,18 @@ describe('webhooks and cancel', () => {
     const payments = createPayments({ environment: 'dev', provider: 'custom', gateway: minimal });
     expect(payments.cancelSession).toBeUndefined();
     await expect(payments.close()).resolves.toBeUndefined();
+  });
+});
+
+describe('clientCheckout', () => {
+  it('rebuilds the client block of an existing session without a gateway call', () => {
+    const { payments } = withFake();
+    expect(payments.clientCheckout('fake-session-9')).toMatchObject({
+      provider: 'fake',
+      checkoutId: 'fake-session-9',
+    });
+    expect(() => payments.clientCheckout('bad id')).toThrow('not a valid identifier');
+    expect(() => payments.clientCheckout('x', 'WALLET')).toThrow('not enabled');
   });
 });
 

@@ -98,6 +98,11 @@ export const createPaymentProvider = (deps: ProviderDeps): PaymentProvider => {
         return session;
       }),
 
+    clientCheckout: (sessionId: string, method?: string) => {
+      assertSessionId(sessionId);
+      return gateway.clientCheckout(sessionId, resolveMethod(method, config.methods));
+    },
+
     verify: (sessionId: string): Promise<PaymentVerification> =>
       safe(async () => {
         assertSessionId(sessionId);

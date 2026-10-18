@@ -10,7 +10,7 @@ import type { Platform, TransactionStatus, TransactionType } from '../../constan
 import { ERROR_CODES } from '../../constants/errorCodes';
 import type { TransactionRaw } from '../../models/transaction.model';
 import type { FullRefundPort } from '../refunds/directRefunds';
-import type { PaymentProvider } from '../../providers/payments/types';
+import type { PaymentClientCheckout, PaymentProvider } from '../../providers/payments/types';
 import type { BookingDraftsRepository } from '../../repositories/bookingDrafts.repository';
 import type { CustomersRepository } from '../../repositories/identity.repository';
 import type { TransactionsRepository } from '../../repositories/transactions.repository';
@@ -34,6 +34,8 @@ export interface PaymentView {
   readonly sessionId: string | null;
   readonly gatewayCode: string | null;
   readonly gatewayMessage: string | null;
+  /** What the app opens the gateway's payment UI with (rebuilt from config, so it also works on resume). */
+  readonly checkout: PaymentClientCheckout | null;
 }
 
 export interface PaymentsService {
@@ -54,7 +56,11 @@ export interface PaymentsService {
    * provider (`UnauthorizedError` otherwise), then the outcome is confirmed with a status query —
    * the payload alone never settles anything. Repeats and unknown sessions are acknowledged.
    */
-  handleWebhook(input: { rawBody: string; signature: string }): Promise<{ settled: boolean }>;
+  handleWebhook(input: {
+    rawBody: string;
+    signature: string;
+    headers?: Readonly<Record<string, string | undefined>>;
+  }): Promise<{ settled: boolean }>;
   /** Polling fallback for lost webhooks: verifies attempts that stayed PENDING; returns how many settled. */
   reconcilePending(): Promise<number>;
   /**
@@ -84,7 +90,7 @@ export interface PaymentsDeps {
   readonly now?: () => Date;
 }
 
-const view = (t: Entity<TransactionRaw>): PaymentView => ({
+const view = (t: Entity<TransactionRaw>, checkout: PaymentClientCheckout | null): PaymentView => ({
   transactionId: t.id,
   draftId: t.bookingDraftId ?? null,
   status: t.status,
@@ -95,12 +101,20 @@ const view = (t: Entity<TransactionRaw>): PaymentView => ({
   sessionId: t.providerRef ?? null,
   gatewayCode: t.gatewayCode ?? null,
   gatewayMessage: t.gatewayMessage ?? null,
+  checkout,
 });
 
 export const createPaymentsService = (deps: PaymentsDeps): PaymentsService => {
   const { transactions, drafts, customers, provider, providerName, logger } = deps;
   const now = deps.now ?? ((): Date => new Date());
   const onSettled = deps.onSettled ?? noPaymentSettledHook;
+
+  /** The attempt plus the data the app opens the gateway UI with (only while it can still be paid). */
+  const present = (t: Entity<TransactionRaw>): PaymentView => {
+    const ref = t.providerRef;
+    const payable = t.status === 'PENDING' && ref !== undefined;
+    return view(t, payable ? (provider.clientCheckout?.(ref) ?? null) : null);
+  };
 
   /** Asks the gateway and settles a PENDING attempt; returns the stored attempt and whether this call settled it. */
   const confirm = async (
@@ -167,7 +181,7 @@ export const createPaymentsService = (deps: PaymentsDeps): PaymentsService => {
       const last = attempts[0];
       // A running or successful attempt is the answer; only a failed/cancelled one allows a new try.
       if (last !== undefined && (last.status === 'PENDING' || last.status === 'SUCCEEDED')) {
-        return view(last);
+        return present(last);
       }
       const attempt = (last?.attempt ?? 0) + 1;
       const idempotencyKey = `${draft.id}${IDEMPOTENCY_SEPARATOR}${String(attempt)}`;
@@ -194,13 +208,13 @@ export const createPaymentsService = (deps: PaymentsDeps): PaymentsService => {
           appVersion,
         });
         await drafts.updateById(draft.id, { transactionId: toObjectId(created.id) });
-        return view(created);
+        return present(created);
       } catch (error) {
         // Two taps at once: the unique key makes the second one return the first checkout.
         if (!isDuplicateKeyError(error)) throw error;
         const existing = await transactions.findOne({ idempotencyKey });
         if (existing === null) throw error;
-        return view(existing);
+        return present(existing);
       }
     },
 
@@ -209,11 +223,17 @@ export const createPaymentsService = (deps: PaymentsDeps): PaymentsService => {
       if (found?.customerId !== customerId) {
         throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       }
-      return view((await confirm(found)).current);
+      return present((await confirm(found)).current);
     },
 
-    async handleWebhook({ rawBody, signature }) {
-      const event = await provider.handleWebhook({ rawBody, signature });
+    async handleWebhook({ rawBody, signature, headers }) {
+      const event = await provider.handleWebhook({
+        rawBody,
+        signature,
+        ...(headers === undefined ? {} : { headers }),
+      });
+      // Refund and other notifications are authentic but settle nothing here.
+      if (event.kind !== undefined && event.kind !== 'PAYMENT') return { settled: false };
       const found = await transactions.findByProviderRef(event.sessionId);
       if (found === null) {
         logger.warn({ sessionId: event.sessionId }, 'payment webhook for an unknown session');

@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Gateway-independent payments (HyperPay first): checkout sessions, verification, refunds and webhooks for WAB projects.",
   "license": "UNLICENSED",
-  "private": true,
   "engines": {
     "node": ">=22"
   },
@@ -32,11 +31,31 @@
       }
     }
   },
+  "typesVersions": {
+    "*": {
+      "mock-gateway": [
+        "./dist/mock-gateway/index.d.ts"
+      ]
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/basimJm/WAB-Salon-System.git",
+    "directory": "wab-payments"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "scripts": {
     "build": "tsup",
+    "prepublishOnly": "npm run verify",
+    "pack:check": "npm pack --dry-run",
     "mock-gateway": "tsx scripts/mock-gateway.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",

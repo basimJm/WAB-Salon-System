@@ -5,7 +5,7 @@
 ## Integration status (one glance)
 
 - Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (116) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
-- Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); storage / payments / analytics on in-repo fakes until SRV-112 / SRV-092 / SRV-110 (BLOCKED on the SDK publish tasks; owner integrates).
+- Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); payments **real** (`@wab/payments`, HyperPay, SRV-092); storage / analytics on in-repo fakes until SRV-112 / SRV-110 (BLOCKED on the SDK publish tasks; owner integrates).
 - Open work: SRV-111 contract guard, Stage N (SRV-117…128, admin gaps), Stage O (SRV-129…134, merchant gaps). Deployment SRV-011/116 and SRV-059/115: owner (PENDING).
 
 ## Current task
@@ -13,6 +13,15 @@
 - (none) — run `python3 scripts/tasks.py next server`; task branches start from `origin/server`.
 
 ## Last blocks
+
+### SRV-092 — Real payment provider through `@wab/payments` (HyperPay)
+
+- Branch: `feat/pay-012-publish-node` (shared PR with PAY-012)
+- Status: DONE
+- Acceptance criteria: `@wab/payments` `file:` dependency + `ensure-sdks` + Docker (KMP folder excluded); env `HYPERPAY_*` / `PAYMENT_GATEWAY` validated at start-up (webhook key required and mock/test mode refused in production); `providers/payments/real.ts` maps SDK statuses (UNKNOWN never success) and errors (webhook -> 401, over-refund -> PaymentError, outage -> 502/503, caller bug -> RangeError); webhook route passes the HyperPay tag/IV headers; REFUND/IGNORED notifications settle nothing; `PaymentView.checkout` gives the app what it opens the gateway UI with
+- Tests: `tests/paymentsReal.test.ts` (21, includes the real SDK against the local OPP mock and Redis), config (new HyperPay block), paymentsService (checkout block, webhook headers/kinds); full gate green
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔ (checkout block contract for CUS-047/CUS-062), Architect ✔, QA ✔) — NOT verified: real HyperPay (entity, token, webhook key, JOD enabled), Docker build (no daemon). API docs: updated (`checkout` on the payment, webhook headers).
 
 ### SRV-034 — Real Firebase ID-token verification via `wab-otp`
 

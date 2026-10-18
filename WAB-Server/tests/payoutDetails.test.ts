@@ -93,6 +93,10 @@ describe('configuration', () => {
     FCM_SERVICE_ACCOUNT_JSON: '{}',
     SMTP_HOST: 'smtp.example.test',
     EMAIL_FROM_ADDRESS: 'noreply@example.test',
+    HYPERPAY_ENTITY_ID: 'entity-test',
+    HYPERPAY_ACCESS_TOKEN: 'access-test-value',
+    HYPERPAY_RETURN_URL: 'wab://payment/result',
+    HYPERPAY_WEBHOOK_KEY: 'ab'.repeat(32),
   };
   const invalidKeys = (env: NodeJS.ProcessEnv): readonly string[] => {
     try {

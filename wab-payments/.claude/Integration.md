@@ -126,6 +126,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-18 | 0.1.0 | PAY-012: publish prep + clientCheckout + server integration. |
 | 2026-10-18 | 0.1.0 | PAY-011: mock launcher + platform in-app browsers. |
 | 2026-10-18 | 0.1.0 | PAY-010: KMP ports, fake launcher, shared native launcher, tests. |
 | 2026-10-18 | 0.1.0 | PAY-009: quality gate, README, Integration reference, webhook event id fix. |

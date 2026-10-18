@@ -14,6 +14,13 @@ import {
 const MONGO = 'mongodb://user:s3cret@localhost/wab';
 const REDIS = 'redis://localhost:6379';
 
+const WEBHOOK_KEY = 'ab'.repeat(32);
+const PAYMENT_CREDENTIALS = {
+  HYPERPAY_ENTITY_ID: 'entity-test',
+  HYPERPAY_ACCESS_TOKEN: 'access-test-value',
+  HYPERPAY_RETURN_URL: 'wab://payment/result',
+};
+
 const REAL_PROVIDERS = {
   OTP_PROVIDER: 'real',
   STORAGE_PROVIDER: 'real',
@@ -24,6 +31,8 @@ const REAL_PROVIDERS = {
   FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
   SMTP_HOST: 'smtp.example.test',
   EMAIL_FROM_ADDRESS: 'noreply@example.test',
+  ...PAYMENT_CREDENTIALS,
+  HYPERPAY_WEBHOOK_KEY: WEBHOOK_KEY,
 };
 const ALL_FAKE_MODES = {
   otp: 'fake',
@@ -91,7 +100,9 @@ describe('loadConfig', () => {
           }
         : key === ENV_KEYS.otpProvider
           ? { FIREBASE_PROJECT_ID: 'wab-dev-test' }
-          : {};
+          : key === ENV_KEYS.paymentProvider
+            ? PAYMENT_CREDENTIALS
+            : {};
     expect(loadConfig(validEnv({ [key]: 'real', ...credentials })).providers).toEqual({
       ...ALL_FAKE_MODES,
       [field]: 'real',
@@ -227,6 +238,79 @@ describe('loadConfig', () => {
         FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
       });
       expect(invalidKeysOf(production)).toEqual(['FIREBASE_AUTH_EMULATOR_HOST']);
+    });
+  });
+
+  describe('real payment settings (HyperPay)', () => {
+    const base = validEnv({ PAYMENT_PROVIDER: 'real' });
+
+    it('names the missing credentials and nothing else', () => {
+      expect([...invalidKeysOf(base)].sort()).toEqual(
+        ['HYPERPAY_ACCESS_TOKEN', 'HYPERPAY_ENTITY_ID', 'HYPERPAY_RETURN_URL'].sort(),
+      );
+    });
+
+    it('builds immutable settings with defaults, and none while the provider is fake', () => {
+      const config = loadConfig({ ...base, ...PAYMENT_CREDENTIALS });
+      expect(config.payment).toEqual({
+        gateway: 'hyperpay',
+        entityId: 'entity-test',
+        accessToken: 'access-test-value',
+        returnUrl: 'wab://payment/result',
+      });
+      expect(Object.isFrozen(config.payment)).toBe(true);
+      expect(loadConfig(validEnv(PAYMENT_CREDENTIALS)).payment).toBeUndefined();
+    });
+
+    it('carries the optional base URL, webhook key and test mode', () => {
+      const config = loadConfig({
+        ...base,
+        ...PAYMENT_CREDENTIALS,
+        HYPERPAY_BASE_URL: 'https://pay.example.test',
+        HYPERPAY_WEBHOOK_KEY: WEBHOOK_KEY,
+        HYPERPAY_TEST_MODE: 'EXTERNAL',
+      });
+      expect(config.payment).toMatchObject({
+        baseUrl: 'https://pay.example.test',
+        webhookKey: WEBHOOK_KEY,
+        testMode: 'EXTERNAL',
+      });
+    });
+
+    it('validates formats', () => {
+      const ok = { ...base, ...PAYMENT_CREDENTIALS };
+      expect(invalidKeysOf({ ...ok, HYPERPAY_WEBHOOK_KEY: 'short' })).toEqual([
+        'HYPERPAY_WEBHOOK_KEY',
+      ]);
+      expect(invalidKeysOf({ ...ok, HYPERPAY_BASE_URL: 'not a url' })).toEqual([
+        'HYPERPAY_BASE_URL',
+      ]);
+      expect(invalidKeysOf({ ...ok, HYPERPAY_TEST_MODE: 'YES' })).toEqual(['HYPERPAY_TEST_MODE']);
+      expect(invalidKeysOf({ ...ok, PAYMENT_GATEWAY: 'other' })).toEqual(['PAYMENT_GATEWAY']);
+    });
+
+    it('needs the mock URL for the mock gateway', () => {
+      const mock = { ...base, ...PAYMENT_CREDENTIALS, PAYMENT_GATEWAY: 'mock-gateway' };
+      expect(invalidKeysOf(mock)).toEqual(['HYPERPAY_BASE_URL']);
+      expect(
+        loadConfig({ ...mock, HYPERPAY_BASE_URL: 'http://localhost:4010' }).payment?.gateway,
+      ).toBe('mock-gateway');
+    });
+
+    it('is strict in production: webhook key required, no mock gateway, no test mode', () => {
+      const production = validEnv({ ...REAL_PROVIDERS, ...PAYOUT_KEY, NODE_ENV: 'production' });
+      const withoutKey = { ...production, HYPERPAY_WEBHOOK_KEY: undefined };
+      expect(invalidKeysOf(withoutKey)).toEqual(['HYPERPAY_WEBHOOK_KEY']);
+      expect(
+        invalidKeysOf({
+          ...production,
+          PAYMENT_GATEWAY: 'mock-gateway',
+          HYPERPAY_BASE_URL: 'https://pay.example.test',
+        }),
+      ).toEqual(['PAYMENT_GATEWAY']);
+      expect(invalidKeysOf({ ...production, HYPERPAY_TEST_MODE: 'EXTERNAL' })).toEqual([
+        'HYPERPAY_TEST_MODE',
+      ]);
     });
   });
 

@@ -10,7 +10,12 @@ import {
   LOG_LEVELS,
   DEFAULT_SMTP_PORT,
   DEFAULT_EMAIL_FROM_NAME,
+  DEFAULT_PAYMENT_GATEWAY,
+  HYPERPAY_TEST_MODES,
+  HYPERPAY_WEBHOOK_KEY_PATTERN,
   NOTIFIER_REAL_REQUIRED_KEYS,
+  PAYMENT_GATEWAYS,
+  PAYMENT_REAL_REQUIRED_KEYS,
   OTP_REAL_REQUIRED_KEYS,
   FIREBASE_EMULATOR_HOST_PATTERN,
   MONGO_URI_PATTERN,
@@ -80,6 +85,13 @@ export const envSchema = z
     [ENV_KEYS.smtpPass]: z.string().min(1).optional(),
     [ENV_KEYS.emailFromAddress]: z.email().optional(),
     [ENV_KEYS.emailFromName]: z.string().min(1).default(DEFAULT_EMAIL_FROM_NAME),
+    [ENV_KEYS.paymentGateway]: z.enum(PAYMENT_GATEWAYS).default(DEFAULT_PAYMENT_GATEWAY),
+    [ENV_KEYS.hyperpayBaseUrl]: z.url().optional(),
+    [ENV_KEYS.hyperpayEntityId]: z.string().min(1).optional(),
+    [ENV_KEYS.hyperpayAccess]: z.string().min(1).optional(),
+    [ENV_KEYS.hyperpayWebhookKey]: z.string().regex(HYPERPAY_WEBHOOK_KEY_PATTERN).optional(),
+    [ENV_KEYS.hyperpayReturnUrl]: z.url().optional(),
+    [ENV_KEYS.hyperpayTestMode]: z.enum(HYPERPAY_TEST_MODES).optional(),
   })
   // Production never runs on fakes, and never guesses: every provider must be named `real`.
   .superRefine((env, context) => {
@@ -110,7 +122,26 @@ export const envSchema = z
         context.addIssue({ code: 'custom', path: [ENV_KEYS.smtpPass], message: ENV_KEYS.smtpPass });
       }
     }
+    // A real payment provider needs its HyperPay credentials; the mock gateway also needs its URL.
+    if (env[ENV_KEYS.paymentProvider] === REAL_PROVIDER_MODE) {
+      const missing: string[] = PAYMENT_REAL_REQUIRED_KEYS.filter((key) => env[key] === undefined);
+      if (
+        env[ENV_KEYS.paymentGateway] === 'mock-gateway' &&
+        env[ENV_KEYS.hyperpayBaseUrl] === undefined
+      ) {
+        missing.push(ENV_KEYS.hyperpayBaseUrl);
+      }
+      for (const key of missing) context.addIssue({ code: 'custom', path: [key], message: key });
+    }
     if (env[ENV_KEYS.nodeEnv] !== 'production') return;
+    if (env[ENV_KEYS.paymentProvider] === REAL_PROVIDER_MODE) {
+      const forbidden: string[] = [];
+      if (env[ENV_KEYS.paymentGateway] === 'mock-gateway') forbidden.push(ENV_KEYS.paymentGateway);
+      if (env[ENV_KEYS.hyperpayTestMode] !== undefined) forbidden.push(ENV_KEYS.hyperpayTestMode);
+      if (env[ENV_KEYS.hyperpayWebhookKey] === undefined)
+        forbidden.push(ENV_KEYS.hyperpayWebhookKey);
+      for (const key of forbidden) context.addIssue({ code: 'custom', path: [key], message: key });
+    }
     if (env[ENV_KEYS.payoutEncryptionKey] === undefined) {
       context.addIssue({
         code: 'custom',

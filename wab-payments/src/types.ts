@@ -135,6 +135,11 @@ export interface PaymentProvider {
   /** What the configured gateway can do (Phase 2 features are `false` in Phase 1). */
   readonly capabilities: GatewayCapabilities;
   readonly createSession: (request: CreateSessionRequest) => Promise<PaymentSession>;
+  /**
+   * The client-side checkout data of an existing session, rebuilt without any network call (so a
+   * resumed attempt can be handed to the app again). `integrity` is only known at creation.
+   */
+  readonly clientCheckout: (sessionId: string, method?: string) => ClientCheckout;
   readonly verify: (sessionId: string) => Promise<PaymentVerification>;
   readonly refund: (request: RefundRequest) => Promise<RefundResult>;
   readonly getRefund: (refundId: string) => Promise<RefundResult>;
@@ -176,6 +181,7 @@ export interface PaymentGateway {
   readonly name: string;
   readonly capabilities: GatewayCapabilities;
   readonly createCheckout: (request: GatewayCheckoutRequest) => Promise<PaymentSession>;
+  readonly clientCheckout: (sessionId: string, method: string) => ClientCheckout;
   readonly fetchPayment: (sessionId: string) => Promise<PaymentVerification>;
   readonly refund: (request: GatewayRefundRequest) => Promise<RefundResult>;
   readonly fetchRefund: (refundId: string) => Promise<RefundResult>;

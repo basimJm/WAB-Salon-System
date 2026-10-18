@@ -9,6 +9,7 @@ import type { Logger } from '../utils/logger';
 import { FakeOtpProvider, type OtpProvider } from './otp';
 import { createRealOtp } from './otp/real';
 import { FakePaymentProvider, type PaymentProvider } from './payments';
+import { createRealPayments } from './payments/real';
 import { FakeStorageProvider, type StorageProvider } from './storage';
 
 /** What the real integrations need from the running process. */
@@ -102,7 +103,28 @@ export const createProviders = (
         return real;
       },
     ),
-    payments: pick('payments', providers.payments, () => new FakePaymentProvider()),
+    payments: pick(
+      'payments',
+      providers.payments,
+      (): PaymentProvider => new FakePaymentProvider(),
+      () => {
+        const settings = deps?.config.payment;
+        if (deps === undefined || settings === undefined) {
+          throw new ProviderUnavailableError(
+            'payments',
+            'HyperPay credentials or runtime dependencies missing',
+          );
+        }
+        const real = createRealPayments({
+          settings,
+          redis: deps.redis,
+          logger: deps.logger,
+          isProduction,
+        });
+        closers.push(() => real.close());
+        return real;
+      },
+    ),
     analytics: pick('analytics', providers.analytics, () => new FakeAnalyticsProvider()),
   };
   return {

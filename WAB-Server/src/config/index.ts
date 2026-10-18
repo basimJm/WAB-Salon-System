@@ -8,6 +8,7 @@ import {
   envFileName,
   type Environment,
   type LogLevel,
+  type PaymentGateway,
 } from '../constants/env';
 import { DEFAULT_PROVIDER_MODE, type ProviderMode } from '../constants/providers';
 import { envSchema, type RawEnv } from './env.schema';
@@ -26,6 +27,17 @@ export interface NotifierSettings {
     readonly pass?: string;
   };
   readonly from: { readonly address: string; readonly name: string };
+}
+
+/** HyperPay settings of the real payment provider (wab-payments). */
+export interface PaymentSettings {
+  readonly gateway: PaymentGateway;
+  readonly baseUrl?: string;
+  readonly entityId: string;
+  readonly accessToken: string;
+  readonly webhookKey?: string;
+  readonly returnUrl: string;
+  readonly testMode?: 'EXTERNAL' | 'INTERNAL';
 }
 
 /** Firebase settings of the real OTP provider (wab-otp). */
@@ -51,6 +63,8 @@ export interface AppConfig {
   readonly secrets: { readonly payoutEncryptionKey?: string };
   /** Credentials of the real notifier (FCM + SMTP); present only when the notifier is `real`. */
   readonly notifier?: NotifierSettings;
+  /** HyperPay credentials of the real payment provider; present only when it is `real`. */
+  readonly payment?: PaymentSettings;
   /** Firebase project of the real OTP provider; present only when the OTP provider is `real`. */
   readonly otp?: OtpSettings;
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
@@ -130,6 +144,28 @@ const buildOtpSettings = (values: RawEnv): OtpSettings | undefined => {
   });
 };
 
+const buildPaymentSettings = (values: RawEnv): PaymentSettings | undefined => {
+  if (values[ENV_KEYS.paymentProvider] !== 'real') return undefined;
+  const entityId = values[ENV_KEYS.hyperpayEntityId];
+  const accessToken = values[ENV_KEYS.hyperpayAccess];
+  const returnUrl = values[ENV_KEYS.hyperpayReturnUrl];
+  if (entityId === undefined || accessToken === undefined || returnUrl === undefined) {
+    return undefined;
+  }
+  const baseUrl = values[ENV_KEYS.hyperpayBaseUrl];
+  const webhookKey = values[ENV_KEYS.hyperpayWebhookKey];
+  const testMode = values[ENV_KEYS.hyperpayTestMode];
+  return Object.freeze({
+    gateway: values[ENV_KEYS.paymentGateway],
+    entityId,
+    accessToken,
+    returnUrl,
+    ...(baseUrl === undefined ? {} : { baseUrl }),
+    ...(webhookKey === undefined ? {} : { webhookKey }),
+    ...(testMode === undefined ? {} : { testMode }),
+  });
+};
+
 /** Validates the environment and returns an immutable, typed config. Fails fast. */
 export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppConfig => {
   const parsed = envSchema.safeParse(source);
@@ -142,9 +178,11 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   const payoutKey = values[ENV_KEYS.payoutEncryptionKey];
   const notifier = buildNotifierSettings(values);
   const otp = buildOtpSettings(values);
+  const payment = buildPaymentSettings(values);
   return Object.freeze({
     ...(notifier === undefined ? {} : { notifier }),
     ...(otp === undefined ? {} : { otp }),
+    ...(payment === undefined ? {} : { payment }),
     env,
     isProduction: env === 'production',
     port: values[ENV_KEYS.port],

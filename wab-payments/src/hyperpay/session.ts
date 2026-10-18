@@ -7,7 +7,12 @@ import { CHECKOUT_CREATED_PATTERN } from '../constants/resultCodes';
 import { PaymentSdkError } from '../errors';
 import { redact } from '../logger';
 import { decimalToFils, filsToDecimal } from '../money';
-import type { GatewayCheckoutRequest, PaymentSession, PaymentVerification } from '../types';
+import type {
+  ClientCheckout,
+  GatewayCheckoutRequest,
+  PaymentSession,
+  PaymentVerification,
+} from '../types';
 import { classifyResult, paymentStatusOf, requestErrorOf } from './codes';
 import type { HyperPayClient, HyperPayResponse } from './client';
 import type { SessionDirectory } from '../directory';
@@ -103,7 +108,7 @@ export const createCheckout = async (
   ctx: HyperPayContext,
   request: GatewayCheckoutRequest,
 ): Promise<PaymentSession> => {
-  const brands = brandsFor(ctx.settings, request.method);
+  brandsFor(ctx.settings, request.method);
   const response = await ctx.client.post(HYPERPAY_PATHS.checkouts, checkoutForm(ctx, request));
   const body = parseWith(checkoutSchema, response, 'checkout');
   const { code, description } = body.result;
@@ -114,25 +119,35 @@ export const createCheckout = async (
     });
   }
   const integrity = typeof body.integrity === 'string' ? body.integrity : undefined;
-  const { checkoutPageUrl } = ctx.settings;
   return {
     sessionId: body.id,
     status: 'PENDING',
     amountFils: request.amountFils,
     currency: request.currency,
     reference: request.reference,
-    client: {
-      provider: ctx.provider,
-      environment: ctx.environment,
-      checkoutId: body.id,
-      brands,
-      shopperResultUrl: ctx.settings.shopperResultUrl,
-      widgetScriptUrl: `${ctx.settings.baseUrl}${HYPERPAY_PATHS.widgetScript(body.id)}`,
-      ...(checkoutPageUrl === undefined
-        ? {}
-        : { checkoutUrl: `${checkoutPageUrl}${encodeURIComponent(body.id)}` }),
-      ...(integrity === undefined ? {} : { integrity }),
-    },
+    client: clientCheckout(ctx, body.id, request.method, integrity),
+  };
+};
+
+/** What the app needs to open the checkout; derived from config, so it can be rebuilt any time. */
+export const clientCheckout = (
+  ctx: HyperPayContext,
+  checkoutId: string,
+  method: string,
+  integrity?: string,
+): ClientCheckout => {
+  const { checkoutPageUrl } = ctx.settings;
+  return {
+    provider: ctx.provider,
+    environment: ctx.environment,
+    checkoutId,
+    brands: brandsFor(ctx.settings, method),
+    shopperResultUrl: ctx.settings.shopperResultUrl,
+    widgetScriptUrl: `${ctx.settings.baseUrl}${HYPERPAY_PATHS.widgetScript(checkoutId)}`,
+    ...(checkoutPageUrl === undefined
+      ? {}
+      : { checkoutUrl: `${checkoutPageUrl}${encodeURIComponent(checkoutId)}` }),
+    ...(integrity === undefined ? {} : { integrity }),
   };
 };
 

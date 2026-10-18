@@ -207,6 +207,19 @@ describe('createSession (HyperPay)', () => {
   });
 });
 
+describe('clientCheckout (HyperPay)', () => {
+  it('is derived from config and matches what createSession returned (minus integrity)', async () => {
+    const { http, requests } = scripted(() => reply(200, CHECKOUT_OK));
+    const payments = hyperpayPayments(http);
+    const session = await payments.createSession(SESSION);
+    expect(payments.clientCheckout(session.sessionId)).toEqual({
+      ...session.client,
+      integrity: undefined,
+    });
+    expect(requests).toHaveLength(1);
+  });
+});
+
 describe('verify (HyperPay)', () => {
   const verify = (
     response: ReturnType<typeof reply>,
