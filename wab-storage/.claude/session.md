@@ -7,10 +7,10 @@
 
 ## Current task
 
-### STO-009 — Quality gate: loop, smoke, README, Integration.md
-- Branch: `feat/sto-009-quality`
+### STO-010 — Publish preparation @wab/storage
+- Branch: `feat/sto-010-publish`
 - Status: IN REVIEW
-- Acceptance criteria: Loop test (100 lifecycles, 20 concurrent, wrong uploads injected, no leftovers) on memory and on the real SDK; consumer smoke (CJS+ESM tarball); README; Integration.md
+- Acceptance criteria: package renamed @wab/storage 0.1.0, files, publishConfig (GitHub Packages, restricted), .npmrc scope, CHANGELOG, prepublishOnly=verify, npm pack dry-run lists 9 files (dist, README, CHANGELOG, package.json); NOT published
 - Tests: `npm run verify` green (typecheck, lint, format, jest coverage gate 100/95/95, build, package smoke, loop)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — every src file has a test file; coverage gate green; loop leak check = zero objects left
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — owner runs npm publish with a registry token; consumers use file:../wab-storage until then (same as @wab/notifications)

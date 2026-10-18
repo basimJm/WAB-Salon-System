@@ -147,3 +147,4 @@ Implementation notes: `createStorage(options)` returns `Storage` = port + `creat
 | 2026-10-18 | 0.1.0 | STO-008: ensureDevBuckets, SAMPLE_FILES/UPLOAD_FIXTURES, adapter parity tests |
 | 2026-10-18 | 0.1.0 | STO-009: loop test (100 lifecycles, 20 concurrent, memory + real SDK), consumer smoke test, README. |
 | 2026-10-18 | 0.1.0 | STO-009: loop test, package smoke, README, Integration.md status |
+| 2026-10-18 | 0.1.0 | STO-010: prepared for publish as @wab/storage (package.json, .npmrc, CHANGELOG); not published |
