@@ -31,7 +31,7 @@
 | CUS-001 | Project rules (`CLAUDE.md`: Clean Architecture + MVI, no hardcoding, AR+EN, 300 lines, variants, CI) | `(merged before backlog)` | — | DONE | T-024 |
 | CUS-002 | Build variants (Android dev/prod × debug/release, iOS Debug/Release-Dev/Prod schemes) + GitHub Actions CI (build, lint, policy checks, secret scan) | `(merged before backlog)` | CUS-001 | DONE | T-025; `.github/workflows/customer-ci.yml` |
 | CUS-003 | Policy checks with tests (`scripts/ci/policy_checks.py`: hardcoded, quality, lazy-list keys, lifecycle collection) + detekt + shrinking baselines | `(merged before backlog)` | CUS-002 | DONE | T-025; baselines only shrink |
-| CUS-004 | Firebase facade: `Analytics`, `Crashlytics`, `PhoneAuth`, `Messaging` behind `core` interfaces with fakes; google-services / plist wired per flavor; nothing Firebase-specific outside `core/notification`, `core/analytics` | `feat/cus-004-firebase-facade` | CUS-002, CUS-023 | TODO | Root `CLAUDE.md` §6; PRD §14; dev project `wab-dev-397ab`, prod `wab-prod-9c58f` (owner registers the apps) |
+| CUS-004 | Firebase facade: `Analytics`, `Crashlytics`, `PhoneAuth`, `Messaging` behind `core` interfaces with fakes; google-services / plist wired per flavor; nothing Firebase-specific outside `core/notification`, `core/analytics` | `feat/cus-004-firebase-facade` | CUS-002, CUS-023 | IN REVIEW | Root `CLAUDE.md` §6; PRD §14; dev project `wab-dev-397ab`, prod `wab-prod-9c58f` (owner registers the apps) |
 
 ## Phase 2 — Structure, contract tooling, platform facades
 | ID | Task | Branch | Needs | Status | Notes |
@@ -61,7 +61,7 @@
 | CUS-020 | Form kit: phone field with country picker (flag, dial code, regex from server), OTP code boxes (N from `otpLength`, never hardcoded), dropdown (city/area dependent), inline validation messages AR/EN, disabled-until-valid buttons | `feat/cus-020-form-kit` | CUS-015 | DONE | PRD §11, S11–S13 |
 | CUS-021 | Sheets and dialogs: full-screen bottom sheet, auth-gate dialog ("You need to log in"), confirmation dialog, filter chips FlowRow with remove, step indicator, sticky bottom action bar | `feat/cus-021-sheets-dialogs` | CUS-015 | DONE | PRD §3.12, S05, S16; Design Script §1.3 |
 | CUS-022 | Media: image loading with cache + placeholders + default avatar vector, gallery grid with video badge, media viewer (swipe, pinch-zoom, video player), banner carousel (auto-swipe) | `feat/cus-022-media` | CUS-015 | DONE | PRD §3.14, S03, S07, S10 |
-| CUS-023 | Adaptive scaffolds: bottom navigation (4 tabs) / navigation rail on medium+ or landscape, content max width, insets (IME, cutout), previews portrait/landscape/tablet/font 2.0/RTL/dark for every state | `feat/cus-023-adaptive-scaffold` | CUS-018 | IN REVIEW | `CLAUDE.md` §7; PRD §7.1 |
+| CUS-023 | Adaptive scaffolds: bottom navigation (4 tabs) / navigation rail on medium+ or landscape, content max width, insets (IME, cutout), previews portrait/landscape/tablet/font 2.0/RTL/dark for every state | `feat/cus-023-adaptive-scaffold` | CUS-018 | DONE | `CLAUDE.md` §7; PRD §7.1 |
 
 ## Phase 4 — Features
 | ID | Task | Branch | Needs | Status | Notes |

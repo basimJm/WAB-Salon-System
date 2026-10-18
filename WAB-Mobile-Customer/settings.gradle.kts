@@ -45,6 +45,7 @@ include(
     ":core:ui",
     ":core:mvi",
     ":core:analytics",
+    ":core:firebase",
     ":core:notification",
     ":core:security",
     ":core:design-system",

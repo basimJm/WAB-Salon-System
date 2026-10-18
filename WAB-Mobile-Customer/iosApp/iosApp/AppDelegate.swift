@@ -11,6 +11,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         FirebaseApp.configure()
+        FirebaseBridgeRegistration.register()
         MainViewControllerKt.doInitKoin()
 
         Messaging.messaging().delegate = self
@@ -31,6 +32,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let token = fcmToken else { return }
         MainViewControllerKt.saveFcmToken(token: token)
+        PushTokenRelay.shared.publish(token: token)
     }
 
     func userNotificationCenter(
