@@ -62,6 +62,17 @@ export const DEFAULT_FIREBASE = {
   /** Used when the key endpoint sends no usable Cache-Control. */
   fallbackKeyTtlSec: 3600,
   minKeyTtlSec: 60,
+  /** Cached keys may serve this long past their expiry when the key endpoint is down. */
+  maxStaleKeySec: 86_400,
+  /** Largest `sub` accepted (Firebase uids are at most 128 characters). */
+  maxSubjectLength: 128,
+  /** Claim names of a Firebase ID token. */
+  claims: {
+    phone: 'phone_number',
+    authTime: 'auth_time',
+    firebase: 'firebase',
+    provider: 'sign_in_provider',
+  },
 } as const;
 
 /** Key prefixes of the limiter store (the consumer may add its own namespace in front). */

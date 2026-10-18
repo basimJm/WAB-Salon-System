@@ -128,3 +128,4 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/analytics` real mode
 | 2026-10-18 | 0.1.0 | ANA-002 kernel: AnalyticsError + codes, zod options with prod rules, redacting logger, range guard, retry. |
 | 2026-10-18 | 0.1.0 | ANA-003 port + memory adapters + `createAnalytics(options, overrides)`; funnel/cohorts/journey/overview pending (ANA-005). |
 | 2026-10-18 | 0.1.0 | ANA-004 Mongo adapters (event store + identity links) over an injected native collection with id codec. |
+| 2026-10-18 | 0.1.0 | ANA-005 queries: funnel, cohorts, journey, overview on the ports; MemoryWarehouse. |

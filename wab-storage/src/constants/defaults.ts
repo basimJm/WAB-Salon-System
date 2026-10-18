@@ -12,6 +12,7 @@ export const DEFAULT_SIGNED_URL_MAX_TTL_SEC = 600;
 export const DELETE_BATCH_SIZE = 1_000;
 /** Largest object `read` returns; bigger objects are refused instead of exhausting memory. */
 export const DEFAULT_READ_MAX_BYTES = 50 * 1024 * 1024;
+export const DEFAULT_PUBLIC_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 /** Bytes inspected to detect the real file type. */
 export const MAGIC_BYTES_LENGTH = 32;
 

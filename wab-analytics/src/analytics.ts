@@ -1,5 +1,6 @@
 import { MemoryEventStore } from './adapters/memory/eventStore';
 import { MemoryIdentityStore } from './adapters/memory/identityStore';
+import { MemoryWarehouse } from './adapters/memory/warehouse';
 import { MongoEventStore } from './adapters/mongo/eventStore';
 import { MongoIdentityStore } from './adapters/mongo/identityStore';
 import type { IdCodec, MongoCollectionLike } from './adapters/mongo/types';
@@ -14,10 +15,14 @@ export interface Adapters {
   readonly warehouse?: WarehouseQuery;
 }
 
+const buildWarehouse = (options: ResolvedOptions): { warehouse?: WarehouseQuery } =>
+  options.warehouse.provider === 'memory' ? { warehouse: new MemoryWarehouse() } : {};
+
 /** Chooses the adapters named by the options. Adding a vendor = one more branch here. */
 export const buildAdapters = (options: ResolvedOptions): Adapters => {
+  const warehouse = buildWarehouse(options);
   if (options.provider === 'memory' || options.mongo === undefined) {
-    return { events: new MemoryEventStore(), identity: new MemoryIdentityStore() };
+    return { events: new MemoryEventStore(), identity: new MemoryIdentityStore(), ...warehouse };
   }
   const { mongo } = options;
   const common = { maxTimeMs: options.queryTimeoutMs, ensureIndexes: mongo.ensureIndexes };
@@ -31,6 +36,7 @@ export const buildAdapters = (options: ResolvedOptions): Adapters => {
       ...common,
       collection: mongo.identityLinks as MongoCollectionLike,
     }),
+    ...warehouse,
   };
 };
 

@@ -215,10 +215,10 @@ describe('createOtpVerifier', () => {
     expect(close).toHaveBeenCalledTimes(1);
   });
 
-  it('refuses unavailable or unconfigured providers at creation', () => {
-    expect(() =>
-      createOtpVerifier({ environment: 'dev', provider: 'firebase', firebase: { projectId: 'p' } }),
-    ).toThrow('not available');
+  it('refuses unconfigured providers at creation', () => {
+    expect(() => createOtpVerifier({ environment: 'dev', provider: 'firebase' })).toThrow(
+      'projectId',
+    );
     expect(() => createOtpVerifier({ environment: 'prod', provider: 'fake' })).toThrow('refused');
   });
 });
