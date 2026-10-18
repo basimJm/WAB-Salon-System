@@ -7,7 +7,7 @@
 | Package | `wab-analytics` |
 | Type | Node.js package (TypeScript, npm), server only |
 | BRD | `docs/WAB_Package_Analytics_BRD.md` |
-| Version | 0.0.0 (design only — no code yet) |
+| Version | 0.1.0 (in development) |
 | Node | >= 22, TypeScript strict, ESM + CJS builds |
 | Server counterpart in WAB | `WAB-Server/src/providers/analytics` (interface already in WAB-Server, fake only today) |
 
@@ -109,8 +109,8 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/analytics` real mode
 ## 12. Implementation status
 | Item | Status |
 |---|---|
-| Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ⬜ |
-| Shared kernel (errors, config, http/retry, logger) | ⬜ |
+| Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ |
+| Shared kernel (errors, config, http/retry, logger) | ✅ |
 | Adapter: memory — in-memory events + fixtures for dev/tests | ⬜ |
 | Adapter: mongo — event store: write events, count/group queries, identity links | ⬜ |
 | Adapter: bigquery — Firebase Analytics/Crashlytics export queries | ⬜ |
@@ -124,3 +124,5 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/analytics` real mode
 | Date | Version | Change |
 |---|---|---|
 | 2026-10-14 | 0.0.0 | Design document created from the BRD; no code yet. |
+| 2026-10-18 | 0.1.0 | ANA-001 scaffold: tooling, package `@wab/analytics`, smoke and loop harness. |
+| 2026-10-18 | 0.1.0 | ANA-002 kernel: AnalyticsError + codes, zod options with prod rules, redacting logger, range guard, retry. |

@@ -18,15 +18,34 @@ TEST_MARKERS = ("/test/", "/tests/", "__tests__/", "commonTest/", "androidUnitTe
 IGNORED_PREFIXES = (".claude/", "docs/")
 
 
+_ROOT_OVERRIDE = None
+
+
 def project_dir():
-    return os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
+    """The repository checkout the command runs in (a git worktree has its own branch and session files)."""
+    return _ROOT_OVERRIDE or os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
+
+
+def worktree_root(cwd):
+    """Top-level folder of the git checkout containing `cwd`, or '' when it cannot be resolved."""
+    try:
+        out = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=cwd, capture_output=True, text=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return out.stdout.strip() if out.returncode == 0 else ""
 
 
 def read_input():
+    """Parse the hook payload; its `cwd` (the Bash tool's directory) selects the checkout the rules apply to."""
+    global _ROOT_OVERRIDE
     try:
-        return json.load(sys.stdin)
+        data = json.load(sys.stdin)
     except (ValueError, OSError):
         return {}
+    cwd = data.get("cwd") if isinstance(data, dict) else None
+    if isinstance(cwd, str) and os.path.isdir(cwd):
+        _ROOT_OVERRIDE = worktree_root(cwd) or None
+    return data
 
 
 def git(*args):
