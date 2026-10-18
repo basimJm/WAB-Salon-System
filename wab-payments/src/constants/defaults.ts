@@ -29,6 +29,9 @@ export const DEFAULT_METHODS: readonly string[] = ['CARD'];
 export const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9:_.-]{8,128}$/;
 /** Our own reference for an attempt (maps to the gateway's merchant transaction id). */
 export const REFERENCE_PATTERN = /^[A-Za-z0-9_.:-]{1,64}$/;
+export const SUB_MERCHANT_ID_PATTERN = /^[A-Za-z0-9_.:-]{1,64}$/;
+/** Phase 2: at most this many split destinations on one checkout. */
+export const MAX_DESTINATIONS = 10;
 export const SESSION_ID_PATTERN = /^[A-Za-z0-9_.:-]{1,128}$/;
 
 export const DEFAULT_RETRY = {

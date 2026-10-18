@@ -63,3 +63,11 @@
 - Tests: npm run verify green (226 tests incl. end-to-end mock webhook delivery)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Assumed (unverified): body is the hex ciphertext or {encryptedBody}; payload carries ndc = checkout id. Replay dedupe now happens after authentication.
+
+### PAY-008 — Phase 2 port readiness
+- Branch: `feat/pay-008-phase2-port`
+- Status: IN REVIEW
+- Acceptance: Optional destinations on createSession and subMerchantId on refund, validated and refused with PAYMENT_FEATURE_UNSUPPORTED on gateways without splitPayments; provider.capabilities exposed; Phase 1 behaviour unchanged.
+- Tests: npm run verify green (236 tests)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — No HyperPay split implementation (needs marketplace product + KYC fields: owner decision); only the port and capability flags.

@@ -17,6 +17,8 @@ import type {
 } from './types';
 import {
   assertCurrency,
+  assertDestinations,
+  assertSubMerchantRefund,
   assertRefundRequest,
   assertSessionId,
   assertSessionRequest,
@@ -67,10 +69,12 @@ export const createPaymentProvider = (deps: ProviderDeps): PaymentProvider => {
   const cancel = gateway.cancelSession?.bind(gateway);
 
   return {
+    capabilities: gateway.capabilities,
     createSession: (request: CreateSessionRequest): Promise<PaymentSession> =>
       safe(async () => {
         assertSessionRequest(request);
         assertCurrency(request.currency, config.currency);
+        assertDestinations(request.destinations, request.amountFils, gateway.capabilities);
         const method = resolveMethod(request.method, config.methods);
         const { idempotencyKey, ...rest } = request;
         const fingerprint = fingerprintOf({ ...rest, currency: config.currency, method });
@@ -111,6 +115,7 @@ export const createPaymentProvider = (deps: ProviderDeps): PaymentProvider => {
     refund: (request: RefundRequest): Promise<RefundResult> =>
       safe(async () => {
         assertRefundRequest(request);
+        assertSubMerchantRefund(request.subMerchantId, gateway.capabilities);
         const { idempotencyKey, ...rest } = request;
         // Never blind-retried: the adapter finds an earlier refund with this key before sending.
         const result = await store.run(
