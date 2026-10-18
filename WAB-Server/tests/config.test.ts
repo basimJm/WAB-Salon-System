@@ -20,6 +20,7 @@ const REAL_PROVIDERS = {
   NOTIFIER_PROVIDER: 'real',
   PAYMENT_PROVIDER: 'real',
   ANALYTICS_PROVIDER: 'real',
+  FIREBASE_PROJECT_ID: 'wab-prod-test',
   FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
   SMTP_HOST: 'smtp.example.test',
   EMAIL_FROM_ADDRESS: 'noreply@example.test',
@@ -88,7 +89,9 @@ describe('loadConfig', () => {
             SMTP_HOST: 'smtp.example.test',
             EMAIL_FROM_ADDRESS: 'noreply@example.test',
           }
-        : {};
+        : key === ENV_KEYS.otpProvider
+          ? { FIREBASE_PROJECT_ID: 'wab-dev-test' }
+          : {};
     expect(loadConfig(validEnv({ [key]: 'real', ...credentials })).providers).toEqual({
       ...ALL_FAKE_MODES,
       [field]: 'real',
@@ -183,6 +186,47 @@ describe('loadConfig', () => {
         'EMAIL_FROM_ADDRESS',
       ]);
       expect(loadConfig(validEnv()).notifier).toBeUndefined();
+    });
+  });
+
+  describe('real OTP settings', () => {
+    const base = validEnv({ OTP_PROVIDER: 'real' });
+
+    it('names the missing Firebase project key, never a value', () => {
+      expect(invalidKeysOf(base)).toEqual(['FIREBASE_PROJECT_ID']);
+    });
+
+    it('builds typed settings, with the emulator host only when given', () => {
+      expect(loadConfig({ ...base, FIREBASE_PROJECT_ID: 'wab-dev-test' }).otp).toEqual({
+        firebase: { projectId: 'wab-dev-test' },
+      });
+      expect(
+        loadConfig({
+          ...base,
+          FIREBASE_PROJECT_ID: 'wab-dev-test',
+          FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+        }).otp,
+      ).toEqual({
+        firebase: { projectId: 'wab-dev-test', authEmulatorHost: 'localhost:9099' },
+      });
+    });
+
+    it('rejects a malformed emulator host and is absent for the fake provider', () => {
+      expect(
+        invalidKeysOf({ ...base, FIREBASE_PROJECT_ID: 'p', FIREBASE_AUTH_EMULATOR_HOST: 'nope' }),
+      ).toEqual(['FIREBASE_AUTH_EMULATOR_HOST']);
+      expect(loadConfig(validEnv()).otp).toBeUndefined();
+      expect(loadConfig(validEnv({ FIREBASE_PROJECT_ID: 'p' })).otp).toBeUndefined();
+    });
+
+    it('refuses the Firebase emulator in production', () => {
+      const production = validEnv({
+        ...REAL_PROVIDERS,
+        ...PAYOUT_KEY,
+        NODE_ENV: 'production',
+        FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+      });
+      expect(invalidKeysOf(production)).toEqual(['FIREBASE_AUTH_EMULATOR_HOST']);
     });
   });
 

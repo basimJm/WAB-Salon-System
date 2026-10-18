@@ -12,6 +12,8 @@ export const DEFAULT_LOG_LEVEL: LogLevel = 'info';
 export const PORT_MIN = 1;
 export const PORT_MAX = 65535;
 
+/** `host:port` of the Firebase Auth emulator. */
+export const FIREBASE_EMULATOR_HOST_PATTERN = /^[A-Za-z0-9.-]+:\d{1,5}$/;
 export const MONGO_URI_PATTERN = /^mongodb(\+srv)?:\/\/\S+$/;
 export const REDIS_URL_PATTERN = /^rediss?:\/\/\S+$/;
 
@@ -38,6 +40,10 @@ export const ENV_KEYS = {
   analyticsProvider: 'ANALYTICS_PROVIDER',
   /** Firebase service-account key as JSON text (secret). Needed when NOTIFIER_PROVIDER=real. */
   fcmServiceAccountJson: 'FCM_SERVICE_ACCOUNT_JSON',
+  /** Firebase project whose Phone Auth ID tokens are accepted (dev and prod use different projects). Needed when OTP_PROVIDER=real. */
+  firebaseProjectId: 'FIREBASE_PROJECT_ID',
+  /** Dev only: Firebase Auth emulator `host:port`; refused in production. */
+  firebaseAuthEmulatorHost: 'FIREBASE_AUTH_EMULATOR_HOST',
   /** Optional: must equal the key's project (catches dev/prod key mix-ups). */
   fcmProjectId: 'FCM_PROJECT_ID',
   /** `true` validates pushes without delivering them (dev only). */
@@ -60,6 +66,9 @@ export const PROVIDER_ENV_KEYS = [
   ENV_KEYS.paymentProvider,
   ENV_KEYS.analyticsProvider,
 ] as const;
+
+/** Keys that must be present when the OTP provider is `real`. */
+export const OTP_REAL_REQUIRED_KEYS = [ENV_KEYS.firebaseProjectId] as const;
 
 /** Keys that must be present when the notifier provider is `real`. */
 export const NOTIFIER_REAL_REQUIRED_KEYS = [
