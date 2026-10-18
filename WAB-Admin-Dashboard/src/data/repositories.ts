@@ -13,6 +13,7 @@ import type { SubscriptionsRepository } from '@/domain/subscriptions/subscriptio
 import type { PlacementsRepository } from '@/domain/placements/placements';
 import type { CampaignsRepository } from '@/domain/campaigns/campaigns';
 import type { AlertsRepository } from '@/domain/alerts/alerts';
+import type { AnalyticsRepository } from '@/domain/analytics/analytics';
 import type { SalonsRepository } from '@/domain/salons/salons';
 import type { CatalogRepository } from '@/domain/catalog/catalog';
 import type { ContentRepository } from '@/domain/content/content';
@@ -36,6 +37,7 @@ import { RemoteSubscriptionsRepository } from './subscriptions/RemoteSubscriptio
 import { RemotePlacementsRepository } from './placements/RemotePlacementsRepository';
 import { RemoteCampaignsRepository } from './campaigns/RemoteCampaignsRepository';
 import { RemoteAlertsRepository } from './alerts/RemoteAlertsRepository';
+import { RemoteAnalyticsRepository } from './analytics/RemoteAnalyticsRepository';
 import { RemoteSalonsRepository } from './salons/RemoteSalonsRepository';
 import { RemoteCatalogRepository } from './catalog/RemoteCatalogRepository';
 import { RemoteContentRepository } from './content/RemoteContentRepository';
@@ -51,6 +53,7 @@ export interface Repositories {
   readonly banners: BannersRepository;
   readonly catalog: CatalogRepository;
   readonly salons: SalonsRepository;
+  readonly analytics: AnalyticsRepository;
   readonly alerts: AlertsRepository;
   readonly campaigns: CampaignsRepository;
   readonly placements: PlacementsRepository;
@@ -74,6 +77,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
   const banners = new RemoteBannersRepository(api);
   const catalog = new RemoteCatalogRepository(api);
   const salons = new RemoteSalonsRepository(api);
+  const analytics = new RemoteAnalyticsRepository(api);
   const alerts = new RemoteAlertsRepository(api);
   const campaigns = new RemoteCampaignsRepository(api);
   const placements = new RemotePlacementsRepository(api);
@@ -98,6 +102,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
       banners,
       catalog,
       salons,
+      analytics,
       alerts,
       campaigns,
       placements,
@@ -121,6 +126,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
     banners,
     catalog,
     salons,
+    analytics,
     alerts,
     campaigns,
     placements,

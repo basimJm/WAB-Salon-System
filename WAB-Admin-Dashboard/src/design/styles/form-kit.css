@@ -97,3 +97,9 @@
   block-size: auto;
   border-radius: var(--radius-md);
 }
+
+.wab-kpi-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--size-field-min)), 1fr));
+}

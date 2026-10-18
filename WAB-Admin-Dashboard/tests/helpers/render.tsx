@@ -35,6 +35,7 @@ import { RemoteSubscriptionsRepository } from '@/data/subscriptions/RemoteSubscr
 import { RemotePlacementsRepository } from '@/data/placements/RemotePlacementsRepository';
 import { RemoteCampaignsRepository } from '@/data/campaigns/RemoteCampaignsRepository';
 import { RemoteAlertsRepository } from '@/data/alerts/RemoteAlertsRepository';
+import { RemoteAnalyticsRepository } from '@/data/analytics/RemoteAnalyticsRepository';
 import { RemoteSalonsRepository } from '@/data/salons/RemoteSalonsRepository';
 import { RemoteLocationsRepository } from '@/data/locations/RemoteLocationsRepository';
 import { RemoteSettingsRepository } from '@/data/settings/RemoteSettingsRepository';
@@ -78,6 +79,7 @@ export function makeContainer(
       banners: new RemoteBannersRepository(api),
       catalog: new RemoteCatalogRepository(api),
       salons: new RemoteSalonsRepository(api),
+      analytics: new RemoteAnalyticsRepository(api),
       alerts: new RemoteAlertsRepository(api),
       campaigns: new RemoteCampaignsRepository(api),
       placements: new RemotePlacementsRepository(api),

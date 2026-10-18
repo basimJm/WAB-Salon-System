@@ -35,6 +35,10 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
   '/content/recommended': lazy(() => import('@/presentation/placements/PlacementsPage')),
   [ROUTES.push]: lazy(() => import('@/presentation/campaigns/CampaignsPage')),
   [ROUTES.alerts]: lazy(() => import('@/presentation/alerts/AlertsPage')),
+  [ROUTES.liveOverview]: lazy(() => import('@/presentation/analytics/LiveOverviewPage')),
+  '/analytics/bookings': lazy(() => import('@/presentation/analytics/BookingsAnalyticsPage')),
+  '/analytics/payments': lazy(() => import('@/presentation/analytics/PaymentsAnalyticsPage')),
+  '/analytics/errors': lazy(() => import('@/presentation/analytics/ErrorsAnalyticsPage')),
   '/settings/versions': lazy(() => import('@/presentation/appconfig/VersionsPage')),
   '/settings/maintenance': lazy(() => import('@/presentation/appconfig/MaintenancePage')),
 };
