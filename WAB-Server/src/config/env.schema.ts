@@ -11,6 +11,7 @@ import {
   DEFAULT_SMTP_PORT,
   DEFAULT_EMAIL_FROM_NAME,
   NOTIFIER_REAL_REQUIRED_KEYS,
+  ANALYTICS_PRODUCTION_REQUIRED_KEYS,
   MONGO_URI_PATTERN,
   PORT_MAX,
   PORT_MIN,
@@ -34,6 +35,16 @@ const splitList = (value: string): string[] =>
 /** Raw environment variables → validated, typed values. Secrets have no defaults. */
 const booleanText = z.enum(['true', 'false']).transform((value) => value === 'true');
 const providerMode = z.enum(PROVIDER_MODES).optional();
+
+/** A JSON object given as text (service-account keys); the content is never echoed. */
+const isJsonObject = (text: string): boolean => {
+  try {
+    const parsed: unknown = JSON.parse(text);
+    return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
+  } catch {
+    return false;
+  }
+};
 
 export const envSchema = z
   .object({
@@ -73,6 +84,12 @@ export const envSchema = z
     [ENV_KEYS.smtpPass]: z.string().min(1).optional(),
     [ENV_KEYS.emailFromAddress]: z.email().optional(),
     [ENV_KEYS.emailFromName]: z.string().min(1).default(DEFAULT_EMAIL_FROM_NAME),
+    [ENV_KEYS.analyticsBigqueryProjectId]: z.string().min(1).optional(),
+    [ENV_KEYS.analyticsBigqueryDataset]: z.string().min(1).optional(),
+    [ENV_KEYS.analyticsBigqueryLocation]: z.string().min(1).optional(),
+    [ENV_KEYS.analyticsBigqueryCredentialsJson]: z.string().refine(isJsonObject).optional(),
+    [ENV_KEYS.analyticsBigqueryCrashTable]: z.string().min(1).optional(),
+    [ENV_KEYS.analyticsBigqueryMaxBytesBilled]: z.coerce.number().int().positive().optional(),
   })
   // Production never runs on fakes, and never guesses: every provider must be named `real`.
   .superRefine((env, context) => {
@@ -85,6 +102,25 @@ export const envSchema = z
       const pass = env[ENV_KEYS.smtpPass];
       if ((user === undefined) !== (pass === undefined)) {
         context.addIssue({ code: 'custom', path: [ENV_KEYS.smtpPass], message: ENV_KEYS.smtpPass });
+      }
+    }
+    // BigQuery needs project and dataset together; production needs the whole group.
+    if (env[ENV_KEYS.analyticsProvider] === REAL_PROVIDER_MODE) {
+      const project = env[ENV_KEYS.analyticsBigqueryProjectId];
+      const dataset = env[ENV_KEYS.analyticsBigqueryDataset];
+      if ((project === undefined) !== (dataset === undefined)) {
+        context.addIssue({
+          code: 'custom',
+          path: [ENV_KEYS.analyticsBigqueryDataset],
+          message: ENV_KEYS.analyticsBigqueryDataset,
+        });
+      }
+      if (env[ENV_KEYS.nodeEnv] === 'production') {
+        for (const key of ANALYTICS_PRODUCTION_REQUIRED_KEYS) {
+          if (env[key] === undefined) {
+            context.addIssue({ code: 'custom', path: [key], message: key });
+          }
+        }
       }
     }
     if (env[ENV_KEYS.nodeEnv] !== 'production') return;

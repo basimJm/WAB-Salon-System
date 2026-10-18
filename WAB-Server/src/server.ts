@@ -10,6 +10,7 @@ import { SOCKET_ROOMS } from './constants/sockets';
 import { createAlertsService } from './domain/alerts/alerts.service';
 import { AlertsRepository } from './repositories/alerts.repository';
 import { ALERT_SOCKET_EVENT } from './constants/alerts';
+import mongoose from 'mongoose';
 import { createAnalyticsService } from './domain/analytics/analytics.service';
 import { createMongoAnalytics } from './providers/analytics';
 import { createServerEvents } from './domain/events';
@@ -289,6 +290,7 @@ const buildServices = (
     redis,
     logger,
     config,
+    mongo: mongoose.connection,
   });
   const phoneServices = {
     countries: new CountriesRepository(),

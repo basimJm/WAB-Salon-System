@@ -5,6 +5,11 @@
 !wab-notifications/tsconfig.json
 !wab-notifications/tsup.config.ts
 !wab-notifications/src
+!wab-analytics/package.json
+!wab-analytics/package-lock.json
+!wab-analytics/tsconfig.json
+!wab-analytics/tsup.config.ts
+!wab-analytics/src
 !WAB-Server/package.json
 !WAB-Server/package-lock.json
 !WAB-Server/tsconfig.json

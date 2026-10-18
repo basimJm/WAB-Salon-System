@@ -28,6 +28,19 @@ export interface NotifierSettings {
   readonly from: { readonly address: string; readonly name: string };
 }
 
+/** BigQuery export of Firebase Analytics / Crashlytics (analytics provider `real`). */
+export interface AnalyticsSettings {
+  readonly bigquery?: {
+    readonly projectId: string;
+    readonly dataset: string;
+    readonly location?: string;
+    /** Service-account key as JSON text (secret). */
+    readonly credentialsJson?: string;
+    readonly crashTable?: string;
+    readonly maxBytesBilled?: number;
+  };
+}
+
 export interface AppConfig {
   readonly env: Environment;
   readonly isProduction: boolean;
@@ -43,6 +56,8 @@ export interface AppConfig {
   readonly secrets: { readonly payoutEncryptionKey?: string };
   /** Credentials of the real notifier (FCM + SMTP); present only when the notifier is `real`. */
   readonly notifier?: NotifierSettings;
+  /** Settings of the real analytics provider; present only when it is `real`. */
+  readonly analytics?: AnalyticsSettings;
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
   readonly providers: {
     readonly otp: ProviderMode;
@@ -107,6 +122,27 @@ const buildNotifierSettings = (values: RawEnv): NotifierSettings | undefined => 
   });
 };
 
+const buildAnalyticsSettings = (values: RawEnv): AnalyticsSettings | undefined => {
+  if (values[ENV_KEYS.analyticsProvider] !== 'real') return undefined;
+  const projectId = values[ENV_KEYS.analyticsBigqueryProjectId];
+  const dataset = values[ENV_KEYS.analyticsBigqueryDataset];
+  if (projectId === undefined || dataset === undefined) return Object.freeze({});
+  const location = values[ENV_KEYS.analyticsBigqueryLocation];
+  const credentialsJson = values[ENV_KEYS.analyticsBigqueryCredentialsJson];
+  const crashTable = values[ENV_KEYS.analyticsBigqueryCrashTable];
+  const maxBytesBilled = values[ENV_KEYS.analyticsBigqueryMaxBytesBilled];
+  return Object.freeze({
+    bigquery: Object.freeze({
+      projectId,
+      dataset,
+      ...(location === undefined ? {} : { location }),
+      ...(credentialsJson === undefined ? {} : { credentialsJson }),
+      ...(crashTable === undefined ? {} : { crashTable }),
+      ...(maxBytesBilled === undefined ? {} : { maxBytesBilled }),
+    }),
+  });
+};
+
 /** Validates the environment and returns an immutable, typed config. Fails fast. */
 export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppConfig => {
   const parsed = envSchema.safeParse(source);
@@ -118,8 +154,10 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   const env = values[ENV_KEYS.nodeEnv];
   const payoutKey = values[ENV_KEYS.payoutEncryptionKey];
   const notifier = buildNotifierSettings(values);
+  const analytics = buildAnalyticsSettings(values);
   return Object.freeze({
     ...(notifier === undefined ? {} : { notifier }),
+    ...(analytics === undefined ? {} : { analytics }),
     env,
     isProduction: env === 'production',
     port: values[ENV_KEYS.port],

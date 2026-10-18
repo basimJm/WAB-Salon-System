@@ -20,6 +20,9 @@ const REAL_PROVIDERS = {
   NOTIFIER_PROVIDER: 'real',
   PAYMENT_PROVIDER: 'real',
   ANALYTICS_PROVIDER: 'real',
+  ANALYTICS_BIGQUERY_PROJECT_ID: 'wab-prod',
+  ANALYTICS_BIGQUERY_DATASET: 'analytics_1',
+  ANALYTICS_BIGQUERY_CREDENTIALS_JSON: '{"client_email":"a@b.c"}',
   FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
   SMTP_HOST: 'smtp.example.test',
   EMAIL_FROM_ADDRESS: 'noreply@example.test',
@@ -119,6 +122,80 @@ describe('loadConfig', () => {
       notifier: 'real',
       payments: 'real',
       analytics: 'real',
+    });
+  });
+
+  describe('real analytics settings', () => {
+    const base = validEnv({ ANALYTICS_PROVIDER: 'real' });
+    const bigquery = {
+      ANALYTICS_BIGQUERY_PROJECT_ID: 'wab-prod',
+      ANALYTICS_BIGQUERY_DATASET: 'analytics_1',
+    };
+
+    it('works without BigQuery outside production', () => {
+      expect(loadConfig(base).analytics).toEqual({});
+      expect(loadConfig(validEnv()).analytics).toBeUndefined();
+    });
+
+    it('builds typed BigQuery settings with the optional values', () => {
+      const config = loadConfig({
+        ...base,
+        ...bigquery,
+        ANALYTICS_BIGQUERY_LOCATION: 'EU',
+        ANALYTICS_BIGQUERY_CREDENTIALS_JSON: '{"client_email":"a@b.c"}',
+        ANALYTICS_BIGQUERY_CRASH_TABLE: 'com_wab_ANDROID',
+        ANALYTICS_BIGQUERY_MAX_BYTES_BILLED: '5000000000',
+      });
+      expect(config.analytics).toEqual({
+        bigquery: {
+          projectId: 'wab-prod',
+          dataset: 'analytics_1',
+          location: 'EU',
+          credentialsJson: '{"client_email":"a@b.c"}',
+          crashTable: 'com_wab_ANDROID',
+          maxBytesBilled: 5_000_000_000,
+        },
+      });
+      expect(loadConfig({ ...base, ...bigquery }).analytics).toEqual({
+        bigquery: { ...{ projectId: 'wab-prod', dataset: 'analytics_1' } },
+      });
+    });
+
+    it('needs project and dataset together and a JSON object as credentials', () => {
+      expect(invalidKeysOf({ ...base, ANALYTICS_BIGQUERY_PROJECT_ID: 'p' })).toEqual([
+        'ANALYTICS_BIGQUERY_DATASET',
+      ]);
+      expect(invalidKeysOf({ ...base, ANALYTICS_BIGQUERY_DATASET: 'd' })).toEqual([
+        'ANALYTICS_BIGQUERY_DATASET',
+      ]);
+      for (const bad of ['not json', '[1]', 'null', '"text"']) {
+        expect(
+          invalidKeysOf({ ...base, ...bigquery, ANALYTICS_BIGQUERY_CREDENTIALS_JSON: bad }),
+        ).toEqual(['ANALYTICS_BIGQUERY_CREDENTIALS_JSON']);
+      }
+      expect(invalidKeysOf({ ...base, ANALYTICS_BIGQUERY_MAX_BYTES_BILLED: '0' })).toEqual([
+        'ANALYTICS_BIGQUERY_MAX_BYTES_BILLED',
+      ]);
+    });
+
+    it('requires the whole BigQuery group in production', () => {
+      const production = validEnv({
+        NODE_ENV: 'production',
+        ...PAYOUT_KEY,
+        ...REAL_PROVIDERS,
+      });
+      const withoutCredentials = Object.fromEntries(
+        Object.entries(production).filter(([key]) => key !== 'ANALYTICS_BIGQUERY_CREDENTIALS_JSON'),
+      );
+      expect(invalidKeysOf(withoutCredentials)).toEqual(['ANALYTICS_BIGQUERY_CREDENTIALS_JSON']);
+      const bare = Object.fromEntries(
+        Object.entries(production).filter(([key]) => !key.startsWith('ANALYTICS_BIGQUERY')),
+      );
+      expect([...invalidKeysOf(bare)].sort()).toEqual([
+        'ANALYTICS_BIGQUERY_CREDENTIALS_JSON',
+        'ANALYTICS_BIGQUERY_DATASET',
+        'ANALYTICS_BIGQUERY_PROJECT_ID',
+      ]);
     });
   });
 
