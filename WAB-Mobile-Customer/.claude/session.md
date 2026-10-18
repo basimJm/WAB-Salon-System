@@ -9,20 +9,7 @@
 
 ## Current task
 
-- Next: CUS-013 realtime client, then features from CUS-024; task branches start from `origin/customer`.
-
-### CUS-010 — Mock data source: fixtures per operation, scenario switcher, DATA_SOURCE config
-- Branch: `feat/cus-010-mock-source`
-- Status: IN REVIEW
-- Acceptance criteria (INTEGRATION.md §4; backlog row):
-  - [x] `DataSource` in `AppEnvironment` from `DATA_SOURCE` (Android build config from `DEV_/PROD_DATA_SOURCE`; iOS xcconfig + Info.plist); prod refuses `mock`; policy variants check the keys
-  - [x] `api_sync.py` also generates `MockFixtures` (success envelope per operation from the response schema, text markers localized by Accept-Language)
-  - [x] `core/data/mock`: `createMockEngine` (Ktor MockEngine over `CustomerOperations`, path templates, 404 envelope for unknown paths), `MockScenarios` (Success / Empty / Unauthorized / NotFound / ServerError / Timeout / Offline), `mockDataModule` binds the `HttpEngineProvider` seam of `core/network`
-  - [x] Tests: `MockTransportTest` (5: matching, every operation has a fixture, localization, scenarios, unknown path), `AppEnvironmentTest` data source, `test_api_sync` fixtures, `test_variants` keys
-- Tests: policy suite 76 OK; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0 (BUILD SUCCESSFUL 3m04s; 4 iOS configurations + K/N tests)
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — fixture keys derived from method+path exactly like the generator (no index coupling); error envelopes carry only `code` (clients never show mock text); mock refused in prod by `AppEnvironment`; `ktor-client-mock` ships in the main source set so the engine choice stays a runtime config (prod binaries carry it unused).
-- Notes: the scenario switcher UI lands with the profile screen (CUS-053); until then `MockScenarios.set` is called from code/tests. No visible screen changed → no simulator UI check. Dev builds now serve fixtures by default (`DEV_DATA_SOURCE=mock`); CUS-060 flips dev to `remote` once the dev API exists.
+- Next: features from CUS-024 (config + system screens), CUS-025…; task branches start from `origin/customer`.
 
 ### CUS-011 — Session store: PRD §5 keys, secure tokens (Keystore / Keychain)
 - Branch: `feat/cus-011-session-store`
@@ -51,3 +38,18 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — route views deduped by a tested grace window instead of per-screen wiring; screen context attached synchronously at call time (no cross-thread state); user id sync is one flow collector on the session state; app-instance id stays behind the `core/firebase` port; nothing analytics-related goes to the backend.
 - Notes: apps never send analytics to the backend (unchanged); only the user id and gender scope leave the device.
+
+### CUS-013 — Realtime client: Socket.IO over Ktor WebSockets, fake, foreground reconnect
+- Branch: `feat/cus-013-realtime-client`
+- Status: IN REVIEW
+- Acceptance criteria (PRD §3.15; BUSINESS_DOMAIN §7; server `constants/sockets.ts`: `/socket.io`, namespace `/customer`, `auth.token`, ping 25 s / timeout 20 s):
+  - [x] `core/realtime`: `RealtimeClient` (status StateFlow, events SharedFlow, connect / disconnect), `RealtimeEvents` constants (`booking.updated`, `booking.requested`, `booking.assigned`, `notifications.unread`), `RealtimeEvent(name, payload)`, `RealtimeStatus`
+  - [x] `SocketIoProtocol` codec (Engine.IO v4 + Socket.IO v4 text frames: open / ping / pong / close, namespace connect with the token, connected, disconnect, event, connect error code) — pure, tested
+  - [x] `SocketIoRealtimeClient`: handshake with the session's access token, pong on ping, silent server (ping budget) or close → reconnect with capped exponential backoff, `UNAUTHORIZED` → stop until the next `connect()`; transport behind `RealtimeTransport` (Ktor WebSockets on the platform engine; in-memory fake in tests)
+  - [x] `FakeRealtimeClient` bound when `DATA_SOURCE=mock`; `realtimeModule` registered in `App.kt`
+  - [x] Foreground rule: `RealtimeConnectionEffect(client, isSignedIn)` in the app shell connects when resumed + signed in, disconnects on pause / sign-out
+  - [x] Tests: `SocketIoProtocolTest` (3), `RealtimeConfigTest` (2), `SocketIoRealtimeClientTest` (4), `RealtimeConnectionRuleTest` (1)
+- Tests: `:core:realtime:testAndroidHostTest` + composeApp green (10 new tests, virtual time); `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — protocol codec pure and tested against socket.io v4 framing; client state machine tested with an in-memory transport under virtual time (handshake, pong, event, unauthorized stop, drop + silence reconnect, backoff); token read on every attempt (rotations picked up); no literals (defaults mirror the server constants); not exercised against a live server (owner deployment pending).
+- Notes: LIBRARY ADDED (CLAUDE.md §1.12): `io.ktor:ktor-client-websockets` (same Ktor 3.4.2 version) — the Socket.IO v4 protocol is implemented in common code over Ktor WebSockets instead of two native Socket.IO SDKs (one codebase, testable without a server, no Swift bridge). The socket URL derives from the API base URL (same host; no new env key).

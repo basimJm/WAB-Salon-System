@@ -34,6 +34,7 @@ core/common            Platform-free helpers (formatters, validators, AppInfoPro
 core/domain            Result/error types, settings contracts, shared models
 core/data, storage     Repositories' shared plumbing, DataStore-backed settings
 core/network           Ktor client, env-driven ApiConfig, safeApiCall (WAB envelope → AppError.ServerError)
+core/realtime          RealtimeClient port (status, events, connect/disconnect) + Socket.IO v4 client over Ktor WebSockets (same host as the API, `/customer` namespace, token in the handshake) + FakeRealtimeClient (mock data source); `RealtimeEvents` constants
 core/data/contract     GENERATED DTOs + `CustomerOperations` from `WAB-Server/docs/api/openapi.customer.json` (`./gradlew apiSync`; `apiSyncCheck` in the gate; never edit by hand)
 core/navigation        Typed routes (Graph/Screen), Navigator
 core/notification      In-app toast host + push handling

@@ -33,6 +33,10 @@ import com.fab.wab.customer.core.di.coreDiModule
 import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.navigation.route.Graph
 import com.fab.wab.customer.core.notification.composable.NotificationHost
+import com.fab.wab.customer.core.realtime.RealtimeClient
+import com.fab.wab.customer.core.realtime.di.realtimeModule
+import com.fab.wab.customer.app.realtime.RealtimeConnectionEffect
+import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.notification.composable.rememberNotificationManager
 import com.fab.wab.customer.core.notification.di.notificationModule
 import com.fab.wab.customer.core.notification.model.NotificationStyle
@@ -54,6 +58,7 @@ import org.koin.compose.viewmodel.koinViewModel
 val appModules = listOf(
     coreDiModule,
     mockDataModule,
+    realtimeModule,
     notificationModule,
     viewModelModule,
     platformFirebaseModule(),
@@ -112,6 +117,8 @@ fun App(androidContext: Any?) {
             ) {
                 AppTheme {
                     TrackNavigationScreens(navController)
+                    val sessionState by koinInject<SessionStore>().state.collectAsStateWithLifecycle(initialValue = null)
+                    RealtimeConnectionEffect(koinInject<RealtimeClient>(), isSignedIn = sessionState?.isSignedIn == true)
                     val tabs = rootNavItems()
                     val backStackEntry by navController.currentBackStackEntryAsState()
                     val hierarchyRoutes = backStackEntry?.destination?.hierarchy?.map { it.route }?.toList().orEmpty()

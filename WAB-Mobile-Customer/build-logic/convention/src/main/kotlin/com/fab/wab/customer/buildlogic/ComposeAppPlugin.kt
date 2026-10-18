@@ -37,6 +37,7 @@ class ComposeAppPlugin : Plugin<Project> {
                     implementation(project(":core:domain"))
                     implementation(project(":core:storage"))
                     implementation(project(":core:network"))
+                    implementation(project(":core:realtime"))
                     implementation(project(":core:data"))
                     implementation(project(":core:navigation"))
                     implementation(project(":core:ui"))
