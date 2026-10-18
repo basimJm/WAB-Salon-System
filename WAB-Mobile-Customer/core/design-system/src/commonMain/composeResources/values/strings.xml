@@ -45,4 +45,8 @@
     <string name="dialog_delete_account_message">Your account will be deactivated for 30 days. Logging in during this period restores it; after that it is permanently deleted.</string>
     <string name="dialog_delete_account_confirm">Delete account</string>
     <string name="filter_remove_description">Remove filter %1$s</string>
+    <string name="media_video">Video</string>
+    <string name="media_position">%1$d of %2$d</string>
+    <string name="media_image_failed">Image could not be loaded</string>
+    <string name="banner_description">Promotion %1$d of %2$d</string>
 </resources>

@@ -45,4 +45,8 @@
     <string name="dialog_delete_account_message">سيتم تعطيل حسابك لمدة 30 يوماً. تسجيل الدخول خلال هذه الفترة يعيد تفعيله، وبعدها يُحذف نهائياً.</string>
     <string name="dialog_delete_account_confirm">حذف الحساب</string>
     <string name="filter_remove_description">إزالة الفلتر %1$s</string>
+    <string name="media_video">فيديو</string>
+    <string name="media_position">%1$d من %2$d</string>
+    <string name="media_image_failed">تعذر تحميل الصورة</string>
+    <string name="banner_description">إعلان %1$d من %2$d</string>
 </resources>

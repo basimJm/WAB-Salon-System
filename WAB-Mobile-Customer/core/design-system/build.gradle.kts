@@ -26,5 +26,6 @@ kotlin {
     }
     sourceSets.androidMain.dependencies {
         implementation(libs.compose.uiTooling)
+        implementation(libs.androidx.core.ktx)
     }
 }
