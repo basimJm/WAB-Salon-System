@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { GENERATED_DIR } from './lib/contractFiles.ts';
 import { overLimit, scanSource } from './lib/hardcoded.ts';
 
 const ROOT = process.cwd();
@@ -14,7 +15,7 @@ const walk = (dir: string): string[] =>
   });
 
 const files = SCAN_DIRS.flatMap((d) => walk(join(ROOT, d)))
-  .filter((f) => SOURCE_EXT.test(f))
+  .filter((f) => SOURCE_EXT.test(f) && !relative(ROOT, f).startsWith(GENERATED_DIR))
   .map((f) => ({ file: relative(ROOT, f), content: readFileSync(f, 'utf8') }));
 
 const findings = files.flatMap((f) => scanSource(f.file, f.content));

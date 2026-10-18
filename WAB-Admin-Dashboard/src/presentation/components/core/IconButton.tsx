@@ -26,7 +26,7 @@ export function IconButton({
   return (
     <button
       type={type}
-      aria-label={label}
+      aria-label={badge !== undefined && badge > 0 ? `${label} ${String(badge)}` : label}
       title={label}
       className={cx('wab-iconbtn', className)}
       {...rest}

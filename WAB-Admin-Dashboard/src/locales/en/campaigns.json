@@ -1,0 +1,60 @@
+{
+  "campaigns": {
+    "subtitle": "Push messages to customers or salons, now or scheduled.",
+    "new": "New campaign",
+    "compose": "Compose a campaign",
+    "titleCol": "Title",
+    "titleAr": "Title (Arabic)",
+    "titleEn": "Title (English)",
+    "bodyAr": "Message (Arabic)",
+    "bodyEn": "Message (English)",
+    "link": "Link when opened (optional)",
+    "linkHint": "A path like /offers or an https link.",
+    "audience": "Who receives it",
+    "choose": "Choose",
+    "customerIds": "Customer ids",
+    "customerIdsHint": "Paste ids separated by commas, up to 500.",
+    "audienceSize": "About {{count}} people will receive it",
+    "sendDay": "Send on",
+    "sendNowHint": "Leave empty to send now.",
+    "sendTime": "Time (24h)",
+    "sendNow": "Send now",
+    "schedule": "Schedule",
+    "stats": "Targeted / delivered / opened / failed",
+    "empty": "No campaigns yet",
+    "created": "Campaign created",
+    "cancelled": "Campaign cancelled",
+    "cancel": "Cancel campaign",
+    "cancelTitle": "Cancel \"{{name}}\"",
+    "cancelText": "It will not be sent. Write the reason.",
+    "kinds": {
+      "ALL": "Everyone",
+      "GUESTS": "Guests (not registered)",
+      "REGISTERED": "Registered users",
+      "GENDER": "By audience (men / women)",
+      "CITY": "By city",
+      "SALON_MEMBERS": "Members of one salon",
+      "SPECIFIC_USERS": "Specific users"
+    },
+    "status": {
+      "SCHEDULED": "Scheduled",
+      "SENDING": "Sending",
+      "SENT": "Sent",
+      "CANCELLED": "Cancelled"
+    },
+    "preview": {
+      "ar": "Notification preview in Arabic",
+      "en": "Notification preview in English"
+    },
+    "error": {
+      "titleAr": "Required, up to {{max}} characters",
+      "titleEn": "Required, up to {{max}} characters",
+      "bodyAr": "Required, up to {{max}} characters",
+      "bodyEn": "Required, up to {{max}} characters",
+      "link": "Use a path like /offers or an https link",
+      "audience": "Complete the audience",
+      "schedule": "Enter both the day and a time like 14:30"
+    },
+    "timePlaceholder": "HH:mm"
+  }
+}

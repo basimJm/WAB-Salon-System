@@ -1,0 +1,29 @@
+{
+  "reviews": {
+    "subtitle": "Reviews are published only after you approve them.",
+    "statusTabs": "Review status",
+    "target": "About",
+    "salon": "Salon",
+    "staff": "Staff",
+    "rating": "Rating",
+    "comment": "Comment",
+    "author": "Author (other reviews)",
+    "empty": "No reviews here",
+    "approve": "Approve",
+    "reject": "Reject",
+    "remove": "Remove",
+    "approveSelected": "Approve selected",
+    "rejectSelected": "Reject selected",
+    "done": "Done",
+    "bulkPartial": "{{ok}} done, {{failed}} could not be changed",
+    "tooMany": "Select at most {{max}} reviews",
+    "rejectTitle": "Reject this review",
+    "removeTitle": "Remove this review",
+    "rejectText": "The review stays hidden. Write the reason.",
+    "removeText": "The review disappears and the average rating is recalculated. Write the reason.",
+    "targets": {
+      "SALON": "Salon",
+      "STAFF": "Staff"
+    }
+  }
+}

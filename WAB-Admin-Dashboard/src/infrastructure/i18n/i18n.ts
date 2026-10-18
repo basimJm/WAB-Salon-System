@@ -8,8 +8,8 @@ import {
   type Direction,
   type Language,
 } from '@/constants/i18n';
-import ar from '@/locales/ar.json';
-import en from '@/locales/en.json';
+import ar from '@/locales/ar';
+import en from '@/locales/en';
 
 export const directionOf = (language: Language): Direction =>
   RTL_LANGUAGES.includes(language) ? 'rtl' : 'ltr';

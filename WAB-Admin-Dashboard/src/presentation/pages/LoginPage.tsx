@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OTP_LENGTH } from '@/constants/auth';
 import { LOGIN_REDIRECT_PARAM, ROUTES } from '@/constants/routes';
+import { useContainer } from '@/app/ContainerContext';
 import { Button } from '../components/core/Button';
 import { InlineAlert } from '../components/feedback/InlineAlert';
 import { safeRedirect } from '../controllers/loginValidation';
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const ctrl = useLoginController();
+  const ended = useContainer().session.endReason();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -25,7 +27,7 @@ export default function LoginPage() {
     key ? t(key, { length: OTP_LENGTH }) : undefined;
   const first = ctrl.step === 'credentials';
 
-  const onSubmit = async (e: FormEvent) => {
+  const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
     if (first) {
       await ctrl.submitCredentials(email, password);
@@ -47,6 +49,11 @@ export default function LoginPage() {
           <h1 id="login-title" className="wab-login__title">
             {t(first ? 'login.title' : 'login.codeTitle')}
           </h1>
+          {first && ended ? (
+            <p className="wab-login__notice" role="status">
+              {t(`login.ended.${ended}`)}
+            </p>
+          ) : null}
           {first ? <p className="wab-login__lead">{t('login.subtitle')}</p> : null}
           <form className="wab-login__form" onSubmit={(e) => void onSubmit(e)} noValidate>
             {first ? (
@@ -65,6 +72,7 @@ export default function LoginPage() {
                 error={fieldError(ctrl.fieldErrors.code)}
                 busy={ctrl.busy}
                 onCode={setCode}
+                resendSeconds={ctrl.resendSeconds}
                 onResend={ctrl.resend}
               />
             )}

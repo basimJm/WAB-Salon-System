@@ -7,7 +7,7 @@ import sys
 
 PROTECTED_BRANCHES = ("main", "master")
 SESSION_FILE = os.path.join(".claude", "session.md")
-LOOPS_DONE = re.compile(r"Loops:\s*3\s*/\s*3", re.IGNORECASE)
+LOOPS_DONE = re.compile(r"Loops:\s*(3\s*/\s*3|1\s*/\s*1\s*\(user decision)", re.IGNORECASE)
 REVIEW_DONE = re.compile(r"Review:\s*PASSED", re.IGNORECASE)
 DOC_EXTENSIONS = (".md", ".txt", ".html", ".png", ".jpg", ".jpeg", ".svg", ".mp4", ".pdf", ".json", ".yml", ".yaml")
 SOURCE_EXTENSIONS = (".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".kt", ".kts", ".swift", ".py")

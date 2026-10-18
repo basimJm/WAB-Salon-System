@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { Suspense } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { buildRoutes, DESIGN_SYSTEM_PATH } from '@/app/routes';
+import { buildRoutes } from '@/app/routes';
+import { DESIGN_SYSTEM_PATH } from '@/constants/routes';
 
 import { MIN_PASSWORD_LENGTH, MOCK_OTP_CODE, OTP_LENGTH } from '@/constants/auth';
 import { NAV_ITEMS } from '@/constants/nav';
@@ -15,7 +16,7 @@ import {
   validateCode,
   validateCredentials,
 } from '@/presentation/controllers/loginValidation';
-import en from '@/locales/en.json';
+import en from '@/locales/en';
 import { makeContainer, renderWithApp } from './helpers/render';
 
 const PASSWORD = 'p'.repeat(MIN_PASSWORD_LENGTH);
@@ -34,8 +35,8 @@ function renderRoutes(path: string, showDesignSystem = true) {
 
 async function signIn(container: ReturnType<typeof makeContainer>) {
   const { auth } = container.repositories;
-  const { challengeId } = await auth.login('admin@example.test', PASSWORD);
-  container.session.set(await auth.verifyOtp(challengeId, MOCK_OTP_CODE));
+  await auth.login('admin@example.test', PASSWORD);
+  container.session.set(await auth.verifyOtp('admin@example.test', MOCK_OTP_CODE));
 }
 
 describe('login validation', () => {
@@ -112,7 +113,8 @@ describe('routing & auth guard', () => {
     );
     await screen.findByRole('heading', { name: en.nav.liveOverview });
     const nav = screen.getByRole('complementary', { name: en.nav.label });
-    expect(nav.querySelectorAll('a')).toHaveLength(NAV_ITEMS.length);
+    // The About link sits in the sidebar footer, outside the module list.
+    expect(nav.querySelectorAll('nav a')).toHaveLength(NAV_ITEMS.length);
   });
 
   it('logout clears the session and returns to login', async () => {
@@ -125,7 +127,8 @@ describe('routing & auth guard', () => {
       </Suspense>,
       container,
     );
-    await userEvent.click(await screen.findByRole('button', { name: en.topbar.logout }));
+    await userEvent.click(await screen.findByRole('button', { name: /admin|@|test/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: en.topbar.logout }));
     await screen.findByRole('heading', { name: en.login.title });
     expect(container.session.get()).toBeNull();
   });

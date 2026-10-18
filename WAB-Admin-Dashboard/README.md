@@ -12,7 +12,7 @@ npm run verify         # typecheck + lint (0 warnings) + format + unit tests + h
 
 ## Build variants
 
-`npm run build:<dev-debug|dev-release|prod-debug|prod-release>` → `dist/<variant>/`. Copy `.env.example` to `.env.dev` / `.env.prod` (git-ignored) or set real env vars. `prod-*` needs https `VITE_API_BASE_URL` and `VITE_SOCKET_URL` and never contains the mock data source. `npm run check:size -- <variant>` checks the performance budget (`scripts/budget.json`) and that release builds ship no source maps.
+`npm run build:<dev-debug|dev-release|prod-debug|prod-release>` → `dist/<variant>/`. Every key is documented in `.env.example`; `npm run check:env` keeps it equal to `ENV_KEYS` and the zod schema. The app version (package.json), build id (short git sha, or `BUILD_ID` when set) and environment are injected at build and shown on `/about`; dev builds also show a DEV ribbon (never in prod). Copy `.env.example` to `.env.dev` / `.env.prod` (git-ignored) or set real env vars. `prod-*` needs https `VITE_API_BASE_URL` and `VITE_SOCKET_URL` and never contains the mock data source. `npm run check:size -- <variant>` checks the performance budget (`scripts/budget.json`) and that release builds ship no source maps.
 
 ## Tests
 

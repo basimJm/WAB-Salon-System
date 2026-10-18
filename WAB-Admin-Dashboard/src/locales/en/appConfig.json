@@ -1,0 +1,45 @@
+{
+  "appConfig": {
+    "versionsSubtitle": "Force or suggest app updates per app and platform.",
+    "maintenanceSubtitle": "Switch an app into maintenance with a message customers see.",
+    "all": "All",
+    "edit": "Edit",
+    "reason": "Reason",
+    "reasonHint": "Recorded in the audit log.",
+    "appLabel": "App",
+    "platformLabel": "Platform",
+    "app": {
+      "CUSTOMER": "Customer app",
+      "MERCHANT": "Salon app"
+    },
+    "platform": {
+      "ANDROID": "Android",
+      "IOS": "iOS"
+    },
+    "latest": "Latest version",
+    "minSupported": "Minimum supported version",
+    "minSupportedHint": "Older apps must update.",
+    "storeUrl": "Store link (https)",
+    "optionalUpdate": "Update is optional",
+    "optional": "Optional",
+    "forced": "Required below minimum",
+    "addVersion": "Add a version",
+    "editVersion": "Edit version",
+    "maintenanceOn": "Maintenance on",
+    "maintenanceOff": "Off",
+    "maintenanceStatus": "Status",
+    "message": "Message",
+    "messageAr": "Message (Arabic)",
+    "messageEn": "Message (English)",
+    "addMaintenance": "Add maintenance record",
+    "editMaintenance": "Edit maintenance",
+    "error": {
+      "reason": "Write the reason (at least 3 characters)",
+      "latest": "Use a version like 1.4.0",
+      "minSupported": "Use a version like 1.2.0",
+      "order": "The minimum cannot be above the latest",
+      "storeUrl": "Enter an https link",
+      "message": "Required, up to {{max}} characters"
+    }
+  }
+}

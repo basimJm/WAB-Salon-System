@@ -1,6 +1,20 @@
 # WAB-Admin-Dashboard — Rules (mandatory for every task)
 
 > These rules add to the root `CLAUDE.md`, the root `.claude/*.md` and `WAB-Admin-Dashboard/CLAUDE.md`. They never relax them; if two rules conflict, the stricter one wins. **This `.claude/` folder is where admin-level rules live: add or change admin rules here, not in scattered notes.**
+>
+> **Always adhere to the WAB-level files, in every admin task, without exception:** `/Users/basimabusnaimeh/WAB/.claude/rules.md` (token efficiency, requirements first, delivery rules 1-14: tests, branch from `origin/admin` checked before the first edit, no hardcoding, three real verification loops, four-role review, honest reporting of deviations) and `/Users/basimabusnaimeh/WAB/.claude/roles.md` (the four roles and the working agreement). Read both at the start of every session; the admin rules below only add to them.
+
+## 0. Token budget (applies to every admin task; root `rules.md` §1 stays the parent rule)
+
+- Run the whole local gate with ONE quiet command and read only its summary: `sh scripts/gate.sh` (typecheck, lint, format, unit tests with coverage, hardcoded/layer checks, the four variant builds, `check:size`). It prints one line per step and the first failing step's tail. Do not run `npm run verify`, the builds and `check:size` separately, and never paste their full output.
+- Run e2e once per task, alone (one Playwright run at a time), through the terminal tool, and read only the pass/fail summary line and the failing test names; open the error context of a failing test only.
+- Before reading or listing anything, search for the symbol or file you need; read only the needed range of a file; do not re-read files you just wrote; do not re-run a passing step unless code changed after it.
+- Keep browser checks to one script that returns a compact JSON of measurements, not screenshots or page dumps.
+- Terminal tabs echo their whole screen when closed: open one e2e tab per run, close only when the tab limit is reached, and always pipe e2e output through `grep -E "passed|failed"` / `tail -3`.
+- Fail early: write each component with its tests together and run `npm run lint` plus the new test file before the gate; run the new e2e spec alone (`--project=desktop`) first and the full suite once per task.
+- Keep `.claude/session.md` to the last 3 task blocks and `.claude/memory.md` to durable facts: both are loaded into every turn. Older history goes to `docs/history/`.
+
+- **User decisions (2026-10-14):** read the rules and roles files once at the start of a session, not on every task; no e2e runs (unit tests + gate + one browser check only); one verification loop is enough; keep only the last 2 task blocks in `.claude/session.md`. These override the e2e and three-loop wording elsewhere in this admin folder; record the deviation in each task block.
 
 ## 1. Performance first
 
@@ -48,13 +62,26 @@
   (use placeholder URLs from the workflow, never real ones in code). New or changed screens also pass `npm run e2e`.
 - Zero compile errors, zero lint/React/Vite/console warnings, zero runtime errors in the browser console. A red or skipped check is a blocker; never use `--no-verify`, never disable or skip a test to get green.
 
+### Run it and look at it before every commit (browser UI check)
+
+Green unit tests are not enough for a UI project. **Before every commit** (not only before the push):
+
+1. **Build and run the project:** build the variant the change affects, serve it (`npm run dev`, or `vite preview --mode <variant> --outDir dist/<variant>` for a built variant) and open it in a real browser (the preinstalled Chromium through Playwright; locally `PW_CHROMIUM_PATH=<chromium>`).
+2. **Use it like an admin:** click through every screen, state and behaviour the change touches, in Arabic RTL and English LTR, light and dark, phone / tablet / desktop widths, portrait and landscape. Exercise loading, empty, error, validation and success states.
+3. **Console and network clean:** zero errors and zero warnings in the browser console, no failed or unexpected requests.
+4. **Match the requirements, not just the code:** compare what you see with the PRD page (A00–A29), the BRD ids, the task row in `docs/WAB_Admin_Tasks.md`, the Design Script and the matching file in `design/`, and with `BUSINESS_DOMAIN.md` (field names, enums, state machines, permissions, error codes, JOD and Asia/Amman rules). Behaviour follows the PRD (PRD wins over the design). Fix every mismatch or record it as an open item in `session.md`; never silently accept it.
+5. **Make it repeatable:** turn what you verified by hand into Playwright e2e assertions (`e2e/`), and keep screenshots of the checked screens in the scratchpad.
+6. **Say it:** the commit/PR body states what was opened and compared (screens, widths, languages, themes) and the result. A UI change committed without this check is not done.
+
 ## 7. Never use deprecated APIs or outdated versions
 
 - Use the current stable major of React, TypeScript, Vite, React Router, TanStack Query, zod, i18next and every other package; do not pin an old version to avoid a migration, and do not copy examples written for old versions.
 - No deprecated API of any library or of the platform (examples to avoid: `ReactDOM.render`, `defaultProps` on function components, `findDOMNode`, legacy context, string refs, `String.prototype.substr`, `document.execCommand`, `new Buffer`, `moment`-style unmaintained packages). Read the library's changelog/migration guide when you touch it.
 - Before adding or upgrading a dependency: check it is maintained and not marked deprecated on npm, run `npm outdated` and `npm audit --omit=dev`, prefer the version that matches the other tools' peer ranges, commit the lockfile. If an install prints a deprecation warning, fix it (replace the package) instead of ignoring it.
-- Lint enforces what it can (`@typescript-eslint/no-deprecated` is part of the quality-gates task); the rest is on you in review.
+- Lint enforces what it can (`@typescript-eslint/no-deprecated`, complexity, max-params and max-depth are errors); the rest is on you in review.
 
-## 8. Workflow (unchanged from the root rules)
+## 8. Workflow
 
-One branch per task from an updated `main`, never push to `main`, three verification loops, four-role review, PR, CI green before merge, `.claude/session.md` and `.claude/memory.md` (root) kept current.
+- **Branching:** `admin` is the master branch for admin work (created from `main`). Every task branches from the latest `origin/admin` as `feat/adm-NNN-<key>` and its PR targets `admin`, never `main`. After each merge, branch the next task from the updated `origin/admin`. If `admin` is behind `main`, merge `main` into `admin` through a PR first. The user merges `admin` into `main`.
+- **No GitHub CI (user decision):** the gate is local. Before every push run the local gate on the developer machine: `npm ci`, `npm run verify`, the four variant builds (`npm run build:dev-debug`, `build:dev-release`, `build:prod-debug`, `build:prod-release`) with `VITE_API_BASE_URL`/`VITE_SOCKET_URL` set to https placeholders, `npm run check:size -- dev-debug dev-release prod-debug prod-release`, and `npm run e2e` for screens, after the browser UI check of §6 (build, run, click through, match PRD/BRD/tasks/domain). Push only when everything is green and say what you ran. Merge a task PR into `admin` only after that gate; the user also runs the branch on their own device before merging `admin` into `main`.
+- Also from the root rules: never push to `main`, three verification loops, four-role review, `.claude/session.md` and `.claude/memory.md` (root) kept current.

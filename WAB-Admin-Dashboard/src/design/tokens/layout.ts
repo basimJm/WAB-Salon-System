@@ -32,7 +32,23 @@ export const SIZES = {
   contentMax: '90rem',
   modal: '32rem',
   modalMax: '90dvh',
+  drawer: '28rem',
+  aside: '20rem',
+  fieldMin: '16rem',
+  chartMax: '20rem',
+  donutMax: '14rem',
+  sparklineWidth: '6rem',
+  sparklineHeight: '1.75rem',
+  funnelLabel: '8rem',
+  jsonMax: '24rem',
+  mediaPreview: '12rem',
+  mediaStage: '28rem',
+  phoneWidth: '22rem',
+  phoneHeight: '40rem',
   toast: '22rem',
+  popupMax: '16rem',
+  popupMin: '12rem',
+  searchMax: '28rem',
   tableMin: '40rem',
   skeletonLine: '1rem',
   spinner: '1.5rem',
@@ -44,6 +60,11 @@ export const SIZES = {
   badgeDot: '0.5rem',
   logo: '2.5rem',
   tableCellMin: '8rem',
+  avatarSm: '2rem',
+  avatar: '2.5rem',
+  avatarLg: '3.5rem',
+  tooltipMax: '18rem',
+  keyValueLabel: '10rem',
 } as const;
 
 export const FONT_FAMILIES = {
@@ -72,7 +93,7 @@ export const MOTION = {
   easing: 'ease-out',
 } as const;
 
-export const Z_INDEX = { sidebar: '30', topbar: '20', overlay: '40', modal: '50', toast: '60' } as const;
+export const Z_INDEX = { sidebar: '30', topbar: '20', overlay: '40', popover: '45', modal: '50', toast: '60', ribbon: '70' } as const;
 
 export const SHADOWS = {
   light: {

@@ -1,0 +1,30 @@
+{
+  "media": {
+    "choose": "Choose image",
+    "replace": "Replace",
+    "remove": "Remove",
+    "retry": "Retry upload",
+    "uploading": "Uploading",
+    "hint": "JPG, PNG or WebP, up to {{max}}",
+    "kb": "KB",
+    "mb": "MB",
+    "viewerTools": "Document tools",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "rotate": "Rotate right",
+    "download": "Download",
+    "openPdf": "Open the PDF",
+    "unsafeUrl": "This document link is not secure and cannot be shown.",
+    "language": {
+      "ar": "Arabic",
+      "en": "English"
+    },
+    "error": {
+      "type": "This file type is not allowed. Use {{types}}.",
+      "size": "The file is too large. The limit is {{max}}.",
+      "empty": "The file is empty.",
+      "upload": "The upload failed. Please try again."
+    },
+    "rotateLeft": "Rotate left"
+  }
+}

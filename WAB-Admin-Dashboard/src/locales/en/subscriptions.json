@@ -1,0 +1,34 @@
+{
+  "subscriptions": {
+    "subtitle": "Salon subscriptions. Payments are made outside the app and recorded here.",
+    "endsAt": "Ends",
+    "daysLeft": "Days left",
+    "lastPayment": "Last payment",
+    "ending": "Ending soon",
+    "endingIn": "Ending within {{days}} days",
+    "payments": "Payments",
+    "paymentsOf": "Payments of {{name}}",
+    "noPayments": "No payments recorded",
+    "record": "Record payment",
+    "recordFor": "Payment for {{name}}",
+    "amount": "Amount",
+    "amountHint": "JOD, up to 3 decimals, for example 25.000",
+    "paidAt": "Paid on",
+    "periodFrom": "Covers from",
+    "periodTo": "Covers until",
+    "period": "Period",
+    "method": "Method (cash, transfer...)",
+    "reference": "Reference",
+    "note": "Note (optional)",
+    "noteHint": "Kept with the payment.",
+    "recorded": "Payment recorded; the subscription is active",
+    "empty": "No subscriptions match",
+    "error": {
+      "amount": "Enter an amount like 25.000",
+      "period": "Choose valid days; the end must be after the start",
+      "method": "Required, up to 40 characters",
+      "reference": "Required, up to 100 characters",
+      "note": "Up to 300 characters"
+    }
+  }
+}
