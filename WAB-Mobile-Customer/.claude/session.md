@@ -9,19 +9,7 @@
 
 ## Current task
 
-- Next: CUS-012, CUS-013, then features from CUS-024; task branches start from `origin/customer`.
-
-### CUS-009 — Contract tooling: generated DTOs + operation registry from the server OpenAPI
-- Branch: `feat/cus-009-api-sync`
-- Status: DONE
-- Acceptance criteria (INTEGRATION.md §3; admin ADM-004 pattern):
-  - [x] `scripts/api_sync.py` renders `@Serializable` DTOs per tag + `Components.kt` (nullability from `required`/`null`, nested objects and array items named by path, enum docs, keyword escaping) and `CustomerOperations` (51 ops: method, path, tag, path/query params, body/data types, spec sha); `--check` fails on stale or extra files; snapshot kept next to the code
-  - [x] `./gradlew apiSync` / `apiSyncCheck`; gate step "Contract"; generated dir excluded from the 300-line/hardcoded policies and detekt; compiles for Android + iOS
-  - [x] `test_api_sync.py` (4 tests: ids, nullability/enums/items/keywords, registry, check mode)
-- Tests: policy tests 75 ok; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — repositories will build requests from `CustomerOperations`, never from path literals; the snapshot sha makes drift visible in review.
-- Notes: Python generator (same toolchain as the policy scripts); enums stay `String` with the allowed values in KDoc until features need typed enums.
+- Next: CUS-013 realtime client, then features from CUS-024; task branches start from `origin/customer`.
 
 ### CUS-010 — Mock data source: fixtures per operation, scenario switcher, DATA_SOURCE config
 - Branch: `feat/cus-010-mock-source`
@@ -49,3 +37,17 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one `SessionStore` port in `core/domain`, platform crypto behind `core/security` ports, DataStore never holds a plain token (test asserts it), the network refresh path reads the same secure entries, no literals beyond named key constants.
 - Notes: tokens are never logged or exposed as flows; guest nickname/gender never leave the device. `push_enabled` defaults to true (PRD gives no default; OS permission still gates delivery). The Keystore/Keychain actuals are exercised by the device builds, not by unit tests (JVM host has no AndroidKeyStore).
+
+### CUS-012 — Analytics tracker: route screen views, action screen context, user id sync, app-instance id
+- Branch: `feat/cus-012-analytics-tracker`
+- Status: IN REVIEW
+- Acceptance criteria (PRD §14; CLAUDE.md §3 analytics rule):
+  - [x] `track(screen)` on every route: `TrackNavigationScreens(navController)` in the app shell → `AnalyticsTracker.trackRoute(route)`; `AnalyticsScreenNames.fromRoute` derives snake_case names from typed routes; a route view waits one grace window so a screen's own `TrackScreen` (with ids) replaces it instead of doubling
+  - [x] Every action carries the current `screen_name` (event params win); common fields already merged by the tracker
+  - [x] Firebase user id set on login / cleared on logout on analytics and Crashlytics (`SessionAnalyticsSync` over `SessionStore.state`, started by `MainViewModel`); user properties `user_type`, `gender_scope`; `UserProfile.id` stored under `user_id`
+  - [x] App-instance id exposed for the backend: `AppInstanceIdProvider` port (Android `FirebaseAnalytics.appInstanceId`, iOS `AnalyticsBridge.appInstanceId()` → `Analytics.appInstanceID()`), fake for tests; consumed by CUS-058 installations
+  - [x] Tests: `AnalyticsScreenNamesTest` (2), `DefaultAnalyticsTrackerTest` (+2: action screen context, route view claim), `SessionAnalyticsSyncTest` (1), `FirebaseFacadeTest` (+1), storage/domain tests updated for the user id
+- Tests: JVM host tests of analytics/firebase/storage/domain/composeApp green; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — route views deduped by a tested grace window instead of per-screen wiring; screen context attached synchronously at call time (no cross-thread state); user id sync is one flow collector on the session state; app-instance id stays behind the `core/firebase` port; nothing analytics-related goes to the backend.
+- Notes: apps never send analytics to the backend (unchanged); only the user id and gender scope leave the device.

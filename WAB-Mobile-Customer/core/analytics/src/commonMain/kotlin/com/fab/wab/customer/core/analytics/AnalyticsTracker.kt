@@ -8,6 +8,13 @@ interface AnalyticsTracker {
     fun trackScreen(screen: AnalyticsScreen)
     fun trackAction(action: AnalyticsAction)
 
+    /**
+     * The navigation host reports every destination change (PRD §14: every screen). The tracker derives the screen
+     * name from the route, attaches it to the following actions and sends a `screen_view` unless the screen itself
+     * reports a richer one (with ids) right away through [trackScreen].
+     */
+    fun trackRoute(route: String?)
+
     /** Set on login, cleared (`null`) on logout (PRD §14). */
     fun setUserId(userId: String?)
     fun setUserProperty(key: String, value: String?)
@@ -27,6 +34,7 @@ interface AnalyticsBackend {
 object NoOpAnalyticsTracker : AnalyticsTracker {
     override fun trackScreen(screen: AnalyticsScreen) = Unit
     override fun trackAction(action: AnalyticsAction) = Unit
+    override fun trackRoute(route: String?) = Unit
     override fun setUserId(userId: String?) = Unit
     override fun setUserProperty(key: String, value: String?) = Unit
 }

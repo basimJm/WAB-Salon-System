@@ -55,3 +55,11 @@ class FakeCrashReporter : CrashReporter {
         this.userId = userId
     }
 }
+
+class FakeAppInstanceIdProvider(var id: String? = DEFAULT_APP_INSTANCE_ID) : AppInstanceIdProvider {
+    override suspend fun appInstanceId(): String? = id
+
+    companion object {
+        const val DEFAULT_APP_INSTANCE_ID = "fake-app-instance"
+    }
+}

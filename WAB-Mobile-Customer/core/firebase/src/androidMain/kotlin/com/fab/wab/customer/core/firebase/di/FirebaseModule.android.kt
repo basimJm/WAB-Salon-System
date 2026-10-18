@@ -2,7 +2,9 @@ package com.fab.wab.customer.core.firebase.di
 
 import android.app.Activity
 import com.fab.wab.customer.core.analytics.AnalyticsBackend
+import com.fab.wab.customer.core.firebase.AndroidAppInstanceIdProvider
 import com.fab.wab.customer.core.firebase.AndroidCrashReporter
+import com.fab.wab.customer.core.firebase.AppInstanceIdProvider
 import com.fab.wab.customer.core.firebase.AndroidFirebaseAnalyticsBackend
 import com.fab.wab.customer.core.firebase.AndroidPhoneAuthGateway
 import com.fab.wab.customer.core.firebase.AndroidPushTokenProvider
@@ -23,4 +25,5 @@ actual fun platformFirebaseModule(): Module = module {
     single<PushTokenProvider> { AndroidPushTokenProvider() }
     single<CrashReporter> { AndroidCrashReporter() }
     single<AnalyticsBackend> { AndroidFirebaseAnalyticsBackend(androidContext()) }
+    single<AppInstanceIdProvider> { AndroidAppInstanceIdProvider(androidContext()) }
 }

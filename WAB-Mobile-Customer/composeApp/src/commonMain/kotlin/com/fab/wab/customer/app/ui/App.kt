@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.fab.wab.customer.app.controller.contract.MainContract
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.vm.MainViewModel
+import com.fab.wab.customer.app.analytics.TrackNavigationScreens
 import com.fab.wab.customer.app.di.analyticsAppModule
 import com.fab.wab.customer.app.di.viewModelModule
 import com.fab.wab.customer.core.analytics.AnalyticsTracker
@@ -110,6 +111,7 @@ fun App(androidContext: Any?) {
                 LocalAnalyticsTracker provides koinInject<AnalyticsTracker>(),
             ) {
                 AppTheme {
+                    TrackNavigationScreens(navController)
                     val tabs = rootNavItems()
                     val backStackEntry by navController.currentBackStackEntryAsState()
                     val hierarchyRoutes = backStackEntry?.destination?.hierarchy?.map { it.route }?.toList().orEmpty()
