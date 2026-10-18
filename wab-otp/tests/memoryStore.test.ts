@@ -97,6 +97,15 @@ describe('MemoryLimitStore', () => {
     expect((await store.startCooldown('r', 2000)).started).toBe(true);
   });
 
+  it('counts live hits only (countOf)', async () => {
+    expect(await store.countOf('c')).toBe(0);
+    await store.hit(spec());
+    await store.hit(spec());
+    expect(await store.countOf('c')).toBe(2);
+    time += 1000;
+    expect(await store.countOf('c')).toBe(0);
+  });
+
   it('uses the real clock by default', async () => {
     const real = new MemoryLimitStore();
     expect((await real.hit(spec())).allowed).toBe(true);
