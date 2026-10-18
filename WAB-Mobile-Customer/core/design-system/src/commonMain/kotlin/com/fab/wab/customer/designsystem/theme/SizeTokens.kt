@@ -46,6 +46,9 @@ data class SizeTokens(
     val dialogIcon: Dp = 56.dp,
     val stateIcon: Dp = 64.dp,
     val shimmerLine: Dp = 14.dp,
+    val cardImageHeight: Dp = 140.dp,
+    val cardCompactWidth: Dp = 220.dp,
+    val listItemImage: Dp = 64.dp,
 )
 
 val DefaultSizes = SizeTokens()
