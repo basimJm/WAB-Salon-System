@@ -8,11 +8,16 @@ import {
   PROVIDER_ENV_KEYS,
   LIST_SEPARATOR,
   LOG_LEVELS,
+  DEFAULT_SMTP_PORT,
+  DEFAULT_EMAIL_FROM_NAME,
+  NOTIFIER_REAL_REQUIRED_KEYS,
   MONGO_URI_PATTERN,
   PORT_MAX,
   PORT_MIN,
   REDIS_URL_PATTERN,
 } from '../constants/env';
+import { JWT_SECRET_MIN_LENGTH } from '../constants/auth';
+import { isEncryptionKey } from '../utils/crypto/aesGcm';
 import { PROVIDER_MODES, REAL_PROVIDER_MODE } from '../constants/providers';
 import {
   DEFAULT_TRUST_PROXY_HOPS,
@@ -27,6 +32,7 @@ const splitList = (value: string): string[] =>
     .filter((item) => item.length > 0);
 
 /** Raw environment variables → validated, typed values. Secrets have no defaults. */
+const booleanText = z.enum(['true', 'false']).transform((value) => value === 'true');
 const providerMode = z.enum(PROVIDER_MODES).optional();
 
 export const envSchema = z
@@ -43,12 +49,52 @@ export const envSchema = z
       .default(DEFAULT_TRUST_PROXY_HOPS),
     [ENV_KEYS.mongoUri]: z.string().regex(MONGO_URI_PATTERN),
     [ENV_KEYS.redisUrl]: z.string().regex(REDIS_URL_PATTERN),
+    // Signs access tokens: a secret with no default, long enough for HS256.
+    [ENV_KEYS.jwtAccessSecret]: z.string().min(JWT_SECRET_MIN_LENGTH),
+    // Optional outside production (bank-details endpoints answer 503 without it); never has a default.
+    [ENV_KEYS.payoutEncryptionKey]: z.string().refine(isEncryptionKey).optional(),
     [ENV_KEYS.otpProvider]: providerMode,
     [ENV_KEYS.storageProvider]: providerMode,
+    [ENV_KEYS.notifierProvider]: providerMode,
+    [ENV_KEYS.paymentProvider]: providerMode,
+    [ENV_KEYS.analyticsProvider]: providerMode,
+    [ENV_KEYS.fcmServiceAccountJson]: z.string().min(1).optional(),
+    [ENV_KEYS.fcmProjectId]: z.string().min(1).optional(),
+    [ENV_KEYS.fcmDryRun]: booleanText.default(false),
+    [ENV_KEYS.smtpHost]: z.string().min(1).optional(),
+    [ENV_KEYS.smtpPort]: z.coerce
+      .number()
+      .int()
+      .min(PORT_MIN)
+      .max(PORT_MAX)
+      .default(DEFAULT_SMTP_PORT),
+    [ENV_KEYS.smtpSecure]: booleanText.default(false),
+    [ENV_KEYS.smtpUser]: z.string().min(1).optional(),
+    [ENV_KEYS.smtpPass]: z.string().min(1).optional(),
+    [ENV_KEYS.emailFromAddress]: z.email().optional(),
+    [ENV_KEYS.emailFromName]: z.string().min(1).default(DEFAULT_EMAIL_FROM_NAME),
   })
   // Production never runs on fakes, and never guesses: every provider must be named `real`.
   .superRefine((env, context) => {
+    // A real notifier needs its credentials; the error names keys only, never values.
+    if (env[ENV_KEYS.notifierProvider] === REAL_PROVIDER_MODE) {
+      for (const key of NOTIFIER_REAL_REQUIRED_KEYS) {
+        if (env[key] === undefined) context.addIssue({ code: 'custom', path: [key], message: key });
+      }
+      const user = env[ENV_KEYS.smtpUser];
+      const pass = env[ENV_KEYS.smtpPass];
+      if ((user === undefined) !== (pass === undefined)) {
+        context.addIssue({ code: 'custom', path: [ENV_KEYS.smtpPass], message: ENV_KEYS.smtpPass });
+      }
+    }
     if (env[ENV_KEYS.nodeEnv] !== 'production') return;
+    if (env[ENV_KEYS.payoutEncryptionKey] === undefined) {
+      context.addIssue({
+        code: 'custom',
+        path: [ENV_KEYS.payoutEncryptionKey],
+        message: ENV_KEYS.payoutEncryptionKey,
+      });
+    }
     for (const key of PROVIDER_ENV_KEYS) {
       if (env[key] !== REAL_PROVIDER_MODE)
         context.addIssue({ code: 'custom', path: [key], message: key });

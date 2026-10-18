@@ -16,3 +16,7 @@ node_modules/
 *.jks
 __pycache__/
 *.pyc
+
+# Firebase / Google service-account keys must never be committed
+*firebase-adminsdk*.json
+*service-account*.json

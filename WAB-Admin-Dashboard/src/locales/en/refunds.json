@@ -1,0 +1,29 @@
+{
+  "refunds": {
+    "subtitle": "Money going back to customers, and what is stuck.",
+    "source": "Why",
+    "nextAttempt": "Next attempt",
+    "lastError": "Last error",
+    "overdue": "Overdue",
+    "empty": "No refunds",
+    "retry": "Retry now",
+    "manual": "Mark as refunded",
+    "retryTitle": "Retry this refund",
+    "retryText": "The gateway is asked again now. Write why.",
+    "manualTitle": "Refund of {{amount}} paid outside the gateway",
+    "manualText": "Use this only when the money was already returned to the customer by another way (bank transfer).",
+    "reference": "Bank reference",
+    "done": "Done",
+    "error": {
+      "reference": "Required, up to {{max}} characters"
+    },
+    "sources": {
+      "SALON_REJECT": "Salon rejected",
+      "SALON_CANCEL": "Salon cancelled",
+      "AUTO_CANCEL": "Auto-cancelled",
+      "CUSTOMER_CANCEL": "Customer cancelled",
+      "NO_SHOW_POLICY": "No-show policy",
+      "ADMIN": "Admin"
+    }
+  }
+}

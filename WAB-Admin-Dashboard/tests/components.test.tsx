@@ -32,7 +32,7 @@ describe('Button / IconButton', () => {
 
   it('icon-only button has an accessible name and shows a badge count', () => {
     app(<IconButton icon="bell" label="Alerts" badge={3} />);
-    expect(screen.getByRole('button', { name: 'Alerts' })).toHaveTextContent('3');
+    expect(screen.getByRole('button', { name: 'Alerts 3' })).toHaveTextContent('3');
   });
 });
 

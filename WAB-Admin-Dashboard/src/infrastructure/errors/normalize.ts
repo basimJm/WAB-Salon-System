@@ -1,5 +1,6 @@
 import { ZodError } from 'zod';
-import { API_ERROR_CODES, HTTP_STATUS } from '@/constants/http';
+import { ERROR_CODE_KIND, isErrorCode } from '@/constants/errorCatalog';
+import { HTTP_STATUS } from '@/constants/http';
 import type { ErrorKind } from '@/constants/errors';
 import { AppError } from './AppError';
 
@@ -14,18 +15,9 @@ const KIND_BY_STATUS: Readonly<Record<number, ErrorKind>> = {
   [HTTP_STATUS.gatewayTimeout]: 'timeout',
 };
 
-const KIND_BY_CODE: Readonly<Record<string, ErrorKind>> = {
-  [API_ERROR_CODES.unauthorized]: 'unauthorized',
-  [API_ERROR_CODES.forbidden]: 'forbidden',
-  [API_ERROR_CODES.notFound]: 'notFound',
-  [API_ERROR_CODES.validation]: 'validation',
-  [API_ERROR_CODES.rateLimited]: 'rateLimited',
-};
-
 /** Domain error codes win over the HTTP status; unknown 5xx are `server`, other 4xx `unknown`. */
 export function kindFromResponse(status: number, code?: string): ErrorKind {
-  const byCode = code ? KIND_BY_CODE[code] : undefined;
-  if (byCode) return byCode;
+  if (isErrorCode(code)) return ERROR_CODE_KIND[code];
   const byStatus = KIND_BY_STATUS[status];
   if (byStatus) return byStatus;
   return status >= HTTP_STATUS.serverError ? 'server' : 'unknown';

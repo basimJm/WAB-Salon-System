@@ -3,16 +3,42 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ConfigError, loadConfig, readEnvSources } from '../src/config';
 import { envSchema } from '../src/config/env.schema';
-import { DEFAULT_PORT, ENV_KEYS, PORT_MAX, envFileName } from '../src/constants/env';
+import {
+  DEFAULT_PORT,
+  ENV_KEYS,
+  PORT_MAX,
+  PROVIDER_ENV_KEYS,
+  envFileName,
+} from '../src/constants/env';
 
 const MONGO = 'mongodb://user:s3cret@localhost/wab';
 const REDIS = 'redis://localhost:6379';
 
-const REAL_PROVIDERS = { OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'real' };
+const REAL_PROVIDERS = {
+  OTP_PROVIDER: 'real',
+  STORAGE_PROVIDER: 'real',
+  NOTIFIER_PROVIDER: 'real',
+  PAYMENT_PROVIDER: 'real',
+  ANALYTICS_PROVIDER: 'real',
+  FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
+  SMTP_HOST: 'smtp.example.test',
+  EMAIL_FROM_ADDRESS: 'noreply@example.test',
+};
+const ALL_FAKE_MODES = {
+  otp: 'fake',
+  storage: 'fake',
+  notifier: 'fake',
+  payments: 'fake',
+  analytics: 'fake',
+};
+
+/** Production also needs the field-encryption key (a valid base64 key of 32 bytes). */
+const PAYOUT_KEY = { PAYOUT_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64') };
 
 const validEnv = (overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv => ({
   [ENV_KEYS.mongoUri]: MONGO,
   [ENV_KEYS.redisUrl]: REDIS,
+  [ENV_KEYS.jwtAccessSecret]: 'a'.repeat(48),
   ...overrides,
 });
 
@@ -44,37 +70,127 @@ describe('loadConfig', () => {
   });
 
   it('defaults every provider to the fake outside production', () => {
-    expect(loadConfig(validEnv()).providers).toEqual({ otp: 'fake', storage: 'fake' });
-    expect(loadConfig(validEnv({ NODE_ENV: 'test' })).providers).toEqual({
-      otp: 'fake',
-      storage: 'fake',
+    expect(loadConfig(validEnv()).providers).toEqual(ALL_FAKE_MODES);
+    expect(loadConfig(validEnv({ NODE_ENV: 'test' })).providers).toEqual(ALL_FAKE_MODES);
+  });
+
+  it.each([
+    [ENV_KEYS.otpProvider, 'otp'],
+    [ENV_KEYS.storageProvider, 'storage'],
+    [ENV_KEYS.notifierProvider, 'notifier'],
+    [ENV_KEYS.paymentProvider, 'payments'],
+    [ENV_KEYS.analyticsProvider, 'analytics'],
+  ] as const)('maps %s to providers.%s and nothing else', (key, field) => {
+    const credentials =
+      key === ENV_KEYS.notifierProvider
+        ? {
+            FCM_SERVICE_ACCOUNT_JSON: '{}',
+            SMTP_HOST: 'smtp.example.test',
+            EMAIL_FROM_ADDRESS: 'noreply@example.test',
+          }
+        : {};
+    expect(loadConfig(validEnv({ [key]: 'real', ...credentials })).providers).toEqual({
+      ...ALL_FAKE_MODES,
+      [field]: 'real',
     });
   });
 
-  it('reads the provider modes and rejects unknown ones', () => {
-    const config = loadConfig(validEnv({ OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'fake' }));
-    expect(config.providers).toEqual({ otp: 'real', storage: 'fake' });
-    expect(invalidKeysOf(validEnv({ OTP_PROVIDER: 'mock' }))).toEqual([ENV_KEYS.otpProvider]);
-    expect(invalidKeysOf(validEnv({ STORAGE_PROVIDER: '' }))).toEqual([ENV_KEYS.storageProvider]);
+  it('rejects unknown or empty provider modes', () => {
+    for (const key of PROVIDER_ENV_KEYS) {
+      expect(invalidKeysOf(validEnv({ [key]: 'mock' }))).toEqual([key]);
+      expect(invalidKeysOf(validEnv({ [key]: '' }))).toEqual([key]);
+    }
   });
 
   it('requires production to name every provider as real, never defaulting or faking', () => {
-    const production = validEnv({ NODE_ENV: 'production' });
-    expect(invalidKeysOf(production)).toEqual([ENV_KEYS.otpProvider, ENV_KEYS.storageProvider]);
-    expect(
-      invalidKeysOf({ ...production, OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'fake' }),
-    ).toEqual([ENV_KEYS.storageProvider]);
-    expect(
-      invalidKeysOf({ ...production, OTP_PROVIDER: 'fake', STORAGE_PROVIDER: 'real' }),
-    ).toEqual([ENV_KEYS.otpProvider]);
-    const ok = loadConfig({ ...production, OTP_PROVIDER: 'real', STORAGE_PROVIDER: 'real' });
-    expect(ok.providers).toEqual({ otp: 'real', storage: 'real' });
+    const production = validEnv({ NODE_ENV: 'production', ...PAYOUT_KEY });
+    expect(invalidKeysOf(production)).toEqual([...PROVIDER_ENV_KEYS]);
+    for (const key of PROVIDER_ENV_KEYS) {
+      expect(invalidKeysOf({ ...production, ...REAL_PROVIDERS, [key]: 'fake' })).toEqual([key]);
+      const others = Object.fromEntries(
+        Object.entries(REAL_PROVIDERS).filter(([name]) => name !== key),
+      );
+      expect(invalidKeysOf({ ...production, ...others })).toEqual([key]);
+    }
+    const ok = loadConfig({ ...production, ...REAL_PROVIDERS });
+    expect(ok.providers).toEqual({
+      otp: 'real',
+      storage: 'real',
+      notifier: 'real',
+      payments: 'real',
+      analytics: 'real',
+    });
+  });
+
+  describe('real notifier settings', () => {
+    const base = validEnv({ NOTIFIER_PROVIDER: 'real' });
+    const creds = {
+      FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
+      SMTP_HOST: 'smtp.example.test',
+      EMAIL_FROM_ADDRESS: 'noreply@example.test',
+    };
+
+    it('names every missing credential key, never a value', () => {
+      expect([...invalidKeysOf(base)].sort()).toEqual(
+        ['EMAIL_FROM_ADDRESS', 'FCM_SERVICE_ACCOUNT_JSON', 'SMTP_HOST'].sort(),
+      );
+    });
+
+    it('builds typed settings with defaults', () => {
+      const config = loadConfig({ ...base, ...creds });
+      expect(config.notifier).toEqual({
+        fcm: { serviceAccountJson: creds.FCM_SERVICE_ACCOUNT_JSON, dryRun: false },
+        smtp: { host: creds.SMTP_HOST, port: 587, secure: false },
+        from: { address: creds.EMAIL_FROM_ADDRESS, name: 'WAB' },
+      });
+    });
+
+    it('reads optional values and requires SMTP user and password together', () => {
+      const full = loadConfig({
+        ...base,
+        ...creds,
+        FCM_PROJECT_ID: 'proj',
+        FCM_DRY_RUN: 'true',
+        SMTP_PORT: '465',
+        SMTP_SECURE: 'true',
+        SMTP_USER: 'u@example.test',
+        SMTP_PASS: 'pw',
+        EMAIL_FROM_NAME: 'Salon',
+      });
+      expect(full.notifier).toEqual({
+        fcm: {
+          serviceAccountJson: creds.FCM_SERVICE_ACCOUNT_JSON,
+          projectId: 'proj',
+          dryRun: true,
+        },
+        smtp: {
+          host: creds.SMTP_HOST,
+          port: 465,
+          secure: true,
+          user: 'u@example.test',
+          pass: 'pw',
+        },
+        from: { address: creds.EMAIL_FROM_ADDRESS, name: 'Salon' },
+      });
+      expect(invalidKeysOf({ ...base, ...creds, SMTP_USER: 'u@example.test' })).toEqual([
+        'SMTP_PASS',
+      ]);
+    });
+
+    it('rejects bad values and is absent for the fake notifier', () => {
+      expect(invalidKeysOf({ ...base, ...creds, FCM_DRY_RUN: 'yes' })).toEqual(['FCM_DRY_RUN']);
+      expect(invalidKeysOf({ ...base, ...creds, EMAIL_FROM_ADDRESS: 'nope' })).toEqual([
+        'EMAIL_FROM_ADDRESS',
+      ]);
+      expect(loadConfig(validEnv()).notifier).toBeUndefined();
+    });
   });
 
   it('flags production', () => {
-    expect(loadConfig(validEnv({ ...REAL_PROVIDERS, NODE_ENV: 'production' })).isProduction).toBe(
-      true,
-    );
+    expect(
+      loadConfig(validEnv({ ...REAL_PROVIDERS, ...PAYOUT_KEY, NODE_ENV: 'production' }))
+        .isProduction,
+    ).toBe(true);
   });
 
   it('rejects unknown NODE_ENV and LOG_LEVEL', () => {
@@ -83,7 +199,22 @@ describe('loadConfig', () => {
   });
 
   it('has no defaults for connection secrets: missing keys fail fast', () => {
-    expect(invalidKeysOf({})).toEqual([ENV_KEYS.mongoUri, ENV_KEYS.redisUrl]);
+    expect(invalidKeysOf({})).toEqual([
+      ENV_KEYS.mongoUri,
+      ENV_KEYS.redisUrl,
+      ENV_KEYS.jwtAccessSecret,
+    ]);
+  });
+
+  it('reads the access-token secret and refuses a missing or short one', () => {
+    expect(loadConfig(validEnv()).auth.accessSecret).toBe('a'.repeat(48));
+    expect(invalidKeysOf(validEnv({ JWT_ACCESS_SECRET: 'a'.repeat(31) }))).toEqual([
+      ENV_KEYS.jwtAccessSecret,
+    ]);
+    expect(
+      loadConfig(validEnv({ JWT_ACCESS_SECRET: 'a'.repeat(32) })).auth.accessSecret,
+    ).toHaveLength(32);
+    expect(invalidKeysOf(validEnv({ JWT_ACCESS_SECRET: '' }))).toEqual([ENV_KEYS.jwtAccessSecret]);
   });
 
   it('rejects malformed connection strings', () => {

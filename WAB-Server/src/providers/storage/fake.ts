@@ -15,6 +15,7 @@ import type {
   StorageProvider,
   UploadTarget,
   UploadUrlRequest,
+  WriteObjectRequest,
 } from './types';
 import { assertContentType, assertObjectKey, assertPositiveInteger, assertTtl } from './validation';
 
@@ -30,6 +31,7 @@ interface StoredObject {
   /** What the "real" content turned out to be (the fake has no bytes to sniff). */
   readonly contentType: string;
   readonly size: number;
+  readonly body?: Buffer;
 }
 
 export interface FakeStorageOptions {
@@ -124,6 +126,21 @@ export class FakeStorageProvider implements StorageProvider {
     });
   }
 
+  read(key: string): Promise<Buffer | null> {
+    return settle(() => {
+      assertObjectKey(key);
+      return this.objects.get(key)?.body ?? null;
+    });
+  }
+
+  write({ key, body, contentType, visibility }: WriteObjectRequest): Promise<void> {
+    return settle(() => {
+      assertObjectKey(key);
+      assertContentType(contentType);
+      this.objects.set(key, { visibility, contentType, size: body.length, body });
+    });
+  }
+
   delete(keys: readonly string[]): Promise<void> {
     return settle(() => {
       for (const key of keys) assertObjectKey(key);
@@ -138,10 +155,17 @@ export class FakeStorageProvider implements StorageProvider {
    * Test helper: the client uploads to the presigned URL. Returns false (nothing stored) when no
    * valid upload URL exists for the key, as a real bucket would answer 403.
    */
-  simulateUpload(key: string, content: { contentType: string; size: number }): boolean {
+  simulateUpload(
+    key: string,
+    content: { contentType: string; size: number; body?: Buffer },
+  ): boolean {
     const upload = this.pending.get(key);
     if (upload === undefined || upload.expiresAt <= this.now().getTime()) return false;
-    this.objects.set(key, { visibility: upload.visibility, ...content });
+    this.objects.set(key, {
+      visibility: upload.visibility,
+      ...content,
+      size: content.body?.length ?? content.size,
+    });
     return true;
   }
 

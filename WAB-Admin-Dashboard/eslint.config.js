@@ -5,6 +5,9 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 
 const MAX_FILE_LINES = 300;
+const MAX_COMPLEXITY = 15;
+const MAX_PARAMS = 4;
+const MAX_DEPTH = 4;
 
 /** Clean-architecture import boundaries (inner layers never import outer ones). */
 const forbid = (...layers) => ({
@@ -29,6 +32,7 @@ export default tseslint.config(
       'test-results',
       'design',
       'docs',
+      'src/data/contract/generated',
     ],
   },
   js.configs.recommended,
@@ -49,6 +53,10 @@ export default tseslint.config(
       'no-console': 'error',
       eqeqeq: ['error', 'always'],
       'max-lines': ['error', { max: MAX_FILE_LINES }],
+      complexity: ['error', MAX_COMPLEXITY],
+      'max-params': ['error', MAX_PARAMS],
+      'max-depth': ['error', MAX_DEPTH],
+      '@typescript-eslint/no-deprecated': 'error',
       'no-restricted-syntax': [
         'error',
         {
@@ -75,5 +83,5 @@ export default tseslint.config(
     files: ['scripts/**', 'tests/**', 'e2e/**', '*.config.*'],
     rules: { 'no-console': 'off', 'max-lines': 'off' },
   },
-  { files: ['**/*.js'], ...tseslint.configs.disableTypeChecked },
+  { files: ['**/*.js', '**/*.cjs'], ...tseslint.configs.disableTypeChecked },
 );

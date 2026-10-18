@@ -1,11 +1,22 @@
 # WAB-Admin-Dashboard — Rules for AI Agents
 
 > These rules add to the root `CLAUDE.md` and `.claude/*.md`. They never relax them. If two rules conflict, the stricter one wins. If documents conflict, stop and ask.
+>
+> **Admin-level rules and role live in this project's own `.claude/` folder — mandatory, read and apply both:**
+>
+> - Rules: @.claude/rules.md
+> - Role (senior web developer: React, JS, TS): @.claude/roles.md
 
-## 0. Read Before Every Task (mandatory)
+> **Also auto-loaded (never read them with a tool):**
+>
+> - Session (current task, integration status): @.claude/session.md
+> - Memory (durable admin facts): @.claude/memory.md
 
-1. Root `CLAUDE.md` and **every** `.md` file in the root `.claude/` folder (`rules.md`, `roles.md`, `hooks.md`, `session.md`, `memory.md`), plus the root files `BUSINESS_DOMAIN.md`, `ROADMAP.md`, `INTEGRATION_WORKFLOW.md`.
-2. `docs/WAB_Admin_PRD.md` (behavior, source of truth), `docs/WAB_Admin_BRD.md`, `docs/WAB_Admin_Design_Script.md`, and the matching file in `design/` (visual reference).
+## 0. Per task (nothing else is read up front)
+
+1. `python3 scripts/tasks.py next admin` → the task row (ID, branch from `origin/admin`, needs, server dependencies, notes). Root rules/roles/hooks, this file, the admin rules/role, session and memory are already in context.
+2. Only the `docs/WAB_Admin_PRD.md` page (A00–A29) and `docs/WAB_Admin_BRD.md` ids the row names, the Design Script section and the matching `design/` file for UI work (grep the heading, read that range).
+3. `docs/ADMIN_ARCHITECTURE.md` / `docs/adr/` only when the task changes a layer or makes an Appendix C decision; `.claude/Integration.md` when it touches the API, realtime or the mock; `BUSINESS_DOMAIN.md` sections the row names.
 
 ## 1. The Rules (non-negotiable)
 
@@ -14,11 +25,11 @@
 3. **Arabic and English for every string.** Add each key to both `src/locales/ar.json` and `en.json`; `tests/i18n.test.ts` fails on a missing key, empty value, or placeholder mismatch. Arabic (RTL) is the default.
 4. **Performance first.** Lazy-load every route, keep the entry small, split vendors, paginate every list server-side, memoize only where measured, no layout thrash. `scripts/budget.json` sets gzip budgets; `npm run check:size` enforces them on release builds.
 5. **All four build variants must build:** `dev-debug`, `dev-release`, `prod-debug`, `prod-release` (§4).
-6. **Always run CI.** Before every push run `npm run verify` and the variant builds; never merge with a red or pending CI check.
+6. **Run the full local gate before every push** (there is no GitHub CI for the admin panel): `sh scripts/gate.sh` (verify, all four variant builds, `check:size`); e2e only when the owner asks (decision 2026-10-14). Before **every commit** also build and run the app in a browser, test the UI and check it against the PRD, BRD, task and `BUSINESS_DOMAIN.md` (`.claude/rules.md` §6). The user also runs the branch on their own device before it reaches `main`.
 7. **Zero runtime errors, compile errors and warnings.** `tsc` strict, `eslint --max-warnings 0`, no console output in tests/builds, no React/Vite warnings.
 8. **No file longer than 300 lines** (code, CSS, JSON, tests). Split instead. ESLint `max-lines` and the hardcoded scan enforce it.
 9. **Responsive everywhere:** phone, tablet, desktop; portrait and landscape; every size scales (rem tokens, fluid root font size, `minmax(0, …)` grids, no horizontal page scroll). New UI ships with an e2e check in `e2e/`.
-10. **One branch per task**, branched from an updated `main`. **Never push to `main`.** Open a PR and wait for green CI (root rules §3).
+10. **One branch per task**, branched from an updated `origin/admin` (the admin master branch, root rules §3.9). **Never push to `main`.** The PR targets `admin`; merge it only after the local gate (rule 6) is green.
 
 ## 2. Architecture — Clean Architecture with MVC
 
@@ -41,8 +52,9 @@ src/
 
 - **Model** = `domain` + `data`. **View** = `presentation/components|pages|layout`. **Controller** = `presentation/controllers` (and the `app` composition root).
 - Allowed imports: `domain` → nothing; `infrastructure` → constants; `data` → domain, infrastructure; `design` → constants, infrastructure/storage; `presentation` → everything except `data` (it reaches repositories only through `useContainer()`); `app` wires everything.
+- New feature = vertical slice (`domain/<f>`, `data/<f>`, `presentation/<f>`); features never import each other (`npm run check:layers`). Checklist: `docs/HOW_TO_ADD_A_MODULE.md`.
 - Pages never call `fetch`; they use a controller. Controllers never touch the DOM or JSX. Components never fetch.
-- Every cross-project dependency (API, socket) sits behind a domain interface with a real and a mock implementation, selected only by `VITE_DATA_SOURCE` (`INTEGRATION_WORKFLOW.md` §3). The mock is compiled out of prod builds.
+- Every cross-project dependency (API, socket) sits behind a domain interface with a real and a mock implementation, selected only by `VITE_DATA_SOURCE` (`INTEGRATION.md` §4). The mock is compiled out of prod builds.
 
 ## 3. Design System
 
@@ -62,7 +74,7 @@ src/
 
 - Pick one with `npm run build:<variant>` (Vite `--mode <variant>`); `npm run dev` uses `dev-debug`.
 - Public, non-secret values come from `.env.dev` / `.env.prod` (git-ignored; keys in `.env.example`) or real env vars. Missing/invalid values fail the build and the app start with a `ConfigError` that names keys only. Prod requires `https` URLs and the `remote` data source.
-- **"Android and iOS" for this web panel** means the browsers and viewports those platforms use: Chrome on Android (Chromium, Pixel/Galaxy Tab) and Safari on iOS (WebKit, iPhone/iPad), each in portrait and landscape. CI runs both (`.github/workflows/admin-ci.yml`).
+- **"Android and iOS" for this web panel** means the browsers and viewports those platforms use: Chrome on Android (Chromium, Pixel/Galaxy Tab) and Safari on iOS (WebKit, iPhone/iPad), each in portrait and landscape. e2e runs locally (`npm run e2e`; WebKit projects need a machine with WebKit, e.g. the user's device).
 
 ## 5. Errors
 
@@ -73,6 +85,6 @@ src/
 
 ## 6. Tests and Delivery
 
-- Every task ships unit tests (Vitest + Testing Library) for its acceptance criteria and edge cases, and e2e (Playwright) for new screens. Run `npm run verify`; locally e2e: `E2E_CHROMIUM_ONLY=true PW_CHROMIUM_PATH=<chromium> npm run e2e` (CI also runs WebKit).
-- Follow the root workflow: branch → implement → 3 verification loops → 4-role review → PR → wait for CI green. Record the task in `.claude/session.md` and durable facts in `.claude/memory.md`.
-- Admin APIs: behavior from the PRD, wire format from `contracts/` once INT-01 exists. Until then the assumed admin-auth endpoints live in `src/constants/endpoints.ts` (marked ASSUMPTION) behind `AuthRepository`.
+- Every task ships unit tests (Vitest + Testing Library) for its acceptance criteria and edge cases, and e2e (Playwright) for new screens. Run `npm run verify`; locally e2e: `E2E_CHROMIUM_ONLY=true PW_CHROMIUM_PATH=<chromium> npm run e2e` (WebKit projects need a machine with WebKit, e.g. the user's device).
+- Follow the root workflow: branch → implement → one verification loop (`Loops: 1/1`) → 4-role review → full local gate → PR into `admin`. Record the task in this project's `.claude/session.md`, durable facts in its `.claude/memory.md`, statuses through `python3 scripts/tasks.py set ADM-NNN <STATUS>`.
+- Admin APIs: behavior from the PRD, wire format from the generated server contract (`WAB-Server/docs/api/openapi.admin.json` → `npm run api:sync`; `INTEGRATION.md` §3).

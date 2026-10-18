@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "admin-preview-dev-debug",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "WAB-Admin-Dashboard", "run", "preview:dev-debug"],
+      "port": 4173,
+      "autoPort": true
+    }
+  ]
+}

@@ -38,7 +38,7 @@ export const PALETTES: Readonly<Record<ThemeName, Palette>> = {
     soft: '#F3EEFB',
     ink: '#1F2233',
     muted: '#646B7B',
-    faint: '#9096A5',
+    faint: '#656972',
     line: '#EEEAF4',
     line2: '#DFD8EB',
     accent: '#6D28D9',
@@ -46,7 +46,7 @@ export const PALETTES: Readonly<Record<ThemeName, Palette>> = {
     hover: '#FAF8FD',
     skeleton: '#EEEAF5',
     danger: '#C2386B',
-    success: '#23845F',
+    success: '#207856',
     warning: '#946010',
     dangerSoft: 'rgba(217,70,122,.05)',
     overlay: 'rgba(31,34,51,.45)',
@@ -59,7 +59,7 @@ export const PALETTES: Readonly<Record<ThemeName, Palette>> = {
     soft: '#2C2553',
     ink: '#F8FAFC',
     muted: '#B6BBCB',
-    faint: '#8A90A6',
+    faint: '#9196AC',
     line: 'rgba(255,255,255,.07)',
     line2: 'rgba(255,255,255,.13)',
     accent: '#C9AEF7',
@@ -82,9 +82,9 @@ export type ToneColors = Readonly<Record<ToneName, readonly [fg: string, bg: str
 /** Status badge tones: [foreground, background]. */
 export const TONES: Readonly<Record<ThemeName, ToneColors>> = {
   light: {
-    green: ['#23845F', 'rgba(46,158,120,.12)'],
+    green: ['#1D6E4F', 'rgba(46,158,120,.12)'],
     amber: ['#946010', 'rgba(245,158,11,.15)'],
-    rose: ['#C2386B', 'rgba(217,70,122,.11)'],
+    rose: ['#AC305F', 'rgba(217,70,122,.11)'],
     grey: ['#585E6E', 'rgba(107,114,128,.12)'],
     purple: ['#6D28D9', 'rgba(109,40,217,.09)'],
     violet: ['#9333EA', 'rgba(168,85,247,.12)'],

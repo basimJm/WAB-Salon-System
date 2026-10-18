@@ -12,8 +12,8 @@ import { ErrorBoundary } from '@/presentation/components/feedback/ErrorBoundary'
 import { ErrorState } from '@/presentation/components/feedback/ErrorState';
 
 import { useToast } from '@/presentation/components/overlay/Toast';
-import ar from '@/locales/ar.json';
-import en from '@/locales/en.json';
+import ar from '@/locales/ar';
+import en from '@/locales/en';
 import { makeContainer, renderWithApp } from './helpers/render';
 
 const app = (ui: React.ReactElement) => renderWithApp(ui);

@@ -1,0 +1,18 @@
+{
+  "reconciliation": {
+    "subtitle": "Payments that need a person to look at them.",
+    "clean": "All clear",
+    "problems": "{{count}} to review",
+    "none": "Nothing to review",
+    "kinds": {
+      "stuckPending": "Stuck pending",
+      "paidWithoutBooking": "Paid without a booking",
+      "missingLedger": "Missing ledger charge"
+    },
+    "hints": {
+      "stuckPending": "The customer left the checkout but the gateway never confirmed.",
+      "paidWithoutBooking": "The money was taken but no booking was created: refund or fix it.",
+      "missingLedger": "A booking exists but the ledger has no charge for it."
+    }
+  }
+}

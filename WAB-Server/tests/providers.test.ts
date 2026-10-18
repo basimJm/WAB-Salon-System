@@ -2,6 +2,9 @@ import { FAKE_OTP_PROOF_KINDS, OTP_PURPOSES } from '../src/constants/providers';
 import { MS_PER_SECOND } from '../src/constants/time';
 import { createProviders, ProviderUnavailableError } from '../src/providers';
 import { FakeOtpProvider, fakeOtpProof, isE164 } from '../src/providers/otp';
+import { FakeAnalyticsProvider } from '../src/providers/analytics';
+import { FakeNotifier } from '../src/providers/notifier';
+import { FakePaymentProvider } from '../src/providers/payments';
 import { FakeStorageProvider } from '../src/providers/storage';
 import { ExternalServiceError } from '../src/utils/errors';
 import { normalizeError } from '../src/utils/errors/normalize';
@@ -273,33 +276,42 @@ describe('fake storage provider', () => {
   });
 });
 
+const ALL_FAKE = {
+  otp: 'fake',
+  storage: 'fake',
+  notifier: 'fake',
+  payments: 'fake',
+  analytics: 'fake',
+} as const;
+
 describe('createProviders', () => {
-  it('builds the fakes outside production', () => {
-    const providers = createProviders({ otp: 'fake', storage: 'fake' }, false);
+  it('builds every fake outside production', () => {
+    const providers = createProviders(ALL_FAKE, false);
     expect(providers.otp).toBeInstanceOf(FakeOtpProvider);
     expect(providers.storage).toBeInstanceOf(FakeStorageProvider);
+    expect(providers.notifier).toBeInstanceOf(FakeNotifier);
+    expect(providers.payments).toBeInstanceOf(FakePaymentProvider);
+    expect(providers.analytics).toBeInstanceOf(FakeAnalyticsProvider);
   });
 
   it('refuses fakes in production even if the config check was bypassed', () => {
-    expect(() => createProviders({ otp: 'fake', storage: 'fake' }, true)).toThrow(
-      ProviderUnavailableError,
-    );
+    expect(() => createProviders(ALL_FAKE, true)).toThrow(ProviderUnavailableError);
   });
 
-  it.each([
-    [{ otp: 'real', storage: 'fake' }, 'otp'],
-    [{ otp: 'fake', storage: 'real' }, 'storage'],
-  ] as const)('fails loudly for %j: the real integration is not built yet', (modes, name) => {
-    const failure = (() => {
-      try {
-        createProviders(modes, false);
-      } catch (error) {
-        return error;
-      }
-      return null;
-    })();
-    expect(failure).toBeInstanceOf(ProviderUnavailableError);
-    expect((failure as ProviderUnavailableError).provider).toBe(name);
-    expect(normalizeError(failure).httpStatus).toBe(500);
-  });
+  it.each(['otp', 'storage', 'notifier', 'payments', 'analytics'] as const)(
+    'fails loudly when %s is real: the integration is not built yet',
+    (name) => {
+      const failure = (() => {
+        try {
+          createProviders({ ...ALL_FAKE, [name]: 'real' }, false);
+        } catch (error) {
+          return error;
+        }
+        return null;
+      })();
+      expect(failure).toBeInstanceOf(ProviderUnavailableError);
+      expect((failure as ProviderUnavailableError).provider).toBe(name);
+      expect(normalizeError(failure).httpStatus).toBe(500);
+    },
+  );
 });
