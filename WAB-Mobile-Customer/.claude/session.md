@@ -9,7 +9,7 @@
 
 ## Current task
 
-- CUS-022 next (media); task branches start from `origin/customer`.
+- CUS-023 next (adaptive scaffolds); task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -99,3 +99,16 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one dialog composable with a data-driven spec; the feature owns when/what, the kit owns how; no literals.
 - Notes: dialog windows cannot be previewed, so their look was verified through the shared `AppDialog` (already in the component gallery). The CUS-021 session block was first appended to the root session file by mistake (network failure mid-command) and removed.
+
+### CUS-022 — Media: image loading, gallery grid, banner carousel, media viewer
+- Branch: `feat/cus-022-media`
+- Status: DONE
+- Acceptance criteria (PRD §3.14, S03 banner carousel, S07 item 11, S10; Design Script §1.2):
+  - [x] `AppImage` = `SubcomposeAsyncImage` on the shared Coil loader with shimmer while loading and `AppImageFallback` on error; `contentDescription` + `contentScale` params
+  - [x] `AppGalleryGrid` / `AppMediaTile` (square tiles, play badge on videos, adaptive `galleryColumns` 3/4/6); `AppBannerCarousel` (HorizontalPager, auto-swipe from `motion.bannerAutoSwipe`, page dots, localized page description, pure `nextBannerIndex`)
+  - [x] `AppMediaViewer` (full-screen pager, position label, close): images pinch-to-zoom (`clampZoom`, `panOffsetFor`), videos via `AppVideoPlayer` expect/actual (Android `VideoView` + `MediaController`; iOS `AVPlayerViewController` through `UIKitView`) — compiled for both platforms by the gate
+  - [x] AR + EN strings (`media_*`, `banner_description`); `MediaTest` (5); `MediaGalleryPreviews` AR/EN, light/dark, portrait/landscape, tablet; icons `Play`, `Image` added
+- Tests: `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0 (`MediaTest` 5/5)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — no new dependency (platform players), lambdas in effects via `rememberUpdatedState`, zoom gestures read state in the draw phase (`graphicsLayer` lambda), keys on every lazy/pager item.
+- Notes: previews run offline so image slots show loading/fallback; real image, zoom and video playback must be exercised on a device when the first feature screen uses them (Salon Details, CUS-036/039).

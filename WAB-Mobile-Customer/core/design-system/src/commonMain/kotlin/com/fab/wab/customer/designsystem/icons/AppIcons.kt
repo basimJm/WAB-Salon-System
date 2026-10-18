@@ -13,10 +13,12 @@ import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.Search
@@ -53,4 +55,6 @@ object AppIcons {
     val Error: ImageVector = Icons.Rounded.ErrorOutline
     val Offline: ImageVector = Icons.Rounded.CloudOff
     val ExpandMore: ImageVector = Icons.Rounded.KeyboardArrowDown
+    val Play: ImageVector = Icons.Rounded.PlayArrow
+    val Image: ImageVector = Icons.Rounded.Image
 }
