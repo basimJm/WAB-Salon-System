@@ -25,4 +25,7 @@
     <string name="splash_retry_button">إعادة المحاولة</string>
     <string name="unauthorized_logout_message">أنت غير مصرح لك وسيتم تسجيل خروجك.</string>
     <string name="nav_home">الرئيسية</string>
+    <string name="nav_favorites">المفضلة</string>
+    <string name="nav_bookings">الحجوزات</string>
+    <string name="nav_profile">الملف الشخصي</string>
 </resources>

@@ -8,4 +8,13 @@ sealed interface Screen {
 
     @Serializable
     data class SampleDetails(val itemId: Int) : Screen
+
+    @Serializable
+    data object Favorites : Screen
+
+    @Serializable
+    data object Bookings : Screen
+
+    @Serializable
+    data object Profile : Screen
 }

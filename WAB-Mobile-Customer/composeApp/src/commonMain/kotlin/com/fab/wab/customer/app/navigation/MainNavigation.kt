@@ -13,5 +13,6 @@ fun MainNavigation(
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
         SampleNavigation(navController).registerGraph(this)
+        registerPlaceholderRoots()
     }
 }

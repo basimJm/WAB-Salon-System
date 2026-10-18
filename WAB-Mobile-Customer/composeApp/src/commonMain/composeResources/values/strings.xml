@@ -25,4 +25,7 @@
     <string name="splash_retry_button">Retry</string>
     <string name="unauthorized_logout_message">You are unauthorized and will be logged out.</string>
     <string name="nav_home">Home</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="nav_bookings">Bookings</string>
+    <string name="nav_profile">Profile</string>
 </resources>

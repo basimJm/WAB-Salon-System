@@ -9,7 +9,7 @@
 
 ## Current task
 
-- CUS-023 next (adaptive scaffolds); task branches start from `origin/customer`.
+- Design phase done (CUS-018…023). Next: CUS-004 Firebase facade, then CUS-006 network kernel; task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -112,3 +112,16 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — no new dependency (platform players), lambdas in effects via `rememberUpdatedState`, zoom gestures read state in the draw phase (`graphicsLayer` lambda), keys on every lazy/pager item.
 - Notes: previews run offline so image slots show loading/fallback; real image, zoom and video playback must be exercised on a device when the first feature screen uses them (Salon Details, CUS-036/039).
+
+### CUS-023 — Adaptive app shell: four root tabs, bottom bar / rail, IME insets, font-scale previews
+- Branch: `feat/cus-023-adaptive-scaffold`
+- Status: DONE
+- Acceptance criteria (PRD §7.1, §3; CLAUDE.md §7):
+  - [x] `App` uses `AppNavScaffold` with `rootNavItems()` (Home, Favorites, Bookings, Profile; AR + EN labels); `switchRootTab` saves/restores each tab's back stack (single top); selected tab from the back-stack hierarchy via pure `RootTab.forRoutes`
+  - [x] `Graph.Favorites/Bookings/Profile` + `Screen.*` roots in `core/navigation`; `registerPlaceholderRoots()` until CUS-040/041/053
+  - [x] `AppScreen(handleIme = true)` applies IME padding; `ShellGalleryPreviews` (phone portrait bottom bar, landscape + tablet rail, RTL/LTR, light/dark, font scale 2.0 frame)
+  - [x] UI check on the Android emulator (Pixel, dev-debug APK, Arabic): bottom bar with Home selected, tab switch to Favorites keeps selection, landscape shows the rail at the Start edge; logcat has no fatal exception
+- Tests: `RootTabTest` (4); `WAB_SKIP_IOS=1 scripts/ci/run_local_checks.sh` → GATE-EXIT=0; `scripts/ci/run_ios_checks.sh` → IOS-GATE-EXIT=0
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — routes stay in `core/navigation`, the design system never sees them; labels from resources; standard nav-compose tab switching.
+- Notes: FOUND (pre-existing, not from this task): the iOS app crashes at launch in the simulator (`FIRInstallations validateAPIKey`) because both tracked Firebase configs carry 42-character API keys (Firebase expects 39): `iosApp/iosApp/GoogleService-Info.plist` and `androidApp/google-services.json` are placeholders — owner must supply the real dev configs (CLAUDE.md §1.11: not edited by me). Android runs. Also observed: the sample screen shows a raw English exception text as its error message (sample feature, replaced by CUS-006's error catalog).
