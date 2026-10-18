@@ -14,6 +14,7 @@ object PlatformNames {
 
 expect fun getPlatform(): Platform
 
-expect fun openStoreLink()
+/** Opens the store page the backend configured (S24); a missing URL is a no-op. */
+expect fun openStoreLink(url: String?)
 
 expect fun exitApp()

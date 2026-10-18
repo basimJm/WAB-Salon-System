@@ -17,22 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import com.fab.wab.customer.app.controller.contract.MainContract
-import com.fab.wab.customer.app.controller.state.SplashScreenState
 import com.fab.wab.customer.app.resources.Res
-import com.fab.wab.customer.app.resources.force_update_button
-import com.fab.wab.customer.app.resources.force_update_message
-import com.fab.wab.customer.app.resources.force_update_title
-import com.fab.wab.customer.app.resources.maintenance_exit_button
-import com.fab.wab.customer.app.resources.maintenance_message
-import com.fab.wab.customer.app.resources.maintenance_title
-import com.fab.wab.customer.app.resources.optional_update_button
-import com.fab.wab.customer.app.resources.optional_update_later
-import com.fab.wab.customer.app.resources.optional_update_message
-import com.fab.wab.customer.app.resources.optional_update_title
 import com.fab.wab.customer.app.resources.splash_version
 import com.fab.wab.customer.core.ui.utils.LocalDarkTheme
-import com.fab.wab.customer.designsystem.components.badge.StatusTone
-import com.fab.wab.customer.designsystem.components.dialog.AppDialog
 import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
 import com.fab.wab.customer.designsystem.components.feedback.AppLoadingIndicator
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
@@ -44,9 +31,10 @@ import com.fab.wab.customer.designsystem.resources.Res as CoreRes
 import com.fab.wab.customer.designsystem.resources.ic_app_logo_dark
 import com.fab.wab.customer.designsystem.resources.ic_app_logo_light
 
+/** Logo + loader while the config call runs; the config error with retry replaces the loader (PRD §4.2). */
 @Composable
 fun SplashScreen(
-    state: SplashScreenState,
+    state: MainContract.UiState,
     onEvent: (MainContract.UiAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -68,7 +56,7 @@ fun SplashScreen(
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.size(AppTheme.sizes.splashLogo),
                 )
-                AppLoadingIndicator()
+                if (state.error == null) AppLoadingIndicator()
                 state.appVersion?.let { version ->
                     AppText(
                         text = stringResource(Res.string.splash_version, version),
@@ -77,45 +65,13 @@ fun SplashScreen(
                     )
                 }
             }
-            if (state.splashErrorMsg != null) {
+            if (state.error != null) {
                 AppErrorState(
-                    message = state.splashErrorMsg,
+                    message = state.error,
                     onRetry = { onEvent(MainContract.UiAction.OnRetryClicked) },
                     modifier = Modifier.background(colors.background),
                 )
             }
         }
-    }
-
-    if (state.showUpdateDialog) {
-        AppDialog(
-            title = stringResource(Res.string.force_update_title),
-            message = stringResource(Res.string.force_update_message),
-            confirmText = stringResource(Res.string.force_update_button),
-            onConfirm = { onEvent(MainContract.UiAction.OnConfirmUpdateDialog) },
-            onDismiss = {},
-            dismissOnOutside = false,
-        )
-    }
-    if (state.showOptionalUpdateDialog) {
-        AppDialog(
-            title = stringResource(Res.string.optional_update_title),
-            message = stringResource(Res.string.optional_update_message),
-            confirmText = stringResource(Res.string.optional_update_button),
-            dismissText = stringResource(Res.string.optional_update_later),
-            onConfirm = { onEvent(MainContract.UiAction.OnConfirmUpdateDialog) },
-            onDismiss = { onEvent(MainContract.UiAction.OnDismissUpdateDialog) },
-        )
-    }
-    if (state.showMaintenanceDialog) {
-        AppDialog(
-            title = stringResource(Res.string.maintenance_title),
-            message = stringResource(Res.string.maintenance_message),
-            confirmText = stringResource(Res.string.maintenance_exit_button),
-            onConfirm = { onEvent(MainContract.UiAction.OnConfirmMaintenanceDialog) },
-            onDismiss = { onEvent(MainContract.UiAction.OnConfirmMaintenanceDialog) },
-            tone = StatusTone.Warning,
-            dismissOnOutside = false,
-        )
     }
 }

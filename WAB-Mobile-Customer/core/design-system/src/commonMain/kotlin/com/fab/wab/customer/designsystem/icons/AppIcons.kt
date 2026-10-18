@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Check
@@ -41,6 +42,7 @@ object AppIcons {
     val SearchOff: ImageVector = Icons.Rounded.SearchOff
     val Filter: ImageVector = Icons.Rounded.Tune
     val Refresh: ImageVector = Icons.Rounded.Refresh
+    val Maintenance: ImageVector = Icons.Rounded.Build
     val Home: ImageVector = Icons.Rounded.Home
     val Favorite: ImageVector = Icons.Rounded.Favorite
     val FavoriteBorder: ImageVector = Icons.Rounded.FavoriteBorder

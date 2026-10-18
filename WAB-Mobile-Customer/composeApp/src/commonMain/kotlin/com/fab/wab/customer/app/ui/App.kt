@@ -17,6 +17,12 @@ import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.vm.MainViewModel
 import com.fab.wab.customer.app.analytics.TrackNavigationScreens
 import com.fab.wab.customer.app.di.analyticsAppModule
+import com.fab.wab.customer.app.di.appPlatformModule
+import com.fab.wab.customer.app.ui.system.ForceUpdateScreen
+import com.fab.wab.customer.app.ui.system.MaintenanceScreen
+import com.fab.wab.customer.core.domain.config.LaunchGate
+import com.fab.wab.customer.designsystem.components.dialog.AppGlobalDialog
+import com.fab.wab.customer.designsystem.components.dialog.GlobalDialogKind
 import com.fab.wab.customer.app.di.viewModelModule
 import com.fab.wab.customer.core.analytics.AnalyticsTracker
 import com.fab.wab.customer.core.analytics.compose.LocalAnalyticsTracker
@@ -47,7 +53,6 @@ import com.fab.wab.customer.designsystem.components.image.LocalImageLoader
 import com.fab.wab.customer.designsystem.components.image.rememberImageLoader
 import com.fab.wab.customer.designsystem.components.navigation.AppNavScaffold
 import com.fab.wab.customer.designsystem.theme.AppTheme
-import com.fab.wab.customer.exitApp
 import com.fab.wab.customer.feature.sample.di.sampleModule
 import com.fab.wab.customer.feature.sample.presentation.di.samplePresentationModule
 import com.fab.wab.customer.openStoreLink
@@ -61,6 +66,7 @@ val appModules = listOf(
     realtimeModule,
     notificationModule,
     viewModelModule,
+    appPlatformModule,
     platformFirebaseModule(),
     analyticsModule(),
     analyticsAppModule,
@@ -98,24 +104,33 @@ fun App(androidContext: Any?) {
 
     CollectSideEffect(mainViewModel.sideEffect) {
         when (it) {
-            MainContract.SideEffect.KillTheApp -> exitApp()
-            MainContract.SideEffect.NavigateToStore -> openStoreLink()
+            is MainContract.SideEffect.OpenStore -> openStoreLink(it.url)
         }
     }
 
-    if (state.splashScreenState.showSplashScreen) {
-        SplashScreen(state.splashScreenState, mainViewModel::onEvent)
-    } else {
+    CompositionLocalProvider(
+        LocalLayoutDirection provides layoutDirection,
+    ) {
         CompositionLocalProvider(
-            LocalLayoutDirection provides layoutDirection,
+            LocalImageLoader provides imageLoader,
+            LocalAppLocale provides languageState.code,
+            LocalDarkTheme provides isDarkTheme,
+            LocalAnalyticsTracker provides koinInject<AnalyticsTracker>(),
         ) {
-            CompositionLocalProvider(
-                LocalImageLoader provides imageLoader,
-                LocalAppLocale provides languageState.code,
-                LocalDarkTheme provides isDarkTheme,
-                LocalAnalyticsTracker provides koinInject<AnalyticsTracker>(),
-            ) {
-                AppTheme {
+            when (val gate = state.gate) {
+                null -> AppTheme { SplashScreen(state, mainViewModel::onEvent) }
+                is LaunchGate.Maintenance ->
+                    AppTheme { MaintenanceScreen(gate.message, onRetry = { mainViewModel.onEvent(UiAction.OnRetryClicked) }) }
+                is LaunchGate.ForceUpdate ->
+                    AppTheme { ForceUpdateScreen(onUpdate = { mainViewModel.onEvent(UiAction.OnUpdateClicked) }) }
+                is LaunchGate.OptionalUpdate, LaunchGate.Ready -> AppTheme {
+                    if (gate is LaunchGate.OptionalUpdate) {
+                        AppGlobalDialog(
+                            kind = GlobalDialogKind.OptionalUpdate,
+                            onConfirm = { mainViewModel.onEvent(UiAction.OnUpdateClicked) },
+                            onDismiss = { mainViewModel.onEvent(UiAction.OnOptionalUpdateDismissed) },
+                        )
+                    }
                     TrackNavigationScreens(navController)
                     val sessionState by koinInject<SessionStore>().state.collectAsStateWithLifecycle(initialValue = null)
                     RealtimeConnectionEffect(koinInject<RealtimeClient>(), isSignedIn = sessionState?.isSignedIn == true)
