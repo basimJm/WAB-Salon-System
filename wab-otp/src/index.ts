@@ -18,5 +18,7 @@ export { MemoryLimitStore } from './adapters/memory-store';
 export { RedisLimitStore, type RedisClientLike } from './adapters/redis-store';
 export { FAKE_PROOF_KINDS, type FakeProofKind } from './constants/fake';
 export { isE164 } from './validation';
+export { createFirebaseVerifier } from './adapters/firebase';
+export { createKeyProvider, type KeyProvider } from './adapters/firebase/keys';
 export { createOtpService } from './service';
 export { createLimits, type Limits, type LimitsConfig } from './limits';

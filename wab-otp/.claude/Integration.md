@@ -111,7 +111,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/otp` real mode (`*_P
 | Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ |
 | Shared kernel (errors, config, http/retry, logger) | ✅ |
 | Adapter: fake — in-memory, deterministic proofs for dev/tests | ✅ |
-| Adapter: firebase — Firebase Admin `verifyIdToken` → verified phone | ⬜ |
+| Adapter: firebase — Firebase Admin `verifyIdToken` → verified phone | ✅ |
 | Adapter: memory-store — LimitStore for dev/tests | ✅ |
 | Adapter: redis-store — LimitStore for prod (atomic Lua counters, TTL) | ✅ |
 | Adapter: sms-server-verified — FUTURE: server sends + checks code | ⬜ |
@@ -128,3 +128,4 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/otp` real mode (`*_P
 | 2026-10-18 | 0.1.0 | OTP-003 verifier: createOtpVerifier, fake adapter, memory store, input validation. |
 | 2026-10-18 | 0.1.0 | OTP-004 limits engine + createOtpService (precheck/verify/reportFailure/getConfig). |
 | 2026-10-18 | 0.1.0 | OTP-005 Redis LimitStore (Lua scripts, ioredis-shaped client). |
+| 2026-10-18 | 0.1.0 | OTP-006 Firebase ID-token adapter on jose (JWK cache, rotation, stale keys, claim checks). |
