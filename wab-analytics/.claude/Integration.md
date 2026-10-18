@@ -112,7 +112,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/analytics` real mode
 | Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ |
 | Shared kernel (errors, config, http/retry, logger) | ✅ |
 | Adapter: memory — in-memory events + identity links for dev/tests | ✅ |
-| Adapter: mongo — event store: write events, count/group queries, identity links | ⬜ |
+| Adapter: mongo — event store: write events, count/group queries, identity links | ✅ (unverified against a real MongoDB) |
 | Adapter: bigquery — Firebase Analytics/Crashlytics export queries | ⬜ |
 | Adapter: cache-memory — dev cache | ⬜ |
 | Adapter: cache-redis — prod cache (injected client) | ⬜ |
@@ -127,3 +127,4 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/analytics` real mode
 | 2026-10-18 | 0.1.0 | ANA-001 scaffold: tooling, package `@wab/analytics`, smoke and loop harness. |
 | 2026-10-18 | 0.1.0 | ANA-002 kernel: AnalyticsError + codes, zod options with prod rules, redacting logger, range guard, retry. |
 | 2026-10-18 | 0.1.0 | ANA-003 port + memory adapters + `createAnalytics(options, overrides)`; funnel/cohorts/journey/overview pending (ANA-005). |
+| 2026-10-18 | 0.1.0 | ANA-004 Mongo adapters (event store + identity links) over an injected native collection with id codec. |

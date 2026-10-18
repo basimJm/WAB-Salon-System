@@ -16,6 +16,15 @@ export { assertRange, type DateRange } from './range';
 export { withRetry, type RetryPolicy } from './retry';
 export { MemoryEventStore } from './adapters/memory/eventStore';
 export { MemoryIdentityStore } from './adapters/memory/identityStore';
+export { MongoEventStore } from './adapters/mongo/eventStore';
+export { MongoIdentityStore } from './adapters/mongo/identityStore';
+export type {
+  IdCodec,
+  MongoCollectionLike,
+  MongoCursorLike,
+  MongoDoc,
+  MongoFindCursorLike,
+} from './adapters/mongo/types';
 export type {
   AppEvent,
   CrashEvent,
