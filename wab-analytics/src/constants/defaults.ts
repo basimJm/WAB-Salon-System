@@ -20,6 +20,7 @@ export const DEFAULT_LIMITS = {
   maxScannedEvents: 50_000,
   maxFunnelSteps: 10,
   minFunnelSteps: 2,
+  maxDropOffUsers: 100,
   maxCohortPeriods: 12,
   maxJourneyItems: 500,
   maxNames: 20,
