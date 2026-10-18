@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -42,13 +43,16 @@ fun AppScreen(
     topBar: (@Composable () -> Unit)? = null,
     bottomBar: (@Composable () -> Unit)? = null,
     maxContentWidth: Dp = AppTheme.adaptive.contentMaxWidth,
+    handleIme: Boolean = true,
     content: @Composable (PaddingValues) -> Unit,
 ) {
+    val imeModifier = if (handleIme) Modifier.imePadding() else Modifier
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(AppTheme.colors.background)
-            .windowInsetsPadding(WindowInsets.displayCutout),
+            .windowInsetsPadding(WindowInsets.displayCutout)
+            .then(imeModifier),
     ) {
         topBar?.invoke()
         Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {

@@ -1,19 +1,16 @@
 package com.fab.wab.customer.app.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fab.wab.customer.app.controller.contract.MainContract
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
@@ -24,6 +21,9 @@ import com.fab.wab.customer.core.analytics.AnalyticsTracker
 import com.fab.wab.customer.core.analytics.compose.LocalAnalyticsTracker
 import com.fab.wab.customer.core.analytics.di.analyticsModule
 import com.fab.wab.customer.app.navigation.MainNavigation
+import com.fab.wab.customer.app.navigation.RootTab
+import com.fab.wab.customer.app.navigation.rootNavItems
+import com.fab.wab.customer.app.navigation.switchRootTab
 import com.fab.wab.customer.app.resources.Res
 import com.fab.wab.customer.app.resources.unauthorized_logout_message
 import com.fab.wab.customer.core.di.coreDiModule
@@ -38,11 +38,7 @@ import com.fab.wab.customer.core.ui.utils.LocalAppLocale
 import com.fab.wab.customer.core.ui.utils.LocalDarkTheme
 import com.fab.wab.customer.designsystem.components.image.LocalImageLoader
 import com.fab.wab.customer.designsystem.components.image.rememberImageLoader
-import com.fab.wab.customer.designsystem.components.navigation.AppNavItem
-import com.fab.wab.customer.designsystem.components.navigation.AppNavigationRail
-import com.fab.wab.customer.designsystem.icons.AppIcons
-import com.fab.wab.customer.designsystem.theme.NavigationStyle
-import com.fab.wab.customer.app.resources.nav_home
+import com.fab.wab.customer.designsystem.components.navigation.AppNavScaffold
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.exitApp
 import com.fab.wab.customer.feature.sample.di.sampleModule
@@ -63,8 +59,6 @@ val appModules = listOf(
     sampleModule,
     samplePresentationModule,
 )
-
-private const val HOME_NAV_ID = "home"
 
 @Composable
 fun App(androidContext: Any?) {
@@ -112,36 +106,37 @@ fun App(androidContext: Any?) {
                 LocalAnalyticsTracker provides koinInject<AnalyticsTracker>(),
             ) {
                 AppTheme {
-                    val homeLabel = stringResource(Res.string.nav_home)
-                    val navItems = remember(homeLabel) { listOf(AppNavItem(HOME_NAV_ID, homeLabel, AppIcons.Home)) }
-                    Row(Modifier.fillMaxSize()) {
-                        if (AppTheme.adaptive.navigation == NavigationStyle.Rail) {
-                            AppNavigationRail(items = navItems, selectedId = HOME_NAV_ID, onSelect = {})
-                        }
-                        Box(Modifier.weight(1f)) {
-                            NotificationHost {
-                                val notificationManager = rememberNotificationManager()
+                    val tabs = rootNavItems()
+                    val backStackEntry by navController.currentBackStackEntryAsState()
+                    val hierarchyRoutes = backStackEntry?.destination?.hierarchy?.map { it.route }?.toList().orEmpty()
+                    val selectedTab = RootTab.forRoutes(hierarchyRoutes)
+                    AppNavScaffold(
+                        items = tabs,
+                        selectedId = selectedTab.id,
+                        onSelect = { id -> navController.switchRootTab(RootTab.fromId(id)) },
+                    ) {
+                        NotificationHost {
+                            val notificationManager = rememberNotificationManager()
 
-                                LaunchedEffect(sessionTimeOut) {
-                                    sessionTimeOut
-                                        .takeIf { it }
-                                        ?.let {
-                                            notificationManager.show(
-                                                unauthorizedLogoutMessage,
-                                                style = NotificationStyle.Error,
-                                            )
-                                            mainViewModel.onEvent(UiAction.OnSessionTimeOut)
-                                            navController.navigate(Graph.Home) {
-                                                popUpTo(navController.graph.id) {
-                                                    inclusive = true
-                                                }
-                                                launchSingleTop = true
+                            LaunchedEffect(sessionTimeOut) {
+                                sessionTimeOut
+                                    .takeIf { it }
+                                    ?.let {
+                                        notificationManager.show(
+                                            unauthorizedLogoutMessage,
+                                            style = NotificationStyle.Error,
+                                        )
+                                        mainViewModel.onEvent(UiAction.OnSessionTimeOut)
+                                        navController.navigate(Graph.Home) {
+                                            popUpTo(navController.graph.id) {
+                                                inclusive = true
                                             }
+                                            launchSingleTop = true
                                         }
-                                }
-
-                                MainNavigation(Graph.Home, navController)
+                                    }
                             }
+
+                            MainNavigation(Graph.Home, navController)
                         }
                     }
                 }
