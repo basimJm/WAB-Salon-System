@@ -29,7 +29,9 @@ export function ChartFrame({ title, description, table, filename, children }: Ch
     <figure className="wab-chart">
       <figcaption className="wab-chart__head">
         <div>
-          <Heading level={3}>{title}</Heading>
+          <Heading level={2} look={3}>
+            {title}
+          </Heading>
           {description ? <Text tone="muted">{description}</Text> : null}
         </div>
         <div className="wab-row">

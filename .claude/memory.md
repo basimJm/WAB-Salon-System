@@ -119,3 +119,4 @@
 - ADM-066 done: audit = repositories.audit.list(query); humanizeAction/hasDiff pure helpers
 - ADM-067 done: exports = repositories.exports {list,request,get}; useExportRunner()(kind, params) -> onExport(format) for ExportMenu; only REPORT_*, TRANSACTIONS and AUDIT_LOGS exist on the server
 - ADM-078 done: fixtures coverage lives in tests/fixtures.test.ts (WITHOUT_FIXTURE has the 19 exempt operations: auth on MockAuthRepository and by-id reads no screen uses)
+- ADM-081 done: tests/pages-a11y.test.tsx renders every module screen in ar+en and runs axe; ChartFrame title is h2 styled as h3
