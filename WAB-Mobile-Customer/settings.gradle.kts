@@ -57,4 +57,8 @@ include(
     ":feature:onboarding:domain",
     ":feature:onboarding:presentation",
     ":feature:onboarding:di",
+    ":feature:auth:domain",
+    ":feature:auth:data",
+    ":feature:auth:presentation",
+    ":feature:auth:di",
 )

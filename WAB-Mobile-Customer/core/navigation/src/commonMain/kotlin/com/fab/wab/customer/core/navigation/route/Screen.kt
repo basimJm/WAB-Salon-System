@@ -17,4 +17,19 @@ sealed interface Screen {
 
     @Serializable
     data object Profile : Screen
+
+    @Serializable
+    data object Login : Screen
+
+    /** S12; prefilled from S11's "not registered" path (PRD S11). */
+    @Serializable
+    data class Register(val countryCode: String? = null, val number: String? = null) : Screen
+
+    /** S13; [purpose] is an `AuthPurpose` code, the phone is the national number with its country. */
+    @Serializable
+    data class Otp(val purpose: String, val countryCode: String, val number: String) : Screen
+
+    /** S23 legal / support pages by slug (`GET /content/pages/{slug}`). */
+    @Serializable
+    data class ContentPage(val slug: String) : Screen
 }

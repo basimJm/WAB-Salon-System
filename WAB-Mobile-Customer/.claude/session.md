@@ -9,22 +9,7 @@
 
 ## Current task
 
-- Next: CUS-028 login S11, CUS-029 OTP…; task branches start from `origin/customer`.
-
-### CUS-025 — Onboarding S01: 4-page pager, skip/next, `onboarding_seen` on display
-- Branch: `feat/cus-025-onboarding`
-- Status: IN REVIEW
-- Acceptance criteria (PRD S01 + §4.3 onboarding rules; Design Script S01; prototype texts):
-  - [x] `feature/onboarding` (domain: `OnboardingPage` ×4, `MarkOnboardingSeenUseCase`, `ObserveOnboardingSeenUseCase` over `SessionStore`; presentation: contract, `OnboardingViewModel` (marks seen in `onStart`, next → scroll, last → complete, skip → finished, analytics `onboarding_next/skip/complete` with page), `OnboardingScreen` (pager, dots, Skip always visible, Next / Get started), `OnboardingRoute`; di modules)
-  - [x] Design system: `AppPageIndicator` (selected dot stretches, localized description) shared with the banner carousel; icons Discover / Booking / Bride / Payment; size tokens `pageIndicatorActive`, `onboardingIllustration`
-  - [x] App shell: `MainViewModel` decides `onboardingRequired` once per launch from `onboarding_seen` (after the config gate); `OnboardingRoute` renders before the tab scaffold; `OnOnboardingFinished` continues to Home (S02 lands with CUS-026)
-  - [x] AR + EN texts from the prototype (4 titles + 4 texts, skip/next/start)
-  - [x] Tests: `OnboardingPageTest` (1), `OnboardingViewModelTest` (3), `MainViewModelTest` (+1 first launch)
-  - [x] Emulator: fresh install shows onboarding (AR, RTL), swipe + Next + Get started reach Home; relaunch skips it (`onboarding_seen`); landscape layout
-- Tests: onboarding domain/presentation + composeApp + design-system host tests green; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0; emulator (Pixel, AR): onboarding on fresh install, Next ×3, Get started → Home, relaunch skips, landscape re-checked after the fix
-- Loops: 1/1 — the loop caught two things: detekt `ParameterNaming` (`onFinished` → `onFinish`) and landscape clipping (texts pushed off-screen) → compact-height pages use a Row layout
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — feature follows the sample layout (domain/presentation/di), `onboarding_seen` written on display (PRD), page indicator reused by the carousel, texts in resources (AR first), analytics constants, no literals.
-- Notes: illustrations are icon placeholders inside a tinted circle (the prototype has image slots only; owner art pending).
+- Next: CUS-029 OTP S13, CUS-030 register…; task branches start from `origin/customer`.
 
 ### CUS-026 — Nickname & gender S02 + launch router (PRD §4.2)
 - Branch: `feat/cus-026-launch-router`
@@ -53,3 +38,18 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — repository built on the generated operations; cache keyed by the same language source as the Accept-Language header so a language switch refetches; errors never cached; no UI.
 - Notes: no UI in this task (consumers: S11/S12 CUS-028, profile CUS-053); the Accept-Language header is added by the shared client, the cache key mirrors it.
+
+### CUS-028 — Login S11: phone + country, check-phone, not-registered / blocked, language + theme, legal links
+- Branch: `feat/cus-028-login`
+- Status: IN REVIEW
+- Acceptance criteria (PRD S11, §3.12 entry, §14 names; Design Script S11; operation `POST /auth/check-phone` → 200 / 404 PHONE_NOT_REGISTERED / 403 ACCOUNT_BLOCKED / 409 PHONE_ALREADY_REGISTERED):
+  - [x] `feature/auth` (domain: `PhoneNumber`, `AuthPurpose`, `PhoneCheck`, `AuthRepository`, `CheckPhoneUseCase`; data: `AuthApi` on the generated operation, `AuthRepositoryImpl` + pure `phoneCheckOf` mapping the contract's error codes to outcomes; presentation: `LoginViewModel`, `LoginScreen` + `LoginOverlays`, `LoginNavigation` registering `Graph.Auth`; di)
+  - [x] S11 behaviour: countries from `LocationsRepository` (default Jordan), number validated with the selected country's regex (error under the field once touched, button disabled until valid), loading spinner on submit; registered → OTP route; not registered → popup → Register route prefilled; blocked → suspended message with Contact action; errors as toast; language + theme icons persist through `AppearanceSettings`; legal links → `Screen.ContentPage(slug)`
+  - [x] Shell: `Graph.Auth` + `Screen.Login/Register/Otp/ContentPage` routes; `AppNavScaffold(navigationVisible)` hides the tab bar outside the root tabs (`RootTab.forRoutesOrNull`); Profile placeholder carries the "Log in" entry; Register / OTP / content placeholders until CUS-029/030/05x; icons Language / ThemeDark / ThemeLight
+  - [x] AR + EN texts from the prototype
+  - [x] Tests: `PhoneCheckMapperTest` (2), `LoginViewModelTest` (6), `RootTabTest` (+1)
+  - [x] Emulator (AR): Profile → Log in → empty / invalid / valid / loading, country picker, language toggle to EN, theme toggle, OTP placeholder after a registered number (mock answers 200)
+- Tests: auth data/presentation + composeApp host tests green (9 new); policy suite 76 OK; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0; emulator (Pixel): Profile → Log in, empty (disabled) / invalid (error) / valid (enabled), country picker, submit → OTP placeholder with the number, English LTR, dark mode, back to Arabic
+- Loops: 1/1 — the loop found three defects (duplicate-key crash from mock fixtures, clipped legal links, literal apostrophe escapes) and fixed them
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — outcomes mapped from contract codes in one pure function; the number is normalized before it leaves the screen and never logged/tracked; auth graph hides the tab bar; strings AR + EN; no literals (slugs, purposes, analytics names are constants).
+- Notes: the not-registered and blocked popups cannot be reached with the mock transport (always 200) and are verified by unit tests; `Screen.Otp` carries the purpose + national number for CUS-029. FOUND by the emulator check: mock list fixtures repeated identical ids/codes → duplicate `LazyColumn` key crash in the country picker; `api_sync.py` now varies ids/codes per item and emits Jordan phone samples (regenerated), the view model de-duplicates by code; legal links overflowed → `FlowRow`; `\'` in Compose string resources renders literally (unlike Android XML) → typographic apostrophes in the login and onboarding EN strings.
