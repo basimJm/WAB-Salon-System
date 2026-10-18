@@ -65,6 +65,8 @@ export interface OtpProvider {
   precheck(input: PrecheckInput): Promise<PrecheckResult>;
   verify(input: VerifyInput): Promise<VerifyResult>;
   reportFailure(input: FailureInput): Promise<FailureResult>;
+  /** Clears counters, block and resend cooldown of a phone (admin unblock; success does it itself). */
+  resetLimits(phone: string): Promise<void>;
   getConfig(): { readonly otpLength: number; readonly resendAfterSeconds: number };
   close(): Promise<void>;
 }

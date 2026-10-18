@@ -47,3 +47,11 @@
 - Tests: npm run verify green (187 tests; HTTP fixtures + real localhost round trips against the OPP mock)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Result-code regexes are from memory of the OPP docs (docs host unreachable here): UNVERIFIED against the live reference. PA (pre-auth) option removed: capture is not built.
+
+### PAY-006 — HyperPay refunds
+- Branch: `feat/pay-006-hyperpay-refund`
+- Status: IN REVIEW
+- Acceptance: refund (full/partial, paymentType=RF) with duplicate protection via merchantTransactionId lookup before sending, checkout->payment SessionDirectory (memory/Redis), over-refund and uncaptured mapping, getRefund with status normalization.
+- Tests: npm run verify green (211 tests incl. restart-with-same-key against the OPP mock)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Refund is never blind-retried; a failed lookup aborts rather than risking a double refund. Real OPP behaviour of /v1/query and RF is unverified.

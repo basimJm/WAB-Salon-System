@@ -26,6 +26,7 @@ import {
   type HyperPayTestMode,
 } from '../constants/hyperpay';
 import { configError } from '../errors';
+import type { SessionDirectory } from '../directory';
 import type { IdempotencyStore } from '../idempotency';
 import type { Logger } from '../logger';
 import type { RetryDeps, RetryPolicy } from '../retry';
@@ -72,6 +73,8 @@ export interface PaymentsOptionsBase {
   readonly timeoutMs?: number;
   readonly retry?: Partial<RetryPolicy>;
   readonly idempotency?: { readonly store?: IdempotencyStore; readonly ttlSec?: number };
+  /** Checkout -> payment mapping needed for late refunds (Redis in prod). */
+  readonly directory?: SessionDirectory;
   /** The adapter when `provider` is `custom` (any gateway implementing the port). */
   readonly gateway?: PaymentGateway;
   readonly logger?: Logger;
@@ -213,6 +216,13 @@ const checkProvider = (options: PaymentsOptionsBase): ResolvedHyperPay | undefin
   }
   if (options.environment === 'prod' && options.idempotency?.store === undefined) {
     reject('idempotency.store (a shared store is required in prod)');
+  }
+  if (
+    options.environment === 'prod' &&
+    options.provider === 'hyperpay' &&
+    options.directory === undefined
+  ) {
+    reject('directory (a shared session directory is required in prod)');
   }
   if (options.provider === 'custom' && options.gateway === undefined) reject('gateway');
   if (options.provider === 'mock-gateway') {
