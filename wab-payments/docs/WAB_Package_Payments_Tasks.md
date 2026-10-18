@@ -4,7 +4,7 @@
 
 | ID | Task | Branch | Needs | Status | Sources / notes |
 |---|---|---|---|---|---|
-| PAY-001 | Node project scaffold (copy the `wab-notifications` setup): TS strict, eslint, prettier, jest, tsup, `verify`, loop-test config | `feat/pay-001-scaffold` | — | TODO | Rules §4.12 |
+| PAY-001 | Node project scaffold (copy the `wab-notifications` setup): TS strict, eslint, prettier, jest, tsup, `verify`, loop-test config | `feat/pay-001-scaffold` | — | IN REVIEW | Rules §4.12 |
 | PAY-002 | Shared kernel: errors (`PaymentError` codes), zod options (`environment`, `provider`, credentials, timeouts, retry, webhook secret), prod rules (sandbox refused in prod, https), redacting logger (never card data), constants (statuses, methods, currency JOD, fils) | `feat/pay-002-kernel` | PAY-001 | TODO | Rules §2, §3; money in integer fils |
 | PAY-003 | `PaymentProvider` port (`createSession`, `verify`, `refund`, `getRefund`, `handleWebhook`) + fake adapter (scriptable outcomes) + idempotency store (memory, Redis) | `feat/pay-003-port-fake` | PAY-002 | TODO | Integration.md §3; idempotency key per request |
 | PAY-004 | Mock-gateway adapter for dev on localhost: tiny HTTP server with checkout page, verify, refund and signed webhooks; used by apps and the server in dev | `feat/pay-004-mock-gateway` | PAY-003 | TODO | Rules §2.6; docker-compose service optional |
