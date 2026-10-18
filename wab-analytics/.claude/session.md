@@ -7,14 +7,14 @@
 
 ## Current task
 
-### ANA-004 — Mongo adapter (events + identity links)
-- Branch: `feat/ana-004-mongo`
+### ANA-005 — Query layer: count, funnel, cohorts, journey, overview
+- Branch: `feat/ana-005-queries`
 - Status: IN REVIEW
-- Acceptance: `MongoEventStore` writes/reads the layout WAB-Server already uses (`serverEvents`: ts, name, actorType, actorId/salonId/bookingId, params, platform, appVersion) through an injected native collection and an id codec (ObjectId); count by name / Amman day, find by actors, distinct actors, all with `maxTimeMS`; `MongoIdentityStore` idempotent upserts (duplicate-key race = success) with a unique index; indexes created only by `init()`; every driver error mapped (network -> UNAVAILABLE, maxTime -> TIMEOUT, auth -> AUTH_FAILED, other server -> VENDOR_ERROR, unknown -> UNKNOWN); malformed documents -> MALFORMED_RESPONSE.
-- Assumed missing: time-series collection (needs a real MongoDB; stays a plain indexed collection like WAB-Server); the identity links live in their own collection `identityLinks` (WAB-Server must allow it; `init()` creates the indexes).
-- Tests: `npm run verify` green (69 tests, fake collection interprets the exact filters/pipelines the adapter sends). NOT verified against a real MongoDB.
+- Acceptance: `countEvents` by name / Amman day (ANA-003); `funnel` (ordered steps, window, best attempt per actor incl. restart, users, conversion from previous/first, drop-off, median time, drop-off user lists, `truncated` when more than `maxScannedEvents`); `cohorts` (first start event in range, DAY or Monday-WEEK periods in the business zone, retention k+1 periods later); `journey` (server events + app events + crashes of every linked installation, ordered, sessions by inactivity gap, paged); `overview` (totals, unique actors, installations, top events, daily series); all validate range/names/limits; `source: 'APP'` reads the warehouse; `MemoryWarehouse` for dev/tests.
+- Assumed missing: funnels/cohorts run per source (server events subject = `TYPE:id`, app events `user:<id>` else `inst:<installation>`); guest/registered subject merge is ANA-008. Weeks start on Monday. Funnel step repeats restart the attempt only before step 2.
+- Tests: `npm run verify` green (86 tests): hand-computed funnels/cohorts incl. Amman day change at 21:00Z, restart, window, truncation, paging.
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found the fake treated ObjectId-shaped filter values as operators (would have hidden a wrong-actor bug); fixed.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA caught two wrong expectations in the first draft of the tests (window default and Amman cohort day) by recomputing by hand; code was right.
 
-### ANA-003 — Port + memory adapter
-- Status: DONE (PR #213)
+### ANA-004 — Mongo adapter
+- Status: DONE (PR #216)

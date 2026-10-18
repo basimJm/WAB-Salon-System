@@ -1,3 +1,4 @@
+import { MemoryIdempotencyStore } from '../src/idempotency';
 import {
   resolveConfig,
   type HyperPayOptions,
@@ -23,6 +24,7 @@ const prod = (extra: Partial<HyperPayOptions> = {}): PaymentsOptionsBase => ({
   environment: 'prod',
   provider: 'hyperpay',
   hyperpay: hyperpay(extra),
+  idempotency: { store: new MemoryIdempotencyStore() },
 });
 const fieldsOf = (options: PaymentsOptionsBase): unknown => {
   try {
@@ -66,6 +68,11 @@ describe('resolveConfig', () => {
     ]);
     expect(fieldsOf({ environment: 'prod', provider: 'mock-gateway' })).toEqual([
       'provider (fake and mock-gateway are refused in prod)',
+    ]);
+  });
+  it('requires a shared idempotency store in prod', () => {
+    expect(fieldsOf({ environment: 'prod', provider: 'hyperpay', hyperpay: hyperpay() })).toEqual([
+      'idempotency.store (a shared store is required in prod)',
     ]);
   });
   it('needs a valid mock gateway url', () => {
@@ -145,7 +152,7 @@ describe('resolveConfig hyperpay', () => {
     expect(fieldsOf(prod({ testMode: 'EXTERNAL' }))).toEqual([
       'hyperpay.testMode (not allowed in prod)',
     ]);
-    expect(fieldsOf({ environment: 'prod', provider: 'hyperpay', hyperpay: base })).toEqual([
+    expect(fieldsOf({ ...prod(), hyperpay: base })).toEqual([
       'hyperpay.webhookDecryptionKey (required in prod)',
     ]);
     expect(fieldsOf(prod({ shopperResultUrl: 'http://x.example.com/r' }))).toEqual([

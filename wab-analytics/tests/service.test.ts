@@ -240,24 +240,4 @@ describe('service', () => {
     expect(calls).toEqual(['init', 'close']);
     await build().init();
   });
-
-  it('queries are pending until their task lands', async () => {
-    const analytics = build();
-    const range = { from: at('2026-03-01'), to: at('2026-03-02') };
-    const pending = [
-      analytics.funnel({ ...range, steps: ['a.b', 'c.d'] }),
-      analytics.cohorts({
-        ...range,
-        startEvent: 'a.b',
-        returnEvent: 'c.d',
-        unit: 'DAY',
-        periods: 1,
-      }),
-      analytics.journey({ actorType: 'CUSTOMER', actorId: 'u1' }, range),
-      analytics.overview(range),
-    ];
-    for (const promise of pending) {
-      expect(await codeOfAsync(promise)).toBe(ERROR_CODES.ANALYTICS_NOT_CONFIGURED);
-    }
-  });
 });

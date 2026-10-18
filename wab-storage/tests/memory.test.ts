@@ -164,13 +164,4 @@ describe('createStorage', () => {
   it('builds the memory provider', () => {
     expect(createStorage(memoryOptions())).toBeInstanceOf(MemoryStorage);
   });
-  it('rejects unavailable providers with a config error', () => {
-    expect(() =>
-      createStorage({
-        ...memoryOptions(),
-        provider: 's3',
-        s3: { region: 'r', publicBucket: 'a', privateBucket: 'b' },
-      }),
-    ).toThrow(expect.objectContaining({ code: ERROR_CODES.CONFIG_INVALID }) as Error);
-  });
 });

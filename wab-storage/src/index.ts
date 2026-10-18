@@ -16,6 +16,7 @@ export { createLocalFsStorage, createStorage } from './storage';
 export { LocalFsStorage } from './adapters/localFs';
 export { createLocalFsHandler, type LocalFsHandler } from './adapters/localFsHttp';
 export { MemoryStorage } from './adapters/memory';
+export { S3Storage } from './adapters/s3';
 export { detectContentType } from './fileType';
 export type {
   ConfirmUploadRequest,
