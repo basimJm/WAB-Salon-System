@@ -95,3 +95,11 @@
 - Tests: 24 KMP unit tests pass on the JVM harness (commonMain+commonTest, warnings as errors); androidMain/iosMain sources NOT compiled here
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Browser results are never trusted: redirect only yields ClientCompleted, server verify decides. Platform browsers unverified.
+
+### PAY-012 — Publish preparation and WAB-Server integration
+- Branch: `feat/pay-012-publish-node`
+- Status: IN REVIEW
+- Acceptance: Registry-ready @wab/payments (GitHub Packages publishConfig, .npmrc, CHANGELOG, files, prepublishOnly, typesVersions for the mock subpath, pack dry-run) — NOT published (owner runs it); clientCheckout port method; WAB-Server PAYMENT_PROVIDER=real wiring (SRV-092).
+- Tests: wab-payments npm run verify green (238 tests); WAB-Server full gate (see SRV-092 block)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Owner publishes with a registry token; until then both projects use the file: dependency.

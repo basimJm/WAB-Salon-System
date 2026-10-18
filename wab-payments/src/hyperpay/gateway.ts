@@ -1,4 +1,5 @@
 import type {
+  ClientCheckout,
   GatewayCapabilities,
   GatewayCheckoutRequest,
   GatewayRefundRequest,
@@ -11,7 +12,7 @@ import type {
 } from '../types';
 import { fetchRefund, refund } from './refunds';
 import { parseWebhook } from './webhook';
-import { createCheckout, fetchPayment, type HyperPayContext } from './session';
+import { clientCheckout, createCheckout, fetchPayment, type HyperPayContext } from './session';
 
 /** HyperPay (ACI OPP / COPYandPAY) behind the stable gateway port. */
 export class HyperPayGateway implements PaymentGateway {
@@ -27,6 +28,10 @@ export class HyperPayGateway implements PaymentGateway {
 
   createCheckout(request: GatewayCheckoutRequest): Promise<PaymentSession> {
     return createCheckout(this.ctx, request);
+  }
+
+  clientCheckout(sessionId: string, method: string): ClientCheckout {
+    return clientCheckout(this.ctx, sessionId, method);
   }
 
   fetchPayment(sessionId: string): Promise<PaymentVerification> {

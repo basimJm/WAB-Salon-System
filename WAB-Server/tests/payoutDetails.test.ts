@@ -100,6 +100,10 @@ describe('configuration', () => {
     S3_PUBLIC_BUCKET: 'wab-public',
     S3_PRIVATE_BUCKET: 'wab-private',
     CDN_BASE_URL: 'https://cdn.example.test',
+    HYPERPAY_ENTITY_ID: 'entity-test',
+    HYPERPAY_ACCESS_TOKEN: 'access-test-value',
+    HYPERPAY_RETURN_URL: 'wab://payment/result',
+    HYPERPAY_WEBHOOK_KEY: 'ab'.repeat(32),
   };
   const invalidKeys = (env: NodeJS.ProcessEnv): readonly string[] => {
     try {

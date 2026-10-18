@@ -9689,6 +9689,56 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "checkout": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "provider": {
+                              "type": "string",
+                              "description": "Gateway adapter: hyperpay, mock-gateway or fake."
+                            },
+                            "environment": {
+                              "type": "string",
+                              "enum": [
+                                "dev",
+                                "prod"
+                              ]
+                            },
+                            "checkoutId": {
+                              "type": "string"
+                            },
+                            "brands": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "shopperResultUrl": {
+                              "type": "string",
+                              "description": "Where the gateway returns the shopper (app scheme or https)."
+                            },
+                            "checkoutUrl": {
+                              "type": "string",
+                              "description": "Hosted pay page (dev mock gateway only)."
+                            },
+                            "widgetScriptUrl": {
+                              "type": "string"
+                            },
+                            "integrity": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "provider",
+                            "environment",
+                            "checkoutId",
+                            "brands",
+                            "shopperResultUrl"
+                          ],
+                          "description": "Data to open the gateway payment UI; null once the attempt is no longer payable."
                         }
                       },
                       "required": [
@@ -9701,7 +9751,8 @@
                         "currency",
                         "sessionId",
                         "gatewayCode",
-                        "gatewayMessage"
+                        "gatewayMessage",
+                        "checkout"
                       ]
                     },
                     "meta": {
@@ -9897,6 +9948,56 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "checkout": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "provider": {
+                              "type": "string",
+                              "description": "Gateway adapter: hyperpay, mock-gateway or fake."
+                            },
+                            "environment": {
+                              "type": "string",
+                              "enum": [
+                                "dev",
+                                "prod"
+                              ]
+                            },
+                            "checkoutId": {
+                              "type": "string"
+                            },
+                            "brands": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "shopperResultUrl": {
+                              "type": "string",
+                              "description": "Where the gateway returns the shopper (app scheme or https)."
+                            },
+                            "checkoutUrl": {
+                              "type": "string",
+                              "description": "Hosted pay page (dev mock gateway only)."
+                            },
+                            "widgetScriptUrl": {
+                              "type": "string"
+                            },
+                            "integrity": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "provider",
+                            "environment",
+                            "checkoutId",
+                            "brands",
+                            "shopperResultUrl"
+                          ],
+                          "description": "Data to open the gateway payment UI; null once the attempt is no longer payable."
                         }
                       },
                       "required": [
@@ -9909,7 +10010,8 @@
                         "currency",
                         "sessionId",
                         "gatewayCode",
-                        "gatewayMessage"
+                        "gatewayMessage",
+                        "checkout"
                       ]
                     },
                     "meta": {

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   FAKE_GATEWAY_CODES,
+  FAKE_PAYMENT_CLIENT,
   FAKE_WEBHOOK_SIGNATURE,
   PAYMENT_REFERENCE_PATTERN,
   PAYMENT_STATUSES,
@@ -15,6 +16,7 @@ import { IdempotencyStore } from '../idempotency';
 import { assertIdempotencyKey } from '../notifier/validation';
 import type {
   CreateSessionRequest,
+  PaymentClientCheckout,
   PaymentProvider,
   PaymentSession,
   PaymentVerification,
@@ -35,6 +37,7 @@ interface StoredSession {
 }
 
 const webhookSchema = z.object({
+  kind: z.enum(['PAYMENT', 'REFUND', 'IGNORED']).optional(),
   sessionId: z.string().min(1),
   status: z.enum(PAYMENT_STATUSES),
   gatewayCode: z.string().min(1),
@@ -219,7 +222,8 @@ export class FakePaymentProvider implements PaymentProvider {
       }
       const event = webhookSchema.safeParse(parsed);
       if (!event.success) throw new UnauthorizedError();
-      return Promise.resolve(event.data);
+      const { kind, ...rest } = event.data;
+      return Promise.resolve(kind === undefined ? rest : { ...rest, kind });
     });
   }
 
@@ -229,12 +233,17 @@ export class FakePaymentProvider implements PaymentProvider {
     return session;
   }
 
+  clientCheckout(sessionId: string): PaymentClientCheckout {
+    return { ...FAKE_PAYMENT_CLIENT, checkoutId: sessionId };
+  }
+
   private toSession(session: StoredSession): PaymentSession {
     return {
       sessionId: session.sessionId,
       status: session.status,
       amountFils: session.amountFils,
       reference: session.reference,
+      client: this.clientCheckout(session.sessionId),
     };
   }
 

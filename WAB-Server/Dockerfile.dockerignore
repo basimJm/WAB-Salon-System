@@ -1,4 +1,4 @@
-# Build context = repository root; only the packages the image needs are allowed in.
+# Build context = repository root; only the packages the image needs are allowed in (the KMP folder wab-payments/kmp is never in the context).
 *
 !wab-notifications/package.json
 !wab-notifications/package-lock.json
@@ -10,6 +10,11 @@
 !wab-otp/tsconfig.json
 !wab-otp/tsup.config.ts
 !wab-otp/src
+!wab-payments/package.json
+!wab-payments/package-lock.json
+!wab-payments/tsconfig.json
+!wab-payments/tsup.config.ts
+!wab-payments/src
 !wab-storage/package.json
 !wab-storage/package-lock.json
 !wab-storage/tsconfig.json

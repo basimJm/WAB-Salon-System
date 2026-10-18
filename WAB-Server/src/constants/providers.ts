@@ -83,6 +83,13 @@ export const FAKE_PAYMENT_SCENARIOS = ['success', 'fail', 'cancel', 'pending'] a
 export type FakePaymentScenario = (typeof FAKE_PAYMENT_SCENARIOS)[number];
 export const FAKE_REFUND_SCENARIOS = ['success', 'fail', 'pending'] as const;
 export type FakeRefundScenario = (typeof FAKE_REFUND_SCENARIOS)[number];
+/** What the fake gateway tells the app to open (the app uses its own fake launcher). */
+export const FAKE_PAYMENT_CLIENT = {
+  provider: 'fake',
+  environment: 'dev',
+  brands: ['VISA', 'MASTER'],
+  shopperResultUrl: 'fake://payment/result',
+} as const;
 export const PAYMENT_REFERENCE_PATTERN = /^[A-Za-z0-9_.:-]{1,64}$/;
 /** The fake gateway's webhook signature: anything else is rejected as unverifiable. */
 export const FAKE_WEBHOOK_SIGNATURE = 'fake-webhook-signature';

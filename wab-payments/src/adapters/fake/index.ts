@@ -10,6 +10,7 @@ import {
 } from '../../constants/defaults';
 import { PaymentSdkError, validationError } from '../../errors';
 import type {
+  ClientCheckout,
   GatewayCapabilities,
   GatewayCheckoutRequest,
   GatewayRefundRequest,
@@ -172,15 +173,19 @@ export class FakeGateway implements PaymentGateway {
         amountFils: stored.amountFils,
         currency: stored.currency,
         reference: stored.reference,
-        client: {
-          provider: 'fake',
-          environment: 'dev',
-          checkoutId: stored.sessionId,
-          brands: ['VISA', 'MASTER'],
-          shopperResultUrl: 'fake://payment/result',
-        },
+        client: this.clientCheckout(stored.sessionId),
       };
     });
+  }
+
+  clientCheckout(sessionId: string): ClientCheckout {
+    return {
+      provider: 'fake',
+      environment: 'dev',
+      checkoutId: sessionId,
+      brands: ['VISA', 'MASTER'],
+      shopperResultUrl: 'fake://payment/result',
+    };
   }
 
   fetchPayment(sessionId: string): Promise<PaymentVerification> {
