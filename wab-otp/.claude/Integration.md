@@ -108,7 +108,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/otp` real mode (`*_P
 ## 12. Implementation status
 | Item | Status |
 |---|---|
-| Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ⬜ |
+| Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ |
 | Shared kernel (errors, config, http/retry, logger) | ⬜ |
 | Adapter: fake — in-memory, deterministic proofs for dev/tests | ⬜ |
 | Adapter: firebase — Firebase Admin `verifyIdToken` → verified phone | ⬜ |
@@ -123,3 +123,4 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/otp` real mode (`*_P
 | Date | Version | Change |
 |---|---|---|
 | 2026-10-14 | 0.0.0 | Design document created from the BRD; no code yet. |
+| 2026-10-18 | 0.1.0 | OTP-001 scaffold (tooling, build, smoke, loop config). |
