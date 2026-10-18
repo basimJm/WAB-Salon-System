@@ -55,11 +55,11 @@ internal class RemoteTokenRefreshApi(
         }
     } catch (e: CancellationException) {
         throw e
-    } catch (e: SerializationException) {
+    } catch (ignored: SerializationException) {
         TokenRefreshResult.Unavailable
-    } catch (e: HttpRequestTimeoutException) {
+    } catch (ignored: HttpRequestTimeoutException) {
         TokenRefreshResult.Unavailable
-    } catch (e: IOException) {
+    } catch (ignored: IOException) {
         TokenRefreshResult.Unavailable
     }
 

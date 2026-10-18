@@ -37,11 +37,12 @@ core/network           Ktor client, env-driven ApiConfig, safeApiCall
 core/navigation        Typed routes (Graph/Screen), Navigator
 core/notification      In-app toast host + push handling
 core/security          Security helpers (keep secrets out of logs, secure storage seam)
-core/ui                MVI base (MVI, MVIDelegate, BaseViewModel), CollectSideEffect, locale/dark-mode locals
+core/mvi               MVI base (MVI, MVIDelegate, BaseViewModel, CollectSideEffect) — standalone, depends only on Compose runtime + lifecycle
+core/ui                Locale/dark-mode locals, permission flow
 core/design-system     Theme, tokens, adaptive layout, base components, icons, string resources
 core/di                Koin aggregation
 feature/<name>/{domain,data,presentation,di}   One folder per feature (see `feature/sample`)
-build-logic/convention Convention plugins (KMP library, Android app, feature layers)
+build-logic/convention Convention plugins: KMP library, Android app, feature layers, core.library / core.compose (namespace from the path, SDK levels from `AndroidSdk.kt`)
 scripts/ci, config/    Policy checks (with tests) and linter configuration used by CI
 ```
 Dependency direction: `presentation → domain ← data`; `di` wires them. `domain` depends on nothing UI/Android/iOS/Ktor. `core/design-system` depends only on `core/ui` and Compose; it never imports a feature.
@@ -56,7 +57,7 @@ feature/<name>/presentation   controller/contract/<Name>Contract.kt   sealed int
                               navigation/, di/
 feature/<name>/di             Koin module that binds data → domain
 ```
-- **MVI by delegate:** `BaseViewModel` is `ViewModel(), MVI<UiState, UiAction, SideEffect> by mvi(initialState)`. State lives in the delegate and changes only through `updateState { copy(...) }`; one-shot work (navigation, toast) goes through `emitSideEffect`. A ViewModel overrides `onEvent(UiAction)` and optionally `onStart()`. Do not create ad hoc `MutableStateFlow`s in a ViewModel.
+- **MVI by delegate** (`core/mvi`, package `com.fab.wab.customer.core.mvi`, added to every feature presentation module by the convention plugin): `BaseViewModel` is `ViewModel(), MVI<UiState, UiAction, SideEffect> by mvi(initialState)`. State lives in the delegate and changes only through `updateState { copy(...) }`; one-shot work (navigation, toast) goes through `emitSideEffect`. A ViewModel overrides `onEvent(UiAction)` and optionally `onStart()`. Do not create ad hoc `MutableStateFlow`s in a ViewModel.
 - `UiState` is an immutable data class with defaults and derived properties; `UiAction` is a sealed interface of user intents; `SideEffect` is a sealed interface of one-time effects.
 - A screen composable takes `state` and `onAction`, owns no business logic, and has a `@Preview` for each state (loading, content, empty, error, offline) in Arabic RTL and English LTR.
 - Use cases and repositories return `AppResult` (`Loading | Success | Error`); ViewModels map `AppError` to localized text via string resources, never raw server text.

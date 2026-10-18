@@ -38,6 +38,7 @@ class ComposeAppPlugin : Plugin<Project> {
                     implementation(project(":core:data"))
                     implementation(project(":core:navigation"))
                     implementation(project(":core:ui"))
+                    implementation(project(":core:mvi"))
                     implementation(project(":core:notification"))
                     implementation(project(":core:security"))
                     implementation(project(":core:design-system"))

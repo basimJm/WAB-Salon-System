@@ -13,7 +13,7 @@ import com.fab.wab.customer.core.domain.AppearanceSettings
 import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.domain.repository.ApplicationSettingsRepository
 import com.fab.wab.customer.core.domain.repository.SessionTimeOut
-import com.fab.wab.customer.core.ui.mvi.BaseViewModel
+import com.fab.wab.customer.core.mvi.BaseViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow

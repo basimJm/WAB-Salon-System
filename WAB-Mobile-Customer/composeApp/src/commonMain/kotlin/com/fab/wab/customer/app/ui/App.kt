@@ -29,7 +29,7 @@ import com.fab.wab.customer.core.notification.composable.NotificationHost
 import com.fab.wab.customer.core.notification.composable.rememberNotificationManager
 import com.fab.wab.customer.core.notification.di.notificationModule
 import com.fab.wab.customer.core.notification.model.NotificationStyle
-import com.fab.wab.customer.core.ui.mvi.CollectSideEffect
+import com.fab.wab.customer.core.mvi.CollectSideEffect
 import com.fab.wab.customer.core.ui.utils.LocalAppLocale
 import com.fab.wab.customer.core.ui.utils.LocalDarkTheme
 import com.fab.wab.customer.designsystem.components.image.LocalImageLoader
