@@ -135,3 +135,5 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/storage` real mode (
 | 2026-10-18 | 0.1.0 | STO-004: local-fs adapter + createLocalFsHandler (PUT upload, public serving, signed private links) |
 | 2026-10-18 | 0.1.0 | STO-005: S3 adapter (presign/confirm/read/write/delete), error mapping, lazy AWS SDK deps, tests with a wire-level S3 emulator |
 | 2026-10-18 | 0.1.0 | STO-006: CDN public URL helper, CloudFront signer, signedUrl.mode option |
+| 2026-10-18 | 0.1.0 | STO-007: variants via sharp behind an ImageProcessor port; Storage type with createVariants |
+| 2026-10-18 | 0.1.0 | STO-007: variants via sharp behind an ImageProcessor port; Storage type with createVariants |
