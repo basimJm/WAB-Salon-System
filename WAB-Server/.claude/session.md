@@ -9,7 +9,17 @@
 
 ## Current task
 
-- (none) — run `python3 scripts/tasks.py next server`; task branches start from `origin/server`.
+### SRV-112 (storage part) — Wire `@wab/storage` into WAB-Server (`STORAGE_PROVIDER=real`)
+- Branch: `feat/srv-112-storage-real`
+- Status: IN REVIEW (SRV-112 itself stays BLOCKED on the other SDKs and the publish; this is the storage slice, owner grant 2026-10-18 "assume everything is ready")
+- Acceptance criteria (BE-70 presigned uploads, NFR-01 secrets only in env, server rules §2 externals behind interfaces, §5 no hardcoding, §8 provider errors):
+  - [x] `file:../wab-storage` dependency (`@wab/storage`), `ensure-sdks` builds it, Docker image + `Dockerfile.dockerignore` include it
+  - [x] Env keys S3_* / CDN_BASE_URL / CLOUDFRONT_* in constants, schema (required when `STORAGE_PROVIDER=real`, credentials and CloudFront keys only complete) and `.env.example`; typed `config.storage`
+  - [x] `providers/storage/real.ts` maps settings to SDK options (dev/prod, TTL ceilings from existing constants), SDK errors to 502/503 `ExternalServiceError`, caller errors to `RangeError`, `EMPTY` rejection to `TYPE_MISMATCH`
+  - [x] `createProviders` builds it; missing settings or invalid SDK config fail at start-up
+- Tests: `tests/storageReal.test.ts` (mapping, delegation, wiring, real SDK presigning offline), config and docker tests extended
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: real S3/CloudFront/CDN calls and the Docker build (no daemon). The SDK is verified against a wire emulator inside `wab-storage` tests. API docs: no change.
 
 ## Last blocks
 

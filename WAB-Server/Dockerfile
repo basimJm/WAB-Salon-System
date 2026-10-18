@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # WAB-Server image. Build context is the REPOSITORY ROOT (the server consumes the sibling
-# wab-notifications package through a `file:` dependency):
+# wab-notifications and wab-storage packages through `file:` dependencies):
 #   docker build -f WAB-Server/Dockerfile .
 
 FROM node:22-alpine AS build
@@ -10,6 +10,11 @@ RUN cd wab-notifications && npm ci
 COPY wab-notifications/tsconfig.json wab-notifications/tsup.config.ts ./wab-notifications/
 COPY wab-notifications/src ./wab-notifications/src
 RUN cd wab-notifications && npm run build
+COPY wab-storage/package.json wab-storage/package-lock.json ./wab-storage/
+RUN cd wab-storage && npm ci
+COPY wab-storage/tsconfig.json wab-storage/tsup.config.ts ./wab-storage/
+COPY wab-storage/src ./wab-storage/src
+RUN cd wab-storage && npm run build
 COPY WAB-Server/package.json WAB-Server/package-lock.json ./WAB-Server/
 RUN cd WAB-Server && npm ci
 COPY WAB-Server/tsconfig.json WAB-Server/tsconfig.build.json ./WAB-Server/
@@ -22,6 +27,9 @@ WORKDIR /repo
 COPY wab-notifications/package.json wab-notifications/package-lock.json ./wab-notifications/
 RUN cd wab-notifications && npm ci --omit=dev && npm cache clean --force
 COPY --from=build /repo/wab-notifications/dist ./wab-notifications/dist
+COPY wab-storage/package.json wab-storage/package-lock.json ./wab-storage/
+RUN cd wab-storage && npm ci --omit=dev && npm cache clean --force
+COPY --from=build /repo/wab-storage/dist ./wab-storage/dist
 COPY WAB-Server/package.json WAB-Server/package-lock.json ./WAB-Server/
 RUN cd WAB-Server && npm ci --omit=dev && npm cache clean --force
 COPY --from=build /repo/WAB-Server/dist ./WAB-Server/dist

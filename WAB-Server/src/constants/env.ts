@@ -50,6 +50,22 @@ export const ENV_KEYS = {
   smtpPass: 'SMTP_PASS',
   emailFromAddress: 'EMAIL_FROM_ADDRESS',
   emailFromName: 'EMAIL_FROM_NAME',
+  /** S3 (or S3-compatible) storage; needed when STORAGE_PROVIDER=real. */
+  s3Region: 'S3_REGION',
+  s3PublicBucket: 'S3_PUBLIC_BUCKET',
+  s3PrivateBucket: 'S3_PRIVATE_BUCKET',
+  /** Dev only: MinIO or another emulator. Unset for AWS. */
+  s3Endpoint: 'S3_ENDPOINT',
+  s3ForcePathStyle: 'S3_FORCE_PATH_STYLE',
+  /** Unset = the platform's IAM role / default credential chain. */
+  s3AccessKeyId: 'S3_ACCESS_KEY_ID',
+  s3SecretAccessKey: 'S3_SECRET_ACCESS_KEY',
+  /** Public media base URL (the CDN domain). */
+  cdnBaseUrl: 'CDN_BASE_URL',
+  /** CloudFront signing for private files; all three together, or none (then S3 presigned GET is used). */
+  cloudfrontBaseUrl: 'CLOUDFRONT_PRIVATE_BASE_URL',
+  cloudfrontKeyPairId: 'CLOUDFRONT_KEY_PAIR_ID',
+  cloudfrontPrivateKey: 'CLOUDFRONT_PRIVATE_KEY',
 } as const;
 
 /** Keys that pick `fake` or `real` for an external provider; production must set them to `real`. */
@@ -66,6 +82,18 @@ export const NOTIFIER_REAL_REQUIRED_KEYS = [
   ENV_KEYS.fcmServiceAccountJson,
   ENV_KEYS.smtpHost,
   ENV_KEYS.emailFromAddress,
+] as const;
+/** Keys that must be present when the storage provider is `real`. */
+export const STORAGE_REAL_REQUIRED_KEYS = [
+  ENV_KEYS.s3Region,
+  ENV_KEYS.s3PublicBucket,
+  ENV_KEYS.s3PrivateBucket,
+  ENV_KEYS.cdnBaseUrl,
+] as const;
+export const CLOUDFRONT_KEYS = [
+  ENV_KEYS.cloudfrontBaseUrl,
+  ENV_KEYS.cloudfrontKeyPairId,
+  ENV_KEYS.cloudfrontPrivateKey,
 ] as const;
 export const DEFAULT_SMTP_PORT = 587;
 export const DEFAULT_EMAIL_FROM_NAME = 'WAB';
