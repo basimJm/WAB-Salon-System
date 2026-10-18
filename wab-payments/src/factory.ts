@@ -7,7 +7,7 @@ import { HyperPayGateway } from './hyperpay/gateway';
 import { MemoryIdempotencyStore } from './idempotency';
 import { silentLogger, createRedactingLogger } from './logger';
 import { createPaymentProvider } from './provider';
-import { realRetryDeps } from './retry';
+import { realRetryDeps, withRetry } from './retry';
 import type { PaymentGateway, PaymentProvider } from './types';
 
 export type PaymentsOptions = PaymentsOptionsBase & {
@@ -33,6 +33,8 @@ const buildGateway = (config: ResolvedConfig, options: PaymentsOptions): Payment
         settings,
         client: createHyperPayClient(settings, options.http ?? fetchHttpClient, config.timeoutMs),
         directory: options.directory ?? new MemorySessionDirectory(),
+        retry: (operation) =>
+          withRetry(operation, config.retry, options.retryDeps ?? realRetryDeps),
       });
     }
   }

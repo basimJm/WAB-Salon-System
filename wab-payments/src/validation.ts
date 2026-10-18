@@ -3,11 +3,13 @@ import { ERROR_CODES } from './constants/codes';
 import {
   IDEMPOTENCY_KEY_PATTERN,
   REFERENCE_PATTERN,
+  MAX_DESTINATIONS,
   SESSION_ID_PATTERN,
+  SUB_MERCHANT_ID_PATTERN,
 } from './constants/defaults';
 import { PaymentSdkError, validationError } from './errors';
 import { assertAmountFils } from './money';
-import type { CreateSessionRequest, RefundRequest } from './types';
+import type { CreateSessionRequest, GatewayCapabilities, RefundRequest } from './types';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const E164_PATTERN = /^\+[1-9]\d{6,14}$/;
@@ -79,4 +81,45 @@ export const assertRefundRequest = (request: RefundRequest): void => {
   assertKey(request.idempotencyKey);
   assertSessionId(request.sessionId);
   assertAmountFils(request.amountFils);
+};
+
+const featureUnsupported = (feature: string): PaymentSdkError =>
+  new PaymentSdkError(
+    ERROR_CODES.FEATURE_UNSUPPORTED,
+    `${feature} is not supported by the gateway`,
+  );
+
+/** Phase 2 split payments: valid only when the gateway supports them and the parts fit the amount. */
+export const assertDestinations = (
+  destinations: CreateSessionRequest['destinations'],
+  amountFils: number,
+  capabilities: GatewayCapabilities,
+): void => {
+  if (destinations === undefined) return;
+  if (!capabilities.splitPayments) throw featureUnsupported('split payments');
+  if (destinations.length === 0 || destinations.length > MAX_DESTINATIONS) {
+    throw validationError('destinations must hold 1 to 10 entries');
+  }
+  let total = 0;
+  for (const destination of destinations) {
+    assertSubMerchantId(destination.subMerchantId);
+    total += assertAmountFils(destination.amountFils, 'destination amountFils');
+  }
+  if (total > amountFils) throw validationError('destinations exceed the payment amount');
+};
+
+export const assertSubMerchantId = (id: unknown): string => {
+  if (typeof id !== 'string' || !SUB_MERCHANT_ID_PATTERN.test(id)) {
+    throw validationError('subMerchantId is not a valid identifier');
+  }
+  return id;
+};
+
+export const assertSubMerchantRefund = (
+  subMerchantId: string | undefined,
+  capabilities: GatewayCapabilities,
+): void => {
+  if (subMerchantId === undefined) return;
+  assertSubMerchantId(subMerchantId);
+  if (!capabilities.splitPayments) throw featureUnsupported('sub-merchant refunds');
 };

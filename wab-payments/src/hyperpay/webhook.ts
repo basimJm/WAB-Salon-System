@@ -68,7 +68,9 @@ export const parseWebhook = async (
   if (iv === undefined || tag === '') throw invalid('missing initialization vector or tag');
 
   const plain = decryptNotification({ body: cipherTextOf(input.rawBody), iv, tag }, key);
-  const eventId = createHash('sha256').update(plain).digest('hex');
+  const digest = (value: unknown): string =>
+    createHash('sha256').update(JSON.stringify(value)).digest('hex');
+  const eventId = digest(plain);
   let json: unknown;
   try {
     json = JSON.parse(plain);
@@ -85,10 +87,20 @@ export const parseWebhook = async (
   const { code, description } = body.result;
   const category = classifyResult(code);
   const amountFils = amountOf(body.amount, ctx);
+  // Only the stable facts identify a notification: timestamps and build numbers differ on a resend.
+  const stableId = digest([
+    type,
+    body.id,
+    body.paymentType,
+    code,
+    body.amount,
+    body.currency,
+    body.referencedId,
+  ]);
   const common = {
     gatewayCode: code,
     gatewayMessage: description,
-    eventId,
+    eventId: stableId,
     ...(body.merchantTransactionId === undefined ? {} : { reference: body.merchantTransactionId }),
     ...(amountFils === undefined ? {} : { amountFils }),
   };

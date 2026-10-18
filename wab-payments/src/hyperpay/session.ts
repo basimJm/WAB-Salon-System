@@ -19,6 +19,8 @@ export interface HyperPayContext {
   readonly settings: ResolvedHyperPay;
   readonly client: HyperPayClient;
   readonly directory: SessionDirectory;
+  /** Retries read-only steps on retryable failures (never used around a POST that moves money). */
+  readonly retry: <T>(operation: () => Promise<T>) => Promise<T>;
 }
 
 const resultSchema = z.object({ code: z.string().min(1), description: z.string().default('') });

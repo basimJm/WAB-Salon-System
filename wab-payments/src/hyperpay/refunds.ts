@@ -67,9 +67,9 @@ const findExisting = async (
   reference: string,
   sessionId: string,
 ): Promise<RefundResult | undefined> => {
-  const response = await ctx.client.get(HYPERPAY_PATHS.query, {
-    [HYPERPAY_PARAMS.merchantTransactionId]: reference,
-  });
+  const response = await ctx.retry(() =>
+    ctx.client.get(HYPERPAY_PATHS.query, { [HYPERPAY_PARAMS.merchantTransactionId]: reference }),
+  );
   if (response.status === HTTP_STATUS.notFound) return undefined;
   const records = response.json.records;
   if (!Array.isArray(records)) return undefined;
@@ -86,7 +86,7 @@ const findExisting = async (
 const paymentIdOf = async (ctx: HyperPayContext, sessionId: string): Promise<string> => {
   const known = await ctx.directory.get(sessionId);
   if (known !== undefined) return known.paymentId;
-  const verification = await fetchPayment(ctx, sessionId);
+  const verification = await ctx.retry(() => fetchPayment(ctx, sessionId));
   if (verification.status !== 'SUCCEEDED' || verification.paymentId === undefined) {
     throw validationError('only a succeeded payment can be refunded');
   }
