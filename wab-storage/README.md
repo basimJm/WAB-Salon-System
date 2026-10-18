@@ -1,14 +1,20 @@
-# wab-storage
+# @wab/storage
 
 Provider-independent file storage for WAB projects: presigned direct uploads, confirmation by the
 real file content, public CDN URLs, short-lived signed URLs for private files, server-side
 read/write/delete and image variants. Adapters: `s3` (AWS S3, MinIO, DigitalOcean Spaces),
 `local-fs` (dev on localhost) and `memory` (tests). No WAB business rules live here.
 
+## Install
+
+Published as a private package on GitHub Packages. Add `@wab:registry=https://npm.pkg.github.com`
+to the consumer's `.npmrc` (token via `NPM_TOKEN`, never committed), then `npm install @wab/storage`.
+Until the first publish, WAB-Server depends on it through `"@wab/storage": "file:../wab-storage"`.
+
 ## Quick start
 
 ```ts
-import { createStorage } from 'wab-storage';
+import { createStorage } from '@wab/storage';
 
 const storage = createStorage({
   environment: 'prod',
