@@ -5,6 +5,11 @@
 !wab-notifications/tsconfig.json
 !wab-notifications/tsup.config.ts
 !wab-notifications/src
+!wab-otp/package.json
+!wab-otp/package-lock.json
+!wab-otp/tsconfig.json
+!wab-otp/tsup.config.ts
+!wab-otp/src
 !wab-storage/package.json
 !wab-storage/package-lock.json
 !wab-storage/tsconfig.json

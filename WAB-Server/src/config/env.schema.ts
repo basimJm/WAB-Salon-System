@@ -11,6 +11,8 @@ import {
   DEFAULT_SMTP_PORT,
   DEFAULT_EMAIL_FROM_NAME,
   NOTIFIER_REAL_REQUIRED_KEYS,
+  OTP_REAL_REQUIRED_KEYS,
+  FIREBASE_EMULATOR_HOST_PATTERN,
   STORAGE_REAL_REQUIRED_KEYS,
   CLOUDFRONT_KEYS,
   MONGO_URI_PATTERN,
@@ -62,6 +64,11 @@ export const envSchema = z
     [ENV_KEYS.analyticsProvider]: providerMode,
     [ENV_KEYS.fcmServiceAccountJson]: z.string().min(1).optional(),
     [ENV_KEYS.fcmProjectId]: z.string().min(1).optional(),
+    [ENV_KEYS.firebaseProjectId]: z.string().min(1).optional(),
+    [ENV_KEYS.firebaseAuthEmulatorHost]: z
+      .string()
+      .regex(FIREBASE_EMULATOR_HOST_PATTERN)
+      .optional(),
     [ENV_KEYS.fcmDryRun]: booleanText.default(false),
     [ENV_KEYS.smtpHost]: z.string().min(1).optional(),
     [ENV_KEYS.smtpPort]: z.coerce
@@ -89,6 +96,22 @@ export const envSchema = z
   })
   // Production never runs on fakes, and never guesses: every provider must be named `real`.
   .superRefine((env, context) => {
+    // A real OTP provider needs the Firebase project; the emulator is for development only.
+    if (env[ENV_KEYS.otpProvider] === REAL_PROVIDER_MODE) {
+      for (const key of OTP_REAL_REQUIRED_KEYS) {
+        if (env[key] === undefined) context.addIssue({ code: 'custom', path: [key], message: key });
+      }
+    }
+    if (
+      env[ENV_KEYS.nodeEnv] === 'production' &&
+      env[ENV_KEYS.firebaseAuthEmulatorHost] !== undefined
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: [ENV_KEYS.firebaseAuthEmulatorHost],
+        message: ENV_KEYS.firebaseAuthEmulatorHost,
+      });
+    }
     // A real notifier needs its credentials; the error names keys only, never values.
     if (env[ENV_KEYS.notifierProvider] === REAL_PROVIDER_MODE) {
       for (const key of NOTIFIER_REAL_REQUIRED_KEYS) {

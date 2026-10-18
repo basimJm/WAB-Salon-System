@@ -8,6 +8,8 @@
 - Email sender (owner, 2026-10-14): `basim.abusnaimeh@gmail.com` via Gmail SMTP; config keys `EMAIL_FROM_ADDRESS`, `SMTP_USER` (same account), `SMTP_PASS` (Google App Password, secret, env only). Not hardcoded in code.
 - Notifier wired (T-123): `NOTIFIER_PROVIDER=real` needs `FCM_SERVICE_ACCOUNT_JSON`, `SMTP_HOST`, `EMAIL_FROM_ADDRESS` (+ optional `FCM_PROJECT_ID`, `FCM_DRY_RUN`, `SMTP_PORT/SECURE/USER/PASS`, `EMAIL_FROM_NAME`); server depends on `file:../wab-notifications` (`npm run ensure-sdks`); Docker context is the repo root (`docker build -f WAB-Server/Dockerfile .`). `createProviders(modes, isProd, {redis, logger, config})`, `providers.close()`.
 
+- OTP wired (SRV-034): `OTP_PROVIDER=real` needs `FIREBASE_PROJECT_ID` (+ dev-only `FIREBASE_AUTH_EMULATOR_HOST`, refused in production); server depends on `file:../wab-otp` as `@wab/otp` (`ensure-sdks`, Docker); `providers/otp/real.ts` uses `createOtpVerifier` (verification only; limits stay in `domain/otp`). Dev tokens: `createEmulatorToken` from the SDK.
+
 ## Per-task facts (SRV-xxx)
 
 - BRANCHING (user rule, `.claude/rules.md` §3.8): `server` = master branch for server work, created from `main`. Server task branches start from `origin/server` and PRs target `server`; the user merges `server` → `main`. Restart the cloud branch `claude/busy-johnson-2rch94` from `origin/server` after each merge; sync `main` into `server` by PR when `main` moves (customer-app work lands there).

@@ -28,6 +28,14 @@ export interface NotifierSettings {
   readonly from: { readonly address: string; readonly name: string };
 }
 
+/** Firebase settings of the real OTP provider (wab-otp). */
+export interface OtpSettings {
+  readonly firebase: {
+    readonly projectId: string;
+    readonly authEmulatorHost?: string;
+  };
+}
+
 export interface StorageSettings {
   readonly region: string;
   readonly publicBucket: string;
@@ -60,6 +68,8 @@ export interface AppConfig {
   readonly notifier?: NotifierSettings;
   /** S3 + CDN settings of the real storage; present only when the storage is `real`. */
   readonly storage?: StorageSettings;
+  /** Firebase project of the real OTP provider; present only when the OTP provider is `real`. */
+  readonly otp?: OtpSettings;
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
   readonly providers: {
     readonly otp: ProviderMode;
@@ -124,6 +134,19 @@ const buildNotifierSettings = (values: RawEnv): NotifierSettings | undefined => 
   });
 };
 
+const buildOtpSettings = (values: RawEnv): OtpSettings | undefined => {
+  if (values[ENV_KEYS.otpProvider] !== 'real') return undefined;
+  const projectId = values[ENV_KEYS.firebaseProjectId];
+  if (projectId === undefined) return undefined;
+  const emulatorHost = values[ENV_KEYS.firebaseAuthEmulatorHost];
+  return Object.freeze({
+    firebase: Object.freeze({
+      projectId,
+      ...(emulatorHost === undefined ? {} : { authEmulatorHost: emulatorHost }),
+    }),
+  });
+};
+
 const buildStorageSettings = (values: RawEnv): StorageSettings | undefined => {
   if (values[ENV_KEYS.storageProvider] !== 'real') return undefined;
   const region = values[ENV_KEYS.s3Region];
@@ -171,9 +194,11 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   const payoutKey = values[ENV_KEYS.payoutEncryptionKey];
   const notifier = buildNotifierSettings(values);
   const storage = buildStorageSettings(values);
+  const otp = buildOtpSettings(values);
   return Object.freeze({
     ...(notifier === undefined ? {} : { notifier }),
     ...(storage === undefined ? {} : { storage }),
+    ...(otp === undefined ? {} : { otp }),
     env,
     isProduction: env === 'production',
     port: values[ENV_KEYS.port],

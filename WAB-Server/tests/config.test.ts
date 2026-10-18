@@ -20,6 +20,7 @@ const REAL_PROVIDERS = {
   NOTIFIER_PROVIDER: 'real',
   PAYMENT_PROVIDER: 'real',
   ANALYTICS_PROVIDER: 'real',
+  FIREBASE_PROJECT_ID: 'wab-prod-test',
   FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
   SMTP_HOST: 'smtp.example.test',
   EMAIL_FROM_ADDRESS: 'noreply@example.test',
@@ -85,23 +86,23 @@ describe('loadConfig', () => {
     [ENV_KEYS.paymentProvider, 'payments'],
     [ENV_KEYS.analyticsProvider, 'analytics'],
   ] as const)('maps %s to providers.%s and nothing else', (key, field) => {
-    const notifierCredentials = {
-      FCM_SERVICE_ACCOUNT_JSON: '{}',
-      SMTP_HOST: 'smtp.example.test',
-      EMAIL_FROM_ADDRESS: 'noreply@example.test',
-    };
-    const storageSettings = {
-      S3_REGION: 'eu-central-1',
-      S3_PUBLIC_BUCKET: 'wab-public',
-      S3_PRIVATE_BUCKET: 'wab-private',
-      CDN_BASE_URL: 'https://cdn.example.test',
-    };
     const credentials =
       key === ENV_KEYS.notifierProvider
-        ? notifierCredentials
+        ? {
+            FCM_SERVICE_ACCOUNT_JSON: '{}',
+            SMTP_HOST: 'smtp.example.test',
+            EMAIL_FROM_ADDRESS: 'noreply@example.test',
+          }
         : key === ENV_KEYS.storageProvider
-          ? storageSettings
-          : {};
+          ? {
+              S3_REGION: 'eu-central-1',
+              S3_PUBLIC_BUCKET: 'wab-public',
+              S3_PRIVATE_BUCKET: 'wab-private',
+              CDN_BASE_URL: 'https://cdn.example.test',
+            }
+          : key === ENV_KEYS.otpProvider
+            ? { FIREBASE_PROJECT_ID: 'wab-dev-test' }
+            : {};
     expect(loadConfig(validEnv({ [key]: 'real', ...credentials })).providers).toEqual({
       ...ALL_FAKE_MODES,
       [field]: 'real',
@@ -263,6 +264,47 @@ describe('loadConfig', () => {
       ]);
       expect(invalidKeysOf({ ...base, ...settings, S3_ENDPOINT: 'nope' })).toEqual(['S3_ENDPOINT']);
       expect(loadConfig(validEnv()).storage).toBeUndefined();
+    });
+  });
+
+  describe('real OTP settings', () => {
+    const base = validEnv({ OTP_PROVIDER: 'real' });
+
+    it('names the missing Firebase project key, never a value', () => {
+      expect(invalidKeysOf(base)).toEqual(['FIREBASE_PROJECT_ID']);
+    });
+
+    it('builds typed settings, with the emulator host only when given', () => {
+      expect(loadConfig({ ...base, FIREBASE_PROJECT_ID: 'wab-dev-test' }).otp).toEqual({
+        firebase: { projectId: 'wab-dev-test' },
+      });
+      expect(
+        loadConfig({
+          ...base,
+          FIREBASE_PROJECT_ID: 'wab-dev-test',
+          FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+        }).otp,
+      ).toEqual({
+        firebase: { projectId: 'wab-dev-test', authEmulatorHost: 'localhost:9099' },
+      });
+    });
+
+    it('rejects a malformed emulator host and is absent for the fake provider', () => {
+      expect(
+        invalidKeysOf({ ...base, FIREBASE_PROJECT_ID: 'p', FIREBASE_AUTH_EMULATOR_HOST: 'nope' }),
+      ).toEqual(['FIREBASE_AUTH_EMULATOR_HOST']);
+      expect(loadConfig(validEnv()).otp).toBeUndefined();
+      expect(loadConfig(validEnv({ FIREBASE_PROJECT_ID: 'p' })).otp).toBeUndefined();
+    });
+
+    it('refuses the Firebase emulator in production', () => {
+      const production = validEnv({
+        ...REAL_PROVIDERS,
+        ...PAYOUT_KEY,
+        NODE_ENV: 'production',
+        FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+      });
+      expect(invalidKeysOf(production)).toEqual(['FIREBASE_AUTH_EMULATOR_HOST']);
     });
   });
 

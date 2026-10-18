@@ -7,7 +7,7 @@
 | Package | `wab-otp` |
 | Type | Node.js package (TypeScript, npm), server only |
 | BRD | `docs/WAB_Package_OTP_BRD.md` |
-| Version | 0.1.0 (implemented; publish prepared in OTP-010) |
+| Version | 0.1.0 (implemented; publish prepared, owner runs `npm publish`) |
 | Node | >= 22, TypeScript strict, ESM + CJS builds |
 | Server counterpart in WAB | `WAB-Server/src/providers/otp` (interface already in WAB-Server, fake only today) |
 
@@ -110,7 +110,9 @@ Initialize the Firebase app once and reuse; cache Google public keys (library de
 const otp = createOtpService({ environment: "dev", provider: "fake", limits: { /* from settings */ } });
 const r = await otp.verify({ proof, expectedPhone: "+9627XXXXXXXX", purpose: "LOGIN" });
 ```
-How WAB-Server adopts it: replace `WAB-Server/src/providers/otp` real mode (`*_PROVIDER=real`) with this package; the interface is already compatible (see §3).
+How WAB-Server adopts it (done, SRV-034): `"@wab/otp": "file:../wab-otp"`, `src/providers/otp/real.ts` calls `createOtpVerifier({environment, provider: 'firebase', firebase: {projectId, authEmulatorHost?}, logger})` and maps outcomes / `OtpError`s to the server's `OtpProvider` + `ExternalServiceError`; env `OTP_PROVIDER=real`, `FIREBASE_PROJECT_ID` (dev `wab-dev-397ab`, prod `wab-prod-9c58f`), dev-only `FIREBASE_AUTH_EMULATOR_HOST`. No service account is needed: ID tokens are verified with Google's public keys.
+
+Publishing (OTP-010, owner runs it): package `@wab/otp`, registry GitHub Packages (`publishConfig`), `npm publish` runs `prepublishOnly` = `npm run verify`; `npm run pack:check` lists the tarball (dist + README + CHANGELOG). Consumers then replace the `file:` dependency by the registry version (SRV-112).
 
 ## 11. Open questions / assumed-missing requirements
 - Per device/IP limit key design (OTP-04 SHOULD): `deviceId`/`ip` are accepted by `precheck` but not limited yet; needs a device id source from the apps.

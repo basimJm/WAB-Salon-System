@@ -126,6 +126,8 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-18 | 0.1.0 | PAY-011: mock launcher + platform in-app browsers. |
+| 2026-10-18 | 0.1.0 | PAY-010: KMP ports, fake launcher, shared native launcher, tests. |
 | 2026-10-18 | 0.1.0 | PAY-009: quality gate, README, Integration reference, webhook event id fix. |
 | 2026-10-18 | 0.1.0 | PAY-008: Phase 2 port fields + capability flags. |
 | 2026-10-18 | 0.1.0 | PAY-007: webhook decryption/normalization + replay flag. |
@@ -173,3 +175,25 @@ HTTP: 401/403 `PAYMENT_AUTH_FAILED`; 408 `PAY_TIMEOUT`; 429 `PAY_RATE_LIMITED`; 
 4. `/v1/query` by `merchantTransactionId` availability for RF duplicate protection; 404 vs 200 answers for unpaid checkouts.
 5. Gateway fee is not in the status answer (`feeFils` omitted): needs the settlement report API (open).
 6. Owner inputs: entityId per environment, access tokens, webhook decryption key, return URL / app scheme, registry token.
+
+## 15. KMP client library (`kmp/`, Maven `com.wab:payments`)
+
+Gradle build (same toolchain as the customer app: Kotlin 2.3.20, AGP 9.1.0, `com.android.kotlin.multiplatform.library`), module `:payments`, targets Android + iosArm64/iosSimulatorArm64/iosX64, `explicitApi()`, warnings as errors. No business rules; no card data ever crosses the library (the gateway UI collects it).
+
+### API used by the customer app (CUS-047 / CUS-062)
+```kotlin
+// 1. POST /payments -> server creates the session with @wab/payments; map its `client` part:
+val session = CheckoutSession(provider, PaymentEnvironment.fromServer(env)!!, sessionId, checkoutId, brands, shopperResultUrl, amountFils)
+// 2. open the gateway UI (DI binds one PaymentLauncher: DelegatingPaymentLauncher by provider)
+when (val r = launcher.launch(session)) {
+    is PaymentResult.ClientCompleted -> api.verify(r.sessionId)   // server-side verify decides; NEVER trust the client
+    is PaymentResult.Cancelled -> backToSummary()
+    is PaymentResult.Failed -> show(r.error)                      // PaymentError(code, message, retryable, sdkCode)
+}
+```
+Ports: `PaymentLauncher` (alias `CheckoutLauncher`), `DelegatingPaymentLauncher`, `FakePaymentLauncher` (tests/previews), `NativeCheckoutBridge` + `NativeCheckoutLauncher` (shared half of the Android and iOS HyperPay launchers), `ShopperResult` (return-URL parsing), `PaymentError`/`PaymentErrorCode`, `Redaction.scrub`.
+
+Verification done here: commonMain + commonTest compile with warnings-as-errors and the unit tests pass on a JVM-only harness (`kotlin("jvm")` over the same source dirs). NOT verified here: the Android/iOS targets (Google Maven and Xcode are unavailable in the sandbox): CI/mac must run `./gradlew :payments:allTests`.
+
+### Dev launcher (PAY-011)
+`MockGatewayLauncher(browser: InAppBrowser)` opens `CheckoutSession.checkoutUrl` (the OPP mock's hosted page, returned by the server in dev as `client.checkoutUrl`) and parses the redirect to `shopperResultUrl`. Browsers: Android `WebViewInAppBrowser(context)` (WebView activity declared in the library manifest; a debug network-security-config must allow the cleartext mock host), iOS `WebAuthInAppBrowser()` (`ASWebAuthenticationSession`; the return URL must use a custom scheme such as `wab://payment/result`). Bind it for provider `mock-gateway` in `DelegatingPaymentLauncher`. The Android and iOS browser classes are NOT compiled here.
