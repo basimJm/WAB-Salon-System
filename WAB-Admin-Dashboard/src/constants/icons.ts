@@ -31,6 +31,7 @@ export const ICON_PATHS = {
   check: 'M5 12l5 5 9-10',
   alert:
     'M12 9v4M12 17h.01M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z',
+  info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v6M12 7.5h.01',
   inbox: 'M3 13l3-8h12l3 8v6H3zM3 13h5l1 3h6l1-3h5',
   sortUp: 'M12 19V5M5 12l7-7 7 7',
   sortDown: 'M12 5v14M5 12l7 7 7-7',

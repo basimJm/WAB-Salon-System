@@ -6,3 +6,7 @@ test-results
 package-lock.json
 design
 docs
+
+contract
+src/data/contract/generated
+reports

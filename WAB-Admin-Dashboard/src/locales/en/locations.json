@@ -1,0 +1,45 @@
+{
+  "locations": {
+    "subtitle": "Places customers and salons can pick. Nothing is deleted: switch a place off instead.",
+    "name": "Name",
+    "nameAr": "Name (Arabic)",
+    "nameEn": "Name (English)",
+    "sortOrder": "Sort order",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "add": "Add",
+    "edit": "Edit",
+    "code": "Country code",
+    "dialCode": "Dial code",
+    "flagKey": "Flag file",
+    "phoneRegex": "Phone number pattern",
+    "phoneRegexHint": "Regular expression for the number without the leading 0",
+    "reason": "Reason",
+    "reasonHint": "Recorded in the audit log",
+    "all": "All",
+    "choose": "Choose",
+    "addCountry": "Add country",
+    "editCountry": "Edit country",
+    "parent": {
+      "countries": "Country",
+      "cities": "City"
+    },
+    "error": {
+      "required": "This field is required",
+      "sortOrder": "Whole number from 0 to 100000",
+      "reason": "Write a short reason",
+      "code": "Two capital letters, e.g. JO",
+      "dial": "Like +962",
+      "regex": "Not a valid pattern"
+    },
+    "addTitle": {
+      "countries": "Add city",
+      "cities": "Add area"
+    },
+    "editTitle": {
+      "countries": "Edit city",
+      "cities": "Edit area"
+    }
+  }
+}

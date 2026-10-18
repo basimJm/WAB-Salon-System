@@ -83,8 +83,10 @@ describe('bundle gate', () => {
     expect(
       run([file('index-abc.js', 10), file('big-1.js', budget.chunkJsGzipKb + 1)]).join(),
     ).toContain('chunk');
-    const many = Array.from({ length: 6 }, (_, i) => file(`c${i}.js`, budget.chunkJsGzipKb - 1));
+    const many = Array.from({ length: 8 }, (_, i) => file(`c${i}.js`, budget.chunkJsGzipKb - 1));
     expect(run([file('index-abc.js', 10), ...many]).join()).toContain('total JS');
+    // Dev builds carry mock and gallery code: only what users download (prod) has a total budget.
+    expect(run([file('index-abc.js', 10), ...many], 'dev-release')).toEqual([]);
     expect(run([file('index-abc.js', 10), file('a.css', budget.cssGzipKb + 1)]).join()).toContain(
       'CSS',
     );
@@ -112,5 +114,35 @@ describe('bundle gate', () => {
     expect(run(files, 'prod-release').join()).toContain('mock code');
     expect(run(files, 'prod-debug').join()).toContain('mock code');
     expect(run(files, 'dev-release')).toEqual([]);
+  });
+
+  it('prod builds must not contain the DEV ribbon; dev builds may', () => {
+    const files = [file('index-abc.js', 10, 'className:"wab-env-ribbon"')];
+    expect(run(files, 'prod-release').join()).toContain('DEV ribbon');
+    expect(run(files, 'prod-debug').join()).toContain('DEV ribbon');
+    expect(run(files, 'dev-release')).toEqual([]);
+  });
+
+  it('prod builds must not ship the design-system gallery chunk or its strings; dev builds may', () => {
+    const chunk = [file('index-abc.js', 10), file('DesignSystemPage-x1.js', 10)];
+    expect(run(chunk, 'prod-release').join()).toContain('dev-only chunk');
+    expect(run(chunk, 'prod-debug').join()).toContain('dev-only chunk');
+    const strings = [file('index-abc.js', 10, '{designKits:{charts:1}}')];
+    expect(run(strings, 'prod-release').join()).toContain('gallery strings');
+    expect(run(strings, 'prod-debug')).toEqual([]);
+    expect(run(chunk, 'dev-release')).toEqual([]);
+  });
+
+  it('the dev-only gallery chunk does not count against the release size budget', () => {
+    const big = [file('index-abc.js', 10), file('DesignSystemPage-x1.js', 300 * 1024)];
+    expect(run(big, 'dev-release')).toEqual([]);
+  });
+
+  it('mock-source chunks are free in dev, size-exempt, and forbidden in prod', () => {
+    const mock = [file('index-abc.js', 10), file('mockTransport-x1.js', 300 * 1024)];
+    expect(run(mock, 'dev-release')).toEqual([]);
+    expect(run(mock, 'prod-release').join()).toContain('dev-only chunk');
+    const fake = [file('index-abc.js', 10), file('FakeRealtimeClient-x1.js', 10)];
+    expect(run(fake, 'prod-debug').join()).toContain('dev-only chunk');
   });
 });

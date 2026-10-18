@@ -22,7 +22,12 @@ export interface HttpClientOptions {
   getToken: () => string | null;
   getLanguage: () => Language;
   /** Called once on a 401 so the session layer can sign out. */
+  /** Called when a request is refused as unauthorized and could not be saved by a refresh. */
   onUnauthorized?: () => void;
+  /** Runs before each request: refreshes an access token that is about to expire. Must not throw. */
+  ensureFresh?: () => Promise<void>;
+  /** Called once after a 401: true = the session was refreshed, so the request is repeated with the new token. */
+  refreshSession?: () => Promise<boolean>;
   logger?: Logger;
   timeoutMs?: number;
   /** Injectable so tests do not wait for real backoff. */
@@ -31,7 +36,14 @@ export interface HttpClientOptions {
 
 export interface RequestOptions<T> {
   schema: z.ZodType<T>;
-  query?: Readonly<Record<string, string | number | boolean | undefined>>;
+  /** A list value is sent as repeated parameters (`status=A&status=B`). */
+  query?: Readonly<
+    Record<string, string | number | boolean | readonly (string | number | boolean)[] | undefined>
+  >;
+  /** The auth calls themselves (refresh, logout) never trigger a refresh. */
+  noRefresh?: boolean;
+  /** Extra request headers (e.g. `Idempotency-Key`). */
+  headers?: Readonly<Record<string, string>>;
   body?: unknown;
   signal?: AbortSignal;
 }
@@ -62,8 +74,40 @@ export class HttpClient {
     return this.request('DELETE', path, o);
   }
 
-  /** Sends the request; retries idempotent calls on transient failures; always rejects with AppError. */
+  /**
+   * Sends the request; always rejects with AppError. Before sending it refreshes a token that is about to
+   * expire; after a 401 it refreshes the session once and repeats the request, and only then reports the
+   * session as unauthorized.
+   */
   async request<T>(method: HttpMethod, path: string, o: RequestOptions<T>): Promise<ApiResult<T>> {
+    if (!o.noRefresh) await this.opts.ensureFresh?.();
+    try {
+      return await this.send(method, path, o);
+    } catch (e) {
+      const error = normalizeError(e);
+      if (error.kind !== 'unauthorized') throw error;
+      const refreshed =
+        !o.noRefresh && this.opts.refreshSession ? await this.opts.refreshSession() : false;
+      if (!refreshed) {
+        this.opts.onUnauthorized?.();
+        throw error;
+      }
+      try {
+        return await this.send(method, path, o);
+      } catch (second) {
+        const again = normalizeError(second);
+        if (again.kind === 'unauthorized') this.opts.onUnauthorized?.();
+        throw again;
+      }
+    }
+  }
+
+  /** One logical request: retries idempotent calls on transient failures. */
+  private async send<T>(
+    method: HttpMethod,
+    path: string,
+    o: RequestOptions<T>,
+  ): Promise<ApiResult<T>> {
     const sleep = this.opts.sleep ?? defaultSleep;
     const attempts = isIdempotent(method) ? HTTP_RETRY.maxAttempts : 1;
     let lastError: AppError | undefined;
@@ -98,13 +142,16 @@ export class HttpClient {
   private buildUrl(path: string, query: RequestOptions<unknown>['query']): string {
     const url = new URL(path, this.opts.baseUrl);
     for (const [key, value] of Object.entries(query ?? {})) {
-      if (value !== undefined) url.searchParams.set(key, String(value));
+      if (value === undefined) continue;
+      if (Array.isArray(value)) value.forEach((item) => url.searchParams.append(key, String(item)));
+      else url.searchParams.set(key, String(value));
     }
     return url.toString();
   }
 
   private buildInit(method: HttpMethod, o: RequestOptions<unknown>): RequestInit {
     const headers: Record<string, string> = {
+      ...o.headers,
       [HTTP_LANGUAGE_HEADER]: this.opts.getLanguage(),
     };
     const token = this.opts.getToken();
@@ -140,7 +187,6 @@ export class HttpClient {
   private toError(status: number, payload: unknown): AppError {
     const parsed = errorEnvelopeSchema.safeParse(payload);
     const kind = kindFromResponse(status, parsed.success ? parsed.data.error.code : undefined);
-    if (kind === 'unauthorized') this.opts.onUnauthorized?.();
     if (!parsed.success) return new AppError({ kind, status });
     const { message, error } = parsed.data;
     return new AppError({

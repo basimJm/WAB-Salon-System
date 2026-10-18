@@ -1,4 +1,5 @@
-import express, { type Express, type Router } from 'express';
+import express, { type Express, type Request, type Router } from 'express';
+import { WEBHOOK_PREFIX } from './constants/payments';
 import { DEFAULT_TRUST_PROXY_HOPS } from './constants/security';
 import { JSON_BODY_LIMIT } from './constants/server';
 import { errorHandler } from './middlewares/errorHandler';
@@ -9,7 +10,11 @@ import { notFound } from './middlewares/notFound';
 import { requestId } from './middlewares/requestId';
 import { buildOpenApiDocuments } from './docs';
 import { createDocsRouter } from './docs/router';
-import { createRootRouter } from './routes';
+import { createRootRouter, defaultWebhooks } from './routes';
+import { createCustomerRouter } from './modules/customer';
+import { createMerchantRouter } from './modules/merchant';
+import { createAdminRouter } from './modules/admin';
+import type { ApiServices } from './modules/services';
 import { createHealthRouter } from './routes/health';
 import type { ReadinessCheck } from './utils/health';
 import type { Logger } from './utils/logger';
@@ -26,6 +31,8 @@ export interface AppDependencies {
   readonly trustProxyHops?: number;
   /** Serve Swagger UI at /docs. Off by default; the server turns it on outside production. */
   readonly docs?: boolean;
+  /** Services for the feature routers (OTP gate...); built by `server.ts` once Redis is up. */
+  readonly services?: ApiServices;
 }
 
 /** Builds the Express app. Order matters: ids and language first, errors last. */
@@ -36,6 +43,7 @@ export const createApp = ({
   security,
   trustProxyHops = DEFAULT_TRUST_PROXY_HOPS,
   docs = false,
+  services = {},
 }: AppDependencies): Express => {
   const app = express();
   app.disable('x-powered-by');
@@ -44,9 +52,28 @@ export const createApp = ({
   app.use(language);
   app.use(securityMiddlewares({ corsAllowedOrigins: [], logger, ...security }));
   if (docs) app.use(createDocsRouter(buildOpenApiDocuments()));
-  app.use(express.json({ limit: JSON_BODY_LIMIT }));
+  app.use(
+    express.json({
+      limit: JSON_BODY_LIMIT,
+      verify: (req: Request, _res, buf) => {
+        // Webhook signatures cover the exact bytes, which the parsed body no longer has.
+        if (req.originalUrl.startsWith(WEBHOOK_PREFIX)) req.rawBody = buf.toString('utf8');
+      },
+    }),
+  );
   app.use(sanitizeRequest);
-  app.use(router ?? createRootRouter(undefined, createHealthRouter(readinessChecks)));
+  app.use(
+    router ??
+      createRootRouter(
+        {
+          customer: createCustomerRouter(services),
+          merchant: createMerchantRouter(services),
+          admin: createAdminRouter(services),
+        },
+        createHealthRouter(readinessChecks),
+        [defaultWebhooks(services)],
+      ),
+  );
   app.use(notFound);
   app.use(errorHandler(logger));
   return app;

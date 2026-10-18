@@ -99,12 +99,13 @@ describe('Dockerfile', () => {
   it('uses a multi-stage Node 22 build', () => {
     expect(dockerfile.match(/^FROM node:22-alpine/gm)).toHaveLength(2);
     expect(dockerfile).toContain('AS build');
-    expect(dockerfile).toContain('COPY --from=build /app/dist ./dist');
+    expect(dockerfile).toContain('COPY --from=build /repo/WAB-Server/dist ./WAB-Server/dist');
   });
 
   it('installs reproducibly and ships production dependencies only', () => {
-    expect(dockerfile).toContain('RUN npm ci\n');
+    expect(dockerfile).toContain('npm ci\n');
     expect(dockerfile).toContain('npm ci --omit=dev');
+    expect(dockerfile).toContain('wab-notifications');
     expect(dockerfile).toContain('ENV NODE_ENV=production');
   });
 
@@ -121,16 +122,19 @@ describe('Dockerfile', () => {
   });
 });
 
-describe('.dockerignore', () => {
-  const lines = read('.dockerignore').split('\n');
+describe('Dockerfile.dockerignore', () => {
+  const lines = read('Dockerfile.dockerignore').split('\n');
 
-  it('keeps environment files, dependencies and VCS data out of the build context', () => {
-    for (const entry of ['.env', '.env.*', 'node_modules', '.git', 'dist']) {
-      expect(lines).toContain(entry);
-    }
+  it('excludes everything by default and lets only the two packages in', () => {
+    expect(lines).toContain('*');
+    expect(lines).toContain('!WAB-Server/src');
+    expect(lines).toContain('!wab-notifications/src');
   });
 
-  it('still allows .env.example', () => {
-    expect(lines).toContain('!.env.example');
+  it('keeps environment files, dependencies and build output out of the context', () => {
+    for (const entry of ['**/.env', '**/.env.*', '**/node_modules', '**/dist']) {
+      expect(lines).toContain(entry);
+    }
+    expect(lines).not.toContain('!.env.example');
   });
 });

@@ -108,6 +108,28 @@ export abstract class BaseRepository<TRaw extends object> {
     return this.model.countDocuments(this.scoped(filter)).exec();
   }
 
+  /** Σ of one numeric field over the matching records (0 when none). */
+  async sumField(filter: QueryFilter<TRaw>, field: string): Promise<number> {
+    const [row] = await this.model
+      .aggregate<{ sum: number }>([
+        { $match: this.scoped(filter) },
+        { $group: { _id: null, sum: { $sum: `$${field}` } } },
+      ])
+      .exec();
+    return row?.sum ?? 0;
+  }
+
+  /** How many matching records have each value of `field`. */
+  async countBy(filter: QueryFilter<TRaw>, field: string): Promise<Record<string, number>> {
+    const rows = await this.model
+      .aggregate<{ _id: string; count: number }>([
+        { $match: this.scoped(filter) },
+        { $group: { _id: `$${field}`, count: { $sum: 1 } } },
+      ])
+      .exec();
+    return Object.fromEntries(rows.map((row) => [row._id, row.count]));
+  }
+
   async exists(filter: QueryFilter<TRaw>): Promise<boolean> {
     return (await this.model.exists(this.scoped(filter)).exec()) !== null;
   }

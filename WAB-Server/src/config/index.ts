@@ -10,7 +10,23 @@ import {
   type LogLevel,
 } from '../constants/env';
 import { DEFAULT_PROVIDER_MODE, type ProviderMode } from '../constants/providers';
-import { envSchema } from './env.schema';
+import { envSchema, type RawEnv } from './env.schema';
+
+export interface NotifierSettings {
+  readonly fcm: {
+    readonly serviceAccountJson: string;
+    readonly projectId?: string;
+    readonly dryRun: boolean;
+  };
+  readonly smtp: {
+    readonly host: string;
+    readonly port: number;
+    readonly secure: boolean;
+    readonly user?: string;
+    readonly pass?: string;
+  };
+  readonly from: { readonly address: string; readonly name: string };
+}
 
 export interface AppConfig {
   readonly env: Environment;
@@ -22,8 +38,19 @@ export interface AppConfig {
   readonly trustProxyHops: number;
   readonly mongo: { readonly uri: string };
   readonly redis: { readonly url: string };
+  readonly auth: { readonly accessSecret: string };
+  /** Encryption keys for fields at rest; absent keys switch the dependent features off. */
+  readonly secrets: { readonly payoutEncryptionKey?: string };
+  /** Credentials of the real notifier (FCM + SMTP); present only when the notifier is `real`. */
+  readonly notifier?: NotifierSettings;
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
-  readonly providers: { readonly otp: ProviderMode; readonly storage: ProviderMode };
+  readonly providers: {
+    readonly otp: ProviderMode;
+    readonly storage: ProviderMode;
+    readonly notifier: ProviderMode;
+    readonly payments: ProviderMode;
+    readonly analytics: ProviderMode;
+  };
 }
 
 /** Thrown at startup when the environment is invalid. Names the bad keys, never their values. */
@@ -55,6 +82,31 @@ export const readEnvSources = (
   return { ...fromFile, ...processEnv };
 };
 
+const buildNotifierSettings = (values: RawEnv): NotifierSettings | undefined => {
+  if (values[ENV_KEYS.notifierProvider] !== 'real') return undefined;
+  const json = values[ENV_KEYS.fcmServiceAccountJson];
+  const host = values[ENV_KEYS.smtpHost];
+  const address = values[ENV_KEYS.emailFromAddress];
+  if (json === undefined || host === undefined || address === undefined) return undefined;
+  const projectId = values[ENV_KEYS.fcmProjectId];
+  const user = values[ENV_KEYS.smtpUser];
+  const pass = values[ENV_KEYS.smtpPass];
+  return Object.freeze({
+    fcm: Object.freeze({
+      serviceAccountJson: json,
+      ...(projectId === undefined ? {} : { projectId }),
+      dryRun: values[ENV_KEYS.fcmDryRun],
+    }),
+    smtp: Object.freeze({
+      host,
+      port: values[ENV_KEYS.smtpPort],
+      secure: values[ENV_KEYS.smtpSecure],
+      ...(user === undefined || pass === undefined ? {} : { user, pass }),
+    }),
+    from: Object.freeze({ address, name: values[ENV_KEYS.emailFromName] }),
+  });
+};
+
 /** Validates the environment and returns an immutable, typed config. Fails fast. */
 export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppConfig => {
   const parsed = envSchema.safeParse(source);
@@ -64,7 +116,10 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   }
   const values = parsed.data;
   const env = values[ENV_KEYS.nodeEnv];
+  const payoutKey = values[ENV_KEYS.payoutEncryptionKey];
+  const notifier = buildNotifierSettings(values);
   return Object.freeze({
+    ...(notifier === undefined ? {} : { notifier }),
     env,
     isProduction: env === 'production',
     port: values[ENV_KEYS.port],
@@ -73,9 +128,14 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
     trustProxyHops: values[ENV_KEYS.trustProxyHops],
     mongo: Object.freeze({ uri: values[ENV_KEYS.mongoUri] }),
     redis: Object.freeze({ url: values[ENV_KEYS.redisUrl] }),
+    auth: Object.freeze({ accessSecret: values[ENV_KEYS.jwtAccessSecret] }),
+    secrets: Object.freeze(payoutKey === undefined ? {} : { payoutEncryptionKey: payoutKey }),
     providers: Object.freeze({
       otp: values[ENV_KEYS.otpProvider] ?? DEFAULT_PROVIDER_MODE,
       storage: values[ENV_KEYS.storageProvider] ?? DEFAULT_PROVIDER_MODE,
+      notifier: values[ENV_KEYS.notifierProvider] ?? DEFAULT_PROVIDER_MODE,
+      payments: values[ENV_KEYS.paymentProvider] ?? DEFAULT_PROVIDER_MODE,
+      analytics: values[ENV_KEYS.analyticsProvider] ?? DEFAULT_PROVIDER_MODE,
     }),
   });
 };

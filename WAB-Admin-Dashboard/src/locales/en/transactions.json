@@ -1,0 +1,24 @@
+{
+  "transactions": {
+    "subtitle": "Every payment attempt with the gateway answer.",
+    "at": "Time",
+    "type": "Type",
+    "amount": "Amount",
+    "fee": "Gateway fee",
+    "attempt": "Attempt",
+    "gatewayCode": "Gateway code",
+    "gatewayMessage": "Gateway message",
+    "provider": "Gateway · reference",
+    "charged": "Charged",
+    "refunded": "Refunded",
+    "platform": "App",
+    "booking": "Booking",
+    "attempts": "Attempts of this checkout",
+    "raw": "Gateway answer (raw)",
+    "empty": "No transactions match",
+    "types": {
+      "DEPOSIT": "Deposit",
+      "FULL": "Full payment"
+    }
+  }
+}

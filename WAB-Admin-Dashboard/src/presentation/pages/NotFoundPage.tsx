@@ -1,15 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { HTTP_CODES } from '@/constants/errors';
 import { ROUTES } from '@/constants/routes';
-import { EmptyState } from '../components/feedback/EmptyState';
+import { StatusPage } from '../components/feedback/StatusPage';
 
 export default function NotFoundPage() {
   const { t } = useTranslation();
   return (
-    <EmptyState
+    <StatusPage
+      code={String(HTTP_CODES.notFound)}
       title={t('notFound.title')}
-      description={t('notFound.text')}
-      icon="alert"
+      text={t('notFound.text')}
       action={
         <Link className="wab-link" to={ROUTES.root}>
           {t('notFound.home')}

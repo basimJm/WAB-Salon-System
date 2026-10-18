@@ -1,0 +1,36 @@
+{
+  "content": {
+    "subtitle": "Privacy, terms and about pages shown in the apps.",
+    "addPage": "Add a page",
+    "editPage": "Edit page",
+    "kind": "Page",
+    "body": "Page text",
+    "kinds": {
+      "PRIVACY": "Privacy policy",
+      "TERMS": "Terms of use",
+      "ABOUT": "About"
+    },
+    "error": {
+      "body": "Write the text (up to 50,000 characters)",
+      "faq": "Required, up to {{max}} characters",
+      "phone": "Use the international format, e.g. +962790000000",
+      "email": "Enter a valid email"
+    },
+    "faqSubtitle": "Questions and answers shown in the apps, in this order.",
+    "contactSubtitle": "How customers and salons reach support.",
+    "addFaq": "Add a question",
+    "editFaq": "Edit question",
+    "addContact": "Add contact info",
+    "editContact": "Edit contact info",
+    "question": "Question",
+    "questionAr": "Question (Arabic)",
+    "questionEn": "Question (English)",
+    "answerAr": "Answer (Arabic)",
+    "answerEn": "Answer (English)",
+    "order": "Order",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "email": "Email",
+    "phoneHint": "International format, e.g. +962790000000"
+  }
+}

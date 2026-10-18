@@ -19,6 +19,18 @@ import { Tabs } from '../components/data/Tabs';
 import { ReasonDialog } from '../components/overlay/ReasonDialog';
 import { useToast } from '../components/overlay/Toast';
 import { DEFAULT_PAGE_SIZE } from '@/constants/ui';
+import { BasicsSection } from './design/BasicsSection';
+import { ChartsSection } from './design/ChartsSection';
+import { FiltersSection } from './design/FiltersSection';
+import { FormsSection } from './design/FormsSection';
+import { MediaSection } from './design/MediaSection';
+import { OverlaysSection } from './design/OverlaysSection';
+import { PrimitivesSection } from './design/PrimitivesSection';
+import { StatusSection } from './design/StatusSection';
+import { RichTextSection } from './design/RichTextSection';
+import { ShellSection } from './design/ShellSection';
+import { TableSection } from './design/TableSection';
+import { TemplatesSection } from './design/TemplatesSection';
 
 interface DemoRow {
   id: string;
@@ -69,6 +81,18 @@ export default function DesignSystemPage() {
         />
         <KpiCard label={t('design.kpiLoading')} value="" loading />
       </section>
+      <PrimitivesSection />
+      <FormsSection />
+      <StatusSection />
+      <TableSection />
+      <FiltersSection />
+      <OverlaysSection />
+      <TemplatesSection />
+      <ChartsSection />
+      <MediaSection />
+      <RichTextSection />
+      <ShellSection />
+      <BasicsSection />
       <Card className="wab-stack">
         <div className="wab-row">
           <Button>{t('design.primary')}</Button>

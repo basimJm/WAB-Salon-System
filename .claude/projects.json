@@ -1,0 +1,98 @@
+{
+  "_comment": "Registry of every project and SDK in the monorepo. Read by scripts/tasks.py (backlog queries, status propagation, INTEGRATION.md board). Paths are relative to the repo root.",
+  "board_file": "INTEGRATION.md",
+  "statuses": ["TODO", "IN PROGRESS", "IN REVIEW", "DONE", "PENDING", "BLOCKED"],
+  "owner_input_markers": ["user input", "owner input", "owner decision"],
+  "projects": {
+    "server": {
+      "title": "WAB-Server (backend API)",
+      "prefix": "SRV",
+      "dir": "WAB-Server",
+      "master": "server",
+      "backlog": "WAB-Server/docs/WAB_Server_Tasks.md",
+      "session": "WAB-Server/.claude/session.md",
+      "memory": "WAB-Server/.claude/memory.md",
+      "integration": "WAB-Server/.claude/Integration.md"
+    },
+    "admin": {
+      "title": "WAB-Admin-Dashboard (web panel)",
+      "prefix": "ADM",
+      "dir": "WAB-Admin-Dashboard",
+      "master": "admin",
+      "backlog": "WAB-Admin-Dashboard/docs/WAB_Admin_Tasks.md",
+      "session": "WAB-Admin-Dashboard/.claude/session.md",
+      "memory": "WAB-Admin-Dashboard/.claude/memory.md",
+      "integration": "WAB-Admin-Dashboard/.claude/Integration.md"
+    },
+    "customer": {
+      "title": "WAB-Mobile-Customer (KMP app)",
+      "prefix": "CUS",
+      "dir": "WAB-Mobile-Customer",
+      "master": "customer",
+      "backlog": "WAB-Mobile-Customer/docs/WAB_Customer_Tasks.md",
+      "session": "WAB-Mobile-Customer/.claude/session.md",
+      "memory": "WAB-Mobile-Customer/.claude/memory.md",
+      "integration": "WAB-Mobile-Customer/.claude/Integration.md"
+    },
+    "merchant": {
+      "title": "WAB-Mobile-Salon (merchant KMP app)",
+      "prefix": "MER",
+      "dir": "WAB-Mobile-Salon",
+      "master": "merchant",
+      "backlog": "WAB-Mobile-Salon/docs/WAB_Merchant_Tasks.md",
+      "session": "WAB-Mobile-Salon/.claude/session.md",
+      "memory": "WAB-Mobile-Salon/.claude/memory.md",
+      "integration": "WAB-Mobile-Salon/.claude/Integration.md"
+    },
+    "payments": {
+      "title": "wab-payments (SDK: Node + KMP)",
+      "prefix": "PAY",
+      "dir": "wab-payments",
+      "master": "server",
+      "backlog": "wab-payments/docs/WAB_Package_Payments_Tasks.md",
+      "session": "wab-payments/.claude/session.md",
+      "memory": "wab-payments/.claude/memory.md",
+      "integration": "wab-payments/.claude/Integration.md"
+    },
+    "otp": {
+      "title": "wab-otp (SDK)",
+      "prefix": "OTP",
+      "dir": "wab-otp",
+      "master": "server",
+      "backlog": "wab-otp/docs/WAB_Package_OTP_Tasks.md",
+      "session": "wab-otp/.claude/session.md",
+      "memory": "wab-otp/.claude/memory.md",
+      "integration": "wab-otp/.claude/Integration.md"
+    },
+    "notifications": {
+      "title": "wab-notifications (SDK)",
+      "prefix": "NOT",
+      "dir": "wab-notifications",
+      "master": "server",
+      "backlog": "wab-notifications/docs/WAB_Package_Notifications_Tasks.md",
+      "session": "wab-notifications/.claude/session.md",
+      "memory": "wab-notifications/.claude/memory.md",
+      "integration": "wab-notifications/.claude/Integration.md"
+    },
+    "analytics": {
+      "title": "wab-analytics (SDK)",
+      "prefix": "ANA",
+      "dir": "wab-analytics",
+      "master": "server",
+      "backlog": "wab-analytics/docs/WAB_Package_Analytics_Tasks.md",
+      "session": "wab-analytics/.claude/session.md",
+      "memory": "wab-analytics/.claude/memory.md",
+      "integration": "wab-analytics/.claude/Integration.md"
+    },
+    "storage": {
+      "title": "wab-storage (SDK)",
+      "prefix": "STO",
+      "dir": "wab-storage",
+      "master": "server",
+      "backlog": "wab-storage/docs/WAB_Package_Storage_Tasks.md",
+      "session": "wab-storage/.claude/session.md",
+      "memory": "wab-storage/.claude/memory.md",
+      "integration": "wab-storage/.claude/Integration.md"
+    }
+  }
+}

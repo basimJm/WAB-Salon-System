@@ -28,9 +28,44 @@ export const ENV_KEYS = {
   trustProxyHops: 'TRUST_PROXY_HOPS',
   mongoUri: 'MONGODB_URI',
   redisUrl: 'REDIS_URL',
+  jwtAccessSecret: 'JWT_ACCESS_SECRET',
+  /** Base64 of 32 random bytes: encrypts salon bank details at rest (AES-256-GCM). */
+  payoutEncryptionKey: 'PAYOUT_ENCRYPTION_KEY',
   otpProvider: 'OTP_PROVIDER',
   storageProvider: 'STORAGE_PROVIDER',
+  notifierProvider: 'NOTIFIER_PROVIDER',
+  paymentProvider: 'PAYMENT_PROVIDER',
+  analyticsProvider: 'ANALYTICS_PROVIDER',
+  /** Firebase service-account key as JSON text (secret). Needed when NOTIFIER_PROVIDER=real. */
+  fcmServiceAccountJson: 'FCM_SERVICE_ACCOUNT_JSON',
+  /** Optional: must equal the key's project (catches dev/prod key mix-ups). */
+  fcmProjectId: 'FCM_PROJECT_ID',
+  /** `true` validates pushes without delivering them (dev only). */
+  fcmDryRun: 'FCM_DRY_RUN',
+  smtpHost: 'SMTP_HOST',
+  smtpPort: 'SMTP_PORT',
+  smtpSecure: 'SMTP_SECURE',
+  smtpUser: 'SMTP_USER',
+  /** Google App Password (secret). */
+  smtpPass: 'SMTP_PASS',
+  emailFromAddress: 'EMAIL_FROM_ADDRESS',
+  emailFromName: 'EMAIL_FROM_NAME',
 } as const;
 
 /** Keys that pick `fake` or `real` for an external provider; production must set them to `real`. */
-export const PROVIDER_ENV_KEYS = [ENV_KEYS.otpProvider, ENV_KEYS.storageProvider] as const;
+export const PROVIDER_ENV_KEYS = [
+  ENV_KEYS.otpProvider,
+  ENV_KEYS.storageProvider,
+  ENV_KEYS.notifierProvider,
+  ENV_KEYS.paymentProvider,
+  ENV_KEYS.analyticsProvider,
+] as const;
+
+/** Keys that must be present when the notifier provider is `real`. */
+export const NOTIFIER_REAL_REQUIRED_KEYS = [
+  ENV_KEYS.fcmServiceAccountJson,
+  ENV_KEYS.smtpHost,
+  ENV_KEYS.emailFromAddress,
+] as const;
+export const DEFAULT_SMTP_PORT = 587;
+export const DEFAULT_EMAIL_FROM_NAME = 'WAB';

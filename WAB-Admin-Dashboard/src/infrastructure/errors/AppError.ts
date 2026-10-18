@@ -1,3 +1,4 @@
+import { ERROR_CODE_MESSAGE_PREFIX, isErrorCode } from '@/constants/errorCatalog';
 import { ERROR_MESSAGE_PREFIX, type ErrorKind } from '@/constants/errors';
 
 export interface FieldIssue {
@@ -37,9 +38,11 @@ export class AppError extends Error {
     this.serverMessage = init.serverMessage;
   }
 
-  /** i18n key of the generic message for this error kind. */
+  /** i18n key of the message: the specific one for a known server code, else the generic one for the kind. */
   get messageKey(): string {
-    return `${ERROR_MESSAGE_PREFIX}${this.kind}`;
+    return isErrorCode(this.code)
+      ? `${ERROR_CODE_MESSAGE_PREFIX}${this.code}`
+      : `${ERROR_MESSAGE_PREFIX}${this.kind}`;
   }
 
   /** Worth showing a "Retry" action: a repeat attempt may succeed. */

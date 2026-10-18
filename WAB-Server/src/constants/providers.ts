@@ -49,3 +49,47 @@ export const FAKE_STORAGE_UPLOAD_BASE_URL = 'https://fake-storage.invalid/upload
 export const FAKE_STORAGE_CDN_BASE_URL = 'https://fake-cdn.invalid';
 export const FAKE_STORAGE_SIGNED_PATH = 'private';
 export const FAKE_STORAGE_SIGNATURE = 'fake-signature';
+
+/** Push and email delivery (SRV-023, wab-notifications BRD). */
+export const PUSH_APPS = ['CUSTOMER', 'MERCHANT'] as const;
+export type PushApp = (typeof PUSH_APPS)[number];
+export const PUSH_KINDS = ['VISIBLE', 'DATA_ONLY'] as const;
+export type PushKind = (typeof PUSH_KINDS)[number];
+export const PUSH_PRIORITIES = ['NORMAL', 'HIGH'] as const;
+export type PushPriority = (typeof PUSH_PRIORITIES)[number];
+export const PUSH_INTERRUPTION_LEVELS = ['TIME_SENSITIVE'] as const;
+export type PushInterruptionLevel = (typeof PUSH_INTERRUPTION_LEVELS)[number];
+export const PUSH_TOKEN_RESULTS = ['SENT', 'INVALID_TOKEN', 'FAILED'] as const;
+export type PushTokenResult = (typeof PUSH_TOKEN_RESULTS)[number];
+/** FCM accepts at most 500 tokens in one multicast call. */
+export const PUSH_MAX_TOKENS_PER_REQUEST = 500;
+export const PUSH_TOPIC_PATTERN = /^[A-Za-z0-9_.~%-]{1,900}$/;
+export const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9:_.-]{8,128}$/;
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL_MAX_RECIPIENTS = 50;
+
+/** Payments (SRV-023, wab-payments BRD PAY-01..09). Amounts are integer fils. */
+export const PAYMENT_STATUSES = ['PENDING', 'SUCCEEDED', 'FAILED', 'CANCELLED'] as const;
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+export const REFUND_STATUSES = ['REFUND_PENDING', 'REFUNDED', 'REFUND_FAILED'] as const;
+export type RefundStatus = (typeof REFUND_STATUSES)[number];
+export const FAKE_PAYMENT_SCENARIOS = ['success', 'fail', 'cancel', 'pending'] as const;
+export type FakePaymentScenario = (typeof FAKE_PAYMENT_SCENARIOS)[number];
+export const FAKE_REFUND_SCENARIOS = ['success', 'fail', 'pending'] as const;
+export type FakeRefundScenario = (typeof FAKE_REFUND_SCENARIOS)[number];
+export const PAYMENT_REFERENCE_PATTERN = /^[A-Za-z0-9_.:-]{1,64}$/;
+/** The fake gateway's webhook signature: anything else is rejected as unverifiable. */
+export const FAKE_WEBHOOK_SIGNATURE = 'fake-webhook-signature';
+export const FAKE_GATEWAY_CODES = {
+  success: '000.100.110',
+  pending: '000.200.000',
+  fail: '800.100.151',
+  cancel: '100.396.101',
+  refundFail: '800.900.300',
+} as const;
+
+/** Server analytics (SRV-023, wab-analytics BRD ANA-01/02). */
+export const ANALYTICS_GROUPINGS = ['NAME', 'DAY'] as const;
+export type AnalyticsGrouping = (typeof ANALYTICS_GROUPINGS)[number];
+export const ANALYTICS_IDENTITY_ACTORS = ['CUSTOMER', 'MEMBER'] as const;
+export const INSTALLATION_ID_PATTERN = /^[A-Za-z0-9._-]{8,128}$/;

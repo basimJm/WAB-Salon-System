@@ -48,6 +48,7 @@ const auditLogSchema = new Schema<AuditLogRaw>(
 auditLogSchema.index({ adminId: 1, createdAt: -1 });
 auditLogSchema.index({ entityType: 1, entityId: 1, createdAt: -1 });
 auditLogSchema.index({ action: 1, createdAt: -1 });
+auditLogSchema.index({ createdAt: -1 });
 makeAppendOnly(auditLogSchema);
 
 export const AuditLogModel = model<AuditLogRaw>('AuditLog', auditLogSchema);

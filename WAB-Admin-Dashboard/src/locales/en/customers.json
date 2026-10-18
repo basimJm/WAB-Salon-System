@@ -1,0 +1,38 @@
+{
+  "customers": {
+    "subtitle": "Every customer of the app and how they use it.",
+    "name": "Customer",
+    "search": "Search by name or phone",
+    "registered": "Registered",
+    "lastActive": "Last active",
+    "bookings": "Bookings",
+    "empty": "No customers match",
+    "profile": "Profile",
+    "email": "Email",
+    "language": "Language",
+    "blockedReason": "Blocked because",
+    "deletionAt": "Deletion date",
+    "journeyId": "Journey id",
+    "devices": "Devices",
+    "app": "App",
+    "platform": "Platform",
+    "version": "Version",
+    "push": "Push",
+    "pushOn": "On",
+    "pushOff": "Off",
+    "actionDone": "Done",
+    "confirmTitle": "{{action}}: {{name}}",
+    "actions": {
+      "block": "Block",
+      "unblock": "Unblock",
+      "delete": "Start deletion",
+      "restore": "Restore"
+    },
+    "confirmText": {
+      "block": "The customer is signed out everywhere and cannot book. Write the reason.",
+      "unblock": "The customer can use the app again.",
+      "delete": "The account is deleted after the grace period unless restored. Write the reason.",
+      "restore": "The account returns to normal and the deletion is cancelled."
+    }
+  }
+}
