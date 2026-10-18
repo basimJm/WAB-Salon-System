@@ -4,8 +4,8 @@
 
 | ID | Task | Branch | Needs | Status | Sources / notes |
 |---|---|---|---|---|---|
-| OTP-001 | Project scaffold: TS strict, eslint, prettier, jest, tsup (ESM + CJS + d.ts), `verify`, loop-test config (copy the `wab-notifications` setup) | `feat/otp-001-scaffold` | — | IN REVIEW | Rules §4.12; reuse `wab-notifications` configs |
-| OTP-002 | Shared kernel: typed errors, zod options (`environment`, `provider`, limits, store), prod rules (fake refused, credentials required), redacting logger bridge, constants (purposes, outcomes, defaults) | `feat/otp-002-kernel` | OTP-001 | TODO | Rules §2, §3; BUSINESS_DOMAIN OTP limits as defaults only |
+| OTP-001 | Project scaffold: TS strict, eslint, prettier, jest, tsup (ESM + CJS + d.ts), `verify`, loop-test config (copy the `wab-notifications` setup) | `feat/otp-001-scaffold` | — | DONE | Rules §4.12; reuse `wab-notifications` configs |
+| OTP-002 | Shared kernel: typed errors, zod options (`environment`, `provider`, limits, store), prod rules (fake refused, credentials required), redacting logger bridge, constants (purposes, outcomes, defaults) | `feat/otp-002-kernel` | OTP-001 | IN REVIEW | Rules §2, §3; BUSINESS_DOMAIN OTP limits as defaults only |
 | OTP-003 | `OtpProvider` port (`precheck`, `verify`, `reportFailure`, `getConfig`) + `LimitStore` port + fake adapter + memory store | `feat/otp-003-port-fake` | OTP-002 | TODO | Integration.md §3; outcomes `VERIFIED/INVALID_PROOF/PHONE_MISMATCH/EXPIRED/PURPOSE_MISMATCH/BLOCKED` |
 | OTP-004 | Limits engine over `LimitStore`: request window (5 / 5 min → 15 min block), wrong attempts (5 → 15 min block), `blockedUntil`, `resendAfterSeconds`, all values from options | `feat/otp-004-limits` | OTP-003 | TODO | Must match `WAB-Server` `domain/otp` gate semantics (SRV-027) so the server can delegate |
 | OTP-005 | Redis `LimitStore` adapter (single Lua script per hit, TTLs), works with an injected ioredis client | `feat/otp-005-redis-store` | OTP-004 | TODO | Same pattern as `wab-notifications` idempotency store |
