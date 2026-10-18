@@ -1,6 +1,8 @@
 /** Package identity, used in logs and error details. */
 export const PACKAGE_NAME = '@wab/analytics';
 
+export { createAnalytics, buildAdapters, type Adapters } from './analytics';
+export { createService, type ServiceDeps } from './service';
 export { ERROR_CODES, type ErrorCode } from './constants/codes';
 export {
   AnalyticsError,
@@ -12,3 +14,18 @@ export { noopLogger, redact, type Logger } from './logger';
 export { resolveOptions, type AnalyticsOptions, type ResolvedOptions } from './config/options';
 export { assertRange, type DateRange } from './range';
 export { withRetry, type RetryPolicy } from './retry';
+export { MemoryEventStore } from './adapters/memory/eventStore';
+export { MemoryIdentityStore } from './adapters/memory/identityStore';
+export type {
+  AppEvent,
+  CrashEvent,
+  EventStore,
+  IdentityStore,
+  Lifecycle,
+  ParamValue,
+  StoreCountQuery,
+  StoreFindQuery,
+  WarehouseFindQuery,
+  WarehouseQuery,
+} from './ports';
+export type * from './types';

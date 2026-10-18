@@ -7,14 +7,14 @@
 
 ## Current task
 
-### ANA-002 — Shared kernel
-- Branch: `feat/ana-002-kernel`
+### ANA-003 — `AnalyticsProvider` port + memory adapter
+- Branch: `feat/ana-003-port-memory`
 - Status: IN REVIEW
-- Acceptance: typed `AnalyticsError` + 14 codes (retryable by code); zod options (environment, provider, time zone, limits, timeouts, retry, cache, bigquery identifiers) with prod rules (memory refused, mongo + bigquery credentials required) naming only option paths; redacting logger; range guard (valid dates, to > from, max days); capped backoff retry; constants for every default.
-- Assumed missing: BUSINESS_DOMAIN event schema is mirrored generically (name pattern, upper-case actor type, id/installation patterns overridable); injected clients (`mongo`, `redis`, BigQuery `client`) are typed `object` here and narrowed by the adapter tasks; sensitive-key redaction list (password/secret/token/otp/iban/card…) leaves gateway `code` readable.
-- Tests: `npm run verify` green (24 tests, coverage 100%).
+- Acceptance: stable port (`track`, `linkIdentity`, `countEvents`, `funnel`, `cohorts`, `journey`, `overview`) + lifecycle (`init`, `close`); ports `EventStore`, `IdentityStore`, `WarehouseQuery`; memory adapters; `createAnalytics(options, overrides)` factory (custom adapter = one override); `track` never throws and retries only retryable store errors; invalid events/links named by path only; count query validation (range, names, groupBy, time zone); `source: 'APP'` needs a warehouse.
+- Assumed missing: the four richer queries answer `ANALYTICS_NOT_CONFIGURED` until ANA-005; actor type/id/installation formats are generic patterns (overridable) because the BRD defines no format.
+- Tests: `npm run verify` green (47 tests; gate met).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found zod `.default()` of nested objects mis-typed (switched to `.prefault`) and verified secrets never appear in config errors.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA: DAY grouping verified at Amman midnight (21:00Z), half-open range, desc tie order.
 
-### ANA-001 — Project scaffold
-- Status: DONE (PR #203)
+### ANA-002 — Shared kernel
+- Status: DONE (PR #208)

@@ -5,8 +5,8 @@
 | ID | Task | Branch | Needs | Status | Sources / notes |
 |---|---|---|---|---|---|
 | ANA-001 | Project scaffold (copy the `wab-notifications` setup): TS strict, eslint, prettier, jest, tsup, `verify`, loop-test config | `feat/ana-001-scaffold` | — | DONE | Rules §4.12 |
-| ANA-002 | Shared kernel: errors, zod options (`environment`, `provider`, cache, limits: max date range, max bytes billed, timeouts), prod rules, redacting logger, constants (event schema fields, group-bys, timeZone default) | `feat/ana-002-kernel` | ANA-001 | IN REVIEW | Rules §2, §3; BUSINESS_DOMAIN server-event schema |
-| ANA-003 | `AnalyticsProvider` port (`track`, `linkIdentity`, `countEvents`, `funnel`, `cohorts`, `journey`, `overview`) + memory adapter; `track` never throws | `feat/ana-003-port-memory` | ANA-002 | TODO | Integration.md §3 |
+| ANA-002 | Shared kernel: errors, zod options (`environment`, `provider`, cache, limits: max date range, max bytes billed, timeouts), prod rules, redacting logger, constants (event schema fields, group-bys, timeZone default) | `feat/ana-002-kernel` | ANA-001 | DONE | Rules §2, §3; BUSINESS_DOMAIN server-event schema |
+| ANA-003 | `AnalyticsProvider` port (`track`, `linkIdentity`, `countEvents`, `funnel`, `cohorts`, `journey`, `overview`) + memory adapter; `track` never throws | `feat/ana-003-port-memory` | ANA-002 | IN REVIEW | Integration.md §3 |
 | ANA-004 | Mongo adapter: server-events collection (append-only), identity links, indexes; works with an injected Mongoose connection | `feat/ana-004-mongo` | ANA-003 | TODO | Must read the collections `WAB-Server` already writes (SRV-020, SRV-105) |
 | ANA-005 | Query layer on Mongo: `countEvents` by name/day (Asia/Amman days), `funnel`, `cohorts`, `journey` (guest + registered merged through identity links), `overview` | `feat/ana-005-queries` | ANA-004 | TODO | Powers admin analytics without BigQuery (ADM-063 already consumes the server overview/events) |
 | ANA-006 | Result cache: memory + Redis adapters, key = query hash, TTL from options; stale-while-revalidate optional | `feat/ana-006-cache` | ANA-005 | TODO | Rules §1.4 performance |
