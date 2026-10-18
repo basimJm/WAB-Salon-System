@@ -30,9 +30,6 @@
   "core/data/src/commonMain/kotlin/com/fab/wab/customer/core/data/AppPagingDataSource.kt": {
     "H003": 1
   },
-  "core/data/src/commonMain/kotlin/com/fab/wab/customer/core/data/PagingConfig.kt": {
-    "H006": 3
-  },
   "core/data/src/commonMain/kotlin/com/fab/wab/customer/core/data/places/PlacesApiService.kt": {
     "H004": 1
   },

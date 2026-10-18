@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Design phase next (CUS-018 universal states); task branches start from `origin/customer`.
+- CUS-019 next (domain cards); task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -48,3 +48,16 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — gate script is data-driven (matrix list), no hardcoded paths beyond the project file CI also names; nothing in app code changed.
 - Notes: the full `run_local_checks.sh` now takes ~15 min with iOS; use `WAB_SKIP_IOS=1` for Android-only iterations and run iOS once before the push.
+
+### CUS-018 — Universal states: shimmer templates, paged list, state switcher
+- Branch: `feat/cus-018-universal-states`
+- Status: DONE
+- Acceptance criteria (PRD §3.3, §3.4, §3.6, §3.7; Design Script §1.1):
+  - [x] Shimmer templates shaped like content: `AppShimmerSalonCard` (vertical/horizontal), `AppShimmerListItem` (square/circular image), `AppShimmerSection`, `AppShimmerList`; sizes from new tokens `cardImageHeight`, `cardCompactWidth`, `listItemImage`
+  - [x] `AppPagedList` (LazyColumn) and `AppAdaptiveGrid` (now with `hasMore/loadingMore/onLoadMore`, full-width footer) request the next page near the end via pure `shouldLoadMore` (prefetch `PagingUiDefaults.PREFETCH_ITEMS`), show a shimmer footer while loading more, never while loading or without more pages; `PagingDefaults.PAGE_SIZE = 10` in `core/data`
+  - [x] `AppContentState` + `AppStateContent(state, onRetry)` switch loading / offline / error / empty / content; pure `contentStateOf(...)` keeps existing content visible during refresh/errors
+  - [x] `StatesGalleryPreviews` (AR RTL light phone, EN LTR dark phone, landscape, tablet); unit tests `UniversalStatesTest` (5), `PagingConfigTest` (1)
+- Tests: `scripts/ci/run_local_checks.sh` (incl. iOS) → GATE-EXIT=0; explicit `--rerun` of design-system + core/data tests green (5 + 1)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — lambdas in effects via `rememberUpdatedState`, keys + content types on every lazy item, no literals (fractions/counts named), AR/EN strings unchanged (existing state strings reused).
+- Notes: UI checked through Compose previews only (no feature screen uses the new components yet; the sample screen is unchanged). Baseline shrank by the `PagingConfig` entry.
