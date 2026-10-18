@@ -26,6 +26,8 @@ class ComposeAppPlugin : Plugin<Project> {
                     iosTarget.binaries.framework {
                         baseName = "ComposeApp"
                         isStatic = true
+                        // Swift implements the Firebase bridges, so their Kotlin interfaces must be in the framework API.
+                        export(project(":core:firebase"))
                     }
                 }
 
@@ -40,6 +42,7 @@ class ComposeAppPlugin : Plugin<Project> {
                     implementation(project(":core:ui"))
                     implementation(project(":core:mvi"))
                     implementation(project(":core:analytics"))
+                    api(project(":core:firebase"))
                     implementation(project(":core:notification"))
                     implementation(project(":core:security"))
                     implementation(project(":core:design-system"))

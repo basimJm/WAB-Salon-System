@@ -18,6 +18,10 @@ koin = "4.2.0"
 coil = "3.0.0"
 googleGmsGoogleServices = "4.4.4"
 firebaseMessaging = "25.0.1"
+# Firebase Android SDK (same release train as messaging 25.0.1 / BOM 34.2.0): analytics, auth (phone OTP), crashlytics behind core/firebase ports
+firebaseAnalytics = "23.0.0"
+firebaseAuth = "24.0.1"
+firebaseCrashlytics = "20.0.1"
 materialIconsExtended = "1.7.3"
 paging = "3.3.0-alpha02-0.5.1"
 compose-navigation = "2.9.2"
@@ -80,6 +84,9 @@ paging-compose-common = { module = "app.cash.paging:paging-compose-common", vers
 paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging" }
 
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseAnalytics" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
 
 # Build logic dependencies
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }

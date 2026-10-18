@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Design phase done (CUS-018…023). Next: CUS-004 Firebase facade, then CUS-006 network kernel; task branches start from `origin/customer`.
+- Next: CUS-006 network kernel (then CUS-009 contract tooling, CUS-010 mock, CUS-011 session store, CUS-012, CUS-013, then features from CUS-024); task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -125,3 +125,16 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — routes stay in `core/navigation`, the design system never sees them; labels from resources; standard nav-compose tab switching.
 - Notes: FOUND (pre-existing, not from this task): the iOS app crashes at launch in the simulator (`FIRInstallations validateAPIKey`) because both tracked Firebase configs carry 42-character API keys (Firebase expects 39): `iosApp/iosApp/GoogleService-Info.plist` and `androidApp/google-services.json` are placeholders — owner must supply the real dev configs (CLAUDE.md §1.11: not edited by me). Android runs. Also observed: the sample screen shows a raw English exception text as its error message (sample feature, replaced by CUS-006's error catalog).
+
+### CUS-004 — Firebase facade: phone auth, push token, crash reporting, analytics backend
+- Branch: `feat/cus-004-firebase-facade`
+- Status: DONE
+- Acceptance criteria (root CLAUDE.md §6 wrap Firebase; PRD S13, §10.2, §14):
+  - [x] `core/firebase` ports `PhoneAuthGateway`, `PushTokenProvider` (+ `PushTokenRelay`), `CrashReporter`; vendor-neutral `FirebaseFailure`/`FirebaseResult`; `FakePhoneAuthGateway`, `FakePushTokenProvider`, `FakeCrashReporter`
+  - [x] Android: `AndroidPhoneAuthGateway` (current Activity from the Koin property, SMS + silent auto-verification, exception → failure mapping), `AndroidPushTokenProvider`, `AndroidCrashReporter`, `AndroidFirebaseAnalyticsBackend` bound by `platformFirebaseModule()`; messaging service publishes refreshed tokens to the relay
+  - [x] iOS: bridge interfaces exported in the ComposeApp framework (`export(project(":core:firebase"))`), `FirebaseBridges.swift` implements them on FirebaseAuth / Messaging / Crashlytics / Analytics (SPM products added to the Xcode project), registered in `AppDelegate`; unregistered bridges answer `Unavailable`
+  - [x] `analyticsModule()` takes the backend from Koin with a no-op fallback; `FirebaseFacadeTest` (4)
+- Tests: `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0 (`FirebaseFacadeTest` 4/4; iOS compiled the Swift bridges)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — nothing Firebase-typed leaves the module; error codes/timeouts are named constants; Android Task bridging without the play-services coroutine artifact.
+- Notes: DECISION (CLAUDE.md §1.12): native SDKs behind ports instead of GitLive — the iOS app already links Firebase from Swift; Firebase Android 34.2.0 train (analytics 23.0.0, auth 24.0.1, crashlytics 20.0.1). NOT verified at runtime: real SMS / token / Crashlytics calls need the real Firebase dev configs (placeholders today). Crashlytics Gradle plugin + mapping upload deferred to CUS-067.

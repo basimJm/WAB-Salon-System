@@ -14,18 +14,18 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 /**
- * Binds the tracker. The app must bind an [AnalyticsContextProvider]; the [AnalyticsBackend] defaults to no-op
- * until the Firebase backend (CUS-004) replaces it, so dev builds without Firebase still run.
+ * Binds the tracker. The app must bind an [AnalyticsContextProvider]; the [AnalyticsBackend] comes from Koin
+ * (the Firebase module binds it) or from [backend], and falls back to no-op so tests and previews run without Firebase.
  */
 fun analyticsModule(
-    backend: AnalyticsBackend = NoOpAnalyticsBackend,
+    backend: AnalyticsBackend? = null,
     issueReporter: AnalyticsIssueReporter = NoOpAnalyticsIssueReporter,
 ): Module = module {
-    single<AnalyticsBackend> { backend }
+    if (backend != null) single<AnalyticsBackend> { backend }
     single<AnalyticsIssueReporter> { issueReporter }
     single<AnalyticsTracker> {
         DefaultAnalyticsTracker(
-            backend = get(),
+            backend = getOrNull<AnalyticsBackend>() ?: NoOpAnalyticsBackend,
             contextProvider = get<AnalyticsContextProvider>(),
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
             issueReporter = get(),

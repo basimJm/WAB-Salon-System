@@ -20,6 +20,7 @@ import com.fab.wab.customer.app.di.viewModelModule
 import com.fab.wab.customer.core.analytics.AnalyticsTracker
 import com.fab.wab.customer.core.analytics.compose.LocalAnalyticsTracker
 import com.fab.wab.customer.core.analytics.di.analyticsModule
+import com.fab.wab.customer.core.firebase.di.platformFirebaseModule
 import com.fab.wab.customer.app.navigation.MainNavigation
 import com.fab.wab.customer.app.navigation.RootTab
 import com.fab.wab.customer.app.navigation.rootNavItems
@@ -52,6 +53,7 @@ val appModules = listOf(
     coreDiModule,
     notificationModule,
     viewModelModule,
+    platformFirebaseModule(),
     analyticsModule(),
     analyticsAppModule,
 
