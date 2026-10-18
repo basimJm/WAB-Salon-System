@@ -15,6 +15,7 @@ import {
   WAREHOUSE_PROVIDERS,
 } from '../constants/defaults';
 import { configError } from '../errors';
+import { isValidTimeZone } from '../time';
 import { noopLogger, redactingLogger, type Logger } from '../logger';
 
 const positiveInt = z.number().int().positive();
@@ -123,15 +124,6 @@ export type ResolvedOptions = Omit<z.output<typeof optionsSchema>, 'logger' | 'p
   readonly logger: Logger;
 };
 export type ResolvedLimits = ResolvedOptions['limits'];
-
-const isValidTimeZone = (timeZone: string): boolean => {
-  try {
-    new Intl.DateTimeFormat('en-US', { timeZone });
-    return true;
-  } catch {
-    return false;
-  }
-};
 
 /** Names the failing option paths only; values (possibly secrets) are never echoed. */
 const fail = (message: string, paths: string[]): never => {
