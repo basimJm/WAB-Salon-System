@@ -33,3 +33,14 @@ dependencies {
         logger.warn("wab.payments.oppwa.version is not set: payments-hyperpay-android will not compile.")
     }
 }
+
+afterEvaluate {
+    publishing {
+        publications {
+            register<MavenPublication>("release") {
+                from(components["release"])
+                artifactId = "payments-hyperpay-android"
+            }
+        }
+    }
+}
