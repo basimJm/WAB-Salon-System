@@ -12,3 +12,17 @@ export {
 export { StorageError, isStorageError } from './errors';
 export { resolveConfig, type ResolvedConfig, type StorageOptions } from './config/options';
 export { noopLogger, type Logger, type LogFields } from './logger';
+export { createLocalFsStorage, createStorage } from './storage';
+export { LocalFsStorage } from './adapters/localFs';
+export { createLocalFsHandler, type LocalFsHandler } from './adapters/localFsHttp';
+export { MemoryStorage } from './adapters/memory';
+export { detectContentType } from './fileType';
+export type {
+  ConfirmUploadRequest,
+  ConfirmUploadResult,
+  SignedUrlRequest,
+  StorageProvider,
+  UploadTarget,
+  UploadUrlRequest,
+  WriteObjectRequest,
+} from './types';

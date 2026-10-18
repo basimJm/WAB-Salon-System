@@ -13,7 +13,9 @@ export const OTP_PURPOSES = [
   'BANK_DETAILS',
   'SALON_REGISTER',
 ] as const;
-export type OtpPurpose = (typeof OTP_PURPOSES)[number];
+export type OtpPurpose = (typeof OTP_PURPOSES)[number] | (string & Record<never, never>);
+export const PURPOSE_PATTERN = /^[A-Z][A-Z0-9_]{1,40}$/;
+export const MAX_PROOF_LENGTH = 8192;
 
 /** What `verify` can answer. Provider outages are errors, never outcomes. */
 export const VERIFY_OUTCOMES = [

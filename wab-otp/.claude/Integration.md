@@ -110,12 +110,12 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/otp` real mode (`*_P
 |---|---|
 | Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ |
 | Shared kernel (errors, config, http/retry, logger) | ✅ |
-| Adapter: fake — in-memory, deterministic proofs for dev/tests | ⬜ |
+| Adapter: fake — in-memory, deterministic proofs for dev/tests | ✅ |
 | Adapter: firebase — Firebase Admin `verifyIdToken` → verified phone | ⬜ |
-| Adapter: memory-store — LimitStore for dev/tests | ⬜ |
+| Adapter: memory-store — LimitStore for dev/tests | ✅ |
 | Adapter: redis-store — LimitStore for prod (atomic Lua counters, TTL) | ⬜ |
 | Adapter: sms-server-verified — FUTURE: server sends + checks code | ⬜ |
-| Unit tests + coverage gate | ⬜ |
+| Unit tests + coverage gate | 🚧 |
 | Loop test | ⬜ |
 | README + consumer smoke test | ⬜ |
 
@@ -125,3 +125,5 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/otp` real mode (`*_P
 | 2026-10-14 | 0.0.0 | Design document created from the BRD; no code yet. |
 | 2026-10-18 | 0.1.0 | OTP-001 scaffold (tooling, build, smoke, loop config). |
 | 2026-10-18 | 0.1.0 | OTP-002 kernel: errors, zod options with prod rules, redacting logger, retry/timeout, ports. |
+| 2026-10-18 | 0.1.0 | OTP-003 verifier: createOtpVerifier, fake adapter, memory store, input validation. |
+| 2026-10-18 | 0.1.0 | OTP-004 limits engine + createOtpService (precheck/verify/reportFailure/getConfig). |

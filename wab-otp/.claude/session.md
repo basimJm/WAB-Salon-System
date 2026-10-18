@@ -7,10 +7,10 @@
 
 ## Current task
 
-### OTP-002 — Shared kernel
-- Branch: `feat/otp-002-kernel`
-- Acceptance: typed `OtpError` (code, retryable, cause, details); zod options with defaults from `constants/`; prod refuses fake / missing project / emulator / http key URL / process-local store; custom needs a verifier; redacting logger (secrets removed, phones masked to last 3 digits); retry with capped backoff + jitter and timeout helper; ports (`OtpProvider`, `ProofVerifier`, `LimitStore`) typed.
-- Assumed missing: `PURPOSE_MISMATCH` and `BLOCKED` outcomes exist in the SDK enum although Firebase cannot bind purpose; per-device/IP limits are out (needs device id source).
-- Tests: `npm run verify` green (22 unit tests, gate met).
+### OTP-004 — Limits engine and `createOtpService`
+- Branch: `feat/otp-004-limits`
+- Acceptance: request limit (default 5 / 5 min → 15 min block), wrong-code limit (5 → 15 min block), resend cooldown (60 s), `blockedUntil`, `resendAfterSeconds`; all values from options; the request that reaches a limit is allowed and starts the block, later ones are denied (same semantics as the WAB-Server gate); requests and wrong codes share one block; success resets; only `WRONG_CODE` counts; `verify` answers `BLOCKED` while blocked; prod needs an injected shared store.
+- Assumed missing: per-device/IP limits (`deviceId`/`ip` accepted but not limited yet; open question in Integration.md).
+- Tests: `npm run verify` green (62 unit tests).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found my own wrong mask-length expectation (fixed in tests); lint-driven test cleanups only.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — added `LimitStore.countOf` so non-counting failure reports can still return `attemptsRemaining`.

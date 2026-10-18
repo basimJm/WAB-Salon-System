@@ -7,14 +7,14 @@
 
 ## Current task
 
-### ANA-002 — Shared kernel
-- Branch: `feat/ana-002-kernel`
+### ANA-004 — Mongo adapter (events + identity links)
+- Branch: `feat/ana-004-mongo`
 - Status: IN REVIEW
-- Acceptance: typed `AnalyticsError` + 14 codes (retryable by code); zod options (environment, provider, time zone, limits, timeouts, retry, cache, bigquery identifiers) with prod rules (memory refused, mongo + bigquery credentials required) naming only option paths; redacting logger; range guard (valid dates, to > from, max days); capped backoff retry; constants for every default.
-- Assumed missing: BUSINESS_DOMAIN event schema is mirrored generically (name pattern, upper-case actor type, id/installation patterns overridable); injected clients (`mongo`, `redis`, BigQuery `client`) are typed `object` here and narrowed by the adapter tasks; sensitive-key redaction list (password/secret/token/otp/iban/card…) leaves gateway `code` readable.
-- Tests: `npm run verify` green (24 tests, coverage 100%).
+- Acceptance: `MongoEventStore` writes/reads the layout WAB-Server already uses (`serverEvents`: ts, name, actorType, actorId/salonId/bookingId, params, platform, appVersion) through an injected native collection and an id codec (ObjectId); count by name / Amman day, find by actors, distinct actors, all with `maxTimeMS`; `MongoIdentityStore` idempotent upserts (duplicate-key race = success) with a unique index; indexes created only by `init()`; every driver error mapped (network -> UNAVAILABLE, maxTime -> TIMEOUT, auth -> AUTH_FAILED, other server -> VENDOR_ERROR, unknown -> UNKNOWN); malformed documents -> MALFORMED_RESPONSE.
+- Assumed missing: time-series collection (needs a real MongoDB; stays a plain indexed collection like WAB-Server); the identity links live in their own collection `identityLinks` (WAB-Server must allow it; `init()` creates the indexes).
+- Tests: `npm run verify` green (69 tests, fake collection interprets the exact filters/pipelines the adapter sends). NOT verified against a real MongoDB.
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found zod `.default()` of nested objects mis-typed (switched to `.prefault`) and verified secrets never appear in config errors.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found the fake treated ObjectId-shaped filter values as operators (would have hidden a wrong-actor bug); fixed.
 
-### ANA-001 — Project scaffold
-- Status: DONE (PR #203)
+### ANA-003 — Port + memory adapter
+- Status: DONE (PR #213)

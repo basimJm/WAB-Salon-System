@@ -70,6 +70,7 @@ export const EVENT_RULES = {
   idPattern: /^[A-Za-z0-9._:-]{1,128}$/,
   installationPattern: /^[A-Za-z0-9._-]{8,128}$/,
   appVersionMaxLength: 32,
+  maxParamsBytes: 8192,
   platformPattern: /^[A-Z][A-Z0-9_]{0,15}$/,
   identifierPattern: /^[A-Za-z0-9_-]{1,128}$/,
 } as const;
@@ -79,3 +80,12 @@ export const SENSITIVE_KEY_PATTERN =
   /pass(word)?|secret|token|otp|authorization|cookie|iban|card|cvv/i;
 export const REDACTED = '[redacted]';
 export const MAX_PARAM_DEPTH = 4;
+
+/** Mongo adapter bounds. */
+export const MONGO_RULES = {
+  /** Links read per lookup. */
+  maxLinks: 1000,
+  /** Actors one `find` may filter on. */
+  maxActorsPerFind: 200,
+  dayFormat: '%Y-%m-%d',
+} as const;
