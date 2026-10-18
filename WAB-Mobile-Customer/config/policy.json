@@ -38,7 +38,8 @@
       "**/GoogleService-Info.plist",
       "**/google-services.json",
       "config/policy-baseline.json",
-      "config/detekt/baseline.xml"
+      "config/detekt/baseline.xml",
+      "**/contract/generated/**"
     ]
   },
   "kotlin": {
@@ -47,7 +48,8 @@
       "**/src/main/**/*.kt"
     ],
     "excludeGlobs": [
-      "build-logic/**"
+      "build-logic/**",
+      "**/contract/generated/**"
     ],
     "testGlobs": [
       "**/src/*Test/**",

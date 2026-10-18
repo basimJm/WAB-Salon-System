@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Next: CUS-009 contract tooling, then CUS-010 mock, CUS-011 session store, CUS-012, CUS-013, then features from CUS-024; task branches start from `origin/customer`.
+- Next: CUS-010 mock data source, then CUS-011 session store, CUS-012, CUS-013, then features from CUS-024; task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -151,3 +151,15 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — clients branch on `code`; writes are never retried; bodies never logged; baseline shrank (removed `println`).
 - Notes: owner instruction 2026-10-18: continue task after task without stopping. `PageableDto` (Laravel-style) stays until CUS-009/010 rebuild the paging source on `BaseResponse.meta`.
+
+### CUS-009 — Contract tooling: generated DTOs + operation registry from the server OpenAPI
+- Branch: `feat/cus-009-api-sync`
+- Status: DONE
+- Acceptance criteria (INTEGRATION.md §3; admin ADM-004 pattern):
+  - [x] `scripts/api_sync.py` renders `@Serializable` DTOs per tag + `Components.kt` (nullability from `required`/`null`, nested objects and array items named by path, enum docs, keyword escaping) and `CustomerOperations` (51 ops: method, path, tag, path/query params, body/data types, spec sha); `--check` fails on stale or extra files; snapshot kept next to the code
+  - [x] `./gradlew apiSync` / `apiSyncCheck`; gate step "Contract"; generated dir excluded from the 300-line/hardcoded policies and detekt; compiles for Android + iOS
+  - [x] `test_api_sync.py` (4 tests: ids, nullability/enums/items/keywords, registry, check mode)
+- Tests: policy tests 75 ok; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — repositories will build requests from `CustomerOperations`, never from path literals; the snapshot sha makes drift visible in review.
+- Notes: Python generator (same toolchain as the policy scripts); enums stay `String` with the allowed values in KDoc until features need typed enums.

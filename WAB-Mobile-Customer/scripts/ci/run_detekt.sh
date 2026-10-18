@@ -37,7 +37,7 @@ fetch "io/nlopez/compose/rules/common/$RULES_VERSION/common-$RULES_VERSION.jar" 
 mkdir -p "$ROOT/build/reports"
 exec java -jar "$CACHE/detekt-cli-$DETEKT_VERSION-all.jar" \
   --input "$ROOT/core,$ROOT/composeApp,$ROOT/feature,$ROOT/androidApp/src,$ROOT/build-logic" \
-  --excludes '**/build/**' \
+  --excludes '**/build/**,**/contract/generated/**' \
   --config "$ROOT/config/detekt/detekt.yml" --build-upon-default-config \
   --baseline "$ROOT/config/detekt/baseline.xml" \
   --plugins "$CACHE/detekt-$RULES_VERSION.jar,$CACHE/common-$RULES_VERSION.jar" \
