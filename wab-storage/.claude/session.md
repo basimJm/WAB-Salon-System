@@ -7,10 +7,10 @@
 
 ## Current task
 
-### STO-002 — Shared kernel
-- Branch: `feat/sto-002-kernel`
+### STO-003 — StorageProvider port + memory adapter
+- Branch: `feat/sto-003-port-memory`
 - Status: IN REVIEW
-- Acceptance criteria: StorageError + codes, zod options with prod rules (https, s3 only, distinct buckets), redacting logger, retry/timeout, constants
+- Acceptance criteria: Port matching WAB-Server types, validation, magic-byte detection, judgeUpload, memory adapter, createStorage factory
 - Tests: `npm run verify` green (typecheck, lint, format, jest coverage gate 100/95/95, build, package smoke, loop)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — no I/O; prod refuses memory/local-fs/http; errors name fields only
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — port is a superset-compatible copy of the server interface (REJECTION adds EMPTY); keys unique across buckets
