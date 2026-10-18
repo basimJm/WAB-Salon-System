@@ -9,7 +9,7 @@
 
 ## Current task
 
-- CUS-019 next (domain cards); task branches start from `origin/customer`.
+- CUS-020 next (form kit); task branches start from `origin/customer`.
 
 ### CUS-005a — Standalone `core/mvi` module + core convention plugins
 - Branch: `feat/cus-005a-core-mvi`
@@ -61,3 +61,16 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — lambdas in effects via `rememberUpdatedState`, keys + content types on every lazy item, no literals (fractions/counts named), AR/EN strings unchanged (existing state strings reused).
 - Notes: UI checked through Compose previews only (no feature screen uses the new components yet; the sample screen is unchanged). Baseline shrank by the `PagingConfig` entry.
+
+### CUS-019 — Domain cards: salon card, service card, review item, staff item
+- Branch: `feat/cus-019-domain-cards`
+- Status: DONE
+- Acceptance criteria (PRD 8.0, S06, S07 items 8–10; Design Script §1.2):
+  - [x] `AppSalonCard` (Vertical / Horizontal): image with placeholder, name, `AppRatingStars` + `ratingValueText`, location, `AppExpandableText` description ("more" in place, only when it overflows), `OpenStatusLine` badge (open · hours / closed today), favorite heart with AR/EN content descriptions (gating in the feature)
+  - [x] `AppServiceCardCompact`, `AppServiceCardExpandable` (expands in place), `AppSalonServiceRow` (duration + price)
+  - [x] `AppReviewItem` (author, stars, comment truncated with "See more" or `onExpandRequest`, date), `AppStaffItem` (`AppAvatar` + first name + on duty / on leave badge)
+  - [x] UI models `SalonCardUi`, `ServiceCardUi`, `ReviewUi`, `StaffItemUi`; strings in both languages; `DomainCardsTest` (3); `CardsGalleryPreviews` AR/EN, light/dark, portrait/landscape, tablet
+- Tests: `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0 (`DomainCardsTest` 3/3)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — `AppText` gained `onTextLayout` for overflow detection; all texts localized by the caller or resources; `@Immutable` models; no literals.
+- Notes: UI checked through Compose previews only; no feature screen uses the cards yet.

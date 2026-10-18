@@ -11,4 +11,16 @@
     <string name="rating_description">التقييم %1$s من %2$s</string>
     <string name="step_description">الخطوة %1$d من %2$d</string>
     <string name="otp_description">رمز التحقق، تم إدخال %1$d من %2$d أرقام</string>
+    <string name="card_more">المزيد</string>
+    <string name="card_see_more">عرض المزيد</string>
+    <string name="card_see_less">عرض أقل</string>
+    <string name="salon_open">مفتوح</string>
+    <string name="salon_closed_today">مغلق اليوم</string>
+    <string name="salon_hours_separator"> · </string>
+    <string name="favorite_add">إضافة إلى المفضلة</string>
+    <string name="favorite_remove">إزالة من المفضلة</string>
+    <string name="staff_on_duty">مداوم اليوم</string>
+    <string name="staff_on_leave">في إجازة</string>
+    <string name="service_duration_minutes">%1$d دقيقة</string>
+    <string name="price_jod">%1$s د.أ</string>
 </resources>
