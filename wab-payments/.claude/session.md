@@ -127,3 +127,11 @@
 - Tests: gradle files unverified (no Google Maven/OPP SDK); common KMP tests (27) still green on the JVM harness
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — Owner runs publish (registry URL + token + OPP SDK version/repository). The customer app has no in-repo payments module, so the switch is a dependency line (see PUBLISHING.md).
+
+### PAY-015 — close-out (status DONE)
+- Branch: `chore/pay-done`
+- Status: DONE
+- Acceptance: board/status only after PR #250 merged; all PAY-001..015 DONE.
+- Tests: docs only (`python3 scripts/tasks.py next payments` reports no ready task)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — status change only.

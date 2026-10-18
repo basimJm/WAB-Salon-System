@@ -18,4 +18,4 @@
 | PAY-012 | Publish `@wab/payments` (Node) to the registry; `WAB-Server` switches `PAYMENT_PROVIDER=real` to the package | `feat/pay-012-publish-node` | PAY-009 | DONE | Owner runs the publish; unblocks SRV-092 and SRV-112 |
 | PAY-013 | KMP HyperPay launcher — Android (HyperPay mSDK or hosted checkout), result mapping, no card data in logs | `feat/pay-013-kmp-hyperpay-android` | PAY-010, PAY-005 | DONE | Sandbox credentials are env/CI only |
 | PAY-014 | KMP HyperPay launcher — iOS (same port, Swift interop), result mapping | `feat/pay-014-kmp-hyperpay-ios` | PAY-013 | DONE | — |
-| PAY-015 | Publish the KMP library to Maven (GitHub Packages assumed); customer app switches from the in-repo module to the artifact | `feat/pay-015-publish-kmp` | PAY-011, PAY-014 | IN REVIEW | Owner runs the publish; unblocks CUS-062 |
+| PAY-015 | Publish the KMP library to Maven (GitHub Packages assumed); customer app switches from the in-repo module to the artifact | `feat/pay-015-publish-kmp` | PAY-011, PAY-014 | DONE | Owner runs the publish; unblocks CUS-062 |
