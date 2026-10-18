@@ -7,14 +7,14 @@
 
 ## Current task
 
-### ANA-003 — `AnalyticsProvider` port + memory adapter
-- Branch: `feat/ana-003-port-memory`
+### ANA-004 — Mongo adapter (events + identity links)
+- Branch: `feat/ana-004-mongo`
 - Status: IN REVIEW
-- Acceptance: stable port (`track`, `linkIdentity`, `countEvents`, `funnel`, `cohorts`, `journey`, `overview`) + lifecycle (`init`, `close`); ports `EventStore`, `IdentityStore`, `WarehouseQuery`; memory adapters; `createAnalytics(options, overrides)` factory (custom adapter = one override); `track` never throws and retries only retryable store errors; invalid events/links named by path only; count query validation (range, names, groupBy, time zone); `source: 'APP'` needs a warehouse.
-- Assumed missing: the four richer queries answer `ANALYTICS_NOT_CONFIGURED` until ANA-005; actor type/id/installation formats are generic patterns (overridable) because the BRD defines no format.
-- Tests: `npm run verify` green (47 tests; gate met).
+- Acceptance: `MongoEventStore` writes/reads the layout WAB-Server already uses (`serverEvents`: ts, name, actorType, actorId/salonId/bookingId, params, platform, appVersion) through an injected native collection and an id codec (ObjectId); count by name / Amman day, find by actors, distinct actors, all with `maxTimeMS`; `MongoIdentityStore` idempotent upserts (duplicate-key race = success) with a unique index; indexes created only by `init()`; every driver error mapped (network -> UNAVAILABLE, maxTime -> TIMEOUT, auth -> AUTH_FAILED, other server -> VENDOR_ERROR, unknown -> UNKNOWN); malformed documents -> MALFORMED_RESPONSE.
+- Assumed missing: time-series collection (needs a real MongoDB; stays a plain indexed collection like WAB-Server); the identity links live in their own collection `identityLinks` (WAB-Server must allow it; `init()` creates the indexes).
+- Tests: `npm run verify` green (69 tests, fake collection interprets the exact filters/pipelines the adapter sends). NOT verified against a real MongoDB.
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA: DAY grouping verified at Amman midnight (21:00Z), half-open range, desc tie order.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA found the fake treated ObjectId-shaped filter values as operators (would have hidden a wrong-actor bug); fixed.
 
-### ANA-002 — Shared kernel
-- Status: DONE (PR #208)
+### ANA-003 — Port + memory adapter
+- Status: DONE (PR #213)
