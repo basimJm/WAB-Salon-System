@@ -126,6 +126,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-18 | 0.1.0 | PAY-014: iOS bridge contract + Swift reference. |
 | 2026-10-18 | 0.1.0 | PAY-013: Android HyperPay bridge + SdkResult mapping. |
 | 2026-10-18 | 0.1.0 | PAY-012: publish prep + clientCheckout + server integration. |
 | 2026-10-18 | 0.1.0 | PAY-011: mock launcher + platform in-app browsers. |
@@ -202,3 +203,6 @@ Verification done here: commonMain + commonTest compile with warnings-as-errors 
 
 ### Android HyperPay bridge (PAY-013)
 Module `:payments-hyperpay-android` (`com.wab:payments-hyperpay-android`): `HyperPayAndroidBridge(context, CheckoutActivityHost)` opens the OPP ready-to-use `CheckoutActivity` with `CheckoutSettings(checkoutId, brands, TEST|LIVE)` + `shopperResultUrl` and maps the activity result through the platform-neutral `sdkOutcome(...)` (common, tested). `ActivityResultRegistryHost(registry)` is the stock `CheckoutActivityHost`. The OPP SDK is `compileOnly` (version/repository are owner inputs in `kmp/gradle.properties`); the app declares the 3-DS return intent filter (`kmp/docs/android.md`). UNVERIFIED: the module is not compiled here and the OPP class/constant names come from the vendor documentation.
+
+### iOS HyperPay bridge (PAY-014)
+`NativeCheckoutBridge` is implemented in Swift on OPPWAMobile (`kmp/ios/HyperPayCheckoutBridge.swift`, reference file: copy into the app) and handed to `hyperPayIosLauncher(bridge)` (iosMain). `IosOutcomes` gives Swift three constructors (completed / cancelled / failed) over the shared `sdkOutcome` mapping. 3-D Secure returns through the app's URL scheme: forward URLs to `bridge.handleReturn(url:)`. Framework name `WabPayments` (static). UNVERIFIED: no Xcode/OPP framework here, nothing iOS was compiled; see `kmp/docs/ios.md`.

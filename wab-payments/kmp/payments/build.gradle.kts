@@ -12,9 +12,13 @@ kotlin {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
-    iosArm64()
-    iosSimulatorArm64()
-    iosX64()
+    listOf(iosArm64(), iosSimulatorArm64(), iosX64()).forEach { target ->
+        target.binaries.framework {
+            // The framework the Swift bridge imports (`import WabPayments`).
+            baseName = "WabPayments"
+            isStatic = true
+        }
+    }
 
     sourceSets {
         commonMain.dependencies {
