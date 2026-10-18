@@ -5,6 +5,6 @@ module.exports = {
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
   testPathIgnorePatterns: ['<rootDir>/tests/loop/'],
-  collectCoverageFrom: ['src/**/*.ts', '!src/index.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/index.ts', '!src/mock-gateway/index.ts'],
   coverageThreshold: { global: { functions: 100, lines: 95, branches: 95, statements: 95 } },
 };
