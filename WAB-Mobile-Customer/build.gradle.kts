@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.kotlinSerialization) apply false
     alias(libs.plugins.google.gms.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }
 
 /** Regenerates the Kotlin contract from the server OpenAPI snapshot (CUS-009; INTEGRATION.md §3). */

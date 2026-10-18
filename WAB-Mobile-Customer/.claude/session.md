@@ -9,21 +9,7 @@
 
 ## Current task
 
-- Next: features from CUS-024 (config + system screens), CUS-025…; task branches start from `origin/customer`.
-
-### CUS-011 — Session store: PRD §5 keys, secure tokens (Keystore / Keychain)
-- Branch: `feat/cus-011-session-store`
-- Status: IN REVIEW
-- Acceptance criteria (PRD §5, §15; BUSINESS_DOMAIN enums; CLAUDE.md §2 core/security seam):
-  - [x] `core/domain/session`: `Gender`, `GuestProfile`, `UserProfile`, `SessionState` (Guest / SignedIn with `genderScope`), one `SessionStore` interface (state, onboardingSeen, pushEnabled flows; `tokens()` on demand; signIn / updateTokens / updateUser / setOnboardingSeen / setGuestProfile / setPushEnabled / signOut / clearAll)
-  - [x] `core/security`: `SecureKeyValueStore` + `StringCipher` ports, `SecurePayload` (iv:cipher base64 framing), Android `KeystoreCipher` (AES-256-GCM, non-exportable Keystore key), iOS `KeychainSecureStore` (generic password, after-first-unlock-this-device-only); `InMemorySecureKeyValueStore` for tests
-  - [x] `core/storage`: `DataStoreSessionStore` (plain keys in DataStore, tokens in the secure store, non-secret `signed_in` marker so the state is a flow), `EncryptedPreferencesSecureStore`, `createSecureKeyValueStore` expect/actual, `AppSettingsImpl` tokens delegated to the same secure entries (refresh interceptor unchanged), `clearSession` → `signOut`
-  - [x] Analytics context: user type + gender scope from `SessionStore.state` (only the scope leaves the device)
-  - [x] Tests: `SessionStateTest` (2), `SecurePayloadTest` (2), `DataStoreSessionStoreTest` (5), `EncryptedPreferencesSecureStoreTest` (2), `AppSettingsImplTokensTest` (2), `AppAnalyticsContextProviderTest` (3)
-- Tests: JVM host tests of domain/security/storage/composeApp green; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0 (4 Android variants + lint, 4 iOS configurations + K/N tests)
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one `SessionStore` port in `core/domain`, platform crypto behind `core/security` ports, DataStore never holds a plain token (test asserts it), the network refresh path reads the same secure entries, no literals beyond named key constants.
-- Notes: tokens are never logged or exposed as flows; guest nickname/gender never leave the device. `push_enabled` defaults to true (PRD gives no default; OS permission still gates delivery). The Keystore/Keychain actuals are exercised by the device builds, not by unit tests (JVM host has no AndroidKeyStore).
+- Next: CUS-025 onboarding, CUS-026 launch router…; task branches start from `origin/customer`.
 
 ### CUS-012 — Analytics tracker: route screen views, action screen context, user id sync, app-instance id
 - Branch: `feat/cus-012-analytics-tracker`
@@ -53,3 +39,18 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — protocol codec pure and tested against socket.io v4 framing; client state machine tested with an in-memory transport under virtual time (handshake, pong, event, unauthorized stop, drop + silence reconnect, backoff); token read on every attempt (rotations picked up); no literals (defaults mirror the server constants); not exercised against a live server (owner deployment pending).
 - Notes: LIBRARY ADDED (CLAUDE.md §1.12): `io.ktor:ktor-client-websockets` (same Ktor 3.4.2 version) — the Socket.IO v4 protocol is implemented in common code over Ktor WebSockets instead of two native Socket.IO SDKs (one codebase, testable without a server, no Swift bridge). The socket URL derives from the API base URL (same host; no new env key).
+
+### CUS-024 — App config + system screens: launch gate, force update, optional update, maintenance (S24)
+- Branch: `feat/cus-024-config-system-screens`
+- Status: IN REVIEW
+- Acceptance criteria (PRD §4.2 first step, S24; operation `GET /customer/v1/config?platform&version`; server `appConfig.service.ts` statuses):
+  - [x] Domain `core/domain/config`: `AppConfig` (update policy + status, maintenance, nearby radius, OTP length/resend, contact), `ClientPlatform`, `AppConfigRepository` (`current` + `refresh()`), pure `launchGateOf` (maintenance > force > optional > ready) — the template's `ApplicationSettings*` removed
+  - [x] Data `core/data/config`: `AppConfigApi` from `CustomerOperations.getConfig` (+ `platform`, `version` query), mapper, repository with the last value for features; `appPlatformModule` binds `ClientPlatform`
+  - [x] `MainViewModel`: config → `LaunchGate`; retry reloads; optional dismiss → ready; update → `OpenStore(storeUrl)` (platform `openStoreLink(url)` replaces the template's hardcoded store links); `UiState(loading, gate, error, appVersion)`
+  - [x] Screens: `SplashScreen` (loader / error + retry), `ForceUpdateScreen` (blocking, Update), `MaintenanceScreen` (blocking, server message or default, Retry), optional update via `AppGlobalDialog(OptionalUpdate)` over the app; AR + EN texts from the design script; previews AR/EN, light/dark, portrait/landscape, tablet
+  - [x] Mock fixtures: generator booleans default `false` (maintenance off in the fixture); `MockFixtures` regenerated
+  - [x] Tests: `LaunchGateTest` (3), `AppConfigMapperTest` (1), `MainViewModelTest` (5)
+- Tests: domain/data/composeApp host tests green (9 new); policy suite 76 OK; `scripts/ci/run_local_checks.sh` incl. iOS → GATE-EXIT=0; Android emulator (Pixel, dev-debug, Arabic): splash → home shell, RTL bottom bar, no fatal exception
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — gate decision is a pure function with tests; store URL comes from the backend (template literals removed, baseline shrank); config read through the generated operation; the ViewModel's error-text seam keeps tests free of resource loading; system screens built from design-system parts only.
+- Notes: PLUGIN ADDED (CLAUDE.md §1.12): `com.google.firebase.crashlytics` 3.0.6 in the Android app convention plugin — the emulator check found the app aborting at startup since CUS-004 (`Crashlytics build ID is missing`); the plugin generates the id (mapping upload stays CUS-067). `viewModelOf(::MainViewModel)` cannot resolve the lambda/test-scope seams → explicit `viewModel { MainViewModel(...) }`. Unused template strings removed (optional update now uses the design-system global dialog). The blocking screens cannot be reached from the mock fixture (status OK, maintenance off) so they are verified through previews; the launch path (splash → home) is checked on the emulator.

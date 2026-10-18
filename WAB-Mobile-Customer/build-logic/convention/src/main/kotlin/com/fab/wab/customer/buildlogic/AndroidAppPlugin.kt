@@ -23,6 +23,8 @@ class AndroidAppPlugin : Plugin<Project> {
             apply(plugin = "org.jetbrains.compose")
             apply(plugin = "org.jetbrains.kotlin.plugin.compose")
             apply(plugin = "com.google.gms.google-services")
+            // Generates the Crashlytics build id; without it the Crashlytics SDK aborts the app at startup.
+            apply(plugin = "com.google.firebase.crashlytics")
 
             val localProperties = Properties()
             val localPropertiesFile = rootProject.file("local.properties")

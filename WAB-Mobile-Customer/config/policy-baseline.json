@@ -2,12 +2,6 @@
   "androidApp/src/main/kotlin/com/fab/wab/customer/main/MainActivity.kt": {
     "H006": 1
   },
-  "composeApp/src/androidMain/kotlin/com/fab/wab/customer/Platform.android.kt": {
-    "H004": 1
-  },
-  "composeApp/src/iosMain/kotlin/com/fab/wab/customer/Platform.ios.kt": {
-    "H004": 1
-  },
   "core/common/src/androidMain/kotlin/com/fab/wab/customer/core/common/Analytics.android.kt": {
     "H003": 1
   },

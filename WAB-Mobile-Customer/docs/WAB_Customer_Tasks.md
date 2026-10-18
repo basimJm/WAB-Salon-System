@@ -47,7 +47,7 @@
 | CUS-010 | Mock data source: fixtures per operation served behind the repository interfaces, switched by build config `DATA_SOURCE=mock|remote` (prod forces `remote`); scenario switcher in dev builds (success / empty / 4xx / 5xx / timeout) | `feat/cus-010-mock-source` | CUS-009 | DONE | `INTEGRATION.md` §4; fixtures carry AR + EN content |
 | CUS-011 | Secure local storage of the PRD §5 keys: `onboarding_seen`, `guest_nickname`, `guest_gender`, tokens (encrypted: Keystore / Keychain), `user_first_name`, `user_gender`, `push_enabled`; one `SessionStore` interface | `feat/cus-011-session-store` | CUS-008, CUS-023 | DONE | PRD §5, §15; tokens never logged |
 | CUS-012 | Analytics tracker: `track(screen)` on every route, `track(action, params)` helper, common fields (user type, gender scope, language, app version, platform), Firebase user id set/cleared on login/logout, app-instance id exposed for the backend | `feat/cus-012-analytics-tracker` | CUS-004 | DONE | PRD §14; apps never send analytics to the backend |
-| CUS-013 | Realtime client interface (`RealtimeClient`: connect with token, events, status) with a Socket.IO implementation and a fake; reconnect on foreground; event names from constants | `feat/cus-013-realtime-client` | CUS-006 | IN REVIEW | PRD §3.15; BUSINESS_DOMAIN §7 events; server SRV-080/081 |
+| CUS-013 | Realtime client interface (`RealtimeClient`: connect with token, events, status) with a Socket.IO implementation and a fake; reconnect on foreground; event names from constants | `feat/cus-013-realtime-client` | CUS-006 | DONE | PRD §3.15; BUSINESS_DOMAIN §7 events; server SRV-080/081 |
 
 ## Phase 3 — Design system and reusable UI
 | ID | Task | Branch | Needs | Status | Notes |
@@ -66,7 +66,7 @@
 ## Phase 4 — Features
 | ID | Task | Branch | Needs | Status | Notes |
 |---|---|---|---|---|---|
-| CUS-024 | App config + system screens: `GET /customer/v1/config` (version policy, maintenance, contact, nearby radius, OTP config), Force update (blocking, store link), Optional update dialog, Maintenance (blocking + Retry) — S24 | `feat/cus-024-config-system-screens` | CUS-010, CUS-018 | TODO | PRD §4.2 first step, S24; server SRV-035 |
+| CUS-024 | App config + system screens: `GET /customer/v1/config` (version policy, maintenance, contact, nearby radius, OTP config), Force update (blocking, store link), Optional update dialog, Maintenance (blocking + Retry) — S24 | `feat/cus-024-config-system-screens` | CUS-010, CUS-018 | IN REVIEW | PRD §4.2 first step, S24; server SRV-035 |
 | CUS-025 | Onboarding S01: 4-page pager (bundled content), skip/next, `onboarding_seen` saved on display | `feat/cus-025-onboarding` | CUS-011, CUS-023 | TODO | PRD S01 acceptance criteria |
 | CUS-026 | Nickname & gender S02 + launch router (PRD §4.2): maintenance/update → onboarding → registered → guest complete → S02; session-expired path to guest | `feat/cus-026-launch-router` | CUS-024, CUS-025 | TODO | PRD §4.1–4.3 |
 | CUS-027 | Locations and reference data: countries (dial code, regex), cities, areas repositories (`GET /locations/*`), cached per language | `feat/cus-027-locations` | CUS-010 | TODO | PRD §3.11; server SRV-036 |

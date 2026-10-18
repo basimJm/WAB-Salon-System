@@ -13,15 +13,11 @@ class IOSPlatform : Platform {
 
 actual fun getPlatform(): Platform = IOSPlatform()
 
-// TODO: replace it with real link
-actual fun openStoreLink() {
-    val url = "https://apps.apple.com/us/app/facebook/id284882215"
-    val nsUrl = NSURL.URLWithString(url)
-    if (nsUrl != null) {
-        UIApplication.sharedApplication.openURL(nsUrl)
-    }
+actual fun openStoreLink(url: String?) {
+    val target = url?.takeIf { it.isNotBlank() } ?: return
+    val nsUrl = NSURL.URLWithString(target) ?: return
+    UIApplication.sharedApplication.openURL(nsUrl)
 }
-
 
 actual fun exitApp() {
     exit(0)

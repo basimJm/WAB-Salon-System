@@ -2,27 +2,19 @@
 <resources>
     <!-- Splash Screen -->
     <string name="splash_version">v%1$s</string>
-    <string name="splash_loading">جاري التحميل...</string>
     
     <!-- Update Dialogs -->
     <string name="force_update_title">تحديث مطلوب</string>
-    <string name="force_update_message">إصدار جديد متاح. يرجى التحديث للاستمرار في استخدام التطبيق.</string>
+    <string name="force_update_message">يتوفر إصدار جديد من WAB. يرجى التحديث للمتابعة.</string>
     <string name="force_update_button">تحديث الآن</string>
 
-    <string name="optional_update_title">تحديث جديد متاح</string>
-    <string name="optional_update_message">إصدار جديد من WAB Customer متاح. هل تود التحديث الآن؟</string>
-    <string name="optional_update_button">تحديث الآن</string>
-    <string name="optional_update_later">لاحقاً</string>
     
     <!-- Maintenance Dialog -->
-    <string name="maintenance_title">تحت الصيانة</string>
-    <string name="maintenance_message">نقوم حالياً بالصيانة. يرجى العودة لاحقاً.</string>
-    <string name="maintenance_exit_button">إغلاق التطبيق</string>
+    <string name="maintenance_title">التطبيق تحت الصيانة</string>
+    <string name="maintenance_message">نعمل على تحسين تجربتك، سنعود قريباً.</string>
+    <string name="maintenance_retry_button">إعادة المحاولة</string>
     
-    <!-- Error States -->
-    <string name="splash_error_title">خطأ في الاتصال</string>
-    <string name="splash_error_message">تعذر تحميل إعدادات التطبيق. يرجى التحقق من الاتصال والمحاولة مرة أخرى.</string>
-    <string name="splash_retry_button">إعادة المحاولة</string>
+    <!-- Session -->
     <string name="unauthorized_logout_message">أنت غير مصرح لك وسيتم تسجيل خروجك.</string>
     <string name="nav_home">الرئيسية</string>
     <string name="nav_favorites">المفضلة</string>

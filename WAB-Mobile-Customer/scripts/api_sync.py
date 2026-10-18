@@ -173,7 +173,7 @@ def sample_value(schema: dict | None, field: str, components: dict, depth: int =
     if kind == "number":
         return 1.5
     if kind == "boolean":
-        return True
+        return False
     return None
 
 
