@@ -31,3 +31,14 @@
 - Tests: `python3 -m unittest scripts/test_tasks.py` (9) · `python3 .claude/hooks/test_hooks.py` (20) · `python3 scripts/tasks.py check`
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs + tooling only; no product code changed. DEVIATION: the browser/UI check does not apply (no UI); PRDs were read by section, not whole.
+
+### CHORE-HOOKS — guard hooks resolve the checkout from the Bash tool's cwd (git worktrees)
+- Branch: `chore/hooks-worktree`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `read_input()` uses the payload `cwd` to find the git checkout, so branch, session files and task blocks come from the worktree the command runs in (parallel agents in worktrees can push their own task branches); same checks, nothing weakened
+  - [x] falls back to `CLAUDE_PROJECT_DIR`/cwd when the payload has no usable cwd
+  - [x] stray `.claude/worktrees/*` gitlinks removed from the index and ignored
+- Tests: `python3 .claude/hooks/test_hooks.py`
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — deviation: this edits the enforcement hooks (owner may review); behaviour only changes which checkout is inspected.

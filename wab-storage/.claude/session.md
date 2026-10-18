@@ -7,4 +7,10 @@
 
 ## Current task
 
-- (none) — run `python3 scripts/tasks.py next storage`; task branches start from `origin/server`.
+### STO-001 — Project scaffold
+- Branch: `feat/sto-001-scaffold`
+- Status: IN REVIEW
+- Acceptance criteria: TS strict, eslint, prettier, jest + coverage gate, tsup ESM+CJS+d.ts, `verify`, loop config, package smoke (copied from `wab-notifications`)
+- Tests: `npm run verify` green (placeholder test + loop; real ones come with later tasks)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling only; vendor SDKs (`@aws-sdk/*`, `sharp`) declared external in tsup, added as dependencies by the tasks that use them.

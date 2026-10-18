@@ -7,4 +7,10 @@
 
 ## Current task
 
-- (none) — run `python3 scripts/tasks.py next otp`; task branches start from `origin/server`.
+### OTP-001 — Project scaffold
+- Branch: `feat/otp-001-scaffold`
+- Acceptance: TS strict + eslint + prettier + jest (coverage gate 100/95/95) + tsup ESM/CJS/d.ts + `verify` + loop config + package smoke, same as `wab-notifications`.
+- Assumed missing: package name stays `wab-otp` (consumers use a `file:` dependency); renamed to `@wab/otp` only in OTP-010.
+- Tests: `npm run verify` green (scaffold test, build, smoke, loop).
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling only, mirrors the proven SDK setup.
