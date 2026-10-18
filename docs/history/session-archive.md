@@ -1397,3 +1397,15 @@
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). DEVIATION: ADM-063 and ADM-064 built as ONE task. Active users, installs and the live feed are not offered by the server (G7); event producers may not emit yet (SRV-105 note), so the numbers need a check against the real server.
 
+
+### T-093 — ADM-065 reports
+
+- Project: `WAB-Admin-Dashboard/`
+- Branch: `feat/adm-065-reports`
+- Status: DONE
+- Acceptance criteria (Admin Tasks ADM-065):
+  - [x] Reports screen with daily, weekly and monthly tabs and a period picker: bookings with a status chart, collected money, registrations, reviews, payments and refunds, and the weekly/monthly extras (top salons, payouts, growth, live snapshot); AR+EN
+- Tests: 4 new tests through the mock stack (plus month validation); no separate browser check
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision). Installs, active users, funnels and retention are not in the server reports (SRV-110). Top salons show ids (names come with the salon lookup in a later task).
+

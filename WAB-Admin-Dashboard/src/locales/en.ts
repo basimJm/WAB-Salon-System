@@ -28,6 +28,7 @@ import alerts from './en/alerts.json';
 import overview from './en/overview.json';
 import reports from './en/reports.json';
 import audit from './en/audit.json';
+import exportsArea from './en/exports.json';
 import status from './en/status.json';
 
 /** Every area file of this language, merged. A new area = a new file here and in the other language. */
@@ -47,6 +48,7 @@ const en = {
   ...gallery,
   ...forms,
   ...status,
+  ...exportsArea,
   ...audit,
   ...reports,
   ...overview,

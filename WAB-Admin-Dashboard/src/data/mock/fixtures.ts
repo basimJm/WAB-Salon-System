@@ -18,6 +18,7 @@ import { alertsRoutes } from './alertsRoutes';
 import { analyticsRoutes } from './analyticsRoutes';
 import { reportsRoutes } from './reportsRoutes';
 import { auditRoutes } from './auditRoutes';
+import { exportsRoutes } from './exportsRoutes';
 import { settingsRoutes } from './settingsRoutes';
 import type { MockRoute } from './mockTransport';
 
@@ -47,6 +48,7 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...analyticsRoutes(),
     ...reportsRoutes(),
     ...auditRoutes(),
+    ...exportsRoutes(),
     ...campaignsRoutes(),
   ];
 }

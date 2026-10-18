@@ -6,6 +6,7 @@ import { hasDiff, humanizeAction, type AuditLog, type AuditQuery } from '@/domai
 import { formatInstant } from '@/domain/shared/format';
 import { isLocalDate, localDayRange } from '@/domain/shared/time';
 import { KeyValue } from '../components/core/KeyValue';
+import { ExportMenu } from '../components/data/ExportMenu';
 import type { Column } from '../components/data/tableTypes';
 import { DateField } from '../components/form/DateField';
 import { SearchField } from '../components/form/SearchField';
@@ -14,6 +15,7 @@ import { Drawer } from '../components/overlay/Drawer';
 import { JsonViewer } from '../components/templates/JsonViewer';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
+import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
 
 const OPTIONS = { filterKeys: ['action', 'entityType', 'entityId', 'admin', 'from', 'to'] };
@@ -37,6 +39,12 @@ function queryOf(
     ...(to && isLocalDate(to) ? { to: localDayRange(to).end.toISOString() } : {}),
   };
 }
+
+const exportParams = ({
+  page: _page,
+  pageSize: _size,
+  ...filters
+}: AuditQuery): Record<string, unknown> => filters;
 
 function Details({ log }: { log: AuditLog }) {
   const { t } = useTranslation();
@@ -84,6 +92,7 @@ export default function AuditPage() {
   const { repositories } = useContainer();
   const list = useListController(OPTIONS);
   const { state } = list;
+  const runner = useExportRunner();
   const f = (k: string) => state.filters[k]?.[0] ?? '';
   const [open, setOpen] = useState<AuditLog | null>(null);
   const query = useQuery({
@@ -124,6 +133,14 @@ export default function AuditPage() {
       <ListPage
         title={title}
         subtitle={t('audit.subtitle')}
+        actions={
+          <ExportMenu
+            onExport={runner(
+              'AUDIT_LOGS',
+              exportParams(queryOf(state.filters, state.page, state.pageSize)),
+            )}
+          />
+        }
         filters={{
           active: [
             ...chip('action', t('audit.action')),

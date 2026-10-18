@@ -57,7 +57,9 @@
       "cities": "المدن",
       "areas": "المناطق",
       "versions": "إصدارات التطبيق",
-      "maintenance": "الصيانة"
+      "maintenance": "الصيانة",
+      "reportsMain": "التقارير",
+      "exports": "عمليات التصدير"
     },
     "breadcrumbs": "مسار التنقل",
     "expand": "توسيع {{name}}",
