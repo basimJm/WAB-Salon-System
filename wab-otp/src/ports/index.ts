@@ -91,6 +91,8 @@ export interface LimitStore {
   /** `local` stores live in one process and are refused in production. */
   readonly scope: 'local' | 'shared';
   hit(spec: HitSpec): Promise<HitResult>;
+  /** Current hits of a counter (0 when none or expired). */
+  countOf(counterKey: string): Promise<number>;
   /** Remaining block time in ms, 0 when not blocked. */
   blockTtlMs(blockKey: string): Promise<number>;
   /** Only the first caller per period starts it; others learn the remaining time. */

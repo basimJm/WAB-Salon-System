@@ -17,3 +17,5 @@ export { createFakeVerifier, fakeProof } from './adapters/fake';
 export { MemoryLimitStore } from './adapters/memory-store';
 export { FAKE_PROOF_KINDS, type FakeProofKind } from './constants/fake';
 export { isE164 } from './validation';
+export { createOtpService } from './service';
+export { createLimits, type Limits, type LimitsConfig } from './limits';

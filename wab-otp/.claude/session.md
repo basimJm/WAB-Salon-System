@@ -7,10 +7,10 @@
 
 ## Current task
 
-### OTP-003 — Port, fake adapter, memory store, verifier
-- Branch: `feat/otp-003-port-fake`
-- Acceptance: `createOtpVerifier(options)` validates input (E.164, purpose, proof size) with `OTP_INPUT_INVALID`; fake adapter (same proof format as the WAB-Server fake); `MemoryLimitStore` (process-local, same semantics as Redis, refused in prod); adapter answers are checked (unknown/incomplete answer = `OTP_MALFORMED_RESPONSE`, mismatching verified phone = `PHONE_MISMATCH`); unexpected throws = `OTP_UNKNOWN` with cause; event hook failures never break a verification; logs carry no proof or full phone.
-- Assumed missing: outcomes `PURPOSE_MISMATCH`/`BLOCKED` are only produced by custom adapters/the service; `precheck`/`reportFailure` land with OTP-004.
-- Tests: `npm run verify` green (48 unit tests).
+### OTP-004 — Limits engine and `createOtpService`
+- Branch: `feat/otp-004-limits`
+- Acceptance: request limit (default 5 / 5 min → 15 min block), wrong-code limit (5 → 15 min block), resend cooldown (60 s), `blockedUntil`, `resendAfterSeconds`; all values from options; the request that reaches a limit is allowed and starts the block, later ones are denied (same semantics as the WAB-Server gate); requests and wrong codes share one block; success resets; only `WRONG_CODE` counts; `verify` answers `BLOCKED` while blocked; prod needs an injected shared store.
+- Assumed missing: per-device/IP limits (`deviceId`/`ip` accepted but not limited yet; open question in Integration.md).
+- Tests: `npm run verify` green (62 unit tests).
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — QA added the malformed-answer and wrong-phone downgrade cases; the `custom` guard in the adapter selector is defensive (options already refuse it).
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — added `LimitStore.countOf` so non-counting failure reports can still return `attemptsRemaining`.
