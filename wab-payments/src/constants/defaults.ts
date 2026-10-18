@@ -44,6 +44,15 @@ export const DEFAULT_IDEMPOTENCY = {
   keyPrefix: 'wab:payments:idem:',
 } as const;
 
+/** Checkout -> payment mapping must outlive the longest refund window (400 days). */
+export const DEFAULT_DIRECTORY = {
+  ttlSec: 34_560_000,
+  keyPrefix: 'wab:payments:dir:',
+} as const;
+
+/** Prefix of the merchant transaction id of a refund, so refunds are found by their idempotency key. */
+export const REFUND_REFERENCE_PREFIX = 'RF:';
+
 export const DEFAULT_TIMEOUT_MS = 15_000;
 export const MS_PER_SECOND = 1000;
 

@@ -29,3 +29,7 @@ export {
 } from './adapters/fake';
 export type { RetryDeps, RetryPolicy } from './retry';
 export type * from './types';
+export { MemorySessionDirectory, RedisSessionDirectory } from './directory';
+export type { DirectoryEntry, SessionDirectory } from './directory';
+export { fetchHttpClient } from './http';
+export type { HttpClient, HttpRequest, HttpResponse } from './http';
