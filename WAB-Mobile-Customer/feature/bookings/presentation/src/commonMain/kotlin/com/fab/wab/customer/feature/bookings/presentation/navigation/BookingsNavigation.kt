@@ -18,13 +18,16 @@ import com.fab.wab.customer.core.navigation.route.Screen
 import com.fab.wab.customer.core.notification.composable.rememberNotificationManager
 import com.fab.wab.customer.core.notification.model.NotificationStyle
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingDetailsContract
+import com.fab.wab.customer.feature.bookings.presentation.controller.contract.RatingContract
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingsContract.SideEffect
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingsContract.UiAction
 import com.fab.wab.customer.feature.bookings.presentation.controller.vm.BookingDetailsViewModel
+import com.fab.wab.customer.feature.bookings.presentation.controller.vm.RatingViewModel
 import com.fab.wab.customer.feature.bookings.presentation.controller.vm.BookingsViewModel
 import com.fab.wab.customer.feature.bookings.presentation.resources.Res
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancelled_toast
 import com.fab.wab.customer.feature.bookings.presentation.screen.BookingDetailsScreen
+import com.fab.wab.customer.feature.bookings.presentation.screen.RatingScreen
 import com.fab.wab.customer.feature.bookings.presentation.screen.BookingsScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -43,6 +46,21 @@ class BookingsNavigation(
         navGraphBuilder.composable<Screen.BookingDetails> { entry ->
             BookingDetailsDestination(entry.toRoute<Screen.BookingDetails>().bookingId)
         }
+        navGraphBuilder.composable<Screen.RateBooking> { entry -> RatingDestination(entry.toRoute<Screen.RateBooking>().bookingId) }
+    }
+
+    @Composable
+    private fun RatingDestination(bookingId: String) {
+        val viewModel: RatingViewModel = koinViewModel(key = bookingId) { parametersOf(bookingId) }
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val notifications = rememberNotificationManager()
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                RatingContract.SideEffect.Exit -> navigateBack()
+                is RatingContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+            }
+        }
+        RatingScreen(state = state, onAction = viewModel::onEvent, onBack = ::navigateBack)
     }
 
     @Composable

@@ -154,3 +154,16 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: nothing navigates into S17 yet: CUS-047 (verification + payment, BLOCKED on PAY-011) is the producer of the booking id + reference. Clipboard uses the deprecated `LocalClipboardManager` (suppressed with reason, same as S15).
+
+### CUS-049 — Rating flow S18: salon step + one step per staff member who served, skip per step, pending-approval message
+- Branch: `feat/cus-049-rating-flow`
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 4)
+- Acceptance criteria (PRD S18; Design Script S18; operations `POST /salons/{id}/reviews`, `POST /salons/{id}/staff/{memberId}/reviews` via `ReviewsRepository`):
+  - [x] `BookingPerson.staffId` added (mapper from `persons[].staff.id`); `ratingStepsOf(booking)` = salon then distinct staff with ids (any-staff persons skipped; deleted salon → no steps)
+  - [x] `RatingViewModel`: load booking → steps; rating 1–5 + comment ≤ 1000 per step; Submit (trimmed comment, empty → null) or Skip advances; last step → finished with the approval message ("nothing to rate" when nothing was submitted); submit failure keeps the step + error toast
+  - [x] `RatingScreen` (step indicator, card per step, Skip, done state) registered for `Screen.RateBooking` in `BookingsNavigation` (placeholder removed); entry from S15 Rate already wired (CUS-042); AR/EN; analytics screen + submit/skip actions
+  - [x] Unit tests: `RatingStepsTest` (2), `RatingViewModelTest` (3)
+- Tests: run with the batch-4 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: entry from the "booking completed" notification lands in CUS-050/051 (notifications + deep links). `ReviewsRepository` lives in `feature/salon/domain` (already a dependency of `feature/bookings/presentation`).

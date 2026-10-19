@@ -6,6 +6,9 @@ import com.fab.wab.customer.core.analytics.AnalyticsScreen
 object BookingsAnalytics {
     private const val SCREEN_NAME = "bookings"
     private const val DETAILS_SCREEN_NAME = "booking_details"
+    private const val RATING_SCREEN_NAME = "booking_rating"
+    const val ACTION_RATE_SUBMIT = "booking_rate_submit"
+    const val ACTION_RATE_SKIP = "booking_rate_skip"
     const val ACTION_CANCEL = "booking_cancel"
     const val ACTION_TAB = "bookings_tab"
     const val ACTION_SEARCH = "bookings_search"
@@ -16,4 +19,5 @@ object BookingsAnalytics {
 
     val SCREEN = AnalyticsScreen(SCREEN_NAME)
     val DETAILS_SCREEN = AnalyticsScreen(DETAILS_SCREEN_NAME)
+    val RATING_SCREEN = AnalyticsScreen(RATING_SCREEN_NAME)
 }

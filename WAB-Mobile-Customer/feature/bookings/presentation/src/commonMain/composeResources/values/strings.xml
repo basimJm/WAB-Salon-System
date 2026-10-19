@@ -57,4 +57,16 @@
     <string name="details_refund_deposit_deducted">The deposit will be deducted from the refunded amount.</string>
     <string name="details_refund_nothing">Nothing was paid online; no refund applies.</string>
     <string name="details_cancelled_toast">Your booking was cancelled.</string>
+    <string name="rating_title">Rate your experience</string>
+    <string name="rating_salon_step">How was your experience at %1$s?</string>
+    <string name="rating_staff_step">How was %1$s?</string>
+    <string name="rating_comment_hint">Write a comment (optional)</string>
+    <string name="rating_counter">%1$d / %2$d</string>
+    <string name="rating_submit">Submit</string>
+    <string name="rating_skip">Skip</string>
+    <string name="rating_done_title">Thank you!</string>
+    <string name="rating_done_message">Your review will appear after approval.</string>
+    <string name="rating_done_none">There is nothing to rate for this booking.</string>
+    <string name="rating_done_button">Done</string>
+    <string name="rating_salon_unknown">the salon</string>
 </resources>
