@@ -23,6 +23,7 @@ sealed interface BookingDetailsContract {
     sealed interface UiAction {
         data object OnRetry : UiAction
         data object OnRefresh : UiAction
+        data object OnResume : UiAction
         data object OnCallClick : UiAction
         data object OnWhatsAppClick : UiAction
         data object OnRateClick : UiAction

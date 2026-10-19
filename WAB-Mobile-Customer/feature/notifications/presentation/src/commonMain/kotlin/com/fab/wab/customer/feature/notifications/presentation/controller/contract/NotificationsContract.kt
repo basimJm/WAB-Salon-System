@@ -36,6 +36,7 @@ sealed interface NotificationsContract {
 
     sealed interface UiAction {
         data object OnRefresh : UiAction
+        data object OnResume : UiAction
         data object OnRetry : UiAction
         data object OnLoadMore : UiAction
         data class OnVisible(val ids: List<String>) : UiAction

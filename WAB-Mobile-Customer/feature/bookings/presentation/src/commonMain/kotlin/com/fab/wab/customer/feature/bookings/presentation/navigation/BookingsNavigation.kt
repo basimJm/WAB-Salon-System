@@ -69,6 +69,7 @@ class BookingsNavigation(
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
         val cancelled = stringResource(Res.string.details_cancelled_toast)
+        LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.onEvent(BookingDetailsContract.UiAction.OnResume) }
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is BookingDetailsContract.SideEffect.OpenRating -> navigateTo(Screen.RateBooking(effect.bookingId))

@@ -157,3 +157,19 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: `PushSignals` is a process-wide object (platform services have no Koin scope guarantee); tests share it (no replay on `messages`). iOS foreground badge count follows the realtime `notifications.unread` event + Home reload. Android notification icon still the launcher foreground mipmap (a dedicated monochrome icon is a design asset for the owner).
+
+### CUS-052 — Realtime wiring: authenticated socket in foreground, events → bookings list / details / unread badge / notifications list; refresh on FCM + foreground; de-duplicate by id
+- Branch: `feat/cus-052-realtime-wiring` (from `feat/cus-051-push`)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 5)
+- Acceptance criteria (PRD §3.15; BUSINESS_DOMAIN §7 `booking.updated` summary, `notifications.unread {count}`):
+  - [x] Socket held only while resumed + signed in, reconnect with backoff (CUS-013 `RealtimeConnectionEffect` / `SocketIoRealtimeClient`; unchanged, verified)
+  - [x] core/realtime `RealtimeRefresh.kt`: `RefreshReason`, `entityId()` (`id` / `bookingId`), `updateKey()` (name + id + status + updatedAt), `Flow.refreshesFor(name, entityId?)` dropping consecutive duplicates (tests)
+  - [x] Bookings list: socket `booking.updated` (de-duplicated) + FCM message → refresh; resume refresh existed
+  - [x] Booking details: only this booking's socket updates (de-duplicated) + FCM messages about it → refresh; new `OnResume` (first one skipped) via `LifecycleEventEffect`
+  - [x] Notifications list: socket `notifications.unread` + FCM message → refresh (not while the filter sheet is open); new `OnResume`; `RealtimeClient` added to its dependencies/DI
+  - [x] Unread badge: Home (`notifications.unread` + push refresh, CUS-032/051)
+  - [x] Unit tests: `RealtimeRefreshTest` (2), `BookingDetailsViewModelTest` / `BookingsViewModelTest` / `NotificationsViewModelTest` (+ realtime / push / resume assertions)
+- Tests: run with the batch-5 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: de-duplication is per consumer and keyed on the delivered state; the server emits a summary per change so a reconnect replay of the same state does not refresh twice.

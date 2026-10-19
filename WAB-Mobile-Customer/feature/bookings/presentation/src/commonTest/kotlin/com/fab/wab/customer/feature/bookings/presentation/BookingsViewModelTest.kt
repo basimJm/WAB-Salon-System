@@ -14,6 +14,8 @@ import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.domain.session.UserProfile
+import com.fab.wab.customer.core.notification.push.PushNotification
+import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.realtime.FakeRealtimeClient
 import com.fab.wab.customer.core.realtime.RealtimeEvent
 import com.fab.wab.customer.core.realtime.RealtimeEvents
@@ -122,6 +124,9 @@ class BookingsViewModelTest {
         realtime.emit(RealtimeEvent(RealtimeEvents.BOOKING_UPDATED))
         runCurrent()
         assertEquals(3, repository.calls.size)
+        PushSignals.publishReceived(PushNotification("t", "b"))
+        runCurrent()
+        assertEquals(4, repository.calls.size, "an FCM message while open refreshes the list")
         assertTrue(effects.none { it is SideEffect.ShowError })
     }
 

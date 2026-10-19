@@ -9,7 +9,11 @@ import com.fab.wab.customer.core.domain.booking.BookingDetails
 import com.fab.wab.customer.core.domain.booking.BookingStatus
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.core.realtime.RealtimeClient
+import com.fab.wab.customer.core.notification.push.PushKeys
+import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.realtime.RealtimeEvents
+import com.fab.wab.customer.core.realtime.RefreshReason
+import com.fab.wab.customer.core.realtime.refreshesFor
 import com.fab.wab.customer.core.ui.external.ExternalActions
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import com.fab.wab.customer.feature.bookings.domain.model.CancellationRule
@@ -24,6 +28,8 @@ import com.fab.wab.customer.feature.bookings.presentation.controller.contract.Bo
 import com.fab.wab.customer.feature.salon.domain.repository.SalonDetailsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -53,9 +59,11 @@ class BookingDetailsViewModel(
         started = true
         load()
         scope.launch {
-            deps.realtime.events.filter { it.name == RealtimeEvents.BOOKING_UPDATED }.collect {
-                if (uiState.value.booking != null) load(refresh = true)
-            }
+            // PRD §3.15: only this booking's socket updates (de-duplicated) and FCM messages about it refresh the screen.
+            merge(
+                deps.realtime.events.refreshesFor(RealtimeEvents.BOOKING_UPDATED, entityId = bookingId),
+                PushSignals.messages.filter { it.data[PushKeys.BOOKING_ID].let { id -> id == null || id == bookingId } }.map { RefreshReason.Push },
+            ).collect { if (uiState.value.booking != null) load(refresh = true) }
         }
     }
 
@@ -63,6 +71,7 @@ class BookingDetailsViewModel(
         when (event) {
             UiAction.OnRetry -> load()
             UiAction.OnRefresh -> load(refresh = true)
+            UiAction.OnResume -> onResume()
             UiAction.OnCallClick -> uiState.value.salonPhone?.let { deps.external.dial(it) }
             UiAction.OnWhatsAppClick -> uiState.value.salonWhatsApp?.let { deps.external.openWhatsApp(it) }
             UiAction.OnRateClick -> rate()
@@ -70,6 +79,17 @@ class BookingDetailsViewModel(
             UiAction.OnCancelConfirm -> cancel()
             UiAction.OnCancelDismiss -> updateState { copy(cancelDialog = null) }
         }
+    }
+
+    /** The first ON_RESUME comes with the first composition, right after the initial load. */
+    private var firstResume = true
+
+    private fun onResume() {
+        if (firstResume) {
+            firstResume = false
+            return
+        }
+        if (uiState.value.booking != null) load(refresh = true)
     }
 
     private fun rate() {
