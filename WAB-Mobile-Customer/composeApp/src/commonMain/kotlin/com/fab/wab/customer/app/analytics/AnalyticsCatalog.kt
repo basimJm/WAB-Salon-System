@@ -127,14 +127,18 @@ object AnalyticsCatalog {
         is SalonDetailsContract.UiAction.OnStaffClick -> ActionEvent.Named(Events.STAFF_OPEN)
         is SalonDetailsContract.UiAction.OnServiceClick -> ActionEvent.Named(Events.SERVICE_OPEN)
         is SalonDetailsContract.UiAction.OnGalleryClick -> ActionEvent.Named(Events.GALLERY_OPEN)
-        SalonDetailsContract.UiAction.OnAllReviewsClick, SalonDetailsContract.UiAction.OnAddReviewClick -> ActionEvent.Named(Events.REVIEWS_OPEN)
+        SalonDetailsContract.UiAction.OnAllReviewsClick, SalonDetailsContract.UiAction.OnAddReviewClick -> ActionEvent.Named(
+            Events.REVIEWS_OPEN,
+        )
         SalonDetailsContract.UiAction.OnHoursToggle -> ActionEvent.Named(Events.HOURS_TOGGLE)
         SalonDetailsContract.UiAction.OnRetry, SalonDetailsContract.UiAction.OnRefresh, SalonDetailsContract.UiAction.OnDialogConfirm,
         SalonDetailsContract.UiAction.OnDialogDismiss, -> ActionEvent.Silent
     }
 
     private fun staff(a: StaffSheetContract.UiAction): ActionEvent = when (a) {
-        StaffSheetContract.UiAction.OnAllReviewsClick, StaffSheetContract.UiAction.OnAddReviewClick -> ActionEvent.Named(Events.REVIEWS_OPEN)
+        StaffSheetContract.UiAction.OnAllReviewsClick, StaffSheetContract.UiAction.OnAddReviewClick -> ActionEvent.Named(
+            Events.REVIEWS_OPEN,
+        )
         StaffSheetContract.UiAction.OnRetry, StaffSheetContract.UiAction.OnDialogConfirm, StaffSheetContract.UiAction.OnDialogDismiss,
         -> ActionEvent.Silent
     }
@@ -187,7 +191,9 @@ object AnalyticsCatalog {
         BookingFlowContract.UiAction.OnConfirm -> ActionEvent.Named(Events.BOOKING_SUBMIT)
         is BookingFlowContract.UiAction.OnDateSelect -> ActionEvent.Named(Events.BOOKING_DATE_SELECT)
         is BookingFlowContract.UiAction.OnSlotSelect -> ActionEvent.Named(Events.BOOKING_SLOT_SELECT)
-        BookingFlowContract.UiAction.OnAnyStaffSelect, is BookingFlowContract.UiAction.OnStaffSelect -> ActionEvent.Named(Events.BOOKING_STAFF_SELECT)
+        BookingFlowContract.UiAction.OnAnyStaffSelect, is BookingFlowContract.UiAction.OnStaffSelect -> ActionEvent.Named(
+            Events.BOOKING_STAFF_SELECT,
+        )
         BookingFlowContract.UiAction.OnAddCompanion -> ActionEvent.Named(Events.BOOKING_COMPANION_ADD)
         is BookingFlowContract.UiAction.OnRemovePerson -> ActionEvent.Named(Events.BOOKING_COMPANION_REMOVE)
         is BookingFlowContract.UiAction.OnBrideChange -> ActionEvent.Named(Events.BOOKING_BRIDE_TOGGLE)

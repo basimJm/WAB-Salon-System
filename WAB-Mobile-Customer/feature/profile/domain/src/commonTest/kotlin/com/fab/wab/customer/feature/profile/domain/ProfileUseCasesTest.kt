@@ -25,7 +25,20 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-internal val ACCOUNT = CustomerAccount("c1", "Sara", "Ali", "s@x.com", Gender.FEMALE, "+962790000000", "JO", "790000000", "city-1", "area-1", null, true)
+internal val ACCOUNT = CustomerAccount(
+    "c1",
+    "Sara",
+    "Ali",
+    "s@x.com",
+    Gender.FEMALE,
+    "+962790000000",
+    "JO",
+    "790000000",
+    "city-1",
+    "area-1",
+    null,
+    true,
+)
 
 internal class ProfileFake : ProfileRepository {
     val avatarKeys = mutableListOf<String>()
@@ -38,7 +51,9 @@ internal class ProfileFake : ProfileRepository {
     }
     override suspend fun update(update: ProfileUpdate): AppResult<CustomerAccount> {
         updates += update
-        return AppResult.Success(ACCOUNT.copy(firstName = update.firstName, lastName = update.lastName, email = update.email, gender = update.gender))
+        return AppResult.Success(
+            ACCOUNT.copy(firstName = update.firstName, lastName = update.lastName, email = update.email, gender = update.gender),
+        )
     }
     override suspend fun deleteAvatar(): AppResult<CustomerAccount> = AppResult.Success(ACCOUNT)
     override suspend fun deleteAccount(): AppResult<String> {

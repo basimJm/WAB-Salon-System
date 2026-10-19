@@ -41,7 +41,9 @@ import kotlin.test.assertTrue
 private class ContentFake : ContentRepository {
     val slugs = mutableListOf<String>()
     var pageResult: AppResult<ContentPage> = AppResult.Success(ContentPage("TERMS", "<p>Hello <b>world</b></p>"))
-    var faqResult: AppResult<List<FaqItem>> = AppResult.Success(listOf(FaqItem("f1", "Q1", "A1"), FaqItem("f1", "dup", "dup"), FaqItem("f2", "Q2", "A2")))
+    var faqResult: AppResult<List<FaqItem>> = AppResult.Success(
+        listOf(FaqItem("f1", "Q1", "A1"), FaqItem("f1", "dup", "dup"), FaqItem("f2", "Q2", "A2")),
+    )
     override suspend fun page(slug: String): AppResult<ContentPage> {
         slugs += slug
         return pageResult
@@ -62,7 +64,13 @@ class ContentViewModelsTest {
     private val external = FakeExternalActions()
 
     private fun TestScope.page(slug: String, contact: ContactInfo? = null): ContentPageViewModel {
-        val deps = ContentPageDependencies(LoadContentPageUseCase(repository), ConfigFake(contact), external, NoOpAnalyticsTracker, errorText = { "error" })
+        val deps = ContentPageDependencies(
+            LoadContentPageUseCase(repository),
+            ConfigFake(contact),
+            external,
+            NoOpAnalyticsTracker,
+            errorText = { "error" },
+        )
         val vm = ContentPageViewModel(slug, deps, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
         vm.onStart()

@@ -54,7 +54,10 @@ class NotificationsViewModel(
         load()
         scope.launch {
             // PRD §3.15: a new notification (socket unread count) or an FCM message while open refreshes the list.
-            merge(deps.realtime.events.filter { it.name == RealtimeEvents.NOTIFICATIONS_UNREAD }.map { RefreshReason.Realtime }, PushSignals.messages.map { RefreshReason.Push })
+            merge(
+                deps.realtime.events.filter { it.name == RealtimeEvents.NOTIFICATIONS_UNREAD }.map { RefreshReason.Realtime },
+                PushSignals.messages.map { RefreshReason.Push },
+            )
                 .collect { if (uiState.value.loaded && uiState.value.sheet == null) load(refresh = true) }
         }
     }

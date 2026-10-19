@@ -51,6 +51,9 @@ class BookingSuccessViewModelTest {
         vm.onEvent(UiAction.OnViewBooking)
         vm.onEvent(UiAction.OnBackHome)
         assertEquals(listOf(SideEffect.OpenBooking("b1"), SideEffect.GoHome), effects)
-        assertEquals(listOf(BookingSuccessAnalytics.ACTION_VIEW_BOOKING, BookingSuccessAnalytics.ACTION_BACK_HOME), analytics.actions.map { it.name })
+        assertEquals(
+            listOf(BookingSuccessAnalytics.ACTION_VIEW_BOOKING, BookingSuccessAnalytics.ACTION_BACK_HOME),
+            analytics.actions.map { it.name },
+        )
     }
 }

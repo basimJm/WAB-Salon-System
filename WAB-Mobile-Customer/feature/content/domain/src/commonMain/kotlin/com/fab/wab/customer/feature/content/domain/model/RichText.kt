@@ -23,6 +23,7 @@ object RichTextParser {
     private val NUMERIC_ENTITY = Regex("&#(\\d+);")
     private val WHITESPACE = Regex("\\s+")
     private const val MAX_HEADING = 3
+    private const val LINE_BREAK = "\n"
     private const val GROUP_SLASH = 1
     private const val GROUP_NAME = 2
     private const val GROUP_ATTRIBUTES = 3
@@ -66,7 +67,7 @@ object RichTextParser {
                 "b", "strong" -> bold++
                 "i", "em" -> italic++
                 "a" -> link = HREF.find(attributes)?.groupValues?.get(1)?.takeIf { it.isNotBlank() }
-                "br" -> spans += RichSpan("\n", bold > 0, italic > 0, link)
+                "br" -> spans += RichSpan(LINE_BREAK, bold > 0, italic > 0, link)
                 "p", "div" -> start { RichBlock.Paragraph(it) }
                 "li" -> start { RichBlock.Bullet(it) }
                 "h1", "h2", "h3", "h4", "h5", "h6" -> {
@@ -105,13 +106,18 @@ object RichTextParser {
         }
 
         /** Merges adjacent runs with the same style (text split by dropped tags), then trims the block's edges. */
+        private fun RichSpan.canMerge(next: RichSpan): Boolean {
+            val sameStyle = bold == next.bold && italic == next.italic && link == next.link
+            val lineBreak = text == LINE_BREAK || next.text == LINE_BREAK
+            return sameStyle && !lineBreak
+        }
+
         private fun trimmed(runs: List<RichSpan>): List<RichSpan> {
             if (runs.isEmpty()) return runs
             val merged = mutableListOf<RichSpan>()
             runs.forEach { span ->
                 val last = merged.lastOrNull()
-                val sameStyle = last != null && last.bold == span.bold && last.italic == span.italic && last.link == span.link
-                if (last != null && sameStyle && span.text != "\n" && last.text != "\n") {
+                if (last != null && last.canMerge(span)) {
                     merged[merged.lastIndex] = last.copy(text = last.text + span.text)
                 } else {
                     merged += span

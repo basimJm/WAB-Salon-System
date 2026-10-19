@@ -32,7 +32,9 @@ class ProfileRepositoryImpl(private val api: ProfileApi) : ProfileRepository {
         )
     }.mapSuccess { it.data.toDomain() }
 
-    override suspend fun setAvatar(key: String): AppResult<CustomerAccount> = safeApiCall { api.putAvatar(key) }.mapSuccess { it.data.toDomain() }
+    override suspend fun setAvatar(
+        key: String,
+    ): AppResult<CustomerAccount> = safeApiCall { api.putAvatar(key) }.mapSuccess { it.data.toDomain() }
     override suspend fun deleteAvatar(): AppResult<CustomerAccount> = safeApiCall { api.deleteAvatar() }.mapSuccess { it.data.toDomain() }
     override suspend fun deleteAccount(): AppResult<String> = safeApiCall { api.deleteProfile() }.mapSuccess { it.data.deletionScheduledAt }
 }
@@ -42,7 +44,11 @@ class UploadsRepositoryImpl(private val api: UploadsApi) : UploadsRepository {
         safeApiCall { api.presign(PostUploadsPresignBody(purpose, contentType, size)) }.mapSuccess { it.data.toDomain() }
 
     override suspend fun upload(target: PresignedUpload, bytes: ByteArray, contentType: String): AppResult<Unit> {
-        val ok = runCatching { api.upload(target, bytes, contentType) }.getOrElse { e -> return AppResult.Error(AppError.NetworkError(e.message.orEmpty())) }
+        val ok = runCatching { api.upload(
+            target,
+            bytes,
+            contentType,
+        ) }.getOrElse { e -> return AppResult.Error(AppError.NetworkError(e.message.orEmpty())) }
         return if (ok) AppResult.Success(Unit) else AppResult.Error(AppError.HttpError(STORAGE_REJECTED, null))
     }
 
@@ -55,16 +61,24 @@ class UploadsRepositoryImpl(private val api: UploadsApi) : UploadsRepository {
 }
 
 fun GetProfileData.toDomain() = CustomerAccount(
-    id, firstName, lastName, email, Gender.fromCode(gender), phone.e164, phone.countryCode, phone.number, cityId, areaId, avatarUrl, pushEnabled,
+    id, firstName, lastName, email, Gender.fromCode(
+        gender,
+    ), phone.e164, phone.countryCode, phone.number, cityId, areaId, avatarUrl, pushEnabled,
 )
 fun PatchProfileData.toDomain() = CustomerAccount(
-    id, firstName, lastName, email, Gender.fromCode(gender), phone.e164, phone.countryCode, phone.number, cityId, areaId, avatarUrl, pushEnabled,
+    id, firstName, lastName, email, Gender.fromCode(
+        gender,
+    ), phone.e164, phone.countryCode, phone.number, cityId, areaId, avatarUrl, pushEnabled,
 )
 fun PutProfileAvatarData.toDomain() = CustomerAccount(
-    id, firstName, lastName, email, Gender.fromCode(gender), phone.e164, phone.countryCode, phone.number, cityId, areaId, avatarUrl, pushEnabled,
+    id, firstName, lastName, email, Gender.fromCode(
+        gender,
+    ), phone.e164, phone.countryCode, phone.number, cityId, areaId, avatarUrl, pushEnabled,
 )
 fun DeleteProfileAvatarData.toDomain() = CustomerAccount(
-    id, firstName, lastName, email, Gender.fromCode(gender), phone.e164, phone.countryCode, phone.number, cityId, areaId, avatarUrl, pushEnabled,
+    id, firstName, lastName, email, Gender.fromCode(
+        gender,
+    ), phone.e164, phone.countryCode, phone.number, cityId, areaId, avatarUrl, pushEnabled,
 )
 
 fun PostUploadsPresignData.toDomain() = PresignedUpload(

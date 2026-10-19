@@ -43,7 +43,13 @@ fun FaqScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Unit, 
     val spacing = AppTheme.spacing
     AppScreen(modifier = modifier, topBar = { AppTopBar(title = stringResource(Res.string.faq_title), onBack = onBack) }) { padding ->
         AppStateContent(
-            state = contentStateOf(state.loading, state.offline, state.error, isEmpty = state.loaded && state.items.isEmpty(), hasContent = state.items.isNotEmpty()),
+            state = contentStateOf(
+                state.loading,
+                state.offline,
+                state.error,
+                isEmpty = state.loaded && state.items.isEmpty(),
+                hasContent = state.items.isNotEmpty(),
+            ),
             onRetry = { onAction(UiAction.OnRetry) },
             modifier = Modifier.fillMaxSize().padding(padding),
             empty = { AppEmptyState(title = stringResource(Res.string.faq_empty)) },

@@ -9,7 +9,9 @@ import com.fab.wab.customer.feature.content.domain.repository.ContentRepository
 
 /** Loads a legal / about page and parses its body into renderable blocks. */
 class LoadContentPageUseCase(private val repository: ContentRepository) {
-    suspend operator fun invoke(slug: String): AppResult<List<RichBlock>> = repository.page(slug).mapSuccess { RichTextParser.parse(it.body) }
+    suspend operator fun invoke(
+        slug: String,
+    ): AppResult<List<RichBlock>> = repository.page(slug).mapSuccess { RichTextParser.parse(it.body) }
 }
 
 class LoadFaqsUseCase(private val repository: ContentRepository) {

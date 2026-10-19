@@ -40,7 +40,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-val ACCOUNT = CustomerAccount("c1", "Sara", "Ali", "s@x.com", Gender.FEMALE, "+962790000000", "JO", "790000000", "city-1", "area-1", null, true)
+val ACCOUNT = CustomerAccount(
+    "c1",
+    "Sara",
+    "Ali",
+    "s@x.com",
+    Gender.FEMALE,
+    "+962790000000",
+    "JO",
+    "790000000",
+    "city-1",
+    "area-1",
+    null,
+    true,
+)
 val GUEST = SessionState.Guest(GuestProfile("Sara", Gender.FEMALE))
 val USER = SessionState.SignedIn(UserProfile("c1", "Sara", Gender.FEMALE))
 val CONTACT = ContactInfo("+962790000001", "+962790000002", "help@wab.jo")
@@ -53,7 +66,9 @@ class ProfileRepoFake : ProfileRepository {
     override suspend fun setAvatar(key: String): AppResult<CustomerAccount> = AppResult.Success(ACCOUNT.copy(avatarUrl = "cdn/$key"))
     override suspend fun update(update: ProfileUpdate): AppResult<CustomerAccount> {
         updates += update
-        return AppResult.Success(ACCOUNT.copy(firstName = update.firstName, lastName = update.lastName, email = update.email, gender = update.gender))
+        return AppResult.Success(
+            ACCOUNT.copy(firstName = update.firstName, lastName = update.lastName, email = update.email, gender = update.gender),
+        )
     }
     override suspend fun deleteAvatar(): AppResult<CustomerAccount> = AppResult.Success(ACCOUNT)
     override suspend fun deleteAccount(): AppResult<String> {
@@ -154,7 +169,11 @@ class AuthRepoFake : AuthRepository {
     override suspend fun checkPhone(phone: PhoneNumber, purpose: AuthPurpose): AppResult<PhoneCheck> = AppResult.Loading
     override suspend fun requestOtp(phoneE164: String, purpose: AuthPurpose): AppResult<OtpPolicy> = AppResult.Loading
     override suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult> = AppResult.Loading
-    override suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession> = AppResult.Loading
+    override suspend fun login(
+        phone: PhoneNumber,
+        idToken: String,
+        installation: InstallationInfo?,
+    ): AppResult<AuthSession> = AppResult.Loading
     override suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession> = AppResult.Loading
     override suspend fun logout(refreshToken: String): AppResult<Unit> {
         logouts++
@@ -168,7 +187,10 @@ class AuthRepoFake : AuthRepository {
 
 class InstallationsFake : InstallationsRepository {
     val pushUpdates = mutableListOf<Boolean>()
-    override suspend fun register(info: InstallationInfo, language: String): AppResult<InstallationLink> = AppResult.Success(InstallationLink("i", true))
+    override suspend fun register(
+        info: InstallationInfo,
+        language: String,
+    ): AppResult<InstallationLink> = AppResult.Success(InstallationLink("i", true))
     override suspend fun setPushEnabled(enabled: Boolean): AppResult<Unit> {
         pushUpdates += enabled
         return AppResult.Success(Unit)

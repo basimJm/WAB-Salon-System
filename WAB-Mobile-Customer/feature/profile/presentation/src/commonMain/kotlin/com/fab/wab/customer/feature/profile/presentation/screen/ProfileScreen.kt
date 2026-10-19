@@ -71,7 +71,12 @@ fun ProfileScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifi
             SettingsSection(state, onAction)
             SupportSection(onAction)
             ProfileSection(title = stringResource(Res.string.profile_section_business)) {
-                ProfileRow(AppIcons.Business, stringResource(Res.string.profile_register_salon), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.REGISTER_SALON)) }, divider = false)
+                ProfileRow(
+                    AppIcons.Business,
+                    stringResource(Res.string.profile_register_salon),
+                    onClick = { onAction(UiAction.OnLinkClick(ProfileLink.REGISTER_SALON)) },
+                    divider = false,
+                )
             }
             LegalSection(onAction)
             SessionActions(state, onAction)
@@ -89,8 +94,18 @@ fun ProfileScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifi
 @Composable
 private fun SettingsSection(state: UiState, onAction: (UiAction) -> Unit) {
     ProfileSection(title = stringResource(Res.string.profile_section_settings)) {
-        ProfileRow(AppIcons.Language, stringResource(Res.string.profile_language), value = state.language.label(), onClick = { onAction(UiAction.OnLanguageClick) })
-        ProfileRow(AppIcons.ThemeDark, stringResource(Res.string.profile_theme), value = state.themeMode.label(), onClick = { onAction(UiAction.OnThemeClick) })
+        ProfileRow(
+            AppIcons.Language,
+            stringResource(Res.string.profile_language),
+            value = state.language.label(),
+            onClick = { onAction(UiAction.OnLanguageClick) },
+        )
+        ProfileRow(
+            AppIcons.ThemeDark,
+            stringResource(Res.string.profile_theme),
+            value = state.themeMode.label(),
+            onClick = { onAction(UiAction.OnThemeClick) },
+        )
         ProfileRow(AppIcons.Notifications, stringResource(Res.string.profile_notifications), divider = false) {
             AppSwitch(checked = state.pushEnabled, onCheckedChange = { onAction(UiAction.OnPushToggle(it)) })
         }
@@ -102,27 +117,58 @@ private fun SupportSection(onAction: (UiAction) -> Unit) {
     ProfileSection(title = stringResource(Res.string.profile_section_support)) {
         ProfileRow(AppIcons.Chat, stringResource(Res.string.profile_contact), onClick = { onAction(UiAction.OnContactClick) })
         ProfileRow(AppIcons.Help, stringResource(Res.string.profile_faq), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.FAQ)) })
-        ProfileRow(AppIcons.Star, stringResource(Res.string.profile_rate), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.RATE_APP)) })
-        ProfileRow(AppIcons.Share, stringResource(Res.string.profile_share), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.SHARE_APP)) }, divider = false)
+        ProfileRow(
+            AppIcons.Star,
+            stringResource(Res.string.profile_rate),
+            onClick = { onAction(UiAction.OnLinkClick(ProfileLink.RATE_APP)) },
+        )
+        ProfileRow(
+            AppIcons.Share,
+            stringResource(Res.string.profile_share),
+            onClick = { onAction(UiAction.OnLinkClick(ProfileLink.SHARE_APP)) },
+            divider = false,
+        )
     }
 }
 
 @Composable
 private fun LegalSection(onAction: (UiAction) -> Unit) {
     ProfileSection(title = stringResource(Res.string.profile_section_legal)) {
-        ProfileRow(AppIcons.Legal, stringResource(Res.string.profile_privacy), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.PRIVACY)) })
-        ProfileRow(AppIcons.Legal, stringResource(Res.string.profile_terms), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.TERMS)) })
-        ProfileRow(AppIcons.Info, stringResource(Res.string.profile_about), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.ABOUT)) }, divider = false)
+        ProfileRow(
+            AppIcons.Legal,
+            stringResource(Res.string.profile_privacy),
+            onClick = { onAction(UiAction.OnLinkClick(ProfileLink.PRIVACY)) },
+        )
+        ProfileRow(
+            AppIcons.Legal,
+            stringResource(Res.string.profile_terms),
+            onClick = { onAction(UiAction.OnLinkClick(ProfileLink.TERMS)) },
+        )
+        ProfileRow(
+            AppIcons.Info,
+            stringResource(Res.string.profile_about),
+            onClick = { onAction(UiAction.OnLinkClick(ProfileLink.ABOUT)) },
+            divider = false,
+        )
     }
 }
 
 @Composable
 private fun SessionActions(state: UiState, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
-    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.space8), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(spacing.space8),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         if (state.signedIn) {
             ProfileSection(title = stringResource(Res.string.profile_personal_info)) {
-                ProfileRow(AppIcons.IdCard, stringResource(Res.string.profile_personal_info), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.PERSONAL_INFO)) }, divider = false)
+                ProfileRow(
+                    AppIcons.IdCard,
+                    stringResource(Res.string.profile_personal_info),
+                    onClick = { onAction(UiAction.OnLinkClick(ProfileLink.PERSONAL_INFO)) },
+                    divider = false,
+                )
             }
             AppOutlinedButton(
                 text = stringResource(Res.string.profile_logout),
@@ -133,7 +179,11 @@ private fun SessionActions(state: UiState, onAction: (UiAction) -> Unit) {
             )
             AppTextButton(text = stringResource(Res.string.profile_delete_account), onClick = { onAction(UiAction.OnDeleteAccountClick) })
         } else {
-            AppPrimaryButton(text = stringResource(Res.string.profile_login), onClick = { onAction(UiAction.OnLoginClick) }, modifier = Modifier.fillMaxWidth())
+            AppPrimaryButton(
+                text = stringResource(Res.string.profile_login),
+                onClick = { onAction(UiAction.OnLoginClick) },
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

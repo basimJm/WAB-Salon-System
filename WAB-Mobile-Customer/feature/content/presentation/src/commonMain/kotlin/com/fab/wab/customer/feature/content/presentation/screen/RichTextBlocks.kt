@@ -63,7 +63,9 @@ private fun List<RichSpan>.annotated(onLinkClick: (String) -> Unit): AnnotatedSt
             val link = span.link
             if (link != null) {
                 val linkStyles = TextLinkStyles(style = style.copy(color = linkColor, textDecoration = TextDecoration.Underline))
-                withLink(LinkAnnotation.Clickable(tag = link, styles = linkStyles, linkInteractionListener = { onLinkClick(link) })) { append(span.text) }
+                withLink(
+                    LinkAnnotation.Clickable(tag = link, styles = linkStyles, linkInteractionListener = { onLinkClick(link) }),
+                ) { append(span.text) }
             } else {
                 withStyle(style) { append(span.text) }
             }

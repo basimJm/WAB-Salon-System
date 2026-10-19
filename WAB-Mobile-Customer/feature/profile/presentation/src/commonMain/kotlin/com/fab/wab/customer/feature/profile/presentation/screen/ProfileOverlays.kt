@@ -51,8 +51,17 @@ internal fun ProfileOverlays(state: UiState, onAction: (UiAction) -> Unit) {
         null -> Unit
         is ProfileOverlay.EditGuest -> EditGuestSheet(overlay, onAction)
         ProfileOverlay.PhotoOptions -> OptionsSheet(stringResource(Res.string.profile_photo_change), dismiss) {
-            ProfileRow(AppIcons.Camera, stringResource(Res.string.profile_photo_camera), onClick = { onAction(UiAction.OnPhotoSourceSelect(ImageSource.CAMERA)) })
-            ProfileRow(AppIcons.Gallery, stringResource(Res.string.profile_photo_gallery), onClick = { onAction(UiAction.OnPhotoSourceSelect(ImageSource.GALLERY)) }, divider = state.hasPhoto)
+            ProfileRow(
+                AppIcons.Camera,
+                stringResource(Res.string.profile_photo_camera),
+                onClick = { onAction(UiAction.OnPhotoSourceSelect(ImageSource.CAMERA)) },
+            )
+            ProfileRow(
+                AppIcons.Gallery,
+                stringResource(Res.string.profile_photo_gallery),
+                onClick = { onAction(UiAction.OnPhotoSourceSelect(ImageSource.GALLERY)) },
+                divider = state.hasPhoto,
+            )
             if (state.hasPhoto) ProfileRow(AppIcons.Delete, stringResource(Res.string.profile_photo_delete), onClick = { onAction(UiAction.OnPhotoDelete) }, danger = true, divider = false)
         }
         ProfileOverlay.LanguagePicker -> OptionsSheet(stringResource(Res.string.profile_language), dismiss) {
@@ -66,11 +75,28 @@ internal fun ProfileOverlays(state: UiState, onAction: (UiAction) -> Unit) {
             }
         }
         ProfileOverlay.ContactUs -> OptionsSheet(stringResource(Res.string.profile_contact), dismiss) {
-            ProfileRow(AppIcons.Call, stringResource(Res.string.profile_contact_call), onClick = { onAction(UiAction.OnContactChannel(ContactChannel.CALL)) })
-            ProfileRow(AppIcons.Chat, stringResource(Res.string.profile_contact_whatsapp), onClick = { onAction(UiAction.OnContactChannel(ContactChannel.WHATSAPP)) })
-            ProfileRow(AppIcons.Email, stringResource(Res.string.profile_contact_email), onClick = { onAction(UiAction.OnContactChannel(ContactChannel.EMAIL)) }, divider = false)
+            ProfileRow(
+                AppIcons.Call,
+                stringResource(Res.string.profile_contact_call),
+                onClick = { onAction(UiAction.OnContactChannel(ContactChannel.CALL)) },
+            )
+            ProfileRow(
+                AppIcons.Chat,
+                stringResource(Res.string.profile_contact_whatsapp),
+                onClick = { onAction(UiAction.OnContactChannel(ContactChannel.WHATSAPP)) },
+            )
+            ProfileRow(
+                AppIcons.Email,
+                stringResource(Res.string.profile_contact_email),
+                onClick = { onAction(UiAction.OnContactChannel(ContactChannel.EMAIL)) },
+                divider = false,
+            )
         }
-        ProfileOverlay.LogoutConfirm -> AppGlobalDialog(GlobalDialogKind.Logout, onConfirm = { onAction(UiAction.OnLogoutConfirm) }, onDismiss = dismiss)
+        ProfileOverlay.LogoutConfirm -> AppGlobalDialog(
+            GlobalDialogKind.Logout,
+            onConfirm = { onAction(UiAction.OnLogoutConfirm) },
+            onDismiss = dismiss,
+        )
         ProfileOverlay.DeleteAccountConfirm ->
             AppGlobalDialog(GlobalDialogKind.DeleteAccount, onConfirm = { onAction(UiAction.OnDeleteAccountConfirm) }, onDismiss = dismiss)
     }

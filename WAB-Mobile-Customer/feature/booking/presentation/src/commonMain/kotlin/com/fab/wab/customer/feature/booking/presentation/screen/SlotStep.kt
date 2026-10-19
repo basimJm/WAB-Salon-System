@@ -116,7 +116,7 @@ private fun MonthCalendar(state: UiState, onAction: (UiAction) -> Unit) {
 }
 
 @Composable
-private fun DayCell(day: CalendarDay?, selected: Boolean, onAction: (UiAction) -> Unit, modifier: Modifier) {
+private fun DayCell(day: CalendarDay?, selected: Boolean, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     if (day == null) {
         Box(modifier.aspectRatio(1f))

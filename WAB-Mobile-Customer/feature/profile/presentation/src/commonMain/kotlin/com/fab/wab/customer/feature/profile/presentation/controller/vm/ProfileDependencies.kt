@@ -18,6 +18,7 @@ import com.fab.wab.customer.feature.profile.domain.usecase.LoadProfileUseCase
 import com.fab.wab.customer.feature.profile.domain.usecase.UpdateGuestProfileUseCase
 import com.fab.wab.customer.feature.profile.domain.usecase.UploadAvatarUseCase
 
+@Suppress("LongParameterList") // S21 touches session, appearance, config, uploads, auth and device ports; Koin wires it
 class ProfileDependencies(
     val sessionStore: SessionStore,
     val appearance: AppearanceSettings,

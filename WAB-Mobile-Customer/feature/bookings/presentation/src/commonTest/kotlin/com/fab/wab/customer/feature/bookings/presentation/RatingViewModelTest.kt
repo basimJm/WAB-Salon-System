@@ -66,7 +66,12 @@ class RatingViewModelTest {
     private val reviews = RatingReviewsFake()
 
     private fun TestScope.viewModel(booking: AppResult<BookingDetails>): RatingViewModel {
-        val deps = RatingDependencies(GetBookingDetailsUseCase(RatingBookingsFake(booking)), reviews, NoOpAnalyticsTracker, errorText = { "error" })
+        val deps = RatingDependencies(
+            GetBookingDetailsUseCase(RatingBookingsFake(booking)),
+            reviews,
+            NoOpAnalyticsTracker,
+            errorText = { "error" },
+        )
         val vm = RatingViewModel("b1", deps, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }

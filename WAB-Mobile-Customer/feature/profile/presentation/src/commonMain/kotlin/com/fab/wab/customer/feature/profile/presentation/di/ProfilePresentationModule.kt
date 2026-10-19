@@ -16,6 +16,13 @@ val profilePresentationModule = module {
         )
     }
     viewModel { ProfileViewModel(deps = get()) }
-    factory { EditProfileDependencies(loadProfile = get(), updateProfile = get(), changePhone = get(), locations = get(), pending = get(), analytics = get()) }
+    factory { EditProfileDependencies(
+        loadProfile = get(),
+        updateProfile = get(),
+        changePhone = get(),
+        locations = get(),
+        pending = get(),
+        analytics = get(),
+    ) }
     viewModel { EditProfileViewModel(deps = get()) }
 }

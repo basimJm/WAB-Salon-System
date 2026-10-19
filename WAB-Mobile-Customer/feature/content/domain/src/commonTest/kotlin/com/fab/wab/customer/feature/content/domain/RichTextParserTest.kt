@@ -16,7 +16,15 @@ class RichTextParserTest {
             listOf(
                 RichBlock.Heading(2, listOf(RichSpan("Privacy"))),
                 RichBlock.Paragraph(
-                    listOf(RichSpan("We keep "), RichSpan("your", bold = true), RichSpan(" data "), RichSpan("safe", italic = true), RichSpan("."), RichSpan("\n"), RichSpan("Really.")),
+                    listOf(
+                        RichSpan("We keep "),
+                        RichSpan("your", bold = true),
+                        RichSpan(" data "),
+                        RichSpan("safe", italic = true),
+                        RichSpan("."),
+                        RichSpan("\n"),
+                        RichSpan("Really."),
+                    ),
                 ),
                 RichBlock.Bullet(listOf(RichSpan("One"))),
                 RichBlock.Bullet(listOf(RichSpan("Two", link = "https://x.y"))),

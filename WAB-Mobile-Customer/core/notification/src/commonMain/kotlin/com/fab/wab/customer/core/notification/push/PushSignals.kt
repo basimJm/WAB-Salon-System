@@ -22,7 +22,12 @@ fun pushNotificationOf(data: Map<String, String>, title: String? = null, body: S
     val shownTitle = title?.takeIf { it.isNotBlank() } ?: data[PushKeys.TITLE].orEmpty()
     val shownBody = body?.takeIf { it.isNotBlank() } ?: data[PushKeys.BODY].orEmpty()
     if (shownTitle.isBlank() && shownBody.isBlank()) return null
-    return PushNotification(title = shownTitle, message = shownBody, data = data, deepLink = data[PushKeys.DEEP_LINK]?.takeIf { it.isNotBlank() })
+    return PushNotification(
+        title = shownTitle,
+        message = shownBody,
+        data = data,
+        deepLink = data[PushKeys.DEEP_LINK]?.takeIf { it.isNotBlank() },
+    )
 }
 
 /**

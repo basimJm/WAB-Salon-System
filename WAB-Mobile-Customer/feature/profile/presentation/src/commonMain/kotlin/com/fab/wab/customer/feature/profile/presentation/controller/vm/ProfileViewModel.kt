@@ -72,9 +72,18 @@ class ProfileViewModel(
         val wasSignedIn = uiState.value.signedIn
         when (session) {
             is SessionState.Guest -> updateState {
-                copy(signedIn = false, guestNickname = session.profile.nickname.orEmpty(), guestGender = session.profile.gender, account = null)
+                copy(
+                    signedIn = false,
+                    guestNickname = session.profile.nickname.orEmpty(),
+                    guestGender = session.profile.gender,
+                    account = null,
+                )
             }
-            is SessionState.SignedIn -> updateState { copy(signedIn = true, guestNickname = session.user.firstName, guestGender = session.user.gender) }
+            is SessionState.SignedIn -> updateState { copy(
+                signedIn = true,
+                guestNickname = session.user.firstName,
+                guestGender = session.user.gender,
+            ) }
         }
         if (session.isSignedIn && !wasSignedIn) account.load()
     }

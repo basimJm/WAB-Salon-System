@@ -38,7 +38,9 @@ class FaqViewModel(
         when (event) {
             UiAction.OnRetry -> load()
             is UiAction.OnToggle -> {
-                deps.analytics.trackAction(AnalyticsAction(ContentAnalytics.ACTION_FAQ_TOGGLE, analyticsParams { text(ContentAnalytics.PARAM_ID, event.id) }))
+                deps.analytics.trackAction(
+                    AnalyticsAction(ContentAnalytics.ACTION_FAQ_TOGGLE, analyticsParams { text(ContentAnalytics.PARAM_ID, event.id) }),
+                )
                 updateState { copy(expanded = if (event.id in expanded) expanded - event.id else expanded + event.id) }
             }
         }
