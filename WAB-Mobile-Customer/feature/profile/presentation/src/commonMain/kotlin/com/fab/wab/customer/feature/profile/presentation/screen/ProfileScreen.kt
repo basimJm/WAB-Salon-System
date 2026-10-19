@@ -42,6 +42,7 @@ import com.fab.wab.customer.feature.profile.presentation.resources.profile_perso
 import com.fab.wab.customer.feature.profile.presentation.resources.profile_privacy
 import com.fab.wab.customer.feature.profile.presentation.resources.profile_rate
 import com.fab.wab.customer.feature.profile.presentation.resources.profile_register_salon
+import com.fab.wab.customer.feature.profile.presentation.resources.profile_section_account
 import com.fab.wab.customer.feature.profile.presentation.resources.profile_section_business
 import com.fab.wab.customer.feature.profile.presentation.resources.profile_section_legal
 import com.fab.wab.customer.feature.profile.presentation.resources.profile_section_settings
@@ -162,7 +163,7 @@ private fun SessionActions(state: UiState, onAction: (UiAction) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (state.signedIn) {
-            ProfileSection(title = stringResource(Res.string.profile_personal_info)) {
+            ProfileSection(title = stringResource(Res.string.profile_section_account)) {
                 ProfileRow(
                     AppIcons.IdCard,
                     stringResource(Res.string.profile_personal_info),

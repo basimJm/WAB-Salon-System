@@ -61,4 +61,5 @@
     <string name="edit_phone_changed_note">سيتم إرسال رمز تحقق إلى الرقم الجديد.</string>
     <string name="edit_save">حفظ</string>
     <string name="edit_saved">تم حفظ معلوماتك.</string>
+    <string name="profile_section_account">الحساب</string>
 </resources>
