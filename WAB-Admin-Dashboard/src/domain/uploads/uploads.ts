@@ -1,4 +1,11 @@
-export type UploadPurpose = 'BANNER_IMAGE' | 'CATALOG_IMAGE';
+export type UploadPurpose =
+  | 'BANNER_IMAGE'
+  | 'CATALOG_IMAGE'
+  | 'SALON_COVER'
+  | 'SALON_PROFILE'
+  | 'GALLERY_IMAGE'
+  | 'GALLERY_VIDEO'
+  | 'SERVICE_MEDIA';
 
 export interface UploadedFile {
   readonly key: string;

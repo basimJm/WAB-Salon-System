@@ -16,6 +16,7 @@ import { placementsRoutes } from './placementsRoutes';
 import { campaignsRoutes } from './campaignsRoutes';
 import { alertsRoutes } from './alertsRoutes';
 import { profileRoutes } from './profileRoutes';
+import { salonEditRoutes } from './salonEditRoutes';
 import { searchRoutes } from './searchRoutes';
 import { analyticsRoutes } from './analyticsRoutes';
 import { reportsRoutes } from './reportsRoutes';
@@ -49,6 +50,7 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...alertsRoutes(),
     ...profileRoutes(),
     ...searchRoutes(),
+    ...salonEditRoutes(),
     ...analyticsRoutes(),
     ...reportsRoutes(),
     ...auditRoutes(),
