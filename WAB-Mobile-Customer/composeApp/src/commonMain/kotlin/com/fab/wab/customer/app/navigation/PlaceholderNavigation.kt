@@ -8,40 +8,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.fab.wab.customer.app.resources.Res
-import com.fab.wab.customer.app.resources.nav_profile
 import com.fab.wab.customer.app.resources.placeholder_content_page
 import com.fab.wab.customer.app.resources.placeholder_verify
-import com.fab.wab.customer.app.resources.profile_login_button
-import com.fab.wab.customer.core.navigation.route.Graph
+import com.fab.wab.customer.app.resources.placeholder_faq
+import com.fab.wab.customer.app.resources.placeholder_personal_info
 import com.fab.wab.customer.core.navigation.route.Screen
-import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
 import com.fab.wab.customer.designsystem.components.feedback.AppEmptyState
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * Root destinations whose feature has not landed yet (Profile CUS-053).
- * Each feature replaces its graph here with its own `Navigator.registerGraph`. The Profile placeholder carries the
- * "Log in" entry so the auth flow is reachable before the real profile screen exists.
- */
-fun NavGraphBuilder.registerPlaceholderRoots(navController: NavHostController) {
-    navigation<Graph.Profile>(startDestination = Screen.Profile) {
-        composable<Screen.Profile> {
-            PlaceholderRootScreen(Res.string.nav_profile) {
-                AppPrimaryButton(
-                    text = stringResource(Res.string.profile_login_button),
-                    onClick = { navController.navigate(Graph.Auth) },
-                )
-            }
-        }
-    }
+/** S22 personal info (CUS-054) and the FAQ page (CUS-055) reached from S21. */
+fun NavGraphBuilder.registerPlaceholderProfileScreens() {
+    composable<Screen.PersonalInfo> { PlaceholderRootScreen(Res.string.placeholder_personal_info) }
+    composable<Screen.Faq> { PlaceholderRootScreen(Res.string.placeholder_faq) }
 }
 
 /** Legal / support pages still to come (CUS-05x); Login and Register link to them. */

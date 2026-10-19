@@ -74,6 +74,14 @@ sealed interface Screen {
     @Serializable
     data class BookingStart(val salonId: String) : Screen
 
+    /** S22 edit personal information (registered). */
+    @Serializable
+    data object PersonalInfo : Screen
+
+    /** S23 FAQ list. */
+    @Serializable
+    data object Faq : Screen
+
     /** S19 notifications (registered users). */
     @Serializable
     data object Notifications : Screen

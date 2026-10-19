@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.fab.wab.customer.app.ui.App
+import com.fab.wab.customer.core.ui.media.AndroidImagePickerBridge
 import com.fab.wab.customer.core.ui.permission.AndroidPermissionBridge
 import org.koin.java.KoinJavaComponent.getKoin
 
@@ -18,6 +19,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         getKoin().get<AndroidPermissionBridge>().attach(this)
+        getKoin().get<AndroidImagePickerBridge>().attach(this)
         setContent {
             App(this)
         }
@@ -25,6 +27,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         getKoin().get<AndroidPermissionBridge>().detach()
+        getKoin().get<AndroidImagePickerBridge>().detach()
         super.onDestroy()
     }
 

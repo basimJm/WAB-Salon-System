@@ -64,6 +64,8 @@ import com.fab.wab.customer.feature.booking.di.bookingModule
 import com.fab.wab.customer.feature.booking.presentation.di.bookingPresentationModule
 import com.fab.wab.customer.feature.bookings.di.bookingsModule
 import com.fab.wab.customer.feature.notifications.di.notificationsModule
+import com.fab.wab.customer.feature.profile.di.profileModule
+import com.fab.wab.customer.feature.profile.presentation.di.profilePresentationModule
 import com.fab.wab.customer.feature.notifications.presentation.di.notificationsPresentationModule
 import com.fab.wab.customer.feature.bookings.presentation.di.bookingsPresentationModule
 import com.fab.wab.customer.feature.favorites.di.favoritesModule
@@ -114,6 +116,8 @@ val appModules = listOf(
     bookingPresentationModule,
     notificationsModule,
     notificationsPresentationModule,
+    profileModule,
+    profilePresentationModule,
 )
 
 @Composable

@@ -31,6 +31,14 @@ class AndroidExternalActions(private val context: Context) : ExternalActions {
         start(Intent.createChooser(send, null))
     }
 
+    override fun openUrl(url: String) {
+        start(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    }
+
+    override fun email(address: String) {
+        start(Intent(Intent.ACTION_SENDTO, Uri.parse(ExternalLinks.mailto(address))))
+    }
+
     /** No handler on this device (e.g. no WhatsApp) is not an error for the user; the PRD shows buttons only when relevant. */
     private fun start(intent: Intent): Boolean = runCatching {
         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

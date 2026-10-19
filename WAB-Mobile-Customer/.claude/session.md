@@ -180,3 +180,17 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: dates are typed as ISO text in the sheet (the design system has no date picker yet; a picker component can replace the two fields without touching the view model). The unread badge on Home keeps using the realtime `notifications.unread` event (CUS-032); S18 for completed bookings from the popup goes through S15's Rate button. Deep link / push tap handling = CUS-051/052.
+
+### CUS-053 — Profile S21 guest + registered: header, photo upload, settings, support, legal, log in / out, delete account, version
+- Branch: `feat/cus-053-profile`
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 4)
+- Acceptance criteria (PRD S21, §3.16, S23 contact; operations `GET /profile`, `PUT/DELETE /profile/avatar`, `DELETE /profile`, `POST /uploads/presign`, `POST /uploads/confirm`; push via `PATCH /installations/push-enabled`, logout via `POST /auth/logout`):
+  - [x] core/ui `media/ImagePicker` port (`ImageSource` camera / gallery, `PickedImage` JPEG ≤ 1024 px q85): Android `AndroidImagePickerBridge` (PickVisualMedia + TakePicturePreview, attached in `MainActivity`) + `AndroidImagePicker`; iOS `IosImagePicker` (UIImagePickerController); `FakeImagePicker`. `ExternalActions.openUrl/email` (+ `ExternalLinks.mailto`)
+  - [x] New `feature/profile`: domain `CustomerAccount`/`PresignedUpload`/`ProfileDefaults` (30-day grace), `ProfileRepository` + `UploadsRepository`, use cases Load / UploadAvatar (presign → size check `UPLOAD_TOO_LARGE` → direct PUT on a bare storage client → confirm → `PUT /profile/avatar`) / DeleteAvatar / DeleteAccount (signs out on success) / UpdateGuestProfile; data `ProfileApi`, `UploadsApi` (storage client = platform engine without WAB plugins, Koin `named(STORAGE_CLIENT)`), impls + mappers; di
+  - [x] `ProfileViewModel` + `AccountCoordinator`: guest header (welcome + Edit sheet nickname/gender, local only) vs registered header (avatar → photo options sheet camera (CAMERA permission via `PermissionFlow`) / gallery / delete, full name, email, shimmer / error + retry); settings (language picker → `AppearanceSettings`, theme picker light/dark/system, push switch → `SetPushEnabledUseCase`); support (Contact Us sheet call / WhatsApp / email from `AppConfig.contact`, FAQ → `Screen.Faq`, Rate → store URL, Share → store URL via share sheet); business → `DeepLinks.merchantRegistration(webBaseUrl)`; legal → `Screen.ContentPage(privacy|terms|about)`; registered: Personal information → `Screen.PersonalInfo`, Log out (global dialog → `LogoutUseCase` → toast), Delete account (global dialog with the 30-day text → `DELETE /profile` → guest + toast); guest: Log in → `Graph.Auth`; app version from `AppEnvironment`
+  - [x] `ProfileScreen` (+ `ProfileHeader`, `ProfileRow`/`ProfileSection`, `ProfileOverlays`), `ProfileNavigation` replaces the placeholder `Graph.Profile`; placeholders for S22 / FAQ; AR/EN; analytics; new `AppIcons` (Edit, Delete, Email, Camera, Gallery, Logout, Help, Legal, Business, IdCard)
+  - [x] Unit tests: `ProfileUseCasesTest` (3), `ProfileViewModelTest` (5)
+- Tests: run with the batch-4 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: "Register your salon" has no server-provided link in the contract (PRD says server-provided page/form link) → website path constant in `DeepLinks`, flagged for the owner / SRV. Upload progress (PRD §3.16) is a busy flag, not a percentage (Ktor upload progress deferred). iOS picker code compiles only at the end-of-backlog gate (no K/N build per task).
