@@ -33,7 +33,7 @@ fun relativeTimeOf(createdAtIso: String, now: Instant, zoneId: String): Relative
     val elapsedMinutes = ((now - created).inWholeMinutes).coerceAtLeast(0)
     if (elapsedMinutes < RelativeTimeRules.NOW_UNDER_MINUTES) return RelativeTime.Now
     if (elapsedMinutes < RelativeTimeRules.MINUTES_PER_HOUR) return RelativeTime.Minutes(elapsedMinutes.toInt())
-    val dayDiff = now.toLocalDateTime(zone).date.toEpochDays() - created.toLocalDateTime(zone).date.toEpochDays()
+    val dayDiff = (now.toLocalDateTime(zone).date.toEpochDays() - created.toLocalDateTime(zone).date.toEpochDays()).toInt()
     return when {
         dayDiff <= 0 -> RelativeTime.Hours((elapsedMinutes / RelativeTimeRules.MINUTES_PER_HOUR).toInt())
         dayDiff == RelativeTimeRules.YESTERDAY_DAYS && elapsedMinutes < MINUTES_PER_DAY ->
