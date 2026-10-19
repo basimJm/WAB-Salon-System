@@ -141,3 +141,19 @@
 - Loops: 1/1 — batch-4 host-test run (94 tests across core/common, booking, bookings, notifications, profile, salon, composeApp + `:androidApp:compileDevDebugKotlin`, exit 0) found: the profile domain test module lacked coroutines-test, the permissions fake missed two members, a smart-cast on `NotificationFilters.from/to` across modules, the notifications API test client sent no JSON content type, the salon share test still expected `/salons/`, and the mark-read retry: a failed `POST /notifications/read` left the row styled read so it was never retried (now reverted on failure).
 - Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — every screen goes through `CustomerOperations`; new features follow domain ← data / presentation + di; no literals in composables, AR/EN parity in all five resource sets; uploads follow PRD §3.16 (presign → bare storage client → confirm → avatar); deep links keep the host in config (`<ENV>_WEB_BASE_URL`, `DEEP_LINK_HOST`) and route only after onboarding / S02; delete account → guest per PRD S21. NON-BLOCKING: merchant registration link path is a constant (no server field); date range typed as ISO text (no picker component yet); iOS picker / entitlement compile only at the final gate.
 - Notes: hosts are placeholders until the platform domain is decided (PRD open item 13); App Link verification will fail until the owner publishes the association files. Push-tap routing (notification → booking) is CUS-051/052.
+
+### CUS-051 — Push handling: token registration + refresh, foreground banner + badge refresh, tap → S19 (guest → Home), push toggle synced
+- Branch: `feat/cus-051-push` (from `origin/customer`, batch 5 start)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 5)
+- Acceptance criteria (PRD §10.2; root `CLAUDE.md` §4; server payload keys `event/notificationId/bookingId/salonId/deepLink` + title/body):
+  - [x] Token registration + refresh already flow through `PushTokenRelay` → `InstallationSyncer` → `PUT /installations` (CUS-031); unchanged, verified
+  - [x] core/notification `push/PushSignals` (`PushKeys`, `pushNotificationOf`, `messages` for foreground pushes, `tap` kept until consumed, `appForeground`)
+  - [x] Shell `PushEffect` inside the NavHost: reports foreground state, shows an in-app banner (title + body) for foreground pushes, routes a tapped push: salon `deepLink` → `DeepLinkStore`, registered → Home tab + `Screen.Notifications`, guest → Home (`pushTapDestinationOf`, tested)
+  - [x] Android `MyFirebaseMessagingService`: foreground → `PushSignals`, else system notification (channel name AR/EN, big text, tap `PendingIntent` → `MainActivity` extras via `PushIntents`); `MainActivity.onCreate/onNewIntent` publish the tap; `:core:notification` added to the app plugin
+  - [x] iOS `AppDelegate`: `willPresent` → `pushReceivedInForeground` (system banner suppressed), `didReceive` → `pushTapped`
+  - [x] Home refreshes on a foreground push (badge from the Home payload; test); Profile push toggle asks `NOTIFICATIONS` permission when enabling (test); `push_enabled` synced via `SetPushEnabledUseCase` (CUS-053)
+  - [x] Unit tests: `PushRoutingTest` (2), `HomeViewModelTest` (+assert), `ProfileViewModelTest` (+assert)
+- Tests: run with the batch-5 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: `PushSignals` is a process-wide object (platform services have no Koin scope guarantee); tests share it (no replay on `messages`). iOS foreground badge count follows the realtime `notifications.unread` event + Home reload. Android notification icon still the launcher foreground mipmap (a dedicated monochrome icon is a design asset for the owner).

@@ -33,6 +33,8 @@ import com.fab.wab.customer.core.analytics.compose.LocalAnalyticsTracker
 import com.fab.wab.customer.core.analytics.di.analyticsModule
 import com.fab.wab.customer.core.firebase.di.platformFirebaseModule
 import com.fab.wab.customer.app.navigation.MainNavigation
+import com.fab.wab.customer.app.push.PushEffect
+import com.fab.wab.customer.core.common.AppEnvironment
 import com.fab.wab.customer.app.navigation.RootTab
 import com.fab.wab.customer.app.navigation.rootNavItems
 import com.fab.wab.customer.app.navigation.switchRootTab
@@ -222,6 +224,12 @@ fun App(androidContext: Any?) {
                                     }
                             }
 
+                            PushEffect(
+                                navController = navController,
+                                deepLinks = koinInject<DeepLinkStore>(),
+                                environment = koinInject<AppEnvironment>(),
+                                isSignedIn = sessionState?.isSignedIn == true,
+                            )
                             MainNavigation(Graph.Home, navController)
                         }
                     }

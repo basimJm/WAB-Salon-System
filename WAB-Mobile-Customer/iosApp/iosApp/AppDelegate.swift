@@ -40,6 +40,19 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        completionHandler([.banner, .sound, .badge])
+        // PRD §10.2: in the foreground the shared shell shows an in-app banner instead of the system one.
+        let content = notification.request.content
+        MainViewControllerKt.pushReceivedInForeground(userInfo: content.userInfo, title: content.title, body: content.body)
+        completionHandler([])
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let content = response.notification.request.content
+        MainViewControllerKt.pushTapped(userInfo: content.userInfo, title: content.title, body: content.body)
+        completionHandler()
     }
 }

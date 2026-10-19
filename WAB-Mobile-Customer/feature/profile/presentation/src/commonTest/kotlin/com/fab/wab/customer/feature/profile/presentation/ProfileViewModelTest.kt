@@ -12,6 +12,7 @@ import com.fab.wab.customer.core.ui.external.FakeExternalActions
 import com.fab.wab.customer.core.ui.media.FakeImagePicker
 import com.fab.wab.customer.core.ui.media.ImageSource
 import com.fab.wab.customer.core.ui.media.PickedImage
+import com.fab.wab.customer.core.ui.permission.AppPermission
 import com.fab.wab.customer.core.ui.permission.PermissionFlow
 import com.fab.wab.customer.core.ui.permission.PermissionStatus
 import com.fab.wab.customer.feature.auth.domain.usecase.LogoutUseCase
@@ -107,6 +108,10 @@ class ProfileViewModelTest {
         assertEquals(ThemeMode.DARK, vm.state.value.themeMode)
         assertFalse(vm.state.value.pushEnabled)
         assertEquals(listOf(false), installations.pushUpdates)
+        permissions.status = PermissionStatus.DENIED
+        vm.onEvent(UiAction.OnPushToggle(true))
+        assertEquals(listOf(AppPermission.NOTIFICATIONS), permissions.requests, "enabling asks the OS permission once")
+        assertEquals(listOf(false, true), installations.pushUpdates)
     }
 
     @Test

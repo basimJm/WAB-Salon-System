@@ -9,6 +9,7 @@ import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.mvi.BaseViewModel
+import com.fab.wab.customer.core.ui.permission.AppPermission
 import com.fab.wab.customer.feature.profile.domain.model.ProfileDefaults
 import com.fab.wab.customer.feature.profile.presentation.analytics.ProfileAnalytics
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ContactChannel
@@ -113,6 +114,8 @@ class ProfileViewModel(
         track(ProfileAnalytics.ACTION_PUSH, ProfileAnalytics.PARAM_VALUE to enabled.toString())
         updateState { copy(pushEnabled = enabled) }
         scope.launch {
+            // PRD §10.2: delivery also needs the OS permission; a refusal keeps the preference (settings can grant it later).
+            if (enabled) deps.permissions.ensure(AppPermission.NOTIFICATIONS)
             val result = deps.setPushEnabled(enabled)
             if (result is AppResult.Error) emitSideEffect(SideEffect.ShowError(deps.errorText(result.appError)))
         }

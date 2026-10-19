@@ -131,8 +131,12 @@ class ConfigFake : AppConfigRepository {
 }
 
 class PermissionsFake(var status: PermissionStatus = PermissionStatus.GRANTED) : PermissionManager {
+    val requests = mutableListOf<AppPermission>()
     override suspend fun status(permission: AppPermission): PermissionStatus = status
-    override suspend fun request(permission: AppPermission): PermissionStatus = status
+    override suspend fun request(permission: AppPermission): PermissionStatus {
+        requests += permission
+        return status
+    }
     override fun openSettings(permission: AppPermission) = Unit
     override fun isLocationServiceEnabled(): Boolean = true
     override fun openLocationServiceSettings() = Unit
