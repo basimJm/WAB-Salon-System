@@ -31,5 +31,6 @@ export const REVOKE_REASONS = {
   reuseDetected: 'REUSE_DETECTED',
   accountBlocked: 'ACCOUNT_BLOCKED',
   accountDeletion: 'ACCOUNT_DELETION',
+  credentialsChanged: 'CREDENTIALS_CHANGED',
   memberDeactivated: 'MEMBER_DEACTIVATED',
 } as const;

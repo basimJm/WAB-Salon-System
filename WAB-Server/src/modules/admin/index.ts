@@ -17,6 +17,7 @@ import {
   unavailableAdminPlacements,
   unavailableCampaigns,
   unavailableAdminSettings,
+  unavailableAdminProfile,
   unavailableAdminCustomers,
   unavailableAdminReviews,
   unavailableSalonReview,
@@ -84,6 +85,8 @@ import { createAdminCatalogRouter } from './catalog/catalog.routes';
 import { createAdminBannersRouter } from './banners/banners.routes';
 import { createAdminLocationsRouter } from './locations/locations.routes';
 import { createAdminAuthRouter } from './auth/auth.routes';
+import { createAdminProfileRouter } from './profile/profile.routes';
+import { ADMIN_PROFILE_ROUTES } from '../../constants/adminProfile';
 
 /** Router for the /admin/v1 namespace. Feature routers are mounted here as they are built. */
 export const createAdminRouter = (services: ApiServices = {}): Router => {
@@ -128,6 +131,11 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     router,
     ADMIN_CUSTOMER_ROUTES.base,
     createAdminCustomersRouter(services.adminCustomers ?? unavailableAdminCustomers, guard),
+  );
+  mount(
+    router,
+    ADMIN_PROFILE_ROUTES.base,
+    createAdminProfileRouter(services.adminProfile ?? unavailableAdminProfile, guard),
   );
   mount(
     router,

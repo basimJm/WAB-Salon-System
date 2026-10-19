@@ -4,7 +4,7 @@
 
 ## Integration status (one glance)
 
-- Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (116) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
+- Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (121) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
 - Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); analytics = the server's own MongoDB events (no analytics provider; BigQuery/`@wab/analytics` dropped, owner 2026-10-19); payments **paused** (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev/test; HyperPay/`@wab/payments` not used by the server); storage on the in-repo S3 code until SRV-112.
 - Open work: SRV-111 contract guard, Stage N (SRV-117…128, admin gaps), Stage O (SRV-129…134, merchant gaps). Deployment SRV-011/116 and SRV-059/115: owner (PENDING).
 
@@ -33,11 +33,16 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: real Firebase ID tokens from the dev/prod projects, Docker build (no daemon). API docs: no change.
 
-### T-123 — Wire `wab-notifications` into WAB-Server (`NOTIFIER_PROVIDER=real`)
+### SRV-117 — Admin profile (G1): profile, change password, change email, alert recipients
 
-- Branch: `claude/busy-johnson-2rch94` (PR #129, merged to `server`)
-- Status: DONE
-- Acceptance criteria: `file:../wab-notifications` dependency + `ensure-sdks`; env keys FCM__/SMTP__/EMAIL_FROM_*; adapter maps SDK errors → `ExternalServiceError`; closed on shutdown; Docker image builds from the repo root
-- Tests: `npm test` 2420; lint/format/typecheck/build green; `tests/notifierReal.test.ts` (16)
-- Loops: 3/3
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: real SMTP send (App Password pending), Docker build (no daemon). API docs: no change.
+- Branch: `feat/srv-117-admin-profile`
+- Status: IN REVIEW
+- Acceptance criteria (Admin PRD §4 "Admin profile", BUSINESS_DOMAIN §3.1 admins, §10 `admin.*`; client impact: ADM-068):
+  - [x] `GET /admin/v1/profile` → id, email, alertEmails, lastLoginAt; `PATCH /admin/v1/profile` replaces `alertEmails` (valid, unique, max N); audited with a reason
+  - [x] `POST /admin/v1/profile/password` {currentPassword, newPassword}: wrong current password counts toward the sign-in lockout and answers 403 `CURRENT_PASSWORD_INVALID` (never 401, so the panel does not treat it as an expired session); locked → 429; new password ≥ min length, differs from the current one; all refresh tokens revoked; notice emailed; audited
+  - [x] `POST /admin/v1/profile/email/request` {newEmail, password} (password checked like above) emails a code to the NEW address; `POST /admin/v1/profile/email/verify` {code}: right code (once, 5 min) changes the email, revokes sessions, notices the old address; taken address → 409 `EMAIL_ALREADY_USED`; wrong/expired code → 422 `OTP_INVALID`/`OTP_EXPIRED` (never 401; a wrong code counts toward the lockout)
+  - [x] All routes need the admin token; AR+EN messages/emails; no hardcoded values; contract regenerated
+- Tests: `tests/adminProfile.test.ts` (18: auth, read, alert list, password incl. lockout/403/422, email change incl. single use, resend window, address binding, send failure) + `tests/errors.test.ts` (codes mirrored). Full gate green: docs, format, lint, typecheck, build, 2487 tests, audit 0. API docs: 5 operations added to `/admin/v1` (`GET|PATCH /profile`, `POST /profile/password|email/request|email/verify`); client impact: ADM-068.
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
+- Notes: BUSINESS_DOMAIN §11 gained `CURRENT_PASSWORD_INVALID`, `EMAIL_ALREADY_USED`. Wrong password is 403 (not 401) on purpose so the panel keeps the session. NOT verified: real Mongo (unique-email race relies on the unique index + duplicate-key mapping, covered by a fake), real email delivery.
