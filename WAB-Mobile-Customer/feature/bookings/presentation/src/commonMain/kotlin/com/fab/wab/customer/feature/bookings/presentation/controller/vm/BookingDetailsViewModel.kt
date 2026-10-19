@@ -1,6 +1,7 @@
 package com.fab.wab.customer.feature.bookings.presentation.controller.vm
 
 import com.fab.wab.customer.core.analytics.AnalyticsAction
+import com.fab.wab.customer.core.common.BusinessTime
 import com.fab.wab.customer.core.analytics.AnalyticsTracker
 import com.fab.wab.customer.core.analytics.analyticsParams
 import com.fab.wab.customer.core.domain.AppError
@@ -41,7 +42,7 @@ class BookingDetailsDependencies(
     val external: ExternalActions,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
-    val now: () -> Instant = { kotlinx.datetime.Clock.System.now() },
+    val now: () -> Instant = { BusinessTime.nowInstant() },
 )
 
 /** S15: booking + salon contact, cancel rule and money outcome from the policy snapshot, live `booking.updated`. */

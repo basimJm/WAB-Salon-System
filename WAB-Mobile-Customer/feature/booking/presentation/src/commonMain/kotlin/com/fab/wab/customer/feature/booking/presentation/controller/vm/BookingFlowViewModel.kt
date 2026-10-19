@@ -39,7 +39,7 @@ class BookingFlowDependencies(
     val deleteDraft: DeleteBookingDraftUseCase,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
-    val today: () -> LocalDate = { kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
+    val today: () -> LocalDate = { BusinessTime.nowInstant().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
 )
 
 /**
