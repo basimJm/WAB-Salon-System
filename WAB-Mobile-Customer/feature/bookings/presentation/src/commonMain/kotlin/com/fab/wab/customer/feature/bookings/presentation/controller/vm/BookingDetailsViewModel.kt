@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 class BookingDetailsDependencies(
@@ -42,7 +41,7 @@ class BookingDetailsDependencies(
     val external: ExternalActions,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
-    val now: () -> Instant = { Clock.System.now() },
+    val now: () -> Instant = { kotlinx.datetime.Clock.System.now() },
 )
 
 /** S15: booking + salon contact, cancel rule and money outcome from the policy snapshot, live `booking.updated`. */

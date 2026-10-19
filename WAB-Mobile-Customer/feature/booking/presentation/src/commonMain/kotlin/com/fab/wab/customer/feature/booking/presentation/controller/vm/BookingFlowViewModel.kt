@@ -27,7 +27,6 @@ import com.fab.wab.customer.feature.salon.domain.repository.SalonDetailsReposito
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -40,7 +39,7 @@ class BookingFlowDependencies(
     val deleteDraft: DeleteBookingDraftUseCase,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
-    val today: () -> LocalDate = { Clock.System.now().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
+    val today: () -> LocalDate = { kotlinx.datetime.Clock.System.now().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
 )
 
 /**
