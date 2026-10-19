@@ -43,7 +43,6 @@ import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllS
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 private val SNAKE_CASE = Regex("^[a-z][a-z0-9_]*$")
@@ -146,8 +145,8 @@ class AnalyticsCatalogTest {
         UiActionObserver.install { owner, action -> seen += owner to action }
         val vm = TapViewModel()
         vm.onEvent("tap")
-        assertEquals(listOf("TapViewModel" to "tap"), seen)
-        assertIs<Int>(vm.uiState.value)
+        assertEquals(listOf<Pair<String, Any?>>("TapViewModel" to "tap"), seen)
+        assertEquals(1, vm.uiState.value)
         UiActionObserver.install(null)
     }
 }

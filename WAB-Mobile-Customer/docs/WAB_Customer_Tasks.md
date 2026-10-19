@@ -100,8 +100,8 @@
 | CUS-055 | Legal & support S23: `GET /content/pages/{slug}` rendered as rich text (sanitized HTML subset), `GET /content/faqs`, Contact Us (dialer, WhatsApp, mail) from config | `feat/cus-055-legal-support` | CUS-053 | DONE | PRD S23, §3.11; server SRV-037 |
 | CUS-056 | "Register your salon with us": opens the merchant app deep link (`<merchant-domain>/register`) if installed, else the store page; links from config | `feat/cus-056-register-salon-entry` | CUS-053 | DONE | PRD S21 "For business"; Merchant PRD §4.5; domain is an open item (config placeholder) |
 | CUS-057 | Deep links: Android App Links + iOS Universal Links for `/salon/{salonId}`, routing through onboarding/S02 first, Home then Salon Details, "Salon not available" fallback; `assetlinks.json` / AASA checklist for the owner | `feat/cus-057-deep-links` | CUS-036, CUS-026 | DONE | PRD §4.4; domain **owner input** later (config only) |
-| CUS-058 | Analytics events: every screen view and every action of PRD §14 (suggested list) with the common fields, verified by a test that every route and every UiAction maps to an event | `feat/cus-058-analytics-events` | CUS-012, CUS-055 | IN PROGRESS | PRD §14 |
-| CUS-059 | Error-code coverage: every code of BUSINESS_DOMAIN §11 and every code in `openapi.customer.json` has an AR + EN message and a handling path (retry / login / contact); contract test | `feat/cus-059-error-coverage` | CUS-006, CUS-009 | IN PROGRESS | Admin equivalent ADM-009 |
+| CUS-058 | Analytics events: every screen view and every action of PRD §14 (suggested list) with the common fields, verified by a test that every route and every UiAction maps to an event | `feat/cus-058-analytics-events` | CUS-012, CUS-055 | IN REVIEW | PRD §14 |
+| CUS-059 | Error-code coverage: every code of BUSINESS_DOMAIN §11 and every code in `openapi.customer.json` has an AR + EN message and a handling path (retry / login / contact); contract test | `feat/cus-059-error-coverage` | CUS-006, CUS-009 | IN REVIEW | Admin equivalent ADM-009 |
 
 ## Phase 5 — Integration, quality and release
 | ID | Task | Branch | Needs | Status | Notes |
