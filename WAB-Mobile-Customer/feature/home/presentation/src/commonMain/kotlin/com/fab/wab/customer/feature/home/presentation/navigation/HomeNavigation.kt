@@ -44,7 +44,7 @@ class HomeNavigation(
             when (effect) {
                 is SideEffect.OpenSalon -> navigateTo(Screen.SalonDetails(effect.salonId))
                 is SideEffect.OpenAllSalons ->
-                    navigateTo(Screen.AllSalons(effect.serviceId, effect.serviceName, effect.filter?.code))
+                    navigateTo(Screen.AllSalons(effect.gender.code, effect.serviceId, effect.serviceName, effect.filter?.code))
                 is SideEffect.OpenAllServices -> navigateTo(Screen.AllServices(effect.gender.code))
                 SideEffect.OpenNotifications -> navigateTo(Screen.Notifications)
                 is SideEffect.OpenUrl -> openUrl(effect.url)

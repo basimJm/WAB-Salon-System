@@ -43,7 +43,13 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
         navGraphBuilder.composable<Screen.AllSalons> { entry ->
             val route = entry.toRoute<Screen.AllSalons>()
-            AllSalonsDestination(AllSalonsEntry(route.serviceId, route.serviceName, SalonListFilter.fromCode(route.filter)))
+            val entry = AllSalonsEntry(
+                gender = Gender.fromCode(route.gender),
+                serviceId = route.serviceId,
+                serviceName = route.serviceName,
+                filter = SalonListFilter.fromCode(route.filter),
+            )
+            AllSalonsDestination(entry)
         }
         navGraphBuilder.composable<Screen.AllServices> { entry ->
             val gender = Gender.fromCode(entry.toRoute<Screen.AllServices>().gender) ?: Gender.entries.first()
@@ -58,7 +64,8 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
         val notifications = rememberNotificationManager()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
-                is AllServicesContract.SideEffect.OpenSalons -> navigateTo(Screen.AllSalons(effect.serviceId, effect.serviceName))
+                is AllServicesContract.SideEffect.OpenSalons ->
+                    navigateTo(Screen.AllSalons(gender.code, effect.serviceId, effect.serviceName))
                 is AllServicesContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }

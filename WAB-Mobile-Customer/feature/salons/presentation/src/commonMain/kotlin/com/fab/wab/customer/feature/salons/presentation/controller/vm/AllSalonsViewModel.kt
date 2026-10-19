@@ -58,6 +58,7 @@ class AllSalonsViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(filters = entry.toFilters()), testScope) {
 
+    private val entryGender = entry.gender
     private var started = false
     private var loadJob: Job? = null
     private val typed = MutableStateFlow("")
@@ -67,7 +68,8 @@ class AllSalonsViewModel(
         started = true
         scope.launch {
             val session = deps.sessionStore.state.first()
-            updateState { copy(gender = session.genderScope ?: Gender.entries.first(), signedIn = session.isSignedIn) }
+            val gender = entryGender ?: session.genderScope ?: Gender.entries.first()
+            updateState { copy(gender = gender, signedIn = session.isSignedIn) }
             load()
         }
         scope.launch {

@@ -8,6 +8,7 @@ import com.fab.wab.customer.core.navigation.route.SalonListFilter
 
 /** How S04 was opened (PRD S04 entry table); becomes the initial [SalonFilters]. */
 data class AllSalonsEntry(
+    val gender: Gender? = null,
     val serviceId: String? = null,
     val serviceName: String? = null,
     val filter: SalonListFilter? = null,

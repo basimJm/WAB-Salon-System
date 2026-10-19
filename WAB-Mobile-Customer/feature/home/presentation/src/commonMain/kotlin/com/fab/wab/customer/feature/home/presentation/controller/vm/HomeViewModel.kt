@@ -94,22 +94,28 @@ class HomeViewModel(
             is UiAction.OnBannerClick -> openBanner(event.bannerId)
             UiAction.OnSearchClick -> {
                 track(HomeAnalytics.ACTION_SEARCH_CLICK)
-                emitSideEffect(SideEffect.OpenAllSalons())
+                openSalons()
             }
             UiAction.OnNotificationsClick -> emitSideEffect(SideEffect.OpenNotifications)
             is UiAction.OnServiceClick -> {
                 track(HomeAnalytics.ACTION_SERVICE_CLICK, HomeAnalytics.PARAM_ID to event.serviceId)
                 val name = uiState.value.services.items.firstOrNull { it.id == event.serviceId }?.name
-                emitSideEffect(SideEffect.OpenAllSalons(serviceId = event.serviceId, serviceName = name))
+                openSalons(serviceId = event.serviceId, serviceName = name)
             }
             UiAction.OnServicesSeeMore -> uiState.value.gender?.let { emitSideEffect(SideEffect.OpenAllServices(it)) }
             is UiAction.OnSalonClick -> {
                 track(HomeAnalytics.ACTION_SALON_CLICK, HomeAnalytics.PARAM_ID to event.salonId)
                 emitSideEffect(SideEffect.OpenSalon(event.salonId))
             }
-            is UiAction.OnSeeAll -> emitSideEffect(SideEffect.OpenAllSalons(filter = event.section.filter()))
+            is UiAction.OnSeeAll -> openSalons(filter = event.section.filter())
             else -> Unit
         }
+    }
+
+    /** S04 always opens for the gender of the selected tab (PRD S04 "selected gender"). */
+    private fun openSalons(serviceId: String? = null, serviceName: String? = null, filter: SalonListFilter? = null) {
+        val gender = uiState.value.gender ?: return
+        emitSideEffect(SideEffect.OpenAllSalons(gender, serviceId, serviceName, filter))
     }
 
     private fun applySession(session: SessionState) {

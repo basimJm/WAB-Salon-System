@@ -58,6 +58,7 @@ sealed interface HomeContract {
     sealed interface SideEffect {
         data class OpenSalon(val salonId: String) : SideEffect
         data class OpenAllSalons(
+            val gender: Gender,
             val serviceId: String? = null,
             val serviceName: String? = null,
             val filter: SalonListFilter? = null,

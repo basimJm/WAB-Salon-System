@@ -126,21 +126,27 @@ class AllSalonsViewModelTest {
     @Test
     fun entryPresetsBecomeFilters() {
         assertEquals(GeneralFilter.RECOMMENDED, AllSalonsEntry(filter = SalonListFilter.RECOMMENDED).toFilters().general)
-        assertEquals(listOf(ServiceRef("s1", "Hair")), AllSalonsEntry("s1", "Hair").toFilters().services)
+        assertEquals(listOf(ServiceRef("s1", "Hair")), AllSalonsEntry(serviceId = "s1", serviceName = "Hair").toFilters().services)
         assertTrue(AllSalonsEntry().toFilters().isEmpty)
     }
 
     @Test
     fun loadsTheFirstPageWithGenderAndPresetsThenPages() = runTest(UnconfinedTestDispatcher()) {
-        val vm = viewModel(AllSalonsEntry(filter = SalonListFilter.RECOMMENDED))
+        val vm = viewModel(AllSalonsEntry(gender = Gender.MALE, filter = SalonListFilter.RECOMMENDED))
         val first = search.queries.single()
-        assertEquals(Gender.FEMALE, first.gender)
+        assertEquals(Gender.MALE, first.gender)
         assertEquals(GeneralFilter.RECOMMENDED, first.filters.general)
         assertEquals(1, first.page)
         assertTrue(vm.state.value.hasMore)
         vm.onEvent(UiAction.OnLoadMore)
         assertEquals(2, search.queries.last().page)
         assertEquals(20, vm.state.value.salons.size)
+    }
+
+    @Test
+    fun withoutAnEntryGenderTheSessionGenderIsUsed() = runTest(UnconfinedTestDispatcher()) {
+        viewModel()
+        assertEquals(Gender.FEMALE, search.queries.single().gender)
     }
 
     @Test
@@ -161,7 +167,7 @@ class AllSalonsViewModelTest {
 
     @Test
     fun removingAChipReloadsWithoutIt() = runTest(UnconfinedTestDispatcher()) {
-        val vm = viewModel(AllSalonsEntry("s1", "Hair", SalonListFilter.RECOMMENDED))
+        val vm = viewModel(AllSalonsEntry(serviceId = "s1", serviceName = "Hair", filter = SalonListFilter.RECOMMENDED))
         vm.onEvent(UiAction.OnChipRemove(FilterChipId.Service("s1")))
         assertTrue(search.queries.last().filters.services.isEmpty())
         vm.onEvent(UiAction.OnChipRemove(FilterChipId.General))
