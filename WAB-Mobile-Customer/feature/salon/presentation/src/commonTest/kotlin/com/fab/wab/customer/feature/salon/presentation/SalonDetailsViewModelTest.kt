@@ -9,6 +9,7 @@ import com.fab.wab.customer.core.domain.model.LocationData
 import com.fab.wab.customer.core.domain.salon.RatingSummary
 import com.fab.wab.customer.core.domain.salon.ReviewsPreview
 import com.fab.wab.customer.core.domain.salon.SalonDetails
+import com.fab.wab.customer.core.domain.salon.StaffMember
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionState
@@ -45,6 +46,7 @@ private val SALON = SalonDetails(
 
 private class DetailsFake(var result: AppResult<SalonDetails> = AppResult.Success(SALON)) : SalonDetailsRepository {
     override suspend fun details(salonId: String): AppResult<SalonDetails> = result
+    override suspend fun staffMember(salonId: String, memberId: String): AppResult<StaffMember> = AppResult.Loading
 }
 
 private class FavoritesFake(var result: AppResult<Boolean>? = null) : FavoritesRepository {

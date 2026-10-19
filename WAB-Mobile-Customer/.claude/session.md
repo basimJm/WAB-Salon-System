@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) verified and shipped as one PR from `feat/cus-036-salon-details` into `customer`. Next: batch 2 = CUS-037…041 (task branches chain from the previous task branch; gate + emulator + loop + review after the fifth).
+- Batch 1 (CUS-032…036) verified and shipped as one PR from `feat/cus-036-salon-details` into `customer`. Batch 2 = CUS-037 ✓ code, CUS-038, CUS-039, CUS-040, CUS-041 (task branches chain from the previous task branch; gate + emulator + loop + review after the fifth).
 
 ### CUS-032 — Home S03: `GET /home`, header + badge, banners, search bar, gender tabs, sections, nearest permission states
 - Branch: `feat/cus-032-home`
@@ -85,3 +85,17 @@
 - Loops: 1/1 — the loop found: S04 ignored the Home tab's gender (session gender was used) → the route now carries the gender (`Screen.AllSalons(gender, …)`, `AllSalonsEntry.gender`); fixture hints for `createdAt` (ISO) and price bounds (5–100); the detekt findings (complexity, modifier param, long lines) and the K/N `NSString` cast in the maps hand-off (replaced by a common percent-encoder).
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — contract-typed query builders with unit-tested parameter mapping; features talk to Firebase / location / permissions / external apps only through ports; strings AR + EN in resources; no literals (query keys, enum codes and analytics names are constants); favorites / booking / add review auth-gated; nearest never requests location without the explanation dialog; business rule "Book always enabled" kept. NON-BLOCKING: `AppStaffItem` truncates "On duty today" in EN at 96 dp (design-system, to widen in CUS-037); S07 landscape not screenshotted (same scaffold as Home / S04, which were).
 - Notes: web base URLs are PLACEHOLDERS like the API hosts (owner decision: platform domain); staff / service taps and gallery taps emit side effects consumed by CUS-037 / CUS-039 (no-ops now).
+
+### CUS-037 — Staff sheet S07a + Service sheet S07b
+- Branch: `feat/cus-037-staff-service-sheets` (from `origin/customer`, batch 2 start)
+- Status: IN PROGRESS (code + tests written; Gradle at the end of batch 2)
+- Acceptance criteria (PRD S07 staff sheet + service sheet, Design Script S07a/S07b; operation `GET /salons/{salonId}/staff/{memberId}`):
+  - [x] core/domain `salon/StaffMember.kt` (`MemberRole`, `WorkingDay`, `StaffServiceRef`, `StaffMember`); `SalonDetailsRepository.staffMember` + API (`pathWith` two params) + mappers (`StaffMappersTest`); `GetStaffMemberUseCase`
+  - [x] `StaffSheetViewModel(salonId, memberId)` + `StaffSheet` (full-screen `AppBottomSheet`: photo, first name, role badge, status badge, rating, bio, years of experience, customers served, working days with "Day off", services chips, staff reviews first 3 + See all → `Screen.StaffReviews` (placeholder, CUS-038) + Add review auth-gated); staff rating independent of the salon rating
+  - [x] `ServiceSheet(service)` from the loaded salon (name, description, duration, price, media tiles → `onMediaClick` for CUS-039); both hosted by `SalonNavigation` (staff per request key, service by id)
+  - [x] AR + EN strings; fixture hints `start/end/day`
+  - [x] Tests: `StaffMappersTest` (1), `StaffSheetViewModelTest` (2)
+  - [ ] Gradle + emulator: batch 2
+- Tests: written, not yet run (batch rule)
+- Loops: 0/1
+- Review: PENDING

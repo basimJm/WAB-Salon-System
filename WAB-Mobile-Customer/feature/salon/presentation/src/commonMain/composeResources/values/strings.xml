@@ -25,4 +25,14 @@
     <string name="day_wed">Wednesday</string>
     <string name="day_thu">Thursday</string>
     <string name="day_fri">Friday</string>
+    <string name="staff_role_owner">Owner</string>
+    <string name="staff_role_manager">Manager</string>
+    <string name="staff_role_employee">Employee</string>
+    <string name="staff_day_off_status">Day off</string>
+    <string name="staff_experience">%1$d years of experience</string>
+    <string name="staff_customers">%1$d customers served via the app</string>
+    <string name="staff_working_days">Working days</string>
+    <string name="staff_services">Services</string>
+    <string name="staff_no_reviews">There are no reviews for this staff member yet.</string>
+    <string name="service_media">Media</string>
 </resources>

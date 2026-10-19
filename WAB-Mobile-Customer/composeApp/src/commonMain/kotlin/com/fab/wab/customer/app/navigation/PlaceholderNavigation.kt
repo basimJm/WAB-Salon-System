@@ -66,6 +66,9 @@ fun NavGraphBuilder.registerPlaceholderHomeScreens() {
     composable<Screen.SalonReviews> { entry ->
         PlaceholderRootScreen(Res.string.placeholder_salon_reviews, detail = entry.toRoute<Screen.SalonReviews>().salonId)
     }
+    composable<Screen.StaffReviews> { entry ->
+        PlaceholderRootScreen(Res.string.placeholder_salon_reviews, detail = entry.toRoute<Screen.StaffReviews>().memberId)
+    }
     composable<Screen.BookingStart> { entry ->
         PlaceholderRootScreen(Res.string.placeholder_booking, detail = entry.toRoute<Screen.BookingStart>().salonId)
     }
