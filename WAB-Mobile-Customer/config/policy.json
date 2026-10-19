@@ -38,7 +38,8 @@
       "**/GoogleService-Info.plist",
       "**/google-services.json",
       "config/policy-baseline.json",
-      "config/detekt/baseline.xml"
+      "config/detekt/baseline.xml",
+      "**/contract/generated/**"
     ]
   },
   "kotlin": {
@@ -47,7 +48,8 @@
       "**/src/main/**/*.kt"
     ],
     "excludeGlobs": [
-      "build-logic/**"
+      "build-logic/**",
+      "**/contract/generated/**"
     ],
     "testGlobs": [
       "**/src/*Test/**",
@@ -136,11 +138,14 @@
       "APP_ENV",
       "API_BASE_URL",
       "APP_DISPLAY_NAME",
-      "PRODUCT_BUNDLE_IDENTIFIER"
+      "PRODUCT_BUNDLE_IDENTIFIER",
+      "DATA_SOURCE"
     ],
     "gradlePropertyKeys": [
       "DEV_API_BASE_URL",
-      "PROD_API_BASE_URL"
+      "PROD_API_BASE_URL",
+      "DEV_DATA_SOURCE",
+      "PROD_DATA_SOURCE"
     ],
     "workflow": ".github/workflows/customer-ci.yml"
   }

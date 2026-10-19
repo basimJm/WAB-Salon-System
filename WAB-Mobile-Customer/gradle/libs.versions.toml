@@ -17,7 +17,12 @@ kotlinx-serialization-json = "1.10.0"
 koin = "4.2.0"
 coil = "3.0.0"
 googleGmsGoogleServices = "4.4.4"
+firebaseCrashlyticsPlugin = "3.0.6"
 firebaseMessaging = "25.0.1"
+# Firebase Android SDK (same release train as messaging 25.0.1 / BOM 34.2.0): analytics, auth (phone OTP), crashlytics behind core/firebase ports
+firebaseAnalytics = "23.0.0"
+firebaseAuth = "24.0.1"
+firebaseCrashlytics = "20.0.1"
 materialIconsExtended = "1.7.3"
 paging = "3.3.0-alpha02-0.5.1"
 compose-navigation = "2.9.2"
@@ -55,6 +60,8 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
@@ -79,6 +86,9 @@ paging-compose-common = { module = "app.cash.paging:paging-compose-common", vers
 paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging" }
 
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseAnalytics" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
 
 # Build logic dependencies
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -125,6 +135,7 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
 
 #RoomDB
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
@@ -134,6 +145,8 @@ androidx-room = { id = "androidx.room", version.ref = "room" }
 com-fab-wab-customer-kotlin-multiplatform-library = { id = "com.fab.wab.customer.kotlin.multiplatform.library" }
 com-fab-wab-customer-compose-app = { id = "com.fab.wab.customer.compose.app" }
 com-fab-wab-customer-android-app = { id = "com.fab.wab.customer.android.app" }
+com-fab-wab-customer-core-library = { id = "com.fab.wab.customer.core.library" }
+com-fab-wab-customer-core-compose = { id = "com.fab.wab.customer.core.compose" }
 com-fab-wab-customer-feature-domain = { id = "com.fab.wab.customer.feature.domain" }
 com-fab-wab-customer-feature-data = { id = "com.fab.wab.customer.feature.data" }
 com-fab-wab-customer-feature-presentation = { id = "com.fab.wab.customer.feature.presentation" }

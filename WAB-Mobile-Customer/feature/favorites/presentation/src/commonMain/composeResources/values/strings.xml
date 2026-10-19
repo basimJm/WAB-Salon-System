@@ -1,0 +1,8 @@
+<resources>
+    <string name="favorites_title">Favorites</string>
+    <string name="favorites_guest_title">Your favorite salons</string>
+    <string name="favorites_guest_message">Log in to save salons and find them here.</string>
+    <string name="favorites_login">Log in</string>
+    <string name="favorites_empty">No favorite salons yet</string>
+    <string name="favorites_explore">Explore salons</string>
+</resources>

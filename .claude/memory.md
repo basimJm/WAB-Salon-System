@@ -14,7 +14,7 @@
 - OTP: Firebase Phone Auth (SMS), `otpLength` from the backend (6), backend verifies the Firebase ID token (`wab-otp`). Admin: email + password + email OTP.
 - Real-time Socket.IO + Redis; push FCM (one Firebase project per env: dev `wab-dev-397ab`, prod `wab-prod-9c58f`; keys outside git, `*firebase-adminsdk*.json` ignored); jobs BullMQ + cron; storage S3 + CDN presigned; email Gmail SMTP from `basim.abusnaimeh@gmail.com` (`EMAIL_FROM_ADDRESS`, `SMTP_USER`, `SMTP_PASS` env only); analytics Firebase → BigQuery + server events in Mongo.
 - Payments Phase 1: platform collects, refunds automatic, payouts manual; Phase 2 sub-merchants (ports already carry optional `destinations`). Gateway candidate HyperPay, not decided.
-- Owner decisions: one verification loop (2026-10-18); no admin/server GitHub CI, local gates only; no e2e runs unless asked; rules/roles read once per session; owner handles deployment and SDK integration tasks (they stay `PENDING`/`BLOCKED`, see `tasks.py blocked`).
+- Owner decisions: every FIVE tasks run unit tests only + one PR; detekt, full gate, emulator + simulator end-to-end journey once after the whole backlog (2026-10-19, rules §3.13); one verification loop (2026-10-18); no admin/server GitHub CI, local gates only; no e2e runs unless asked; rules/roles read once per session; owner handles deployment and SDK integration tasks (they stay `PENDING`/`BLOCKED`, see `tasks.py blocked`).
 
 ## Open owner inputs (block integration)
 - Platform domain, payment gateway + sandbox, DigitalOcean product + managed Redis, Atlas tier, error-tracking tool, package registry (GitHub Packages assumed), merchant Firebase registrations + APNs, store accounts/signing, shared `core/*` between the two KMP apps.

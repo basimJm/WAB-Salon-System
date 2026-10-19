@@ -1,0 +1,15 @@
+<resources>
+    <string name="home_welcome">Hello, %1$s</string>
+    <string name="home_notifications">Notifications</string>
+    <string name="home_search_hint">Search for a salon name, service, or category</string>
+    <string name="home_tab_men">Men</string>
+    <string name="home_tab_women">Women</string>
+    <string name="home_services">Services</string>
+    <string name="home_see_more">See more</string>
+    <string name="home_recommended">Recommended salons</string>
+    <string name="home_see_all">See all</string>
+    <string name="home_nearest">Nearest salons</string>
+    <string name="home_nearest_empty">No salons near you yet.</string>
+    <string name="home_nearest_location_off">Enable location to see salons near you.</string>
+    <string name="home_enable_location">Enable location services</string>
+</resources>

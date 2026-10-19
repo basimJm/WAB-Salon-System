@@ -1,0 +1,25 @@
+<resources>
+    <string name="bookings_welcome">مرحباً %1$s</string>
+    <string name="bookings_guest_message">أنت غير مسجل بعد</string>
+    <string name="bookings_login">تسجيل الدخول</string>
+    <string name="bookings_search_hint">ابحث باسم الصالون أو الرقم المرجعي</string>
+    <string name="bookings_tab_upcoming">القادمة</string>
+    <string name="bookings_tab_past">السابقة</string>
+    <string name="bookings_empty">ليس لديك حجوزات</string>
+    <string name="bookings_book_now">احجز الآن</string>
+    <string name="booking_reference">المرجع %1$s</string>
+    <string name="booking_status_pending">قيد الانتظار</string>
+    <string name="booking_status_approved">مقبول</string>
+    <string name="booking_status_rejected">مرفوض</string>
+    <string name="booking_status_cancelled_customer">ألغيته</string>
+    <string name="booking_status_cancelled_salon">ألغاه الصالون</string>
+    <string name="booking_status_auto_cancelled">أُلغي (بدون رد)</string>
+    <string name="booking_status_completed">مكتمل</string>
+    <string name="booking_status_no_show">لم يحضر</string>
+    <string name="booking_status_unknown">غير معروف</string>
+    <string name="payment_status_pay_on_arrival">الدفع عند الوصول</string>
+    <string name="payment_status_deposit_paid">تم دفع العربون</string>
+    <string name="payment_status_fully_paid">مدفوع بالكامل</string>
+    <string name="payment_status_paid">مدفوع</string>
+    <string name="payment_status_unknown">الدفع</string>
+</resources>

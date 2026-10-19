@@ -1,0 +1,18 @@
+package com.fab.wab.customer.core.domain.booking
+
+/** One row of `GET /bookings` (PRD S14 card); instants are ISO UTC, money is JOD text. */
+data class BookingSummary(
+    val id: String,
+    val referenceNumber: String,
+    val status: BookingStatus,
+    val paymentMethod: PaymentMethod,
+    val paymentStatus: PaymentStatus,
+    val hasBride: Boolean,
+    val appointmentStart: String,
+    val appointmentEnd: String,
+    val personsCount: Int,
+    val total: String,
+    val salonId: String?,
+    val salonName: String?,
+    val staffNames: List<String>,
+)

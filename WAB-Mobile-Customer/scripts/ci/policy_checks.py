@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """WAB-Mobile-Customer policy checks (CLAUDE.md §1). Usage: policy_checks.py <command> [--root DIR] [--update-baseline]."""
+from __future__ import annotations
+
 import argparse
 import sys
 from pathlib import Path
