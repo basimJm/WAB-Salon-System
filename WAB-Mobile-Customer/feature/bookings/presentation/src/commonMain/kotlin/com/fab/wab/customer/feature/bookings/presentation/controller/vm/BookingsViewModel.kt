@@ -72,7 +72,7 @@ class BookingsViewModel(
         }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnLoginClick -> emitSideEffect(SideEffect.OpenLogin)
             UiAction.OnBookNowClick -> emitSideEffect(SideEffect.OpenHome)

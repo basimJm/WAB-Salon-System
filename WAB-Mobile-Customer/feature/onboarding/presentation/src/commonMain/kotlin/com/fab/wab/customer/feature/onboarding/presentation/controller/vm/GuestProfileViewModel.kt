@@ -19,7 +19,7 @@ class GuestProfileViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnNicknameChange -> updateState { copy(nickname = event.value, nicknameError = false) }
             is UiAction.OnGenderSelect -> updateState { copy(gender = event.gender) }

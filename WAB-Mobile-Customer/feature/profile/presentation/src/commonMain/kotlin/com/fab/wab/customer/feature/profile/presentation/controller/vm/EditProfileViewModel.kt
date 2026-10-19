@@ -57,7 +57,7 @@ class EditProfileViewModel(
         scope.launch { awaitProof() }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnFirstNameChange -> updateState { copy(firstName = event.value, touched = touched + Field.FirstName) }
             is UiAction.OnLastNameChange -> updateState { copy(lastName = event.value, touched = touched + Field.LastName) }

@@ -46,7 +46,7 @@ class ContentPageViewModel(
         }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnRetry -> if (!uiState.value.isContact) load()
             is UiAction.OnLinkClick -> {

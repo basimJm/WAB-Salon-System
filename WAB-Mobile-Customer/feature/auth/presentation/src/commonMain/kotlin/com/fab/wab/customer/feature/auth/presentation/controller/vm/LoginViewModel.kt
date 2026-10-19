@@ -43,7 +43,7 @@ class LoginViewModel(
         }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnNumberChange -> updateState { copy(number = event.value, numberTouched = true).revalidated() }
             UiAction.OnCountryClick -> updateState { copy(pickerOpen = true) }

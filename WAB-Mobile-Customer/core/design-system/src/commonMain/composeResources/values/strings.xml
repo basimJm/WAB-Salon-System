@@ -95,4 +95,7 @@
     <string name="time_am">AM</string>
     <string name="time_pm">PM</string>
     <string name="time_range_separator"> – </string>
+    <string name="state_action_login">Log in</string>
+    <string name="state_action_contact">Contact us</string>
+    <string name="state_action_update">Update the app</string>
 </resources>

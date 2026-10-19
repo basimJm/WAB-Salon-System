@@ -17,7 +17,7 @@ class BookingSuccessViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(UiState(bookingId, referenceNumber), testScope) {
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         val state = uiState.value
         when (event) {
             UiAction.OnCopyReference -> {

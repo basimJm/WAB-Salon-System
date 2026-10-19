@@ -67,7 +67,7 @@ class NotificationsViewModel(
         if (uiState.value.loaded) load(refresh = true)
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnResume -> onResume()

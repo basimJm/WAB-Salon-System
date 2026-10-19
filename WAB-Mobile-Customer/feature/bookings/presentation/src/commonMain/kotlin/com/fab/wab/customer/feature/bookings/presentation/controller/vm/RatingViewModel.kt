@@ -43,7 +43,7 @@ class RatingViewModel(
         load()
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnRetry -> load()
             is UiAction.OnRatingChange -> updateState { copy(rating = event.value.coerceIn(0, ReviewDefaults.MAX_RATING)) }

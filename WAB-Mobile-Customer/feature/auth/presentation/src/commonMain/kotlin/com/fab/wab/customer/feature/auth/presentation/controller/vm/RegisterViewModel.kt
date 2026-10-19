@@ -67,7 +67,7 @@ class RegisterViewModel(
         scope.launch { awaitProof() }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnFirstNameChange, is UiAction.OnLastNameChange, is UiAction.OnEmailChange, is UiAction.OnNumberChange ->
                 onTextChange(event)

@@ -33,7 +33,7 @@ private class LoadViewModel(scope: CoroutineScope) : BaseViewModel<LoadState, Lo
         load()
     }
 
-    override fun onEvent(event: LoadAction) {
+    override fun handle(event: LoadAction) {
         when (event) {
             LoadAction.Refresh -> load()
         }

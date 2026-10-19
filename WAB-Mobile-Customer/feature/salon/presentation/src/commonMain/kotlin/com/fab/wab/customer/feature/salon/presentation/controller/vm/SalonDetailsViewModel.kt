@@ -47,7 +47,7 @@ class SalonDetailsViewModel(
         load()
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnRetry -> load()
             UiAction.OnRefresh -> load(refresh = true)
