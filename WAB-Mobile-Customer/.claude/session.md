@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (owner rule 2026-10-19: Gradle/gate/emulator/loop/review once per five tasks): CUS-032 ✓ code, CUS-033 ✓ code, CUS-034 ✓ code, CUS-035, CUS-036 → then gate + emulator + loop + review + one PR into `customer`. Each task branch starts from the previous task branch.
+- Batch 1 (owner rule 2026-10-19: Gradle/gate/emulator/loop/review once per five tasks): CUS-032 ✓ code, CUS-033 ✓ code, CUS-034 ✓ code, CUS-035 ✓ code, CUS-036 → then gate + emulator + loop + review + one PR into `customer`. Each task branch starts from the previous task branch.
 
 ### CUS-029 — OTP S13 (shared): pre-check, Firebase verification, ID token to the backend, wrong attempts, countdown
 - Branch: `feat/cus-029-otp`
@@ -97,3 +97,15 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: the contract has no "general filters list" endpoint, so the two options are the `GeneralFilter` enum (PRD says "list from server"; flagged). Price bounds come as JOD text; the slider rounds to whole JOD.
+
+### CUS-035 — All services S06: `GET /catalog/services?gender=` paginated expandable cards, tap → S04 prefiltered
+- Branch: `feat/cus-035-all-services` (from `feat/cus-034-filter-sheet`)
+- Status: IN PROGRESS (code + tests written; Gradle not run yet — batch 1)
+- Acceptance criteria (PRD S06, Design Script S06; operation `GET /catalog/services?gender&page&pageSize`):
+  - [x] Route `Screen.AllServices(gender)` carries the Home tab's gender (Home passes it in `OpenAllServices`); placeholder removed
+  - [x] `AllServicesViewModel(gender)` over `CatalogRepository` (page 10, load more, pull-to-refresh, empty/offline/error), tap → `Screen.AllSalons(serviceId, serviceName)`; `AllServicesScreen` (top bar, `AppPagedList` of `AppServiceCardExpandable` = description collapsed with "more", expands in place); registered in `SalonsNavigation`; AR + EN strings
+  - [x] Tests: `AllServicesViewModelTest` (2: gender + paging + open salons; empty/error)
+  - [ ] Gradle + emulator: batch 1
+- Tests: written, not yet run (batch rule)
+- Loops: 0/1
+- Review: PENDING

@@ -37,9 +37,9 @@ sealed interface Screen {
     @Serializable
     data class AllSalons(val serviceId: String? = null, val serviceName: String? = null, val filter: String? = null) : Screen
 
-    /** S06 all services. */
+    /** S06 all services of the Home tab's gender (a `Gender` code). */
     @Serializable
-    data object AllServices : Screen
+    data class AllServices(val gender: String) : Screen
 
     /** S19 notifications (registered users). */
     @Serializable

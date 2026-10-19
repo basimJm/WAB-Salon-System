@@ -17,4 +17,6 @@
     <string name="filter_price">Price range</string>
     <string name="filter_general">General filters</string>
     <string name="filter_rating">Rating</string>
+    <string name="services_title">All Services</string>
+    <string name="services_empty">No services yet</string>
 </resources>

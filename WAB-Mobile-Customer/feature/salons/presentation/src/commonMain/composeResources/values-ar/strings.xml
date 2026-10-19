@@ -17,4 +17,6 @@
     <string name="filter_price">نطاق السعر</string>
     <string name="filter_general">فلاتر عامة</string>
     <string name="filter_rating">التقييم</string>
+    <string name="services_title">جميع الخدمات</string>
+    <string name="services_empty">لا توجد خدمات بعد</string>
 </resources>

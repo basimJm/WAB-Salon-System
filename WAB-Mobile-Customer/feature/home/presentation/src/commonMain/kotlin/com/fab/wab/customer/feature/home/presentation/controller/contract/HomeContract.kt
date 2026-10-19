@@ -62,7 +62,7 @@ sealed interface HomeContract {
             val serviceName: String? = null,
             val filter: SalonListFilter? = null,
         ) : SideEffect
-        data object OpenAllServices : SideEffect
+        data class OpenAllServices(val gender: Gender) : SideEffect
         data object OpenNotifications : SideEffect
         data class OpenUrl(val url: String) : SideEffect
         data object OpenLogin : SideEffect

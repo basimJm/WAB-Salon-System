@@ -21,20 +21,23 @@ import com.fab.wab.customer.core.notification.model.NotificationStyle
 import com.fab.wab.customer.core.domain.salon.SalonFilters
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllSalonsContract.SideEffect
+import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllServicesContract
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllSalonsContract.UiAction
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.FilterSheetContract
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllSalonsEntry
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.AllSalonsViewModel
+import com.fab.wab.customer.feature.salons.presentation.controller.vm.AllServicesViewModel
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.FilterSheetViewModel
 import com.fab.wab.customer.feature.salons.presentation.resources.Res
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_nearest_dropped
 import com.fab.wab.customer.feature.salons.presentation.screen.AllSalonsScreen
+import com.fab.wab.customer.feature.salons.presentation.screen.AllServicesScreen
 import com.fab.wab.customer.feature.salons.presentation.screen.FilterSheet
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-/** S04 (and S05 with CUS-034); reachable from Home and S06, so registered at the host level. */
+/** S04 + S05 sheet and S06; reachable from Home, so registered at the host level. */
 class SalonsNavigation(override val navController: NavHostController) : Navigator by NavigatorDelegation(navController) {
 
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
@@ -42,6 +45,24 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
             val route = entry.toRoute<Screen.AllSalons>()
             AllSalonsDestination(AllSalonsEntry(route.serviceId, route.serviceName, SalonListFilter.fromCode(route.filter)))
         }
+        navGraphBuilder.composable<Screen.AllServices> { entry ->
+            val gender = Gender.fromCode(entry.toRoute<Screen.AllServices>().gender) ?: Gender.entries.first()
+            AllServicesDestination(gender)
+        }
+    }
+
+    @Composable
+    private fun AllServicesDestination(gender: Gender) {
+        val viewModel: AllServicesViewModel = koinViewModel { parametersOf(gender) }
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val notifications = rememberNotificationManager()
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                is AllServicesContract.SideEffect.OpenSalons -> navigateTo(Screen.AllSalons(effect.serviceId, effect.serviceName))
+                is AllServicesContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+            }
+        }
+        AllServicesScreen(state = state, onAction = viewModel::onEvent, onBack = ::navigateBack)
     }
 
     @Composable
