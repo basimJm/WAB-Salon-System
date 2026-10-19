@@ -15,7 +15,6 @@ import androidx.navigation.toRoute
 import com.fab.wab.customer.app.resources.Res
 import com.fab.wab.customer.app.resources.nav_profile
 import com.fab.wab.customer.app.resources.placeholder_content_page
-import com.fab.wab.customer.app.resources.placeholder_notifications
 import com.fab.wab.customer.app.resources.placeholder_verify
 import com.fab.wab.customer.app.resources.profile_login_button
 import com.fab.wab.customer.core.navigation.route.Graph
@@ -52,12 +51,11 @@ fun NavGraphBuilder.registerPlaceholderAuthScreens() {
     }
 }
 
-/** Destinations Home links to before their tasks land (S16 step 6 CUS-047, S19 CUS-050). */
+/** Destinations Home links to before their tasks land (S16 step 6 CUS-047). */
 fun NavGraphBuilder.registerPlaceholderHomeScreens() {
     composable<Screen.BookingVerify> { entry ->
         PlaceholderRootScreen(Res.string.placeholder_verify, detail = entry.toRoute<Screen.BookingVerify>().draftId)
     }
-    composable<Screen.Notifications> { PlaceholderRootScreen(Res.string.placeholder_notifications) }
 }
 
 @Composable

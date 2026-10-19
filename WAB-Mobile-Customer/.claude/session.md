@@ -167,3 +167,16 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: entry from the "booking completed" notification lands in CUS-050/051 (notifications + deep links). `ReviewsRepository` lives in `feature/salon/domain` (already a dependency of `feature/bookings/presentation`).
+
+### CUS-050 — Notifications S19: list + filters, unread count, visible items reported read, popup with View booking
+- Branch: `feat/cus-050-notifications`
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 4)
+- Acceptance criteria (PRD S19, Design Script S19; operations `GET /notifications?page&pageSize&from&to&q`, `GET /notifications/unread-count`, `POST /notifications/read`):
+  - [x] New `feature/notifications` (domain `Notification`/`NotificationFilters`/`NotificationDefaults`, `relativeTimeOf` buckets in Asia/Amman (tested), repository + 3 use cases (`MarkNotificationsReadUseCase` drops read ids); data `NotificationsApi` (only active filters sent, tested) + impl + mapper; di) wired in settings/plugin/App/MainNavigation
+  - [x] `NotificationsViewModel`: paged list (10), pull-to-refresh (keeps content on failure + toast), filter sheet (ISO date range validated `from ≤ to`, search ≤ 60 trimmed) → removable chips (dates / text), visible ids reported read once in the background (optimistic read styling; failed report retried on the next visibility), tap → popup marks read; booking notifications offer View booking → `Screen.BookingDetails`
+  - [x] `NotificationsScreen` (top bar Filter action, chips, shimmer / empty "No notifications" / error / offline, `AppPagedList` with a `snapshotFlow` on visible keys), `NotificationRow` (unread bold + badge, relative time: now / minutes / hours / yesterday / days / date), `NotificationsFilterSheet`, popup `AppDialog`; placeholder removed; AR/EN; analytics
+  - [x] Unit tests: `RelativeTimeTest` (2), `NotificationsApiTest` (3), `NotificationsViewModelTest` (5)
+- Tests: run with the batch-4 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: dates are typed as ISO text in the sheet (the design system has no date picker yet; a picker component can replace the two fields without touching the view model). The unread badge on Home keeps using the realtime `notifications.unread` event (CUS-032); S18 for completed bookings from the popup goes through S15's Rate button. Deep link / push tap handling = CUS-051/052.
