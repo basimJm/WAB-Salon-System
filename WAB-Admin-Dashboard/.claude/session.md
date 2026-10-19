@@ -14,15 +14,6 @@
 
 ## Last blocks
 
-### T-097 — ADM-081 QA pass: accessibility and RTL
-
-- Branch: `feat/adm-081-qa-pass`
-- Status: DONE
-- Acceptance criteria: axe finds no violations on the 29 module screens in ar + en; chart titles keep heading levels
-- Tests: tests/pages-a11y.test.tsx (58); gate PASS
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision).
-
 ### T-096 — ADM-078 fixture tests
 
 - Branch: `feat/adm-078-fixture-tests`
@@ -39,3 +30,12 @@
 - Tests: tests/profile.test.tsx (8); full suite + gate PASS
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: the reports sources (domain, data, page) were rebuilt from tests and mocks because they were never committed; salon mock gained the new server fields.
+
+### ADM-069 — global search
+
+- Branch: `feat/adm-069-global-search`
+- Status: DONE
+- Acceptance criteria: top-bar search wired to GET /search: customers, salons, bookings, members grouped with links; 500 ms debounce, min 2 chars, loading/empty/error states
+- Tests: tests/search.test.tsx (4); full suite + gate PASS
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
