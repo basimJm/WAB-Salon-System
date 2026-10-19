@@ -22,6 +22,7 @@
     <string name="nav_profile">الملف الشخصي</string>
     <string name="profile_login_button">تسجيل الدخول</string>
     <string name="placeholder_content_page">الصفحة (قريباً)</string>
-    <string name="placeholder_salon_details">صفحة الصالون (قريباً)</string>
     <string name="placeholder_notifications">الإشعارات (قريباً)</string>
+    <string name="placeholder_salon_reviews">التقييمات (قريباً)</string>
+    <string name="placeholder_booking">الحجز (قريباً)</string>
 </resources>

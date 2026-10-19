@@ -41,6 +41,14 @@ sealed interface Screen {
     @Serializable
     data class AllServices(val gender: String) : Screen
 
+    /** S08 all reviews of a salon. */
+    @Serializable
+    data class SalonReviews(val salonId: String) : Screen
+
+    /** S16 booking flow start for a salon (registered users). */
+    @Serializable
+    data class BookingStart(val salonId: String) : Screen
+
     /** S19 notifications (registered users). */
     @Serializable
     data object Notifications : Screen

@@ -69,4 +69,8 @@ include(
     ":feature:salons:data",
     ":feature:salons:presentation",
     ":feature:salons:di",
+    ":feature:salon:domain",
+    ":feature:salon:data",
+    ":feature:salon:presentation",
+    ":feature:salon:di",
 )

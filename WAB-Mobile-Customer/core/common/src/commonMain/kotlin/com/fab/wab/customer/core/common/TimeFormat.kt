@@ -10,6 +10,10 @@ object TimeFormat {
     private const val SEPARATOR = ':'
     private const val PAD = '0'
     private const val INVALID = -1
+    private const val ISO_DATE_LENGTH = 10
+    private const val DATE_PARTS = 3
+    private const val DATE_SEPARATOR = '-'
+    private const val DISPLAY_DATE_SEPARATOR = "/"
 
     /** "16:05" → "4:05 PM"; null when the input is not a valid "HH:mm" (fixtures, bad data) so callers can hide it. */
     fun to12Hour(hhmm: String, am: String, pm: String): String? {
@@ -21,6 +25,13 @@ object TimeFormat {
         val label = if (hour < HOURS_IN_HALF_DAY) am else pm
         val shown = (hour % HOURS_IN_HALF_DAY).let { if (it == 0) HOURS_IN_HALF_DAY else it }
         return "$shown$SEPARATOR${minute.toString().padStart(MINUTE_DIGITS, PAD)} $label"
+    }
+
+    /** ISO date or date-time ("2026-10-18T10:00:00Z") → "18/10/2026"; null when not ISO. */
+    fun isoDateText(iso: String): String? {
+        val date = iso.trim().take(ISO_DATE_LENGTH).split(DATE_SEPARATOR)
+        if (date.size != DATE_PARTS || date.any { it.toIntOrNull() == null }) return null
+        return date.reversed().joinToString(DISPLAY_DATE_SEPARATOR)
     }
 
     /** "8:00 AM – 4:00 PM"; null when either end is invalid. */

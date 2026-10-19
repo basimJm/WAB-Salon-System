@@ -122,6 +122,8 @@ private fun ApplicationProductFlavor.environment(id: String, prefix: String, pro
     versionNameSuffix = "-$id"
     buildConfigField("String", "ENVIRONMENT", quoted(id))
     buildConfigField("String", "API_BASE_URL", quoted(baseUrl))
+    val webBaseUrl = requireNotNull(property("${prefix}_WEB_BASE_URL")) { missing("${prefix}_WEB_BASE_URL") }
+    buildConfigField("String", "WEB_BASE_URL", quoted(webBaseUrl))
     val dataSource = requireNotNull(property("${prefix}_DATA_SOURCE")) { missing("${prefix}_DATA_SOURCE") }
     buildConfigField("String", "DATA_SOURCE", quoted(dataSource))
 }

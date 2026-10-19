@@ -21,6 +21,7 @@
     <string name="nav_profile">Profile</string>
     <string name="profile_login_button">Log in</string>
     <string name="placeholder_content_page">Page (coming soon)</string>
-    <string name="placeholder_salon_details">Salon profile (coming soon)</string>
     <string name="placeholder_notifications">Notifications (coming soon)</string>
+    <string name="placeholder_salon_reviews">Reviews (coming soon)</string>
+    <string name="placeholder_booking">Booking (coming soon)</string>
 </resources>

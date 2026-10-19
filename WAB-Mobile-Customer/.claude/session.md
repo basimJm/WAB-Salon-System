@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (owner rule 2026-10-19: Gradle/gate/emulator/loop/review once per five tasks): CUS-032 ✓ code, CUS-033 ✓ code, CUS-034 ✓ code, CUS-035 ✓ code, CUS-036 → then gate + emulator + loop + review + one PR into `customer`. Each task branch starts from the previous task branch.
+- Batch 1 (owner rule 2026-10-19: Gradle/gate/emulator/loop/review once per five tasks): CUS-032 ✓ code, CUS-033 ✓ code, CUS-034 ✓ code, CUS-035 ✓ code, CUS-036 ✓ code → then gate + emulator + loop + review + one PR into `customer`. Each task branch starts from the previous task branch.
 
 ### CUS-029 — OTP S13 (shared): pre-check, Firebase verification, ID token to the backend, wrong attempts, countdown
 - Branch: `feat/cus-029-otp`
@@ -109,3 +109,19 @@
 - Tests: written, not yet run (batch rule)
 - Loops: 0/1
 - Review: PENDING
+
+### CUS-036 — Salon details S07: `GET /salons/{id}`, maps / call / WhatsApp, hours + closures, staff, reviews, services, gallery, sticky Book, share, favorite
+- Branch: `feat/cus-036-salon-details` (from `feat/cus-035-all-services`)
+- Status: IN PROGRESS (code + tests written; Gradle not run yet — batch 1)
+- Acceptance criteria (PRD S07 items 1–12 + acceptance, Design Script S07; operation `GET /salons/{salonId}`; sheets / reviews list / media viewer / booking are CUS-037/038/039/042):
+  - [x] Env: `AppEnvironment.webBaseUrl` (`DEV/PROD_WEB_BASE_URL` → Android `BuildConfig.WEB_BASE_URL`, iOS `WEB_BASE_URL` xcconfig → Info.plist), `DeepLinks.salon(webBaseUrl, id)` (core/common)
+  - [x] core/ui `external/ExternalActions` port (maps chooser, dialer, WhatsApp, native share) with Android intents + iOS `UIApplication`/`UIActivityViewController`, `ExternalLinks` pure builders, `FakeExternalActions`; `externalActionsModule` in `coreDiModule`
+  - [x] core/domain `salon/SalonDetails.kt` (`DayOfWeek` SAT…FRI, `StaffStatus`, `MediaType`, `RatingSummary`, `DaySchedule`, `Closure`, `StaffPreview`, `SalonService`, `GalleryItem`, `Review`, `ReviewsPreview`, `SalonDetails`); `TimeFormat.isoDateText`
+  - [x] `feature/salon`: domain (`SalonDetailsRepository`, `GetSalonDetailsUseCase`), data (`SalonDetailsApi` via `pathWith`, mappers with safe enum fallbacks), presentation (`SalonDetailsViewModel`: load / refresh, share = name + deep link, maps / call / WhatsApp through the port, favorite auth-gated + optimistic with revert, Book always enabled → guest auth dialog / registered → `Screen.BookingStart`, hours expand; screens: top bar with share + favorite, cover + overlapping avatar, open/closed badge + today's hours, tappable location, Call + WhatsApp (only with a number), expandable description, working hours + "Day off" + upcoming closures, staff row, reviews header (salon rating independent) + first 3 + See all + Add review (auth-gated), services rows, gallery grid from rows, sticky Book in the bottom bar), `SalonNavigation`, di; AR + EN strings incl. day names
+  - [x] Routes `Screen.SalonReviews(salonId)`, `Screen.BookingStart(salonId)` with placeholders; the S07 placeholder removed
+  - [x] Tests: `DeepLinksTest` (1), `ExternalLinksTest` (1), `TimeFormatTest` (+1), `AppEnvironmentTest` (+1), `SalonDetailsMappersTest` (1), `SalonDetailsViewModelTest` (4)
+  - [ ] Gradle + emulator: batch 1
+- Tests: written, not yet run (batch rule)
+- Loops: 0/1
+- Review: PENDING
+- Notes: web base URLs are PLACEHOLDERS like the API hosts (owner decision: platform domain); staff / service taps and gallery taps emit side effects consumed by CUS-037 / CUS-039 (no-ops now).

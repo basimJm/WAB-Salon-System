@@ -23,6 +23,12 @@ class TimeFormatTest {
     }
 
     @Test
+    fun formatsIsoDates() {
+        assertEquals("18/10/2026", TimeFormat.isoDateText("2026-10-18T10:00:00.000Z"))
+        assertNull(TimeFormat.isoDateText("yesterday"))
+    }
+
+    @Test
     fun formatsARange() {
         assertEquals("8:00 AM – 4:00 PM", TimeFormat.range12Hour("08:00", "16:00", "AM", "PM", " – "))
     }

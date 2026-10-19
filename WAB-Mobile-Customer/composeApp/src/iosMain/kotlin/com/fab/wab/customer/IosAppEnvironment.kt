@@ -12,6 +12,7 @@ import platform.Foundation.NSBundle
 internal object InfoPlistKeys {
     const val ENVIRONMENT = "APP_ENV"
     const val API_BASE_URL = "API_BASE_URL"
+    const val WEB_BASE_URL = "WEB_BASE_URL"
     const val DATA_SOURCE = "DATA_SOURCE"
     const val VERSION_NAME = "CFBundleShortVersionString"
     const val VERSION_CODE = "CFBundleVersion"
@@ -26,6 +27,7 @@ internal fun iosAppEnvironmentModule(): Module = module {
 internal fun readIosAppEnvironment(bundle: NSBundle = NSBundle.mainBundle): AppEnvironment = AppEnvironment(
     name = bundle.requireInfoString(InfoPlistKeys.ENVIRONMENT),
     apiBaseUrl = bundle.requireInfoString(InfoPlistKeys.API_BASE_URL),
+    webBaseUrl = bundle.requireInfoString(InfoPlistKeys.WEB_BASE_URL),
     appVersion = bundle.requireInfoString(InfoPlistKeys.VERSION_NAME),
     appVersionCode = bundle.requireInfoString(InfoPlistKeys.VERSION_CODE).toIntOrNull()
         ?: error("Info.plist key ${InfoPlistKeys.VERSION_CODE} must be a number"),

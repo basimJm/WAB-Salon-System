@@ -3,9 +3,11 @@ package com.fab.wab.customer.designsystem.icons
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.Chat
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.EventAvailable
+import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.Face
 import androidx.compose.material.icons.rounded.LocationOff
 import androidx.compose.material.icons.rounded.LocationOn
@@ -78,6 +80,8 @@ object AppIcons {
     val ThemeDark: ImageVector = Icons.Rounded.DarkMode
     val ThemeLight: ImageVector = Icons.Rounded.LightMode
     val Woman: ImageVector = Icons.Rounded.Face3
+    val Chat: ImageVector = Icons.AutoMirrored.Rounded.Chat
+    val ExpandLess: ImageVector = Icons.Rounded.ExpandLess
     val Location: ImageVector = Icons.Rounded.LocationOn
     val LocationOff: ImageVector = Icons.Rounded.LocationOff
     val Image: ImageVector = Icons.Rounded.Image

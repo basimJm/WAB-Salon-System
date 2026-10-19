@@ -135,7 +135,7 @@ private class MinimalAppSettings : AppSettings {
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModelTest {
 
-    private val environment = AppEnvironment("dev", "https://api.example", "1.2.3", 7, isDebug = true)
+    private val environment = AppEnvironment("dev", "https://api.example", "https://web.example", "1.2.3", 7, isDebug = true)
     private val settings = MinimalAppSettings()
     private val sessionTimeOut = FakeSessionTimeOut()
 
