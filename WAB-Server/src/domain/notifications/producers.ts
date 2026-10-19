@@ -251,11 +251,16 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
   };
 
   const salonStateNotifier: SalonStateNotifier = {
-    changed: guarded('salon.state', async ({ salonId, event, reason }) => {
+    changed: guarded('salon.state', async ({ salonId, event, reason, area }) => {
       await notifications.notify(event, {
-        key: `${event}:${salonId}:${reason ?? ''}`,
+        key: `${event}:${salonId}:${area ?? ''}:${reason ?? ''}`,
         salonId,
-        params: { salon: await salonName(salonId), reason: reason ?? '' },
+        params: {
+          salon: await salonName(salonId),
+          reason: reason ?? '',
+          area: (language: Language) =>
+            area === undefined ? '' : translate(language, `notifications.salon.area.${area}`),
+        },
         data: { salonId, deepLink: DEEP_LINKS.salonSetup },
       });
     }),

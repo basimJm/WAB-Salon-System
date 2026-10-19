@@ -19,6 +19,13 @@ import type { InboxService } from '../domain/notifications/inbox.service';
 import type { FavoritesService } from '../domain/favorites/favorites.service';
 import type { AdminCustomersService } from '../domain/customers/adminCustomers.service';
 import type { AdminSettingsService } from '../domain/adminSettings/adminSettings.service';
+import type { AdminProfileService } from '../domain/adminProfile/adminProfile.service';
+import type { AdminSearchService } from '../domain/adminSearch/adminSearch.service';
+import type { AdminSalonEditService } from '../domain/adminSalonEdit/adminSalonEdit.service';
+import type { BookingAdminExtrasService } from '../domain/bookings/bookingAdminExtras.service';
+import type { AdminCustomerExtrasService } from '../domain/customers/adminCustomerExtras.service';
+import type { SalonDeletionService } from '../domain/salons/salonDeletion.service';
+import type { SalonInsightsService } from '../domain/salons/salonInsights.service';
 import type { CampaignsService } from '../domain/campaigns/campaigns.service';
 import type { PlacementsService } from '../domain/placements/placements.service';
 import type { AdminReviewsService } from '../domain/reviews/adminReviews.service';
@@ -81,6 +88,15 @@ export interface ApiServices {
   readonly adminPlacements?: PlacementsService;
   readonly adminCampaigns?: CampaignsService;
   readonly adminSettings?: AdminSettingsService;
+  readonly adminProfile?: AdminProfileService;
+  readonly adminSearch?: AdminSearchService;
+  readonly adminSalonEdit?: AdminSalonEditService;
+  readonly adminCustomerExtras?: AdminCustomerExtrasService;
+  readonly bookingAdminExtras?: BookingAdminExtrasService;
+  readonly adminSalonInsights?: {
+    readonly insights: SalonInsightsService;
+    readonly deletion: SalonDeletionService;
+  };
   readonly adminCustomers?: AdminCustomersService;
   readonly salonState?: SalonStateService;
   readonly adminSalons?: AdminSalonsService;
@@ -363,6 +379,63 @@ export const unavailableAdminSettings: AdminSettingsService = {
   auditLog: unavailable,
 };
 
+export const unavailableAdminSearch: AdminSearchService = { search: unavailable };
+
+export const unavailableBookingAdminExtras: BookingAdminExtrasService = {
+  eligibleStaff: unavailable,
+  reassign: unavailable,
+  cancel: unavailable,
+  refund: unavailable,
+};
+
+export const unavailableAdminCustomerExtras: AdminCustomerExtrasService = {
+  update: unavailable,
+  reviews: unavailable,
+  notifications: unavailable,
+  push: unavailable,
+  forceDelete: unavailable,
+};
+
+export const unavailableAdminSalonInsights = {
+  insights: {
+    kpis: unavailable,
+    analytics: unavailable,
+    activity: unavailable,
+  } satisfies SalonInsightsService,
+  deletion: { decide: unavailable } satisfies SalonDeletionService,
+};
+
+export const unavailableAdminSalonEdit: AdminSalonEditService = {
+  profile: unavailable,
+  updateProfile: unavailable,
+  gallery: unavailable,
+  addGalleryItem: unavailable,
+  removeGalleryItem: unavailable,
+  reorderGallery: unavailable,
+  hours: unavailable,
+  previewWeekly: unavailable,
+  previewClosure: unavailable,
+  setWeekly: unavailable,
+  addClosure: unavailable,
+  updateClosure: unavailable,
+  removeClosure: unavailable,
+  services: unavailable,
+  addService: unavailable,
+  updateService: unavailable,
+  staff: unavailable,
+  setStaff: unavailable,
+  policy: unavailable,
+  setPolicy: unavailable,
+};
+
+export const unavailableAdminProfile: AdminProfileService = {
+  get: unavailable,
+  updateAlertEmails: unavailable,
+  changePassword: unavailable,
+  requestEmailChange: unavailable,
+  confirmEmailChange: unavailable,
+};
+
 export const unavailableCampaigns: CampaignsService = {
   create: unavailable,
   list: unavailable,
@@ -421,7 +494,11 @@ export const unavailableBookingActions: BookingActionsService = {
 
 export const unavailableBookingCancel: BookingCancelService = { cancel: unavailable };
 
-export const unavailableBookingReassign: BookingReassignService = { reassign: unavailable };
+export const unavailableBookingReassign: BookingReassignService = {
+  reassign: unavailable,
+  reassignAny: unavailable,
+  eligibleStaff: unavailable,
+};
 
 export const unavailableBookingQueries: BookingQueriesService = {
   list: unavailable,
@@ -429,12 +506,16 @@ export const unavailableBookingQueries: BookingQueriesService = {
   calendar: unavailable,
 };
 
-export const unavailableBookingAdmin: BookingAdminService = { changeStatus: unavailable };
+export const unavailableBookingAdmin: BookingAdminService = {
+  changeStatus: unavailable,
+  cancel: unavailable,
+};
 
 export const unavailableBookingBulk: BookingBulkService = { cancelAffected: unavailable };
 
 export const unavailableAdminRefunds: RefundService = {
   requestForBooking: unavailable,
+  refundBookingAmount: unavailable,
   refundPayment: unavailable,
   attempt: unavailable,
   runDue: unavailable,

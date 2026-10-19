@@ -5,7 +5,8 @@ import {
   REFUND_AUDIT,
 } from '../../constants/refunds';
 import type { RefundSource } from '../../constants/enums';
-import { ERROR_CODES } from '../../constants/errorCodes';
+import { ADMIN_BOOKING_EXTRA_AUDIT } from '../../constants/bookings';
+import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import { MS_PER_HOUR } from '../../constants/time';
 import type { RefundRaw } from '../../models/refund.model';
 import type { PaymentProvider } from '../../providers/payments/types';
@@ -15,7 +16,7 @@ import type { TransactionsRepository } from '../../repositories/transactions.rep
 import { isDuplicateKeyError } from '../../utils/database/errors';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
-import { BaseError, BusinessRuleError, NotFoundError } from '../../utils/errors';
+import { BaseError, BusinessRuleError, NotFoundError, ValidationError } from '../../utils/errors';
 import type { Logger } from '../../utils/logger';
 import type { PaginationParams } from '../../utils/pagination';
 import type { AuditWriter } from '../audit/audit.service';
@@ -43,6 +44,17 @@ export interface RefundService extends FullRefundPort {
     source: RefundSource;
     reason?: string | undefined;
   }): Promise<Entity<RefundRaw> | null>;
+  /**
+   * Admin: refunds a chosen amount (integer fils) of the booking's online payment with a reason.
+   * More than what is still refundable is refused (400 `body.amount`); a booking nobody paid online
+   * for is 422. The first attempt runs at once; failures retry like any refund.
+   */
+  refundBookingAmount(input: {
+    bookingId: string;
+    amount: number;
+    reason: string;
+    actor: AdminActor;
+  }): Promise<Entity<RefundRaw>>;
   /** One attempt for a pending refund (idempotent at the gateway). */
   attempt(refundId: string): Promise<Entity<RefundRaw> | null>;
   /** Job: attempts every refund that is due (retries with backoff, gateway-pending polls); returns how many were tried. */
@@ -281,6 +293,45 @@ export const createRefundService = (deps: RefundServiceDeps): RefundService => {
         reason,
         idempotencyKey: `refund:${bookingId}:${source}${source === 'ADMIN' ? `:${String(sameSource)}` : ''}`,
       });
+    },
+
+    async refundBookingAmount({ bookingId, amount, reason, actor }) {
+      const payment = await transactions.findOne({ bookingId, status: 'SUCCEEDED' });
+      if (payment === null) throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
+      const available = payment.amount - (await refunds.committedFor(payment.id));
+      if (!Number.isSafeInteger(amount) || amount < 1 || amount > available) {
+        throw new ValidationError({
+          code: ERROR_CODES.VALIDATION_ERROR,
+          details: [
+            {
+              field: 'body.amount',
+              code: ERROR_CODES.VALIDATION_ERROR,
+              messageKey: errorMessageKey(ERROR_CODES.VALIDATION_ERROR),
+            },
+          ],
+        });
+      }
+      const row = await request({
+        transactionId: payment.id,
+        bookingId,
+        amount,
+        source: 'ADMIN',
+        reason,
+        idempotencyKey: `refund:${bookingId}:ADMIN:${String((await refunds.findMany({ bookingId, source: 'ADMIN' })).length + 1)}`,
+      });
+      if (row === null) throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
+      await audit.record({
+        adminId: actor.adminId,
+        action: ADMIN_BOOKING_EXTRA_AUDIT.refund,
+        entityType: ADMIN_BOOKING_EXTRA_AUDIT.entityType,
+        entityId: bookingId,
+        before: { paid: payment.amount, refundable: available },
+        after: { refundId: row.id, amount: row.amount, status: row.status },
+        reason,
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+      return row;
     },
 
     async refundPayment({ transactionId, reason }) {
