@@ -4,4 +4,5 @@ export const STORAGE_KEYS = {
   language: `${STORAGE_PREFIX}language`,
   theme: `${STORAGE_PREFIX}theme`,
   sidebarCollapsed: `${STORAGE_PREFIX}sidebarCollapsed`,
+  chunkReloadAt: `${STORAGE_PREFIX}chunkReloadAt`,
 } as const;

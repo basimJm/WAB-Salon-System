@@ -81,3 +81,4 @@
 - ADM-006 done: hosting = scripts/lib/hosting.ts (single source of headers) + scripts/write-hosting.ts <variant> [--target netlify|vercel] [--out dir]; netlify.toml builds prod-release on production and dev-release (mock) on previews; CSP font-src needs data: because the build inlines small fonts
 - ADM-084 done: data source: dev-debug = mock by default (VITE_DATA_SOURCE=remote to override), every other variant remote; .env.dev/.env.prod are committed PLACEHOLDERS (https://api-dev.wab.example, https://api.wab.example), real env vars win; gitignore allows only these two
 - ADM-085 done: real-server QA = sh qa/stack.sh, node qa/seed.mjs, qa/contract-check.mjs (see docs/REAL_SERVER_QA.md); server defects S1-S9 in docs/SERVER_ISSUES.md; mock appointment dates are relative to now
+- ADM-086 done: lazyPage(load, {reload, now}) in app/lazyPage.ts (all 45 route imports), RouteErrorPage as errorElement of the login and shell routes; STORAGE_KEYS.chunkReloadAt guards loops
