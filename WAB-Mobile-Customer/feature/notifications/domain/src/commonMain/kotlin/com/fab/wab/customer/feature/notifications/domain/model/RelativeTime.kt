@@ -22,6 +22,8 @@ object RelativeTimeRules {
     const val FULL_DATE_FROM_DAYS = 7
 }
 
+private const val MINUTES_PER_DAY = RelativeTimeRules.HOURS_PER_DAY * RelativeTimeRules.MINUTES_PER_HOUR
+
 /** Calendar-day differences are computed in [zoneId] so "yesterday" follows the Amman day, not a 24 h window. */
 fun relativeTimeOf(createdAtIso: String, now: Instant, zoneId: String): RelativeTime? {
     val created = runCatching { Instant.parse(createdAtIso) }.getOrNull() ?: return null
@@ -32,7 +34,7 @@ fun relativeTimeOf(createdAtIso: String, now: Instant, zoneId: String): Relative
     val dayDiff = now.toLocalDateTime(zone).date.toEpochDays() - created.toLocalDateTime(zone).date.toEpochDays()
     return when {
         dayDiff <= 0 -> RelativeTime.Hours((elapsedMinutes / RelativeTimeRules.MINUTES_PER_HOUR).toInt())
-        dayDiff == RelativeTimeRules.YESTERDAY_DAYS && elapsedMinutes < RelativeTimeRules.HOURS_PER_DAY * RelativeTimeRules.MINUTES_PER_HOUR ->
+        dayDiff == RelativeTimeRules.YESTERDAY_DAYS && elapsedMinutes < MINUTES_PER_DAY ->
             RelativeTime.Hours((elapsedMinutes / RelativeTimeRules.MINUTES_PER_HOUR).toInt())
         dayDiff == RelativeTimeRules.YESTERDAY_DAYS -> RelativeTime.Yesterday
         dayDiff < RelativeTimeRules.FULL_DATE_FROM_DAYS -> RelativeTime.Days(dayDiff)

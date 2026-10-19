@@ -62,7 +62,9 @@ class BookingDetailsViewModel(
             // PRD §3.15: only this booking's socket updates (de-duplicated) and FCM messages about it refresh the screen.
             merge(
                 deps.realtime.events.refreshesFor(RealtimeEvents.BOOKING_UPDATED, entityId = bookingId),
-                PushSignals.messages.filter { it.data[PushKeys.BOOKING_ID].let { id -> id == null || id == bookingId } }.map { RefreshReason.Push },
+                PushSignals.messages
+                    .filter { it.data[PushKeys.BOOKING_ID].let { id -> id == null || id == bookingId } }
+                    .map { RefreshReason.Push },
             ).collect { if (uiState.value.booking != null) load(refresh = true) }
         }
     }

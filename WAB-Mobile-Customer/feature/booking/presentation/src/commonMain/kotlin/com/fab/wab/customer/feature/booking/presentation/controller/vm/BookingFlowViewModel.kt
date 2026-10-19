@@ -64,17 +64,35 @@ class BookingFlowViewModel(
     }
 
     override fun handle(event: UiAction) {
+        if (!handlePersonAndServices(event) && !handleSchedule(event)) handleFlow(event)
+    }
+
+    private fun handlePersonAndServices(event: UiAction): Boolean {
         when (event) {
             UiAction.OnRetry -> load()
             is UiAction.OnNameChange -> updatePerson { copy(name = event.value.take(BookingFlowDefaults.MAX_NAME_LENGTH)) }
                 .also { updateState { copy(nameError = false) } }
             is UiAction.OnBrideChange -> if (uiState.value.isWomenSalon) updatePerson { copy(isBride = event.isBride) }
             is UiAction.OnServiceToggle -> toggleService(event.serviceId)
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleSchedule(event: UiAction): Boolean {
+        when (event) {
             is UiAction.OnMonthChange -> calendar.changeMonth(event.delta)
             is UiAction.OnDateSelect -> calendar.selectDate(event.date)
             is UiAction.OnSlotSelect -> calendar.selectSlot(event.start)
             UiAction.OnAnyStaffSelect -> selectAnyStaff()
             is UiAction.OnStaffSelect -> selectStaff(event.staffId)
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleFlow(event: UiAction) {
+        when (event) {
             UiAction.OnJustMe -> go(BookingStep.SUMMARY)
             UiAction.OnAddCompanion -> addCompanion()
             is UiAction.OnRemovePerson -> removePerson(event.index)
@@ -82,6 +100,7 @@ class BookingFlowViewModel(
             UiAction.OnConfirm -> uiState.value.draft?.let { emitSideEffect(SideEffect.OpenVerification(it.id)) }
             UiAction.OnContinue -> next()
             UiAction.OnBack -> back()
+            else -> Unit
         }
     }
 

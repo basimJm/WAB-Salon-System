@@ -62,7 +62,15 @@ internal fun ProfileOverlays(state: UiState, onAction: (UiAction) -> Unit) {
                 onClick = { onAction(UiAction.OnPhotoSourceSelect(ImageSource.GALLERY)) },
                 divider = state.hasPhoto,
             )
-            if (state.hasPhoto) ProfileRow(AppIcons.Delete, stringResource(Res.string.profile_photo_delete), onClick = { onAction(UiAction.OnPhotoDelete) }, danger = true, divider = false)
+            if (state.hasPhoto) {
+                ProfileRow(
+                    AppIcons.Delete,
+                    stringResource(Res.string.profile_photo_delete),
+                    onClick = { onAction(UiAction.OnPhotoDelete) },
+                    danger = true,
+                    divider = false,
+                )
+            }
         }
         ProfileOverlay.LanguagePicker -> OptionsSheet(stringResource(Res.string.profile_language), dismiss) {
             AppLanguage.entries.forEach { language ->

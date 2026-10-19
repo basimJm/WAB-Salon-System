@@ -10,7 +10,8 @@ class RichTextParserTest {
 
     @Test
     fun parsesHeadingsParagraphsListsAndInlineStyles() {
-        val html = "<h2>Privacy</h2><p>We keep <strong>your</strong> data <em>safe</em>.<br>Really.</p><ul><li>One</li><li><a href=\"https://x.y\">Two</a></li></ul>"
+        val html = "<h2>Privacy</h2><p>We keep <strong>your</strong> data <em>safe</em>.<br>Really.</p>" +
+            "<ul><li>One</li><li><a href=\"https://x.y\">Two</a></li></ul>"
         val blocks = RichTextParser.parse(html)
         assertEquals(
             listOf(
