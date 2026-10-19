@@ -46,3 +46,16 @@ export function bookingQueryOf(state: ListState): BookingQuery {
     ...(state.search ? { q: state.search } : {}),
   };
 }
+
+/** What a BOOKINGS export accepts: the list's filters except the tab and the bride switch. */
+export function bookingExportParams(q: BookingQuery): Record<string, unknown> {
+  return {
+    ...(q.status && q.status.length > 0 ? { statuses: [...q.status] } : {}),
+    ...(q.paymentStatus ? { paymentStatus: q.paymentStatus } : {}),
+    ...(q.salonId ? { salonId: q.salonId } : {}),
+    ...(q.customerId ? { customerId: q.customerId } : {}),
+    ...(q.from ? { from: q.from } : {}),
+    ...(q.to ? { to: q.to } : {}),
+    ...(q.q ? { q: q.q } : {}),
+  };
+}

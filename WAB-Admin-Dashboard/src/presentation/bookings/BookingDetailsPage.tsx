@@ -12,7 +12,7 @@ import {
   type BookingStatus,
 } from '@/domain/bookings/bookings';
 import { formatInstant, formatJodAmount } from '@/domain/shared/format';
-import { Button } from '../components/core/Button';
+import { BookingActions } from './BookingActions';
 import { KeyValue } from '../components/core/KeyValue';
 import { StatusBadge } from '../components/core/StatusBadge';
 import { DataTable } from '../components/data/DataTable';
@@ -206,13 +206,7 @@ export default function BookingDetailsPage() {
         title={b?.referenceNumber ?? t('nav.bookings')}
         back={{ to: ROUTES.bookings, label: t('nav.bookings') }}
         status={b ? <StatusBadge kind="booking" value={b.status} /> : null}
-        actions={
-          b ? (
-            <Button variant="secondary" onClick={() => setChanging(true)}>
-              {t('bookings.changeStatus')}
-            </Button>
-          ) : null
-        }
+        actions={b ? <BookingActions b={b} onStatus={() => setChanging(true)} /> : null}
         tabs={[
           { id: 'details', label: t('bookings.details'), content: b ? <Facts b={b} /> : null },
           { id: 'history', label: t('bookings.history'), content: b ? <History b={b} /> : null },

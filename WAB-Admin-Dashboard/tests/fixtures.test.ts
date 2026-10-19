@@ -14,16 +14,12 @@ import { successEnvelope } from '@/infrastructure/http/envelope';
  */
 /** Server operations whose screens are the next tasks (ADM-069..073); each task deletes its lines. */
 const NOT_BUILT_YET = [
-  'getBookingsByIdEligibleStaff',
   'getCustomersByIdNotifications',
   'getCustomersByIdReviews',
   'getSalonsByIdActivity',
   'getSalonsByIdAnalytics',
   'getSalonsByIdKpis',
   'patchCustomersById',
-  'postBookingsByIdCancel',
-  'postBookingsByIdReassign',
-  'postBookingsByIdRefund',
   'postCustomersByIdForceDelete',
   'postCustomersByIdPush',
   'postSalonsByIdDeletionRequestDecision',

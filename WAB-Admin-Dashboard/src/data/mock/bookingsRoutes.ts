@@ -84,8 +84,8 @@ export function bookingsRoutes(): readonly MockRoute[] {
             ],
             money: {
               total: r.total,
-              dueOnline: '0.000',
-              paidOnline: '0.000',
+              dueOnline: r.paymentStatus === 'DEPOSIT_PAID' ? '20.000' : '0.000',
+              paidOnline: r.paymentStatus === 'DEPOSIT_PAID' ? '20.000' : '0.000',
               remaining: r.total,
               refunded: '0.000',
             },
@@ -118,6 +118,74 @@ export function bookingsRoutes(): readonly MockRoute[] {
         const irregular = r.status === 'COMPLETED' || r.status.startsWith('CANCELLED');
         r.status = status;
         return { data: { id: r.id, referenceNumber: r.referenceNumber, status, irregular } };
+      },
+    ),
+    mockRoute(
+      defineEndpoint(O.getBookingsByIdEligibleStaff, {
+        data: dto.getBookingsByIdEligibleStaffDataSchema,
+        query: dto.getBookingsByIdEligibleStaffQuerySchema,
+      }),
+      () => ({
+        data: [
+          { staffId: '64f0000000000000000000a2', name: 'Sara Ali' },
+          { staffId: '64f0000000000000000000a3', name: 'Lina Omar' },
+        ],
+      }),
+    ),
+    mockRoute(
+      defineEndpoint(O.postBookingsByIdReassign, {
+        data: dto.postBookingsByIdReassignDataSchema,
+        body: dto.postBookingsByIdReassignBodySchema,
+      }),
+      ({ params }) => {
+        const r = find(params['id']);
+        if (!r) throw new Error('no booking');
+        return {
+          data: {
+            id: r.id,
+            referenceNumber: r.referenceNumber,
+            status: r.status,
+            appointmentStart: r.appointmentStart,
+            appointmentEnd: r.appointmentEnd,
+            money: { total: r.total, dueOnline: '0.000', paidOnline: '0.000', remaining: r.total },
+          },
+        };
+      },
+    ),
+    mockRoute(
+      defineEndpoint(O.postBookingsByIdCancel, {
+        data: dto.postBookingsByIdCancelDataSchema,
+        body: dto.postBookingsByIdCancelBodySchema,
+      }),
+      ({ params, body }) => {
+        const r = find(params['id']);
+        if (!r) throw new Error('no booking');
+        const mode = (body as { mode: string }).mode;
+        r.status = mode === 'CUSTOMER' ? 'CANCELLED_BY_CUSTOMER' : 'CANCELLED_BY_SALON';
+        return {
+          data: {
+            id: r.id,
+            referenceNumber: r.referenceNumber,
+            status: r.status,
+            appointmentStart: r.appointmentStart,
+            appointmentEnd: r.appointmentEnd,
+            money: { total: r.total, dueOnline: '0.000', paidOnline: '0.000', remaining: r.total },
+            irregular: false,
+          },
+        };
+      },
+    ),
+    mockRoute(
+      defineEndpoint(O.postBookingsByIdRefund, {
+        data: dto.postBookingsByIdRefundDataSchema,
+        body: dto.postBookingsByIdRefundBodySchema,
+      }),
+      ({ params, body }) => {
+        const r = find(params['id']);
+        if (!r) throw new Error('no booking');
+        return {
+          data: { id: r.id, amount: (body as { amount: string }).amount, status: 'PENDING' },
+        };
       },
     ),
   ];

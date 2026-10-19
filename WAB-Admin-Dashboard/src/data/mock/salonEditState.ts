@@ -9,7 +9,7 @@ const CITY = '64a000000000000000000001';
 export const uid = (prefix: string, n: number) =>
   `${prefix}${String(n).padStart(OBJECT_ID_LENGTH - prefix.length, '0')}`;
 /** Mock catalog service ids the salon menu is built from. */
-export const MOCK_CATALOG_SERVICE = '64e000000000000000000001';
+export const MOCK_CATALOG_SERVICE = '64e000000000000000000009';
 
 function salonState(id: string) {
   const salon = MOCK_SALONS.find((s) => s.id === id) ?? MOCK_SALONS[0];
