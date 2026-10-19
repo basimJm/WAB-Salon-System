@@ -10,6 +10,31 @@
 
 ## Current task
 
+### T-128 — Run any environment on any Docker host (owner order 2026-10-19)
+
+- Branch: `chore/srv-deploy-compose`
+- Status: IN REVIEW
+- Acceptance criteria (CLAUDE.md §5 no hardcoding; no BUSINESS_DOMAIN change; API docs: no change):
+  - [x] `docker-compose.deploy.yml`: one API per environment from a required `ENV_FILE`, built from the repository root, container port pinned to 3000, host port `API_PORT` on `127.0.0.1` unless `API_BIND` opts in, optional password-protected Redis behind `--profile redis`; no credential in the file
+  - [x] `.env.*` git-ignored except `.env.example`; `docs/DEPLOYMENT.md` gains run-per-environment, keys-per-environment (local, hosted dev, prod; Atlas per environment) and how Redis works / how to run it
+- Tests: `tests/dockerDeploy.test.ts` (6); `docker compose config` accepted the file; full gate green
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — config + docs only. NOT verified: an actual `docker compose up` / image build (no Docker daemon in this runner), Atlas and managed Redis connections.
+- Notes: hosting product stays open (owner chose "any server"); the file is host-agnostic.
+
+### T-127 — Deployment readiness: env templates, `env:check`, DEPLOYMENT.md (owner order 2026-10-19)
+
+- Branch: `chore/srv-deploy-envs`
+- Status: IN REVIEW
+- Acceptance criteria (CLAUDE.md §5 no hardcoding, NFR config; no BUSINESS_DOMAIN change; API docs: no change):
+  - [x] `npm run env:check -- <file>` validates an env file with the server's own schema and production rules and prints key names only (never values); exit 0 pass, 1 invalid, 2 usage
+  - [x] `docker/env.development.example` passes as is; `docker/env.production.example` fails until every placeholder is filled, then passes; fake providers, enabled payments and bad values are refused in production
+  - [x] `docs/DEPLOYMENT.md`: local build/run, the three environments (local, hosted dev, prod), where each value comes from, release checklist, what is still owner-side
+- Tests: `tests/checkEnv.test.ts` (6); full gate green (130 suites, 2578 tests, lint, typecheck, build, format, docs unchanged, audit 0, tasks.py check OK)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling + docs only, no endpoint or schema change; templates hold placeholders, no secrets. DEVIATION: the CLI prints English ops text (like `loadtest`), not locale keys (not an API response).
+- Notes: Not verified: Docker build (no daemon), a real boot against Mongo/Redis.
+
 ### T-125 — Remove the analytics and payment SDK providers from WAB-Server (owner order 2026-10-19)
 
 - Branch: `chore/srv-remove-analytics-payments`
