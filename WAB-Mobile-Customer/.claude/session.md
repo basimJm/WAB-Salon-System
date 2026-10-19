@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Next: batch 3 = CUS-042…046.
+- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 = CUS-042 ✓ code, CUS-043, CUS-044, CUS-045, CUS-046 (unit tests after the fifth, then one PR).
 
 ### CUS-037 — Staff sheet S07a + Service sheet S07b
 - Branch: `feat/cus-037-staff-service-sheets` (from `origin/customer`, batch 2 start)
@@ -79,3 +79,16 @@
 - Loops: 1/1 — the loop found: duplicate private test fakes across the salon test files, `FavoritesRepository` fakes missing the new `list`, `String as NSString`-style smart casts in the staff mapper, two multi-emitter composables (detekt), the app plugin `apply` over 80 lines (feature list extracted), a double refresh on the first ON_RESUME of Favorites / Bookings, favorites rows shown with an inactive heart (now always active), fixture hints for booking dates / reference / statuses / prices and staff hours.
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — all four screens talk to the contract through `pathWith`/typed query builders; reviews stay PENDING until approval and the form is auth-gated; staff rating is independent of the salon rating; instants are formatted in Asia/Amman (`BusinessTime.ZONE_ID`), 12-hour; realtime `booking.updated` refreshes the bookings list; sheets are hosted per request key so state resets per opening. NON-BLOCKING: `GetBookingsDataItem` has no rejection reason (server contract gap, flagged); staff media not in the contract.
 - Notes: the list contract (`GetBookingsDataItem`) carries no rejection reason, so the card cannot show it (PRD S14 wants it) — flagged for the server (S15 has `rejection.reasonText`).
+
+### CUS-042 — Booking details S15: `GET /bookings/{id}`, cancel rules + `POST /bookings/{id}/cancel` with money-outcome confirmation, Rate when COMPLETED, realtime
+- Branch: `feat/cus-042-booking-details` (from `origin/customer`, batch 3 start)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 3)
+- Acceptance criteria (PRD S15, Design Script S15, BUSINESS_DOMAIN §5.7/§5.8; operations `GET /bookings/{id}`, `POST /bookings/{id}/cancel`; realtime `booking.updated`):
+  - [x] core/domain `booking/BookingDetails.kt` (`RefundStatus`, `FullPaymentRefundRule`, `BookingPolicy` snapshot, persons, money, reasons); data mapper parses the untyped `policy` object leniently (null → block hidden)
+  - [x] Pure rules (`CancellationRules.kt`, tested): PENDING → any time; APPROVED → until `appointmentStart − cancellationWindowHours` else window passed; others → not applicable. Refund outcome: PENDING → full refund (or nothing paid); DEPOSIT → full if `depositRefundableOnCustomerCancel` else deposit kept; FULL_ONLINE → full or deposit deducted (`MINUS_DEPOSIT` with a deposit %); PAY_ON_ARRIVAL → nothing
+  - [x] `BookingDetailsViewModel(bookingId)`: booking + salon contact (`SalonDetailsRepository`: phone / WhatsApp / image, since the booking carries only the salon id), cancel dialog with the money outcome → `POST cancel` → toast + reload, Rate only when COMPLETED → `Screen.RateBooking` (placeholder, CUS-049), instant reload on `booking.updated`; `BookingDetailsScreen` (status / payment / refund badges, reference with Copy, rejection / cancellation reason, salon block + Call / WhatsApp via the external port, persons with bride badge / services + prices / staff / date-time, payment breakdown incl. refunded, policy snapshot, sticky Cancel bar with the fixed rule message, disabled when the window passed); registered in `BookingsNavigation`; AR + EN strings
+  - [x] Tests: `CancellationRulesTest` (2), `BookingDetailsViewModelTest` (4)
+  - [ ] Unit-test run: batch 3
+- Loops: 0/1
+- Review: PENDING
+- Notes: `actions` in the contract is the merchant view, so the customer rule is computed locally from the policy snapshot; no partial cancel / reschedule by design.

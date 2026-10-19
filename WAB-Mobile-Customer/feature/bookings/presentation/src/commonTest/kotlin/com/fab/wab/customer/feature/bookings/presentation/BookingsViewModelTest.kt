@@ -3,6 +3,7 @@ package com.fab.wab.customer.feature.bookings.presentation
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.auth.AuthTokens
+import com.fab.wab.customer.core.domain.booking.BookingDetails
 import com.fab.wab.customer.core.domain.booking.BookingStatus
 import com.fab.wab.customer.core.domain.booking.BookingSummary
 import com.fab.wab.customer.core.domain.booking.BookingTab
@@ -48,6 +49,8 @@ private class BookingsFake : BookingsRepository {
         calls += Triple(tab, query, page)
         return AppResult.Success(List(perPage) { booking("$page-$it") })
     }
+    override suspend fun details(bookingId: String): AppResult<BookingDetails> = AppResult.Loading
+    override suspend fun cancel(bookingId: String, reasonText: String?): AppResult<String> = AppResult.Loading
 }
 
 private class SessionStoreFake(initial: SessionState) : SessionStore {

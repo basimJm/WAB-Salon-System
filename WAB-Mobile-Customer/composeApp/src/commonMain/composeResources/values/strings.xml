@@ -23,4 +23,5 @@
     <string name="placeholder_content_page">Page (coming soon)</string>
     <string name="placeholder_notifications">Notifications (coming soon)</string>
     <string name="placeholder_booking">Booking (coming soon)</string>
+    <string name="placeholder_rating">Rating (coming soon)</string>
 </resources>
