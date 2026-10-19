@@ -94,7 +94,7 @@ class BookingsViewModelTest {
         assertEquals("Sara", guest.state.value.welcomeName)
         assertTrue(repository.calls.isEmpty())
         guest.onEvent(UiAction.OnLoginClick)
-        assertEquals(SideEffect.OpenLogin, effects.last())
+        assertEquals<SideEffect>(SideEffect.OpenLogin, effects.last())
 
         val user = viewModel(USER)
         assertEquals(Triple(BookingTab.UPCOMING, "", 1), repository.calls.single())
@@ -128,6 +128,6 @@ class BookingsViewModelTest {
         val vm = viewModel(USER)
         assertTrue(vm.state.value.loaded)
         vm.onEvent(UiAction.OnBookNowClick)
-        assertEquals(SideEffect.OpenHome, effects.last())
+        assertEquals<SideEffect>(SideEffect.OpenHome, effects.last())
     }
 }

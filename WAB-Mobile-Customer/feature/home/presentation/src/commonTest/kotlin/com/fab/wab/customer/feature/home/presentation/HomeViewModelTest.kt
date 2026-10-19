@@ -92,6 +92,7 @@ private class FavoritesFake(var result: AppResult<Boolean>? = null) : FavoritesR
         calls += salonId to favorite
         return result ?: AppResult.Success(favorite)
     }
+    override suspend fun list(page: Int, pageSize: Int): AppResult<List<SalonSummary>> = AppResult.Success(emptyList())
 }
 
 private class SessionStoreFake(initial: SessionState) : SessionStore {

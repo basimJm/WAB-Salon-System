@@ -67,46 +67,50 @@ fun BookingsScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modif
 private fun RegisteredContent(state: UiState, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
     val tabs = BookingTab.entries
-    AppSearchBar(
-        value = state.query,
-        onValueChange = { onAction(UiAction.OnQueryChange(it)) },
-        placeholder = stringResource(Res.string.bookings_search_hint),
-        modifier = Modifier.padding(horizontal = spacing.space16, vertical = spacing.space4),
-    )
-    AppSegmentedTabs(
-        tabs = tabs.map { stringResource(if (it == BookingTab.UPCOMING) Res.string.bookings_tab_upcoming else Res.string.bookings_tab_past) },
-        selectedIndex = tabs.indexOf(state.tab),
-        onSelect = { onAction(UiAction.OnTabSelect(tabs[it])) },
-        modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.space16, vertical = spacing.space8),
-    )
-    AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }) {
-        AppStateContent(
-            state = contentStateOf(
-                isLoading = state.loading,
-                isOffline = state.offline,
-                errorMessage = state.error,
-                isEmpty = state.loaded && state.bookings.isEmpty(),
-                hasContent = state.bookings.isNotEmpty(),
-            ),
-            onRetry = { onAction(UiAction.OnRetry) },
-            modifier = Modifier.fillMaxSize(),
-            loading = { AppShimmerList(Modifier.padding(spacing.space16)) },
-            empty = {
-                AppEmptyState(
-                    title = stringResource(Res.string.bookings_empty),
-                    actionText = stringResource(Res.string.bookings_book_now),
-                    onAction = { onAction(UiAction.OnBookNowClick) },
-                )
+    Column(modifier = Modifier.fillMaxSize()) {
+        AppSearchBar(
+            value = state.query,
+            onValueChange = { onAction(UiAction.OnQueryChange(it)) },
+            placeholder = stringResource(Res.string.bookings_search_hint),
+            modifier = Modifier.padding(horizontal = spacing.space16, vertical = spacing.space4),
+        )
+        AppSegmentedTabs(
+            tabs = tabs.map { tab ->
+                stringResource(if (tab == BookingTab.UPCOMING) Res.string.bookings_tab_upcoming else Res.string.bookings_tab_past)
             },
-        ) {
-            AppPagedList(
-                items = state.bookings,
-                itemKey = { it.id },
-                hasMore = state.hasMore,
-                loadingMore = state.loadingMore,
-                onLoadMore = { onAction(UiAction.OnLoadMore) },
+            selectedIndex = tabs.indexOf(state.tab),
+            onSelect = { onAction(UiAction.OnTabSelect(tabs[it])) },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.space16, vertical = spacing.space8),
+        )
+        AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }) {
+            AppStateContent(
+                state = contentStateOf(
+                    isLoading = state.loading,
+                    isOffline = state.offline,
+                    errorMessage = state.error,
+                    isEmpty = state.loaded && state.bookings.isEmpty(),
+                    hasContent = state.bookings.isNotEmpty(),
+                ),
+                onRetry = { onAction(UiAction.OnRetry) },
                 modifier = Modifier.fillMaxSize(),
-            ) { booking -> BookingCard(booking = booking, onClick = { onAction(UiAction.OnBookingClick(booking.id)) }) }
+                loading = { AppShimmerList(Modifier.padding(spacing.space16)) },
+                empty = {
+                    AppEmptyState(
+                        title = stringResource(Res.string.bookings_empty),
+                        actionText = stringResource(Res.string.bookings_book_now),
+                        onAction = { onAction(UiAction.OnBookNowClick) },
+                    )
+                },
+            ) {
+                AppPagedList(
+                    items = state.bookings,
+                    itemKey = { it.id },
+                    hasMore = state.hasMore,
+                    loadingMore = state.loadingMore,
+                    onLoadMore = { onAction(UiAction.OnLoadMore) },
+                    modifier = Modifier.fillMaxSize(),
+                ) { booking -> BookingCard(booking = booking, onClick = { onAction(UiAction.OnBookingClick(booking.id)) }) }
+            }
         }
     }
 }

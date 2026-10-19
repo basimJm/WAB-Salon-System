@@ -29,10 +29,11 @@ fun GetSalonsBySalonIdStaffByMemberIdData.toDomain(): StaffMember = StaffMember(
     reviews = ReviewsPreview(RatingSummary(reviews.avg.toFloat(), reviews.count.toInt()), reviews.latest.map { it.toDomain() }),
 )
 
-fun GetSalonsBySalonIdStaffByMemberIdDataWorkingDaysItem.toDomain(): WorkingDay = WorkingDay(
-    day = DayOfWeek.fromCode(day),
-    hours = if (start.isNullOrBlank() || end.isNullOrBlank()) null else OpeningHours(start, end),
-)
+fun GetSalonsBySalonIdStaffByMemberIdDataWorkingDaysItem.toDomain(): WorkingDay {
+    val open = start?.takeIf { it.isNotBlank() }
+    val close = end?.takeIf { it.isNotBlank() }
+    return WorkingDay(day = DayOfWeek.fromCode(day), hours = if (open != null && close != null) OpeningHours(open, close) else null)
+}
 
 fun GetSalonsBySalonIdStaffByMemberIdDataReviewsLatestItem.toDomain(): Review =
     Review(id = id, customerName = customerName, rating = rating.toFloat(), comment = comment, createdAt = createdAt)

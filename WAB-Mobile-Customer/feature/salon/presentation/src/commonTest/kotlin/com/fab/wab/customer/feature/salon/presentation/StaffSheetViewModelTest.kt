@@ -45,7 +45,7 @@ private class StaffRepositoryFake(var result: AppResult<StaffMember> = AppResult
     }
 }
 
-private class SessionStoreFake(initial: SessionState) : SessionStore {
+private class StaffSessionFake(initial: SessionState) : SessionStore {
     override val state: Flow<SessionState> = MutableStateFlow(initial)
     override val onboardingSeen: Flow<Boolean> = MutableStateFlow(true)
     override val pushEnabled: Flow<Boolean> = MutableStateFlow(true)
@@ -67,7 +67,7 @@ class StaffSheetViewModelTest {
     private val effects = mutableListOf<SideEffect>()
 
     private fun TestScope.viewModel(session: SessionState): StaffSheetViewModel {
-        val vm = StaffSheetViewModel("s1", "m1", GetStaffMemberUseCase(repository), SessionStoreFake(session), { "error" }, backgroundScope)
+        val vm = StaffSheetViewModel("s1", "m1", GetStaffMemberUseCase(repository), StaffSessionFake(session), { "error" }, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }
         return vm
@@ -81,7 +81,7 @@ class StaffSheetViewModelTest {
         vm.onEvent(UiAction.OnAddReviewClick)
         assertTrue(vm.state.value.authDialog)
         vm.onEvent(UiAction.OnDialogConfirm)
-        assertEquals(SideEffect.OpenLogin, effects.last())
+        assertEquals<SideEffect>(SideEffect.OpenLogin, effects.last())
         vm.onEvent(UiAction.OnAllReviewsClick)
         assertEquals(SideEffect.OpenReviews("s1", "m1"), effects.last())
     }

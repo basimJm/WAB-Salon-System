@@ -50,7 +50,7 @@ private class ReviewsFake : ReviewsRepository {
     }
 }
 
-private class SessionStoreFake(initial: SessionState) : SessionStore {
+private class ReviewsSessionFake(initial: SessionState) : SessionStore {
     override val state: Flow<SessionState> = MutableStateFlow(initial)
     override val onboardingSeen: Flow<Boolean> = MutableStateFlow(true)
     override val pushEnabled: Flow<Boolean> = MutableStateFlow(true)
@@ -77,7 +77,7 @@ class ReviewsViewModelTest {
 
     private fun TestScope.viewModel(session: SessionState, target: ReviewTarget = STAFF, openForm: Boolean = false): ReviewsViewModel {
         val deps = ReviewsDependencies(
-            LoadReviewsUseCase(repository), SubmitReviewUseCase(repository), SessionStoreFake(session), NoOpAnalyticsTracker, { "error" },
+            LoadReviewsUseCase(repository), SubmitReviewUseCase(repository), ReviewsSessionFake(session), NoOpAnalyticsTracker, { "error" },
         )
         val vm = ReviewsViewModel(target, openForm, deps, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
@@ -96,7 +96,7 @@ class ReviewsViewModelTest {
     @Test
     fun loadsPagesForTheTargetAndGatesTheFormForGuests() = runTest(UnconfinedTestDispatcher()) {
         val vm = viewModel(GUEST)
-        assertEquals(listOf(STAFF to 1), repository.pages)
+        assertEquals(listOf<Pair<ReviewTarget, Int>>(STAFF to 1), repository.pages)
         assertEquals(12, vm.state.value.summary?.count)
         vm.onEvent(UiAction.OnLoadMore)
         assertEquals(2, repository.pages.last().second)
@@ -105,7 +105,7 @@ class ReviewsViewModelTest {
         assertTrue(vm.state.value.authDialog)
         assertNull(vm.state.value.form)
         vm.onEvent(UiAction.OnDialogConfirm)
-        assertEquals(SideEffect.OpenLogin, effects.last())
+        assertEquals<SideEffect>(SideEffect.OpenLogin, effects.last())
     }
 
     @Test
@@ -117,8 +117,8 @@ class ReviewsViewModelTest {
         vm.onEvent(UiAction.OnRatingChange(4))
         vm.onEvent(UiAction.OnCommentChange(" Nice "))
         vm.onEvent(UiAction.OnSubmit)
-        assertEquals(listOf(STAFF to ReviewDraft(4, "Nice")), repository.submitted)
-        assertEquals(SideEffect.Submitted, effects.last())
+        assertEquals(listOf<Pair<ReviewTarget, ReviewDraft>>(STAFF to ReviewDraft(4, "Nice")), repository.submitted)
+        assertEquals<SideEffect>(SideEffect.Submitted, effects.last())
         assertNull(vm.state.value.form)
         repository.submitResult = AppResult.Error(AppError.NetworkError("offline"))
         vm.onEvent(UiAction.OnAddReviewClick)

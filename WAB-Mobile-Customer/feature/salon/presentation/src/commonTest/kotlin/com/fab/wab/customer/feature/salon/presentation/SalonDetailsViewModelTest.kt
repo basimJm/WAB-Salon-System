@@ -9,6 +9,7 @@ import com.fab.wab.customer.core.domain.model.LocationData
 import com.fab.wab.customer.core.domain.salon.RatingSummary
 import com.fab.wab.customer.core.domain.salon.ReviewsPreview
 import com.fab.wab.customer.core.domain.salon.SalonDetails
+import com.fab.wab.customer.core.domain.salon.SalonSummary
 import com.fab.wab.customer.core.domain.salon.StaffMember
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.GuestProfile
@@ -55,9 +56,10 @@ private class FavoritesFake(var result: AppResult<Boolean>? = null) : FavoritesR
         calls += salonId to favorite
         return result ?: AppResult.Success(favorite)
     }
+    override suspend fun list(page: Int, pageSize: Int): AppResult<List<SalonSummary>> = AppResult.Success(emptyList())
 }
 
-private class SessionStoreFake(initial: SessionState) : SessionStore {
+private class DetailsSessionFake(initial: SessionState) : SessionStore {
     override val state: Flow<SessionState> = MutableStateFlow(initial)
     override val onboardingSeen: Flow<Boolean> = MutableStateFlow(true)
     override val pushEnabled: Flow<Boolean> = MutableStateFlow(true)
@@ -88,7 +90,7 @@ class SalonDetailsViewModelTest {
         val deps = SalonDetailsDependencies(
             getSalonDetails = GetSalonDetailsUseCase(details),
             favorites = favorites,
-            sessionStore = SessionStoreFake(session),
+            sessionStore = DetailsSessionFake(session),
             external = external,
             analytics = NoOpAnalyticsTracker,
             webBaseUrl = WEB,

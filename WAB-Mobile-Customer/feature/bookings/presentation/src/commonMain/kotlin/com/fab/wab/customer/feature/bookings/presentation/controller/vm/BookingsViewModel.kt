@@ -92,7 +92,8 @@ class BookingsViewModel(
             is SessionState.SignedIn -> session.user.firstName
         }
         updateState {
-            copy(signedIn = session.isSignedIn, welcomeName = name, bookings = if (session.isSignedIn) bookings else emptyList(), loaded = false)
+            val kept = if (session.isSignedIn) bookings else emptyList()
+            copy(signedIn = session.isSignedIn, welcomeName = name, bookings = kept, loaded = false)
         }
         if (session.isSignedIn && was != true) load()
     }

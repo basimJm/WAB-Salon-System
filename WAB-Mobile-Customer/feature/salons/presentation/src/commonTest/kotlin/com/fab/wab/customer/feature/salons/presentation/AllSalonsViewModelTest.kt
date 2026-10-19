@@ -75,6 +75,7 @@ private class PermissionManagerFake(var status: PermissionStatus) : PermissionMa
 
 private class FavoritesFake : FavoritesRepository {
     override suspend fun setFavorite(salonId: String, favorite: Boolean): AppResult<Boolean> = AppResult.Success(favorite)
+    override suspend fun list(page: Int, pageSize: Int): AppResult<List<SalonSummary>> = AppResult.Success(emptyList())
 }
 
 private class SessionStoreFake(initial: SessionState) : SessionStore {

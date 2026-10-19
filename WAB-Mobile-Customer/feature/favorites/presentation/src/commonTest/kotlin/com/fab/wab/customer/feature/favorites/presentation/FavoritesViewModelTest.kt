@@ -88,7 +88,7 @@ class FavoritesViewModelTest {
         assertEquals(false, vm.state.value.signedIn)
         assertTrue(repository.pages.isEmpty())
         vm.onEvent(UiAction.OnLoginClick)
-        assertEquals(SideEffect.OpenLogin, effects.last())
+        assertEquals<SideEffect>(SideEffect.OpenLogin, effects.last())
         store.sessionState.value = USER
         assertEquals(listOf(1), repository.pages)
         assertEquals(10, vm.state.value.salons.size)
@@ -115,7 +115,7 @@ class FavoritesViewModelTest {
         val vm = viewModel(SessionStoreFake(USER))
         assertTrue(vm.state.value.loaded)
         vm.onEvent(UiAction.OnExploreClick)
-        assertEquals(SideEffect.OpenHome, effects.last())
+        assertEquals<SideEffect>(SideEffect.OpenHome, effects.last())
         vm.onEvent(UiAction.OnResume)
         assertEquals(listOf(1, 1), repository.pages)
     }

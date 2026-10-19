@@ -42,7 +42,9 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun BookingCard(booking: BookingSummary, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
-    val start = TimeFormat.instantText(booking.appointmentStart, stringResource(CoreRes.string.time_am), stringResource(CoreRes.string.time_pm))
+    val am = stringResource(CoreRes.string.time_am)
+    val pm = stringResource(CoreRes.string.time_pm)
+    val start = TimeFormat.instantText(booking.appointmentStart, am, pm)
     AppCard(modifier = modifier.fillMaxWidth(), onClick = onClick) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
             AppText(text = booking.salonName.orEmpty(), style = AppTheme.typography.titleMedium, maxLines = 1)

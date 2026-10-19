@@ -139,26 +139,28 @@ private fun StatusBadge(status: StaffStatus) {
 @Composable
 private fun StaffReviews(member: StaffMember, onAction: (UiAction) -> Unit) {
     val summary = member.reviews.summary
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        AppSectionHeader(title = stringResource(Res.string.salon_reviews), modifier = Modifier.weight(1f))
-        if (summary.count > 0) {
-            AppText(
-                text = stringResource(Res.string.salon_reviews_summary, ratingValueText(summary.average), summary.count),
-                color = AppTheme.colors.muted,
-                style = AppTheme.typography.bodySmall,
-            )
+    Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12)) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            AppSectionHeader(title = stringResource(Res.string.salon_reviews), modifier = Modifier.weight(1f))
+            if (summary.count > 0) {
+                AppText(
+                    text = stringResource(Res.string.salon_reviews_summary, ratingValueText(summary.average), summary.count),
+                    color = AppTheme.colors.muted,
+                    style = AppTheme.typography.bodySmall,
+                )
+            }
         }
-    }
-    if (member.reviews.latest.isEmpty()) {
-        AppText(text = stringResource(Res.string.staff_no_reviews), color = AppTheme.colors.muted)
-    } else {
-        member.reviews.latest.take(REVIEW_PREVIEW_COUNT).forEach { AppReviewItem(review = it.toUi()) }
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
-        if (summary.count > 0) {
-            AppTextButton(text = stringResource(Res.string.salon_reviews_all), onClick = { onAction(UiAction.OnAllReviewsClick) })
+        if (member.reviews.latest.isEmpty()) {
+            AppText(text = stringResource(Res.string.staff_no_reviews), color = AppTheme.colors.muted)
+        } else {
+            member.reviews.latest.take(REVIEW_PREVIEW_COUNT).forEach { AppReviewItem(review = it.toUi()) }
         }
-        AppTextButton(text = stringResource(Res.string.salon_review_add), onClick = { onAction(UiAction.OnAddReviewClick) })
+        Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
+            if (summary.count > 0) {
+                AppTextButton(text = stringResource(Res.string.salon_reviews_all), onClick = { onAction(UiAction.OnAllReviewsClick) })
+            }
+            AppTextButton(text = stringResource(Res.string.salon_review_add), onClick = { onAction(UiAction.OnAddReviewClick) })
+        }
     }
 }
 
