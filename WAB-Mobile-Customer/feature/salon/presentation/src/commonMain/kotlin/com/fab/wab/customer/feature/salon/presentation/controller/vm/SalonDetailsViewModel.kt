@@ -6,6 +6,7 @@ import com.fab.wab.customer.core.analytics.analyticsParams
 import com.fab.wab.customer.core.common.DeepLinks
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
+import com.fab.wab.customer.core.domain.ErrorCode
 import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.mvi.BaseViewModel
@@ -95,6 +96,11 @@ class SalonDetailsViewModel(
             when (val result = deps.getSalonDetails(salonId)) {
                 is AppResult.Success -> updateState { copy(loading = false, refreshing = false, salon = result.data) }
                 is AppResult.Error -> {
+                    if (result.appError.isSalonMissing()) {
+                        updateState { copy(loading = false, refreshing = false) }
+                        emitSideEffect(SideEffect.NotAvailable)
+                        return@launch
+                    }
                     val message = deps.errorText(result.appError)
                     val keep = refresh && salon() != null
                     val offline = result.appError is AppError.NetworkError
@@ -165,3 +171,7 @@ class SalonDetailsViewModel(
 
 /** Share payload: the salon name and its link (the platform's share sheet decides the rest). */
 fun shareText(name: String, link: String): String = "$name\n$link"
+
+/** Missing or hidden salon (deleted, not approved, offline): the server answers `SALON_NOT_FOUND` / `NOT_FOUND`. */
+private fun AppError.isSalonMissing(): Boolean =
+    this is AppError.ServerError && (code == ErrorCode.SALON_NOT_FOUND || code == ErrorCode.NOT_FOUND)

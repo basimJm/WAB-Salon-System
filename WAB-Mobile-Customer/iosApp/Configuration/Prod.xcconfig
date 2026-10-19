@@ -7,6 +7,8 @@ APP_DISPLAY_NAME = WAB
 // scheme separator is written as ':/$()/'.
 API_BASE_URL = https:/$()/api.template.app
 WEB_BASE_URL = https:/$()/template.app
+// Universal Links domain (PRD §4.4) = the WEB_BASE_URL host; used by iosApp.entitlements.
+DEEP_LINK_HOST = template.app
 DATA_SOURCE = remote
 BUNDLE_ID_SUFFIX =
 PRODUCT_BUNDLE_IDENTIFIER = com.fab.wab.customer$(BUNDLE_ID_SUFFIX)$(TEAM_ID)

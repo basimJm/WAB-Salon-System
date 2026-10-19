@@ -57,4 +57,16 @@
     <string name="details_refund_deposit_deducted">سيتم خصم العربون من المبلغ المسترد.</string>
     <string name="details_refund_nothing">لم يُدفع أي مبلغ إلكترونياً؛ لا يوجد استرداد.</string>
     <string name="details_cancelled_toast">تم إلغاء حجزك.</string>
+    <string name="rating_title">قيّم تجربتك</string>
+    <string name="rating_salon_step">كيف كانت تجربتك في %1$s؟</string>
+    <string name="rating_staff_step">كيف كان %1$s؟</string>
+    <string name="rating_comment_hint">اكتب تعليقاً (اختياري)</string>
+    <string name="rating_counter">%1$d / %2$d</string>
+    <string name="rating_submit">إرسال</string>
+    <string name="rating_skip">تخطي</string>
+    <string name="rating_done_title">شكراً لك!</string>
+    <string name="rating_done_message">سيظهر تقييمك بعد الموافقة.</string>
+    <string name="rating_done_none">لا يوجد ما يمكن تقييمه في هذا الحجز.</string>
+    <string name="rating_done_button">تم</string>
+    <string name="rating_salon_unknown">الصالون</string>
 </resources>

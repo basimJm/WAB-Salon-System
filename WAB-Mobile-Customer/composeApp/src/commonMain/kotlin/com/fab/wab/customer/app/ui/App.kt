@@ -16,6 +16,9 @@ import com.fab.wab.customer.app.controller.contract.MainContract
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.vm.MainViewModel
 import com.fab.wab.customer.app.analytics.TrackNavigationScreens
+import com.fab.wab.customer.app.deeplink.DeepLinkEffect
+import com.fab.wab.customer.app.deeplink.DeepLinkStore
+import com.fab.wab.customer.app.deeplink.deepLinkModule
 import com.fab.wab.customer.app.di.analyticsAppModule
 import com.fab.wab.customer.app.di.appPlatformModule
 import com.fab.wab.customer.app.di.installationSyncModule
@@ -63,6 +66,10 @@ import com.fab.wab.customer.feature.onboarding.presentation.screen.OnboardingRou
 import com.fab.wab.customer.feature.booking.di.bookingModule
 import com.fab.wab.customer.feature.booking.presentation.di.bookingPresentationModule
 import com.fab.wab.customer.feature.bookings.di.bookingsModule
+import com.fab.wab.customer.feature.notifications.di.notificationsModule
+import com.fab.wab.customer.feature.profile.di.profileModule
+import com.fab.wab.customer.feature.profile.presentation.di.profilePresentationModule
+import com.fab.wab.customer.feature.notifications.presentation.di.notificationsPresentationModule
 import com.fab.wab.customer.feature.bookings.presentation.di.bookingsPresentationModule
 import com.fab.wab.customer.feature.favorites.di.favoritesModule
 import com.fab.wab.customer.feature.favorites.presentation.di.favoritesPresentationModule
@@ -87,6 +94,7 @@ val appModules = listOf(
     viewModelModule,
     appPlatformModule,
     installationSyncModule,
+    deepLinkModule,
     platformFirebaseModule(),
     analyticsModule(),
     analyticsAppModule,
@@ -110,6 +118,10 @@ val appModules = listOf(
     bookingsPresentationModule,
     bookingModule,
     bookingPresentationModule,
+    notificationsModule,
+    notificationsPresentationModule,
+    profileModule,
+    profilePresentationModule,
 )
 
 @Composable
@@ -176,6 +188,7 @@ fun App(androidContext: Any?) {
                         )
                     }
                     TrackNavigationScreens(navController)
+                    DeepLinkEffect(koinInject<DeepLinkStore>(), navController)
                     val sessionState by koinInject<SessionStore>().state.collectAsStateWithLifecycle(initialValue = null)
                     RealtimeConnectionEffect(koinInject<RealtimeClient>(), isSignedIn = sessionState?.isSignedIn == true)
                     val tabs = rootNavItems()

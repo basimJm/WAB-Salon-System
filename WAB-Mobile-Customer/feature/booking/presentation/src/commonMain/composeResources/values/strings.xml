@@ -40,4 +40,11 @@
     <string name="booking_pay_deposit">Deposit %1$d%% = %2$s JOD</string>
     <string name="booking_pay_full">Pay the full amount online (%1$s JOD)</string>
     <string name="booking_confirm">Confirm booking</string>
+    <string name="success_title">Request sent</string>
+    <string name="success_message">Your booking request was sent and is waiting for the salon\'s approval.</string>
+    <string name="success_reference">Reference number</string>
+    <string name="success_copy">Copy</string>
+    <string name="success_copied">Reference number copied</string>
+    <string name="success_view_booking">View booking</string>
+    <string name="success_back_home">Back to Home</string>
 </resources>

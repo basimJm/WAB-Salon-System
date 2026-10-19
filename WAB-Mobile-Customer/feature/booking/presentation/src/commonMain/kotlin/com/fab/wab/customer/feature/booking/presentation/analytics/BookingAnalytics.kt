@@ -14,3 +14,13 @@ object BookingAnalytics {
 
     val SCREEN = AnalyticsScreen(SCREEN_NAME)
 }
+
+/** PRD §14 names for S17. */
+object BookingSuccessAnalytics {
+    private const val SCREEN_NAME = "booking_success"
+    const val ACTION_COPY_REFERENCE = "booking_success_copy_reference"
+    const val ACTION_VIEW_BOOKING = "booking_success_view_booking"
+    const val ACTION_BACK_HOME = "booking_success_back_home"
+
+    val SCREEN = AnalyticsScreen(SCREEN_NAME)
+}

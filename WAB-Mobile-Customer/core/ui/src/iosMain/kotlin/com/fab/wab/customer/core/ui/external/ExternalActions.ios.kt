@@ -28,6 +28,10 @@ class IosExternalActions : ExternalActions {
         root.presentViewController(controller, animated = true, completion = null)
     }
 
+    override fun openUrl(url: String) = open(url)
+
+    override fun email(address: String) = open(ExternalLinks.mailto(address))
+
     private fun open(url: String) {
         val nsUrl = NSURL.URLWithString(url) ?: return
         UIApplication.sharedApplication.openURL(nsUrl)

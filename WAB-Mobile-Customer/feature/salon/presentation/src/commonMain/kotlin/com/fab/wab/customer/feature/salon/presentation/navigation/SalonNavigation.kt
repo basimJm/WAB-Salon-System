@@ -30,6 +30,7 @@ import com.fab.wab.customer.feature.salon.presentation.controller.vm.SalonDetail
 import com.fab.wab.customer.feature.salon.presentation.controller.vm.StaffSheetViewModel
 import com.fab.wab.customer.feature.salon.presentation.resources.Res
 import com.fab.wab.customer.feature.salon.presentation.resources.review_submitted
+import com.fab.wab.customer.feature.salon.presentation.resources.salon_not_available
 import com.fab.wab.customer.feature.salon.presentation.screen.ReviewsScreen
 import com.fab.wab.customer.feature.salon.presentation.screen.SalonDetailsScreen
 import com.fab.wab.customer.feature.salon.presentation.screen.ServiceSheet
@@ -78,8 +79,13 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
         var staffSheet by remember { mutableStateOf<StaffRequest?>(null) }
         var serviceSheet by remember { mutableStateOf<SalonService?>(null) }
         var viewer by remember { mutableStateOf<MediaRequest?>(null) }
+        val notAvailable = stringResource(Res.string.salon_not_available)
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
+                SideEffect.NotAvailable -> {
+                    navigateBack()
+                    notifications.show(notAvailable, style = NotificationStyle.Error)
+                }
                 is SideEffect.OpenReviews -> navigateTo(Screen.SalonReviews(effect.salonId))
                 is SideEffect.OpenBooking -> navigateTo(Screen.BookingStart(effect.salonId))
                 SideEffect.OpenLogin -> navigateTo(Graph.Auth)

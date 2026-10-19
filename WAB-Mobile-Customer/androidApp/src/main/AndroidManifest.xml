@@ -43,6 +43,18 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- PRD §4.4 App Links: https://<web host>/salon/{salonId}; the host comes from <ENV>_WEB_BASE_URL. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="${DEEP_LINK_HOST}"
+                    android:pathPrefix="/salon/" />
+            </intent-filter>
         </activity>
 
         <service

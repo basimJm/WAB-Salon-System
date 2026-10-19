@@ -40,4 +40,11 @@
     <string name="booking_pay_deposit">عربون %1$d%% = %2$s د.أ</string>
     <string name="booking_pay_full">الدفع كاملاً عبر التطبيق (%1$s د.أ)</string>
     <string name="booking_confirm">تأكيد الحجز</string>
+    <string name="success_title">تم إرسال الطلب</string>
+    <string name="success_message">تم إرسال طلب الحجز وبانتظار موافقة الصالون.</string>
+    <string name="success_reference">رقم المرجع</string>
+    <string name="success_copy">نسخ</string>
+    <string name="success_copied">تم نسخ رقم المرجع</string>
+    <string name="success_view_booking">عرض الحجز</string>
+    <string name="success_back_home">العودة للرئيسية</string>
 </resources>

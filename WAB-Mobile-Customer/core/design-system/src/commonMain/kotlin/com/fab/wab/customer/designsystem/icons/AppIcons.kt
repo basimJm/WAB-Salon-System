@@ -1,6 +1,16 @@
 package com.fab.wab.customer.designsystem.icons
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
+import androidx.compose.material.icons.automirrored.rounded.Logout
+import androidx.compose.material.icons.rounded.CameraAlt
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.Gavel
+import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material.icons.rounded.Storefront
+import androidx.compose.material.icons.rounded.Badge
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.Chat
@@ -85,4 +95,14 @@ object AppIcons {
     val Location: ImageVector = Icons.Rounded.LocationOn
     val LocationOff: ImageVector = Icons.Rounded.LocationOff
     val Image: ImageVector = Icons.Rounded.Image
+    val Edit: ImageVector = Icons.Rounded.Edit
+    val Delete: ImageVector = Icons.Rounded.Delete
+    val Email: ImageVector = Icons.Rounded.Email
+    val Camera: ImageVector = Icons.Rounded.CameraAlt
+    val Gallery: ImageVector = Icons.Rounded.PhotoLibrary
+    val Logout: ImageVector = Icons.AutoMirrored.Rounded.Logout
+    val Help: ImageVector = Icons.AutoMirrored.Rounded.HelpOutline
+    val Legal: ImageVector = Icons.Rounded.Gavel
+    val Business: ImageVector = Icons.Rounded.Storefront
+    val IdCard: ImageVector = Icons.Rounded.Badge
 }

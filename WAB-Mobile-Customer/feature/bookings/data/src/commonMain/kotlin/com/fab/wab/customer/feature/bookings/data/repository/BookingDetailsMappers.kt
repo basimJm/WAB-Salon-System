@@ -69,6 +69,7 @@ fun GetBookingsByIdDataPersonsItem.toDomain(): BookingPerson = BookingPerson(
     start = start,
     end = end,
     subtotal = subtotal,
+    staffId = staff?.id,
     staffName = staff?.name,
     services = services.map { BookingService(it.name, it.price, it.durationMinutes.toInt()) },
 )

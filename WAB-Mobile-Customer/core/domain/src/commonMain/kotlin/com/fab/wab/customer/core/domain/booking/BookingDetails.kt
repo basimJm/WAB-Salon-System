@@ -38,6 +38,7 @@ data class BookingPerson(
     val start: String,
     val end: String,
     val subtotal: String,
+    val staffId: String?,
     val staffName: String?,
     val services: List<BookingService>,
 )
