@@ -60,7 +60,7 @@ internal fun NotificationRow(item: Notification, onClick: () -> Unit, modifier: 
 
 @Composable
 internal fun relativeText(createdAt: String): String =
-    when (val rel = relativeTimeOf(createdAt, kotlinx.datetime.Clock.System.now(), BusinessTime.ZONE_ID)) {
+    when (val rel = relativeTimeOf(createdAt, BusinessTime.nowInstant(), BusinessTime.ZONE_ID)) {
         RelativeTime.Now -> stringResource(Res.string.time_now)
         is RelativeTime.Minutes -> stringResource(Res.string.time_minutes_ago, rel.value)
         is RelativeTime.Hours -> stringResource(Res.string.time_hours_ago, rel.value)
