@@ -49,8 +49,13 @@ export class RemoteCampaignsRepository implements CampaignsRepository {
       query: defined({ page: q.page, pageSize: q.pageSize, status: q.status, app: q.app }),
     });
 
-  create: CampaignsRepository['create'] = async (input, reason) =>
-    (await this.api.execute(create, { body: { ...defined(input), reason } })).data;
+  // `null` means "send now" for the form, but the server reads a null date as 1 Jan 1970: the key is left out.
+  create: CampaignsRepository['create'] = async ({ scheduledAt, ...rest }, reason) =>
+    (
+      await this.api.execute(create, {
+        body: { ...defined(rest), ...(scheduledAt ? { scheduledAt } : {}), reason },
+      })
+    ).data;
 
   audienceSize: CampaignsRepository['audienceSize'] = async (app, a) =>
     (await this.api.execute(size, { body: { app, audience: a } })).data.size;

@@ -231,6 +231,7 @@ Integration and release tasks for the admin panel (`INTEGRATION.md` §6).
 | ADM-082 | Error tracking and source-map upload for release builds | `feat/adm-082-error-tracking` | ADM-005 | SRV-115 | BLOCKED | Tool selection (open item #4) and DSN — **user input**. |
 | ADM-083 | Prod go-live checklist for the admin panel (env values, domain, CSP, rollback, smoke tests) | `feat/adm-083-go-live` | ADM-081, ADM-005, ADM-006, ADM-079 | — | PENDING | Hosting, domain and the pending tasks above (REL-03). |
 | ADM-084 | Real data by default: only dev-debug uses the mock; dev-release, prod-debug and prod-release call the API through placeholder base URLs (`.env.dev`, `.env.prod`) the owner replaces | `feat/adm-084-remote-default` | ADM-081 | — | DONE | Owner request 2026-10-19. |
+| ADM-085 | Real-server QA: every screen against a real WAB-Server (MongoDB, Redis, MinIO) with real data, and the defects it found | `feat/adm-085-real-server-fixes` | ADM-084 | — | DONE | Owner request 2026-10-19. |
 
 ---
 
