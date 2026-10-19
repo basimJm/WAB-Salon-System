@@ -55,3 +55,14 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — reads the same registry as `tasks.py`; falls back to main/master when the registry is missing.
 - Notes: patched through the Terminal panel (the sandbox cannot write `.claude/hooks/`). Triggered by the Stop hook firing on the `customer` checkout after the CUS-023 merge.
 
+
+### T-126 — Sync main into server and merge the masters into main
+- Project: repo root
+- Branch: `chore/sync-main-into-server`
+- Status: IN PROGRESS
+- Acceptance criteria:
+  - [x] `main` (2 hook commits) merged into `server`; the only conflict (this file) resolved by keeping both task blocks
+  - [ ] masters `server`, `admin`, `customer` merged into `main` through PRs (owner order 2026-10-19)
+- Tests: `python3 .claude/hooks/test_hooks.py` (25 green after the merge)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written; hooks diff comes from main as merged.
