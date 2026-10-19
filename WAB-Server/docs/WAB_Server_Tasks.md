@@ -249,8 +249,8 @@ Added 2026-10-18. Each row is an `/admin/v1` capability the Admin PRD needs and 
 
 | ID | Task | Branch | Needs (besides previous merged) | Status | Pending on / notes |
 |---|---|---|---|---|---|
-| SRV-117 | Admin profile: `GET/PATCH /admin/v1/profile`, change password (current + new, lockout rules), change email with email-OTP verification, alert-recipient list read/write (settings key) | `feat/srv-117-admin-profile` | SRV-030, SRV-031 | IN REVIEW | G1 → unblocks ADM-068. |
-| SRV-118 | Admin global search `GET /admin/v1/search?q=` grouped results (customers by phone/name, salons, bookings by reference, members), paginated per group, indexes | `feat/srv-118-admin-search` | SRV-041, SRV-074 | TODO | G2 → unblocks ADM-069. |
+| SRV-117 | Admin profile: `GET/PATCH /admin/v1/profile`, change password (current + new, lockout rules), change email with email-OTP verification, alert-recipient list read/write (settings key) | `feat/srv-117-admin-profile` | SRV-030, SRV-031 | DONE | G1 → unblocks ADM-068. |
+| SRV-118 | Admin global search `GET /admin/v1/search?q=` grouped results (customers by phone/name, salons, bookings by reference, members), paginated per group, indexes | `feat/srv-118-admin-search` | SRV-041, SRV-074 | IN REVIEW | G2 → unblocks ADM-069. |
 | SRV-119 | Admin salon editing part 1: profile/location/contacts, gallery (add/remove/reorder) on behalf of a salon, with reason + audit + owner notification | `feat/srv-119-admin-salon-edit-1` | SRV-045, SRV-048 | TODO | G3 → unblocks ADM-070 (with SRV-120). |
 | SRV-120 | Admin salon editing part 2: working hours/closures (with affected-booking preview), services, staff profiles, policies, on behalf of a salon | `feat/srv-120-admin-salon-edit-2` | SRV-119, SRV-049, SRV-050, SRV-052, SRV-054 | TODO | G3 → unblocks ADM-070. |
 | SRV-121 | Admin salon list extras: subscription filter, recommended flag, bookings (30d) column; per-salon KPIs, analytics and activity tabs; salon deletion-request decision endpoint | `feat/srv-121-admin-salon-insights` | SRV-102, SRV-055 | TODO | G4 → unblocks ADM-073. |
