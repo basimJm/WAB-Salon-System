@@ -53,17 +53,37 @@ class SalonDetailsViewModel(
             UiAction.OnShareClick -> share()
             UiAction.OnFavoriteClick -> toggleFavorite()
             UiAction.OnLocationClick -> openMaps()
-            UiAction.OnCallClick -> salon()?.phone?.let { track(SalonAnalytics.ACTION_CALL); deps.external.dial(it) }
-            UiAction.OnWhatsAppClick -> salon()?.whatsapp?.let { track(SalonAnalytics.ACTION_WHATSAPP); deps.external.openWhatsApp(it) }
+            UiAction.OnCallClick -> call()
+            UiAction.OnWhatsAppClick -> whatsApp()
             UiAction.OnHoursToggle -> updateState { copy(hoursExpanded = !hoursExpanded) }
             UiAction.OnBookClick -> book()
-            UiAction.OnAddReviewClick -> authGated { emitSideEffect(SideEffect.OpenAddReview(salonId)) }
             UiAction.OnDialogConfirm -> confirmDialog()
             UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
+            else -> onNavigation(event)
+        }
+    }
+
+    private fun call() {
+        val phone = salon()?.phone ?: return
+        track(SalonAnalytics.ACTION_CALL)
+        deps.external.dial(phone)
+    }
+
+    private fun whatsApp() {
+        val number = salon()?.whatsapp ?: return
+        track(SalonAnalytics.ACTION_WHATSAPP)
+        deps.external.openWhatsApp(number)
+    }
+
+    /** Taps that open another screen or sheet. */
+    private fun onNavigation(event: UiAction) {
+        when (event) {
+            UiAction.OnAddReviewClick -> authGated { emitSideEffect(SideEffect.OpenAddReview(salonId)) }
             is UiAction.OnStaffClick -> emitSideEffect(SideEffect.OpenStaff(salonId, event.memberId))
             is UiAction.OnServiceClick -> emitSideEffect(SideEffect.OpenService(salonId, event.serviceId))
             is UiAction.OnGalleryClick -> emitSideEffect(SideEffect.OpenGallery(salonId, event.index))
             UiAction.OnAllReviewsClick -> emitSideEffect(SideEffect.OpenReviews(salonId))
+            else -> Unit
         }
     }
 

@@ -53,10 +53,10 @@ import kotlin.math.roundToInt
 
 /** S05 full-screen sheet: header (close / title / reset), scrollable sections, sticky Apply. */
 @Composable
-fun FilterSheet(state: UiState, onAction: (UiAction) -> Unit, onDismiss: () -> Unit) {
+fun FilterSheet(state: UiState, onAction: (UiAction) -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(SalonsAnalytics.FILTER_SCREEN)
     val spacing = AppTheme.spacing
-    AppBottomSheet(onDismiss = onDismiss) {
+    AppBottomSheet(onDismiss = onDismiss, modifier = modifier) {
         Column(modifier = Modifier.fillMaxHeight(SHEET_HEIGHT_FRACTION)) {
             SheetHeader(state.canReset, onAction, onDismiss)
             Column(

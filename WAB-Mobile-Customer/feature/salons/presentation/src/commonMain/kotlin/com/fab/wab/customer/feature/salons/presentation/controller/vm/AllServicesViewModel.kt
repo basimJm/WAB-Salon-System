@@ -62,9 +62,8 @@ class AllServicesViewModel(
                 is AppResult.Error -> {
                     val message = errorText(result.appError)
                     val keep = refresh && uiState.value.loaded
-                    updateState {
-                        copy(loading = false, refreshing = false, offline = result.appError is AppError.NetworkError, error = if (keep) null else message)
-                    }
+                    val offline = result.appError is AppError.NetworkError
+                    updateState { copy(loading = false, refreshing = false, offline = offline, error = if (keep) null else message) }
                     if (keep) emitSideEffect(SideEffect.ShowError(message))
                 }
                 AppResult.Loading -> Unit

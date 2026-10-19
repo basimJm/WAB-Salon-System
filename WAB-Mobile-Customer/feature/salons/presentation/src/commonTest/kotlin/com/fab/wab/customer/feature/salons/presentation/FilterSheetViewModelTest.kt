@@ -29,7 +29,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-private class CatalogFake : CatalogRepository {
+private class SheetCatalogFake : CatalogRepository {
     val pages = mutableListOf<Int>()
     var perPage = 10
     override suspend fun services(gender: Gender, page: Int, pageSize: Int): AppResult<List<CatalogService>> {
@@ -49,7 +49,7 @@ private class OptionsFake(var bounds: AppResult<PriceRange?> = AppResult.Success
 @OptIn(ExperimentalCoroutinesApi::class)
 class FilterSheetViewModelTest {
 
-    private val catalog = CatalogFake()
+    private val catalog = SheetCatalogFake()
     private val options = OptionsFake()
     private val effects = mutableListOf<SideEffect>()
 

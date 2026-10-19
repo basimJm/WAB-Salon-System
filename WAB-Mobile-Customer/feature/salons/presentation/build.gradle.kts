@@ -12,6 +12,7 @@ kotlin {
     sourceSets.commonMain.dependencies {
         implementation(projects.feature.salons.domain)
         implementation(projects.feature.home.domain)
+        implementation(projects.feature.home.presentation)
     }
     sourceSets.commonTest.dependencies {
         implementation(libs.kotlinx.coroutines.test)
