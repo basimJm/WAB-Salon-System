@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 (CUS-042…046) shipped (PR #287). Batch 4 (CUS-048/049/050/053/057) shipped (PR #293). Batch 5 (CUS-051/052/054/055/056) shipped (PR #296). Batch 6 = CUS-058 + CUS-059 (the last code tasks) → unit-test run green → PR. Batch 6 shipped (PR #301). `main` merged into `customer` (PR #314). Now: CUS-064 + CUS-065 end-of-backlog pass on `feat/cus-064-a11y-rtl-qa`.
+- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 (CUS-042…046) shipped (PR #287). Batch 4 (CUS-048/049/050/053/057) shipped (PR #293). Batch 5 (CUS-051/052/054/055/056) shipped (PR #296). Batch 6 = CUS-058 + CUS-059 (the last code tasks) → unit-test run green → PR. Batch 6 shipped (PR #301). `main` merged into `customer` (PR #314). CUS-064 + CUS-065 end-of-backlog pass shipped (PR #315). Backlog has no ready task: remaining rows are blocked/pending (`tasks.py next customer`).
 
 ### CUS-058 — Analytics events: every screen view and every action of PRD §14 with the common fields, verified by a test
 - Branch: `feat/cus-058-analytics-events` (from `origin/customer`, batch 6 start)
@@ -49,7 +49,7 @@
 
 ### CUS-064 — Accessibility and RTL QA pass: TalkBack names, 48 dp targets, font scale 200 %, RTL mirroring, dark mode, landscape; fixes + screenshot evidence
 - Branch: `feat/cus-064-a11y-rtl-qa` (from `origin/customer` after the `main` merge, PR #314)
-- Status: IN REVIEW
+- Status: DONE (PR #315)
 - Acceptance criteria (PRD §12; CLAUDE.md §7; rules §3.13 end-of-backlog pass):
   - [x] detekt clean over the whole app after batches 1–6 (reducer splits in BookingFlow / Profile / Notifications, analytics catalog split into `AuthDiscoveryActionEvents` / `BookingAccountActionEvents`, error-action tables, line wraps, modifier/naming fixes)
   - [x] Kotlin/Native build + tests: kotlinx-datetime aligned to 0.7.1 (Ktor already pulled it on iOS → mixed klibs broke linking), `BusinessTime.nowInstant()` replaces `Clock.System` (name clash with core/common `Clock` on K/N), file-level deprecation suppressions until the datetime API migration, `toEpochDays()` Long, `import ComposeApp` in `iOSApp.swift`
@@ -63,7 +63,7 @@
 
 ### CUS-065 — Performance pass: cold start, R8 keep rules, release size budget, baseline profile, image sizing, no main-thread blocking; measurements recorded
 - Branch: `feat/cus-064-a11y-rtl-qa` (same end-of-backlog branch)
-- Status: IN REVIEW
+- Status: DONE (PR #315)
 - Acceptance criteria (CLAUDE.md §6; `config/budgets.json` 60 MiB per flavor):
   - [x] Cold start (dev debug, emulator, `am start -W` ×3 after force-stop): 1021 / 968 / 969 ms TotalTime; PSS after launch 176 MB (debug build, Compose + Koin)
   - [x] Release APK size: dev 10,307,971 B, prod 10,308,003 B (unsigned, R8) vs budget 62,914,560 B → `budget: ok`
@@ -74,3 +74,11 @@
 - Tests: measurements above; `policy_checks.py budget` ok; gate exit 0
 - Loops: 1/1 — numbers re-read from the gate output; no code change specific to this task beyond the batch fixes
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — measurements recorded, budget enforced in the gate. DEVIATION: baseline profile deferred to CUS-066 (needs owner signing/device run); cold start measured on a debug build only.
+
+### T-127 — Docs: CUS-064/065 DONE, board + session index
+- Branch: `docs/cus-064-065-done`
+- Status: IN REVIEW
+- Acceptance criteria: statuses set through `tasks.py`; board regenerated; session/memory current
+- Tests: none (docs only)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only, no source changed.
