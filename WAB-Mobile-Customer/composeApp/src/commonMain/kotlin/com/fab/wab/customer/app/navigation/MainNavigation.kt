@@ -8,6 +8,7 @@ import com.fab.wab.customer.feature.auth.presentation.navigation.AuthNavigation
 import com.fab.wab.customer.feature.booking.presentation.navigation.BookingNavigation
 import com.fab.wab.customer.feature.bookings.presentation.navigation.BookingsNavigation
 import com.fab.wab.customer.feature.notifications.presentation.navigation.NotificationsNavigation
+import com.fab.wab.customer.feature.content.presentation.navigation.ContentNavigation
 import com.fab.wab.customer.feature.profile.presentation.navigation.ProfileNavigation
 import com.fab.wab.customer.feature.favorites.presentation.navigation.FavoritesNavigation
 import com.fab.wab.customer.feature.home.presentation.navigation.HomeNavigation
@@ -31,8 +32,7 @@ fun MainNavigation(
         BookingNavigation(navController).registerGraph(this)
         NotificationsNavigation(navController).registerGraph(this)
         ProfileNavigation(navController).registerGraph(this)
-        registerPlaceholderProfileScreens()
-        registerPlaceholderAuthScreens()
+        ContentNavigation(navController).registerGraph(this)
         registerPlaceholderHomeScreens()
     }
 }

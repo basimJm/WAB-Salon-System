@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_title_privacy">سياسة الخصوصية</string>
+    <string name="content_title_terms">الشروط والأحكام</string>
+    <string name="content_title_about">من نحن</string>
+    <string name="content_title_contact">تواصل معنا</string>
+    <string name="content_title_page">معلومات</string>
+    <string name="content_contact_call">اتصال</string>
+    <string name="content_contact_whatsapp">واتساب</string>
+    <string name="content_contact_email">بريد إلكتروني</string>
+    <string name="content_contact_intro">يسعدنا مساعدتك. تواصل معنا عبر أي من هذه القنوات.</string>
+    <string name="content_contact_missing">بيانات التواصل غير متاحة حالياً.</string>
+    <string name="content_empty">لا يوجد محتوى بعد.</string>
+    <string name="faq_title">الأسئلة الشائعة</string>
+    <string name="faq_empty">لا توجد أسئلة بعد.</string>
+</resources>

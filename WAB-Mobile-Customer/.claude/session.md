@@ -186,3 +186,16 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: `POST /auth/check-phone` accepts LOGIN/REGISTER only, so the new number is not pre-checked; the server answers `PHONE_ALREADY_REGISTERED` at change time and the error text is shown. The form composable is a copy of the S12 one (separate feature module); a shared design-system form is a possible later extraction.
+
+### CUS-055 — Legal & support S23: `GET /content/pages/{slug}` rich text (sanitized HTML subset), `GET /content/faqs`, Contact Us from config
+- Branch: `feat/cus-055-legal-support` (from `feat/cus-054-edit-profile`)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 5)
+- Acceptance criteria (PRD S23, §3.11; Design Script S23; operations `GET /content/pages/{slug}`, `GET /content/faqs`):
+  - [x] New `feature/content`: domain `ContentPage` / `FaqItem` / `ContentSlugs` (privacy, terms, about, contact), `RichTextParser` (p, br, h1–h6→3, ul/ol/li, b/strong, i/em, a href; unknown tags dropped, entities decoded, whitespace collapsed; tested), repository + use cases (`LoadContentPageUseCase` parses, `LoadFaqsUseCase` de-duplicates); data `ContentApi` (`pathWith` slug) + impl + di
+  - [x] `ContentPageViewModel(slug)`: server page → blocks with loading / offline / error / empty; `contact` slug → config contact with Call / WhatsApp / Email through `ExternalActions` (no server call); links open in the browser. `FaqViewModel`: list + independent expand/collapse
+  - [x] `ContentPageScreen` (titles per slug, `RichTextBlocks` renderer with theme typography, underlined accent links via `LinkAnnotation`, bullets), `FaqScreen` (cards, animated answers), `ContentNavigation` registers `Screen.ContentPage` + `Screen.Faq` (placeholders removed; S11/S12/S21 links now land here); `AppText(AnnotatedString)` overload; AR/EN; analytics
+  - [x] Unit tests: `RichTextParserTest` (2), `ContentApiTest` (1), `ContentViewModelsTest` (3)
+- Tests: run with the batch-5 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: the parser is the client-side guard of the "sanitized HTML subset"; scripts / unknown tags never render. Contact details come only from `GET /config` (PRD §3.11).
