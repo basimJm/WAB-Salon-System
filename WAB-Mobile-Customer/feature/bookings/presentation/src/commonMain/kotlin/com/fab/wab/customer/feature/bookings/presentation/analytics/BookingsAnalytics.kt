@@ -5,6 +5,8 @@ import com.fab.wab.customer.core.analytics.AnalyticsScreen
 /** PRD §14 names for S14. */
 object BookingsAnalytics {
     private const val SCREEN_NAME = "bookings"
+    private const val DETAILS_SCREEN_NAME = "booking_details"
+    const val ACTION_CANCEL = "booking_cancel"
     const val ACTION_TAB = "bookings_tab"
     const val ACTION_SEARCH = "bookings_search"
     const val ACTION_OPEN = "booking_open"
@@ -13,4 +15,5 @@ object BookingsAnalytics {
     const val PARAM_HAS_TEXT = "has_text"
 
     val SCREEN = AnalyticsScreen(SCREEN_NAME)
+    val DETAILS_SCREEN = AnalyticsScreen(DETAILS_SCREEN_NAME)
 }

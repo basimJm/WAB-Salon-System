@@ -58,6 +58,14 @@ sealed interface Screen {
     @Serializable
     data class BookingDetails(val bookingId: String) : Screen
 
+    /** S16 step 6: OTP + payment for a server draft. */
+    @Serializable
+    data class BookingVerify(val draftId: String) : Screen
+
+    /** S18 rating flow of a completed booking. */
+    @Serializable
+    data class RateBooking(val bookingId: String) : Screen
+
     /** S16 booking flow start for a salon (registered users). */
     @Serializable
     data class BookingStart(val salonId: String) : Screen
