@@ -82,6 +82,18 @@ def is_source_file(path):
     return path.endswith(SOURCE_EXTENSIONS) and not is_test_file(path)
 
 
+def master_branches():
+    """Branches that only receive merged PRs: main/master plus every project master in .claude/projects.json."""
+    branches = set(PROTECTED_BRANCHES)
+    try:
+        with open(os.path.join(project_dir(), REGISTRY_FILE), encoding="utf-8") as fh:
+            registry = json.load(fh)
+        branches.update(p["master"] for p in registry.get("projects", {}).values() if p.get("master"))
+    except (OSError, ValueError, TypeError):
+        pass
+    return branches
+
+
 def session_files():
     """Root session.md plus every project/SDK session file listed in .claude/projects.json."""
     root = project_dir()

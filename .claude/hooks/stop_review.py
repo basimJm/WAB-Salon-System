@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Stop: require unit tests, the verification loop and the 4-role review when source code changed."""
 import json
-from _common import read_input, current_branch, changed_files, is_source_file, is_test_file, task_block, task_verified
+from _common import read_input, current_branch, changed_files, is_source_file, is_test_file, task_block, task_verified, master_branches
 
-def evaluate(files, branch, block):
+def evaluate(files, branch, block, masters=None):
+    """A master branch (main, server, admin, customer, merchant) only holds merged, already-reviewed PRs."""
+    if branch in (masters if masters is not None else master_branches()):
+        return None
     source = [f for f in files if is_source_file(f)]
     if not source:
         return None
