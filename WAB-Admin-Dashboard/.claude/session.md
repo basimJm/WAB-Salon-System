@@ -14,15 +14,6 @@
 
 ## Last blocks
 
-### ADM-069 — global search
-
-- Branch: `feat/adm-069-global-search`
-- Status: DONE
-- Acceptance criteria: top-bar search wired to GET /search: customers, salons, bookings, members grouped with links; 500 ms debounce, min 2 chars, loading/empty/error states
-- Tests: tests/search.test.tsx (4); full suite + gate PASS
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
-
 ### ADM-070 — salon editing by admin
 
 - Branch: `feat/adm-070-salon-edit`
@@ -40,3 +31,12 @@
 - Tests: tests/bookingExtras.test.tsx (8) and 1 more salonEdit test; full suite + gate PASS
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: ADM-070 shipped with a defect (requests carrying ids failed client validation because of the server's broken id regex); found by a new end-to-end test here and fixed in this PR.
+
+### ADM-072 — customer extras
+
+- Branch: `feat/adm-072-customer-extras`
+- Status: DONE
+- Acceptance criteria: customer page: edit profile, send one push, delete now (skips the 30-day grace), reviews written and notifications received tabs (paginated); every write needs a reason
+- Tests: tests/customerExtras.test.tsx (10); full suite + gate PASS
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.

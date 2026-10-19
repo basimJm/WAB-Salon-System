@@ -76,3 +76,4 @@
 - ADM-069 done: search = repositories.search.search(text); useGlobalSearch() maps groups to links (presentation/utils/searchHits.ts) and AppShell passes it to Topbar
 - ADM-070 done: salonEdit = repositories.salonEdit (profile, gallery, hours, closures, services, staff, policy); page presentation/salonEdit/SalonEditPage with useReasonAction (reason dialog) and useSalonMutation; moveId now in domain/shared/order; UploadPurpose gained SALON_COVER/SALON_PROFILE/GALLERY_IMAGE/GALLERY_VIDEO/SERVICE_MEDIA
 - ADM-071 done: bookings gained eligibleStaff/reassign/cancel/refund; rules in domain/bookings/bookingRules.ts; BOOKINGS export params via bookingExportParams; shared data/api/objectId.ts (OBJECT_ID) for the server's broken id pattern
+- ADM-072 done: customers gained update/reviews/notifications/forceDelete/push; rules in domain/customers/customerRules.ts; page parts CustomerExtraActions/CustomerEditDrawer/CustomerPushDrawer/CustomerListTabs
