@@ -161,3 +161,16 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: payment events (`payment_start/success/failure`) and `push_open` arrive with CUS-047 (payments) and the push tap is logged when CUS-063 runs on devices (the shell routes taps today; the event constant lands with the gateway work). A new route or `UiAction` fails compilation until classified (compile-time guarantee, the unit test checks naming).
+
+### CUS-059 — Error-code coverage: every code of BUSINESS_DOMAIN §11 and `openapi.customer.json` has AR + EN text and a handling path; contract test
+- Branch: `feat/cus-059-error-coverage` (from `feat/cus-058-analytics-events`)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 6)
+- Acceptance criteria (BUSINESS_DOMAIN §11; `openapi.customer.json` error enums; CLAUDE.md §3 "never raw server text"):
+  - [x] Policy check `error-codes` (`scripts/ci/policy/error_codes.py`, in `policy_checks.py all` and the gate): codes of §11 ∪ the snapshot's `code` enums must all be in `ErrorCode`, `ErrorCode` must not carry codes outside the contract (except `UNKNOWN`), every code needs `error_code_<code>` in EN and AR and a branch in `ErrorHandling.kt`; Python unit test `tests/test_error_codes.py`
+  - [x] Handling path: `ErrorAction { RETRY, LOGIN, CONTACT, UPDATE, DISMISS }`, `errorActionOf(code)` exhaustive over the 42 codes (login for auth/account codes, contact for permission / internal / unknown, update for `UPDATE_REQUIRED`, retry for transient / availability codes, dismiss for validation-type business rules), `errorActionOf(AppError)` (transport → retry), `errorActionLabel` (retry / log in / contact us / update the app; AR/EN strings); `AppErrorState(action, onAction)` renders the matching button (retry by default, existing call sites unchanged)
+  - [x] Current state: 41 contract codes + `UNKNOWN` all present with EN + AR strings (CUS-006) → check passes
+  - [x] Tests: `ErrorTextTest` (+1), `test_error_codes.py` (1)
+- Tests: run with the batch-6 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: screens keep showing the code's text through `appErrorText`; the action mapping is now available for screens that want a login / contact / update button (`AppErrorState(action = errorActionOf(error))`). Wiring every screen to `onAction` is UI work for the end-of-backlog pass.

@@ -1,5 +1,7 @@
 package com.fab.wab.customer.core.mvi
 
+import kotlin.concurrent.Volatile
+
 /**
  * Process-wide tap on every UI action that reaches a [BaseViewModel] (PRD §14: every user action is tracked).
  * The app shell installs an observer that maps actions to analytics events; nothing else should observe here.

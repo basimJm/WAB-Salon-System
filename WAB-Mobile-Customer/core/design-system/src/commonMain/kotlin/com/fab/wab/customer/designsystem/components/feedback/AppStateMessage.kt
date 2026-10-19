@@ -64,14 +64,25 @@ fun AppOfflineState(onRetry: () -> Unit, modifier: Modifier = Modifier) {
     )
 }
 
+/**
+ * Error state with the handling path of CUS-059: [action] decides the button (retry by default); a login / contact /
+ * update action goes through [onAction] when given, otherwise the button falls back to [onRetry].
+ */
 @Composable
-fun AppErrorState(onRetry: () -> Unit, modifier: Modifier = Modifier, message: String? = null) {
+fun AppErrorState(
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+    message: String? = null,
+    action: ErrorAction = ErrorAction.RETRY,
+    onAction: ((ErrorAction) -> Unit)? = null,
+) {
+    val label = errorActionLabel(action)
     AppStateMessage(
         icon = AppIcons.Error,
         title = stringResource(Res.string.state_error_title),
         message = message ?: stringResource(Res.string.state_error_message),
-        actionText = stringResource(Res.string.state_retry),
-        onAction = onRetry,
+        actionText = label?.let { stringResource(it) },
+        onAction = label?.let { { onAction?.invoke(action) ?: onRetry() } },
         modifier = modifier,
     )
 }

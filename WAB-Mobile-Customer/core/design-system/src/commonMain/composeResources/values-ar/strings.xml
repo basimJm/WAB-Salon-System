@@ -95,4 +95,7 @@
     <string name="time_am">ص</string>
     <string name="time_pm">م</string>
     <string name="time_range_separator"> – </string>
+    <string name="state_action_login">تسجيل الدخول</string>
+    <string name="state_action_contact">تواصل معنا</string>
+    <string name="state_action_update">تحديث التطبيق</string>
 </resources>
