@@ -11,6 +11,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.fab.wab.customer.core.domain.salon.SalonService
+import com.fab.wab.customer.designsystem.components.media.AppMediaViewer
+import com.fab.wab.customer.designsystem.components.media.MediaItemUi
+import com.fab.wab.customer.designsystem.components.media.MediaKind
 import com.fab.wab.customer.core.mvi.CollectSideEffect
 import com.fab.wab.customer.core.navigation.Navigator
 import com.fab.wab.customer.core.navigation.NavigatorDelegation
@@ -31,11 +34,12 @@ import com.fab.wab.customer.feature.salon.presentation.screen.ReviewsScreen
 import com.fab.wab.customer.feature.salon.presentation.screen.SalonDetailsScreen
 import com.fab.wab.customer.feature.salon.presentation.screen.ServiceSheet
 import com.fab.wab.customer.feature.salon.presentation.screen.StaffSheet
+import com.fab.wab.customer.feature.salon.presentation.screen.toUi
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-/** S07 with the staff (S07a) and service (S07b) sheets; media viewer: CUS-039, reviews: CUS-038, booking: CUS-042. */
+/** S07 with the staff (S07a) / service (S07b) sheets, the media viewer (S10) and the review lists (S08/S09); booking: CUS-042. */
 class SalonNavigation(override val navController: NavHostController) : Navigator by NavigatorDelegation(navController) {
 
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
@@ -73,6 +77,7 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
         val notifications = rememberNotificationManager()
         var staffSheet by remember { mutableStateOf<StaffRequest?>(null) }
         var serviceSheet by remember { mutableStateOf<SalonService?>(null) }
+        var viewer by remember { mutableStateOf<MediaRequest?>(null) }
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is SideEffect.OpenReviews -> navigateTo(Screen.SalonReviews(effect.salonId))
@@ -82,13 +87,18 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
                 is SideEffect.OpenStaff -> staffSheet = StaffRequest(effect.salonId, effect.memberId, (staffSheet?.key ?: 0) + 1)
                 is SideEffect.OpenService -> serviceSheet = state.salon?.services?.firstOrNull { it.id == effect.serviceId }
                 is SideEffect.OpenAddReview -> navigateTo(Screen.SalonReviews(effect.salonId, addReview = true))
-                is SideEffect.OpenGallery -> Unit
+                is SideEffect.OpenGallery -> viewer = MediaRequest(state.salon?.gallery.orEmpty().map { it.toUi() }, effect.index)
             }
         }
         SalonDetailsScreen(state = state, onAction = viewModel::onEvent, onBack = ::navigateBack)
         staffSheet?.let { request -> StaffSheetDestination(request, onDismiss = { staffSheet = null }) }
+        viewer?.let { request -> AppMediaViewer(items = request.items, startIndex = request.index, onClose = { viewer = null }) }
         serviceSheet?.let { service ->
-            ServiceSheet(service = service, onMediaClick = {}, onDismiss = { serviceSheet = null })
+            ServiceSheet(
+                service = service,
+                onMediaClick = { index -> viewer = MediaRequest(service.mediaUrls.map { MediaItemUi(it, it, MediaKind.Image) }, index) },
+                onDismiss = { serviceSheet = null },
+            )
         }
     }
 
@@ -117,3 +127,6 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
 }
 
 private data class StaffRequest(val salonId: String, val memberId: String, val key: Int)
+
+/** S10 (CUS-039): the items of the tapped gallery / service media and the start index. */
+private data class MediaRequest(val items: List<MediaItemUi>, val index: Int)

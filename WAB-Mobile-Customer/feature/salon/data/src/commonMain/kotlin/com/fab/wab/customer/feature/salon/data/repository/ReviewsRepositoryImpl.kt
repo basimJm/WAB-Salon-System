@@ -27,9 +27,10 @@ class ReviewsRepositoryImpl(private val api: ReviewsApi) : ReviewsRepository {
         is ReviewTarget.Salon ->
             safeApiCall { api.submitSalonReview(target.salonId, PostSalonsBySalonIdReviewsBody(draft.rating, draft.comment)) }
                 .mapSuccess { }
-        is ReviewTarget.Staff -> safeApiCall {
-            api.submitStaffReview(target.salonId, target.memberId, PostSalonsBySalonIdStaffByMemberIdReviewsBody(draft.rating, draft.comment))
-        }.mapSuccess { }
+        is ReviewTarget.Staff -> {
+            val body = PostSalonsBySalonIdStaffByMemberIdReviewsBody(draft.rating, draft.comment)
+            safeApiCall { api.submitStaffReview(target.salonId, target.memberId, body) }.mapSuccess { }
+        }
     }
 }
 

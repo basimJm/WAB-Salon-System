@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) verified and shipped as one PR from `feat/cus-036-salon-details` into `customer`. Batch 2 = CUS-037 ✓ code, CUS-038 ✓ code, CUS-039, CUS-040, CUS-041 (task branches chain from the previous task branch; gate + emulator + loop + review after the fifth).
+- Batch 1 (CUS-032…036) verified and shipped as one PR from `feat/cus-036-salon-details` into `customer`. Batch 2 = CUS-037 ✓ code, CUS-038 ✓ code, CUS-039 ✓ code, CUS-040, CUS-041 (task branches chain from the previous task branch; gate + emulator + loop + review after the fifth).
 
 ### CUS-032 — Home S03: `GET /home`, header + badge, banners, search bar, gender tabs, sections, nearest permission states
 - Branch: `feat/cus-032-home`
@@ -110,5 +110,16 @@
   - [x] Tests: `ReviewsViewModelTest` (3: draft validation, paging + guest gating, submit success / failure)
   - [ ] Gradle + emulator: batch 2
 - Tests: written, not yet run (batch rule)
+- Loops: 0/1
+- Review: PENDING
+
+### CUS-039 — Media viewer S10 wired from the gallery, service media and staff media
+- Branch: `feat/cus-039-media-viewer` (from `feat/cus-038-reviews`)
+- Status: IN PROGRESS (code written; Gradle at the end of batch 2)
+- Acceptance criteria (PRD S10: full-screen, swipe, pinch-to-zoom, video player — the viewer itself is `AppMediaViewer` from CUS-022):
+  - [x] S07 gallery tile → `AppMediaViewer(gallery items, index)`; service sheet media tile → viewer over the service's media; opened from `SalonNavigation` (`MediaRequest`), closed with the viewer's close / back
+  - [x] Staff media: the contract has no staff media list (only `photoUrl`), so nothing to wire; flagged
+  - [ ] Gradle + emulator: batch 2
+- Tests: covered by the existing design-system viewer tests (`clampZoom`, `panOffsetFor`, `nextBannerIndex`); the wiring is UI-only (no view model logic) — stated plainly
 - Loops: 0/1
 - Review: PENDING
