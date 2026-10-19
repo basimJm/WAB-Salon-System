@@ -60,6 +60,12 @@ import com.fab.wab.customer.feature.onboarding.di.onboardingModule
 import com.fab.wab.customer.feature.onboarding.presentation.di.onboardingPresentationModule
 import com.fab.wab.customer.feature.onboarding.presentation.screen.GuestProfileRoute
 import com.fab.wab.customer.feature.onboarding.presentation.screen.OnboardingRoute
+import com.fab.wab.customer.feature.home.di.homeModule
+import com.fab.wab.customer.feature.home.presentation.di.homePresentationModule
+import com.fab.wab.customer.feature.salon.di.salonModule
+import com.fab.wab.customer.feature.salon.presentation.di.salonPresentationModule
+import com.fab.wab.customer.feature.salons.di.salonsModule
+import com.fab.wab.customer.feature.salons.presentation.di.salonsPresentationModule
 import com.fab.wab.customer.feature.sample.di.sampleModule
 import com.fab.wab.customer.feature.sample.presentation.di.samplePresentationModule
 import com.fab.wab.customer.openStoreLink
@@ -86,6 +92,12 @@ val appModules = listOf(
     onboardingPresentationModule,
     authModule,
     authPresentationModule,
+    homeModule,
+    homePresentationModule,
+    salonsModule,
+    salonsPresentationModule,
+    salonModule,
+    salonPresentationModule,
 )
 
 @Composable

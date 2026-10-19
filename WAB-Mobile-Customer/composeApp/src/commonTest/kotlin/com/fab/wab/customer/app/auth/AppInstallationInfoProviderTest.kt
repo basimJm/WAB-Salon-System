@@ -11,7 +11,7 @@ import kotlin.test.assertNull
 
 class AppInstallationInfoProviderTest {
 
-    private val environment = AppEnvironment("dev", "https://api.example", "1.2.3", 7, isDebug = true)
+    private val environment = AppEnvironment("dev", "https://api.example", "https://web.example", "1.2.3", 7, isDebug = true)
     private val instanceId = FakeAppInstanceIdProvider()
 
     private fun provider(osVersion: String = "14", model: String = "Pixel") = AppInstallationInfoProvider(

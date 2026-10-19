@@ -11,6 +11,7 @@ internal val appEnvironmentModule = module {
         AppEnvironment(
             name = BuildConfig.ENVIRONMENT,
             apiBaseUrl = BuildConfig.API_BASE_URL,
+            webBaseUrl = BuildConfig.WEB_BASE_URL,
             appVersion = BuildConfig.VERSION_NAME,
             appVersionCode = BuildConfig.VERSION_CODE,
             isDebug = BuildConfig.DEBUG,

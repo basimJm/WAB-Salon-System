@@ -11,11 +11,13 @@ class AppEnvironmentTest {
     private fun environment(
         name: String = AppEnvironmentNames.DEV,
         apiBaseUrl: String = TEST_URL,
+        webBaseUrl: String = TEST_URL,
         appVersion: String = TEST_VERSION,
         appVersionCode: Int = TEST_VERSION_CODE,
     ) = AppEnvironment(
         name = name,
         apiBaseUrl = apiBaseUrl,
+        webBaseUrl = webBaseUrl,
         appVersion = appVersion,
         appVersionCode = appVersionCode,
         isDebug = true,
@@ -41,6 +43,7 @@ class AppEnvironmentTest {
     fun blankValuesAreRejectedAtStartup() {
         assertFailsWith<IllegalArgumentException> { environment(name = " ") }
         assertFailsWith<IllegalArgumentException> { environment(apiBaseUrl = "") }
+        assertFailsWith<IllegalArgumentException> { environment(webBaseUrl = " ") }
         assertFailsWith<IllegalArgumentException> { environment(appVersion = "  ") }
     }
 

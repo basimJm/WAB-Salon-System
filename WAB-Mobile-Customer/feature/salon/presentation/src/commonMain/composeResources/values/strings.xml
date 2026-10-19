@@ -1,0 +1,28 @@
+<resources>
+    <string name="salon_share">Share</string>
+    <string name="salon_favorite_add">Add to favorites</string>
+    <string name="salon_favorite_remove">Remove from favorites</string>
+    <string name="salon_closed">Closed</string>
+    <string name="salon_call">Call</string>
+    <string name="salon_whatsapp">WhatsApp</string>
+    <string name="salon_hours_title">Working days &amp; hours</string>
+    <string name="salon_day_off">Day off</string>
+    <string name="salon_closure">Closed %1$s – %2$s · %3$s</string>
+    <string name="salon_staff">Staff</string>
+    <string name="salon_reviews">Reviews</string>
+    <string name="salon_reviews_summary">%1$s of 5 · %2$d reviews</string>
+    <string name="salon_reviews_empty">There are no reviews for this salon yet.</string>
+    <string name="salon_reviews_all">See all</string>
+    <string name="salon_review_add">Add review</string>
+    <string name="salon_services">Services</string>
+    <string name="salon_gallery">Gallery</string>
+    <string name="salon_book">Book now</string>
+    <string name="salon_cover">Salon cover</string>
+    <string name="day_sat">Saturday</string>
+    <string name="day_sun">Sunday</string>
+    <string name="day_mon">Monday</string>
+    <string name="day_tue">Tuesday</string>
+    <string name="day_wed">Wednesday</string>
+    <string name="day_thu">Thursday</string>
+    <string name="day_fri">Friday</string>
+</resources>

@@ -24,6 +24,8 @@ enum class DataSource(val configValue: String) {
 data class AppEnvironment(
     val name: String,
     val apiBaseUrl: String,
+    /** Public web origin of the platform: deep links shared from the app (`DeepLinks`). */
+    val webBaseUrl: String,
     val appVersion: String,
     val appVersionCode: Int,
     val isDebug: Boolean,
@@ -32,6 +34,7 @@ data class AppEnvironment(
     init {
         require(name.isNotBlank()) { "Environment name must not be blank" }
         require(apiBaseUrl.isNotBlank()) { "API base URL must not be blank for environment '$name'" }
+        require(webBaseUrl.isNotBlank()) { "Web base URL must not be blank for environment '$name'" }
         require(appVersion.isNotBlank()) { "App version must not be blank for environment '$name'" }
         require(appVersionCode >= 0) { "App version code must not be negative" }
         require(!(isProd && dataSource == DataSource.MOCK)) { "The prod environment must use the remote data source" }

@@ -18,6 +18,7 @@ class AppAnalyticsContextProviderTest {
     private val environment = AppEnvironment(
         name = "dev",
         apiBaseUrl = "https://example.invalid",
+        webBaseUrl = "https://example.invalid",
         appVersion = "1.2.3",
         appVersionCode = 7,
         isDebug = true,
