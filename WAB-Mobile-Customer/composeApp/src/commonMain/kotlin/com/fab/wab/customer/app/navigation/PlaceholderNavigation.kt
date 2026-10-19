@@ -14,7 +14,6 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.fab.wab.customer.app.resources.Res
 import com.fab.wab.customer.app.resources.nav_bookings
-import com.fab.wab.customer.app.resources.nav_favorites
 import com.fab.wab.customer.app.resources.nav_profile
 import com.fab.wab.customer.app.resources.placeholder_content_page
 import com.fab.wab.customer.app.resources.placeholder_notifications
@@ -30,14 +29,11 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Root destinations whose feature has not landed yet (Favorites CUS-040, Bookings CUS-041, Profile CUS-053).
+ * Root destinations whose feature has not landed yet (Bookings CUS-041, Profile CUS-053).
  * Each feature replaces its graph here with its own `Navigator.registerGraph`. The Profile placeholder carries the
  * "Log in" entry so the auth flow is reachable before the real profile screen exists.
  */
 fun NavGraphBuilder.registerPlaceholderRoots(navController: NavHostController) {
-    navigation<Graph.Favorites>(startDestination = Screen.Favorites) {
-        composable<Screen.Favorites> { PlaceholderRootScreen(Res.string.nav_favorites) }
-    }
     navigation<Graph.Bookings>(startDestination = Screen.Bookings) {
         composable<Screen.Bookings> { PlaceholderRootScreen(Res.string.nav_bookings) }
     }

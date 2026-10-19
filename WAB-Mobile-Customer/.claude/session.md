@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) verified and shipped as one PR from `feat/cus-036-salon-details` into `customer`. Batch 2 = CUS-037 ✓ code, CUS-038 ✓ code, CUS-039 ✓ code, CUS-040, CUS-041 (task branches chain from the previous task branch; gate + emulator + loop + review after the fifth).
+- Batch 1 (CUS-032…036) verified and shipped as one PR from `feat/cus-036-salon-details` into `customer`. Batch 2 = CUS-037 ✓ code, CUS-038 ✓ code, CUS-039 ✓ code, CUS-040 ✓ code, CUS-041 (task branches chain from the previous task branch; gate + emulator + loop + review after the fifth).
 
 ### CUS-032 — Home S03: `GET /home`, header + badge, banners, search bar, gender tabs, sections, nearest permission states
 - Branch: `feat/cus-032-home`
@@ -121,5 +121,17 @@
   - [x] Staff media: the contract has no staff media list (only `photoUrl`), so nothing to wire; flagged
   - [ ] Gradle + emulator: batch 2
 - Tests: covered by the existing design-system viewer tests (`clampZoom`, `panOffsetFor`, `nextBannerIndex`); the wiring is UI-only (no view model logic) — stated plainly
+- Loops: 0/1
+- Review: PENDING
+
+### CUS-040 — Favorites S20 + heart everywhere: `GET /favorites`, `PUT/DELETE /favorites/{salonId}`, guest message + Log in, empty → Explore
+- Branch: `feat/cus-040-favorites` (from `feat/cus-039-media-viewer`)
+- Status: IN PROGRESS (code + tests written; Gradle at the end of batch 2)
+- Acceptance criteria (PRD S20, Design Script S20; operations `GET /favorites?page&pageSize`, `PUT/DELETE /favorites/{salonId}`):
+  - [x] core: `FavoritesRepository.list(page, pageSize)` + `FavoritesDefaults` (impl + `GetFavoritesDataItem` mapper in core/data); the heart on Home / S04 / S07 cards already toggles through the same repository (CUS-032/033/036)
+  - [x] `feature/favorites` (domain use cases, presentation `FavoritesViewModel`: guest → message + Log in, signed-in → paged list (10), heart removes the card optimistically and restores it on failure, empty → "Explore salons" → Home tab, reload on resume and on sign-in; `FavoritesScreen`; `FavoritesNavigation` replaces the placeholder `Graph.Favorites`; di); AR + EN strings
+  - [x] Tests: `FavoritesViewModelTest` (3)
+  - [ ] Gradle + emulator: batch 2
+- Tests: written, not yet run (batch rule)
 - Loops: 0/1
 - Review: PENDING

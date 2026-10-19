@@ -73,4 +73,7 @@ include(
     ":feature:salon:data",
     ":feature:salon:presentation",
     ":feature:salon:di",
+    ":feature:favorites:domain",
+    ":feature:favorites:presentation",
+    ":feature:favorites:di",
 )

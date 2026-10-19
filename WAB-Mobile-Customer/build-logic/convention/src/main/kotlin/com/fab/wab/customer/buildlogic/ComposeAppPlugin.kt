@@ -67,6 +67,9 @@ class ComposeAppPlugin : Plugin<Project> {
                     implementation(project(":feature:salon:presentation"))
                     implementation(project(":feature:salon:domain"))
                     implementation(project(":feature:salon:di"))
+                    implementation(project(":feature:favorites:presentation"))
+                    implementation(project(":feature:favorites:domain"))
+                    implementation(project(":feature:favorites:di"))
 
                     implementation(libs.findBundle("compose").get())
                     implementation(libs.findLibrary("compose-uiToolingPreview").get())
