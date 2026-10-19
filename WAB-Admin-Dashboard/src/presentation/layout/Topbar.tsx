@@ -64,6 +64,11 @@ export function Topbar({
         label={adminName || t('topbar.adminMenu')}
         variant="ghost"
         items={[
+          {
+            key: 'profile',
+            label: t('topbar.profile'),
+            onSelect: () => void navigate(ROUTES.profile),
+          },
           { key: 'about', label: t('topbar.about'), onSelect: () => void navigate(ROUTES.about) },
           { key: 'logout', label: t('topbar.logout'), onSelect: onLogout, danger: true },
         ]}

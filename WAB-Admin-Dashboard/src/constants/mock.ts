@@ -36,3 +36,6 @@ export const MOCK_ERROR_SCENARIOS = {
 export const MOCK_VALIDATION_FIELD = 'body.name';
 export const MOCK_TRACE_PREFIX = 'mock-';
 export const MOCK_ACCEPT_LANGUAGE_HEADER = 'Accept-Language';
+
+/** Mock data source only: where fake uploaded files appear to live. */
+export const MOCK_CDN_BASE = 'https://cdn.example';

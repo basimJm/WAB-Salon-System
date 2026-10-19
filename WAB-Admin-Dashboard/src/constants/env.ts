@@ -27,10 +27,10 @@ export const ENV_KEYS = {
 
 export const PUBLIC_ENV_PREFIX = 'VITE_';
 export const HTTPS_PROTOCOL = 'https:';
-export const DEFAULT_DATA_SOURCE: Readonly<Record<AppEnv, DataSource>> = {
-  dev: 'mock',
-  prod: 'remote',
-};
+/** Only the dev debug build talks to fake data by default; every other variant calls the real API. */
+export const MOCK_VARIANT = 'dev-debug';
+export const DEFAULT_DATA_SOURCE = 'remote';
+export const DEV_DEBUG_DATA_SOURCE: DataSource = 'mock';
 
 /** Build-time values injected by vite.config.ts (declared in vite-env.d.ts); not VITE_* env keys. */
 export const BUILD_INFO_KEYS = {

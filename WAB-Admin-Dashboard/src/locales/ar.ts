@@ -25,6 +25,8 @@ import subscriptions from './ar/subscriptions.json';
 import placements from './ar/placements.json';
 import campaigns from './ar/campaigns.json';
 import alerts from './ar/alerts.json';
+import profile from './ar/profile.json';
+import salonEdit from './ar/salonEdit.json';
 import overview from './ar/overview.json';
 import reports from './ar/reports.json';
 import audit from './ar/audit.json';
@@ -53,6 +55,8 @@ const ar = {
   ...reports,
   ...overview,
   ...alerts,
+  ...profile,
+  ...salonEdit,
   ...campaigns,
   ...placements,
   ...subscriptions,

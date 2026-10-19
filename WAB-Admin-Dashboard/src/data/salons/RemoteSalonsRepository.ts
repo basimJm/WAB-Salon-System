@@ -4,8 +4,10 @@ import { defineEndpoint } from '@/data/api/endpoint';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
+import type { PageQuery } from '@/domain/shared/page';
 import {
   normalizeIban,
+  type DeletionDecision,
   type PayoutDetailsInput,
   type SalonGender,
   type SalonQuery,
@@ -18,6 +20,22 @@ const OBJECT_ID = z.string().regex(/^[a-f0-9]{24}$/i);
 const listSalons = defineEndpoint(OPERATIONS.getSalons, {
   data: dto.getSalonsDataSchema,
   query: () => dto.getSalonsQuerySchema().extend({ cityId: OBJECT_ID.optional() }),
+});
+
+const kpis = defineEndpoint(OPERATIONS.getSalonsByIdKpis, {
+  data: dto.getSalonsByIdKpisDataSchema,
+});
+const analytics = defineEndpoint(OPERATIONS.getSalonsByIdAnalytics, {
+  data: dto.getSalonsByIdAnalyticsDataSchema,
+  query: dto.getSalonsByIdAnalyticsQuerySchema,
+});
+const activity = defineEndpoint(OPERATIONS.getSalonsByIdActivity, {
+  data: dto.getSalonsByIdActivityDataSchema,
+  query: dto.getSalonsByIdActivityQuerySchema,
+});
+const decision = defineEndpoint(OPERATIONS.postSalonsByIdDeletionRequestDecision, {
+  data: dto.postSalonsByIdDeletionRequestDecisionDataSchema,
+  body: dto.postSalonsByIdDeletionRequestDecisionBodySchema,
 });
 
 const getSalon = defineEndpoint(OPERATIONS.getSalonsById, { data: dto.getSalonsByIdDataSchema });
@@ -57,6 +75,10 @@ export class RemoteSalonsRepository implements SalonsRepository {
         gender: q.gender,
         cityId: q.cityId,
         q: q.q,
+        subscription: q.subscription,
+        recommended:
+          q.recommended === undefined ? undefined : (String(q.recommended) as 'true' | 'false'),
+        deletionRequested: q.deletionRequested ? ('true' as const) : undefined,
       }),
     });
   }
@@ -89,5 +111,24 @@ export class RemoteSalonsRepository implements SalonsRepository {
   async replacePayoutDetails(id: string, input: PayoutDetailsInput, reason: string) {
     const body = { ...input, iban: normalizeIban(input.iban), reason };
     return (await this.api.execute(writePayout, { params: { id }, body })).data;
+  }
+
+  async kpis(id: string) {
+    return (await this.api.execute(kpis, { params: { id } })).data;
+  }
+
+  async analytics(id: string, range: { from: string; to: string }) {
+    return (await this.api.execute(analytics, { params: { id }, query: range })).data;
+  }
+
+  activity(id: string, q: PageQuery) {
+    return this.api.executePage(activity, {
+      params: { id },
+      query: { page: q.page, pageSize: q.pageSize },
+    });
+  }
+
+  async decideDeletion(id: string, choice: DeletionDecision, reason: string) {
+    await this.api.execute(decision, { params: { id }, body: { decision: choice, reason } });
   }
 }

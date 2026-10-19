@@ -15,7 +15,10 @@ import { DetailPage } from '../components/templates/DetailPage';
 import { useLanguage } from '../hooks/useLanguage';
 import { useLocationOptions } from '../hooks/useLocationOptions';
 import { PayoutDetailsPanel } from './PayoutDetailsPanel';
+import { DeletionDecision } from './DeletionDecision';
 import { SalonActions } from './SalonActions';
+import { SalonActivityTab } from './SalonActivityTab';
+import { SalonInsightsTab } from './SalonInsightsTab';
 
 const TABS = ['overview', 'members', 'payout'] as const;
 
@@ -143,9 +146,22 @@ export default function SalonDetailsPage() {
       title={s?.name ?? t('nav.sub.allSalons')}
       back={{ to: ROUTES.salons, label: t('nav.sub.allSalons') }}
       status={s ? <StatusBadge kind="salon" value={s.state} /> : null}
-      actions={s ? <SalonActions salon={s} /> : null}
+      actions={
+        s ? (
+          <>
+            <SalonActions salon={s} />
+            <DeletionDecision salon={s} />
+          </>
+        ) : null
+      }
       tabs={[
         { id: 'overview', label: t('salons.overview'), content: s ? <Overview salon={s} /> : null },
+        { id: 'insights', label: t('salons.insights'), content: <SalonInsightsTab id={id} /> },
+        {
+          id: 'activity',
+          label: t('salons.activity.title'),
+          content: <SalonActivityTab id={id} />,
+        },
         { id: 'payout', label: t('salons.payout'), content: <PayoutDetailsPanel salonId={id} /> },
         {
           id: 'members',

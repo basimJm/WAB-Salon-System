@@ -12,7 +12,8 @@
       "REPORT_WEEKLY": "تقرير أسبوعي",
       "REPORT_MONTHLY": "تقرير شهري",
       "TRANSACTIONS": "المعاملات",
-      "AUDIT_LOGS": "سجل التدقيق"
+      "AUDIT_LOGS": "سجل التدقيق",
+      "BOOKINGS": "الحجوزات"
     },
     "failures": {
       "TOO_MANY_ROWS": "عدد الصفوف كبير: ضيّق عوامل التصفية",

@@ -12,7 +12,7 @@ export function App() {
   // Publishes data-bp / data-orientation on <html> for every screen, including login.
   useViewport();
   const router = useMemo(
-    () => createBrowserRouter(buildRoutes(config.variant.allowMock)),
+    () => createBrowserRouter(buildRoutes(config.variant.appEnv === 'dev')),
     [config],
   );
   return (
