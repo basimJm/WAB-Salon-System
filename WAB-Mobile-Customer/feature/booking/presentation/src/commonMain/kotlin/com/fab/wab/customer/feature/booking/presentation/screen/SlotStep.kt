@@ -202,9 +202,9 @@ private fun Legend(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun LegendItem(label: String, modifier: Modifier = Modifier) {
+private fun LegendItem(label: String, square: Modifier) {
     Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4), verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier.size(BookingDesignConstants.legendSquare))
+        Box(square.size(BookingDesignConstants.legendSquare))
         AppText(text = label, style = AppTheme.typography.labelSmall, color = AppTheme.colors.muted)
     }
 }
