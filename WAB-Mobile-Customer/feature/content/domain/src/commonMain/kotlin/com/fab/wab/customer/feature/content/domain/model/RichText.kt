@@ -17,7 +17,9 @@ sealed interface RichBlock {
 object RichTextParser {
     private val TAG = Regex("<(/?)([a-zA-Z][a-zA-Z0-9]*)([^>]*)>")
     private val HREF = Regex("href\\s*=\\s*[\"']([^\"']*)[\"']")
-    private val ENTITIES = mapOf("&amp;" to "&", "&lt;" to "<", "&gt;" to ">", "&quot;" to "\"", "&#39;" to "'", "&apos;" to "'", "&nbsp;" to " ")
+    private val ENTITIES = mapOf(
+        "&amp;" to "&", "&lt;" to "<", "&gt;" to ">", "&quot;" to "\"", "&#39;" to "'", "&apos;" to "'", "&nbsp;" to " ",
+    )
     private val NUMERIC_ENTITY = Regex("&#(\\d+);")
     private val WHITESPACE = Regex("\\s+")
     private const val MAX_HEADING = 3
@@ -102,12 +104,22 @@ object RichTextParser {
             block = null
         }
 
+        /** Merges adjacent runs with the same style (text split by dropped tags), then trims the block's edges. */
         private fun trimmed(runs: List<RichSpan>): List<RichSpan> {
             if (runs.isEmpty()) return runs
-            val out = runs.toMutableList()
-            out[0] = out[0].copy(text = out[0].text.trimStart())
-            out[out.lastIndex] = out[out.lastIndex].copy(text = out[out.lastIndex].text.trimEnd())
-            return out.filter { it.text.isNotEmpty() }
+            val merged = mutableListOf<RichSpan>()
+            runs.forEach { span ->
+                val last = merged.lastOrNull()
+                val sameStyle = last != null && last.bold == span.bold && last.italic == span.italic && last.link == span.link
+                if (last != null && sameStyle && span.text != "\n" && last.text != "\n") {
+                    merged[merged.lastIndex] = last.copy(text = last.text + span.text)
+                } else {
+                    merged += span
+                }
+            }
+            merged[0] = merged[0].copy(text = merged[0].text.trimStart())
+            merged[merged.lastIndex] = merged[merged.lastIndex].copy(text = merged[merged.lastIndex].text.trimEnd())
+            return merged.filter { it.text.isNotEmpty() }
         }
     }
 }

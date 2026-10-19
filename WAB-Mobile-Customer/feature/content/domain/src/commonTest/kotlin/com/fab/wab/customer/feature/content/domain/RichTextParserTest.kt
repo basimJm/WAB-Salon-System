@@ -27,7 +27,7 @@ class RichTextParserTest {
 
     @Test
     fun dropsUnknownTagsDecodesEntitiesAndCollapsesWhitespace() {
-        val blocks = RichTextParser.parse("<script>alert(1)</script>Tom &amp; Jerry\n\n  &lt;3 &#169;<h9>deep</h9>")
+        val blocks = RichTextParser.parse("<script>alert(1)</script>Tom &amp; Jerry\n\n  &lt;3 &#169;<h5>deep</h5>")
         assertEquals(
             listOf(RichBlock.Paragraph(listOf(RichSpan("alert(1)Tom & Jerry <3 ©"))), RichBlock.Heading(3, listOf(RichSpan("deep")))),
             blocks,

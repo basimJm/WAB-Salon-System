@@ -72,7 +72,7 @@ class HomeViewModel(
         }
         scope.launch {
             // PRD §10.2: a push shown while the app is open refreshes the badge (the Home payload carries the unread count).
-            PushSignals.messages.collect { if (uiState.value.signedIn && uiState.value.content != null) load(refresh = true) }
+            PushSignals.messages.collect { if (uiState.value.signedIn && uiState.value.hasContent) load(refresh = true) }
         }
     }
 
