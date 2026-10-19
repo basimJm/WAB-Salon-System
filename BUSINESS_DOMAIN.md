@@ -153,7 +153,7 @@ offline?: { reason: String, at: Date, by → admins }
 completeness: { missing: String[], isComplete: Boolean }   // recomputed on every relevant write
 rating: { avg: Number (1 decimal), count: Number }          // APPROVED salon reviews only
 payoutDetails?: { bankName, accountHolderName, ibanEncrypted, ibanLast4 }   // AES-GCM, key from secrets
-deletionRequestedAt?: Date
+deletionRequestedAt?: Date    deletionApprovedAt?: Date   (admin approved: salon OFFLINE, waits for the purge; a rejection clears deletionRequestedAt)
 searchText: String (normalized Arabic/English name + area; for Atlas Search)
 ```
 **SalonPolicy** (embedded; copied as snapshot into every booking)

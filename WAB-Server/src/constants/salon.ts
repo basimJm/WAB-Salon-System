@@ -82,6 +82,7 @@ export const SALON_STATE_EVENTS = [
   'salon.online',
   'salon.gender_changed',
   'salon.edited_by_admin',
+  'salon.deletion_rejected',
 ] as const;
 export type SalonStateEvent = (typeof SALON_STATE_EVENTS)[number];
 

@@ -2555,6 +2555,21 @@
                   "key": "q",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "subscription",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "recommended",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "deletionRequested",
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []
@@ -7362,6 +7377,215 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cancellationWindowHours\": 0,\n  \"paymentOptions\": [\n    \"PAY_ON_ARRIVAL\"\n  ],\n  \"depositPercentage\": 0,\n  \"depositRefundableOnCustomerCancel\": false,\n  \"fullPaymentRefundOnCustomerCancel\": \"FULL\",\n  \"noShowDeposit\": \"KEEP\",\n  \"noShowFullPayment\": \"KEEP\",\n  \"notes\": \"string\",\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin salon insights",
+      "item": [
+        {
+          "name": "Salon KPIs: rating, bookings by status (all time and last 30 days), active services and staff",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/kpis",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "kpis"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bookings created per day (Asia/Amman) for a date range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/analytics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "analytics"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": ""
+                },
+                {
+                  "key": "to",
+                  "value": ""
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Both ends inclusive, at most 92 days (400 `VALIDATION_ERROR` otherwise). Days without bookings are present with 0."
+          }
+        },
+        {
+          "name": "What admins did to the salon (approval, offline/online, edits, deletion decision), newest first",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/activity",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "activity"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Decide the owner’s deletion request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/deletion-request/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "deletion-request",
+                "decision"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "`APPROVE` or `REJECT`, with a reason. APPROVE needs no PENDING/APPROVED booking left (409 `SCHEDULE_CONFLICT` with the ids), then the salon goes offline and waits for the purge. REJECT clears the request and tells the owner. 422 `INVALID_TRANSITION` when there is no open request.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APPROVE\",\n  \"reason\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

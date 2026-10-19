@@ -57,6 +57,8 @@ import { createAdminCustomersService } from './domain/customers/adminCustomers.s
 import { createAdminSettingsService } from './domain/adminSettings/adminSettings.service';
 import { createAdminProfileService } from './domain/adminProfile/adminProfile.service';
 import { createAdminSearchService } from './domain/adminSearch/adminSearch.service';
+import { createSalonInsightsService } from './domain/salons/salonInsights.service';
+import { createSalonDeletionService } from './domain/salons/salonDeletion.service';
 import { createAdminSalonEditService } from './domain/adminSalonEdit/adminSalonEdit.service';
 import { createCampaignsService } from './domain/campaigns/campaigns.service';
 import { CampaignsRepository } from './repositories/campaigns.repository';
@@ -871,7 +873,27 @@ const buildServices = (
       logger,
       bookings: conflictFinder.salon,
       notifier: producers.salonStateNotifier,
+      placements: new PlacementsRepository(),
+      bookingCounts: bookingsRepository,
     }),
+    adminSalonInsights: {
+      insights: createSalonInsightsService({
+        salons: new SalonsRepository(),
+        bookings: bookingsRepository,
+        salonServices,
+        members: new MembersRepository(),
+        auditLogs: new AuditLogsRepository(),
+        settings,
+      }),
+      deletion: createSalonDeletionService({
+        salons: new SalonsRepository(),
+        state: salonState,
+        bookings: conflictFinder.salon,
+        audit,
+        notifier: producers.salonStateNotifier,
+        logger,
+      }),
+    },
     policy: policyService,
     leaves: createLeavesService({
       leaves: new LeavesRepository(),
