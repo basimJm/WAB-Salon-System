@@ -744,9 +744,41 @@ const buildServices = (
     state: salonState,
     uploads,
   });
+  const policyService = createPolicyService({ salons: new SalonsRepository(), state: salonState });
+  const staffService = createStaffService({
+    members: new MembersRepository(),
+    salons: new SalonsRepository(),
+    salonServices,
+    settings,
+    state: salonState,
+    conflicts: {
+      check: ({ salonId, memberId, after }) =>
+        conflictFinder.staff.check({ salonId, memberId, after }),
+    },
+  });
+  const salonServicesService = createSalonServicesService({
+    salons: new SalonsRepository(),
+    catalog: new CatalogServicesRepository(),
+    services: salonServices,
+    storage: providers.storage,
+    uploads,
+    state: salonState,
+  });
+  const hoursService = createHoursService({
+    salons: new SalonsRepository(),
+    closures: new ClosuresRepository(),
+    settings,
+    state: salonState,
+    conflicts: conflictFinder.schedule,
+  });
   const adminSalonEditService = createAdminSalonEditService({
     profile: salonProfileService,
     gallery: galleryService,
+    hours: hoursService,
+    conflicts: conflictFinder.schedule,
+    salonServices: salonServicesService,
+    staff: staffService,
+    policy: policyService,
     audit,
     notifier: producers.salonStateNotifier,
     logger,
@@ -840,24 +872,14 @@ const buildServices = (
       bookings: conflictFinder.salon,
       notifier: producers.salonStateNotifier,
     }),
-    policy: createPolicyService({ salons: new SalonsRepository(), state: salonState }),
+    policy: policyService,
     leaves: createLeavesService({
       leaves: new LeavesRepository(),
       members: new MembersRepository(),
       settings,
       conflicts: conflictFinder.leave,
     }),
-    staff: createStaffService({
-      members: new MembersRepository(),
-      salons: new SalonsRepository(),
-      salonServices,
-      settings,
-      state: salonState,
-      conflicts: {
-        check: ({ salonId, memberId, after }) =>
-          conflictFinder.staff.check({ salonId, memberId, after }),
-      },
-    }),
+    staff: staffService,
     team: createTeamService({
       access: accessEvents,
       members: new MembersRepository(),
@@ -876,21 +898,8 @@ const buildServices = (
       logger,
       notifier: producers.catalogRequestNotifier,
     }),
-    salonServices: createSalonServicesService({
-      salons: new SalonsRepository(),
-      catalog: new CatalogServicesRepository(),
-      services: salonServices,
-      storage: providers.storage,
-      uploads,
-      state: salonState,
-    }),
-    hours: createHoursService({
-      salons: new SalonsRepository(),
-      closures: new ClosuresRepository(),
-      settings,
-      state: salonState,
-      conflicts: conflictFinder.schedule,
-    }),
+    salonServices: salonServicesService,
+    hours: hoursService,
     gallery: galleryService,
     salonProfile: {
       service: salonProfileService,

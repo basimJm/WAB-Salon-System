@@ -4,7 +4,7 @@
 
 ## Integration status (one glance)
 
-- Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (128) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
+- Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (142) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
 - Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); analytics = the server's own MongoDB events (no analytics provider; BigQuery/`@wab/analytics` dropped, owner 2026-10-19); payments **paused** (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev/test; HyperPay/`@wab/payments` not used by the server); storage on the in-repo S3 code until SRV-112.
 - Open work: SRV-111 contract guard, Stage N (SRV-117…128, admin gaps), Stage O (SRV-129…134, merchant gaps). Deployment SRV-011/116 and SRV-059/115: owner (PENDING).
 
@@ -24,20 +24,6 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔ (apps get 503 on payment start; CUS-047/062 blocked by the owner's pause), Architect ✔, QA ✔) — NOT verified: Docker build (no daemon), real Mongo. DEVIATIONS: the owner's "delete provider" was interpreted as removing the SDK adapters/config and pausing payments (ports, fakes and the Mongo analytics kept, `wab-analytics`/`wab-payments` folders kept); `tasks.py` touched two admin backlog rows (status only) to keep `check` green.
 
-### SRV-118 — Admin global search (G2)
-
-- Branch: `feat/srv-118-admin-search`
-- Status: IN REVIEW
-- Acceptance criteria (Admin PRD §3 "global search"; client impact: ADM-069):
-  - [x] `GET /admin/v1/search?q=&types=&page=&pageSize=` returns groups `customers`, `salons`, `bookings`, `members`, each `{items, total}`, paginated per group with the same `page`/`pageSize` (`types` limits the groups, default all)
-  - [x] customers by name or phone, salons by name, members by name or phone, bookings by reference number (exact, normalised); every pattern is escaped (no regex injection); `q` is 2–100 characters (400 otherwise)
-  - [x] Phone and reference lookups are anchored/exact so they use the existing indexes; name lookups are a documented scan on small admin-scale collections
-  - [x] Admin token only; contract regenerated; no hardcoded values
-- Tests: `tests/adminSearch.test.ts` (9: auth, grouping, phone forms, reference, group filter, pagination, literal text, bad input) + full gate green (2496 tests, lint, typecheck, build, docs, audit 0). API docs: `GET /admin/v1/search` added; client impact: ADM-069.
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
-- Notes: Name lookups are an unanchored case-insensitive scan (fine at admin scale; no stemming, Arabic safe); phone/reference lookups are anchored or exact. New shared `escapeRegex` in `utils/format/regex.ts` (five older local copies not touched, out of scope). NOT verified: real Mongo.
-
 ### SRV-119 — Admin salon editing part 1: profile, location, contacts, gallery (G3)
 
 - Branch: `feat/srv-119-admin-salon-edit-1`
@@ -52,3 +38,18 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
 - Notes: Reuses the merchant services (one rule set); admin uploads of the four salon purposes are allowed and an admin edit accepts any ADMIN-owned confirmed upload. New notice event `salon.edited_by_admin` + `notifications.salon.area.*` texts (SRV-120 reuses them). Criteria were written after the first pass (deviation). NOT verified: real Mongo/S3.
+
+### SRV-120 — Admin salon editing part 2: hours, closures, services, staff, policy (G3)
+
+- Branch: `feat/srv-120-admin-salon-edit-2`
+- Status: IN REVIEW
+- Acceptance criteria (Admin PRD A13; BUSINESS_DOMAIN §3.2, §5.12 schedule conflicts; client impact: ADM-070):
+  - [x] Admin endpoints under `/admin/v1/salons/:id`: `GET|PUT /hours`, `POST /hours/preview`, `POST /closures`, `POST /closures/preview`, `PATCH /closures/:closureId`, `POST /closures/:closureId/remove`, `GET|POST /services`, `PATCH /services/:serviceId`, `GET|PUT /members/:memberId/staff`, `GET|PUT /policy`
+  - [x] Previews list the PENDING/APPROVED bookings a new weekly schedule or closure would break and change nothing; a real change that would break bookings is refused with 409 `SCHEDULE_CONFLICT` and the booking ids (existing §5.12 rule)
+  - [x] Every write needs `reason`, is audited (before/after) and tells the owner (`salon.edited_by_admin` with the area); the closure's own text is `closureReason`, separate from the audit `reason`
+  - [x] Same rules as the merchant app (audience, duplicates, price above zero, staff skills/days, deposit percentage); service media must be admin uploads of purpose SERVICE_MEDIA
+  - [x] Merchant endpoints unchanged (zod schemas moved to `modules/shared/salonEdit`); admin token only; contract regenerated
+- Tests: `tests/adminSalonEditPart2.test.ts` (13: hours get/preview/set with audit+notice, 409 SCHEDULE_CONFLICT with booking ids, closure add/update/remove + bad input, policy null/set/validation, services add/list/rules/media, staff get/set/refusals) + part 1 (11) + merchant suites unchanged; full gate green (2520 tests, lint, typecheck, build, docs, audit 0). API docs: 14 operations added under `/admin/v1/salons/{id}/…`; client impact: ADM-070.
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
+- Notes: Same services as the merchant app, so one rule set; closure text is `closureReason`, audit reason is `reason`. Previews call the booking conflict finder and change nothing. Staff-edit conflicts use the staff service own conflict hook (wired in server.ts). Criteria written before coding this time. NOT verified: real Mongo; a real booking conflict end to end (conflict finder is covered by its own tests, here it is a stub).

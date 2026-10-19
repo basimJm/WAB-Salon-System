@@ -5,6 +5,16 @@ export const ADMIN_SALON_EDIT_ROUTES = {
   gallery: '/:id/gallery',
   galleryOrder: '/:id/gallery/order',
   galleryRemove: '/:id/gallery/:itemId/remove',
+  hours: '/:id/hours',
+  hoursPreview: '/:id/hours/preview',
+  closures: '/:id/closures',
+  closuresPreview: '/:id/closures/preview',
+  closure: '/:id/closures/:closureId',
+  closureRemove: '/:id/closures/:closureId/remove',
+  services: '/:id/services',
+  service: '/:id/services/:serviceId',
+  staff: '/:id/members/:memberId/staff',
+  policy: '/:id/policy',
 } as const;
 
 export const ADMIN_SALON_EDIT_AUDIT = {
@@ -14,5 +24,13 @@ export const ADMIN_SALON_EDIT_AUDIT = {
     galleryAdd: 'SALON_GALLERY_ADD',
     galleryRemove: 'SALON_GALLERY_REMOVE',
     galleryOrder: 'SALON_GALLERY_REORDER',
+    hours: 'SALON_HOURS_EDIT',
+    closureAdd: 'SALON_CLOSURE_ADD',
+    closureUpdate: 'SALON_CLOSURE_UPDATE',
+    closureRemove: 'SALON_CLOSURE_REMOVE',
+    serviceAdd: 'SALON_SERVICE_ADD',
+    serviceUpdate: 'SALON_SERVICE_UPDATE',
+    staff: 'SALON_STAFF_EDIT',
+    policy: 'SALON_POLICY_EDIT',
   },
 } as const;
