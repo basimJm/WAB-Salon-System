@@ -9,18 +9,19 @@ import kotlin.system.exitProcess
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
+    override val analyticsName: String = PlatformNames.ANDROID
+    override val osVersion: String = Build.VERSION.RELEASE.orEmpty()
+    override val deviceModel: String = listOf(Build.MANUFACTURER, Build.MODEL).filter { !it.isNullOrBlank() }.joinToString(" ")
 }
 
 actual fun getPlatform(): Platform = AndroidPlatform()
 
-// TODO: replace it with real link
-actual fun openStoreLink() {
-    val url = "https://play.google.com/store/apps/details?id=com.facebook.katana&hl=en"
-    val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+actual fun openStoreLink(url: String?) {
+    val target = url?.takeIf { it.isNotBlank() } ?: return
+    val intent = Intent(Intent.ACTION_VIEW, target.toUri()).apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     val context = KoinPlatform.getKoin().getProperty<Context>("androidContext")
-
     context?.startActivity(intent)
 }
 

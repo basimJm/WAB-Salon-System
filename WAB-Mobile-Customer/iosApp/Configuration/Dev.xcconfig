@@ -6,6 +6,9 @@ APP_DISPLAY_NAME = WAB Dev
 // PLACEHOLDER host until the platform domain is decided. In xcconfig '//' starts a comment, so the
 // scheme separator is written as ':/$()/'.
 API_BASE_URL = https:/$()/dev-api.template.app
+WEB_BASE_URL = https:/$()/dev.template.app
 // Set a suffix (for example .dev) only when the Firebase project has a matching iOS app.
+// Dev builds run on fixtures until the dev API exists (CUS-060 switches to remote).
+DATA_SOURCE = mock
 BUNDLE_ID_SUFFIX =
 PRODUCT_BUNDLE_IDENTIFIER = com.fab.wab.customer$(BUNDLE_ID_SUFFIX)$(TEAM_ID)

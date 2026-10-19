@@ -23,6 +23,8 @@ class AndroidAppPlugin : Plugin<Project> {
             apply(plugin = "org.jetbrains.compose")
             apply(plugin = "org.jetbrains.kotlin.plugin.compose")
             apply(plugin = "com.google.gms.google-services")
+            // Generates the Crashlytics build id; without it the Crashlytics SDK aborts the app at startup.
+            apply(plugin = "com.google.firebase.crashlytics")
 
             val localProperties = Properties()
             val localPropertiesFile = rootProject.file("local.properties")
@@ -33,12 +35,12 @@ class AndroidAppPlugin : Plugin<Project> {
             val property = { name: String -> projectProperty(localProperties, name) }
 
             extensions.configure<ApplicationExtension> {
-                namespace = "com.fab.wab.customer"
-                compileSdk = 36
+                namespace = AndroidSdk.NAMESPACE_ROOT
+                compileSdk = AndroidSdk.COMPILE_SDK
                 defaultConfig {
-                    applicationId = "com.fab.wab.customer"
-                    minSdk = 26
-                    targetSdk = 36
+                    applicationId = AndroidSdk.NAMESPACE_ROOT
+                    minSdk = AndroidSdk.MIN_SDK
+                    targetSdk = AndroidSdk.TARGET_SDK
                     versionCode = requireNotNull(property("APP_VERSION_CODE")) { missing("APP_VERSION_CODE") }.toInt()
                     versionName = requireNotNull(property("APP_VERSION_NAME")) { missing("APP_VERSION_NAME") }
 
@@ -94,6 +96,8 @@ class AndroidAppPlugin : Plugin<Project> {
                 add("implementation", project(":core:domain"))
                 add("implementation", project(":core:storage"))
                 add("implementation", project(":core:ui"))
+                add("implementation", project(":core:mvi"))
+                add("implementation", project(":core:firebase"))
                 add("implementation", libs.findLibrary("androidx-activity-compose").get())
                 add("implementation", libs.findBundle("koin-android").get())
                 add("implementation", libs.findBundle("lifecycle").get())
@@ -118,6 +122,10 @@ private fun ApplicationProductFlavor.environment(id: String, prefix: String, pro
     versionNameSuffix = "-$id"
     buildConfigField("String", "ENVIRONMENT", quoted(id))
     buildConfigField("String", "API_BASE_URL", quoted(baseUrl))
+    val webBaseUrl = requireNotNull(property("${prefix}_WEB_BASE_URL")) { missing("${prefix}_WEB_BASE_URL") }
+    buildConfigField("String", "WEB_BASE_URL", quoted(webBaseUrl))
+    val dataSource = requireNotNull(property("${prefix}_DATA_SOURCE")) { missing("${prefix}_DATA_SOURCE") }
+    buildConfigField("String", "DATA_SOURCE", quoted(dataSource))
 }
 
 private fun quoted(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""

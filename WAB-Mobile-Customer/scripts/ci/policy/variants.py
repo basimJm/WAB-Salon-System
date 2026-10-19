@@ -1,4 +1,6 @@
 """R5: every build variant (Android flavors x build types, iOS configurations and schemes) stays declared and wired into CI."""
+from __future__ import annotations
+
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path

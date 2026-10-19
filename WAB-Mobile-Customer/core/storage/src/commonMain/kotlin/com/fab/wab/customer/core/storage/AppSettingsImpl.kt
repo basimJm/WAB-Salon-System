@@ -6,11 +6,21 @@ import androidx.datastore.preferences.core.edit
 import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.AppSettings
 import com.fab.wab.customer.core.domain.ThemeMode
+import com.fab.wab.customer.core.domain.session.SessionStore
+import com.fab.wab.customer.core.security.SecureKeyValueStore
+import com.fab.wab.customer.core.storage.session.SessionKeys
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
+/**
+ * Template settings over DataStore. Tokens are delegated to the session store's secure entries (CUS-011) so the
+ * network layer (refresh interceptor) and the session store always see the same pair.
+ */
 class AppSettingsImpl(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val secure: SecureKeyValueStore,
+    private val sessionStore: SessionStore,
 ) : AppSettings {
 
     override val language: Flow<String> = dataStore.data.map { preferences ->
@@ -22,16 +32,12 @@ class AppSettingsImpl(
         ThemeMode.fromString(themeName)
     }
 
-    override val token: Flow<String?> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.TOKEN]
-    }
+    override val token: Flow<String?> = flow { emit(secure.read(SessionKeys.SECURE_ACCESS)) }
     override val fcmToken: Flow<String?> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.FCM_TOKEN]
     }
 
-    override val refreshToken: Flow<String?> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.REFRESH_TOKEN]
-    }
+    override val refreshToken: Flow<String?> = flow { emit(secure.read(SessionKeys.SECURE_REFRESH)) }
 
     override val userId: Flow<String?> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.USER_ID]
@@ -69,15 +75,7 @@ class AppSettingsImpl(
         }
     }
 
-    override suspend fun setToken(token: String?) {
-        dataStore.edit { preferences ->
-            if (token != null) {
-                preferences[PreferencesKeys.TOKEN] = token
-            } else {
-                preferences.remove(PreferencesKeys.TOKEN)
-            }
-        }
-    }
+    override suspend fun setToken(token: String?) = secure.write(SessionKeys.SECURE_ACCESS, token)
 
     override suspend fun setFcmToken(fcmToken: String?) {
         dataStore.edit { preferences ->
@@ -89,15 +87,7 @@ class AppSettingsImpl(
         }
     }
 
-    override suspend fun setRefreshToken(token: String?) {
-        dataStore.edit { preferences ->
-            if (token != null) {
-                preferences[PreferencesKeys.REFRESH_TOKEN] = token
-            } else {
-                preferences.remove(PreferencesKeys.REFRESH_TOKEN)
-            }
-        }
-    }
+    override suspend fun setRefreshToken(token: String?) = secure.write(SessionKeys.SECURE_REFRESH, token)
 
     override suspend fun setUserId(id: String?) {
         dataStore.edit { preferences ->
@@ -152,15 +142,15 @@ class AppSettingsImpl(
     }
 
     override suspend fun clearAll() {
+        sessionStore.clearAll()
         dataStore.edit { preferences ->
             preferences.clear()
         }
     }
 
     override suspend fun clearSession() {
+        sessionStore.signOut()
         dataStore.edit { preferences ->
-            preferences.remove(PreferencesKeys.TOKEN)
-            preferences.remove(PreferencesKeys.REFRESH_TOKEN)
             preferences.remove(PreferencesKeys.USER_ID)
             preferences.remove(PreferencesKeys.USER_ROLE)
         }

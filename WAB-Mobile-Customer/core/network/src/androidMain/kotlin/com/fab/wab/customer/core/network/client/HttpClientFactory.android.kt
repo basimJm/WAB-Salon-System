@@ -8,7 +8,8 @@ import io.ktor.client.HttpClient
 actual fun createHttpClient(
     apiConfig: ApiConfig,
     appSettings: AppSettings,
-    sessionTimeOut: SessionTimeOut
+    sessionTimeOut: SessionTimeOut,
+    engineProvider: HttpEngineProvider,
 ): HttpClient {
-    return BaseHttpClient(apiConfig, appSettings,sessionTimeOut).buildHttpClient()
+    return BaseHttpClient(apiConfig, appSettings, sessionTimeOut, engineProvider).buildHttpClient()
 }

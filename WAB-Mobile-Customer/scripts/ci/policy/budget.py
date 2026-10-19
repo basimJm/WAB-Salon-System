@@ -1,4 +1,6 @@
 """Performance gate: release builds are minified (mapping file exists) and stay under the APK size budget."""
+from __future__ import annotations
+
 import json
 from pathlib import Path
 from .model import Violation
