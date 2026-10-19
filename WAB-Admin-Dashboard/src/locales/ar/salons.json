@@ -52,6 +52,55 @@
       "bankName": "أدخل اسم البنك",
       "accountHolderName": "أدخل اسم صاحب الحساب",
       "iban": "أدخل آيبان صحيحًا"
+    },
+    "recommended": "مميّز",
+    "recommendedYes": "مميّز",
+    "bookings30d": "الحجوزات (30 يومًا)",
+    "deletionAsked": "طلب حذف",
+    "yes": "نعم",
+    "no": "لا",
+    "insights": "المؤشرات",
+    "kpi": {
+      "rating": "التقييم",
+      "bookings": "الحجوزات",
+      "completion": "المكتملة (30 يومًا)",
+      "services": "الخدمات الفعّالة",
+      "staff": "الموظفون الفعّالون",
+      "byStatus30d": "الحجوزات حسب الحالة (30 يومًا)",
+      "trend": "الحجوزات في اليوم",
+      "from": "من",
+      "to": "إلى",
+      "rangeError": "لا يمكن أن يسبق آخر يوم أول يوم."
+    },
+    "activity": {
+      "title": "نشاط الإدارة",
+      "action": "الإجراء",
+      "reason": "السبب",
+      "empty": "لا توجد تعديلات من الإدارة بعد.",
+      "actions": {
+        "SALON_PROFILE_EDIT": "تعديل الملف",
+        "SALON_GALLERY_ADD": "إضافة صورة",
+        "SALON_GALLERY_REMOVE": "حذف صورة",
+        "SALON_GALLERY_REORDER": "إعادة ترتيب الصور",
+        "SALON_HOURS_EDIT": "تعديل ساعات الدوام",
+        "SALON_CLOSURE_ADD": "إضافة إغلاق",
+        "SALON_CLOSURE_UPDATE": "تعديل إغلاق",
+        "SALON_CLOSURE_REMOVE": "إزالة إغلاق",
+        "SALON_SERVICE_ADD": "إضافة خدمة",
+        "SALON_SERVICE_UPDATE": "تعديل خدمة",
+        "SALON_STAFF_EDIT": "تعديل ملف موظف",
+        "SALON_POLICY_EDIT": "تعديل السياسات"
+      }
+    },
+    "deletion": {
+      "approve": "الموافقة على الحذف",
+      "reject": "رفض الحذف",
+      "approveTitle": "الموافقة على حذف {{name}}؟",
+      "rejectTitle": "رفض حذف {{name}}؟",
+      "approveText": "يصبح الصالون غير متصل وينتظر الإزالة. يشترط ألا يبقى حجز مفتوح.",
+      "rejectText": "يُلغى الطلب ويُبلَّغ المالك.",
+      "done": "تم حفظ القرار",
+      "failed": "تعذّر حفظ القرار. إذا بقيت حجوزات مفتوحة فعالجها أولًا."
     }
   }
 }

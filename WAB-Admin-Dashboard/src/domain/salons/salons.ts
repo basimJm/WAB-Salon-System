@@ -21,10 +21,16 @@ export interface SalonSummary {
   readonly areaId: string | null;
   readonly rating: { readonly avg: number; readonly count: number };
   readonly subscriptionStatus: SubscriptionStatus | null;
+  readonly recommended: boolean;
+  /** Bookings created in the last 30 days. */
+  readonly bookings30d: number;
+  /** The owner asked to delete the salon; the admin has not decided yet when `deletionApprovedAt` is null. */
+  readonly deletionRequestedAt: string | null;
   readonly createdAt: string;
 }
 
 export interface SalonDetails extends SalonSummary {
+  readonly deletionApprovedAt: string | null;
   readonly description: string | null;
   readonly phone: string | null;
   /** Profile parts still missing before the salon can be visible. */
@@ -76,12 +82,58 @@ export interface SalonQuery extends PageQuery {
   gender?: SalonGender;
   cityId?: string;
   q?: string;
+  subscription?: SubscriptionStatus;
+  recommended?: boolean;
+  /** Only salons with an open deletion request. */
+  deletionRequested?: boolean;
 }
+
+export const SUBSCRIPTION_STATUSES = ['TRIAL', 'ACTIVE', 'EXPIRED'] as const;
+
+/** Booking counts by status (all eight statuses). */
+export type StatusCounts = Readonly<Record<string, number>>;
+
+export interface SalonKpis {
+  readonly rating: { readonly avg: number; readonly count: number };
+  readonly bookings: {
+    readonly total: number;
+    readonly last30d: number;
+    readonly byStatus: StatusCounts;
+    readonly byStatus30d: StatusCounts;
+  };
+  readonly activeServices: number;
+  readonly activeStaff: number;
+}
+
+export interface SalonAnalytics {
+  readonly from: string;
+  readonly to: string;
+  readonly total: number;
+  readonly days: readonly { readonly date: string; readonly bookings: number }[];
+  readonly byStatus: StatusCounts;
+}
+
+/** One thing an admin did to this salon. */
+export interface SalonActivity {
+  readonly id: string;
+  readonly action: string;
+  readonly adminId: string;
+  readonly reason: string;
+  readonly createdAt: string;
+}
+
+export type DeletionDecision = 'APPROVE' | 'REJECT';
 
 export interface SalonsRepository {
   list(query: SalonQuery): Promise<Page<SalonSummary>>;
   get(id: string): Promise<SalonDetails>;
   members(id: string): Promise<readonly SalonMember[]>;
+  kpis(id: string): Promise<SalonKpis>;
+  /** Bookings per Amman day between two local days (inclusive). */
+  analytics(id: string, range: { from: string; to: string }): Promise<SalonAnalytics>;
+  activity(id: string, query: PageQuery): Promise<Page<SalonActivity>>;
+  /** Approving needs no open booking left; the server answers 409 SCHEDULE_CONFLICT otherwise. */
+  decideDeletion(id: string, decision: DeletionDecision, reason: string): Promise<void>;
   setOffline(id: string, reason: string): Promise<void>;
   setOnline(id: string, reason: string): Promise<void>;
   /** Services of the salon are switched off by the server: the caller must warn first. */

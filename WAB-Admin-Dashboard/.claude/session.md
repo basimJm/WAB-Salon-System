@@ -14,15 +14,6 @@
 
 ## Last blocks
 
-### ADM-070 — salon editing by admin
-
-- Branch: `feat/adm-070-salon-edit`
-- Status: DONE
-- Acceptance criteria: page /salons/:id/edit with six tabs (profile and location with cover/logo upload, gallery add/remove/reorder, weekly hours with affected-bookings preview and closures add/change/remove, services menu, staff profile, payment and cancellation policy); every write asks for a reason; AR+EN
-- Tests: tests/salonEdit.test.tsx (15); full suite + gate PASS
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: gallery adds images only (videos need a thumbnail and duration); service media keys not edited; area is not editable (server patch cannot clear it).
-
 ### ADM-071 — booking extras
 
 - Branch: `feat/adm-071-booking-extras`
@@ -38,5 +29,14 @@
 - Status: DONE
 - Acceptance criteria: customer page: edit profile, send one push, delete now (skips the 30-day grace), reviews written and notifications received tabs (paginated); every write needs a reason
 - Tests: tests/customerExtras.test.tsx (10); full suite + gate PASS
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
+
+### ADM-073 — salon list columns and insights
+
+- Branch: `feat/adm-073-salon-insights`
+- Status: DONE
+- Acceptance criteria: salon list: subscription, recommended and deletion-request filters, recommended and bookings (30 days) columns; salon page: insights tab (KPIs, completion, status chart, bookings per day for a range), admin activity tab, deletion-request approve/reject with a reason
+- Tests: tests/salonInsights.test.tsx (9); full suite + gate PASS; fixture exemption list removed (every operation has a fixture)
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
