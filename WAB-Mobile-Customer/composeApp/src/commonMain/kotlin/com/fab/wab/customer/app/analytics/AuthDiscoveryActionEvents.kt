@@ -46,7 +46,8 @@ internal object AuthDiscoveryActionEvents {
         RegisterContract.UiAction.OnRetryLoad, -> ActionEvent.Silent
     }
     fun otp(a: OtpContract.UiAction): ActionEvent = when (a) {
-        OtpContract.UiAction.OnVerifyClick, OtpContract.UiAction.OnResendClick, OtpContract.UiAction.OnRetryRequest -> ActionEvent.ByViewModel
+        OtpContract.UiAction.OnVerifyClick, OtpContract.UiAction.OnResendClick, OtpContract.UiAction.OnRetryRequest,
+        -> ActionEvent.ByViewModel
         is OtpContract.UiAction.OnCodeChange, OtpContract.UiAction.OnDialogDismiss -> ActionEvent.Silent
     }
     fun home(a: HomeContract.UiAction): ActionEvent = when (a) {
