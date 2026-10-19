@@ -59,7 +59,7 @@ def _code_rules(path: str, masked: str, cfg: dict, theme: bool, numbers_allowed:
         if not theme:
             found.append(Violation(path, _line_of(scan, match.start()), COLOR, "named color; use a LocalAppColors token"))
     for match in _DIMENSION.finditer(scan):
-        if not theme and float(match.group(1)) != 0:
+        if not (theme or numbers_allowed) and float(match.group(1)) != 0:
             found.append(Violation(path, _line_of(scan, match.start()), DIMENSION, f"{match.group(0)}; use a spacing/size/typography token"))
     if not numbers_allowed:
         scan = _COLOR_CALL.sub(lambda m: " " * len(m.group(0)), scan)

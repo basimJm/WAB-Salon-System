@@ -42,6 +42,7 @@ class BookingSuccessViewModelTest {
         assertEquals("WAB-1001", vm.state.value.referenceNumber)
         vm.onEvent(UiAction.OnCopyReference)
         assertEquals<SideEffect>(SideEffect.CopyToClipboard("WAB-1001"), effects.single())
+        assertEquals(true, vm.state.value.copied)
         assertEquals(BookingSuccessAnalytics.ACTION_COPY_REFERENCE, analytics.actions.single().name)
     }
 

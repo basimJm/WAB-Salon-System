@@ -1,174 +1,178 @@
 package com.fab.wab.customer.feature.salons.presentation.screen
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
-import com.fab.wab.customer.core.domain.salon.GeneralFilter
-import com.fab.wab.customer.designsystem.components.button.AppIconButton
 import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
-import com.fab.wab.customer.designsystem.components.button.AppTextButton
-import com.fab.wab.customer.designsystem.components.chip.AppFilterChip
-import com.fab.wab.customer.designsystem.components.control.AppRadioButton
-import com.fab.wab.customer.designsystem.components.control.AppRangeSlider
-import com.fab.wab.customer.designsystem.components.dialog.AppBottomSheet
-import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
-import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerLine
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
+import com.fab.wab.customer.designsystem.resources.Res as DsRes
+import com.fab.wab.customer.designsystem.resources.state_error_title
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.feature.home.presentation.screen.DiscoveryDesign
+import com.fab.wab.customer.feature.home.presentation.screen.DiscoveryGradientButton
+import com.fab.wab.customer.feature.home.presentation.screen.discoveryBody
 import com.fab.wab.customer.feature.salons.presentation.analytics.SalonsAnalytics
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.FilterSheetContract.UiAction
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.FilterSheetContract.UiState
-import com.fab.wab.customer.feature.salons.presentation.controller.contract.RatingOptions
-import com.fab.wab.customer.feature.salons.presentation.controller.contract.toFloatRange
-import com.fab.wab.customer.feature.salons.presentation.controller.vm.generalFilterOptions
 import com.fab.wab.customer.feature.salons.presentation.resources.Res
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_apply
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_close
-import com.fab.wab.customer.feature.salons.presentation.resources.filter_general
-import com.fab.wab.customer.feature.salons.presentation.resources.filter_price
-import com.fab.wab.customer.feature.salons.presentation.resources.filter_rating
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_reset
-import com.fab.wab.customer.feature.salons.presentation.resources.filter_see_more
-import com.fab.wab.customer.feature.salons.presentation.resources.filter_services
+import com.fab.wab.customer.feature.salons.presentation.resources.filter_retry
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_title
-import com.fab.wab.customer.feature.salons.presentation.resources.salons_chip_nearest
-import com.fab.wab.customer.feature.salons.presentation.resources.salons_chip_price
-import com.fab.wab.customer.feature.salons.presentation.resources.salons_chip_rating
-import com.fab.wab.customer.feature.salons.presentation.resources.salons_chip_recommended
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.roundToInt
 
-/** S05 full-screen sheet: header (close / title / reset), scrollable sections, sticky Apply. */
+/** S05 (design `filterOpen`): full-screen sheet with header (close / title / reset), scrolling sections, sticky Apply. */
 @Composable
 fun FilterSheet(state: UiState, onAction: (UiAction) -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(SalonsAnalytics.FILTER_SCREEN)
     val spacing = AppTheme.spacing
-    AppBottomSheet(onDismiss = onDismiss, modifier = modifier) {
-        Column(modifier = Modifier.fillMaxHeight(SHEET_HEIGHT_FRACTION)) {
+    val colors = AppTheme.colors
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = false, usePlatformDefaultWidth = false),
+    ) {
+        Column(modifier = modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.statusBars)) {
             SheetHeader(state.canReset, onAction, onDismiss)
             Column(
-                modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = spacing.space16),
-                verticalArrangement = Arrangement.spacedBy(spacing.space24),
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(
+                        start = spacing.space20,
+                        end = spacing.space20,
+                        top = SalonsDesign.SHEET_BODY_PADDING_TOP,
+                        bottom = spacing.space20,
+                    ),
             ) {
-                ServicesSection(state, onAction)
-                if (state.showPrice) PriceSection(state, onAction)
-                GeneralSection(state, onAction)
-                RatingSection(state, onAction)
+                when {
+                    state.servicesLoading && state.services.isEmpty() && state.servicesError == null -> FilterChipsShimmer()
+                    state.servicesError != null && state.services.isEmpty() -> FilterError(onRetry = { onAction(UiAction.OnRetryServices) })
+                    else -> {
+                        FilterServicesSection(state, onAction)
+                        if (state.showPrice) FilterPriceSection(state, onAction)
+                        FilterGeneralSection(state, onAction)
+                        FilterRatingSection(state, onAction)
+                    }
+                }
             }
-            AppPrimaryButton(
-                text = stringResource(Res.string.filter_apply),
-                onClick = { onAction(UiAction.OnApply) },
-                modifier = Modifier.fillMaxWidth().padding(spacing.space16),
-            )
+            SheetFooter(onApply = { onAction(UiAction.OnApply) })
         }
     }
 }
 
+/** 50 dp row with a hairline below: 44 dp "✕" at Start, centred 16 sp bold title, Reset (accent, or faint at 60 %). */
 @Composable
 private fun SheetHeader(canReset: Boolean, onAction: (UiAction) -> Unit, onDismiss: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = AppTheme.spacing.space8),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AppIconButton(icon = AppIcons.Close, contentDescription = stringResource(Res.string.filter_close), onClick = onDismiss)
-        AppText(
-            text = stringResource(Res.string.filter_title),
-            style = AppTheme.typography.titleMedium,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Center,
-        )
-        AppTextButton(text = stringResource(Res.string.filter_reset), onClick = { onAction(UiAction.OnReset) }, enabled = canReset)
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun ServicesSection(state: UiState, onAction: (UiAction) -> Unit) {
-    val spacing = AppTheme.spacing
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.space12)) {
-        AppText(text = stringResource(Res.string.filter_services), style = AppTheme.typography.titleSmall)
-        val selectedIds = state.selectedServices.map { it.id }.toSet()
-        val shown = state.selectedServices.filterNot { sel -> state.services.any { it.id == sel.id } } + state.services
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
-            shown.forEach { service ->
-                AppFilterChip(
-                    text = service.name,
-                    selected = service.id in selectedIds,
-                    onClick = { onAction(UiAction.OnServiceToggle(service)) },
+    val colors = AppTheme.colors
+    Column {
+        Box(Modifier.fillMaxWidth().height(AppTheme.sizes.topBarHeight).padding(horizontal = DiscoveryDesign.TOP_BAR_PADDING_H)) {
+            AppText(
+                text = stringResource(Res.string.filter_title),
+                style = discoveryBody(DiscoveryDesign.TEXT_16, FontWeight.Bold),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = DiscoveryDesign.TOP_BAR_BACK_SIZE),
+            )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .size(DiscoveryDesign.TOP_BAR_BACK_SIZE)
+                    .clickable(role = Role.Button, onClick = onDismiss),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = AppIcons.Close,
+                    contentDescription = stringResource(Res.string.filter_close),
+                    tint = colors.ink,
+                    modifier = Modifier.size(SalonsDesign.CLOSE_ICON),
                 )
             }
-            if (state.servicesLoading) repeat(SHIMMER_CHIPS) { AppShimmerLine(Modifier.fillMaxWidth(SHIMMER_CHIP_WIDTH)) }
+            AppText(
+                text = stringResource(Res.string.filter_reset),
+                style = discoveryBody(DiscoveryDesign.TEXT_14, FontWeight.SemiBold),
+                color = if (canReset) colors.accent else colors.faint,
+                maxLines = 1,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .alpha(if (canReset) 1f else SalonsDesign.RESET_DISABLED_ALPHA)
+                    .clickable(enabled = canReset, role = Role.Button, onClick = { onAction(UiAction.OnReset) })
+                    .padding(horizontal = AppTheme.spacing.space8, vertical = AppTheme.spacing.space10),
+            )
         }
-        when {
-            state.servicesError != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetryServices) }, message = state.servicesError)
-            state.servicesHasMore && !state.servicesLoading ->
-                AppTextButton(text = stringResource(Res.string.filter_see_more), onClick = { onAction(UiAction.OnSeeMoreServices) })
-        }
+        Box(Modifier.fillMaxWidth().height(AppTheme.sizes.hairline).background(colors.line))
     }
 }
 
+/** Design `fError`: 100 dp soft circle with a 42 dp warning icon, 16 sp bold title, 46 dp gradient Retry. */
 @Composable
-private fun PriceSection(state: UiState, onAction: (UiAction) -> Unit) {
-    val bounds = state.priceBounds?.toFloatRange() ?: return
-    val selection = state.priceSelection ?: bounds
-    Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
-        AppText(text = stringResource(Res.string.filter_price), style = AppTheme.typography.titleSmall)
+private fun FilterError(onRetry: () -> Unit) {
+    val colors = AppTheme.colors
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = AppTheme.spacing.space20, vertical = SalonsDesign.ERROR_PADDING_V),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(Modifier.size(SalonsDesign.ERROR_CIRCLE).background(colors.soft, AppTheme.shapes.circle), contentAlignment = Alignment.Center) {
+            Icon(AppIcons.Error, contentDescription = null, tint = colors.accent, modifier = Modifier.size(SalonsDesign.ERROR_ICON))
+        }
+        Spacer(Modifier.height(SalonsDesign.ERROR_TITLE_BOTTOM))
         AppText(
-            text = stringResource(
-                Res.string.salons_chip_price,
-                selection.start.roundToInt().toString(),
-                selection.endInclusive.roundToInt().toString(),
-            ),
-            color = AppTheme.colors.muted,
+            text = stringResource(DsRes.string.state_error_title),
+            style = discoveryBody(DiscoveryDesign.TEXT_16, FontWeight.Bold),
+            textAlign = TextAlign.Center,
         )
-        AppRangeSlider(value = selection, onValueChange = { onAction(UiAction.OnPriceChange(it)) }, valueRange = bounds)
+        Spacer(Modifier.height(SalonsDesign.ERROR_TITLE_BOTTOM))
+        DiscoveryGradientButton(
+            text = stringResource(Res.string.filter_retry),
+            onClick = onRetry,
+            height = SalonsDesign.ERROR_BUTTON_HEIGHT,
+            paddingHorizontal = SalonsDesign.ERROR_BUTTON_PADDING_H,
+        )
     }
 }
 
+/** Hairline on top, 12 / 20 / 30 padding, 54 dp gradient Apply button (the design-system primary button). */
 @Composable
-private fun GeneralSection(state: UiState, onAction: (UiAction) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
-        AppText(text = stringResource(Res.string.filter_general), style = AppTheme.typography.titleSmall)
-        generalFilterOptions.forEach { option ->
-            val label = if (option == GeneralFilter.NEAREST) Res.string.salons_chip_nearest else Res.string.salons_chip_recommended
-            OptionRow(stringResource(label), state.general == option) { onAction(UiAction.OnGeneralSelect(option)) }
-        }
+private fun SheetFooter(onApply: () -> Unit) {
+    val colors = AppTheme.colors
+    Column(Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.navigationBars)) {
+        Box(Modifier.fillMaxWidth().height(AppTheme.sizes.hairline).background(colors.line))
+        AppPrimaryButton(
+            text = stringResource(Res.string.filter_apply),
+            onClick = onApply,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = AppTheme.spacing.space20,
+                    end = AppTheme.spacing.space20,
+                    top = AppTheme.spacing.space12,
+                    bottom = SalonsDesign.FOOTER_PADDING_BOTTOM,
+                ),
+        )
     }
 }
-
-@Composable
-private fun RatingSection(state: UiState, onAction: (UiAction) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
-        AppText(text = stringResource(Res.string.filter_rating), style = AppTheme.typography.titleSmall)
-        RatingOptions.all.forEach { rating ->
-            OptionRow(stringResource(Res.string.salons_chip_rating, rating), state.minRating == rating) {
-                onAction(UiAction.OnRatingSelect(rating))
-            }
-        }
-    }
-}
-
-@Composable
-private fun OptionRow(label: String, selected: Boolean, onSelect: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        AppRadioButton(selected = selected, onClick = onSelect)
-        AppText(text = label)
-    }
-}
-
-private const val SHEET_HEIGHT_FRACTION = 0.95f
-private const val SHIMMER_CHIPS = 3
-private const val SHIMMER_CHIP_WIDTH = 0.25f

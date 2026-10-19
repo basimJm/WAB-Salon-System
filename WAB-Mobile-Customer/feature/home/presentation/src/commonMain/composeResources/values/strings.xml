@@ -1,4 +1,5 @@
 <resources>
+    <string name="home_hello_sub">What would you like to book today?</string>
     <string name="home_welcome">Hello, %1$s</string>
     <string name="home_notifications">Notifications</string>
     <string name="home_search_hint">Search for a salon name, service, or category</string>
@@ -8,8 +9,12 @@
     <string name="home_see_more">See more</string>
     <string name="home_recommended">Recommended salons</string>
     <string name="home_see_all">See all</string>
-    <string name="home_nearest">Nearest salons</string>
-    <string name="home_nearest_empty">No salons near you yet.</string>
-    <string name="home_nearest_location_off">Enable location to see salons near you.</string>
+    <string name="home_nearest">Nearest to you</string>
+    <string name="home_nearest_empty">No salons within 10 km of your location right now.</string>
+    <string name="home_nearest_location_off">Enable location services to see salons near you</string>
     <string name="home_enable_location">Enable location services</string>
+    <string name="home_reviews_count">(%1$d)</string>
+    <string name="home_distance_km">%1$s km</string>
+    <string name="discovery_retry">Retry</string>
+    <string name="discovery_error_server_body">Sorry, an unexpected problem occurred.</string>
 </resources>

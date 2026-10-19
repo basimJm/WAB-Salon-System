@@ -3,137 +3,184 @@
 package com.fab.wab.customer.feature.booking.presentation.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
-import com.fab.wab.customer.core.common.TimeFormat
-import com.fab.wab.customer.designsystem.components.button.AppIconButton
-import com.fab.wab.customer.designsystem.components.chip.AppTimeSlotChip
-import com.fab.wab.customer.designsystem.components.chip.SlotState
-import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
-import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerLine
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import com.fab.wab.customer.core.domain.salon.Closure
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
-import com.fab.wab.customer.designsystem.resources.Res as CoreRes
-import com.fab.wab.customer.designsystem.resources.time_am
-import com.fab.wab.customer.designsystem.resources.time_pm
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.designsystem.utils.brandBackground
+import com.fab.wab.customer.designsystem.utils.brandBrush
 import com.fab.wab.customer.feature.booking.domain.model.CalendarDay
-import com.fab.wab.customer.feature.booking.domain.model.toSalonDay
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract.UiAction
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract.UiState
 import com.fab.wab.customer.feature.booking.presentation.resources.Res
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_month_label
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_closure_note
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_legend_closed
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_legend_selected
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_month_next
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_month_previous
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_no_slots
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_pick_date
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_slot_full
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_slots_title
-import com.fab.wab.customer.feature.salon.presentation.screen.nameRes
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_month_year
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_pick_date_title
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_wk_fri
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_wk_mon
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_wk_sat
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_wk_sun
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_wk_thu
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_wk_tue
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_wk_wed
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
 
-/** Step 2 (PRD S16): calendar (closed / past / too-far days disabled) + 15-minute slots with "Full" chips. */
+/**
+ * Step 2 (`st.s2`): title `mb 14`, calendar card (`border:1px solid var(--line);border-radius:20px;padding:14px`),
+ * optional closure note `mt 10 12px danger`, then the times section once a date is chosen.
+ */
 @Composable
 internal fun SlotStep(state: UiState, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
+    val months = state.calendar.map { it.date.year to it.date.monthNumber }.distinct()
+    val month = months.getOrNull(state.visibleMonth)
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(spacing.space16),
-        verticalArrangement = Arrangement.spacedBy(spacing.space16),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(start = spacing.space20, top = spacing.space4, end = spacing.space20, bottom = spacing.space20),
     ) {
-        MonthCalendar(state, onAction)
-        when {
-            state.selectedDate == null -> AppText(text = stringResource(Res.string.booking_pick_date), color = AppTheme.colors.muted)
-            state.slotsLoading -> repeat(SHIMMER_ROWS) { AppShimmerLine(Modifier.fillMaxWidth()) }
-            state.slotsError != null ->
-                AppErrorState(onRetry = { onAction(UiAction.OnDateSelect(state.selectedDate)) }, message = state.slotsError)
-            state.availability?.hasAvailableSlot != true ->
-                AppText(text = stringResource(Res.string.booking_no_slots), color = AppTheme.colors.muted)
-            else -> SlotsGrid(state, onAction)
+        StepTitle(text = stringResource(Res.string.booking_pick_date_title), modifier = Modifier.padding(bottom = spacing.space14))
+        if (month != null) {
+            MonthCalendar(state, month, months.lastIndex, onAction)
+            state.salon?.upcomingClosures.orEmpty().filter { it.isIn(month) }.forEach { ClosureNote(it) }
         }
+        if (state.selectedDate != null) SlotTimes(state, onAction, Modifier.padding(top = spacing.space20))
     }
 }
 
 @Composable
-private fun MonthCalendar(state: UiState, onAction: (UiAction) -> Unit) {
-    val months = state.calendar.map { it.date.year to it.date.monthNumber }.distinct()
-    val month = months.getOrNull(state.visibleMonth) ?: return
-    val days = state.calendar.filter { it.date.year == month.first && it.date.monthNumber == month.second }
+private fun MonthCalendar(state: UiState, month: Pair<Int, Int>, lastMonth: Int, onAction: (UiAction) -> Unit) {
+    val colors = AppTheme.colors
     val spacing = AppTheme.spacing
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            AppIconButton(
+    val days = state.calendar.filter { it.date.year == month.first && it.date.monthNumber == month.second }
+    val today = state.calendar.firstOrNull()?.date
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(AppTheme.sizes.hairline, colors.line, roundedShape(BookingDesignConstants.calendarRadius))
+            .padding(spacing.space14),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = spacing.space10),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MonthButton(
                 icon = AppIcons.Back,
-                contentDescription = stringResource(Res.string.booking_month_previous),
-                onClick = { onAction(UiAction.OnMonthChange(-1)) },
+                label = stringResource(Res.string.booking_month_previous),
                 enabled = state.visibleMonth > 0,
+                onClick = { onAction(UiAction.OnMonthChange(-1)) },
             )
             AppText(
-                text = stringResource(Res.string.booking_month_label, month.second, month.first),
-                modifier = Modifier.weight(1f),
+                text = stringResource(Res.string.booking_month_year, monthName(month.second), month.first),
                 style = AppTheme.typography.titleMedium,
             )
-            AppIconButton(
+            MonthButton(
                 icon = AppIcons.Forward,
-                contentDescription = stringResource(Res.string.booking_month_next),
+                label = stringResource(Res.string.booking_month_next),
+                enabled = state.visibleMonth < lastMonth,
                 onClick = { onAction(UiAction.OnMonthChange(1)) },
-                enabled = state.visibleMonth < months.lastIndex,
             )
         }
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(BookingDesignConstants.dayCellGap)) {
             WEEK.forEach { day ->
                 AppText(
-                    text = stringResource(day.toSalonDay().nameRes()).take(DAY_LABEL_LENGTH),
-                    modifier = Modifier.weight(1f),
-                    style = AppTheme.typography.bodySmall,
-                    color = AppTheme.colors.muted,
+                    text = stringResource(day.headRes()),
+                    modifier = Modifier.weight(1f).padding(vertical = spacing.space4),
+                    style = AppTheme.typography.labelSmall,
+                    color = colors.faint,
+                    textAlign = TextAlign.Center,
                 )
             }
         }
-        val leading = WEEK.indexOf(days.first().date.dayOfWeek)
+        val leading = days.firstOrNull()?.let { WEEK.indexOf(it.date.dayOfWeek) } ?: 0
         val cells: List<CalendarDay?> = List(leading) { null } + days
         cells.chunked(WEEK.size).forEach { week ->
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(spacing.space4)) {
-                week.forEach { day -> DayCell(day, state.selectedDate == day?.date, onAction, Modifier.weight(1f)) }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = BookingDesignConstants.dayCellGap),
+                horizontalArrangement = Arrangement.spacedBy(BookingDesignConstants.dayCellGap),
+            ) {
+                week.forEach { day -> DayCell(day, state.selectedDate == day?.date, day?.date == today, onAction, Modifier.weight(1f)) }
                 repeat(WEEK.size - week.size) { Box(Modifier.weight(1f)) }
             }
         }
+        Legend(Modifier.padding(top = spacing.space10))
     }
 }
 
+/** Design `prevStyle` / `nextStyle`: `36px;border-radius:10px;background:var(--surface)`, `opacity:.35` when disabled. */
 @Composable
-private fun DayCell(day: CalendarDay?, selected: Boolean, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
-    val colors = AppTheme.colors
-    if (day == null) {
-        Box(modifier.aspectRatio(1f))
-        return
-    }
+private fun MonthButton(icon: ImageVector, label: String, enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val shape = roundedShape(BookingDesignConstants.monthButtonRadius)
     Box(
         modifier = modifier
-            .aspectRatio(1f)
-            .clip(AppTheme.shapes.small)
-            .background(if (selected) colors.accent else if (day.enabled) colors.soft else colors.surface)
-            .clickable(enabled = day.enabled, role = Role.Button) { onAction(UiAction.OnDateSelect(day.date)) },
+            .size(BookingDesignConstants.monthButton)
+            .alpha(if (enabled) 1f else BookingDesignConstants.MONTH_BUTTON_DISABLED_ALPHA)
+            .clip(shape)
+            .background(AppTheme.colors.surface)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = label, tint = AppTheme.colors.ink, modifier = Modifier.size(AppTheme.sizes.icon))
+    }
+}
+
+/**
+ * Design `calDays`: `height:38px;border-radius:11px;font-size:13.5px`, weight 700 selected / 500 otherwise; gradient when
+ * selected, `rgba(217,70,122,.12)` on closed days, `var(--soft)` on today; faint text when disabled.
+ */
+@Composable
+private fun DayCell(day: CalendarDay?, selected: Boolean, isToday: Boolean, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
+    val colors = AppTheme.colors
+    val shape = roundedShape(BookingDesignConstants.dayCellRadius)
+    val cell = modifier.height(BookingDesignConstants.dayCellHeight)
+    if (day == null) {
+        Box(cell)
+        return
+    }
+    val background = when {
+        selected -> cell.brandBackground(brandBrush(), shape)
+        !day.enabled -> cell.clip(shape).background(colors.dangerContainer)
+        isToday -> cell.clip(shape).background(colors.soft)
+        else -> cell.clip(shape)
+    }
+    Box(
+        modifier = background.clickable(enabled = day.enabled, role = Role.Button) { onAction(UiAction.OnDateSelect(day.date)) },
         contentAlignment = Alignment.Center,
     ) {
         AppText(
             text = day.date.dayOfMonth.toString(),
+            style = AppTheme.typography.bodyMedium.copy(fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium),
             color = when {
                 selected -> colors.onGradient
                 day.enabled -> colors.ink
@@ -143,37 +190,66 @@ private fun DayCell(day: CalendarDay?, selected: Boolean, onAction: (UiAction) -
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+/** Design legend: `gap:14px;font-size:11px;color:var(--muted)` with 10 dp squares (`radius 3px`). */
 @Composable
-private fun SlotsGrid(state: UiState, onAction: (UiAction) -> Unit) {
-    val spacing = AppTheme.spacing
-    val am = stringResource(CoreRes.string.time_am)
-    val pm = stringResource(CoreRes.string.time_pm)
-    val full = stringResource(Res.string.booking_slot_full)
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
-        AppText(text = stringResource(Res.string.booking_slots_title), style = AppTheme.typography.titleSmall)
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
-            state.availability?.slots.orEmpty().forEach { slot ->
-                val label = TimeFormat.instantText(slot.start, am, pm)?.time ?: slot.start
-                val slotState = when {
-                    state.person.start == slot.start -> SlotState.Selected
-                    slot.available -> SlotState.Available
-                    else -> SlotState.Full
-                }
-                AppTimeSlotChip(
-                    time = label,
-                    state = slotState,
-                    onClick = { onAction(UiAction.OnSlotSelect(slot.start)) },
-                    fullLabel = full,
-                )
-            }
-        }
+private fun Legend(modifier: Modifier = Modifier) {
+    val colors = AppTheme.colors
+    val shape = roundedShape(BookingDesignConstants.legendRadius)
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(BookingDesignConstants.legendGap)) {
+        LegendItem(Modifier.brandBackground(brandBrush(), shape), stringResource(Res.string.booking_legend_selected))
+        LegendItem(Modifier.background(colors.dangerContainer, shape), stringResource(Res.string.booking_legend_closed))
     }
+}
+
+@Composable
+private fun LegendItem(squareModifier: Modifier, label: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(BookingDesignConstants.legendSquare).then(squareModifier))
+        AppText(text = label, style = AppTheme.typography.labelSmall, color = AppTheme.colors.muted)
+    }
+}
+
+/** Design `closureNote`: `margin-top:10px;font-size:12px;color:#D9467A` with a 14 dp info icon, `gap:6px`. */
+@Composable
+private fun ClosureNote(closure: Closure) {
+    val date = runCatching { LocalDate.parse(closure.from.take(ISO_DATE_LENGTH)) }.getOrNull() ?: return
+    Row(
+        modifier = Modifier.padding(top = AppTheme.spacing.space10),
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            AppIcons.Info,
+            contentDescription = null,
+            tint = AppTheme.colors.danger,
+            modifier = Modifier.size(BookingDesignConstants.closureIcon),
+        )
+        AppText(
+            text = stringResource(Res.string.booking_closure_note, dayMonthText(date), closure.reason),
+            style = AppTheme.typography.bodySmall,
+            color = AppTheme.colors.danger,
+        )
+    }
+}
+
+private fun Closure.isIn(month: Pair<Int, Int>): Boolean {
+    val date = runCatching { LocalDate.parse(from.take(ISO_DATE_LENGTH)) }.getOrNull() ?: return false
+    return date.year == month.first && date.monthNumber == month.second
+}
+
+/** Design `t.wk`: one-/two-letter day heads, Saturday first (Jordan week). */
+private fun DayOfWeek.headRes() = when (this) {
+    DayOfWeek.SATURDAY -> Res.string.booking_wk_sat
+    DayOfWeek.SUNDAY -> Res.string.booking_wk_sun
+    DayOfWeek.MONDAY -> Res.string.booking_wk_mon
+    DayOfWeek.TUESDAY -> Res.string.booking_wk_tue
+    DayOfWeek.WEDNESDAY -> Res.string.booking_wk_wed
+    DayOfWeek.THURSDAY -> Res.string.booking_wk_thu
+    DayOfWeek.FRIDAY -> Res.string.booking_wk_fri
 }
 
 /** Week starts on Saturday in Jordan (BUSINESS_DOMAIN `DayOfWeek`). */
 private val WEEK = listOf(
     DayOfWeek.SATURDAY, DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY,
 )
-private const val DAY_LABEL_LENGTH = 3
-private const val SHIMMER_ROWS = 3
+private const val ISO_DATE_LENGTH = 10

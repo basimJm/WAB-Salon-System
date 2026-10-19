@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="profile_title">الملف الشخصي</string>
-    <string name="profile_guest_welcome">مرحباً %1$s</string>
+    <string name="profile_guest_welcome">مرحباً، %1$s</string>
+    <string name="profile_guest_account">حساب زائر</string>
     <string name="profile_guest_edit">تعديل</string>
-    <string name="profile_edit_title">تعديل بياناتك</string>
+    <string name="profile_edit_title">تعديل الاسم والجنس</string>
     <string name="profile_nickname_label">الاسم المستعار</string>
-    <string name="profile_gender_male">ذكر</string>
-    <string name="profile_gender_female">أنثى</string>
+    <string name="profile_gender_male">رجل</string>
+    <string name="profile_gender_female">امرأة</string>
     <string name="profile_save">حفظ</string>
-    <string name="profile_photo_change">تغيير الصورة</string>
+    <string name="profile_photo_change">الصورة الشخصية</string>
     <string name="profile_photo_camera">الكاميرا</string>
     <string name="profile_photo_gallery">المعرض</string>
     <string name="profile_photo_delete">حذف الصورة</string>
     <string name="profile_section_settings">الإعدادات</string>
     <string name="profile_language">اللغة</string>
     <string name="profile_language_ar">العربية</string>
-    <string name="profile_language_en">الإنجليزية</string>
+    <string name="profile_language_en">English</string>
     <string name="profile_theme">المظهر</string>
     <string name="profile_theme_light">فاتح</string>
     <string name="profile_theme_dark">داكن</string>
@@ -25,7 +26,8 @@
     <string name="profile_contact">تواصل معنا</string>
     <string name="profile_contact_call">اتصال</string>
     <string name="profile_contact_whatsapp">واتساب</string>
-    <string name="profile_contact_email">بريد إلكتروني</string>
+    <string name="profile_contact_email">البريد الإلكتروني</string>
+    <string name="profile_contact_row">%1$s · %2$s</string>
     <string name="profile_faq">الأسئلة الشائعة</string>
     <string name="profile_rate">قيّم التطبيق</string>
     <string name="profile_share">شارك التطبيق</string>
@@ -35,10 +37,18 @@
     <string name="profile_privacy">سياسة الخصوصية</string>
     <string name="profile_terms">الشروط والأحكام</string>
     <string name="profile_about">من نحن</string>
+    <string name="profile_section_account">الحساب</string>
     <string name="profile_personal_info">المعلومات الشخصية</string>
     <string name="profile_login">تسجيل الدخول</string>
     <string name="profile_logout">تسجيل الخروج</string>
+    <string name="profile_logout_title">تسجيل الخروج؟</string>
+    <string name="profile_logout_body">ستتمكن من تسجيل الدخول مجدداً في أي وقت برقم هاتفك.</string>
     <string name="profile_delete_account">حذف الحساب</string>
+    <string name="profile_delete_title">حذف الحساب؟</string>
+    <string name="profile_delete_body">سيتم تعطيل حسابك لمدة 30 يوماً، ويمكنك استعادته بتسجيل الدخول خلال هذه الفترة، بعدها يُحذف نهائياً.</string>
+    <string name="profile_delete_confirm">حذف الحساب</string>
+    <string name="profile_cancel">إلغاء</string>
+    <string name="profile_dialog_mark">!</string>
     <string name="profile_version">الإصدار %1$s</string>
     <string name="profile_logged_out">تم تسجيل خروجك.</string>
     <string name="profile_account_deleted">تم تعطيل حسابك. يمكنك استعادته بتسجيل الدخول خلال %1$d يوماً.</string>
@@ -58,8 +68,7 @@
     <string name="edit_email_error">البريد الإلكتروني غير صحيح</string>
     <string name="edit_phone_label">رقم الهاتف</string>
     <string name="edit_phone_error">رقم الهاتف غير صحيح</string>
-    <string name="edit_phone_changed_note">سيتم إرسال رمز تحقق إلى الرقم الجديد.</string>
+    <string name="edit_phone_changed_note">سيتم إرسال رمز تحقق إلى الرقم الجديد قبل الحفظ.</string>
     <string name="edit_save">حفظ</string>
-    <string name="edit_saved">تم حفظ معلوماتك.</string>
-    <string name="profile_section_account">الحساب</string>
+    <string name="edit_saved">تم حفظ التغييرات بنجاح</string>
 </resources>

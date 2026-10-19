@@ -100,4 +100,6 @@
     <string name="state_action_update">Update the app</string>
     <string name="error_code_current_password_invalid">The current password is incorrect.</string>
     <string name="error_code_email_already_used">This email is already in use.</string>
+    <string name="brand_name" translatable="false">WAB</string>
+    <string name="brand_tagline" translatable="false">WEDDING &amp; BEAUTY</string>
 </resources>

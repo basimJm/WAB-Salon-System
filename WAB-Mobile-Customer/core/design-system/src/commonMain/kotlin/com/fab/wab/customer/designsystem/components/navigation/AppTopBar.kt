@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.fab.wab.customer.designsystem.components.button.AppIconButton
 import com.fab.wab.customer.designsystem.components.text.AppText
@@ -47,7 +48,7 @@ fun AppTopBar(
         }
         AppText(
             text = title,
-            style = AppTheme.typography.titleMedium,
+            style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Center,
             maxLines = 1,
             modifier = Modifier.weight(1f),

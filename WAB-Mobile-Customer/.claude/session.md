@@ -82,3 +82,18 @@
 - Tests: none (docs only)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only, no source changed.
+
+### CUS-069 — Design fidelity pass: app icon + logo, every component and screen matched to `design/WAB 0x *.dc.html`
+- Branch: `feat/cus-069-design-fidelity`
+- Status: IN PROGRESS
+- Branched from `origin/customer` after PR #319.
+- Acceptance criteria (owner request 2026-10-19; design files = reference, `CLAUDE.md` §3 precedence):
+  - [x] App icon = `design/assets/wab-app-icon.png` (centre square, Lanczos to 1024): iOS `AppIcon.appiconset`, Android legacy + round + adaptive foreground (bg `#3B2B53` sampled from the icon) at 5 densities, Play Store 512; the GREENJO template icons are gone
+  - [x] In-app logo = the same icon (`ic_app_logo_light.webp`, 512², theme-independent; dark copy deleted); new `brand/AppLogo` (radius = size/4, violet glow `rgba(109,40,217,.3)` = `elevation.logoShadowAlpha`) + `AppBrandHeader` (WAB Playfair wordmark + "WEDDING & BEAUTY" tagline) with `brand_name`/`brand_tagline` strings
+  - [ ] Shared chrome matched to the design (tab bar, top bar, button height 52, sheets, dialogs)
+  - [ ] Every screen of 01 Auth, 02 Discovery, 03 Salon, 04 Booking Flow, 05 Bookings, 06 Account matched (six parallel agents, one per design file; shared needs collected and applied in the design system)
+  - [ ] Policy checks + detekt + full gate green; emulator check of the changed screens AR/EN light/dark
+- Tests: existing unit tests + any contract additions; gate run
+- Loops: 0/1
+- Review: PENDING
+- Notes: the `DesignSync` import of the claude.ai/design project could not run (needs an interactive `/design-login`); the repo copies under `design/` are identical to the `customer` master and were used as the reference.
