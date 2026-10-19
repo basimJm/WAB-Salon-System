@@ -26,7 +26,6 @@ const NOT_BUILT_YET = [
   'getSalonsByIdPolicy',
   'getSalonsByIdProfile',
   'getSalonsByIdServices',
-  'getSearch',
   'patchCustomersById',
   'patchSalonsByIdClosuresByClosureId',
   'patchSalonsByIdProfile',

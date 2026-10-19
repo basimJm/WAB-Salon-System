@@ -73,3 +73,4 @@
 - ADM-078 done: fixtures coverage lives in tests/fixtures.test.ts (WITHOUT_FIXTURE has the 19 exempt operations: auth on MockAuthRepository and by-id reads no screen uses)
 - ADM-081 done: tests/pages-a11y.test.tsx renders every module screen in ar+en and runs axe; ChartFrame title is h2 styled as h3
 - ADM-068 done: profile = repositories.profile {get,saveAlertEmails,changePassword,requestEmailChange,verifyEmailChange}; page /profile from the topbar menu. LESSON: .gitignore had 'reports/' which hid src/{domain,data,presentation}/reports: the pattern is now '/reports/' and the files were rebuilt (ADM-064/065 sources had never been committed). tests/fixtures.test.ts NOT_BUILT_YET lists the new server operations; each ADM-069..073 task deletes its lines and has its Appendix A rows already
+- ADM-069 done: search = repositories.search.search(text); useGlobalSearch() maps groups to links (presentation/utils/searchHits.ts) and AppShell passes it to Topbar

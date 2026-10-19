@@ -14,6 +14,7 @@ import type { PlacementsRepository } from '@/domain/placements/placements';
 import type { CampaignsRepository } from '@/domain/campaigns/campaigns';
 import type { AlertsRepository } from '@/domain/alerts/alerts';
 import type { ProfileRepository } from '@/domain/profile/profile';
+import type { SearchRepository } from '@/domain/search/search';
 import type { AnalyticsRepository } from '@/domain/analytics/analytics';
 import type { ReportsRepository } from '@/domain/reports/reports';
 import type { AuditRepository } from '@/domain/audit/audit';
@@ -42,6 +43,7 @@ import { RemotePlacementsRepository } from './placements/RemotePlacementsReposit
 import { RemoteCampaignsRepository } from './campaigns/RemoteCampaignsRepository';
 import { RemoteAlertsRepository } from './alerts/RemoteAlertsRepository';
 import { RemoteProfileRepository } from './profile/RemoteProfileRepository';
+import { RemoteSearchRepository } from './search/RemoteSearchRepository';
 import { RemoteAnalyticsRepository } from './analytics/RemoteAnalyticsRepository';
 import { RemoteReportsRepository } from './reports/RemoteReportsRepository';
 import { RemoteAuditRepository } from './audit/RemoteAuditRepository';
@@ -67,6 +69,7 @@ export interface Repositories {
   readonly analytics: AnalyticsRepository;
   readonly alerts: AlertsRepository;
   readonly profile: ProfileRepository;
+  readonly search: SearchRepository;
   readonly campaigns: CampaignsRepository;
   readonly placements: PlacementsRepository;
   readonly subscriptions: SubscriptionsRepository;
@@ -95,6 +98,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
   const analytics = new RemoteAnalyticsRepository(api);
   const alerts = new RemoteAlertsRepository(api);
   const profile = new RemoteProfileRepository(api);
+  const search = new RemoteSearchRepository(api);
   const campaigns = new RemoteCampaignsRepository(api);
   const placements = new RemotePlacementsRepository(api);
   const subscriptions = new RemoteSubscriptionsRepository(api);
@@ -124,6 +128,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
       analytics,
       alerts,
       profile,
+      search,
       campaigns,
       placements,
       subscriptions,
@@ -152,6 +157,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
     analytics,
     alerts,
     profile,
+    search,
     campaigns,
     placements,
     subscriptions,
