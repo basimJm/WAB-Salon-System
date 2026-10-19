@@ -18,18 +18,21 @@ const REAL_PROVIDERS = {
   OTP_PROVIDER: 'real',
   STORAGE_PROVIDER: 'real',
   NOTIFIER_PROVIDER: 'real',
-  PAYMENT_PROVIDER: 'real',
-  ANALYTICS_PROVIDER: 'real',
+  PAYMENT_PROVIDER: 'disabled',
+  FIREBASE_PROJECT_ID: 'wab-prod-test',
   FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
   SMTP_HOST: 'smtp.example.test',
   EMAIL_FROM_ADDRESS: 'noreply@example.test',
+  S3_REGION: 'eu-central-1',
+  S3_PUBLIC_BUCKET: 'wab-public',
+  S3_PRIVATE_BUCKET: 'wab-private',
+  CDN_BASE_URL: 'https://cdn.example.test',
 };
 const ALL_FAKE_MODES = {
   otp: 'fake',
   storage: 'fake',
   notifier: 'fake',
   payments: 'fake',
-  analytics: 'fake',
 };
 
 /** Production also needs the field-encryption key (a valid base64 key of 32 bytes). */
@@ -78,8 +81,6 @@ describe('loadConfig', () => {
     [ENV_KEYS.otpProvider, 'otp'],
     [ENV_KEYS.storageProvider, 'storage'],
     [ENV_KEYS.notifierProvider, 'notifier'],
-    [ENV_KEYS.paymentProvider, 'payments'],
-    [ENV_KEYS.analyticsProvider, 'analytics'],
   ] as const)('maps %s to providers.%s and nothing else', (key, field) => {
     const credentials =
       key === ENV_KEYS.notifierProvider
@@ -88,7 +89,14 @@ describe('loadConfig', () => {
             SMTP_HOST: 'smtp.example.test',
             EMAIL_FROM_ADDRESS: 'noreply@example.test',
           }
-        : {};
+        : key === ENV_KEYS.storageProvider
+          ? {
+              S3_REGION: 'eu-central-1',
+              S3_PUBLIC_BUCKET: 'wab-public',
+              S3_PRIVATE_BUCKET: 'wab-private',
+              CDN_BASE_URL: 'https://cdn.example.test',
+            }
+          : { FIREBASE_PROJECT_ID: 'wab-dev-test' };
     expect(loadConfig(validEnv({ [key]: 'real', ...credentials })).providers).toEqual({
       ...ALL_FAKE_MODES,
       [field]: 'real',
@@ -100,12 +108,21 @@ describe('loadConfig', () => {
       expect(invalidKeysOf(validEnv({ [key]: 'mock' }))).toEqual([key]);
       expect(invalidKeysOf(validEnv({ [key]: '' }))).toEqual([key]);
     }
+    // Payments are paused: there is no `real` gateway mode, only `fake` and `disabled`.
+    for (const bad of ['real', 'mock', '']) {
+      expect(invalidKeysOf(validEnv({ [ENV_KEYS.paymentProvider]: bad }))).toEqual([
+        ENV_KEYS.paymentProvider,
+      ]);
+    }
+    expect(
+      loadConfig(validEnv({ [ENV_KEYS.paymentProvider]: 'disabled' })).providers.payments,
+    ).toBe('disabled');
   });
 
-  it('requires production to name every provider as real, never defaulting or faking', () => {
+  it('requires production to name every provider as real (payments: disabled), never defaulting or faking', () => {
     const production = validEnv({ NODE_ENV: 'production', ...PAYOUT_KEY });
-    expect(invalidKeysOf(production)).toEqual([...PROVIDER_ENV_KEYS]);
-    for (const key of PROVIDER_ENV_KEYS) {
+    expect(invalidKeysOf(production)).toEqual([...PROVIDER_ENV_KEYS, ENV_KEYS.paymentProvider]);
+    for (const key of [...PROVIDER_ENV_KEYS, ENV_KEYS.paymentProvider]) {
       expect(invalidKeysOf({ ...production, ...REAL_PROVIDERS, [key]: 'fake' })).toEqual([key]);
       const others = Object.fromEntries(
         Object.entries(REAL_PROVIDERS).filter(([name]) => name !== key),
@@ -117,8 +134,7 @@ describe('loadConfig', () => {
       otp: 'real',
       storage: 'real',
       notifier: 'real',
-      payments: 'real',
-      analytics: 'real',
+      payments: 'disabled',
     });
   });
 
@@ -183,6 +199,114 @@ describe('loadConfig', () => {
         'EMAIL_FROM_ADDRESS',
       ]);
       expect(loadConfig(validEnv()).notifier).toBeUndefined();
+    });
+  });
+
+  describe('real storage settings', () => {
+    const base = validEnv({ STORAGE_PROVIDER: 'real' });
+    const settings = {
+      S3_REGION: 'eu-central-1',
+      S3_PUBLIC_BUCKET: 'wab-public',
+      S3_PRIVATE_BUCKET: 'wab-private',
+      CDN_BASE_URL: 'https://cdn.example.test',
+    };
+
+    it('names every missing key, never a value', () => {
+      expect([...invalidKeysOf(base)].sort()).toEqual(
+        ['CDN_BASE_URL', 'S3_PRIVATE_BUCKET', 'S3_PUBLIC_BUCKET', 'S3_REGION'].sort(),
+      );
+    });
+
+    it('builds typed settings with defaults (IAM role: no credentials)', () => {
+      expect(loadConfig({ ...base, ...settings }).storage).toEqual({
+        region: 'eu-central-1',
+        publicBucket: 'wab-public',
+        privateBucket: 'wab-private',
+        forcePathStyle: false,
+        cdnBaseUrl: 'https://cdn.example.test',
+      });
+    });
+
+    it('reads endpoint, credentials and CloudFront signing', () => {
+      const config = loadConfig({
+        ...base,
+        ...settings,
+        S3_ENDPOINT: 'http://localhost:9000',
+        S3_FORCE_PATH_STYLE: 'true',
+        S3_ACCESS_KEY_ID: 'id',
+        S3_SECRET_ACCESS_KEY: 'value',
+        CLOUDFRONT_PRIVATE_BASE_URL: 'https://private.example.test',
+        CLOUDFRONT_KEY_PAIR_ID: 'K1',
+        CLOUDFRONT_PRIVATE_KEY: 'pem',
+      });
+      expect(config.storage).toEqual({
+        region: 'eu-central-1',
+        publicBucket: 'wab-public',
+        privateBucket: 'wab-private',
+        endpoint: 'http://localhost:9000',
+        forcePathStyle: true,
+        credentials: { accessKeyId: 'id', secretAccessKey: 'value' },
+        cdnBaseUrl: 'https://cdn.example.test',
+        cloudfront: { baseUrl: 'https://private.example.test', keyPairId: 'K1', privateKey: 'pem' },
+      });
+    });
+
+    it('requires credentials and CloudFront settings to come complete', () => {
+      expect(invalidKeysOf({ ...base, ...settings, S3_ACCESS_KEY_ID: 'id' })).toEqual([
+        'S3_SECRET_ACCESS_KEY',
+      ]);
+      expect(
+        [...invalidKeysOf({ ...base, ...settings, CLOUDFRONT_KEY_PAIR_ID: 'K1' })].sort(),
+      ).toEqual(['CLOUDFRONT_PRIVATE_BASE_URL', 'CLOUDFRONT_PRIVATE_KEY']);
+    });
+
+    it('rejects bad URLs and is absent for the fake storage', () => {
+      expect(invalidKeysOf({ ...base, ...settings, CDN_BASE_URL: 'nope' })).toEqual([
+        'CDN_BASE_URL',
+      ]);
+      expect(invalidKeysOf({ ...base, ...settings, S3_ENDPOINT: 'nope' })).toEqual(['S3_ENDPOINT']);
+      expect(loadConfig(validEnv()).storage).toBeUndefined();
+    });
+  });
+
+  describe('real OTP settings', () => {
+    const base = validEnv({ OTP_PROVIDER: 'real' });
+
+    it('names the missing Firebase project key, never a value', () => {
+      expect(invalidKeysOf(base)).toEqual(['FIREBASE_PROJECT_ID']);
+    });
+
+    it('builds typed settings, with the emulator host only when given', () => {
+      expect(loadConfig({ ...base, FIREBASE_PROJECT_ID: 'wab-dev-test' }).otp).toEqual({
+        firebase: { projectId: 'wab-dev-test' },
+      });
+      expect(
+        loadConfig({
+          ...base,
+          FIREBASE_PROJECT_ID: 'wab-dev-test',
+          FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+        }).otp,
+      ).toEqual({
+        firebase: { projectId: 'wab-dev-test', authEmulatorHost: 'localhost:9099' },
+      });
+    });
+
+    it('rejects a malformed emulator host and is absent for the fake provider', () => {
+      expect(
+        invalidKeysOf({ ...base, FIREBASE_PROJECT_ID: 'p', FIREBASE_AUTH_EMULATOR_HOST: 'nope' }),
+      ).toEqual(['FIREBASE_AUTH_EMULATOR_HOST']);
+      expect(loadConfig(validEnv()).otp).toBeUndefined();
+      expect(loadConfig(validEnv({ FIREBASE_PROJECT_ID: 'p' })).otp).toBeUndefined();
+    });
+
+    it('refuses the Firebase emulator in production', () => {
+      const production = validEnv({
+        ...REAL_PROVIDERS,
+        ...PAYOUT_KEY,
+        NODE_ENV: 'production',
+        FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+      });
+      expect(invalidKeysOf(production)).toEqual(['FIREBASE_AUTH_EMULATOR_HOST']);
     });
   });
 

@@ -21,23 +21,24 @@ const m = {
   customers: createFakeModel(),
 };
 const audits: Record<string, unknown>[] = [];
+const reviewsService = createAdminReviewsService({
+  reviews: new ReviewsRepository(m.reviews.model as never),
+  salons: new SalonsRepository(m.salons.model as never),
+  members: new MembersRepository(m.members.model as never),
+  customers: new CustomersRepository(m.customers.model as never),
+  audit: createAuditWriter({
+    append: (data) => {
+      audits.push(data);
+      return Promise.resolve({ id: 'a', ...data } as never);
+    },
+  }),
+  logger,
+});
 const app = createApp({
   logger,
   services: {
     adminGuard: requireAuth('admin', SECRET),
-    adminReviews: createAdminReviewsService({
-      reviews: new ReviewsRepository(m.reviews.model as never),
-      salons: new SalonsRepository(m.salons.model as never),
-      members: new MembersRepository(m.members.model as never),
-      customers: new CustomersRepository(m.customers.model as never),
-      audit: createAuditWriter({
-        append: (data) => {
-          audits.push(data);
-          return Promise.resolve({ id: 'a', ...data } as never);
-        },
-      }),
-      logger,
-    }),
+    adminReviews: reviewsService,
   },
 });
 
@@ -241,5 +242,27 @@ describe('bulk decisions', () => {
     ],
   ])('rejects %s', async (_n, body) => {
     expect((await post('/bulk', body)).status).toBe(400);
+  });
+});
+
+describe('service list by author', () => {
+  it('lists every review of one customer whatever its status, newest first, and no one else’s', async () => {
+    const other = id();
+    const first = addReview({ status: 'APPROVED', createdAt: new Date('2026-10-01T00:00:00Z') });
+    const second = addReview({ status: 'REJECTED', createdAt: new Date('2026-10-02T00:00:00Z') });
+    const pending = addReview({ status: 'PENDING', createdAt: new Date('2026-10-03T00:00:00Z') });
+    addReview({ customerId: other, status: 'APPROVED' });
+    const result = await reviewsService.list({
+      authorId: author.toHexString(),
+      params: { page: 1, pageSize: 10 },
+    });
+    expect(result.total).toBe(3);
+    expect(result.items.map((r) => r.id)).toEqual([pending, second, first]);
+    const approvedOnly = await reviewsService.list({
+      authorId: author.toHexString(),
+      status: 'APPROVED',
+      params: { page: 1, pageSize: 10 },
+    });
+    expect(approvedOnly.items.map((r) => r.id)).toEqual([first]);
   });
 });

@@ -1,9 +1,8 @@
 {
-  "name": "wab-notifications",
+  "name": "@wab/notifications",
   "version": "0.1.0",
   "description": "Provider-independent push (FCM) and email (SMTP) delivery for WAB projects.",
   "license": "UNLICENSED",
-  "private": true,
   "engines": {
     "node": ">=22"
   },
@@ -23,7 +22,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsup",
@@ -35,7 +36,9 @@
     "test:loop": "jest --config jest.loop.config.js --runInBand",
     "smoke": "tsx scripts/smoke.ts",
     "verify": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build && npm run test:smoke-package && npm run test:loop",
-    "test:smoke-package": "node scripts/package-smoke.cjs"
+    "test:smoke-package": "node scripts/package-smoke.cjs",
+    "prepublishOnly": "npm run verify",
+    "pack:check": "npm pack --dry-run"
   },
   "dependencies": {
     "firebase-admin": "^14.5.0",
@@ -57,5 +60,14 @@
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/basimJm/WAB-Salon-System.git",
+    "directory": "wab-notifications"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   }
 }

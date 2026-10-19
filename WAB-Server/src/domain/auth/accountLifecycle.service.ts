@@ -1,4 +1,5 @@
 import {
+  FORCE_DELETE_FROM,
   ACCOUNT_AUDIT_ACTIONS,
   ANONYMIZED_EMAIL_DOMAIN,
   ANONYMIZED_FIRST_NAME,
@@ -19,6 +20,7 @@ import type {
   InstallationsRepository,
   MembersRepository,
 } from '../../repositories/identity.repository';
+import type { CustomerStatus } from '../../constants/enums';
 import type { Entity } from '../../utils/database/plain';
 import { BusinessRuleError, ConflictError, NotFoundError } from '../../utils/errors';
 import type { Logger } from '../../utils/logger';
@@ -39,6 +41,15 @@ export interface AccountLifecycleService {
   blockCustomer(input: { customerId: string; reason: string; actor: AdminActor }): Promise<void>;
   /** Admin: lifts a block; a deletion request made before the block is dropped. */
   unblockCustomer(input: { customerId: string; reason: string; actor: AdminActor }): Promise<void>;
+  /**
+   * Admin: anonymizes a customer at once, without the grace period (reason + audit), and ends every
+   * session. The bookings and transactions stay for accounting, attached to the anonymized account.
+   */
+  forceDeleteCustomer(input: {
+    customerId: string;
+    reason: string;
+    actor: AdminActor;
+  }): Promise<void>;
   /** Customer: starts the grace period and ends every session; logging in restores the account. */
   requestCustomerDeletion(input: { customerId: string }): Promise<{ deletionScheduledAt: Date }>;
   /** Owner or admin: switches a non-owner member off and ends their sessions. */
@@ -89,8 +100,11 @@ export const createAccountLifecycleService = (
     return member;
   };
 
-  const anonymize = async (customer: Entity<CustomerRaw>): Promise<boolean> => {
-    const done = await customers.transition(customer.id, ['DELETION_PENDING'], {
+  const anonymize = async (
+    customer: Entity<CustomerRaw>,
+    from: readonly CustomerStatus[] = ['DELETION_PENDING'],
+  ): Promise<boolean> => {
+    const done = await customers.transition(customer.id, from, {
       set: {
         status: 'DELETED',
         firstName: ANONYMIZED_FIRST_NAME,
@@ -160,6 +174,24 @@ export const createAccountLifecycleService = (
         entityId: customer.id,
         before: { status: 'BLOCKED' },
         after: { status: 'ACTIVE' },
+        reason,
+        ip: actor.ip,
+        userAgent: actor.userAgent,
+      });
+    },
+
+    async forceDeleteCustomer({ customerId, reason, actor }) {
+      const customer = await requireCustomer(customerId);
+      if (customer.status === 'DELETED') throw new ConflictError();
+      if (!(await anonymize(customer, FORCE_DELETE_FROM))) throw new ConflictError();
+      await access.accessRevoked({ scope: 'customer', id: customer.id });
+      await audit.record({
+        adminId: actor.adminId,
+        action: ACCOUNT_AUDIT_ACTIONS.customerForceDelete,
+        entityType: CUSTOMER_AUDIT_ENTITY,
+        entityId: customer.id,
+        before: { status: customer.status },
+        after: { status: 'DELETED' },
         reason,
         ip: actor.ip,
         userAgent: actor.userAgent,

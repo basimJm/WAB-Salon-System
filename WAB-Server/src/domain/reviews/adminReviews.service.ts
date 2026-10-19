@@ -50,6 +50,8 @@ export interface AdminReviewsService {
     salonId?: string | undefined;
     staffId?: string | undefined;
     rating?: number | undefined;
+    /** The customer who wrote them; without a `status` every status is listed. */
+    authorId?: string | undefined;
     params: PaginationParams;
   }): Promise<{ items: AdminReviewRow[]; total: number }>;
   decide(input: {
@@ -198,18 +200,21 @@ export const createAdminReviewsService = (deps: AdminReviewsDeps): AdminReviewsS
         );
 
   return {
-    async list({ status = 'PENDING', target, salonId, staffId, rating, params }) {
+    async list({ status, target, salonId, staffId, rating, authorId, params }) {
+      // The moderation queue defaults to PENDING; one author's reviews are shown whatever their status.
+      const shown = status ?? (authorId === undefined ? 'PENDING' : undefined);
       const page = await reviews.findPage(
         {
-          status,
+          ...(shown === undefined ? {} : { status: shown }),
           ...(target === undefined ? {} : { target }),
           ...(salonId === undefined ? {} : { salonId }),
           ...(staffId === undefined ? {} : { staffId }),
           ...(rating === undefined ? {} : { rating }),
+          ...(authorId === undefined ? {} : { customerId: toObjectId(authorId) }),
         },
         params,
         // The queue is worked oldest first; published and closed lists show the newest first.
-        { createdAt: status === 'PENDING' ? 1 : -1 },
+        { createdAt: shown === 'PENDING' ? 1 : -1 },
       );
       return { items: await rows(page.items), total: page.meta.total };
     },

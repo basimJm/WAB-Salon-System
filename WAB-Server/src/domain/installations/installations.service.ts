@@ -1,6 +1,6 @@
 import type { AppKind } from '../../constants/enums';
 import { ERROR_CODES } from '../../constants/errorCodes';
-import type { AnalyticsProvider } from '../../providers';
+import type { AnalyticsProvider } from '../../providers/analytics';
 import type {
   CustomersRepository,
   DeviceRecord,

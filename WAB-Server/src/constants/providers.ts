@@ -1,9 +1,19 @@
+import { EXPORT_URL_TTL_SEC } from './exports';
+import { LICENSE_URL_TTL_SEC } from './salon';
+
 /** External-provider constants (SRV-022): how providers are selected and their static rules. */
 export const PROVIDER_MODES = ['fake', 'real'] as const;
 export type ProviderMode = (typeof PROVIDER_MODES)[number];
 /** Used when the variable is absent outside production; production must say `real` explicitly. */
 export const DEFAULT_PROVIDER_MODE: ProviderMode = 'fake';
 export const REAL_PROVIDER_MODE: ProviderMode = 'real';
+
+/** Payments are paused (owner decision 2026-10-19): no gateway is integrated, so there is no `real` mode. */
+export const PAYMENT_PROVIDER_MODES = ['fake', 'disabled'] as const;
+export type PaymentProviderMode = (typeof PAYMENT_PROVIDER_MODES)[number];
+export const DISABLED_PAYMENT_MODE: PaymentProviderMode = 'disabled';
+export const PAYMENTS_DISABLED_MESSAGE = 'payments are paused: no payment gateway is integrated';
+export const DEFAULT_PAYMENT_PROVIDER_MODE: PaymentProviderMode = 'fake';
 
 /** Why a purpose is verified (BUSINESS_DOMAIN.md §4.2, wab-otp BRD §4.1). */
 export const OTP_PURPOSES = [
@@ -28,6 +38,9 @@ export const FAKE_OTP_PROOF_PREFIX = 'fake-otp';
 export const FAKE_OTP_PROOF_SEPARATOR = ':';
 export const FAKE_OTP_PROOF_KINDS = ['valid', 'expired', 'invalid', 'provider-error'] as const;
 export type FakeOtpProofKind = (typeof FAKE_OTP_PROOF_KINDS)[number];
+
+/** Longest signed-URL lifetime the storage SDK accepts: the longest the server ever asks for. */
+export const STORAGE_SIGNED_URL_MAX_TTL_SEC = Math.max(LICENSE_URL_TTL_SEC, EXPORT_URL_TTL_SEC);
 
 export const STORAGE_VISIBILITIES = ['PUBLIC', 'PRIVATE'] as const;
 export type StorageVisibility = (typeof STORAGE_VISIBILITIES)[number];
@@ -77,6 +90,13 @@ export const FAKE_PAYMENT_SCENARIOS = ['success', 'fail', 'cancel', 'pending'] a
 export type FakePaymentScenario = (typeof FAKE_PAYMENT_SCENARIOS)[number];
 export const FAKE_REFUND_SCENARIOS = ['success', 'fail', 'pending'] as const;
 export type FakeRefundScenario = (typeof FAKE_REFUND_SCENARIOS)[number];
+/** What the fake gateway tells the app to open (the app uses its own fake launcher). */
+export const FAKE_PAYMENT_CLIENT = {
+  provider: 'fake',
+  environment: 'dev',
+  brands: ['VISA', 'MASTER'],
+  shopperResultUrl: 'fake://payment/result',
+} as const;
 export const PAYMENT_REFERENCE_PATTERN = /^[A-Za-z0-9_.:-]{1,64}$/;
 /** The fake gateway's webhook signature: anything else is rejected as unverifiable. */
 export const FAKE_WEBHOOK_SIGNATURE = 'fake-webhook-signature';
@@ -93,3 +113,6 @@ export const ANALYTICS_GROUPINGS = ['NAME', 'DAY'] as const;
 export type AnalyticsGrouping = (typeof ANALYTICS_GROUPINGS)[number];
 export const ANALYTICS_IDENTITY_ACTORS = ['CUSTOMER', 'MEMBER'] as const;
 export const INSTALLATION_ID_PATTERN = /^[A-Za-z0-9._-]{8,128}$/;
+
+/** Collection of installation-to-account links kept by the analytics package. */
+export const IDENTITY_LINKS_COLLECTION = 'identityLinks';
