@@ -1,11 +1,13 @@
 package com.fab.wab.customer.feature.profile.presentation.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.ThemeMode
@@ -125,8 +127,9 @@ private fun OptionsSheet(title: String, onDismiss: () -> Unit, content: @Composa
 private fun RadioRow(label: String, selected: Boolean, onClick: () -> Unit) {
     val spacing = AppTheme.spacing
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.space16, vertical = spacing.space8),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = spacing.space16, vertical = spacing.space8),
         horizontalArrangement = Arrangement.spacedBy(spacing.space12),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         AppRadioButton(selected = selected, onClick = onClick)
         AppText(text = label, modifier = Modifier.weight(1f))
