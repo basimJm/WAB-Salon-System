@@ -1,0 +1,11 @@
+<resources>
+    <string name="booking_title">حجز جديد</string>
+    <string name="booking_step_person_title">لمن هذا الحجز؟</string>
+    <string name="booking_name_label">الاسم</string>
+    <string name="booking_name_error">يرجى إدخال الاسم</string>
+    <string name="booking_bride_toggle">هذا الشخص عروس</string>
+    <string name="booking_continue">متابعة</string>
+    <string name="booking_total_price">الإجمالي: %1$s د.أ</string>
+    <string name="booking_total_duration">%1$d دقيقة</string>
+    <string name="booking_step_coming">هذه الخطوة قريباً</string>
+</resources>

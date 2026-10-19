@@ -80,4 +80,8 @@ include(
     ":feature:bookings:data",
     ":feature:bookings:presentation",
     ":feature:bookings:di",
+    ":feature:booking:domain",
+    ":feature:booking:data",
+    ":feature:booking:presentation",
+    ":feature:booking:di",
 )

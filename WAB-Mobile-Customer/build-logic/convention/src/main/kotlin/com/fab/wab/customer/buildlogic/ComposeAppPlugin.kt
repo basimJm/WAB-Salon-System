@@ -109,4 +109,7 @@ private val FEATURE_MODULES = listOf(
     ":feature:bookings:presentation",
     ":feature:bookings:domain",
     ":feature:bookings:di",
+    ":feature:booking:presentation",
+    ":feature:booking:domain",
+    ":feature:booking:di",
 )

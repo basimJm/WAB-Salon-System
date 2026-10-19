@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 = CUS-042 ✓ code, CUS-043, CUS-044, CUS-045, CUS-046 (unit tests after the fifth, then one PR).
+- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 = CUS-042 ✓ code, CUS-043 ✓ code, CUS-044, CUS-045, CUS-046 (unit tests after the fifth, then one PR).
 
 ### CUS-037 — Staff sheet S07a + Service sheet S07b
 - Branch: `feat/cus-037-staff-service-sheets` (from `origin/customer`, batch 2 start)
@@ -92,3 +92,15 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: `actions` in the contract is the merchant view, so the customer rule is computed locally from the policy snapshot; no partial cancel / reschedule by design.
+
+### CUS-043 — Booking flow S16 steps 0–1: person setup (bride toggle), services multi-select with totals, draft `POST/GET/DELETE /bookings/drafts`
+- Branch: `feat/cus-043-booking-persons-services` (from `feat/cus-042-booking-details`)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 3)
+- Acceptance criteria (PRD S16 steps 0–1, Design Script S16; operations `POST /bookings/drafts` (name 1–50, serviceIds 1–20, start required per person), `GET/DELETE /bookings/drafts/{id}`):
+  - [x] `feature/booking` domain: `DraftPerson` (name, bride, services, date, start, staff choice), `BookingDraft` + `DraftPolicy` / money / persons results, `BookingFlowDefaults` (5 companions, 90 days, 15-min slots, name ≤ 50), money in fils (`jodToFils` / `filsToJod`, `selectionTotalsOf`, tested), `BookingDraftRepository` + use cases; data `BookingDraftApi` + mappers + impl + di
+  - [x] `BookingFlowViewModel(salonId)` owns the whole draft (Back keeps selections): loads the salon (gender, services) and prefills the main person with the account first name; step 0 name required (error on continue), bride toggle only for women's salons; step 1 multi-select per person with running total price (fils) + duration, Continue enabled when ≥ 1; `AppStepIndicator` on every step; `BookingFlowScreen` + `ServicesStep`; `BookingNavigation` replaces the `Screen.BookingStart` placeholder; AR + EN strings
+  - [x] Tests: `SelectionTotalsTest` (1), `BookingFlowViewModelTest` (3)
+  - [ ] Unit-test run: batch 3
+- Loops: 0/1
+- Review: PENDING
+- Notes: CONTRACT GAP — the salon's services carry no `brideOnly` flag, so bride-only visibility (PRD step 1) cannot be applied on the client; the server rejects with `BRIDE_ONLY_SERVICE` at draft time (flagged for SRV). The server draft is created at the summary step (it needs `start` per person and holds slots for 10 min).
