@@ -206,7 +206,7 @@ The admin PRD asks for these, the server does not offer them yet (Appendix D). S
 
 | ID | Task | Branch | Needs | Server (SRV) | Status | Notes |
 |---|---|---|---|---|---|---|
-| ADM-068 | Admin profile (PRD §4): change password, change email with verification, alert-email recipients | `feat/adm-068-admin-profile` | ADM-030, ADM-013 | SRV-117 | TODO | Server gap G1: no profile endpoints (alert recipients are a setting key). unblocked by SRV-117 on 2026-10-19 |
+| ADM-068 | Admin profile (PRD §4): change password, change email with verification, alert-email recipients | `feat/adm-068-admin-profile` | ADM-030, ADM-013 | SRV-117 | DONE | Server gap G1: no profile endpoints (alert recipients are a setting key). unblocked by SRV-117 on 2026-10-19 |
 | ADM-069 | Global search (PRD §3): customers, salons, bookings, members grouped; wire the topbar search UI | `feat/adm-069-global-search` | ADM-022, ADM-028 | SRV-118 | TODO | Server gap G2: no search endpoint. unblocked by SRV-118 on 2026-10-19 |
 | ADM-070 | Salon editing by admin (A13): profile and location, gallery, working hours and closures, services, staff, policies | `feat/adm-070-salon-edit` | ADM-041, ADM-020 | SRV-119, SRV-120 | TODO | Server gap G3: those endpoints are merchant-scoped; admin variants (with reason + audit) are missing. unblocked by SRV-120 on 2026-10-19 |
 | ADM-071 | Booking extras (A15): reassign staff with eligible list, issue a refund of a chosen amount, explicit cancel modes, related notifications and events, bookings export | `feat/adm-071-booking-extras` | ADM-049 | SRV-123 | TODO | Server gap G6. unblocked by SRV-123 on 2026-10-19 |
@@ -464,6 +464,45 @@ Integration and release tasks for the admin panel (`INTEGRATION.md` §6).
 | Variant to build | `dev-debug` (`npm run dev`) | `dev-release` (`dev-debug` for diagnosis) | `prod-release` (`prod-debug` for diagnosis) |
 | `VITE_DATA_SOURCE` | `mock` | `remote` (mock allowed through the dev scenario switcher) | `remote` only; mock code compiled out |
 | `VITE_API_BASE_URL` / `VITE_SOCKET_URL` | optional | dev API / socket (GitHub `vars`) | prod API / socket, **https only** |
+| `POST /bookings/{id}/cancel` | Cancel a PENDING or APPROVED booking by mode | ADM-071 |
+| `GET /bookings/{id}/eligible-staff` | Staff who could take over one person of an APPROVED booking | ADM-071 |
+| `POST /bookings/{id}/reassign` | Reassign one person of an APPROVED booking to another staff member | ADM-071 |
+| `POST /bookings/{id}/refund` | Refund a chosen amount of the online payment | ADM-071 |
+| `PATCH /customers/{id}` | Correct a customer’s profile (name, email, gender, city/area, language) | ADM-072 |
+| `POST /customers/{id}/force-delete` | Delete a customer at once, without the 30-day grace period | ADM-072 |
+| `GET /customers/{id}/notifications` | Notifications the platform sent to the customer, newest first | ADM-072 |
+| `POST /customers/{id}/push` | Send a push to this one customer, now | ADM-072 |
+| `GET /customers/{id}/reviews` | Reviews the customer wrote, every moderation status, newest first | ADM-072 |
+| `GET /profile` | The signed-in admin’s profile | ADM-068 |
+| `PATCH /profile` | Replace the alert recipients | ADM-068 |
+| `POST /profile/email/request` | Step 1 of an email change: code to the new address | ADM-068 |
+| `POST /profile/email/verify` | Step 2 of an email change: confirm the code | ADM-068 |
+| `POST /profile/password` | Change the password | ADM-068 |
+| `GET /salons/{id}/activity` | What admins did to the salon (approval, offline/online, edits, deletion decision), newest first | ADM-073 |
+| `GET /salons/{id}/analytics` | Bookings created per day (Asia/Amman) for a date range | ADM-073 |
+| `POST /salons/{id}/closures` | Add a closure | ADM-070 |
+| `PATCH /salons/{id}/closures/{closureId}` | Change a closure that has not started | ADM-070 |
+| `POST /salons/{id}/closures/{closureId}/remove` | Remove a closure that has not started | ADM-070 |
+| `POST /salons/{id}/closures/preview` | Preview: bookings a closure would break (nothing is changed) | ADM-070 |
+| `POST /salons/{id}/deletion-request/decision` | Decide the owner’s deletion request | ADM-073 |
+| `GET /salons/{id}/gallery` | A salon’s gallery | ADM-070 |
+| `POST /salons/{id}/gallery` | Add an uploaded image or video to a salon’s gallery (appended last) | ADM-070 |
+| `POST /salons/{id}/gallery/{itemId}/remove` | Remove a gallery item and its files | ADM-070 |
+| `PUT /salons/{id}/gallery/order` | Reorder a salon’s gallery: every item id exactly once | ADM-070 |
+| `GET /salons/{id}/hours` | Weekly hours, upcoming closures and today’s state | ADM-070 |
+| `PUT /salons/{id}/hours` | Replace the weekly working hours | ADM-070 |
+| `POST /salons/{id}/hours/preview` | Preview: bookings a new weekly schedule would break (nothing is changed) | ADM-070 |
+| `GET /salons/{id}/kpis` | Salon KPIs: rating, bookings by status (all time and last 30 days), active services and staff | ADM-073 |
+| `GET /salons/{id}/members/{memberId}/staff` | A member’s staff profile | ADM-070 |
+| `PUT /salons/{id}/members/{memberId}/staff` | Replace a member’s staff profile (services, bride qualification, working days) | ADM-070 |
+| `GET /salons/{id}/policy` | A salon’s booking policy (null until one is set) | ADM-070 |
+| `PUT /salons/{id}/policy` | Replace a salon’s booking policy | ADM-070 |
+| `GET /salons/{id}/profile` | A salon’s editable profile | ADM-070 |
+| `PATCH /salons/{id}/profile` | Edit a salon’s profile, location and contacts | ADM-070 |
+| `GET /salons/{id}/services` | A salon’s services, paginated | ADM-070 |
+| `POST /salons/{id}/services` | Add a catalog service to the salon | ADM-070 |
+| `PATCH /salons/{id}/services/{serviceId}` | Change a salon service (price, duration, bride-only, media, active) | ADM-070 |
+| `GET /search` | Global search: customers, salons, bookings and team members | ADM-069 |
 | Ribbon / `/about` / dev gallery | shown | shown | hidden / shown without internals / compiled out |
 | Source maps | yes (debug) | yes in debug, no in release | no in release |
 | Secrets | none: every `VITE_*` value is public | none | none |

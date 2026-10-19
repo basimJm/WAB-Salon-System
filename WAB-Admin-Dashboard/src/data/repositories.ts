@@ -13,6 +13,7 @@ import type { SubscriptionsRepository } from '@/domain/subscriptions/subscriptio
 import type { PlacementsRepository } from '@/domain/placements/placements';
 import type { CampaignsRepository } from '@/domain/campaigns/campaigns';
 import type { AlertsRepository } from '@/domain/alerts/alerts';
+import type { ProfileRepository } from '@/domain/profile/profile';
 import type { AnalyticsRepository } from '@/domain/analytics/analytics';
 import type { ReportsRepository } from '@/domain/reports/reports';
 import type { AuditRepository } from '@/domain/audit/audit';
@@ -40,6 +41,7 @@ import { RemoteSubscriptionsRepository } from './subscriptions/RemoteSubscriptio
 import { RemotePlacementsRepository } from './placements/RemotePlacementsRepository';
 import { RemoteCampaignsRepository } from './campaigns/RemoteCampaignsRepository';
 import { RemoteAlertsRepository } from './alerts/RemoteAlertsRepository';
+import { RemoteProfileRepository } from './profile/RemoteProfileRepository';
 import { RemoteAnalyticsRepository } from './analytics/RemoteAnalyticsRepository';
 import { RemoteReportsRepository } from './reports/RemoteReportsRepository';
 import { RemoteAuditRepository } from './audit/RemoteAuditRepository';
@@ -64,6 +66,7 @@ export interface Repositories {
   readonly reports: ReportsRepository;
   readonly analytics: AnalyticsRepository;
   readonly alerts: AlertsRepository;
+  readonly profile: ProfileRepository;
   readonly campaigns: CampaignsRepository;
   readonly placements: PlacementsRepository;
   readonly subscriptions: SubscriptionsRepository;
@@ -91,6 +94,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
   const reports = new RemoteReportsRepository(api);
   const analytics = new RemoteAnalyticsRepository(api);
   const alerts = new RemoteAlertsRepository(api);
+  const profile = new RemoteProfileRepository(api);
   const campaigns = new RemoteCampaignsRepository(api);
   const placements = new RemotePlacementsRepository(api);
   const subscriptions = new RemoteSubscriptionsRepository(api);
@@ -119,6 +123,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
       reports,
       analytics,
       alerts,
+      profile,
       campaigns,
       placements,
       subscriptions,
@@ -146,6 +151,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
     reports,
     analytics,
     alerts,
+    profile,
     campaigns,
     placements,
     subscriptions,

@@ -117,6 +117,9 @@ describe('generated DTOs behave like the server contract', () => {
       areaId: null,
       rating: { avg: 4.5, count: 3 },
       subscriptionStatus: null,
+      recommended: false,
+      bookings30d: 0,
+      deletionRequestedAt: null,
       createdAt: '2026-10-14T10:00:00.000Z',
     };
     expect(getSalonsDataSchema().safeParse([item]).success).toBe(true);
