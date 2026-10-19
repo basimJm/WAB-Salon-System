@@ -142,3 +142,15 @@
   - [ ] Unit-test run: batch 3
 - Loops: 1/1 — batch-3 host-test run (41 tests, 7 modules, exit 0) found: the calendar helpers dropped when the flow view model was split (restored as `CalendarCoordinator`), `AppDestructiveButton` has no `loading` parameter (now `AppButton(kind = Destructive)`), a redundant `else` in `DayOfWeek.toSalonDay()` (-Werror), deprecated `LocalClipboardManager` (suppressed with reason), duplicate private fakes/helpers across the bookings test files, and the flow test file over 300 lines (split into fakes + harness + two classes).
 - Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — flow and details talk to the contract via `CustomerOperations`/`pathWith`; rules §4 (max 5 companions, 15-min slots, 90 days, staff must cover all services, no overlap for a specific staff, PENDING cancel any time, policy snapshot drives the money outcome) live in the domain with tests; draft payment fallback keyed on `ErrorCode.PAYMENT_OPTION_NOT_ALLOWED`; AR+EN parity; no literals in composables; policy suite ok. NON-BLOCKING: salon details carry no payment options/policy (draft fallback); services lack `brideOnly`; `actions` is the merchant view.
+
+### CUS-048 — Booking success S17: reference number (copyable), View booking → S15, Back to Home
+- Branch: `feat/cus-048-booking-success`
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 4)
+- Acceptance criteria (PRD S17; Design Script S17; no API operation):
+  - [x] `Screen.BookingSuccess(bookingId, referenceNumber)` route; success icon + message, reference card with Copy (clipboard + success toast), View booking → `Screen.BookingDetails` replacing S17, Back to Home clears to `Graph.Home`
+  - [x] No "add to calendar" (PRD); AR/EN strings; analytics screen + three actions
+  - [x] Unit test: state from the route, copy / view / home side effects and action names
+- Tests: `BookingSuccessViewModelTest` (2) — run with the batch-4 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: nothing navigates into S17 yet: CUS-047 (verification + payment, BLOCKED on PAY-011) is the producer of the booking id + reference. Clipboard uses the deprecated `LocalClipboardManager` (suppressed with reason, same as S15).

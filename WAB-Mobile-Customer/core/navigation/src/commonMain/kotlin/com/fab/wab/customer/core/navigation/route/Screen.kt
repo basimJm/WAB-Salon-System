@@ -62,6 +62,10 @@ sealed interface Screen {
     @Serializable
     data class BookingVerify(val draftId: String) : Screen
 
+    /** S17 booking success: the created booking's id and copyable reference number. */
+    @Serializable
+    data class BookingSuccess(val bookingId: String, val referenceNumber: String) : Screen
+
     /** S18 rating flow of a completed booking. */
     @Serializable
     data class RateBooking(val bookingId: String) : Screen
