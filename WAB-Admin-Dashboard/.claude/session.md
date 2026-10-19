@@ -14,15 +14,6 @@
 
 ## Last blocks
 
-### ADM-072 — customer extras
-
-- Branch: `feat/adm-072-customer-extras`
-- Status: DONE
-- Acceptance criteria: customer page: edit profile, send one push, delete now (skips the 30-day grace), reviews written and notifications received tabs (paginated); every write needs a reason
-- Tests: tests/customerExtras.test.tsx (10); full suite + gate PASS
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
-
 ### ADM-073 — salon list columns and insights
 
 - Branch: `feat/adm-073-salon-insights`
@@ -40,3 +31,12 @@
 - Tests: tests/hosting.test.ts (13); full suite + gate PASS; browser check: built dev-release served with the generated headers, login and 9 screens walk with 0 CSP violations after allowing data: fonts (a real defect the check found), fonts 6 loaded 0 errors
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
+
+### ADM-084 — real data by default and placeholder base URLs
+
+- Branch: `feat/adm-084-remote-default`
+- Status: DONE
+- Acceptance criteria: dev-debug is the only variant with the mock by default; dev-release, prod-debug, prod-release use the real API (the mock code is no longer shipped in dev-release); committed placeholder base URLs in .env.dev and .env.prod (public values, guarded by tests/envFiles.test.ts) for the owner to replace; the design gallery stays in all dev builds
+- Tests: tests/config.test.ts, tests/envFiles.test.ts (5), tests/about-ribbon.test.tsx updated; full suite + gate PASS
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: root rule 'never commit .env*' relaxed by the owner's request for placeholder URLs; browser check of this change done together with the real-server QA that follows.

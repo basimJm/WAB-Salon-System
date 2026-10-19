@@ -1,5 +1,6 @@
 import {
   BUILD_VARIANTS,
+  MOCK_VARIANT,
   MODE_ALIASES,
   RELEASE_TYPE,
   VARIANT_SEPARATOR,
@@ -12,7 +13,7 @@ export interface BuildVariant {
   readonly appEnv: AppEnv;
   /** debug = readable bundle + source maps + verbose logs; release = minified, silent. */
   readonly debug: boolean;
-  /** Mock data source code is shipped only in dev builds (INTEGRATION.md §4). */
+  /** Mock data source code is shipped only in the dev debug build; every other build calls the real API. */
   readonly allowMock: boolean;
 }
 
@@ -22,5 +23,5 @@ export function resolveVariant(mode: string): BuildVariant {
     throw new Error(`Unknown build mode "${mode}". Use one of: ${BUILD_VARIANTS.join(', ')}`);
   }
   const [env, type] = name.split(VARIANT_SEPARATOR) as [AppEnv, string];
-  return { name, appEnv: env, debug: type !== RELEASE_TYPE, allowMock: env === 'dev' };
+  return { name, appEnv: env, debug: type !== RELEASE_TYPE, allowMock: name === MOCK_VARIANT };
 }

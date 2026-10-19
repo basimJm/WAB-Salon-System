@@ -230,6 +230,7 @@ Integration and release tasks for the admin panel (`INTEGRATION.md` §6).
 | ADM-081 | RTL, accessibility and performance pass over all pages: keyboard paths, contrast in both themes, bundle budget per route chunk, 2-second load on a 30-day range with mock latency | `feat/adm-081-qa-pass` | ADM-080 | — | DONE | REL-01; budgets recorded in `scripts/budget.json`. |
 | ADM-082 | Error tracking and source-map upload for release builds | `feat/adm-082-error-tracking` | ADM-005 | SRV-115 | BLOCKED | Tool selection (open item #4) and DSN — **user input**. |
 | ADM-083 | Prod go-live checklist for the admin panel (env values, domain, CSP, rollback, smoke tests) | `feat/adm-083-go-live` | ADM-081, ADM-005, ADM-006, ADM-079 | — | PENDING | Hosting, domain and the pending tasks above (REL-03). |
+| ADM-084 | Real data by default: only dev-debug uses the mock; dev-release, prod-debug and prod-release call the API through placeholder base URLs (`.env.dev`, `.env.prod`) the owner replaces | `feat/adm-084-remote-default` | ADM-081 | — | DONE | Owner request 2026-10-19. |
 
 ---
 

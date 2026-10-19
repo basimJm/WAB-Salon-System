@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   DATA_SOURCES,
   DEFAULT_DATA_SOURCE,
+  DEV_DEBUG_DATA_SOURCE,
   ENV_KEYS,
   HTTPS_PROTOCOL,
   type DataSource,
@@ -75,7 +76,8 @@ export function parsePublicEnv(
     throw new ConfigError([...new Set(parsed.error.issues.map((i) => String(i.path[0])))]);
   }
   const v = parsed.data;
-  const dataSource = v[ENV_KEYS.dataSource] ?? DEFAULT_DATA_SOURCE[variant.appEnv];
+  const dataSource =
+    v[ENV_KEYS.dataSource] ?? (variant.allowMock ? DEV_DEBUG_DATA_SOURCE : DEFAULT_DATA_SOURCE);
   const apiBaseUrl = v[ENV_KEYS.apiBaseUrl] ?? '';
   const socketUrl = v[ENV_KEYS.socketUrl] ?? '';
   const bad = [

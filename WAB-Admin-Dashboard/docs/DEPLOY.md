@@ -8,14 +8,14 @@ The panel is a static site (`dist/<variant>/`). The host must serve the files, s
 |---|---|---|
 | `VITE_API_BASE_URL` | build | API base URL, `https://…` (required for prod) |
 | `VITE_SOCKET_URL` | build | Socket.IO origin, `https://…` (required for prod) |
-| `VITE_DATA_SOURCE` | build | `remote` (prod, default) or `mock` (dev builds only) |
+| `VITE_DATA_SOURCE` | build | `remote` (default everywhere except dev-debug) or `mock` (dev-debug only) |
 | `CSP_CONNECT_EXTRA` | build machine | comma list of extra `https://` origins the browser may call, e.g. the storage host presigned uploads go to |
 
 ## Netlify (config is committed: `netlify.toml`)
 
 1. New site from Git, repository `WAB-Salon-System`, **Base directory** `WAB-Admin-Dashboard`. The build command and publish folder come from `netlify.toml`.
 2. Site settings → Environment variables: `VITE_API_BASE_URL`, `VITE_SOCKET_URL` (and `CSP_CONNECT_EXTRA` if needed) for the production context.
-3. Production branch: `main` (builds `prod-release`). Deploy previews and branch deploys build the **dev** variant with the **mock data source**, so they work before any API exists.
+3. Production branch: `main` (builds `prod-release`). Deploy previews and branch deploys build `dev-release`, which calls the **dev API**. The committed placeholders `.env.dev` / `.env.prod` hold the base URLs (`https://api-dev.wab.example`, `https://api.wab.example`): replace them, or set the environment variables in the site settings (they win). Only `npm run dev` (dev-debug) uses the built-in mock data.
 4. Add the custom domain in Domain management; HTTPS is automatic. The headers include HSTS.
 
 ## Vercel
