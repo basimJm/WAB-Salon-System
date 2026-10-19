@@ -46,7 +46,7 @@ fun BookingFlowScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Mo
     AppScreen(
         modifier = modifier,
         topBar = { AppTopBar(title = stringResource(Res.string.booking_title), onBack = { onAction(UiAction.OnBack) }) },
-        bottomBar = { if (state.salon != null) StepBottomBar(state, onAction) },
+        bottomBar = { if (state.salon != null && state.step != BookingStep.COMPANIONS) StepBottomBar(state, onAction) },
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             AppStepIndicator(
@@ -64,6 +64,8 @@ fun BookingFlowScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Mo
                     BookingStep.PERSON -> PersonStep(state, onAction)
                     BookingStep.SERVICES -> ServicesStep(state, onAction)
                     BookingStep.SLOT -> SlotStep(state, onAction)
+                    BookingStep.STAFF -> StaffStep(state, onAction)
+                    BookingStep.COMPANIONS -> CompanionsStep(state, onAction)
                     else -> AppEmptyState(title = stringResource(Res.string.booking_step_coming))
                 }
             }
@@ -105,6 +107,7 @@ private fun StepBottomBar(state: UiState, onAction: (UiAction) -> Unit) {
             BookingStep.PERSON -> state.canContinuePerson
             BookingStep.SERVICES -> state.canContinueServices
             BookingStep.SLOT -> state.canContinueSlot
+            BookingStep.STAFF -> state.canContinueStaff
             else -> false
         }
         AppPrimaryButton(

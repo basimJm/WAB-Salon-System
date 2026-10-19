@@ -12,6 +12,9 @@ import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import com.fab.wab.customer.feature.booking.domain.model.BookingFlowDefaults
 import com.fab.wab.customer.core.common.BusinessTime
 import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
+import com.fab.wab.customer.feature.booking.domain.model.StaffChoice
+import com.fab.wab.customer.feature.booking.domain.model.hasStaffOverlap
+import com.fab.wab.customer.feature.booking.domain.model.selectionTotalsOf
 import com.fab.wab.customer.feature.booking.domain.model.calendarDaysOf
 import com.fab.wab.customer.feature.booking.domain.usecase.LoadAvailabilityUseCase
 import com.fab.wab.customer.feature.booking.presentation.analytics.BookingAnalytics
@@ -65,6 +68,11 @@ class BookingFlowViewModel(
             is UiAction.OnMonthChange -> changeMonth(event.delta)
             is UiAction.OnDateSelect -> selectDate(event.date)
             is UiAction.OnSlotSelect -> selectSlot(event.start)
+            UiAction.OnAnyStaffSelect -> selectAnyStaff()
+            is UiAction.OnStaffSelect -> selectStaff(event.staffId)
+            UiAction.OnJustMe -> go(BookingStep.SUMMARY)
+            UiAction.OnAddCompanion -> addCompanion()
+            is UiAction.OnRemovePerson -> removePerson(event.index)
             UiAction.OnContinue -> next()
             UiAction.OnBack -> back()
         }
@@ -109,14 +117,76 @@ class BookingFlowViewModel(
             BookingStep.PERSON -> if (state.canContinuePerson) go(BookingStep.SERVICES) else updateState { copy(nameError = true) }
             BookingStep.SERVICES -> if (state.canContinueServices) go(BookingStep.SLOT)
             BookingStep.SLOT -> if (state.canContinueSlot) go(BookingStep.STAFF)
+            BookingStep.STAFF -> if (state.canContinueStaff) finishPerson()
             else -> Unit
         }
     }
 
-    /** Back preserves selections (PRD S16); from the first step the flow exits. */
+    /** Back preserves selections (PRD S16); from the first step the flow exits; a companion's Back leads to the companions list. */
     private fun back() {
-        val previous = BookingStep.entries.getOrNull(uiState.value.step.ordinal - 1)
-        if (previous == null) emitSideEffect(SideEffect.Exit) else go(previous)
+        val state = uiState.value
+        when {
+            state.isCompanionFlow && state.step == BookingStep.PERSON -> dropUnfinishedCompanion()
+            state.step == BookingStep.COMPANIONS -> {
+                updateState { copy(currentPerson = 0) }
+                go(BookingStep.STAFF)
+            }
+            state.step == BookingStep.SUMMARY -> go(BookingStep.COMPANIONS)
+            else -> {
+                val previous = BookingStep.entries.getOrNull(state.step.ordinal - 1)
+                if (previous == null) emitSideEffect(SideEffect.Exit) else go(previous)
+            }
+        }
+    }
+
+    private fun selectAnyStaff() {
+        updateState { copy(staffOverlapError = false) }
+        updatePerson { copy(staff = StaffChoice.Any) }
+    }
+
+    /** Step 3 (PRD S16): a specific staff member must be eligible for the slot and free of overlaps inside the draft. */
+    private fun selectStaff(staffId: String) {
+        val state = uiState.value
+        if (staffId !in state.eligibleStaffIds) return
+        val member = state.salon?.staff?.firstOrNull { it.id == staffId } ?: return
+        val start = state.person.start ?: return
+        val duration = state.availability?.durationMinutes ?: state.totals.durationMinutes
+        val overlap = hasStaffOverlap(state.persons, state.currentPerson, staffId, start, duration) { other ->
+            selectionTotalsOf(state.salon.services, other.serviceIds).durationMinutes
+        }
+        if (overlap) {
+            updateState { copy(staffOverlapError = true) }
+            return
+        }
+        updateState { copy(staffOverlapError = false) }
+        updatePerson { copy(staff = StaffChoice.Specific(member.id, member.firstName)) }
+    }
+
+    /** After step 3: the main person goes to the companions prompt; a companion returns to the companions list. */
+    private fun finishPerson() {
+        if (uiState.value.isCompanionFlow) updateState { copy(currentPerson = 0) }
+        go(BookingStep.COMPANIONS)
+    }
+
+    /** Step 4 (PRD S16): up to 5 companions, each repeating steps 0–3; same gender as the salon by construction. */
+    private fun addCompanion() {
+        if (!uiState.value.canAddCompanion) return
+        updateState { copy(persons = persons + DraftPerson(), currentPerson = persons.size, availability = null, selectedDate = null) }
+        go(BookingStep.PERSON)
+    }
+
+    private fun removePerson(index: Int) {
+        if (index == 0 || index !in uiState.value.persons.indices) return
+        updateState { copy(persons = persons.filterIndexed { i, _ -> i != index }, currentPerson = 0) }
+    }
+
+    private fun dropUnfinishedCompanion() {
+        val state = uiState.value
+        val unfinished = state.person.staff == null
+        updateState {
+            copy(persons = if (unfinished) persons.filterIndexed { i, _ -> i != state.currentPerson } else persons, currentPerson = 0)
+        }
+        go(BookingStep.COMPANIONS)
     }
 
     private fun go(step: BookingStep) {

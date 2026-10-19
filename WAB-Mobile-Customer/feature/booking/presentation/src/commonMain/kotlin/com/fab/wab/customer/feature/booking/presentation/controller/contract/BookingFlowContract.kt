@@ -2,6 +2,7 @@ package com.fab.wab.customer.feature.booking.presentation.controller.contract
 
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.session.Gender
+import com.fab.wab.customer.feature.booking.domain.model.BookingFlowDefaults
 import com.fab.wab.customer.feature.booking.domain.model.CalendarDay
 import com.fab.wab.customer.feature.booking.domain.model.DayAvailability
 import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
@@ -29,8 +30,16 @@ sealed interface BookingFlowContract {
         val slotsLoading: Boolean = false,
         val slotsError: String? = null,
         val availability: DayAvailability? = null,
+        val staffOverlapError: Boolean = false,
     ) {
         val canContinueSlot: Boolean get() = person.start != null
+        val canContinueStaff: Boolean get() = person.staff != null
+        /** Staff eligible for the chosen slot (server-computed per person, bride rules included). */
+        val eligibleStaffIds: Set<String>
+            get() = availability?.slots?.firstOrNull { it.start == person.start }?.eligibleStaffIds?.toSet().orEmpty()
+        val companionsCount: Int get() = persons.size - 1
+        val canAddCompanion: Boolean get() = companionsCount < BookingFlowDefaults.MAX_COMPANIONS
+        val isCompanionFlow: Boolean get() = currentPerson > 0
         val person: DraftPerson get() = persons[currentPerson]
         val isWomenSalon: Boolean get() = salon?.gender == Gender.FEMALE
         val canContinuePerson: Boolean get() = person.name.isNotBlank()
@@ -46,6 +55,11 @@ sealed interface BookingFlowContract {
         data class OnMonthChange(val delta: Int) : UiAction
         data class OnDateSelect(val date: LocalDate) : UiAction
         data class OnSlotSelect(val start: String) : UiAction
+        data object OnAnyStaffSelect : UiAction
+        data class OnStaffSelect(val staffId: String) : UiAction
+        data object OnJustMe : UiAction
+        data object OnAddCompanion : UiAction
+        data class OnRemovePerson(val index: Int) : UiAction
         data object OnContinue : UiAction
         data object OnBack : UiAction
     }

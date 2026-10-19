@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 = CUS-042 ✓ code, CUS-043 ✓ code, CUS-044 ✓ code, CUS-045, CUS-046 (unit tests after the fifth, then one PR).
+- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 = CUS-042 ✓ code, CUS-043 ✓ code, CUS-044 ✓ code, CUS-045 ✓ code, CUS-046 (unit tests after the fifth, then one PR).
 
 ### CUS-037 — Staff sheet S07a + Service sheet S07b
 - Branch: `feat/cus-037-staff-service-sheets` (from `origin/customer`, batch 2 start)
@@ -117,3 +117,16 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: the server returns `eligibleStaffIds` per slot; step 3 (CUS-045) uses them to enable / disable staff.
+
+### CUS-045 — Booking flow steps 3–4: staff selection (eligible vs disabled, "Any available"), companions up to 5, repeat per companion, overlap rule, remove persons
+- Branch: `feat/cus-045-booking-staff-companions` (from `feat/cus-044-booking-slots`)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 3)
+- Acceptance criteria (PRD S16 steps 3–4, Design Script S16):
+  - [x] Step 3: all salon staff listed; only the chosen slot's `eligibleStaffIds` selectable (others disabled with a hint); "Any available staff" on top; `hasStaffOverlap` (pure, tested) blocks the same staff member at an overlapping time inside the draft with a message
+  - [x] Step 4: "Continue (just me)" → summary; "Add companion" (≤ 5, counter, limit message) appends a person and repeats steps 0–3 for it (the availability request carries the earlier persons' picks as `others`); the companion's Back on step 0 drops an unfinished companion; persons list with bride badge and remove (main cannot be removed); Back from the list returns to the main person's staff step
+  - [x] `StaffStep`, `CompanionsStep`; AR + EN strings
+  - [x] Tests: `StaffRulesTest` (1), `BookingFlowViewModelTest` (+3)
+  - [ ] Unit-test run: batch 3
+- Loops: 0/1
+- Review: PENDING
+- Notes: companions are the salon's gender by construction (the flow is per salon); the server re-validates overlaps and eligibility at draft time.

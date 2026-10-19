@@ -15,6 +15,9 @@ import com.fab.wab.customer.core.domain.salon.ReviewsPreview
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.salon.SalonService
 import com.fab.wab.customer.core.domain.salon.StaffMember
+import com.fab.wab.customer.core.domain.salon.StaffPreview
+import com.fab.wab.customer.core.domain.salon.StaffStatus
+import com.fab.wab.customer.feature.booking.domain.model.StaffChoice
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionState
@@ -43,7 +46,8 @@ private fun service(id: String, price: String, minutes: Int) = SalonService(id, 
 private fun salon(gender: Gender) = SalonDetails(
     id = "s1", name = "Glow", gender = gender, coverUrl = null, profileImageUrl = null, description = null, locationText = null,
     location = null, phone = null, whatsapp = null, rating = RatingSummary(4f, 1), isOpenNow = true, todayHours = null, closedReason = null,
-    weeklySchedule = emptyList(), upcomingClosures = emptyList(), staff = emptyList(),
+    weeklySchedule = emptyList(), upcomingClosures = emptyList(),
+    staff = listOf(StaffPreview("m1", "Omar", null, StaffStatus.ON_DUTY), StaffPreview("m2", "Ali", null, StaffStatus.ON_DUTY)),
     services = listOf(service("a", "10", 30), service("b", "5.5", 15)), gallery = emptyList(), isFavorite = false,
     reviews = ReviewsPreview(RatingSummary(4f, 1), emptyList()),
 )
@@ -174,5 +178,83 @@ class BookingFlowViewModelTest {
         assertEquals(BookingStep.SLOT, vm.state.value.step)
         assertEquals(LocalDate.parse("2026-10-20"), vm.state.value.selectedDate)
         assertEquals(1, availability.calls.size)
+    }
+
+    private fun BookingFlowViewModel.reachStaffStep() {
+        onEvent(UiAction.OnContinue)
+        onEvent(UiAction.OnServiceToggle("a"))
+        onEvent(UiAction.OnContinue)
+        onEvent(UiAction.OnDateSelect(LocalDate.parse("2026-10-20")))
+        onEvent(UiAction.OnSlotSelect("2026-10-20T07:00:00Z"))
+        onEvent(UiAction.OnContinue)
+    }
+
+    @Test
+    fun staffStepAllowsOnlyEligibleMembersOrAnyThenCompanions() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        vm.reachStaffStep()
+        assertEquals(BookingStep.STAFF, vm.state.value.step)
+        assertEquals(setOf("m1"), vm.state.value.eligibleStaffIds)
+        vm.onEvent(UiAction.OnStaffSelect("m2"))
+        assertFalse(vm.state.value.canContinueStaff)
+        vm.onEvent(UiAction.OnStaffSelect("m1"))
+        assertEquals(StaffChoice.Specific("m1", "Omar"), vm.state.value.person.staff)
+        vm.onEvent(UiAction.OnContinue)
+        assertEquals(BookingStep.COMPANIONS, vm.state.value.step)
+        vm.onEvent(UiAction.OnJustMe)
+        assertEquals(BookingStep.SUMMARY, vm.state.value.step)
+    }
+
+    @Test
+    fun companionRepeatsTheStepsOverlapIsBlockedAndRemovalWorks() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        vm.reachStaffStep()
+        vm.onEvent(UiAction.OnStaffSelect("m1"))
+        vm.onEvent(UiAction.OnContinue)
+        vm.onEvent(UiAction.OnAddCompanion)
+        assertEquals(BookingStep.PERSON, vm.state.value.step)
+        assertEquals(1, vm.state.value.currentPerson)
+        vm.onEvent(UiAction.OnNameChange("Lina"))
+        vm.reachStaffStep()
+        assertEquals(2, availability.calls.size)
+        assertEquals(1, availability.calls.last().second.size)
+        vm.onEvent(UiAction.OnStaffSelect("m1"))
+        assertTrue(vm.state.value.staffOverlapError)
+        assertFalse(vm.state.value.canContinueStaff)
+        vm.onEvent(UiAction.OnAnyStaffSelect)
+        assertFalse(vm.state.value.staffOverlapError)
+        vm.onEvent(UiAction.OnContinue)
+        assertEquals(BookingStep.COMPANIONS, vm.state.value.step)
+        assertEquals(0, vm.state.value.currentPerson)
+        assertEquals(1, vm.state.value.companionsCount)
+        vm.onEvent(UiAction.OnRemovePerson(0))
+        assertEquals(2, vm.state.value.persons.size)
+        vm.onEvent(UiAction.OnRemovePerson(1))
+        assertEquals(1, vm.state.value.persons.size)
+    }
+
+    @Test
+    fun companionLimitAndUnfinishedCompanionIsDroppedOnBack() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        vm.reachStaffStep()
+        vm.onEvent(UiAction.OnAnyStaffSelect)
+        vm.onEvent(UiAction.OnContinue)
+        repeat(5) {
+            vm.onEvent(UiAction.OnAddCompanion)
+            vm.onEvent(UiAction.OnNameChange("C$it"))
+            vm.reachStaffStep()
+            vm.onEvent(UiAction.OnAnyStaffSelect)
+            vm.onEvent(UiAction.OnContinue)
+        }
+        assertEquals(5, vm.state.value.companionsCount)
+        assertFalse(vm.state.value.canAddCompanion)
+        vm.onEvent(UiAction.OnAddCompanion)
+        assertEquals(6, vm.state.value.persons.size)
+        vm.onEvent(UiAction.OnRemovePerson(5))
+        vm.onEvent(UiAction.OnAddCompanion)
+        assertEquals(BookingStep.PERSON, vm.state.value.step)
+        vm.onEvent(UiAction.OnBack)
+        assertEquals(BookingStep.COMPANIONS, vm.state.value.step)
+        assertEquals(5, vm.state.value.persons.size)
     }
 }
