@@ -45,6 +45,8 @@ import com.fab.wab.customer.designsystem.resources.error_code_upload_invalid
 import com.fab.wab.customer.designsystem.resources.error_code_upload_too_large
 import com.fab.wab.customer.designsystem.resources.error_code_maintenance
 import com.fab.wab.customer.designsystem.resources.error_code_update_required
+import com.fab.wab.customer.designsystem.resources.error_code_current_password_invalid
+import com.fab.wab.customer.designsystem.resources.error_code_email_already_used
 import com.fab.wab.customer.designsystem.resources.error_code_unknown
 import com.fab.wab.customer.designsystem.resources.state_error_message
 import com.fab.wab.customer.designsystem.resources.state_offline_message
@@ -95,6 +97,8 @@ internal val ERROR_CODE_STRINGS: Map<ErrorCode, StringResource> = mapOf(
     ErrorCode.UPLOAD_TOO_LARGE to Res.string.error_code_upload_too_large,
     ErrorCode.MAINTENANCE to Res.string.error_code_maintenance,
     ErrorCode.UPDATE_REQUIRED to Res.string.error_code_update_required,
+    ErrorCode.CURRENT_PASSWORD_INVALID to Res.string.error_code_current_password_invalid,
+    ErrorCode.EMAIL_ALREADY_USED to Res.string.error_code_email_already_used,
     ErrorCode.UNKNOWN to Res.string.error_code_unknown,
 )
 

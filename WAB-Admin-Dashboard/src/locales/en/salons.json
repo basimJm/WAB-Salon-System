@@ -52,6 +52,55 @@
       "bankName": "Enter the bank name",
       "accountHolderName": "Enter the account holder",
       "iban": "Enter a valid IBAN"
+    },
+    "recommended": "Recommended",
+    "recommendedYes": "Recommended",
+    "bookings30d": "Bookings (30 days)",
+    "deletionAsked": "Deletion requested",
+    "yes": "Yes",
+    "no": "No",
+    "insights": "Insights",
+    "kpi": {
+      "rating": "Rating",
+      "bookings": "Bookings",
+      "completion": "Completed (30 days)",
+      "services": "Active services",
+      "staff": "Active staff",
+      "byStatus30d": "Bookings by status (30 days)",
+      "trend": "Bookings per day",
+      "from": "From",
+      "to": "To",
+      "rangeError": "The last day cannot be before the first."
+    },
+    "activity": {
+      "title": "Admin activity",
+      "action": "Action",
+      "reason": "Reason",
+      "empty": "No admin changes yet.",
+      "actions": {
+        "SALON_PROFILE_EDIT": "Profile edited",
+        "SALON_GALLERY_ADD": "Picture added",
+        "SALON_GALLERY_REMOVE": "Picture removed",
+        "SALON_GALLERY_REORDER": "Pictures reordered",
+        "SALON_HOURS_EDIT": "Working hours edited",
+        "SALON_CLOSURE_ADD": "Closure added",
+        "SALON_CLOSURE_UPDATE": "Closure changed",
+        "SALON_CLOSURE_REMOVE": "Closure removed",
+        "SALON_SERVICE_ADD": "Service added",
+        "SALON_SERVICE_UPDATE": "Service changed",
+        "SALON_STAFF_EDIT": "Staff profile edited",
+        "SALON_POLICY_EDIT": "Policies edited"
+      }
+    },
+    "deletion": {
+      "approve": "Approve deletion",
+      "reject": "Reject deletion",
+      "approveTitle": "Approve the deletion of {{name}}?",
+      "rejectTitle": "Reject the deletion of {{name}}?",
+      "approveText": "The salon goes offline and waits to be removed. This needs no open booking.",
+      "rejectText": "The request is cleared and the owner is told.",
+      "done": "Decision saved",
+      "failed": "The decision could not be saved. If bookings are still open, handle them first."
     }
   }
 }

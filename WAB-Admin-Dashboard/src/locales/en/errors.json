@@ -52,6 +52,8 @@
       "SCHEDULE_CONFLICT": "The change conflicts with upcoming bookings. Resolve them first.",
       "OWNER_REQUIRED": "Only the salon owner can do this.",
       "LAST_OWNER": "The last owner of a salon cannot be removed.",
+      "CURRENT_PASSWORD_INVALID": "The current password is not correct.",
+      "EMAIL_ALREADY_USED": "This email address is already used by another account.",
       "UPLOAD_INVALID": "The uploaded file is not valid.",
       "UPLOAD_TOO_LARGE": "The uploaded file is too large.",
       "MAINTENANCE": "The service is under maintenance. Please try again later.",

@@ -3,6 +3,8 @@ package com.fab.wab.customer.feature.auth.domain.usecase
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.feature.auth.domain.model.InstallationLink
+import com.fab.wab.customer.feature.auth.domain.model.OtpVerified
+import com.fab.wab.customer.core.domain.session.UserProfile
 import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
 import com.fab.wab.customer.feature.auth.domain.repository.InstallationInfoProvider
 import com.fab.wab.customer.feature.auth.domain.repository.InstallationsRepository
@@ -46,5 +48,14 @@ class SetPushEnabledUseCase(
         sessionStore.setPushEnabled(enabled)
         val signedIn = sessionStore.state.first().isSignedIn
         return if (signedIn) installations.setPushEnabled(enabled) else AppResult.Success(Unit)
+    }
+}
+
+/** PRD S22: the verified new number replaces the account's phone; the local profile follows the server answer. */
+class ChangePhoneUseCase(private val repository: AuthRepository, private val sessionStore: SessionStore) {
+    suspend operator fun invoke(proof: OtpVerified): AppResult<UserProfile> {
+        val result = repository.changePhone(proof.phone, proof.idToken)
+        if (result is AppResult.Success) sessionStore.updateUser(result.data)
+        return result
     }
 }

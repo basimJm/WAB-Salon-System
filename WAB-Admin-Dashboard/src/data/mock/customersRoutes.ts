@@ -111,5 +111,102 @@ export function customersRoutes(): readonly MockRoute[] {
       }),
       ({ params }) => set(params['id'], 'ACTIVE'),
     ),
+    mockRoute(
+      defineEndpoint(O.patchCustomersById, {
+        data: dto.patchCustomersByIdDataSchema,
+        body: dto.patchCustomersByIdBodySchema,
+      }),
+      ({ params, body }) => {
+        const r = find(params['id']);
+        if (!r) throw new Error('no customer');
+        const b = body as { firstName?: string; lastName?: string; gender?: 'MALE' | 'FEMALE' };
+        const [first = '', ...rest] = r.name.split(' ');
+        r.name = `${b.firstName ?? first} ${b.lastName ?? rest.join(' ')}`.trim();
+        if (b.gender) r.gender = b.gender;
+        return {
+          data: {
+            id: r.id,
+            firstName: b.firstName ?? first,
+            lastName: b.lastName ?? rest.join(' '),
+            email: 'customer@example.test', // hardcoded-ok: mock data
+            gender: r.gender,
+            cityId: r.cityId,
+            areaId: '',
+            language: 'ar' as const,
+          },
+        };
+      },
+    ),
+    mockRoute(
+      defineEndpoint(O.getCustomersByIdReviews, {
+        data: dto.getCustomersByIdReviewsDataSchema,
+        query: dto.getCustomersByIdReviewsQuerySchema,
+      }),
+      ({ params }) => {
+        const r = find(params['id']);
+        return {
+          data: [
+            {
+              id: '64r000000000000000000001',
+              target: 'SALON' as const,
+              status: 'APPROVED' as const,
+              rating: 5,
+              comment: 'Lovely service',
+              salon: { id: '64f000000000000000000001', name: 'Noor Salon' },
+              staff: null,
+              author: { id: r?.id ?? '', firstName: 'Dana', lastName: 'Khoury' },
+              authorOtherReviews: 1,
+              createdAt: '2026-10-05T08:00:00.000Z',
+              moderation: null,
+            },
+          ],
+          meta: { page: 1, pageSize: 25, total: 1, totalPages: 1 },
+          empty: [],
+        };
+      },
+    ),
+    mockRoute(
+      defineEndpoint(O.getCustomersByIdNotifications, {
+        data: dto.getCustomersByIdNotificationsDataSchema,
+        query: dto.getCustomersByIdNotificationsQuerySchema,
+      }),
+      () => ({
+        data: [
+          {
+            id: '64n000000000000000000001',
+            event: 'BOOKING_APPROVED',
+            type: 'BOOKING' as const,
+            title: { ar: 'تمت الموافقة', en: 'Booking approved' },
+            body: { ar: 'تمت الموافقة على حجزك', en: 'Your booking was approved' },
+            readAt: null,
+            pushSent: true,
+            pushResult: null,
+            createdAt: '2026-10-06T08:00:00.000Z',
+          },
+        ],
+        meta: { page: 1, pageSize: 25, total: 1, totalPages: 1 },
+        empty: [],
+      }),
+    ),
+    mockRoute(
+      defineEndpoint(O.postCustomersByIdForceDelete, {
+        data: dto.postCustomersByIdForceDeleteDataSchema,
+        body: dto.postCustomersByIdForceDeleteBodySchema,
+      }),
+      ({ params }) => set(params['id'], 'DELETED'),
+    ),
+    mockRoute(
+      defineEndpoint(O.postCustomersByIdPush, {
+        data: dto.postCustomersByIdPushDataSchema,
+        body: dto.postCustomersByIdPushBodySchema,
+      }),
+      () => ({
+        data: {
+          campaignId: '64q000000000000000000001',
+          status: 'SENDING' as const,
+          scheduledAt: '2026-10-19T08:00:00.000Z',
+        },
+      }),
+    ),
   ];
 }

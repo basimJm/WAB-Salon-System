@@ -13,6 +13,7 @@ import { useRealtimeConnection } from '../hooks/useRealtime';
 import { useShellCounters } from '../hooks/useShellCounters';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import { useBreadcrumbs } from '../controllers/useBreadcrumbs';
+import { useGlobalSearch } from '../hooks/useGlobalSearch';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
@@ -25,6 +26,7 @@ export function AppShell() {
   const current = useSession();
   const location = useLocation();
   const crumbs = useBreadcrumbs();
+  const search = useGlobalSearch();
   const docked = breakpoint === 'expanded';
   const [collapsed, setCollapsed] = useState(
     () => safeStorage.get(STORAGE_KEYS.sidebarCollapsed) === TRUE,
@@ -99,6 +101,7 @@ export function AppShell() {
           onMenu={onMenu}
           onLogout={onLogout}
           alertCount={counters.alerts}
+          search={search}
         />
         <main id="main" className="wab-content">
           <Breadcrumbs crumbs={crumbs} />

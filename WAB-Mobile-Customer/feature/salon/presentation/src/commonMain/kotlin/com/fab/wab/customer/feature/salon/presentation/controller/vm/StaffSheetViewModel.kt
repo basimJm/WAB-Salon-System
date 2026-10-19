@@ -31,7 +31,7 @@ class StaffSheetViewModel(
         load()
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnRetry -> load()
             UiAction.OnAllReviewsClick -> emitSideEffect(SideEffect.OpenReviews(salonId, memberId))

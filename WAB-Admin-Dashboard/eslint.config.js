@@ -31,6 +31,8 @@ export default tseslint.config(
       'playwright-report',
       'test-results',
       'design',
+      // Local real-server QA tooling (plain Node scripts, not part of the app).
+      'qa',
       'docs',
       'src/data/contract/generated',
     ],

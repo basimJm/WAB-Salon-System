@@ -18,3 +18,11 @@ export const MOCK_TOKEN = 'mock-access-token';
 export const MOCK_ACCESS_TTL_MS = 15 * 60 * 1000;
 export const MOCK_REFRESH_TTL_MS = 30 * 60 * 1000;
 export const MOCK_REFRESH_PREFIX = 'mock-refresh-';
+
+/** Admin profile limits (the server contract: `POST /profile/password`, `PATCH /profile`). */
+export const MIN_NEW_PASSWORD_LENGTH = 12;
+export const MAX_PASSWORD_LENGTH = 256;
+export const MAX_EMAIL_LENGTH = 254;
+export const MAX_ALERT_EMAILS = 10;
+export const EMAIL_CODE_PATTERN = /^[0-9]{4,10}$/;
+export const MOCK_EMAIL_CODE = '123456';

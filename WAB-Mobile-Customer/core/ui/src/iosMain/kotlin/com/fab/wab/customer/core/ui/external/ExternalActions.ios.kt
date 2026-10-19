@@ -28,6 +28,17 @@ class IosExternalActions : ExternalActions {
         root.presentViewController(controller, animated = true, completion = null)
     }
 
+    override fun openUrl(url: String) = open(url)
+
+    override fun email(address: String) = open(ExternalLinks.mailto(address))
+
+    /** [appId] is the merchant app's URL scheme (declared in `LSApplicationQueriesSchemes`). */
+    override fun openApp(appUrl: String, appId: String, fallbackUrl: String) {
+        val probe = appId.takeIf { it.isNotBlank() }?.let { NSURL.URLWithString("$it$SCHEME_SEPARATOR") }
+        val installed = probe != null && UIApplication.sharedApplication.canOpenURL(probe)
+        open(if (installed) appUrl else fallbackUrl)
+    }
+
     private fun open(url: String) {
         val nsUrl = NSURL.URLWithString(url) ?: return
         UIApplication.sharedApplication.openURL(nsUrl)

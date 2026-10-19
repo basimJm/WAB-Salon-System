@@ -1,7 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
+import { ROUTES } from '@/constants/routes';
 import { SALON_GENDERS, type SalonDetails, type SalonGender } from '@/domain/salons/salons';
 import { Button } from '../components/core/Button';
 import { ReasonDialog } from '../components/overlay/ReasonDialog';
@@ -13,6 +15,7 @@ type Open = 'offline' | 'online' | 'gender' | null;
 /** Header actions of a salon: offline/online (owner is notified) and change of audience (services switch off). */
 export function SalonActions({ salon }: { salon: SalonDetails }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const toast = useToast();
   const queryClient = useQueryClient();
   const { repositories } = useContainer();
@@ -43,6 +46,12 @@ export function SalonActions({ salon }: { salon: SalonDetails }) {
   };
   return (
     <>
+      <Button
+        variant="secondary"
+        onClick={() => void navigate(`${ROUTES.salons}/${salon.id}/edit`)}
+      >
+        {t('salonEdit.open')}
+      </Button>
       {salon.state === 'LIVE' ? (
         <Button variant="secondary" onClick={() => setOpen('offline')}>
           {t('salons.takeOffline')}

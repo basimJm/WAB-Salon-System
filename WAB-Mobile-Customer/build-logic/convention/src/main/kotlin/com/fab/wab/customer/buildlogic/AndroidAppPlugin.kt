@@ -98,6 +98,7 @@ class AndroidAppPlugin : Plugin<Project> {
                 add("implementation", project(":core:ui"))
                 add("implementation", project(":core:mvi"))
                 add("implementation", project(":core:firebase"))
+                add("implementation", project(":core:notification"))
                 add("implementation", libs.findLibrary("androidx-activity-compose").get())
                 add("implementation", libs.findBundle("koin-android").get())
                 add("implementation", libs.findBundle("lifecycle").get())
@@ -124,8 +125,16 @@ private fun ApplicationProductFlavor.environment(id: String, prefix: String, pro
     buildConfigField("String", "API_BASE_URL", quoted(baseUrl))
     val webBaseUrl = requireNotNull(property("${prefix}_WEB_BASE_URL")) { missing("${prefix}_WEB_BASE_URL") }
     buildConfigField("String", "WEB_BASE_URL", quoted(webBaseUrl))
+    manifestPlaceholders["DEEP_LINK_HOST"] = hostOf(webBaseUrl)
+    // Merchant app hand-off (CUS-056): optional until the merchant app and its store listing exist.
+    buildConfigField("String", "MERCHANT_REGISTER_URL", quoted(property("${prefix}_MERCHANT_REGISTER_URL").orEmpty()))
+    buildConfigField("String", "MERCHANT_STORE_URL", quoted(property("${prefix}_MERCHANT_STORE_URL").orEmpty()))
+    buildConfigField("String", "MERCHANT_APP_ID", quoted(property("${prefix}_MERCHANT_APP_ID").orEmpty()))
     val dataSource = requireNotNull(property("${prefix}_DATA_SOURCE")) { missing("${prefix}_DATA_SOURCE") }
     buildConfigField("String", "DATA_SOURCE", quoted(dataSource))
 }
+
+/** `https://dev.example.app/` → `dev.example.app` (App Links host of the manifest). */
+private fun hostOf(url: String): String = url.substringAfter("://").substringBefore('/').trim()
 
 private fun quoted(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""

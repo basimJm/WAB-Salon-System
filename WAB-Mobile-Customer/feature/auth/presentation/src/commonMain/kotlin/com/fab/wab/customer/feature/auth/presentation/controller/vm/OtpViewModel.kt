@@ -72,7 +72,7 @@ class OtpViewModel(
         }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnCodeChange -> updateState { copy(code = sanitizeOtp(event.value, otpLength), codeError = false) }
             UiAction.OnVerifyClick -> verify()

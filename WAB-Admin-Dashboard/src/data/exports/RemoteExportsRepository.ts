@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
 import * as dto from '@/data/contract/generated/dto';
@@ -5,16 +6,21 @@ import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { ExportsRepository } from '@/domain/exports/exports';
 
 const O = OPERATIONS;
+/** The server leaves `params` out of a job that has none, although the contract lists it as required. */
+const params = { params: z.record(z.string(), z.unknown()).default({}) };
+export const exportListSchema = () => z.array(dto.getExportsDataSchema().element.extend(params));
 const list = defineEndpoint(O.getExports, {
-  data: dto.getExportsDataSchema,
+  data: exportListSchema,
   query: dto.getExportsQuerySchema,
 });
-const request = defineEndpoint(
-  O.postExports,
-  { data: dto.postExportsDataSchema, body: dto.postExportsBodySchema },
-  { idempotent: true },
-);
-const get = defineEndpoint(O.getExportsById, { data: dto.getExportsByIdDataSchema });
+// No Idempotency-Key: the contract does not declare it and the server's CORS list refuses the header.
+const request = defineEndpoint(O.postExports, {
+  data: () => dto.postExportsDataSchema().extend(params),
+  body: dto.postExportsBodySchema,
+});
+const get = defineEndpoint(O.getExportsById, {
+  data: () => dto.getExportsByIdDataSchema().extend(params),
+});
 
 export class RemoteExportsRepository implements ExportsRepository {
   constructor(private readonly api: ApiClient) {}

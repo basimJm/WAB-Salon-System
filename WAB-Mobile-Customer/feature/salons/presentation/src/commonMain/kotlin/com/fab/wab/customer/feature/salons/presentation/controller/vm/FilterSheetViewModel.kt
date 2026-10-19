@@ -52,7 +52,7 @@ class FilterSheetViewModel(
         if (uiState.value.selectedServices.isNotEmpty()) refreshPriceBounds()
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnServiceToggle -> toggleService(event.service)
             UiAction.OnSeeMoreServices -> if (uiState.value.servicesHasMore) loadServices(uiState.value.servicesPage + 1)

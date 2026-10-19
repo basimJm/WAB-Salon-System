@@ -10,7 +10,10 @@ import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.core.realtime.RealtimeClient
+import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.realtime.RealtimeEvents
+import com.fab.wab.customer.core.realtime.RefreshReason
+import com.fab.wab.customer.core.realtime.refreshesFor
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import com.fab.wab.customer.feature.bookings.domain.repository.BookingsDefaults
 import com.fab.wab.customer.feature.bookings.domain.usecase.LoadBookingsUseCase
@@ -26,6 +29,8 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 class BookingsDependencies(
@@ -61,13 +66,13 @@ class BookingsViewModel(
             }
         }
         scope.launch {
-            deps.realtime.events.filter { it.name == RealtimeEvents.BOOKING_UPDATED }.collect {
-                if (uiState.value.signedIn == true && uiState.value.loaded) load(refresh = true)
-            }
+            // PRD §3.15: socket updates (de-duplicated by booking + state) and FCM messages refresh the list.
+            merge(deps.realtime.events.refreshesFor(RealtimeEvents.BOOKING_UPDATED), PushSignals.messages.map { RefreshReason.Push })
+                .collect { if (uiState.value.signedIn == true && uiState.value.loaded) load(refresh = true) }
         }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnLoginClick -> emitSideEffect(SideEffect.OpenLogin)
             UiAction.OnBookNowClick -> emitSideEffect(SideEffect.OpenHome)
