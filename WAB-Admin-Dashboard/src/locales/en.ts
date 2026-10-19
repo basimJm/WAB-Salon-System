@@ -26,6 +26,7 @@ import placements from './en/placements.json';
 import campaigns from './en/campaigns.json';
 import alerts from './en/alerts.json';
 import profile from './en/profile.json';
+import salonEdit from './en/salonEdit.json';
 import overview from './en/overview.json';
 import reports from './en/reports.json';
 import audit from './en/audit.json';
@@ -55,6 +56,7 @@ const en = {
   ...overview,
   ...alerts,
   ...profile,
+  ...salonEdit,
   ...campaigns,
   ...placements,
   ...subscriptions,

@@ -14,14 +14,6 @@
 
 ## Last blocks
 
-### T-096 — ADM-078 fixture tests
-
-- Branch: `feat/adm-078-fixture-tests`
-- Status: DONE
-- Tests: 3 new tests; gate green
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision).
-
 ### ADM-068 — admin profile
 
 - Branch: `feat/adm-068-admin-profile`
@@ -39,3 +31,12 @@
 - Tests: tests/search.test.tsx (4); full suite + gate PASS
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
+
+### ADM-070 — salon editing by admin
+
+- Branch: `feat/adm-070-salon-edit`
+- Status: DONE
+- Acceptance criteria: page /salons/:id/edit with six tabs (profile and location with cover/logo upload, gallery add/remove/reorder, weekly hours with affected-bookings preview and closures add/change/remove, services menu, staff profile, payment and cancellation policy); every write asks for a reason; AR+EN
+- Tests: tests/salonEdit.test.tsx (15); full suite + gate PASS
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: gallery adds images only (videos need a thumbnail and duration); service media keys not edited; area is not editable (server patch cannot clear it).

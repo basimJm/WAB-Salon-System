@@ -56,6 +56,7 @@ const DETAIL_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>>
     () => import('@/presentation/transactions/TransactionDetailsPage'),
   ),
   [`${ROUTES.salons}/:id`]: lazy(() => import('@/presentation/salons/SalonDetailsPage')),
+  [`${ROUTES.salons}/:id/edit`]: lazy(() => import('@/presentation/salonEdit/SalonEditPage')),
 };
 const ProfilePage = lazy(() => import('@/presentation/profile/ProfilePage'));
 const AboutPage = lazy(() => import('@/presentation/pages/AboutPage'));
