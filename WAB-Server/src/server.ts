@@ -54,6 +54,7 @@ import { createBullJobScheduler } from './jobs/bullmq';
 import type { JobHandler, JobScheduler } from './jobs/jobs';
 import { CAMPAIGN_JOB_NAME } from './constants/campaigns';
 import { createAdminCustomersService } from './domain/customers/adminCustomers.service';
+import { createAdminCustomerExtrasService } from './domain/customers/adminCustomerExtras.service';
 import { createAdminSettingsService } from './domain/adminSettings/adminSettings.service';
 import { createAdminProfileService } from './domain/adminProfile/adminProfile.service';
 import { createAdminSearchService } from './domain/adminSearch/adminSearch.service';
@@ -785,6 +786,14 @@ const buildServices = (
     notifier: producers.salonStateNotifier,
     logger,
   });
+  const adminReviewsService = createAdminReviewsService({
+    reviews: new ReviewsRepository(),
+    salons: new SalonsRepository(),
+    members: new MembersRepository(),
+    customers: new CustomersRepository(),
+    audit,
+    logger,
+  });
   return {
     otpGate,
     adminGuard,
@@ -949,13 +958,16 @@ const buildServices = (
       lifecycle: accountLifecycle,
       audit,
     }),
-    adminReviews: createAdminReviewsService({
-      reviews: new ReviewsRepository(),
-      salons: new SalonsRepository(),
-      members: new MembersRepository(),
+    adminReviews: adminReviewsService,
+    adminCustomerExtras: createAdminCustomerExtrasService({
       customers: new CustomersRepository(),
+      cities: new CitiesRepository(),
+      areas: new AreasRepository(),
+      reviews: adminReviewsService,
+      notifications: notificationsRepository,
+      campaigns,
+      lifecycle: accountLifecycle,
       audit,
-      logger,
     }),
     adminApplications: createSalonReviewService({
       completeness: salonState,
