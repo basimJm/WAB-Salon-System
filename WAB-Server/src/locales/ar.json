@@ -127,6 +127,8 @@
   "notifications.salon.gender_changed.owner.body": "غيّرت WAB فئة العملاء لـ {salon}. يرجى مراجعة خدماتك وفريقك.",
   "notifications.salon.edited_by_admin.owner.title": "حدّثت WAB بيانات صالونك",
   "notifications.salon.edited_by_admin.owner.body": "غيّرت WAB {area} في {salon}: {reason}",
+  "notifications.salon.deletion_rejected.owner.title": "تم رفض طلب حذف الصالون",
+  "notifications.salon.deletion_rejected.owner.body": "رفضت WAB طلب حذف {salon}: {reason}",
   "notifications.salon.area.profile": "الملف التعريفي",
   "notifications.salon.area.gallery": "المعرض",
   "notifications.salon.area.hours": "ساعات العمل",

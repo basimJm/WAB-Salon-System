@@ -6,6 +6,7 @@ import {
 } from '../constants/enums';
 import type { BookingBusyLookup } from '../domain/availability/availability.service';
 import type { BookingLookup, UpcomingBooking } from '../domain/salons/conflicts';
+import { ANALYTICS_DAY_FORMAT } from '../constants/adminSalonInsights';
 import { BookingModel, type BookingRaw, type StatusHistoryEntry } from '../models/booking.model';
 import { isObjectIdString, toObjectId } from '../utils/database/ids';
 import { toEntity, type Entity } from '../utils/database/plain';
@@ -152,6 +153,38 @@ export class BookingsRepository
       params,
       { appointmentStart: 1 },
     );
+  }
+
+  /** Bookings of one salon created in `[from, to)`, counted per local calendar day. */
+  async dailyCounts(input: {
+    salonId: string;
+    from: Date;
+    to: Date;
+    timeZone: string;
+  }): Promise<Record<string, number>> {
+    const rows = await this.model
+      .aggregate<{ _id: string; count: number }>([
+        {
+          $match: {
+            salonId: toObjectId(input.salonId),
+            createdAt: { $gte: input.from, $lt: input.to },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: ANALYTICS_DAY_FORMAT,
+                date: '$createdAt',
+                timezone: input.timeZone,
+              },
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ])
+      .exec();
+    return Object.fromEntries(rows.map((row) => [row._id, row.count]));
   }
 
   /** Salons with the most bookings created in `[from, to)`, with how they ended. */

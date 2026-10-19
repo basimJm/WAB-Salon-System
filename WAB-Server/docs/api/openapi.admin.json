@@ -10681,6 +10681,42 @@
             "schema": {
               "type": "string",
               "enum": [
+                "TRIAL",
+                "ACTIVE",
+                "EXPIRED"
+              ]
+            },
+            "required": false,
+            "name": "subscription",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "required": false,
+            "name": "recommended",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            },
+            "required": false,
+            "name": "deletionRequested",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
                 "ar",
                 "en"
               ],
@@ -10776,6 +10812,21 @@
                               null
                             ]
                           },
+                          "recommended": {
+                            "type": "boolean",
+                            "description": "In an active Recommended placement right now."
+                          },
+                          "bookings30d": {
+                            "type": "integer",
+                            "description": "Bookings created in the last 30 days."
+                          },
+                          "deletionRequestedAt": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "The owner asked to delete the salon and no decision was made yet."
+                          },
                           "createdAt": {
                             "type": "string"
                           }
@@ -10789,6 +10840,9 @@
                           "areaId",
                           "rating",
                           "subscriptionStatus",
+                          "recommended",
+                          "bookings30d",
+                          "deletionRequestedAt",
                           "createdAt"
                         ]
                       }
@@ -10993,6 +11047,21 @@
                             null
                           ]
                         },
+                        "recommended": {
+                          "type": "boolean",
+                          "description": "In an active Recommended placement right now."
+                        },
+                        "bookings30d": {
+                          "type": "integer",
+                          "description": "Bookings created in the last 30 days."
+                        },
+                        "deletionRequestedAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The owner asked to delete the salon and no decision was made yet."
+                        },
                         "createdAt": {
                           "type": "string"
                         },
@@ -11070,6 +11139,12 @@
                             "phone"
                           ]
                         },
+                        "deletionApprovedAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "subscription": {
                           "type": [
                             "object",
@@ -11110,12 +11185,16 @@
                         "areaId",
                         "rating",
                         "subscriptionStatus",
+                        "recommended",
+                        "bookings30d",
+                        "deletionRequestedAt",
                         "createdAt",
                         "description",
                         "phone",
                         "completeness",
                         "offline",
                         "owner",
+                        "deletionApprovedAt",
                         "subscription"
                       ]
                     },
@@ -11521,6 +11600,21 @@
                             null
                           ]
                         },
+                        "recommended": {
+                          "type": "boolean",
+                          "description": "In an active Recommended placement right now."
+                        },
+                        "bookings30d": {
+                          "type": "integer",
+                          "description": "Bookings created in the last 30 days."
+                        },
+                        "deletionRequestedAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The owner asked to delete the salon and no decision was made yet."
+                        },
                         "createdAt": {
                           "type": "string"
                         },
@@ -11598,6 +11692,12 @@
                             "phone"
                           ]
                         },
+                        "deletionApprovedAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "subscription": {
                           "type": [
                             "object",
@@ -11638,12 +11738,16 @@
                         "areaId",
                         "rating",
                         "subscriptionStatus",
+                        "recommended",
+                        "bookings30d",
+                        "deletionRequestedAt",
                         "createdAt",
                         "description",
                         "phone",
                         "completeness",
                         "offline",
                         "owner",
+                        "deletionApprovedAt",
                         "subscription"
                       ]
                     },
@@ -33148,6 +33252,903 @@
           },
           "404": {
             "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/salons/{id}/kpis": {
+      "get": {
+        "tags": [
+          "Admin salon insights"
+        ],
+        "summary": "Salon KPIs: rating, bookings by status (all time and last 30 days), active services and staff",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KPIs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "rating": {
+                          "type": "object",
+                          "properties": {
+                            "avg": {
+                              "type": "number"
+                            },
+                            "count": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "avg",
+                            "count"
+                          ]
+                        },
+                        "bookings": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer"
+                            },
+                            "last30d": {
+                              "type": "integer",
+                              "description": "Created in the last 30 days."
+                            },
+                            "byStatus": {
+                              "type": "object",
+                              "properties": {
+                                "PENDING": {
+                                  "type": "integer"
+                                },
+                                "APPROVED": {
+                                  "type": "integer"
+                                },
+                                "REJECTED": {
+                                  "type": "integer"
+                                },
+                                "CANCELLED_BY_CUSTOMER": {
+                                  "type": "integer"
+                                },
+                                "CANCELLED_BY_SALON": {
+                                  "type": "integer"
+                                },
+                                "AUTO_CANCELLED": {
+                                  "type": "integer"
+                                },
+                                "COMPLETED": {
+                                  "type": "integer"
+                                },
+                                "NO_SHOW": {
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "PENDING",
+                                "APPROVED",
+                                "REJECTED",
+                                "CANCELLED_BY_CUSTOMER",
+                                "CANCELLED_BY_SALON",
+                                "AUTO_CANCELLED",
+                                "COMPLETED",
+                                "NO_SHOW"
+                              ]
+                            },
+                            "byStatus30d": {
+                              "type": "object",
+                              "properties": {
+                                "PENDING": {
+                                  "type": "integer"
+                                },
+                                "APPROVED": {
+                                  "type": "integer"
+                                },
+                                "REJECTED": {
+                                  "type": "integer"
+                                },
+                                "CANCELLED_BY_CUSTOMER": {
+                                  "type": "integer"
+                                },
+                                "CANCELLED_BY_SALON": {
+                                  "type": "integer"
+                                },
+                                "AUTO_CANCELLED": {
+                                  "type": "integer"
+                                },
+                                "COMPLETED": {
+                                  "type": "integer"
+                                },
+                                "NO_SHOW": {
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "PENDING",
+                                "APPROVED",
+                                "REJECTED",
+                                "CANCELLED_BY_CUSTOMER",
+                                "CANCELLED_BY_SALON",
+                                "AUTO_CANCELLED",
+                                "COMPLETED",
+                                "NO_SHOW"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "last30d",
+                            "byStatus",
+                            "byStatus30d"
+                          ]
+                        },
+                        "activeServices": {
+                          "type": "integer"
+                        },
+                        "activeStaff": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "rating",
+                        "bookings",
+                        "activeServices",
+                        "activeStaff"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/salons/{id}/analytics": {
+      "get": {
+        "tags": [
+          "Admin salon insights"
+        ],
+        "summary": "Bookings created per day (Asia/Amman) for a date range",
+        "description": "Both ends inclusive, at most 92 days (400 `VALIDATION_ERROR` otherwise). Days without bookings are present with 0.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "to",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Series",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "days": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "date": {
+                                "type": "string"
+                              },
+                              "bookings": {
+                                "type": "integer"
+                              }
+                            },
+                            "required": [
+                              "date",
+                              "bookings"
+                            ]
+                          }
+                        },
+                        "byStatus": {
+                          "type": "object",
+                          "properties": {
+                            "PENDING": {
+                              "type": "integer"
+                            },
+                            "APPROVED": {
+                              "type": "integer"
+                            },
+                            "REJECTED": {
+                              "type": "integer"
+                            },
+                            "CANCELLED_BY_CUSTOMER": {
+                              "type": "integer"
+                            },
+                            "CANCELLED_BY_SALON": {
+                              "type": "integer"
+                            },
+                            "AUTO_CANCELLED": {
+                              "type": "integer"
+                            },
+                            "COMPLETED": {
+                              "type": "integer"
+                            },
+                            "NO_SHOW": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "PENDING",
+                            "APPROVED",
+                            "REJECTED",
+                            "CANCELLED_BY_CUSTOMER",
+                            "CANCELLED_BY_SALON",
+                            "AUTO_CANCELLED",
+                            "COMPLETED",
+                            "NO_SHOW"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "from",
+                        "to",
+                        "total",
+                        "days",
+                        "byStatus"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/salons/{id}/activity": {
+      "get": {
+        "tags": [
+          "Admin salon insights"
+        ],
+        "summary": "What admins did to the salon (approval, offline/online, edits, deletion decision), newest first",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            },
+            "required": false,
+            "name": "pageSize",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Activity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "adminId": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "action",
+                          "adminId",
+                          "reason",
+                          "createdAt"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/salons/{id}/deletion-request/decision": {
+      "post": {
+        "tags": [
+          "Admin salon insights"
+        ],
+        "summary": "Decide the owner’s deletion request",
+        "description": "`APPROVE` or `REJECT`, with a reason. APPROVE needs no PENDING/APPROVED booking left (409 `SCHEDULE_CONFLICT` with the ids), then the salon goes offline and waits for the purge. REJECT clears the request and tells the owner. 422 `INVALID_TRANSITION` when there is no open request.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": [
+                      "APPROVE",
+                      "REJECT"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "decision",
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "decision": {
+                          "type": "string",
+                          "enum": [
+                            "APPROVE",
+                            "REJECT"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "decision"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
             "content": {
               "application/json": {
                 "schema": {

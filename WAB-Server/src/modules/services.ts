@@ -22,6 +22,8 @@ import type { AdminSettingsService } from '../domain/adminSettings/adminSettings
 import type { AdminProfileService } from '../domain/adminProfile/adminProfile.service';
 import type { AdminSearchService } from '../domain/adminSearch/adminSearch.service';
 import type { AdminSalonEditService } from '../domain/adminSalonEdit/adminSalonEdit.service';
+import type { SalonDeletionService } from '../domain/salons/salonDeletion.service';
+import type { SalonInsightsService } from '../domain/salons/salonInsights.service';
 import type { CampaignsService } from '../domain/campaigns/campaigns.service';
 import type { PlacementsService } from '../domain/placements/placements.service';
 import type { AdminReviewsService } from '../domain/reviews/adminReviews.service';
@@ -87,6 +89,10 @@ export interface ApiServices {
   readonly adminProfile?: AdminProfileService;
   readonly adminSearch?: AdminSearchService;
   readonly adminSalonEdit?: AdminSalonEditService;
+  readonly adminSalonInsights?: {
+    readonly insights: SalonInsightsService;
+    readonly deletion: SalonDeletionService;
+  };
   readonly adminCustomers?: AdminCustomersService;
   readonly salonState?: SalonStateService;
   readonly adminSalons?: AdminSalonsService;
@@ -370,6 +376,15 @@ export const unavailableAdminSettings: AdminSettingsService = {
 };
 
 export const unavailableAdminSearch: AdminSearchService = { search: unavailable };
+
+export const unavailableAdminSalonInsights = {
+  insights: {
+    kpis: unavailable,
+    analytics: unavailable,
+    activity: unavailable,
+  } satisfies SalonInsightsService,
+  deletion: { decide: unavailable } satisfies SalonDeletionService,
+};
 
 export const unavailableAdminSalonEdit: AdminSalonEditService = {
   profile: unavailable,

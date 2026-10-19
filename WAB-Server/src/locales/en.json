@@ -127,6 +127,8 @@
   "notifications.salon.gender_changed.owner.body": "WAB changed the audience of {salon}. Please review your services and staff.",
   "notifications.salon.edited_by_admin.owner.title": "WAB updated your salon",
   "notifications.salon.edited_by_admin.owner.body": "WAB changed {area} of {salon}: {reason}",
+  "notifications.salon.deletion_rejected.owner.title": "Deletion request declined",
+  "notifications.salon.deletion_rejected.owner.body": "WAB declined the request to delete {salon}: {reason}",
   "notifications.salon.area.profile": "the profile",
   "notifications.salon.area.gallery": "the gallery",
   "notifications.salon.area.hours": "the working hours",
