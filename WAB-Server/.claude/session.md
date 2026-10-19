@@ -10,6 +10,19 @@
 
 ## Current task
 
+### T-127 — Deployment readiness: env templates, `env:check`, DEPLOYMENT.md (owner order 2026-10-19)
+
+- Branch: `chore/srv-deploy-envs`
+- Status: IN REVIEW
+- Acceptance criteria (CLAUDE.md §5 no hardcoding, NFR config; no BUSINESS_DOMAIN change; API docs: no change):
+  - [x] `npm run env:check -- <file>` validates an env file with the server's own schema and production rules and prints key names only (never values); exit 0 pass, 1 invalid, 2 usage
+  - [x] `docker/env.development.example` passes as is; `docker/env.production.example` fails until every placeholder is filled, then passes; fake providers, enabled payments and bad values are refused in production
+  - [x] `docs/DEPLOYMENT.md`: local build/run, the three environments (local, hosted dev, prod), where each value comes from, release checklist, what is still owner-side
+- Tests: `tests/checkEnv.test.ts` (6); full gate green (130 suites, 2578 tests, lint, typecheck, build, format, docs unchanged, audit 0, tasks.py check OK)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tooling + docs only, no endpoint or schema change; templates hold placeholders, no secrets. DEVIATION: the CLI prints English ops text (like `loadtest`), not locale keys (not an API response).
+- Notes: Not verified: Docker build (no daemon), a real boot against Mongo/Redis.
+
 ### T-125 — Remove the analytics and payment SDK providers from WAB-Server (owner order 2026-10-19)
 
 - Branch: `chore/srv-remove-analytics-payments`
