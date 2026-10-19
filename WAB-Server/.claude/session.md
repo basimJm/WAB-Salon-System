@@ -4,7 +4,7 @@
 
 ## Integration status (one glance)
 
-- Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (146) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
+- Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (151) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
 - Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); analytics = the server's own MongoDB events (no analytics provider; BigQuery/`@wab/analytics` dropped, owner 2026-10-19); payments **paused** (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev/test; HyperPay/`@wab/payments` not used by the server); storage on the in-repo S3 code until SRV-112.
 - Open work: SRV-111 contract guard, Stage N (SRV-117…128, admin gaps), Stage O (SRV-129…134, merchant gaps). Deployment SRV-011/116 and SRV-059/115: owner (PENDING).
 
@@ -24,21 +24,6 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔ (apps get 503 on payment start; CUS-047/062 blocked by the owner's pause), Architect ✔, QA ✔) — NOT verified: Docker build (no daemon), real Mongo. DEVIATIONS: the owner's "delete provider" was interpreted as removing the SDK adapters/config and pausing payments (ports, fakes and the Mongo analytics kept, `wab-analytics`/`wab-payments` folders kept); `tasks.py` touched two admin backlog rows (status only) to keep `check` green.
 
-### SRV-120 — Admin salon editing part 2: hours, closures, services, staff, policy (G3)
-
-- Branch: `feat/srv-120-admin-salon-edit-2`
-- Status: IN REVIEW
-- Acceptance criteria (Admin PRD A13; BUSINESS_DOMAIN §3.2, §5.12 schedule conflicts; client impact: ADM-070):
-  - [x] Admin endpoints under `/admin/v1/salons/:id`: `GET|PUT /hours`, `POST /hours/preview`, `POST /closures`, `POST /closures/preview`, `PATCH /closures/:closureId`, `POST /closures/:closureId/remove`, `GET|POST /services`, `PATCH /services/:serviceId`, `GET|PUT /members/:memberId/staff`, `GET|PUT /policy`
-  - [x] Previews list the PENDING/APPROVED bookings a new weekly schedule or closure would break and change nothing; a real change that would break bookings is refused with 409 `SCHEDULE_CONFLICT` and the booking ids (existing §5.12 rule)
-  - [x] Every write needs `reason`, is audited (before/after) and tells the owner (`salon.edited_by_admin` with the area); the closure's own text is `closureReason`, separate from the audit `reason`
-  - [x] Same rules as the merchant app (audience, duplicates, price above zero, staff skills/days, deposit percentage); service media must be admin uploads of purpose SERVICE_MEDIA
-  - [x] Merchant endpoints unchanged (zod schemas moved to `modules/shared/salonEdit`); admin token only; contract regenerated
-- Tests: `tests/adminSalonEditPart2.test.ts` (13: hours get/preview/set with audit+notice, 409 SCHEDULE_CONFLICT with booking ids, closure add/update/remove + bad input, policy null/set/validation, services add/list/rules/media, staff get/set/refusals) + part 1 (11) + merchant suites unchanged; full gate green (2520 tests, lint, typecheck, build, docs, audit 0). API docs: 14 operations added under `/admin/v1/salons/{id}/…`; client impact: ADM-070.
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
-- Notes: Same services as the merchant app, so one rule set; closure text is `closureReason`, audit reason is `reason`. Previews call the booking conflict finder and change nothing. Staff-edit conflicts use the staff service own conflict hook (wired in server.ts). Criteria written before coding this time. NOT verified: real Mongo; a real booking conflict end to end (conflict finder is covered by its own tests, here it is a stub).
-
 ### SRV-121 — Admin salon list extras, KPIs, analytics, activity and the deletion decision (G4)
 
 - Branch: `feat/srv-121-admin-salon-insights`
@@ -52,3 +37,18 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
 - Notes: Decisions to confirm (owner): APPROVE of a deletion request takes the salon OFFLINE and stamps `deletionApprovedAt` (new field, BUSINESS_DOMAIN §3.3); the purge job is NOT built. No endpoint creates `deletionRequestedAt` for salons yet (the owner-side request is Stage O: SRV-129/133). Bookings counted by creation date. Activity = admin audit trail of the salon. NOT verified: the Mongo aggregates (`dailyCounts`, `countBy`) on a real database; fake models cannot run them (pipeline shape is tested).
+
+### SRV-122 — Admin customer extras: edit, reviews, notifications, push to one, force delete (G5)
+
+- Branch: `feat/srv-122-admin-customer-extras`
+- Status: IN REVIEW
+- Acceptance criteria (Admin PRD A12, BUSINESS_DOMAIN §5.15, §8; client impact: ADM-072, ADM-077):
+  - [x] `PATCH /admin/v1/customers/:id` corrects name, email, gender, city/area (checked), language with a reason, audited before/after of the changed fields; works for BLOCKED and DELETION_PENDING, 409 for an anonymized account; the phone is not editable
+  - [x] `GET /customers/:id/reviews` (every review the customer wrote, any status, newest first, paginated; admin reviews list gains an `authorId` filter) and `GET /customers/:id/notifications` (what the platform sent, newest first, paginated, with push result and read state)
+  - [x] `POST /customers/:id/push {title, body, link?, reason}` sends now to this one customer through a SPECIFIC_USERS campaign (audited there); only an ACTIVE account (422 INVALID_TRANSITION otherwise)
+  - [x] `POST /customers/:id/force-delete {reason}` anonymizes at once from ACTIVE/BLOCKED/DELETION_PENDING (no grace period), revokes sessions, hangs up sockets, audits; DELETED → 409
+  - [x] Admin token only; contract regenerated; no hardcoded values
+- Tests: `tests/adminCustomerExtras.test.ts` (12: auth on all routes, audited edit + status rules + validation, reviews delegation, notifications scoping/paging, push via SPECIFIC_USERS + ACTIVE-only + bad input, force delete from 3 statuses + 409/404/validation) + `tests/adminReviews.test.ts` (+1: author filter) ; full gate green (2551 tests, lint, typecheck, build, docs, audit 0). API docs: 5 operations added under `/admin/v1/customers/{id}/…`; admin reviews service gains an `authorId` filter; client impact: ADM-072, ADM-077 (journey: SRV-110 still dropped).
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
+- Notes: Force delete does not check open bookings (same as the existing grace-period deletion); anonymized accounts keep their bookings/transactions for accounting (BUSINESS_DOMAIN §5.15). Push uses the existing campaign engine (campaign history shows it). ADM-077 also waits on SRV-110 (BigQuery journey, dropped by the owner), so it stays blocked. NOT verified: real Mongo / FCM delivery.
