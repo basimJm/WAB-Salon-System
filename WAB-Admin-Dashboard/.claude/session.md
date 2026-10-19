@@ -14,15 +14,6 @@
 
 ## Last blocks
 
-### ADM-071 — booking extras
-
-- Branch: `feat/adm-071-booking-extras`
-- Status: DONE
-- Acceptance criteria: booking page: reassign staff from the eligible list, cancel as customer/salon/admin, refund a chosen amount (never above paid minus refunded), bookings export; plus fixes to ADM-070: server id patterns that no real id matches are overridden in the salon-edit requests (gallery order, add service, staff, profile city) and the service drawer picks the first catalog entry that arrives late
-- Tests: tests/bookingExtras.test.tsx (8) and 1 more salonEdit test; full suite + gate PASS
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: ADM-070 shipped with a defect (requests carrying ids failed client validation because of the server's broken id regex); found by a new end-to-end test here and fixed in this PR.
-
 ### ADM-072 — customer extras
 
 - Branch: `feat/adm-072-customer-extras`
@@ -38,5 +29,14 @@
 - Status: DONE
 - Acceptance criteria: salon list: subscription, recommended and deletion-request filters, recommended and bookings (30 days) columns; salon page: insights tab (KPIs, completion, status chart, bookings per day for a range), admin activity tab, deletion-request approve/reject with a reason
 - Tests: tests/salonInsights.test.tsx (9); full suite + gate PASS; fixture exemption list removed (every operation has a fixture)
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
+
+### ADM-006 — hosting headers and deploy config (Netlify and Vercel)
+
+- Branch: `feat/adm-006-headers`
+- Status: DONE
+- Acceptance criteria: versioned security-header spec (CSP with API and socket origins, HSTS, nosniff, frame-ancestors none, cache rules) + generator for Netlify _headers/_redirects and vercel.json + netlify.toml + docs/DEPLOY.md; the owner chose Vercel or Netlify
+- Tests: tests/hosting.test.ts (13); full suite + gate PASS; browser check: built dev-release served with the generated headers, login and 9 screens walk with 0 CSP violations after allowing data: fonts (a real defect the check found), fonts 6 loaded 0 errors
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
