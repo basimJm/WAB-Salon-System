@@ -24,21 +24,6 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔ (apps get 503 on payment start; CUS-047/062 blocked by the owner's pause), Architect ✔, QA ✔) — NOT verified: Docker build (no daemon), real Mongo. DEVIATIONS: the owner's "delete provider" was interpreted as removing the SDK adapters/config and pausing payments (ports, fakes and the Mongo analytics kept, `wab-analytics`/`wab-payments` folders kept); `tasks.py` touched two admin backlog rows (status only) to keep `check` green.
 
-### SRV-122 — Admin customer extras: edit, reviews, notifications, push to one, force delete (G5)
-
-- Branch: `feat/srv-122-admin-customer-extras`
-- Status: IN REVIEW
-- Acceptance criteria (Admin PRD A12, BUSINESS_DOMAIN §5.15, §8; client impact: ADM-072, ADM-077):
-  - [x] `PATCH /admin/v1/customers/:id` corrects name, email, gender, city/area (checked), language with a reason, audited before/after of the changed fields; works for BLOCKED and DELETION_PENDING, 409 for an anonymized account; the phone is not editable
-  - [x] `GET /customers/:id/reviews` (every review the customer wrote, any status, newest first, paginated; admin reviews list gains an `authorId` filter) and `GET /customers/:id/notifications` (what the platform sent, newest first, paginated, with push result and read state)
-  - [x] `POST /customers/:id/push {title, body, link?, reason}` sends now to this one customer through a SPECIFIC_USERS campaign (audited there); only an ACTIVE account (422 INVALID_TRANSITION otherwise)
-  - [x] `POST /customers/:id/force-delete {reason}` anonymizes at once from ACTIVE/BLOCKED/DELETION_PENDING (no grace period), revokes sessions, hangs up sockets, audits; DELETED → 409
-  - [x] Admin token only; contract regenerated; no hardcoded values
-- Tests: `tests/adminCustomerExtras.test.ts` (12: auth on all routes, audited edit + status rules + validation, reviews delegation, notifications scoping/paging, push via SPECIFIC_USERS + ACTIVE-only + bad input, force delete from 3 statuses + 409/404/validation) + `tests/adminReviews.test.ts` (+1: author filter) ; full gate green (2551 tests, lint, typecheck, build, docs, audit 0). API docs: 5 operations added under `/admin/v1/customers/{id}/…`; admin reviews service gains an `authorId` filter; client impact: ADM-072, ADM-077 (journey: SRV-110 still dropped).
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
-- Notes: Force delete does not check open bookings (same as the existing grace-period deletion); anonymized accounts keep their bookings/transactions for accounting (BUSINESS_DOMAIN §5.15). Push uses the existing campaign engine (campaign history shows it). ADM-077 also waits on SRV-110 (BigQuery journey, dropped by the owner), so it stays blocked. NOT verified: real Mongo / FCM delivery.
-
 ### SRV-123 — Admin booking extras: eligible staff, reassign, cancel modes, chosen-amount refund, bookings export (G6)
 
 - Branch: `feat/srv-123-admin-booking-extras`
@@ -53,3 +38,17 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
 - Notes: Assumption to confirm: cancel mode ADMIN is recorded as CANCELLED_BY_SALON (no separate status exists; history/cancellation keep the admin as actor). Reassign core refactored into one shared function for merchant and admin (merchant suite unchanged and green). Payments paused: nothing is paid online, so refund answers 422 and cancel refunds are 0; a gateway outage keeps a refund pending and retried. NOT verified: real Mongo/gateway.
+
+### SRV-127 — Live analytics: dropped (owner 2026-10-19, analytics excluded)
+
+- Branch: `feat/srv-127-live-analytics`
+- Status: PENDING (dropped, no server code)
+- Acceptance criteria (backlog/doc work only):
+  - [x] SRV-123 set DONE (PR #297 merged)
+  - [x] SRV-127 and SRV-110 set PENDING with the note "dropped by owner 2026-10-19: analytics excluded"; no endpoint, socket presence or counters are built
+  - [x] ADM-074, ADM-075, ADM-076, ADM-077 set PENDING with the same note: the admin hides or skips those screens; if analytics ever returns, ADM-074 should depend on SRV-127 only (SRV-110 stays dropped)
+  - [x] `python3 scripts/tasks.py check` OK and the board in `INTEGRATION.md` regenerated
+- Tests: `python3 scripts/tasks.py check` (408 tasks OK), `python3 .claude/hooks/test_hooks.py` (25 OK)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: docs/backlog only, no product code and no unit tests (nothing to test); the analytics work was stopped on the owner's order.
+- Notes: none.
