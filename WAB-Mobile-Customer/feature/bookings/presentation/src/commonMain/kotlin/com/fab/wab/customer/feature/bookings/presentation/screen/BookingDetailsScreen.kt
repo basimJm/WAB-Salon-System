@@ -13,7 +13,8 @@ import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.core.common.TimeFormat
 import com.fab.wab.customer.core.domain.booking.BookingDetails
 import com.fab.wab.customer.core.domain.booking.BookingStatus
-import com.fab.wab.customer.designsystem.components.button.AppDestructiveButton
+import com.fab.wab.customer.designsystem.components.button.AppButton
+import com.fab.wab.customer.designsystem.components.button.ButtonKind
 import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
 import com.fab.wab.customer.designsystem.components.dialog.AppDialog
 import com.fab.wab.customer.designsystem.components.feedback.AppStateContent
@@ -116,10 +117,11 @@ private fun CancelBar(state: UiState, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
     Column(modifier = Modifier.fillMaxWidth().padding(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
         AppText(text = rule.message(), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
-        AppDestructiveButton(
+        AppButton(
             text = stringResource(Res.string.details_cancel),
             onClick = { onAction(UiAction.OnCancelClick) },
             modifier = Modifier.fillMaxWidth(),
+            kind = ButtonKind.Destructive,
             enabled = rule !is CancellationRule.WindowPassed && !state.cancelling,
             loading = state.cancelling,
         )

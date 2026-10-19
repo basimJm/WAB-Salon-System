@@ -15,7 +15,6 @@ import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
 import com.fab.wab.customer.feature.booking.domain.model.StaffChoice
 import com.fab.wab.customer.feature.booking.domain.model.hasStaffOverlap
 import com.fab.wab.customer.feature.booking.domain.model.selectionTotalsOf
-import com.fab.wab.customer.feature.booking.domain.model.calendarDaysOf
 import com.fab.wab.customer.feature.booking.domain.usecase.CreateBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.DeleteBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.LoadAvailabilityUseCase
@@ -56,6 +55,7 @@ class BookingFlowViewModel(
 
     private var started = false
     private val drafts = DraftCoordinator(deps, { scope }, { uiState.value }, ::updateState)
+    private val calendar = CalendarCoordinator(salonId, deps, { scope }, { uiState.value }, ::updateState, ::updatePerson)
 
     override fun onStart() {
         if (started) return
@@ -70,9 +70,9 @@ class BookingFlowViewModel(
                 .also { updateState { copy(nameError = false) } }
             is UiAction.OnBrideChange -> if (uiState.value.isWomenSalon) updatePerson { copy(isBride = event.isBride) }
             is UiAction.OnServiceToggle -> toggleService(event.serviceId)
-            is UiAction.OnMonthChange -> changeMonth(event.delta)
-            is UiAction.OnDateSelect -> selectDate(event.date)
-            is UiAction.OnSlotSelect -> selectSlot(event.start)
+            is UiAction.OnMonthChange -> calendar.changeMonth(event.delta)
+            is UiAction.OnDateSelect -> calendar.selectDate(event.date)
+            is UiAction.OnSlotSelect -> calendar.selectSlot(event.start)
             UiAction.OnAnyStaffSelect -> selectAnyStaff()
             is UiAction.OnStaffSelect -> selectStaff(event.staffId)
             UiAction.OnJustMe -> go(BookingStep.SUMMARY)
@@ -203,7 +203,7 @@ class BookingFlowViewModel(
         track(BookingAnalytics.ACTION_STEP, BookingAnalytics.PARAM_STEP to step.name.lowercase())
         updateState { copy(step = step) }
         when (step) {
-            BookingStep.SLOT -> prepareCalendar()
+            BookingStep.SLOT -> calendar.prepare()
             BookingStep.SUMMARY -> drafts.create(uiState.value.draft?.paymentMethod ?: DraftCoordinator.PAYMENT_PREFERENCE.first())
             else -> Unit
         }

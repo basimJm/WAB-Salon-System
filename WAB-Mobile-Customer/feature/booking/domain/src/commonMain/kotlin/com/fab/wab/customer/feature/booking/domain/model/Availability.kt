@@ -48,7 +48,6 @@ fun DayOfWeek.toSalonDay(): SalonDay = when (this) {
     DayOfWeek.WEDNESDAY -> SalonDay.WED
     DayOfWeek.THURSDAY -> SalonDay.THU
     DayOfWeek.FRIDAY -> SalonDay.FRI
-    else -> SalonDay.SAT
 }
 
 private const val ISO_DATE_LENGTH = 10

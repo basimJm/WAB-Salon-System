@@ -82,63 +82,63 @@
 
 ### CUS-042 — Booking details S15: `GET /bookings/{id}`, cancel rules + `POST /bookings/{id}/cancel` with money-outcome confirmation, Rate when COMPLETED, realtime
 - Branch: `feat/cus-042-booking-details` (from `origin/customer`, batch 3 start)
-- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 3)
+- Status: IN REVIEW (batch 3)
 - Acceptance criteria (PRD S15, Design Script S15, BUSINESS_DOMAIN §5.7/§5.8; operations `GET /bookings/{id}`, `POST /bookings/{id}/cancel`; realtime `booking.updated`):
   - [x] core/domain `booking/BookingDetails.kt` (`RefundStatus`, `FullPaymentRefundRule`, `BookingPolicy` snapshot, persons, money, reasons); data mapper parses the untyped `policy` object leniently (null → block hidden)
   - [x] Pure rules (`CancellationRules.kt`, tested): PENDING → any time; APPROVED → until `appointmentStart − cancellationWindowHours` else window passed; others → not applicable. Refund outcome: PENDING → full refund (or nothing paid); DEPOSIT → full if `depositRefundableOnCustomerCancel` else deposit kept; FULL_ONLINE → full or deposit deducted (`MINUS_DEPOSIT` with a deposit %); PAY_ON_ARRIVAL → nothing
   - [x] `BookingDetailsViewModel(bookingId)`: booking + salon contact (`SalonDetailsRepository`: phone / WhatsApp / image, since the booking carries only the salon id), cancel dialog with the money outcome → `POST cancel` → toast + reload, Rate only when COMPLETED → `Screen.RateBooking` (placeholder, CUS-049), instant reload on `booking.updated`; `BookingDetailsScreen` (status / payment / refund badges, reference with Copy, rejection / cancellation reason, salon block + Call / WhatsApp via the external port, persons with bride badge / services + prices / staff / date-time, payment breakdown incl. refunded, policy snapshot, sticky Cancel bar with the fixed rule message, disabled when the window passed); registered in `BookingsNavigation`; AR + EN strings
   - [x] Tests: `CancellationRulesTest` (2), `BookingDetailsViewModelTest` (4)
   - [ ] Unit-test run: batch 3
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-3 host-test run (41 tests, 7 modules, exit 0) found: the calendar helpers dropped when the flow view model was split (restored as `CalendarCoordinator`), `AppDestructiveButton` has no `loading` parameter (now `AppButton(kind = Destructive)`), a redundant `else` in `DayOfWeek.toSalonDay()` (-Werror), deprecated `LocalClipboardManager` (suppressed with reason), duplicate private fakes/helpers across the bookings test files, and the flow test file over 300 lines (split into fakes + harness + two classes).
+- Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — flow and details talk to the contract via `CustomerOperations`/`pathWith`; rules §4 (max 5 companions, 15-min slots, 90 days, staff must cover all services, no overlap for a specific staff, PENDING cancel any time, policy snapshot drives the money outcome) live in the domain with tests; draft payment fallback keyed on `ErrorCode.PAYMENT_OPTION_NOT_ALLOWED`; AR+EN parity; no literals in composables; policy suite ok. NON-BLOCKING: salon details carry no payment options/policy (draft fallback); services lack `brideOnly`; `actions` is the merchant view.
 - Notes: `actions` in the contract is the merchant view, so the customer rule is computed locally from the policy snapshot; no partial cancel / reschedule by design.
 
 ### CUS-043 — Booking flow S16 steps 0–1: person setup (bride toggle), services multi-select with totals, draft `POST/GET/DELETE /bookings/drafts`
 - Branch: `feat/cus-043-booking-persons-services` (from `feat/cus-042-booking-details`)
-- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 3)
+- Status: IN REVIEW (batch 3)
 - Acceptance criteria (PRD S16 steps 0–1, Design Script S16; operations `POST /bookings/drafts` (name 1–50, serviceIds 1–20, start required per person), `GET/DELETE /bookings/drafts/{id}`):
   - [x] `feature/booking` domain: `DraftPerson` (name, bride, services, date, start, staff choice), `BookingDraft` + `DraftPolicy` / money / persons results, `BookingFlowDefaults` (5 companions, 90 days, 15-min slots, name ≤ 50), money in fils (`jodToFils` / `filsToJod`, `selectionTotalsOf`, tested), `BookingDraftRepository` + use cases; data `BookingDraftApi` + mappers + impl + di
   - [x] `BookingFlowViewModel(salonId)` owns the whole draft (Back keeps selections): loads the salon (gender, services) and prefills the main person with the account first name; step 0 name required (error on continue), bride toggle only for women's salons; step 1 multi-select per person with running total price (fils) + duration, Continue enabled when ≥ 1; `AppStepIndicator` on every step; `BookingFlowScreen` + `ServicesStep`; `BookingNavigation` replaces the `Screen.BookingStart` placeholder; AR + EN strings
   - [x] Tests: `SelectionTotalsTest` (1), `BookingFlowViewModelTest` (3)
   - [ ] Unit-test run: batch 3
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-3 host-test run (41 tests, 7 modules, exit 0) found: the calendar helpers dropped when the flow view model was split (restored as `CalendarCoordinator`), `AppDestructiveButton` has no `loading` parameter (now `AppButton(kind = Destructive)`), a redundant `else` in `DayOfWeek.toSalonDay()` (-Werror), deprecated `LocalClipboardManager` (suppressed with reason), duplicate private fakes/helpers across the bookings test files, and the flow test file over 300 lines (split into fakes + harness + two classes).
+- Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — flow and details talk to the contract via `CustomerOperations`/`pathWith`; rules §4 (max 5 companions, 15-min slots, 90 days, staff must cover all services, no overlap for a specific staff, PENDING cancel any time, policy snapshot drives the money outcome) live in the domain with tests; draft payment fallback keyed on `ErrorCode.PAYMENT_OPTION_NOT_ALLOWED`; AR+EN parity; no literals in composables; policy suite ok. NON-BLOCKING: salon details carry no payment options/policy (draft fallback); services lack `brideOnly`; `actions` is the merchant view.
 - Notes: CONTRACT GAP — the salon's services carry no `brideOnly` flag, so bride-only visibility (PRD step 1) cannot be applied on the client; the server rejects with `BRIDE_ONLY_SERVICE` at draft time (flagged for SRV). The server draft is created at the summary step (it needs `start` per person and holds slots for 10 min).
 
 ### CUS-044 — Booking flow step 2: calendar 90 days (closed days disabled), `POST /salons/{id}/availability` slots at 15 min, "Full" slots, per-person occupancy
 - Branch: `feat/cus-044-booking-slots` (from `feat/cus-043-booking-persons-services`)
-- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 3)
+- Status: IN REVIEW (batch 3)
 - Acceptance criteria (PRD S16 step 2, Design Script S16, BUSINESS_DOMAIN §5.4; operation `POST /salons/{salonId}/availability` (date, person, others, draftId)):
   - [x] Domain: `AvailabilitySlot` / `DayAvailability` / `NoSlotsReason`, `calendarDaysOf(today, 90, weeklySchedule, closures)` (weekly days off + exceptional closures disabled; tested), `AvailabilityRepository` + `LoadAvailabilityUseCase` (sends the earlier persons with a specific staff + start as `others`); data `AvailabilityApi` + body builder + mapper
   - [x] View model: entering the step builds the calendar from the business-zone today; date select → slots request (resets slot + staff); "Full" slots cannot be selected; Continue only with a slot; Back keeps the date, slot and slots (no re-request)
   - [x] `SlotStep`: month calendar (Saturday-first week, prev / next month, disabled days greyed), 15-minute slots as `AppTimeSlotChip` (available / selected / Full) in Amman 12-hour time, "no available times" message, shimmer, error with retry; AR + EN strings
   - [x] Tests: `CalendarDaysTest` (1), `BookingFlowViewModelTest` (+1)
   - [ ] Unit-test run: batch 3
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-3 host-test run (41 tests, 7 modules, exit 0) found: the calendar helpers dropped when the flow view model was split (restored as `CalendarCoordinator`), `AppDestructiveButton` has no `loading` parameter (now `AppButton(kind = Destructive)`), a redundant `else` in `DayOfWeek.toSalonDay()` (-Werror), deprecated `LocalClipboardManager` (suppressed with reason), duplicate private fakes/helpers across the bookings test files, and the flow test file over 300 lines (split into fakes + harness + two classes).
+- Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — flow and details talk to the contract via `CustomerOperations`/`pathWith`; rules §4 (max 5 companions, 15-min slots, 90 days, staff must cover all services, no overlap for a specific staff, PENDING cancel any time, policy snapshot drives the money outcome) live in the domain with tests; draft payment fallback keyed on `ErrorCode.PAYMENT_OPTION_NOT_ALLOWED`; AR+EN parity; no literals in composables; policy suite ok. NON-BLOCKING: salon details carry no payment options/policy (draft fallback); services lack `brideOnly`; `actions` is the merchant view.
 - Notes: the server returns `eligibleStaffIds` per slot; step 3 (CUS-045) uses them to enable / disable staff.
 
 ### CUS-045 — Booking flow steps 3–4: staff selection (eligible vs disabled, "Any available"), companions up to 5, repeat per companion, overlap rule, remove persons
 - Branch: `feat/cus-045-booking-staff-companions` (from `feat/cus-044-booking-slots`)
-- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 3)
+- Status: IN REVIEW (batch 3)
 - Acceptance criteria (PRD S16 steps 3–4, Design Script S16):
   - [x] Step 3: all salon staff listed; only the chosen slot's `eligibleStaffIds` selectable (others disabled with a hint); "Any available staff" on top; `hasStaffOverlap` (pure, tested) blocks the same staff member at an overlapping time inside the draft with a message
   - [x] Step 4: "Continue (just me)" → summary; "Add companion" (≤ 5, counter, limit message) appends a person and repeats steps 0–3 for it (the availability request carries the earlier persons' picks as `others`); the companion's Back on step 0 drops an unfinished companion; persons list with bride badge and remove (main cannot be removed); Back from the list returns to the main person's staff step
   - [x] `StaffStep`, `CompanionsStep`; AR + EN strings
   - [x] Tests: `StaffRulesTest` (1), `BookingFlowViewModelTest` (+3)
   - [ ] Unit-test run: batch 3
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-3 host-test run (41 tests, 7 modules, exit 0) found: the calendar helpers dropped when the flow view model was split (restored as `CalendarCoordinator`), `AppDestructiveButton` has no `loading` parameter (now `AppButton(kind = Destructive)`), a redundant `else` in `DayOfWeek.toSalonDay()` (-Werror), deprecated `LocalClipboardManager` (suppressed with reason), duplicate private fakes/helpers across the bookings test files, and the flow test file over 300 lines (split into fakes + harness + two classes).
+- Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — flow and details talk to the contract via `CustomerOperations`/`pathWith`; rules §4 (max 5 companions, 15-min slots, 90 days, staff must cover all services, no overlap for a specific staff, PENDING cancel any time, policy snapshot drives the money outcome) live in the domain with tests; draft payment fallback keyed on `ErrorCode.PAYMENT_OPTION_NOT_ALLOWED`; AR+EN parity; no literals in composables; policy suite ok. NON-BLOCKING: salon details carry no payment options/policy (draft fallback); services lack `brideOnly`; `actions` is the merchant view.
 - Notes: companions are the salon's gender by construction (the flow is per salon); the server re-validates overlaps and eligibility at draft time.
 
 ### CUS-046 — Booking flow step 5: summary per person, grand total, salon rules, payment method with deposit amount
 - Branch: `feat/cus-046-booking-summary` (from `feat/cus-045-booking-staff-companions`)
-- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 3)
+- Status: IN REVIEW (batch 3)
 - Acceptance criteria (PRD S16 step 5, Design Script S16; operations `POST /bookings/drafts` (price + policy snapshot, holds 10 min), `DELETE /bookings/drafts/{id}`):
   - [x] Entering the summary creates the server draft (`DraftCoordinator`): preferred method order pay-on-arrival → deposit → full; `PAYMENT_OPTION_NOT_ALLOWED` falls back to the next option (the salon's options are only known from the draft — contract gap flagged: salon details carry no policy); other errors (e.g. `SLOT_TAKEN`) show the error with Back
   - [x] `SummaryStep`: per-person blocks (name, bride badge, services + prices, staff / any, date-time), grand total, salon rules (window, deposit %, refund rule, approval note, notes), payment selector limited to the policy's options with the deposit amount / full amount; selecting another method deletes and re-creates the draft (server recomputes money); Confirm → `Screen.BookingVerify(draftId)` (placeholder, CUS-047); Back releases the draft (holds) and returns to companions
   - [x] AR + EN strings
   - [x] Tests: `BookingFlowViewModelTest` (+1: fallback order, switching, confirm, release)
   - [ ] Unit-test run: batch 3
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-3 host-test run (41 tests, 7 modules, exit 0) found: the calendar helpers dropped when the flow view model was split (restored as `CalendarCoordinator`), `AppDestructiveButton` has no `loading` parameter (now `AppButton(kind = Destructive)`), a redundant `else` in `DayOfWeek.toSalonDay()` (-Werror), deprecated `LocalClipboardManager` (suppressed with reason), duplicate private fakes/helpers across the bookings test files, and the flow test file over 300 lines (split into fakes + harness + two classes).
+- Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — flow and details talk to the contract via `CustomerOperations`/`pathWith`; rules §4 (max 5 companions, 15-min slots, 90 days, staff must cover all services, no overlap for a specific staff, PENDING cancel any time, policy snapshot drives the money outcome) live in the domain with tests; draft payment fallback keyed on `ErrorCode.PAYMENT_OPTION_NOT_ALLOWED`; AR+EN parity; no literals in composables; policy suite ok. NON-BLOCKING: salon details carry no payment options/policy (draft fallback); services lack `brideOnly`; `actions` is the merchant view.

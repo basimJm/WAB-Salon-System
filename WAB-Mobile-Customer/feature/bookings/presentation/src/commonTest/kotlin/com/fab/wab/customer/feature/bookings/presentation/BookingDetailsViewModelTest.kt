@@ -46,7 +46,7 @@ import kotlin.test.assertTrue
 
 private val POLICY = BookingPolicy(3.0, listOf(PaymentMethod.DEPOSIT), 20.0, false, FullPaymentRefundRule.FULL, null)
 
-private fun booking(status: BookingStatus) = BookingDetails(
+private fun detailsBooking(status: BookingStatus) = BookingDetails(
     id = "b1", referenceNumber = "WAB-1", status = status, paymentMethod = PaymentMethod.DEPOSIT,
     paymentStatus = PaymentStatus.DEPOSIT_PAID, refundStatus = RefundStatus.NONE, hasBride = false,
     appointmentStart = "2026-10-20T10:00:00Z", appointmentEnd = "2026-10-20T11:00:00Z", salonId = "s1", salonName = "Glow",
@@ -60,7 +60,7 @@ private val SALON = SalonDetails(
     gallery = emptyList(), isFavorite = false, reviews = ReviewsPreview(RatingSummary(4f, 1), emptyList()),
 )
 
-private class BookingsFake(var details: AppResult<BookingDetails>) : BookingsRepository {
+private class DetailsBookingsFake(var details: AppResult<BookingDetails>) : BookingsRepository {
     val detailCalls = mutableListOf<String>()
     val cancels = mutableListOf<String>()
     var cancelResult: AppResult<String> = AppResult.Success("6")
@@ -92,7 +92,7 @@ class BookingDetailsViewModelTest {
     private val effects = mutableListOf<SideEffect>()
     private val salons = SalonFake()
 
-    private fun TestScope.viewModel(repository: BookingsFake, now: String = "2026-10-19T10:00:00Z"): BookingDetailsViewModel {
+    private fun TestScope.viewModel(repository: DetailsBookingsFake, now: String = "2026-10-19T10:00:00Z"): BookingDetailsViewModel {
         val deps = BookingDetailsDependencies(
             getBookingDetails = GetBookingDetailsUseCase(repository),
             cancelBooking = CancelBookingUseCase(repository),
@@ -111,7 +111,7 @@ class BookingDetailsViewModelTest {
 
     @Test
     fun loadsBookingAndSalonContactAndComputesTheCancelRule() = runTest(UnconfinedTestDispatcher()) {
-        val repository = BookingsFake(AppResult.Success(booking(BookingStatus.APPROVED)))
+        val repository = DetailsBookingsFake(AppResult.Success(detailsBooking(BookingStatus.APPROVED)))
         val vm = viewModel(repository)
         assertEquals("+962791234567", vm.state.value.salonPhone)
         assertIs<CancellationRule.Until>(vm.state.value.cancellation)
@@ -124,7 +124,7 @@ class BookingDetailsViewModelTest {
 
     @Test
     fun cancelShowsTheMoneyOutcomeThenCancelsAndReloads() = runTest(UnconfinedTestDispatcher()) {
-        val repository = BookingsFake(AppResult.Success(booking(BookingStatus.APPROVED)))
+        val repository = DetailsBookingsFake(AppResult.Success(detailsBooking(BookingStatus.APPROVED)))
         val vm = viewModel(repository)
         vm.onEvent(UiAction.OnCancelClick)
         assertEquals(RefundOutcome.DEPOSIT_KEPT, vm.state.value.cancelDialog)
@@ -137,12 +137,12 @@ class BookingDetailsViewModelTest {
 
     @Test
     fun windowPassedBlocksCancelAndCompletedOffersRating() = runTest(UnconfinedTestDispatcher()) {
-        val late = viewModel(BookingsFake(AppResult.Success(booking(BookingStatus.APPROVED))), now = "2026-10-20T09:00:00Z")
+        val late = viewModel(DetailsBookingsFake(AppResult.Success(detailsBooking(BookingStatus.APPROVED))), now = "2026-10-20T09:00:00Z")
         assertEquals(CancellationRule.WindowPassed(3.0), late.state.value.cancellation)
         late.onEvent(UiAction.OnCancelClick)
         assertNull(late.state.value.cancelDialog)
 
-        val completed = viewModel(BookingsFake(AppResult.Success(booking(BookingStatus.COMPLETED))))
+        val completed = viewModel(DetailsBookingsFake(AppResult.Success(detailsBooking(BookingStatus.COMPLETED))))
         assertEquals(CancellationRule.NotApplicable, completed.state.value.cancellation)
         completed.onEvent(UiAction.OnRateClick)
         assertEquals(SideEffect.OpenRating("b1"), effects.last())
@@ -150,7 +150,7 @@ class BookingDetailsViewModelTest {
 
     @Test
     fun cancelFailureKeepsTheBookingAndReportsTheError() = runTest(UnconfinedTestDispatcher()) {
-        val repository = BookingsFake(AppResult.Success(booking(BookingStatus.PENDING)))
+        val repository = DetailsBookingsFake(AppResult.Success(detailsBooking(BookingStatus.PENDING)))
         repository.cancelResult = AppResult.Error(AppError.NetworkError("offline"))
         val vm = viewModel(repository)
         vm.onEvent(UiAction.OnCancelClick)

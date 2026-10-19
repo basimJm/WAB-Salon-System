@@ -55,6 +55,7 @@ import com.fab.wab.customer.feature.bookings.presentation.resources.details_what
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
+@Suppress("DEPRECATION") // LocalClipboard is suspend-only; the common plain-text ClipEntry helper is not yet stable in CMP 1.10
 @Composable
 internal fun StatusBlock(booking: BookingDetails) {
     val spacing = AppTheme.spacing
