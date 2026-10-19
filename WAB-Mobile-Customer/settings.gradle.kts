@@ -76,4 +76,8 @@ include(
     ":feature:favorites:domain",
     ":feature:favorites:presentation",
     ":feature:favorites:di",
+    ":feature:bookings:domain",
+    ":feature:bookings:data",
+    ":feature:bookings:presentation",
+    ":feature:bookings:di",
 )

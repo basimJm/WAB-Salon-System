@@ -13,7 +13,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.fab.wab.customer.app.resources.Res
-import com.fab.wab.customer.app.resources.nav_bookings
 import com.fab.wab.customer.app.resources.nav_profile
 import com.fab.wab.customer.app.resources.placeholder_content_page
 import com.fab.wab.customer.app.resources.placeholder_notifications
@@ -29,14 +28,11 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Root destinations whose feature has not landed yet (Bookings CUS-041, Profile CUS-053).
+ * Root destinations whose feature has not landed yet (Profile CUS-053).
  * Each feature replaces its graph here with its own `Navigator.registerGraph`. The Profile placeholder carries the
  * "Log in" entry so the auth flow is reachable before the real profile screen exists.
  */
 fun NavGraphBuilder.registerPlaceholderRoots(navController: NavHostController) {
-    navigation<Graph.Bookings>(startDestination = Screen.Bookings) {
-        composable<Screen.Bookings> { PlaceholderRootScreen(Res.string.nav_bookings) }
-    }
     navigation<Graph.Profile>(startDestination = Screen.Profile) {
         composable<Screen.Profile> {
             PlaceholderRootScreen(Res.string.nav_profile) {
@@ -56,8 +52,11 @@ fun NavGraphBuilder.registerPlaceholderAuthScreens() {
     }
 }
 
-/** Destinations Home links to before their tasks land (S16 CUS-042, S19 CUS-050). */
+/** Destinations Home links to before their tasks land (S15 CUS-044, S16 CUS-042, S19 CUS-050). */
 fun NavGraphBuilder.registerPlaceholderHomeScreens() {
+    composable<Screen.BookingDetails> { entry ->
+        PlaceholderRootScreen(Res.string.placeholder_booking, detail = entry.toRoute<Screen.BookingDetails>().bookingId)
+    }
     composable<Screen.BookingStart> { entry ->
         PlaceholderRootScreen(Res.string.placeholder_booking, detail = entry.toRoute<Screen.BookingStart>().salonId)
     }

@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) verified and shipped as one PR from `feat/cus-036-salon-details` into `customer`. Batch 2 = CUS-037 ✓ code, CUS-038 ✓ code, CUS-039 ✓ code, CUS-040 ✓ code, CUS-041 (task branches chain from the previous task branch; gate + emulator + loop + review after the fifth).
+- Batch 1 (CUS-032…036) verified and shipped as one PR from `feat/cus-036-salon-details` into `customer`. Batch 2 = CUS-037 ✓ code, CUS-038 ✓ code, CUS-039 ✓ code, CUS-040 ✓ code, CUS-041 ✓ code (task branches chain from the previous task branch; gate + emulator + loop + review after the fifth).
 
 ### CUS-032 — Home S03: `GET /home`, header + badge, banners, search bar, gender tabs, sections, nearest permission states
 - Branch: `feat/cus-032-home`
@@ -135,3 +135,16 @@
 - Tests: written, not yet run (batch rule)
 - Loops: 0/1
 - Review: PENDING
+
+### CUS-041 — Bookings tab S14: `GET /bookings?tab&q`, cards with booking + payment status, guest state, empty → Book now, realtime refresh
+- Branch: `feat/cus-041-bookings-tab` (from `feat/cus-040-favorites`)
+- Status: IN PROGRESS (code + tests written; Gradle at the end of batch 2)
+- Acceptance criteria (PRD S14, Design Script S14; operation `GET /bookings?page&pageSize&tab=UPCOMING|PAST&q(≤60)`; realtime `booking.updated`):
+  - [x] core: `booking/BookingEnums.kt` (`BookingStatus`, `PaymentStatus`, `PaymentMethod`, `BookingTab` with safe `UNKNOWN`), `BookingSummary`; `TimeFormat.instantText` (UTC instant → Asia/Amman date + 12-hour time, `BusinessTime.ZONE_ID`; kotlinx-datetime added to core/common); route `Screen.BookingDetails(bookingId)` placeholder (S15)
+  - [x] `feature/bookings`: `BookingsRepository` / `LoadBookingsUseCase` (query trimmed to 60), `BookingsApi` + mapper, `BookingsViewModel(BookingsDependencies)`: welcome name from the session, guest gate → Log in, Upcoming | Past tabs, 500 ms debounced search, paging by 10, pull-to-refresh, resume refresh, instant refresh on `booking.updated`; `BookingsScreen` + `BookingCard` (salon, reference, date, time, status badge with tone, payment badge), empty → Book now → Home tab; `BookingsNavigation` replaces the placeholder graph; AR + EN strings for all statuses
+  - [x] Tests: `BookingsApiTest` (2), `BookingsViewModelTest` (3)
+  - [ ] Gradle + emulator: batch 2
+- Tests: written, not yet run (batch rule)
+- Loops: 0/1
+- Review: PENDING
+- Notes: the list contract (`GetBookingsDataItem`) carries no rejection reason, so the card cannot show it (PRD S14 wants it) — flagged for the server (S15 has `rejection.reasonText`).

@@ -36,7 +36,9 @@ class FavoritesViewModel(
         scope.launch {
             sessionStore.state.collect { session ->
                 val was = uiState.value.signedIn
-                updateState { copy(signedIn = session.isSignedIn, salons = if (session.isSignedIn) salons else emptyList(), loaded = false) }
+                updateState {
+                    copy(signedIn = session.isSignedIn, salons = if (session.isSignedIn) salons else emptyList(), loaded = false)
+                }
                 if (session.isSignedIn && was != true) load()
             }
         }

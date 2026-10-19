@@ -29,6 +29,12 @@ class TimeFormatTest {
     }
 
     @Test
+    fun formatsInstantsInAmman() {
+        assertEquals(DateTimeText("18/10/2026", "1:00 PM"), TimeFormat.instantText("2026-10-18T10:00:00.000Z", "AM", "PM"))
+        assertNull(TimeFormat.instantText("soon", "AM", "PM"))
+    }
+
+    @Test
     fun formatsARange() {
         assertEquals("8:00 AM – 4:00 PM", TimeFormat.range12Hour("08:00", "16:00", "AM", "PM", " – "))
     }

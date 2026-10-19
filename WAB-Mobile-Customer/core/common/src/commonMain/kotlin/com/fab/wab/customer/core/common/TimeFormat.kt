@@ -1,5 +1,9 @@
 package com.fab.wab.customer.core.common
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+
 /** 12-hour display of the server's "HH:mm" times (root CLAUDE.md: display 12-hour); labels come from resources. */
 object TimeFormat {
     private const val HOURS_IN_HALF_DAY = 12
@@ -34,6 +38,15 @@ object TimeFormat {
         return date.reversed().joinToString(DISPLAY_DATE_SEPARATOR)
     }
 
+    /** An ISO instant (stored UTC) shown in the business time zone: date "18/10/2026" and 12-hour time. */
+    fun instantText(iso: String, am: String, pm: String, zoneId: String = BusinessTime.ZONE_ID): DateTimeText? {
+        val instant = runCatching { Instant.parse(iso.trim()) }.getOrNull() ?: return null
+        val local = instant.toLocalDateTime(TimeZone.of(zoneId))
+        val date = local.date.toString().split(DATE_SEPARATOR).reversed().joinToString(DISPLAY_DATE_SEPARATOR)
+        val hhmm = local.hour.toString().padStart(MINUTE_DIGITS, PAD) + SEPARATOR + local.minute.toString().padStart(MINUTE_DIGITS, PAD)
+        return DateTimeText(date = date, time = to12Hour(hhmm, am, pm) ?: hhmm)
+    }
+
     /** "8:00 AM – 4:00 PM"; null when either end is invalid. */
     fun range12Hour(open: String, close: String, am: String, pm: String, rangeSeparator: String): String? {
         val from = to12Hour(open, am, pm) ?: return null
@@ -41,3 +54,10 @@ object TimeFormat {
         return "$from$rangeSeparator$to"
     }
 }
+
+/** Root CLAUDE.md: UTC stored, Asia/Amman computed, 12-hour displayed. */
+object BusinessTime {
+    const val ZONE_ID = "Asia/Amman"
+}
+
+data class DateTimeText(val date: String, val time: String)
