@@ -9,6 +9,9 @@ kotlin {
         minSdk = 26
         androidResources { enable = true }
     }
+    sourceSets.commonMain.dependencies {
+        implementation(libs.kotlinx.datetime)
+    }
     sourceSets.commonTest.dependencies {
         implementation(libs.kotlin.test)
     }

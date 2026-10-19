@@ -10,7 +10,10 @@ import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import com.fab.wab.customer.feature.booking.domain.model.BookingFlowDefaults
+import com.fab.wab.customer.core.common.BusinessTime
 import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
+import com.fab.wab.customer.feature.booking.domain.model.calendarDaysOf
+import com.fab.wab.customer.feature.booking.domain.usecase.LoadAvailabilityUseCase
 import com.fab.wab.customer.feature.booking.presentation.analytics.BookingAnalytics
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract.SideEffect
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract.UiAction
@@ -20,17 +23,23 @@ import com.fab.wab.customer.feature.salon.domain.repository.SalonDetailsReposito
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class BookingFlowDependencies(
     val salonDetails: SalonDetailsRepository,
     val sessionStore: SessionStore,
+    val loadAvailability: LoadAvailabilityUseCase,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    val today: () -> LocalDate = { Clock.System.now().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
 )
 
 /**
- * S16 steps 0–1 (CUS-043): one view model owns the whole draft so Back keeps every selection;
- * later steps (slot, staff, companions, summary) plug into the same state (CUS-044…046).
+ * S16 steps 0–2 (CUS-043/044): one view model owns the whole draft so Back keeps every selection;
+ * staff, companions and summary plug into the same state (CUS-045/046).
  */
 class BookingFlowViewModel(
     private val salonId: String,
@@ -53,6 +62,9 @@ class BookingFlowViewModel(
                 .also { updateState { copy(nameError = false) } }
             is UiAction.OnBrideChange -> if (uiState.value.isWomenSalon) updatePerson { copy(isBride = event.isBride) }
             is UiAction.OnServiceToggle -> toggleService(event.serviceId)
+            is UiAction.OnMonthChange -> changeMonth(event.delta)
+            is UiAction.OnDateSelect -> selectDate(event.date)
+            is UiAction.OnSlotSelect -> selectSlot(event.start)
             UiAction.OnContinue -> next()
             UiAction.OnBack -> back()
         }
@@ -96,6 +108,7 @@ class BookingFlowViewModel(
         when (state.step) {
             BookingStep.PERSON -> if (state.canContinuePerson) go(BookingStep.SERVICES) else updateState { copy(nameError = true) }
             BookingStep.SERVICES -> if (state.canContinueServices) go(BookingStep.SLOT)
+            BookingStep.SLOT -> if (state.canContinueSlot) go(BookingStep.STAFF)
             else -> Unit
         }
     }
@@ -109,6 +122,50 @@ class BookingFlowViewModel(
     private fun go(step: BookingStep) {
         track(BookingAnalytics.ACTION_STEP, BookingAnalytics.PARAM_STEP to step.name.lowercase())
         updateState { copy(step = step) }
+        if (step == BookingStep.SLOT) prepareCalendar()
+    }
+
+    /** Step 2 (PRD S16): today → +90 days, weekly days off and closures disabled; the picked day's slots are restored. */
+    private fun prepareCalendar() {
+        val salon = uiState.value.salon ?: return
+        val days = calendarDaysOf(deps.today(), BookingFlowDefaults.MAX_DAYS_AHEAD, salon.weeklySchedule, salon.upcomingClosures)
+        val selected = uiState.value.person.date?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        updateState { copy(calendar = days, visibleMonth = 0, selectedDate = selected) }
+        if (selected != null && uiState.value.availability?.date != selected.toString()) loadSlots(selected)
+    }
+
+    private fun changeMonth(delta: Int) {
+        val months = uiState.value.calendar.map { it.date.year to it.date.monthNumber }.distinct()
+        updateState { copy(visibleMonth = (visibleMonth + delta).coerceIn(0, (months.size - 1).coerceAtLeast(0))) }
+    }
+
+    private fun selectDate(date: LocalDate) {
+        if (uiState.value.calendar.none { it.date == date && it.enabled }) return
+        updateState { copy(selectedDate = date, availability = null) }
+        updatePerson { copy(date = date.toString(), start = null, staff = null) }
+        loadSlots(date)
+    }
+
+    private fun loadSlots(date: LocalDate) {
+        scope.launch {
+            updateState { copy(slotsLoading = true, slotsError = null) }
+            val state = uiState.value
+            val others = state.persons.filterIndexed { index, _ -> index != state.currentPerson }
+            when (val result = deps.loadAvailability(salonId, date.toString(), state.person, others)) {
+                is AppResult.Success -> updateState { copy(slotsLoading = false, availability = result.data) }
+                is AppResult.Error -> {
+                    val message = deps.errorText(result.appError)
+                    updateState { copy(slotsLoading = false, slotsError = message) }
+                }
+                AppResult.Loading -> Unit
+            }
+        }
+    }
+
+    /** A "Full" slot cannot be picked; picking resets the staff choice (eligibility depends on the slot). */
+    private fun selectSlot(start: String) {
+        val slot = uiState.value.availability?.slots?.firstOrNull { it.start == start && it.available } ?: return
+        updatePerson { copy(start = slot.start, staff = null) }
     }
 
     private fun track(action: String, vararg params: Pair<String, String>) {

@@ -2,9 +2,12 @@ package com.fab.wab.customer.feature.booking.presentation.controller.contract
 
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.session.Gender
+import com.fab.wab.customer.feature.booking.domain.model.CalendarDay
+import com.fab.wab.customer.feature.booking.domain.model.DayAvailability
 import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
 import com.fab.wab.customer.feature.booking.domain.model.SelectionTotals
 import com.fab.wab.customer.feature.booking.domain.model.selectionTotalsOf
+import kotlinx.datetime.LocalDate
 
 /** PRD S16 steps; the indicator shows 0–5 (verification is a separate screen). */
 enum class BookingStep { PERSON, SERVICES, SLOT, STAFF, COMPANIONS, SUMMARY }
@@ -20,7 +23,14 @@ sealed interface BookingFlowContract {
         val persons: List<DraftPerson> = listOf(DraftPerson()),
         val currentPerson: Int = 0,
         val nameError: Boolean = false,
+        val calendar: List<CalendarDay> = emptyList(),
+        val visibleMonth: Int = 0,
+        val selectedDate: LocalDate? = null,
+        val slotsLoading: Boolean = false,
+        val slotsError: String? = null,
+        val availability: DayAvailability? = null,
     ) {
+        val canContinueSlot: Boolean get() = person.start != null
         val person: DraftPerson get() = persons[currentPerson]
         val isWomenSalon: Boolean get() = salon?.gender == Gender.FEMALE
         val canContinuePerson: Boolean get() = person.name.isNotBlank()
@@ -33,6 +43,9 @@ sealed interface BookingFlowContract {
         data class OnNameChange(val value: String) : UiAction
         data class OnBrideChange(val isBride: Boolean) : UiAction
         data class OnServiceToggle(val serviceId: String) : UiAction
+        data class OnMonthChange(val delta: Int) : UiAction
+        data class OnDateSelect(val date: LocalDate) : UiAction
+        data class OnSlotSelect(val start: String) : UiAction
         data object OnContinue : UiAction
         data object OnBack : UiAction
     }

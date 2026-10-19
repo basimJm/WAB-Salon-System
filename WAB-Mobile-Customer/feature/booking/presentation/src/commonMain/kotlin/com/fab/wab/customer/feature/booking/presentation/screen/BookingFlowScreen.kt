@@ -63,6 +63,7 @@ fun BookingFlowScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Mo
                 when (state.step) {
                     BookingStep.PERSON -> PersonStep(state, onAction)
                     BookingStep.SERVICES -> ServicesStep(state, onAction)
+                    BookingStep.SLOT -> SlotStep(state, onAction)
                     else -> AppEmptyState(title = stringResource(Res.string.booking_step_coming))
                 }
             }
@@ -103,6 +104,7 @@ private fun StepBottomBar(state: UiState, onAction: (UiAction) -> Unit) {
         val enabled = when (state.step) {
             BookingStep.PERSON -> state.canContinuePerson
             BookingStep.SERVICES -> state.canContinueServices
+            BookingStep.SLOT -> state.canContinueSlot
             else -> false
         }
         AppPrimaryButton(

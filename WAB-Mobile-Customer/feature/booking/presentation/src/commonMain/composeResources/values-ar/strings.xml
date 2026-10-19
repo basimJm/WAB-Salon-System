@@ -8,4 +8,11 @@
     <string name="booking_total_price">الإجمالي: %1$s د.أ</string>
     <string name="booking_total_duration">%1$d دقيقة</string>
     <string name="booking_step_coming">هذه الخطوة قريباً</string>
+    <string name="booking_pick_date">اختر تاريخاً لعرض الأوقات المتاحة.</string>
+    <string name="booking_slots_title">الأوقات المتاحة</string>
+    <string name="booking_no_slots">لا توجد مواعيد متاحة في هذا اليوم.</string>
+    <string name="booking_slot_full">ممتلئ</string>
+    <string name="booking_month_previous">الشهر السابق</string>
+    <string name="booking_month_next">الشهر التالي</string>
+    <string name="booking_month_label">%1$d / %2$d</string>
 </resources>

@@ -6,6 +6,6 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val bookingPresentationModule = module {
-    factory { BookingFlowDependencies(salonDetails = get(), sessionStore = get(), analytics = get()) }
+    factory { BookingFlowDependencies(salonDetails = get(), sessionStore = get(), loadAvailability = get(), analytics = get()) }
     viewModel { (salonId: String) -> BookingFlowViewModel(salonId, deps = get()) }
 }

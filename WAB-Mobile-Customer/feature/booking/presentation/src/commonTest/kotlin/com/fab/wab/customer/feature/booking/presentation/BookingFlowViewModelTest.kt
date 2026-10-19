@@ -2,6 +2,13 @@ package com.fab.wab.customer.feature.booking.presentation
 
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppResult
+import com.fab.wab.customer.feature.booking.domain.model.AvailabilitySlot
+import com.fab.wab.customer.feature.booking.domain.model.DayAvailability
+import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
+import com.fab.wab.customer.feature.booking.domain.model.NoSlotsReason
+import com.fab.wab.customer.feature.booking.domain.repository.AvailabilityRepository
+import com.fab.wab.customer.feature.booking.domain.usecase.LoadAvailabilityUseCase
+import kotlinx.datetime.LocalDate
 import com.fab.wab.customer.core.domain.auth.AuthTokens
 import com.fab.wab.customer.core.domain.salon.RatingSummary
 import com.fab.wab.customer.core.domain.salon.ReviewsPreview
@@ -62,14 +69,36 @@ private class SessionFake(initial: SessionState) : SessionStore {
 }
 
 private val USER = SessionState.SignedIn(UserProfile("c1", "Sara", Gender.FEMALE))
+private val TODAY = LocalDate.parse("2026-10-19")
+
+private class AvailabilityFake : AvailabilityRepository {
+    val calls = mutableListOf<Pair<String, List<DraftPerson>>>()
+    override suspend fun slots(
+        salonId: String,
+        date: String,
+        person: DraftPerson,
+        others: List<DraftPerson>,
+        draftId: String?,
+    ): AppResult<DayAvailability> {
+        calls += date to others
+        val slots = listOf(
+            AvailabilitySlot("${date}T07:00:00Z", "${date}T07:45:00Z", true, listOf("m1")),
+            AvailabilitySlot("${date}T07:15:00Z", "${date}T08:00:00Z", false, emptyList()),
+        )
+        return AppResult.Success(DayAvailability(date, NoSlotsReason.NONE, 45, slots))
+    }
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BookingFlowViewModelTest {
 
     private val effects = mutableListOf<SideEffect>()
+    private val availability = AvailabilityFake()
 
     private fun TestScope.viewModel(gender: Gender = Gender.FEMALE): BookingFlowViewModel {
-        val deps = BookingFlowDependencies(SalonFake(gender), SessionFake(USER), NoOpAnalyticsTracker, { "error" })
+        val deps = BookingFlowDependencies(
+            SalonFake(gender), SessionFake(USER), LoadAvailabilityUseCase(availability), NoOpAnalyticsTracker, { "error" }, { TODAY },
+        )
         val vm = BookingFlowViewModel("s1", deps, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }
@@ -120,5 +149,30 @@ class BookingFlowViewModelTest {
         val vm = viewModel()
         vm.onEvent(UiAction.OnBack)
         assertEquals(SideEffect.Exit, effects.last())
+    }
+
+    @Test
+    fun slotStepBuildsTheCalendarLoadsSlotsAndRejectsFullOnes() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        vm.onEvent(UiAction.OnContinue)
+        vm.onEvent(UiAction.OnServiceToggle("a"))
+        vm.onEvent(UiAction.OnContinue)
+        assertEquals(BookingStep.SLOT, vm.state.value.step)
+        assertEquals(91, vm.state.value.calendar.size)
+        assertFalse(vm.state.value.canContinueSlot)
+        vm.onEvent(UiAction.OnDateSelect(LocalDate.parse("2026-10-20")))
+        assertEquals("2026-10-20", availability.calls.single().first)
+        assertEquals(2, vm.state.value.availability?.slots?.size)
+        vm.onEvent(UiAction.OnSlotSelect("2026-10-20T07:15:00Z"))
+        assertFalse(vm.state.value.canContinueSlot)
+        vm.onEvent(UiAction.OnSlotSelect("2026-10-20T07:00:00Z"))
+        assertTrue(vm.state.value.canContinueSlot)
+        assertEquals("2026-10-20", vm.state.value.person.date)
+        vm.onEvent(UiAction.OnContinue)
+        assertEquals(BookingStep.STAFF, vm.state.value.step)
+        vm.onEvent(UiAction.OnBack)
+        assertEquals(BookingStep.SLOT, vm.state.value.step)
+        assertEquals(LocalDate.parse("2026-10-20"), vm.state.value.selectedDate)
+        assertEquals(1, availability.calls.size)
     }
 }

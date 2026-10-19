@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 = CUS-042 ✓ code, CUS-043 ✓ code, CUS-044, CUS-045, CUS-046 (unit tests after the fifth, then one PR).
+- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 = CUS-042 ✓ code, CUS-043 ✓ code, CUS-044 ✓ code, CUS-045, CUS-046 (unit tests after the fifth, then one PR).
 
 ### CUS-037 — Staff sheet S07a + Service sheet S07b
 - Branch: `feat/cus-037-staff-service-sheets` (from `origin/customer`, batch 2 start)
@@ -104,3 +104,16 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: CONTRACT GAP — the salon's services carry no `brideOnly` flag, so bride-only visibility (PRD step 1) cannot be applied on the client; the server rejects with `BRIDE_ONLY_SERVICE` at draft time (flagged for SRV). The server draft is created at the summary step (it needs `start` per person and holds slots for 10 min).
+
+### CUS-044 — Booking flow step 2: calendar 90 days (closed days disabled), `POST /salons/{id}/availability` slots at 15 min, "Full" slots, per-person occupancy
+- Branch: `feat/cus-044-booking-slots` (from `feat/cus-043-booking-persons-services`)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 3)
+- Acceptance criteria (PRD S16 step 2, Design Script S16, BUSINESS_DOMAIN §5.4; operation `POST /salons/{salonId}/availability` (date, person, others, draftId)):
+  - [x] Domain: `AvailabilitySlot` / `DayAvailability` / `NoSlotsReason`, `calendarDaysOf(today, 90, weeklySchedule, closures)` (weekly days off + exceptional closures disabled; tested), `AvailabilityRepository` + `LoadAvailabilityUseCase` (sends the earlier persons with a specific staff + start as `others`); data `AvailabilityApi` + body builder + mapper
+  - [x] View model: entering the step builds the calendar from the business-zone today; date select → slots request (resets slot + staff); "Full" slots cannot be selected; Continue only with a slot; Back keeps the date, slot and slots (no re-request)
+  - [x] `SlotStep`: month calendar (Saturday-first week, prev / next month, disabled days greyed), 15-minute slots as `AppTimeSlotChip` (available / selected / Full) in Amman 12-hour time, "no available times" message, shimmer, error with retry; AR + EN strings
+  - [x] Tests: `CalendarDaysTest` (1), `BookingFlowViewModelTest` (+1)
+  - [ ] Unit-test run: batch 3
+- Loops: 0/1
+- Review: PENDING
+- Notes: the server returns `eligibleStaffIds` per slot; step 3 (CUS-045) uses them to enable / disable staff.
