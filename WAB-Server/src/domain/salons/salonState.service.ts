@@ -1,5 +1,5 @@
 import { ERROR_CODES } from '../../constants/errorCodes';
-import type { SalonState, SalonStateEvent } from '../../constants/salon';
+import type { SalonEditArea, SalonState, SalonStateEvent } from '../../constants/salon';
 import type { SalonRaw } from '../../models/salon.model';
 import type { MembersRepository } from '../../repositories/identity.repository';
 import type { SalonsRepository } from '../../repositories/salons.repository';
@@ -19,7 +19,13 @@ export interface CompletenessFacts {
 
 /** Tells the owner about a salon state change; failures are logged, never block the change. */
 export interface SalonStateNotifier {
-  changed(input: { salonId: string; event: SalonStateEvent; reason?: string }): Promise<void>;
+  changed(input: {
+    salonId: string;
+    event: SalonStateEvent;
+    reason?: string;
+    /** `salon.edited_by_admin` only: what the admin changed (a `SALON_EDIT_AREAS` value). */
+    area?: SalonEditArea;
+  }): Promise<void>;
 }
 
 export interface SalonStatus {

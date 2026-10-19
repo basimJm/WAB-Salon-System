@@ -5,6 +5,7 @@ import type { StorageProvider } from '../../providers/storage';
 import type { AreasRepository, CitiesRepository } from '../../repositories/locations.repository';
 import type { SalonsRepository } from '../../repositories/salons.repository';
 import { toObjectId } from '../../utils/database/ids';
+import type { UploadRaw } from '../../models/upload.model';
 import type { Entity } from '../../utils/database/plain';
 import { NotFoundError } from '../../utils/errors';
 import { assertPlace } from '../locations/place';
@@ -47,7 +48,12 @@ export interface ProfilePatch {
 
 export interface SalonProfileService {
   get(salonId: string): Promise<SalonProfile>;
-  update(salonId: string, patch: ProfilePatch): Promise<SalonProfile>;
+  /** `acceptUpload` replaces the default "uploaded by this salon" check (an admin edits for the salon). */
+  update(
+    salonId: string,
+    patch: ProfilePatch,
+    options?: { acceptUpload?: (upload: Entity<UploadRaw>) => boolean },
+  ): Promise<SalonProfile>;
 }
 
 export interface SalonProfileDeps {
@@ -103,7 +109,7 @@ export const createSalonProfileService = ({
       return toProfile(await load(salonId));
     },
 
-    async update(salonId, patch) {
+    async update(salonId, patch, options) {
       const current = await load(salonId);
       // A new area must belong to the (new or current) city.
       const cityId = patch.cityId ?? (patch.areaId === undefined ? undefined : current.cityId);
@@ -118,7 +124,7 @@ export const createSalonProfileService = ({
             keys: [key],
             purpose,
             field: purpose === 'SALON_COVER' ? 'body.coverKey' : 'body.profileKey',
-            accept: (upload) => upload.salonId === salonId,
+            accept: options?.acceptUpload ?? ((upload) => upload.salonId === salonId),
           });
         }
       }

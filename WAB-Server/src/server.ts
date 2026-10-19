@@ -57,6 +57,7 @@ import { createAdminCustomersService } from './domain/customers/adminCustomers.s
 import { createAdminSettingsService } from './domain/adminSettings/adminSettings.service';
 import { createAdminProfileService } from './domain/adminProfile/adminProfile.service';
 import { createAdminSearchService } from './domain/adminSearch/adminSearch.service';
+import { createAdminSalonEditService } from './domain/adminSalonEdit/adminSalonEdit.service';
 import { createCampaignsService } from './domain/campaigns/campaigns.service';
 import { CampaignsRepository } from './repositories/campaigns.repository';
 import { createFavoritesService } from './domain/favorites/favorites.service';
@@ -729,6 +730,27 @@ const buildServices = (
     banners: new BannersRepository(),
     storage: providers.storage,
   });
+  const galleryService = createGalleryService({
+    gallery: new GalleryRepository(),
+    storage: providers.storage,
+    uploads,
+    settings,
+  });
+  const salonProfileService = createSalonProfileService({
+    salons: new SalonsRepository(),
+    cities: new CitiesRepository(),
+    areas: new AreasRepository(),
+    storage: providers.storage,
+    state: salonState,
+    uploads,
+  });
+  const adminSalonEditService = createAdminSalonEditService({
+    profile: salonProfileService,
+    gallery: galleryService,
+    audit,
+    notifier: producers.salonStateNotifier,
+    logger,
+  });
   return {
     otpGate,
     adminGuard,
@@ -869,21 +891,9 @@ const buildServices = (
       state: salonState,
       conflicts: conflictFinder.schedule,
     }),
-    gallery: createGalleryService({
-      gallery: new GalleryRepository(),
-      storage: providers.storage,
-      uploads,
-      settings,
-    }),
+    gallery: galleryService,
     salonProfile: {
-      service: createSalonProfileService({
-        salons: new SalonsRepository(),
-        cities: new CitiesRepository(),
-        areas: new AreasRepository(),
-        storage: providers.storage,
-        state: salonState,
-        uploads,
-      }),
+      service: salonProfileService,
       guard: [
         requireAuth('merchant', config.auth.accessSecret),
         loadMember(new MembersRepository()),
@@ -894,6 +904,7 @@ const buildServices = (
     adminCampaigns: campaigns,
     adminSettings: adminSettingsService,
     adminProfile: adminProfileService,
+    adminSalonEdit: adminSalonEditService,
     adminSearch: createAdminSearchService({
       customers: new CustomersRepository(),
       salons: new SalonsRepository(),
