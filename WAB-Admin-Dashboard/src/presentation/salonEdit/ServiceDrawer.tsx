@@ -40,14 +40,16 @@ export function ServiceDrawer(p: ServiceDrawerProps) {
   const [v, setV] = useState(() => serviceDraftOf(s, p.catalog[0]?.value ?? ''));
   const [reason, setReason] = useState('');
   const [tried, setTried] = useState(false);
-  const bad = serviceProblems(v);
+  // The catalog may arrive after the drawer opened: until one is picked, the first is used.
+  const draft = { ...v, catalogServiceId: v.catalogServiceId || (p.catalog[0]?.value ?? '') };
+  const bad = serviceProblems(draft);
   const err = (k: ServiceField) =>
     tried && bad.has(k) ? t(`salonEdit.error.service.${k}`) : undefined;
   const submit = () => {
     setTried(true);
     if (bad.size > 0 || reasonError(reason)) return;
-    if (s) p.onUpdate(servicePatchOf(v), reason.trim());
-    else p.onCreate(newServiceOf(v), reason.trim());
+    if (s) p.onUpdate(servicePatchOf(draft), reason.trim());
+    else p.onCreate(newServiceOf(draft), reason.trim());
   };
   return (
     <ResourceDrawer
@@ -65,7 +67,7 @@ export function ServiceDrawer(p: ServiceDrawerProps) {
       ) : (
         <Select
           label={t('salonEdit.catalogService')}
-          value={v.catalogServiceId}
+          value={draft.catalogServiceId}
           options={p.catalog}
           error={err('catalog')}
           onChange={(e) => setV({ ...v, catalogServiceId: e.target.value })}

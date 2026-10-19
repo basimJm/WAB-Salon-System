@@ -1,13 +1,10 @@
-import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
+import { OBJECT_ID } from '@/data/api/objectId';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { BookingsRepository } from '@/domain/bookings/bookings';
-
-/** The server's OpenAPI writes the id pattern as "^[a-f0-9]{24}$/i" that no id matches; see RemoteLocationsRepository. */
-const OBJECT_ID = z.string().regex(/^[a-f0-9]{24}$/i);
 
 const list = defineEndpoint(OPERATIONS.getBookings, {
   data: dto.getBookingsDataSchema,
@@ -20,6 +17,23 @@ const get = defineEndpoint(OPERATIONS.getBookingsById, { data: dto.getBookingsBy
 const change = defineEndpoint(OPERATIONS.postBookingsByIdStatus, {
   data: dto.postBookingsByIdStatusDataSchema,
   body: dto.postBookingsByIdStatusBodySchema,
+});
+
+const eligible = defineEndpoint(OPERATIONS.getBookingsByIdEligibleStaff, {
+  data: dto.getBookingsByIdEligibleStaffDataSchema,
+  query: dto.getBookingsByIdEligibleStaffQuerySchema,
+});
+const reassign = defineEndpoint(OPERATIONS.postBookingsByIdReassign, {
+  data: dto.postBookingsByIdReassignDataSchema,
+  body: () => dto.postBookingsByIdReassignBodySchema().extend({ staffId: OBJECT_ID }),
+});
+const cancel = defineEndpoint(OPERATIONS.postBookingsByIdCancel, {
+  data: dto.postBookingsByIdCancelDataSchema,
+  body: dto.postBookingsByIdCancelBodySchema,
+});
+const refund = defineEndpoint(OPERATIONS.postBookingsByIdRefund, {
+  data: dto.postBookingsByIdRefundDataSchema,
+  body: dto.postBookingsByIdRefundBodySchema,
 });
 
 export class RemoteBookingsRepository implements BookingsRepository {
@@ -54,4 +68,23 @@ export class RemoteBookingsRepository implements BookingsRepository {
       irregular: data.irregular,
     };
   };
+
+  eligibleStaff: BookingsRepository['eligibleStaff'] = async (id, personIndex) =>
+    (await this.api.execute(eligible, { params: { id }, query: { personIndex } })).data;
+
+  reassign: BookingsRepository['reassign'] = async (id, personIndex, staffId, reason) => {
+    await this.api.execute(reassign, { params: { id }, body: { personIndex, staffId, reason } });
+  };
+
+  cancel: BookingsRepository['cancel'] = async (id, mode, reason) => {
+    const { data } = await this.api.execute(cancel, { params: { id }, body: { mode, reason } });
+    return {
+      referenceNumber: data.referenceNumber,
+      status: data.status,
+      irregular: data.irregular,
+    };
+  };
+
+  refund: BookingsRepository['refund'] = async (id, amount, reason) =>
+    (await this.api.execute(refund, { params: { id }, body: { amount, reason } })).data;
 }

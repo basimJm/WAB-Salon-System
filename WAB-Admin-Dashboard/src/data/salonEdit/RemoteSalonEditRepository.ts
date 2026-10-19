@@ -1,15 +1,46 @@
+import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
+import { OBJECT_ID } from '@/data/api/objectId';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { SalonEditRepository } from '@/domain/salonEdit/salonEdit';
 
 const O = OPERATIONS;
+const KEY = z
+  .string()
+  .max(1024)
+  .regex(/^[A-Za-z0-9_-]+(\/[A-Za-z0-9._-]+)*$/);
+const E164 = z.string().regex(/^\+[1-9][0-9]{6,14}$/);
+const REASON = z.string().min(1).max(1000);
+const LATITUDE_LIMIT = 90;
+const LONGITUDE_LIMIT = 180;
+/** The generated profile body is an intersection that cannot be extended, so it is restated with the id override. */
+const profileBody = () =>
+  z.object({
+    name: z.string().min(1).max(80).optional(),
+    description: z.string().max(1000).nullable().optional(),
+    coverKey: KEY.nullable().optional(),
+    profileKey: KEY.nullable().optional(),
+    location: z
+      .object({
+        latitude: z.number().min(-LATITUDE_LIMIT).max(LATITUDE_LIMIT),
+        longitude: z.number().min(-LONGITUDE_LIMIT).max(LONGITUDE_LIMIT),
+      })
+      .nullable()
+      .optional(),
+    locationText: z.string().max(300).nullable().optional(),
+    cityId: OBJECT_ID.optional(),
+    areaId: OBJECT_ID.optional(),
+    phone: E164.optional(),
+    whatsapp: E164.nullable().optional(),
+    reason: REASON,
+  });
 const E = {
   profile: defineEndpoint(O.getSalonsByIdProfile, { data: dto.getSalonsByIdProfileDataSchema }),
   patchProfile: defineEndpoint(O.patchSalonsByIdProfile, {
     data: dto.patchSalonsByIdProfileDataSchema,
-    body: dto.patchSalonsByIdProfileBodySchema,
+    body: profileBody,
   }),
   gallery: defineEndpoint(O.getSalonsByIdGallery, { data: dto.getSalonsByIdGalleryDataSchema }),
   addGallery: defineEndpoint(O.postSalonsByIdGallery, {
@@ -22,7 +53,8 @@ const E = {
   }),
   orderGallery: defineEndpoint(O.putSalonsByIdGalleryOrder, {
     data: dto.putSalonsByIdGalleryOrderDataSchema,
-    body: dto.putSalonsByIdGalleryOrderBodySchema,
+    body: () =>
+      dto.putSalonsByIdGalleryOrderBodySchema().extend({ ids: z.array(OBJECT_ID).max(100) }),
   }),
   hours: defineEndpoint(O.getSalonsByIdHours, { data: dto.getSalonsByIdHoursDataSchema }),
   putHours: defineEndpoint(O.putSalonsByIdHours, {
@@ -55,7 +87,7 @@ const E = {
   }),
   addService: defineEndpoint(O.postSalonsByIdServices, {
     data: dto.postSalonsByIdServicesDataSchema,
-    body: dto.postSalonsByIdServicesBodySchema,
+    body: () => dto.postSalonsByIdServicesBodySchema().extend({ catalogServiceId: OBJECT_ID }),
   }),
   patchService: defineEndpoint(O.patchSalonsByIdServicesByServiceId, {
     data: dto.patchSalonsByIdServicesByServiceIdDataSchema,
@@ -66,7 +98,10 @@ const E = {
   }),
   putStaff: defineEndpoint(O.putSalonsByIdMembersByMemberIdStaff, {
     data: dto.putSalonsByIdMembersByMemberIdStaffDataSchema,
-    body: dto.putSalonsByIdMembersByMemberIdStaffBodySchema,
+    body: () =>
+      dto.putSalonsByIdMembersByMemberIdStaffBodySchema().extend({
+        serviceIds: z.array(OBJECT_ID).max(200),
+      }),
   }),
   policy: defineEndpoint(O.getSalonsByIdPolicy, { data: dto.getSalonsByIdPolicyDataSchema }),
   putPolicy: defineEndpoint(O.putSalonsByIdPolicy, {

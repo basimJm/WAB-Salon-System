@@ -93,10 +93,31 @@ export interface StatusChangeResult {
   readonly irregular: boolean;
 }
 
+export const CANCEL_MODES = ['CUSTOMER', 'SALON', 'ADMIN'] as const;
+export type CancelMode = (typeof CANCEL_MODES)[number];
+
+export interface EligibleStaff {
+  readonly staffId: string;
+  readonly name: string;
+}
+
+export interface RefundResult {
+  readonly id: string;
+  /** JOD amount as a 3-decimal string. */
+  readonly amount: string;
+  readonly status: string;
+}
+
 export interface BookingsRepository {
   list(query: BookingQuery): Promise<Page<BookingSummary>>;
   get(id: string): Promise<BookingDetails>;
   changeStatus(id: string, status: BookingStatus, reason: string): Promise<StatusChangeResult>;
+  /** Staff who can take `personIndex` (0 = the customer) for the whole booking time. */
+  eligibleStaff(id: string, personIndex: number): Promise<readonly EligibleStaff[]>;
+  reassign(id: string, personIndex: number, staffId: string, reason: string): Promise<void>;
+  /** Cancels with the rules of `mode` (the customer's, the salon's or the admin's own). */
+  cancel(id: string, mode: CancelMode, reason: string): Promise<StatusChangeResult>;
+  refund(id: string, amount: string, reason: string): Promise<RefundResult>;
 }
 
 export const isBookingStatus = (v: string | undefined): v is BookingStatus =>

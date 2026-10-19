@@ -239,6 +239,33 @@ describe('SalonEditPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('saves a new gallery order, a new service, a staff profile and a city change with real ids', async () => {
+    const user = userEvent.setup();
+    open();
+    await user.click(await screen.findByRole('tab', { name: 'Gallery' }));
+    const down = await screen.findAllByRole('button', { name: 'Move down' }, SLOW);
+    await user.click(down[0] as HTMLElement);
+    await user.click(screen.getByRole('button', { name: 'Save order' }));
+    await confirmWithReason(user);
+    expect(await screen.findByText('Change saved', undefined, SLOW)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: 'Services' }));
+    await user.click(await screen.findByRole('button', { name: 'Add service' }, SLOW));
+    const drawer = await screen.findByRole('dialog');
+    await within(drawer).findByRole('option', { name: /./ }, SLOW);
+    await user.type(within(drawer).getByLabelText('Price'), '12.5');
+    await user.type(within(drawer).getByLabelText('Minutes'), '30');
+    await user.type(within(drawer).getByLabelText('Reason'), 'Owner asked');
+    await user.click(within(drawer).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), SLOW);
+
+    await user.click(screen.getByRole('tab', { name: 'Staff' }));
+    await screen.findByLabelText('Provides services', undefined, SLOW);
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+    await confirmWithReason(user);
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), SLOW);
+  });
+
   it('shows the error state with retry when the server fails', async () => {
     const container = makeContainer();
     container.mock?.scenarios.set('serverError');

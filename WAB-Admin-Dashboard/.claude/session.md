@@ -14,15 +14,6 @@
 
 ## Last blocks
 
-### ADM-068 — admin profile
-
-- Branch: `feat/adm-068-admin-profile`
-- Status: DONE
-- Acceptance criteria: profile page: account, alert recipients, password change, two-step email change; error codes CURRENT_PASSWORD_INVALID/EMAIL_ALREADY_USED; contract resynced with 34 new operations
-- Tests: tests/profile.test.tsx (8); full suite + gate PASS
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: the reports sources (domain, data, page) were rebuilt from tests and mocks because they were never committed; salon mock gained the new server fields.
-
 ### ADM-069 — global search
 
 - Branch: `feat/adm-069-global-search`
@@ -40,3 +31,12 @@
 - Tests: tests/salonEdit.test.tsx (15); full suite + gate PASS
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: gallery adds images only (videos need a thumbnail and duration); service media keys not edited; area is not editable (server patch cannot clear it).
+
+### ADM-071 — booking extras
+
+- Branch: `feat/adm-071-booking-extras`
+- Status: DONE
+- Acceptance criteria: booking page: reassign staff from the eligible list, cancel as customer/salon/admin, refund a chosen amount (never above paid minus refunded), bookings export; plus fixes to ADM-070: server id patterns that no real id matches are overridden in the salon-edit requests (gallery order, add service, staff, profile city) and the service drawer picks the first catalog entry that arrives late
+- Tests: tests/bookingExtras.test.tsx (8) and 1 more salonEdit test; full suite + gate PASS
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: ADM-070 shipped with a defect (requests carrying ids failed client validation because of the server's broken id regex); found by a new end-to-end test here and fixed in this PR.
