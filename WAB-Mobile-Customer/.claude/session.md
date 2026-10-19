@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (owner rule 2026-10-19: Gradle/gate/emulator/loop/review once per five tasks): CUS-032 ✓ code, CUS-033 ✓ code, CUS-034, CUS-035, CUS-036 → then gate + emulator + loop + review + one PR into `customer`. Each task branch starts from the previous task branch.
+- Batch 1 (owner rule 2026-10-19: Gradle/gate/emulator/loop/review once per five tasks): CUS-032 ✓ code, CUS-033 ✓ code, CUS-034 ✓ code, CUS-035, CUS-036 → then gate + emulator + loop + review + one PR into `customer`. Each task branch starts from the previous task branch.
 
 ### CUS-029 — OTP S13 (shared): pre-check, Firebase verification, ID token to the backend, wrong attempts, countdown
 - Branch: `feat/cus-029-otp`
@@ -83,3 +83,17 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: ASSUMPTION `serviceIds` is sent as repeated query params (the contract schema has no `style`); S05 (`OpenFilters`) is wired in CUS-034; the S04 placeholder was removed.
+
+### CUS-034 — Filter sheet S05: services paged 10 + See more, price bounds after a service, general / rating single-select, Apply / Reset / Close
+- Branch: `feat/cus-034-filter-sheet` (from `feat/cus-033-all-salons`)
+- Status: IN PROGRESS (code + tests written; Gradle not run yet — batch 1)
+- Acceptance criteria (PRD S05, Design Script S05; operations `GET /catalog/services?gender&page&pageSize`, `GET /salons/filters?gender&serviceIds`):
+  - [x] core: `CatalogRepository` / `CatalogService` (core/domain `catalog/`, impl core/data `catalog/`, bound in `dataModule`; reused by S06)
+  - [x] `feature/salons`: `SalonFilterOptionsRepository` (price bounds) + `SalonFiltersApi` + impl; use cases `LoadFilterServices`, `LoadPriceBounds`; `FilterSheetViewModel(initial, gender)` seeded with the active filters (selected services kept visible even off page 1), services paged by 10 with See more, price bounds requested whenever the selection changes and hidden without a selection / numeric bounds, general + rating single-select (tap again clears), Reset clears all, Apply emits the filters (a full-bounds slider = no price filter); `FilterSheet` (full-screen `AppBottomSheet`: close / title / Reset header, chips FlowRow + shimmer chips + See more, range slider with JOD text, radio rows, sticky Apply); `SalonsNavigation` hosts the sheet per request key and feeds `OnFiltersApplied` to S04 (chips + reload page 1); close discards
+  - [x] AR + EN strings
+  - [x] Tests: `FilterSheetViewModelTest` (5: reflects active filters + first page + bounds call, See more paging stops on a short page, price visibility + single-selects, reset/apply payloads, bounds failure / non-numeric + range conversions)
+  - [ ] Gradle + emulator: batch 1
+- Tests: written, not yet run (batch rule)
+- Loops: 0/1
+- Review: PENDING
+- Notes: the contract has no "general filters list" endpoint, so the two options are the `GeneralFilter` enum (PRD says "list from server"; flagged). Price bounds come as JOD text; the slider rounds to whole JOD.
