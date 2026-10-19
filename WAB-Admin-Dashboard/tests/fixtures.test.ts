@@ -12,14 +12,6 @@ import { successEnvelope } from '@/infrastructure/http/envelope';
  * list, so this test fails until it gets a fixture (or an honest entry here). A fixture added for one of these
  * fails the test too, so the list can only shrink.
  */
-/** Server operations whose screens are the next tasks (ADM-069..073); each task deletes its lines. */
-const NOT_BUILT_YET = [
-  'getSalonsByIdActivity',
-  'getSalonsByIdAnalytics',
-  'getSalonsByIdKpis',
-  'postSalonsByIdDeletionRequestDecision',
-];
-
 const WITHOUT_FIXTURE: Readonly<Record<string, string>> = {
   postAuthLogin: 'login runs on MockAuthRepository (mock mode)',
   postAuthVerifyOtp: 'login runs on MockAuthRepository (mock mode)',
@@ -53,7 +45,7 @@ describe('mock fixtures', () => {
     .sort();
 
   it('every operation of the contract has a fixture, or a reason it has none', () => {
-    expect(missing).toEqual([...Object.keys(WITHOUT_FIXTURE), ...NOT_BUILT_YET].sort());
+    expect(missing).toEqual(Object.keys(WITHOUT_FIXTURE).sort());
   });
 
   it('every fixture route exists in the contract', () => {

@@ -25,7 +25,7 @@ const salon = ({ n, name, gender, state, cityId, sub }: Seed) => ({
   subscriptionStatus: sub,
   recommended: n === 1,
   bookings30d: n * 10,
-  deletionRequestedAt: null as string | null,
+  deletionRequestedAt: (n === 3 ? '2026-10-15T08:00:00.000Z' : null) as string | null,
   createdAt: `2026-09-${String(10 + n).padStart(2, '0')}T08:00:00.000Z`,
 });
 
@@ -196,6 +196,9 @@ export function salonsRoutes(): readonly MockRoute[] {
             (!query.get('state') || s.state === query.get('state')) &&
             (!query.get('gender') || s.gender === query.get('gender')) &&
             (!query.get('cityId') || s.cityId === query.get('cityId')) &&
+            (!query.get('subscription') || s.subscriptionStatus === query.get('subscription')) &&
+            (!query.get('recommended') || String(s.recommended) === query.get('recommended')) &&
+            (!query.get('deletionRequested') || s.deletionRequestedAt !== null) &&
             s.name.toLowerCase().includes(q),
         );
         return {
