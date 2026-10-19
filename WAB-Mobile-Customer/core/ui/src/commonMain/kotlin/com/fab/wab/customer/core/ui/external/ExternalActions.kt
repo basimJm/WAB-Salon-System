@@ -25,6 +25,24 @@ object ExternalLinks {
         "$WHATSAPP_SCHEME$SCHEME_SEPARATOR$WHATSAPP_HOST$PATH_SEPARATOR${phoneE164.replace(NON_DIGITS, "")}"
 
     fun tel(phoneE164: String): String = "$TEL_SCHEME:${phoneE164.trim()}"
+
+    /** RFC 3986 query encoding of a label (UTF-8 bytes as %XX; unreserved characters kept). */
+    fun queryEncode(value: String): String = buildString {
+        value.encodeToByteArray().forEach { byte ->
+            val code = byte.toInt() and BYTE_MASK
+            val char = code.toChar()
+            if (char.isUnreserved()) append(char) else append(PERCENT).append(HEX[code shr NIBBLE]).append(HEX[code and NIBBLE_MASK])
+        }
+    }
+
+    private fun Char.isUnreserved(): Boolean = this in 'A'..'Z' || this in 'a'..'z' || this in '0'..'9' || this in UNRESERVED
+
+    private const val UNRESERVED = "-_.~"
+    private const val PERCENT = '%'
+    private const val HEX = "0123456789ABCDEF"
+    private const val BYTE_MASK = 0xFF
+    private const val NIBBLE = 4
+    private const val NIBBLE_MASK = 0x0F
 }
 
 /** Recording double for tests and previews. */

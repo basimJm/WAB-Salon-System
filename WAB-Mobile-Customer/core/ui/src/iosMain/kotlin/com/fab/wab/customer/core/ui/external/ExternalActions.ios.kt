@@ -2,11 +2,7 @@ package com.fab.wab.customer.core.ui.external
 
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import platform.Foundation.NSCharacterSet
-import platform.Foundation.NSString
 import platform.Foundation.NSURL
-import platform.Foundation.URLQueryAllowedCharacterSet
-import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 
@@ -18,8 +14,8 @@ actual val platformExternalActionsModule: Module = module {
 class IosExternalActions : ExternalActions {
 
     override fun openMaps(latitude: Double, longitude: Double, label: String) {
-        val encoded = (label as NSString).stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet)
-        open("$MAPS_SCHEME$SCHEME_SEPARATOR$MAPS_HOST/?$MAPS_COORDS=$latitude,$longitude&$MAPS_QUERY=${encoded ?: ""}")
+        val encoded = ExternalLinks.queryEncode(label)
+        open("$MAPS_SCHEME$SCHEME_SEPARATOR$MAPS_HOST/?$MAPS_COORDS=$latitude,$longitude&$MAPS_QUERY=$encoded")
     }
 
     override fun dial(phoneE164: String) = open(ExternalLinks.tel(phoneE164))
