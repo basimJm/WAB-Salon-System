@@ -10,7 +10,6 @@ import { SOCKET_ROOMS } from './constants/sockets';
 import { createAlertsService } from './domain/alerts/alerts.service';
 import { AlertsRepository } from './repositories/alerts.repository';
 import { ALERT_SOCKET_EVENT } from './constants/alerts';
-import mongoose from 'mongoose';
 import { createAnalyticsService } from './domain/analytics/analytics.service';
 import { createMongoAnalytics } from './providers/analytics';
 import { createServerEvents } from './domain/events';
@@ -285,12 +284,16 @@ const buildServices = (
 ): ApiServices => {
   const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
   const serverEventsRepository = new ServerEventsRepository();
+  // Server events live in the server's own MongoDB; installation links and admin queries share them.
+  const serverAnalytics = createMongoAnalytics({
+    events: createServerEvents({ store: serverEventsRepository, logger }),
+    counter: serverEventsRepository,
+  });
   const otpGate = createOtpGate({ redis, settings });
   const providers = createProviders(config.providers, config.isProduction, {
     redis,
     logger,
     config,
-    mongo: mongoose.connection,
   });
   const phoneServices = {
     countries: new CountriesRepository(),
@@ -333,7 +336,7 @@ const buildServices = (
     installations: new InstallationsRepository(),
     customers: new CustomersRepository(),
     members: new MembersRepository(),
-    analytics: providers.analytics,
+    analytics: serverAnalytics,
     logger,
   });
   const appConfig = createAppConfigService({
@@ -741,10 +744,7 @@ const buildServices = (
     adminReports: reportsService,
     adminExports: exportsService,
     adminAnalytics: createAnalyticsService({
-      analytics: createMongoAnalytics({
-        events: createServerEvents({ store: serverEventsRepository, logger }),
-        counter: serverEventsRepository,
-      }),
+      analytics: serverAnalytics,
       settings,
       redis,
       logger,

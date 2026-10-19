@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # WAB-Server image. Build context is the REPOSITORY ROOT (the server consumes the sibling
-# wab-notifications, wab-otp, wab-payments, wab-storage and wab-analytics packages through `file:` dependencies):
+# wab-notifications, wab-otp and wab-storage packages through `file:` dependencies):
 #   docker build -f WAB-Server/Dockerfile .
 
 FROM node:22-alpine AS build
@@ -20,16 +20,6 @@ RUN cd wab-storage && npm ci
 COPY wab-storage/tsconfig.json wab-storage/tsup.config.ts ./wab-storage/
 COPY wab-storage/src ./wab-storage/src
 RUN cd wab-storage && npm run build
-COPY wab-analytics/package.json wab-analytics/package-lock.json ./wab-analytics/
-RUN cd wab-analytics && npm ci
-COPY wab-analytics/tsconfig.json wab-analytics/tsup.config.ts ./wab-analytics/
-COPY wab-analytics/src ./wab-analytics/src
-RUN cd wab-analytics && npm run build
-COPY wab-payments/package.json wab-payments/package-lock.json ./wab-payments/
-RUN cd wab-payments && npm ci
-COPY wab-payments/tsconfig.json wab-payments/tsup.config.ts ./wab-payments/
-COPY wab-payments/src ./wab-payments/src
-RUN cd wab-payments && npm run build
 COPY WAB-Server/package.json WAB-Server/package-lock.json ./WAB-Server/
 RUN cd WAB-Server && npm ci
 COPY WAB-Server/tsconfig.json WAB-Server/tsconfig.build.json ./WAB-Server/
@@ -45,15 +35,9 @@ COPY --from=build /repo/wab-notifications/dist ./wab-notifications/dist
 COPY wab-otp/package.json wab-otp/package-lock.json ./wab-otp/
 RUN cd wab-otp && npm ci --omit=dev && npm cache clean --force
 COPY --from=build /repo/wab-otp/dist ./wab-otp/dist
-COPY wab-payments/package.json wab-payments/package-lock.json ./wab-payments/
-RUN cd wab-payments && npm ci --omit=dev && npm cache clean --force
-COPY --from=build /repo/wab-payments/dist ./wab-payments/dist
 COPY wab-storage/package.json wab-storage/package-lock.json ./wab-storage/
 RUN cd wab-storage && npm ci --omit=dev && npm cache clean --force
 COPY --from=build /repo/wab-storage/dist ./wab-storage/dist
-COPY wab-analytics/package.json wab-analytics/package-lock.json ./wab-analytics/
-RUN cd wab-analytics && npm ci --omit=dev && npm cache clean --force
-COPY --from=build /repo/wab-analytics/dist ./wab-analytics/dist
 COPY WAB-Server/package.json WAB-Server/package-lock.json ./WAB-Server/
 RUN cd WAB-Server && npm ci --omit=dev && npm cache clean --force
 COPY --from=build /repo/WAB-Server/dist ./WAB-Server/dist

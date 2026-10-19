@@ -8,9 +8,13 @@ import {
   envFileName,
   type Environment,
   type LogLevel,
-  type PaymentGateway,
 } from '../constants/env';
-import { DEFAULT_PROVIDER_MODE, type ProviderMode } from '../constants/providers';
+import {
+  DEFAULT_PAYMENT_PROVIDER_MODE,
+  DEFAULT_PROVIDER_MODE,
+  type PaymentProviderMode,
+  type ProviderMode,
+} from '../constants/providers';
 import { envSchema, type RawEnv } from './env.schema';
 
 export interface NotifierSettings {
@@ -27,17 +31,6 @@ export interface NotifierSettings {
     readonly pass?: string;
   };
   readonly from: { readonly address: string; readonly name: string };
-}
-
-/** HyperPay settings of the real payment provider (wab-payments). */
-export interface PaymentSettings {
-  readonly gateway: PaymentGateway;
-  readonly baseUrl?: string;
-  readonly entityId: string;
-  readonly accessToken: string;
-  readonly webhookKey?: string;
-  readonly returnUrl: string;
-  readonly testMode?: 'EXTERNAL' | 'INTERNAL';
 }
 
 /** Firebase settings of the real OTP provider (wab-otp). */
@@ -63,19 +56,6 @@ export interface StorageSettings {
   };
 }
 
-/** BigQuery export of Firebase Analytics / Crashlytics (analytics provider `real`). */
-export interface AnalyticsSettings {
-  readonly bigquery?: {
-    readonly projectId: string;
-    readonly dataset: string;
-    readonly location?: string;
-    /** Service-account key as JSON text (secret). */
-    readonly credentialsJson?: string;
-    readonly crashTable?: string;
-    readonly maxBytesBilled?: number;
-  };
-}
-
 export interface AppConfig {
   readonly env: Environment;
   readonly isProduction: boolean;
@@ -91,12 +71,8 @@ export interface AppConfig {
   readonly secrets: { readonly payoutEncryptionKey?: string };
   /** Credentials of the real notifier (FCM + SMTP); present only when the notifier is `real`. */
   readonly notifier?: NotifierSettings;
-  /** Settings of the real analytics provider; present only when it is `real`. */
-  readonly analytics?: AnalyticsSettings;
   /** S3 + CDN settings of the real storage; present only when the storage is `real`. */
   readonly storage?: StorageSettings;
-  /** HyperPay credentials of the real payment provider; present only when it is `real`. */
-  readonly payment?: PaymentSettings;
   /** Firebase project of the real OTP provider; present only when the OTP provider is `real`. */
   readonly otp?: OtpSettings;
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
@@ -104,8 +80,8 @@ export interface AppConfig {
     readonly otp: ProviderMode;
     readonly storage: ProviderMode;
     readonly notifier: ProviderMode;
-    readonly payments: ProviderMode;
-    readonly analytics: ProviderMode;
+    /** Payments are paused: `fake` in dev/test, `disabled` in production. */
+    readonly payments: PaymentProviderMode;
   };
 }
 
@@ -211,49 +187,6 @@ const buildStorageSettings = (values: RawEnv): StorageSettings | undefined => {
   });
 };
 
-const buildAnalyticsSettings = (values: RawEnv): AnalyticsSettings | undefined => {
-  if (values[ENV_KEYS.analyticsProvider] !== 'real') return undefined;
-  const projectId = values[ENV_KEYS.analyticsBigqueryProjectId];
-  const dataset = values[ENV_KEYS.analyticsBigqueryDataset];
-  if (projectId === undefined || dataset === undefined) return Object.freeze({});
-  const location = values[ENV_KEYS.analyticsBigqueryLocation];
-  const credentialsJson = values[ENV_KEYS.analyticsBigqueryCredentialsJson];
-  const crashTable = values[ENV_KEYS.analyticsBigqueryCrashTable];
-  const maxBytesBilled = values[ENV_KEYS.analyticsBigqueryMaxBytesBilled];
-  return Object.freeze({
-    bigquery: Object.freeze({
-      projectId,
-      dataset,
-      ...(location === undefined ? {} : { location }),
-      ...(credentialsJson === undefined ? {} : { credentialsJson }),
-      ...(crashTable === undefined ? {} : { crashTable }),
-      ...(maxBytesBilled === undefined ? {} : { maxBytesBilled }),
-    }),
-  });
-};
-
-const buildPaymentSettings = (values: RawEnv): PaymentSettings | undefined => {
-  if (values[ENV_KEYS.paymentProvider] !== 'real') return undefined;
-  const entityId = values[ENV_KEYS.hyperpayEntityId];
-  const accessToken = values[ENV_KEYS.hyperpayAccess];
-  const returnUrl = values[ENV_KEYS.hyperpayReturnUrl];
-  if (entityId === undefined || accessToken === undefined || returnUrl === undefined) {
-    return undefined;
-  }
-  const baseUrl = values[ENV_KEYS.hyperpayBaseUrl];
-  const webhookKey = values[ENV_KEYS.hyperpayWebhookKey];
-  const testMode = values[ENV_KEYS.hyperpayTestMode];
-  return Object.freeze({
-    gateway: values[ENV_KEYS.paymentGateway],
-    entityId,
-    accessToken,
-    returnUrl,
-    ...(baseUrl === undefined ? {} : { baseUrl }),
-    ...(webhookKey === undefined ? {} : { webhookKey }),
-    ...(testMode === undefined ? {} : { testMode }),
-  });
-};
-
 /** Validates the environment and returns an immutable, typed config. Fails fast. */
 export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppConfig => {
   const parsed = envSchema.safeParse(source);
@@ -265,16 +198,12 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   const env = values[ENV_KEYS.nodeEnv];
   const payoutKey = values[ENV_KEYS.payoutEncryptionKey];
   const notifier = buildNotifierSettings(values);
-  const analytics = buildAnalyticsSettings(values);
   const storage = buildStorageSettings(values);
   const otp = buildOtpSettings(values);
-  const payment = buildPaymentSettings(values);
   return Object.freeze({
     ...(notifier === undefined ? {} : { notifier }),
-    ...(analytics === undefined ? {} : { analytics }),
     ...(storage === undefined ? {} : { storage }),
     ...(otp === undefined ? {} : { otp }),
-    ...(payment === undefined ? {} : { payment }),
     env,
     isProduction: env === 'production',
     port: values[ENV_KEYS.port],
@@ -289,8 +218,7 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
       otp: values[ENV_KEYS.otpProvider] ?? DEFAULT_PROVIDER_MODE,
       storage: values[ENV_KEYS.storageProvider] ?? DEFAULT_PROVIDER_MODE,
       notifier: values[ENV_KEYS.notifierProvider] ?? DEFAULT_PROVIDER_MODE,
-      payments: values[ENV_KEYS.paymentProvider] ?? DEFAULT_PROVIDER_MODE,
-      analytics: values[ENV_KEYS.analyticsProvider] ?? DEFAULT_PROVIDER_MODE,
+      payments: values[ENV_KEYS.paymentProvider] ?? DEFAULT_PAYMENT_PROVIDER_MODE,
     }),
   });
 };

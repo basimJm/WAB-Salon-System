@@ -24,7 +24,9 @@ const payment = z.object({
   gatewayMessage: z.string().nullable(),
   checkout: z
     .object({
-      provider: z.string().describe('Gateway adapter: hyperpay, mock-gateway or fake.'),
+      provider: z
+        .string()
+        .describe('Gateway adapter: fake (dev/test) or disabled (payments paused).'),
       environment: z.enum(['dev', 'prod']),
       checkoutId: z.string(),
       brands: z.array(z.string()),

@@ -1,20 +1,13 @@
 import type { AppConfig } from '../config';
-import { REAL_PROVIDER_MODE } from '../constants/providers';
+import { DISABLED_PAYMENT_MODE, REAL_PROVIDER_MODE } from '../constants/providers';
 import { InternalError } from '../utils/errors';
-import {
-  FakeAnalyticsProvider,
-  createRealAnalytics,
-  type AnalyticsProvider,
-  type CollectionSource,
-} from './analytics';
 import { FakeNotifier, type Notifier } from './notifier';
 import { createRealNotifier, type ClosableNotifier } from './notifier/real';
 import type { Redis } from 'ioredis';
 import type { Logger } from '../utils/logger';
 import { FakeOtpProvider, type OtpProvider } from './otp';
 import { createRealOtp } from './otp/real';
-import { FakePaymentProvider, type PaymentProvider } from './payments';
-import { createRealPayments } from './payments/real';
+import { DisabledPaymentProvider, FakePaymentProvider, type PaymentProvider } from './payments';
 import { FakeStorageProvider, type StorageProvider } from './storage';
 import { createRealStorage } from './storage/real';
 
@@ -23,8 +16,6 @@ export interface ProviderDeps {
   readonly redis: Redis;
   readonly logger: Logger;
   readonly config: AppConfig;
-  /** MongoDB connection the real analytics provider reads its collections from. */
-  readonly mongo?: CollectionSource;
 }
 
 export interface Providers {
@@ -34,7 +25,6 @@ export interface Providers {
   /** Releases provider connections on shutdown. */
   readonly close: () => Promise<void>;
   readonly payments: PaymentProvider;
-  readonly analytics: AnalyticsProvider;
 }
 
 /** The configured provider cannot be built: not integrated yet, or a fake in production. */
@@ -69,6 +59,13 @@ export const createProviders = (
     if (isProduction)
       throw new ProviderUnavailableError(name, 'fakes are not allowed in production');
     return fake();
+  };
+  // Payments are paused: `disabled` answers 503 on every gateway call; a fake never runs in production.
+  const pickPayments = (mode: AppConfig['providers']['payments']): PaymentProvider => {
+    if (mode === DISABLED_PAYMENT_MODE) return new DisabledPaymentProvider();
+    if (isProduction)
+      throw new ProviderUnavailableError('payments', 'fakes are not allowed in production');
+    return new FakePaymentProvider();
   };
   const built = {
     otp: pick(
@@ -121,47 +118,7 @@ export const createProviders = (
         return real;
       },
     ),
-    payments: pick(
-      'payments',
-      providers.payments,
-      (): PaymentProvider => new FakePaymentProvider(),
-      () => {
-        const settings = deps?.config.payment;
-        if (deps === undefined || settings === undefined) {
-          throw new ProviderUnavailableError(
-            'payments',
-            'HyperPay credentials or runtime dependencies missing',
-          );
-        }
-        const real = createRealPayments({
-          settings,
-          redis: deps.redis,
-          logger: deps.logger,
-          isProduction,
-        });
-        closers.push(() => real.close());
-        return real;
-      },
-    ),
-    analytics: pick(
-      'analytics',
-      providers.analytics,
-      (): AnalyticsProvider => new FakeAnalyticsProvider(),
-      () => {
-        if (deps?.mongo === undefined) {
-          throw new ProviderUnavailableError('analytics', 'database connection missing');
-        }
-        const real = createRealAnalytics({
-          settings: deps.config.analytics ?? {},
-          mongo: deps.mongo,
-          redis: deps.redis,
-          logger: deps.logger,
-          isProduction,
-        });
-        closers.push(() => real.close());
-        return real;
-      },
-    ),
+    payments: pickPayments(providers.payments),
   };
   return {
     ...built,
@@ -171,4 +128,4 @@ export const createProviders = (
   };
 };
 
-export type { AnalyticsProvider, Notifier, OtpProvider, PaymentProvider, StorageProvider };
+export type { Notifier, OtpProvider, PaymentProvider, StorageProvider };

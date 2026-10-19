@@ -37,7 +37,6 @@ export const ENV_KEYS = {
   storageProvider: 'STORAGE_PROVIDER',
   notifierProvider: 'NOTIFIER_PROVIDER',
   paymentProvider: 'PAYMENT_PROVIDER',
-  analyticsProvider: 'ANALYTICS_PROVIDER',
   /** Firebase service-account key as JSON text (secret). Needed when NOTIFIER_PROVIDER=real. */
   fcmServiceAccountJson: 'FCM_SERVICE_ACCOUNT_JSON',
   /** Firebase project whose Phone Auth ID tokens are accepted (dev and prod use different projects). Needed when OTP_PROVIDER=real. */
@@ -56,29 +55,6 @@ export const ENV_KEYS = {
   smtpPass: 'SMTP_PASS',
   emailFromAddress: 'EMAIL_FROM_ADDRESS',
   emailFromName: 'EMAIL_FROM_NAME',
-  /** `hyperpay` (default) or `mock-gateway` (dev only: the local OPP mock). Used when PAYMENT_PROVIDER=real. */
-  paymentGateway: 'PAYMENT_GATEWAY',
-  /** Optional: defaults to the HyperPay test host outside production and the live host in production. Required for `mock-gateway`. */
-  hyperpayBaseUrl: 'HYPERPAY_BASE_URL',
-  hyperpayEntityId: 'HYPERPAY_ENTITY_ID',
-  /** HyperPay bearer token (secret). */
-  hyperpayAccess: 'HYPERPAY_ACCESS_TOKEN',
-  /** 64 hex characters from the HyperPay portal that decrypt notifications (secret). Required in production. */
-  hyperpayWebhookKey: 'HYPERPAY_WEBHOOK_KEY',
-  /** Where the checkout returns the shopper: the customer app's scheme or an https URL. */
-  hyperpayReturnUrl: 'HYPERPAY_RETURN_URL',
-  /** Sandbox switch (`EXTERNAL` | `INTERNAL`); refused in production. */
-  hyperpayTestMode: 'HYPERPAY_TEST_MODE',
-  /** BigQuery project/dataset of the Firebase Analytics export (ANALYTICS_PROVIDER=real). */
-  analyticsBigqueryProjectId: 'ANALYTICS_BIGQUERY_PROJECT_ID',
-  analyticsBigqueryDataset: 'ANALYTICS_BIGQUERY_DATASET',
-  analyticsBigqueryLocation: 'ANALYTICS_BIGQUERY_LOCATION',
-  /** Service-account key as JSON text (secret). */
-  analyticsBigqueryCredentialsJson: 'ANALYTICS_BIGQUERY_CREDENTIALS_JSON',
-  /** Crashlytics export table (optional). */
-  analyticsBigqueryCrashTable: 'ANALYTICS_BIGQUERY_CRASH_TABLE',
-  /** Cost guard: most bytes one query may bill. */
-  analyticsBigqueryMaxBytesBilled: 'ANALYTICS_BIGQUERY_MAX_BYTES_BILLED',
   /** S3 (or S3-compatible) storage; needed when STORAGE_PROVIDER=real. */
   s3Region: 'S3_REGION',
   s3PublicBucket: 'S3_PUBLIC_BUCKET',
@@ -97,13 +73,11 @@ export const ENV_KEYS = {
   cloudfrontPrivateKey: 'CLOUDFRONT_PRIVATE_KEY',
 } as const;
 
-/** Keys that pick `fake` or `real` for an external provider; production must set them to `real`. */
+/** Keys that pick `fake` or `real` for an external provider; production must set them to `real`. Payments are paused: PAYMENT_PROVIDER is `fake` or `disabled` and has its own production rule. */
 export const PROVIDER_ENV_KEYS = [
   ENV_KEYS.otpProvider,
   ENV_KEYS.storageProvider,
   ENV_KEYS.notifierProvider,
-  ENV_KEYS.paymentProvider,
-  ENV_KEYS.analyticsProvider,
 ] as const;
 
 /** Keys that must be present when the OTP provider is `real`. */
@@ -127,23 +101,5 @@ export const CLOUDFRONT_KEYS = [
   ENV_KEYS.cloudfrontKeyPairId,
   ENV_KEYS.cloudfrontPrivateKey,
 ] as const;
-/** Keys that must be present when the payment provider is `real`. */
-export const PAYMENT_REAL_REQUIRED_KEYS = [
-  ENV_KEYS.hyperpayEntityId,
-  ENV_KEYS.hyperpayAccess,
-  ENV_KEYS.hyperpayReturnUrl,
-] as const;
-export const PAYMENT_GATEWAYS = ['hyperpay', 'mock-gateway'] as const;
-export type PaymentGateway = (typeof PAYMENT_GATEWAYS)[number];
-export const DEFAULT_PAYMENT_GATEWAY: PaymentGateway = 'hyperpay';
-export const HYPERPAY_TEST_MODES = ['EXTERNAL', 'INTERNAL'] as const;
-export const HYPERPAY_WEBHOOK_KEY_PATTERN = /^[0-9a-fA-F]{64}$/;
 export const DEFAULT_SMTP_PORT = 587;
 export const DEFAULT_EMAIL_FROM_NAME = 'WAB';
-
-/** Keys production needs when the analytics provider is `real` (BigQuery is part of production). */
-export const ANALYTICS_PRODUCTION_REQUIRED_KEYS = [
-  ENV_KEYS.analyticsBigqueryProjectId,
-  ENV_KEYS.analyticsBigqueryDataset,
-  ENV_KEYS.analyticsBigqueryCredentialsJson,
-] as const;
