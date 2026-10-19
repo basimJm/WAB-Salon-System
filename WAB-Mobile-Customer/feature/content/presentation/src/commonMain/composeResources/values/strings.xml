@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_title_privacy">Privacy Policy</string>
+    <string name="content_title_terms">Terms &amp; Conditions</string>
+    <string name="content_title_about">About us</string>
+    <string name="content_title_contact">Contact us</string>
+    <string name="content_title_page">Information</string>
+    <string name="content_contact_call">Call</string>
+    <string name="content_contact_whatsapp">WhatsApp</string>
+    <string name="content_contact_email">Email</string>
+    <string name="content_contact_intro">We are happy to help. Reach us through any of these channels.</string>
+    <string name="content_contact_missing">Contact details are not available right now.</string>
+    <string name="content_empty">No content yet.</string>
+    <string name="faq_title">FAQ</string>
+    <string name="faq_empty">No questions yet.</string>
+</resources>

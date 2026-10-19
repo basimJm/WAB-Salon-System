@@ -1,9 +1,12 @@
 package com.fab.wab.customer
 
 import androidx.compose.ui.window.ComposeUIViewController
+import com.fab.wab.customer.app.deeplink.DeepLinkStore
 import com.fab.wab.customer.app.ui.App
 import com.fab.wab.customer.app.ui.appModules
 import com.fab.wab.customer.core.domain.AppSettings
+import com.fab.wab.customer.core.notification.push.PushSignals
+import com.fab.wab.customer.core.notification.push.pushNotificationOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,4 +32,24 @@ fun saveFcmToken(token: String) {
     CoroutineScope(Dispatchers.Main).launch {
         appSettings.setFcmToken(token)
     }
+}
+
+// Called from iOSApp.swift (Universal Links), so the compiler sees no Kotlin caller.
+@Suppress("unused")
+fun handleDeepLink(url: String): Boolean = KoinPlatform.getKoin().get<DeepLinkStore>().publish(url)
+
+/** APNs `userInfo` → the shared payload (string values only, as FCM sends them). */
+private fun pushPayload(userInfo: Map<Any?, *>): Map<String, String> =
+    userInfo.entries.mapNotNull { (key, value) -> (key as? String)?.let { k -> (value as? String)?.let { v -> k to v } } }.toMap()
+
+// Called from AppDelegate.swift (foreground delivery), so the compiler sees no Kotlin caller.
+@Suppress("unused")
+fun pushReceivedInForeground(userInfo: Map<Any?, *>, title: String?, body: String?) {
+    pushNotificationOf(pushPayload(userInfo), title, body)?.let(PushSignals::publishReceived)
+}
+
+// Called from AppDelegate.swift (tap on a system notification), so the compiler sees no Kotlin caller.
+@Suppress("unused")
+fun pushTapped(userInfo: Map<Any?, *>, title: String?, body: String?) {
+    pushNotificationOf(pushPayload(userInfo), title, body)?.let(PushSignals::tapped)
 }

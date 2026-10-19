@@ -43,4 +43,5 @@
     <string name="review_counter">%1$d / %2$d</string>
     <string name="review_submit">إرسال التقييم</string>
     <string name="review_submitted">شكراً لك! سيظهر تقييمك بعد الموافقة عليه.</string>
+    <string name="salon_not_available">الصالون غير متاح</string>
 </resources>

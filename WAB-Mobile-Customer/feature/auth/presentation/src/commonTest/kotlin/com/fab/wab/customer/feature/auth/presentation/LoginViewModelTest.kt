@@ -4,6 +4,7 @@ import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.AppResult
+import com.fab.wab.customer.core.domain.session.UserProfile
 import com.fab.wab.customer.core.domain.AppSettings
 import com.fab.wab.customer.core.domain.AppearanceSettings
 import com.fab.wab.customer.core.domain.ThemeMode
@@ -65,6 +66,8 @@ private class FakeAuth(var result: AppResult<PhoneCheck> = AppResult.Success(Pho
     override suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession> =
         AppResult.Loading
     override suspend fun logout(refreshToken: String): AppResult<Unit> = AppResult.Success(Unit)
+    override suspend fun changePhone(phone: PhoneNumber, idToken: String): AppResult<UserProfile> =
+        AppResult.Success(UserProfile("c1", "Sara", null))
 }
 
 private class SettingsFake : AppSettings {

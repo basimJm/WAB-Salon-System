@@ -22,7 +22,8 @@
     "ensure-sdks": "node scripts/ensure-sdks.cjs",
     "prebuild": "npm run ensure-sdks",
     "pretypecheck": "npm run ensure-sdks",
-    "pretest": "npm run ensure-sdks"
+    "pretest": "npm run ensure-sdks",
+    "env:check": "node dist/config/checkEnvCli.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

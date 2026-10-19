@@ -13,6 +13,8 @@ import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.domain.session.UserProfile
+import com.fab.wab.customer.core.notification.push.PushNotification
+import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.realtime.FakeRealtimeClient
 import com.fab.wab.customer.core.realtime.RealtimeEvent
 import com.fab.wab.customer.core.realtime.RealtimeEvents
@@ -178,6 +180,8 @@ class HomeViewModelTest {
         assertIs<NearestUi.Salons>(vm.state.value.nearest)
         realtime.emit(RealtimeEvent(RealtimeEvents.NOTIFICATIONS_UNREAD, buildJsonObject { put("count", JsonPrimitive(120)) }))
         assertEquals(120, vm.state.value.unreadCount)
+        PushSignals.publishReceived(PushNotification("Approved", "Your booking was approved"))
+        assertEquals(2, repository.calls.size, "a foreground push refreshes Home (badge)")
     }
 
     @Test

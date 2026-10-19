@@ -69,6 +69,8 @@ private class LogoutAuth(var result: AppResult<Unit> = AppResult.Success(Unit)) 
         loggedOut += refreshToken
         return result
     }
+    override suspend fun changePhone(phone: PhoneNumber, idToken: String): AppResult<UserProfile> =
+        AppResult.Success(UserProfile("c1", "Sara", null))
 }
 
 private class PushInstallations : InstallationsRepository {

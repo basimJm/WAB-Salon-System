@@ -53,7 +53,7 @@ class MainViewModel(
         loadConfig()
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnUpdateClicked -> emitSideEffect(SideEffect.OpenStore(storeUrl))
             UiAction.OnOptionalUpdateDismissed -> updateState { copy(gate = LaunchGate.Ready) }

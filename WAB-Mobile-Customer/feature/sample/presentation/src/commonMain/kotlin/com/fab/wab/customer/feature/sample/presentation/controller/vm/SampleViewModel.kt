@@ -23,7 +23,7 @@ class SampleViewModel(
         loadItems()
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnRefresh -> {
                 analytics.trackAction(AnalyticsAction(SampleAnalytics.ACTION_REFRESH))

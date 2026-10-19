@@ -45,5 +45,7 @@ sealed interface SalonDetailsContract {
         data class OpenBooking(val salonId: String) : SideEffect
         data object OpenLogin : SideEffect
         data class ShowError(val message: String) : SideEffect
+        /** PRD §4.4: the salon does not exist or is not visible → back to Home with "Salon not available". */
+        data object NotAvailable : SideEffect
     }
 }
