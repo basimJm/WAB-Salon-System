@@ -77,8 +77,25 @@ class HomeViewModel(
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnRetry -> load()
             UiAction.OnResume -> resumeAfterSettings()
+            is UiAction.OnFavoriteClick -> toggleFavorite(event.salonId)
+            UiAction.OnEnableLocationClick -> {
+                track(HomeAnalytics.ACTION_ENABLE_LOCATION)
+                updateState { copy(dialog = HomeDialog.LocationExplanation) }
+            }
+            UiAction.OnDialogConfirm -> confirmDialog()
+            UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
+            else -> onNavigation(event)
+        }
+    }
+
+    /** Taps that only leave the screen. */
+    private fun onNavigation(event: UiAction) {
+        when (event) {
             is UiAction.OnBannerClick -> openBanner(event.bannerId)
-            UiAction.OnSearchClick -> { track(HomeAnalytics.ACTION_SEARCH_CLICK); emitSideEffect(SideEffect.OpenAllSalons()) }
+            UiAction.OnSearchClick -> {
+                track(HomeAnalytics.ACTION_SEARCH_CLICK)
+                emitSideEffect(SideEffect.OpenAllSalons())
+            }
             UiAction.OnNotificationsClick -> emitSideEffect(SideEffect.OpenNotifications)
             is UiAction.OnServiceClick -> {
                 track(HomeAnalytics.ACTION_SERVICE_CLICK, HomeAnalytics.PARAM_ID to event.serviceId)
@@ -89,14 +106,8 @@ class HomeViewModel(
                 track(HomeAnalytics.ACTION_SALON_CLICK, HomeAnalytics.PARAM_ID to event.salonId)
                 emitSideEffect(SideEffect.OpenSalon(event.salonId))
             }
-            is UiAction.OnFavoriteClick -> toggleFavorite(event.salonId)
             is UiAction.OnSeeAll -> emitSideEffect(SideEffect.OpenAllSalons(filter = event.section.filter()))
-            UiAction.OnEnableLocationClick -> {
-                track(HomeAnalytics.ACTION_ENABLE_LOCATION)
-                updateState { copy(dialog = HomeDialog.LocationExplanation) }
-            }
-            UiAction.OnDialogConfirm -> confirmDialog()
-            UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
+            else -> Unit
         }
     }
 

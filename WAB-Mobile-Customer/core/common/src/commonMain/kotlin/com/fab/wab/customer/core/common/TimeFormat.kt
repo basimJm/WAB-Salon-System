@@ -9,14 +9,15 @@ object TimeFormat {
     private const val TIME_PARTS = 2
     private const val SEPARATOR = ':'
     private const val PAD = '0'
+    private const val INVALID = -1
 
     /** "16:05" → "4:05 PM"; null when the input is not a valid "HH:mm" (fixtures, bad data) so callers can hide it. */
     fun to12Hour(hhmm: String, am: String, pm: String): String? {
         val parts = hhmm.trim().split(SEPARATOR)
-        if (parts.size != TIME_PARTS) return null
-        val hour = parts[0].toIntOrNull() ?: return null
-        val minute = parts[1].toIntOrNull() ?: return null
-        if (hour !in 0 until HOURS_IN_DAY || minute !in 0 until MINUTES_IN_HOUR) return null
+        val hour = parts.getOrNull(0)?.toIntOrNull() ?: INVALID
+        val minute = parts.getOrNull(1)?.toIntOrNull() ?: INVALID
+        val valid = parts.size == TIME_PARTS && hour in 0 until HOURS_IN_DAY && minute in 0 until MINUTES_IN_HOUR
+        if (!valid) return null
         val label = if (hour < HOURS_IN_HALF_DAY) am else pm
         val shown = (hour % HOURS_IN_HALF_DAY).let { if (it == 0) HOURS_IN_HALF_DAY else it }
         return "$shown$SEPARATOR${minute.toString().padStart(MINUTE_DIGITS, PAD)} $label"
