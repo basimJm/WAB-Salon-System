@@ -56,6 +56,7 @@ import { CAMPAIGN_JOB_NAME } from './constants/campaigns';
 import { createAdminCustomersService } from './domain/customers/adminCustomers.service';
 import { createAdminSettingsService } from './domain/adminSettings/adminSettings.service';
 import { createAdminProfileService } from './domain/adminProfile/adminProfile.service';
+import { createAdminSearchService } from './domain/adminSearch/adminSearch.service';
 import { createCampaignsService } from './domain/campaigns/campaigns.service';
 import { CampaignsRepository } from './repositories/campaigns.repository';
 import { createFavoritesService } from './domain/favorites/favorites.service';
@@ -893,6 +894,12 @@ const buildServices = (
     adminCampaigns: campaigns,
     adminSettings: adminSettingsService,
     adminProfile: adminProfileService,
+    adminSearch: createAdminSearchService({
+      customers: new CustomersRepository(),
+      salons: new SalonsRepository(),
+      members: new MembersRepository(),
+      bookings: bookingsRepository,
+    }),
     adminCustomers: createAdminCustomersService({
       customers: new CustomersRepository(),
       installations: new InstallationsRepository(),

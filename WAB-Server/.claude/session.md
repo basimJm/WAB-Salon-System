@@ -4,7 +4,7 @@
 
 ## Integration status (one glance)
 
-- Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (121) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
+- Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (122) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
 - Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); analytics = the server's own MongoDB events (no analytics provider; BigQuery/`@wab/analytics` dropped, owner 2026-10-19); payments **paused** (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev/test; HyperPay/`@wab/payments` not used by the server); storage on the in-repo S3 code until SRV-112.
 - Open work: SRV-111 contract guard, Stage N (SRV-117…128, admin gaps), Stage O (SRV-129…134, merchant gaps). Deployment SRV-011/116 and SRV-059/115: owner (PENDING).
 
@@ -24,15 +24,6 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔ (apps get 503 on payment start; CUS-047/062 blocked by the owner's pause), Architect ✔, QA ✔) — NOT verified: Docker build (no daemon), real Mongo. DEVIATIONS: the owner's "delete provider" was interpreted as removing the SDK adapters/config and pausing payments (ports, fakes and the Mongo analytics kept, `wab-analytics`/`wab-payments` folders kept); `tasks.py` touched two admin backlog rows (status only) to keep `check` green.
 
-### SRV-034 — Real Firebase ID-token verification via `wab-otp`
-
-- Branch: `feat/otp-010-publish` (shared PR with OTP-010)
-- Status: DONE
-- Acceptance criteria: `@wab/otp` `file:` dependency + `ensure-sdks` + Docker; env `FIREBASE_PROJECT_ID` (required for `OTP_PROVIDER=real`), `FIREBASE_AUTH_EMULATOR_HOST` (dev only, refused in production); `providers/otp/real.ts` maps SDK outcomes (anything unexpected is an invalid proof, never success) and errors (outage -> `ExternalServiceError`, caller bug -> `RangeError`); closed on shutdown
-- Tests: `tests/otpReal.test.ts` (9, includes the real SDK on emulator-shaped tokens) + config tests; full gate green
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: real Firebase ID tokens from the dev/prod projects, Docker build (no daemon). API docs: no change.
-
 ### SRV-117 — Admin profile (G1): profile, change password, change email, alert recipients
 
 - Branch: `feat/srv-117-admin-profile`
@@ -46,3 +37,17 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
 - Notes: BUSINESS_DOMAIN §11 gained `CURRENT_PASSWORD_INVALID`, `EMAIL_ALREADY_USED`. Wrong password is 403 (not 401) on purpose so the panel keeps the session. NOT verified: real Mongo (unique-email race relies on the unique index + duplicate-key mapping, covered by a fake), real email delivery.
+
+### SRV-118 — Admin global search (G2)
+
+- Branch: `feat/srv-118-admin-search`
+- Status: IN REVIEW
+- Acceptance criteria (Admin PRD §3 "global search"; client impact: ADM-069):
+  - [x] `GET /admin/v1/search?q=&types=&page=&pageSize=` returns groups `customers`, `salons`, `bookings`, `members`, each `{items, total}`, paginated per group with the same `page`/`pageSize` (`types` limits the groups, default all)
+  - [x] customers by name or phone, salons by name, members by name or phone, bookings by reference number (exact, normalised); every pattern is escaped (no regex injection); `q` is 2–100 characters (400 otherwise)
+  - [x] Phone and reference lookups are anchored/exact so they use the existing indexes; name lookups are a documented scan on small admin-scale collections
+  - [x] Admin token only; contract regenerated; no hardcoded values
+- Tests: `tests/adminSearch.test.ts` (9: auth, grouping, phone forms, reference, group filter, pagination, literal text, bad input) + full gate green (2496 tests, lint, typecheck, build, docs, audit 0). API docs: `GET /admin/v1/search` added; client impact: ADM-069.
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔)
+- Notes: Name lookups are an unanchored case-insensitive scan (fine at admin scale; no stemming, Arabic safe); phone/reference lookups are anchored or exact. New shared `escapeRegex` in `utils/format/regex.ts` (five older local copies not touched, out of scope). NOT verified: real Mongo.

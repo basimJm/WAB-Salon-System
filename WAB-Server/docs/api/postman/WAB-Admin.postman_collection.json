@@ -6223,6 +6223,67 @@
           }
         }
       ]
+    },
+    {
+      "name": "Admin search",
+      "item": [
+        {
+          "name": "Global search: customers, salons, bookings and team members",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/search",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "types",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            },
+            "description": "One box for the panel. `q` is 2–100 characters and is always a literal (never a pattern). Customers and members match by name or phone (national number or with the dial code), salons by name, bookings by reference number (exact). Each requested group is paginated with the same `page`/`pageSize`; `types` (comma separated) limits the groups, absent = all four."
+          }
+        }
+      ]
     }
   ],
   "variable": [

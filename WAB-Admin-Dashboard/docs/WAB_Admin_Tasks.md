@@ -206,7 +206,7 @@ The admin PRD asks for these, the server does not offer them yet (Appendix D). S
 
 | ID | Task | Branch | Needs | Server (SRV) | Status | Notes |
 |---|---|---|---|---|---|---|
-| ADM-068 | Admin profile (PRD §4): change password, change email with verification, alert-email recipients | `feat/adm-068-admin-profile` | ADM-030, ADM-013 | SRV-117 | BLOCKED | Server gap G1: no profile endpoints (alert recipients are a setting key). |
+| ADM-068 | Admin profile (PRD §4): change password, change email with verification, alert-email recipients | `feat/adm-068-admin-profile` | ADM-030, ADM-013 | SRV-117 | TODO | Server gap G1: no profile endpoints (alert recipients are a setting key). unblocked by SRV-117 on 2026-10-19 |
 | ADM-069 | Global search (PRD §3): customers, salons, bookings, members grouped; wire the topbar search UI | `feat/adm-069-global-search` | ADM-022, ADM-028 | SRV-118 | BLOCKED | Server gap G2: no search endpoint. |
 | ADM-070 | Salon editing by admin (A13): profile and location, gallery, working hours and closures, services, staff, policies | `feat/adm-070-salon-edit` | ADM-041, ADM-020 | SRV-119, SRV-120 | BLOCKED | Server gap G3: those endpoints are merchant-scoped; admin variants (with reason + audit) are missing. |
 | ADM-071 | Booking extras (A15): reassign staff with eligible list, issue a refund of a chosen amount, explicit cancel modes, related notifications and events, bookings export | `feat/adm-071-booking-extras` | ADM-049 | SRV-123 | BLOCKED | Server gap G6. |
