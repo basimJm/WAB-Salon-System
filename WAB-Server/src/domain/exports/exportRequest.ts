@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { OBJECT_ID_PATTERN } from '../../constants/database';
-import { TRANSACTION_STATUSES, TRANSACTION_TYPES } from '../../constants/enums';
+import {
+  BOOKING_PAYMENT_STATUSES,
+  BOOKING_STATUSES,
+  TRANSACTION_STATUSES,
+  TRANSACTION_TYPES,
+} from '../../constants/enums';
 import { EXPORT_FORMATS } from '../../constants/exports';
 import { REPORT_MONTH_PATTERN } from '../../constants/reports';
 import { isLocalDate } from '../../utils/time';
@@ -49,6 +54,20 @@ export const exportRequestSchema = z.discriminatedUnion('kind', [
       entityId: z.string().min(1).max(100).optional(),
       from: instant.optional(),
       to: instant.optional(),
+    }),
+  }),
+  z.object({
+    kind: z.literal('BOOKINGS'),
+    format: z.enum(EXPORT_FORMATS),
+    params: z.object({
+      statuses: z.array(z.enum(BOOKING_STATUSES)).min(1).max(BOOKING_STATUSES.length).optional(),
+      paymentStatus: z.enum(BOOKING_PAYMENT_STATUSES).optional(),
+      salonId: objectId.optional(),
+      customerId: objectId.optional(),
+      /** Appointment days (Asia/Amman), both inclusive. */
+      from: day.optional(),
+      to: day.optional(),
+      q: z.string().trim().min(1).max(100).optional(),
     }),
   }),
 ]);

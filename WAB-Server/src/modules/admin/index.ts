@@ -22,6 +22,7 @@ import {
   unavailableAdminSalonEdit,
   unavailableAdminSalonInsights,
   unavailableAdminCustomerExtras,
+  unavailableBookingAdminExtras,
   unavailableAdminCustomers,
   unavailableAdminReviews,
   unavailableSalonReview,
@@ -93,6 +94,7 @@ import { createAdminProfileRouter } from './profile/profile.routes';
 import { createAdminSearchRouter } from './search/search.routes';
 import { createAdminSalonEditRouter } from './salonEdit/salonEdit.routes';
 import { createAdminSalonInsightsRouter } from './salonInsights/salonInsights.routes';
+import { createAdminBookingExtrasRouter } from './bookingExtras/bookingExtras.routes';
 import { createAdminCustomerExtrasRouter } from './customerExtras/customerExtras.routes';
 import { ADMIN_SALON_INSIGHT_ROUTES } from '../../constants/adminSalonInsights';
 import { ADMIN_SALON_EDIT_ROUTES } from '../../constants/adminSalonEdit';
@@ -147,6 +149,14 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     router,
     ADMIN_SALON_EDIT_ROUTES.base,
     createAdminSalonEditRouter(services.adminSalonEdit ?? unavailableAdminSalonEdit, guard),
+  );
+  mount(
+    router,
+    ADMIN_BOOKING_ROUTES.base,
+    createAdminBookingExtrasRouter(
+      services.bookingAdminExtras ?? unavailableBookingAdminExtras,
+      guard,
+    ),
   );
   mount(
     router,

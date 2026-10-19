@@ -22,6 +22,7 @@ import type { AdminSettingsService } from '../domain/adminSettings/adminSettings
 import type { AdminProfileService } from '../domain/adminProfile/adminProfile.service';
 import type { AdminSearchService } from '../domain/adminSearch/adminSearch.service';
 import type { AdminSalonEditService } from '../domain/adminSalonEdit/adminSalonEdit.service';
+import type { BookingAdminExtrasService } from '../domain/bookings/bookingAdminExtras.service';
 import type { AdminCustomerExtrasService } from '../domain/customers/adminCustomerExtras.service';
 import type { SalonDeletionService } from '../domain/salons/salonDeletion.service';
 import type { SalonInsightsService } from '../domain/salons/salonInsights.service';
@@ -91,6 +92,7 @@ export interface ApiServices {
   readonly adminSearch?: AdminSearchService;
   readonly adminSalonEdit?: AdminSalonEditService;
   readonly adminCustomerExtras?: AdminCustomerExtrasService;
+  readonly bookingAdminExtras?: BookingAdminExtrasService;
   readonly adminSalonInsights?: {
     readonly insights: SalonInsightsService;
     readonly deletion: SalonDeletionService;
@@ -379,6 +381,13 @@ export const unavailableAdminSettings: AdminSettingsService = {
 
 export const unavailableAdminSearch: AdminSearchService = { search: unavailable };
 
+export const unavailableBookingAdminExtras: BookingAdminExtrasService = {
+  eligibleStaff: unavailable,
+  reassign: unavailable,
+  cancel: unavailable,
+  refund: unavailable,
+};
+
 export const unavailableAdminCustomerExtras: AdminCustomerExtrasService = {
   update: unavailable,
   reviews: unavailable,
@@ -485,7 +494,11 @@ export const unavailableBookingActions: BookingActionsService = {
 
 export const unavailableBookingCancel: BookingCancelService = { cancel: unavailable };
 
-export const unavailableBookingReassign: BookingReassignService = { reassign: unavailable };
+export const unavailableBookingReassign: BookingReassignService = {
+  reassign: unavailable,
+  reassignAny: unavailable,
+  eligibleStaff: unavailable,
+};
 
 export const unavailableBookingQueries: BookingQueriesService = {
   list: unavailable,
@@ -493,12 +506,16 @@ export const unavailableBookingQueries: BookingQueriesService = {
   calendar: unavailable,
 };
 
-export const unavailableBookingAdmin: BookingAdminService = { changeStatus: unavailable };
+export const unavailableBookingAdmin: BookingAdminService = {
+  changeStatus: unavailable,
+  cancel: unavailable,
+};
 
 export const unavailableBookingBulk: BookingBulkService = { cancelAffected: unavailable };
 
 export const unavailableAdminRefunds: RefundService = {
   requestForBooking: unavailable,
+  refundBookingAmount: unavailable,
   refundPayment: unavailable,
   attempt: unavailable,
   runDue: unavailable,

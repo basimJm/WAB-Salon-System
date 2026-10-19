@@ -75,6 +75,7 @@ import { createPaymentsService } from './domain/payments/payments.service';
 import { TransactionsRepository } from './repositories/transactions.repository';
 import { createBookingBulkService } from './domain/bookings/bookingBulk.service';
 import { createBookingAdminService } from './domain/bookings/bookingAdmin.service';
+import { createBookingAdminExtrasService } from './domain/bookings/bookingAdminExtras.service';
 import { createBookingQueriesService } from './domain/bookings/bookingQueries.service';
 import { createBookingReassignService } from './domain/bookings/bookingReassign.service';
 import { createBookingCancelService } from './domain/bookings/bookingCancel.service';
@@ -569,6 +570,7 @@ const buildServices = (
     bookings: bookingsRepository,
     availability,
     settings,
+    members: new MembersRepository(),
   });
   const bookingQueries = createBookingQueriesService({
     bookings: bookingsRepository,
@@ -584,6 +586,12 @@ const buildServices = (
     members: new MembersRepository(),
     audit,
     settings,
+  });
+  const bookingAdminExtras = createBookingAdminExtrasService({
+    reassign: bookingReassign,
+    admin: bookingAdmin,
+    refunds: fullRefunds,
+    audit,
   });
   const payments = createPaymentsService({
     transactions: transactionsRepository,
@@ -653,6 +661,7 @@ const buildServices = (
       reports: reportsService,
       transactions: adminTransactionsService,
       adminSettings: adminSettingsService,
+      bookings: bookingQueries,
     }),
     storage: providers.storage,
     scheduler: jobs.scheduler,
@@ -959,6 +968,7 @@ const buildServices = (
       audit,
     }),
     adminReviews: adminReviewsService,
+    bookingAdminExtras,
     adminCustomerExtras: createAdminCustomerExtrasService({
       customers: new CustomersRepository(),
       cities: new CitiesRepository(),

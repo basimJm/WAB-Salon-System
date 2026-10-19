@@ -7868,6 +7868,228 @@
           }
         }
       ]
+    },
+    {
+      "name": "Admin bookings",
+      "item": [
+        {
+          "name": "Staff who could take over one person of an APPROVED booking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/bookings/:id/eligible-staff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "bookings",
+                ":id",
+                "eligible-staff"
+              ],
+              "query": [
+                {
+                  "key": "personIndex",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Skills, bride qualification, hours, leave and a free slot are checked; the current staff member is left out. Advisory: the reassignment re-checks under the staff lock."
+          }
+        },
+        {
+          "name": "Reassign one person of an APPROVED booking to another staff member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/bookings/:id/reassign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "bookings",
+                ":id",
+                "reassign"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Same rules as the salon app (409 `SLOT_TAKEN`, 422 for ineligible staff or a booking that is not APPROVED/in the future). Needs a reason, is audited; customer, salon and staff are notified and sockets updated.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personIndex\": 0,\n  \"staffId\": \"string\",\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cancel a PENDING or APPROVED booking by mode",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/bookings/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "bookings",
+                ":id",
+                "cancel"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Modes: `CUSTOMER`, `SALON`, `ADMIN`. CUSTOMER = as if the customer cancelled (refund by the snapshotted policy; everything while PENDING), SALON = the salon cancels (full refund), ADMIN = platform decision (full refund; recorded as a salon-side cancellation because no separate status exists, the history keeps the admin as the actor). 422 `INVALID_TRANSITION` for other statuses (use the status endpoint). Needs a reason, is audited; refunds start through the refund engine and the parties are notified.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mode\": \"CUSTOMER\",\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Refund a chosen amount of the online payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/bookings/:id/refund",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "bookings",
+                ":id",
+                "refund"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "`amount` is a JOD string above zero and at most what is still refundable (400 `body.amount`). 422 `INVALID_TRANSITION` when nothing was paid online. The refund starts at once and retries like any refund; while payments are paused nothing can have been paid, so it answers 422. Needs a reason, is audited.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"string\",\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

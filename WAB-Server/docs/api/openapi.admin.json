@@ -22163,6 +22163,81 @@
                       "format",
                       "params"
                     ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "BOOKINGS"
+                        ]
+                      },
+                      "format": {
+                        "type": "string",
+                        "enum": [
+                          "XLSX",
+                          "CSV",
+                          "PDF"
+                        ]
+                      },
+                      "params": {
+                        "type": "object",
+                        "properties": {
+                          "statuses": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "PENDING",
+                                "APPROVED",
+                                "REJECTED",
+                                "CANCELLED_BY_CUSTOMER",
+                                "CANCELLED_BY_SALON",
+                                "AUTO_CANCELLED",
+                                "COMPLETED",
+                                "NO_SHOW"
+                              ]
+                            },
+                            "minItems": 1,
+                            "maxItems": 8
+                          },
+                          "paymentStatus": {
+                            "type": "string",
+                            "enum": [
+                              "PAY_ON_ARRIVAL",
+                              "DEPOSIT_PAID",
+                              "FULLY_PAID",
+                              "PAID"
+                            ]
+                          },
+                          "salonId": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{24}$/i"
+                          },
+                          "customerId": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{24}$/i"
+                          },
+                          "from": {
+                            "type": "string"
+                          },
+                          "to": {
+                            "type": "string"
+                          },
+                          "q": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "format",
+                      "params"
+                    ]
                   }
                 ]
               }
@@ -22199,7 +22274,8 @@
                             "REPORT_WEEKLY",
                             "REPORT_MONTHLY",
                             "TRANSACTIONS",
-                            "AUDIT_LOGS"
+                            "AUDIT_LOGS",
+                            "BOOKINGS"
                           ]
                         },
                         "format": {
@@ -22410,7 +22486,8 @@
                               "REPORT_WEEKLY",
                               "REPORT_MONTHLY",
                               "TRANSACTIONS",
-                              "AUDIT_LOGS"
+                              "AUDIT_LOGS",
+                              "BOOKINGS"
                             ]
                           },
                           "format": {
@@ -22609,7 +22686,8 @@
                             "REPORT_WEEKLY",
                             "REPORT_MONTHLY",
                             "TRANSACTIONS",
-                            "AUDIT_LOGS"
+                            "AUDIT_LOGS",
+                            "BOOKINGS"
                           ]
                         },
                         "format": {
@@ -35299,6 +35377,846 @@
                     },
                     "data": {
                       "type": "null"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/bookings/{id}/eligible-staff": {
+      "get": {
+        "tags": [
+          "Admin bookings"
+        ],
+        "summary": "Staff who could take over one person of an APPROVED booking",
+        "description": "Skills, bride qualification, hours, leave and a free slot are checked; the current staff member is left out. Advisory: the reassignment re-checks under the staff lock.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 5
+            },
+            "required": false,
+            "name": "personIndex",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Eligible staff",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "staffId": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "staffId",
+                          "name"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/bookings/{id}/reassign": {
+      "post": {
+        "tags": [
+          "Admin bookings"
+        ],
+        "summary": "Reassign one person of an APPROVED booking to another staff member",
+        "description": "Same rules as the salon app (409 `SLOT_TAKEN`, 422 for ineligible staff or a booking that is not APPROVED/in the future). Needs a reason, is audited; customer, salon and staff are notified and sockets updated.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "personIndex": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 5
+                  },
+                  "staffId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "personIndex",
+                  "staffId",
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Booking",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "referenceNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "APPROVED",
+                            "REJECTED",
+                            "CANCELLED_BY_CUSTOMER",
+                            "CANCELLED_BY_SALON",
+                            "AUTO_CANCELLED",
+                            "COMPLETED",
+                            "NO_SHOW"
+                          ]
+                        },
+                        "appointmentStart": {
+                          "type": "string"
+                        },
+                        "appointmentEnd": {
+                          "type": "string"
+                        },
+                        "money": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "string"
+                            },
+                            "dueOnline": {
+                              "type": "string"
+                            },
+                            "paidOnline": {
+                              "type": "string"
+                            },
+                            "remaining": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "dueOnline",
+                            "paidOnline",
+                            "remaining"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "referenceNumber",
+                        "status",
+                        "appointmentStart",
+                        "appointmentEnd",
+                        "money"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/bookings/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Admin bookings"
+        ],
+        "summary": "Cancel a PENDING or APPROVED booking by mode",
+        "description": "Modes: `CUSTOMER`, `SALON`, `ADMIN`. CUSTOMER = as if the customer cancelled (refund by the snapshotted policy; everything while PENDING), SALON = the salon cancels (full refund), ADMIN = platform decision (full refund; recorded as a salon-side cancellation because no separate status exists, the history keeps the admin as the actor). 422 `INVALID_TRANSITION` for other statuses (use the status endpoint). Needs a reason, is audited; refunds start through the refund engine and the parties are notified.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "CUSTOMER",
+                      "SALON",
+                      "ADMIN"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "mode",
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Booking",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "referenceNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "APPROVED",
+                            "REJECTED",
+                            "CANCELLED_BY_CUSTOMER",
+                            "CANCELLED_BY_SALON",
+                            "AUTO_CANCELLED",
+                            "COMPLETED",
+                            "NO_SHOW"
+                          ]
+                        },
+                        "appointmentStart": {
+                          "type": "string"
+                        },
+                        "appointmentEnd": {
+                          "type": "string"
+                        },
+                        "money": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "string"
+                            },
+                            "dueOnline": {
+                              "type": "string"
+                            },
+                            "paidOnline": {
+                              "type": "string"
+                            },
+                            "remaining": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "dueOnline",
+                            "paidOnline",
+                            "remaining"
+                          ]
+                        },
+                        "irregular": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "referenceNumber",
+                        "status",
+                        "appointmentStart",
+                        "appointmentEnd",
+                        "money",
+                        "irregular"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/bookings/{id}/refund": {
+      "post": {
+        "tags": [
+          "Admin bookings"
+        ],
+        "summary": "Refund a chosen amount of the online payment",
+        "description": "`amount` is a JOD string above zero and at most what is still refundable (400 `body.amount`). 422 `INVALID_TRANSITION` when nothing was paid online. The refund starts at once and retries like any refund; while payments are paused nothing can have been paid, so it answers 422. Needs a reason, is audited.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "amount",
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Refund",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "amount",
+                        "status"
+                      ]
                     },
                     "meta": {
                       "$ref": "#/components/schemas/PaginationMeta"
