@@ -5,7 +5,7 @@ const { existsSync } = require('node:fs');
 const { join, resolve } = require('node:path');
 const { spawnSync } = require('node:child_process');
 
-const SDKS = ['wab-notifications', 'wab-otp', 'wab-payments', 'wab-storage', 'wab-analytics'];
+const SDKS = ['wab-notifications', 'wab-otp', 'wab-storage'];
 const root = resolve(__dirname, '..', '..');
 
 const run = (cwd, args) => {

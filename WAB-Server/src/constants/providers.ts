@@ -8,6 +8,13 @@ export type ProviderMode = (typeof PROVIDER_MODES)[number];
 export const DEFAULT_PROVIDER_MODE: ProviderMode = 'fake';
 export const REAL_PROVIDER_MODE: ProviderMode = 'real';
 
+/** Payments are paused (owner decision 2026-10-19): no gateway is integrated, so there is no `real` mode. */
+export const PAYMENT_PROVIDER_MODES = ['fake', 'disabled'] as const;
+export type PaymentProviderMode = (typeof PAYMENT_PROVIDER_MODES)[number];
+export const DISABLED_PAYMENT_MODE: PaymentProviderMode = 'disabled';
+export const PAYMENTS_DISABLED_MESSAGE = 'payments are paused: no payment gateway is integrated';
+export const DEFAULT_PAYMENT_PROVIDER_MODE: PaymentProviderMode = 'fake';
+
 /** Why a purpose is verified (BUSINESS_DOMAIN.md §4.2, wab-otp BRD §4.1). */
 export const OTP_PURPOSES = [
   'LOGIN',

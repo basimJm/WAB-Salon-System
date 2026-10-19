@@ -5,35 +5,24 @@
 ## Integration status (one glance)
 
 - Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (116) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
-- Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); analytics **real** (`@wab/analytics`, SRV-110); payments **real** (`@wab/payments`, HyperPay, SRV-092); storage on the in-repo S3 code until SRV-112.
+- Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); analytics = the server's own MongoDB events (no analytics provider; BigQuery/`@wab/analytics` dropped, owner 2026-10-19); payments **paused** (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev/test; HyperPay/`@wab/payments` not used by the server); storage on the in-repo S3 code until SRV-112.
 - Open work: SRV-111 contract guard, Stage N (SRV-117…128, admin gaps), Stage O (SRV-129…134, merchant gaps). Deployment SRV-011/116 and SRV-059/115: owner (PENDING).
 
 ## Current task
 
-### SRV-110 — `ANALYTICS_PROVIDER=real` through `@wab/analytics`
+### T-125 — Remove the analytics and payment SDK providers from WAB-Server (owner order 2026-10-19)
 
-- Branch: `feat/ana-010-publish` (shared with ANA-010: package prep and the server wiring in one PR)
-- Status: IN REVIEW
-- Acceptance criteria (BE/NFR: ANA-03, ANA-04 via the package; server rules §2 externals behind interfaces, §5 no hardcoding, §8 provider errors):
-  - [x] `@wab/analytics` dependency (`file:../wab-analytics`, built by `ensure-sdks`, Dockerfile + dockerignore), `@google-cloud/bigquery` for the warehouse
-  - [x] Env keys `ANALYTICS_BIGQUERY_PROJECT_ID|DATASET|LOCATION|CREDENTIALS_JSON|CRASH_TABLE|MAX_BYTES_BILLED` in constants, schema, `.env.example`; project and dataset together; credentials must be a JSON object (never echoed); production requires project, dataset and credentials
-  - [x] `providers/analytics/real.ts`: SDK over `serverEvents` (ObjectId codec) and `identityLinks`, Redis result cache, BigQuery when configured; caller errors -> `RangeError`, vendor errors -> `ExternalServiceError`; indexes created on start (failure logged); closed on shutdown; `sdk` exposed for funnels/cohorts/journey/overview
-  - [x] `createProviders` builds it with `mongoose.connection`; without a connection or deps it fails loudly
-  - [x] The existing Mongo-backed admin analytics (SRV-105) is untouched; admin gap tasks (SRV-117+) are NOT done here
-- Tests: `tests/analyticsReal.test.ts` (19: options, codec, error mapping, stubbed SDK, real SDK over fake collections, createProviders) + config tests (analytics settings, production requirements)
+- Branch: `chore/srv-remove-analytics-payments`
+- Status: IN REVIEW (draft PR into `server`)
+- Acceptance criteria (CLAUDE.md §3/§4, BUSINESS_DOMAIN payments rules 4.10):
+  - [x] No `analytics` provider: `ANALYTICS_PROVIDER` + `ANALYTICS_BIGQUERY_*`, `AnalyticsSettings`, `providers/analytics/real.ts`, `@wab/analytics` dependency, Docker/ensure-sdks entries removed; ONE `createMongoAnalytics` in `server.ts` feeds installation links and admin analytics
+  - [x] No HyperPay: `HYPERPAY_*`, `PAYMENT_GATEWAY`, `PaymentSettings`, `providers/payments/real.ts`, `@wab/payments` dependency, Docker/ensure-sdks entries removed
+  - [x] `PAYMENT_PROVIDER` = `fake|disabled`; production accepts only `disabled`; `DisabledPaymentProvider` answers 503 (`ExternalServiceError`, unavailable) on createSession/verify/refund/getRefund and `UnauthorizedError` on webhooks
+  - [x] A paused payment start creates no transaction and no draft link (failure happens before `transactions.create`); refunds cannot exist because no payment can succeed
+  - [x] Backlog: SRV-092 and SRV-110 set to PENDING by the tool (dependents ADM-075/076 → BLOCKED so `tasks.py check` stays OK)
+- Tests: `tests/paymentsDisabled.test.ts` (provider), `tests/paymentsPaused.test.ts` (HTTP 503, no transaction; webhook 401), `tests/providers.test.ts`, `tests/config.test.ts`, `tests/payoutDetails.test.ts` adapted; deleted `paymentsReal`/`analyticsReal` tests
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: a real MongoDB write/read through the package, a real BigQuery dataset or credentials, the Docker build (no daemon). API docs: no change.
-
-## Last blocks
-
-### SRV-092 — Real payment provider through `@wab/payments` (HyperPay)
-
-- Branch: `feat/pay-012-publish-node` (shared PR with PAY-012)
-- Status: DONE
-- Acceptance criteria: `@wab/payments` `file:` dependency + `ensure-sdks` + Docker (KMP folder excluded); env `HYPERPAY_*` / `PAYMENT_GATEWAY` validated at start-up (webhook key required and mock/test mode refused in production); `providers/payments/real.ts` maps SDK statuses (UNKNOWN never success) and errors (webhook -> 401, over-refund -> PaymentError, outage -> 502/503, caller bug -> RangeError); webhook route passes the HyperPay tag/IV headers; REFUND/IGNORED notifications settle nothing; `PaymentView.checkout` gives the app what it opens the gateway UI with
-- Tests: `tests/paymentsReal.test.ts` (21, includes the real SDK against the local OPP mock and Redis), config (new HyperPay block), paymentsService (checkout block, webhook headers/kinds); full gate green
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔ (checkout block contract for CUS-047/CUS-062), Architect ✔, QA ✔) — NOT verified: real HyperPay (entity, token, webhook key, JOD enabled), Docker build (no daemon). API docs: updated (`checkout` on the payment, webhook headers).
+- Review: PASSED (SE ✔, Mobile ✔ (apps get 503 on payment start; CUS-047/062 blocked by the owner's pause), Architect ✔, QA ✔) — NOT verified: Docker build (no daemon), real Mongo. DEVIATIONS: the owner's "delete provider" was interpreted as removing the SDK adapters/config and pausing payments (ports, fakes and the Mongo analytics kept, `wab-analytics`/`wab-payments` folders kept); `tasks.py` touched two admin backlog rows (status only) to keep `check` green.
 
 ### SRV-034 — Real Firebase ID-token verification via `wab-otp`
 

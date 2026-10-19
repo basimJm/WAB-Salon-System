@@ -9698,7 +9698,7 @@
                           "properties": {
                             "provider": {
                               "type": "string",
-                              "description": "Gateway adapter: hyperpay, mock-gateway or fake."
+                              "description": "Gateway adapter: fake (dev/test) or disabled (payments paused)."
                             },
                             "environment": {
                               "type": "string",
@@ -9957,7 +9957,7 @@
                           "properties": {
                             "provider": {
                               "type": "string",
-                              "description": "Gateway adapter: hyperpay, mock-gateway or fake."
+                              "description": "Gateway adapter: fake (dev/test) or disabled (payments paused)."
                             },
                             "environment": {
                               "type": "string",

@@ -1,5 +1,7 @@
 # wab-analytics — Integration (technical implementation document)
 
+> Not used by the server (owner decision 2026-10-19): WAB-Server no longer depends on this package.
+
 > Single source of truth for **how this package is built and how any project uses it**. Updated after every commit/push that changes the implementation (Rules.md §14). Status legend: ✅ done · 🚧 in progress · ⬜ not started.
 
 | Field | Value |

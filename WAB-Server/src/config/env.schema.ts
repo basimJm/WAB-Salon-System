@@ -10,13 +10,7 @@ import {
   LOG_LEVELS,
   DEFAULT_SMTP_PORT,
   DEFAULT_EMAIL_FROM_NAME,
-  DEFAULT_PAYMENT_GATEWAY,
-  HYPERPAY_TEST_MODES,
-  HYPERPAY_WEBHOOK_KEY_PATTERN,
   NOTIFIER_REAL_REQUIRED_KEYS,
-  PAYMENT_GATEWAYS,
-  PAYMENT_REAL_REQUIRED_KEYS,
-  ANALYTICS_PRODUCTION_REQUIRED_KEYS,
   OTP_REAL_REQUIRED_KEYS,
   FIREBASE_EMULATOR_HOST_PATTERN,
   STORAGE_REAL_REQUIRED_KEYS,
@@ -28,7 +22,12 @@ import {
 } from '../constants/env';
 import { JWT_SECRET_MIN_LENGTH } from '../constants/auth';
 import { isEncryptionKey } from '../utils/crypto/aesGcm';
-import { PROVIDER_MODES, REAL_PROVIDER_MODE } from '../constants/providers';
+import {
+  DISABLED_PAYMENT_MODE,
+  PAYMENT_PROVIDER_MODES,
+  PROVIDER_MODES,
+  REAL_PROVIDER_MODE,
+} from '../constants/providers';
 import {
   DEFAULT_TRUST_PROXY_HOPS,
   TRUST_PROXY_HOPS_MAX,
@@ -44,16 +43,7 @@ const splitList = (value: string): string[] =>
 /** Raw environment variables → validated, typed values. Secrets have no defaults. */
 const booleanText = z.enum(['true', 'false']).transform((value) => value === 'true');
 const providerMode = z.enum(PROVIDER_MODES).optional();
-
-/** A JSON object given as text (service-account keys); the content is never echoed. */
-const isJsonObject = (text: string): boolean => {
-  try {
-    const parsed: unknown = JSON.parse(text);
-    return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
-  } catch {
-    return false;
-  }
-};
+const paymentProviderMode = z.enum(PAYMENT_PROVIDER_MODES).optional();
 
 export const envSchema = z
   .object({
@@ -76,8 +66,7 @@ export const envSchema = z
     [ENV_KEYS.otpProvider]: providerMode,
     [ENV_KEYS.storageProvider]: providerMode,
     [ENV_KEYS.notifierProvider]: providerMode,
-    [ENV_KEYS.paymentProvider]: providerMode,
-    [ENV_KEYS.analyticsProvider]: providerMode,
+    [ENV_KEYS.paymentProvider]: paymentProviderMode,
     [ENV_KEYS.fcmServiceAccountJson]: z.string().min(1).optional(),
     [ENV_KEYS.fcmProjectId]: z.string().min(1).optional(),
     [ENV_KEYS.firebaseProjectId]: z.string().min(1).optional(),
@@ -98,13 +87,6 @@ export const envSchema = z
     [ENV_KEYS.smtpPass]: z.string().min(1).optional(),
     [ENV_KEYS.emailFromAddress]: z.email().optional(),
     [ENV_KEYS.emailFromName]: z.string().min(1).default(DEFAULT_EMAIL_FROM_NAME),
-    [ENV_KEYS.paymentGateway]: z.enum(PAYMENT_GATEWAYS).default(DEFAULT_PAYMENT_GATEWAY),
-    [ENV_KEYS.hyperpayBaseUrl]: z.url().optional(),
-    [ENV_KEYS.hyperpayEntityId]: z.string().min(1).optional(),
-    [ENV_KEYS.hyperpayAccess]: z.string().min(1).optional(),
-    [ENV_KEYS.hyperpayWebhookKey]: z.string().regex(HYPERPAY_WEBHOOK_KEY_PATTERN).optional(),
-    [ENV_KEYS.hyperpayReturnUrl]: z.url().optional(),
-    [ENV_KEYS.hyperpayTestMode]: z.enum(HYPERPAY_TEST_MODES).optional(),
     [ENV_KEYS.s3Region]: z.string().min(1).optional(),
     [ENV_KEYS.s3PublicBucket]: z.string().min(1).optional(),
     [ENV_KEYS.s3PrivateBucket]: z.string().min(1).optional(),
@@ -116,12 +98,6 @@ export const envSchema = z
     [ENV_KEYS.cloudfrontBaseUrl]: z.url().optional(),
     [ENV_KEYS.cloudfrontKeyPairId]: z.string().min(1).optional(),
     [ENV_KEYS.cloudfrontPrivateKey]: z.string().min(1).optional(),
-    [ENV_KEYS.analyticsBigqueryProjectId]: z.string().min(1).optional(),
-    [ENV_KEYS.analyticsBigqueryDataset]: z.string().min(1).optional(),
-    [ENV_KEYS.analyticsBigqueryLocation]: z.string().min(1).optional(),
-    [ENV_KEYS.analyticsBigqueryCredentialsJson]: z.string().refine(isJsonObject).optional(),
-    [ENV_KEYS.analyticsBigqueryCrashTable]: z.string().min(1).optional(),
-    [ENV_KEYS.analyticsBigqueryMaxBytesBilled]: z.coerce.number().int().positive().optional(),
   })
   // Production never runs on fakes, and never guesses: every provider must be named `real`.
   .superRefine((env, context) => {
@@ -174,45 +150,7 @@ export const envSchema = z
         }
       }
     }
-    // BigQuery needs project and dataset together; production needs the whole group.
-    if (env[ENV_KEYS.analyticsProvider] === REAL_PROVIDER_MODE) {
-      const project = env[ENV_KEYS.analyticsBigqueryProjectId];
-      const dataset = env[ENV_KEYS.analyticsBigqueryDataset];
-      if ((project === undefined) !== (dataset === undefined)) {
-        context.addIssue({
-          code: 'custom',
-          path: [ENV_KEYS.analyticsBigqueryDataset],
-          message: ENV_KEYS.analyticsBigqueryDataset,
-        });
-      }
-      if (env[ENV_KEYS.nodeEnv] === 'production') {
-        for (const key of ANALYTICS_PRODUCTION_REQUIRED_KEYS) {
-          if (env[key] === undefined) {
-            context.addIssue({ code: 'custom', path: [key], message: key });
-          }
-        }
-      }
-    }
-    // A real payment provider needs its HyperPay credentials; the mock gateway also needs its URL.
-    if (env[ENV_KEYS.paymentProvider] === REAL_PROVIDER_MODE) {
-      const missing: string[] = PAYMENT_REAL_REQUIRED_KEYS.filter((key) => env[key] === undefined);
-      if (
-        env[ENV_KEYS.paymentGateway] === 'mock-gateway' &&
-        env[ENV_KEYS.hyperpayBaseUrl] === undefined
-      ) {
-        missing.push(ENV_KEYS.hyperpayBaseUrl);
-      }
-      for (const key of missing) context.addIssue({ code: 'custom', path: [key], message: key });
-    }
     if (env[ENV_KEYS.nodeEnv] !== 'production') return;
-    if (env[ENV_KEYS.paymentProvider] === REAL_PROVIDER_MODE) {
-      const forbidden: string[] = [];
-      if (env[ENV_KEYS.paymentGateway] === 'mock-gateway') forbidden.push(ENV_KEYS.paymentGateway);
-      if (env[ENV_KEYS.hyperpayTestMode] !== undefined) forbidden.push(ENV_KEYS.hyperpayTestMode);
-      if (env[ENV_KEYS.hyperpayWebhookKey] === undefined)
-        forbidden.push(ENV_KEYS.hyperpayWebhookKey);
-      for (const key of forbidden) context.addIssue({ code: 'custom', path: [key], message: key });
-    }
     if (env[ENV_KEYS.payoutEncryptionKey] === undefined) {
       context.addIssue({
         code: 'custom',
@@ -223,6 +161,14 @@ export const envSchema = z
     for (const key of PROVIDER_ENV_KEYS) {
       if (env[key] !== REAL_PROVIDER_MODE)
         context.addIssue({ code: 'custom', path: [key], message: key });
+    }
+    // Payments are paused: production names `disabled` explicitly and never runs a fake gateway.
+    if (env[ENV_KEYS.paymentProvider] !== DISABLED_PAYMENT_MODE) {
+      context.addIssue({
+        code: 'custom',
+        path: [ENV_KEYS.paymentProvider],
+        message: ENV_KEYS.paymentProvider,
+      });
     }
   });
 
