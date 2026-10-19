@@ -12,6 +12,7 @@ import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.mvi.BaseViewModel
+import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.navigation.route.SalonListFilter
 import com.fab.wab.customer.core.realtime.RealtimeClient
 import com.fab.wab.customer.core.realtime.RealtimeEvents
@@ -68,6 +69,10 @@ class HomeViewModel(
                 val count = runCatching { event.payload.jsonObject[UNREAD_COUNT_KEY]?.jsonPrimitive?.intOrNull }.getOrNull()
                 if (count != null) updateState { copy(unreadCount = count) }
             }
+        }
+        scope.launch {
+            // PRD §10.2: a push shown while the app is open refreshes the badge (the Home payload carries the unread count).
+            PushSignals.messages.collect { if (uiState.value.signedIn && uiState.value.hasContent) load(refresh = true) }
         }
     }
 

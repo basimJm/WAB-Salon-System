@@ -18,6 +18,9 @@ import com.fab.wab.customer.core.domain.salon.ReviewsPreview
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.salon.StaffMember
 import com.fab.wab.customer.core.domain.session.Gender
+import com.fab.wab.customer.core.notification.push.PushKeys
+import com.fab.wab.customer.core.notification.push.PushNotification
+import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.realtime.FakeRealtimeClient
 import com.fab.wab.customer.core.realtime.RealtimeEvent
 import com.fab.wab.customer.core.realtime.RealtimeEvents
@@ -38,6 +41,8 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Instant
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -120,6 +125,19 @@ class BookingDetailsViewModelTest {
         realtime.emit(RealtimeEvent(RealtimeEvents.BOOKING_UPDATED))
         assertEquals(2, repository.detailCalls.size)
         assertEquals(1, salons.calls)
+        val other = buildJsonObject { put("id", JsonPrimitive("b9")); put("status", JsonPrimitive("APPROVED")) }
+        realtime.emit(RealtimeEvent(RealtimeEvents.BOOKING_UPDATED, other))
+        assertEquals(2, repository.detailCalls.size, "another booking's update is ignored")
+        val mine = buildJsonObject { put("id", JsonPrimitive("b1")); put("status", JsonPrimitive("COMPLETED")) }
+        realtime.emit(RealtimeEvent(RealtimeEvents.BOOKING_UPDATED, mine))
+        realtime.emit(RealtimeEvent(RealtimeEvents.BOOKING_UPDATED, mine))
+        assertEquals(3, repository.detailCalls.size, "the same change delivered twice refreshes once")
+        PushSignals.publishReceived(PushNotification("t", "b", mapOf(PushKeys.BOOKING_ID to "b9")))
+        PushSignals.publishReceived(PushNotification("t", "b", mapOf(PushKeys.BOOKING_ID to "b1")))
+        assertEquals(4, repository.detailCalls.size, "only a push about this booking refreshes")
+        vm.onEvent(UiAction.OnResume)
+        vm.onEvent(UiAction.OnResume)
+        assertEquals(5, repository.detailCalls.size, "the first resume is the initial composition")
     }
 
     @Test

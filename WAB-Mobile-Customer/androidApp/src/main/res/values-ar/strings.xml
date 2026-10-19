@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">WAB للأعراس والجمال</string>
+    <string name="push_channel_name">الإشعارات</string>
 </resources>

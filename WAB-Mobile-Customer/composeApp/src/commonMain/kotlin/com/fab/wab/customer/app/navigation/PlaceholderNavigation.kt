@@ -11,29 +11,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.fab.wab.customer.app.resources.Res
-import com.fab.wab.customer.app.resources.placeholder_content_page
 import com.fab.wab.customer.app.resources.placeholder_verify
-import com.fab.wab.customer.app.resources.placeholder_faq
-import com.fab.wab.customer.app.resources.placeholder_personal_info
 import com.fab.wab.customer.core.navigation.route.Screen
 import com.fab.wab.customer.designsystem.components.feedback.AppEmptyState
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-
-/** S22 personal info (CUS-054) and the FAQ page (CUS-055) reached from S21. */
-fun NavGraphBuilder.registerPlaceholderProfileScreens() {
-    composable<Screen.PersonalInfo> { PlaceholderRootScreen(Res.string.placeholder_personal_info) }
-    composable<Screen.Faq> { PlaceholderRootScreen(Res.string.placeholder_faq) }
-}
-
-/** Legal / support pages still to come (CUS-05x); Login and Register link to them. */
-fun NavGraphBuilder.registerPlaceholderAuthScreens() {
-    composable<Screen.ContentPage> { entry ->
-        PlaceholderRootScreen(Res.string.placeholder_content_page, detail = entry.toRoute<Screen.ContentPage>().slug)
-    }
-}
 
 /** Destinations Home links to before their tasks land (S16 step 6 CUS-047). */
 fun NavGraphBuilder.registerPlaceholderHomeScreens() {

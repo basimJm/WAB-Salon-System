@@ -118,4 +118,7 @@ private val FEATURE_MODULES = listOf(
     ":feature:profile:presentation",
     ":feature:profile:domain",
     ":feature:profile:di",
+    ":feature:content:presentation",
+    ":feature:content:domain",
+    ":feature:content:di",
 )

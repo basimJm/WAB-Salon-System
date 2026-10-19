@@ -6,6 +6,6 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val notificationsPresentationModule = module {
-    factory { NotificationsDependencies(loadNotifications = get(), markRead = get(), analytics = get()) }
+    factory { NotificationsDependencies(loadNotifications = get(), markRead = get(), realtime = get(), analytics = get()) }
     viewModel { NotificationsViewModel(deps = get()) }
 }

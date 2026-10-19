@@ -10,6 +10,10 @@ data class CustomerAccount(
     val email: String,
     val gender: Gender?,
     val phoneE164: String,
+    val phoneCountryCode: String,
+    val phoneNumber: String,
+    val cityId: String,
+    val areaId: String,
     val avatarUrl: String?,
     val pushEnabled: Boolean,
 ) {
@@ -38,3 +42,6 @@ object ProfileDefaults {
     const val DELETION_GRACE_DAYS = 30
     const val MAX_NICKNAME_LENGTH = 50
 }
+
+/** `PATCH /profile` fields of S22 (phone changes go through `POST /auth/change-phone`). */
+data class ProfileUpdate(val firstName: String, val lastName: String, val email: String, val gender: Gender, val cityId: String, val areaId: String)

@@ -19,8 +19,5 @@
     <string name="nav_favorites">Favorites</string>
     <string name="nav_bookings">Bookings</string>
     <string name="nav_profile">Profile</string>
-    <string name="placeholder_content_page">Page (coming soon)</string>
     <string name="placeholder_verify">Verification &amp; payment (coming soon)</string>
-    <string name="placeholder_personal_info">Personal information (coming soon)</string>
-    <string name="placeholder_faq">FAQ (coming soon)</string>
 </resources>

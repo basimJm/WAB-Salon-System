@@ -9,6 +9,7 @@ import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.mvi.BaseViewModel
+import com.fab.wab.customer.core.ui.permission.AppPermission
 import com.fab.wab.customer.feature.profile.domain.model.ProfileDefaults
 import com.fab.wab.customer.feature.profile.presentation.analytics.ProfileAnalytics
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ContactChannel
@@ -113,6 +114,8 @@ class ProfileViewModel(
         track(ProfileAnalytics.ACTION_PUSH, ProfileAnalytics.PARAM_VALUE to enabled.toString())
         updateState { copy(pushEnabled = enabled) }
         scope.launch {
+            // PRD §10.2: delivery also needs the OS permission; a refusal keeps the preference (settings can grant it later).
+            if (enabled) deps.permissions.ensure(AppPermission.NOTIFICATIONS)
             val result = deps.setPushEnabled(enabled)
             if (result is AppResult.Error) emitSideEffect(SideEffect.ShowError(deps.errorText(result.appError)))
         }
@@ -137,10 +140,20 @@ class ProfileViewModel(
             ProfileLink.FAQ -> emitSideEffect(SideEffect.OpenFaq)
             ProfileLink.RATE_APP -> storeUrl?.let(deps.external::openUrl)
             ProfileLink.SHARE_APP -> storeUrl?.let(deps.external::share)
-            ProfileLink.REGISTER_SALON -> deps.external.openUrl(DeepLinks.merchantRegistration(deps.environment.webBaseUrl))
+            ProfileLink.REGISTER_SALON -> openMerchantRegistration()
             ProfileLink.PRIVACY -> emitSideEffect(SideEffect.OpenContent(ContentSlugs.PRIVACY))
             ProfileLink.TERMS -> emitSideEffect(SideEffect.OpenContent(ContentSlugs.TERMS))
             ProfileLink.ABOUT -> emitSideEffect(SideEffect.OpenContent(ContentSlugs.ABOUT))
+        }
+    }
+
+    /** PRD S21 / Merchant PRD §4.5: the merchant app if installed, else its store page; the website until those are configured. */
+    private fun openMerchantRegistration() {
+        val merchant = deps.environment.merchant
+        if (merchant.isConfigured) {
+            deps.external.openApp(merchant.registerUrl, merchant.appId, merchant.storeUrl)
+        } else {
+            deps.external.openUrl(DeepLinks.merchantRegistration(deps.environment.webBaseUrl))
         }
     }
 

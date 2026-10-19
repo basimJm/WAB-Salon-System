@@ -3,6 +3,11 @@ package com.fab.wab.customer.feature.notifications.presentation
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
+import com.fab.wab.customer.core.notification.push.PushNotification
+import com.fab.wab.customer.core.notification.push.PushSignals
+import com.fab.wab.customer.core.realtime.FakeRealtimeClient
+import com.fab.wab.customer.core.realtime.RealtimeEvent
+import com.fab.wab.customer.core.realtime.RealtimeEvents
 import com.fab.wab.customer.feature.notifications.domain.model.Notification
 import com.fab.wab.customer.feature.notifications.domain.model.NotificationFilters
 import com.fab.wab.customer.feature.notifications.domain.repository.NotificationsRepository
@@ -50,10 +55,11 @@ class NotificationsViewModelTest {
 
     private val effects = mutableListOf<SideEffect>()
     private val repository = NotificationsFake()
+    private val realtime = FakeRealtimeClient()
 
     private fun TestScope.viewModel(): NotificationsViewModel {
         val deps = NotificationsDependencies(
-            LoadNotificationsUseCase(repository), MarkNotificationsReadUseCase(repository), NoOpAnalyticsTracker, errorText = { "error" },
+            LoadNotificationsUseCase(repository), MarkNotificationsReadUseCase(repository), realtime, NoOpAnalyticsTracker, errorText = { "error" },
         )
         val vm = NotificationsViewModel(deps, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
@@ -132,5 +138,20 @@ class NotificationsViewModelTest {
         assertEquals(10, vm.state.value.items.size)
         assertNull(vm.state.value.error)
         assertEquals<SideEffect>(SideEffect.ShowError("error"), effects.single())
+    }
+
+    @Test
+    fun realtimeUnreadPushAndForegroundRefreshTheList() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        assertEquals(1, repository.lists.size)
+        realtime.emit(RealtimeEvent(RealtimeEvents.NOTIFICATIONS_UNREAD))
+        assertEquals(2, repository.lists.size)
+        PushSignals.publishReceived(PushNotification("t", "b"))
+        assertEquals(3, repository.lists.size)
+        vm.onEvent(UiAction.OnResume)
+        assertEquals(3, repository.lists.size, "the first resume comes with the first composition")
+        vm.onEvent(UiAction.OnResume)
+        assertEquals(4, repository.lists.size)
+        assertEquals(10, vm.state.value.items.size)
     }
 }

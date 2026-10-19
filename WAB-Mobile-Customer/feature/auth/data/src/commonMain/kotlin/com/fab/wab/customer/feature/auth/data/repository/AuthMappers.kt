@@ -1,6 +1,7 @@
 package com.fab.wab.customer.feature.auth.data.repository
 
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBodyInstallation
+import com.fab.wab.customer.core.data.contract.generated.CustomerProfile
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptData
@@ -74,3 +75,5 @@ fun RegisterRequest.toBody(installation: InstallationInfo): PostAuthRegisterBody
     idToken = idToken,
     installation = installation.toRegisterBody(),
 )
+
+fun CustomerProfile.toUserProfile(): UserProfile = UserProfile(id = id, firstName = firstName, gender = Gender.fromCode(gender))

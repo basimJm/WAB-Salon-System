@@ -6,6 +6,10 @@ import com.fab.wab.customer.core.analytics.analyticsParams
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.mvi.BaseViewModel
+import com.fab.wab.customer.core.notification.push.PushSignals
+import com.fab.wab.customer.core.realtime.RealtimeClient
+import com.fab.wab.customer.core.realtime.RealtimeEvents
+import com.fab.wab.customer.core.realtime.RefreshReason
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import com.fab.wab.customer.feature.notifications.domain.model.NotificationDefaults
 import com.fab.wab.customer.feature.notifications.domain.model.NotificationFilters
@@ -19,11 +23,15 @@ import com.fab.wab.customer.feature.notifications.presentation.controller.contra
 import com.fab.wab.customer.feature.notifications.presentation.controller.contract.NotificationsContract.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 class NotificationsDependencies(
     val loadNotifications: LoadNotificationsUseCase,
     val markRead: MarkNotificationsReadUseCase,
+    val realtime: RealtimeClient,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
 )
@@ -37,16 +45,32 @@ class NotificationsViewModel(
     private var started = false
     private var loadJob: Job? = null
     private val reported = mutableSetOf<String>()
+    /** The first ON_RESUME comes with the first composition, right after the initial load. */
+    private var firstResume = true
 
     override fun onStart() {
         if (started) return
         started = true
         load()
+        scope.launch {
+            // PRD §3.15: a new notification (socket unread count) or an FCM message while open refreshes the list.
+            merge(deps.realtime.events.filter { it.name == RealtimeEvents.NOTIFICATIONS_UNREAD }.map { RefreshReason.Realtime }, PushSignals.messages.map { RefreshReason.Push })
+                .collect { if (uiState.value.loaded && uiState.value.sheet == null) load(refresh = true) }
+        }
+    }
+
+    private fun onResume() {
+        if (firstResume) {
+            firstResume = false
+            return
+        }
+        if (uiState.value.loaded) load(refresh = true)
     }
 
     override fun onEvent(event: UiAction) {
         when (event) {
             UiAction.OnRefresh -> load(refresh = true)
+            UiAction.OnResume -> onResume()
             UiAction.OnRetry -> load()
             UiAction.OnLoadMore -> loadMore()
             is UiAction.OnVisible -> reportRead(event.ids)

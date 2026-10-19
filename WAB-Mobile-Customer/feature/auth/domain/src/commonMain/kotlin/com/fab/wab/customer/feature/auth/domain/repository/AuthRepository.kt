@@ -1,6 +1,7 @@
 package com.fab.wab.customer.feature.auth.domain.repository
 
 import com.fab.wab.customer.core.domain.AppResult
+import com.fab.wab.customer.core.domain.session.UserProfile
 import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.customer.feature.auth.domain.model.AuthSession
 import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
@@ -23,4 +24,7 @@ interface AuthRepository {
 
     /** `POST /auth/logout`: revokes the refresh token and unlinks the device. */
     suspend fun logout(refreshToken: String): AppResult<Unit>
+
+    /** `POST /auth/change-phone` with the Firebase proof of the NEW number (PRD S22); returns the updated local profile. */
+    suspend fun changePhone(phone: PhoneNumber, idToken: String): AppResult<UserProfile>
 }

@@ -30,6 +30,8 @@ data class AppEnvironment(
     val appVersionCode: Int,
     val isDebug: Boolean,
     val dataSource: DataSource = DataSource.REMOTE,
+    /** Merchant app hand-off (PRD S21 "For business", Merchant PRD §4.5); empty values mean "not configured yet". */
+    val merchant: MerchantLinks = MerchantLinks(),
 ) {
     init {
         require(name.isNotBlank()) { "Environment name must not be blank" }
@@ -43,6 +45,14 @@ data class AppEnvironment(
     val isDev: Boolean get() = name == AppEnvironmentNames.DEV
     val isProd: Boolean get() = name == AppEnvironmentNames.PROD
     val usesMock: Boolean get() = dataSource == DataSource.MOCK
+}
+
+/**
+ * [registerUrl] = the merchant app's registration deep link (`<merchant-domain>/register`), [storeUrl] = this platform's
+ * store page of the merchant app, [appId] = Android package name / iOS URL scheme used to detect the installed app.
+ */
+data class MerchantLinks(val registerUrl: String = "", val storeUrl: String = "", val appId: String = "") {
+    val isConfigured: Boolean get() = registerUrl.isNotBlank() && storeUrl.isNotBlank()
 }
 
 object AppEnvironmentNames {
