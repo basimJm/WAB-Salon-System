@@ -140,10 +140,20 @@ class ProfileViewModel(
             ProfileLink.FAQ -> emitSideEffect(SideEffect.OpenFaq)
             ProfileLink.RATE_APP -> storeUrl?.let(deps.external::openUrl)
             ProfileLink.SHARE_APP -> storeUrl?.let(deps.external::share)
-            ProfileLink.REGISTER_SALON -> deps.external.openUrl(DeepLinks.merchantRegistration(deps.environment.webBaseUrl))
+            ProfileLink.REGISTER_SALON -> openMerchantRegistration()
             ProfileLink.PRIVACY -> emitSideEffect(SideEffect.OpenContent(ContentSlugs.PRIVACY))
             ProfileLink.TERMS -> emitSideEffect(SideEffect.OpenContent(ContentSlugs.TERMS))
             ProfileLink.ABOUT -> emitSideEffect(SideEffect.OpenContent(ContentSlugs.ABOUT))
+        }
+    }
+
+    /** PRD S21 / Merchant PRD §4.5: the merchant app if installed, else its store page; the website until those are configured. */
+    private fun openMerchantRegistration() {
+        val merchant = deps.environment.merchant
+        if (merchant.isConfigured) {
+            deps.external.openApp(merchant.registerUrl, merchant.appId, merchant.storeUrl)
+        } else {
+            deps.external.openUrl(DeepLinks.merchantRegistration(deps.environment.webBaseUrl))
         }
     }
 

@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 (CUS-042…046) shipped (PR #287). Batch 4 = CUS-048, 049, 050, 053, 057 → unit-test run green → PR.
+- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 (CUS-042…046) shipped (PR #287). Batch 4 (CUS-048/049/050/053/057) shipped (PR #293). Batch 5 = CUS-051, 052, 054, 055, 056 → unit-test run → PR.
 
 ### CUS-042 — Booking details S15: `GET /bookings/{id}`, cancel rules + `POST /bookings/{id}/cancel` with money-outcome confirmation, Rate when COMPLETED, realtime
 - Branch: `feat/cus-042-booking-details` (from `origin/customer`, batch 3 start)
@@ -199,3 +199,15 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: the parser is the client-side guard of the "sanitized HTML subset"; scripts / unknown tags never render. Contact details come only from `GET /config` (PRD §3.11).
+
+### CUS-056 — "Register your salon with us": merchant app deep link if installed, else the store page; links from config
+- Branch: `feat/cus-056-register-salon-entry` (from `feat/cus-055-legal-support`)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 5)
+- Acceptance criteria (PRD S21 "For business"; Merchant PRD §4.5; domain = owner input → config placeholders):
+  - [x] `AppEnvironment.merchant: MerchantLinks(registerUrl, storeUrl, appId)` (`isConfigured` needs both URLs); Android from `<ENV>_MERCHANT_REGISTER_URL / _STORE_URL / _APP_ID` (`gradle.properties`, placeholders) via `BuildConfig`; iOS from `MERCHANT_REGISTER_URL / MERCHANT_STORE_URL / MERCHANT_APP_SCHEME` (xcconfig → Info.plist, optional keys) + `LSApplicationQueriesSchemes`
+  - [x] `ExternalActions.openApp(appUrl, appId, fallbackUrl)`: Android launches the deep link inside the merchant package when `getLaunchIntentForPackage` finds it, else the Play page; iOS `canOpenURL(scheme://)` → deep link, else the App Store page; fake records the call
+  - [x] Profile "Register your salon" → merchant app / store when configured, website registration page otherwise (tests); `AppEnvironmentTest` (+1)
+- Tests: run with the batch-5 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: the merchant app's URL scheme (`wabmerchant`) and store ids are placeholders for the owner (MER backlog decides the scheme). iOS `LSApplicationQueriesSchemes` uses a build-setting value, which Xcode substitutes at build time.

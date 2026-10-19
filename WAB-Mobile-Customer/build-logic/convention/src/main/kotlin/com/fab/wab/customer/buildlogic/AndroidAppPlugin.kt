@@ -126,6 +126,10 @@ private fun ApplicationProductFlavor.environment(id: String, prefix: String, pro
     val webBaseUrl = requireNotNull(property("${prefix}_WEB_BASE_URL")) { missing("${prefix}_WEB_BASE_URL") }
     buildConfigField("String", "WEB_BASE_URL", quoted(webBaseUrl))
     manifestPlaceholders["DEEP_LINK_HOST"] = hostOf(webBaseUrl)
+    // Merchant app hand-off (CUS-056): optional until the merchant app and its store listing exist.
+    buildConfigField("String", "MERCHANT_REGISTER_URL", quoted(property("${prefix}_MERCHANT_REGISTER_URL").orEmpty()))
+    buildConfigField("String", "MERCHANT_STORE_URL", quoted(property("${prefix}_MERCHANT_STORE_URL").orEmpty()))
+    buildConfigField("String", "MERCHANT_APP_ID", quoted(property("${prefix}_MERCHANT_APP_ID").orEmpty()))
     val dataSource = requireNotNull(property("${prefix}_DATA_SOURCE")) { missing("${prefix}_DATA_SOURCE") }
     buildConfigField("String", "DATA_SOURCE", quoted(dataSource))
 }

@@ -2,6 +2,7 @@ package com.fab.wab.customer.feature.profile.presentation
 
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.common.AppEnvironment
+import com.fab.wab.customer.core.common.MerchantLinks
 import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.AppearanceSettings
 import com.fab.wab.customer.core.domain.ThemeMode
@@ -54,13 +55,15 @@ class ProfileViewModelTest {
     private val installations = InstallationsFake()
     private lateinit var session: SessionStoreFake
 
+    private var merchant = MerchantLinks()
+
     private fun TestScope.viewModel(initial: SessionState): ProfileViewModel {
         session = SessionStoreFake(initial)
         val deps = ProfileDependencies(
             sessionStore = session,
             appearance = AppearanceSettings(settings),
             config = ConfigFake(),
-            environment = AppEnvironment("dev", "https://api.example", "https://web.example", "1.2.3", 7, isDebug = true),
+            environment = AppEnvironment("dev", "https://api.example", "https://web.example", "1.2.3", 7, isDebug = true, merchant = merchant),
             loadProfile = LoadProfileUseCase(profile),
             uploadAvatar = UploadAvatarUseCase(UploadsRepoFake(), profile),
             deleteAvatar = DeleteAvatarUseCase(profile),
@@ -144,6 +147,14 @@ class ProfileViewModelTest {
             external.calls,
         )
         assertEquals(listOf(SideEffect.OpenContent(ContentSlugs.PRIVACY), SideEffect.OpenFaq), effects)
+    }
+
+    @Test
+    fun registerYourSalonOpensTheMerchantAppWithTheStoreFallbackWhenConfigured() = runTest(UnconfinedTestDispatcher()) {
+        merchant = MerchantLinks("https://merchant.example/register", "https://store.example/merchant", "com.fab.wab.merchant")
+        val vm = viewModel(GUEST)
+        vm.onEvent(UiAction.OnLinkClick(ProfileLink.REGISTER_SALON))
+        assertEquals(listOf("app:https://merchant.example/register|com.fab.wab.merchant|https://store.example/merchant"), external.calls)
     }
 
     @Test

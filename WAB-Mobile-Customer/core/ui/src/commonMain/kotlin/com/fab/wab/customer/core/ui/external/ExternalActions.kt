@@ -13,6 +13,8 @@ interface ExternalActions {
     fun openUrl(url: String)
     /** Mail app composer (PRD S23 contact). */
     fun email(address: String)
+    /** Opens [appUrl] in the app identified by [appId] (package / URL scheme) when installed, else [fallbackUrl] (store page). */
+    fun openApp(appUrl: String, appId: String, fallbackUrl: String)
 }
 
 /** Pure link builders shared by the platforms (unit-tested). */
@@ -61,6 +63,7 @@ class FakeExternalActions : ExternalActions {
     override fun share(text: String) { calls += "share:$text" }
     override fun openUrl(url: String) { calls += "url:$url" }
     override fun email(address: String) { calls += ExternalLinks.mailto(address) }
+    override fun openApp(appUrl: String, appId: String, fallbackUrl: String) { calls += "app:$appUrl|$appId|$fallbackUrl" }
 }
 
 expect val platformExternalActionsModule: Module

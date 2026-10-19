@@ -12,3 +12,7 @@ DEEP_LINK_HOST = template.app
 DATA_SOURCE = remote
 BUNDLE_ID_SUFFIX =
 PRODUCT_BUNDLE_IDENTIFIER = com.fab.wab.customer$(BUNDLE_ID_SUFFIX)$(TEAM_ID)
+// Merchant app hand-off (CUS-056, PLACEHOLDERS until the merchant app ships): deep link, App Store page, URL scheme.
+MERCHANT_REGISTER_URL = https:/$()/merchant.template.app/register
+MERCHANT_STORE_URL = https:/$()/apps.apple.com/app/id0000000000
+MERCHANT_APP_SCHEME = wabmerchant
