@@ -57,6 +57,7 @@ const DETAIL_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>>
   ),
   [`${ROUTES.salons}/:id`]: lazy(() => import('@/presentation/salons/SalonDetailsPage')),
 };
+const ProfilePage = lazy(() => import('@/presentation/profile/ProfilePage'));
 const AboutPage = lazy(() => import('@/presentation/pages/AboutPage'));
 /** Compile-time: `__SHOW_DESIGN_SYSTEM__` is false in prod builds, so the whole gallery chunk is dropped. */
 const DesignSystemPage = __SHOW_DESIGN_SYSTEM__
@@ -89,6 +90,7 @@ export function buildRoutes(showDesignSystem: boolean): RouteObject[] {
         { path: ROUTES.forbidden, element: <ForbiddenPage /> },
         { path: ROUTES.serverError, element: <ServerErrorPage /> },
         { path: ROUTES.about, element: <AboutPage /> },
+        { path: ROUTES.profile, element: <ProfilePage /> },
         ...(showDesignSystem && DesignSystemPage
           ? [{ path: DESIGN_SYSTEM_PATH, element: <DesignSystemPage /> }]
           : []),

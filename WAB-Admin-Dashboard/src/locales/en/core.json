@@ -85,7 +85,8 @@
       "salons": "Salons",
       "bookings": "Bookings",
       "members": "Members"
-    }
+    },
+    "profile": "My profile"
   },
   "module": {
     "comingSoon": "This section is coming soon",

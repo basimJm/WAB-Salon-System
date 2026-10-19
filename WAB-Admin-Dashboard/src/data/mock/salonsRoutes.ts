@@ -23,6 +23,9 @@ const salon = ({ n, name, gender, state, cityId, sub }: Seed) => ({
   areaId: null,
   rating: { avg: 4.5, count: n * 3 },
   subscriptionStatus: sub,
+  recommended: n === 1,
+  bookings30d: n * 10,
+  deletionRequestedAt: null as string | null,
   createdAt: `2026-09-${String(10 + n).padStart(2, '0')}T08:00:00.000Z`,
 });
 
@@ -55,6 +58,7 @@ export const MOCK_SALONS = [
 
 const details = (s: (typeof MOCK_SALONS)[number]) => ({
   ...s,
+  deletionApprovedAt: null as string | null,
   description: 'Hair, nails and bridal packages',
   phone: '+962790000100',
   completeness:
