@@ -16,6 +16,9 @@ import com.fab.wab.customer.app.controller.contract.MainContract
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.vm.MainViewModel
 import com.fab.wab.customer.app.analytics.TrackNavigationScreens
+import com.fab.wab.customer.app.deeplink.DeepLinkEffect
+import com.fab.wab.customer.app.deeplink.DeepLinkStore
+import com.fab.wab.customer.app.deeplink.deepLinkModule
 import com.fab.wab.customer.app.di.analyticsAppModule
 import com.fab.wab.customer.app.di.appPlatformModule
 import com.fab.wab.customer.app.di.installationSyncModule
@@ -91,6 +94,7 @@ val appModules = listOf(
     viewModelModule,
     appPlatformModule,
     installationSyncModule,
+    deepLinkModule,
     platformFirebaseModule(),
     analyticsModule(),
     analyticsAppModule,
@@ -184,6 +188,7 @@ fun App(androidContext: Any?) {
                         )
                     }
                     TrackNavigationScreens(navController)
+                    DeepLinkEffect(koinInject<DeepLinkStore>(), navController)
                     val sessionState by koinInject<SessionStore>().state.collectAsStateWithLifecycle(initialValue = null)
                     RealtimeConnectionEffect(koinInject<RealtimeClient>(), isSignedIn = sessionState?.isSignedIn == true)
                     val tabs = rootNavItems()

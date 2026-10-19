@@ -194,3 +194,19 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: "Register your salon" has no server-provided link in the contract (PRD says server-provided page/form link) → website path constant in `DeepLinks`, flagged for the owner / SRV. Upload progress (PRD §3.16) is a busy flag, not a percentage (Ktor upload progress deferred). iOS picker code compiles only at the end-of-backlog gate (no K/N build per task).
+
+### CUS-057 — Deep links: Android App Links + iOS Universal Links for `/salon/{salonId}`, onboarding / S02 first, Home → Salon Details, "Salon not available"
+- Branch: `feat/cus-057-deep-links`
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 4)
+- Acceptance criteria (PRD §4.4; domain = owner input, config only):
+  - [x] `DeepLinks` (core/common): `salon()` now builds `/salon/{id}` (PRD format; share links updated), `host()`, `parse(url, webBaseUrl?)` (host check, query/fragment ignored, only `/salon/{id}`), `DeepLink.Salon`; tests
+  - [x] App shell `DeepLinkStore` (Koin `deepLinkModule`, keeps the last link until consumed) + `DeepLinkEffect` composed only with the NavHost (so onboarding and S02 finish first), then Home tab → `Screen.SalonDetails`; Back returns to Home
+  - [x] Android: manifest `autoVerify` intent filter `https://${DEEP_LINK_HOST}/salon/…` (host derived per flavor from `<ENV>_WEB_BASE_URL` in `AndroidAppPlugin`), `MainActivity.onCreate/onNewIntent` publish the URL
+  - [x] iOS: `applinks:$(DEEP_LINK_HOST)` entitlement (`DEEP_LINK_HOST` in Dev/Prod xcconfig), `iOSApp.swift` `onOpenURL` + `NSUserActivityTypeBrowsingWeb` → `handleDeepLink` (MainViewController.kt)
+  - [x] Missing / hidden salon (`SALON_NOT_FOUND` / `NOT_FOUND`) → `SideEffect.NotAvailable` → back + "Salon not available" toast (AR/EN); test
+  - [x] Owner checklist `docs/DEEP_LINKS_CHECKLIST.md` (assetlinks.json, AASA, capability, verification commands)
+  - [x] Unit tests: `DeepLinksTest` (2), `DeepLinkStoreTest` (1), `SalonDetailsViewModelTest` (+1)
+- Tests: run with the batch-4 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: hosts are placeholders until the platform domain is decided (PRD open item 13); App Link verification will fail until the owner publishes the association files. Push-tap routing (notification → booking) is CUS-051/052.

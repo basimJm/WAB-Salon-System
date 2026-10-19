@@ -1,6 +1,7 @@
 package com.fab.wab.customer
 
 import androidx.compose.ui.window.ComposeUIViewController
+import com.fab.wab.customer.app.deeplink.DeepLinkStore
 import com.fab.wab.customer.app.ui.App
 import com.fab.wab.customer.app.ui.appModules
 import com.fab.wab.customer.core.domain.AppSettings
@@ -30,3 +31,7 @@ fun saveFcmToken(token: String) {
         appSettings.setFcmToken(token)
     }
 }
+
+// Called from iOSApp.swift (Universal Links), so the compiler sees no Kotlin caller.
+@Suppress("unused")
+fun handleDeepLink(url: String): Boolean = KoinPlatform.getKoin().get<DeepLinkStore>().publish(url)

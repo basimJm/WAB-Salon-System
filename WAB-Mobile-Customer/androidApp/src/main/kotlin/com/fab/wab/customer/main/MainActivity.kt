@@ -1,10 +1,12 @@
 package com.fab.wab.customer.main
 
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.fab.wab.customer.app.deeplink.DeepLinkStore
 import com.fab.wab.customer.app.ui.App
 import com.fab.wab.customer.core.ui.media.AndroidImagePickerBridge
 import com.fab.wab.customer.core.ui.permission.AndroidPermissionBridge
@@ -20,9 +22,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         getKoin().get<AndroidPermissionBridge>().attach(this)
         getKoin().get<AndroidImagePickerBridge>().attach(this)
+        getKoin().get<DeepLinkStore>().publish(intent?.dataString)
         setContent {
             App(this)
         }
+    }
+
+    /** App Links arriving while the activity is alive (`singleTop`). */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        getKoin().get<DeepLinkStore>().publish(intent.dataString)
     }
 
     override fun onDestroy() {
