@@ -14,15 +14,6 @@
 
 ## Last blocks
 
-### ADM-006 — hosting headers and deploy config (Netlify and Vercel)
-
-- Branch: `feat/adm-006-headers`
-- Status: DONE
-- Acceptance criteria: versioned security-header spec (CSP with API and socket origins, HSTS, nosniff, frame-ancestors none, cache rules) + generator for Netlify _headers/_redirects and vercel.json + netlify.toml + docs/DEPLOY.md; the owner chose Vercel or Netlify
-- Tests: tests/hosting.test.ts (13); full suite + gate PASS; browser check: built dev-release served with the generated headers, login and 9 screens walk with 0 CSP violations after allowing data: fonts (a real defect the check found), fonts 6 loaded 0 errors
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
-
 ### ADM-084 — real data by default and placeholder base URLs
 
 - Branch: `feat/adm-084-remote-default`
@@ -40,3 +31,12 @@
 - Tests: tests/realServerShapes.test.ts (4), tests/bookingExtras.test.tsx (+2), full suite + gate PASS; qa/ tooling + docs/REAL_SERVER_QA.md + docs/SERVER_ISSUES.md; contract check of every real GET answer against the generated schemas: only getAlerts and getExports were BAD (fixed)
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: browser check done in the built-in browser with JS-driven clicks (not e2e); payouts creation, refunds of paid bookings and the realtime socket were not exercised (no money settled).
+
+### ADM-086 — a new deploy no longer breaks open tabs
+
+- Branch: `feat/adm-086-chunk-reload`
+- Status: DONE
+- Acceptance criteria: route pages load through lazyPage(): when a page's code file is gone (a new deploy replaced the hashed files) the tab reloads once (not again within 10 s) and lands on the sign-in page with the destination kept; any other route error shows the panel's error state with a retry instead of the router's crash screen
+- Tests: tests/lazyPage.test.tsx (6), tests/routeError.test.tsx (1); full suite + gate PASS; browser check: built twice with a changed About chunk while a tab was open: the tab reloaded once and showed /login?next=/about
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: the reload signs the admin out (tokens live in memory only): accepted instead of a broken screen.
