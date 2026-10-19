@@ -9,11 +9,25 @@ export interface CreateSessionRequest {
   readonly reference: string;
 }
 
+/** What the app needs to open the gateway's payment UI (no secrets). */
+export interface PaymentClientCheckout {
+  readonly provider: string;
+  readonly environment: 'dev' | 'prod';
+  readonly checkoutId: string;
+  readonly brands: readonly string[];
+  readonly shopperResultUrl: string;
+  /** Hosted pay page (the local mock gateway only). */
+  readonly checkoutUrl?: string;
+  readonly widgetScriptUrl?: string;
+  readonly integrity?: string;
+}
+
 export interface PaymentSession {
   readonly sessionId: string;
   readonly status: PaymentStatus;
   readonly amountFils: number;
   readonly reference: string;
+  readonly client?: PaymentClientCheckout;
 }
 
 /** The gateway's answer, normalized, with its raw code kept for the admin attempt log (PAY-08). */
@@ -47,9 +61,15 @@ export interface WebhookInput {
   /** The body exactly as received: the signature covers it. */
   readonly rawBody: string;
   readonly signature: string;
+  /** Request headers (lower-case names): some gateways need more than the signature. */
+  readonly headers?: Readonly<Record<string, string | undefined>>;
 }
 
 export interface PaymentWebhookEvent {
+  /** Absent = a payment notification. `REFUND` / `IGNORED` never settle a payment. */
+  readonly kind?: 'PAYMENT' | 'REFUND' | 'IGNORED';
+  /** True when this exact notification was already handled. */
+  readonly replayed?: boolean;
   readonly sessionId: string;
   readonly status: PaymentStatus;
   readonly gatewayCode: string;
@@ -69,4 +89,6 @@ export interface PaymentProvider {
   getRefund(refundId: string): Promise<RefundResult>;
   /** Authenticates the webhook, then maps it to a normalized event. */
   handleWebhook(input: WebhookInput): Promise<PaymentWebhookEvent>;
+  /** Rebuilds the app's checkout data for an existing session (resumed attempts). */
+  clientCheckout?(sessionId: string): PaymentClientCheckout;
 }

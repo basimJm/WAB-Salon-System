@@ -12,7 +12,10 @@ export const AMOUNT_MISMATCH_CODE = 'AMOUNT_MISMATCH';
 /** Gateway notifications (SRV-084): the signature covers the raw body, so it is kept untouched. */
 export const WEBHOOK_PREFIX = '/webhooks';
 export const PAYMENT_WEBHOOK_ROUTE = '/payments';
-export const PAYMENT_WEBHOOK_SIGNATURE_HEADER = 'x-signature';
+/** The first of these headers present carries the signature (HyperPay: the GCM tag; the fake: `x-signature`). */
+export const PAYMENT_WEBHOOK_SIGNATURE_HEADERS = ['x-authentication-tag', 'x-signature'] as const;
+/** HyperPay also sends the initialization vector as a header; all request headers reach the provider. */
+export const PAYMENT_WEBHOOK_IV_HEADER = 'x-initialization-vector';
 /** Polling fallback: attempts still PENDING after this long are asked about again. */
 export const RECONCILE_MIN_AGE_MS = 120_000;
 export const RECONCILE_BATCH_SIZE = 50;

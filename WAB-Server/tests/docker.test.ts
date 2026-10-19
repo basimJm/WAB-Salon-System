@@ -106,6 +106,7 @@ describe('Dockerfile', () => {
     expect(dockerfile).toContain('npm ci\n');
     expect(dockerfile).toContain('npm ci --omit=dev');
     expect(dockerfile).toContain('wab-notifications');
+    expect(dockerfile).toContain('wab-storage');
     expect(dockerfile).toContain('ENV NODE_ENV=production');
   });
 
@@ -129,6 +130,7 @@ describe('Dockerfile.dockerignore', () => {
     expect(lines).toContain('*');
     expect(lines).toContain('!WAB-Server/src');
     expect(lines).toContain('!wab-notifications/src');
+    expect(lines).toContain('!wab-storage/src');
   });
 
   it('keeps environment files, dependencies and build output out of the context', () => {

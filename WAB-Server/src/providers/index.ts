@@ -1,14 +1,15 @@
 import type { AppConfig } from '../config';
-import { REAL_PROVIDER_MODE } from '../constants/providers';
+import { DISABLED_PAYMENT_MODE, REAL_PROVIDER_MODE } from '../constants/providers';
 import { InternalError } from '../utils/errors';
-import { FakeAnalyticsProvider, type AnalyticsProvider } from './analytics';
 import { FakeNotifier, type Notifier } from './notifier';
 import { createRealNotifier, type ClosableNotifier } from './notifier/real';
 import type { Redis } from 'ioredis';
 import type { Logger } from '../utils/logger';
 import { FakeOtpProvider, type OtpProvider } from './otp';
-import { FakePaymentProvider, type PaymentProvider } from './payments';
+import { createRealOtp } from './otp/real';
+import { DisabledPaymentProvider, FakePaymentProvider, type PaymentProvider } from './payments';
 import { FakeStorageProvider, type StorageProvider } from './storage';
+import { createRealStorage } from './storage/real';
 
 /** What the real integrations need from the running process. */
 export interface ProviderDeps {
@@ -24,7 +25,6 @@ export interface Providers {
   /** Releases provider connections on shutdown. */
   readonly close: () => Promise<void>;
   readonly payments: PaymentProvider;
-  readonly analytics: AnalyticsProvider;
 }
 
 /** The configured provider cannot be built: not integrated yet, or a fake in production. */
@@ -60,9 +60,42 @@ export const createProviders = (
       throw new ProviderUnavailableError(name, 'fakes are not allowed in production');
     return fake();
   };
+  // Payments are paused: `disabled` answers 503 on every gateway call; a fake never runs in production.
+  const pickPayments = (mode: AppConfig['providers']['payments']): PaymentProvider => {
+    if (mode === DISABLED_PAYMENT_MODE) return new DisabledPaymentProvider();
+    if (isProduction)
+      throw new ProviderUnavailableError('payments', 'fakes are not allowed in production');
+    return new FakePaymentProvider();
+  };
   const built = {
-    otp: pick('otp', providers.otp, () => new FakeOtpProvider()),
-    storage: pick('storage', providers.storage, () => new FakeStorageProvider()),
+    otp: pick(
+      'otp',
+      providers.otp,
+      (): OtpProvider => new FakeOtpProvider(),
+      () => {
+        const settings = deps?.config.otp;
+        if (deps === undefined || settings === undefined) {
+          throw new ProviderUnavailableError(
+            'otp',
+            'Firebase project or runtime dependencies missing',
+          );
+        }
+        const real = createRealOtp({ settings, logger: deps.logger, isProduction });
+        closers.push(() => real.close());
+        return real;
+      },
+    ),
+    storage: pick(
+      'storage',
+      providers.storage,
+      () => new FakeStorageProvider(),
+      () => {
+        const settings = deps?.config.storage;
+        if (deps === undefined || settings === undefined)
+          throw new ProviderUnavailableError('storage', 'S3 or CDN settings missing');
+        return createRealStorage({ settings, isProduction, logger: deps.logger });
+      },
+    ),
     notifier: pick(
       'notifier',
       providers.notifier,
@@ -85,8 +118,7 @@ export const createProviders = (
         return real;
       },
     ),
-    payments: pick('payments', providers.payments, () => new FakePaymentProvider()),
-    analytics: pick('analytics', providers.analytics, () => new FakeAnalyticsProvider()),
+    payments: pickPayments(providers.payments),
   };
   return {
     ...built,
@@ -96,4 +128,4 @@ export const createProviders = (
   };
 };
 
-export type { AnalyticsProvider, Notifier, OtpProvider, PaymentProvider, StorageProvider };
+export type { Notifier, OtpProvider, PaymentProvider, StorageProvider };
