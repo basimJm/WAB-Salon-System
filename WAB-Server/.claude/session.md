@@ -10,6 +10,18 @@
 
 ## Current task
 
+### T-128 — Run any environment on any Docker host (owner order 2026-10-19)
+
+- Branch: `chore/srv-deploy-compose`
+- Status: IN REVIEW
+- Acceptance criteria (CLAUDE.md §5 no hardcoding; no BUSINESS_DOMAIN change; API docs: no change):
+  - [x] `docker-compose.deploy.yml`: one API per environment from a required `ENV_FILE`, built from the repository root, container port pinned to 3000, host port `API_PORT` on `127.0.0.1` unless `API_BIND` opts in, optional password-protected Redis behind `--profile redis`; no credential in the file
+  - [x] `.env.*` git-ignored except `.env.example`; `docs/DEPLOYMENT.md` gains run-per-environment, keys-per-environment (local, hosted dev, prod; Atlas per environment) and how Redis works / how to run it
+- Tests: `tests/dockerDeploy.test.ts` (6); `docker compose config` accepted the file; full gate green
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — config + docs only. NOT verified: an actual `docker compose up` / image build (no Docker daemon in this runner), Atlas and managed Redis connections.
+- Notes: hosting product stays open (owner chose "any server"); the file is host-agnostic.
+
 ### T-127 — Deployment readiness: env templates, `env:check`, DEPLOYMENT.md (owner order 2026-10-19)
 
 - Branch: `chore/srv-deploy-envs`

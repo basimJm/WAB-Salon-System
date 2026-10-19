@@ -7,3 +7,7 @@ node_modules/
 config/firebase-service-account.json
 dist/
 coverage/
+
+# Environment files hold real values: only the *.example templates are committed.
+.env.*
+!.env.example
