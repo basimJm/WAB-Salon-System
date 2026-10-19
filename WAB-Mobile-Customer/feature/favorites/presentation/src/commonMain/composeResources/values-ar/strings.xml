@@ -1,0 +1,8 @@
+<resources>
+    <string name="favorites_title">المفضلة</string>
+    <string name="favorites_guest_title">صالوناتك المفضلة</string>
+    <string name="favorites_guest_message">سجّل الدخول لحفظ الصالونات والعودة إليها هنا.</string>
+    <string name="favorites_login">تسجيل الدخول</string>
+    <string name="favorites_empty">لا توجد صالونات مفضلة</string>
+    <string name="favorites_explore">استكشف الصالونات</string>
+</resources>

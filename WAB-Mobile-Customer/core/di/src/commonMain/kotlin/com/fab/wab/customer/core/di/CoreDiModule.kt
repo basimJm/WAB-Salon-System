@@ -10,6 +10,7 @@ import com.fab.wab.customer.core.domain.repository.PlacesRepository
 import com.fab.wab.customer.core.domain.repository.SessionTimeOut
 import com.fab.wab.customer.core.network.di.networkModule
 import com.fab.wab.customer.core.storage.di.storageModule
+import com.fab.wab.customer.core.ui.external.externalActionsModule
 import com.fab.wab.customer.core.ui.permission.permissionModule
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.bind
@@ -23,5 +24,5 @@ val coreDiModule = module {
     singleOf(::PlacesRepositoryImpl) { bind<PlacesRepository>() }
     singleOf(::SessionTimeOutImpl) { bind<SessionTimeOut>() }
     singleOf(::AppearanceSettings)
-    includes(storageModule, dataModule, networkModule, deviceLocationProviderModule, permissionModule)
+    includes(storageModule, dataModule, networkModule, deviceLocationProviderModule, permissionModule, externalActionsModule)
 }

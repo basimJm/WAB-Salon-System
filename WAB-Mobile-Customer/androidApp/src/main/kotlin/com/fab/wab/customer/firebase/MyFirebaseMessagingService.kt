@@ -1,5 +1,7 @@
 package com.fab.wab.customer.firebase
 
+import com.fab.wab.customer.core.firebase.PushTokenRelay
+
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.media.RingtoneManager
@@ -22,6 +24,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        PushTokenRelay.publish(token)
         CoroutineScope(Dispatchers.IO).launch {
             appSettings.setFcmToken(token)
         }

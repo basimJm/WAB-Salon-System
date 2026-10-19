@@ -26,6 +26,8 @@ class ComposeAppPlugin : Plugin<Project> {
                     iosTarget.binaries.framework {
                         baseName = "ComposeApp"
                         isStatic = true
+                        // Swift implements the Firebase bridges, so their Kotlin interfaces must be in the framework API.
+                        export(project(":core:firebase"))
                     }
                 }
 
@@ -35,17 +37,18 @@ class ComposeAppPlugin : Plugin<Project> {
                     implementation(project(":core:domain"))
                     implementation(project(":core:storage"))
                     implementation(project(":core:network"))
+                    implementation(project(":core:realtime"))
                     implementation(project(":core:data"))
                     implementation(project(":core:navigation"))
                     implementation(project(":core:ui"))
+                    implementation(project(":core:mvi"))
+                    implementation(project(":core:analytics"))
+                    api(project(":core:firebase"))
                     implementation(project(":core:notification"))
                     implementation(project(":core:security"))
                     implementation(project(":core:design-system"))
 
-                    implementation(project(":feature:sample:presentation"))
-                    implementation(project(":feature:sample:data"))
-                    implementation(project(":feature:sample:domain"))
-                    implementation(project(":feature:sample:di"))
+                    FEATURE_MODULES.forEach { implementation(project(it)) }
 
                     implementation(libs.findBundle("compose").get())
                     implementation(libs.findLibrary("compose-uiToolingPreview").get())
@@ -69,6 +72,7 @@ class ComposeAppPlugin : Plugin<Project> {
 
                 sourceSets.commonTest.dependencies {
                     implementation(libs.findLibrary("kotlin-test").get())
+                    implementation(libs.findLibrary("kotlinx-coroutines-test").get())
                 }
             }
 
@@ -77,3 +81,32 @@ class ComposeAppPlugin : Plugin<Project> {
         }
     }
 }
+
+/** Feature modules compiled into the app shell (add a feature here, in `settings.gradle.kts` and in `App.kt`). */
+private val FEATURE_MODULES = listOf(
+    ":feature:sample:presentation",
+    ":feature:sample:data",
+    ":feature:sample:domain",
+    ":feature:sample:di",
+    ":feature:onboarding:presentation",
+    ":feature:onboarding:domain",
+    ":feature:onboarding:di",
+    ":feature:auth:presentation",
+    ":feature:auth:domain",
+    ":feature:auth:di",
+    ":feature:home:presentation",
+    ":feature:home:domain",
+    ":feature:home:di",
+    ":feature:salons:presentation",
+    ":feature:salons:domain",
+    ":feature:salons:di",
+    ":feature:salon:presentation",
+    ":feature:salon:domain",
+    ":feature:salon:di",
+    ":feature:favorites:presentation",
+    ":feature:favorites:domain",
+    ":feature:favorites:di",
+    ":feature:bookings:presentation",
+    ":feature:bookings:domain",
+    ":feature:bookings:di",
+)

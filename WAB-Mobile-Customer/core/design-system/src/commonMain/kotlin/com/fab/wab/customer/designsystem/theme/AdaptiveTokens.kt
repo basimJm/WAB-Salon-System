@@ -49,6 +49,8 @@ data class AdaptiveTokens(
     val contentMaxWidth: Dp,
     val gridColumns: Int,
     val twoPane: Boolean,
+    /** Columns of the Instagram-style gallery grid (S07 item 11). */
+    val galleryColumns: Int = GALLERY_COLUMNS_COMPACT,
 )
 
 private val CompactPadding = 16.dp
@@ -58,9 +60,36 @@ private val NoMaxWidth = Dp.Infinity
 private const val SINGLE_COLUMN = 1
 private const val DOUBLE_COLUMN = 2
 private const val TRIPLE_COLUMN = 3
+private const val GALLERY_COLUMNS_COMPACT = 3
+private const val GALLERY_COLUMNS_MEDIUM = 4
+private const val GALLERY_COLUMNS_EXPANDED = 6
 
 fun adaptiveFor(window: AppWindowSize): AdaptiveTokens = when (window.widthClass) {
-    WidthClass.Compact -> AdaptiveTokens(window, NavigationStyle.BottomBar, CompactPadding, NoMaxWidth, SINGLE_COLUMN, false)
-    WidthClass.Medium -> AdaptiveTokens(window, NavigationStyle.Rail, MediumPadding, Breakpoints.mediumWidth, DOUBLE_COLUMN, false)
-    WidthClass.Expanded -> AdaptiveTokens(window, NavigationStyle.Rail, ExpandedPadding, Breakpoints.expandedWidth, TRIPLE_COLUMN, true)
+    WidthClass.Compact -> AdaptiveTokens(
+        window = window,
+        navigation = NavigationStyle.BottomBar,
+        horizontalPadding = CompactPadding,
+        contentMaxWidth = NoMaxWidth,
+        gridColumns = SINGLE_COLUMN,
+        twoPane = false,
+        galleryColumns = GALLERY_COLUMNS_COMPACT,
+    )
+    WidthClass.Medium -> AdaptiveTokens(
+        window = window,
+        navigation = NavigationStyle.Rail,
+        horizontalPadding = MediumPadding,
+        contentMaxWidth = Breakpoints.mediumWidth,
+        gridColumns = DOUBLE_COLUMN,
+        twoPane = false,
+        galleryColumns = GALLERY_COLUMNS_MEDIUM,
+    )
+    WidthClass.Expanded -> AdaptiveTokens(
+        window = window,
+        navigation = NavigationStyle.Rail,
+        horizontalPadding = ExpandedPadding,
+        contentMaxWidth = Breakpoints.expandedWidth,
+        gridColumns = TRIPLE_COLUMN,
+        twoPane = true,
+        galleryColumns = GALLERY_COLUMNS_EXPANDED,
+    )
 }

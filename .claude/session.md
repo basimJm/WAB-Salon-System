@@ -6,7 +6,7 @@
 |---|---|---|---|---|---|
 | server | `server` | none (backlog Stage A–M done; Stage N/O added) | SRV-111 contract guard, then SRV-117… | SRV-011/059/115/116 owner deployment; SRV-034/092/110/112 SDK publish | `WAB-Server/.claude/session.md` |
 | admin | `admin` | none (ADM-001…081 done except owner-pending rows) | none ready (all remaining rows PENDING/BLOCKED) | SRV-117…127 (Stage N), SRV-011, owner hosting/CI | `WAB-Admin-Dashboard/.claude/session.md` |
-| customer | `customer` | none | CUS-004 Firebase facade | CUS-047 ← PAY-011; CUS-060 ← SRV-011 | `WAB-Mobile-Customer/.claude/session.md` |
+| customer | `customer` | batch 2 CUS-037…041 (staff/service sheets, reviews, media viewer, favorites, bookings tab) in review | CUS-042 booking flow | CUS-047 ← PAY-011; CUS-060 ← SRV-011 | `WAB-Mobile-Customer/.claude/session.md` |
 | merchant | `merchant` | none (no code yet) | MER-001 scaffold from the customer template | MER-004 owner Firebase; MER-042/043/049/050 ← SRV-129…134 | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
 | otp | `server` | none | OTP-001 scaffold | — | `wab-otp/.claude/session.md` |
@@ -32,6 +32,17 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs + tooling only; no product code changed. DEVIATION: the browser/UI check does not apply (no UI); PRDs were read by section, not whole.
 
+### CHORE-HOOKS — guard hooks resolve the checkout from the Bash tool's cwd (git worktrees)
+- Branch: `chore/hooks-worktree`
+- Status: DONE
+- Acceptance criteria:
+  - [x] `read_input()` uses the payload `cwd` to find the git checkout, so branch, session files and task blocks come from the worktree the command runs in (parallel agents in worktrees can push their own task branches); same checks, nothing weakened
+  - [x] falls back to `CLAUDE_PROJECT_DIR`/cwd when the payload has no usable cwd
+  - [x] stray `.claude/worktrees/*` gitlinks removed from the index and ignored
+- Tests: `python3 .claude/hooks/test_hooks.py`
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — deviation: this edits the enforcement hooks (owner may review); behaviour only changes which checkout is inspected.
+
 ### T-125 — Stop hook: master branches are exempt (they only hold merged PRs)
 - Project: repo root (`.claude/hooks`)
 - Branch: `chore/hooks-master-branches`
@@ -44,3 +55,14 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — reads the same registry as `tasks.py`; falls back to main/master when the registry is missing.
 - Notes: patched through the Terminal panel (the sandbox cannot write `.claude/hooks/`). Triggered by the Stop hook firing on the `customer` checkout after the CUS-023 merge.
 
+
+### T-126 — Sync main into server and merge the masters into main
+- Project: repo root
+- Branch: `chore/sync-main-into-server`
+- Status: IN PROGRESS
+- Acceptance criteria:
+  - [x] `main` (2 hook commits) merged into `server`; the only conflict (this file) resolved by keeping both task blocks
+  - [ ] masters `server`, `admin`, `customer` merged into `main` through PRs (owner order 2026-10-19)
+- Tests: `python3 .claude/hooks/test_hooks.py` (25 green after the merge)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written; hooks diff comes from main as merged.

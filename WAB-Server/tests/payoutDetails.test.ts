@@ -87,11 +87,15 @@ describe('configuration', () => {
     OTP_PROVIDER: 'real',
     STORAGE_PROVIDER: 'real',
     NOTIFIER_PROVIDER: 'real',
-    PAYMENT_PROVIDER: 'real',
-    ANALYTICS_PROVIDER: 'real',
+    PAYMENT_PROVIDER: 'disabled',
+    FIREBASE_PROJECT_ID: 'wab-prod-test',
     FCM_SERVICE_ACCOUNT_JSON: '{}',
     SMTP_HOST: 'smtp.example.test',
     EMAIL_FROM_ADDRESS: 'noreply@example.test',
+    S3_REGION: 'eu-central-1',
+    S3_PUBLIC_BUCKET: 'wab-public',
+    S3_PRIVATE_BUCKET: 'wab-private',
+    CDN_BASE_URL: 'https://cdn.example.test',
   };
   const invalidKeys = (env: NodeJS.ProcessEnv): readonly string[] => {
     try {

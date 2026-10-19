@@ -415,3 +415,57 @@ describe('booking hook', () => {
     expect(seen).toEqual(['changed', 'reassigned']);
   });
 });
+
+describe('admin refund of a chosen amount', () => {
+  const actor = { adminId: adminId.toHexString(), ip: '203.0.113.7', userAgent: 'jest' };
+  const ask = (bookingId: string, amount: number): ReturnType<typeof service.refundBookingAmount> =>
+    service.refundBookingAmount({ bookingId, amount, reason: 'Goodwill', actor });
+
+  it('refunds the chosen part, audited with what was refundable before', async () => {
+    const { bookingId } = await paidBooking(10_000);
+    const row = await ask(bookingId, 3_000);
+    expect(row).toMatchObject({ amount: 3_000, source: 'ADMIN', status: 'REFUNDED' });
+    expect(bookingDoc(bookingId)).toMatchObject({ money: { refunded: 3_000 } });
+    expect(audits.at(-1)).toMatchObject({
+      action: 'BOOKING_ADMIN_REFUND',
+      entityType: 'BOOKING',
+      entityId: bookingId,
+      reason: 'Goodwill',
+      before: { paid: 10_000, refundable: 10_000 },
+      after: { amount: 3_000, status: 'REFUNDED' },
+    });
+  });
+
+  it('several partial refunds add up to at most what was paid; one more is refused', async () => {
+    const { bookingId } = await paidBooking(10_000);
+    await ask(bookingId, 4_000);
+    await ask(bookingId, 6_000);
+    await expect(ask(bookingId, 1)).rejects.toMatchObject({ httpStatus: 400 });
+    expect(m.refunds.docs).toHaveLength(2);
+  });
+
+  it('more than what is refundable, zero and fractions are refused and nothing is created', async () => {
+    const { bookingId } = await paidBooking(10_000);
+    await ask(bookingId, 4_000);
+    for (const amount of [6_001, 0, -5, 1.5]) {
+      await expect(ask(bookingId, amount)).rejects.toMatchObject({ httpStatus: 400 });
+    }
+    expect(m.refunds.docs).toHaveLength(1);
+  });
+
+  it('a booking nobody paid online for is 422', async () => {
+    const bookingId = new Types.ObjectId().toHexString();
+    await expect(ask(bookingId, 1_000)).rejects.toMatchObject({ httpStatus: 422 });
+    expect(audits).toHaveLength(0);
+  });
+
+  it('while the gateway is down the refund is kept and retried: no error, no money lost', async () => {
+    const { bookingId } = await paidBooking(10_000);
+    providerDown = true;
+    const row = await ask(bookingId, 2_000);
+    expect(row.status).toBe('REFUND_PENDING');
+    expect(row.attempts).toBe(1);
+    expect(bookingDoc(bookingId)).toMatchObject({ refundStatus: 'REFUND_PENDING' });
+    expect(audits.at(-1)).toMatchObject({ action: 'BOOKING_ADMIN_REFUND' });
+  });
+});

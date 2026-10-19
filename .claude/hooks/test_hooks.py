@@ -5,7 +5,12 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _common import task_block, task_verified, is_source_file, is_test_file  # noqa: E402
+import io  # noqa: E402
+import json  # noqa: E402
+import subprocess  # noqa: E402
+import tempfile  # noqa: E402
+import _common  # noqa: E402
+from _common import task_block, task_verified, is_source_file, is_test_file, worktree_root  # noqa: E402
 from guard_git import violation  # noqa: E402
 from check_hardcoded import findings  # noqa: E402
 from stop_review import evaluate  # noqa: E402
@@ -23,6 +28,43 @@ SESSION = """# Log
 
 def lookup(branch):
     return task_block(branch, SESSION)
+
+
+class WorktreeResolution(unittest.TestCase):
+    def tearDown(self):
+        _common._ROOT_OVERRIDE = None
+
+    def test_resolves_the_checkout_of_the_payload_cwd(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            subprocess.run(["git", "init", "-q", tmp], check=True)
+            sub = os.path.join(tmp, "a")
+            os.mkdir(sub)
+            self.assertEqual(os.path.realpath(worktree_root(sub)), os.path.realpath(tmp))
+
+    def test_non_repository_and_missing_dirs_resolve_to_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(worktree_root(tmp), "")
+        self.assertEqual(worktree_root("/definitely/not/here"), "")
+
+    def test_read_input_switches_the_project_dir_to_the_payload_cwd(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            subprocess.run(["git", "init", "-q", tmp], check=True)
+            old = sys.stdin
+            sys.stdin = io.StringIO(json.dumps({"cwd": tmp, "tool_input": {}}))
+            try:
+                _common.read_input()
+            finally:
+                sys.stdin = old
+            self.assertEqual(os.path.realpath(_common.project_dir()), os.path.realpath(tmp))
+
+    def test_bad_payload_keeps_the_default(self):
+        old = sys.stdin
+        sys.stdin = io.StringIO("not json")
+        try:
+            self.assertEqual(_common.read_input(), {})
+        finally:
+            sys.stdin = old
+        self.assertIsNone(_common._ROOT_OVERRIDE)
 
 
 class SessionParsing(unittest.TestCase):

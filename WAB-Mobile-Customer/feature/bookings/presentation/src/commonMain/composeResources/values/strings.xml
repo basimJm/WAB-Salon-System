@@ -1,0 +1,25 @@
+<resources>
+    <string name="bookings_welcome">Hello, %1$s</string>
+    <string name="bookings_guest_message">You are not registered yet</string>
+    <string name="bookings_login">Log in</string>
+    <string name="bookings_search_hint">Search by salon or reference number</string>
+    <string name="bookings_tab_upcoming">Upcoming</string>
+    <string name="bookings_tab_past">Past</string>
+    <string name="bookings_empty">You don’t have any bookings</string>
+    <string name="bookings_book_now">Book now</string>
+    <string name="booking_reference">Ref. %1$s</string>
+    <string name="booking_status_pending">Pending</string>
+    <string name="booking_status_approved">Approved</string>
+    <string name="booking_status_rejected">Rejected</string>
+    <string name="booking_status_cancelled_customer">Cancelled by you</string>
+    <string name="booking_status_cancelled_salon">Cancelled by the salon</string>
+    <string name="booking_status_auto_cancelled">Cancelled (no response)</string>
+    <string name="booking_status_completed">Completed</string>
+    <string name="booking_status_no_show">No-show</string>
+    <string name="booking_status_unknown">Unknown</string>
+    <string name="payment_status_pay_on_arrival">Pay on arrival</string>
+    <string name="payment_status_deposit_paid">Deposit paid</string>
+    <string name="payment_status_fully_paid">Fully paid</string>
+    <string name="payment_status_paid">Paid</string>
+    <string name="payment_status_unknown">Payment</string>
+</resources>

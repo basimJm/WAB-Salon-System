@@ -2,7 +2,12 @@ import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { Gender } from '../../constants/enums';
 import type { SalonState } from '../../constants/salon';
 import type { SubscriptionStatus } from '../../constants/subscriptions';
+import { SALON_RECENT_DAYS } from '../../constants/adminSalonInsights';
+import { MS_PER_DAY } from '../../constants/time';
 import type { SalonRaw } from '../../models/salon.model';
+import type { BookingsRepository } from '../../repositories/bookings.repository';
+import type { PlacementsRepository } from '../../repositories/placements.repository';
+import { toObjectId } from '../../utils/database/ids';
 import type { MembersRepository } from '../../repositories/identity.repository';
 import type { SalonServicesRepository } from '../../repositories/salonServices.repository';
 import type { SalonsRepository } from '../../repositories/salons.repository';
@@ -26,10 +31,17 @@ export interface AdminSalonRow {
   readonly areaId: string | null;
   readonly rating: { avg: number; count: number };
   readonly subscriptionStatus: SubscriptionStatus | null;
+  /** In an active "Recommended" placement right now. */
+  readonly recommended: boolean;
+  /** Bookings created in the last `SALON_RECENT_DAYS` days. */
+  readonly bookings30d: number;
+  /** The owner asked to delete the salon and no decision was made yet. */
+  readonly deletionRequestedAt: Date | null;
   readonly createdAt: Date;
 }
 
 export interface AdminSalonDetail extends AdminSalonRow {
+  readonly deletionApprovedAt: Date | null;
   readonly description: string | null;
   readonly phone: string | null;
   readonly completeness: { missing: string[]; isComplete: boolean };
@@ -48,6 +60,11 @@ export interface SalonListFilter {
   readonly cityId?: string | undefined;
   /** Part of the salon name. */
   readonly q?: string | undefined;
+  readonly subscription?: SubscriptionStatus | undefined;
+  /** `true` = only salons in an active placement now, `false` = only the others. */
+  readonly recommended?: boolean | undefined;
+  /** `true` = only salons with a pending deletion request. */
+  readonly deletionRequested?: boolean | undefined;
 }
 
 export interface AdminSalonMember {
@@ -92,6 +109,10 @@ export interface AdminSalonsDeps {
   readonly logger: Logger;
   /** Upcoming bookings of the salon; the gender cannot change while any exist. */
   readonly bookings?: { check(input: { salonId: string }): Promise<BookingConflict[]> };
+  /** Without these the list shows no recommended flag and 0 recent bookings. */
+  readonly placements?: Pick<PlacementsRepository, 'findMany'>;
+  readonly bookingCounts?: Pick<BookingsRepository, 'countBy'>;
+  readonly now?: () => Date;
 }
 
 const escapeRegex = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -99,8 +120,39 @@ const escapeRegex = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g
 export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsService => {
   const { salons, members, subscriptions, salonServices, state, audit, notifier, logger } = deps;
   const { bookings } = deps;
+  const now = deps.now ?? ((): Date => new Date());
 
-  const row = (s: Entity<SalonRaw>, status: SubscriptionStatus | null): AdminSalonRow => ({
+  interface Extras {
+    readonly recommended: ReadonlySet<string>;
+    readonly bookings30d: Readonly<Record<string, number>>;
+  }
+
+  /** Salons in an active placement now, and the bookings created in the last 30 days, for these ids. */
+  const extrasFor = async (ids: readonly string[]): Promise<Extras> => {
+    if (ids.length === 0) return { recommended: new Set(), bookings30d: {} };
+    const at = now();
+    const [placed, counts] = await Promise.all([
+      deps.placements?.findMany({
+        salonId: { $in: ids },
+        startAt: { $lte: at },
+        endAt: { $gt: at },
+      }) ?? Promise.resolve([]),
+      deps.bookingCounts?.countBy(
+        {
+          salonId: { $in: ids.map(toObjectId) },
+          createdAt: { $gte: new Date(at.getTime() - SALON_RECENT_DAYS * MS_PER_DAY) },
+        },
+        'salonId',
+      ) ?? Promise.resolve({}),
+    ]);
+    return { recommended: new Set(placed.map((p) => p.salonId)), bookings30d: counts };
+  };
+
+  const row = (
+    s: Entity<SalonRaw>,
+    status: SubscriptionStatus | null,
+    extras: Extras,
+  ): AdminSalonRow => ({
     id: s.id,
     name: s.name,
     gender: s.gender,
@@ -109,6 +161,9 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
     areaId: s.areaId ?? null,
     rating: s.rating,
     subscriptionStatus: status,
+    recommended: extras.recommended.has(s.id),
+    bookings30d: extras.bookings30d[s.id] ?? 0,
+    deletionRequestedAt: s.deletionRequestedAt ?? null,
     createdAt: s.createdAt,
   });
 
@@ -125,7 +180,8 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
       subscriptions.findOne({ salonId }),
     ]);
     return {
-      ...row(salon, subscription?.status ?? null),
+      ...row(salon, subscription?.status ?? null, await extrasFor([salonId])),
+      deletionApprovedAt: salon.deletionApprovedAt ?? null,
       description: salon.description ?? null,
       phone: salon.phone ?? null,
       completeness: salon.completeness,
@@ -169,6 +225,38 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
     },
 
     async list({ filter, params }) {
+      // Filters that depend on other collections become an id list on the salons query.
+      const include: Set<string>[] = [];
+      const exclude = new Set<string>();
+      if (filter.subscription !== undefined) {
+        const subs = await subscriptions.findMany({ status: filter.subscription });
+        include.push(new Set(subs.map((sub) => sub.salonId)));
+      }
+      if (filter.recommended !== undefined) {
+        const at = now();
+        const placed = await (deps.placements?.findMany({
+          startAt: { $lte: at },
+          endAt: { $gt: at },
+        }) ?? Promise.resolve([]));
+        const ids = new Set(placed.map((p) => p.salonId));
+        if (filter.recommended) include.push(ids);
+        else ids.forEach((id) => exclude.add(id));
+      }
+      const included = include.reduce<Set<string> | null>(
+        (all, next) => (all === null ? next : new Set([...all].filter((id) => next.has(id)))),
+        null,
+      );
+      const idFilter =
+        included === null && exclude.size === 0
+          ? {}
+          : {
+              _id: {
+                ...(included === null
+                  ? {}
+                  : { $in: [...included].filter((id) => !exclude.has(id)) }),
+                ...(exclude.size === 0 ? {} : { $nin: [...exclude] }),
+              },
+            };
       const page = await salons.findPage(
         {
           ...(filter.state === undefined ? {} : { state: filter.state }),
@@ -177,15 +265,20 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
           ...(filter.q === undefined || filter.q === ''
             ? {}
             : { name: { $regex: escapeRegex(filter.q), $options: 'i' } }),
+          ...(filter.deletionRequested === true ? { deletionRequestedAt: { $exists: true } } : {}),
+          ...idFilter,
         },
         params,
         { createdAt: -1 },
       );
       const ids = page.items.map((s) => s.id);
-      const subs = ids.length === 0 ? [] : await subscriptions.findMany({ salonId: { $in: ids } });
+      const [subs, extras] = await Promise.all([
+        ids.length === 0 ? [] : subscriptions.findMany({ salonId: { $in: ids } }),
+        extrasFor(ids),
+      ]);
       const bySalon = new Map(subs.map((s) => [s.salonId, s.status]));
       return {
-        items: page.items.map((s) => row(s, bySalon.get(s.id) ?? null)),
+        items: page.items.map((s) => row(s, bySalon.get(s.id) ?? null, extras)),
         meta: page.meta,
       };
     },

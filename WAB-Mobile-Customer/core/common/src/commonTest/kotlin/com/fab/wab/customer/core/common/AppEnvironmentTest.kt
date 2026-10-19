@@ -11,11 +11,13 @@ class AppEnvironmentTest {
     private fun environment(
         name: String = AppEnvironmentNames.DEV,
         apiBaseUrl: String = TEST_URL,
+        webBaseUrl: String = TEST_URL,
         appVersion: String = TEST_VERSION,
         appVersionCode: Int = TEST_VERSION_CODE,
     ) = AppEnvironment(
         name = name,
         apiBaseUrl = apiBaseUrl,
+        webBaseUrl = webBaseUrl,
         appVersion = appVersion,
         appVersionCode = appVersionCode,
         isDebug = true,
@@ -41,6 +43,7 @@ class AppEnvironmentTest {
     fun blankValuesAreRejectedAtStartup() {
         assertFailsWith<IllegalArgumentException> { environment(name = " ") }
         assertFailsWith<IllegalArgumentException> { environment(apiBaseUrl = "") }
+        assertFailsWith<IllegalArgumentException> { environment(webBaseUrl = " ") }
         assertFailsWith<IllegalArgumentException> { environment(appVersion = "  ") }
     }
 
@@ -54,5 +57,14 @@ class AppEnvironmentTest {
         const val TEST_VERSION = "2.3.4"
         const val TEST_VERSION_CODE = 7
         const val NEGATIVE_VERSION_CODE = -1
+    }
+
+    @Test
+    fun dataSourceComesFromConfigAndProdRefusesMock() {
+        assertEquals(DataSource.MOCK, DataSource.fromConfig(" Mock "))
+        assertEquals(DataSource.REMOTE, DataSource.fromConfig("remote"))
+        assertFailsWith<IllegalStateException> { DataSource.fromConfig("fixtures") }
+        assertTrue(environment().copy(dataSource = DataSource.MOCK).usesMock)
+        assertFailsWith<IllegalArgumentException> { environment(name = AppEnvironmentNames.PROD).copy(dataSource = DataSource.MOCK) }
     }
 }

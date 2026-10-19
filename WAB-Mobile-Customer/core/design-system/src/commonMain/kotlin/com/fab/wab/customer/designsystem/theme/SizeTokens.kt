@@ -25,6 +25,9 @@ data class SizeTokens(
     val avatar: Dp = 56.dp,
     val avatarLarge: Dp = 96.dp,
     val statusDot: Dp = 10.dp,
+    val pageIndicatorActive: Dp = 24.dp,
+    val choiceCardHeight: Dp = 96.dp,
+    val onboardingIllustration: Dp = 200.dp,
     val badgeHeight: Dp = 24.dp,
     val countBadge: Dp = 18.dp,
     val otpBoxWidth: Dp = 46.dp,
@@ -46,6 +49,9 @@ data class SizeTokens(
     val dialogIcon: Dp = 56.dp,
     val stateIcon: Dp = 64.dp,
     val shimmerLine: Dp = 14.dp,
+    val cardImageHeight: Dp = 140.dp,
+    val cardCompactWidth: Dp = 220.dp,
+    val listItemImage: Dp = 64.dp,
 )
 
 val DefaultSizes = SizeTokens()

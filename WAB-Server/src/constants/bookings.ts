@@ -47,6 +47,28 @@ export const ADMIN_BOOKING_AUDIT = {
   reasonCode: 'ADMIN_ACTION',
 } as const;
 
+/** Admin booking extras (SRV-123, Admin PRD A15): eligible staff, reassign, cancel by mode, chosen-amount refund. */
+export const ADMIN_BOOKING_EXTRA_ROUTES = {
+  eligibleStaff: '/:id/eligible-staff',
+  reassign: '/:id/reassign',
+  cancel: '/:id/cancel',
+  refund: '/:id/refund',
+} as const;
+/**
+ * Who a cancellation is booked for. The mode decides the status and the refund rule:
+ * CUSTOMER = the customer asked (policy refund; everything while PENDING), SALON = the salon
+ * cancels (full refund), ADMIN = the platform decides (full refund, recorded as a salon-side
+ * cancellation because no separate status exists; the history keeps the admin as the actor).
+ */
+export const ADMIN_CANCEL_MODES = ['CUSTOMER', 'SALON', 'ADMIN'] as const;
+export type AdminCancelMode = (typeof ADMIN_CANCEL_MODES)[number];
+export const ADMIN_BOOKING_EXTRA_AUDIT = {
+  entityType: 'BOOKING',
+  cancel: 'BOOKING_ADMIN_CANCEL',
+  reassign: 'BOOKING_ADMIN_REASSIGN',
+  refund: 'BOOKING_ADMIN_REFUND',
+} as const;
+
 /** Bulk cancellation of the bookings a schedule/team change would break (SRV-079, §5.12). */
 export const MERCHANT_CANCEL_AFFECTED_ROUTE = '/cancel-affected';
 export const CANCEL_AFFECTED_MAX_BOOKINGS = 100;
