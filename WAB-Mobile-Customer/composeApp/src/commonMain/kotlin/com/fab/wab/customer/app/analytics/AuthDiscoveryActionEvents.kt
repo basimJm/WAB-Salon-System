@@ -1,6 +1,5 @@
 package com.fab.wab.customer.app.analytics
-import com.fab.wab.customer.core.analytics.AnalyticsScreenNames
-import com.fab.wab.customer.core.navigation.route.Screen
+import com.fab.wab.customer.app.analytics.AnalyticsCatalog.Events
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.LoginContract
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.OtpContract
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.RegisterContract
