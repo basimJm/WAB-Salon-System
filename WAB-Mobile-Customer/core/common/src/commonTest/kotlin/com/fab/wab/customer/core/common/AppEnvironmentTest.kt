@@ -67,4 +67,11 @@ class AppEnvironmentTest {
         assertTrue(environment().copy(dataSource = DataSource.MOCK).usesMock)
         assertFailsWith<IllegalArgumentException> { environment(name = AppEnvironmentNames.PROD).copy(dataSource = DataSource.MOCK) }
     }
+
+    @Test
+    fun merchantLinksAreConfiguredOnlyWithBothUrls() {
+        assertFalse(environment().merchant.isConfigured)
+        assertFalse(MerchantLinks(registerUrl = TEST_URL).isConfigured)
+        assertTrue(MerchantLinks(registerUrl = TEST_URL, storeUrl = TEST_URL).isConfigured)
+    }
 }

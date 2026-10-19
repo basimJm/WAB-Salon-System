@@ -3,6 +3,7 @@ package com.fab.wab.customer.feature.salon.presentation
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
+import com.fab.wab.customer.core.domain.ErrorCode
 import com.fab.wab.customer.core.domain.auth.AuthTokens
 import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
 import com.fab.wab.customer.core.domain.model.LocationData
@@ -34,6 +35,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -110,7 +112,7 @@ class SalonDetailsViewModelTest {
         vm.onEvent(UiAction.OnCallClick)
         vm.onEvent(UiAction.OnWhatsAppClick)
         vm.onEvent(UiAction.OnShareClick)
-        val share = "share:" + shareText("Glow", "$WEB/salons/s1")
+        val share = "share:" + shareText("Glow", "$WEB/salon/s1")
         assertEquals(listOf("maps:31.9,35.9:Glow", "tel:+962791234567", "https://wa.me/962791234567", share), external.calls)
     }
 
@@ -148,4 +150,14 @@ class SalonDetailsViewModelTest {
         vm.onEvent(UiAction.OnHoursToggle)
         assertTrue(vm.state.value.hoursExpanded)
     }
+
+    @Test
+    fun missingSalonEmitsNotAvailableInsteadOfAnErrorState() = runTest(UnconfinedTestDispatcher()) {
+        details.result = AppResult.Error(AppError.ServerError(ErrorCode.SALON_NOT_FOUND, HTTP_NOT_FOUND, null))
+        val vm = viewModel()
+        assertNull(vm.state.value.error)
+        assertEquals<SideEffect>(SideEffect.NotAvailable, effects.single())
+    }
 }
+
+private const val HTTP_NOT_FOUND = 404

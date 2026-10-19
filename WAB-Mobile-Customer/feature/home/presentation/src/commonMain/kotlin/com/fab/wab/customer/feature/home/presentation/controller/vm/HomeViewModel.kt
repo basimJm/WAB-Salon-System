@@ -12,6 +12,7 @@ import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.mvi.BaseViewModel
+import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.navigation.route.SalonListFilter
 import com.fab.wab.customer.core.realtime.RealtimeClient
 import com.fab.wab.customer.core.realtime.RealtimeEvents
@@ -69,9 +70,13 @@ class HomeViewModel(
                 if (count != null) updateState { copy(unreadCount = count) }
             }
         }
+        scope.launch {
+            // PRD §10.2: a push shown while the app is open refreshes the badge (the Home payload carries the unread count).
+            PushSignals.messages.collect { if (uiState.value.signedIn && uiState.value.hasContent) load(refresh = true) }
+        }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnGenderSelect -> selectGender(event.gender)
             UiAction.OnRefresh -> load(refresh = true)

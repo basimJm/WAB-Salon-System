@@ -32,5 +32,14 @@ abstract class BaseViewModel<UiState, UiEvent, SideEffect>(
         scope.emitSideEffect(effect)
     }
 
+    /** Every action passes the [UiActionObserver] tap before the view model handles it. */
+    final override fun onEvent(event: UiEvent) {
+        UiActionObserver.notify(this::class.simpleName.orEmpty(), event)
+        handle(event)
+    }
+
+    /** The view model's reducer entry point (what `onEvent` used to be). */
+    abstract fun handle(event: UiEvent)
+
     open fun onStart() {}
 }

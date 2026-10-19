@@ -3,6 +3,7 @@ package com.fab.wab.customer.feature.bookings.presentation
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.auth.AuthTokens
+import com.fab.wab.customer.core.domain.booking.BookingDetails
 import com.fab.wab.customer.core.domain.booking.BookingStatus
 import com.fab.wab.customer.core.domain.booking.BookingSummary
 import com.fab.wab.customer.core.domain.booking.BookingTab
@@ -13,6 +14,8 @@ import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.domain.session.UserProfile
+import com.fab.wab.customer.core.notification.push.PushNotification
+import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.realtime.FakeRealtimeClient
 import com.fab.wab.customer.core.realtime.RealtimeEvent
 import com.fab.wab.customer.core.realtime.RealtimeEvents
@@ -48,6 +51,8 @@ private class BookingsFake : BookingsRepository {
         calls += Triple(tab, query, page)
         return AppResult.Success(List(perPage) { booking("$page-$it") })
     }
+    override suspend fun details(bookingId: String): AppResult<BookingDetails> = AppResult.Loading
+    override suspend fun cancel(bookingId: String, reasonText: String?): AppResult<String> = AppResult.Loading
 }
 
 private class SessionStoreFake(initial: SessionState) : SessionStore {
@@ -119,6 +124,9 @@ class BookingsViewModelTest {
         realtime.emit(RealtimeEvent(RealtimeEvents.BOOKING_UPDATED))
         runCurrent()
         assertEquals(3, repository.calls.size)
+        PushSignals.publishReceived(PushNotification("t", "b"))
+        runCurrent()
+        assertEquals(4, repository.calls.size, "an FCM message while open refreshes the list")
         assertTrue(effects.none { it is SideEffect.ShowError })
     }
 

@@ -58,9 +58,29 @@ sealed interface Screen {
     @Serializable
     data class BookingDetails(val bookingId: String) : Screen
 
+    /** S16 step 6: OTP + payment for a server draft. */
+    @Serializable
+    data class BookingVerify(val draftId: String) : Screen
+
+    /** S17 booking success: the created booking's id and copyable reference number. */
+    @Serializable
+    data class BookingSuccess(val bookingId: String, val referenceNumber: String) : Screen
+
+    /** S18 rating flow of a completed booking. */
+    @Serializable
+    data class RateBooking(val bookingId: String) : Screen
+
     /** S16 booking flow start for a salon (registered users). */
     @Serializable
     data class BookingStart(val salonId: String) : Screen
+
+    /** S22 edit personal information (registered). */
+    @Serializable
+    data object PersonalInfo : Screen
+
+    /** S23 FAQ list. */
+    @Serializable
+    data object Faq : Screen
 
     /** S19 notifications (registered users). */
     @Serializable

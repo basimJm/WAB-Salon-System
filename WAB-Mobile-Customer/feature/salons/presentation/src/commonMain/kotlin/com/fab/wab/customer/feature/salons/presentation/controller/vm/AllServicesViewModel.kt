@@ -35,7 +35,7 @@ class AllServicesViewModel(
         load()
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnServiceClick -> open(event.serviceId)
             UiAction.OnLoadMore -> loadMore()

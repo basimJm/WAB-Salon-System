@@ -24,7 +24,7 @@ class OnboardingViewModel(
         scope.launch { markOnboardingSeen() }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnPageShown -> updateState { copy(page = OnboardingPage.at(event.index)) }
             UiAction.OnNextClicked -> next()

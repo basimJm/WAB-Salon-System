@@ -6,7 +6,7 @@
 |---|---|---|---|---|---|
 | server | `server` | none (backlog Stage A–M done; Stage N/O added) | SRV-111 contract guard, then SRV-117… | SRV-011/059/115/116 owner deployment; SRV-034/092/110/112 SDK publish | `WAB-Server/.claude/session.md` |
 | admin | `admin` | none (ADM-001…081 done except owner-pending rows) | none ready (all remaining rows PENDING/BLOCKED) | SRV-117…127 (Stage N), SRV-011, owner hosting/CI | `WAB-Admin-Dashboard/.claude/session.md` |
-| customer | `customer` | batch 2 CUS-037…041 (staff/service sheets, reviews, media viewer, favorites, bookings tab) in review | CUS-042 booking flow | CUS-047 ← PAY-011; CUS-060 ← SRV-011 | `WAB-Mobile-Customer/.claude/session.md` |
+| customer | `customer` | none (CUS-004…065 done; end-of-backlog pass PR #315) | none (remaining rows blocked/pending) | CUS-047 ← PAY-011; CUS-060 ← SRV-011 | `WAB-Mobile-Customer/.claude/session.md` |
 | merchant | `merchant` | none (no code yet) | MER-001 scaffold from the customer template | MER-004 owner Firebase; MER-042/043/049/050 ← SRV-129…134 | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
 | otp | `server` | none | OTP-001 scaffold | — | `wab-otp/.claude/session.md` |
@@ -66,3 +66,13 @@
 - Tests: `python3 .claude/hooks/test_hooks.py` (25 green after the merge)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written; hooks diff comes from main as merged.
+
+### T-129 — Sync main into admin (owner order 2026-10-19)
+- Project: repo root
+- Branch: `chore/sync-main-into-admin`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `main` merged into the `admin` master so `admin` → `main` can merge; the only conflict (`INTEGRATION.md`, the generated board) resolved by taking main's block and regenerating with `tasks.py board`
+- Tests: `python3 .claude/hooks/test_hooks.py` (25 OK)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written. NOTE: `tasks.py check` reports `CUS-047: BLOCKED but every dependency is DONE` from the customer backlog on main; not touched here (customer project's status).

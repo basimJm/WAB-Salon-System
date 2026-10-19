@@ -9,6 +9,12 @@ interface ExternalActions {
     fun dial(phoneE164: String)
     fun openWhatsApp(phoneE164: String)
     fun share(text: String)
+    /** Web page in the system browser (store page, merchant registration). */
+    fun openUrl(url: String)
+    /** Mail app composer (PRD S23 contact). */
+    fun email(address: String)
+    /** Opens [appUrl] in the app identified by [appId] (package / URL scheme) when installed, else [fallbackUrl] (store page). */
+    fun openApp(appUrl: String, appId: String, fallbackUrl: String)
 }
 
 /** Pure link builders shared by the platforms (unit-tested). */
@@ -17,6 +23,7 @@ object ExternalLinks {
     private const val WHATSAPP_SCHEME = "https"
     private const val WHATSAPP_HOST = "wa.me"
     private const val TEL_SCHEME = "tel"
+    private const val MAILTO_SCHEME = "mailto"
     private const val PATH_SEPARATOR = '/'
     private val NON_DIGITS = Regex("[^0-9]")
 
@@ -25,6 +32,8 @@ object ExternalLinks {
         "$WHATSAPP_SCHEME$SCHEME_SEPARATOR$WHATSAPP_HOST$PATH_SEPARATOR${phoneE164.replace(NON_DIGITS, "")}"
 
     fun tel(phoneE164: String): String = "$TEL_SCHEME:${phoneE164.trim()}"
+
+    fun mailto(address: String): String = "$MAILTO_SCHEME:${address.trim()}"
 
     /** RFC 3986 query encoding of a label (UTF-8 bytes as %XX; unreserved characters kept). */
     fun queryEncode(value: String): String = buildString {
@@ -52,6 +61,9 @@ class FakeExternalActions : ExternalActions {
     override fun dial(phoneE164: String) { calls += ExternalLinks.tel(phoneE164) }
     override fun openWhatsApp(phoneE164: String) { calls += ExternalLinks.whatsApp(phoneE164) }
     override fun share(text: String) { calls += "share:$text" }
+    override fun openUrl(url: String) { calls += "url:$url" }
+    override fun email(address: String) { calls += ExternalLinks.mailto(address) }
+    override fun openApp(appUrl: String, appId: String, fallbackUrl: String) { calls += "app:$appUrl|$appId|$fallbackUrl" }
 }
 
 expect val platformExternalActionsModule: Module

@@ -1,12 +1,17 @@
 package com.fab.wab.customer.main
 
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.fab.wab.customer.app.deeplink.DeepLinkStore
 import com.fab.wab.customer.app.ui.App
+import com.fab.wab.customer.core.ui.media.AndroidImagePickerBridge
+import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.ui.permission.AndroidPermissionBridge
+import com.fab.wab.customer.firebase.PushIntents
 import org.koin.java.KoinJavaComponent.getKoin
 
 class MainActivity : ComponentActivity() {
@@ -18,13 +23,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         getKoin().get<AndroidPermissionBridge>().attach(this)
+        getKoin().get<AndroidImagePickerBridge>().attach(this)
+        getKoin().get<DeepLinkStore>().publish(intent?.dataString)
+        PushIntents.fromIntent(intent)?.let(PushSignals::tapped)
         setContent {
             App(this)
         }
     }
 
+    /** App Links arriving while the activity is alive (`singleTop`). */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        getKoin().get<DeepLinkStore>().publish(intent.dataString)
+        PushIntents.fromIntent(intent)?.let(PushSignals::tapped)
+    }
+
     override fun onDestroy() {
         getKoin().get<AndroidPermissionBridge>().detach()
+        getKoin().get<AndroidImagePickerBridge>().detach()
         super.onDestroy()
     }
 

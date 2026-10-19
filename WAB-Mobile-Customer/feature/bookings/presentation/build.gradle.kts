@@ -12,6 +12,9 @@ kotlin {
     sourceSets.commonMain.dependencies {
         implementation(projects.feature.bookings.domain)
         implementation(projects.core.realtime)
+        implementation(projects.feature.salon.domain)
+        implementation(libs.kotlinx.datetime)
+        implementation(libs.kotlinx.serialization.json)
     }
     sourceSets.commonTest.dependencies {
         implementation(libs.kotlinx.coroutines.test)

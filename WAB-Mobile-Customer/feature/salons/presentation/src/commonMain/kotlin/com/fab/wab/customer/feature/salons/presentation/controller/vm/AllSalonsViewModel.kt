@@ -80,7 +80,7 @@ class AllSalonsViewModel(
         }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnTextChange -> {
                 updateState { copy(text = event.value) }
