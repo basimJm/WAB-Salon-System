@@ -378,6 +378,20 @@ export const unavailableAdminSalonEdit: AdminSalonEditService = {
   addGalleryItem: unavailable,
   removeGalleryItem: unavailable,
   reorderGallery: unavailable,
+  hours: unavailable,
+  previewWeekly: unavailable,
+  previewClosure: unavailable,
+  setWeekly: unavailable,
+  addClosure: unavailable,
+  updateClosure: unavailable,
+  removeClosure: unavailable,
+  services: unavailable,
+  addService: unavailable,
+  updateService: unavailable,
+  staff: unavailable,
+  setStaff: unavailable,
+  policy: unavailable,
+  setPolicy: unavailable,
 };
 
 export const unavailableAdminProfile: AdminProfileService = {
