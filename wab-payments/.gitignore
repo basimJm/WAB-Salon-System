@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+kmp/**/build/
+kmp/.gradle/
+kmp/local.properties

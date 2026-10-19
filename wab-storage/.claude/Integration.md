@@ -7,7 +7,7 @@
 | Package | `wab-storage` |
 | Type | Node.js package (TypeScript, npm), server only |
 | BRD | `docs/WAB_Package_Storage_BRD.md` |
-| Version | 0.0.0 (design only — no code yet) |
+| Version | 0.1.0 (SDK built; real AWS/MinIO/CloudFront calls not verified — see §11) |
 | Node | >= 22, TypeScript strict, ESM + CJS builds |
 | Server counterpart in WAB | `WAB-Server/src/providers/storage` (interface already in WAB-Server, fake only today) |
 
@@ -103,7 +103,7 @@ Reuse one S3 client; presigning is local (no network); stream large bodies; bulk
 const storage = createStorage({ environment: "dev", provider: "s3", s3: { endpoint, region, publicBucket, privateBucket, credentials }, cdn: { baseUrl } });
 const t = await storage.createUploadUrl({ key, visibility: "PUBLIC", contentType: "image/jpeg", maxBytes, expiresInSec });
 ```
-How WAB-Server adopts it: replace `WAB-Server/src/providers/storage` real mode (`*_PROVIDER=real`) with this package; the interface is already compatible (see §3).
+How WAB-Server adopts it (done, branch `feat/srv-112-storage-real`): dependency `"@wab/storage": "file:../wab-storage"`, adapter `WAB-Server/src/providers/storage/real.ts` (settings -> SDK options; SDK errors -> `ExternalServiceError` 502/503, caller errors -> `RangeError`; the SDK's `EMPTY` rejection maps to the server's `TYPE_MISMATCH`), env keys `S3_*`, `CDN_BASE_URL`, `CLOUDFRONT_*`. The server keeps its own sharp-based variants (same `_thumb.webp` / `_medium.webp` naming), so `createVariants` is optional for it.
 
 ## 11. Open questions / assumed-missing requirements
 - Video duration limit (60 s) needs media probing — not available from S3 metadata.
@@ -112,21 +112,41 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/storage` real mode (
 - CDN cache invalidation and cache headers policy.
 - Bucket/CDN names, region and IAM model are owner decisions.
 
+- NOT verified against real services (no cloud access here): AWS S3, MinIO container, CloudFront distribution, real IAM roles. Verified instead with the real AWS SDK against an in-repo S3 wire emulator.
+- Presigned PUT cannot cap the size; oversize uploads are caught at confirm. Use S3 lifecycle rules to expire unconfirmed objects and incomplete uploads.
+- Cache headers: public objects written by the server get `publicCacheControl` (immutable); client-uploaded originals get whatever the client sends (consider a CloudFront response-headers policy).
+- Error codes in use: `STORAGE_CONFIG_INVALID`, `_VALIDATION_FAILED`, `_KEY_INVALID`, `_ACCESS_DENIED`, `_AUTH_FAILED`, `_NETWORK_ERROR`, `_TIMEOUT`, `_RATE_LIMITED`, `_UNAVAILABLE`, `_VENDOR_ERROR`, `_MALFORMED_RESPONSE`, `_VARIANT_FAILED`, `_UNKNOWN`.
+
 ## 12. Implementation status
 | Item | Status |
 |---|---|
-| Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ⬜ |
-| Shared kernel (errors, config, http/retry, logger) | ⬜ |
-| Adapter: memory — in-memory objects for tests | ⬜ |
-| Adapter: local-fs — folder on localhost for dev | ⬜ |
-| Adapter: s3 — AWS S3 (and S3-compatible: MinIO in dev, DO Spaces) | ⬜ |
-| Adapter: cdn-url-builder — public URL = CDN domain + key | ⬜ |
-| Adapter: sharp-variants — image variants | ⬜ |
-| Unit tests + coverage gate | ⬜ |
-| Loop test | ⬜ |
-| README + consumer smoke test | ⬜ |
+| Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ STO-001 |
+| Shared kernel (errors, config + prod rules, retry/timeout, redacting logger) | ✅ STO-002 |
+| Port + memory adapter + validation + magic-byte detection | ✅ STO-003 |
+| Adapter: local-fs + HTTP helper (PUT upload, public serving, HMAC signed links) | ✅ STO-004 |
+| Adapter: s3 (presign, confirm, read/write/delete, error mapping, retries, lazy SDK) | ✅ STO-005 (verified with the real AWS SDK against a wire emulator) |
+| Public URL + signed GET URLs (S3 presign or CloudFront canned policy) | ✅ STO-006 |
+| Image variants (sharp behind `ImageProcessor`) | ✅ STO-007 |
+| MinIO dev mode (`ensureDevBuckets`) + upload fixtures + adapter parity | ✅ STO-008 |
+| Unit tests + coverage gate, loop test, package smoke, README | ✅ STO-009 |
+| Publish `@wab/storage` + WAB-Server `STORAGE_PROVIDER=real` | 🚧 STO-010 |
+
+Implementation notes: `createStorage(options)` returns `Storage` = port + `createVariants/variantKey/variantKeys` (variants are layered over any adapter). `RejectionReason` = `NOT_FOUND | EMPTY | TYPE_MISMATCH | TOO_LARGE`. Keys are unique across the public and private locations: `read` tries public then private, `delete` removes from both. Size cannot be enforced by a presigned PUT (SigV4 cannot bind `content-length-range`), so `maxBytes` is enforced at confirm (object rejected and deleted); the content type is signed into the URL.
 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
 | 2026-10-14 | 0.0.0 | Design document created from the BRD; no code yet. |
+| 2026-10-18 | 0.1.0 | STO-002: kernel: errors, config/options (prod rules), logger redaction, retry/timeout, constants |
+| 2026-10-18 | 0.1.0 | STO-003: port types, validation, file-type detection, confirm rule, memory adapter, createStorage |
+| 2026-10-18 | 0.1.0 | STO-004: local-fs adapter + createLocalFsHandler (PUT upload, public serving, signed private links) |
+| 2026-10-18 | 0.1.0 | STO-005: S3 adapter (presign/confirm/read/write/delete), error mapping, lazy AWS SDK deps, tests with a wire-level S3 emulator |
+| 2026-10-18 | 0.1.0 | STO-006: CDN public URL helper, CloudFront signer, signedUrl.mode option |
+| 2026-10-18 | 0.1.0 | STO-007: variants via sharp behind an ImageProcessor port; Storage type with createVariants |
+| 2026-10-18 | 0.1.0 | STO-007: variants via sharp behind an ImageProcessor port; Storage type with createVariants |
+| 2026-10-18 | 0.1.0 | STO-008: ensureDevBuckets, SAMPLE_FILES/UPLOAD_FIXTURES, adapter parity tests |
+| 2026-10-18 | 0.1.0 | STO-009: loop test (100 lifecycles, 20 concurrent, memory + real SDK), consumer smoke test, README. |
+| 2026-10-18 | 0.1.0 | STO-009: loop test, package smoke, README, Integration.md status |
+| 2026-10-18 | 0.1.0 | STO-010: prepared for publish as @wab/storage (package.json, .npmrc, CHANGELOG); not published |
+| 2026-10-18 | 0.1.0 | FIX-STO-CJS: CJS builds load AWS SDK/sharp via require; smoke covers both formats |
+| 2026-10-18 | 0.1.0 | Fix: the CJS build now loads the AWS SDK and sharp with `require()` (a native `import()` cannot run under Jest/ts-node); ESM keeps `import()`; package smoke covers both. Found while wiring WAB-Server. |

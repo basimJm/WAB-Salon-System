@@ -16,10 +16,12 @@ import { genderBody, salonsQuery } from './adminSalons.validation';
 const iso = (date: Date | null): string | null => (date === null ? null : date.toISOString());
 const rowData = (r: AdminSalonRow): Record<string, unknown> => ({
   ...r,
+  deletionRequestedAt: iso(r.deletionRequestedAt),
   createdAt: r.createdAt.toISOString(),
 });
 const detailData = (d: AdminSalonDetail): Record<string, unknown> => ({
   ...rowData(d),
+  deletionApprovedAt: iso(d.deletionApprovedAt),
   description: d.description,
   phone: d.phone,
   completeness: d.completeness,

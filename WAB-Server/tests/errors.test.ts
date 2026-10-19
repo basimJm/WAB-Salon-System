@@ -129,6 +129,8 @@ describe('error codes', () => {
         'PHONE_ALREADY_REGISTERED',
         'ACCOUNT_BLOCKED',
         'MEMBER_INACTIVE',
+        'CURRENT_PASSWORD_INVALID',
+        'EMAIL_ALREADY_USED',
         'SALON_NOT_FOUND',
         'SALON_NOT_BOOKABLE',
         'SALON_CLOSED',

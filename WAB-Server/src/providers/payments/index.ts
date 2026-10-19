@@ -1,6 +1,8 @@
+export { DisabledPaymentProvider } from './disabled';
 export { FakePaymentProvider, fakeWebhookBody } from './fake';
 export type {
   CreateSessionRequest,
+  PaymentClientCheckout,
   PaymentProvider,
   PaymentSession,
   PaymentVerification,

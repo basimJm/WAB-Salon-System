@@ -23,6 +23,12 @@ const row = z.object({
   areaId: z.string().nullable(),
   rating: z.object({ avg: z.number(), count: z.number() }),
   subscriptionStatus: z.enum(SUBSCRIPTION_STATUSES).nullable(),
+  recommended: z.boolean().describe('In an active Recommended placement right now.'),
+  bookings30d: z.number().int().describe('Bookings created in the last 30 days.'),
+  deletionRequestedAt: z
+    .string()
+    .nullable()
+    .describe('The owner asked to delete the salon and no decision was made yet.'),
   createdAt: z.string(),
 });
 const detail = row.extend({
@@ -33,6 +39,7 @@ const detail = row.extend({
   owner: z
     .object({ id: z.string(), firstName: z.string(), lastName: z.string(), phone: z.string() })
     .nullable(),
+  deletionApprovedAt: z.string().nullable(),
   subscription: z
     .object({
       status: z.enum(SUBSCRIPTION_STATUSES),

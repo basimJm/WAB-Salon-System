@@ -43,6 +43,8 @@
                   "PHONE_NOT_REGISTERED",
                   "PHONE_ALREADY_REGISTERED",
                   "ACCOUNT_BLOCKED",
+                  "CURRENT_PASSWORD_INVALID",
+                  "EMAIL_ALREADY_USED",
                   "MEMBER_INACTIVE",
                   "SALON_NOT_FOUND",
                   "SALON_NOT_BOOKABLE",
@@ -316,14 +318,30 @@
           "Webhooks"
         ],
         "summary": "Payment gateway notification (called by the gateway, not by the apps)",
-        "description": "Authenticated by the gateway signature over the raw body (header `X-Signature`); a bad or missing signature is 401. The outcome is confirmed with a status query before anything is settled, so a repeated or forged-content notification changes nothing. Unknown sessions are acknowledged. Answers 200 `{settled}`.",
+        "description": "Authenticated by the gateway signature over the raw body (HyperPay: AES-256-GCM `X-Authentication-Tag` + `X-Initialization-Vector`, body is the encrypted message; the fake gateway: `X-Signature`); a bad or missing signature is 401. The outcome is confirmed with a status query before anything is settled, so a repeated or forged-content notification changes nothing. Unknown sessions are acknowledged. Answers 200 `{settled}`.",
         "parameters": [
           {
             "schema": {
               "type": "string"
             },
-            "required": true,
+            "required": false,
+            "name": "x-authentication-tag",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
             "name": "x-signature",
+            "in": "header"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "x-initialization-vector",
             "in": "header"
           }
         ],

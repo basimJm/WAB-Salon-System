@@ -8,6 +8,7 @@ import type { SalonServicesRepository } from '../../repositories/salonServices.r
 import type { SalonsRepository } from '../../repositories/salons.repository';
 import { isDuplicateKeyError } from '../../utils/database/errors';
 import { toObjectId } from '../../utils/database/ids';
+import type { UploadRaw } from '../../models/upload.model';
 import type { Entity } from '../../utils/database/plain';
 import { formatJod } from '../../utils/money';
 import {
@@ -65,12 +66,15 @@ export interface SalonServicesService {
     language: Language;
     catalogServiceId: string;
     fields: AddFields;
+    /** Replaces the default "uploaded by this salon" check (an admin edits for the salon). */
+    acceptUpload?: ((upload: Entity<UploadRaw>) => boolean) | undefined;
   }): Promise<SalonServiceView>;
   update(input: {
     salonId: string;
     language: Language;
     id: string;
     fields: UpdateFields;
+    acceptUpload?: ((upload: Entity<UploadRaw>) => boolean) | undefined;
   }): Promise<SalonServiceView>;
 }
 
@@ -125,12 +129,16 @@ export const createSalonServicesService = ({
     return salon;
   };
 
-  const verifyMedia = async (salonId: string, keys: readonly string[]): Promise<void> => {
+  const verifyMedia = async (
+    salonId: string,
+    keys: readonly string[],
+    accept?: (upload: Entity<UploadRaw>) => boolean,
+  ): Promise<void> => {
     await uploads.assertConfirmed({
       keys,
       purpose: 'SERVICE_MEDIA',
       field: 'body.mediaKeys',
-      accept: (upload) => upload.salonId === salonId,
+      accept: accept ?? ((upload) => upload.salonId === salonId),
     });
   };
 
@@ -146,7 +154,7 @@ export const createSalonServicesService = ({
       };
     },
 
-    async add({ salonId, language, catalogServiceId, fields }) {
+    async add({ salonId, language, catalogServiceId, fields, acceptUpload }) {
       const salon = await loadSalon(salonId);
       const entry = await catalog.findById(catalogServiceId);
       if (entry === null || !entry.active) throw invalid('body.catalogServiceId');
@@ -156,7 +164,7 @@ export const createSalonServicesService = ({
       if (await services.exists({ salonId, catalogServiceId })) {
         throw new ConflictError({ code: ERROR_CODES.CONFLICT });
       }
-      await verifyMedia(salonId, fields.mediaKeys ?? []);
+      await verifyMedia(salonId, fields.mediaKeys ?? [], acceptUpload);
       let created: Entity<SalonServiceRaw>;
       try {
         created = await services.create({
@@ -179,7 +187,7 @@ export const createSalonServicesService = ({
       return toView(created, entry, language);
     },
 
-    async update({ salonId, language, id, fields }) {
+    async update({ salonId, language, id, fields, acceptUpload }) {
       const salon = await loadSalon(salonId);
       const current = await services.findOne({ _id: id, salonId });
       if (current === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
@@ -188,6 +196,7 @@ export const createSalonServicesService = ({
         await verifyMedia(
           salonId,
           fields.mediaKeys.filter((key) => !current.mediaKeys.includes(key)),
+          acceptUpload,
         );
       }
       const { extraDescription, mediaKeys, ...rest } = fields;

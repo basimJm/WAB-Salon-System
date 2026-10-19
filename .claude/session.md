@@ -32,6 +32,17 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs + tooling only; no product code changed. DEVIATION: the browser/UI check does not apply (no UI); PRDs were read by section, not whole.
 
+### CHORE-HOOKS — guard hooks resolve the checkout from the Bash tool's cwd (git worktrees)
+- Branch: `chore/hooks-worktree`
+- Status: DONE
+- Acceptance criteria:
+  - [x] `read_input()` uses the payload `cwd` to find the git checkout, so branch, session files and task blocks come from the worktree the command runs in (parallel agents in worktrees can push their own task branches); same checks, nothing weakened
+  - [x] falls back to `CLAUDE_PROJECT_DIR`/cwd when the payload has no usable cwd
+  - [x] stray `.claude/worktrees/*` gitlinks removed from the index and ignored
+- Tests: `python3 .claude/hooks/test_hooks.py`
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — deviation: this edits the enforcement hooks (owner may review); behaviour only changes which checkout is inspected.
+
 ### T-125 — Stop hook: master branches are exempt (they only hold merged PRs)
 - Project: repo root (`.claude/hooks`)
 - Branch: `chore/hooks-master-branches`
@@ -44,3 +55,14 @@
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — reads the same registry as `tasks.py`; falls back to main/master when the registry is missing.
 - Notes: patched through the Terminal panel (the sandbox cannot write `.claude/hooks/`). Triggered by the Stop hook firing on the `customer` checkout after the CUS-023 merge.
 
+
+### T-126 — Sync main into server and merge the masters into main
+- Project: repo root
+- Branch: `chore/sync-main-into-server`
+- Status: IN PROGRESS
+- Acceptance criteria:
+  - [x] `main` (2 hook commits) merged into `server`; the only conflict (this file) resolved by keeping both task blocks
+  - [ ] masters `server`, `admin`, `customer` merged into `main` through PRs (owner order 2026-10-19)
+- Tests: `python3 .claude/hooks/test_hooks.py` (25 green after the merge)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written; hooks diff comes from main as merged.

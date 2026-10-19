@@ -55,6 +55,8 @@
                   "PHONE_NOT_REGISTERED",
                   "PHONE_ALREADY_REGISTERED",
                   "ACCOUNT_BLOCKED",
+                  "CURRENT_PASSWORD_INVALID",
+                  "EMAIL_ALREADY_USED",
                   "MEMBER_INACTIVE",
                   "SALON_NOT_FOUND",
                   "SALON_NOT_BOOKABLE",
