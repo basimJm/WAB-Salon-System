@@ -77,16 +77,20 @@ internal fun AuthDropdownField(
             )
         }
         if (open) {
-            OptionList(options, selectedIndex) { index ->
-                expanded = false
-                onSelect(index)
-            }
+            OptionList(
+                options = options,
+                selectedIndex = selectedIndex,
+                onSelect = { index ->
+                    expanded = false
+                    onSelect(index)
+                },
+            )
         }
     }
 }
 
 @Composable
-private fun OptionList(options: List<String>, selectedIndex: Int?, modifier: Modifier = Modifier, onSelect: (Int) -> Unit) {
+private fun OptionList(options: List<String>, selectedIndex: Int?, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.medium
     Column(

@@ -39,7 +39,11 @@ fun AppLogo(modifier: Modifier = Modifier, size: Dp = AppTheme.sizes.logo, shado
 /** Logo + "WAB" serif wordmark + letter-spaced tagline (S11 login, S02 nickname, S24 system screens). */
 @Composable
 fun AppBrandHeader(modifier: Modifier = Modifier, size: Dp = AppTheme.sizes.logo, tagline: Boolean = true) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6)) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
+    ) {
         AppLogo(size = size)
         Spacer(Modifier.height(AppTheme.spacing.space6))
         AppText(

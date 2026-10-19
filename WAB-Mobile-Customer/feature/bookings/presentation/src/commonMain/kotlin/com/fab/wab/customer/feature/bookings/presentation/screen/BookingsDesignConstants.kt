@@ -54,9 +54,9 @@ internal object BookingsDesign {
     val doneTitleBottomPadding = 26.dp
     val salonStepBottomPadding = 18.dp
     val lineVerticalPadding = 3.dp
-    val dashLength = 6f
-    val dashGap = 4f
-    val strokeCenterDivisor = 2f
+    const val dashLength = 6f
+    const val dashGap = 4f
+    const val strokeCenterDivisor = 2f
 
     /** Design `listPh` / `dError`: 110 px circle, 46 px icon, 16 px title, 13 px body, 48 px button with 30 px side padding. */
     val listPlaceholder = PlaceholderSpec(

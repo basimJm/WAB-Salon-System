@@ -196,15 +196,15 @@ private fun Legend(modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val shape = roundedShape(BookingDesignConstants.legendRadius)
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(BookingDesignConstants.legendGap)) {
-        LegendItem(Modifier.brandBackground(brandBrush(), shape), stringResource(Res.string.booking_legend_selected))
-        LegendItem(Modifier.background(colors.dangerContainer, shape), stringResource(Res.string.booking_legend_closed))
+        LegendItem(stringResource(Res.string.booking_legend_selected), Modifier.brandBackground(brandBrush(), shape))
+        LegendItem(stringResource(Res.string.booking_legend_closed), Modifier.background(colors.dangerContainer, shape))
     }
 }
 
 @Composable
-private fun LegendItem(squareModifier: Modifier, label: String) {
+private fun LegendItem(label: String, modifier: Modifier = Modifier) {
     Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(BookingDesignConstants.legendSquare).then(squareModifier))
+        Box(modifier.size(BookingDesignConstants.legendSquare))
         AppText(text = label, style = AppTheme.typography.labelSmall, color = AppTheme.colors.muted)
     }
 }

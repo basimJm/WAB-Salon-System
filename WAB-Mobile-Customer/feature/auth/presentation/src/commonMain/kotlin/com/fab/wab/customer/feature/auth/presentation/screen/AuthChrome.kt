@@ -59,11 +59,11 @@ internal fun AuthPillButton(
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = AuthDesign.pillMinWidth, minHeight = AppTheme.sizes.touchTarget)
-            .clickable(role = Role.Button, onClickLabel = contentDescription, onClick = onClick)
             .padding(vertical = AuthDesign.pillVerticalInset)
             .height(AppTheme.sizes.buttonHeightCompact)
             .defaultMinSize(minWidth = AuthDesign.pillMinWidth)
             .clip(shape)
+            .clickable(role = Role.Button, onClickLabel = contentDescription, onClick = onClick)
             .background(colors.card)
             .border(AppTheme.sizes.hairline, colors.line, shape)
             .padding(horizontal = if (label != null) AuthDesign.pillHorizontalPadding else AppTheme.spacing.space0),
@@ -132,14 +132,14 @@ internal fun AuthLegalLinks(onLegalClick: (String) -> Unit, modifier: Modifier =
         horizontalArrangement = Arrangement.spacedBy(AuthDesign.legalGapHorizontal, Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(AuthDesign.legalGapVertical),
     ) {
-        AuthLegalLink(stringResource(Res.string.login_privacy)) { onLegalClick(LegalSlugs.PRIVACY) }
-        AuthLegalLink(stringResource(Res.string.login_terms)) { onLegalClick(LegalSlugs.TERMS) }
-        AuthLegalLink(stringResource(Res.string.login_contact)) { onLegalClick(LegalSlugs.CONTACT) }
+        AuthLegalLink(stringResource(Res.string.login_privacy), onClick = { onLegalClick(LegalSlugs.PRIVACY) })
+        AuthLegalLink(stringResource(Res.string.login_terms), onClick = { onLegalClick(LegalSlugs.TERMS) })
+        AuthLegalLink(stringResource(Res.string.login_contact), onClick = { onLegalClick(LegalSlugs.CONTACT) })
     }
 }
 
 @Composable
-private fun AuthLegalLink(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun AuthLegalLink(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     AppText(
         text = text,
         modifier = modifier
