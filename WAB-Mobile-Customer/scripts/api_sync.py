@@ -149,7 +149,7 @@ TEXT_FIELD_HINTS = ("name", "description", "title", "body", "message", "comment"
 TEXT_MARKER = "__TEXT__"
 SAMPLE_ITEMS = 3
 SAMPLE_DATE = "2026-10-18T10:00:00.000Z"
-SAMPLE_STRING_HINTS = {"open": "08:00", "close": "16:00", "actiontype": "NONE", "min": "5", "max": "100", "createdat": SAMPLE_DATE, "start": "09:00", "end": "17:00", "day": "SAT"}
+SAMPLE_STRING_HINTS = {"open": "08:00", "close": "16:00", "actiontype": "NONE", "min": "5", "max": "100", "createdat": SAMPLE_DATE, "start": "09:00", "end": "17:00", "day": "SAT", "appointmentstart": SAMPLE_DATE, "appointmentend": SAMPLE_DATE, "respondby": SAMPLE_DATE, "referencenumber": "WAB-1001", "status": "APPROVED", "paymentstatus": "DEPOSIT_PAID", "paymentmethod": "DEPOSIT", "price": "15", "total": "30"}
 SAMPLE_URL = "https://example.invalid/sample.jpg"
 SAMPLE_ID_PREFIX = "id-"
 

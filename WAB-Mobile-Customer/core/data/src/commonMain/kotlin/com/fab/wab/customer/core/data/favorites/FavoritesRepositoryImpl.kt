@@ -20,6 +20,7 @@ class FavoritesRepositoryImpl(private val api: FavoritesApi) : FavoritesReposito
         safeApiCall { api.list(page, pageSize) }.mapSuccess { response -> response.data.map { it.toDomain() } }
 }
 
+/** Every row of `GET /favorites` is a favorite: the heart shows active whatever the flag says (Design Script S20). */
 fun GetFavoritesDataItem.toDomain(): SalonSummary = SalonSummary(
     id = id,
     name = name,
@@ -30,6 +31,6 @@ fun GetFavoritesDataItem.toDomain(): SalonSummary = SalonSummary(
     shortDescription = shortDescription,
     isOpenNow = isOpenNow,
     todayHours = todayHours?.let { OpeningHours(it.open, it.close) },
-    isFavorite = isFavorite,
+    isFavorite = true,
     distanceKm = distanceKm,
 )

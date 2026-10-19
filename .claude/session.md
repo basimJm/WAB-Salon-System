@@ -6,7 +6,7 @@
 |---|---|---|---|---|---|
 | server | `server` | none (backlog Stage A–M done; Stage N/O added) | SRV-111 contract guard, then SRV-117… | SRV-011/059/115/116 owner deployment; SRV-034/092/110/112 SDK publish | `WAB-Server/.claude/session.md` |
 | admin | `admin` | none (ADM-001…081 done except owner-pending rows) | none ready (all remaining rows PENDING/BLOCKED) | SRV-117…127 (Stage N), SRV-011, owner hosting/CI | `WAB-Admin-Dashboard/.claude/session.md` |
-| customer | `customer` | batch 1 CUS-032…036 (Home, All salons, Filter sheet, All services, Salon details) in review | CUS-037 staff/service sheets | CUS-047 ← PAY-011; CUS-060 ← SRV-011 | `WAB-Mobile-Customer/.claude/session.md` |
+| customer | `customer` | batch 2 CUS-037…041 (staff/service sheets, reviews, media viewer, favorites, bookings tab) in review | CUS-042 booking flow | CUS-047 ← PAY-011; CUS-060 ← SRV-011 | `WAB-Mobile-Customer/.claude/session.md` |
 | merchant | `merchant` | none (no code yet) | MER-001 scaffold from the customer template | MER-004 owner Firebase; MER-042/043/049/050 ← SRV-129…134 | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
 | otp | `server` | none | OTP-001 scaffold | — | `wab-otp/.claude/session.md` |

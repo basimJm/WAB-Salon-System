@@ -117,6 +117,8 @@ class FavoritesViewModelTest {
         vm.onEvent(UiAction.OnExploreClick)
         assertEquals<SideEffect>(SideEffect.OpenHome, effects.last())
         vm.onEvent(UiAction.OnResume)
+        assertEquals(listOf(1), repository.pages)
+        vm.onEvent(UiAction.OnResume)
         assertEquals(listOf(1, 1), repository.pages)
     }
 }

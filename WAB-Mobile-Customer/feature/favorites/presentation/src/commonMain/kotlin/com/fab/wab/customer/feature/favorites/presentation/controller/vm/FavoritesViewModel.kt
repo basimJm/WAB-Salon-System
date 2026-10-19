@@ -29,6 +29,8 @@ class FavoritesViewModel(
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
     private var started = false
+    /** The first ON_RESUME comes with the first composition, right after the initial load. */
+    private var firstResume = true
 
     override fun onStart() {
         if (started) return
@@ -56,7 +58,7 @@ class FavoritesViewModel(
             UiAction.OnLoadMore -> loadMore()
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnRetry -> load()
-            UiAction.OnResume -> if (uiState.value.signedIn == true && uiState.value.loaded) load(refresh = true)
+            UiAction.OnResume -> onResume()
         }
     }
 
@@ -122,5 +124,13 @@ class FavoritesViewModel(
 
     private fun track(action: String, vararg params: Pair<String, String>) {
         analytics.trackAction(AnalyticsAction(action, analyticsParams { params.forEach { (k, v) -> text(k, v) } }))
+    }
+
+    private fun onResume() {
+        if (firstResume) {
+            firstResume = false
+            return
+        }
+        if (uiState.value.signedIn == true && uiState.value.loaded) load(refresh = true)
     }
 }

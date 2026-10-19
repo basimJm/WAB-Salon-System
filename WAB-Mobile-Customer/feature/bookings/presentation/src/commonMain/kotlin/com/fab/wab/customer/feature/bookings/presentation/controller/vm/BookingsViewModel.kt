@@ -45,6 +45,8 @@ class BookingsViewModel(
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
     private var started = false
+    /** The first ON_RESUME comes with the first composition, right after the initial load. */
+    private var firstResume = true
     private var loadJob: Job? = null
     private val typed = MutableStateFlow("")
 
@@ -81,7 +83,7 @@ class BookingsViewModel(
             UiAction.OnLoadMore -> loadMore()
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnRetry -> load()
-            UiAction.OnResume -> if (uiState.value.signedIn == true && uiState.value.loaded) load(refresh = true)
+            UiAction.OnResume -> onResume()
         }
     }
 
@@ -149,5 +151,13 @@ class BookingsViewModel(
 
     private fun track(action: String, vararg params: Pair<String, String>) {
         deps.analytics.trackAction(AnalyticsAction(action, analyticsParams { params.forEach { (k, v) -> text(k, v) } }))
+    }
+
+    private fun onResume() {
+        if (firstResume) {
+            firstResume = false
+            return
+        }
+        if (uiState.value.signedIn == true && uiState.value.loaded) load(refresh = true)
     }
 }
