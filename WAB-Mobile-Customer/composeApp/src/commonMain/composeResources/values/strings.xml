@@ -22,7 +22,6 @@
     <string name="profile_login_button">Log in</string>
     <string name="placeholder_content_page">Page (coming soon)</string>
     <string name="placeholder_salon_details">Salon profile (coming soon)</string>
-    <string name="placeholder_all_salons">All salons (coming soon)</string>
     <string name="placeholder_all_services">All services (coming soon)</string>
     <string name="placeholder_notifications">Notifications (coming soon)</string>
 </resources>

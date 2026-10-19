@@ -1,0 +1,11 @@
+<resources>
+    <string name="salons_title">All Salons</string>
+    <string name="salons_search_hint">Search by salon name</string>
+    <string name="salons_filter">Filters</string>
+    <string name="salons_empty">No salons match your search</string>
+    <string name="salons_chip_recommended">Recommended</string>
+    <string name="salons_chip_nearest">Nearest</string>
+    <string name="salons_chip_price">%1$s–%2$s JOD</string>
+    <string name="salons_chip_rating">%1$d★ and up</string>
+    <string name="salons_nearest_dropped">Location is off, so the Nearest filter was removed.</string>
+</resources>

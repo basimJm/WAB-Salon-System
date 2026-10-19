@@ -99,7 +99,8 @@ class HomeViewModel(
             UiAction.OnNotificationsClick -> emitSideEffect(SideEffect.OpenNotifications)
             is UiAction.OnServiceClick -> {
                 track(HomeAnalytics.ACTION_SERVICE_CLICK, HomeAnalytics.PARAM_ID to event.serviceId)
-                emitSideEffect(SideEffect.OpenAllSalons(serviceId = event.serviceId))
+                val name = uiState.value.services.items.firstOrNull { it.id == event.serviceId }?.name
+                emitSideEffect(SideEffect.OpenAllSalons(serviceId = event.serviceId, serviceName = name))
             }
             UiAction.OnServicesSeeMore -> emitSideEffect(SideEffect.OpenAllServices)
             is UiAction.OnSalonClick -> {

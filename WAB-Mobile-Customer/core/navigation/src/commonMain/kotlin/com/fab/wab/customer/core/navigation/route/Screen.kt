@@ -35,7 +35,7 @@ sealed interface Screen {
 
     /** S04 all salons; opened from Home with no filters, a service pre-filter, or a `SalonListFilter` code. */
     @Serializable
-    data class AllSalons(val serviceId: String? = null, val filter: String? = null) : Screen
+    data class AllSalons(val serviceId: String? = null, val serviceName: String? = null, val filter: String? = null) : Screen
 
     /** S06 all services. */
     @Serializable

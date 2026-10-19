@@ -23,7 +23,6 @@
     <string name="profile_login_button">تسجيل الدخول</string>
     <string name="placeholder_content_page">الصفحة (قريباً)</string>
     <string name="placeholder_salon_details">صفحة الصالون (قريباً)</string>
-    <string name="placeholder_all_salons">كل الصالونات (قريباً)</string>
     <string name="placeholder_all_services">كل الخدمات (قريباً)</string>
     <string name="placeholder_notifications">الإشعارات (قريباً)</string>
 </resources>

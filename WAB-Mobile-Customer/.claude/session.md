@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Next: finish CUS-032 (see block), then CUS-033…; task branches start from `origin/customer`.
+- Batch 1 (owner rule 2026-10-19: Gradle/gate/emulator/loop/review once per five tasks): CUS-032 ✓ code, CUS-033 ✓ code, CUS-034, CUS-035, CUS-036 → then gate + emulator + loop + review + one PR into `customer`. Each task branch starts from the previous task branch.
 
 ### CUS-029 — OTP S13 (shared): pre-check, Firebase verification, ID token to the backend, wrong attempts, countdown
 - Branch: `feat/cus-029-otp`
@@ -58,7 +58,7 @@
 
 ### CUS-032 — Home S03: `GET /home`, header + badge, banners, search bar, gender tabs, sections, nearest permission states
 - Branch: `feat/cus-032-home`
-- Status: IN PROGRESS (code + host tests done; gate, emulator check, loop and review still pending — session ended on the usage limit)
+- Status: IN PROGRESS (code + host tests done; gate ran green except two detekt findings, fixed; emulator check, loop and review at the end of batch 1)
 - Acceptance criteria (PRD S03 + 8.0, Design Script S03; operations `GET /home?gender=&lat=&lng=`, `PUT/DELETE /favorites/{salonId}`; realtime `notifications.unread {count}`):
   - [x] Core: `SalonSummary`/`OpeningHours` (core/domain `salon/`), `FavoritesRepository` (+ impl in core/data `favorites/`, bound in `dataModule`), `Operation.pathWith`, `TimeFormat.to12Hour/range12Hour` (core/common), routes `Screen.SalonDetails/AllSalons/AllServices/Notifications` + `SalonListFilter`, strings `time_am/pm/range_separator`, icons `Location/LocationOff`
   - [x] `feature/home` domain (`HomeContent`, `BannerAction` + `bannerActionOf`, `HomeRepository`, `LoadHomeUseCase`, `GetCurrentLocationUseCase` with timeout) · data (`HomeApi`, mappers, `HomeRepositoryImpl`) · presentation (`HomeViewModel`: gender from session, one request per tab, coordinates only when permission + service on, nearest LocationOff/Empty/Salons, explanation → system request → denied-permanently → settings, resume reload, live unread badge from the socket, favorites auth-gated + optimistic; `HomeScreen`/`HomeSections`/`HomeUiMappers`; `HomeNavigation` with `openUrl`) · di
@@ -70,3 +70,16 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: `HomeViewModel` must read `uiState.value` (delegate), not `state.value`, inside `onStart`-launched work: the derived `state` lags and the first load was skipped. Welcome name/gender come from the session store, not the server's `firstName`.
+
+### CUS-033 — All salons S04: `GET /salons` (debounced search + filters + gender + location), entry presets, chips, nearest without location
+- Branch: `feat/cus-033-all-salons` (from `feat/cus-032-home`)
+- Status: IN PROGRESS (code + tests written; Gradle not run yet — batch 1)
+- Acceptance criteria (PRD S04 + 8.0, Design Script S04; operation `GET /salons` with `page, pageSize, gender, q(≤80), serviceIds, minPrice, maxPrice, minRating, general=RECOMMENDED, lat, lng, sort=NEAREST`):
+  - [x] core/domain `salon/SalonFilters.kt`: `ServiceRef`, `PriceRange`, `GeneralFilter`, `SalonFilters`, `SalonQuery` (+ `SalonQueryDefaults`: page 10, q ≤ 80, debounce 500 ms), `SalonSearchRepository`; route `Screen.AllSalons(serviceId, serviceName, filter)` (Home passes the service name for the chip)
+  - [x] `feature/salons` domain (`SearchSalonsUseCase`), data (`SalonSearchApi` builds the combined query: Recommended → `general`, Nearest → `sort=NEAREST` + lat/lng, services repeated `serviceIds`; `SalonSearchRepositoryImpl` + mapper), presentation (`AllSalonsViewModel`: entry presets → filters, gender from the session, 500 ms debounce on the typed text, paging by page size, chips removal reloads, Nearest without location → explanation dialog → system request → granted reload / refused drop + info toast, favorites auth-gated; `AllSalonsScreen`: sticky top bar + search bar + filter icon, `AppFilterChipRow`, shimmer / empty / offline / error / pull-to-refresh, `AppPagedList`; `SalonsNavigation` registers `Screen.AllSalons` at the host), di; AR + EN strings
+  - [x] Tests: `SalonSearchApiTest` (2, MockEngine query assertions), `AllSalonsViewModelTest` (7: presets, first page + paging, debounce = no request per keystroke, chip removal, nearest refused → dropped, nearest granted → coordinates, empty/error)
+  - [ ] Gradle + emulator: batch 1
+- Tests: written, not yet run (batch rule)
+- Loops: 0/1
+- Review: PENDING
+- Notes: ASSUMPTION `serviceIds` is sent as repeated query params (the contract schema has no `style`); S05 (`OpenFilters`) is wired in CUS-034; the S04 placeholder was removed.
