@@ -25,4 +25,22 @@
     <string name="day_wed">الأربعاء</string>
     <string name="day_thu">الخميس</string>
     <string name="day_fri">الجمعة</string>
+    <string name="staff_role_owner">مالك</string>
+    <string name="staff_role_manager">مدير</string>
+    <string name="staff_role_employee">موظف</string>
+    <string name="staff_day_off_status">عطلة</string>
+    <string name="staff_experience">%1$d سنوات خبرة</string>
+    <string name="staff_customers">%1$d عميل عبر التطبيق</string>
+    <string name="staff_working_days">أيام العمل</string>
+    <string name="staff_services">الخدمات</string>
+    <string name="staff_no_reviews">لا يوجد تقييمات حالية لهذا الموظف.</string>
+    <string name="service_media">الوسائط</string>
+    <string name="reviews_title">التقييمات</string>
+    <string name="reviews_staff_title">تقييمات الموظف</string>
+    <string name="reviews_empty">لا توجد تقييمات بعد.</string>
+    <string name="review_form_title">قيّم تجربتك</string>
+    <string name="review_comment_hint">اكتب تعليقاً (اختياري)</string>
+    <string name="review_counter">%1$d / %2$d</string>
+    <string name="review_submit">إرسال التقييم</string>
+    <string name="review_submitted">شكراً لك! سيظهر تقييمك بعد الموافقة عليه.</string>
 </resources>
