@@ -78,3 +78,4 @@
 - ADM-071 done: bookings gained eligibleStaff/reassign/cancel/refund; rules in domain/bookings/bookingRules.ts; BOOKINGS export params via bookingExportParams; shared data/api/objectId.ts (OBJECT_ID) for the server's broken id pattern
 - ADM-072 done: customers gained update/reviews/notifications/forceDelete/push; rules in domain/customers/customerRules.ts; page parts CustomerExtraActions/CustomerEditDrawer/CustomerPushDrawer/CustomerListTabs
 - ADM-073 done: salons gained kpis/analytics/activity/decideDeletion and list filters; rules in domain/salons/salonRules.ts; filters in presentation/salons/salonFilters.ts; tests/fixtures.test.ts has no NOT_BUILT_YET list any more
+- ADM-006 done: hosting = scripts/lib/hosting.ts (single source of headers) + scripts/write-hosting.ts <variant> [--target netlify|vercel] [--out dir]; netlify.toml builds prod-release on production and dev-release (mock) on previews; CSP font-src needs data: because the build inlines small fonts
