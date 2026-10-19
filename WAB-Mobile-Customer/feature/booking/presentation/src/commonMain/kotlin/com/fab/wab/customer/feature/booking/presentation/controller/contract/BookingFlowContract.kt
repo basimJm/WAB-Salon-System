@@ -2,6 +2,8 @@ package com.fab.wab.customer.feature.booking.presentation.controller.contract
 
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.session.Gender
+import com.fab.wab.customer.core.domain.booking.PaymentMethod
+import com.fab.wab.customer.feature.booking.domain.model.BookingDraft
 import com.fab.wab.customer.feature.booking.domain.model.BookingFlowDefaults
 import com.fab.wab.customer.feature.booking.domain.model.CalendarDay
 import com.fab.wab.customer.feature.booking.domain.model.DayAvailability
@@ -31,7 +33,11 @@ sealed interface BookingFlowContract {
         val slotsError: String? = null,
         val availability: DayAvailability? = null,
         val staffOverlapError: Boolean = false,
+        val draft: BookingDraft? = null,
+        val draftLoading: Boolean = false,
+        val draftError: String? = null,
     ) {
+        val canConfirm: Boolean get() = draft != null && !draftLoading
         val canContinueSlot: Boolean get() = person.start != null
         val canContinueStaff: Boolean get() = person.staff != null
         /** Staff eligible for the chosen slot (server-computed per person, bride rules included). */
@@ -60,12 +66,15 @@ sealed interface BookingFlowContract {
         data object OnJustMe : UiAction
         data object OnAddCompanion : UiAction
         data class OnRemovePerson(val index: Int) : UiAction
+        data class OnPaymentMethodSelect(val method: PaymentMethod) : UiAction
+        data object OnConfirm : UiAction
         data object OnContinue : UiAction
         data object OnBack : UiAction
     }
 
     sealed interface SideEffect {
         data object Exit : SideEffect
+        data class OpenVerification(val draftId: String) : SideEffect
         data class ShowError(val message: String) : SideEffect
     }
 }

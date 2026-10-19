@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
 import com.fab.wab.customer.designsystem.components.control.AppSwitch
-import com.fab.wab.customer.designsystem.components.feedback.AppEmptyState
 import com.fab.wab.customer.designsystem.components.feedback.AppStateContent
 import com.fab.wab.customer.designsystem.components.feedback.contentStateOf
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
@@ -33,7 +32,7 @@ import com.fab.wab.customer.feature.booking.presentation.resources.booking_bride
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_continue
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_name_error
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_name_label
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_step_coming
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_confirm
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_step_person_title
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_title
 import org.jetbrains.compose.resources.stringResource
@@ -66,7 +65,7 @@ fun BookingFlowScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Mo
                     BookingStep.SLOT -> SlotStep(state, onAction)
                     BookingStep.STAFF -> StaffStep(state, onAction)
                     BookingStep.COMPANIONS -> CompanionsStep(state, onAction)
-                    else -> AppEmptyState(title = stringResource(Res.string.booking_step_coming))
+                    BookingStep.SUMMARY -> SummaryStep(state, onAction)
                 }
             }
         }
@@ -108,13 +107,16 @@ private fun StepBottomBar(state: UiState, onAction: (UiAction) -> Unit) {
             BookingStep.SERVICES -> state.canContinueServices
             BookingStep.SLOT -> state.canContinueSlot
             BookingStep.STAFF -> state.canContinueStaff
-            else -> false
+            BookingStep.SUMMARY -> state.canConfirm
+            BookingStep.COMPANIONS -> false
         }
+        val summary = state.step == BookingStep.SUMMARY
         AppPrimaryButton(
-            text = stringResource(Res.string.booking_continue),
-            onClick = { onAction(UiAction.OnContinue) },
+            text = stringResource(if (summary) Res.string.booking_confirm else Res.string.booking_continue),
+            onClick = { onAction(if (summary) UiAction.OnConfirm else UiAction.OnContinue) },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
+            loading = summary && state.draftLoading,
         )
     }
 }

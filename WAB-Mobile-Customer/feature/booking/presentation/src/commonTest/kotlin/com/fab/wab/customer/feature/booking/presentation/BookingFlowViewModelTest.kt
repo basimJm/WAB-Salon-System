@@ -1,7 +1,16 @@
 package com.fab.wab.customer.feature.booking.presentation
 
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
+import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
+import com.fab.wab.customer.core.domain.ErrorCode
+import com.fab.wab.customer.core.domain.booking.PaymentMethod
+import com.fab.wab.customer.feature.booking.domain.model.BookingDraft
+import com.fab.wab.customer.feature.booking.domain.model.DraftMoney
+import com.fab.wab.customer.feature.booking.domain.model.DraftPolicy
+import com.fab.wab.customer.feature.booking.domain.repository.BookingDraftRepository
+import com.fab.wab.customer.feature.booking.domain.usecase.CreateBookingDraftUseCase
+import com.fab.wab.customer.feature.booking.domain.usecase.DeleteBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.model.AvailabilitySlot
 import com.fab.wab.customer.feature.booking.domain.model.DayAvailability
 import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
@@ -75,6 +84,25 @@ private class SessionFake(initial: SessionState) : SessionStore {
 private val USER = SessionState.SignedIn(UserProfile("c1", "Sara", Gender.FEMALE))
 private val TODAY = LocalDate.parse("2026-10-19")
 
+private class DraftFake(val allowed: Set<PaymentMethod> = setOf(PaymentMethod.DEPOSIT, PaymentMethod.FULL_ONLINE)) : BookingDraftRepository {
+    val created = mutableListOf<PaymentMethod>()
+    val deleted = mutableListOf<String>()
+    override suspend fun create(salonId: String, paymentMethod: PaymentMethod, persons: List<DraftPerson>): AppResult<BookingDraft> {
+        created += paymentMethod
+        if (paymentMethod !in allowed) {
+            return AppResult.Error(AppError.ServerError(ErrorCode.PAYMENT_OPTION_NOT_ALLOWED, 422, null))
+        }
+        val policy = DraftPolicy(3.0, allowed.toList(), 20.0, false, null)
+        val deposit = if (paymentMethod == PaymentMethod.DEPOSIT) "2" else "0"
+        return AppResult.Success(BookingDraft("d${created.size}", salonId, "Glow", "2026-10-19T10:10:00Z", paymentMethod, emptyList(), DraftMoney("10", deposit, deposit, "8"), policy))
+    }
+    override suspend fun get(draftId: String): AppResult<BookingDraft> = AppResult.Loading
+    override suspend fun delete(draftId: String): AppResult<Unit> {
+        deleted += draftId
+        return AppResult.Success(Unit)
+    }
+}
+
 private class AvailabilityFake : AvailabilityRepository {
     val calls = mutableListOf<Pair<String, List<DraftPerson>>>()
     override suspend fun slots(
@@ -98,10 +126,18 @@ class BookingFlowViewModelTest {
 
     private val effects = mutableListOf<SideEffect>()
     private val availability = AvailabilityFake()
+    private val drafts = DraftFake()
 
     private fun TestScope.viewModel(gender: Gender = Gender.FEMALE): BookingFlowViewModel {
         val deps = BookingFlowDependencies(
-            SalonFake(gender), SessionFake(USER), LoadAvailabilityUseCase(availability), NoOpAnalyticsTracker, { "error" }, { TODAY },
+            salonDetails = SalonFake(gender),
+            sessionStore = SessionFake(USER),
+            loadAvailability = LoadAvailabilityUseCase(availability),
+            createDraft = CreateBookingDraftUseCase(drafts),
+            deleteDraft = DeleteBookingDraftUseCase(drafts),
+            analytics = NoOpAnalyticsTracker,
+            errorText = { "error" },
+            today = { TODAY },
         )
         val vm = BookingFlowViewModel("s1", deps, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
@@ -256,5 +292,28 @@ class BookingFlowViewModelTest {
         vm.onEvent(UiAction.OnBack)
         assertEquals(BookingStep.COMPANIONS, vm.state.value.step)
         assertEquals(5, vm.state.value.persons.size)
+    }
+
+    @Test
+    fun summaryCreatesTheDraftWithPaymentFallbackSwitchesMethodsAndReleasesOnBack() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        vm.reachStaffStep()
+        vm.onEvent(UiAction.OnAnyStaffSelect)
+        vm.onEvent(UiAction.OnContinue)
+        vm.onEvent(UiAction.OnJustMe)
+        assertEquals(BookingStep.SUMMARY, vm.state.value.step)
+        assertEquals(listOf(PaymentMethod.PAY_ON_ARRIVAL, PaymentMethod.DEPOSIT), drafts.created)
+        assertEquals(PaymentMethod.DEPOSIT, vm.state.value.draft?.paymentMethod)
+        assertTrue(vm.state.value.canConfirm)
+        vm.onEvent(UiAction.OnPaymentMethodSelect(PaymentMethod.FULL_ONLINE))
+        assertEquals(listOf("d2"), drafts.deleted)
+        assertEquals(PaymentMethod.FULL_ONLINE, vm.state.value.draft?.paymentMethod)
+        vm.onEvent(UiAction.OnPaymentMethodSelect(PaymentMethod.PAY_ON_ARRIVAL))
+        assertEquals(3, drafts.created.size)
+        vm.onEvent(UiAction.OnConfirm)
+        assertEquals(SideEffect.OpenVerification("d3"), effects.last())
+        vm.onEvent(UiAction.OnBack)
+        assertEquals(BookingStep.COMPANIONS, vm.state.value.step)
+        assertEquals(listOf("d2", "d3"), drafts.deleted)
     }
 }

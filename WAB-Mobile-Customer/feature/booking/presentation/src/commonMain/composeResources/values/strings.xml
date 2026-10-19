@@ -7,7 +7,6 @@
     <string name="booking_continue">Continue</string>
     <string name="booking_total_price">Total: %1$s JOD</string>
     <string name="booking_total_duration">%1$d min</string>
-    <string name="booking_step_coming">This step is coming soon</string>
     <string name="booking_pick_date">Pick a date to see the available times.</string>
     <string name="booking_slots_title">Available times</string>
     <string name="booking_no_slots">No available times on this day.</string>
@@ -27,4 +26,18 @@
     <string name="booking_companion_remove">Remove</string>
     <string name="booking_companion_limit">Maximum 5 companions</string>
     <string name="booking_just_me">Continue</string>
+    <string name="booking_summary_title">Booking summary</string>
+    <string name="booking_grand_total">Grand total</string>
+    <string name="booking_staff_label">Staff: %1$s</string>
+    <string name="booking_rules_title">Salon rules</string>
+    <string name="booking_rules_window">Free cancellation up to %1$d hours before the appointment</string>
+    <string name="booking_rules_deposit">Deposit: %1$d%% of the total</string>
+    <string name="booking_rules_deposit_refundable">The deposit is refunded if you cancel in time</string>
+    <string name="booking_rules_deposit_non_refundable">The deposit is not refunded if you cancel</string>
+    <string name="booking_rules_approval">Your booking needs the salon’s approval.</string>
+    <string name="booking_payment_title">Payment method</string>
+    <string name="booking_pay_on_arrival">Pay on arrival</string>
+    <string name="booking_pay_deposit">Deposit %1$d%% = %2$s JOD</string>
+    <string name="booking_pay_full">Pay the full amount online (%1$s JOD)</string>
+    <string name="booking_confirm">Confirm booking</string>
 </resources>

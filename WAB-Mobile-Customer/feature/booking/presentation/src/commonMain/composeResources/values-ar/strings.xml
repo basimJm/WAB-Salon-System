@@ -7,7 +7,6 @@
     <string name="booking_continue">متابعة</string>
     <string name="booking_total_price">الإجمالي: %1$s د.أ</string>
     <string name="booking_total_duration">%1$d دقيقة</string>
-    <string name="booking_step_coming">هذه الخطوة قريباً</string>
     <string name="booking_pick_date">اختر تاريخاً لعرض الأوقات المتاحة.</string>
     <string name="booking_slots_title">الأوقات المتاحة</string>
     <string name="booking_no_slots">لا توجد مواعيد متاحة في هذا اليوم.</string>
@@ -27,4 +26,18 @@
     <string name="booking_companion_remove">إزالة</string>
     <string name="booking_companion_limit">الحد الأقصى 5 مرافقين</string>
     <string name="booking_just_me">متابعة</string>
+    <string name="booking_summary_title">ملخص الحجز</string>
+    <string name="booking_grand_total">الإجمالي الكلي</string>
+    <string name="booking_staff_label">الموظف: %1$s</string>
+    <string name="booking_rules_title">قواعد الصالون</string>
+    <string name="booking_rules_window">إلغاء مجاني حتى %1$d ساعة قبل الموعد</string>
+    <string name="booking_rules_deposit">العربون: %1$d%% من الإجمالي</string>
+    <string name="booking_rules_deposit_refundable">يُسترد العربون عند الإلغاء في الوقت المسموح</string>
+    <string name="booking_rules_deposit_non_refundable">لا يُسترد العربون عند الإلغاء</string>
+    <string name="booking_rules_approval">الحجز بحاجة لموافقة الصالون.</string>
+    <string name="booking_payment_title">طريقة الدفع</string>
+    <string name="booking_pay_on_arrival">الدفع عند الوصول</string>
+    <string name="booking_pay_deposit">عربون %1$d%% = %2$s د.أ</string>
+    <string name="booking_pay_full">الدفع كاملاً عبر التطبيق (%1$s د.أ)</string>
+    <string name="booking_confirm">تأكيد الحجز</string>
 </resources>

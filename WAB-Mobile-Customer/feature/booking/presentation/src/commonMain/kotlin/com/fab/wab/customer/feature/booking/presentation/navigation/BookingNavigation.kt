@@ -34,6 +34,7 @@ class BookingNavigation(override val navController: NavHostController) : Navigat
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 SideEffect.Exit -> navigateBack()
+                is SideEffect.OpenVerification -> navigateTo(Screen.BookingVerify(effect.draftId))
                 is SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }

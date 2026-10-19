@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 = CUS-042 ✓ code, CUS-043 ✓ code, CUS-044 ✓ code, CUS-045 ✓ code, CUS-046 (unit tests after the fifth, then one PR).
+- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 = CUS-042 ✓ code, CUS-043 ✓ code, CUS-044 ✓ code, CUS-045 ✓ code, CUS-046 ✓ code → unit-test run + PR.
 
 ### CUS-037 — Staff sheet S07a + Service sheet S07b
 - Branch: `feat/cus-037-staff-service-sheets` (from `origin/customer`, batch 2 start)
@@ -130,3 +130,15 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: companions are the salon's gender by construction (the flow is per salon); the server re-validates overlaps and eligibility at draft time.
+
+### CUS-046 — Booking flow step 5: summary per person, grand total, salon rules, payment method with deposit amount
+- Branch: `feat/cus-046-booking-summary` (from `feat/cus-045-booking-staff-companions`)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 3)
+- Acceptance criteria (PRD S16 step 5, Design Script S16; operations `POST /bookings/drafts` (price + policy snapshot, holds 10 min), `DELETE /bookings/drafts/{id}`):
+  - [x] Entering the summary creates the server draft (`DraftCoordinator`): preferred method order pay-on-arrival → deposit → full; `PAYMENT_OPTION_NOT_ALLOWED` falls back to the next option (the salon's options are only known from the draft — contract gap flagged: salon details carry no policy); other errors (e.g. `SLOT_TAKEN`) show the error with Back
+  - [x] `SummaryStep`: per-person blocks (name, bride badge, services + prices, staff / any, date-time), grand total, salon rules (window, deposit %, refund rule, approval note, notes), payment selector limited to the policy's options with the deposit amount / full amount; selecting another method deletes and re-creates the draft (server recomputes money); Confirm → `Screen.BookingVerify(draftId)` (placeholder, CUS-047); Back releases the draft (holds) and returns to companions
+  - [x] AR + EN strings
+  - [x] Tests: `BookingFlowViewModelTest` (+1: fallback order, switching, confirm, release)
+  - [ ] Unit-test run: batch 3
+- Loops: 0/1
+- Review: PENDING
