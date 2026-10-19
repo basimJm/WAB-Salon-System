@@ -4,6 +4,7 @@ import type { GalleryItemRaw } from '../../models/galleryItem.model';
 import type { StorageProvider } from '../../providers/storage';
 import type { GalleryRepository } from '../../repositories/gallery.repository';
 import { toObjectId } from '../../utils/database/ids';
+import type { UploadRaw } from '../../models/upload.model';
 import type { Entity } from '../../utils/database/plain';
 import { BusinessRuleError, NotFoundError, ValidationError } from '../../utils/errors';
 import type { SettingsService } from '../settings';
@@ -28,6 +29,8 @@ export interface GalleryService {
     key: string;
     thumbnailKey?: string | undefined;
     durationSec?: number | undefined;
+    /** Replaces the default "uploaded by this salon" check (an admin adds for the salon). */
+    acceptUpload?: ((upload: Entity<UploadRaw>) => boolean) | undefined;
   }): Promise<GalleryItem>;
   remove(input: { salonId: string; id: string }): Promise<void>;
   /** `ids` must list every item of the salon exactly once. */
@@ -73,8 +76,9 @@ export const createGalleryService = ({
       return (await gallery.forSalon(salonId)).map(toItem);
     },
 
-    async add({ salonId, type, key, thumbnailKey, durationSec }) {
-      const mine = (upload: { salonId?: string }): boolean => upload.salonId === salonId;
+    async add({ salonId, type, key, thumbnailKey, durationSec, acceptUpload }) {
+      const mine =
+        acceptUpload ?? ((upload: { salonId?: string }): boolean => upload.salonId === salonId);
       await uploads.assertConfirmed({
         keys: [key],
         purpose: type === 'IMAGE' ? 'GALLERY_IMAGE' : 'GALLERY_VIDEO',

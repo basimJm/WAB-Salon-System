@@ -21,6 +21,7 @@ import type { AdminCustomersService } from '../domain/customers/adminCustomers.s
 import type { AdminSettingsService } from '../domain/adminSettings/adminSettings.service';
 import type { AdminProfileService } from '../domain/adminProfile/adminProfile.service';
 import type { AdminSearchService } from '../domain/adminSearch/adminSearch.service';
+import type { AdminSalonEditService } from '../domain/adminSalonEdit/adminSalonEdit.service';
 import type { CampaignsService } from '../domain/campaigns/campaigns.service';
 import type { PlacementsService } from '../domain/placements/placements.service';
 import type { AdminReviewsService } from '../domain/reviews/adminReviews.service';
@@ -85,6 +86,7 @@ export interface ApiServices {
   readonly adminSettings?: AdminSettingsService;
   readonly adminProfile?: AdminProfileService;
   readonly adminSearch?: AdminSearchService;
+  readonly adminSalonEdit?: AdminSalonEditService;
   readonly adminCustomers?: AdminCustomersService;
   readonly salonState?: SalonStateService;
   readonly adminSalons?: AdminSalonsService;
@@ -368,6 +370,15 @@ export const unavailableAdminSettings: AdminSettingsService = {
 };
 
 export const unavailableAdminSearch: AdminSearchService = { search: unavailable };
+
+export const unavailableAdminSalonEdit: AdminSalonEditService = {
+  profile: unavailable,
+  updateProfile: unavailable,
+  gallery: unavailable,
+  addGalleryItem: unavailable,
+  removeGalleryItem: unavailable,
+  reorderGallery: unavailable,
+};
 
 export const unavailableAdminProfile: AdminProfileService = {
   get: unavailable,
