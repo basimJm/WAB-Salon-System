@@ -55,6 +55,7 @@ import type { JobHandler, JobScheduler } from './jobs/jobs';
 import { CAMPAIGN_JOB_NAME } from './constants/campaigns';
 import { createAdminCustomersService } from './domain/customers/adminCustomers.service';
 import { createAdminSettingsService } from './domain/adminSettings/adminSettings.service';
+import { createAdminProfileService } from './domain/adminProfile/adminProfile.service';
 import { createCampaignsService } from './domain/campaigns/campaigns.service';
 import { CampaignsRepository } from './repositories/campaigns.repository';
 import { createFavoritesService } from './domain/favorites/favorites.service';
@@ -627,6 +628,17 @@ const buildServices = (
     auditLogs: new AuditLogsRepository(),
     audit,
   });
+  const adminProfileService = createAdminProfileService({
+    admins,
+    auth: adminAuthService,
+    refreshTokens: phoneServices.refreshTokens,
+    audit,
+    redis,
+    notifier: providers.notifier,
+    settings,
+    logger,
+    secret: config.auth.accessSecret,
+  });
   const adminTransactionsService = createAdminTransactionsService({
     transactions: transactionsRepository,
   });
@@ -880,6 +892,7 @@ const buildServices = (
     adminPlacements: placements,
     adminCampaigns: campaigns,
     adminSettings: adminSettingsService,
+    adminProfile: adminProfileService,
     adminCustomers: createAdminCustomersService({
       customers: new CustomersRepository(),
       installations: new InstallationsRepository(),

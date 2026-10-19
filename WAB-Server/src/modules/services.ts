@@ -19,6 +19,7 @@ import type { InboxService } from '../domain/notifications/inbox.service';
 import type { FavoritesService } from '../domain/favorites/favorites.service';
 import type { AdminCustomersService } from '../domain/customers/adminCustomers.service';
 import type { AdminSettingsService } from '../domain/adminSettings/adminSettings.service';
+import type { AdminProfileService } from '../domain/adminProfile/adminProfile.service';
 import type { CampaignsService } from '../domain/campaigns/campaigns.service';
 import type { PlacementsService } from '../domain/placements/placements.service';
 import type { AdminReviewsService } from '../domain/reviews/adminReviews.service';
@@ -81,6 +82,7 @@ export interface ApiServices {
   readonly adminPlacements?: PlacementsService;
   readonly adminCampaigns?: CampaignsService;
   readonly adminSettings?: AdminSettingsService;
+  readonly adminProfile?: AdminProfileService;
   readonly adminCustomers?: AdminCustomersService;
   readonly salonState?: SalonStateService;
   readonly adminSalons?: AdminSalonsService;
@@ -361,6 +363,14 @@ export const unavailableAdminSettings: AdminSettingsService = {
   update: unavailable,
   auditLogs: unavailable,
   auditLog: unavailable,
+};
+
+export const unavailableAdminProfile: AdminProfileService = {
+  get: unavailable,
+  updateAlertEmails: unavailable,
+  changePassword: unavailable,
+  requestEmailChange: unavailable,
+  confirmEmailChange: unavailable,
 };
 
 export const unavailableCampaigns: CampaignsService = {
