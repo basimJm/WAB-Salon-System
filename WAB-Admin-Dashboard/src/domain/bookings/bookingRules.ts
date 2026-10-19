@@ -4,8 +4,11 @@ import type { BookingDetails } from './bookings';
 /** Statuses a booking can still be moved or cancelled in. */
 const OPEN_STATUSES = ['PENDING', 'APPROVED'];
 
-export const canReassign = (b: Pick<BookingDetails, 'status'>): boolean =>
-  OPEN_STATUSES.includes(b.status);
+/** Only an approved booking whose appointment has not started can get another staff member (server rule). */
+export const canReassign = (
+  b: Pick<BookingDetails, 'status' | 'appointmentStart'>,
+  now: Date = new Date(),
+): boolean => b.status === 'APPROVED' && new Date(b.appointmentStart).getTime() > now.getTime();
 export const canCancel = (b: Pick<BookingDetails, 'status'>): boolean =>
   OPEN_STATUSES.includes(b.status);
 

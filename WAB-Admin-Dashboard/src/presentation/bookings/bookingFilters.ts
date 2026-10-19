@@ -1,4 +1,5 @@
 import {
+  BOOKING_STATUSES,
   BOOKING_TABS,
   PAYMENT_STATUSES,
   isBookingStatus,
@@ -47,10 +48,13 @@ export function bookingQueryOf(state: ListState): BookingQuery {
   };
 }
 
-/** What a BOOKINGS export accepts: the list's filters except the tab and the bride switch. */
+/**
+ * What a BOOKINGS export accepts: the list's filters except the tab and the bride switch. The server's bookings export
+ * fails with GENERATION_FAILED when the job has no params at all, so "no filter" is sent as "every status".
+ */
 export function bookingExportParams(q: BookingQuery): Record<string, unknown> {
   return {
-    ...(q.status && q.status.length > 0 ? { statuses: [...q.status] } : {}),
+    statuses: q.status && q.status.length > 0 ? [...q.status] : [...BOOKING_STATUSES],
     ...(q.paymentStatus ? { paymentStatus: q.paymentStatus } : {}),
     ...(q.salonId ? { salonId: q.salonId } : {}),
     ...(q.customerId ? { customerId: q.customerId } : {}),

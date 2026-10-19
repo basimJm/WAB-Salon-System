@@ -14,15 +14,6 @@
 
 ## Last blocks
 
-### ADM-073 — salon list columns and insights
-
-- Branch: `feat/adm-073-salon-insights`
-- Status: DONE
-- Acceptance criteria: salon list: subscription, recommended and deletion-request filters, recommended and bookings (30 days) columns; salon page: insights tab (KPIs, completion, status chart, bookings per day for a range), admin activity tab, deletion-request approve/reject with a reason
-- Tests: tests/salonInsights.test.tsx (9); full suite + gate PASS; fixture exemption list removed (every operation has a fixture)
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch.
-
 ### ADM-006 — hosting headers and deploy config (Netlify and Vercel)
 
 - Branch: `feat/adm-006-headers`
@@ -40,3 +31,12 @@
 - Tests: tests/config.test.ts, tests/envFiles.test.ts (5), tests/about-ribbon.test.tsx updated; full suite + gate PASS
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: root rule 'never commit .env*' relaxed by the owner's request for placeholder URLs; browser check of this change done together with the real-server QA that follows.
+
+### ADM-085 — real-server QA and fixes
+
+- Branch: `feat/adm-085-real-server-fixes`
+- Status: DONE
+- Acceptance criteria: all 33 list screens, the detail pages and every write flow of ADM-068..073 (salon edit with real MinIO uploads, bookings, customers, reviews, recommended, subscriptions, settings, locations, versions, maintenance, catalog, banners, contact, FAQ, campaigns, profile, applications) driven in a browser against a real local WAB-Server with seeded data; fixed what it found: alerts and exports lists failed on real answers (empty data/params left out), send-now campaigns were stored as 1 Jan 1970, exports sent a header the server refuses, reassign offered for bookings the server refuses
+- Tests: tests/realServerShapes.test.ts (4), tests/bookingExtras.test.tsx (+2), full suite + gate PASS; qa/ tooling + docs/REAL_SERVER_QA.md + docs/SERVER_ISSUES.md; contract check of every real GET answer against the generated schemas: only getAlerts and getExports were BAD (fixed)
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: browser check done in the built-in browser with JS-driven clicks (not e2e); payouts creation, refunds of paid bookings and the realtime socket were not exercised (no money settled).

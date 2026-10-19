@@ -19,11 +19,23 @@ const PAID = MOCK_BOOKINGS[1]!.id;
 const DONE = MOCK_BOOKINGS[2]!.id;
 
 describe('booking rules', () => {
-  it('lets only open bookings be reassigned or cancelled', () => {
-    expect(canReassign({ status: 'PENDING' })).toBe(true);
+  it('lets only open bookings be cancelled', () => {
+    expect(canCancel({ status: 'PENDING' })).toBe(true);
     expect(canCancel({ status: 'APPROVED' })).toBe(true);
     expect(canCancel({ status: 'COMPLETED' })).toBe(false);
-    expect(canReassign({ status: 'CANCELLED_BY_SALON' })).toBe(false);
+  });
+
+  it('lets only an approved booking that has not started be reassigned (server rule)', () => {
+    const now = new Date('2026-10-19T10:00:00.000Z');
+    const future = '2026-10-20T09:00:00.000Z';
+    expect(canReassign({ status: 'APPROVED', appointmentStart: future }, now)).toBe(true);
+    expect(canReassign({ status: 'PENDING', appointmentStart: future }, now)).toBe(false);
+    expect(canReassign({ status: 'CANCELLED_BY_SALON', appointmentStart: future }, now)).toBe(
+      false,
+    );
+    expect(
+      canReassign({ status: 'APPROVED', appointmentStart: '2026-10-19T09:00:00.000Z' }, now),
+    ).toBe(false);
   });
 
   it('works out what can still be refunded in fils, never below zero', () => {
@@ -54,9 +66,10 @@ describe('booking rules', () => {
 
 describe('bookingExportParams', () => {
   it('keeps the filters the export accepts and drops the rest', () => {
-    expect(bookingExportParams({ page: 1, pageSize: 25, tab: 'TODAY', brideOnly: true })).toEqual(
-      {},
-    );
+    const none = bookingExportParams({ page: 1, pageSize: 25, tab: 'TODAY', brideOnly: true });
+    // The server's bookings export fails without any params: "no filter" is every status.
+    expect(Object.keys(none)).toEqual(['statuses']);
+    expect(none['statuses']).toHaveLength(8);
     expect(
       bookingExportParams({
         page: 1,
@@ -87,6 +100,13 @@ describe('BookingDetailsPage actions', () => {
     await user.click(within(root).getByRole('button', { name: 'Save' }));
   };
 
+  it('offers no reassign for a pending booking (the server refuses it)', async () => {
+    open(PENDING);
+    await screen.findByRole('button', { name: 'Change status' });
+    expect(screen.queryByRole('button', { name: 'Reassign staff' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Cancel booking' })).toBeInTheDocument();
+  });
+
   it('hides reassign, cancel and refund where they do not apply', async () => {
     open(DONE);
     await screen.findByRole('button', { name: 'Change status' });
@@ -97,7 +117,7 @@ describe('BookingDetailsPage actions', () => {
 
   it('reassigns a person to an eligible staff member', async () => {
     const user = userEvent.setup();
-    open(PENDING);
+    open(PAID);
     await user.click(await screen.findByRole('button', { name: 'Reassign staff' }));
     const d = await drawer();
     expect(await within(d).findByRole('option', { name: 'Lina Omar' })).toBeInTheDocument();

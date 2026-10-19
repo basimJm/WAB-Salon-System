@@ -11,6 +11,10 @@ interface Seed {
   bride: boolean;
   total: string;
 }
+const DAY_MS = 86_400_000;
+/** Appointments are n days from now, so "not started yet" rules stay true whenever the tests run. */
+const inDays = (n: number, hour: number) =>
+  new Date(Math.floor(Date.now() / DAY_MS) * DAY_MS + n * DAY_MS + hour * 3_600_000).toISOString();
 const make = ({ n, status, payment, bride, total }: Seed) => ({
   id: `64h${String(n).padStart(21, '0')}`,
   referenceNumber: `WAB-00000${String(n)}`,
@@ -18,9 +22,9 @@ const make = ({ n, status, payment, bride, total }: Seed) => ({
   paymentMethod: payment === 'PAY_ON_ARRIVAL' ? 'PAY_ON_ARRIVAL' : 'DEPOSIT',
   paymentStatus: payment,
   hasBride: bride,
-  appointmentStart: `2026-10-2${String(n)}T09:00:00.000Z`,
-  appointmentEnd: `2026-10-2${String(n)}T10:00:00.000Z`,
-  respondBy: `2026-10-2${String(n)}T08:00:00.000Z`,
+  appointmentStart: inDays(n, 9),
+  appointmentEnd: inDays(n, 10),
+  respondBy: inDays(n, 8),
   personsCount: n,
   total,
   salon: { id: '64f000000000000000000001', name: 'Noor Salon' },
