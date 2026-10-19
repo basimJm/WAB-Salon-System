@@ -106,6 +106,8 @@ export const NOTIFICATION_EVENTS = {
   'salon.offline': { type: 'SYSTEM', audiences: [owner] },
   'salon.online': { type: 'SYSTEM', audiences: [owner] },
   'salon.gender_changed': { type: 'SYSTEM', audiences: [owner] },
+  'salon.edited_by_admin': { type: 'SYSTEM', audiences: [owner] },
+  'salon.deletion_rejected': { type: 'SYSTEM', audiences: [owner] },
 } as const satisfies Record<string, EventDefinition>;
 
 export type NotificationEvent = keyof typeof NOTIFICATION_EVENTS;

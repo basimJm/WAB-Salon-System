@@ -80,6 +80,8 @@ export interface SalonRaw {
   /** The IBAN is stored encrypted (AES-GCM); only its last four characters are readable. */
   payoutDetails?: PayoutDetails;
   deletionRequestedAt?: Date;
+  /** The admin approved the deletion request: the salon is offline and waits for the purge. */
+  deletionApprovedAt?: Date;
   searchText: string;
   createdAt: Date;
   updatedAt: Date;
@@ -205,6 +207,7 @@ const salonSchema = new Schema<SalonRaw>(
       default: () => ({ avg: 0, count: 0 }),
     },
     deletionRequestedAt: { type: Date },
+    deletionApprovedAt: { type: Date },
     searchText: { type: String, default: '' },
   },
   { timestamps: true, collection: SALONS_COLLECTION },

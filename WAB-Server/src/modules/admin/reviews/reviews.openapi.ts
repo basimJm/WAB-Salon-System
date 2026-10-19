@@ -35,6 +35,8 @@ const row = z.object({
     .nullable(),
 });
 
+export { row as adminReviewRowSchema };
+
 export const registerAdminReviewDocs = (registry: OpenAPIRegistry): void => {
   const base = `${API_PREFIXES.admin}${ADMIN_REVIEW_ROUTES.base}`;
   const headers = z.object({ 'Accept-Language': acceptLanguageHeader });

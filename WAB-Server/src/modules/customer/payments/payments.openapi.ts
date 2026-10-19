@@ -22,6 +22,23 @@ const payment = z.object({
   sessionId: z.string().nullable().describe('The gateway checkout session the app pays with.'),
   gatewayCode: z.string().nullable(),
   gatewayMessage: z.string().nullable(),
+  checkout: z
+    .object({
+      provider: z
+        .string()
+        .describe('Gateway adapter: fake (dev/test) or disabled (payments paused).'),
+      environment: z.enum(['dev', 'prod']),
+      checkoutId: z.string(),
+      brands: z.array(z.string()),
+      shopperResultUrl: z
+        .string()
+        .describe('Where the gateway returns the shopper (app scheme or https).'),
+      checkoutUrl: z.string().optional().describe('Hosted pay page (dev mock gateway only).'),
+      widgetScriptUrl: z.string().optional(),
+      integrity: z.string().optional(),
+    })
+    .nullable()
+    .describe('Data to open the gateway payment UI; null once the attempt is no longer payable.'),
 });
 
 export const registerCustomerPaymentDocs = (registry: OpenAPIRegistry): void => {

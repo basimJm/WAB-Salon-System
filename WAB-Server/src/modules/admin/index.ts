@@ -17,6 +17,12 @@ import {
   unavailableAdminPlacements,
   unavailableCampaigns,
   unavailableAdminSettings,
+  unavailableAdminProfile,
+  unavailableAdminSearch,
+  unavailableAdminSalonEdit,
+  unavailableAdminSalonInsights,
+  unavailableAdminCustomerExtras,
+  unavailableBookingAdminExtras,
   unavailableAdminCustomers,
   unavailableAdminReviews,
   unavailableSalonReview,
@@ -84,6 +90,16 @@ import { createAdminCatalogRouter } from './catalog/catalog.routes';
 import { createAdminBannersRouter } from './banners/banners.routes';
 import { createAdminLocationsRouter } from './locations/locations.routes';
 import { createAdminAuthRouter } from './auth/auth.routes';
+import { createAdminProfileRouter } from './profile/profile.routes';
+import { createAdminSearchRouter } from './search/search.routes';
+import { createAdminSalonEditRouter } from './salonEdit/salonEdit.routes';
+import { createAdminSalonInsightsRouter } from './salonInsights/salonInsights.routes';
+import { createAdminBookingExtrasRouter } from './bookingExtras/bookingExtras.routes';
+import { createAdminCustomerExtrasRouter } from './customerExtras/customerExtras.routes';
+import { ADMIN_SALON_INSIGHT_ROUTES } from '../../constants/adminSalonInsights';
+import { ADMIN_SALON_EDIT_ROUTES } from '../../constants/adminSalonEdit';
+import { ADMIN_SEARCH_ROUTES } from '../../constants/adminSearch';
+import { ADMIN_PROFILE_ROUTES } from '../../constants/adminProfile';
 
 /** Router for the /admin/v1 namespace. Feature routers are mounted here as they are built. */
 export const createAdminRouter = (services: ApiServices = {}): Router => {
@@ -128,6 +144,45 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     router,
     ADMIN_CUSTOMER_ROUTES.base,
     createAdminCustomersRouter(services.adminCustomers ?? unavailableAdminCustomers, guard),
+  );
+  mount(
+    router,
+    ADMIN_SALON_EDIT_ROUTES.base,
+    createAdminSalonEditRouter(services.adminSalonEdit ?? unavailableAdminSalonEdit, guard),
+  );
+  mount(
+    router,
+    ADMIN_BOOKING_ROUTES.base,
+    createAdminBookingExtrasRouter(
+      services.bookingAdminExtras ?? unavailableBookingAdminExtras,
+      guard,
+    ),
+  );
+  mount(
+    router,
+    ADMIN_CUSTOMER_ROUTES.base,
+    createAdminCustomerExtrasRouter(
+      services.adminCustomerExtras ?? unavailableAdminCustomerExtras,
+      guard,
+    ),
+  );
+  mount(
+    router,
+    ADMIN_SALON_INSIGHT_ROUTES.base,
+    createAdminSalonInsightsRouter(
+      services.adminSalonInsights ?? unavailableAdminSalonInsights,
+      guard,
+    ),
+  );
+  mount(
+    router,
+    ADMIN_SEARCH_ROUTES.base,
+    createAdminSearchRouter(services.adminSearch ?? unavailableAdminSearch, guard),
+  );
+  mount(
+    router,
+    ADMIN_PROFILE_ROUTES.base,
+    createAdminProfileRouter(services.adminProfile ?? unavailableAdminProfile, guard),
   );
   mount(
     router,

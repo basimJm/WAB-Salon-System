@@ -65,12 +65,14 @@ internal object BookingAccountActionEvents {
         -> ActionEvent.Silent
     }
     fun notifications(a: NotificationsContract.UiAction): ActionEvent = when (a) {
-        is NotificationsContract.UiAction.OnItemClick, NotificationsContract.UiAction.OnViewBooking, NotificationsContract.UiAction.OnApplyFilters,
+        is NotificationsContract.UiAction.OnItemClick, NotificationsContract.UiAction.OnViewBooking,
+        NotificationsContract.UiAction.OnApplyFilters,
         NotificationsContract.UiAction.OnResetFilters, -> ActionEvent.ByViewModel
         NotificationsContract.UiAction.OnFilterClick -> ActionEvent.Named(Events.FILTER_OPEN)
         is NotificationsContract.UiAction.OnChipRemove -> ActionEvent.Named(Events.FILTER_CHIP_REMOVE)
         NotificationsContract.UiAction.OnRefresh, NotificationsContract.UiAction.OnResume, NotificationsContract.UiAction.OnRetry,
-        NotificationsContract.UiAction.OnLoadMore, is NotificationsContract.UiAction.OnVisible, NotificationsContract.UiAction.OnPopupDismiss,
+        NotificationsContract.UiAction.OnLoadMore, is NotificationsContract.UiAction.OnVisible,
+        NotificationsContract.UiAction.OnPopupDismiss,
         NotificationsContract.UiAction.OnSheetDismiss, is NotificationsContract.UiAction.OnDraftFromChange,
         is NotificationsContract.UiAction.OnDraftToChange, is NotificationsContract.UiAction.OnDraftQueryChange, -> ActionEvent.Silent
     }
@@ -89,10 +91,12 @@ internal object BookingAccountActionEvents {
     fun editProfile(a: EditProfileContract.UiAction): ActionEvent = when (a) {
         EditProfileContract.UiAction.OnSaveClick -> ActionEvent.ByViewModel
         is EditProfileContract.UiAction.OnCountrySelect -> ActionEvent.Named(Events.COUNTRY_SELECT)
-        is EditProfileContract.UiAction.OnGenderSelect, is EditProfileContract.UiAction.OnCitySelect, is EditProfileContract.UiAction.OnAreaSelect,
+        is EditProfileContract.UiAction.OnGenderSelect, is EditProfileContract.UiAction.OnCitySelect,
+        is EditProfileContract.UiAction.OnAreaSelect,
         -> ActionEvent.Named(Events.REGISTER_FIELD_SELECT)
         is EditProfileContract.UiAction.OnFirstNameChange, is EditProfileContract.UiAction.OnLastNameChange,
-        is EditProfileContract.UiAction.OnEmailChange, is EditProfileContract.UiAction.OnNumberChange, EditProfileContract.UiAction.OnCountryClick,
+        is EditProfileContract.UiAction.OnEmailChange, is EditProfileContract.UiAction.OnNumberChange,
+        EditProfileContract.UiAction.OnCountryClick,
         EditProfileContract.UiAction.OnPickerDismiss, EditProfileContract.UiAction.OnRetryLoad, -> ActionEvent.Silent
     }
     fun content(a: Any): ActionEvent = when (a) {

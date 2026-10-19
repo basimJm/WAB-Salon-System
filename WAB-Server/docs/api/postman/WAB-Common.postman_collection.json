@@ -75,8 +75,19 @@
                 "value": "application/json"
               },
               {
+                "key": "x-authentication-tag",
+                "value": "",
+                "disabled": true
+              },
+              {
                 "key": "x-signature",
-                "value": ""
+                "value": "",
+                "disabled": true
+              },
+              {
+                "key": "x-initialization-vector",
+                "value": "",
+                "disabled": true
               }
             ],
             "url": {
@@ -91,7 +102,7 @@
               "query": [],
               "variable": []
             },
-            "description": "Authenticated by the gateway signature over the raw body (header `X-Signature`); a bad or missing signature is 401. The outcome is confirmed with a status query before anything is settled, so a repeated or forged-content notification changes nothing. Unknown sessions are acknowledged. Answers 200 `{settled}`.",
+            "description": "Authenticated by the gateway signature over the raw body (HyperPay: AES-256-GCM `X-Authentication-Tag` + `X-Initialization-Vector`, body is the encrypted message; the fake gateway: `X-Signature`); a bad or missing signature is 401. The outcome is confirmed with a status query before anything is settled, so a repeated or forged-content notification changes nothing. Unknown sessions are acknowledged. Answers 200 `{settled}`.",
             "body": {
               "mode": "raw",
               "raw": "{}",

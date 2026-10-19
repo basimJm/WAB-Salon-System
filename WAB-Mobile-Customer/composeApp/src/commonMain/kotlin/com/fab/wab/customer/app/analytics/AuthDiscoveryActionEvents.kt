@@ -41,7 +41,8 @@ internal object AuthDiscoveryActionEvents {
         is RegisterContract.UiAction.OnCountrySelect -> ActionEvent.Named(Events.COUNTRY_SELECT)
         is RegisterContract.UiAction.OnGenderSelect, is RegisterContract.UiAction.OnCitySelect, is RegisterContract.UiAction.OnAreaSelect,
         -> ActionEvent.Named(Events.REGISTER_FIELD_SELECT)
-        is RegisterContract.UiAction.OnFirstNameChange, is RegisterContract.UiAction.OnLastNameChange, is RegisterContract.UiAction.OnEmailChange,
+        is RegisterContract.UiAction.OnFirstNameChange, is RegisterContract.UiAction.OnLastNameChange,
+        is RegisterContract.UiAction.OnEmailChange,
         is RegisterContract.UiAction.OnNumberChange, RegisterContract.UiAction.OnCountryClick, RegisterContract.UiAction.OnPickerDismiss,
         RegisterContract.UiAction.OnRetryLoad, -> ActionEvent.Silent
     }
@@ -57,19 +58,22 @@ internal object AuthDiscoveryActionEvents {
         HomeContract.UiAction.OnNotificationsClick -> ActionEvent.Named(Events.NOTIFICATIONS_OPEN)
         HomeContract.UiAction.OnServicesSeeMore, is HomeContract.UiAction.OnSeeAll -> ActionEvent.Named(Events.HOME_SEE_ALL)
         HomeContract.UiAction.OnDialogConfirm -> ActionEvent.Named(Events.LOCATION_PERMISSION_RESULT)
-        HomeContract.UiAction.OnRefresh, HomeContract.UiAction.OnRetry, HomeContract.UiAction.OnResume, HomeContract.UiAction.OnDialogDismiss,
+        HomeContract.UiAction.OnRefresh, HomeContract.UiAction.OnRetry, HomeContract.UiAction.OnResume,
+        HomeContract.UiAction.OnDialogDismiss,
         -> ActionEvent.Silent
     }
     fun allSalons(a: AllSalonsContract.UiAction): ActionEvent = when (a) {
         is AllSalonsContract.UiAction.OnTextChange, AllSalonsContract.UiAction.OnFilterClick, is AllSalonsContract.UiAction.OnChipRemove,
-        is AllSalonsContract.UiAction.OnSalonClick, is AllSalonsContract.UiAction.OnFavoriteClick, is AllSalonsContract.UiAction.OnFiltersApplied,
+        is AllSalonsContract.UiAction.OnSalonClick, is AllSalonsContract.UiAction.OnFavoriteClick,
+        is AllSalonsContract.UiAction.OnFiltersApplied,
         -> ActionEvent.ByViewModel
         AllSalonsContract.UiAction.OnDialogConfirm -> ActionEvent.Named(Events.LOCATION_PERMISSION_RESULT)
         AllSalonsContract.UiAction.OnLoadMore, AllSalonsContract.UiAction.OnRefresh, AllSalonsContract.UiAction.OnRetry,
         AllSalonsContract.UiAction.OnDialogDismiss, -> ActionEvent.Silent
     }
     fun salonDetails(a: SalonDetailsContract.UiAction): ActionEvent = when (a) {
-        SalonDetailsContract.UiAction.OnShareClick, SalonDetailsContract.UiAction.OnFavoriteClick, SalonDetailsContract.UiAction.OnLocationClick,
+        SalonDetailsContract.UiAction.OnShareClick, SalonDetailsContract.UiAction.OnFavoriteClick,
+        SalonDetailsContract.UiAction.OnLocationClick,
         SalonDetailsContract.UiAction.OnCallClick, SalonDetailsContract.UiAction.OnWhatsAppClick, SalonDetailsContract.UiAction.OnBookClick,
         -> ActionEvent.ByViewModel
         is SalonDetailsContract.UiAction.OnStaffClick -> ActionEvent.Named(Events.STAFF_OPEN)

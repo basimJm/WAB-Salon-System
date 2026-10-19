@@ -2,9 +2,8 @@ import { FAKE_OTP_PROOF_KINDS, OTP_PURPOSES } from '../src/constants/providers';
 import { MS_PER_SECOND } from '../src/constants/time';
 import { createProviders, ProviderUnavailableError } from '../src/providers';
 import { FakeOtpProvider, fakeOtpProof, isE164 } from '../src/providers/otp';
-import { FakeAnalyticsProvider } from '../src/providers/analytics';
 import { FakeNotifier } from '../src/providers/notifier';
-import { FakePaymentProvider } from '../src/providers/payments';
+import { DisabledPaymentProvider, FakePaymentProvider } from '../src/providers/payments';
 import { FakeStorageProvider } from '../src/providers/storage';
 import { ExternalServiceError } from '../src/utils/errors';
 import { normalizeError } from '../src/utils/errors/normalize';
@@ -281,7 +280,6 @@ const ALL_FAKE = {
   storage: 'fake',
   notifier: 'fake',
   payments: 'fake',
-  analytics: 'fake',
 } as const;
 
 describe('createProviders', () => {
@@ -291,14 +289,29 @@ describe('createProviders', () => {
     expect(providers.storage).toBeInstanceOf(FakeStorageProvider);
     expect(providers.notifier).toBeInstanceOf(FakeNotifier);
     expect(providers.payments).toBeInstanceOf(FakePaymentProvider);
-    expect(providers.analytics).toBeInstanceOf(FakeAnalyticsProvider);
   });
 
   it('refuses fakes in production even if the config check was bypassed', () => {
     expect(() => createProviders(ALL_FAKE, true)).toThrow(ProviderUnavailableError);
   });
 
-  it.each(['otp', 'storage', 'notifier', 'payments', 'analytics'] as const)(
+  it('refuses a fake payment gateway in production and builds the disabled one anywhere', () => {
+    const real = { ...ALL_FAKE, otp: 'real', storage: 'real', notifier: 'real' } as const;
+    const failure = (() => {
+      try {
+        createProviders(real, true);
+      } catch (error) {
+        return error;
+      }
+      return null;
+    })();
+    expect(failure).toBeInstanceOf(ProviderUnavailableError);
+    expect(createProviders({ ...ALL_FAKE, payments: 'disabled' }, false).payments).toBeInstanceOf(
+      DisabledPaymentProvider,
+    );
+  });
+
+  it.each(['otp', 'storage', 'notifier'] as const)(
     'fails loudly when %s is real: the integration is not built yet',
     (name) => {
       const failure = (() => {

@@ -3,28 +3,32 @@
 > Read when a task touches a contract, a provider or another project. The cross-project map is `INTEGRATION.md` at the repo root; this file is the server's side of it. Updated 2026-10-18.
 
 ## Provides
-| To | Contract | Where generated | Live state |
-|---|---|---|---|
-| Customer app | `/customer/v1` — 51 operations (`docs/api/openapi.customer.json`) | `<feature>.openapi.ts` → `src/docs/index.ts` → `npm run docs` | Complete for the Customer PRD §13 list; no client yet |
-| Merchant app | `/merchant/v1` — 71 operations (`docs/api/openapi.merchant.json`) | same | 6 gaps → Stage O (SRV-129…134) |
-| Admin panel | `/admin/v1` — 116 operations (`docs/api/openapi.admin.json`) | same | All consumed by the admin; 11 gaps → Stage N (SRV-117…127) |
-| All clients | Socket.IO namespaces/rooms (`constants/sockets.ts`), FCM payloads (`constants/notifications.ts`), error codes (`constants/errors`, BUSINESS_DOMAIN §11), envelope (`utils/response`) | code | Admin receives `booking.updated`, `alert.created`; SRV-124 adds the rest |
-| Postman | `docs/api/postman/*.json` with `{{baseUrl}}`, `{{language}}`, per-scope tokens | `npm run docs` | current |
+
+| To           | Contract                                                                                                                                                                             | Where generated                                               | Live state                                                               |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Customer app | `/customer/v1` — 51 operations (`docs/api/openapi.customer.json`)                                                                                                                    | `<feature>.openapi.ts` → `src/docs/index.ts` → `npm run docs` | Complete for the Customer PRD §13 list; no client yet                    |
+| Merchant app | `/merchant/v1` — 71 operations (`docs/api/openapi.merchant.json`)                                                                                                                    | same                                                          | 6 gaps → Stage O (SRV-129…134)                                           |
+| Admin panel  | `/admin/v1` — 116 operations (`docs/api/openapi.admin.json`)                                                                                                                         | same                                                          | All consumed by the admin; 11 gaps → Stage N (SRV-117…127)               |
+| All clients  | Socket.IO namespaces/rooms (`constants/sockets.ts`), FCM payloads (`constants/notifications.ts`), error codes (`constants/errors`, BUSINESS_DOMAIN §11), envelope (`utils/response`) | code                                                          | Admin receives `booking.updated`, `alert.created`; SRV-124 adds the rest |
+| Postman      | `docs/api/postman/*.json` with `{{baseUrl}}`, `{{language}}`, per-scope tokens                                                                                                       | `npm run docs`                                                | current                                                                  |
 
 Every endpoint change: update `*.openapi.ts`, run `npm run docs`, commit `docs/api/**`, and write in the task block which client tasks must re-sync (admin `npm run api:sync`; apps `./gradlew apiSync`). `tests/docs.test.ts` fails on stale files.
 
 ## Consumes (ports in `src/providers/<name>/types.ts`, selected by `*_PROVIDER=fake|real`)
-| Port | Real implementation | State | Switch task |
-|---|---|---|---|
-| `notifier` | `wab-notifications` (`file:../wab-notifications`, `npm run ensure-sdks`) | **real** — env `FCM_SERVICE_ACCOUNT_JSON`, `SMTP_HOST`, `EMAIL_FROM_ADDRESS` (+ optional `FCM_PROJECT_ID`, `FCM_DRY_RUN`, `SMTP_PORT/SECURE/USER/PASS`, `EMAIL_FROM_NAME`) | done (T-123); registry package later (SRV-112 ← NOT-010) |
-| `otp` | `wab-otp` (Firebase ID-token verification) | fake | SRV-034 ← OTP-010 |
-| `storage` | in-repo S3 code today; `wab-storage` later | real S3 in repo, fake in tests | SRV-112 ← STO-010 |
-| `payments` | `wab-payments` (HyperPay candidate) | fake | SRV-092 ← PAY-012 |
-| `analytics` | Mongo server events in repo (`providers/analytics/mongo.ts`); `wab-analytics` + BigQuery later | mongo | SRV-110 ← ANA-010 |
-| Infra | MongoDB (Atlas), Redis, BullMQ, Docker (`docker-compose.yml`: mongo replica set, redis, minio, mailpit) | local only | SRV-011 deployment (owner) |
+
+| Port        | Real implementation                                                                                                              | State                                                                                                                                                                                                           | Switch task                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `notifier`  | `wab-notifications` (`file:../wab-notifications`, `npm run ensure-sdks`)                                                         | **real** — env `FCM_SERVICE_ACCOUNT_JSON`, `SMTP_HOST`, `EMAIL_FROM_ADDRESS` (+ optional `FCM_PROJECT_ID`, `FCM_DRY_RUN`, `SMTP_PORT/SECURE/USER/PASS`, `EMAIL_FROM_NAME`)                                      | done (T-123); registry package later (SRV-112 ← NOT-010)           |
+| `otp`       | `@wab/otp` (`file:../wab-otp`, `npm run ensure-sdks`; Firebase ID-token verification only, limits stay in `domain/otp`)          | **real** — env `OTP_PROVIDER=real` + `FIREBASE_PROJECT_ID` (dev and prod are different projects), dev-only `FIREBASE_AUTH_EMULATOR_HOST`; verified against locally signed tokens, NOT yet against real Firebase | done (SRV-034); registry package later (SRV-112 ← OTP-010 publish) |
+| `storage`   | `@wab/storage` (`file:../wab-storage`, `npm run ensure-sdks`; S3 + CDN, presign/confirm)                                         | **real** — env `S3_*`, `CDN_BASE_URL`, optional `CLOUDFRONT_*`; fake in tests                                                                                                                                   | SRV-112 ← STO-010                                                  |
+| `payments`  | none: payments are paused (owner 2026-10-19); `DisabledPaymentProvider` in production, `FakePaymentProvider` in dev/test         | **disabled** — env `PAYMENT_PROVIDER=disabled` (production) or `fake`; no gateway keys                                                                                                                          |
+| `analytics` | none: server events in MongoDB (`providers/analytics/mongo.ts`, `createMongoAnalytics`); Firebase on mobile covers app analytics | mongo — no env keys                                                                                                                                                                                             |
+| Infra       | MongoDB (Atlas), Redis, BullMQ, Docker (`docker-compose.yml`: mongo replica set, redis, minio, mailpit)                          | local only                                                                                                                                                                                                      | SRV-011 deployment (owner)                                         |
 
 ## Environment keys (names only; values never in git)
+
 `MONGO_URI`, `REDIS_URL`, `JWT_*`/access secrets, `PAYOUT_ENCRYPTION_KEY` (prod required), `*_PROVIDER`, FCM/SMTP/EMAIL keys above, `CORS_ALLOWED_ORIGINS`, `TRUST_PROXY_HOPS`. Full list and defaults: `src/config/env.schema.ts`, `src/constants/env.ts`, `.env.example`.
 
 ## Gate
+
 `npm run format:check && npm run lint && npm run typecheck && npm run build && npm test` (no GitHub CI; GitGuardian scans PRs). Docs test must be green. Merge own PR into `server` after the gate.
