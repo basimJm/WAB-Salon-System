@@ -40,7 +40,9 @@ class BookingNavigation(override val navController: NavHostController) : Navigat
     @Suppress("DEPRECATION") // LocalClipboard is suspend-only; the common plain-text ClipEntry helper is not yet stable in CMP 1.10
     @Composable
     private fun BookingSuccessDestination(route: Screen.BookingSuccess) {
-        val viewModel: BookingSuccessViewModel = koinViewModel(key = route.bookingId) { parametersOf(route.bookingId, route.referenceNumber) }
+        val viewModel: BookingSuccessViewModel = koinViewModel(
+            key = route.bookingId,
+        ) { parametersOf(route.bookingId, route.referenceNumber) }
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
         val clipboard = LocalClipboardManager.current

@@ -55,6 +55,8 @@
                   "PHONE_NOT_REGISTERED",
                   "PHONE_ALREADY_REGISTERED",
                   "ACCOUNT_BLOCKED",
+                  "CURRENT_PASSWORD_INVALID",
+                  "EMAIL_ALREADY_USED",
                   "MEMBER_INACTIVE",
                   "SALON_NOT_FOUND",
                   "SALON_NOT_BOOKABLE",
@@ -9689,6 +9691,56 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "checkout": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "provider": {
+                              "type": "string",
+                              "description": "Gateway adapter: fake (dev/test) or disabled (payments paused)."
+                            },
+                            "environment": {
+                              "type": "string",
+                              "enum": [
+                                "dev",
+                                "prod"
+                              ]
+                            },
+                            "checkoutId": {
+                              "type": "string"
+                            },
+                            "brands": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "shopperResultUrl": {
+                              "type": "string",
+                              "description": "Where the gateway returns the shopper (app scheme or https)."
+                            },
+                            "checkoutUrl": {
+                              "type": "string",
+                              "description": "Hosted pay page (dev mock gateway only)."
+                            },
+                            "widgetScriptUrl": {
+                              "type": "string"
+                            },
+                            "integrity": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "provider",
+                            "environment",
+                            "checkoutId",
+                            "brands",
+                            "shopperResultUrl"
+                          ],
+                          "description": "Data to open the gateway payment UI; null once the attempt is no longer payable."
                         }
                       },
                       "required": [
@@ -9701,7 +9753,8 @@
                         "currency",
                         "sessionId",
                         "gatewayCode",
-                        "gatewayMessage"
+                        "gatewayMessage",
+                        "checkout"
                       ]
                     },
                     "meta": {
@@ -9897,6 +9950,56 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "checkout": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "provider": {
+                              "type": "string",
+                              "description": "Gateway adapter: fake (dev/test) or disabled (payments paused)."
+                            },
+                            "environment": {
+                              "type": "string",
+                              "enum": [
+                                "dev",
+                                "prod"
+                              ]
+                            },
+                            "checkoutId": {
+                              "type": "string"
+                            },
+                            "brands": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "shopperResultUrl": {
+                              "type": "string",
+                              "description": "Where the gateway returns the shopper (app scheme or https)."
+                            },
+                            "checkoutUrl": {
+                              "type": "string",
+                              "description": "Hosted pay page (dev mock gateway only)."
+                            },
+                            "widgetScriptUrl": {
+                              "type": "string"
+                            },
+                            "integrity": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "provider",
+                            "environment",
+                            "checkoutId",
+                            "brands",
+                            "shopperResultUrl"
+                          ],
+                          "description": "Data to open the gateway payment UI; null once the attempt is no longer payable."
                         }
                       },
                       "required": [
@@ -9909,7 +10012,8 @@
                         "currency",
                         "sessionId",
                         "gatewayCode",
-                        "gatewayMessage"
+                        "gatewayMessage",
+                        "checkout"
                       ]
                     },
                     "meta": {

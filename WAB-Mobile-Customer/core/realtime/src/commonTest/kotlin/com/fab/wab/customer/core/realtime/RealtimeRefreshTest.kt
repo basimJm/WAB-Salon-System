@@ -18,7 +18,10 @@ class RealtimeRefreshTest {
     @Test
     fun entityIdReadsIdOrBookingIdAndIgnoresOtherPayloads() {
         assertEquals("b1", updated("b1", "APPROVED").entityId())
-        assertEquals("b2", RealtimeEvent(RealtimeEvents.BOOKING_UPDATED, buildJsonObject { put("bookingId", JsonPrimitive("b2")) }).entityId())
+        assertEquals(
+            "b2",
+            RealtimeEvent(RealtimeEvents.BOOKING_UPDATED, buildJsonObject { put("bookingId", JsonPrimitive("b2")) }).entityId(),
+        )
         assertNull(RealtimeEvent(RealtimeEvents.BOOKING_UPDATED).entityId())
         assertNull(RealtimeEvent(RealtimeEvents.NOTIFICATIONS_UNREAD, JsonPrimitive(3)).updateKey())
     }

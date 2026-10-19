@@ -52,15 +52,21 @@ private val SCREENS: List<Screen> = listOf(
     Screen.Home, Screen.Favorites, Screen.Bookings, Screen.Profile, Screen.Login, Screen.Notifications, Screen.PersonalInfo, Screen.Faq,
     Screen.SampleDetails(1), Screen.Register(), Screen.Otp("LOGIN", "JO", "1"), Screen.SalonDetails("s"), Screen.AllSalons("FEMALE"),
     Screen.AllServices("FEMALE"), Screen.SalonReviews("s"), Screen.StaffReviews("s", "m"), Screen.BookingDetails("b"),
-    Screen.BookingVerify("d"), Screen.BookingSuccess("b", "WAB-1"), Screen.RateBooking("b"), Screen.BookingStart("s"), Screen.ContentPage("terms"),
+    Screen.BookingVerify(
+        "d",
+    ), Screen.BookingSuccess("b", "WAB-1"), Screen.RateBooking("b"), Screen.BookingStart("s"), Screen.ContentPage("terms"),
 )
 
 /** One action per feature contract (the catalog's `when` is exhaustive per contract). */
 private val ACTIONS: List<Any> = listOf(
     LoginContract.UiAction.OnLoginClick, RegisterContract.UiAction.OnRegisterClick, OtpContract.UiAction.OnVerifyClick,
     OnboardingContract.UiAction.OnSkipClicked, GuestProfileContract.UiAction.OnContinueClick, HomeContract.UiAction.OnNotificationsClick,
-    AllSalonsContract.UiAction.OnFilterClick, SalonDetailsContract.UiAction.OnStaffClick("m"), StaffSheetContract.UiAction.OnAllReviewsClick,
-    ReviewsContract.UiAction.OnAddReviewClick, FavoritesContract.UiAction.OnSalonClick("s"), BookingsContract.UiAction.OnTabSelect(BookingTab.PAST),
+    AllSalonsContract.UiAction.OnFilterClick, SalonDetailsContract.UiAction.OnStaffClick(
+        "m",
+    ), StaffSheetContract.UiAction.OnAllReviewsClick,
+    ReviewsContract.UiAction.OnAddReviewClick, FavoritesContract.UiAction.OnSalonClick(
+        "s",
+    ), BookingsContract.UiAction.OnTabSelect(BookingTab.PAST),
     BookingDetailsContract.UiAction.OnCancelClick, RatingContract.UiAction.OnDone, BookingFlowContract.UiAction.OnConfirm,
     BookingSuccessContract.UiAction.OnCopyReference, NotificationsContract.UiAction.OnFilterClick, ProfileContract.UiAction.OnLogoutClick,
     EditProfileContract.UiAction.OnSaveClick, ContentPageContract.UiAction.OnLinkClick("u"), FaqContract.UiAction.OnToggle("f"),
@@ -130,7 +136,11 @@ class AnalyticsCatalogTest {
         val named = ActionAnalytics.eventFor("HomeViewModel", HomeContract.UiAction.OnNotificationsClick)
         assertEquals(AnalyticsCatalog.Events.NOTIFICATIONS_OPEN, named?.name)
         assertEquals(AnalyticsValue.Text("HomeViewModel"), named?.params?.get(ActionAnalytics.PARAM_OWNER))
-        assertEquals(null, ActionAnalytics.eventFor("LoginViewModel", LoginContract.UiAction.OnLoginClick), "view-model-tracked actions are not duplicated")
+        assertEquals(
+            null,
+            ActionAnalytics.eventFor("LoginViewModel", LoginContract.UiAction.OnLoginClick),
+            "view-model-tracked actions are not duplicated",
+        )
     }
 
     @Test

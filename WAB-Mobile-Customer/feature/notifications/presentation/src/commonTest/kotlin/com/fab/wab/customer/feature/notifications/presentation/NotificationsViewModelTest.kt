@@ -59,7 +59,9 @@ class NotificationsViewModelTest {
 
     private fun TestScope.viewModel(): NotificationsViewModel {
         val deps = NotificationsDependencies(
-            LoadNotificationsUseCase(repository), MarkNotificationsReadUseCase(repository), realtime, NoOpAnalyticsTracker, errorText = { "error" },
+            LoadNotificationsUseCase(
+                repository,
+            ), MarkNotificationsReadUseCase(repository), realtime, NoOpAnalyticsTracker, errorText = { "error" },
         )
         val vm = NotificationsViewModel(deps, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }

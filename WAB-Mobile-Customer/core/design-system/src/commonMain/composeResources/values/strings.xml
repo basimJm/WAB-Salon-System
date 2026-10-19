@@ -98,4 +98,6 @@
     <string name="state_action_login">Log in</string>
     <string name="state_action_contact">Contact us</string>
     <string name="state_action_update">Update the app</string>
+    <string name="error_code_current_password_invalid">The current password is incorrect.</string>
+    <string name="error_code_email_already_used">This email is already in use.</string>
 </resources>

@@ -58,7 +58,7 @@ fun RatingScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Uni
                 onRetry = { onAction(UiAction.OnRetry) },
                 modifier = Modifier.fillMaxSize().padding(padding),
             ) {}
-            state.finished -> DoneContent(state.submittedCount, onDone = { onAction(UiAction.OnDone) }, Modifier.padding(padding))
+            state.finished -> DoneContent(state.submittedCount, onFinish = { onAction(UiAction.OnDone) }, Modifier.padding(padding))
             else -> state.step?.let { StepContent(state, it, onAction, Modifier.padding(padding)) }
         }
     }
@@ -74,7 +74,10 @@ private fun StepContent(state: UiState, step: RatingStep, onAction: (UiAction) -
     ) {
         AppStepIndicator(currentStep = state.stepIndex, stepCount = state.steps.size, modifier = Modifier.fillMaxWidth())
         val title = when (step) {
-            is RatingStep.Salon -> stringResource(Res.string.rating_salon_step, step.salonName ?: stringResource(Res.string.rating_salon_unknown))
+            is RatingStep.Salon -> stringResource(
+                Res.string.rating_salon_step,
+                step.salonName ?: stringResource(Res.string.rating_salon_unknown),
+            )
             is RatingStep.Staff -> stringResource(Res.string.rating_staff_step, step.memberName)
         }
         AppCard(modifier = Modifier.fillMaxWidth().widthIn(max = AppTheme.sizes.sheetMaxWidth)) {
@@ -113,13 +116,13 @@ private fun StepContent(state: UiState, step: RatingStep, onAction: (UiAction) -
 }
 
 @Composable
-private fun DoneContent(submittedCount: Int, onDone: () -> Unit, modifier: Modifier = Modifier) {
+private fun DoneContent(submittedCount: Int, onFinish: () -> Unit, modifier: Modifier = Modifier) {
     AppStateMessage(
         icon = AppIcons.Check,
         title = stringResource(Res.string.rating_done_title),
         modifier = modifier.fillMaxSize(),
         message = stringResource(if (submittedCount > 0) Res.string.rating_done_message else Res.string.rating_done_none),
         actionText = stringResource(Res.string.rating_done_button),
-        onAction = onDone,
+        onAction = onFinish,
     )
 }

@@ -20,23 +20,23 @@ class LoadProfileUseCase(private val repository: ProfileRepository) {
 
 /** PRD §3.16: presign → direct upload → confirm → `PUT /profile/avatar`; any failed step surfaces as the error. */
 class UploadAvatarUseCase(private val uploads: UploadsRepository, private val profile: ProfileRepository) {
-    suspend operator fun invoke(bytes: ByteArray, contentType: String): AppResult<CustomerAccount> {
-        val presigned = when (val r = uploads.presign(UploadPurpose.CUSTOMER_AVATAR, contentType, bytes.size)) {
-            is AppResult.Success -> r.data
-            is AppResult.Error -> return r
-            AppResult.Loading -> return AppResult.Loading
+    suspend operator fun invoke(bytes: ByteArray, contentType: String): AppResult<CustomerAccount> =
+        uploads.presign(UploadPurpose.CUSTOMER_AVATAR, contentType, bytes.size).andThen { presigned ->
+            if (bytes.size > presigned.maxBytes) {
+                AppResult.Error(tooLarge(presigned.maxBytes))
+            } else {
+                uploads.upload(presigned, bytes, contentType)
+                    .andThen { uploads.confirm(presigned.key) }
+                    .andThen { profile.setAvatar(presigned.key) }
+            }
         }
-        if (bytes.size > presigned.maxBytes) return AppResult.Error(tooLarge(presigned.maxBytes))
-        when (val r = uploads.upload(presigned, bytes, contentType)) {
-            is AppResult.Error -> return r
-            else -> Unit
-        }
-        when (val r = uploads.confirm(presigned.key)) {
-            is AppResult.Error -> return r
-            else -> Unit
-        }
-        return profile.setAvatar(presigned.key)
-    }
+}
+
+/** Runs [next] on success; errors and the loading marker pass through unchanged. */
+private suspend inline fun <T, R> AppResult<T>.andThen(next: (T) -> AppResult<R>): AppResult<R> = when (this) {
+    is AppResult.Success -> next(data)
+    is AppResult.Error -> this
+    AppResult.Loading -> AppResult.Loading
 }
 
 /** Mirrors the server's `UPLOAD_TOO_LARGE` so the UI shows the same localized text without a round trip. */

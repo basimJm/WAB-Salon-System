@@ -13,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -27,6 +28,9 @@ import com.fab.wab.customer.designsystem.utils.softShadow
 
 /** Visual weight of a button; the layout, height, shape and states are shared. */
 enum class ButtonKind { Primary, Secondary, Outlined, Text, Destructive }
+
+/** Labels wrap to a second line instead of truncating (narrow cards, 200 % font scale). */
+private const val BUTTON_MAX_LINES = 2
 
 @Composable
 fun AppPrimaryButton(
@@ -106,6 +110,7 @@ fun AppButton(
         }
     Row(
         modifier = modifier
+            .defaultMinSize(minHeight = sizes.touchTarget)
             .then(container)
             .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
             .clickable(enabled = active, role = Role.Button, onClick = onClick)
@@ -123,7 +128,13 @@ fun AppButton(
             if (leadingIcon != null) {
                 Icon(leadingIcon, contentDescription = null, tint = contentColor, modifier = Modifier.size(sizes.icon))
             }
-            AppText(text = text, style = AppTheme.typography.labelLarge, color = contentColor, maxLines = 1)
+            AppText(
+                text = text,
+                style = AppTheme.typography.labelLarge,
+                color = contentColor,
+                maxLines = BUTTON_MAX_LINES,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }

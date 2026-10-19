@@ -64,7 +64,13 @@ fun EditProfileScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -
         handleIme = true,
     ) { padding ->
         AppStateContent(
-            state = contentStateOf(state.loading, isOffline = false, state.loadError, isEmpty = false, hasContent = !state.loading && state.loadError == null),
+            state = contentStateOf(
+                state.loading,
+                isOffline = false,
+                state.loadError,
+                isEmpty = false,
+                hasContent = !state.loading && state.loadError == null,
+            ),
             onRetry = { onAction(UiAction.OnRetryLoad) },
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
@@ -75,7 +81,11 @@ fun EditProfileScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -
             ) {
                 EditProfileForm(state, onAction, Modifier.widthIn(max = AppTheme.sizes.sheetMaxWidth))
                 if (state.phoneChanged) {
-                    AppText(text = stringResource(Res.string.edit_phone_changed_note), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+                    AppText(
+                        text = stringResource(Res.string.edit_phone_changed_note),
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.colors.muted,
+                    )
                 }
                 AppPrimaryButton(
                     text = stringResource(Res.string.edit_save),

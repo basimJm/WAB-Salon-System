@@ -1,6 +1,9 @@
+@file:Suppress("DEPRECATION") // kotlinx.datetime.Instant is a deprecated typealias on the K/N classpath until the datetime upgrade
+
 package com.fab.wab.customer.feature.bookings.presentation.controller.vm
 
 import com.fab.wab.customer.core.analytics.AnalyticsAction
+import com.fab.wab.customer.core.common.BusinessTime
 import com.fab.wab.customer.core.analytics.AnalyticsTracker
 import com.fab.wab.customer.core.analytics.analyticsParams
 import com.fab.wab.customer.core.domain.AppError
@@ -31,7 +34,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 class BookingDetailsDependencies(
@@ -42,7 +44,7 @@ class BookingDetailsDependencies(
     val external: ExternalActions,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
-    val now: () -> Instant = { Clock.System.now() },
+    val now: () -> Instant = { BusinessTime.nowInstant() },
 )
 
 /** S15: booking + salon contact, cancel rule and money outcome from the policy snapshot, live `booking.updated`. */
@@ -62,7 +64,9 @@ class BookingDetailsViewModel(
             // PRD §3.15: only this booking's socket updates (de-duplicated) and FCM messages about it refresh the screen.
             merge(
                 deps.realtime.events.refreshesFor(RealtimeEvents.BOOKING_UPDATED, entityId = bookingId),
-                PushSignals.messages.filter { it.data[PushKeys.BOOKING_ID].let { id -> id == null || id == bookingId } }.map { RefreshReason.Push },
+                PushSignals.messages
+                    .filter { it.data[PushKeys.BOOKING_ID].let { id -> id == null || id == bookingId } }
+                    .map { RefreshReason.Push },
             ).collect { if (uiState.value.booking != null) load(refresh = true) }
         }
     }

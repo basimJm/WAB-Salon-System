@@ -47,15 +47,28 @@ fun BookingSuccessScreen(state: UiState, onAction: (UiAction) -> Unit, modifier:
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(spacing.space16, Alignment.CenterVertically),
         ) {
-            Icon(AppIcons.Check, contentDescription = null, tint = AppTheme.colors.success, modifier = Modifier.size(AppTheme.sizes.stateIcon))
-            AppText(text = stringResource(Res.string.success_title), style = AppTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+            Icon(
+                AppIcons.Check,
+                contentDescription = null,
+                tint = AppTheme.colors.success,
+                modifier = Modifier.size(AppTheme.sizes.stateIcon),
+            )
+            AppText(
+                text = stringResource(Res.string.success_title),
+                style = AppTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+            )
             AppText(
                 text = stringResource(Res.string.success_message),
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.colors.muted,
                 textAlign = TextAlign.Center,
             )
-            ReferenceCard(state.referenceNumber, onCopy = { onAction(UiAction.OnCopyReference) }, Modifier.widthIn(max = AppTheme.sizes.sheetMaxWidth))
+            ReferenceCard(
+                state.referenceNumber,
+                onCopy = { onAction(UiAction.OnCopyReference) },
+                Modifier.widthIn(max = AppTheme.sizes.sheetMaxWidth),
+            )
             Column(
                 modifier = Modifier.fillMaxWidth().widthIn(max = AppTheme.sizes.sheetMaxWidth),
                 verticalArrangement = Arrangement.spacedBy(spacing.space8),
@@ -80,7 +93,11 @@ private fun ReferenceCard(referenceNumber: String, onCopy: () -> Unit, modifier:
     AppCard(modifier = modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
-                AppText(text = stringResource(Res.string.success_reference), style = AppTheme.typography.labelMedium, color = AppTheme.colors.muted)
+                AppText(
+                    text = stringResource(Res.string.success_reference),
+                    style = AppTheme.typography.labelMedium,
+                    color = AppTheme.colors.muted,
+                )
                 AppText(text = referenceNumber, style = AppTheme.typography.titleLarge)
             }
             AppTextButton(text = stringResource(Res.string.success_copy), onClick = onCopy)

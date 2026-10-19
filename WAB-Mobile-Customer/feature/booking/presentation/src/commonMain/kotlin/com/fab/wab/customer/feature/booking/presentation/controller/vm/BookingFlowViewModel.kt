@@ -27,7 +27,6 @@ import com.fab.wab.customer.feature.salon.domain.repository.SalonDetailsReposito
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -40,7 +39,7 @@ class BookingFlowDependencies(
     val deleteDraft: DeleteBookingDraftUseCase,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
-    val today: () -> LocalDate = { Clock.System.now().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
+    val today: () -> LocalDate = { BusinessTime.nowInstant().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
 )
 
 /**
@@ -64,17 +63,35 @@ class BookingFlowViewModel(
     }
 
     override fun handle(event: UiAction) {
+        if (!handlePersonAndServices(event) && !handleSchedule(event)) handleFlow(event)
+    }
+
+    private fun handlePersonAndServices(event: UiAction): Boolean {
         when (event) {
             UiAction.OnRetry -> load()
             is UiAction.OnNameChange -> updatePerson { copy(name = event.value.take(BookingFlowDefaults.MAX_NAME_LENGTH)) }
                 .also { updateState { copy(nameError = false) } }
             is UiAction.OnBrideChange -> if (uiState.value.isWomenSalon) updatePerson { copy(isBride = event.isBride) }
             is UiAction.OnServiceToggle -> toggleService(event.serviceId)
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleSchedule(event: UiAction): Boolean {
+        when (event) {
             is UiAction.OnMonthChange -> calendar.changeMonth(event.delta)
             is UiAction.OnDateSelect -> calendar.selectDate(event.date)
             is UiAction.OnSlotSelect -> calendar.selectSlot(event.start)
             UiAction.OnAnyStaffSelect -> selectAnyStaff()
             is UiAction.OnStaffSelect -> selectStaff(event.staffId)
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleFlow(event: UiAction) {
+        when (event) {
             UiAction.OnJustMe -> go(BookingStep.SUMMARY)
             UiAction.OnAddCompanion -> addCompanion()
             is UiAction.OnRemovePerson -> removePerson(event.index)
@@ -82,6 +99,7 @@ class BookingFlowViewModel(
             UiAction.OnConfirm -> uiState.value.draft?.let { emitSideEffect(SideEffect.OpenVerification(it.id)) }
             UiAction.OnContinue -> next()
             UiAction.OnBack -> back()
+            else -> Unit
         }
     }
 

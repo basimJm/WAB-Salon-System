@@ -41,6 +41,10 @@ class ProfileViewModel(
     }
 
     override fun handle(event: UiAction) {
+        if (!handleGuestAndPhoto(event) && !handleSettingsAndSupport(event)) handleSession(event)
+    }
+
+    private fun handleGuestAndPhoto(event: UiAction): Boolean {
         when (event) {
             UiAction.OnResume -> if (uiState.value.signedIn) account.load()
             UiAction.OnRetryAccount -> account.load()
@@ -51,6 +55,13 @@ class ProfileViewModel(
             UiAction.OnPhotoClick -> updateState { copy(overlay = ProfileOverlay.PhotoOptions) }
             is UiAction.OnPhotoSourceSelect -> account.pickPhoto(event.source)
             UiAction.OnPhotoDelete -> account.deletePhoto()
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleSettingsAndSupport(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnLanguageClick -> updateState { copy(overlay = ProfileOverlay.LanguagePicker) }
             is UiAction.OnLanguageSelect -> selectLanguage(event.language)
             UiAction.OnThemeClick -> updateState { copy(overlay = ProfileOverlay.ThemePicker) }
@@ -59,12 +70,20 @@ class ProfileViewModel(
             UiAction.OnContactClick -> updateState { copy(overlay = ProfileOverlay.ContactUs) }
             is UiAction.OnContactChannel -> contact(event.channel)
             is UiAction.OnLinkClick -> openLink(event.link)
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleSession(event: UiAction) {
+        when (event) {
             UiAction.OnLoginClick -> emitSideEffect(SideEffect.OpenLogin)
             UiAction.OnLogoutClick -> updateState { copy(overlay = ProfileOverlay.LogoutConfirm) }
             UiAction.OnLogoutConfirm -> logout()
             UiAction.OnDeleteAccountClick -> updateState { copy(overlay = ProfileOverlay.DeleteAccountConfirm) }
             UiAction.OnDeleteAccountConfirm -> account.deleteAccount()
             UiAction.OnOverlayDismiss -> updateState { copy(overlay = null) }
+            else -> Unit
         }
     }
 
@@ -72,9 +91,18 @@ class ProfileViewModel(
         val wasSignedIn = uiState.value.signedIn
         when (session) {
             is SessionState.Guest -> updateState {
-                copy(signedIn = false, guestNickname = session.profile.nickname.orEmpty(), guestGender = session.profile.gender, account = null)
+                copy(
+                    signedIn = false,
+                    guestNickname = session.profile.nickname.orEmpty(),
+                    guestGender = session.profile.gender,
+                    account = null,
+                )
             }
-            is SessionState.SignedIn -> updateState { copy(signedIn = true, guestNickname = session.user.firstName, guestGender = session.user.gender) }
+            is SessionState.SignedIn -> updateState { copy(
+                signedIn = true,
+                guestNickname = session.user.firstName,
+                guestGender = session.user.gender,
+            ) }
         }
         if (session.isSignedIn && !wasSignedIn) account.load()
     }

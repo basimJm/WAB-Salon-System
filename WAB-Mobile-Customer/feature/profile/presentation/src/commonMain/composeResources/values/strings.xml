@@ -61,4 +61,5 @@
     <string name="edit_phone_changed_note">A verification code will be sent to the new number.</string>
     <string name="edit_save">Save</string>
     <string name="edit_saved">Your information was saved.</string>
+    <string name="profile_section_account">Account</string>
 </resources>

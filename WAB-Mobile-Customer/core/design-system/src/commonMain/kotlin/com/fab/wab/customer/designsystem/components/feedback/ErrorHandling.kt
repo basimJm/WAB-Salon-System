@@ -14,19 +14,38 @@ enum class ErrorAction { RETRY, LOGIN, CONTACT, UPDATE, DISMISS }
 
 /** The handling path of every server code (BUSINESS_DOMAIN §11); the policy check `error-codes` keeps this exhaustive. */
 fun errorActionOf(code: ErrorCode): ErrorAction = when (code) {
-    ErrorCode.UNAUTHORIZED, ErrorCode.ACCOUNT_BLOCKED, ErrorCode.MEMBER_INACTIVE, ErrorCode.PHONE_NOT_REGISTERED -> ErrorAction.LOGIN
-    ErrorCode.FORBIDDEN, ErrorCode.PERMISSION_DENIED, ErrorCode.OWNER_REQUIRED, ErrorCode.LAST_OWNER, ErrorCode.INTERNAL,
-    ErrorCode.UNKNOWN, -> ErrorAction.CONTACT
+    in LOGIN_CODES -> ErrorAction.LOGIN
+    in CONTACT_CODES -> ErrorAction.CONTACT
     ErrorCode.UPDATE_REQUIRED -> ErrorAction.UPDATE
+    in RETRY_CODES -> ErrorAction.RETRY
+    else -> ErrorAction.DISMISS
+}
+
+private val LOGIN_CODES = setOf(
+    ErrorCode.UNAUTHORIZED, ErrorCode.ACCOUNT_BLOCKED, ErrorCode.MEMBER_INACTIVE, ErrorCode.PHONE_NOT_REGISTERED,
+)
+private val CONTACT_CODES = setOf(
+    ErrorCode.FORBIDDEN, ErrorCode.PERMISSION_DENIED, ErrorCode.OWNER_REQUIRED, ErrorCode.LAST_OWNER, ErrorCode.INTERNAL, ErrorCode.UNKNOWN,
+)
+private val RETRY_CODES = setOf(
     ErrorCode.RATE_LIMITED, ErrorCode.MAINTENANCE, ErrorCode.NOT_FOUND, ErrorCode.CONFLICT, ErrorCode.SALON_NOT_FOUND,
     ErrorCode.SERVICE_UNAVAILABLE, ErrorCode.SLOT_UNAVAILABLE, ErrorCode.SLOT_TAKEN, ErrorCode.DRAFT_EXPIRED, ErrorCode.PAYMENT_FAILED,
-    ErrorCode.PAYMENT_NOT_VERIFIED, ErrorCode.OTP_EXPIRED, ErrorCode.UPLOAD_INVALID, ErrorCode.UPLOAD_TOO_LARGE, ErrorCode.SCHEDULE_CONFLICT,
-    -> ErrorAction.RETRY
-    ErrorCode.VALIDATION_ERROR, ErrorCode.OTP_BLOCKED, ErrorCode.OTP_INVALID, ErrorCode.PHONE_ALREADY_REGISTERED, ErrorCode.SALON_NOT_BOOKABLE,
-    ErrorCode.SALON_CLOSED, ErrorCode.GENDER_MISMATCH, ErrorCode.TOO_MANY_COMPANIONS, ErrorCode.BRIDE_ONLY_SERVICE, ErrorCode.STAFF_NOT_ELIGIBLE,
+    ErrorCode.PAYMENT_NOT_VERIFIED, ErrorCode.OTP_EXPIRED, ErrorCode.UPLOAD_INVALID, ErrorCode.UPLOAD_TOO_LARGE,
+    ErrorCode.SCHEDULE_CONFLICT,
+)
+
+/** Business-rule codes whose message is the whole handling (no button). Listed so the policy check sees every code. */
+private val DISMISS_CODES = setOf(
+    ErrorCode.VALIDATION_ERROR, ErrorCode.OTP_BLOCKED, ErrorCode.OTP_INVALID, ErrorCode.PHONE_ALREADY_REGISTERED,
+    ErrorCode.SALON_NOT_BOOKABLE,
+    ErrorCode.SALON_CLOSED, ErrorCode.GENDER_MISMATCH, ErrorCode.TOO_MANY_COMPANIONS, ErrorCode.BRIDE_ONLY_SERVICE,
+    ErrorCode.STAFF_NOT_ELIGIBLE,
     ErrorCode.DATE_OUT_OF_RANGE, ErrorCode.PAYMENT_OPTION_NOT_ALLOWED, ErrorCode.INVALID_TRANSITION, ErrorCode.CANCELLATION_WINDOW_PASSED,
-    ErrorCode.TOO_EARLY_TO_COMPLETE, ErrorCode.ALREADY_HANDLED, -> ErrorAction.DISMISS
-}
+    ErrorCode.TOO_EARLY_TO_COMPLETE, ErrorCode.ALREADY_HANDLED, ErrorCode.CURRENT_PASSWORD_INVALID, ErrorCode.EMAIL_ALREADY_USED,
+)
+
+/** All codes are classified exactly once (checked by `ErrorTextTest`). */
+internal val CLASSIFIED_CODES: Set<ErrorCode> = LOGIN_CODES + CONTACT_CODES + setOf(ErrorCode.UPDATE_REQUIRED) + RETRY_CODES + DISMISS_CODES
 
 /** Connectivity and transport failures are always retried; server errors follow their code. */
 fun errorActionOf(error: AppError): ErrorAction = when (error) {

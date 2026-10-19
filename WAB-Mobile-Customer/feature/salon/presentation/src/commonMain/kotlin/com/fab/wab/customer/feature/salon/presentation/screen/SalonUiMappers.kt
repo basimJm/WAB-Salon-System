@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // kotlinx-datetime 0.7 deprecations on the K/N classpath until the datetime upgrade
+
 package com.fab.wab.customer.feature.salon.presentation.screen
 
 import androidx.compose.runtime.Composable

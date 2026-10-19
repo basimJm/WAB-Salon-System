@@ -85,13 +85,20 @@ class EditProfileViewModel(
         val countries = deps.locations.countries()
         val cities = deps.locations.cities(DEFAULT_COUNTRY_FOR_CITIES)
         val error = listOf(account, countries, cities).firstNotNullOfOrNull { (it as? AppResult.Error)?.appError }
-        if (error != null || account !is AppResult.Success || countries !is AppResult.Success || cities !is AppResult.Success) {
+        val loaded = account is AppResult.Success && countries is AppResult.Success && cities is AppResult.Success
+        if (error != null || !loaded) {
             val message = deps.errorText(error ?: AppError.UnknownError(""))
             updateState { copy(loading = false, loadError = message) }
             return
         }
-        val areas = deps.locations.areas(account.data.cityId)
-        prefill(account.data, countries.data.distinctBy { it.code }, cities.data, (areas as? AppResult.Success)?.data.orEmpty())
+        val loadedAccount = account.data
+        val areas = deps.locations.areas(loadedAccount.cityId)
+        prefill(
+            loadedAccount,
+            countries.data.distinctBy { it.code },
+            cities.data,
+            (areas as? AppResult.Success)?.data.orEmpty(),
+        )
     }
 
     private fun prefill(account: CustomerAccount, countries: List<Country>, cities: List<City>, areas: List<Area>) {

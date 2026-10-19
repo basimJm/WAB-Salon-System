@@ -44,9 +44,9 @@ internal fun ProfileRow(
     val colors = AppTheme.colors
     val spacing = AppTheme.spacing
     val tint = if (danger) colors.danger else colors.accent
-    Column {
+    Column(modifier = modifier) {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = AppTheme.sizes.touchTarget)
                 .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
@@ -59,7 +59,12 @@ internal fun ProfileRow(
             if (value != null) AppText(text = value, style = AppTheme.typography.bodySmall, color = colors.muted)
             when {
                 trailing != null -> trailing()
-                onClick != null -> Icon(AppIcons.Forward, contentDescription = null, tint = colors.muted, modifier = Modifier.size(AppTheme.sizes.iconSmall))
+                onClick != null -> Icon(
+                    AppIcons.Forward,
+                    contentDescription = null,
+                    tint = colors.muted,
+                    modifier = Modifier.size(AppTheme.sizes.iconSmall),
+                )
             }
         }
         if (divider) AppDivider()

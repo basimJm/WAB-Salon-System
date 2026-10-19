@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // kotlinx-datetime 0.7 deprecations on the K/N classpath until the datetime upgrade
+
 package com.fab.wab.customer.feature.bookings.domain
 
 import com.fab.wab.customer.core.domain.booking.BookingDetails

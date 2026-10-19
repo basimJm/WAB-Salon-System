@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // kotlinx-datetime 0.7 deprecations on the K/N classpath until the datetime upgrade
+
 package com.fab.wab.customer.feature.booking.presentation.screen
 
 import androidx.compose.foundation.background
@@ -116,7 +118,7 @@ private fun MonthCalendar(state: UiState, onAction: (UiAction) -> Unit) {
 }
 
 @Composable
-private fun DayCell(day: CalendarDay?, selected: Boolean, onAction: (UiAction) -> Unit, modifier: Modifier) {
+private fun DayCell(day: CalendarDay?, selected: Boolean, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     if (day == null) {
         Box(modifier.aspectRatio(1f))

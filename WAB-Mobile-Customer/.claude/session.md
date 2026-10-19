@@ -9,81 +9,11 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 (CUS-042…046) shipped (PR #287). Batch 4 (CUS-048/049/050/053/057) shipped (PR #293). Batch 5 (CUS-051/052/054/055/056) shipped (PR #296). Batch 6 = CUS-058 + CUS-059 (the last code tasks) → unit-test run green → PR. Remaining: CUS-064 (a11y/RTL QA pass) and CUS-065 (performance pass) = the end-of-backlog gate + device journey.
-
-### CUS-051 — Push handling: token registration + refresh, foreground banner + badge refresh, tap → S19 (guest → Home), push toggle synced
-- Branch: `feat/cus-051-push` (from `origin/customer`, batch 5 start)
-- Status: IN REVIEW (batch 5)
-- Acceptance criteria (PRD §10.2; root `CLAUDE.md` §4; server payload keys `event/notificationId/bookingId/salonId/deepLink` + title/body):
-  - [x] Token registration + refresh already flow through `PushTokenRelay` → `InstallationSyncer` → `PUT /installations` (CUS-031); unchanged, verified
-  - [x] core/notification `push/PushSignals` (`PushKeys`, `pushNotificationOf`, `messages` for foreground pushes, `tap` kept until consumed, `appForeground`)
-  - [x] Shell `PushEffect` inside the NavHost: reports foreground state, shows an in-app banner (title + body) for foreground pushes, routes a tapped push: salon `deepLink` → `DeepLinkStore`, registered → Home tab + `Screen.Notifications`, guest → Home (`pushTapDestinationOf`, tested)
-  - [x] Android `MyFirebaseMessagingService`: foreground → `PushSignals`, else system notification (channel name AR/EN, big text, tap `PendingIntent` → `MainActivity` extras via `PushIntents`); `MainActivity.onCreate/onNewIntent` publish the tap; `:core:notification` added to the app plugin
-  - [x] iOS `AppDelegate`: `willPresent` → `pushReceivedInForeground` (system banner suppressed), `didReceive` → `pushTapped`
-  - [x] Home refreshes on a foreground push (badge from the Home payload; test); Profile push toggle asks `NOTIFICATIONS` permission when enabling (test); `push_enabled` synced via `SetPushEnabledUseCase` (CUS-053)
-  - [x] Unit tests: `PushRoutingTest` (2), `HomeViewModelTest` (+assert), `ProfileViewModelTest` (+assert)
-- Tests: run with the batch-5 host-test run
-- Loops: 1/1 — batch-5 host-test run (121 tests across core/common, core/realtime, auth, home, bookings, notifications, profile, content, composeApp + `:androidApp:compileDevDebugKotlin`, exit 0; one Gradle daemon crash re-run) found: a stale `content` field reference in the Home push refresh (now `hasContent`), the rich-text parser left adjacent same-style runs split by dropped tags (now merged) and the heading test used an unsupported `h9`, plus two lines over 140 chars.
-- Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — push and realtime stay behind core ports (`PushSignals`, `RealtimeClient`, `refreshesFor` de-dup by id + state); platform services only publish into the shared bridge; S22 reuses the auth OTP flow with `PendingOtpVerification` and the CHANGE_PHONE purpose; S23 content is server-driven with a client-side HTML-subset guard; merchant hand-off is config-only on both platforms; AR/EN parity; no literals in composables; policy suite ok. NON-BLOCKING: `check-phone` has no CHANGE_PHONE purpose (server answers at change time); Android notification icon is the launcher mipmap; merchant scheme / store ids are placeholders.
-- Notes: `PushSignals` is a process-wide object (platform services have no Koin scope guarantee); tests share it (no replay on `messages`). iOS foreground badge count follows the realtime `notifications.unread` event + Home reload. Android notification icon still the launcher foreground mipmap (a dedicated monochrome icon is a design asset for the owner).
-
-### CUS-052 — Realtime wiring: authenticated socket in foreground, events → bookings list / details / unread badge / notifications list; refresh on FCM + foreground; de-duplicate by id
-- Branch: `feat/cus-052-realtime-wiring` (from `feat/cus-051-push`)
-- Status: IN REVIEW (batch 5)
-- Acceptance criteria (PRD §3.15; BUSINESS_DOMAIN §7 `booking.updated` summary, `notifications.unread {count}`):
-  - [x] Socket held only while resumed + signed in, reconnect with backoff (CUS-013 `RealtimeConnectionEffect` / `SocketIoRealtimeClient`; unchanged, verified)
-  - [x] core/realtime `RealtimeRefresh.kt`: `RefreshReason`, `entityId()` (`id` / `bookingId`), `updateKey()` (name + id + status + updatedAt), `Flow.refreshesFor(name, entityId?)` dropping consecutive duplicates (tests)
-  - [x] Bookings list: socket `booking.updated` (de-duplicated) + FCM message → refresh; resume refresh existed
-  - [x] Booking details: only this booking's socket updates (de-duplicated) + FCM messages about it → refresh; new `OnResume` (first one skipped) via `LifecycleEventEffect`
-  - [x] Notifications list: socket `notifications.unread` + FCM message → refresh (not while the filter sheet is open); new `OnResume`; `RealtimeClient` added to its dependencies/DI
-  - [x] Unread badge: Home (`notifications.unread` + push refresh, CUS-032/051)
-  - [x] Unit tests: `RealtimeRefreshTest` (2), `BookingDetailsViewModelTest` / `BookingsViewModelTest` / `NotificationsViewModelTest` (+ realtime / push / resume assertions)
-- Tests: run with the batch-5 host-test run
-- Loops: 1/1 — batch-5 host-test run (121 tests across core/common, core/realtime, auth, home, bookings, notifications, profile, content, composeApp + `:androidApp:compileDevDebugKotlin`, exit 0; one Gradle daemon crash re-run) found: a stale `content` field reference in the Home push refresh (now `hasContent`), the rich-text parser left adjacent same-style runs split by dropped tags (now merged) and the heading test used an unsupported `h9`, plus two lines over 140 chars.
-- Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — push and realtime stay behind core ports (`PushSignals`, `RealtimeClient`, `refreshesFor` de-dup by id + state); platform services only publish into the shared bridge; S22 reuses the auth OTP flow with `PendingOtpVerification` and the CHANGE_PHONE purpose; S23 content is server-driven with a client-side HTML-subset guard; merchant hand-off is config-only on both platforms; AR/EN parity; no literals in composables; policy suite ok. NON-BLOCKING: `check-phone` has no CHANGE_PHONE purpose (server answers at change time); Android notification icon is the launcher mipmap; merchant scheme / store ids are placeholders.
-- Notes: de-duplication is per consumer and keyed on the delivered state; the server emits a summary per change so a reconnect replay of the same state does not refresh twice.
-
-### CUS-054 — Edit personal information S22: `PATCH /profile`, phone change → OTP CHANGE_PHONE (`POST /auth/change-phone`), local first name / gender updated
-- Branch: `feat/cus-054-edit-profile` (from `feat/cus-052-realtime-wiring`)
-- Status: IN REVIEW (batch 5)
-- Acceptance criteria (PRD S22 + S12 fields/validation; Design Script S22; operations `PATCH /profile`, `POST /auth/change-phone`):
-  - [x] auth: `AuthRepository.changePhone(phone, idToken)` (+ API, impl, `CustomerProfile.toUserProfile`), `ChangePhoneUseCase` updates the session user; profile: `CustomerAccount` gains phone country/number + city/area ids, `ProfileUpdate`, `ProfileRepository.update` (`PATCH /profile`), `UpdateProfileUseCase` refreshes `user_first_name` / `user_gender` locally
-  - [x] `EditProfileViewModel`: loads account + countries + cities + the account's areas, prefills all S12 fields (same validation: required, email regex, server phone regex), city change reloads areas; Save: phone unchanged → PATCH → Saved toast + back; phone changed → `Screen.Otp(CHANGE_PHONE, new number)` → proof from `PendingOtpVerification` (other purposes ignored) → change phone → PATCH
-  - [x] `EditProfileScreen` (form, "verification code will be sent to the new number" note, Save enabled when valid, country picker) registered for `Screen.PersonalInfo` in `ProfileNavigation` (placeholder removed); AR/EN; analytics
-  - [x] Unit tests: `EditProfileViewModelTest` (3); existing `AuthRepository` fakes extended
-- Tests: run with the batch-5 host-test run
-- Loops: 1/1 — batch-5 host-test run (121 tests across core/common, core/realtime, auth, home, bookings, notifications, profile, content, composeApp + `:androidApp:compileDevDebugKotlin`, exit 0; one Gradle daemon crash re-run) found: a stale `content` field reference in the Home push refresh (now `hasContent`), the rich-text parser left adjacent same-style runs split by dropped tags (now merged) and the heading test used an unsupported `h9`, plus two lines over 140 chars.
-- Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — push and realtime stay behind core ports (`PushSignals`, `RealtimeClient`, `refreshesFor` de-dup by id + state); platform services only publish into the shared bridge; S22 reuses the auth OTP flow with `PendingOtpVerification` and the CHANGE_PHONE purpose; S23 content is server-driven with a client-side HTML-subset guard; merchant hand-off is config-only on both platforms; AR/EN parity; no literals in composables; policy suite ok. NON-BLOCKING: `check-phone` has no CHANGE_PHONE purpose (server answers at change time); Android notification icon is the launcher mipmap; merchant scheme / store ids are placeholders.
-- Notes: `POST /auth/check-phone` accepts LOGIN/REGISTER only, so the new number is not pre-checked; the server answers `PHONE_ALREADY_REGISTERED` at change time and the error text is shown. The form composable is a copy of the S12 one (separate feature module); a shared design-system form is a possible later extraction.
-
-### CUS-055 — Legal & support S23: `GET /content/pages/{slug}` rich text (sanitized HTML subset), `GET /content/faqs`, Contact Us from config
-- Branch: `feat/cus-055-legal-support` (from `feat/cus-054-edit-profile`)
-- Status: IN REVIEW (batch 5)
-- Acceptance criteria (PRD S23, §3.11; Design Script S23; operations `GET /content/pages/{slug}`, `GET /content/faqs`):
-  - [x] New `feature/content`: domain `ContentPage` / `FaqItem` / `ContentSlugs` (privacy, terms, about, contact), `RichTextParser` (p, br, h1–h6→3, ul/ol/li, b/strong, i/em, a href; unknown tags dropped, entities decoded, whitespace collapsed; tested), repository + use cases (`LoadContentPageUseCase` parses, `LoadFaqsUseCase` de-duplicates); data `ContentApi` (`pathWith` slug) + impl + di
-  - [x] `ContentPageViewModel(slug)`: server page → blocks with loading / offline / error / empty; `contact` slug → config contact with Call / WhatsApp / Email through `ExternalActions` (no server call); links open in the browser. `FaqViewModel`: list + independent expand/collapse
-  - [x] `ContentPageScreen` (titles per slug, `RichTextBlocks` renderer with theme typography, underlined accent links via `LinkAnnotation`, bullets), `FaqScreen` (cards, animated answers), `ContentNavigation` registers `Screen.ContentPage` + `Screen.Faq` (placeholders removed; S11/S12/S21 links now land here); `AppText(AnnotatedString)` overload; AR/EN; analytics
-  - [x] Unit tests: `RichTextParserTest` (2), `ContentApiTest` (1), `ContentViewModelsTest` (3)
-- Tests: run with the batch-5 host-test run
-- Loops: 1/1 — batch-5 host-test run (121 tests across core/common, core/realtime, auth, home, bookings, notifications, profile, content, composeApp + `:androidApp:compileDevDebugKotlin`, exit 0; one Gradle daemon crash re-run) found: a stale `content` field reference in the Home push refresh (now `hasContent`), the rich-text parser left adjacent same-style runs split by dropped tags (now merged) and the heading test used an unsupported `h9`, plus two lines over 140 chars.
-- Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — push and realtime stay behind core ports (`PushSignals`, `RealtimeClient`, `refreshesFor` de-dup by id + state); platform services only publish into the shared bridge; S22 reuses the auth OTP flow with `PendingOtpVerification` and the CHANGE_PHONE purpose; S23 content is server-driven with a client-side HTML-subset guard; merchant hand-off is config-only on both platforms; AR/EN parity; no literals in composables; policy suite ok. NON-BLOCKING: `check-phone` has no CHANGE_PHONE purpose (server answers at change time); Android notification icon is the launcher mipmap; merchant scheme / store ids are placeholders.
-- Notes: the parser is the client-side guard of the "sanitized HTML subset"; scripts / unknown tags never render. Contact details come only from `GET /config` (PRD §3.11).
-
-### CUS-056 — "Register your salon with us": merchant app deep link if installed, else the store page; links from config
-- Branch: `feat/cus-056-register-salon-entry` (from `feat/cus-055-legal-support`)
-- Status: IN REVIEW (batch 5)
-- Acceptance criteria (PRD S21 "For business"; Merchant PRD §4.5; domain = owner input → config placeholders):
-  - [x] `AppEnvironment.merchant: MerchantLinks(registerUrl, storeUrl, appId)` (`isConfigured` needs both URLs); Android from `<ENV>_MERCHANT_REGISTER_URL / _STORE_URL / _APP_ID` (`gradle.properties`, placeholders) via `BuildConfig`; iOS from `MERCHANT_REGISTER_URL / MERCHANT_STORE_URL / MERCHANT_APP_SCHEME` (xcconfig → Info.plist, optional keys) + `LSApplicationQueriesSchemes`
-  - [x] `ExternalActions.openApp(appUrl, appId, fallbackUrl)`: Android launches the deep link inside the merchant package when `getLaunchIntentForPackage` finds it, else the Play page; iOS `canOpenURL(scheme://)` → deep link, else the App Store page; fake records the call
-  - [x] Profile "Register your salon" → merchant app / store when configured, website registration page otherwise (tests); `AppEnvironmentTest` (+1)
-- Tests: run with the batch-5 host-test run
-- Loops: 1/1 — batch-5 host-test run (121 tests across core/common, core/realtime, auth, home, bookings, notifications, profile, content, composeApp + `:androidApp:compileDevDebugKotlin`, exit 0; one Gradle daemon crash re-run) found: a stale `content` field reference in the Home push refresh (now `hasContent`), the rich-text parser left adjacent same-style runs split by dropped tags (now merged) and the heading test used an unsupported `h9`, plus two lines over 140 chars.
-- Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — push and realtime stay behind core ports (`PushSignals`, `RealtimeClient`, `refreshesFor` de-dup by id + state); platform services only publish into the shared bridge; S22 reuses the auth OTP flow with `PendingOtpVerification` and the CHANGE_PHONE purpose; S23 content is server-driven with a client-side HTML-subset guard; merchant hand-off is config-only on both platforms; AR/EN parity; no literals in composables; policy suite ok. NON-BLOCKING: `check-phone` has no CHANGE_PHONE purpose (server answers at change time); Android notification icon is the launcher mipmap; merchant scheme / store ids are placeholders.
-- Notes: the merchant app's URL scheme (`wabmerchant`) and store ids are placeholders for the owner (MER backlog decides the scheme). iOS `LSApplicationQueriesSchemes` uses a build-setting value, which Xcode substitutes at build time.
+- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 (CUS-042…046) shipped (PR #287). Batch 4 (CUS-048/049/050/053/057) shipped (PR #293). Batch 5 (CUS-051/052/054/055/056) shipped (PR #296). Batch 6 = CUS-058 + CUS-059 (the last code tasks) → unit-test run green → PR. Batch 6 shipped (PR #301). `main` merged into `customer` (PR #314). Now: CUS-064 + CUS-065 end-of-backlog pass on `feat/cus-064-a11y-rtl-qa`.
 
 ### CUS-058 — Analytics events: every screen view and every action of PRD §14 with the common fields, verified by a test
 - Branch: `feat/cus-058-analytics-events` (from `origin/customer`, batch 6 start)
-- Status: IN REVIEW (batch 6)
+- Status: DONE (batch 6, PR #301)
 - Acceptance criteria (PRD §14; CUS-012 common fields already attached by `DefaultAnalyticsTracker`):
   - [x] core/mvi `UiActionObserver` tap: `BaseViewModel.onEvent` is now final (notifies the observer, then `handle(event)`); the 25 view models' reducers were renamed `onEvent` → `handle` (call sites and tests unchanged)
   - [x] App shell `AnalyticsCatalog`: `screenNameOf(Screen)` exhaustive over all 22 routes (consistent with the route-derived names of `TrackNavigationScreens`), `actionEventOf(action)` exhaustive per feature contract → `Named` (shell logs it with the owning view model), `ByViewModel` (richer event already logged with ids) or `Silent` (keystrokes, dismissals, lifecycle, paging); `ActionAnalytics.install(tracker)` wired in `App.kt`
@@ -96,7 +26,7 @@
 
 ### CUS-059 — Error-code coverage: every code of BUSINESS_DOMAIN §11 and `openapi.customer.json` has AR + EN text and a handling path; contract test
 - Branch: `feat/cus-059-error-coverage` (from `feat/cus-058-analytics-events`)
-- Status: IN REVIEW (batch 6)
+- Status: DONE (batch 6, PR #301)
 - Acceptance criteria (BUSINESS_DOMAIN §11; `openapi.customer.json` error enums; CLAUDE.md §3 "never raw server text"):
   - [x] Policy check `error-codes` (`scripts/ci/policy/error_codes.py`, in `policy_checks.py all` and the gate): codes of §11 ∪ the snapshot's `code` enums must all be in `ErrorCode`, `ErrorCode` must not carry codes outside the contract (except `UNKNOWN`), every code needs `error_code_<code>` in EN and AR and a branch in `ErrorHandling.kt`; Python unit test `tests/test_error_codes.py`
   - [x] Handling path: `ErrorAction { RETRY, LOGIN, CONTACT, UPDATE, DISMISS }`, `errorActionOf(code)` exhaustive over the 42 codes (login for auth/account codes, contact for permission / internal / unknown, update for `UPDATE_REQUIRED`, retry for transient / availability codes, dismiss for validation-type business rules), `errorActionOf(AppError)` (transport → retry), `errorActionLabel` (retry / log in / contact us / update the app; AR/EN strings); `AppErrorState(action, onAction)` renders the matching button (retry by default, existing call sites unchanged)
@@ -109,10 +39,38 @@
 
 ### T-126 — Merge `main` into `customer` (owner request 2026-10-19)
 - Branch: `chore/merge-main-into-customer`
-- Status: IN REVIEW
+- Status: DONE (PR #314)
 - Acceptance criteria:
   - [x] `origin/main` merged into a branch from `origin/customer`; only conflict = generated board in `INTEGRATION.md` (regenerated by `tasks.py board`)
   - [x] No customer-app source touched by the merge
 - Tests: none needed (docs/board + server files already verified on `main`)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge commit only; board regenerated from the backlogs.
+
+### CUS-064 — Accessibility and RTL QA pass: TalkBack names, 48 dp targets, font scale 200 %, RTL mirroring, dark mode, landscape; fixes + screenshot evidence
+- Branch: `feat/cus-064-a11y-rtl-qa` (from `origin/customer` after the `main` merge, PR #314)
+- Status: IN REVIEW
+- Acceptance criteria (PRD §12; CLAUDE.md §7; rules §3.13 end-of-backlog pass):
+  - [x] detekt clean over the whole app after batches 1–6 (reducer splits in BookingFlow / Profile / Notifications, analytics catalog split into `AuthDiscoveryActionEvents` / `BookingAccountActionEvents`, error-action tables, line wraps, modifier/naming fixes)
+  - [x] Kotlin/Native build + tests: kotlinx-datetime aligned to 0.7.1 (Ktor already pulled it on iOS → mixed klibs broke linking), `BusinessTime.nowInstant()` replaces `Clock.System` (name clash with core/common `Clock` on K/N), file-level deprecation suppressions until the datetime API migration, `toEpochDays()` Long, `import ComposeApp` in `iOSApp.swift`
+  - [x] Emulator journey (Pixel-class AVD, mock data, 39 screenshots + uiautomator dumps in the session scratchpad): onboarding → S02 → Home AR/RTL light → Profile → theme Dark → language EN/LTR → landscape (rail) → font scale 2.0 (wraps, no clipping) → All salons → Salon details → auth gate → Login → OTP (mock) → Home registered → booking steps 0–5 (draft + summary) → verify placeholder → Bookings → Booking details → Notifications (popup, filter sheet) → Profile registered (photo sheet) → FAQ → Contact sheet → Edit profile (S22)
+  - [x] Audit script (`a11y_dump.py`: clickable nodes without a label, targets under 48 dp at 440 dpi) → findings fixed: picker radio rows misaligned and only the radio tappable (now centered, whole row tappable); `AppTextButton` 16 dp tall (all buttons now ≥ 48 dp); button labels truncated in narrow cards ("WhatsA…" on S15; labels wrap to 2 lines); "Personal information" section header duplicated the row (now "Account"); unlabeled clickable containers were Compose wrappers whose child carries the text/content-desc (false positives)
+  - [x] Final gate green (`scripts/ci/run_local_checks.sh` exit 0 on the final commit: policy tests, policy checks, contract, detekt, Gradle unit tests + 4 Android variants, 4 iOS configurations, K/N tests)
+- Tests: `scripts/ci/run_local_checks.sh` exit 0 (2026-10-19, after `2277fc8`)
+- Loops: 1/1 — re-checked every criterion against the journey screenshots + a11y dumps and the gate log; the AppButton min-height change re-verified on S15/S21 before the final gate
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — fixes are confined to the design system (`AppButton`, `RadioRow`) and one string; all strings AR+EN; no hardcoded values; gate green. DEVIATION: iOS simulator journey not run (placeholder Firebase keys, owner input); Android journey only, on one AVD.
+- Notes: iOS simulator journey still blocked by the placeholder Firebase keys (`GoogleService-Info.plist`, owner input); the iOS build itself is green. Slot chips show the fixture's raw "09:00" (real server sends instants → 12-hour text).
+
+### CUS-065 — Performance pass: cold start, R8 keep rules, release size budget, baseline profile, image sizing, no main-thread blocking; measurements recorded
+- Branch: `feat/cus-064-a11y-rtl-qa` (same end-of-backlog branch)
+- Status: IN REVIEW
+- Acceptance criteria (CLAUDE.md §6; `config/budgets.json` 60 MiB per flavor):
+  - [x] Cold start (dev debug, emulator, `am start -W` ×3 after force-stop): 1021 / 968 / 969 ms TotalTime; PSS after launch 176 MB (debug build, Compose + Koin)
+  - [x] Release APK size: dev 10,307,971 B, prod 10,308,003 B (unsigned, R8) vs budget 62,914,560 B → `budget: ok`
+  - [x] R8: release variants minified + shrunk by the convention plugin with the keep rules of CUS-001; the gate builds them
+  - [x] Main thread: repositories/use cases run on IO through Ktor; mapping is small; no `runBlocking`/`Thread.sleep` (policy Q rules); lists use keys + content types (P001)
+  - [x] Images: `AppImage` sized to its slot with Coil caches; avatar uploads compressed on device to ≤ 1024 px JPEG q85
+  - [x] Baseline profile: not generated (needs a device run of the `baselineprofile` module → deferred to the release task CUS-066 with the owner's signing)
+- Tests: measurements above; `policy_checks.py budget` ok; gate exit 0
+- Loops: 1/1 — numbers re-read from the gate output; no code change specific to this task beyond the batch fixes
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — measurements recorded, budget enforced in the gate. DEVIATION: baseline profile deferred to CUS-066 (needs owner signing/device run); cold start measured on a debug build only.

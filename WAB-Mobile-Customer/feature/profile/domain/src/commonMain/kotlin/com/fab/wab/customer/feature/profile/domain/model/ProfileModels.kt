@@ -44,4 +44,11 @@ object ProfileDefaults {
 }
 
 /** `PATCH /profile` fields of S22 (phone changes go through `POST /auth/change-phone`). */
-data class ProfileUpdate(val firstName: String, val lastName: String, val email: String, val gender: Gender, val cityId: String, val areaId: String)
+data class ProfileUpdate(
+    val firstName: String,
+    val lastName: String,
+    val email: String,
+    val gender: Gender,
+    val cityId: String,
+    val areaId: String,
+)

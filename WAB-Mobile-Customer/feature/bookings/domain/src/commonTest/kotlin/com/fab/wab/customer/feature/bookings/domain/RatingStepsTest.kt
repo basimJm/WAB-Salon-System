@@ -26,7 +26,9 @@ class RatingStepsTest {
 
     @Test
     fun salonFirstThenDistinctStaffWithIdsOnly() {
-        val steps = ratingStepsOf(booking("s1", listOf(person("m1", "Lina"), person(null, null), person("m1", "Lina"), person("m2", "Dana"))))
+        val steps = ratingStepsOf(
+            booking("s1", listOf(person("m1", "Lina"), person(null, null), person("m1", "Lina"), person("m2", "Dana"))),
+        )
         assertEquals(
             listOf(RatingStep.Salon("s1", "Glow"), RatingStep.Staff("s1", "m1", "Lina"), RatingStep.Staff("s1", "m2", "Dana")),
             steps,

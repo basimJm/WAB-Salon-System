@@ -2,6 +2,7 @@ package com.fab.wab.customer.designsystem
 
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.ErrorCode
+import com.fab.wab.customer.designsystem.components.feedback.CLASSIFIED_CODES
 import com.fab.wab.customer.designsystem.components.feedback.ERROR_CODE_STRINGS
 import com.fab.wab.customer.designsystem.components.feedback.ErrorAction
 import com.fab.wab.customer.designsystem.components.feedback.errorActionLabel
@@ -34,8 +35,7 @@ class ErrorTextTest {
 
     @Test
     fun everyErrorCodeHasAHandlingPathAndLabelsFollowIt() {
-        val actions = ErrorCode.entries.associateWith(::errorActionOf)
-        assertEquals(ErrorCode.entries.size, actions.size)
+        assertEquals(ErrorCode.entries.toSet(), CLASSIFIED_CODES)
         assertEquals(ErrorAction.LOGIN, errorActionOf(ErrorCode.UNAUTHORIZED))
         assertEquals(ErrorAction.UPDATE, errorActionOf(ErrorCode.UPDATE_REQUIRED))
         assertEquals(ErrorAction.RETRY, errorActionOf(ErrorCode.SLOT_TAKEN))
