@@ -19,7 +19,6 @@ import com.fab.wab.customer.app.resources.nav_profile
 import com.fab.wab.customer.app.resources.placeholder_content_page
 import com.fab.wab.customer.app.resources.placeholder_notifications
 import com.fab.wab.customer.app.resources.placeholder_booking
-import com.fab.wab.customer.app.resources.placeholder_salon_reviews
 import com.fab.wab.customer.app.resources.profile_login_button
 import com.fab.wab.customer.core.navigation.route.Graph
 import com.fab.wab.customer.core.navigation.route.Screen
@@ -61,14 +60,8 @@ fun NavGraphBuilder.registerPlaceholderAuthScreens() {
     }
 }
 
-/** Destinations Home links to before their tasks land (S08 CUS-038, S16 CUS-042, S19 CUS-050). */
+/** Destinations Home links to before their tasks land (S16 CUS-042, S19 CUS-050). */
 fun NavGraphBuilder.registerPlaceholderHomeScreens() {
-    composable<Screen.SalonReviews> { entry ->
-        PlaceholderRootScreen(Res.string.placeholder_salon_reviews, detail = entry.toRoute<Screen.SalonReviews>().salonId)
-    }
-    composable<Screen.StaffReviews> { entry ->
-        PlaceholderRootScreen(Res.string.placeholder_salon_reviews, detail = entry.toRoute<Screen.StaffReviews>().memberId)
-    }
     composable<Screen.BookingStart> { entry ->
         PlaceholderRootScreen(Res.string.placeholder_booking, detail = entry.toRoute<Screen.BookingStart>().salonId)
     }

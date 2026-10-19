@@ -7,6 +7,8 @@ object SalonAnalytics {
     private const val SCREEN_NAME = "salon_details"
     private const val STAFF_SCREEN_NAME = "staff_sheet"
     private const val SERVICE_SCREEN_NAME = "service_sheet"
+    private const val REVIEWS_SCREEN_NAME = "reviews"
+    const val ACTION_REVIEW_SUBMIT = "review_submit"
     const val ACTION_SHARE = "salon_share"
     const val ACTION_FAVORITE = "favorite_toggle"
     const val ACTION_CALL = "salon_call"
@@ -19,4 +21,5 @@ object SalonAnalytics {
     val SCREEN = AnalyticsScreen(SCREEN_NAME)
     val STAFF_SCREEN = AnalyticsScreen(STAFF_SCREEN_NAME)
     val SERVICE_SCREEN = AnalyticsScreen(SERVICE_SCREEN_NAME)
+    val REVIEWS_SCREEN = AnalyticsScreen(REVIEWS_SCREEN_NAME)
 }

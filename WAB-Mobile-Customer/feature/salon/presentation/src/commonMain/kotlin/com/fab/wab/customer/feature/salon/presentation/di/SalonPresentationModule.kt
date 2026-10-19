@@ -1,6 +1,9 @@
 package com.fab.wab.customer.feature.salon.presentation.di
 
 import com.fab.wab.customer.core.common.AppEnvironment
+import com.fab.wab.customer.feature.salon.domain.model.ReviewTarget
+import com.fab.wab.customer.feature.salon.presentation.controller.vm.ReviewsDependencies
+import com.fab.wab.customer.feature.salon.presentation.controller.vm.ReviewsViewModel
 import com.fab.wab.customer.feature.salon.presentation.controller.vm.SalonDetailsDependencies
 import com.fab.wab.customer.feature.salon.presentation.controller.vm.SalonDetailsViewModel
 import com.fab.wab.customer.feature.salon.presentation.controller.vm.StaffSheetViewModel
@@ -19,6 +22,8 @@ val salonPresentationModule = module {
         )
     }
     viewModel { (salonId: String) -> SalonDetailsViewModel(salonId, deps = get()) }
+    factory { ReviewsDependencies(loadReviews = get(), submitReview = get(), sessionStore = get(), analytics = get()) }
+    viewModel { (target: ReviewTarget, addReview: Boolean) -> ReviewsViewModel(target, addReview, deps = get()) }
     viewModel { (salonId: String, memberId: String) ->
         StaffSheetViewModel(salonId, memberId, getStaffMember = get(), sessionStore = get())
     }

@@ -35,4 +35,12 @@
     <string name="staff_services">الخدمات</string>
     <string name="staff_no_reviews">لا يوجد تقييمات حالية لهذا الموظف.</string>
     <string name="service_media">الوسائط</string>
+    <string name="reviews_title">التقييمات</string>
+    <string name="reviews_staff_title">تقييمات الموظف</string>
+    <string name="reviews_empty">لا توجد تقييمات بعد.</string>
+    <string name="review_form_title">قيّم تجربتك</string>
+    <string name="review_comment_hint">اكتب تعليقاً (اختياري)</string>
+    <string name="review_counter">%1$d / %2$d</string>
+    <string name="review_submit">إرسال التقييم</string>
+    <string name="review_submitted">شكراً لك! سيظهر تقييمك بعد الموافقة عليه.</string>
 </resources>

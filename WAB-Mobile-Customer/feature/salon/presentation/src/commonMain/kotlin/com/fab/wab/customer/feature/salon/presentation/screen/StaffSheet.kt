@@ -114,7 +114,10 @@ private fun StaffBody(member: StaffMember, onAction: (UiAction) -> Unit) {
         }
         if (member.services.isNotEmpty()) {
             AppSectionHeader(title = stringResource(Res.string.staff_services))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.space8),
+                verticalArrangement = Arrangement.spacedBy(spacing.space8),
+            ) {
                 member.services.forEach { AppFilterChip(text = it.name, selected = false, onClick = {}) }
             }
         }

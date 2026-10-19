@@ -37,14 +37,17 @@ fun ServiceSheet(service: SalonService, onMediaClick: (Int) -> Unit, onDismiss: 
         Column(modifier = Modifier.fillMaxWidth().padding(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space12)) {
             AppText(text = service.name, style = AppTheme.typography.headlineSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.space12)) {
-                AppText(text = stringResource(CoreRes.string.service_duration_minutes, service.durationMinutes), color = AppTheme.colors.muted)
+                AppText(
+                    text = stringResource(CoreRes.string.service_duration_minutes, service.durationMinutes),
+                    color = AppTheme.colors.muted,
+                )
                 AppText(text = stringResource(CoreRes.string.price_jod, service.price), style = AppTheme.typography.titleSmall)
             }
             service.description?.let { AppText(text = it) }
             if (service.mediaUrls.isNotEmpty()) {
                 AppText(text = stringResource(Res.string.service_media), style = AppTheme.typography.titleSmall)
                 LazyRow(contentPadding = PaddingValues(0.dp), horizontalArrangement = Arrangement.spacedBy(spacing.space8)) {
-                    itemsIndexed(service.mediaUrls) { index, url ->
+                    itemsIndexed(service.mediaUrls, key = { _, url -> url }, contentType = { _, _ -> MEDIA_TYPE }) { index, url ->
                         AppMediaTile(
                             item = MediaItemUi(id = url, url = url, kind = MediaKind.Image),
                             onClick = { onMediaClick(index) },
@@ -58,3 +61,4 @@ fun ServiceSheet(service: SalonService, onMediaClick: (Int) -> Unit, onDismiss: 
 }
 
 private const val MEDIA_TILE_SCALE = 2
+private const val MEDIA_TYPE = "media"

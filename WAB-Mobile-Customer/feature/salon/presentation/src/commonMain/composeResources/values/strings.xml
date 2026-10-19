@@ -35,4 +35,12 @@
     <string name="staff_services">Services</string>
     <string name="staff_no_reviews">There are no reviews for this staff member yet.</string>
     <string name="service_media">Media</string>
+    <string name="reviews_title">Reviews</string>
+    <string name="reviews_staff_title">Staff reviews</string>
+    <string name="reviews_empty">No reviews yet.</string>
+    <string name="review_form_title">Rate your experience</string>
+    <string name="review_comment_hint">Write a comment (optional)</string>
+    <string name="review_counter">%1$d / %2$d</string>
+    <string name="review_submit">Submit review</string>
+    <string name="review_submitted">Thank you! Your review will appear after approval.</string>
 </resources>

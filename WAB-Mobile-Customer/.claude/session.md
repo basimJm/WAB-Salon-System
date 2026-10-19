@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) verified and shipped as one PR from `feat/cus-036-salon-details` into `customer`. Batch 2 = CUS-037 ✓ code, CUS-038, CUS-039, CUS-040, CUS-041 (task branches chain from the previous task branch; gate + emulator + loop + review after the fifth).
+- Batch 1 (CUS-032…036) verified and shipped as one PR from `feat/cus-036-salon-details` into `customer`. Batch 2 = CUS-037 ✓ code, CUS-038 ✓ code, CUS-039, CUS-040, CUS-041 (task branches chain from the previous task branch; gate + emulator + loop + review after the fifth).
 
 ### CUS-032 — Home S03: `GET /home`, header + badge, banners, search bar, gender tabs, sections, nearest permission states
 - Branch: `feat/cus-032-home`
@@ -95,6 +95,19 @@
   - [x] `ServiceSheet(service)` from the loaded salon (name, description, duration, price, media tiles → `onMediaClick` for CUS-039); both hosted by `SalonNavigation` (staff per request key, service by id)
   - [x] AR + EN strings; fixture hints `start/end/day`
   - [x] Tests: `StaffMappersTest` (1), `StaffSheetViewModelTest` (2)
+  - [ ] Gradle + emulator: batch 2
+- Tests: written, not yet run (batch rule)
+- Loops: 0/1
+- Review: PENDING
+
+### CUS-038 — Reviews S08/S09: salon and staff review lists, add review form, "appears after approval"
+- Branch: `feat/cus-038-reviews` (from `feat/cus-037-staff-service-sheets`)
+- Status: IN PROGRESS (code + tests written; Gradle at the end of batch 2)
+- Acceptance criteria (PRD S08/S09 + review rules; operations `GET/POST /salons/{id}/reviews`, `GET/POST /salons/{id}/staff/{memberId}/reviews` (rating 1–5, comment ≤ 1000, 201 → PENDING)):
+  - [x] Domain `model/Reviews.kt` (`ReviewTarget` Salon / Staff, `ReviewsPage`, `ReviewDraft`, `ReviewDefaults`), `ReviewsRepository`, `LoadReviewsUseCase`, `reviewDraftOf` validation, `SubmitReviewUseCase`; data `ReviewsApi` (4 ops via `pathWith`), `ReviewsRepositoryImpl`
+  - [x] `ReviewsViewModel(target, openForm)`: paged list (10) + summary, pull-to-refresh, Add review auth-gated (guest → auth dialog → login), form sheet (rating input + optional comment with counter, submit disabled until valid), submit → `Submitted` toast "Thank you! Your review will appear after approval." (PENDING reviews are not shown); `ReviewsScreen` registered for `Screen.SalonReviews(salonId, addReview)` and `Screen.StaffReviews(salonId, memberId, addReview)`; S07 and the staff sheet "Add review" open the list with the form; placeholders removed
+  - [x] AR + EN strings; CUS-037 lint leftovers fixed (P001 keys, long lines)
+  - [x] Tests: `ReviewsViewModelTest` (3: draft validation, paging + guest gating, submit success / failure)
   - [ ] Gradle + emulator: batch 2
 - Tests: written, not yet run (batch rule)
 - Loops: 0/1

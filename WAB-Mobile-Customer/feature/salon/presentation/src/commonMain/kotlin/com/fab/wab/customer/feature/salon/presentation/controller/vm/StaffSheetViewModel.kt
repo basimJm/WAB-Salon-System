@@ -35,14 +35,17 @@ class StaffSheetViewModel(
         when (event) {
             UiAction.OnRetry -> load()
             UiAction.OnAllReviewsClick -> emitSideEffect(SideEffect.OpenReviews(salonId, memberId))
-            UiAction.OnAddReviewClick ->
-                if (uiState.value.signedIn) emitSideEffect(SideEffect.OpenAddReview(salonId, memberId)) else updateState { copy(authDialog = true) }
+            UiAction.OnAddReviewClick -> addReview()
             UiAction.OnDialogConfirm -> {
                 updateState { copy(authDialog = false) }
                 emitSideEffect(SideEffect.OpenLogin)
             }
             UiAction.OnDialogDismiss -> updateState { copy(authDialog = false) }
         }
+    }
+
+    private fun addReview() {
+        if (uiState.value.signedIn) emitSideEffect(SideEffect.OpenAddReview(salonId, memberId)) else updateState { copy(authDialog = true) }
     }
 
     private fun load() {
