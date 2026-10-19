@@ -43,6 +43,8 @@ export const ERROR_CODE_KIND = {
   SCHEDULE_CONFLICT: 'conflict',
   OWNER_REQUIRED: 'conflict',
   LAST_OWNER: 'conflict',
+  CURRENT_PASSWORD_INVALID: 'validation',
+  EMAIL_ALREADY_USED: 'conflict',
   UPLOAD_INVALID: 'validation',
   UPLOAD_TOO_LARGE: 'validation',
   MAINTENANCE: 'server',

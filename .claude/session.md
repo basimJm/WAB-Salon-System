@@ -66,3 +66,13 @@
 - Tests: `python3 .claude/hooks/test_hooks.py` (25 green after the merge)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written; hooks diff comes from main as merged.
+
+### T-129 — Sync main into admin (owner order 2026-10-19)
+- Project: repo root
+- Branch: `chore/sync-main-into-admin`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `main` merged into the `admin` master so `admin` → `main` can merge; the only conflict (`INTEGRATION.md`, the generated board) resolved by taking main's block and regenerating with `tasks.py board`
+- Tests: `python3 .claude/hooks/test_hooks.py` (25 OK)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written. NOTE: `tasks.py check` reports `CUS-047: BLOCKED but every dependency is DONE` from the customer backlog on main; not touched here (customer project's status).

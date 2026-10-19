@@ -17,6 +17,7 @@ export const ROUTES = {
   settings: '/settings',
   auditLog: '/audit-log',
   about: '/about',
+  profile: '/profile',
   forbidden: '/forbidden',
   serverError: '/error',
 } as const;

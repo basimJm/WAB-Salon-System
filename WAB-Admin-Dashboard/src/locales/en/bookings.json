@@ -44,6 +44,29 @@
       "DEPOSIT_PAID": "Deposit paid",
       "FULLY_PAID": "Fully paid",
       "PAID": "Paid"
+    },
+    "reassign": "Reassign staff",
+    "reassigned": "Staff changed",
+    "newStaff": "New staff member",
+    "noEligible": "No staff member is free for the whole time.",
+    "cancelBooking": "Cancel booking",
+    "cancelMode": "Cancel as",
+    "mode": {
+      "CUSTOMER": "The customer",
+      "SALON": "The salon",
+      "ADMIN": "The admin"
+    },
+    "modeHint": {
+      "CUSTOMER": "Follows the salon's cancellation window and refund policy.",
+      "SALON": "The customer gets a full refund.",
+      "ADMIN": "Cancelled by the platform; the refund is decided by the server rules."
+    },
+    "cancelled": "Booking cancelled",
+    "refundStarted": "Refund started",
+    "refundAmount": "Amount to refund",
+    "refundMax": "At most {{max}} (paid online, not yet refunded).",
+    "error": {
+      "refund": "Enter an amount above zero and not above what can be refunded."
     }
   }
 }

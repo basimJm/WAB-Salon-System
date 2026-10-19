@@ -1,0 +1,72 @@
+import type { TFunction } from 'i18next';
+import { hasOpenDeletionRequest } from '@/domain/salons/salonRules';
+import type { SalonSummary } from '@/domain/salons/salons';
+import { formatInstant, formatNumber } from '@/domain/shared/format';
+import type { Language } from '@/constants/i18n';
+import { Badge } from '../components/core/Badge';
+import { StatusBadge } from '../components/core/StatusBadge';
+import type { Column } from '../components/data/tableTypes';
+
+/** The columns of the salon list (Admin PRD A13). */
+export function salonColumns(
+  t: TFunction,
+  language: Language,
+  cityName: (id: string | null) => string,
+): Column<SalonSummary>[] {
+  return [
+    {
+      key: 'name',
+      header: t('salons.name'),
+      render: (r) => (
+        <>
+          {r.name}
+          {hasOpenDeletionRequest(r) ? (
+            <Badge tone="amber">{t('salons.deletionAsked')}</Badge>
+          ) : null}
+        </>
+      ),
+    },
+    { key: 'gender', header: t('salons.gender'), render: (r) => t(`catalog.genders.${r.gender}`) },
+    { key: 'city', header: t('salons.city'), render: (r) => cityName(r.cityId) },
+    {
+      key: 'state',
+      header: t('salons.state'),
+      render: (r) => <StatusBadge kind="salon" value={r.state} />,
+    },
+    {
+      key: 'rating',
+      header: t('salons.rating'),
+      ltr: true,
+      render: (r) =>
+        `${formatNumber(r.rating.avg, language)} (${formatNumber(r.rating.count, language)})`,
+    },
+    {
+      key: 'sub',
+      header: t('salons.subscription'),
+      render: (r) =>
+        r.subscriptionStatus ? (
+          <StatusBadge kind="subscription" value={r.subscriptionStatus} />
+        ) : (
+          '—'
+        ),
+    },
+    {
+      key: 'recommended',
+      header: t('salons.recommended'),
+      render: (r) =>
+        r.recommended ? <Badge tone="green">{t('salons.recommendedYes')}</Badge> : '—',
+    },
+    {
+      key: 'bookings30d',
+      header: t('salons.bookings30d'),
+      ltr: true,
+      render: (r) => formatNumber(r.bookings30d, language),
+    },
+    {
+      key: 'created',
+      header: t('salons.created'),
+      ltr: true,
+      render: (r) => formatInstant(r.createdAt, language, 'date'),
+    },
+  ];
+}

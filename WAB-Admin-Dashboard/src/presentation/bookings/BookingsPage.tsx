@@ -15,12 +15,14 @@ import { StatusBadge } from '../components/core/StatusBadge';
 import type { Column } from '../components/data/tableTypes';
 import { DateField } from '../components/form/DateField';
 import { SearchField } from '../components/form/SearchField';
+import { ExportMenu } from '../components/data/ExportMenu';
 import { SegmentedControl } from '../components/form/SegmentedControl';
 import { Select } from '../components/form/Select';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
+import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
-import { BOOKING_FILTER_KEYS, bookingQueryOf } from './bookingFilters';
+import { BOOKING_FILTER_KEYS, bookingExportParams, bookingQueryOf } from './bookingFilters';
 
 const OPTIONS = { filterKeys: BOOKING_FILTER_KEYS };
 const ALL_TABS = 'ALL';
@@ -32,6 +34,7 @@ export default function BookingsPage() {
   const navigate = useNavigate();
   const { repositories } = useContainer();
   const list = useListController(OPTIONS);
+  const runner = useExportRunner();
   const { state } = list;
   const f = (key: string) => state.filters[key]?.[0] ?? '';
   const query = useQuery({
@@ -104,15 +107,18 @@ export default function BookingsPage() {
       title={title}
       subtitle={t('bookings.subtitle')}
       actions={
-        <SegmentedControl
-          ariaLabel={t('bookings.tabs')}
-          value={tab}
-          options={[
-            { value: ALL_TABS, label: t('appConfig.all') },
-            ...BOOKING_TABS.map((x) => ({ value: x, label: t(`bookings.tab.${x}`) })),
-          ]}
-          onChange={(v) => list.setFilter('tab', v === ALL_TABS ? [] : [v])}
-        />
+        <>
+          <ExportMenu onExport={runner('BOOKINGS', bookingExportParams(bookingQueryOf(state)))} />
+          <SegmentedControl
+            ariaLabel={t('bookings.tabs')}
+            value={tab}
+            options={[
+              { value: ALL_TABS, label: t('appConfig.all') },
+              ...BOOKING_TABS.map((x) => ({ value: x, label: t(`bookings.tab.${x}`) })),
+            ]}
+            onChange={(v) => list.setFilter('tab', v === ALL_TABS ? [] : [v])}
+          />
+        </>
       }
       filters={{
         active: chips,

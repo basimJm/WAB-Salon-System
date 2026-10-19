@@ -11,6 +11,10 @@ interface Seed {
   bride: boolean;
   total: string;
 }
+const DAY_MS = 86_400_000;
+/** Appointments are n days from now, so "not started yet" rules stay true whenever the tests run. */
+const inDays = (n: number, hour: number) =>
+  new Date(Math.floor(Date.now() / DAY_MS) * DAY_MS + n * DAY_MS + hour * 3_600_000).toISOString();
 const make = ({ n, status, payment, bride, total }: Seed) => ({
   id: `64h${String(n).padStart(21, '0')}`,
   referenceNumber: `WAB-00000${String(n)}`,
@@ -18,9 +22,9 @@ const make = ({ n, status, payment, bride, total }: Seed) => ({
   paymentMethod: payment === 'PAY_ON_ARRIVAL' ? 'PAY_ON_ARRIVAL' : 'DEPOSIT',
   paymentStatus: payment,
   hasBride: bride,
-  appointmentStart: `2026-10-2${String(n)}T09:00:00.000Z`,
-  appointmentEnd: `2026-10-2${String(n)}T10:00:00.000Z`,
-  respondBy: `2026-10-2${String(n)}T08:00:00.000Z`,
+  appointmentStart: inDays(n, 9),
+  appointmentEnd: inDays(n, 10),
+  respondBy: inDays(n, 8),
   personsCount: n,
   total,
   salon: { id: '64f000000000000000000001', name: 'Noor Salon' },
@@ -84,8 +88,8 @@ export function bookingsRoutes(): readonly MockRoute[] {
             ],
             money: {
               total: r.total,
-              dueOnline: '0.000',
-              paidOnline: '0.000',
+              dueOnline: r.paymentStatus === 'DEPOSIT_PAID' ? '20.000' : '0.000',
+              paidOnline: r.paymentStatus === 'DEPOSIT_PAID' ? '20.000' : '0.000',
               remaining: r.total,
               refunded: '0.000',
             },
@@ -118,6 +122,74 @@ export function bookingsRoutes(): readonly MockRoute[] {
         const irregular = r.status === 'COMPLETED' || r.status.startsWith('CANCELLED');
         r.status = status;
         return { data: { id: r.id, referenceNumber: r.referenceNumber, status, irregular } };
+      },
+    ),
+    mockRoute(
+      defineEndpoint(O.getBookingsByIdEligibleStaff, {
+        data: dto.getBookingsByIdEligibleStaffDataSchema,
+        query: dto.getBookingsByIdEligibleStaffQuerySchema,
+      }),
+      () => ({
+        data: [
+          { staffId: '64f0000000000000000000a2', name: 'Sara Ali' },
+          { staffId: '64f0000000000000000000a3', name: 'Lina Omar' },
+        ],
+      }),
+    ),
+    mockRoute(
+      defineEndpoint(O.postBookingsByIdReassign, {
+        data: dto.postBookingsByIdReassignDataSchema,
+        body: dto.postBookingsByIdReassignBodySchema,
+      }),
+      ({ params }) => {
+        const r = find(params['id']);
+        if (!r) throw new Error('no booking');
+        return {
+          data: {
+            id: r.id,
+            referenceNumber: r.referenceNumber,
+            status: r.status,
+            appointmentStart: r.appointmentStart,
+            appointmentEnd: r.appointmentEnd,
+            money: { total: r.total, dueOnline: '0.000', paidOnline: '0.000', remaining: r.total },
+          },
+        };
+      },
+    ),
+    mockRoute(
+      defineEndpoint(O.postBookingsByIdCancel, {
+        data: dto.postBookingsByIdCancelDataSchema,
+        body: dto.postBookingsByIdCancelBodySchema,
+      }),
+      ({ params, body }) => {
+        const r = find(params['id']);
+        if (!r) throw new Error('no booking');
+        const mode = (body as { mode: string }).mode;
+        r.status = mode === 'CUSTOMER' ? 'CANCELLED_BY_CUSTOMER' : 'CANCELLED_BY_SALON';
+        return {
+          data: {
+            id: r.id,
+            referenceNumber: r.referenceNumber,
+            status: r.status,
+            appointmentStart: r.appointmentStart,
+            appointmentEnd: r.appointmentEnd,
+            money: { total: r.total, dueOnline: '0.000', paidOnline: '0.000', remaining: r.total },
+            irregular: false,
+          },
+        };
+      },
+    ),
+    mockRoute(
+      defineEndpoint(O.postBookingsByIdRefund, {
+        data: dto.postBookingsByIdRefundDataSchema,
+        body: dto.postBookingsByIdRefundBodySchema,
+      }),
+      ({ params, body }) => {
+        const r = find(params['id']);
+        if (!r) throw new Error('no booking');
+        return {
+          data: { id: r.id, amount: (body as { amount: string }).amount, status: 'PENDING' },
+        };
       },
     ),
   ];

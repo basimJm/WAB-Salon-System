@@ -29,7 +29,8 @@
     "api:sync": "node scripts/api-sync.ts",
     "api:check": "node scripts/api-sync.ts --check",
     "docs:api": "node scripts/docs-api.ts",
-    "docs:api:check": "node scripts/docs-api.ts --check"
+    "docs:api:check": "node scripts/docs-api.ts --check",
+    "hosting:write": "node scripts/write-hosting.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans-arabic": "^5.3.0",

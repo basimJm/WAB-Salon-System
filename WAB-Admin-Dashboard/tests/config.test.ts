@@ -11,7 +11,7 @@ const remoteEnv = { [ENV_KEYS.apiBaseUrl]: API, [ENV_KEYS.socketUrl]: SOCKET };
 describe('build variants', () => {
   it.each([
     ['dev-debug', 'dev', true, true],
-    ['dev-release', 'dev', false, true],
+    ['dev-release', 'dev', false, false],
     ['prod-debug', 'prod', true, false],
     ['prod-release', 'prod', false, false],
   ])('%s -> env %s, debug %s, mock allowed %s', (name, env, debug, mock) => {
@@ -32,9 +32,20 @@ describe('build variants', () => {
 });
 
 describe('public env', () => {
-  it('dev defaults to the mock source and Arabic without any env', () => {
+  it('dev debug defaults to the mock source and Arabic without any env', () => {
     const env = parsePublicEnv({}, resolveVariant('dev-debug'));
     expect(env).toMatchObject({ dataSource: 'mock', defaultLanguage: 'ar', apiBaseUrl: '' });
+  });
+
+  it('dev release defaults to the real API and therefore needs both URLs; it cannot use the mock', () => {
+    expect(() => parsePublicEnv({}, resolveVariant('dev-release'))).toThrow(ConfigError);
+    expect(parsePublicEnv(remoteEnv, resolveVariant('dev-release')).dataSource).toBe('remote');
+    expect(() =>
+      parsePublicEnv(
+        { ...remoteEnv, [ENV_KEYS.dataSource]: 'mock' },
+        resolveVariant('dev-release'),
+      ),
+    ).toThrow(ConfigError);
   });
 
   it('prod defaults to remote and therefore needs both URLs', () => {
@@ -90,6 +101,6 @@ describe('public env', () => {
     const debug = buildAppConfig({}, 'dev-debug');
     expect(Object.isFrozen(debug)).toBe(true);
     expect(debug.logLevel).toBe('debug');
-    expect(buildAppConfig({}, 'dev-release').logLevel).toBe('warn');
+    expect(buildAppConfig(remoteEnv, 'dev-release').logLevel).toBe('warn');
   });
 });

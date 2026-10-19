@@ -4,7 +4,8 @@ import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
 
-type Kind = 'REPORT_DAILY' | 'REPORT_WEEKLY' | 'REPORT_MONTHLY' | 'TRANSACTIONS' | 'AUDIT_LOGS';
+type Kind =
+  'REPORT_DAILY' | 'REPORT_WEEKLY' | 'REPORT_MONTHLY' | 'TRANSACTIONS' | 'AUDIT_LOGS' | 'BOOKINGS';
 type Format = 'XLSX' | 'CSV' | 'PDF';
 type Status = 'QUEUED' | 'RUNNING' | 'DONE' | 'FAILED';
 const job = (n: number, kind: Kind, format: Format, status: Status) => ({

@@ -33,6 +33,52 @@
       "unblock": "The customer can use the app again.",
       "delete": "The account is deleted after the grace period unless restored. Write the reason.",
       "restore": "The account returns to normal and the deletion is cancelled."
-    }
+    },
+    "edit": "Edit profile",
+    "saved": "Profile saved",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "nothingChanged": "Nothing was changed.",
+    "error": {
+      "firstName": "Enter a first name of up to 50 characters.",
+      "lastName": "Enter a last name of up to 50 characters.",
+      "email": "Enter a valid email address."
+    },
+    "languageName": {
+      "ar": "Arabic",
+      "en": "English"
+    },
+    "sendPush": "Send push",
+    "pushSent": "Push sent",
+    "titleAr": "Title (Arabic)",
+    "titleEn": "Title (English)",
+    "bodyAr": "Message (Arabic)",
+    "bodyEn": "Message (English)",
+    "link": "Link (optional)",
+    "linkHint": "A path inside the app like /bookings/123, or an https address.",
+    "pushError": {
+      "titleAr": "Write an Arabic title (up to 200 characters).",
+      "titleEn": "Write an English title (up to 200 characters).",
+      "bodyAr": "Write an Arabic message (up to 1000 characters).",
+      "bodyEn": "Write an English message (up to 1000 characters).",
+      "link": "Use a path starting with / or an https address."
+    },
+    "forceDelete": "Delete now",
+    "forceDeleted": "Account deleted",
+    "forceDeleteTitle": "Delete {{name}} now?",
+    "forceDeleteText": "The account is deleted at once, without the 30-day wait. This cannot be undone.",
+    "reviews": "Reviews written",
+    "noReviews": "This customer has not written any review.",
+    "notifications": "Notifications",
+    "noNotifications": "No notifications were sent to this customer.",
+    "notificationTitle": "Title",
+    "notificationType": "Type",
+    "types": {
+      "BOOKING": "Booking",
+      "PROMOTION": "Promotion",
+      "SYSTEM": "System"
+    },
+    "read": "Read",
+    "pushDelivered": "Push sent"
   }
 }
