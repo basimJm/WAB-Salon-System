@@ -63,7 +63,7 @@ class BookingFlowViewModel(
         load()
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnRetry -> load()
             is UiAction.OnNameChange -> updatePerson { copy(name = event.value.take(BookingFlowDefaults.MAX_NAME_LENGTH)) }

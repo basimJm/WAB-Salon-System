@@ -34,7 +34,7 @@ class FaqViewModel(
         load()
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnRetry -> load()
             is UiAction.OnToggle -> {

@@ -76,7 +76,7 @@ class HomeViewModel(
         }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnGenderSelect -> selectGender(event.gender)
             UiAction.OnRefresh -> load(refresh = true)

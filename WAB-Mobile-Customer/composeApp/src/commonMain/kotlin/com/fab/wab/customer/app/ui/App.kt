@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.fab.wab.customer.app.controller.contract.MainContract
 import com.fab.wab.customer.app.controller.contract.MainContract.UiAction
 import com.fab.wab.customer.app.controller.vm.MainViewModel
+import com.fab.wab.customer.app.analytics.ActionAnalytics
 import com.fab.wab.customer.app.analytics.TrackNavigationScreens
 import com.fab.wab.customer.app.deeplink.DeepLinkEffect
 import com.fab.wab.customer.app.deeplink.DeepLinkStore
@@ -169,7 +170,7 @@ fun App(androidContext: Any?) {
             LocalImageLoader provides imageLoader,
             LocalAppLocale provides languageState.code,
             LocalDarkTheme provides isDarkTheme,
-            LocalAnalyticsTracker provides koinInject<AnalyticsTracker>(),
+            LocalAnalyticsTracker provides koinInject<AnalyticsTracker>().also(ActionAnalytics::install),
         ) {
             when (val gate = state.gate) {
                 null -> AppTheme { SplashScreen(state, mainViewModel::onEvent) }

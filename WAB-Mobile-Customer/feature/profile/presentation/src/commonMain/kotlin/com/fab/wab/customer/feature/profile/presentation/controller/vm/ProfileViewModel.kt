@@ -40,7 +40,7 @@ class ProfileViewModel(
         scope.launch { deps.config.current.collect { updateState { copy(contact = it?.contact) } } }
     }
 
-    override fun onEvent(event: UiAction) {
+    override fun handle(event: UiAction) {
         when (event) {
             UiAction.OnResume -> if (uiState.value.signedIn) account.load()
             UiAction.OnRetryAccount -> account.load()

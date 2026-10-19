@@ -9,7 +9,7 @@
 
 ## Current task
 
-- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 (CUS-042…046) shipped (PR #287). Batch 4 (CUS-048/049/050/053/057) shipped (PR #293). Batch 5 = CUS-051, 052, 054, 055, 056 → unit-test run → PR.
+- Batch 1 (CUS-032…036) shipped (PR #277). Batch 2 (CUS-037…041) shipped as one PR from `feat/cus-041-bookings-tab`. Owner rule (revised 2026-10-19): every five tasks unit tests only + one PR; detekt, full gate, emulator + simulator journey once after the whole backlog. Batch 3 (CUS-042…046) shipped (PR #287). Batch 4 (CUS-048/049/050/053/057) shipped (PR #293). Batch 5 (CUS-051/052/054/055/056) shipped (PR #296). Batch 6 = CUS-058 + the remaining ready tasks → unit-test run → PR.
 
 ### CUS-048 — Booking success S17: reference number (copyable), View booking → S15, Back to Home
 - Branch: `feat/cus-048-booking-success`
@@ -148,3 +148,16 @@
 - Loops: 1/1 — batch-5 host-test run (121 tests across core/common, core/realtime, auth, home, bookings, notifications, profile, content, composeApp + `:androidApp:compileDevDebugKotlin`, exit 0; one Gradle daemon crash re-run) found: a stale `content` field reference in the Home push refresh (now `hasContent`), the rich-text parser left adjacent same-style runs split by dropped tags (now merged) and the heading test used an unsupported `h9`, plus two lines over 140 chars.
 - Review: PASSED (SE ✔, Mobile ✔ (UI check deferred to the end-of-backlog journey per rules §3.13), Architect ✔, QA ✔) — push and realtime stay behind core ports (`PushSignals`, `RealtimeClient`, `refreshesFor` de-dup by id + state); platform services only publish into the shared bridge; S22 reuses the auth OTP flow with `PendingOtpVerification` and the CHANGE_PHONE purpose; S23 content is server-driven with a client-side HTML-subset guard; merchant hand-off is config-only on both platforms; AR/EN parity; no literals in composables; policy suite ok. NON-BLOCKING: `check-phone` has no CHANGE_PHONE purpose (server answers at change time); Android notification icon is the launcher mipmap; merchant scheme / store ids are placeholders.
 - Notes: the merchant app's URL scheme (`wabmerchant`) and store ids are placeholders for the owner (MER backlog decides the scheme). iOS `LSApplicationQueriesSchemes` uses a build-setting value, which Xcode substitutes at build time.
+
+### CUS-058 — Analytics events: every screen view and every action of PRD §14 with the common fields, verified by a test
+- Branch: `feat/cus-058-analytics-events` (from `origin/customer`, batch 6 start)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 6)
+- Acceptance criteria (PRD §14; CUS-012 common fields already attached by `DefaultAnalyticsTracker`):
+  - [x] core/mvi `UiActionObserver` tap: `BaseViewModel.onEvent` is now final (notifies the observer, then `handle(event)`); the 25 view models' reducers were renamed `onEvent` → `handle` (call sites and tests unchanged)
+  - [x] App shell `AnalyticsCatalog`: `screenNameOf(Screen)` exhaustive over all 22 routes (consistent with the route-derived names of `TrackNavigationScreens`), `actionEventOf(action)` exhaustive per feature contract → `Named` (shell logs it with the owning view model), `ByViewModel` (richer event already logged with ids) or `Silent` (keystrokes, dismissals, lifecycle, paging); `ActionAnalytics.install(tracker)` wired in `App.kt`
+  - [x] Shell event names cover the PRD suggested list not already logged by view models (salon/staff/service/gallery open, call/whatsapp from S15, booking steps date/slot/staff/companions/submit, filter chip remove, login open, legal open, location permission result, …)
+  - [x] Tests: `AnalyticsCatalogTest` (4): every route → snake_case unique name equal to the route-derived one; every contract's actions classified; `eventFor` carries the owner and never duplicates view-model events; PRD §14 suggested events map to a constant; the tap fires before the reducer
+- Tests: run with the batch-6 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: payment events (`payment_start/success/failure`) and `push_open` arrive with CUS-047 (payments) and the push tap is logged when CUS-063 runs on devices (the shell routes taps today; the event constant lands with the gateway work). A new route or `UiAction` fails compilation until classified (compile-time guarantee, the unit test checks naming).
