@@ -123,7 +123,11 @@ class NotificationsViewModel(
         if (items.isEmpty()) return
         updateState { copy(items = this.items.map { if (it.id in ids) it.copy(isRead = true) else it }) }
         scope.launch {
-            if (deps.markRead(items) is AppResult.Error) items.forEach { reported.remove(it.id) }
+            if (deps.markRead(items) is AppResult.Error) {
+                val failed = items.map { it.id }.toSet()
+                reported.removeAll(failed)
+                updateState { copy(items = this.items.map { if (it.id in failed) it.copy(isRead = false) else it }) }
+            }
         }
     }
 

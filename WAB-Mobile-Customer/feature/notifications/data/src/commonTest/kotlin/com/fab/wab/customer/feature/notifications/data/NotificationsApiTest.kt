@@ -10,6 +10,8 @@ import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.toByteArray
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.http.contentType
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
@@ -34,7 +36,10 @@ class NotificationsApiTest {
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
             )
         },
-    ) { install(ContentNegotiation) { json() } }
+    ) {
+        install(ContentNegotiation) { json() }
+        defaultRequest { contentType(ContentType.Application.Json) }
+    }
 
     @Test
     fun listSendsOnlyActiveFilters() = runTest {

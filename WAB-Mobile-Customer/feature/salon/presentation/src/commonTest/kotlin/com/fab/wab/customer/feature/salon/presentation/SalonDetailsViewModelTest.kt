@@ -112,7 +112,7 @@ class SalonDetailsViewModelTest {
         vm.onEvent(UiAction.OnCallClick)
         vm.onEvent(UiAction.OnWhatsAppClick)
         vm.onEvent(UiAction.OnShareClick)
-        val share = "share:" + shareText("Glow", "$WEB/salons/s1")
+        val share = "share:" + shareText("Glow", "$WEB/salon/s1")
         assertEquals(listOf("maps:31.9,35.9:Glow", "tel:+962791234567", "https://wa.me/962791234567", share), external.calls)
     }
 

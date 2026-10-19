@@ -126,9 +126,13 @@ private fun NotificationPopup(item: Notification, onAction: (UiAction) -> Unit) 
 @Composable
 private fun chipLabel(chip: NotificationChip, filters: NotificationFilters): String = when (chip) {
     NotificationChip.TEXT -> stringResource(Res.string.notifications_chip_text, filters.query)
-    NotificationChip.DATES -> when {
-        filters.from != null && filters.to != null -> stringResource(Res.string.notifications_chip_dates, filters.from, filters.to)
-        filters.from != null -> stringResource(Res.string.notifications_chip_from, filters.from)
-        else -> stringResource(Res.string.notifications_chip_to, filters.to.orEmpty())
+    NotificationChip.DATES -> {
+        val from = filters.from
+        val to = filters.to
+        when {
+            from != null && to != null -> stringResource(Res.string.notifications_chip_dates, from, to)
+            from != null -> stringResource(Res.string.notifications_chip_from, from)
+            else -> stringResource(Res.string.notifications_chip_to, to.orEmpty())
+        }
     }
 }
