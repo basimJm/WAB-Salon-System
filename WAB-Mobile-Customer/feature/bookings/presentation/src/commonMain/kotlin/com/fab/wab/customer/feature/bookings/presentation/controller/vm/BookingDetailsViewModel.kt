@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // kotlinx.datetime.Instant is a deprecated typealias on the K/N classpath until the datetime upgrade
+
 package com.fab.wab.customer.feature.bookings.presentation.controller.vm
 
 import com.fab.wab.customer.core.analytics.AnalyticsAction
