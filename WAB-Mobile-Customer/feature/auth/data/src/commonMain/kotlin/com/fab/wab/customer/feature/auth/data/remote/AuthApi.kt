@@ -2,6 +2,8 @@ package com.fab.wab.customer.feature.auth.data.remote
 
 import com.fab.wab.customer.core.data.BaseResponse
 import com.fab.wab.customer.core.data.contract.generated.CustomerOperations
+import com.fab.wab.customer.core.data.contract.generated.PostAuthChangePhoneBody
+import com.fab.wab.customer.core.data.contract.generated.PostAuthChangePhoneData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthCheckPhoneBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginData
@@ -34,6 +36,9 @@ class AuthApi(private val client: HttpClient) {
 
     suspend fun register(body: PostAuthRegisterBody): BaseResponse<PostAuthRegisterData> =
         client.post(CustomerOperations.postAuthRegister.path) { setBody(body) }.body()
+
+    suspend fun changePhone(body: PostAuthChangePhoneBody): BaseResponse<PostAuthChangePhoneData> =
+        client.post(CustomerOperations.postAuthChangePhone.path) { setBody(body) }.body()
 
     suspend fun logout(body: PostAuthLogoutBody): BaseResponse<JsonElement?> =
         client.post(CustomerOperations.postAuthLogout.path) { setBody(body) }.body()

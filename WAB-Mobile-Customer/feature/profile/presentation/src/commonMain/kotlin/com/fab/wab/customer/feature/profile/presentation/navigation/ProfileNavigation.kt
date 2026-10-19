@@ -16,7 +16,12 @@ import com.fab.wab.customer.core.navigation.route.Graph
 import com.fab.wab.customer.core.navigation.route.Screen
 import com.fab.wab.customer.core.notification.composable.rememberNotificationManager
 import com.fab.wab.customer.core.notification.model.NotificationStyle
+import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.customer.feature.profile.domain.model.ProfileDefaults
+import com.fab.wab.customer.feature.profile.presentation.controller.contract.EditProfileContract
+import com.fab.wab.customer.feature.profile.presentation.controller.vm.EditProfileViewModel
+import com.fab.wab.customer.feature.profile.presentation.resources.edit_saved
+import com.fab.wab.customer.feature.profile.presentation.screen.EditProfileScreen
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ProfileContract.SideEffect
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ProfileContract.UiAction
 import com.fab.wab.customer.feature.profile.presentation.controller.vm.ProfileViewModel
@@ -34,6 +39,28 @@ class ProfileNavigation(override val navController: NavHostController) : Navigat
         navGraphBuilder.navigation<Graph.Profile>(startDestination = Screen.Profile) {
             composable<Screen.Profile> { ProfileDestination() }
         }
+        navGraphBuilder.composable<Screen.PersonalInfo> { EditProfileDestination() }
+    }
+
+    /** S22: the OTP screen (CHANGE_PHONE) pops back here with the proof; Saved pops to S21 with a toast. */
+    @Composable
+    private fun EditProfileDestination() {
+        val viewModel: EditProfileViewModel = koinViewModel()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val notifications = rememberNotificationManager()
+        val saved = stringResource(Res.string.edit_saved)
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                is EditProfileContract.SideEffect.NavigateToOtp ->
+                    navigateTo(Screen.Otp(AuthPurpose.CHANGE_PHONE.code, effect.phone.countryCode, effect.phone.number))
+                EditProfileContract.SideEffect.Saved -> {
+                    notifications.show(saved, style = NotificationStyle.Success)
+                    navigateBack()
+                }
+                is EditProfileContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+            }
+        }
+        EditProfileScreen(state = state, onAction = viewModel::onEvent, onBack = ::navigateBack)
     }
 
     @Composable

@@ -6,6 +6,8 @@ import com.fab.wab.customer.core.domain.ErrorCode
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionStore
+import com.fab.wab.customer.core.domain.session.UserProfile
+import com.fab.wab.customer.feature.profile.domain.model.ProfileUpdate
 import com.fab.wab.customer.feature.profile.domain.model.CustomerAccount
 import com.fab.wab.customer.feature.profile.domain.model.ProfileDefaults
 import com.fab.wab.customer.feature.profile.domain.model.UploadPurpose
@@ -60,4 +62,16 @@ class DeleteAccountUseCase(private val repository: ProfileRepository, private va
 class UpdateGuestProfileUseCase(private val sessionStore: SessionStore) {
     suspend operator fun invoke(nickname: String, gender: Gender) =
         sessionStore.setGuestProfile(GuestProfile(nickname.trim().take(ProfileDefaults.MAX_NICKNAME_LENGTH), gender))
+}
+
+/** PRD S22: saves the form and refreshes the locally stored first name / gender. */
+class UpdateProfileUseCase(private val repository: ProfileRepository, private val sessionStore: SessionStore) {
+    suspend operator fun invoke(update: ProfileUpdate): AppResult<CustomerAccount> {
+        val result = repository.update(update)
+        if (result is AppResult.Success) {
+            val account = result.data
+            sessionStore.updateUser(UserProfile(id = account.id, firstName = account.firstName, gender = account.gender))
+        }
+        return result
+    }
 }

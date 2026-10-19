@@ -2,6 +2,8 @@ package com.fab.wab.customer.feature.auth.data.repository
 
 import com.fab.wab.customer.core.data.contract.generated.PostAuthCheckPhoneBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthCheckPhoneBodyPhone
+import com.fab.wab.customer.core.data.contract.generated.PostAuthChangePhoneBody
+import com.fab.wab.customer.core.data.contract.generated.PostAuthChangePhoneBodyPhone
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBodyPhone
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLogoutBody
@@ -9,6 +11,7 @@ import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptBody
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
+import com.fab.wab.customer.core.domain.session.UserProfile
 import com.fab.wab.customer.core.domain.ErrorCode
 import com.fab.wab.customer.core.domain.mapSuccess
 import com.fab.wab.customer.core.network.safeApiCall
@@ -52,6 +55,11 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
     override suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession> {
         val body = request.toBody(installation ?: InstallationInfo.UNKNOWN_INSTALLATION)
         return safeApiCall { api.register(body) }.mapSuccess { it.data.toDomain() }
+    }
+
+    override suspend fun changePhone(phone: PhoneNumber, idToken: String): AppResult<UserProfile> {
+        val body = PostAuthChangePhoneBody(PostAuthChangePhoneBodyPhone(countryCode = phone.countryCode, number = phone.number), idToken)
+        return safeApiCall { api.changePhone(body) }.mapSuccess { it.data.customer.toUserProfile() }
     }
 
     override suspend fun logout(refreshToken: String): AppResult<Unit> =

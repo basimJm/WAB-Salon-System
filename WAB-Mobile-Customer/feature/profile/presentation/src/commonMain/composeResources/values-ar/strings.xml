@@ -43,4 +43,22 @@
     <string name="profile_logged_out">تم تسجيل خروجك.</string>
     <string name="profile_account_deleted">تم تعطيل حسابك. يمكنك استعادته بتسجيل الدخول خلال %1$d يوماً.</string>
     <string name="profile_default_avatar">صورة الملف الشخصي</string>
+    <string name="edit_profile_title">المعلومات الشخصية</string>
+    <string name="edit_first_name">الاسم الأول</string>
+    <string name="edit_last_name">اسم العائلة</string>
+    <string name="edit_email">البريد الإلكتروني</string>
+    <string name="edit_gender">الجنس</string>
+    <string name="edit_gender_man">رجل</string>
+    <string name="edit_gender_woman">امرأة</string>
+    <string name="edit_city">المدينة</string>
+    <string name="edit_area">المنطقة</string>
+    <string name="edit_choose">اختر</string>
+    <string name="edit_area_hint">اختر المدينة أولاً</string>
+    <string name="edit_required">هذا الحقل مطلوب</string>
+    <string name="edit_email_error">البريد الإلكتروني غير صحيح</string>
+    <string name="edit_phone_label">رقم الهاتف</string>
+    <string name="edit_phone_error">رقم الهاتف غير صحيح</string>
+    <string name="edit_phone_changed_note">سيتم إرسال رمز تحقق إلى الرقم الجديد.</string>
+    <string name="edit_save">حفظ</string>
+    <string name="edit_saved">تم حفظ معلوماتك.</string>
 </resources>

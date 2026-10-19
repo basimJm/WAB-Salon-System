@@ -14,7 +14,6 @@ import com.fab.wab.customer.app.resources.Res
 import com.fab.wab.customer.app.resources.placeholder_content_page
 import com.fab.wab.customer.app.resources.placeholder_verify
 import com.fab.wab.customer.app.resources.placeholder_faq
-import com.fab.wab.customer.app.resources.placeholder_personal_info
 import com.fab.wab.customer.core.navigation.route.Screen
 import com.fab.wab.customer.designsystem.components.feedback.AppEmptyState
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
@@ -22,9 +21,8 @@ import com.fab.wab.customer.designsystem.theme.AppTheme
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** S22 personal info (CUS-054) and the FAQ page (CUS-055) reached from S21. */
+/** The FAQ page (CUS-055) reached from S21. */
 fun NavGraphBuilder.registerPlaceholderProfileScreens() {
-    composable<Screen.PersonalInfo> { PlaceholderRootScreen(Res.string.placeholder_personal_info) }
     composable<Screen.Faq> { PlaceholderRootScreen(Res.string.placeholder_faq) }
 }
 

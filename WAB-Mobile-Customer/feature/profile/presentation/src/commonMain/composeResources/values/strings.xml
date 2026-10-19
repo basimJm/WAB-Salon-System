@@ -43,4 +43,22 @@
     <string name="profile_logged_out">You have been logged out.</string>
     <string name="profile_account_deleted">Your account was deactivated. You can restore it by logging in within %1$d days.</string>
     <string name="profile_default_avatar">Profile photo</string>
+    <string name="edit_profile_title">Personal information</string>
+    <string name="edit_first_name">First name</string>
+    <string name="edit_last_name">Last name</string>
+    <string name="edit_email">Email</string>
+    <string name="edit_gender">Gender</string>
+    <string name="edit_gender_man">Man</string>
+    <string name="edit_gender_woman">Woman</string>
+    <string name="edit_city">City</string>
+    <string name="edit_area">Area</string>
+    <string name="edit_choose">Select</string>
+    <string name="edit_area_hint">Select a city first</string>
+    <string name="edit_required">This field is required</string>
+    <string name="edit_email_error">Invalid email address</string>
+    <string name="edit_phone_label">Mobile number</string>
+    <string name="edit_phone_error">Invalid mobile number</string>
+    <string name="edit_phone_changed_note">A verification code will be sent to the new number.</string>
+    <string name="edit_save">Save</string>
+    <string name="edit_saved">Your information was saved.</string>
 </resources>

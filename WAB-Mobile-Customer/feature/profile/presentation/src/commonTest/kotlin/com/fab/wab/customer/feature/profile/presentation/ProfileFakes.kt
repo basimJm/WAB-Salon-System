@@ -33,22 +33,28 @@ import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
 import com.fab.wab.customer.feature.auth.domain.repository.InstallationsRepository
 import com.fab.wab.customer.feature.profile.domain.model.CustomerAccount
 import com.fab.wab.customer.feature.profile.domain.model.PresignedUpload
+import com.fab.wab.customer.feature.profile.domain.model.ProfileUpdate
 import com.fab.wab.customer.feature.profile.domain.repository.ProfileRepository
 import com.fab.wab.customer.feature.profile.domain.repository.UploadsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-val ACCOUNT = CustomerAccount("c1", "Sara", "Ali", "s@x.com", Gender.FEMALE, "+962790000000", null, true)
+val ACCOUNT = CustomerAccount("c1", "Sara", "Ali", "s@x.com", Gender.FEMALE, "+962790000000", "JO", "790000000", "city-1", "area-1", null, true)
 val GUEST = SessionState.Guest(GuestProfile("Sara", Gender.FEMALE))
 val USER = SessionState.SignedIn(UserProfile("c1", "Sara", Gender.FEMALE))
 val CONTACT = ContactInfo("+962790000001", "+962790000002", "help@wab.jo")
 
 class ProfileRepoFake : ProfileRepository {
     var me: AppResult<CustomerAccount> = AppResult.Success(ACCOUNT)
+    val updates = mutableListOf<ProfileUpdate>()
     var deleted = false
     override suspend fun me(): AppResult<CustomerAccount> = me
     override suspend fun setAvatar(key: String): AppResult<CustomerAccount> = AppResult.Success(ACCOUNT.copy(avatarUrl = "cdn/$key"))
+    override suspend fun update(update: ProfileUpdate): AppResult<CustomerAccount> {
+        updates += update
+        return AppResult.Success(ACCOUNT.copy(firstName = update.firstName, lastName = update.lastName, email = update.email, gender = update.gender))
+    }
     override suspend fun deleteAvatar(): AppResult<CustomerAccount> = AppResult.Success(ACCOUNT)
     override suspend fun deleteAccount(): AppResult<String> {
         deleted = true
@@ -144,6 +150,7 @@ class PermissionsFake(var status: PermissionStatus = PermissionStatus.GRANTED) :
 
 class AuthRepoFake : AuthRepository {
     var logouts = 0
+    val phoneChanges = mutableListOf<PhoneNumber>()
     override suspend fun checkPhone(phone: PhoneNumber, purpose: AuthPurpose): AppResult<PhoneCheck> = AppResult.Loading
     override suspend fun requestOtp(phoneE164: String, purpose: AuthPurpose): AppResult<OtpPolicy> = AppResult.Loading
     override suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult> = AppResult.Loading
@@ -152,6 +159,10 @@ class AuthRepoFake : AuthRepository {
     override suspend fun logout(refreshToken: String): AppResult<Unit> {
         logouts++
         return AppResult.Success(Unit)
+    }
+    override suspend fun changePhone(phone: PhoneNumber, idToken: String): AppResult<UserProfile> {
+        phoneChanges += phone
+        return AppResult.Success(UserProfile("c1", "Sara", Gender.FEMALE))
     }
 }
 

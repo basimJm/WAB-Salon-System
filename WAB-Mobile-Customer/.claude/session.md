@@ -173,3 +173,16 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: de-duplication is per consumer and keyed on the delivered state; the server emits a summary per change so a reconnect replay of the same state does not refresh twice.
+
+### CUS-054 — Edit personal information S22: `PATCH /profile`, phone change → OTP CHANGE_PHONE (`POST /auth/change-phone`), local first name / gender updated
+- Branch: `feat/cus-054-edit-profile` (from `feat/cus-052-realtime-wiring`)
+- Status: IN PROGRESS (code + tests written; unit tests at the end of batch 5)
+- Acceptance criteria (PRD S22 + S12 fields/validation; Design Script S22; operations `PATCH /profile`, `POST /auth/change-phone`):
+  - [x] auth: `AuthRepository.changePhone(phone, idToken)` (+ API, impl, `CustomerProfile.toUserProfile`), `ChangePhoneUseCase` updates the session user; profile: `CustomerAccount` gains phone country/number + city/area ids, `ProfileUpdate`, `ProfileRepository.update` (`PATCH /profile`), `UpdateProfileUseCase` refreshes `user_first_name` / `user_gender` locally
+  - [x] `EditProfileViewModel`: loads account + countries + cities + the account's areas, prefills all S12 fields (same validation: required, email regex, server phone regex), city change reloads areas; Save: phone unchanged → PATCH → Saved toast + back; phone changed → `Screen.Otp(CHANGE_PHONE, new number)` → proof from `PendingOtpVerification` (other purposes ignored) → change phone → PATCH
+  - [x] `EditProfileScreen` (form, "verification code will be sent to the new number" note, Save enabled when valid, country picker) registered for `Screen.PersonalInfo` in `ProfileNavigation` (placeholder removed); AR/EN; analytics
+  - [x] Unit tests: `EditProfileViewModelTest` (3); existing `AuthRepository` fakes extended
+- Tests: run with the batch-5 host-test run
+- Loops: 0/1
+- Review: PENDING
+- Notes: `POST /auth/check-phone` accepts LOGIN/REGISTER only, so the new number is not pre-checked; the server answers `PHONE_ALREADY_REGISTERED` at change time and the error text is shown. The form composable is a copy of the S12 one (separate feature module); a shared design-system form is a possible later extraction.
