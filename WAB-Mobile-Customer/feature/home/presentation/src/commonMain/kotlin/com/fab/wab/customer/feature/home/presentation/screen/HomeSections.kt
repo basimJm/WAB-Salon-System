@@ -52,18 +52,24 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun ServicesSection(section: HomeSection<HomeService>, onAction: (UiAction) -> Unit) {
     if (section.items.isEmpty()) return
-    SectionTitle(
-        title = stringResource(Res.string.home_services),
-        topMargin = DiscoveryDesign.SECTION_TOP_FIRST,
-        actionText = if (section.hasMore) stringResource(Res.string.home_see_more) else null,
-        onAction = { onAction(UiAction.OnServicesSeeMore) },
-    )
-    LazyRow(
-        contentPadding = PaddingValues(start = AppTheme.spacing.space20, end = AppTheme.spacing.space20, bottom = AppTheme.spacing.space4),
-        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12),
-    ) {
-        items(section.items, key = { it.id }, contentType = { SERVICE_TYPE }) { service ->
-            ServiceTile(service, onClick = { onAction(UiAction.OnServiceClick(service.id)) })
+    Column(Modifier.fillMaxWidth()) {
+        SectionTitle(
+            title = stringResource(Res.string.home_services),
+            topMargin = DiscoveryDesign.SECTION_TOP_FIRST,
+            actionText = if (section.hasMore) stringResource(Res.string.home_see_more) else null,
+            onAction = { onAction(UiAction.OnServicesSeeMore) },
+        )
+        LazyRow(
+            contentPadding = PaddingValues(
+                start = AppTheme.spacing.space20,
+                end = AppTheme.spacing.space20,
+                bottom = AppTheme.spacing.space4,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12),
+        ) {
+            items(section.items, key = { it.id }, contentType = { SERVICE_TYPE }) { service ->
+                ServiceTile(service, onClick = { onAction(UiAction.OnServiceClick(service.id)) })
+            }
         }
     }
 }
@@ -97,13 +103,15 @@ private fun ServiceTile(service: HomeService, onClick: () -> Unit) {
 @Composable
 internal fun RecommendedSection(section: HomeSection<SalonSummary>, onAction: (UiAction) -> Unit) {
     if (section.items.isEmpty()) return
-    SectionTitle(
-        title = stringResource(Res.string.home_recommended),
-        topMargin = DiscoveryDesign.SECTION_TOP,
-        actionText = if (section.hasMore) stringResource(Res.string.home_see_all) else null,
-        onAction = { onAction(UiAction.OnSeeAll(SalonSection.Recommended)) },
-    )
-    SalonRow(section.items, onAction, showDistance = false)
+    Column(Modifier.fillMaxWidth()) {
+        SectionTitle(
+            title = stringResource(Res.string.home_recommended),
+            topMargin = DiscoveryDesign.SECTION_TOP,
+            actionText = if (section.hasMore) stringResource(Res.string.home_see_all) else null,
+            onAction = { onAction(UiAction.OnSeeAll(SalonSection.Recommended)) },
+        )
+        SalonRow(section.items, onAction, showDistance = false)
+    }
 }
 
 /** PRD S03 item 7 / design `nearOn | nearOff | nearEmpty`; available to guests. */

@@ -51,26 +51,28 @@ import kotlin.math.roundToInt
 /** Design `fReady` services block: 15 sp bold title, wrapped 38 dp chips, shimmer chips while paging, "See more". */
 @Composable
 internal fun FilterServicesSection(state: UiState, onAction: (UiAction) -> Unit) {
-    SectionTitle(stringResource(Res.string.filter_services))
-    val selectedIds = state.selectedServices.map { it.id }.toSet()
-    val shown = state.selectedServices.filterNot { sel -> state.services.any { it.id == sel.id } } + state.services
-    ChipFlow {
-        shown.forEach { service ->
-            FilterChoiceChip(service.name, service.id in selectedIds, onClick = { onAction(UiAction.OnServiceToggle(service)) })
+    Column(Modifier.fillMaxWidth()) {
+        SectionTitle(stringResource(Res.string.filter_services))
+        val selectedIds = state.selectedServices.map { it.id }.toSet()
+        val shown = state.selectedServices.filterNot { sel -> state.services.any { it.id == sel.id } } + state.services
+        ChipFlow {
+            shown.forEach { service ->
+                FilterChoiceChip(service.name, service.id in selectedIds, onClick = { onAction(UiAction.OnServiceToggle(service)) })
+            }
+            if (state.servicesLoading && state.services.isNotEmpty()) {
+                repeat(SalonsDesign.CHIP_SHIMMER_COUNT_MORE) { ChipShimmer(SalonsDesign.CHIP_SHIMMER_WIDTH_MORE) }
+            }
         }
-        if (state.servicesLoading && state.services.isNotEmpty()) {
-            repeat(SalonsDesign.CHIP_SHIMMER_COUNT_MORE) { ChipShimmer(SalonsDesign.CHIP_SHIMMER_WIDTH_MORE) }
+        if (state.servicesHasMore && !state.servicesLoading) {
+            AppText(
+                text = stringResource(Res.string.filter_see_more),
+                style = discoveryBody(DiscoveryDesign.TEXT_13, FontWeight.SemiBold),
+                color = AppTheme.colors.accent,
+                modifier = Modifier
+                    .clickable(role = Role.Button, onClick = { onAction(UiAction.OnSeeMoreServices) })
+                    .padding(top = AppTheme.spacing.space10),
+            )
         }
-    }
-    if (state.servicesHasMore && !state.servicesLoading) {
-        AppText(
-            text = stringResource(Res.string.filter_see_more),
-            style = discoveryBody(DiscoveryDesign.TEXT_13, FontWeight.SemiBold),
-            color = AppTheme.colors.accent,
-            modifier = Modifier
-                .clickable(role = Role.Button, onClick = { onAction(UiAction.OnSeeMoreServices) })
-                .padding(top = AppTheme.spacing.space10),
-        )
     }
 }
 
@@ -78,60 +80,70 @@ internal fun FilterServicesSection(state: UiState, onAction: (UiAction) -> Unit)
 @Composable
 internal fun FilterPriceSection(state: UiState, onAction: (UiAction) -> Unit) {
     val bounds = state.priceBounds?.toFloatRange() ?: return
-    val selection = state.priceSelection ?: bounds
-    val colors = AppTheme.colors
-    SectionDivider()
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = AppTheme.spacing.space8),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AppText(text = stringResource(Res.string.filter_price), style = discoveryBody(SalonsDesign.TEXT_15, FontWeight.Bold))
-        AppText(
-            text = stringResource(
-                Res.string.salons_chip_price,
-                selection.start.roundToInt().toString(),
-                selection.endInclusive.roundToInt().toString(),
-            ),
-            style = discoveryBody(DiscoveryDesign.TEXT_13, FontWeight.Bold),
-            color = colors.accent,
-        )
-    }
-    FilterPriceSlider(selection = selection, bounds = bounds, onSelectionChange = { onAction(UiAction.OnPriceChange(it)) })
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        val style = discoveryBody(DiscoveryDesign.TEXT_11_5)
-        AppText(text = stringResource(DsRes.string.price_jod, bounds.start.roundToInt().toString()), style = style, color = colors.faint)
-        AppText(
-            text = stringResource(DsRes.string.price_jod, bounds.endInclusive.roundToInt().toString()),
-            style = style,
-            color = colors.faint,
-        )
+    Column(Modifier.fillMaxWidth()) {
+        val selection = state.priceSelection ?: bounds
+        val colors = AppTheme.colors
+        SectionDivider()
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = AppTheme.spacing.space8),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AppText(text = stringResource(Res.string.filter_price), style = discoveryBody(SalonsDesign.TEXT_15, FontWeight.Bold))
+            AppText(
+                text = stringResource(
+                    Res.string.salons_chip_price,
+                    selection.start.roundToInt().toString(),
+                    selection.endInclusive.roundToInt().toString(),
+                ),
+                style = discoveryBody(DiscoveryDesign.TEXT_13, FontWeight.Bold),
+                color = colors.accent,
+            )
+        }
+        FilterPriceSlider(selection = selection, bounds = bounds, onSelectionChange = { onAction(UiAction.OnPriceChange(it)) })
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            val style = discoveryBody(DiscoveryDesign.TEXT_11_5)
+            AppText(
+                text = stringResource(DsRes.string.price_jod, bounds.start.roundToInt().toString()),
+                style = style,
+                color = colors.faint,
+            )
+            AppText(
+                text = stringResource(DsRes.string.price_jod, bounds.endInclusive.roundToInt().toString()),
+                style = style,
+                color = colors.faint,
+            )
+        }
     }
 }
 
 @Composable
 internal fun FilterGeneralSection(state: UiState, onAction: (UiAction) -> Unit) {
-    SectionDivider()
-    SectionTitle(stringResource(Res.string.filter_general))
-    ChipFlow {
-        generalFilterOptions.forEach { option ->
-            val label = if (option == GeneralFilter.NEAREST) Res.string.salons_chip_nearest else Res.string.salons_chip_recommended
-            FilterChoiceChip(stringResource(label), state.general == option, onClick = { onAction(UiAction.OnGeneralSelect(option)) })
+    Column(Modifier.fillMaxWidth()) {
+        SectionDivider()
+        SectionTitle(stringResource(Res.string.filter_general))
+        ChipFlow {
+            generalFilterOptions.forEach { option ->
+                val label = if (option == GeneralFilter.NEAREST) Res.string.salons_chip_nearest else Res.string.salons_chip_recommended
+                FilterChoiceChip(stringResource(label), state.general == option, onClick = { onAction(UiAction.OnGeneralSelect(option)) })
+            }
         }
     }
 }
 
 @Composable
 internal fun FilterRatingSection(state: UiState, onAction: (UiAction) -> Unit) {
-    SectionDivider()
-    SectionTitle(stringResource(Res.string.filter_rating))
-    ChipFlow {
-        RatingOptions.all.forEach { rating ->
-            FilterChoiceChip(
-                stringResource(Res.string.salons_chip_rating, rating),
-                state.minRating == rating,
-                onClick = { onAction(UiAction.OnRatingSelect(rating)) },
-            )
+    Column(Modifier.fillMaxWidth()) {
+        SectionDivider()
+        SectionTitle(stringResource(Res.string.filter_rating))
+        ChipFlow {
+            RatingOptions.all.forEach { rating ->
+                FilterChoiceChip(
+                    stringResource(Res.string.salons_chip_rating, rating),
+                    state.minRating == rating,
+                    onClick = { onAction(UiAction.OnRatingSelect(rating)) },
+                )
+            }
         }
     }
 }
