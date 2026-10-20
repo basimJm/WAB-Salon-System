@@ -10,6 +10,17 @@
 
 ## Current task
 
+### T-130 — Commented env templates for hosted dev and prod (owner request 2026-10-20)
+
+- Branch: `chore/srv-env-templates`
+- Status: IN REVIEW
+- Acceptance criteria (CLAUDE.md §5; API docs: no change):
+  - [x] `docker/env.dev.example` and `docker/env.prod.example` (renamed from `env.production.example`) list every key the server needs on a hosted service, each with a comment saying what it is and where to get it; fixed values pre-filled (providers, Gmail SMTP host/port, `TRUST_PROXY_HOPS=1`, Firebase project per environment); `PORT` left out (the host sets it)
+  - [x] `env:check` tests run both templates: untouched fails and names keys only, filled passes, fakes and enabled payments refused
+- Tests: `tests/checkEnv.test.ts` (10); full gate green
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — templates + docs only. NOT verified: a real deploy on Render.
+
 ### T-128 — Run any environment on any Docker host (owner order 2026-10-19)
 
 - Branch: `chore/srv-deploy-compose`
@@ -28,7 +39,7 @@
 - Status: IN REVIEW
 - Acceptance criteria (CLAUDE.md §5 no hardcoding, NFR config; no BUSINESS_DOMAIN change; API docs: no change):
   - [x] `npm run env:check -- <file>` validates an env file with the server's own schema and production rules and prints key names only (never values); exit 0 pass, 1 invalid, 2 usage
-  - [x] `docker/env.development.example` passes as is; `docker/env.production.example` fails until every placeholder is filled, then passes; fake providers, enabled payments and bad values are refused in production
+  - [x] `docker/env.development.example` passes as is; `docker/env.prod.example` fails until every placeholder is filled, then passes; fake providers, enabled payments and bad values are refused in production
   - [x] `docs/DEPLOYMENT.md`: local build/run, the three environments (local, hosted dev, prod), where each value comes from, release checklist, what is still owner-side
 - Tests: `tests/checkEnv.test.ts` (6); full gate green (130 suites, 2578 tests, lint, typecheck, build, format, docs unchanged, audit 0, tasks.py check OK)
 - Loops: 1/1
