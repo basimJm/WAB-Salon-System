@@ -140,3 +140,20 @@ describe('Dockerfile.dockerignore', () => {
     expect(lines).not.toContain('!.env.example');
   });
 });
+
+describe('image build scripts', () => {
+  it('copies every folder that an npm lifecycle script runs from into the build stage', () => {
+    const scripts = (JSON.parse(read('package.json')) as { scripts: Record<string, string> })
+      .scripts;
+    const folders = new Set(
+      Object.values(scripts)
+        .map((command) => /node (\w+)\//.exec(command)?.[1])
+        .filter((folder): folder is string => folder !== undefined && folder !== 'dist'),
+    );
+    expect(folders.size).toBeGreaterThan(0);
+    for (const folder of folders) {
+      expect(read('Dockerfile')).toContain(`COPY WAB-Server/${folder} ./WAB-Server/${folder}`);
+      expect(read('Dockerfile.dockerignore')).toContain(`!WAB-Server/${folder}\n`);
+    }
+  });
+});

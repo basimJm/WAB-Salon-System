@@ -10,6 +10,19 @@
 
 ## Current task
 
+### T-131 — Fix the Render image build: copy `WAB-Server/scripts` into the build stage (owner report 2026-10-20)
+
+- Branch: `fix/srv-docker-scripts`
+- Status: IN REVIEW
+- Acceptance criteria (CLAUDE.md §5; API docs: no change):
+  - [x] The Render build log failed at `npm run build` (`prebuild` runs `node scripts/ensure-sdks.cjs`, the folder was never copied into the image): `Dockerfile` copies `WAB-Server/scripts` before the build and `Dockerfile.dockerignore` allows it
+  - [x] A test derives the folders that npm scripts run from and requires them in the Dockerfile and the dockerignore (fails without the fix, proven by removing the line)
+  - [x] The build stage and the runtime stage were replayed by hand in clean folders (SDK builds, server build, `npm ci --omit=dev`, `node dist/server.js` with production real-provider env reaches the MongoDB connect and nothing earlier)
+- Tests: `tests/docker.test.ts` (+1, 16 in file); full gate green
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — NOT verified: an actual `docker build` (no daemon here); the hand replay mirrors the Dockerfile steps but not Alpine/musl.
+- Notes: the first Render deploy exposed this; the image had never been built before.
+
 ### T-130 — Commented env templates for hosted dev and prod (owner request 2026-10-20)
 
 - Branch: `chore/srv-env-templates`
