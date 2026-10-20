@@ -193,18 +193,24 @@ private fun DayCell(day: CalendarDay?, selected: Boolean, isToday: Boolean, onAc
 /** Design legend: `gap:14px;font-size:11px;color:var(--muted)` with 10 dp squares (`radius 3px`). */
 @Composable
 private fun Legend(modifier: Modifier = Modifier) {
-    val colors = AppTheme.colors
-    val shape = roundedShape(BookingDesignConstants.legendRadius)
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(BookingDesignConstants.legendGap)) {
-        LegendItem(stringResource(Res.string.booking_legend_selected), Modifier.brandBackground(brandBrush(), shape))
-        LegendItem(stringResource(Res.string.booking_legend_closed), Modifier.background(colors.dangerContainer, shape))
+        LegendItem(stringResource(Res.string.booking_legend_selected), selected = true)
+        LegendItem(stringResource(Res.string.booking_legend_closed), selected = false)
     }
 }
 
 @Composable
-private fun LegendItem(label: String, square: Modifier) {
+private fun LegendItem(label: String, selected: Boolean) {
+    val shape = roundedShape(BookingDesignConstants.legendRadius)
+    val square = Modifier.size(BookingDesignConstants.legendSquare)
     Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4), verticalAlignment = Alignment.CenterVertically) {
-        Box(square.size(BookingDesignConstants.legendSquare))
+        Box(
+            if (selected) {
+                square.brandBackground(brandBrush(), shape)
+            } else {
+                square.background(AppTheme.colors.dangerContainer, shape)
+            },
+        )
         AppText(text = label, style = AppTheme.typography.labelSmall, color = AppTheme.colors.muted)
     }
 }

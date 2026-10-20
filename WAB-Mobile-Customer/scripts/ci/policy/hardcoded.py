@@ -49,7 +49,7 @@ def _line_of(text: str, index: int) -> int:
     return text.count("\n", 0, index) + 1
 
 
-def _code_rules(path: str, masked: str, cfg: dict, theme: bool, numbers_allowed: bool) -> list[Violation]:
+def _code_rules(path: str, masked: str, cfg: dict, theme: bool, numbers_allowed: bool, dimensions_allowed: bool = False) -> list[Violation]:
     found: list[Violation] = []
     scan = _mask_annotations(masked)
     for match in _COLOR_CALL.finditer(scan):
@@ -59,7 +59,7 @@ def _code_rules(path: str, masked: str, cfg: dict, theme: bool, numbers_allowed:
         if not theme:
             found.append(Violation(path, _line_of(scan, match.start()), COLOR, "named color; use a LocalAppColors token"))
     for match in _DIMENSION.finditer(scan):
-        if not (theme or numbers_allowed) and float(match.group(1)) != 0:
+        if not (theme or dimensions_allowed) and float(match.group(1)) != 0:
             found.append(Violation(path, _line_of(scan, match.start()), DIMENSION, f"{match.group(0)}; use a spacing/size/typography token"))
     if not numbers_allowed:
         scan = _COLOR_CALL.sub(lambda m: " " * len(m.group(0)), scan)
@@ -100,8 +100,9 @@ def _string_rules(path: str, masked: str, strings: list[StringLiteral], cfg: dic
 def check_kotlin_source(path: str, text: str, config_kotlin: dict) -> list[Violation]:
     masked, strings = lex(text)
     theme = matches_any(path, config_kotlin["themeGlobs"])
-    numbers_allowed = theme or matches_any(path, config_kotlin["constantsGlobs"] + config_kotlin["previewGlobs"])
-    found = _code_rules(path, masked, config_kotlin, theme, numbers_allowed)
+    constants = matches_any(path, config_kotlin["constantsGlobs"])
+    numbers_allowed = theme or constants or matches_any(path, config_kotlin["previewGlobs"])
+    found = _code_rules(path, masked, config_kotlin, theme, numbers_allowed, dimensions_allowed=constants)
     if not matches_any(path, config_kotlin["previewGlobs"]):
         found += _string_rules(path, masked, strings, config_kotlin)
     return found
