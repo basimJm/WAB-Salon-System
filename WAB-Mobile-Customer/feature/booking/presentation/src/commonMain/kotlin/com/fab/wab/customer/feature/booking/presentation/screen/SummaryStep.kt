@@ -1,8 +1,11 @@
 package com.fab.wab.customer.feature.booking.presentation.screen
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,51 +15,41 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
-import com.fab.wab.customer.core.common.TimeFormat
+import androidx.compose.ui.draw.clip
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
-import com.fab.wab.customer.designsystem.components.badge.AppStatusBadge
-import com.fab.wab.customer.designsystem.components.badge.StatusTone
-import com.fab.wab.customer.designsystem.components.card.AppCard
-import com.fab.wab.customer.designsystem.components.control.AppRadioButton
 import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
-import com.fab.wab.customer.designsystem.components.section.AppSectionHeader
-import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerList
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.resources.Res as CoreRes
 import com.fab.wab.customer.designsystem.resources.price_jod
-import com.fab.wab.customer.designsystem.resources.time_am
-import com.fab.wab.customer.designsystem.resources.time_pm
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.booking.domain.model.BookingDraft
 import com.fab.wab.customer.feature.booking.domain.model.DraftPersonResult
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract.UiAction
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract.UiState
 import com.fab.wab.customer.feature.booking.presentation.resources.Res
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_bride_badge
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_grand_total
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_deposit
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_deposit_sub
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_full
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_full_sub
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_on_arrival
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_on_arrival_sub
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_payment_title
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_rules_approval
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_rules_deposit
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_rules_deposit_non_refundable
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_rules_deposit_refundable
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_rules_title
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_rules_window
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_staff_any
-import com.fab.wab.customer.feature.booking.presentation.resources.booking_staff_label
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_summary_title
 import org.jetbrains.compose.resources.stringResource
 
-/** Step 5 (PRD S16): per-person blocks, grand total, salon rules, payment method among the salon's options. */
+/**
+ * Step 5 (`st.s5`): title `mb 14`, one bordered card per person (`gap:10px`), the soft total row `mt 10`, the surface
+ * rules box `mt 16`, "Payment method" `15px 700 margin 18 0 10` and one `card(sel)` per payment option (`gap:8px`).
+ */
 @Composable
 internal fun SummaryStep(state: UiState, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
     val draft = state.draft
     when {
-        state.draftLoading && draft == null -> AppShimmerList(Modifier.padding(spacing.space16))
+        state.draftLoading && draft == null -> ShimmerRows(BookingDesignConstants.serviceShimmerHeight, Modifier.padding(spacing.space20))
         state.draftError != null && draft == null ->
             AppErrorState(onRetry = { onAction(UiAction.OnBack) }, message = state.draftError, modifier = Modifier.fillMaxSize())
         draft != null -> SummaryBody(draft, onAction)
@@ -66,90 +59,125 @@ internal fun SummaryStep(state: UiState, onAction: (UiAction) -> Unit) {
 @Composable
 private fun SummaryBody(draft: BookingDraft, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
+    val colors = AppTheme.colors
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(spacing.space16),
-        verticalArrangement = Arrangement.spacedBy(spacing.space16),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(start = spacing.space20, top = spacing.space4, end = spacing.space20, bottom = spacing.space20),
     ) {
-        AppText(text = stringResource(Res.string.booking_summary_title), style = AppTheme.typography.headlineSmall)
-        draft.persons.forEach { PersonSummary(it) }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            AppText(text = stringResource(Res.string.booking_grand_total), style = AppTheme.typography.titleMedium)
-            AppText(text = stringResource(CoreRes.string.price_jod, draft.money.total), style = AppTheme.typography.titleMedium)
+        StepTitle(text = stringResource(Res.string.booking_summary_title), modifier = Modifier.padding(bottom = spacing.space14))
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.space10)) { draft.persons.forEach { PersonSummary(it) } }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = spacing.space10)
+                .clip(AppTheme.shapes.large)
+                .background(colors.soft)
+                .padding(horizontal = spacing.space16, vertical = spacing.space14),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AppText(text = stringResource(Res.string.booking_grand_total), style = AppTheme.typography.titleSmall)
+            AppText(
+                text = stringResource(CoreRes.string.price_jod, draft.money.total),
+                style = AppTheme.typography.titleLarge,
+                color = colors.accent,
+            )
         }
-        RulesBlock(draft)
-        PaymentBlock(draft, onAction)
+        RulesBlock(draft, Modifier.padding(top = spacing.space16))
+        AppText(
+            text = stringResource(Res.string.booking_payment_title),
+            modifier = Modifier.padding(top = spacing.space20, bottom = spacing.space10),
+            style = AppTheme.typography.titleMedium,
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
+            draft.policy.paymentOptions.forEach { option ->
+                val texts = paymentOptionTexts(option, draft) ?: return@forEach
+                SelectionCard(selected = draft.paymentMethod == option, onClick = { onAction(UiAction.OnPaymentMethodSelect(option)) }) {
+                    DesignRadio(draft.paymentMethod == option)
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
+                        AppText(text = texts.first, style = AppTheme.typography.titleSmall)
+                        AppText(text = texts.second, style = AppTheme.typography.bodySmall, color = colors.muted)
+                    }
+                }
+            }
+        }
     }
 }
 
+/**
+ * Design `sumPersons`: `padding:14px;border-radius:18px;border:1px solid var(--line)`; name row `mb 8`, service lines
+ * `13px padding 3px 0` with `600` prices, dashed top border footer (`gap:6px 14px;12px muted`) with staff and time.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PersonSummary(person: DraftPersonResult) {
     val spacing = AppTheme.spacing
-    val am = stringResource(CoreRes.string.time_am)
-    val pm = stringResource(CoreRes.string.time_pm)
-    val start = TimeFormat.instantText(person.start, am, pm)
-    AppCard(modifier = Modifier.fillMaxWidth()) {
-        Column(verticalArrangement = Arrangement.spacedBy(spacing.space4)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(spacing.space8)) {
-                AppText(text = person.name, style = AppTheme.typography.titleSmall)
-                if (person.isBride) AppStatusBadge(text = stringResource(Res.string.booking_bride_badge), tone = StatusTone.Accent)
-            }
-            person.services.forEach { line ->
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    AppText(text = line.name, color = AppTheme.colors.muted)
-                    AppText(text = stringResource(CoreRes.string.price_jod, line.price))
-                }
-            }
-            val staff = if (person.staffIsAny) stringResource(Res.string.booking_staff_any) else person.staffFirstName
-            AppText(text = stringResource(Res.string.booking_staff_label, staff), color = AppTheme.colors.muted)
-            AppText(text = listOfNotNull(start?.date, start?.time).joinToString(DATE_TIME_SEPARATOR), color = AppTheme.colors.muted)
-        }
-    }
-}
-
-/** Salon rules block (PRD S16 step 5): window, deposit %, refund rule, approval note. */
-@Composable
-private fun RulesBlock(draft: BookingDraft) {
-    val policy = draft.policy
-    val muted = AppTheme.colors.muted
-    Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
-        AppSectionHeader(title = stringResource(Res.string.booking_rules_title))
-        AppText(text = stringResource(Res.string.booking_rules_window, policy.cancellationWindowHours.toInt()), color = muted)
-        policy.depositPercentage?.let { AppText(text = stringResource(Res.string.booking_rules_deposit, it.toInt()), color = muted) }
-        val refundRes = if (policy.depositRefundableOnCustomerCancel) {
-            Res.string.booking_rules_deposit_refundable
-        } else {
-            Res.string.booking_rules_deposit_non_refundable
-        }
-        AppText(text = stringResource(refundRes), color = muted)
-        AppText(text = stringResource(Res.string.booking_rules_approval), color = muted)
-        policy.notes?.let { AppText(text = it, color = muted) }
-    }
-}
-
-@Composable
-private fun PaymentBlock(draft: BookingDraft, onAction: (UiAction) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
-        AppSectionHeader(title = stringResource(Res.string.booking_payment_title))
-        draft.policy.paymentOptions.forEach { option ->
-            val label = when (option) {
-                PaymentMethod.PAY_ON_ARRIVAL -> stringResource(Res.string.booking_pay_on_arrival)
-                PaymentMethod.DEPOSIT -> stringResource(
-                    Res.string.booking_pay_deposit,
-                    draft.policy.depositPercentage?.toInt() ?: 0,
-                    draft.money.deposit,
-                )
-                PaymentMethod.FULL_ONLINE -> stringResource(Res.string.booking_pay_full, draft.money.total)
-                PaymentMethod.UNKNOWN -> return@forEach
-            }
+    val colors = AppTheme.colors
+    val shape = roundedShape(BookingDesignConstants.summaryCardRadius)
+    Column(modifier = Modifier.fillMaxWidth().border(AppTheme.sizes.hairline, colors.line, shape).padding(spacing.space14)) {
+        PersonNameRow(name = person.name, isBride = person.isBride, modifier = Modifier.padding(bottom = spacing.space8))
+        person.services.forEach { line ->
             Row(
-                modifier = Modifier.fillMaxWidth().clickable(role = Role.RadioButton) { onAction(UiAction.OnPaymentMethodSelect(option)) },
-                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(vertical = spacing.space2),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                AppRadioButton(selected = draft.paymentMethod == option, onClick = { onAction(UiAction.OnPaymentMethodSelect(option)) })
-                AppText(text = label)
+                AppText(text = line.name, modifier = Modifier.weight(1f), style = AppTheme.typography.bodyMedium)
+                AppText(text = stringResource(CoreRes.string.price_jod, line.price), style = AppTheme.typography.titleSmall)
+            }
+        }
+        DashedDivider(Modifier.padding(top = spacing.space8))
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(top = spacing.space8),
+            horizontalArrangement = Arrangement.spacedBy(spacing.space14),
+            verticalArrangement = Arrangement.spacedBy(spacing.space6),
+        ) {
+            val staff = if (person.staffIsAny) stringResource(Res.string.booking_staff_any) else person.staffFirstName
+            AppText(text = staff, style = AppTheme.typography.bodySmall, color = colors.muted)
+            AppText(text = whenText(dateIso = null, startIso = person.start), style = AppTheme.typography.bodySmall, color = colors.muted)
+        }
+    }
+}
+
+/** Design `rules`: `padding:14px 16px;border-radius:16px;background:var(--surface)`, title `14px 700 mb 8`, accent bullets. */
+@Composable
+private fun RulesBlock(draft: BookingDraft, modifier: Modifier = Modifier) {
+    val spacing = AppTheme.spacing
+    val colors = AppTheme.colors
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(AppTheme.shapes.large)
+            .background(colors.surface)
+            .padding(horizontal = spacing.space16, vertical = spacing.space14),
+    ) {
+        AppText(
+            text = stringResource(Res.string.booking_rules_title),
+            modifier = Modifier.padding(bottom = spacing.space8),
+            style = AppTheme.typography.titleSmall,
+        )
+        rulesOf(draft).forEach { rule ->
+            Row(modifier = Modifier.padding(vertical = spacing.space2), horizontalArrangement = Arrangement.spacedBy(spacing.space8)) {
+                AppText(text = BULLET, style = AppTheme.typography.bodySmall, color = colors.accent)
+                AppText(text = rule, style = AppTheme.typography.bodySmall, color = colors.muted)
             }
         }
     }
 }
 
-private const val DATE_TIME_SEPARATOR = " "
+/** Payment option label + subtitle (`t.arrival/arrivalSub`, `t.deposit = x JOD/depositSub`, `t.fullPay/fullSub`). */
+@Composable
+private fun paymentOptionTexts(option: PaymentMethod, draft: BookingDraft): Pair<String, String>? = when (option) {
+    PaymentMethod.PAY_ON_ARRIVAL ->
+        stringResource(Res.string.booking_pay_on_arrival) to stringResource(Res.string.booking_pay_on_arrival_sub)
+    PaymentMethod.DEPOSIT -> stringResource(
+        Res.string.booking_pay_deposit,
+        draft.policy.depositPercentage?.toInt() ?: 0,
+        draft.money.deposit,
+    ) to stringResource(Res.string.booking_pay_deposit_sub)
+    PaymentMethod.FULL_ONLINE -> stringResource(Res.string.booking_pay_full) to stringResource(Res.string.booking_pay_full_sub)
+    PaymentMethod.UNKNOWN -> null
+}
+
+private const val BULLET = "•"

@@ -23,6 +23,11 @@ import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
@@ -45,12 +50,17 @@ data class AppNavItem(
 private fun NavItemContent(item: AppNavItem, selected: Boolean, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val tint = if (selected) colors.accent else colors.faint
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    val weight = if (selected) FontWeight.Bold else FontWeight.Medium
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space2, Alignment.CenterVertically),
+    ) {
         Box {
-            Icon(item.icon, contentDescription = null, tint = tint, modifier = Modifier.size(AppTheme.sizes.iconLarge))
+            Icon(item.icon, contentDescription = null, tint = tint, modifier = Modifier.size(AppTheme.sizes.tabIcon))
             AppCountBadge(item.badgeCount, Modifier.align(Alignment.TopEnd))
         }
-        AppText(text = item.label, style = AppTheme.typography.labelSmall, color = tint, maxLines = 1)
+        AppText(text = item.label, style = AppTheme.typography.labelSmall.copy(fontWeight = weight), color = tint, maxLines = 1)
     }
 }
 
@@ -66,7 +76,9 @@ fun AppBottomBar(
         modifier = modifier
             .fillMaxWidth()
             .background(AppTheme.colors.card)
-            .windowInsetsPadding(WindowInsets.navigationBars),
+            .topHairline(AppTheme.colors.line, AppTheme.sizes.hairline)
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(horizontal = AppTheme.spacing.space6, vertical = AppTheme.spacing.space8),
     ) {
         items.forEach { item ->
             val selected = item.id == selectedId
@@ -142,4 +154,9 @@ fun AppNavScaffold(
             Box(Modifier.weight(1f)) { body() }
         }
     }
+}
+
+/** 1 px line along the top edge, as the design draws `border-top:1px solid var(--line)` on the tab bar. */
+private fun Modifier.topHairline(color: Color, thickness: Dp): Modifier = drawBehind {
+    drawLine(color, Offset.Zero, Offset(size.width, 0f), thickness.toPx())
 }

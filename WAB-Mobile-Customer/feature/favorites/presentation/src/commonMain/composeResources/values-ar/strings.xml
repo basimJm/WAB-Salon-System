@@ -1,8 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="favorites_title">المفضلة</string>
-    <string name="favorites_guest_title">صالوناتك المفضلة</string>
-    <string name="favorites_guest_message">سجّل الدخول لحفظ الصالونات والعودة إليها هنا.</string>
+    <string name="favorites_hello">مرحباً، %1$s</string>
+    <string name="favorites_guest_title">سجّل الدخول لحفظ صالوناتك المفضلة</string>
+    <string name="favorites_guest_message">ستجد هنا الصالونات التي تحبها.</string>
     <string name="favorites_login">تسجيل الدخول</string>
     <string name="favorites_empty">لا توجد صالونات مفضلة</string>
+    <string name="favorites_empty_message">اضغط على القلب في أي صالون لحفظه هنا.</string>
     <string name="favorites_explore">استكشف الصالونات</string>
+    <string name="favorites_error">حدث خطأ ما</string>
+    <string name="favorites_retry">إعادة المحاولة</string>
+    <string name="favorites_remove">إزالة من المفضلة</string>
+    <string name="favorites_reviews">(%1$d)</string>
+    <string name="favorites_more">المزيد</string>
+    <string name="favorites_open">مفتوح · %1$s</string>
+    <string name="favorites_closed_today">مغلق اليوم</string>
 </resources>

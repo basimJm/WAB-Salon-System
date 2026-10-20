@@ -23,6 +23,7 @@ kotlin {
         api(libs.compose.uiToolingPreview)
         implementation(projects.core.ui)
         implementation(projects.core.domain)
+        implementation(libs.kotlinx.datetime)
         api(libs.material.icons.extended)
     }
     sourceSets.androidMain.dependencies {

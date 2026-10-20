@@ -130,7 +130,7 @@ class ReviewsViewModel(
                 is AppResult.Success -> {
                     val params = analyticsParams { text(SalonAnalytics.PARAM_VALUE, draft.rating.toString()) }
                     deps.analytics.trackAction(AnalyticsAction(SalonAnalytics.ACTION_REVIEW_SUBMIT, params))
-                    updateState { copy(form = null) }
+                    updateForm { copy(submitting = false, submitted = true) }
                     emitSideEffect(SideEffect.Submitted)
                 }
                 is AppResult.Error -> {

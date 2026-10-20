@@ -82,3 +82,18 @@
 - Tests: none (docs only)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only, no source changed.
+
+### CUS-069 — Design fidelity pass: app icon + logo, every component and screen matched to `design/WAB 0x *.dc.html`
+- Branch: `feat/cus-069-design-fidelity`
+- Status: IN REVIEW
+- Branched from `origin/customer` after PR #319.
+- Acceptance criteria (owner request 2026-10-19/20; design files = reference, `CLAUDE.md` §3 precedence):
+  - [x] App icon = `design/assets/wab-app-icon.png` on iOS + Android (legacy, round, adaptive, Play 512); in-app logo = same icon via `brand/AppLogo` + `AppBrandHeader` (wordmark/tagline typography tokens, non-translatable brand strings)
+  - [x] Design icons: 50 stroke icons rebuilt from the design SVG paths (`icons/DesignIcons.kt` + `DesignIconPaths.kt`), `AppIcons` points at them (Material kept only for icons the design lacks)
+  - [x] Chrome: tab bar (22 dp icons, bold active label, top hairline, design padding), top bar title bold
+  - [x] Screens rewritten against the design: auth/onboarding/system (01), discovery (02), salon (03), booking flow + S17 (04), bookings + details + rating (05), notifications/favorites/profile/edit/content (06); feature values in `*DesignConstants.kt`
+  - [x] Date fields open a calendar (owner request 2026-10-20): `AppDatePickerDialog` (theme colours, AR/EN title, calendar only, no typed-input toggle) + `DatePickerDates` (ISO ↔ picker millis, dd/MM/yyyy display); notifications From/To use it
+  - [x] Policy: `*Constants.kt` may hold dp/sp (previews still may not); test added
+- Tests: `scripts/ci/run_local_checks.sh` exit 0 (policy, contract, detekt, unit tests + 4 Android variants, 4 iOS configs, K/N tests) after the screen work; then `testAndroidHostTest` + detekt + policy green after the date picker; new `DatePickerDatesTest` (4), `BookingSuccessViewModelTest` copied flag, `test_hardcoded` constants case
+- Loops: 1/1 — re-checked: gate log, emulator (Pixel AVD, AR dark) home with design icons/tab bar, notifications filter → calendar → 20/10/2026 → Apply enabled; found and fixed: English picker title, typed-date toggle, preview dp exemption, booking legend detekt, success-VM test collector
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — design-system additions are token-based and reusable; no contract/API change; AR+EN strings for every new key. DEVIATIONS: per-screen visual comparison was done by agents reading the design HTML, emulator spot-checks only covered home and the notifications filter (not every screen, not EN light / landscape); iOS simulator run blocked by placeholder Firebase keys; states the contracts cannot express (salon image on booking cards, staff rating, bride-only VIP flag, payment verify screen = CUS-047) stay as before; the claude.ai/design import could not run (needs interactive `/design-login`), the repo copies of the design were used.

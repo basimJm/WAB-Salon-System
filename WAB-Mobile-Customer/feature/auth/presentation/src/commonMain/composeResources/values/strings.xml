@@ -21,7 +21,7 @@
     <string name="login_blocked_contact">Contact us</string>
     <string name="otp_title">Verify your number</string>
     <string name="otp_title_booking">Confirm booking</string>
-    <string name="otp_sent_to">We sent a code to %1$s</string>
+    <string name="otp_sent_to">We sent a code to</string>
     <string name="otp_verify">Verify</string>
     <string name="otp_resend_in">Resend in %1$s</string>
     <string name="otp_resend">Resend code</string>
@@ -48,4 +48,10 @@
     <string name="register_button">Register</string>
     <string name="register_have_account">I already have an account –</string>
     <string name="register_login_link">Log in</string>
+    <string name="auth_language_switch">ع</string>
+    <string name="login_phone_placeholder">7X XXX XXXX</string>
+    <string name="register_email_placeholder">name@example.com</string>
+    <string name="auth_dialog_glyph_alert">!</string>
+    <string name="auth_dialog_glyph_blocked">⛔</string>
+    <string name="auth_dialog_glyph_expired">⏱</string>
 </resources>

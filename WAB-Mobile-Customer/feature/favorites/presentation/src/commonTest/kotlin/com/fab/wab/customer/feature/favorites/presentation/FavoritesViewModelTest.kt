@@ -86,10 +86,12 @@ class FavoritesViewModelTest {
         val store = SessionStoreFake(GUEST)
         val vm = viewModel(store)
         assertEquals(false, vm.state.value.signedIn)
+        assertEquals("Sara", vm.state.value.greetingName)
         assertTrue(repository.pages.isEmpty())
         vm.onEvent(UiAction.OnLoginClick)
         assertEquals<SideEffect>(SideEffect.OpenLogin, effects.last())
         store.sessionState.value = USER
+        assertEquals("Omar", vm.state.value.greetingName)
         assertEquals(listOf(1), repository.pages)
         assertEquals(10, vm.state.value.salons.size)
         vm.onEvent(UiAction.OnLoadMore)
