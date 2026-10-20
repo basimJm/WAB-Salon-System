@@ -138,7 +138,12 @@ internal fun EditPickerField(
                     maxLines = 1,
                     modifier = Modifier.weight(1f),
                 )
-                Icon(AppIcons.ExpandMore, contentDescription = null, tint = colors.faint, modifier = Modifier.size(EditProfileDesign.chevron))
+                Icon(
+                    AppIcons.ExpandMore,
+                    contentDescription = null,
+                    tint = colors.faint,
+                    modifier = Modifier.size(EditProfileDesign.chevron),
+                )
             }
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }, containerColor = colors.card) {
                 options.forEachIndexed { index, option ->

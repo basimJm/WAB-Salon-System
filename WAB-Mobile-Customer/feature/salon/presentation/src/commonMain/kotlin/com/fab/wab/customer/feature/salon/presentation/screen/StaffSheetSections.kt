@@ -59,16 +59,18 @@ private fun SheetSectionTitle(text: String, modifier: Modifier = Modifier) {
 /** All seven days: working ones as soft accent chips, the others faint, dashed and struck through. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun WorkingDaysSection(member: StaffMember) {
+internal fun WorkingDaysSection(member: StaffMember, modifier: Modifier = Modifier) {
     if (member.workingDays.isEmpty()) return
     val working = remember(member) { member.workingDays.mapNotNull { it.day }.toSet() }
-    SheetSectionTitle(stringResource(Res.string.staff_working_days))
-    FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(bottom = SalonDesign.statGridVertical),
-        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
-        verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
-    ) {
-        DayOfWeek.entries.forEach { day -> DayChip(stringResource(day.nameRes()), isWorking = day in working) }
+    Column(modifier) {
+        SheetSectionTitle(stringResource(Res.string.staff_working_days))
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(bottom = SalonDesign.statGridVertical),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
+        ) {
+            DayOfWeek.entries.forEach { day -> DayChip(stringResource(day.nameRes()), isWorking = day in working) }
+        }
     }
 }
 
@@ -99,58 +101,65 @@ private fun DayChip(text: String, isWorking: Boolean) {
 /** Outlined chips (`12.5px`, padding `7 12`, radius 16) with the services the member provides. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun StaffServicesSection(member: StaffMember) {
+internal fun StaffServicesSection(member: StaffMember, modifier: Modifier = Modifier) {
     if (member.services.isEmpty()) return
-    SheetSectionTitle(stringResource(Res.string.staff_services))
-    FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(bottom = AppTheme.spacing.space20),
-        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
-        verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
-    ) {
-        member.services.forEach { service ->
-            AppText(
-                text = service.name,
-                style = AppTheme.typography.bodySmall,
-                maxLines = 1,
-                modifier = Modifier
-                    .border(AppTheme.sizes.hairline, AppTheme.colors.line, AppTheme.shapes.large)
-                    .padding(horizontal = SalonDesign.serviceChipPaddingH, vertical = SalonDesign.serviceChipPaddingV),
-            )
+    Column(modifier) {
+        SheetSectionTitle(stringResource(Res.string.staff_services))
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(bottom = AppTheme.spacing.space20),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
+        ) {
+            member.services.forEach { service ->
+                AppText(
+                    text = service.name,
+                    style = AppTheme.typography.bodySmall,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .border(AppTheme.sizes.hairline, AppTheme.colors.line, AppTheme.shapes.large)
+                        .padding(horizontal = SalonDesign.serviceChipPaddingH, vertical = SalonDesign.serviceChipPaddingV),
+                )
+            }
         }
     }
 }
 
 /** Staff ratings are independent of the salon rating (PRD S07 acceptance): header, 3 compact cards, actions. */
 @Composable
-internal fun StaffReviews(member: StaffMember, onAction: (UiAction) -> Unit) {
+internal fun StaffReviews(member: StaffMember, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
     val summary = member.reviews.summary
     val hasReviews = summary.count > 0 && member.reviews.latest.isNotEmpty()
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = spacing.space10),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AppText(text = stringResource(Res.string.salon_reviews), style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
-        if (hasReviews) {
+    Column(modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = spacing.space10),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             AppText(
-                text = reviewSummaryText(summary, withReviewsWord = false),
-                style = AppTheme.typography.bodySmall,
-                color = AppTheme.colors.muted,
+                text = stringResource(Res.string.salon_reviews),
+                style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
             )
+            if (hasReviews) {
+                AppText(
+                    text = reviewSummaryText(summary, withReviewsWord = false),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.muted,
+                )
+            }
         }
-    }
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
-        if (hasReviews) {
-            member.reviews.latest.take(SalonDesign.REVIEW_PREVIEW_COUNT).forEach { SalonReviewCard(it, ReviewCardStyle.StaffPreview) }
-        } else {
-            NoReviewsBox(stringResource(Res.string.staff_no_reviews), compact = true)
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
+            if (hasReviews) {
+                member.reviews.latest.take(SalonDesign.REVIEW_PREVIEW_COUNT).forEach { SalonReviewCard(it, ReviewCardStyle.StaffPreview) }
+            } else {
+                NoReviewsBox(stringResource(Res.string.staff_no_reviews), compact = true)
+            }
         }
+        ReviewActionsRow(
+            hasReviews = hasReviews,
+            onSeeAll = { onAction(UiAction.OnAllReviewsClick) },
+            onAdd = { onAction(UiAction.OnAddReviewClick) },
+            modifier = Modifier.padding(top = spacing.space12),
+        )
     }
-    ReviewActionsRow(
-        hasReviews = hasReviews,
-        onSeeAll = { onAction(UiAction.OnAllReviewsClick) },
-        onAdd = { onAction(UiAction.OnAddReviewClick) },
-        modifier = Modifier.padding(top = spacing.space12),
-    )
 }

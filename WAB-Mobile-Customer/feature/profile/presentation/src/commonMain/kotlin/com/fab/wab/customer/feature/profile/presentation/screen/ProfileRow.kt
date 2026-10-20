@@ -38,7 +38,9 @@ internal fun ProfileSection(title: String, modifier: Modifier = Modifier, conten
             text = title,
             style = AppTheme.typography.labelMedium.copy(fontSize = ProfileDesign.sectionTitleSize, fontWeight = FontWeight.Bold),
             color = colors.faint,
-            modifier = Modifier.padding(horizontal = ProfileDesign.sectionTitleHorizontal).padding(bottom = ProfileDesign.sectionTitleBottom),
+            modifier = Modifier
+                .padding(horizontal = ProfileDesign.sectionTitleHorizontal)
+                .padding(bottom = ProfileDesign.sectionTitleBottom),
         )
         Column(
             modifier = Modifier

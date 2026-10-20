@@ -62,7 +62,11 @@ internal fun ProfileOverlays(state: UiState, onAction: (UiAction) -> Unit) {
         null -> Unit
         is ProfileOverlay.EditGuest -> EditGuestSheet(overlay, onAction)
         ProfileOverlay.PhotoOptions -> ProfileSheet(stringResource(Res.string.profile_photo_change), dismiss) {
-            OptionRow(AppIcons.Camera, stringResource(Res.string.profile_photo_camera), { onAction(UiAction.OnPhotoSourceSelect(ImageSource.CAMERA)) })
+            OptionRow(
+                AppIcons.Camera,
+                stringResource(Res.string.profile_photo_camera),
+                { onAction(UiAction.OnPhotoSourceSelect(ImageSource.CAMERA)) },
+            )
             OptionRow(
                 AppIcons.Gallery,
                 stringResource(Res.string.profile_photo_gallery),
@@ -168,12 +172,18 @@ private fun EditGuestSheet(draft: ProfileOverlay.EditGuest, onAction: (UiAction)
             modifier = Modifier.fillMaxWidth().padding(bottom = ProfileDesign.genderBottom),
             horizontalArrangement = Arrangement.spacedBy(ProfileDesign.genderGap),
         ) {
-            GenderButton(stringResource(Res.string.profile_gender_male), draft.gender == Gender.MALE, Modifier.weight(1f)) {
-                onAction(UiAction.OnGuestGenderSelect(Gender.MALE))
-            }
-            GenderButton(stringResource(Res.string.profile_gender_female), draft.gender == Gender.FEMALE, Modifier.weight(1f)) {
-                onAction(UiAction.OnGuestGenderSelect(Gender.FEMALE))
-            }
+            GenderButton(
+                label = stringResource(Res.string.profile_gender_male),
+                selected = draft.gender == Gender.MALE,
+                onClick = { onAction(UiAction.OnGuestGenderSelect(Gender.MALE)) },
+                modifier = Modifier.weight(1f),
+            )
+            GenderButton(
+                label = stringResource(Res.string.profile_gender_female),
+                selected = draft.gender == Gender.FEMALE,
+                onClick = { onAction(UiAction.OnGuestGenderSelect(Gender.FEMALE)) },
+                modifier = Modifier.weight(1f),
+            )
         }
         GradientButton(
             text = stringResource(Res.string.profile_save),
@@ -210,7 +220,12 @@ private fun NicknameField(value: String, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-private fun GenderButton(label: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun GenderButton(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.medium
     Box(

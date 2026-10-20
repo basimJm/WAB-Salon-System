@@ -45,46 +45,52 @@ internal fun ReviewFormSheet(form: ReviewForm, onAction: (UiAction) -> Unit) {
                 .padding(start = spacing.space20, end = spacing.space20, bottom = SalonDesign.modalSheetBottom),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (form.submitted) SuccessPanel(onDone = { onAction(UiAction.OnFormDismiss) }) else FormFields(form, onAction)
+            if (form.submitted) {
+                SuccessPanel(onDoneClick = { onAction(UiAction.OnFormDismiss) })
+            } else {
+                FormFields(form, onAction, Modifier.fillMaxWidth())
+            }
         }
     }
 }
 
 @Composable
-private fun FormFields(form: ReviewForm, onAction: (UiAction) -> Unit) {
+private fun FormFields(form: ReviewForm, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
-    AppText(
-        text = stringResource(Res.string.salon_review_add),
-        style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(bottom = spacing.space16),
-    )
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        AppRatingInput(
-            value = form.rating,
-            onValueChange = { onAction(UiAction.OnRatingChange(it)) },
-            modifier = Modifier.padding(bottom = SalonDesign.statGridVertical),
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        AppText(
+            text = stringResource(Res.string.salon_review_add),
+            style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = spacing.space16),
+        )
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            AppRatingInput(
+                value = form.rating,
+                onValueChange = { onAction(UiAction.OnRatingChange(it)) },
+                modifier = Modifier.padding(bottom = SalonDesign.statGridVertical),
+            )
+        }
+        AppTextField(
+            value = form.comment,
+            onValueChange = { onAction(UiAction.OnCommentChange(it)) },
+            modifier = Modifier.fillMaxWidth().heightIn(min = SalonDesign.commentFieldHeight).padding(bottom = spacing.space16),
+            placeholder = stringResource(Res.string.review_comment_hint),
+            singleLine = false,
+        )
+        AppPrimaryButton(
+            text = stringResource(Res.string.review_submit),
+            onClick = { onAction(UiAction.OnSubmit) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = form.canSubmit,
+            loading = form.submitting,
         )
     }
-    AppTextField(
-        value = form.comment,
-        onValueChange = { onAction(UiAction.OnCommentChange(it)) },
-        modifier = Modifier.fillMaxWidth().heightIn(min = SalonDesign.commentFieldHeight).padding(bottom = spacing.space16),
-        placeholder = stringResource(Res.string.review_comment_hint),
-        singleLine = false,
-    )
-    AppPrimaryButton(
-        text = stringResource(Res.string.review_submit),
-        onClick = { onAction(UiAction.OnSubmit) },
-        modifier = Modifier.fillMaxWidth(),
-        enabled = form.canSubmit,
-        loading = form.submitting,
-    )
 }
 
 /** Gradient check badge, "Thank you! Your review will appear after approval.", soft "Done". */
 @Composable
-private fun SuccessPanel(onDone: () -> Unit) {
+private fun SuccessPanel(onDoneClick: () -> Unit) {
     val spacing = AppTheme.spacing
     Column(
         modifier = Modifier
@@ -111,7 +117,7 @@ private fun SuccessPanel(onDone: () -> Unit) {
         )
         SalonButton(
             text = stringResource(Res.string.review_done),
-            onClick = onDone,
+            onClick = onDoneClick,
             modifier = Modifier.fillMaxWidth(),
             kind = SalonButtonKind.Soft,
             height = SalonDesign.doneButtonHeight,

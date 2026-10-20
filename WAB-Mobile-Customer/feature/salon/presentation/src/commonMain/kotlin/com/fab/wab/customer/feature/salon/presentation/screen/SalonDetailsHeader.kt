@@ -46,24 +46,26 @@ import org.jetbrains.compose.resources.stringResource
 
 /** Cover (180, radius 22) with the 96 px logo overlapping by 50 px, then name, status + rating and the location link. */
 @Composable
-internal fun SalonHeader(salon: SalonDetails, onAction: (UiAction) -> Unit) {
+internal fun SalonHeader(salon: SalonDetails, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
-    CoverWithLogo(salon)
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(top = spacing.space10, start = spacing.space20, end = spacing.space20),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        AppText(
-            text = salon.name,
-            style = AppTheme.typography.headlineMedium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = spacing.space6),
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalAlignment = Alignment.CenterVertically) {
-            SalonStatusBadge(text = statusText(salon), positive = salon.isOpenNow)
-            RatingLine(salon)
+    Column(modifier) {
+        CoverWithLogo(salon)
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(top = spacing.space10, start = spacing.space20, end = spacing.space20),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            AppText(
+                text = salon.name,
+                style = AppTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = spacing.space6),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalAlignment = Alignment.CenterVertically) {
+                SalonStatusBadge(text = statusText(salon), positive = salon.isOpenNow)
+                RatingLine(salon)
+            }
+            LocationLink(salon, onAction)
         }
-        LocationLink(salon, onAction)
     }
 }
 

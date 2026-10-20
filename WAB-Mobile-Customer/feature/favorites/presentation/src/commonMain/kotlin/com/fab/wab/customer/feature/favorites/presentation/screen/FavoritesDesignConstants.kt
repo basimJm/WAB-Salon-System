@@ -37,7 +37,7 @@ internal object FavoritesDesign {
 
     // Shimmer cards: `height:112px;border-radius:18px`, four of them
     val shimmerHeight = 112.dp
-    val shimmerCount = 4
+    const val shimmerCount = 4
 
     // Placeholder (guest / empty / error): `padding:30px 24px`, circle 110, icon 46, title 16/700 mb 8, body 13 lh 1.6 mb 20
     val placeholderVertical = 30.dp

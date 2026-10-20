@@ -231,7 +231,10 @@ private fun SaveBar(state: UiState, onAction: (UiAction) -> Unit) {
             } else {
                 AppText(
                     text = stringResource(Res.string.edit_save),
-                    style = AppTheme.typography.labelLarge.copy(fontSize = EditProfileDesign.saveTextSize, fontWeight = FontWeight.SemiBold),
+                    style = AppTheme.typography.labelLarge.copy(
+                        fontSize = EditProfileDesign.saveTextSize,
+                        fontWeight = FontWeight.SemiBold,
+                    ),
                     color = if (active) colors.onGradient else colors.faint,
                     maxLines = 1,
                 )

@@ -42,5 +42,5 @@ internal object EditProfileDesign {
     val saveTextSize = 15.sp
     val spinner = 18.dp
     val spinnerStroke = 2.5.dp
-    val spinnerTrackAlpha = 0.4f
+    const val spinnerTrackAlpha = 0.4f
 }

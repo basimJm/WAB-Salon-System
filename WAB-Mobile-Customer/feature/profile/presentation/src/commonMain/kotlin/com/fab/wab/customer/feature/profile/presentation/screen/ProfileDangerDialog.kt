@@ -95,7 +95,10 @@ internal fun ProfileDangerDialog(
             ) {
                 AppText(
                     text = confirmText,
-                    style = AppTheme.typography.labelLarge.copy(fontSize = ProfileDesign.dialogOkTextSize, fontWeight = FontWeight.SemiBold),
+                    style = AppTheme.typography.labelLarge.copy(
+                        fontSize = ProfileDesign.dialogOkTextSize,
+                        fontWeight = FontWeight.SemiBold,
+                    ),
                     color = colors.onGradient,
                     maxLines = 1,
                 )

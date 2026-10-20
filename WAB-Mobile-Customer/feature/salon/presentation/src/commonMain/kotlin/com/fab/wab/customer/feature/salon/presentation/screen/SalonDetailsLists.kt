@@ -65,19 +65,21 @@ private fun Modifier.sectionHeaderPadding(top: Dp = SalonDesign.sectionTop, bott
 
 /** Horizontal row of 64 px avatars with the duty dot, first name and the green / rose availability line. */
 @Composable
-internal fun StaffSection(salon: SalonDetails, onAction: (UiAction) -> Unit) {
+internal fun StaffSection(salon: SalonDetails, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     if (salon.staff.isEmpty()) return
     val spacing = AppTheme.spacing
-    AppSectionHeader(
-        title = stringResource(Res.string.salon_staff),
-        modifier = Modifier.sectionHeaderPadding(top = SalonDesign.staffSectionTop),
-    )
-    LazyRow(
-        contentPadding = PaddingValues(start = spacing.space20, end = spacing.space20, bottom = spacing.space4),
-        horizontalArrangement = Arrangement.spacedBy(spacing.space14),
-    ) {
-        items(salon.staff, key = { it.id }, contentType = { STAFF_TYPE }) { member ->
-            StaffAvatarItem(member, onClick = { onAction(UiAction.OnStaffClick(member.id)) })
+    Column(modifier) {
+        AppSectionHeader(
+            title = stringResource(Res.string.salon_staff),
+            modifier = Modifier.sectionHeaderPadding(top = SalonDesign.staffSectionTop),
+        )
+        LazyRow(
+            contentPadding = PaddingValues(start = spacing.space20, end = spacing.space20, bottom = spacing.space4),
+            horizontalArrangement = Arrangement.spacedBy(spacing.space14),
+        ) {
+            items(salon.staff, key = { it.id }, contentType = { STAFF_TYPE }) { member ->
+                StaffAvatarItem(member, onClick = { onAction(UiAction.OnStaffClick(member.id)) })
+            }
         }
     }
 }
@@ -117,42 +119,46 @@ private fun StaffAvatarItem(member: StaffPreview, onClick: () -> Unit) {
 
 /** Header with the salon's own rating (independent of staff ratings), first 3 reviews, See all, + Add review. */
 @Composable
-internal fun ReviewsSection(salon: SalonDetails, onAction: (UiAction) -> Unit) {
+internal fun ReviewsSection(salon: SalonDetails, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
     val summary = salon.reviews.summary
     val hasReviews = summary.count > 0 && salon.reviews.latest.isNotEmpty()
-    Row(
-        modifier = Modifier.fillMaxWidth().sectionHeaderPadding(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AppSectionHeader(title = stringResource(Res.string.salon_reviews), modifier = Modifier.weight(1f))
-        if (hasReviews) AppText(text = reviewSummaryText(summary), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
-    }
-    Column(modifier = Modifier.padding(horizontal = spacing.space20), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
-        if (hasReviews) {
-            salon.reviews.latest.take(SalonDesign.REVIEW_PREVIEW_COUNT).forEach { SalonReviewCard(it, ReviewCardStyle.SalonPreview) }
-        } else {
-            NoReviewsBox(stringResource(Res.string.salon_reviews_empty))
+    Column(modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth().sectionHeaderPadding(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AppSectionHeader(title = stringResource(Res.string.salon_reviews), modifier = Modifier.weight(1f))
+            if (hasReviews) AppText(text = reviewSummaryText(summary), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
         }
-        ReviewActionsRow(
-            hasReviews = hasReviews,
-            onSeeAll = { onAction(UiAction.OnAllReviewsClick) },
-            onAdd = { onAction(UiAction.OnAddReviewClick) },
-        )
+        Column(modifier = Modifier.padding(horizontal = spacing.space20), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
+            if (hasReviews) {
+                salon.reviews.latest.take(SalonDesign.REVIEW_PREVIEW_COUNT).forEach { SalonReviewCard(it, ReviewCardStyle.SalonPreview) }
+            } else {
+                NoReviewsBox(stringResource(Res.string.salon_reviews_empty))
+            }
+            ReviewActionsRow(
+                hasReviews = hasReviews,
+                onSeeAll = { onAction(UiAction.OnAllReviewsClick) },
+                onAdd = { onAction(UiAction.OnAddReviewClick) },
+            )
+        }
     }
 }
 
 /** Borderless rows separated by hairlines: 52 px image, name, duration, accent price. */
 @Composable
-internal fun ServicesSection(salon: SalonDetails, onAction: (UiAction) -> Unit) {
+internal fun ServicesSection(salon: SalonDetails, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     if (salon.services.isEmpty()) return
     val spacing = AppTheme.spacing
-    AppSectionHeader(
-        title = stringResource(Res.string.salon_services),
-        modifier = Modifier.sectionHeaderPadding(bottom = spacing.space8),
-    )
-    Column(Modifier.padding(horizontal = spacing.space20)) {
-        salon.services.forEach { service -> ServiceRow(service, onClick = { onAction(UiAction.OnServiceClick(service.id)) }) }
+    Column(modifier) {
+        AppSectionHeader(
+            title = stringResource(Res.string.salon_services),
+            modifier = Modifier.sectionHeaderPadding(bottom = spacing.space8),
+        )
+        Column(Modifier.padding(horizontal = spacing.space20)) {
+            salon.services.forEach { service -> ServiceRow(service, onClick = { onAction(UiAction.OnServiceClick(service.id)) }) }
+        }
     }
 }
 
@@ -191,21 +197,26 @@ private fun ServiceRow(service: SalonService, onClick: () -> Unit) {
 
 /** Instagram-style grid (3 px gaps, 6 px radius) built from rows: the page already scrolls, so no nested lazy grid. */
 @Composable
-internal fun GallerySection(salon: SalonDetails, onAction: (UiAction) -> Unit) {
+internal fun GallerySection(salon: SalonDetails, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     if (salon.gallery.isEmpty()) return
     val spacing = AppTheme.spacing
     val columns = AppTheme.adaptive.galleryColumns
-    AppSectionHeader(
-        title = stringResource(Res.string.salon_gallery),
-        modifier = Modifier.sectionHeaderPadding(),
-    )
-    Column(modifier = Modifier.padding(horizontal = spacing.space20), verticalArrangement = Arrangement.spacedBy(SalonDesign.galleryGap)) {
-        salon.gallery.chunked(columns).forEachIndexed { rowIndex, row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(SalonDesign.galleryGap), modifier = Modifier.fillMaxWidth()) {
-                row.forEachIndexed { column, item ->
-                    GalleryTile(item, onClick = { onAction(UiAction.OnGalleryClick(rowIndex * columns + column)) }, Modifier.weight(1f))
+    Column(modifier) {
+        AppSectionHeader(
+            title = stringResource(Res.string.salon_gallery),
+            modifier = Modifier.sectionHeaderPadding(),
+        )
+        Column(
+            modifier = Modifier.padding(horizontal = spacing.space20),
+            verticalArrangement = Arrangement.spacedBy(SalonDesign.galleryGap),
+        ) {
+            salon.gallery.chunked(columns).forEachIndexed { rowIndex, row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(SalonDesign.galleryGap), modifier = Modifier.fillMaxWidth()) {
+                    row.forEachIndexed { column, item ->
+                        GalleryTile(item, onClick = { onAction(UiAction.OnGalleryClick(rowIndex * columns + column)) }, Modifier.weight(1f))
+                    }
+                    repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
                 }
-                repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
     }

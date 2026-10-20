@@ -18,7 +18,7 @@ internal object ProfileDesign {
     val headerBottom = 22.dp
     val avatar = 68.dp
     val avatarIcon = 52.dp
-    val avatarIconAlpha = 0.9f
+    const val avatarIconAlpha = 0.9f
     val cameraBadge = 24.dp
     val cameraBadgeBorder = 2.dp
     val cameraIcon = 12.dp
@@ -53,7 +53,7 @@ internal object ProfileDesign {
     val togglePadding = 3.dp
     val toggleKnob = 20.dp
     val toggleKnobShadow = 2.dp
-    val toggleKnobShadowAlpha = 0.2f
+    const val toggleKnobShadowAlpha = 0.2f
 
     // Session buttons: login / logout 52 15/600; delete 46 13.5/600 `margin-top:8px`; version 11.5 faint `margin-top:14px`
     val buttonHeight = 52.dp
@@ -76,7 +76,7 @@ internal object ProfileDesign {
     val optionIconBox = 36.dp
     val optionIcon = 18.dp
     val optionCheck = 18.dp
-    val optionDangerAlpha = 0.1f
+    const val optionDangerAlpha = 0.1f
 
     // Nickname sheet: label 12/600 accent mb 6; input 52 radius 14 border 1.5 mb 14; gender buttons 48 gap 10 mb 18 14/600
     val nickLabelSize = 12.sp
@@ -97,7 +97,7 @@ internal object ProfileDesign {
     val dialogIcon = 56.dp
     val dialogIconBottom = 14.dp
     val dialogIconTextSize = 24.sp
-    val dialogIconAlpha = 0.12f
+    const val dialogIconAlpha = 0.12f
     val dialogTitleSize = 17.sp
     val dialogTitleBottom = 8.dp
     val dialogBodySize = 13.5.sp

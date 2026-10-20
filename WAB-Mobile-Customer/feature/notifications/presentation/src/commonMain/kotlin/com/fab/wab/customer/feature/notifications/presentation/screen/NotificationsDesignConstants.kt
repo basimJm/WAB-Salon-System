@@ -20,7 +20,7 @@ internal object NotificationsDesign {
     val chipTextSize = 12.5.sp
     val chipRemove = 22.dp
     val chipRemoveIcon = 11.dp
-    val chipRemoveAlpha = 0.14f
+    const val chipRemoveAlpha = 0.14f
 
     // List: `padding:4px 20px 24px;gap:8px`
     val listTop = 4.dp
@@ -30,7 +30,7 @@ internal object NotificationsDesign {
 
     // Item: `padding:14px;border-radius:16px;gap:12px`, unread border `rgba(168,85,247,.35)`
     val itemPadding = 14.dp
-    val unreadBorderAlpha = 0.35f
+    const val unreadBorderAlpha = 0.35f
     val iconBox = 42.dp
     val iconBoxRadius = 13.dp
     val titleSize = 14.sp
@@ -39,13 +39,13 @@ internal object NotificationsDesign {
     val bodySize = 12.5.sp
     val bodyLineHeight = 19.sp
     val bodyTop = 3.dp
-    val bodyLines = 2
+    const val bodyLines = 2
     val unreadDot = 8.dp
     val unreadDotTop = 6.dp
 
     // Shimmer rows: `height:84px;border-radius:16px`, five on first load, one while paging
     val shimmerHeight = 84.dp
-    val shimmerCount = 5
+    const val shimmerCount = 5
 
     // Placeholder (empty / error): `padding:30px 24px`, circle 110, icon 46, title 16/700 `margin-bottom:18px`
     val placeholderVertical = 30.dp
@@ -62,7 +62,7 @@ internal object NotificationsDesign {
     val retryTextSize = 14.sp
     val sheetButtonHeight = 52.dp
     val sheetButtonTextSize = 14.5.sp
-    val applyWeight = 2f
+    const val applyWeight = 2f
     val sheetButtonGap = 10.dp
 
     // Sheet: `padding:10px 20px 34px`, title 16.5/700 `margin-bottom:12px`

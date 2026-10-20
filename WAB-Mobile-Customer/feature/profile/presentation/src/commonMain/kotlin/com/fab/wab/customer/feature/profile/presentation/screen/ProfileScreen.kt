@@ -141,7 +141,11 @@ private fun SupportSection(onAction: (UiAction) -> Unit) {
     ProfileSection(title = stringResource(Res.string.profile_section_support)) {
         ProfileRow(AppIcons.Call, stringResource(Res.string.profile_contact), onClick = { onAction(UiAction.OnContactClick) })
         ProfileRow(AppIcons.Help, stringResource(Res.string.profile_faq), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.FAQ)) })
-        ProfileRow(AppIcons.Star, stringResource(Res.string.profile_rate), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.RATE_APP)) })
+        ProfileRow(
+            AppIcons.Star,
+            stringResource(Res.string.profile_rate),
+            onClick = { onAction(UiAction.OnLinkClick(ProfileLink.RATE_APP)) },
+        )
         ProfileRow(
             AppIcons.Share,
             stringResource(Res.string.profile_share),
@@ -154,8 +158,16 @@ private fun SupportSection(onAction: (UiAction) -> Unit) {
 @Composable
 private fun LegalSection(onAction: (UiAction) -> Unit) {
     ProfileSection(title = stringResource(Res.string.profile_section_legal)) {
-        ProfileRow(AppIcons.Legal, stringResource(Res.string.profile_privacy), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.PRIVACY)) })
-        ProfileRow(AppIcons.Legal, stringResource(Res.string.profile_terms), onClick = { onAction(UiAction.OnLinkClick(ProfileLink.TERMS)) })
+        ProfileRow(
+            AppIcons.Legal,
+            stringResource(Res.string.profile_privacy),
+            onClick = { onAction(UiAction.OnLinkClick(ProfileLink.PRIVACY)) },
+        )
+        ProfileRow(
+            AppIcons.Legal,
+            stringResource(Res.string.profile_terms),
+            onClick = { onAction(UiAction.OnLinkClick(ProfileLink.TERMS)) },
+        )
         ProfileRow(
             AppIcons.Info,
             stringResource(Res.string.profile_about),

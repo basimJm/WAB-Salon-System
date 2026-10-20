@@ -14,7 +14,7 @@ internal object ContentDesign {
     val pageBottom = 30.dp
 
     // Loading: eight lines `height:14px;border-radius:7px;gap:10px`
-    val shimmerLines = 8
+    const val shimmerLines = 8
     val shimmerGap = 10.dp
 
     // Error: `padding:120px 20px`, circle 100, icon 42, title 16/700 `margin-bottom:18px`, Retry 46 `padding:0 28px` 14/600
@@ -44,7 +44,7 @@ internal object ContentDesign {
     val questionGap = 10.dp
     val questionSize = 14.sp
     val faqChevron = 14.dp
-    val chevronOpenRotation = 180f
+    const val chevronOpenRotation = 180f
     val answerTop = 12.dp
     val answerBottom = 14.dp
     val answerSize = 13.sp
