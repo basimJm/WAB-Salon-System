@@ -184,11 +184,14 @@ private fun ResendRow(state: UiState, onAction: (UiAction) -> Unit, modifier: Mo
         when {
             state.isBlocked -> Unit
             state.resendRemainingSeconds > 0 -> {
+                // The string carries the time as %1$s; the time part is bolded where it lands in either language.
+                val time = isolateLtr(formatCountdown(state.resendRemainingSeconds))
+                val sentence = stringResource(Res.string.otp_resend_in, time)
+                val start = sentence.indexOf(time)
                 val countdown = buildAnnotatedString {
-                    append(stringResource(Res.string.otp_resend_in))
-                    append(' ')
-                    withStyle(SpanStyle(color = colors.ink, fontWeight = FontWeight.Bold)) {
-                        append(isolateLtr(formatCountdown(state.resendRemainingSeconds)))
+                    append(sentence)
+                    if (start >= 0) {
+                        addStyle(SpanStyle(color = colors.ink, fontWeight = FontWeight.Bold), start, start + time.length)
                     }
                 }
                 AppText(
