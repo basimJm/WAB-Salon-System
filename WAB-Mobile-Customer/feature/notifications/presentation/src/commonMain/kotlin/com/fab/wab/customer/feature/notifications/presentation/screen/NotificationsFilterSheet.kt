@@ -1,5 +1,18 @@
 package com.fab.wab.customer.feature.notifications.presentation.screen
 
+import com.fab.wab.customer.designsystem.icons.AppIcons
+import com.fab.wab.customer.designsystem.components.textfield.DatePickerDates
+import com.fab.wab.customer.designsystem.components.textfield.AppDatePickerDialog
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -57,9 +70,20 @@ internal fun NotificationsSheet(title: String, onDismiss: () -> Unit, content: @
     }
 }
 
-/** S19 filter sheet: From / To (ISO dates until a date picker exists), search, Reset (1/3) + Apply (2/3). */
+/** S19 filter sheet: From / To open the calendar picker (ISO dates in the draft), search, Reset (1/3) + Apply (2/3). */
 @Composable
 internal fun NotificationsFilterSheet(draft: FilterDraft, onAction: (UiAction) -> Unit) {
+    var picking by remember { mutableStateOf<DateEnd?>(null) }
+    picking?.let { end ->
+        AppDatePickerDialog(
+            initialIsoDate = if (end == DateEnd.FROM) draft.from else draft.to,
+            onConfirm = { iso ->
+                onAction(if (end == DateEnd.FROM) UiAction.OnDraftFromChange(iso) else UiAction.OnDraftToChange(iso))
+                picking = null
+            },
+            onDismiss = { picking = null },
+        )
+    }
     NotificationsSheet(title = stringResource(Res.string.notifications_filter_title), onDismiss = { onAction(UiAction.OnSheetDismiss) }) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = NotificationsDesign.dateRowBottom),
@@ -67,16 +91,18 @@ internal fun NotificationsFilterSheet(draft: FilterDraft, onAction: (UiAction) -
         ) {
             SheetField(
                 label = stringResource(Res.string.notifications_from_label),
-                value = draft.from,
-                onValueChange = { onAction(UiAction.OnDraftFromChange(it)) },
+                value = DatePickerDates.display(draft.from),
+                onValueChange = {},
                 modifier = Modifier.weight(1f),
+                onClick = { picking = DateEnd.FROM },
                 horizontalPadding = NotificationsDesign.dateFieldPadding,
             )
             SheetField(
                 label = stringResource(Res.string.notifications_to_label),
-                value = draft.to,
-                onValueChange = { onAction(UiAction.OnDraftToChange(it)) },
+                value = DatePickerDates.display(draft.to),
+                onValueChange = {},
                 modifier = Modifier.weight(1f),
+                onClick = { picking = DateEnd.TO },
                 horizontalPadding = NotificationsDesign.dateFieldPadding,
                 error = if (draft.datesValid) null else stringResource(Res.string.notifications_dates_error),
             )
@@ -115,6 +141,7 @@ private fun SheetField(
     horizontalPadding: Dp = NotificationsDesign.searchFieldPadding,
     placeholder: String? = null,
     error: String? = null,
+    onClick: (() -> Unit)? = null,
 ) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.medium
@@ -126,7 +153,9 @@ private fun SheetField(
             color = colors.accent,
             modifier = Modifier.padding(bottom = NotificationsDesign.fieldLabelBottom),
         )
-        BasicTextField(
+        if (onClick != null) {
+            DateBox(value, error != null, horizontalPadding, textStyle, onClick)
+        } else BasicTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
@@ -158,5 +187,28 @@ private fun SheetField(
                 modifier = Modifier.padding(top = NotificationsDesign.fieldErrorTop),
             )
         }
+    }
+}
+
+private enum class DateEnd { FROM, TO }
+
+/** Same 48 px field look, read-only: tapping it opens the calendar; the calendar icon sits at the end. */
+@Composable
+private fun DateBox(value: String, hasError: Boolean, horizontalPadding: Dp, textStyle: TextStyle, onClick: () -> Unit) {
+    val colors = AppTheme.colors
+    val shape = AppTheme.shapes.medium
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(NotificationsDesign.fieldHeight)
+            .clip(shape)
+            .background(colors.card, shape)
+            .border(AppTheme.sizes.borderWidth, if (hasError) colors.danger else colors.line, shape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = horizontalPadding),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AppText(text = value, style = textStyle, maxLines = 1, modifier = Modifier.weight(1f))
+        Icon(AppIcons.Bookings, contentDescription = null, tint = colors.muted, modifier = Modifier.size(AppTheme.sizes.iconSmall))
     }
 }
