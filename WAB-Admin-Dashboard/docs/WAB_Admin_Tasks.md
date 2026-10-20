@@ -233,6 +233,7 @@ Integration and release tasks for the admin panel (`INTEGRATION.md` §6).
 | ADM-084 | Real data by default: only dev-debug uses the mock; dev-release, prod-debug and prod-release call the API through placeholder base URLs (`.env.dev`, `.env.prod`) the owner replaces | `feat/adm-084-remote-default` | ADM-081 | — | DONE | Owner request 2026-10-19. |
 | ADM-085 | Real-server QA: every screen against a real WAB-Server (MongoDB, Redis, MinIO) with real data, and the defects it found | `feat/adm-085-real-server-fixes` | ADM-084 | — | DONE | Owner request 2026-10-19. |
 | ADM-086 | A new deploy no longer breaks open tabs: a page whose code file is gone reloads once, and a route error shows the panel's error state instead of the router's crash screen | `feat/adm-086-chunk-reload` | ADM-085 | — | DONE | Found by the real-server QA (stale tab after a rebuild). |
+| ADM-087 | Dev and prod base URLs point at the Render server and a one-command free deploy is documented | `feat/adm-087-onrender-urls` | ADM-086 | — | DONE | Owner request 2026-10-20. |
 
 ---
 

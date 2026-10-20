@@ -15,7 +15,7 @@ The panel is a static site (`dist/<variant>/`). The host must serve the files, s
 
 1. New site from Git, repository `WAB-Salon-System`, **Base directory** `WAB-Admin-Dashboard`. The build command and publish folder come from `netlify.toml`.
 2. Site settings → Environment variables: `VITE_API_BASE_URL`, `VITE_SOCKET_URL` (and `CSP_CONNECT_EXTRA` if needed) for the production context.
-3. Production branch: `main` (builds `prod-release`). Deploy previews and branch deploys build `dev-release`, which calls the **dev API**. The committed placeholders `.env.dev` / `.env.prod` hold the base URLs (`https://api-dev.wab.example`, `https://api.wab.example`): replace them, or set the environment variables in the site settings (they win). Only `npm run dev` (dev-debug) uses the built-in mock data.
+3. Production branch: `main` (builds `prod-release`). Deploy previews and branch deploys build `dev-release`, which calls the **dev API**. The committed `.env.dev` / `.env.prod` hold the base URLs (both `https://wab-server-dev.onrender.com` for now); change them, or set the environment variables in the site settings (they win). Only `npm run dev` (dev-debug) uses the built-in mock data.
 4. Add the custom domain in Domain management; HTTPS is automatic. The headers include HSTS.
 
 ## Vercel
@@ -34,3 +34,17 @@ The panel is a static site (`dist/<variant>/`). The host must serve the files, s
 ## What the headers are
 
 `scripts/lib/hosting.ts` is the single source (tested in `tests/hosting.test.ts`): CSP (self only, plus API, socket https+wss and the extras; no framing; fonts may be `data:` because the build inlines small fonts), HSTS (2 years), `nosniff`, `X-Frame-Options: DENY`, referrer, permissions and opener policies, immutable cache for `/assets/*`, no cache for `index.html`.
+
+## Fast free deploy (Netlify CLI, about two minutes)
+
+```bash
+cd WAB-Admin-Dashboard
+npm ci
+npm run build:prod-release && node scripts/write-hosting.ts prod-release     # reads .env.prod
+npx netlify-cli login                                                          # once, opens the browser
+npx netlify-cli deploy --prod --dir dist/prod-release --site <site-name>       # first time: add --create-site <site-name>
+```
+
+Dev copy (second site or the same site's draft deploy): `npm run build:dev-release && node scripts/write-hosting.ts dev-release && npx netlify-cli deploy --dir dist/dev-release` (add `--prod` on a separate dev site).
+
+Render's free server sleeps after idle time: the first request after a pause can take up to a minute; the panel shows its loading state until then. The server's `CORS_ALLOWED_ORIGINS` must include the deployed panel origin (`https://<site-name>.netlify.app`).
