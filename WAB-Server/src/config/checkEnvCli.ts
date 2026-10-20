@@ -18,7 +18,10 @@ const main = (): number => {
     process.stdout.write(`PASS ${file}\n`);
     return EXIT_OK;
   }
-  process.stderr.write(`FAIL ${file}: ${result.invalidKeys.join(', ')}\n`);
+  process.stderr.write(`FAIL ${file}: ${String(result.invalidKeys.length)} problem(s)\n`);
+  for (const problem of result.problems) {
+    process.stderr.write(`  - ${problem.key} ${problem.reason}\n`);
+  }
   return EXIT_INVALID;
 };
 

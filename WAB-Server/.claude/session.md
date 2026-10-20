@@ -10,6 +10,18 @@
 
 ## Current task
 
+### T-132 — Clear startup errors for invalid configuration (owner report 2026-10-20)
+
+- Branch: `fix/srv-clear-config-errors`
+- Status: IN REVIEW
+- Acceptance criteria (CLAUDE.md §8 errors, §5; API docs: no change):
+  - [x] The Render log only said `Invalid environment configuration: JWT_ACCESS_SECRET, PAYOUT_ENCRYPTION_KEY, CDN_BASE_URL`; the startup error now lists one line per key: not set / set but empty / invalid value, plus what a valid value looks like and how to generate it (`ENV_KEY_HINTS`); values are never printed
+  - [x] `env:check` prints the same per-key reasons
+  - [x] The three keys of the failed deploy were reproduced with the built server and now read clearly
+- Tests: `tests/configErrors.test.ts` (5), `tests/checkEnv.test.ts`, `tests/config.test.ts`, `tests/payoutDetails.test.ts` adapted; full gate green
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — the failing deploy itself was a configuration problem (placeholder values left in three keys), not a code defect. DEVIATION: ops hints are English constants (stderr at startup, not an API response).
+
 ### T-131 — Fix the Render image build: copy `WAB-Server/scripts` into the build stage (owner report 2026-10-20)
 
 - Branch: `fix/srv-docker-scripts`
