@@ -108,10 +108,18 @@
 
 ### CUS-070 — iOS: no launch crash with placeholder Firebase keys; OTP countdown text
 - Branch: `fix/cus-070-ios-firebase-guard`
-- Status: IN REVIEW
+- Status: DONE (PR #325)
 - Acceptance criteria (owner request 2026-10-20 "run iOS and see if there are crashes"):
   - [x] Launch no longer crashes: `FirebaseSetup.configureIfValid()` configures Firebase only when `GoogleService-Info.plist` has a 39-char API key; otherwise no Firebase bridges, no Messaging delegate, APNs token ignored (Kotlin side falls back to its no-op bridges, as Android does)
   - [x] OTP resend line formats the countdown into `otp_resend_in` (was showing a raw `%1$s`)
 - Tests: `:feature:auth:presentation:testAndroidHostTest` green, detekt + policy green, `xcodebuild iosApp-Dev Debug-Dev` succeeded
 - Loops: 1/1 — simulator (iPhone 17, AR light): launch → onboarding → nickname → home → salon → book (login gate) → login → OTP → home → bookings → booking details → profile → favorites → notifications → filter → calendar → 15/10/2026 → logout → login → OTP text fixed; no crash report after the fix (only the 10:02 pre-fix `com.firebase.installations` report)
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — guard is a startup-only Swift change; real keys keep the full Firebase path. DEVIATION: with placeholder keys iOS runs without push/analytics/crash reporting until the owner supplies the real plist; no Swift unit test (the guard is plain plist reading, verified on the simulator).
+
+### T-129 — Docs: CUS-070 DONE
+- Branch: `docs/cus-070-done`
+- Status: IN REVIEW
+- Acceptance criteria: status set through `tasks.py`; board regenerated
+- Tests: none (docs only)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only.
