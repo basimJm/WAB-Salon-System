@@ -39,7 +39,7 @@ It runs as the unprivileged `node` user, reads `PORT`, and has a health check on
 
 ## 3. Configure an environment
 
-Start from `docker/env.production.example` (used for dev-hosted and prod; only the values differ), put the values in the host's secret store, then check the same variables with the real tool:
+Start from `docker/env.dev.example` (hosted dev) or `docker/env.prod.example` (production); every key has a comment saying what it is and where to get it, put the values in the host's secret store, then check the same variables with the real tool:
 
 ```sh
 npm run env:check -- <env file>      # prints key names only, never values

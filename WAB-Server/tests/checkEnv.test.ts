@@ -50,34 +50,36 @@ describe('checkEnvText', () => {
     });
   });
 
-  it('rejects the untouched production template and names keys only', () => {
-    const result = checkEnvText(example('env.production.example'));
-    expect(result.ok).toBe(false);
-    expect(result.invalidKeys).toContain('MONGODB_URI');
-    expect(result.invalidKeys).toContain('JWT_ACCESS_SECRET');
-    expect(JSON.stringify(result)).not.toContain(PLACEHOLDER);
-  });
+  describe.each(['env.dev.example', 'env.prod.example'])('%s', (template) => {
+    it('rejects the untouched template and names keys only', () => {
+      const result = checkEnvText(example(template));
+      expect(result.ok).toBe(false);
+      expect(result.invalidKeys).toContain('MONGODB_URI');
+      expect(result.invalidKeys).toContain('JWT_ACCESS_SECRET');
+      expect(JSON.stringify(result)).not.toContain(PLACEHOLDER);
+    });
 
-  it('accepts the production template once every placeholder has a valid value', () => {
-    const filled = fill(example('env.production.example'), PRODUCTION_VALUES);
-    expect(filled).not.toContain(PLACEHOLDER);
-    expect(checkEnvText(filled)).toEqual({ ok: true, invalidKeys: [] });
-  });
+    it('accepts the template once every placeholder has a valid value', () => {
+      const filled = fill(example(template), PRODUCTION_VALUES);
+      expect(filled).not.toContain(PLACEHOLDER);
+      expect(checkEnvText(filled)).toEqual({ ok: true, invalidKeys: [] });
+    });
 
-  it('refuses a fake provider in production', () => {
-    const filled = fill(example('env.production.example'), PRODUCTION_VALUES).replace(
-      'OTP_PROVIDER=real',
-      'OTP_PROVIDER=fake',
-    );
-    expect(checkEnvText(filled)).toEqual({ ok: false, invalidKeys: ['OTP_PROVIDER'] });
-  });
+    it('refuses a fake provider in production', () => {
+      const filled = fill(example(template), PRODUCTION_VALUES).replace(
+        'OTP_PROVIDER=real',
+        'OTP_PROVIDER=fake',
+      );
+      expect(checkEnvText(filled)).toEqual({ ok: false, invalidKeys: ['OTP_PROVIDER'] });
+    });
 
-  it('refuses enabled payments in production while they are paused', () => {
-    const filled = fill(example('env.production.example'), PRODUCTION_VALUES).replace(
-      'PAYMENT_PROVIDER=disabled',
-      'PAYMENT_PROVIDER=fake',
-    );
-    expect(checkEnvText(filled)).toEqual({ ok: false, invalidKeys: ['PAYMENT_PROVIDER'] });
+    it('refuses enabled payments in production while they are paused', () => {
+      const filled = fill(example(template), PRODUCTION_VALUES).replace(
+        'PAYMENT_PROVIDER=disabled',
+        'PAYMENT_PROVIDER=fake',
+      );
+      expect(checkEnvText(filled)).toEqual({ ok: false, invalidKeys: ['PAYMENT_PROVIDER'] });
+    });
   });
 
   it('never echoes a secret value of an invalid file', () => {
