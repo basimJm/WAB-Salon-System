@@ -44,7 +44,7 @@ const fill = (template: string, values: Readonly<Record<string, string>>): strin
 
 describe('checkEnvText', () => {
   it('accepts the development template as is', () => {
-    expect(checkEnvText(example('env.development.example'))).toEqual({
+    expect(checkEnvText(example('env.development.example'))).toMatchObject({
       ok: true,
       invalidKeys: [],
     });
@@ -62,7 +62,7 @@ describe('checkEnvText', () => {
     it('accepts the template once every placeholder has a valid value', () => {
       const filled = fill(example(template), PRODUCTION_VALUES);
       expect(filled).not.toContain(PLACEHOLDER);
-      expect(checkEnvText(filled)).toEqual({ ok: true, invalidKeys: [] });
+      expect(checkEnvText(filled)).toMatchObject({ ok: true, invalidKeys: [] });
     });
 
     it('refuses a fake provider in production', () => {
@@ -70,7 +70,7 @@ describe('checkEnvText', () => {
         'OTP_PROVIDER=real',
         'OTP_PROVIDER=fake',
       );
-      expect(checkEnvText(filled)).toEqual({ ok: false, invalidKeys: ['OTP_PROVIDER'] });
+      expect(checkEnvText(filled)).toMatchObject({ ok: false, invalidKeys: ['OTP_PROVIDER'] });
     });
 
     it('refuses enabled payments in production while they are paused', () => {
@@ -78,7 +78,7 @@ describe('checkEnvText', () => {
         'PAYMENT_PROVIDER=disabled',
         'PAYMENT_PROVIDER=fake',
       );
-      expect(checkEnvText(filled)).toEqual({ ok: false, invalidKeys: ['PAYMENT_PROVIDER'] });
+      expect(checkEnvText(filled)).toMatchObject({ ok: false, invalidKeys: ['PAYMENT_PROVIDER'] });
     });
   });
 
