@@ -23,6 +23,7 @@ RUN cd wab-storage && npm run build
 COPY WAB-Server/package.json WAB-Server/package-lock.json ./WAB-Server/
 RUN cd WAB-Server && npm ci
 COPY WAB-Server/tsconfig.json WAB-Server/tsconfig.build.json ./WAB-Server/
+COPY WAB-Server/scripts ./WAB-Server/scripts
 COPY WAB-Server/src ./WAB-Server/src
 RUN cd WAB-Server && npm run build
 

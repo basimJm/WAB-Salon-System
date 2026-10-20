@@ -20,6 +20,7 @@
 !WAB-Server/tsconfig.json
 !WAB-Server/tsconfig.build.json
 !WAB-Server/src
+!WAB-Server/scripts
 **/node_modules
 **/dist
 **/.env
