@@ -10,11 +10,15 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        FirebaseApp.configure()
-        FirebaseBridgeRegistration.register()
+        let firebaseReady = FirebaseSetup.configureIfValid()
+        if firebaseReady {
+            FirebaseBridgeRegistration.register()
+        }
         MainViewControllerKt.doInitKoin()
 
-        Messaging.messaging().delegate = self
+        if firebaseReady {
+            Messaging.messaging().delegate = self
+        }
         UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
         application.registerForRemoteNotifications()
@@ -26,6 +30,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
+        guard FirebaseApp.app() != nil else { return }
         Messaging.messaging().apnsToken = deviceToken
     }
 
