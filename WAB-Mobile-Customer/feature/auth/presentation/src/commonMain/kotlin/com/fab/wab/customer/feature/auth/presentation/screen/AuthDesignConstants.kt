@@ -35,7 +35,7 @@ internal object AuthDesign {
 
     // Card: `border-radius:24px;padding:22px 18px` (login) / `20px 16px` (register); shadow `0 16px 40px rgba(31,34,51,.08)`
     val cardRadius = 24.dp
-    val cardShadowAlpha = 0.08f
+    const val cardShadowAlpha = 0.08f
     val loginCardVertical = 22.dp
     val loginCardHorizontal = 18.dp
     val registerCardVertical = 20.dp
@@ -76,7 +76,7 @@ internal object AuthDesign {
     val optionVertical = 13.dp
     val optionHorizontal = 16.dp
     val optionSize = 14.sp
-    val listShadowAlpha = 0.12f
+    const val listShadowAlpha = 0.12f
 
     // Login spacing: field → button 18, footer margin-top 22, flex min 24; register: 18 / 16
     val loginButtonTop = 18.dp
@@ -104,10 +104,10 @@ internal object AuthDesign {
     val otpBoxBottom = 10.dp
     val otpDigitSize = 24.sp
     val otpFocusRing = 4.dp
-    val otpFocusRingAlpha = 0.12f
-    val otpBlockedAlpha = 0.5f
+    const val otpFocusRingAlpha = 0.12f
+    const val otpBlockedAlpha = 0.5f
     val otpWrongSize = 12.5.sp
-    val otpBlockedBgAlpha = 0.10f
+    const val otpBlockedBgAlpha = 0.10f
     val otpBlockedPaddingV = 12.dp
     val otpBlockedPaddingH = 14.dp
     val otpBlockedIcon = 18.dp
@@ -137,10 +137,10 @@ internal object AuthDesign {
     val dialogSecondarySize = 14.sp
     val dialogButtonGap = 8.dp
     val dialogOuterPadding = 28.dp
-    val dialogDangerBgAlpha = 0.12f
+    const val dialogDangerBgAlpha = 0.12f
 
     // Country sheet: `border-radius:26px 26px 0 0;padding:10px 20px 34px;height:68%`, handle 40x5, close 36, search 46/radius 12
-    val sheetHeightFraction = 0.68f
+    const val sheetHeightFraction = 0.68f
     val sheetPaddingTop = 10.dp
     val sheetPaddingHorizontal = 20.dp
     val sheetPaddingBottom = 34.dp

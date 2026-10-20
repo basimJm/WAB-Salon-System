@@ -121,48 +121,51 @@ private fun NameRow(state: UiState, onAction: (UiAction) -> Unit, required: Stri
     }
 }
 
+/** Gender, city and area blocks (`dropdowns`), one column so the form emits a single node per block. */
 @Composable
-private fun Dropdowns(state: UiState, onAction: (UiAction) -> Unit, required: String) {
+private fun Dropdowns(state: UiState, onAction: (UiAction) -> Unit, required: String, modifier: Modifier = Modifier) {
     val genderLabels = listOf(stringResource(Res.string.guest_gender_man_option), stringResource(Res.string.guest_gender_woman_option))
-    AuthFieldBlock(
-        label = stringResource(Res.string.register_gender),
-        error = required.takeIf { state.showError(RegisterField.Gender) },
-        compact = true,
-    ) {
-        AuthDropdownField(
-            options = genderLabels,
-            selectedIndex = state.gender?.let { GENDER_OPTIONS.indexOf(it) }?.takeIf { it >= 0 },
-            onSelect = { onAction(UiAction.OnGenderSelect(GENDER_OPTIONS[it])) },
-            placeholder = stringResource(Res.string.register_choose),
-            error = state.showError(RegisterField.Gender),
-        )
-    }
-    AuthFieldBlock(
-        label = stringResource(Res.string.register_city),
-        error = required.takeIf { state.showError(RegisterField.City) },
-        compact = true,
-    ) {
-        AuthDropdownField(
-            options = state.cities.map { it.name },
-            selectedIndex = state.cities.indexOfFirst { it.id == state.cityId }.takeIf { it >= 0 },
-            onSelect = { onAction(UiAction.OnCitySelect(state.cities[it].id)) },
-            placeholder = stringResource(Res.string.register_choose),
-            error = state.showError(RegisterField.City),
-            enabled = !state.citiesLoading,
-        )
-    }
-    AuthFieldBlock(
-        label = stringResource(Res.string.register_area),
-        error = required.takeIf { state.showError(RegisterField.Area) },
-        compact = true,
-    ) {
-        AuthDropdownField(
-            options = state.areas.map { it.name },
-            selectedIndex = state.areas.indexOfFirst { it.id == state.areaId }.takeIf { it >= 0 },
-            onSelect = { onAction(UiAction.OnAreaSelect(state.areas[it].id)) },
-            placeholder = stringResource(if (state.cityId == null) Res.string.register_area_hint else Res.string.register_choose),
-            error = state.showError(RegisterField.Area),
-            enabled = state.areaEnabled,
-        )
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(AuthDesign.registerCardGap)) {
+        AuthFieldBlock(
+            label = stringResource(Res.string.register_gender),
+            error = required.takeIf { state.showError(RegisterField.Gender) },
+            compact = true,
+        ) {
+            AuthDropdownField(
+                options = genderLabels,
+                selectedIndex = state.gender?.let { GENDER_OPTIONS.indexOf(it) }?.takeIf { it >= 0 },
+                onSelect = { onAction(UiAction.OnGenderSelect(GENDER_OPTIONS[it])) },
+                placeholder = stringResource(Res.string.register_choose),
+                error = state.showError(RegisterField.Gender),
+            )
+        }
+        AuthFieldBlock(
+            label = stringResource(Res.string.register_city),
+            error = required.takeIf { state.showError(RegisterField.City) },
+            compact = true,
+        ) {
+            AuthDropdownField(
+                options = state.cities.map { it.name },
+                selectedIndex = state.cities.indexOfFirst { it.id == state.cityId }.takeIf { it >= 0 },
+                onSelect = { onAction(UiAction.OnCitySelect(state.cities[it].id)) },
+                placeholder = stringResource(Res.string.register_choose),
+                error = state.showError(RegisterField.City),
+                enabled = !state.citiesLoading,
+            )
+        }
+        AuthFieldBlock(
+            label = stringResource(Res.string.register_area),
+            error = required.takeIf { state.showError(RegisterField.Area) },
+            compact = true,
+        ) {
+            AuthDropdownField(
+                options = state.areas.map { it.name },
+                selectedIndex = state.areas.indexOfFirst { it.id == state.areaId }.takeIf { it >= 0 },
+                onSelect = { onAction(UiAction.OnAreaSelect(state.areas[it].id)) },
+                placeholder = stringResource(if (state.cityId == null) Res.string.register_area_hint else Res.string.register_choose),
+                error = state.showError(RegisterField.Area),
+                enabled = state.areaEnabled,
+            )
+        }
     }
 }

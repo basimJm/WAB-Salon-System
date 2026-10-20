@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -52,7 +50,7 @@ fun ForceUpdateScreen(onUpdate: () -> Unit, modifier: Modifier = Modifier) {
         actionText = stringResource(Res.string.force_update_button),
         onAction = onUpdate,
         modifier = modifier,
-        icon = Icons.Rounded.Download,
+        icon = AppIcons.Download,
     )
 }
 

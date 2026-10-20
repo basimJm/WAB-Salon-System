@@ -19,7 +19,7 @@ internal object OnboardingDesign {
     val imageHeight = 360.dp
     val imageHeightCompact = 200.dp
     val imageRadius = 28.dp
-    val imageShadowAlpha = 0.18f
+    const val imageShadowAlpha = 0.18f
     val imageIcon = 96.dp
     val contentGap = 30.dp
     val titleSize = 25.sp

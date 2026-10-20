@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Smartphone
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,6 +25,7 @@ import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
 import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
 import com.fab.wab.customer.designsystem.components.text.AppText
+import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.customer.feature.auth.presentation.analytics.OtpAnalytics
@@ -73,7 +72,7 @@ fun OtpScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    Icons.Rounded.Smartphone,
+                    AppIcons.Device,
                     contentDescription = null,
                     tint = colors.accent,
                     modifier = Modifier.size(AuthDesign.otpIcon),

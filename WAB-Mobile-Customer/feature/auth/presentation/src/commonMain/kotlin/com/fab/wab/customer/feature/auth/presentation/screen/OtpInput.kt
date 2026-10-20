@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -31,6 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.LayoutDirection
 import com.fab.wab.customer.designsystem.components.text.AppText
+import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.components.textfield.sanitizeOtp
 import com.fab.wab.customer.designsystem.resources.Res as CoreRes
 import com.fab.wab.customer.designsystem.resources.otp_description
@@ -141,7 +140,7 @@ internal fun OtpBlockedBanner(remainingSeconds: Int, modifier: Modifier = Modifi
         horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space10),
         verticalAlignment = Alignment.Top,
     ) {
-        Icon(Icons.Rounded.Schedule, contentDescription = null, tint = colors.danger, modifier = Modifier.size(AuthDesign.otpBlockedIcon))
+        Icon(AppIcons.Clock, contentDescription = null, tint = colors.danger, modifier = Modifier.size(AuthDesign.otpBlockedIcon))
         Column {
             val style = AppTheme.typography.bodySmall.copy(
                 fontSize = AuthDesign.otpBlockedTextSize,
