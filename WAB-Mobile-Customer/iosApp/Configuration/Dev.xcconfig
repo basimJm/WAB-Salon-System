@@ -5,7 +5,7 @@ APP_ENV = dev
 APP_DISPLAY_NAME = WAB Dev
 // PLACEHOLDER host until the platform domain is decided. In xcconfig '//' starts a comment, so the
 // scheme separator is written as ':/$()/'.
-API_BASE_URL = https:/$()/dev-api.template.app
+API_BASE_URL = https://wab-server-dev.onrender.com
 WEB_BASE_URL = https:/$()/dev.template.app
 // Universal Links domain (PRD §4.4) = the WEB_BASE_URL host; used by iosApp.entitlements.
 DEEP_LINK_HOST = dev.template.app
