@@ -17,6 +17,8 @@ class AndroidApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // App Check before any Firebase Auth / Phone Auth call (Play Integrity in release, debug provider in debug).
+        installAppCheck(this)
         startKoin {
             androidContext(this@AndroidApp)
             properties(mapOf("androidContext" to this@AndroidApp))

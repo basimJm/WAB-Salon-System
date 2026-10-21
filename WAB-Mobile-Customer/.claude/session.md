@@ -138,7 +138,7 @@
 
 ### CUS-072 — iOS Phone OTP URL scheme + Crashlytics dSYM upload
 - Branch: `feat/cus-072-firebase-ios-otp-crashlytics`
-- Status: IN REVIEW
+- Status: DONE (PR #336)
 - Acceptance criteria (owner request 2026-10-21 "set up Firebase SMS OTP, Analytics, Crashlytics for Android and iOS"):
   - [x] Android: Phone Auth, Analytics, Crashlytics, FCM already wired (CUS-004); nothing missing in code
   - [x] iOS Phone Auth: build step registers the encoded-app-id / reversed-client-id URL scheme from the env plist; `FirebaseSetup.handleAuthURL` passes reCAPTCHA return URLs to Firebase Auth before deep links
@@ -147,3 +147,15 @@
 - Tests: xcodebuild Debug-Dev + Release-Prod green; built Info.plist has the URL scheme; upload step skips with the placeholder; app launches on the simulator
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — build scripts + one Swift entry point. DEVIATION: real OTP, events and crash reports cannot be verified until the owner adds the real Firebase files and finishes the console steps.
+
+### CUS-073 — Firebase App Check (Play Integrity / App Attest) + phone-auth resend token
+- Branch: `feat/cus-073-firebase-app-check`
+- Status: IN REVIEW
+- Acceptance criteria (owner request 2026-10-21 "Firebase Auth, Phone Auth and App Check Play Integrity on Android and iOS"):
+  - [x] Android App Check: Play Integrity provider in release, debug provider in debug (per build-type source sets, so the debug provider never ships); installed in `AndroidApp.onCreate` before any Auth call, skipped when Firebase is not initialised
+  - [x] iOS App Check: `WABAppCheckProviderFactory` (App Attest, DeviceCheck before iOS 14, debug provider on simulator / Debug) set before `FirebaseApp.configure`; FirebaseAppCheck package linked; App Attest entitlement per env (`APP_ATTEST_ENVIRONMENT`)
+  - [x] Phone Auth (Android): Firebase resend token reused for the same number, cleared on sign-out; Auth + Phone Auth flow otherwise unchanged (already complete)
+  - [x] `docs/FIREBASE_SETUP.md`: App Check console steps (Play Integrity link, App Attest/DeviceCheck, debug tokens, enforce last), Apple capability
+- Tests: `:androidApp:assembleDevDebug` + `:androidApp:assembleProdRelease` + `:core:firebase:testAndroidHostTest` green; xcodebuild Debug-Dev + Release-Prod green; detekt + policy green; app launches on the simulator
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — providers chosen by build type, no secrets. DEVIATIONS: App Check tokens, OTP and enforcement cannot be verified until the owner adds the real Firebase files, links Play Integrity and enables App Attest on the App IDs; device build signing for the App Attest entitlement is owner input.
