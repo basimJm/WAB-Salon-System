@@ -9,14 +9,22 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
+
+/** How long [AndroidPushTokenProvider.currentToken] waits for `onRegistered` after `register()`. */
+private const val REGISTRATION_TIMEOUT_MS = 15_000L
 
 class AndroidPushTokenProvider(
     private val messaging: FirebaseMessaging = FirebaseMessaging.getInstance(),
 ) : PushTokenProvider {
+    // FCM 26: `register()` replaces the deprecated `getToken()`; the token arrives in the messaging service's
+    // `onRegistered`, which publishes it to [PushTokenRelay] (replay 1, so an earlier token is returned at once).
     // A placeholder Firebase config (no valid API key yet) raises IllegalArgumentException: no token, no crash.
     override suspend fun currentToken(): String? = try {
-        messaging.token.awaitResult()
+        messaging.register().awaitResult()
+        withTimeoutOrNull(REGISTRATION_TIMEOUT_MS) { PushTokenRelay.tokenUpdates.first() }
     } catch (expected: IOException) {
         null
     } catch (expected: IllegalStateException) {

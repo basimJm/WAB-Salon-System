@@ -27,8 +27,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     private val appSettings: AppSettings by lazy { KoinJavaComponent.getKoin().get() }
 
-    override fun onNewToken(token: String) {
-        super.onNewToken(token)
+    // FCM 26: the registration token arrives here after `FirebaseMessaging.register()` (replaces `onNewToken`).
+    override fun onRegistered(token: String) {
+        super.onRegistered(token)
         PushTokenRelay.publish(token)
         CoroutineScope(Dispatchers.IO).launch { appSettings.setFcmToken(token) }
     }
