@@ -29,15 +29,39 @@ class AndroidPhoneAuthGateway(
     private var resend: ResendHandle? = null
 
     override suspend fun startVerification(phoneE164: String): FirebaseResult<PhoneVerification> {
-        val activity = activityProvider.current() ?: return FirebaseResult.Failure(FirebaseFailure.Unavailable)
+        val activity = activityProvider.current()
+        val reuseResend = resend?.phoneE164 == phoneE164
+        PhoneAuthLog.info(
+            "start phone=${PhoneAuthLog.mask(phoneE164)} activity=${activity?.javaClass?.simpleName} " +
+                "timeoutSec=$VERIFICATION_TIMEOUT_SECONDS resendToken=$reuseResend app=${auth.app.options.projectId}",
+        )
+        if (activity == null) {
+            PhoneAuthLog.info("start ABORTED: no foreground Activity (Firebase needs it for reCAPTCHA / Play Integrity)")
+            return FirebaseResult.Failure(FirebaseFailure.Unavailable)
+        }
+        val startedAt = System.currentTimeMillis()
         return suspendCancellableCoroutine { continuation ->
             val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                 override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
                     resend = ResendHandle(phoneE164, token)
+                    PhoneAuthLog.info(
+                        "codeSent verificationId=${PhoneAuthLog.preview(verificationId)} " +
+                            "afterMs=${System.currentTimeMillis() - startedAt} — Firebase accepted the request and handed the " +
+                            "SMS to its carrier; if it never arrives check Authentication → Usage, the SMS region policy, " +
+                            "billing (Blaze) and whether the number is a test number (test numbers never get an SMS)",
+                    )
                     if (continuation.isActive) continuation.resume(FirebaseResult.Success(PhoneVerification(verificationId)))
                 }
 
+                override fun onCodeAutoRetrievalTimeOut(verificationId: String) {
+                    PhoneAuthLog.info(
+                        "autoRetrievalTimeout verificationId=${PhoneAuthLog.preview(verificationId)} — this device did not " +
+                            "read the SMS by itself (normal when the SMS goes to another phone); the user types the code",
+                    )
+                }
+
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                    PhoneAuthLog.info("verificationCompleted (instant / auto-retrieved) smsCodePresent=${credential.smsCode != null}")
                     if (!continuation.isActive) return
                     auth.signInWithCredential(credential).addOnCompleteListener { task ->
                         val user = task.result?.user
@@ -59,6 +83,7 @@ class AndroidPhoneAuthGateway(
                 }
 
                 override fun onVerificationFailed(exception: FirebaseException) {
+                    PhoneAuthLog.failure("verifyPhoneNumber", exception)
                     if (continuation.isActive) continuation.resume(FirebaseResult.Failure(exception.toFailure(PhoneAuthStage.Start)))
                 }
             }
@@ -69,20 +94,27 @@ class AndroidPhoneAuthGateway(
                 .setCallbacks(callbacks)
             // "Resend code" for the same number reuses Firebase's resend token (no new reCAPTCHA / Play Integrity round).
             resend?.takeIf { it.phoneE164 == phoneE164 }?.let { builder.setForceResendingToken(it.token) }
+            PhoneAuthLog.info("verifyPhoneNumber requested")
             val options = builder.build()
             PhoneAuthProvider.verifyPhoneNumber(options)
         }
     }
 
     override suspend fun confirm(verification: PhoneVerification, code: String): FirebaseResult<String> {
-        verification.autoVerifiedIdToken?.let { return FirebaseResult.Success(it) }
+        verification.autoVerifiedIdToken?.let {
+            PhoneAuthLog.info("confirm skipped: already auto-verified")
+            return FirebaseResult.Success(it)
+        }
+        PhoneAuthLog.info("confirm verificationId=${PhoneAuthLog.preview(verification.id)} codeLength=${code.length}")
         return try {
             val credential = PhoneAuthProvider.getCredential(verification.id, code)
             val user = auth.signInWithCredential(credential).awaitResult().user
                 ?: return FirebaseResult.Failure(FirebaseFailure.Unknown(null))
             val token = user.getIdToken(false).awaitResult().token
+            PhoneAuthLog.info("confirm OK uid=${PhoneAuthLog.preview(user.uid)} idToken=${token != null}")
             if (token != null) FirebaseResult.Success(token) else FirebaseResult.Failure(FirebaseFailure.Unknown(null))
         } catch (expected: FirebaseException) {
+            PhoneAuthLog.failure("confirm", expected)
             FirebaseResult.Failure(expected.toFailure(PhoneAuthStage.Confirm))
         }
     }
