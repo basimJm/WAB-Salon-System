@@ -126,7 +126,7 @@
 
 ### CUS-071 — Firebase per environment; version name without env suffix
 - Branch: `feat/cus-071-firebase-per-env`
-- Status: IN REVIEW
+- Status: DONE (PR #334; customer → main #335; main → customer synced)
 - Acceptance criteria (owner requests 2026-10-21):
   - [x] Dev ids `com.fab.wab.customer.dev` (Android `DEV_APPLICATION_ID_SUFFIX=.dev`, iOS `BUNDLE_ID_SUFFIX = .dev`); prod `com.fab.wab.customer`
   - [x] Android `src/{dev,prod}/google-services.json`; iOS `iosApp/Firebase/{dev,prod}/GoogleService-Info.plist` copied by the "Copy Firebase Config" build phase per `APP_ENV`; old single files removed; placeholders until the owner's real files
@@ -135,3 +135,15 @@
 - Tests: aapt: dev `com.fab.wab.customer.dev` 1.0, prod `com.fab.wab.customer` 1.0; xcodebuild Debug-Dev / Debug-Prod: bundle id and bundled plist BUNDLE_ID match; gate: policy, contract, detekt, unit tests, all Android variants, iOS Dev configs green
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — build config only; no business code. DEVIATIONS: gate stopped by the owner before iOS Prod configs and K/N tests (Debug-Prod built by hand and green); side-by-side install on a device not done (emulator was closed); real Firebase files pending (owner).
+
+### CUS-072 — iOS Phone OTP URL scheme + Crashlytics dSYM upload
+- Branch: `feat/cus-072-firebase-ios-otp-crashlytics`
+- Status: IN REVIEW
+- Acceptance criteria (owner request 2026-10-21 "set up Firebase SMS OTP, Analytics, Crashlytics for Android and iOS"):
+  - [x] Android: Phone Auth, Analytics, Crashlytics, FCM already wired (CUS-004); nothing missing in code
+  - [x] iOS Phone Auth: build step registers the encoded-app-id / reversed-client-id URL scheme from the env plist; `FirebaseSetup.handleAuthURL` passes reCAPTCHA return URLs to Firebase Auth before deep links
+  - [x] iOS Crashlytics: "Upload Crashlytics Symbols" phase (Release dSYMs; skipped for placeholder configs)
+  - [x] `docs/FIREBASE_SETUP.md` lists what is wired per platform
+- Tests: xcodebuild Debug-Dev + Release-Prod green; built Info.plist has the URL scheme; upload step skips with the placeholder; app launches on the simulator
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — build scripts + one Swift entry point. DEVIATION: real OTP, events and crash reports cannot be verified until the owner adds the real Firebase files and finishes the console steps.
