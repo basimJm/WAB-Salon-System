@@ -6,6 +6,8 @@ sealed interface FavoritesContract {
 
     data class UiState(
         val signedIn: Boolean? = null,
+        /** First name (registered) or nickname (guest) for the "Hello, …" header of S20. */
+        val greetingName: String = "",
         val loading: Boolean = false,
         val refreshing: Boolean = false,
         val loadingMore: Boolean = false,

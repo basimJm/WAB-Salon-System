@@ -22,6 +22,7 @@ class BookingSuccessViewModel(
         when (event) {
             UiAction.OnCopyReference -> {
                 analytics.trackAction(AnalyticsAction(BookingSuccessAnalytics.ACTION_COPY_REFERENCE))
+                updateState { copy(copied = true) }
                 emitSideEffect(SideEffect.CopyToClipboard(state.referenceNumber))
             }
             UiAction.OnViewBooking -> {

@@ -82,3 +82,44 @@
 - Tests: none (docs only)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only, no source changed.
+
+### CUS-069 — Design fidelity pass: app icon + logo, every component and screen matched to `design/WAB 0x *.dc.html`
+- Branch: `feat/cus-069-design-fidelity`
+- Status: DONE (PR #322)
+- Branched from `origin/customer` after PR #319.
+- Acceptance criteria (owner request 2026-10-19/20; design files = reference, `CLAUDE.md` §3 precedence):
+  - [x] App icon = `design/assets/wab-app-icon.png` on iOS + Android (legacy, round, adaptive, Play 512); in-app logo = same icon via `brand/AppLogo` + `AppBrandHeader` (wordmark/tagline typography tokens, non-translatable brand strings)
+  - [x] Design icons: 50 stroke icons rebuilt from the design SVG paths (`icons/DesignIcons.kt` + `DesignIconPaths.kt`), `AppIcons` points at them (Material kept only for icons the design lacks)
+  - [x] Chrome: tab bar (22 dp icons, bold active label, top hairline, design padding), top bar title bold
+  - [x] Screens rewritten against the design: auth/onboarding/system (01), discovery (02), salon (03), booking flow + S17 (04), bookings + details + rating (05), notifications/favorites/profile/edit/content (06); feature values in `*DesignConstants.kt`
+  - [x] Date fields open a calendar (owner request 2026-10-20): `AppDatePickerDialog` (theme colours, AR/EN title, calendar only, no typed-input toggle) + `DatePickerDates` (ISO ↔ picker millis, dd/MM/yyyy display); notifications From/To use it
+  - [x] Policy: `*Constants.kt` may hold dp/sp (previews still may not); test added
+- Tests: `scripts/ci/run_local_checks.sh` exit 0 (policy, contract, detekt, unit tests + 4 Android variants, 4 iOS configs, K/N tests) after the screen work; then `testAndroidHostTest` + detekt + policy green after the date picker; new `DatePickerDatesTest` (4), `BookingSuccessViewModelTest` copied flag, `test_hardcoded` constants case
+- Loops: 1/1 — re-checked: gate log, emulator (Pixel AVD, AR dark) home with design icons/tab bar, notifications filter → calendar → 20/10/2026 → Apply enabled; found and fixed: English picker title, typed-date toggle, preview dp exemption, booking legend detekt, success-VM test collector
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — design-system additions are token-based and reusable; no contract/API change; AR+EN strings for every new key. DEVIATIONS: per-screen visual comparison was done by agents reading the design HTML, emulator spot-checks only covered home and the notifications filter (not every screen, not EN light / landscape); iOS simulator run blocked by placeholder Firebase keys; states the contracts cannot express (salon image on booking cards, staff rating, bride-only VIP flag, payment verify screen = CUS-047) stay as before; the claude.ai/design import could not run (needs interactive `/design-login`), the repo copies of the design were used.
+
+### T-128 — Docs: CUS-069 DONE
+- Branch: `docs/cus-069-done`
+- Status: IN REVIEW
+- Acceptance criteria: status set through `tasks.py`; board regenerated
+- Tests: none (docs only)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only.
+
+### CUS-070 — iOS: no launch crash with placeholder Firebase keys; OTP countdown text
+- Branch: `fix/cus-070-ios-firebase-guard`
+- Status: DONE (PR #325)
+- Acceptance criteria (owner request 2026-10-20 "run iOS and see if there are crashes"):
+  - [x] Launch no longer crashes: `FirebaseSetup.configureIfValid()` configures Firebase only when `GoogleService-Info.plist` has a 39-char API key; otherwise no Firebase bridges, no Messaging delegate, APNs token ignored (Kotlin side falls back to its no-op bridges, as Android does)
+  - [x] OTP resend line formats the countdown into `otp_resend_in` (was showing a raw `%1$s`)
+- Tests: `:feature:auth:presentation:testAndroidHostTest` green, detekt + policy green, `xcodebuild iosApp-Dev Debug-Dev` succeeded
+- Loops: 1/1 — simulator (iPhone 17, AR light): launch → onboarding → nickname → home → salon → book (login gate) → login → OTP → home → bookings → booking details → profile → favorites → notifications → filter → calendar → 15/10/2026 → logout → login → OTP text fixed; no crash report after the fix (only the 10:02 pre-fix `com.firebase.installations` report)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — guard is a startup-only Swift change; real keys keep the full Firebase path. DEVIATION: with placeholder keys iOS runs without push/analytics/crash reporting until the owner supplies the real plist; no Swift unit test (the guard is plain plist reading, verified on the simulator).
+
+### T-129 — Docs: CUS-070 DONE
+- Branch: `docs/cus-070-done`
+- Status: IN REVIEW
+- Acceptance criteria: status set through `tasks.py`; board regenerated
+- Tests: none (docs only)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only.

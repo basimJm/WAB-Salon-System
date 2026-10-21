@@ -6,6 +6,7 @@ import com.fab.wab.customer.core.analytics.analyticsParams
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.favorites.FavoritesDefaults
+import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
@@ -39,7 +40,12 @@ class FavoritesViewModel(
             sessionStore.state.collect { session ->
                 val was = uiState.value.signedIn
                 updateState {
-                    copy(signedIn = session.isSignedIn, salons = if (session.isSignedIn) salons else emptyList(), loaded = false)
+                    copy(
+                        signedIn = session.isSignedIn,
+                        greetingName = session.greetingName(),
+                        salons = if (session.isSignedIn) salons else emptyList(),
+                        loaded = false,
+                    )
                 }
                 if (session.isSignedIn && was != true) load()
             }
@@ -121,6 +127,11 @@ class FavoritesViewModel(
     }
 
     private fun List<*>.isFull(): Boolean = size >= FavoritesDefaults.PAGE_SIZE
+
+    private fun SessionState.greetingName(): String = when (this) {
+        is SessionState.SignedIn -> user.firstName
+        is SessionState.Guest -> profile.nickname.orEmpty()
+    }
 
     private fun track(action: String, vararg params: Pair<String, String>) {
         analytics.trackAction(AnalyticsAction(action, analyticsParams { params.forEach { (k, v) -> text(k, v) } }))

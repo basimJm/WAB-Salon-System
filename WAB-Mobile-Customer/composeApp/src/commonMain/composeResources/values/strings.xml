@@ -4,9 +4,9 @@
     <string name="splash_version">v%1$s</string>
 
     <!-- Update Dialogs -->
-    <string name="force_update_title">Update Required</string>
+    <string name="force_update_title">Update required</string>
     <string name="force_update_message">A new version of WAB is available. Please update to continue.</string>
-    <string name="force_update_button">Update Now</string>
+    <string name="force_update_button">Update now</string>
 
     <!-- Maintenance Dialog -->
     <string name="maintenance_title">Under maintenance</string>

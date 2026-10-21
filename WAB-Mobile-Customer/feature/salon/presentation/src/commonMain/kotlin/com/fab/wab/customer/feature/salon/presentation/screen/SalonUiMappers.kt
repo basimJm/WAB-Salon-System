@@ -3,8 +3,10 @@
 package com.fab.wab.customer.feature.salon.presentation.screen
 
 import androidx.compose.runtime.Composable
+import com.fab.wab.customer.core.common.BusinessTime
 import com.fab.wab.customer.core.common.TimeFormat
 import com.fab.wab.customer.core.domain.salon.DayOfWeek
+import kotlinx.datetime.DayOfWeek as IsoDayOfWeek
 import com.fab.wab.customer.core.domain.salon.GalleryItem
 import com.fab.wab.customer.core.domain.salon.MediaType
 import com.fab.wab.customer.core.domain.salon.OpeningHours
@@ -30,6 +32,9 @@ import com.fab.wab.customer.feature.salon.presentation.resources.day_sun
 import com.fab.wab.customer.feature.salon.presentation.resources.day_thu
 import com.fab.wab.customer.feature.salon.presentation.resources.day_tue
 import com.fab.wab.customer.feature.salon.presentation.resources.day_wed
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -79,3 +84,15 @@ fun Review.toUi(): ReviewUi = ReviewUi(
     comment = comment.orEmpty(),
     dateText = TimeFormat.isoDateText(createdAt) ?: createdAt,
 )
+
+/** The business day in Asia/Amman for [now] (S07 hours card highlights today). Pure and tested. */
+fun todayDayOfWeek(now: Instant = BusinessTime.nowInstant(), zoneId: String = BusinessTime.ZONE_ID): DayOfWeek =
+    when (now.toLocalDateTime(TimeZone.of(zoneId)).dayOfWeek) {
+        IsoDayOfWeek.SATURDAY -> DayOfWeek.SAT
+        IsoDayOfWeek.SUNDAY -> DayOfWeek.SUN
+        IsoDayOfWeek.MONDAY -> DayOfWeek.MON
+        IsoDayOfWeek.TUESDAY -> DayOfWeek.TUE
+        IsoDayOfWeek.WEDNESDAY -> DayOfWeek.WED
+        IsoDayOfWeek.THURSDAY -> DayOfWeek.THU
+        IsoDayOfWeek.FRIDAY -> DayOfWeek.FRI
+    }

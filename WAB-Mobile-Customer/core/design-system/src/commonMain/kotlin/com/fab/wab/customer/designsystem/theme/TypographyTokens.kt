@@ -28,6 +28,10 @@ data class TypographyTokens(
     val labelLarge: TextStyle,
     val labelMedium: TextStyle,
     val labelSmall: TextStyle,
+    /** "WAB" serif wordmark under the logo (26 sp, letter-spacing .5). */
+    val wordmark: TextStyle,
+    /** "WEDDING & BEAUTY" tagline (10.5 sp, letter-spacing 2, semibold). */
+    val tagline: TextStyle,
 )
 
 private fun style(family: FontFamily, weight: FontWeight, size: TextUnit, lineHeight: TextUnit) = TextStyle(
@@ -52,6 +56,8 @@ fun appTypography(headline: FontFamily, body: FontFamily) = TypographyTokens(
     labelLarge = style(body, FontWeight.SemiBold, 15.sp, 22.sp),
     labelMedium = style(body, FontWeight.SemiBold, 12.sp, 18.sp),
     labelSmall = style(body, FontWeight.SemiBold, 11.sp, 16.sp),
+    wordmark = style(headline, FontWeight.Bold, 26.sp, 32.sp).copy(letterSpacing = 0.5.sp),
+    tagline = style(body, FontWeight.SemiBold, 10.5.sp, 14.sp).copy(letterSpacing = 2.sp),
 )
 
 /** Material text styles mapped from WAB styles, so stock Material components use the bundled fonts. */

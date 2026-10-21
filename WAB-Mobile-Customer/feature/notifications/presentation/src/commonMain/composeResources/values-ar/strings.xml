@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notifications_title">الإشعارات</string>
-    <string name="notifications_filter">تصفية</string>
+    <string name="notifications_filter">تصفية الإشعارات</string>
     <string name="notifications_empty">لا توجد إشعارات</string>
+    <string name="notifications_error">حدث خطأ ما</string>
+    <string name="notifications_retry">إعادة المحاولة</string>
     <string name="notifications_chip_dates">%1$s – %2$s</string>
     <string name="notifications_chip_from">من %1$s</string>
     <string name="notifications_chip_to">حتى %1$s</string>
     <string name="notifications_chip_text">”%1$s“</string>
+    <string name="notifications_chip_remove">إزالة التصفية %1$s</string>
     <string name="notifications_filter_title">تصفية الإشعارات</string>
-    <string name="notifications_from_label">من (YYYY-MM-DD)</string>
-    <string name="notifications_to_label">إلى (YYYY-MM-DD)</string>
+    <string name="notifications_from_label">من</string>
+    <string name="notifications_to_label">إلى</string>
     <string name="notifications_dates_error">يجب أن يكون تاريخ النهاية بعد تاريخ البداية</string>
-    <string name="notifications_search_hint">بحث (مثل اسم الصالون)</string>
+    <string name="notifications_search_label">بحث</string>
+    <string name="notifications_search_hint">اسم الصالون…</string>
     <string name="notifications_apply">تطبيق</string>
-    <string name="notifications_reset">إعادة ضبط</string>
+    <string name="notifications_reset">إعادة تعيين</string>
     <string name="notifications_view_booking">عرض الحجز</string>
-    <string name="notifications_close">إغلاق</string>
-    <string name="notifications_unread">غير مقروء</string>
     <string name="time_now">الآن</string>
     <string name="time_minutes_ago">قبل %1$d دقيقة</string>
     <string name="time_hours_ago">قبل %1$d ساعة</string>
     <string name="time_yesterday">أمس</string>
-    <string name="time_days_ago">قبل %1$d أيام</string>
+    <string name="time_days_ago">قبل %1$d يوم</string>
 </resources>
