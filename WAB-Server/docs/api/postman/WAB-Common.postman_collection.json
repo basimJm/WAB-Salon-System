@@ -115,6 +115,91 @@
           }
         }
       ]
+    },
+    {
+      "name": "App links",
+      "item": [
+        {
+          "name": "Android App Links verification (Digital Asset Links)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/.well-known/assetlinks.json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ".well-known",
+                "assetlinks.json"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "One entry per configured Android package. Platform format, not the base envelope. Public; always 200, never redirected."
+          }
+        },
+        {
+          "name": "iOS Universal Links verification (apple-app-site-association)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/.well-known/apple-app-site-association",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ".well-known",
+                "apple-app-site-association"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Configured app IDs claim the salon path. Platform format, not the base envelope. Public; always 200, never redirected."
+          }
+        },
+        {
+          "name": "Shared salon link: fallback page for a phone without the app",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/salon/:salonId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "salon",
+                ":salonId"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "salonId",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Small localized HTML page (noindex) with store buttons. The app opens this URL directly when installed."
+          }
+        }
+      ]
     }
   ],
   "variable": [
