@@ -94,4 +94,19 @@
     <string name="success_copied">تم نسخ رقم المرجع</string>
     <string name="success_view_booking">عرض الحجز</string>
     <string name="success_back_home">العودة للرئيسية</string>
+    <string name="booking_pay_online_soon">الدفع الإلكتروني قريباً</string>
+    <string name="verify_title">تأكيد الحجز</string>
+    <string name="verify_heading">راجع وتحقق</string>
+    <string name="verify_salon">الصالون</string>
+    <string name="verify_when">التاريخ والوقت</string>
+    <string name="verify_people">عدد الأشخاص</string>
+    <string name="verify_payment">الدفع</string>
+    <string name="verify_total">المجموع</string>
+    <string name="verify_hint">سنرسل رمز تحقق إلى هاتفك لتأكيد الحجز.</string>
+    <string name="verify_cta">تحقق بالرمز</string>
+    <string name="verify_processing">جارٍ تأكيد حجزك…</string>
+    <string name="verify_dont_close">لا تغلق هذه الصفحة</string>
+    <string name="verify_error_title">تعذّر تأكيد الحجز</string>
+    <string name="verify_expired_title">انتهت مهلة حجز الموعد</string>
+    <string name="verify_back_to_booking">العودة إلى الحجز</string>
 </resources>

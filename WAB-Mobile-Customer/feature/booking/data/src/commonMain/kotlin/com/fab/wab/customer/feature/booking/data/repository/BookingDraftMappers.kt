@@ -1,11 +1,13 @@
 package com.fab.wab.customer.feature.booking.data.repository
 
 import com.fab.wab.customer.core.data.contract.generated.GetBookingsDraftsByIdData
+import com.fab.wab.customer.core.data.contract.generated.PostBookingsData
 import com.fab.wab.customer.core.data.contract.generated.PostBookingsDraftsBody
 import com.fab.wab.customer.core.data.contract.generated.PostBookingsDraftsBodyPersonsItem
 import com.fab.wab.customer.core.data.contract.generated.PostBookingsDraftsData
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.feature.booking.domain.model.BookingDraft
+import com.fab.wab.customer.feature.booking.domain.model.CreatedBooking
 import com.fab.wab.customer.feature.booking.domain.model.DraftMoney
 import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
 import com.fab.wab.customer.feature.booking.domain.model.DraftPersonResult
@@ -86,3 +88,5 @@ fun GetBookingsDraftsByIdData.toDomain(): BookingDraft = BookingDraft(
         notes = policy.notes?.takeIf { it.isNotBlank() },
     ),
 )
+
+fun PostBookingsData.toDomain(): CreatedBooking = CreatedBooking(id = id, referenceNumber = referenceNumber, status = status)

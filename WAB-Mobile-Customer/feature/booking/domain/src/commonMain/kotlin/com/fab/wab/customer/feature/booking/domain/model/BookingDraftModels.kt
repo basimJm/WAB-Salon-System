@@ -95,3 +95,6 @@ data class BookingDraft(
     val money: DraftMoney,
     val policy: DraftPolicy,
 )
+
+/** `POST /bookings` 201: the request is PENDING until the salon responds (PRD S17 shows the reference). */
+data class CreatedBooking(val id: String, val referenceNumber: String, val status: String)
