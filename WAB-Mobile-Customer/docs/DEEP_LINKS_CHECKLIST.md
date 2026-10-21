@@ -1,5 +1,12 @@
 # Deep links — owner checklist (CUS-057, PRD §4.4)
 
+**Current setup (2026-10-21):** dev links use `https://wab-server-dev.onrender.com/salon/{id}`; the server (SRV-135) serves
+`/.well-known/assetlinks.json`, `/.well-known/apple-app-site-association` and a `/salon/{id}` fallback page from env
+`APP_LINKS_ANDROID_PACKAGES`, `APP_LINKS_ANDROID_SHA256`, `APP_LINKS_IOS_APP_IDS` (+ optional store URLs). On Render dev set
+`APP_LINKS_ANDROID_PACKAGES=com.fab.wab.customer.dev`, `APP_LINKS_ANDROID_SHA256=<debug SHA-256>`,
+`APP_LINKS_IOS_APP_IDS=<TEAM_ID>.com.fab.wab.customer.dev`, deploy `server`, then re-verify on the device. Prod keeps the
+placeholder host until the platform domain exists (package `com.fab.wab.customer`, release + Play signing SHA-256).
+
 The app opens `https://<web host>/salon/{salonId}` as an Android App Link / iOS Universal Link. The host is the one
 configured as `DEV_WEB_BASE_URL` / `PROD_WEB_BASE_URL` (`gradle.properties`) and `WEB_BASE_URL` + `DEEP_LINK_HOST`
 (`iosApp/Configuration/<Env>.xcconfig`); the code never hardcodes it. Until the platform domain is decided the hosts are

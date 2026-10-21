@@ -195,7 +195,7 @@
 
 ### CUS-077 — Booking verification (OTP) + success, no online payment; FCM token stored again
 - Branch: `feat/cus-077-booking-verify`
-- Status: IN REVIEW
+- Status: DONE (PR #342)
 - Acceptance criteria (owner requests 2026-10-21):
   - [x] `Screen.BookingVerify(draftId)` real screen (placeholder `PlaceholderNavigation.kt` removed): loads the draft (salon, date/time, people, pay on arrival, total), "Verify with code" → OTP (BOOKING_CONFIRMATION, own phone from the profile) → `verify-otp` → `POST /bookings` → `BookingSuccess`; the whole booking flow (start, summary, verify) is popped so Back from S17 leaves booking
   - [x] Errors: DRAFT_EXPIRED → message + back to booking; failed verify → retry reopens OTP; failed create → retry create without a new code
@@ -205,3 +205,13 @@
 - Tests: `./gradlew :androidApp:assembleDevDebug testAndroidHostTest` exit 0 (all modules), detekt exit 0, policy ok; dev build installed on the emulator
 - Loops: 1/1 — re-checked every criterion against the code and the test run; found and fixed: Back after success landed on the summary step (now `popUpTo<Screen.BookingStart>(inclusive)`)
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — reuses the OTP hand-off pattern (`PendingOtpVerification`), contract ops from the generated snapshot, no payment code. DEVIATIONS: emulator walk-through stopped at login (Firebase rejected 123456 for the test number +962799000004 — owner to confirm the test code), so the verify/success screens were not exercised on a device; iOS not built for this change; FCM token delivery not tested with a console push.
+
+### CUS-078 — Dev deep links on the dev server host (owner request 2026-10-21)
+- Branch: `feat/cus-078-dev-app-links`
+- Status: IN REVIEW
+- Acceptance criteria (PRD §4.4; server SRV-135 serves the .well-known files + fallback page):
+  - [x] Dev web/deep-link host = `wab-server-dev.onrender.com` (Android `DEV_WEB_BASE_URL`, iOS Dev `WEB_BASE_URL` + `DEEP_LINK_HOST`), so shared salon links are `https://wab-server-dev.onrender.com/salon/{id}`; prod unchanged (placeholder until the domain exists)
+  - [x] `docs/DEEP_LINKS_CHECKLIST.md`: current setup + Render env values
+- Tests: config only (no code); emulator: `am start -a VIEW -d https://wab-server-dev.onrender.com/salon/08c23382575950264c482f48` opens Salon Details "Gentlemen's Corner"; policy ok
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — config + doc only. PENDING (owner): set `APP_LINKS_*` on Render dev and deploy `server` (dev host still answers 404 for assetlinks.json), then verify the tap-from-WhatsApp path on a device; iOS needs the Team ID + Associated Domains capability.
