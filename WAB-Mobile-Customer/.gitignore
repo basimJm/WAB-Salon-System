@@ -18,3 +18,5 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
 .hotswan/
+# per-developer iOS signing overrides
+iosApp/Configuration/Local.xcconfig

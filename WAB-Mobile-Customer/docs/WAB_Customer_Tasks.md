@@ -123,7 +123,8 @@
 | CUS-075 | Phone Auth diagnostic log trail `WAB-PhoneAuth` (Android Logcat + iOS console): every step, Firebase error codes, App Check token result; numbers masked | `feat/cus-075-phone-auth-logs` | CUS-074 | DONE | Owner request 2026-10-21 |
 | CUS-076 | Firebase Android SDK upgrade (Messaging 26, Auth 25, Analytics 24, Crashlytics 21, App Check 20) and FCM 26 `register()` / `onRegistered` instead of the deprecated token API | `feat/cus-076-firebase-upgrade` | CUS-075 | DONE | Versions bumped by the owner 2026-10-21 |
 | CUS-077 | S16 step 6 booking verification (OTP → verify-otp → create) + S17 hand-off, pay on arrival only; FCM token stored at startup | `feat/cus-077-booking-verify` | CUS-076 | DONE | Online payment stays CUS-047 (PAY-011) |
-| CUS-078 | Dev deep-link host = `wab-server-dev.onrender.com` (server SRV-135 serves App Links / Universal Links files) | `feat/cus-078-dev-app-links` | CUS-077 | IN REVIEW | Owner sets Render env + deploys |
+| CUS-078 | Dev deep-link host = `wab-server-dev.onrender.com` (server SRV-135 serves App Links / Universal Links files) | `feat/cus-078-dev-app-links` | CUS-077 | DONE | Owner sets Render env + deploys |
+| CUS-079 | iOS signing: apply the entitlements file (push, Associated Domains, App Attest were never signed in), team + free-account entitlements via git-ignored Local.xcconfig | `fix/cus-079-ios-signing` | CUS-078 | IN REVIEW | Found while preparing a device run 2026-10-21 |
 
 ## 4. Traceability (PRD screen → task)
 S01 CUS-025 · S02 CUS-026 · S03 CUS-032 · S04 CUS-033 · S05 CUS-034 · S06 CUS-035 · S07 CUS-036/037 · S08/S09 CUS-038 · S10 CUS-039 · S11 CUS-028 · S12 CUS-030 · S13 CUS-029 · S14 CUS-041 · S15 CUS-042 · S16 CUS-043…047 · S17 CUS-048 · S18 CUS-049 · S19 CUS-050 · S20 CUS-040 · S21 CUS-053 · S22 CUS-054 · S23 CUS-055 · S24 CUS-024 · §3 global rules CUS-006/018/020/021/022 · §4 CUS-026/057 · §5 CUS-011 · §10 CUS-050/051 · §14 CUS-012/058 · §15 CUS-011.
