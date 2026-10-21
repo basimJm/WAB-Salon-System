@@ -1009,8 +1009,8 @@
                   },
                   "flagKey": {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
+                    "maxLength": 1024,
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                   },
                   "phoneRegex": {
                     "type": "string",
@@ -1442,8 +1442,8 @@
                   },
                   "flagKey": {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
+                    "maxLength": 1024,
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                   },
                   "phoneRegex": {
                     "type": "string",
@@ -7592,13 +7592,13 @@
                     "properties": {
                       "ar": {
                         "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200
+                        "maxLength": 1024,
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                       },
                       "en": {
                         "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200
+                        "maxLength": 1024,
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                       }
                     },
                     "required": [
@@ -8072,13 +8072,13 @@
                     "properties": {
                       "ar": {
                         "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200
+                        "maxLength": 1024,
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                       },
                       "en": {
                         "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200
+                        "maxLength": 1024,
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                       }
                     },
                     "required": [
@@ -8603,8 +8603,8 @@
                   },
                   "imageKey": {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
+                    "maxLength": 1024,
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                   },
                   "gender": {
                     "type": "string",
@@ -9077,8 +9077,8 @@
                   },
                   "imageKey": {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
+                    "maxLength": 1024,
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                   },
                   "active": {
                     "type": "boolean"
