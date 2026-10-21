@@ -120,7 +120,6 @@ private fun ApplicationProductFlavor.environment(id: String, prefix: String, pro
     dimension = ENVIRONMENT_DIMENSION
     val baseUrl = requireNotNull(property("${prefix}_API_BASE_URL")) { missing("${prefix}_API_BASE_URL") }
     property("${prefix}_APPLICATION_ID_SUFFIX")?.let { applicationIdSuffix = it }
-    versionNameSuffix = "-$id"
     buildConfigField("String", "ENVIRONMENT", quoted(id))
     buildConfigField("String", "API_BASE_URL", quoted(baseUrl))
     val webBaseUrl = requireNotNull(property("${prefix}_WEB_BASE_URL")) { missing("${prefix}_WEB_BASE_URL") }
