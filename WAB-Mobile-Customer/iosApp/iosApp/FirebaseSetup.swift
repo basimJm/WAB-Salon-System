@@ -1,3 +1,4 @@
+import FirebaseAuth
 import FirebaseCore
 
 /// Configures Firebase only when `GoogleService-Info.plist` carries a real API key.
@@ -16,5 +17,11 @@ enum FirebaseSetup {
         }
         FirebaseApp.configure(options: options)
         return true
+    }
+
+    /// Phone Auth reCAPTCHA fallback returns through a URL; Firebase consumes it when it is its own.
+    static func handleAuthURL(_ url: URL) -> Bool {
+        guard FirebaseApp.app() != nil else { return false }
+        return Auth.auth().canHandle(url)
     }
 }

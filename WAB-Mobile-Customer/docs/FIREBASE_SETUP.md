@@ -27,6 +27,14 @@ The ids come from `DEV_APPLICATION_ID_SUFFIX=.dev` (`gradle.properties`) and `BU
 | Dev `GoogleService-Info.plist` | `iosApp/Firebase/dev/GoogleService-Info.plist` |
 | Prod `GoogleService-Info.plist` | `iosApp/Firebase/prod/GoogleService-Info.plist` |
 
+## What is already wired in the app
+| Feature | Android | iOS |
+|---|---|---|
+| Phone OTP (Firebase Auth) | `AndroidPhoneAuthGateway` (core/firebase) | `SwiftPhoneAuthBridge`; URL scheme (encoded app id + reversed client id) added at build time by `iosApp/scripts/firebase_config.sh`; returning URLs passed to `Auth.auth().canHandle` |
+| Analytics | `AndroidFirebaseServices` | `SwiftAnalyticsBridge` |
+| Crashlytics | Crashlytics Gradle plugin (R8 mapping upload on release) | `SwiftCrashReporterBridge`; dSYM upload phase `iosApp/scripts/crashlytics_upload.sh` (skipped while the config is a placeholder) |
+| Push (FCM) | `MyFirebaseMessagingService` | `AppDelegate` + APNs |
+
 ## How the app picks the file
 - **Android**: the Google Services plugin reads `src/<flavor>/google-services.json` for the `dev` / `prod` flavor.
 - **iOS**: the "Copy Firebase Config" build phase copies `iosApp/Firebase/$(APP_ENV)/GoogleService-Info.plist` into the app bundle (`APP_ENV` = `dev` / `prod` from the xcconfig).
