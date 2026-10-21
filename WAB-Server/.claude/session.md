@@ -10,6 +10,20 @@
 
 ## Current task
 
+### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
+
+- Branch: `feat/srv-135-app-links`
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD §4.4 deep links; CLAUDE.md §5 config, §7 locales, §11 docs; client impact: CUS deep-link host):
+  - [x] `GET /.well-known/assetlinks.json`: one entry per `APP_LINKS_ANDROID_PACKAGES` with `APP_LINKS_ANDROID_SHA256`; empty env → `[]`; 200 JSON, platform format (no envelope, documented)
+  - [x] `GET /.well-known/apple-app-site-association`: `APP_LINKS_IOS_APP_IDS` with `/salon/*`; 200 JSON
+  - [x] `GET /salon/{salonId}`: localized AR (rtl) / EN fallback page, store buttons from optional `APP_LINKS_PLAY_STORE_URL` / `APP_LINKS_APP_STORE_URL`, `noindex`, escaped output; invalid id → standard 404
+  - [x] Env keys in schema, `AppConfig.appLinks`, `.env.example`, `docker/env.{dev,prod}.example` (commented); wired through `createApp` and `server.ts`
+  - [x] OpenAPI (`common`) + `npm run docs` regenerated; locales AR/EN
+- Tests: `tests/appLinks.test.ts` (+ config cases), `tests/docs.test.ts` expected common paths; full gate green via the Terminal panel: format, lint, typecheck, build, 135 suites / 2649 tests
+- Loops: 1/1 — re-checked each criterion against the routes, config and the regenerated common document
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — root routes like health; values from env only. NOTE: owner sets the env on Render dev (package `com.fab.wab.customer.dev`, debug SHA-256) and deploys `server`.
+
 ### T-135 — Customer inserts fail with `language override unsupported: ar` (found while running the demo seed, 2026-10-21)
 
 - Branch: `fix/srv-customer-text-index`

@@ -245,6 +245,7 @@ export const startServer = async (
     trustProxyHops: config.trustProxyHops,
     docs: !config.isProduction,
     readinessChecks,
+    appLinks: config.appLinks,
     ...(services === undefined ? {} : { services }),
   });
   // Plain http server: Express 5's `app.listen` passes listen errors to its callback as if started.

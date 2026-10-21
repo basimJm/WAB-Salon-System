@@ -419,6 +419,191 @@
           }
         }
       }
+    },
+    "/.well-known/assetlinks.json": {
+      "get": {
+        "tags": [
+          "App links"
+        ],
+        "summary": "Android App Links verification (Digital Asset Links)",
+        "description": "One entry per configured Android package. Platform format, not the base envelope. Public; always 200, never redirected.",
+        "responses": {
+          "200": {
+            "description": "Asset links",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "relation": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "delegate_permission/common.handle_all_urls"
+                          ]
+                        }
+                      },
+                      "target": {
+                        "type": "object",
+                        "properties": {
+                          "namespace": {
+                            "type": "string",
+                            "enum": [
+                              "android_app"
+                            ]
+                          },
+                          "package_name": {
+                            "type": "string"
+                          },
+                          "sha256_cert_fingerprints": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "namespace",
+                          "package_name",
+                          "sha256_cert_fingerprints"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "relation",
+                      "target"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/apple-app-site-association": {
+      "get": {
+        "tags": [
+          "App links"
+        ],
+        "summary": "iOS Universal Links verification (apple-app-site-association)",
+        "description": "Configured app IDs claim the salon path. Platform format, not the base envelope. Public; always 200, never redirected.",
+        "responses": {
+          "200": {
+            "description": "Apple app site association",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "applinks": {
+                      "type": "object",
+                      "properties": {
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "appIDs": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "components": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "/": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "/"
+                                  ]
+                                }
+                              }
+                            },
+                            "required": [
+                              "appIDs",
+                              "components"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "details"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "applinks"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/salon/{salonId}": {
+      "get": {
+        "tags": [
+          "App links"
+        ],
+        "summary": "Shared salon link: fallback page for a phone without the app",
+        "description": "Small localized HTML page (noindex) with store buttons. The app opens this URL directly when installed.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "salonId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fallback page",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}
