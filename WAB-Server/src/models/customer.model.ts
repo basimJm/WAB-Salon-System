@@ -1,5 +1,7 @@
 import { Schema, model, type Types } from 'mongoose';
 import {
+  CUSTOMER_TEXT_INDEX_NAME,
+  CUSTOMER_TEXT_LANGUAGE_OVERRIDE,
   CUSTOMERS_COLLECTION,
   EMAIL_MAX_LENGTH,
   PERSON_NAME_MAX_LENGTH,
@@ -110,7 +112,11 @@ customerSchema.index({ status: 1 });
 customerSchema.index({ createdAt: -1 });
 customerSchema.index(
   { firstName: 'text', lastName: 'text', 'phone.e164': 'text' },
-  { default_language: 'none' },
+  {
+    name: CUSTOMER_TEXT_INDEX_NAME,
+    default_language: 'none',
+    language_override: CUSTOMER_TEXT_LANGUAGE_OVERRIDE,
+  },
 );
 
 export const CustomerModel = model<CustomerRaw>('Customer', customerSchema);

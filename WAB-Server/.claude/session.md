@@ -10,6 +10,19 @@
 
 ## Current task
 
+### T-135 — Customer inserts fail with `language override unsupported: ar` (found while running the demo seed, 2026-10-21)
+
+- Branch: `fix/srv-customer-text-index`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN customers `language` ar|en; CLAUDE.md §2 schema layer; API docs: no change):
+  - [x] Cause: the customer text index (admin search) had no `language_override`, so MongoDB read each row's `language` field as its text-search language and refused `ar`: every insert of an Arabic-language customer failed once the index existed (registration too, not only the seed)
+  - [x] The index is named `customer_search_text`, keeps `default_language: 'none'` and sets `language_override` to a field no document has
+  - [x] `ensureIndexes` drops the named `RETIRED_INDEXES` (the old auto-named customer text index) before creating, so the new one can exist (one text index per collection); "index/collection not found" is fine, any other drop error stops start-up as before
+  - [x] Guard: no text index in any model may read a stored field as its language
+- Tests: `tests/indexes.test.ts` (+8; 2 fail without the model fix); full gate green
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — drop runs once per database (then not found), safe with several instances. NOT verified against Atlas until the demo seed reruns.
+
 ### T-134 — Demo seed for every collection (owner request 2026-10-21: dev only, realistic sample data, all collections, owner provides photos)
 
 - Branch: `feat/srv-demo-seed-all`
