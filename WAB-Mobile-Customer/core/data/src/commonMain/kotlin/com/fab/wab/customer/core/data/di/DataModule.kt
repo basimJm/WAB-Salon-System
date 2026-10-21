@@ -23,7 +23,7 @@ import org.koin.dsl.module
 /** The app binds [ClientPlatform]; the environment carries the installed version the config call reports. */
 val dataModule = module {
     single { PlacesApiService(get<HttpClient>(), PlacesApiConfig.apiKey) }
-    single { AppConfigApi(client = get(), platform = get<ClientPlatform>(), appVersion = get<AppEnvironment>().appVersion) }
+    single { AppConfigApi(client = get(), platform = get<ClientPlatform>(), appVersion = "1.0") }
     single<AppConfigRepository> { AppConfigRepositoryImpl(get()) }
     single { LocationsApi(get()) }
     single { FavoritesApi(get()) }
