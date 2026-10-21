@@ -123,3 +123,15 @@
 - Tests: none (docs only)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs only.
+
+### CUS-071 — Firebase per environment; version name without env suffix
+- Branch: `feat/cus-071-firebase-per-env`
+- Status: IN REVIEW
+- Acceptance criteria (owner requests 2026-10-21):
+  - [x] Dev ids `com.fab.wab.customer.dev` (Android `DEV_APPLICATION_ID_SUFFIX=.dev`, iOS `BUNDLE_ID_SUFFIX = .dev`); prod `com.fab.wab.customer`
+  - [x] Android `src/{dev,prod}/google-services.json`; iOS `iosApp/Firebase/{dev,prod}/GoogleService-Info.plist` copied by the "Copy Firebase Config" build phase per `APP_ENV`; old single files removed; placeholders until the owner's real files
+  - [x] `docs/FIREBASE_SETUP.md` (console steps, SHA keys, APNs, file paths); CLAUDE.md rule paths updated
+  - [x] `/config` app version: Android `versionNameSuffix` removed, so dev and prod send `1.0` (iOS already `1.0`)
+- Tests: aapt: dev `com.fab.wab.customer.dev` 1.0, prod `com.fab.wab.customer` 1.0; xcodebuild Debug-Dev / Debug-Prod: bundle id and bundled plist BUNDLE_ID match; gate: policy, contract, detekt, unit tests, all Android variants, iOS Dev configs green
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — build config only; no business code. DEVIATIONS: gate stopped by the owner before iOS Prod configs and K/N tests (Debug-Prod built by hand and green); side-by-side install on a device not done (emulator was closed); real Firebase files pending (owner).
