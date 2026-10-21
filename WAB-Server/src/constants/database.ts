@@ -11,3 +11,14 @@ export const MONGO_READINESS_CHECK_NAME = 'mongodb';
 export const SORT_ASCENDING = 1;
 export const SORT_DESCENDING = -1;
 export const DEFAULT_SORT = { createdAt: SORT_DESCENDING } as const;
+
+/**
+ * Indexes a schema no longer declares and that must go before the new ones can be created (one
+ * text index per collection), by model name. Dropping is idempotent and runs at every start.
+ */
+export const RETIRED_INDEXES: Readonly<Record<string, readonly string[]>> = {
+  // Read each customer's `language` (ar/en) as a text-search language: inserting `ar` failed.
+  Customer: ['firstName_text_lastName_text_phone.e164_text'],
+};
+/** Server codes for "nothing to drop": the index or the whole collection does not exist yet. */
+export const MONGO_INDEX_NOT_FOUND_CODES: readonly number[] = [26, 27];

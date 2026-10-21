@@ -1,6 +1,12 @@
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { ALL_MODELS } from '../src/models';
+import { RETIRED_INDEXES } from '../src/constants/database';
+import {
+  CUSTOMER_TEXT_INDEX_NAME,
+  CUSTOMER_TEXT_LANGUAGE_OVERRIDE,
+} from '../src/constants/identity';
+import { CustomerModel } from '../src/models/customer.model';
 import { SettingModel } from '../src/models/setting.model';
 import { ensureIndexes, type IndexedModel } from '../src/utils/database/indexes';
 import type { Logger } from '../src/utils/logger';
@@ -70,5 +76,96 @@ describe('ensureIndexes', () => {
     await ensureIndexes([fakeModel('A', calls)], log);
     await ensureIndexes([fakeModel('A', calls)], log);
     expect(calls).toEqual(['A', 'A']);
+  });
+});
+
+describe('text indexes', () => {
+  /** MongoDB reads this field of each row as its text-search language unless told otherwise. */
+  const DEFAULT_LANGUAGE_OVERRIDE = 'language';
+
+  it('never read a stored field as the text-search language (a customer with language "ar" could not be saved)', () => {
+    for (const model of ALL_MODELS) {
+      for (const [fields, options] of model.schema.indexes()) {
+        if (!Object.values(fields).includes('text')) continue;
+        const override =
+          (options as { language_override?: string }).language_override ??
+          DEFAULT_LANGUAGE_OVERRIDE;
+        expect([model.modelName, Object.hasOwn(model.schema.paths, override)]).toEqual([
+          model.modelName,
+          false,
+        ]);
+      }
+    }
+  });
+
+  it('the customer search index has its own name, so the old one can be retired', () => {
+    const text = CustomerModel.schema
+      .indexes()
+      .find(([fields]) => Object.values(fields).includes('text'));
+    expect(text?.[1]).toMatchObject({
+      name: CUSTOMER_TEXT_INDEX_NAME,
+      default_language: 'none',
+      language_override: CUSTOMER_TEXT_LANGUAGE_OVERRIDE,
+    });
+    expect(RETIRED_INDEXES['Customer']).toContain('firstName_text_lastName_text_phone.e164_text');
+  });
+});
+
+describe('ensureIndexes with retired indexes', () => {
+  const retiringModel = (calls: string[], dropError?: Error): IndexedModel => ({
+    modelName: 'Customer',
+    collection: {
+      dropIndex: (name) => {
+        calls.push(`drop:${name}`);
+        return dropError === undefined ? Promise.resolve(true) : Promise.reject(dropError);
+      },
+    },
+    createIndexes: () => {
+      calls.push('create');
+      return Promise.resolve([]);
+    },
+  });
+  const retired = { Customer: ['old_text'] };
+
+  it('drops the retired index before creating the new ones, and logs it', async () => {
+    const calls: string[] = [];
+    const { logger: log, info } = logger();
+    await ensureIndexes([retiringModel(calls)], log, retired);
+    expect(calls).toEqual(['drop:old_text', 'create']);
+    expect(info).toHaveBeenCalledWith(
+      { model: 'Customer', index: 'old_text' },
+      'retired index dropped',
+    );
+  });
+
+  it.each([
+    ['index not found', 27],
+    ['collection not created yet', 26],
+  ])('carries on when there is nothing to drop (%s)', async (_label, code) => {
+    const calls: string[] = [];
+    await ensureIndexes(
+      [retiringModel(calls, Object.assign(new Error('gone'), { code }))],
+      logger().logger,
+      retired,
+    );
+    expect(calls).toEqual(['drop:old_text', 'create']);
+  });
+
+  it('stops start-up on any other drop failure', async () => {
+    const calls: string[] = [];
+    const denied = Object.assign(new Error('not authorized'), { code: 13 });
+    const { logger: log, error } = logger();
+    await expect(ensureIndexes([retiringModel(calls, denied)], log, retired)).rejects.toBe(denied);
+    expect(calls).toEqual(['drop:old_text']);
+    expect(error).toHaveBeenCalledWith(
+      { err: denied, model: 'Customer' },
+      'creating indexes failed',
+    );
+  });
+
+  it('leaves models without retired indexes alone', async () => {
+    const calls: string[] = [];
+    await ensureIndexes([fakeModel('Salon', calls)], logger().logger, retired);
+    expect(calls).toEqual(['Salon']);
   });
 });
