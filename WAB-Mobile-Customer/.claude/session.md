@@ -208,10 +208,21 @@
 
 ### CUS-078 — Dev deep links on the dev server host (owner request 2026-10-21)
 - Branch: `feat/cus-078-dev-app-links`
-- Status: IN REVIEW
+- Status: DONE (PR #345)
 - Acceptance criteria (PRD §4.4; server SRV-135 serves the .well-known files + fallback page):
   - [x] Dev web/deep-link host = `wab-server-dev.onrender.com` (Android `DEV_WEB_BASE_URL`, iOS Dev `WEB_BASE_URL` + `DEEP_LINK_HOST`), so shared salon links are `https://wab-server-dev.onrender.com/salon/{id}`; prod unchanged (placeholder until the domain exists)
   - [x] `docs/DEEP_LINKS_CHECKLIST.md`: current setup + Render env values
 - Tests: config only (no code); emulator: `am start -a VIEW -d https://wab-server-dev.onrender.com/salon/08c23382575950264c482f48` opens Salon Details "Gentlemen's Corner"; policy ok
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — config + doc only. PENDING (owner): set `APP_LINKS_*` on Render dev and deploy `server` (dev host still answers 404 for assetlinks.json), then verify the tap-from-WhatsApp path on a device; iOS needs the Team ID + Associated Domains capability.
+
+### CUS-079 — iOS signing: entitlements actually applied; team + free-account mode configurable
+- Branch: `fix/cus-079-ios-signing`
+- Status: IN REVIEW
+- Acceptance criteria (owner request 2026-10-21 "run on my iPhone 17 Pro"):
+  - [x] Bug: `CODE_SIGN_ENTITLEMENTS` was never set, so push, Associated Domains and App Attest were never signed into the app; now `CODE_SIGN_ENTITLEMENTS = $(WAB_ENTITLEMENTS)` (default `iosApp/iosApp.entitlements`) in `Config.xcconfig`
+  - [x] Team no longer hardcoded in the target: `DEVELOPMENT_TEAM = $(TEAM_ID)` (default X6UZ9NMK56); bundle id no longer appends `$(TEAM_ID)`
+  - [x] Optional git-ignored `Local.xcconfig` (included last by Dev/Prod) + `Local.xcconfig.example`: own `TEAM_ID`, and `WAB_ENTITLEMENTS = iosApp/iosApp-Personal.entitlements` (empty) for free Apple IDs
+- Tests: policy ok; xcodebuild Debug-Dev simulator green; generated entitlements = aps-environment development, applinks:wab-server-dev.onrender.com, appattest development; bundle id com.fab.wab.customer.dev
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — build config only. PENDING (owner): sign in to Xcode with an Apple ID and enable Developer Mode on the iPhone before a device build can run.
