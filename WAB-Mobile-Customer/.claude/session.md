@@ -173,7 +173,7 @@
 
 ### CUS-075 — Phone Auth diagnostic logs (Android + iOS)
 - Branch: `feat/cus-075-phone-auth-logs`
-- Status: IN REVIEW
+- Status: DONE (PR #339)
 - Acceptance criteria (owner request 2026-10-21 "no real SMS received, add logs for Firebase phone auth"):
   - [x] Android tag `WAB-PhoneAuth`: start (masked phone, activity, project, resend token), verifyPhoneNumber requested, codeSent (+ elapsed ms and what to check), autoRetrievalTimeout, verificationCompleted, failures with exception type + Firebase errorCode + message, confirm start / OK / failure; App Check token OK / FAILED at startup
   - [x] iOS prefix `WAB-PhoneAuth` (NSLog): same steps, `AuthErrorCode` name on failures, App Check token result, "Firebase NOT configured" when the plist is a placeholder
@@ -181,3 +181,14 @@
 - Tests: Android installDevDebug + prodRelease + core:firebase tests green, iOS Debug-Dev green, detekt + policy green; emulator log shows `WAB-PhoneAuth: codeSent … afterMs=3182`
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — logging only, PII masked.
+
+### CUS-076 — Firebase Android SDK upgrade (owner bumped versions) + FCM 26 API
+- Branch: `feat/cus-076-firebase-upgrade`
+- Status: IN REVIEW
+- Acceptance criteria (owner request 2026-10-21 "updated Firebase versions, update the code for deprecations"):
+  - [x] Versions (owner): google-services 4.5.0, Crashlytics plugin 3.0.8, Messaging 26.0.0, Analytics 24.0.0, Auth 25.0.0, Crashlytics 21.0.0, App Check 20.0.0
+  - [x] FCM 26 deprecates `getToken()` / `deleteToken()` / `onNewToken()`: now `FirebaseMessaging.register()` at startup and in `AndroidPushTokenProvider.currentToken()`; the token arrives in `MyFirebaseMessagingService.onRegistered()` → `PushTokenRelay` + `AppSettings`; provider waits up to 15 s for it
+  - [x] No other deprecations (build is `-Werror`); iOS Firebase 12.12.1 unchanged
+- Tests: devDebug + prodRelease assemble, all host unit tests, detekt + policy green; emulator: app starts, `appCheck token OK (provider=debug)`
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — API swap only. DEVIATION: delivery of a push to the new token not tested (needs a send from the Firebase console).
