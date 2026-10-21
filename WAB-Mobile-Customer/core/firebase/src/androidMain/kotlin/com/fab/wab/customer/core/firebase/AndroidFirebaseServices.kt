@@ -24,7 +24,7 @@ class AndroidPushTokenProvider(
     // A placeholder Firebase config (no valid API key yet) raises IllegalArgumentException: no token, no crash.
     override suspend fun currentToken(): String? = try {
         messaging.register().awaitResult()
-        withTimeoutOrNull(REGISTRATION_TIMEOUT_MS) { PushTokenRelay.tokenUpdates.first() }
+        withTimeoutOrNull(REGISTRATION_TIMEOUT_MS) { PushTokenRelay.tokenUpdates.first() } ?: existingToken()
     } catch (expected: IOException) {
         null
     } catch (expected: IllegalStateException) {
@@ -34,6 +34,10 @@ class AndroidPushTokenProvider(
     }
 
     override val tokenUpdates: SharedFlow<String> get() = PushTokenRelay.tokenUpdates
+
+    // An already-registered install may not get `onRegistered` again; read the stored registration once and relay it.
+    @Suppress("DEPRECATION") // FCM 26: getToken() is the only read of an existing registration; register() covers new ones
+    private suspend fun existingToken(): String? = messaging.token.awaitResult()?.also { PushTokenRelay.publish(it) }
 }
 
 class AndroidCrashReporter(

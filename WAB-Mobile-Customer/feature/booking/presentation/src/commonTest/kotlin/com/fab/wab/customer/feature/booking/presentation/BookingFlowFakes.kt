@@ -6,6 +6,7 @@ import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.ErrorCode
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.feature.booking.domain.model.BookingDraft
+import com.fab.wab.customer.feature.booking.domain.model.CreatedBooking
 import com.fab.wab.customer.feature.booking.domain.model.DraftMoney
 import com.fab.wab.customer.feature.booking.domain.model.DraftPolicy
 import com.fab.wab.customer.feature.booking.domain.repository.BookingDraftRepository
@@ -84,7 +85,7 @@ class SessionFake(initial: SessionState) : SessionStore {
 val USER = SessionState.SignedIn(UserProfile("c1", "Sara", Gender.FEMALE))
 val TODAY = LocalDate.parse("2026-10-19")
 
-val DEFAULT_ALLOWED = setOf(PaymentMethod.DEPOSIT, PaymentMethod.FULL_ONLINE)
+val DEFAULT_ALLOWED = setOf(PaymentMethod.PAY_ON_ARRIVAL, PaymentMethod.DEPOSIT, PaymentMethod.FULL_ONLINE)
 
 class DraftFake(val allowed: Set<PaymentMethod> = DEFAULT_ALLOWED) : BookingDraftRepository {
     val created = mutableListOf<PaymentMethod>()
@@ -101,6 +102,8 @@ class DraftFake(val allowed: Set<PaymentMethod> = DEFAULT_ALLOWED) : BookingDraf
         return AppResult.Success(draft)
     }
     override suspend fun get(draftId: String): AppResult<BookingDraft> = AppResult.Loading
+    override suspend fun verifyOtp(draftId: String, idToken: String): AppResult<String> = AppResult.Loading
+    override suspend fun createBooking(draftId: String): AppResult<CreatedBooking> = AppResult.Loading
     override suspend fun delete(draftId: String): AppResult<Unit> {
         deleted += draftId
         return AppResult.Success(Unit)
@@ -130,7 +133,7 @@ class AvailabilityFake : AvailabilityRepository {
 abstract class BookingFlowHarness {
     val effects = mutableListOf<SideEffect>()
     val availability = AvailabilityFake()
-    val drafts = DraftFake()
+    var drafts = DraftFake()
 
     fun TestScope.viewModel(gender: Gender = Gender.FEMALE): BookingFlowViewModel {
         val deps = BookingFlowDependencies(

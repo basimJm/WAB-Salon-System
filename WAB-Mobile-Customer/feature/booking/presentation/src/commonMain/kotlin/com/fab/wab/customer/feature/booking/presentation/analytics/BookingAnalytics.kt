@@ -24,3 +24,13 @@ object BookingSuccessAnalytics {
 
     val SCREEN = AnalyticsScreen(SCREEN_NAME)
 }
+
+/** PRD §14 names for S16 step 6 (verification). */
+object BookingVerifyAnalytics {
+    private const val SCREEN_NAME = "booking_verify"
+    const val ACTION_VERIFY = "booking_verify_open_otp"
+    const val ACTION_RETRY = "booking_verify_retry"
+    const val ACTION_CREATED = "booking_verify_created"
+
+    val SCREEN = AnalyticsScreen(SCREEN_NAME)
+}

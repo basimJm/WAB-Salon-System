@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
+import com.fab.wab.customer.feature.booking.presentation.controller.vm.DraftCoordinator
 import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.resources.Res as CoreRes
@@ -34,6 +35,7 @@ import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_f
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_full_sub
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_on_arrival
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_on_arrival_sub
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_pay_online_soon
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_payment_title
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_rules_title
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_staff_any
@@ -94,11 +96,20 @@ private fun SummaryBody(draft: BookingDraft, onAction: (UiAction) -> Unit) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
             draft.policy.paymentOptions.forEach { option ->
                 val texts = paymentOptionTexts(option, draft) ?: return@forEach
-                SelectionCard(selected = draft.paymentMethod == option, onClick = { onAction(UiAction.OnPaymentMethodSelect(option)) }) {
+                val enabled = option in DraftCoordinator.ENABLED_METHODS
+                SelectionCard(
+                    selected = draft.paymentMethod == option,
+                    onClick = { onAction(UiAction.OnPaymentMethodSelect(option)) },
+                    enabled = enabled,
+                ) {
                     DesignRadio(draft.paymentMethod == option)
                     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
                         AppText(text = texts.first, style = AppTheme.typography.titleSmall)
-                        AppText(text = texts.second, style = AppTheme.typography.bodySmall, color = colors.muted)
+                        AppText(
+                            text = if (enabled) texts.second else stringResource(Res.string.booking_pay_online_soon),
+                            style = AppTheme.typography.bodySmall,
+                            color = colors.muted,
+                        )
                     }
                 }
             }
