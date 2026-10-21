@@ -83,7 +83,7 @@ class OtpViewModel(
     }
 
     private suspend fun requestCode(isResend: Boolean) {
-        updateState { copy(requesting = true, requestError = null, code = "", codeError = false) }
+        updateState { copy(requesting = true, codeSent = false, requestError = null, code = "", codeError = false) }
         when (val result = deps.requestOtp(phoneE164, purpose)) {
             is AppResult.Success -> applyPolicy(result.data, isResend)
             is AppResult.Error -> {
@@ -109,11 +109,12 @@ class OtpViewModel(
         when (val started = deps.phoneAuth.startVerification(phoneE164)) {
             is FirebaseResult.Success -> {
                 verification = started.value
-                updateState { copy(requesting = false, otpLength = length) }
+                updateState { copy(requesting = false, codeSent = true, otpLength = length) }
                 startCountdown(resend = resendAfter, blocked = 0)
                 started.value.autoVerifiedIdToken?.let { complete(it) }
             }
             is FirebaseResult.Failure -> {
+                verification = null
                 val message = failureMessage(started.failure)
                 updateState { copy(requesting = false, otpLength = length, requestError = message) }
             }

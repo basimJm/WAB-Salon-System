@@ -13,6 +13,8 @@ sealed interface OtpContract {
         val code: String = "",
         val otpLength: Int = 0,
         val requesting: Boolean = true,
+        /** Firebase confirmed it sent a code; Verify stays off until then (a failed send leaves nothing to confirm). */
+        val codeSent: Boolean = false,
         val verifying: Boolean = false,
         val codeError: Boolean = false,
         val resendRemainingSeconds: Int = 0,
@@ -21,7 +23,8 @@ sealed interface OtpContract {
         val requestError: String? = null,
     ) {
         val isBlocked: Boolean get() = blockedRemainingSeconds > 0
-        val canVerify: Boolean get() = otpLength > 0 && code.length == otpLength && !verifying && !isBlocked && !requesting
+        val canVerify: Boolean get() =
+            codeSent && otpLength > 0 && code.length == otpLength && !verifying && !isBlocked && !requesting
         val canResend: Boolean get() = resendRemainingSeconds == 0 && !isBlocked && !requesting && !verifying
     }
 

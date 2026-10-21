@@ -150,7 +150,7 @@
 
 ### CUS-073 — Firebase App Check (Play Integrity / App Attest) + phone-auth resend token
 - Branch: `feat/cus-073-firebase-app-check`
-- Status: IN REVIEW
+- Status: DONE (PR #337)
 - Acceptance criteria (owner request 2026-10-21 "Firebase Auth, Phone Auth and App Check Play Integrity on Android and iOS"):
   - [x] Android App Check: Play Integrity provider in release, debug provider in debug (per build-type source sets, so the debug provider never ships); installed in `AndroidApp.onCreate` before any Auth call, skipped when Firebase is not initialised
   - [x] iOS App Check: `WABAppCheckProviderFactory` (App Attest, DeviceCheck before iOS 14, debug provider on simulator / Debug) set before `FirebaseApp.configure`; FirebaseAppCheck package linked; App Attest entitlement per env (`APP_ATTEST_ENVIRONMENT`)
@@ -159,3 +159,14 @@
 - Tests: `:androidApp:assembleDevDebug` + `:androidApp:assembleProdRelease` + `:core:firebase:testAndroidHostTest` green; xcodebuild Debug-Dev + Release-Prod green; detekt + policy green; app launches on the simulator
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — providers chosen by build type, no secrets. DEVIATIONS: App Check tokens, OTP and enforcement cannot be verified until the owner adds the real Firebase files, links Play Integrity and enables App Attest on the App IDs; device build signing for the App Attest entitlement is owner input.
+
+### CUS-074 — OTP: Verify does nothing when Firebase did not send a code
+- Branch: `fix/cus-074-otp-verify-guard`
+- Status: IN REVIEW
+- Acceptance criteria (owner report 2026-10-21 "verify button not work on verification screen"):
+  - [x] Root cause found on the emulator: Firebase `verifyPhoneNumber` failed with 17006 (`ERROR_OPERATION_NOT_ALLOWED`, Phone provider not enabled in `wab-dev-397ab`), so there was no verification to confirm, yet Verify was enabled and silently returned
+  - [x] `UiState.codeSent`: true only after Firebase reports the code sent; `canVerify` requires it; cleared on every new request and on Firebase failure (stale verification dropped)
+  - [x] Test `firebaseSendFailureKeepsVerifyOffAndShowsTheError`
+- Tests: `:feature:auth:presentation:testAndroidHostTest` green, detekt + policy green; emulator: OTP screen with no sent code shows Verify disabled
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — state-only change, no contract/API change. NOTE: real SMS still needs the owner to enable Phone sign-in (and App Check debug token / SHA keys) in Firebase.
