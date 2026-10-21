@@ -162,7 +162,7 @@
 
 ### CUS-074 — OTP: Verify does nothing when Firebase did not send a code
 - Branch: `fix/cus-074-otp-verify-guard`
-- Status: IN REVIEW
+- Status: DONE (PR #338)
 - Acceptance criteria (owner report 2026-10-21 "verify button not work on verification screen"):
   - [x] Root cause found on the emulator: Firebase `verifyPhoneNumber` failed with 17006 (`ERROR_OPERATION_NOT_ALLOWED`, Phone provider not enabled in `wab-dev-397ab`), so there was no verification to confirm, yet Verify was enabled and silently returned
   - [x] `UiState.codeSent`: true only after Firebase reports the code sent; `canVerify` requires it; cleared on every new request and on Firebase failure (stale verification dropped)
@@ -170,3 +170,14 @@
 - Tests: `:feature:auth:presentation:testAndroidHostTest` green, detekt + policy green; emulator: OTP screen with no sent code shows Verify disabled
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — state-only change, no contract/API change. NOTE: real SMS still needs the owner to enable Phone sign-in (and App Check debug token / SHA keys) in Firebase.
+
+### CUS-075 — Phone Auth diagnostic logs (Android + iOS)
+- Branch: `feat/cus-075-phone-auth-logs`
+- Status: IN REVIEW
+- Acceptance criteria (owner request 2026-10-21 "no real SMS received, add logs for Firebase phone auth"):
+  - [x] Android tag `WAB-PhoneAuth`: start (masked phone, activity, project, resend token), verifyPhoneNumber requested, codeSent (+ elapsed ms and what to check), autoRetrievalTimeout, verificationCompleted, failures with exception type + Firebase errorCode + message, confirm start / OK / failure; App Check token OK / FAILED at startup
+  - [x] iOS prefix `WAB-PhoneAuth` (NSLog): same steps, `AuthErrorCode` name on failures, App Check token result, "Firebase NOT configured" when the plist is a placeholder
+  - [x] No codes or tokens logged; numbers masked (`+962*****059`)
+- Tests: Android installDevDebug + prodRelease + core:firebase tests green, iOS Debug-Dev green, detekt + policy green; emulator log shows `WAB-PhoneAuth: codeSent … afterMs=3182`
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — logging only, PII masked.

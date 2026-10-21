@@ -47,3 +47,14 @@ The ids come from `DEV_APPLICATION_ID_SUFFIX=.dev` (`gradle.properties`) and `BU
 ## Check after adding the real files
 - Build `devDebug` and `prodDebug`; both install side by side.
 - Dev: request an OTP on a real phone number and send a test push from the dev console.
+
+## Troubleshooting a missing SMS
+Android: `adb logcat -s WAB-PhoneAuth` · iOS: Xcode console, filter `WAB-PhoneAuth`.
+| Log line | Meaning |
+|---|---|
+| `appCheck token FAILED` | debug token not registered / Play Integrity or App Attest not set up |
+| `verifyPhoneNumber FAILED errorCode=ERROR_OPERATION_NOT_ALLOWED` | Phone provider disabled, or SMS region policy blocks the country |
+| `… ERROR_QUOTA_EXCEEDED` / `TooManyRequests` | daily SMS quota or abuse protection hit |
+| `… ERROR_INVALID_APP_CREDENTIAL` / `MISSING_CLIENT_IDENTIFIER` | SHA keys / reCAPTCHA / App Check problem |
+| `codeSent` | Firebase accepted and sent the SMS; non-delivery is on the carrier side (Authentication → Usage, try another SIM) |
+| `autoRetrievalTimeout` | this device did not read the SMS itself; normal on an emulator |
