@@ -18,7 +18,9 @@ The ids come from `DEV_APPLICATION_ID_SUFFIX=.dev` (`gradle.properties`) and `BU
    - Android app `com.fab.wab.customer` with the **release** and **Play App Signing** SHA-1 / SHA-256.
    - iOS app `com.fab.wab.customer`; upload the same APNs key.
 3. In both projects enable Authentication → Phone, Analytics, Crashlytics and Cloud Messaging.
-4. Download the four files and replace the placeholders:
+4. **App Check** (both projects): register the Android app with **Play Integrity** (link the Google Cloud project in Play Console → App integrity) and the iOS app with **App Attest** (and DeviceCheck: upload the DeviceCheck key). Add the debug tokens printed by debug builds (Android Logcat tag `DebugAppCheckProvider`; Xcode console "App Check debug token") under App Check → Manage debug tokens. Turn on **Enforce** for Authentication only after the monitoring view shows verified requests from both apps.
+5. Apple Developer: enable the **App Attest** capability on both App IDs (`com.fab.wab.customer.dev`, `com.fab.wab.customer`); the entitlement environment comes from `APP_ATTEST_ENVIRONMENT` in the xcconfigs.
+6. Download the four files and replace the placeholders:
 
 | File | Path |
 |---|---|
@@ -34,6 +36,8 @@ The ids come from `DEV_APPLICATION_ID_SUFFIX=.dev` (`gradle.properties`) and `BU
 | Analytics | `AndroidFirebaseServices` | `SwiftAnalyticsBridge` |
 | Crashlytics | Crashlytics Gradle plugin (R8 mapping upload on release) | `SwiftCrashReporterBridge`; dSYM upload phase `iosApp/scripts/crashlytics_upload.sh` (skipped while the config is a placeholder) |
 | Push (FCM) | `MyFirebaseMessagingService` | `AppDelegate` + APNs |
+| App Check | Play Integrity in release (`src/release/.../AppCheckSetup.kt`), debug provider in debug builds | App Attest (DeviceCheck before iOS 14) on devices, debug provider on simulator / Debug (`AppCheckSetup.swift`) |
+| Resend code | Firebase resend token reused for the same number | handled by the Firebase SDK |
 
 ## How the app picks the file
 - **Android**: the Google Services plugin reads `src/<flavor>/google-services.json` for the `dev` / `prod` flavor.

@@ -18,3 +18,5 @@ PRODUCT_BUNDLE_IDENTIFIER = com.fab.wab.customer$(BUNDLE_ID_SUFFIX)$(TEAM_ID)
 MERCHANT_REGISTER_URL = https:/$()/merchant-dev.template.app/register
 MERCHANT_STORE_URL = https:/$()/apps.apple.com/app/id0000000000
 MERCHANT_APP_SCHEME = wabmerchant
+// App Check (App Attest) environment for the entitlement
+APP_ATTEST_ENVIRONMENT = development

@@ -1,3 +1,4 @@
+import FirebaseAppCheck
 import FirebaseAuth
 import FirebaseCore
 
@@ -15,6 +16,8 @@ enum FirebaseSetup {
             NSLog("WAB: Firebase not configured (missing or placeholder GoogleService-Info.plist)")
             return false
         }
+        // App Check must be installed before Firebase starts (protects Auth / Phone Auth).
+        AppCheck.setAppCheckProviderFactory(WABAppCheckProviderFactory())
         FirebaseApp.configure(options: options)
         return true
     }

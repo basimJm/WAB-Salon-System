@@ -23,6 +23,8 @@ firebaseMessaging = "25.0.1"
 firebaseAnalytics = "23.0.0"
 firebaseAuth = "24.0.1"
 firebaseCrashlytics = "20.0.1"
+# App Check (same BOM 34.2.0 train): Play Integrity in release, debug provider in debug builds
+firebaseAppCheck = "19.0.0"
 materialIconsExtended = "1.7.3"
 paging = "3.3.0-alpha02-0.5.1"
 compose-navigation = "2.9.2"
@@ -89,6 +91,8 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseAnalytics" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity", version.ref = "firebaseAppCheck" }
+firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug", version.ref = "firebaseAppCheck" }
 
 # Build logic dependencies
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }

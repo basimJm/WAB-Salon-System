@@ -26,11 +26,14 @@ class AndroidPhoneAuthGateway(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
 ) : PhoneAuthGateway {
 
+    private var resend: ResendHandle? = null
+
     override suspend fun startVerification(phoneE164: String): FirebaseResult<PhoneVerification> {
         val activity = activityProvider.current() ?: return FirebaseResult.Failure(FirebaseFailure.Unavailable)
         return suspendCancellableCoroutine { continuation ->
             val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                 override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
+                    resend = ResendHandle(phoneE164, token)
                     if (continuation.isActive) continuation.resume(FirebaseResult.Success(PhoneVerification(verificationId)))
                 }
 
@@ -59,12 +62,14 @@ class AndroidPhoneAuthGateway(
                     if (continuation.isActive) continuation.resume(FirebaseResult.Failure(exception.toFailure(PhoneAuthStage.Start)))
                 }
             }
-            val options = PhoneAuthOptions.newBuilder(auth)
+            val builder = PhoneAuthOptions.newBuilder(auth)
                 .setPhoneNumber(phoneE164)
                 .setTimeout(VERIFICATION_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .setActivity(activity)
                 .setCallbacks(callbacks)
-                .build()
+            // "Resend code" for the same number reuses Firebase's resend token (no new reCAPTCHA / Play Integrity round).
+            resend?.takeIf { it.phoneE164 == phoneE164 }?.let { builder.setForceResendingToken(it.token) }
+            val options = builder.build()
             PhoneAuthProvider.verifyPhoneNumber(options)
         }
     }
@@ -83,6 +88,7 @@ class AndroidPhoneAuthGateway(
     }
 
     override suspend fun signOut() {
+        resend = null
         auth.signOut()
     }
 }
@@ -95,3 +101,6 @@ internal fun Throwable?.toFailure(stage: PhoneAuthStage): FirebaseFailure = when
     is FirebaseNetworkException -> FirebaseFailure.Network
     else -> FirebaseFailure.Unknown(this?.message)
 }
+
+/** Firebase's resend token for the last number a code was sent to. */
+private data class ResendHandle(val phoneE164: String, val token: PhoneAuthProvider.ForceResendingToken)
