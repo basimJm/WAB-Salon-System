@@ -357,6 +357,7 @@ const buildServices = (
     cities: new CitiesRepository(),
     areas: new AreasRepository(),
     storage: providers.storage,
+    logger,
   });
   const faqs = new FaqsRepository();
   const pages = new ContentPagesRepository();
@@ -737,10 +738,12 @@ const buildServices = (
   const catalogService = createCatalogService({
     catalog: new CatalogServicesRepository(),
     storage: providers.storage,
+    logger,
   });
   const bannersService = createBannersService({
     banners: new BannersRepository(),
     storage: providers.storage,
+    logger,
   });
   const galleryService = createGalleryService({
     gallery: new GalleryRepository(),
