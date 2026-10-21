@@ -14,15 +14,6 @@
 
 ## Last blocks
 
-### ADM-084 — real data by default and placeholder base URLs
-
-- Branch: `feat/adm-084-remote-default`
-- Status: DONE
-- Acceptance criteria: dev-debug is the only variant with the mock by default; dev-release, prod-debug, prod-release use the real API (the mock code is no longer shipped in dev-release); committed placeholder base URLs in .env.dev and .env.prod (public values, guarded by tests/envFiles.test.ts) for the owner to replace; the design gallery stays in all dev builds
-- Tests: tests/config.test.ts, tests/envFiles.test.ts (5), tests/about-ribbon.test.tsx updated; full suite + gate PASS
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: root rule 'never commit .env*' relaxed by the owner's request for placeholder URLs; browser check of this change done together with the real-server QA that follows.
-
 ### ADM-085 — real-server QA and fixes
 
 - Branch: `feat/adm-085-real-server-fixes`
@@ -40,3 +31,12 @@
 - Tests: tests/lazyPage.test.tsx (6), tests/routeError.test.tsx (1); full suite + gate PASS; browser check: built twice with a changed About chunk while a tab was open: the tab reloaded once and showed /login?next=/about
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: the reload signs the admin out (tokens live in memory only): accepted instead of a broken screen.
+
+### ADM-087 — Render base URLs and fast deploy guide
+
+- Branch: `feat/adm-087-onrender-urls`
+- Status: DONE
+- Acceptance criteria: .env.dev and .env.prod name https://wab-server-dev.onrender.com for the API and the socket; docs/DEPLOY.md has the Netlify CLI deploy commands
+- Tests: tests/envFiles, hosting, config (33) green; server health 200 checked; gate not rerun (values and docs only)
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: full gate not rerun for a values-and-docs change; the server answers 200 on /health but does not yet allow a Netlify origin in CORS.
