@@ -184,7 +184,7 @@
 
 ### CUS-076 — Firebase Android SDK upgrade (owner bumped versions) + FCM 26 API
 - Branch: `feat/cus-076-firebase-upgrade`
-- Status: IN REVIEW
+- Status: DONE (PR #340)
 - Acceptance criteria (owner request 2026-10-21 "updated Firebase versions, update the code for deprecations"):
   - [x] Versions (owner): google-services 4.5.0, Crashlytics plugin 3.0.8, Messaging 26.0.0, Analytics 24.0.0, Auth 25.0.0, Crashlytics 21.0.0, App Check 20.0.0
   - [x] FCM 26 deprecates `getToken()` / `deleteToken()` / `onNewToken()`: now `FirebaseMessaging.register()` at startup and in `AndroidPushTokenProvider.currentToken()`; the token arrives in `MyFirebaseMessagingService.onRegistered()` → `PushTokenRelay` + `AppSettings`; provider waits up to 15 s for it
@@ -192,3 +192,16 @@
 - Tests: devDebug + prodRelease assemble, all host unit tests, detekt + policy green; emulator: app starts, `appCheck token OK (provider=debug)`
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — API swap only. DEVIATION: delivery of a push to the new token not tested (needs a send from the Firebase console).
+
+### CUS-077 — Booking verification (OTP) + success, no online payment; FCM token stored again
+- Branch: `feat/cus-077-booking-verify`
+- Status: IN REVIEW
+- Acceptance criteria (owner requests 2026-10-21):
+  - [x] `Screen.BookingVerify(draftId)` real screen (placeholder `PlaceholderNavigation.kt` removed): loads the draft (salon, date/time, people, pay on arrival, total), "Verify with code" → OTP (BOOKING_CONFIRMATION, own phone from the profile) → `verify-otp` → `POST /bookings` → `BookingSuccess`; the whole booking flow (start, summary, verify) is popped so Back from S17 leaves booking
+  - [x] Errors: DRAFT_EXPIRED → message + back to booking; failed verify → retry reopens OTP; failed create → retry create without a new code
+  - [x] Summary: only PAY_ON_ARRIVAL selectable; online methods visible but disabled with AR/EN "coming soon" note
+  - [x] FCM token stored at startup again: `AndroidApp` stores `PushTokenProvider.currentToken()` (register + `onRegistered` relay, fallback to the stored registration)
+  - [x] Tests: `BookingVerifyViewModelTest` (happy path, other-purpose proof ignored, expired draft, expiry during create, verify failure, create failure), repository mapper test, booking fakes + summary payment test updated
+- Tests: `./gradlew :androidApp:assembleDevDebug testAndroidHostTest` exit 0 (all modules), detekt exit 0, policy ok; dev build installed on the emulator
+- Loops: 1/1 — re-checked every criterion against the code and the test run; found and fixed: Back after success landed on the summary step (now `popUpTo<Screen.BookingStart>(inclusive)`)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — reuses the OTP hand-off pattern (`PendingOtpVerification`), contract ops from the generated snapshot, no payment code. DEVIATIONS: emulator walk-through stopped at login (Firebase rejected 123456 for the test number +962799000004 — owner to confirm the test code), so the verify/success screens were not exercised on a device; iOS not built for this change; FCM token delivery not tested with a console push.

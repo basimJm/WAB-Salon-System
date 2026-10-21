@@ -94,4 +94,19 @@
     <string name="success_copied">Reference number copied</string>
     <string name="success_view_booking">View booking</string>
     <string name="success_back_home">Back to Home</string>
+    <string name="booking_pay_online_soon">Online payment coming soon</string>
+    <string name="verify_title">Confirm booking</string>
+    <string name="verify_heading">Review and verify</string>
+    <string name="verify_salon">Salon</string>
+    <string name="verify_when">Date &amp; time</string>
+    <string name="verify_people">People</string>
+    <string name="verify_payment">Payment</string>
+    <string name="verify_total">Total</string>
+    <string name="verify_hint">We’ll send a verification code to your phone to confirm the booking.</string>
+    <string name="verify_cta">Verify with code</string>
+    <string name="verify_processing">Confirming your booking…</string>
+    <string name="verify_dont_close">Please don’t close this page</string>
+    <string name="verify_error_title">Couldn’t confirm the booking</string>
+    <string name="verify_expired_title">Your booking hold expired</string>
+    <string name="verify_back_to_booking">Back to booking</string>
 </resources>

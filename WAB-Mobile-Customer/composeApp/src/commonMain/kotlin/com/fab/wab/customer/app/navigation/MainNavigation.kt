@@ -33,6 +33,5 @@ fun MainNavigation(
         NotificationsNavigation(navController).registerGraph(this)
         ProfileNavigation(navController).registerGraph(this)
         ContentNavigation(navController).registerGraph(this)
-        registerPlaceholderHomeScreens()
     }
 }

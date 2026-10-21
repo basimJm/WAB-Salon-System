@@ -7,6 +7,7 @@ import com.fab.wab.customer.feature.auth.presentation.controller.contract.OtpCon
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.RegisterContract
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingSuccessContract
+import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingVerifyContract
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingDetailsContract
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingsContract
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.RatingContract
@@ -71,7 +72,7 @@ object AnalyticsCatalog {
         is BookingDetailsContract.UiAction -> BookingAccountActionEvents.bookingDetails(action)
         is RatingContract.UiAction -> BookingAccountActionEvents.rating(action)
         is BookingFlowContract.UiAction -> BookingAccountActionEvents.bookingFlow(action)
-        is BookingSuccessContract.UiAction -> ActionEvent.ByViewModel
+        is BookingSuccessContract.UiAction, is BookingVerifyContract.UiAction -> ActionEvent.ByViewModel
         is NotificationsContract.UiAction -> BookingAccountActionEvents.notifications(action)
         is ProfileContract.UiAction -> BookingAccountActionEvents.profile(action)
         is EditProfileContract.UiAction -> BookingAccountActionEvents.editProfile(action)
