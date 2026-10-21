@@ -126,7 +126,7 @@
 
 ### CUS-071 — Firebase per environment; version name without env suffix
 - Branch: `feat/cus-071-firebase-per-env`
-- Status: IN REVIEW
+- Status: DONE (PR #334; customer → main #335; main → customer synced)
 - Acceptance criteria (owner requests 2026-10-21):
   - [x] Dev ids `com.fab.wab.customer.dev` (Android `DEV_APPLICATION_ID_SUFFIX=.dev`, iOS `BUNDLE_ID_SUFFIX = .dev`); prod `com.fab.wab.customer`
   - [x] Android `src/{dev,prod}/google-services.json`; iOS `iosApp/Firebase/{dev,prod}/GoogleService-Info.plist` copied by the "Copy Firebase Config" build phase per `APP_ENV`; old single files removed; placeholders until the owner's real files
@@ -135,3 +135,60 @@
 - Tests: aapt: dev `com.fab.wab.customer.dev` 1.0, prod `com.fab.wab.customer` 1.0; xcodebuild Debug-Dev / Debug-Prod: bundle id and bundled plist BUNDLE_ID match; gate: policy, contract, detekt, unit tests, all Android variants, iOS Dev configs green
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — build config only; no business code. DEVIATIONS: gate stopped by the owner before iOS Prod configs and K/N tests (Debug-Prod built by hand and green); side-by-side install on a device not done (emulator was closed); real Firebase files pending (owner).
+
+### CUS-072 — iOS Phone OTP URL scheme + Crashlytics dSYM upload
+- Branch: `feat/cus-072-firebase-ios-otp-crashlytics`
+- Status: DONE (PR #336)
+- Acceptance criteria (owner request 2026-10-21 "set up Firebase SMS OTP, Analytics, Crashlytics for Android and iOS"):
+  - [x] Android: Phone Auth, Analytics, Crashlytics, FCM already wired (CUS-004); nothing missing in code
+  - [x] iOS Phone Auth: build step registers the encoded-app-id / reversed-client-id URL scheme from the env plist; `FirebaseSetup.handleAuthURL` passes reCAPTCHA return URLs to Firebase Auth before deep links
+  - [x] iOS Crashlytics: "Upload Crashlytics Symbols" phase (Release dSYMs; skipped for placeholder configs)
+  - [x] `docs/FIREBASE_SETUP.md` lists what is wired per platform
+- Tests: xcodebuild Debug-Dev + Release-Prod green; built Info.plist has the URL scheme; upload step skips with the placeholder; app launches on the simulator
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — build scripts + one Swift entry point. DEVIATION: real OTP, events and crash reports cannot be verified until the owner adds the real Firebase files and finishes the console steps.
+
+### CUS-073 — Firebase App Check (Play Integrity / App Attest) + phone-auth resend token
+- Branch: `feat/cus-073-firebase-app-check`
+- Status: DONE (PR #337)
+- Acceptance criteria (owner request 2026-10-21 "Firebase Auth, Phone Auth and App Check Play Integrity on Android and iOS"):
+  - [x] Android App Check: Play Integrity provider in release, debug provider in debug (per build-type source sets, so the debug provider never ships); installed in `AndroidApp.onCreate` before any Auth call, skipped when Firebase is not initialised
+  - [x] iOS App Check: `WABAppCheckProviderFactory` (App Attest, DeviceCheck before iOS 14, debug provider on simulator / Debug) set before `FirebaseApp.configure`; FirebaseAppCheck package linked; App Attest entitlement per env (`APP_ATTEST_ENVIRONMENT`)
+  - [x] Phone Auth (Android): Firebase resend token reused for the same number, cleared on sign-out; Auth + Phone Auth flow otherwise unchanged (already complete)
+  - [x] `docs/FIREBASE_SETUP.md`: App Check console steps (Play Integrity link, App Attest/DeviceCheck, debug tokens, enforce last), Apple capability
+- Tests: `:androidApp:assembleDevDebug` + `:androidApp:assembleProdRelease` + `:core:firebase:testAndroidHostTest` green; xcodebuild Debug-Dev + Release-Prod green; detekt + policy green; app launches on the simulator
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — providers chosen by build type, no secrets. DEVIATIONS: App Check tokens, OTP and enforcement cannot be verified until the owner adds the real Firebase files, links Play Integrity and enables App Attest on the App IDs; device build signing for the App Attest entitlement is owner input.
+
+### CUS-074 — OTP: Verify does nothing when Firebase did not send a code
+- Branch: `fix/cus-074-otp-verify-guard`
+- Status: DONE (PR #338)
+- Acceptance criteria (owner report 2026-10-21 "verify button not work on verification screen"):
+  - [x] Root cause found on the emulator: Firebase `verifyPhoneNumber` failed with 17006 (`ERROR_OPERATION_NOT_ALLOWED`, Phone provider not enabled in `wab-dev-397ab`), so there was no verification to confirm, yet Verify was enabled and silently returned
+  - [x] `UiState.codeSent`: true only after Firebase reports the code sent; `canVerify` requires it; cleared on every new request and on Firebase failure (stale verification dropped)
+  - [x] Test `firebaseSendFailureKeepsVerifyOffAndShowsTheError`
+- Tests: `:feature:auth:presentation:testAndroidHostTest` green, detekt + policy green; emulator: OTP screen with no sent code shows Verify disabled
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — state-only change, no contract/API change. NOTE: real SMS still needs the owner to enable Phone sign-in (and App Check debug token / SHA keys) in Firebase.
+
+### CUS-075 — Phone Auth diagnostic logs (Android + iOS)
+- Branch: `feat/cus-075-phone-auth-logs`
+- Status: DONE (PR #339)
+- Acceptance criteria (owner request 2026-10-21 "no real SMS received, add logs for Firebase phone auth"):
+  - [x] Android tag `WAB-PhoneAuth`: start (masked phone, activity, project, resend token), verifyPhoneNumber requested, codeSent (+ elapsed ms and what to check), autoRetrievalTimeout, verificationCompleted, failures with exception type + Firebase errorCode + message, confirm start / OK / failure; App Check token OK / FAILED at startup
+  - [x] iOS prefix `WAB-PhoneAuth` (NSLog): same steps, `AuthErrorCode` name on failures, App Check token result, "Firebase NOT configured" when the plist is a placeholder
+  - [x] No codes or tokens logged; numbers masked (`+962*****059`)
+- Tests: Android installDevDebug + prodRelease + core:firebase tests green, iOS Debug-Dev green, detekt + policy green; emulator log shows `WAB-PhoneAuth: codeSent … afterMs=3182`
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — logging only, PII masked.
+
+### CUS-076 — Firebase Android SDK upgrade (owner bumped versions) + FCM 26 API
+- Branch: `feat/cus-076-firebase-upgrade`
+- Status: IN REVIEW
+- Acceptance criteria (owner request 2026-10-21 "updated Firebase versions, update the code for deprecations"):
+  - [x] Versions (owner): google-services 4.5.0, Crashlytics plugin 3.0.8, Messaging 26.0.0, Analytics 24.0.0, Auth 25.0.0, Crashlytics 21.0.0, App Check 20.0.0
+  - [x] FCM 26 deprecates `getToken()` / `deleteToken()` / `onNewToken()`: now `FirebaseMessaging.register()` at startup and in `AndroidPushTokenProvider.currentToken()`; the token arrives in `MyFirebaseMessagingService.onRegistered()` → `PushTokenRelay` + `AppSettings`; provider waits up to 15 s for it
+  - [x] No other deprecations (build is `-Werror`); iOS Firebase 12.12.1 unchanged
+- Tests: devDebug + prodRelease assemble, all host unit tests, detekt + policy green; emulator: app starts, `appCheck token OK (provider=debug)`
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — API swap only. DEVIATION: delivery of a push to the new token not tested (needs a send from the Firebase console).
