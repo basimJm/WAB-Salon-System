@@ -78,4 +78,52 @@
         <item quantity="one">%1$d selected</item>
         <item quantity="other">%1$d selected</item>
     </plurals>
+    <string name="hours_title">Working hours</string>
+    <string name="hours_weekly">Weekly schedule</string>
+    <string name="hours_open">Opens</string>
+    <string name="hours_close">Closes</string>
+    <string name="hours_day_off">Day off</string>
+    <string name="hours_copy_all">Copy to all days</string>
+    <string name="hours_error">Closing time must be after opening time</string>
+    <string name="hours_save">Save working hours</string>
+    <string name="hours_saved">Working hours saved</string>
+    <string name="closures_title">Temporary closures</string>
+    <string name="closures_hint">Close the salon for specific days (holiday, maintenance…). Customers cannot book during them.</string>
+    <string name="closures_add">Add closure</string>
+    <string name="closures_past">Past closures</string>
+    <string name="closures_empty">No upcoming closures</string>
+    <string name="closure_sheet_sub">Choose a day or a range of days. We check the affected bookings.</string>
+    <string name="closure_from">From</string>
+    <string name="closure_to">To</string>
+    <string name="closure_reason">Reason</string>
+    <string name="closure_reason_hint">e.g. Maintenance</string>
+    <string name="closure_save">Save closure</string>
+    <string name="closure_added">Closure added</string>
+    <string name="closure_updated">Closure updated</string>
+    <string name="closure_deleted">Closure removed</string>
+    <string name="closure_delete_title">Remove this closure?</string>
+    <string name="closure_delete">Remove</string>
+    <string name="closure_edit">Edit</string>
+    <string name="closure_range">%1$s – %2$s</string>
+    <string name="conflict_title">There are bookings in this period</string>
+    <string name="conflict_refund">They will be cancelled with a full refund and customers notified</string>
+    <string name="conflict_cancel">Cancel bookings &amp; save</string>
+    <string name="conflict_back">Go back</string>
+    <string name="schedule_change_reason">The salon changed its working hours</string>
+    <string name="hours_cancel">Cancel</string>
+    <plurals name="conflict_body">
+        <item quantity="one">%1$d booking would be affected by this change.</item>
+        <item quantity="other">%1$d bookings would be affected by this change.</item>
+    </plurals>
+    <plurals name="cancelled_bookings">
+        <item quantity="one">%1$d booking cancelled</item>
+        <item quantity="other">%1$d bookings cancelled</item>
+    </plurals>
+    <string name="day_sat">Saturday</string>
+    <string name="day_sun">Sunday</string>
+    <string name="day_mon">Monday</string>
+    <string name="day_tue">Tuesday</string>
+    <string name="day_wed">Wednesday</string>
+    <string name="day_thu">Thursday</string>
+    <string name="day_fri">Friday</string>
 </resources>

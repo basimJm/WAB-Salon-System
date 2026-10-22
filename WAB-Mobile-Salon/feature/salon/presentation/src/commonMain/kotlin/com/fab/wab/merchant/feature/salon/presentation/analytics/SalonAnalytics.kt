@@ -16,5 +16,9 @@ object SalonAnalytics {
     const val ACTION_GALLERY_REORDER = "gallery_reorder"
     const val ACTION_GALLERY_DELETE = "gallery_delete"
     const val PARAM_TYPE = "type"
+    val SCREEN_HOURS = AnalyticsScreen("salon_working_hours")
+    const val ACTION_HOURS_SAVE = "working_hours_save"
+    const val ACTION_CLOSURE_SAVE = "closure_save"
+    const val ACTION_CANCEL_AFFECTED = "cancel_affected_bookings"
     const val PARAM_COUNT = "count"
 }

@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-035 — Working hours & closures M15
+- Branch: `feat/mer-035-hours`
+- Branched: (from `feat/mer-034-gallery`)
+- Status: IN PROGRESS (batch 6)
+- Acceptance criteria (PRD M15; operations `GET /salon/hours`, `PUT /salon/hours/weekly`, closures `POST/PATCH/DELETE`, `POST /bookings/cancel-affected`; design 05 `on.hours`, `closureAdd`, `closureConflict`):
+  - [x] Weekly schedule Saturday → Friday: working toggle, open / close in 15-minute steps (close may be 24:00), "close after open" error, "Copy to all days" (days off stay off), save only when changed and valid; saving refreshes the shared salon (completeness)
+  - [x] Closures: upcoming list, past collapsed, add / edit (future only, `editable`) with date range + reason (1..300, required by the contract), remove with confirmation
+  - [x] 409 `SCHEDULE_CONFLICT` (booking ids in `details[].field`) → dialog with the count + full-refund note: "Cancel bookings & save" calls `cancel-affected` (closure → `EXCEPTIONAL_CLOSURE` + its reason; weekly → `OTHER` + localized "hours changed") then re-sends the change; "Go back" keeps the edit; hub tile HOURS registered
+- Tests: `WorkingHoursTest` (3), `HoursMappersTest` (1), `HoursViewModelTest` (3); `/tmp/claude/quick.sh m35` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the conflict dialog shows the number of affected bookings, not each booking (the 409 carries ids only); times use a 15-minute dropdown (no time-picker component in the design system); design marks the closure reason optional but the contract requires it.
+
 ### MER-034 — Gallery M14
 - Branch: `feat/mer-034-gallery`
 - Branched: (from `feat/mer-033-salon-profile`)

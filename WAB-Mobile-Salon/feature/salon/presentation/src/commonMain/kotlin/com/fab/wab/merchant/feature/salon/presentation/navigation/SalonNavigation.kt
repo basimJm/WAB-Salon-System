@@ -18,18 +18,28 @@ import com.fab.wab.merchant.feature.salon.domain.HubTile
 import com.fab.wab.merchant.core.ui.permission.AppPermission
 import com.fab.wab.merchant.core.ui.permission.PermissionFlow
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.GalleryContract
+import com.fab.wab.merchant.feature.salon.presentation.controller.contract.HoursContract
+import com.fab.wab.merchant.feature.salon.presentation.controller.contract.HoursMessage
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonHubContract
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.GalleryViewModel
+import com.fab.wab.merchant.feature.salon.presentation.controller.vm.HoursViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonHubViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonProfileViewModel
 import com.fab.wab.merchant.feature.salon.presentation.resources.Res
+import com.fab.wab.merchant.feature.salon.presentation.resources.cancelled_bookings
+import com.fab.wab.merchant.feature.salon.presentation.resources.closure_added
+import com.fab.wab.merchant.feature.salon.presentation.resources.closure_deleted
+import com.fab.wab.merchant.feature.salon.presentation.resources.closure_updated
 import com.fab.wab.merchant.feature.salon.presentation.resources.gallery_deleted
+import com.fab.wab.merchant.feature.salon.presentation.resources.hours_saved
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_location_blocked
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_saved
 import com.fab.wab.merchant.feature.salon.presentation.screen.GalleryScreen
+import com.fab.wab.merchant.feature.salon.presentation.screen.HoursScreen
 import com.fab.wab.merchant.feature.salon.presentation.screen.SalonHubScreen
 import com.fab.wab.merchant.feature.salon.presentation.screen.SalonProfileScreen
+import org.jetbrains.compose.resources.getPluralString
 import org.jetbrains.compose.resources.getString
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -38,6 +48,7 @@ import org.koin.compose.viewmodel.koinViewModel
 private val TILE_SCREENS: Map<HubTile, Screen> = mapOf(
     HubTile.PROFILE to Screen.SalonProfile,
     HubTile.GALLERY to Screen.Gallery,
+    HubTile.HOURS to Screen.WorkingHours,
 )
 
 /** `Graph.Salon` tab: hub (M12) and the management screens (M13–M19, M22, M23). */
@@ -48,6 +59,7 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
             composable<Screen.SalonHub> { HubDestination() }
             composable<Screen.SalonProfile> { ProfileDestination() }
             composable<Screen.Gallery> { GalleryDestination() }
+            composable<Screen.WorkingHours> { HoursDestination() }
         }
     }
 
@@ -98,4 +110,32 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
         }
         GalleryScreen(state = state, onAction = viewModel::onEvent, onBack = { navigateBack() })
     }
+
+    @Composable
+    private fun HoursDestination() {
+        val viewModel: HoursViewModel = koinViewModel()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val notifications = rememberNotificationManager()
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                is HoursContract.SideEffect.Done -> notifications.show(hoursMessage(effect.message, effect.cancelledBookings), style = NotificationStyle.Success)
+                is HoursContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+            }
+        }
+        HoursScreen(state = state, onAction = viewModel::onEvent, onBack = { navigateBack() })
+    }
 }
+
+private suspend fun hoursMessage(message: HoursMessage, cancelled: Int): String {
+    val text = getString(
+        when (message) {
+            HoursMessage.WEEK_SAVED -> Res.string.hours_saved
+            HoursMessage.CLOSURE_ADDED -> Res.string.closure_added
+            HoursMessage.CLOSURE_UPDATED -> Res.string.closure_updated
+            HoursMessage.CLOSURE_DELETED -> Res.string.closure_deleted
+        },
+    )
+    return if (cancelled == 0) text else getPluralString(Res.plurals.cancelled_bookings, cancelled, cancelled) + MESSAGE_SEPARATOR + text
+}
+
+private const val MESSAGE_SEPARATOR = "\n"

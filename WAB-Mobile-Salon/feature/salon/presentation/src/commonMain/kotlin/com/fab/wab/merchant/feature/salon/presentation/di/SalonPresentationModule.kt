@@ -1,16 +1,25 @@
 package com.fab.wab.merchant.feature.salon.presentation.di
 
+import com.fab.wab.merchant.core.common.BusinessTime
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapController
 import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapDependencies
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.GalleryViewModel
+import com.fab.wab.merchant.feature.salon.presentation.controller.vm.HoursDependencies
+import com.fab.wab.merchant.feature.salon.presentation.controller.vm.HoursViewModel
+import com.fab.wab.merchant.feature.salon.presentation.resources.Res
+import com.fab.wab.merchant.feature.salon.presentation.resources.schedule_change_reason
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonHubViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonProfileDependencies
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonProfileViewModel
 import kotlinx.coroutines.flow.first
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.getString
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import kotlin.time.Clock
 
 val salonPresentationModule = module {
     viewModel { SalonHubViewModel(salon = get(), session = get<SessionStore>().state, analytics = get()) }
@@ -40,4 +49,14 @@ val salonPresentationModule = module {
     }
     viewModel { SalonProfileViewModel(deps = get()) }
     viewModel { GalleryViewModel(gallery = get(), picker = get(), upload = get(), analytics = get()) }
+    viewModel {
+        HoursViewModel(
+            HoursDependencies(
+                repository = get(),
+                analytics = get(),
+                today = { Clock.System.now().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
+                scheduleChangeReason = { getString(Res.string.schedule_change_reason) },
+            ),
+        )
+    }
 }
