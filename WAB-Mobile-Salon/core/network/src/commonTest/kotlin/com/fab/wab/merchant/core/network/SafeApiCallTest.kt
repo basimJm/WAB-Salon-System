@@ -3,6 +3,7 @@ package com.fab.wab.merchant.core.network
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.ErrorCode
+import com.fab.wab.merchant.core.domain.permission.PermissionDeniedSignals
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.mock.MockEngine
@@ -13,6 +14,10 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.IOException
 import kotlinx.serialization.Serializable
@@ -83,5 +88,15 @@ class SafeApiCallTest {
     fun transportFailureIsANetworkError() = runTest {
         val result = safeApiCall<Pong> { throw IOException("unreachable") }
         assertEquals(AppResult.Error(AppError.NetworkError("unreachable")), result)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun permissionRefusalIsReportedSoThePermissionsRefresh() = runTest(UnconfinedTestDispatcher()) {
+        val signal = async { PermissionDeniedSignals.events.first() }
+        val body = """{"success":false,"message":"m","error":{"code":"PERMISSION_DENIED"}}"""
+        val result = safeApiCall { client(HttpStatusCode.Forbidden, body).get("/x").body<Pong>() }
+        assertEquals(ErrorCode.PERMISSION_DENIED, assertIs<AppError.ServerError>(assertIs<AppResult.Error>(result).appError).code)
+        assertEquals(Unit, signal.await())
     }
 }

@@ -13,6 +13,7 @@ import com.fab.wab.merchant.core.realtime.RealtimeEvent
 import com.fab.wab.merchant.core.realtime.RealtimeEvents
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -60,5 +61,18 @@ class RealtimeAccountEventsTest {
         client.emit(RealtimeEvent(RealtimeEvents.ACCESS_REVOKED))
         assertEquals(1, store.signOuts)
         assertTrue(revoked == 1)
+    }
+
+    @Test
+    fun aPermissionRefusalFromAnyCallReFetchesThePermissions() = runTest(UnconfinedTestDispatcher()) {
+        val store = RecordingSessionStore()
+        val denied = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        var refreshes = 0
+        val sync = PermissionsSync({ refreshes++; TokenRefreshResult.Unavailable }, store)
+        RealtimeAccountEvents(FakeRealtimeClient(), sync, store, denied).start(backgroundScope) {}
+
+        denied.emit(Unit)
+        assertEquals(1, refreshes)
+        assertEquals(0, store.signOuts)
     }
 }

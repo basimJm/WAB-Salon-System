@@ -9,6 +9,18 @@
 
 ## Current task
 
+### MER-052 — Error-code coverage + permission refusals
+- Branch: `feat/mer-052-error-codes`
+- Branched: (from `feat/mer-048-more`; backlog name `feat/mer-052-error-coverage`)
+- Status: IN PROGRESS (batch 9)
+- Acceptance criteria (BUSINESS_DOMAIN §11; `openapi.merchant.json` error codes; PRD §3, §6 hidden-not-disabled):
+  - [x] Every §11 code and every contract code is in `ErrorCode` with AR + EN `error_code_*` text and an `ErrorHandling` action (audited: 43 + UNKNOWN; enforced by the `error-codes` policy since MER-005)
+  - [x] A `FORBIDDEN` / `PERMISSION_DENIED` answer from any call (`safeApiCall`) is reported to `PermissionDeniedSignals` (bursts collapse); the shell (`RealtimeAccountEvents`) re-fetches the permissions through `PermissionsSync`, so gated tabs, tiles and buttons hide; other codes and plain HTTP 403s do not trigger it
+- Tests: `PermissionDeniedSignalsTest` (1), `SafeApiCallTest` (+1), `RealtimeAccountEventsTest` (+1); `/tmp/claude/quick.sh m52b` domain + network + composeApp tests + `assembleDevDebug` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the refused screen itself shows the CONTACT error text; it disappears once the refreshed permissions remove its entry.
+
 ### MER-048 — More M25 part 1
 - Branch: `feat/mer-048-more`
 - Branched: (batch 9 start, from `feat/mer-047-notifications`)
