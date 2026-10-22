@@ -7,6 +7,7 @@ Non-interactive: pass the values as flags and --yes. See README.md next to this 
 from __future__ import annotations
 
 import argparse
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -17,8 +18,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from configure import (FIREBASE_SLOTS, configure_environment, configure_names, install_firebase,  # noqa: E402
                        prune_policy_baseline, write_docs)
 from firebase_files import looks_like  # noqa: E402
-from generator import (SOURCE_PACKAGE, SOURCE_PROJECT, Options, apply_shell, copy_project,  # noqa: E402
-                       project_name_from, rename_everything, retarget_tooling, strip_features, validate_package)
+from generator import (SOURCE_PACKAGE, SOURCE_PROJECT, Options, apply_shell, copy_project, merge_into,  # noqa: E402
+                       project_name_from, rename_everything, retarget_api, retarget_tooling, strip_features,
+                       validate_api_path, validate_package)
+from genericize import genericize  # noqa: E402
 
 DEFAULT_SOURCE = Path(__file__).resolve().parents[3] / "WAB-Mobile-Customer"
 FIREBASE_QUESTIONS = {
@@ -67,9 +70,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument("--dev-web-url")
     parser.add_argument("--prod-web-url")
     parser.add_argument("--team-id", help="Apple Team ID (default: keep the template's)")
+    parser.add_argument("--api-prefix", help="API path prefix of the backend, e.g. /api/v1")
+    parser.add_argument("--realtime-namespace", help="Socket.IO namespace, e.g. /app")
+    parser.add_argument("--dev-data-source", choices=("mock", "remote"), help="dev builds: mock fixtures or the dev API")
     for slot in FIREBASE_SLOTS:
         parser.add_argument(f"--firebase-{slot.replace('_', '-')}", type=Path, dest=f"firebase_{slot}")
     parser.add_argument("--no-git", action="store_true", help="do not run 'git init' in the new project")
+    parser.add_argument("--merge", action="store_true",
+                        help="the target folder exists (e.g. docs/design already there): add the project, keep its existing files")
     parser.add_argument("--yes", action="store_true", help="never prompt: use flags and defaults")
     return parser.parse_args(argv)
 
@@ -94,14 +102,20 @@ def collect(args: argparse.Namespace) -> Options:
     app_name_ar = value(args.app_name_ar, "Arabic app name (Enter = same as the app name)", app_name)
     target = Path(value(str(args.target) if args.target else None, "Create the project in folder",
                         str(Path.cwd() / project_name),
-                        check=lambda t: f"{t} already exists" if Path(t).expanduser().exists() else None)).expanduser()
+                        check=lambda t: f"{t} already exists (use --merge to add the project into it)"
+                        if Path(t).expanduser().exists() and not args.merge else None)).expanduser()
     opts = Options(target=target.resolve(), app_name=app_name, package=package, project_name=project_name,
-                   app_name_ar=app_name_ar)
+                   app_name_ar=app_name_ar, merge_into_existing=args.merge)
     opts.dev_suffix = value(args.dev_suffix, "Dev build id suffix (dev and prod install side by side)", opts.dev_suffix)
     opts.dev_api_url = value(args.dev_api_url, "Dev API base URL", opts.dev_api_url)
     opts.prod_api_url = value(args.prod_api_url, "Prod API base URL", opts.prod_api_url)
     opts.dev_web_url = value(args.dev_web_url, "Dev web URL (deep links)", opts.dev_web_url)
     opts.prod_web_url = value(args.prod_web_url, "Prod web URL (deep links)", opts.prod_web_url)
+    opts.api_prefix = value(args.api_prefix, "API path prefix", opts.api_prefix, check=validate_api_path)
+    opts.realtime_namespace = value(args.realtime_namespace, "Realtime (Socket.IO) namespace", opts.realtime_namespace,
+                                    check=validate_api_path)
+    opts.dev_data_source = value(args.dev_data_source, "Dev data source (mock = sample fixtures, remote = dev API)",
+                                 opts.dev_data_source, check=lambda v: None if v in ("mock", "remote") else "mock or remote")
     opts.team_id = value(args.team_id, "Apple Team ID (Enter = keep the template's)", "")
     for slot, question in FIREBASE_QUESTIONS.items():
         given = getattr(args, f"firebase_{slot}")
@@ -112,10 +126,24 @@ def collect(args: argparse.Namespace) -> Options:
 
 
 def generate(opts: Options, source: Path, git: bool) -> List[str]:
+    if opts.merge_into_existing and opts.target.exists():
+        final = opts.target
+        staging = final.parent / f".{final.name}.kmp-template"
+        if staging.exists():
+            shutil.rmtree(staging)
+        opts.target = staging
+        try:
+            notes = generate(opts, source, git=False)
+        finally:
+            opts.target = final
+        kept = merge_into(staging, final)
+        return notes + [f"kept the existing {rel}" for rel in kept]
     copy_project(source, opts.target)
     strip_features(opts.target)
     apply_shell(opts.target)
+    genericize(opts.target)
     retarget_tooling(opts.target, source)
+    retarget_api(opts.target, opts)
     rename_everything(opts.target, opts)
     configure_environment(opts.target, opts)
     configure_names(opts.target, opts)

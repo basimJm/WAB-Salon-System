@@ -8,7 +8,8 @@ customer app: same convention plugins, core modules, SDKs and third parties, wit
 | Dev | flavor `dev`, applicationId `__DEV_ID__` | scheme `iosApp-Dev`, bundle id `__DEV_ID__` |
 | Prod | flavor `prod`, applicationId `__PACKAGE__` | scheme `iosApp-Prod`, bundle id `__PACKAGE__` |
 
-API: dev `__DEV_API__`, prod `__PROD_API__` (`gradle.properties` for Android, `iosApp/Configuration/{Dev,Prod}.xcconfig` for iOS;
+API: dev `__DEV_API__`, prod `__PROD_API__`, path prefix `__API_PREFIX__`; dev builds use `DATA_SOURCE=__DEV_DATA_SOURCE__`
+(`mock` serves the fixtures each feature binds, e.g. the sample list). URLs live in `gradle.properties` (Android) and `iosApp/Configuration/{Dev,Prod}.xcconfig` (iOS;
 in an xcconfig write `https:/$()/host`, because `//` starts a comment).
 
 ## Firebase
@@ -40,5 +41,4 @@ scripts/ci/run_local_checks.sh  # policy, detekt, unit tests, every Android vari
 - App icons (`androidApp/src/main/res/mipmap-*`, `iosApp/iosApp/Assets.xcassets/AppIcon.appiconset`) and the in-app logo
   (`core/design-system/.../composeResources/drawable`) still show the template brand.
 - Colors and fonts: `core/design-system/.../theme`.
-- `core/data/.../contract/generated` + `docs/api/openapi.json`: regenerate DTOs from your backend with `python3 scripts/api_sync.py`.
-- The template core keeps the customer app's domain models (sessions, catalog, bookings); delete what your app does not use.
+- `docs/api/openapi.json`: put your backend spec there and run `python3 scripts/api_sync.py` to generate DTOs into `core/data/.../contract/generated`.

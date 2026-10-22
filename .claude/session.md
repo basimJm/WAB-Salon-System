@@ -92,3 +92,27 @@
 - Loops: 1/1 — re-checked every criterion against a fresh generation (Acme Shop / com.acme.shop) and its full gate; found and fixed: xcconfig empty-value regex ate the next line (prod bundle id), policy scripts/tests read the monorepo workflow path, Android lint `MissingFirebaseInstanceTokenRefresh` (also broke the customer gate), off-centre sample error state, target inside the template, root-only exclusions
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — stdlib Python 3.9, split into prompts / generator / configure / firebase helpers; never copies WAB Firebase keys or signing files; the template source is the live customer app. DEVIATIONS: the generated core keeps the customer's domain models (sessions, catalog, bookings, generated WAB contract) as requested ("same as customer"), app icons/logo and some code comments still show WAB (README lists what to replace); interactive prompts tested through the `ask` reader seam, not a real TTY run.
 
+### T-131 — KMP_TEMPLATE generic (no WAB business) + shared rules/roles
+- Project: repo root (`.claude/tools/KMP_TEMPLATE`)
+- Branch: `chore/kmp-template-generic`
+- Status: DONE (PR into `customer`)
+- Acceptance criteria (owner request 2026-10-22):
+  - [x] Template keeps every module, the design system and Liquid Glass; removes salons, bookings, catalog, favorites, locations, gender, merchant hand-off, WAB config gate, generated WAB contract/fixtures, WAB-only error codes, salon/service cards, WAB routes, their strings/tests; neutral test data and comments; generic session, deep links, routes, mock engine with per-feature `MockFixture` (sample shows mock data in dev)
+  - [x] New questions: API path prefix, realtime namespace, dev data source; `--merge` into an existing folder; error-code policy reads the project's own `BUSINESS_DOMAIN.md` first
+  - [x] Generated projects get `.claude/{rules,roles,session,memory}.md` (WAB rules/roles without customer/monorepo points) + CLAUDE.md importing them
+  - [x] Tool tests (18) incl. end-to-end: no WAB business terms left; scratch project: policy tests, policy, detekt, all unit tests, devDebug + prodRelease green
+- Tests: `python3 -m unittest discover -s .claude/tools/KMP_TEMPLATE -p 'test_*.py'` (18 OK); scratch gate log
+- Loops: 1/1 — regenerated the scratch project after every change and re-ran its gate until green; found and fixed: error table / tests referencing dropped codes, long re-wrapped sets, analytics test data rewritten twice, App Links `/salon/` filter, WAB terms in comments/test data/previews/iOS permission texts
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — removals + strict transforms fail loudly when the customer app drifts (tool tests run a full generation); generic session/deep links/mock engine keep the customer's patterns. DEVIATIONS: generic whole-file overlays in `shell/` do not follow later customer edits of those files automatically; icons named Favorite/Calendar stay (generic shapes).
+
+### T-132 — Masters into main, then every master synced from main (owner request 2026-10-22)
+- Project: repo root
+- Branch: PRs `<master>` → `main` and `main` → `<master>` (no task branch unless a conflict needs one)
+- Status: IN PROGRESS
+- Acceptance criteria:
+  - [ ] `server`, `admin`, `customer`, `merchant` merged into `main` by PR (conflicts resolved on a sync branch)
+  - [ ] `main` merged back into each master; local masters pulled
+- Tests: hook tests + `tasks.py check` after the merges
+- Loops: 0/1
+- Review: PENDING
+

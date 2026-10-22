@@ -24,21 +24,14 @@ def application_id(opts: Options, env: str) -> str:
 
 def configure_environment(target: Path, opts: Options) -> None:
     props = target / "gradle.properties"
-    merchant = f"https://merchant.{host_of(opts.prod_web_url)}"
     props.write_text(set_properties(props.read_text(encoding="utf-8"), {
         "DEV_API_BASE_URL": opts.dev_api_url,
         "DEV_WEB_BASE_URL": opts.dev_web_url,
         "PROD_API_BASE_URL": opts.prod_api_url,
         "PROD_WEB_BASE_URL": opts.prod_web_url,
         "DEV_APPLICATION_ID_SUFFIX": opts.dev_suffix,
-        "DEV_DATA_SOURCE": "remote",
+        "DEV_DATA_SOURCE": opts.dev_data_source,
         "PROD_DATA_SOURCE": "remote",
-        "DEV_MERCHANT_REGISTER_URL": f"{merchant}/register",
-        "PROD_MERCHANT_REGISTER_URL": f"{merchant}/register",
-        "DEV_MERCHANT_STORE_URL": f"{merchant}/app",
-        "PROD_MERCHANT_STORE_URL": f"{merchant}/app",
-        "DEV_MERCHANT_APP_ID": f"{opts.package}.business",
-        "PROD_MERCHANT_APP_ID": f"{opts.package}.business",
     }), encoding="utf-8")
     for env, display, api, web in (("Dev", f"{opts.app_name} Dev", opts.dev_api_url, opts.dev_web_url),
                                    ("Prod", opts.app_name, opts.prod_api_url, opts.prod_web_url)):
@@ -49,8 +42,7 @@ def configure_environment(target: Path, opts: Options) -> None:
             "WEB_BASE_URL": xcconfig_url(web),
             "DEEP_LINK_HOST": host_of(web),
             "BUNDLE_ID_SUFFIX": opts.dev_suffix if env == "Dev" else "",
-            "MERCHANT_REGISTER_URL": xcconfig_url(f"{merchant}/register"),
-            "MERCHANT_APP_SCHEME": f"{opts.project_name.lower()}business",
+            "DATA_SOURCE": opts.dev_data_source if env == "Dev" else "remote",
         }), encoding="utf-8")
     if opts.team_id:
         config = target / "iosApp/Configuration/Config.xcconfig"
@@ -119,8 +111,13 @@ def write_docs(target: Path, opts: Options, notes: List[str]) -> None:
         "__DEV_API__": opts.dev_api_url,
         "__PROD_API__": opts.prod_api_url,
         "__FIREBASE_NOTES__": "\n".join(f"- {note}" for note in notes),
+        "__API_PREFIX__": opts.api_prefix,
+        "__DEV_DATA_SOURCE__": opts.dev_data_source,
     }
-    for source, name in (("README.md", "README.md"), ("CLAUDE.md", "CLAUDE.md"), ("gitignore", ".gitignore")):
+    (target / ".claude").mkdir(exist_ok=True)
+    for source, name in (("README.md", "README.md"), ("CLAUDE.md", "CLAUDE.md"), ("gitignore", ".gitignore"),
+                         ("rules.md", ".claude/rules.md"), ("roles.md", ".claude/roles.md"),
+                         ("session.md", ".claude/session.md"), ("memory.md", ".claude/memory.md")):
         text = (FILES_DIR / source).read_text(encoding="utf-8")
         for key, value in values.items():
             text = text.replace(key, value)
