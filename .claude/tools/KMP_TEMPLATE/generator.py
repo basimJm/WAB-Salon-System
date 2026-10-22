@@ -69,6 +69,10 @@ class Options:
     dev_web_url: str = f"https://dev.{PLACEHOLDER_HOST}"
     prod_web_url: str = f"https://{PLACEHOLDER_HOST}"
     team_id: str = ""
+    api_prefix: str = "/api/v1"
+    realtime_namespace: str = "/app"
+    dev_data_source: str = "mock"
+    merge_into_existing: bool = False
     firebase: Dict[str, Optional[Path]] = field(default_factory=dict)  # android_dev, android_prod, ios_dev, ios_prod
 
 
@@ -194,6 +198,10 @@ def retarget_tooling(target: Path, source: Path) -> None:
         'if [ -f docs/api/openapi.json ]; then python3 scripts/api_sync.py --check; '
         'else echo "docs/api/openapi.json not found: contract check skipped"; fi\n',
     )])
+    edit(target / "scripts/ci/policy/error_codes.py", [(
+        'doc = read(f"../{_DOMAIN_DOC}") or read(_DOMAIN_DOC)',
+        'doc = read(_DOMAIN_DOC) or read(f"../{_DOMAIN_DOC}")',
+    )])
     edit(target / "scripts/ci/policy/variants.py", [(
         'text = _read(config, f"../{workflow}")',
         'text = _read(config, workflow) or _read(config, f"../{workflow}")',
@@ -256,6 +264,40 @@ def rename_everything(target: Path, opts: Options) -> None:
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(directory), str(destination))
             prune_empty(base / old_parts[0])
+
+
+def retarget_api(target: Path, opts: Options) -> None:
+    """The customer API prefix (`/customer/v1`) and Socket.IO namespace (`/customer`) become the new app's."""
+    for path in target.rglob("*"):
+        if path.is_file() and is_text(path):
+            text = path.read_text(encoding="utf-8")
+            updated = text.replace("/customer/v1", opts.api_prefix)
+            if "core/realtime" in path.as_posix():
+                updated = updated.replace("CUSTOMER_NAMESPACE", "APP_NAMESPACE").replace("/customer", opts.realtime_namespace)
+            if updated != text:
+                path.write_text(updated, encoding="utf-8")
+
+
+def validate_api_path(value: str) -> Optional[str]:
+    return None if re.match(r"^/[a-z0-9][a-z0-9/_-]*$", value) and not value.endswith("/") else \
+        "start with '/', lowercase letters, digits, '-', '_' or '/', no trailing '/' (e.g. /api/v1)"
+
+
+def merge_into(staging: Path, target: Path) -> List[str]:
+    """Moves the generated files into an existing folder; files the folder already has are kept (theirs win)."""
+    kept = []
+    for path in sorted(staging.rglob("*")):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(staging)
+        dest = target / rel
+        if dest.exists():
+            kept.append(rel.as_posix())
+            continue
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(path), str(dest))
+    shutil.rmtree(staging)
+    return kept
 
 
 def prune_empty(directory: Path) -> None:

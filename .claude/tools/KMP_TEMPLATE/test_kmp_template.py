@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -12,8 +13,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kmp_template  # noqa: E402
 from configure import install_firebase, prune_policy_baseline  # noqa: E402
 from firebase_files import android_placeholder, ios_placeholder, looks_like, read_android_packages, read_ios_bundle_id  # noqa: E402
-from generator import (Options, host_of, project_name_from, rename_everything, set_properties,  # noqa: E402
-                       strip_features, validate_package, xcconfig_url)
+from generator import (Options, host_of, merge_into, project_name_from, rename_everything, set_properties,  # noqa: E402
+                       strip_features, validate_api_path, validate_package, xcconfig_url)
+from genericize import rewrap_sets  # noqa: E402
+
+WAB_TERMS = re.compile(r"(?i)salon|booking|gender|\bcatalog\b|bride|\bstaff\b|merchant|favorites")
 
 CUSTOMER = kmp_template.DEFAULT_SOURCE
 
@@ -48,6 +52,31 @@ class NamingTest(unittest.TestCase):
     def test_urls(self):
         self.assertEqual("https:/$()/api.acme.io/v1", xcconfig_url("https://api.acme.io/v1"))
         self.assertEqual("api.acme.io", host_of("https://api.acme.io/v1"))
+
+
+class GenericTest(TempDir):
+    def test_sets_are_rewrapped_after_codes_were_dropped(self):
+        text = "private val A = setOf(\n    ErrorCode.X, ErrorCode.Y, ErrorCode.Z, ErrorCode.W, ErrorCode.V,\n)\n"
+        self.assertEqual("private val A = setOf(\n    ErrorCode.X, ErrorCode.Y, ErrorCode.Z, ErrorCode.W,\n    ErrorCode.V,\n)\n",
+                         rewrap_sets(text))
+
+    def test_api_paths(self):
+        self.assertIsNone(validate_api_path("/merchant/v1"))
+        self.assertIsNone(validate_api_path("/app"))
+        for bad in ("merchant/v1", "/Merchant", "/v1/", ""):
+            self.assertIsNotNone(validate_api_path(bad), bad)
+
+    def test_merge_keeps_existing_files(self):
+        staging = self.root / "staging"
+        target = self.root / "target"
+        self.write("staging/CLAUDE.md", "generated")
+        self.write("staging/core/A.kt", "a")
+        self.write("target/CLAUDE.md", "mine")
+        kept = merge_into(staging, target)
+        self.assertEqual(["CLAUDE.md"], kept)
+        self.assertEqual("mine", (target / "CLAUDE.md").read_text(encoding="utf-8"))
+        self.assertEqual("a", (target / "core/A.kt").read_text(encoding="utf-8"))
+        self.assertFalse(staging.exists())
 
 
 class PropertiesTest(unittest.TestCase):
@@ -142,6 +171,7 @@ class PromptTest(unittest.TestCase):
         self.assertEqual(".dev", opts.dev_suffix)
         self.assertEqual("Acme Shop", opts.app_name_ar)
         self.assertEqual({"android_dev": None, "android_prod": None, "ios_dev": None, "ios_prod": None}, opts.firebase)
+        self.assertEqual(("/api/v1", "/app", "mock"), (opts.api_prefix, opts.realtime_namespace, opts.dev_data_source))
 
 
 @unittest.skipUnless((CUSTOMER / "settings.gradle.kts").exists(), "customer app not next to the tool")
@@ -154,8 +184,21 @@ class EndToEndTest(TempDir):
 
     def test_generates_a_renamed_project_with_only_the_sample_feature(self):
         target = self.root / "Acme"
-        opts = Options(target=target, app_name="Acme Shop", package="com.acme.shop", project_name="AcmeShop")
+        opts = Options(target=target, app_name="Acme Shop", package="com.acme.shop", project_name="AcmeShop",
+                       api_prefix="/shop/v1", realtime_namespace="/shop")
         kmp_template.generate(opts, CUSTOMER, git=False)
+        business = [str(p.relative_to(target)) for p in target.rglob("*")
+                    if p.is_file() and p.suffix in (".kt", ".kts", ".xml", ".plist", ".xcconfig", ".properties", ".strings", ".swift")
+                    and WAB_TERMS.search(p.read_text(encoding="utf-8"))]
+        self.assertEqual([], business)
+        auth = next(target.rglob("AuthEndpoints.kt")).read_text(encoding="utf-8")
+        self.assertIn('"/shop/v1/auth/refresh"', auth)
+        self.assertIn('"/shop"', next(target.rglob("RealtimeConfig.kt")).read_text(encoding="utf-8"))
+        self.assertIn("DEV_DATA_SOURCE=mock", (target / "gradle.properties").read_text(encoding="utf-8"))
+        for doc in (".claude/rules.md", ".claude/roles.md", ".claude/session.md", ".claude/memory.md"):
+            self.assertTrue((target / doc).exists(), doc)
+        self.assertNotIn("__", (target / ".claude/memory.md").read_text(encoding="utf-8"))
+        self.assertFalse(list((target / "core/data").rglob("contract")))
         self.assertEqual(["sample"], sorted(p.name for p in (target / "feature").iterdir()))
         self.assertEqual([], kmp_template.leftovers(target))
         self.assertFalse(list(target.rglob("fab")))

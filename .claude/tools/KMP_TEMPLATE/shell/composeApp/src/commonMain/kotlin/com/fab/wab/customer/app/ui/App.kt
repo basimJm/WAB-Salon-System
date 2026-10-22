@@ -16,7 +16,6 @@ import com.fab.wab.customer.app.controller.vm.MainViewModel
 import com.fab.wab.customer.app.deeplink.DeepLinkStore
 import com.fab.wab.customer.app.deeplink.deepLinkModule
 import com.fab.wab.customer.app.di.analyticsAppModule
-import com.fab.wab.customer.app.di.appPlatformModule
 import com.fab.wab.customer.app.di.viewModelModule
 import com.fab.wab.customer.app.navigation.MainNavigation
 import com.fab.wab.customer.app.push.PushEffect
@@ -56,7 +55,6 @@ val appModules = listOf(
     realtimeModule,
     notificationModule,
     viewModelModule,
-    appPlatformModule,
     deepLinkModule,
     platformFirebaseModule(),
     analyticsModule(),
