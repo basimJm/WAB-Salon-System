@@ -1,6 +1,5 @@
 package com.fab.wab.customer.designsystem.components.layout
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -22,6 +21,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -29,13 +31,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import com.fab.wab.customer.designsystem.components.glass.LocalFloatingBarPadding
+import com.fab.wab.customer.designsystem.components.glass.glassBackdrop
+import com.fab.wab.customer.designsystem.components.glass.LocalGlassSource
+import com.fab.wab.customer.designsystem.components.glass.glassSource
+import com.fab.wab.customer.designsystem.components.glass.liquidGlass
+import com.fab.wab.customer.designsystem.components.glass.rememberGlass
+import com.fab.wab.customer.designsystem.components.glass.rememberGlassSource
 import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerListItem
 import com.fab.wab.customer.designsystem.theme.AppTheme
 
 /**
  * Screen scaffold: background, side insets (display cutout in landscape), and the content column limited to the
- * adaptive max width and centered, so one layout serves phones, landscape and tablets.
+ * adaptive max width and centered, so one layout serves phones, landscape and tablets. The content is the backdrop
+ * of the glass bars; everything sits above the floating tab bar ([LocalFloatingBarPadding]). With
+ * [scrollsUnderTabBar] the content runs under the floating glass tab bar; the screen pads its scroll content's end
+ * by [tabBarInset]. With [contentUnderBars] the content fills the screen and scrolls under the glass bars: the bar heights then arrive in
+ * the [PaddingValues] (top/bottom), which the screen must apply as its list content padding.
  */
 @Composable
 fun AppScreen(
@@ -44,23 +60,62 @@ fun AppScreen(
     bottomBar: (@Composable () -> Unit)? = null,
     maxContentWidth: Dp = AppTheme.adaptive.contentMaxWidth,
     handleIme: Boolean = true,
+    contentUnderBars: Boolean = false,
+    scrollsUnderTabBar: Boolean = false,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val imeModifier = if (handleIme) Modifier.imePadding() else Modifier
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(AppTheme.colors.background)
-            .windowInsetsPadding(WindowInsets.displayCutout)
-            .then(imeModifier),
-    ) {
-        topBar?.invoke()
-        Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-            Box(Modifier.widthIn(max = maxContentWidth).fillMaxSize()) {
-                content(PaddingValues(horizontal = AppTheme.adaptive.horizontalPadding))
+    val source = rememberGlassSource()
+    val rootModifier = modifier
+        .fillMaxSize()
+        .glassBackdrop(AppTheme.colors.background, AppTheme.glass)
+        .padding(bottom = if (scrollsUnderTabBar) Dp.Hairline else LocalFloatingBarPadding.current)
+        .windowInsetsPadding(WindowInsets.displayCutout)
+        .then(imeModifier)
+    val body: @Composable (PaddingValues) -> Unit = { padding ->
+        Box(modifier = Modifier.fillMaxSize().glassSource(source), contentAlignment = Alignment.TopCenter) {
+            Box(Modifier.widthIn(max = maxContentWidth).fillMaxSize()) { content(padding) }
+        }
+    }
+    CompositionLocalProvider(LocalGlassSource provides source) {
+        if (contentUnderBars) {
+            OverlaidBars(topBar, bottomBar, body, rootModifier)
+        } else {
+            Column(modifier = rootModifier) {
+                topBar?.invoke()
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    body(PaddingValues(horizontal = AppTheme.adaptive.horizontalPadding))
+                }
+                bottomBar?.invoke()
             }
         }
-        bottomBar?.invoke()
+    }
+}
+
+/** Bottom space a screen built with `scrollsUnderTabBar = true` adds after its last scrollable item. */
+@Composable
+fun tabBarInset(): Dp = LocalFloatingBarPadding.current
+
+/** Bars drawn over the content; their measured heights become the content's top/bottom padding. */
+@Composable
+private fun OverlaidBars(
+    topBar: (@Composable () -> Unit)?,
+    bottomBar: (@Composable () -> Unit)?,
+    body: @Composable (PaddingValues) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val density = LocalDensity.current
+    var topHeight by remember { mutableStateOf(Dp.Hairline) }
+    var bottomHeight by remember { mutableStateOf(Dp.Hairline) }
+    Box(modifier) {
+        val side = AppTheme.adaptive.horizontalPadding
+        body(PaddingValues(start = side, end = side, top = topHeight, bottom = bottomHeight))
+        Box(Modifier.align(Alignment.TopCenter).onSizeChanged { topHeight = with(density) { it.height.toDp() } }) {
+            topBar?.invoke()
+        }
+        Box(Modifier.align(Alignment.BottomCenter).onSizeChanged { bottomHeight = with(density) { it.height.toDp() } }) {
+            bottomBar?.invoke()
+        }
     }
 }
 
@@ -136,7 +191,7 @@ fun AppStickyActionBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(AppTheme.colors.card)
+            .liquidGlass(rememberGlass(), RectangleShape, elevated = false, rim = false)
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(horizontal = AppTheme.adaptive.horizontalPadding, vertical = AppTheme.spacing.space12),
     ) {

@@ -1,7 +1,5 @@
 package com.fab.wab.customer.designsystem.components.textfield
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -15,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import com.fab.wab.customer.designsystem.components.button.AppIconButton
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -66,8 +65,7 @@ fun AppSearchBarStatic(
         modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = AppTheme.sizes.fieldHeight)
-            .background(colors.card, AppTheme.shapes.medium)
-            .border(AppTheme.sizes.borderWidth, colors.line, AppTheme.shapes.medium)
+            .glassBackground(AppTheme.glass, AppTheme.shapes.medium)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = AppTheme.spacing.space14),
         verticalAlignment = Alignment.CenterVertically,

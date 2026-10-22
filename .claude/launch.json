@@ -4,9 +4,26 @@
     {
       "name": "admin-preview-dev-debug",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "WAB-Admin-Dashboard", "run", "preview:dev-debug"],
+      "runtimeArgs": [
+        "--prefix",
+        "WAB-Admin-Dashboard",
+        "run",
+        "preview:dev-debug"
+      ],
       "port": 4173,
       "autoPort": true
+    },
+    {
+      "name": "customer-design",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4180",
+        "--directory",
+        "WAB-Mobile-Customer/design"
+      ],
+      "port": 4180
     }
   ]
 }

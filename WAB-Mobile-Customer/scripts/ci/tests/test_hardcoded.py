@@ -50,6 +50,7 @@ class KotlinHardcodedTest(unittest.TestCase):
 
     def test_constants_and_preview_files_may_hold_numbers(self):
         self.assertEqual(rules("const val A = 5\nval b = 7", "core/x/src/commonMain/kotlin/p/constants/Limits.kt"), [])
+        self.assertEqual(rules("val Pad = 14.dp\nval Size = 12.5.sp", "feature/x/src/commonMain/kotlin/p/screen/XDesignConstants.kt"), [])
         self.assertEqual(rules("val b = 7\nval c = 12.dp", "core/x/src/commonMain/kotlin/p/ButtonPreviews.kt"), ["H002"])
 
     def test_user_visible_text(self):

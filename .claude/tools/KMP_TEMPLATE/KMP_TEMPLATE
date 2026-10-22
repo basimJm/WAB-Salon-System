@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# KMP_TEMPLATE: create a new Kotlin Multiplatform app with the same setup as the WAB customer app.
+# Usage: .claude/tools/KMP_TEMPLATE/KMP_TEMPLATE            (interactive)
+#        .claude/tools/KMP_TEMPLATE/KMP_TEMPLATE --help     (flags for non-interactive use)
+set -euo pipefail
+exec python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/kmp_template.py" "$@"

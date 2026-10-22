@@ -13,6 +13,7 @@ import com.fab.wab.customer.designsystem.resources.time_range_separator
 import com.fab.wab.customer.feature.home.domain.model.HomeBanner
 import com.fab.wab.customer.feature.home.domain.model.HomeService
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 
 fun HomeBanner.toUi(): BannerUi = BannerUi(id = id, imageUrl = imageUrl)
 
@@ -32,15 +33,24 @@ fun SalonSummary.toUi(todayHoursText: String?): SalonCardUi = SalonCardUi(
 )
 
 @Composable
-fun SalonSummary.toUi(): SalonCardUi {
-    val hours = todayHours?.let {
-        TimeFormat.range12Hour(
-            open = it.open,
-            close = it.close,
-            am = stringResource(Res.string.time_am),
-            pm = stringResource(Res.string.time_pm),
-            rangeSeparator = stringResource(Res.string.time_range_separator),
-        )
-    }
-    return toUi(hours)
+fun SalonSummary.toUi(): SalonCardUi = toUi(todayHoursText())
+
+/** Today's window as 12-hour text in the user's language, or null when the salon has no hours today. */
+@Composable
+fun SalonSummary.todayHoursText(): String? = todayHours?.let {
+    TimeFormat.range12Hour(
+        open = it.open,
+        close = it.close,
+        am = stringResource(Res.string.time_am),
+        pm = stringResource(Res.string.time_pm),
+        rangeSeparator = stringResource(Res.string.time_range_separator),
+    )
 }
+
+/** Distance as the design shows it: one decimal ("0.8", "2.4"), never negative; whole numbers keep the ".0". */
+fun distanceText(km: Double): String {
+    val tenths = (km.coerceAtLeast(0.0) * DISTANCE_TENTHS).roundToInt()
+    return "${tenths / DISTANCE_TENTHS}.${tenths % DISTANCE_TENTHS}"
+}
+
+private const val DISTANCE_TENTHS = 10

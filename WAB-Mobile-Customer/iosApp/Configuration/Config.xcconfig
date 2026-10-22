@@ -1,5 +1,11 @@
 // Settings shared by every environment. Per-environment values live in Dev.xcconfig and Prod.xcconfig.
-TEAM_ID=
+// Signing team: the project team by default; a developer overrides it in Local.xcconfig (not committed).
+TEAM_ID = X6UZ9NMK56
+DEVELOPMENT_TEAM = $(TEAM_ID)
+// Full capabilities (push, Associated Domains, App Attest). A free Apple ID cannot sign these: set
+// WAB_ENTITLEMENTS = iosApp/iosApp-Personal.entitlements in Local.xcconfig (see Local.xcconfig.example).
+WAB_ENTITLEMENTS = iosApp/iosApp.entitlements
+CODE_SIGN_ENTITLEMENTS = $(WAB_ENTITLEMENTS)
 
 PRODUCT_NAME=WABCustomer
 

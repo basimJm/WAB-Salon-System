@@ -82,3 +82,4 @@
 - ADM-084 done: data source: dev-debug = mock by default (VITE_DATA_SOURCE=remote to override), every other variant remote; .env.dev/.env.prod are committed PLACEHOLDERS (https://api-dev.wab.example, https://api.wab.example), real env vars win; gitignore allows only these two
 - ADM-085 done: real-server QA = sh qa/stack.sh, node qa/seed.mjs, qa/contract-check.mjs (see docs/REAL_SERVER_QA.md); server defects S1-S9 in docs/SERVER_ISSUES.md; mock appointment dates are relative to now
 - ADM-086 done: lazyPage(load, {reload, now}) in app/lazyPage.ts (all 45 route imports), RouteErrorPage as errorElement of the login and shell routes; STORAGE_KEYS.chunkReloadAt guards loops
+- ADM-087 done: base URL for dev and prod = https://wab-server-dev.onrender.com (.env.dev/.env.prod); deploy: build:prod-release + write-hosting + netlify-cli deploy; the server's CORS_ALLOWED_ORIGINS must list the panel origin

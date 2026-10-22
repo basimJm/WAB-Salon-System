@@ -1,26 +1,28 @@
 package com.fab.wab.customer.feature.notifications.presentation.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.fab.wab.customer.core.common.BusinessTime
 import com.fab.wab.customer.core.common.TimeFormat
-import com.fab.wab.customer.designsystem.components.badge.AppStatusBadge
-import com.fab.wab.customer.designsystem.components.badge.StatusTone
-import com.fab.wab.customer.designsystem.components.card.AppCard
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.designsystem.theme.GlassStyle
 import com.fab.wab.customer.feature.notifications.domain.model.Notification
 import com.fab.wab.customer.feature.notifications.domain.model.RelativeTime
 import com.fab.wab.customer.feature.notifications.domain.model.relativeTimeOf
 import com.fab.wab.customer.feature.notifications.presentation.resources.Res
-import com.fab.wab.customer.feature.notifications.presentation.resources.notifications_unread
 import com.fab.wab.customer.feature.notifications.presentation.resources.time_days_ago
 import com.fab.wab.customer.feature.notifications.presentation.resources.time_hours_ago
 import com.fab.wab.customer.feature.notifications.presentation.resources.time_minutes_ago
@@ -28,33 +30,65 @@ import com.fab.wab.customer.feature.notifications.presentation.resources.time_no
 import com.fab.wab.customer.feature.notifications.presentation.resources.time_yesterday
 import org.jetbrains.compose.resources.stringResource
 
-private const val BODY_PREVIEW_LINES = 2
-
-/** S19 list item: title, short body, relative time; unread = bold title + badge. */
+/**
+ * S19 list item (`padding:14px;border-radius:16px;gap:12px`): icon box, title + time, two-line body; unread rows use the
+ * soft background, a violet border and a dot at the end.
+ */
 @Composable
 internal fun NotificationRow(item: Notification, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = AppTheme.colors
     val spacing = AppTheme.spacing
-    AppCard(modifier = modifier.fillMaxWidth(), onClick = onClick) {
-        Column(verticalArrangement = Arrangement.spacedBy(spacing.space4)) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    val shape = AppTheme.shapes.large
+    val unread = !item.isRead
+    val borderColor = if (unread) colors.gradientEnd.copy(alpha = NotificationsDesign.unreadBorderAlpha) else colors.line
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .glassBackground(
+                AppTheme.glass,
+                shape,
+                style = if (unread) GlassStyle.Prominent else GlassStyle.Regular,
+                stateBorder = borderColor,
+            )
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(NotificationsDesign.itemPadding),
+        horizontalArrangement = Arrangement.spacedBy(spacing.space12),
+        verticalAlignment = Alignment.Top,
+    ) {
+        NotificationIconBox(isBooking = item.bookingId != null)
+        Column(modifier = Modifier.weight(1f)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalAlignment = Alignment.Top) {
                 AppText(
                     text = item.title,
-                    style = AppTheme.typography.titleSmall.copy(fontWeight = if (item.isRead) FontWeight.Normal else FontWeight.Bold),
+                    style = AppTheme.typography.titleSmall.copy(
+                        fontSize = NotificationsDesign.titleSize,
+                        lineHeight = NotificationsDesign.titleLineHeight,
+                        fontWeight = if (unread) FontWeight.Bold else FontWeight.SemiBold,
+                    ),
                     modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
-                if (!item.isRead) AppStatusBadge(text = stringResource(Res.string.notifications_unread), tone = StatusTone.Accent)
+                AppText(
+                    text = relativeText(item.createdAt),
+                    style = AppTheme.typography.bodySmall.copy(fontSize = NotificationsDesign.timeSize),
+                    color = colors.faint,
+                    maxLines = 1,
+                    overflow = TextOverflow.Clip,
+                )
             }
             AppText(
                 text = item.body,
-                style = AppTheme.typography.bodyMedium,
-                color = AppTheme.colors.muted,
-                maxLines = BODY_PREVIEW_LINES,
+                style = AppTheme.typography.bodySmall.copy(
+                    fontSize = NotificationsDesign.bodySize,
+                    lineHeight = NotificationsDesign.bodyLineHeight,
+                ),
+                color = colors.muted,
+                maxLines = NotificationsDesign.bodyLines,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = NotificationsDesign.bodyTop),
             )
-            AppText(text = relativeText(item.createdAt), style = AppTheme.typography.labelSmall, color = AppTheme.colors.muted)
         }
+        if (unread) UnreadDot(modifier = Modifier.padding(top = NotificationsDesign.unreadDotTop))
     }
 }
 

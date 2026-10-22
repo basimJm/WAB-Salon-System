@@ -27,6 +27,7 @@
 | `WAB-Mobile-Salon/` | Merchant app (same stack, scaffolded from the customer template) | Backlog only; MER-001 scaffold |
 | `wab-notifications/` | SDK: FCM push + SMTP email | Built, wired in the server |
 | `wab-payments/`, `wab-otp/`, `wab-analytics/`, `wab-storage/` | SDKs (ports + adapters; `wab-payments` also KMP) | Backlogs only |
+| `.claude/tools/KMP_TEMPLATE/` | Tool: `KMP_TEMPLATE` creates a new KMP app with the customer app's setup (README inside) | Ready |
 
 Each project: `docs/` (PRD = behaviour source of truth, BRD, Design Script, `*_Tasks.md` backlog), `design/` (apps: `*.dc.html` visual reference), `.claude/` (session, memory, Integration). Precedence: **PRD > BRD > Design Script > design files**; conflicts → stop and ask. `BUSINESS_DOMAIN.md` = the single source for schemas, enums, rules, state machine, permissions, jobs, settings and error codes (mandatory for server, contract and cross-project work).
 
