@@ -11,46 +11,46 @@
 
 ### MER-019 — Splash + config + system screens
 - Branch: `feat/mer-019-splash-config` (from `feat/mer-018-calendar-grid`; backlog name `feat/mer-019-config-system`)
-- Status: IN PROGRESS (batch 3)
+- Status: IN REVIEW (batch 3 PR)
 - Acceptance criteria (PRD M01, M26 "same as the customer app"; operation `GET /merchant/v1/config?platform&version`; design 01 `on.splash`, `on.sys`):
   - [x] Domain `core/domain/config` (from the customer app): `AppConfig` (update policy, maintenance, OTP length + resend, contact), `UpdateStatus` (unknown → OK), `ClientPlatform`, `LaunchGate` + `launchGateOf` (maintenance over force update over optional update)
   - [x] Data `core/data/config`: `AppConfigApi` (platform + installed version), mapper (blank texts → null, numbers → ints), `AppConfigRepositoryImpl` (`current` StateFlow for OTP / contact); bound in `dataModule`; `ClientPlatform` bound by the shell (`appPlatformModule`)
   - [x] Shell: `MainContract` (loading, gate, error, `OpenStore`), `MainViewModel` loads the config at start, retry, optional-update dismiss, store link; `LaunchGateContent`: splash until the gate is known, maintenance / force update blocking, optional update dialog over the app
   - [x] Splash (app icon 108 + WAB Business wordmark + tagline, loader, version, error + retry) and system screens (icon + wordmark row, circle icon, title, body, button) per design 01; AR + EN strings; previews
 - Tests: `LaunchGateTest` (3), `AppConfigMapperTest` (2), `MainViewModelTest` (+4: gate ready, maintenance / force update, optional update → store / dismiss, error → retry); domain / data / composeApp host tests, `assembleDevDebug`, `linkDebugFrameworkIosSimulatorArm64` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-3 run: policy `all: ok` (empty baseline), 81 policy-script tests OK, `testAndroidHostTest` (all modules, fresh results: 68 suites, 258 tests, 0 failures) + `:androidApp:assembleDevDebug` green; per task the iOS compile / framework link of the touched modules
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-3 code read (98 files): request sheet, uploaders, map picker, calendar and config gate behind ports (`RequestAlert`, `FilePicker`, `ImageCropper`, `MapProvider`, `ReverseGeocoder`, `UploadsRepository`, `AppConfigRepository`) with Android + iOS implementations and fakes; pure logic tested; tokens only, AR + EN, files < 300 lines, one `@Suppress` with its reason. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); the components are not yet on screens, so nothing was exercised on the emulator / simulator.
 - Notes: the post-gate launch router (session, salon state) is MER-024; mock mode answers the config with the generated fixture (status OK, maintenance off).
 
 ### MER-018 — Calendar grid component
 - Branch: `feat/mer-018-calendar-grid` (from `feat/mer-017-map-picker`)
-- Status: IN PROGRESS (batch 3)
+- Status: IN REVIEW (batch 3 PR)
 - Acceptance criteria (PRD M11; Design Script M11; design 04 Calendar):
   - [x] Models + pure helpers: blocks / shades (closed, leave) / columns in local minutes, `TimeWindow.covering` (working hours widened to every block, snapped to whole hours), `spanIn` (15-minute resolution, clamped), `weekOf` (Saturday-first week), `pageDate` (day ±1, week ±7)
   - [x] `AppCalendarDayView`: staff header (avatar, name, leave tag), time column (pre-formatted 12-hour labels), hour grid, hatched closed hours and amber leave, status-coloured blocks (pending dashed on the card colour, completed faded, bride crown + rose outline; tap → details), now line, empty / closed card, horizontal swipe (mirrored in RTL)
   - [x] `AppCalendarWeekView` (compact day columns, tap a day) + `AppCalendarLegend`; `AppCalendarHeader` (title, month → date picker, Today, staff filter with count, Day / Week switch, previous / next, week strip with today outline, selection gradient and booking dots)
   - [x] Tokens (56 dp per hour, columns, hatch, now line), AR + EN strings, previews (day light/dark RTL, week LTR)
 - Tests: `CalendarTest` (5); design-system host tests, `assembleDevDebug`, design-system iOS compile green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-3 run: policy `all: ok` (empty baseline), 81 policy-script tests OK, `testAndroidHostTest` (all modules, fresh results: 68 suites, 258 tests, 0 failures) + `:androidApp:assembleDevDebug` green; per task the iOS compile / framework link of the touched modules
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-3 code read (98 files): request sheet, uploaders, map picker, calendar and config gate behind ports (`RequestAlert`, `FilePicker`, `ImageCropper`, `MapProvider`, `ReverseGeocoder`, `UploadsRepository`, `AppConfigRepository`) with Android + iOS implementations and fakes; pure logic tested; tokens only, AR + EN, files < 300 lines, one `@Suppress` with its reason. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); the components are not yet on screens, so nothing was exercised on the emulator / simulator.
 - Notes: DEVIATION (PRD over design): the design colours blocks per staff member; PRD M11 says "colored by status", so blocks use the status hues and the legend shows statuses. Data, staff filter, employee single column and permissions are the calendar screen (MER-031). Only the visible window is drawn (no virtualisation needed: ≤ 24 h × staff columns).
 
 ### MER-017 — Map picker
 - Branch: `feat/mer-017-map-picker` (from `feat/mer-016-uploaders`)
-- Status: IN PROGRESS (batch 3)
+- Status: IN REVIEW (batch 3 PR)
 - Acceptance criteria (PRD M13; design 05 Salon `on.map`; maps key env/CI only):
   - [x] `MapProvider` port (core/ui): Google Maps (maps-compose) on Android when `MAPS_API_KEY` is set (local.properties or CI env → manifest meta-data), MapKit on iOS (no key), `NoMapProvider` otherwise; camera follows `target`, reports the idle centre and moving state
   - [x] `ReverseGeocoder` port (core/domain) with platform `Geocoder` (Android 13+ listener, older blocking call on IO) and `CLGeocoder`, in the app language; `addressLineOf` (trim, de-duplicate, Arabic/Latin comma), `isSamePointAs` (≈ 1 m), Amman default centre
   - [x] `AppMapPicker(MapPickerUi, mapProvider, onAction)`: map under a fixed centre pin (lifts while moving), search field + suggestions, "Use my location" (spinner while locating), bottom card with pin hint, address / "Finding the address…", error, Confirm (off while resolving or locating); stylized design map (grid, roads, park; drag to move) when no platform map
   - [x] Tokens: map colours (light/dark from the design), pin/grid/road sizes; AR + EN strings; previews
 - Tests: `ReverseGeocoderTest` (2), `MapPickerTest` (2); domain + design-system host tests, `assembleDevDebug`, iOS compile of core/ui (MapKit), core/data (CLGeocoder), design-system, core/di green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-3 run: policy `all: ok` (empty baseline), 81 policy-script tests OK, `testAndroidHostTest` (all modules, fresh results: 68 suites, 258 tests, 0 failures) + `:androidApp:assembleDevDebug` green; per task the iOS compile / framework link of the touched modules
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-3 code read (98 files): request sheet, uploaders, map picker, calendar and config gate behind ports (`RequestAlert`, `FilePicker`, `ImageCropper`, `MapProvider`, `ReverseGeocoder`, `UploadsRepository`, `AppConfigRepository`) with Android + iOS implementations and fakes; pure logic tested; tokens only, AR + EN, files < 300 lines, one `@Suppress` with its reason. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); the components are not yet on screens, so nothing was exercised on the emulator / simulator.
 - Notes: "use my location" permission + device position and the Places search wiring belong to the profile screen (MER-033), which owns the view model; the pin is "drag the map" (design hint), not a draggable marker.
 
 ### MER-016 — Uploaders
 - Branch: `feat/mer-016-uploaders` (from `feat/mer-015-request-sheet`)
-- Status: IN PROGRESS (batch 3)
+- Status: IN REVIEW (batch 3 PR)
 - Acceptance criteria (PRD M04, M13, M14, §12; operations `POST /uploads/presign|confirm`, `POST /uploads/license/presign|confirm`; design 01 Onboarding documents, 05 Salon crop + gallery):
   - [x] Domain `core/domain/upload`: purposes, `LocalFile` (kind from MIME), limits (documents 1–5, image/PDF, ≤ 10 MB; images ≤ 10 MB; videos ≤ 50 MB and ≤ 60 s; gallery 50 photos / 10 videos), `validateUpload` / `acceptUploads` (refusals WRONG_TYPE / TOO_LARGE / TOO_LONG / TOO_MANY), `UploadsRepository`, `UploadFileUseCase` (presign → PUT with progress → confirm; failures stop the chain; retry = new run)
   - [x] Data `core/data/upload`: `UploadsApi` (WAB client + bare storage client, Ktor `onUpload` progress), `UploadsRepositoryImpl` (license purpose → public license endpoints; storage non-2xx / IO → errors), `uploadModule` in Koin; mock mode answers the storage PUT
@@ -58,13 +58,13 @@
   - [x] Design system `components/upload`: `AppUploadTile` (uploading % + bar / uploaded + size / failed + retry / remove), `AppUploadAddTile`, `AppDocumentUploader` (3 columns, n / max, hint, error), `uploadRejectionText`, `AppImageUploader` (16:9 / 1:1 slot, progress, retry, change), `AppImageCropper` (frame + thirds grid, drag, pinch, zoom slider, Cancel / Use image), `AppMediaGrid` (Normal "First" badge, Reorder numbers + long-press drag + tap-to-move-earlier, Select checks, video duration, progress / failed cells); `AppImage(bytes)` for local previews
   - [x] AR + EN strings; previews (light RTL, dark reorder, LTR select); localization policy now flags duplicate keys (found `media_position` clash)
 - Tests: `UploadRulesTest` (5), `UploadFileUseCaseTest` (3), `UploadComponentsTest` (7), `UploadsMapperTest` (2), `test_localization.py` (+1); domain / data / ui / design-system host tests, `assembleDevDebug`, iOS compile of core/ui + core/data + design-system green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-3 run: policy `all: ok` (empty baseline), 81 policy-script tests OK, `testAndroidHostTest` (all modules, fresh results: 68 suites, 258 tests, 0 failures) + `:androidApp:assembleDevDebug` green; per task the iOS compile / framework link of the touched modules
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-3 code read (98 files): request sheet, uploaders, map picker, calendar and config gate behind ports (`RequestAlert`, `FilePicker`, `ImageCropper`, `MapProvider`, `ReverseGeocoder`, `UploadsRepository`, `AppConfigRepository`) with Android + iOS implementations and fakes; pure logic tested; tokens only, AR + EN, files < 300 lines, one `@Suppress` with its reason. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); the components are not yet on screens, so nothing was exercised on the emulator / simulator.
 - Notes: whole files are read into memory before upload (videos up to 50 MB); a streaming upload would need a file-source port (later if memory shows up). Screens (registration, profile, gallery, services) wire these in MER-022/033/034/036.
 
 ### MER-015 — Request sheet component
 - Branch: `feat/mer-015-request-sheet` (batch 3 start, from `feat/mer-014-components`)
-- Status: IN PROGRESS (batch 3)
+- Status: IN REVIEW (batch 3 PR)
 - Acceptance criteria (PRD M10 in-app; Design Script M10; design 02 Home `sheetOn`):
   - [x] `AppBookingRequestSheetContent(RequestSheetUi, onAction)`: "New booking request" + age · reference, "1 of 3" queue chip (only with more than one), bride banner ("Bridal booking — high priority"), customer + persons + time/date, one card per person (services, staff · time, bride badge), total + payment badge, Reject (outlined rose) / Accept (green, check icon, spinner while accepting), View details
   - [x] "Handled by {member}" state: content dimmed, actions off, dark toast with the outcome line (approved / rejected / closing); `RequestSheetDefaults.HANDLED_DISMISS_MS` for the host
@@ -73,8 +73,8 @@
   - [x] `ButtonKind.Success` (green accept) and an outlined Destructive button (design reject)
   - [x] AR + EN strings; previews (queued bride light RTL, handled dark, accepted LTR)
 - Tests: `RequestSheetTest` (4), `RequestAlertTest` (2); `:core:ui` + `:core:design-system` host tests, `assembleDevDebug`, `:core:ui:compileKotlinIosSimulatorArm64` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-3 run: policy `all: ok` (empty baseline), 81 policy-script tests OK, `testAndroidHostTest` (all modules, fresh results: 68 suites, 258 tests, 0 failures) + `:androidApp:assembleDevDebug` green; per task the iOS compile / framework link of the touched modules
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-3 code read (98 files): request sheet, uploaders, map picker, calendar and config gate behind ports (`RequestAlert`, `FilePicker`, `ImageCropper`, `MapProvider`, `ReverseGeocoder`, `UploadsRepository`, `AppConfigRepository`) with Android + iOS implementations and fakes; pure logic tested; tokens only, AR + EN, files < 300 lines, one `@Suppress` with its reason. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); the components are not yet on screens, so nothing was exercised on the emulator / simulator.
 - Notes: hosting, queue, de-duplication, reason picker and the Android overlay / iOS time-sensitive paths are MER-028/029/030; the design's pulsing "ring" animations are not drawn.
 
 ### MER-014 — Merchant components
