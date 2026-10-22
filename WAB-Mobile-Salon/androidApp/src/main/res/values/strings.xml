@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">WAB Merchant</string>
+    <string name="push_channel_name">Notifications</string>
+</resources>
