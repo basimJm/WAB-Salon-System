@@ -12,68 +12,68 @@
 ### MER-035 — Working hours & closures M15
 - Branch: `feat/mer-035-hours`
 - Branched: (from `feat/mer-034-gallery`)
-- Status: IN PROGRESS (batch 6)
+- Status: IN REVIEW (batch 6 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M15; operations `GET /salon/hours`, `PUT /salon/hours/weekly`, closures `POST/PATCH/DELETE`, `POST /bookings/cancel-affected`; design 05 `on.hours`, `closureAdd`, `closureConflict`):
   - [x] Weekly schedule Saturday → Friday: working toggle, open / close in 15-minute steps (close may be 24:00), "close after open" error, "Copy to all days" (days off stay off), save only when changed and valid; saving refreshes the shared salon (completeness)
   - [x] Closures: upcoming list, past collapsed, add / edit (future only, `editable`) with date range + reason (1..300, required by the contract), remove with confirmation
   - [x] 409 `SCHEDULE_CONFLICT` (booking ids in `details[].field`) → dialog with the count + full-refund note: "Cancel bookings & save" calls `cancel-affected` (closure → `EXCEPTIONAL_CLOSURE` + its reason; weekly → `OTHER` + localized "hours changed") then re-sends the change; "Go back" keeps the edit; hub tile HOURS registered
 - Tests: `WorkingHoursTest` (3), `HoursMappersTest` (1), `HoursViewModelTest` (3); `/tmp/claude/quick.sh m35` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 6 run: policy ok, 81 policy-script tests, 382 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 6 code reading; fixed: calendar column of a staff member missing from the team list showed the raw id (now untitled). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: the conflict dialog shows the number of affected bookings, not each booking (the 409 carries ids only); times use a 15-minute dropdown (no time-picker component in the design system); design marks the closure reason optional but the contract requires it.
 
 ### MER-034 — Gallery M14
 - Branch: `feat/mer-034-gallery`
 - Branched: (from `feat/mer-033-salon-profile`)
-- Status: IN PROGRESS (batch 6)
+- Status: IN REVIEW (batch 6 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M14; operations `GET/POST /salon/gallery`, `PUT /salon/gallery/order`, `DELETE /salon/gallery/{id}`; design 05 `on.gallery`):
   - [x] Grid of photos and videos (thumbnail falls back to url, video duration), hint with the limits, empty state "Add your work", tap → full-screen viewer
   - [x] Multi-select add within the free slots (50 photos / 10 videos, `acceptUploads` per kind: size, type, 60 s), each file uploaded (`GALLERY_IMAGE` / `GALLERY_VIDEO`) with progress then `POST /salon/gallery` (duration rounded up to seconds); failures stay as retry cells; refused files explained
   - [x] Reorder mode saved with `PUT /salon/gallery/order` on Done (restored on failure); select mode with "n selected" (AR plurals) → delete confirm → `DELETE` each, partial failures kept selected + reload; hub tile GALLERY registered
 - Tests: `GalleryTest` (2), `GalleryViewModelTest` (5); `/tmp/claude/quick.sh m34` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 6 run: policy ok, 81 policy-script tests, 382 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 6 code reading; fixed: calendar column of a staff member missing from the team list showed the raw id (now untitled). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: no video thumbnail is generated on the device (`thumbnailKey` optional; the server falls back to the url).
 
 ### MER-033 — Salon profile edit M13
 - Branch: `feat/mer-033-salon-profile`
 - Branched: (from `feat/mer-032-salon-hub`)
-- Status: IN PROGRESS (batch 6)
+- Status: IN REVIEW (batch 6 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M13; operations `GET /salon`, `PATCH /salon/profile`, uploads presign/confirm; design 05 `on.profile`, `sh.crop`, `on.map`, `on.preview`):
   - [x] Form from the shared salon: cover (16:9) and profile (1:1) images picked → cropped (`ImageCropper`) → uploaded (`SALON_COVER` / `SALON_PROFILE`) with progress and retry; name (≤ 80, required), description (≤ 1000 with counter), address text (≤ 300), city / area (areas reload per city), phone (required) and WhatsApp (optional) in E.164; salon type read-only
   - [x] Full-screen map picker: pin moves re-geocode (`ReverseGeocoder`), place search debounced 400 ms (`PlacesRepository`), "Use my location" through the location permission (blocked → settings), confirm fills location + address
   - [x] Save sends only changed fields; cleared description / address / WhatsApp go out as explicit `null` (the client drops nulls, so the body is built as JSON); success refreshes the shared salon (hub completeness, home); validation errors shown on save
   - [x] Unsaved-changes guard on the top-bar back and the system back (`NavigationBackHandler`): save & leave / discard; customer preview sheet; hub tile PROFILE registered
 - Tests: `ProfileFormTest` (3), `ProfileBodyTest` (1), `SalonProfileViewModelTest` (7); `/tmp/claude/quick.sh m33c` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 6 run: policy ok, 81 policy-script tests, 382 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 6 code reading; fixed: calendar column of a staff member missing from the team list showed the raw id (now untitled). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: new library `org.jetbrains.androidx.navigationevent:navigationevent-compose:1.0.1` (already a transitive dependency of navigation-compose; `BackHandler` is deprecated in Compose 1.10 and warnings fail the build). The preview is a simplified customer header (cover, logo, name, rating, description, address), not the full customer salon screen.
 
 ### MER-032 — Salon hub M12
 - Branch: `feat/mer-032-salon-hub`
 - Branched: (from `feat/mer-031-calendar`)
-- Status: IN PROGRESS (batch 6)
+- Status: IN REVIEW (batch 6 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M12, §6 hidden-not-disabled; `GET /salon` completeness; design 05 `on.hub`):
   - [x] New `feature/salon` (domain / data / presentation / di) wired in the shell; Salon tab registered (`Graph.Salon`, start = hub)
   - [x] `hubEntries(permissions, missing)`: tiles per permission (team also for owner `TEAM_MANAGE`), "Missing" when a tile fixes a completeness item (profile ← cover/profile image/name/description/location/phone, hours, services, staff, policies)
   - [x] Header: salon avatar, name, women/men type, state chip; "no permissions" text when nothing is granted; pull-to-refresh reloads `GET /salon`; adaptive grid columns
   - [x] A tile shows only once its screen is registered (`TILE_SCREENS`, filled by MER-033…046)
 - Tests: `SalonHubTest` (3), `SalonHubViewModelTest` (2); `/tmp/claude/quick.sh m32` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 6 run: policy ok, 81 policy-script tests, 382 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 6 code reading; fixed: calendar column of a staff member missing from the team list showed the raw id (now untitled). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: tile subtitles are static descriptions (no counts endpoint for gallery / services / team / reviews in one call).
 
 ### MER-031 — Calendar M11
 - Branch: `feat/mer-031-calendar`
 - Branched: (batch 6 start, from `feat/mer-028-request-in-app`)
-- Status: IN PROGRESS (batch 6)
+- Status: IN REVIEW (batch 6 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M11; operations `GET /bookings/calendar?from&to&staffId`, `GET /salon/hours`; design 04):
   - [x] `CalendarRepository` (entries ≤ 7 days, salon hours + closures) with mappers; Calendar tab registered (`Graph.Calendar`)
   - [x] Day view: one column per staff (filtered / all providers + anyone booked), blocks at 15-min resolution in Asia/Amman minutes, colored by status + bride icon, closed hours / day off / closure shaded, now line (1-minute tick), empty / closed states; Week view: Saturday-first compact day columns, tap → that day
   - [x] Header: month label (AR/EN month names), Today, date picker, Day/Week, previous/next + swipe, week strip (today, selected, has bookings, day off); staff filter sheet ("all staff" = none); `BOOKINGS_VIEW_OWN` → own column only, no filter; read-only; tap → M09; realtime booking events reload silently
 - Tests: `CalendarLayoutTest` (5), `CalendarViewModelTest` (3), `CalendarMappersTest` (2); `/tmp/claude/quick.sh m31b` bookings data + presentation + composeApp tests + `assembleDevDebug` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 6 run: policy ok, 81 policy-script tests, 382 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 6 code reading; fixed: calendar column of a staff member missing from the team list showed the raw id (now untitled). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: staff leaves are not in any merchant read contract the calendar can use per day, so only salon closures / off days are shaded; block subtitle shows the reference (calendar rows carry no service names).
 
 ### MER-028 — Real-time request M10 in-app

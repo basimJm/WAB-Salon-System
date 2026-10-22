@@ -20,6 +20,9 @@ import kotlin.time.Instant
 private val ZONE: TimeZone by lazy { TimeZone.of(BusinessTime.ZONE_ID) }
 private const val MINUTES_PER_DAY = 1_440
 
+/** A booked staff member missing from the team list (no TEAM read access): the column has no name rather than an id. */
+private const val UNKNOWN_STAFF_TITLE = ""
+
 /** Texts the layout needs from the screen (localized there). */
 class CalendarTexts(
     val timeRange: (Instant, Instant) -> String,
@@ -85,7 +88,7 @@ fun dayColumns(
     val people = when {
         own != null -> listOf(own)
         filter.isNotEmpty() -> staff.filter { it.id in filter }
-        else -> staff + ofDay.map { it.staffId }.distinct().filter { id -> staff.none { it.id == id } }.map { StaffRef(it, it) }
+        else -> staff + ofDay.map { it.staffId }.distinct().filter { id -> staff.none { it.id == id } }.map { StaffRef(it, UNKNOWN_STAFF_TITLE) }
     }
     val shades = dayShades(day, hours, texts)
     return people.map { person ->
