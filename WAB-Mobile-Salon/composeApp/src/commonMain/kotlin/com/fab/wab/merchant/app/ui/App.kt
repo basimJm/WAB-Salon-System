@@ -65,6 +65,8 @@ import com.fab.wab.merchant.feature.team.di.teamModule
 import com.fab.wab.merchant.feature.team.presentation.di.teamPresentationModule
 import com.fab.wab.merchant.feature.finance.di.financeModule
 import com.fab.wab.merchant.feature.finance.presentation.di.financePresentationModule
+import com.fab.wab.merchant.feature.notifications.di.notificationsModule
+import com.fab.wab.merchant.feature.notifications.presentation.di.notificationsPresentationModule
 import com.fab.wab.merchant.feature.sample.di.sampleModule
 import com.fab.wab.merchant.openStoreLink
 import com.fab.wab.merchant.feature.sample.presentation.di.samplePresentationModule
@@ -98,6 +100,8 @@ val appModules = listOf(
     teamPresentationModule,
     financeModule,
     financePresentationModule,
+    notificationsModule,
+    notificationsPresentationModule,
     sampleModule,
     samplePresentationModule,
 )

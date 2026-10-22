@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-047 — Notifications M24
+- Branch: `feat/mer-047-notifications`
+- Branched: (from `feat/mer-046-subscription`)
+- Status: IN PROGRESS (batch 8)
+- Acceptance criteria (PRD M24; operations `GET /notifications` (page, from, to, q), `GET /notifications/unread-count`, `POST /notifications/read`):
+  - [x] `feature/notifications` ported from the customer app (same pattern, as the PRD asks): paginated list, title, body, relative time, read / unread with read-on-visible (once each, failures roll back), filter sheet (date range + search, chips), realtime refresh, popup on tap
+  - [x] Merchant tap routing (`Notification.target()`): booking id → M09, `application.*` → M05, `catalog_request.*` → M16 requests, `payout.*` / `refund.*` → M22, `subscription.*` → M23; the popup shows "View booking" / "Open" only when there is a target
+  - [x] `Screen.Notifications` registered (opened from More, MER-048); search hint made generic
+- Tests: `NotificationTargetTest` (1) + ported `RelativeTimeTest` (2), `NotificationsApiTest` (3), `NotificationsViewModelTest` (6); `/tmp/claude/quick.sh m47` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: `review.*` opens nothing until the reviews screen (MER-042 ← SRV-131); the unread count badge has no host yet (Home MER-050 is blocked), More shows the entry.
+
 ### MER-046 — Subscription & status M23
 - Branch: `feat/mer-046-subscription`
 - Branched: (from `feat/mer-045-bank-details`)
