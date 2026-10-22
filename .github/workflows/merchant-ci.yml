@@ -1,31 +1,31 @@
-# Merchant CI (T-025). Runs only when the customer app (or this workflow) changes.
+# WAB-Mobile-Salon (merchant app) CI (MER-002). Runs only when the merchant app (or this workflow) changes.
 # Gates (CLAUDE.md §1): policy checks (hardcoded values, AR+EN resources, 300-line files, variants, crash-prone and
 # slow constructs, config security), detekt + Compose rules, secret scan, every Android variant (assemble + lint +
 # unit tests + R8/APK-size budget) and every iOS configuration (xcodebuild + Kotlin/Native tests + SwiftLint).
-name: Customer App CI
+name: Merchant App CI
 
 on:
   pull_request:
     paths:
-      - "**"
-      - ".github/workflows/ci.yml"
+      - "WAB-Mobile-Salon/**"
+      - ".github/workflows/merchant-ci.yml"
   push:
     branches: [main]
     paths:
-      - "**"
-      - ".github/workflows/ci.yml"
+      - "WAB-Mobile-Salon/**"
+      - ".github/workflows/merchant-ci.yml"
 
 permissions:
   contents: read
 
 # A newer push to the same branch makes the older run pointless.
 concurrency:
-  group: customer-ci-${{ github.ref }}
+  group: merchant-ci-${{ github.ref }}
   cancel-in-progress: true
 
 defaults:
   run:
-    working-directory: .
+    working-directory: WAB-Mobile-Salon
 
 jobs:
   policy:
@@ -55,8 +55,8 @@ jobs:
           java-version: 21
       - uses: actions/cache@v4
         with:
-          path: ~/.cache/wab-customer-lint
-          key: wab-customer-lint-${{ hashFiles('scripts/ci/run_detekt.sh') }}
+          path: ~/.cache/wab-merchant-lint
+          key: wab-merchant-lint-${{ hashFiles('WAB-Mobile-Salon/scripts/ci/run_detekt.sh') }}
       - name: detekt
         run: scripts/ci/run_detekt.sh
       - name: Upload report
@@ -64,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: detekt-report
-          path: build/reports/detekt.txt
+          path: WAB-Mobile-Salon/build/reports/detekt.txt
           if-no-files-found: ignore
 
   secret-scan:
@@ -125,8 +125,8 @@ jobs:
         with:
           name: android-reports-${{ matrix.task }}
           path: |
-            androidApp/build/reports
-            **/build/reports/tests
+            WAB-Mobile-Salon/androidApp/build/reports
+            WAB-Mobile-Salon/**/build/reports/tests
           if-no-files-found: ignore
 
   ios:
@@ -172,8 +172,8 @@ jobs:
           swiftlint lint --strict --config config/swiftlint.yml
 
   # One stable check to require in branch protection.
-  customer-ci-passed:
-    name: Customer CI passed
+  merchant-ci-passed:
+    name: Merchant CI passed
     if: always()
     needs: [policy, lint, secret-scan, android, ios]
     runs-on: ubuntu-latest

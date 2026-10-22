@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds every iOS configuration for the simulator exactly like CI (.github/workflows/ci.yml, iOS matrix),
+# Builds every iOS configuration for the simulator exactly like CI (.github/workflows/merchant-ci.yml at the repository root, iOS matrix),
 # then runs the Kotlin/Native unit tests and SwiftLint (when installed). CLAUDE.md §1.5: all four iOS variants must build.
 # Usage: scripts/ci/run_ios_checks.sh [--dry-run]   (--dry-run prints the commands instead of running them)
 set -euo pipefail

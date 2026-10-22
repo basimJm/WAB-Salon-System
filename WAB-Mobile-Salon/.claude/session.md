@@ -9,6 +9,17 @@
 
 ## Current task
 
+### MER-002 — Build variants + CI
+- Branch: `feat/mer-002-variants-ci` (batch 1 start, from `origin/merchant`)
+- Status: IN PROGRESS (batch 1)
+- Acceptance criteria (backlog MER-002, mirror `customer-ci.yml`):
+  - [x] Android dev/prod × debug/release and iOS Debug/Release-Dev/Prod (schemes iosApp-Dev/Prod) from the template; `variants` policy ok
+  - [x] Root `.github/workflows/merchant-ci.yml` (paths `WAB-Mobile-Salon/**`): policy checks, detekt, secret scan, Android matrix (assemble + lint + unit tests + R8/APK budget `config/budgets.json`), iOS matrix; the in-folder copy removed (GitHub reads only the root)
+  - [x] `config/policy.json` + policy tests + `run_ios_checks.sh` point at `merchant-ci.yml`
+- Tests: `python3 -m unittest discover -s scripts/ci/tests` (77 OK); `policy_checks.py variants` ok
+- Loops: 0/1
+- Review: PENDING
+
 ### MER-001 — Scaffold the KMP app from the customer template
 - Branch: `feat/mer-001-scaffold`
 - Status: DONE (PR into `merchant`)

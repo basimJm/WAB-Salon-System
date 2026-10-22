@@ -5,7 +5,7 @@ from policy import variants
 PLUGIN = "build-logic/convention/src/main/kotlin/com/fab/wab/merchant/buildlogic/AndroidAppPlugin.kt"
 PBXPROJ = "iosApp/iosApp.xcodeproj/project.pbxproj"
 SCHEMES = "iosApp/iosApp.xcodeproj/xcshareddata/xcschemes"
-WORKFLOW = ".github/workflows/ci.yml"
+WORKFLOW = ".github/workflows/merchant-ci.yml"
 SCHEME_XML = (
     '<Scheme><BuildAction/><TestAction buildConfiguration="Debug-{e}"/><LaunchAction buildConfiguration="Debug-{e}"/>'
     '<ProfileAction buildConfiguration="Release-{e}"/><AnalyzeAction buildConfiguration="Debug-{e}"/>'

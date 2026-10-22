@@ -9,7 +9,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 REPO_ROOT = PROJECT_ROOT.parent
 SCRIPT = PROJECT_ROOT / "scripts" / "ci" / "run_ios_checks.sh"
-WORKFLOW = PROJECT_ROOT / ".github" / "workflows" / "ci.yml"
+WORKFLOW = REPO_ROOT / ".github" / "workflows" / "merchant-ci.yml"
 MATRIX_ROW = re.compile(r"\{\s*scheme:\s*([\w-]+),\s*configuration:\s*([\w-]+)\s*\}")
 
 

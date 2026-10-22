@@ -147,6 +147,6 @@
       "DEV_DATA_SOURCE",
       "PROD_DATA_SOURCE"
     ],
-    "workflow": ".github/workflows/ci.yml"
+    "workflow": ".github/workflows/merchant-ci.yml"
   }
 }
