@@ -1,6 +1,5 @@
 package com.fab.wab.customer.designsystem.components.textfield
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -20,9 +19,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDirection
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
 
@@ -58,7 +59,7 @@ fun AppTextField(
     val borderColor = when {
         error != null -> colors.danger
         focused -> colors.accent
-        else -> colors.line
+        else -> Color.Transparent
     }
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.space6)) {
         if (label != null) {
@@ -83,7 +84,7 @@ fun AppTextField(
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = AppTheme.sizes.fieldHeight)
                         .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
-                        .background(if (enabled) colors.card else colors.surface, AppTheme.shapes.medium)
+                        .glassBackground(AppTheme.glass, AppTheme.shapes.medium)
                         .border(AppTheme.sizes.borderWidth, borderColor, AppTheme.shapes.medium)
                         .padding(horizontal = spacing.space14),
                     verticalAlignment = Alignment.CenterVertically,

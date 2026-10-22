@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.profile.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -46,8 +46,7 @@ internal fun ProfileSection(title: String, modifier: Modifier = Modifier, conten
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(shape)
-                .background(colors.card)
-                .border(AppTheme.sizes.hairline, colors.line, shape),
+                .glassBackground(AppTheme.glass, shape),
         ) { content() }
     }
 }

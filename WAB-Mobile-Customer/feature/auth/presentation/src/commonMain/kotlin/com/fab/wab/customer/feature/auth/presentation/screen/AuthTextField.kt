@@ -1,7 +1,5 @@
 package com.fab.wab.customer.feature.auth.presentation.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,8 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextDirection
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
 
@@ -57,8 +57,7 @@ internal fun AuthTextField(
                     .height(AppTheme.sizes.fieldHeight)
                     .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
                     .clip(shape)
-                    .background(if (enabled) colors.card else colors.surface)
-                    .border(AppTheme.sizes.borderWidth, if (error) colors.danger else colors.line, shape)
+                    .glassBackground(AppTheme.glass, shape, stateBorder = if (error) colors.danger else Color.Unspecified)
                     .padding(horizontal = AppTheme.spacing.space14),
                 contentAlignment = Alignment.CenterStart,
             ) {

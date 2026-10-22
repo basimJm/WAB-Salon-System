@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.onboarding.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -20,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
@@ -28,6 +28,7 @@ import com.fab.wab.customer.designsystem.components.brand.AppLogo
 import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
 import com.fab.wab.customer.designsystem.components.card.AppChoiceCard
 import com.fab.wab.customer.designsystem.components.form.AppKeyboards
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
@@ -150,8 +151,7 @@ private fun NicknameField(state: UiState, onAction: (UiAction) -> Unit, modifier
                     .fillMaxWidth()
                     .height(AppTheme.sizes.fieldHeight)
                     .clip(shape)
-                    .background(colors.card)
-                    .border(AppTheme.sizes.borderWidth, if (state.nicknameError) colors.danger else colors.line, shape)
+                    .glassBackground(AppTheme.glass, shape, stateBorder = if (state.nicknameError) colors.danger else Color.Unspecified)
                     .padding(horizontal = AppTheme.spacing.space14),
                 contentAlignment = Alignment.CenterStart,
             ) {

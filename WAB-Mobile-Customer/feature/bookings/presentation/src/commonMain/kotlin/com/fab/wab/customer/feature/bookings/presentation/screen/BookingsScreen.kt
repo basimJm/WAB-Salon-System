@@ -3,9 +3,12 @@ package com.fab.wab.customer.feature.bookings.presentation.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -16,6 +19,7 @@ import com.fab.wab.customer.core.domain.booking.BookingTab
 import com.fab.wab.customer.designsystem.components.layout.AppPagedList
 import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
+import com.fab.wab.customer.designsystem.components.layout.tabBarInset
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.resources.Res as CoreRes
@@ -47,8 +51,8 @@ import org.jetbrains.compose.resources.stringResource
 fun BookingsScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(BookingsAnalytics.SCREEN)
     val spacing = AppTheme.spacing
-    AppScreen(modifier = modifier, handleIme = false) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+    AppScreen(modifier = modifier, handleIme = false, scrollsUnderTabBar = true) { padding ->
+        Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars).padding(padding)) {
             Column(modifier = Modifier.padding(top = spacing.space8, bottom = spacing.space14)) {
                 AppText(
                     text = stringResource(Res.string.bookings_welcome, state.welcomeName),
@@ -139,7 +143,7 @@ private fun ListContent(state: UiState, onAction: (UiAction) -> Unit) {
             loadingMore = state.loadingMore,
             onLoadMore = { onAction(UiAction.OnLoadMore) },
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = spacing.space20),
+            contentPadding = PaddingValues(bottom = spacing.space20 + tabBarInset()),
             footer = { BookingsShimmerCard(BookingsDesign.listShimmerHeight) },
         ) { booking -> BookingCard(booking = booking, onClick = { onAction(UiAction.OnBookingClick(booking.id)) }) }
     }
