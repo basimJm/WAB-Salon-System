@@ -224,4 +224,9 @@
     <string name="time_am">ص</string>
     <string name="time_pm">م</string>
     <string name="price_jod">%1$s د.أ</string>
+    <string name="contact_title">تواصل مع WAB</string>
+    <string name="contact_hours">فريقنا متاح من السبت إلى الخميس، 9 ص – 6 م</string>
+    <string name="contact_call">اتصال</string>
+    <string name="contact_whatsapp">واتساب</string>
+    <string name="contact_email">البريد الإلكتروني</string>
 </resources>

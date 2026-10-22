@@ -250,4 +250,35 @@
     <string name="rule_ns_full_keep">عند عدم الحضور لا يُسترد الدفع الكامل</string>
     <string name="rule_ns_full_minus">عند عدم الحضور يُسترد الدفع الكامل بعد خصم العربون</string>
     <string name="rule_ns_full_full">عند عدم الحضور يُسترد الدفع الكامل</string>
+    <string name="sub_title">الاشتراك والحالة</string>
+    <string name="sub_salon_state">حالة الصالون</string>
+    <string name="sub_state_live">ظاهر للزبائن ويستقبل الحجوزات</string>
+    <string name="sub_state_offline">مخفي عن الزبائن</string>
+    <string name="sub_state_incomplete">أكمل الخطوات المطلوبة</string>
+    <string name="sub_subscription">الاشتراك</string>
+    <string name="sub_trial">فترة مجانية</string>
+    <string name="sub_active">اشتراك شهري فعّال</string>
+    <string name="sub_expired">انتهى الاشتراك</string>
+    <string name="sub_trial_ends">تنتهي في %1$s</string>
+    <string name="sub_renews">يتجدد في %1$s</string>
+    <string name="sub_expired_on">انتهى في %1$s — صالونك غير متصل</string>
+    <string name="sub_badge_trial">تجريبي</string>
+    <string name="sub_badge_active">فعّال</string>
+    <string name="sub_badge_expired">منتهي</string>
+    <string name="sub_ending_soon">ينتهي قريباً</string>
+    <string name="sub_paid_outside">يتم دفع الاشتراكات خارج التطبيق. تواصل مع فريق WAB لتفعيل أو تجديد اشتراكك.</string>
+    <string name="sub_cta_activate">تواصل مع WAB للتفعيل</string>
+    <string name="sub_cta_renew">تواصل مع WAB للتجديد</string>
+    <string name="sub_cta_contact">تواصل مع WAB</string>
+    <string name="sub_featured">اظهر ضمن الصالونات الموصى بها</string>
+    <string name="sub_featured_sub">ميّز صالونك في الصفحة الرئيسية لتطبيق الزبائن</string>
+    <string name="sub_featured_note">أخبرنا أنك مهتم بالظهور ضمن الصالونات الموصى بها</string>
+    <plurals name="sub_days_left">
+        <item quantity="zero">تبقّى %1$d يوم</item>
+        <item quantity="one">تبقّى %1$d يوم</item>
+        <item quantity="two">تبقّى %1$d يومان</item>
+        <item quantity="few">تبقّى %1$d أيام</item>
+        <item quantity="many">تبقّى %1$d يوماً</item>
+        <item quantity="other">تبقّى %1$d يوم</item>
+    </plurals>
 </resources>

@@ -31,6 +31,9 @@ object SalonAnalytics {
     val SCREEN_POLICY = AnalyticsScreen("salon_policies")
     val SCREEN_POLICY_PREVIEW = AnalyticsScreen("salon_policies_preview")
     const val ACTION_POLICY_SAVE = "policy_save"
+    val SCREEN_SUBSCRIPTION = AnalyticsScreen("salon_subscription")
+    const val ACTION_CONTACT_WAB = "contact_wab"
+    const val PARAM_REASON = "reason"
     const val PARAM_NEW = "new"
     const val PARAM_COUNT = "count"
 }

@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-046 — Subscription & status M23
+- Branch: `feat/mer-046-subscription`
+- Branched: (from `feat/mer-045-bank-details`)
+- Status: IN PROGRESS (batch 8)
+- Acceptance criteria (PRD M23; operation `GET /subscription`, config contact; design 08 `on.sub`, `sh.contact`):
+  - [x] Salon state card (Live / Offline / Incomplete with its meaning), subscription card (Free trial / Monthly plan active / Expired, badge, days left in AR plurals, ends / renews / expired date, "ending soon")
+  - [x] "Subscriptions are paid outside the app" + CTA by status (activate / renew / contact), "Get featured in Recommended Salons" → Contact WAB with its note; contact channels (call / WhatsApp / email) from the server config, each hidden when missing; pull-to-refresh; hub tile SUBSCRIPTION registered
+  - [x] Shared design-system `AppContactSheet` (reused by More, MER-048)
+- Tests: `SubscriptionMappersTest` (1), `SubscriptionViewModelTest` (2); `/tmp/claude/quick.sh m46` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the end date shown is the one that matches the status (trial end, period end or expiry).
+
 ### MER-045 — Bank details (owner)
 - Branch: `feat/mer-045-bank-details`
 - Branched: (from `feat/mer-044-finance`)

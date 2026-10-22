@@ -11,6 +11,7 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.vm.GalleryView
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.ServiceEditDependencies
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.ServiceEditViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.ServicesViewModel
+import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SubscriptionViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.HoursDependencies
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.HoursViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.PolicyViewModel
@@ -54,6 +55,7 @@ val salonPresentationModule = module {
         )
     }
     viewModel { SalonProfileViewModel(deps = get()) }
+    viewModel { SubscriptionViewModel(repository = get(), config = get(), analytics = get()) }
     viewModel { PolicyViewModel(repository = get(), analytics = get()) }
     viewModel { ServicesViewModel(repository = get(), analytics = get()) }
     viewModel { CatalogPickerViewModel(services = get(), salon = get()) }

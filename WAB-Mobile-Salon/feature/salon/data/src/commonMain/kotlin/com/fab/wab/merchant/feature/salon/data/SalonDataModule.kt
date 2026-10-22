@@ -6,6 +6,7 @@ import com.fab.wab.merchant.feature.salon.domain.HoursRepository
 import com.fab.wab.merchant.feature.salon.domain.PolicyRepository
 import com.fab.wab.merchant.feature.salon.domain.SalonProfileRepository
 import com.fab.wab.merchant.feature.salon.domain.ServicesRepository
+import com.fab.wab.merchant.feature.salon.domain.SubscriptionRepository
 import org.koin.dsl.module
 
 /** Salon management data (MER-033…041); the hub reads the core salon source. */
@@ -22,4 +23,6 @@ val salonDataModule = module {
     single<CatalogRequestsRepository> { CatalogRequestsRepositoryImpl(get()) }
     single { PolicyApi(get()) }
     single<PolicyRepository> { PolicyRepositoryImpl(get(), get()) }
+    single { SubscriptionApi(get()) }
+    single<SubscriptionRepository> { SubscriptionRepositoryImpl(get()) }
 }

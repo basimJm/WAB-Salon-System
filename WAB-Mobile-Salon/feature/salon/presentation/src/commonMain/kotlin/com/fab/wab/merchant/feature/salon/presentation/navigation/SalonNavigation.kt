@@ -57,6 +57,7 @@ private val TILE_SCREENS: Map<HubTile, Screen> = mapOf(
     HubTile.TEAM to Screen.Team,
     HubTile.POLICIES to Screen.Policies,
     HubTile.FINANCE to Screen.Finance,
+    HubTile.SUBSCRIPTION to Screen.Subscription,
 )
 
 /** `Graph.Salon` tab: hub (M12) and the management screens (M13–M19, M22, M23). */
@@ -69,6 +70,7 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
             composable<Screen.Gallery> { GalleryDestination() }
             composable<Screen.WorkingHours> { HoursDestination() }
             servicesDestinations(this@SalonNavigation)
+            accountDestinations(this@SalonNavigation)
             composable<Screen.Policies> { PolicyDestination() }
         }
     }

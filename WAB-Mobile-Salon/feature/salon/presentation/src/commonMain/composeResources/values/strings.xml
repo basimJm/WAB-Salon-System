@@ -234,4 +234,31 @@
     <string name="rule_ns_full_keep">No-show: full payment not refunded</string>
     <string name="rule_ns_full_minus">No-show: full payment refunded minus deposit</string>
     <string name="rule_ns_full_full">No-show: full payment refunded</string>
+    <string name="sub_title">Subscription &amp; status</string>
+    <string name="sub_salon_state">Salon status</string>
+    <string name="sub_state_live">Visible and accepting bookings</string>
+    <string name="sub_state_offline">Hidden from customers</string>
+    <string name="sub_state_incomplete">Complete the required steps</string>
+    <string name="sub_subscription">Subscription</string>
+    <string name="sub_trial">Free trial</string>
+    <string name="sub_active">Monthly plan active</string>
+    <string name="sub_expired">Subscription expired</string>
+    <string name="sub_trial_ends">Ends %1$s</string>
+    <string name="sub_renews">Renews %1$s</string>
+    <string name="sub_expired_on">Expired %1$s — your salon is offline</string>
+    <string name="sub_badge_trial">Trial</string>
+    <string name="sub_badge_active">Active</string>
+    <string name="sub_badge_expired">Expired</string>
+    <string name="sub_ending_soon">Ending soon</string>
+    <string name="sub_paid_outside">Subscriptions are paid outside the app. Contact WAB to activate or renew your subscription.</string>
+    <string name="sub_cta_activate">Contact WAB to activate</string>
+    <string name="sub_cta_renew">Contact WAB to renew</string>
+    <string name="sub_cta_contact">Contact WAB</string>
+    <string name="sub_featured">Get featured in Recommended Salons</string>
+    <string name="sub_featured_sub">Highlight your salon on the customer app home</string>
+    <string name="sub_featured_note">Tell us you are interested in appearing in Recommended Salons</string>
+    <plurals name="sub_days_left">
+        <item quantity="one">%1$d day left</item>
+        <item quantity="other">%1$d days left</item>
+    </plurals>
 </resources>

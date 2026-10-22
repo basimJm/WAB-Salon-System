@@ -210,4 +210,9 @@
     <string name="time_am">AM</string>
     <string name="time_pm">PM</string>
     <string name="price_jod">%1$s JOD</string>
+    <string name="contact_title">Contact WAB</string>
+    <string name="contact_hours">Our team is available Sat–Thu, 9 AM – 6 PM</string>
+    <string name="contact_call">Call</string>
+    <string name="contact_whatsapp">WhatsApp</string>
+    <string name="contact_email">Email</string>
 </resources>
