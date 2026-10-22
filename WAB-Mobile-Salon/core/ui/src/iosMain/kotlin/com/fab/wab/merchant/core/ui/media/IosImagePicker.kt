@@ -1,13 +1,10 @@
 package com.fab.wab.merchant.core.ui.media
 
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.useContents
-import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.CompletableDeferred
 import platform.CoreGraphics.CGRectMake
 import platform.CoreGraphics.CGSizeMake
-import platform.Foundation.NSData
 import platform.UIKit.UIApplication
 import platform.UIKit.UIGraphicsBeginImageContextWithOptions
 import platform.UIKit.UIGraphicsEndImageContext
@@ -20,7 +17,6 @@ import platform.UIKit.UIImagePickerControllerOriginalImage
 import platform.UIKit.UIImagePickerControllerSourceType
 import platform.UIKit.UINavigationControllerDelegateProtocol
 import platform.darwin.NSObject
-import platform.posix.memcpy
 
 /** `UIImagePickerController` over the key window; compresses to JPEG on the device. */
 @OptIn(ExperimentalForeignApi::class)
@@ -79,11 +75,4 @@ private class PickerDelegate(private val answer: CompletableDeferred<UIImage?>) 
     override fun imagePickerControllerDidCancel(picker: UIImagePickerController) {
         answer.complete(null)
     }
-}
-
-@OptIn(ExperimentalForeignApi::class)
-private fun NSData.toByteArray(): ByteArray {
-    val size = length.toInt()
-    if (size == 0) return ByteArray(0)
-    return ByteArray(size).apply { usePinned { memcpy(it.addressOf(0), bytes, length) } }
 }

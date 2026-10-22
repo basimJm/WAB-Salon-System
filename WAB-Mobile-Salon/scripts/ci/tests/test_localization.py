@@ -56,6 +56,11 @@ class LocalizationTest(TempProject):
               '<item quantity="few">منذ %1$d دقائق</item><item quantity="other">منذ %1$d دقيقة</item></plurals></resources>')
         self.assertEqual(self.run_check(en, ar), [])
 
+    def test_duplicate_keys_are_flagged(self):
+        en = res(("a", "One"), ("a", "Two"))
+        messages = self.run_check(en, res(("a", "واحد")))
+        self.assertTrue(any("string:a is declared more than once" in m for m in messages))
+
 
 if __name__ == "__main__":
     unittest.main()

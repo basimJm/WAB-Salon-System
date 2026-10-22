@@ -181,4 +181,26 @@
     <string name="request_next">الطلب التالي</string>
     <string name="request_view_booking">عرض الحجز</string>
     <string name="request_done">تم</string>
+    <string name="upload_add">إضافة</string>
+    <string name="upload_add_document_hint">صورة أو PDF</string>
+    <string name="upload_retry">إعادة</string>
+    <string name="upload_failed">فشل الرفع</string>
+    <string name="upload_remove">إزالة</string>
+    <string name="upload_percent">%1$d٪</string>
+    <string name="upload_count">%1$d / %2$d</string>
+    <string name="upload_pdf">PDF</string>
+    <string name="upload_too_large">حجم الملف حتى %1$d ميغابايت</string>
+    <string name="upload_wrong_type">نوع الملف غير مدعوم</string>
+    <string name="upload_too_long">مدة الفيديو حتى %1$d ثانية</string>
+    <string name="upload_too_many">يمكنك إضافة %1$d ملفات كحد أقصى</string>
+    <string name="upload_crop_title">قص الصورة</string>
+    <string name="upload_use_image">استخدام الصورة</string>
+    <string name="upload_cancel">إلغاء</string>
+    <string name="upload_zoom">تكبير</string>
+    <string name="upload_change_image">تغيير الصورة</string>
+    <string name="media_first">الأولى</string>
+    <string name="media_add">إضافة صور وفيديو</string>
+    <string name="media_duration">%1$d:%2$s</string>
+    <string name="media_selected">محدد</string>
+    <string name="media_order_position">الترتيب %1$d</string>
 </resources>

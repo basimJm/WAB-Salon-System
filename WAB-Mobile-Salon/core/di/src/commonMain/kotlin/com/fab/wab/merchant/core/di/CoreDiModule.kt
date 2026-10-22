@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.core.di
 
 import com.fab.wab.merchant.core.data.di.dataModule
+import com.fab.wab.merchant.core.data.upload.uploadModule
 import com.fab.wab.merchant.core.data.places.PlacesRepositoryImpl
 import com.fab.wab.merchant.core.data.repository.LocalCacheRepositoryImpl
 import com.fab.wab.merchant.core.data.repository.SessionTimeOutImpl
@@ -28,6 +29,7 @@ val coreDiModule = module {
     includes(
         storageModule,
         dataModule,
+        uploadModule,
         networkModule,
         deviceLocationProviderModule,
         permissionModule,

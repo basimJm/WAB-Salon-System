@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
 import com.fab.wab.merchant.app.ui.App
 import com.fab.wab.merchant.core.notification.push.PushSignals
+import com.fab.wab.merchant.core.ui.media.AndroidFilePickerBridge
 import com.fab.wab.merchant.core.ui.media.AndroidImagePickerBridge
 import com.fab.wab.merchant.core.ui.permission.AndroidPermissionBridge
 import com.fab.wab.merchant.firebase.PushIntents
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         getKoin().get<AndroidPermissionBridge>().attach(this)
         getKoin().get<AndroidImagePickerBridge>().attach(this)
+        getKoin().get<AndroidFilePickerBridge>().attach(this)
         getKoin().get<DeepLinkStore>().publish(intent?.dataString)
         PushIntents.fromIntent(intent)?.let(PushSignals::tapped)
         setContent {
@@ -45,6 +47,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         getKoin().get<AndroidPermissionBridge>().detach()
         getKoin().get<AndroidImagePickerBridge>().detach()
+        getKoin().get<AndroidFilePickerBridge>().detach()
         super.onDestroy()
     }
 

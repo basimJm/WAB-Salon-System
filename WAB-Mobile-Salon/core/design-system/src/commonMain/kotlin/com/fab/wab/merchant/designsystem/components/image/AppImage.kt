@@ -25,9 +25,25 @@ fun AppImage(
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
+    ModelImage(url, modifier, contentDescription, contentScale)
+}
+
+/** Local bytes (picked, not uploaded yet) through the same loader, shimmer and fallback. */
+@Composable
+fun AppImage(
+    bytes: ByteArray,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    contentScale: ContentScale = ContentScale.Crop,
+) {
+    ModelImage(bytes, modifier, contentDescription, contentScale)
+}
+
+@Composable
+private fun ModelImage(model: Any, modifier: Modifier, contentDescription: String?, contentScale: ContentScale) {
     val imageLoader = LocalImageLoader.current
     SubcomposeAsyncImage(
-        model = url,
+        model = model,
         contentDescription = contentDescription,
         imageLoader = imageLoader,
         modifier = modifier,

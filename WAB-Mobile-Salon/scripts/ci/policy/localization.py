@@ -11,6 +11,18 @@ _ARABIC = re.compile(r"[؀-ۿ]")
 _WORD = re.compile(r"[A-Za-z]{4,}")
 
 
+def _duplicates(path: Path) -> list[str]:
+    """Resource names declared more than once (Compose resources refuse to build them)."""
+    seen: set[str] = set()
+    found: list[str] = []
+    for node in ET.parse(path).getroot():
+        key = f"{node.tag}:{node.get('name', '')}"
+        if key in seen:
+            found.append(key)
+        seen.add(key)
+    return found
+
+
 def _entries(path: Path) -> dict[str, str]:
     """Map `kind:name` to text; arrays/plurals are flattened to one joined value."""
     entries: dict[str, str] = {}
@@ -50,6 +62,8 @@ def check(config: Config) -> list[Violation]:
     found: list[Violation] = []
     for default_file in _find_default_files(config):
         default = _entries(default_file)
+        for key in _duplicates(default_file):
+            found.append(Violation(rel(config, default_file), 1, RULE, f"{key} is declared more than once"))
         for language, folder in section["translations"].items():
             target = default_file.parent.parent / folder / section["stringFile"]
             where = rel(config, default_file)
@@ -58,6 +72,8 @@ def check(config: Config) -> list[Violation]:
                 continue
             translated = _entries(target)
             target_rel = rel(config, target)
+            for key in _duplicates(target):
+                found.append(Violation(target_rel, 1, RULE, f"{key} is declared more than once"))
             for key in sorted(default.keys() - translated.keys()):
                 found.append(Violation(target_rel, 1, RULE, f"missing {language} translation for {key}"))
             for key in sorted(translated.keys() - default.keys()):

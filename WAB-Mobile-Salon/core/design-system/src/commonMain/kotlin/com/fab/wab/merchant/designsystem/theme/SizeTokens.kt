@@ -65,6 +65,13 @@ data class SizeTokens(
     val requestAvatar: Dp = 42.dp,
     val requestDone: Dp = 80.dp,
     val requestDoneIcon: Dp = 40.dp,
+    // Uploaders (MER-016, design 01 Onboarding documents / 05 Salon gallery)
+    val uploadTile: Dp = 112.dp,
+    val uploadCaption: Dp = 44.dp,
+    val pdfMarkWidth: Dp = 38.dp,
+    val pdfMarkHeight: Dp = 46.dp,
+    val removeBadge: Dp = 24.dp,
+    val cropZoomTrack: Dp = 4.dp,
 )
 
 val DefaultSizes = SizeTokens()

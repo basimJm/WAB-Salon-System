@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-016 — Uploaders
+- Branch: `feat/mer-016-uploaders` (from `feat/mer-015-request-sheet`)
+- Status: IN PROGRESS (batch 3)
+- Acceptance criteria (PRD M04, M13, M14, §12; operations `POST /uploads/presign|confirm`, `POST /uploads/license/presign|confirm`; design 01 Onboarding documents, 05 Salon crop + gallery):
+  - [x] Domain `core/domain/upload`: purposes, `LocalFile` (kind from MIME), limits (documents 1–5, image/PDF, ≤ 10 MB; images ≤ 10 MB; videos ≤ 50 MB and ≤ 60 s; gallery 50 photos / 10 videos), `validateUpload` / `acceptUploads` (refusals WRONG_TYPE / TOO_LARGE / TOO_LONG / TOO_MANY), `UploadsRepository`, `UploadFileUseCase` (presign → PUT with progress → confirm; failures stop the chain; retry = new run)
+  - [x] Data `core/data/upload`: `UploadsApi` (WAB client + bare storage client, Ktor `onUpload` progress), `UploadsRepositoryImpl` (license purpose → public license endpoints; storage non-2xx / IO → errors), `uploadModule` in Koin; mock mode answers the storage PUT
+  - [x] Platform pickers `core/ui/media`: `FilePicker` (documents: PDF + images; media: photos + videos, multi-select), `ImageCropper` (normalized region → JPEG ≤ 2048 px); Android (OpenMultipleDocuments, PickMultipleVisualMedia, MediaMetadataRetriever duration, sampled decode + crop) and iOS (UIDocumentPicker, PHPicker, AVURLAsset duration, orientation-safe CGImage crop); fakes for tests
+  - [x] Design system `components/upload`: `AppUploadTile` (uploading % + bar / uploaded + size / failed + retry / remove), `AppUploadAddTile`, `AppDocumentUploader` (3 columns, n / max, hint, error), `uploadRejectionText`, `AppImageUploader` (16:9 / 1:1 slot, progress, retry, change), `AppImageCropper` (frame + thirds grid, drag, pinch, zoom slider, Cancel / Use image), `AppMediaGrid` (Normal "First" badge, Reorder numbers + long-press drag + tap-to-move-earlier, Select checks, video duration, progress / failed cells); `AppImage(bytes)` for local previews
+  - [x] AR + EN strings; previews (light RTL, dark reorder, LTR select); localization policy now flags duplicate keys (found `media_position` clash)
+- Tests: `UploadRulesTest` (5), `UploadFileUseCaseTest` (3), `UploadComponentsTest` (7), `UploadsMapperTest` (2), `test_localization.py` (+1); domain / data / ui / design-system host tests, `assembleDevDebug`, iOS compile of core/ui + core/data + design-system green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: whole files are read into memory before upload (videos up to 50 MB); a streaming upload would need a file-source port (later if memory shows up). Screens (registration, profile, gallery, services) wire these in MER-022/033/034/036.
+
 ### MER-015 — Request sheet component
 - Branch: `feat/mer-015-request-sheet` (batch 3 start, from `feat/mer-014-components`)
 - Status: IN PROGRESS (batch 3)

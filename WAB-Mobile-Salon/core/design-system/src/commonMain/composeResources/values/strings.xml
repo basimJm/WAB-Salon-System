@@ -167,4 +167,26 @@
     <string name="request_next">Next request</string>
     <string name="request_view_booking">View booking</string>
     <string name="request_done">Done</string>
+    <string name="upload_add">Add</string>
+    <string name="upload_add_document_hint">Image or PDF</string>
+    <string name="upload_retry">Retry</string>
+    <string name="upload_failed">Upload failed</string>
+    <string name="upload_remove">Remove</string>
+    <string name="upload_percent">%1$d%</string>
+    <string name="upload_count">%1$d / %2$d</string>
+    <string name="upload_pdf">PDF</string>
+    <string name="upload_too_large">Files can be up to %1$d MB</string>
+    <string name="upload_wrong_type">This file type is not supported</string>
+    <string name="upload_too_long">Videos can be up to %1$d seconds</string>
+    <string name="upload_too_many">You can add up to %1$d files</string>
+    <string name="upload_crop_title">Crop image</string>
+    <string name="upload_use_image">Use image</string>
+    <string name="upload_cancel">Cancel</string>
+    <string name="upload_zoom">Zoom</string>
+    <string name="upload_change_image">Change image</string>
+    <string name="media_first">First</string>
+    <string name="media_add">Add photos &amp; video</string>
+    <string name="media_duration">%1$d:%2$s</string>
+    <string name="media_selected">Selected</string>
+    <string name="media_order_position">Position %1$d</string>
 </resources>
