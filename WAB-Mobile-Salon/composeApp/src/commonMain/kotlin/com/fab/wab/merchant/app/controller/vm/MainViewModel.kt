@@ -5,6 +5,7 @@ import com.fab.wab.merchant.app.analytics.SessionAnalyticsSync
 import com.fab.wab.merchant.app.controller.contract.MainContract.SideEffect
 import com.fab.wab.merchant.app.controller.contract.MainContract.UiAction
 import com.fab.wab.merchant.app.controller.contract.MainContract.UiState
+import com.fab.wab.merchant.app.realtime.RealtimeAccountEvents
 import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.domain.AppLanguage
 import com.fab.wab.merchant.core.domain.AppSettings
@@ -29,6 +30,7 @@ class MainViewModel(
     environment: AppEnvironment,
     sessionAnalyticsSync: SessionAnalyticsSync,
     private val permissionsSync: PermissionsSync,
+    accountEvents: RealtimeAccountEvents,
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(appVersion = environment.appVersion), testScope) {
 
@@ -36,6 +38,7 @@ class MainViewModel(
         sessionAnalyticsSync.start(scope)
         // PRD §3: permissions are re-fetched on app start (Home refresh and the PERMISSIONS_UPDATED push call it too).
         scope.launch { permissionsSync.refresh() }
+        accountEvents.start(scope) { emitSideEffect(SideEffect.AccessRevoked) }
     }
 
     override fun handle(event: UiAction) {

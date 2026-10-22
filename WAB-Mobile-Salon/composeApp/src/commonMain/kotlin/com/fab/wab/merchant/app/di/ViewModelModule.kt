@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.app.di
 
 import com.fab.wab.merchant.app.controller.vm.MainViewModel
+import com.fab.wab.merchant.app.realtime.RealtimeAccountEvents
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -14,6 +15,7 @@ val viewModelModule = module {
             environment = get(),
             sessionAnalyticsSync = get(),
             permissionsSync = get(),
+            accountEvents = RealtimeAccountEvents(client = get(), permissionsSync = get(), sessionStore = get()),
         )
     }
 }

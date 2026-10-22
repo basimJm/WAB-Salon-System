@@ -3,6 +3,7 @@ package com.fab.wab.merchant.app.controller
 import com.fab.wab.merchant.app.analytics.SessionAnalyticsSync
 import com.fab.wab.merchant.app.controller.contract.MainContract.UiAction
 import com.fab.wab.merchant.app.controller.vm.MainViewModel
+import com.fab.wab.merchant.app.realtime.RealtimeAccountEvents
 import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.domain.AppLanguage
@@ -19,6 +20,7 @@ import com.fab.wab.merchant.core.domain.session.SalonState
 import com.fab.wab.merchant.core.domain.session.SessionState
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.core.firebase.FakeCrashReporter
+import com.fab.wab.merchant.core.realtime.FakeRealtimeClient
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -96,6 +98,7 @@ class MainViewModelTest {
         SessionState.SignedIn(MemberProfile("m1", "s1", "Rami", MemberRole.OWNER)),
     )
     private var refreshes = 0
+    private val permissionsSync = PermissionsSync({ refreshes++; TokenRefreshResult.Unavailable }, sessionStore)
 
     private fun TestScope.viewModel() = MainViewModel(
         appSettings = settings,
@@ -103,7 +106,8 @@ class MainViewModelTest {
         sessionTimeOut = sessionTimeOut,
         environment = environment,
         sessionAnalyticsSync = SessionAnalyticsSync(MutableStateFlow(SessionState.Guest), NoOpAnalyticsTracker, FakeCrashReporter()),
-        permissionsSync = PermissionsSync({ refreshes++; TokenRefreshResult.Unavailable }, sessionStore),
+        permissionsSync = permissionsSync,
+        accountEvents = RealtimeAccountEvents(FakeRealtimeClient(), permissionsSync, sessionStore),
         testScope = backgroundScope,
     )
 

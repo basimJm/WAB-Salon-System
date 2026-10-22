@@ -11,6 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.fab.wab.merchant.app.analytics.TrackNavigationScreens
+import com.fab.wab.merchant.app.controller.contract.MainContract
 import com.fab.wab.merchant.app.controller.contract.MainContract.UiAction
 import com.fab.wab.merchant.app.controller.vm.MainViewModel
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
@@ -21,6 +22,7 @@ import com.fab.wab.merchant.app.navigation.MainNavigation
 import com.fab.wab.merchant.app.push.PushEffect
 import com.fab.wab.merchant.app.realtime.RealtimeConnectionEffect
 import com.fab.wab.merchant.app.resources.Res
+import com.fab.wab.merchant.app.resources.access_removed_message
 import com.fab.wab.merchant.app.resources.unauthorized_logout_message
 import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.compose.LocalAnalyticsTracker
@@ -32,6 +34,7 @@ import com.fab.wab.merchant.core.domain.permission.permissionSet
 import com.fab.wab.merchant.core.domain.session.SessionState
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.core.firebase.di.platformFirebaseModule
+import com.fab.wab.merchant.core.mvi.CollectSideEffect
 import com.fab.wab.merchant.core.navigation.route.Graph
 import com.fab.wab.merchant.core.notification.composable.NotificationHost
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
@@ -105,6 +108,13 @@ fun App() {
                             if (sessionTimeOut) {
                                 notificationManager.show(unauthorizedLogoutMessage, style = NotificationStyle.Error)
                                 mainViewModel.onEvent(UiAction.OnSessionTimeOut)
+                            }
+                        }
+                        val accessRemovedMessage = stringResource(Res.string.access_removed_message)
+                        CollectSideEffect(mainViewModel.sideEffect) { effect ->
+                            when (effect) {
+                                MainContract.SideEffect.AccessRevoked ->
+                                    notificationManager.show(accessRemovedMessage, style = NotificationStyle.Error)
                             }
                         }
                         PushEffect(deepLinks = koinInject<DeepLinkStore>())

@@ -43,7 +43,7 @@
 | MER-008 | Secure local storage of PRD §5 keys (tokens encrypted, member id, salon id, salon state, permissions cache, language, theme, push, overlay-permission-asked) via one `SessionStore` | `feat/mer-008-session-store` | MER-005 | IN PROGRESS | PRD §5 |
 | MER-009 | Permissions model: the 15 grantable keys + owner-only keys (PRD §6.2), `hasPermission`/`anyOf` helpers, `PermissionGated` composable (hidden-not-disabled), re-fetch on app start, Home pull-to-refresh and `PERMISSIONS_UPDATED` data push; default templates | `feat/mer-009-permissions` | MER-008 | IN PROGRESS | PRD §3, §6; BUSINESS_DOMAIN permissions |
 | MER-010 | Analytics tracker + Crashlytics facade (member id as Firebase user id, salon id, role, `app=MERCHANT` fields), app-instance id for the backend | `feat/mer-010-analytics` | MER-004 | TODO | PRD §14 |
-| MER-011 | Realtime client (Socket.IO, salon room filtered by permission) + fake; reconnect on foreground; events from constants | `feat/mer-011-realtime-client` | MER-005 | TODO | PRD §3 real-time; server SRV-080/081 |
+| MER-011 | Realtime client (Socket.IO, salon room filtered by permission) + fake; reconnect on foreground; events from constants | `feat/mer-011-realtime-client` | MER-005 | IN PROGRESS | PRD §3 real-time; server SRV-080/081 |
 | MER-012 | Push facade for merchants: FCM token registration (`PUT /installations`), high-priority data messages, Android notification channels with alert sound, "display over other apps" permission flow + full-screen intent, iOS time-sensitive category with Accept/Reject actions (notification service + content extensions) | `feat/mer-012-push-facade` | MER-004, MER-008 | TODO | PRD M10 outside-the-app; root `CLAUDE.md` §4.4 |
 
 ## Phase 3 — Design system and merchant components

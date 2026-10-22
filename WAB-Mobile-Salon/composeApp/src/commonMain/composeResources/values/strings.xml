@@ -4,5 +4,6 @@
     <!-- Update Dialogs -->
     <!-- Maintenance Dialog -->
     <!-- Session -->
+    <string name="access_removed_message">Your access was removed by the salon owner.</string>
     <string name="unauthorized_logout_message">You are unauthorized and will be logged out.</string>
 </resources>

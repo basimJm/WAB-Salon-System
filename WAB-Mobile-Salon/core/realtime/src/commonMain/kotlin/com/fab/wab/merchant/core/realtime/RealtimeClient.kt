@@ -9,14 +9,26 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 
-/** Server → customer events of BUSINESS_DOMAIN §7 (names exactly as the server's `SOCKET_EVENTS`). */
+/** Server → merchant events of BUSINESS_DOMAIN §7 (names exactly as the server's `SOCKET_EVENTS`). */
 object RealtimeEvents {
-    /** Example event: an entity changed on the server (payload `{id, status, updatedAt}`). */
-    const val ENTITY_UPDATED = "entity.updated"
+    /** New pending request (room `salon:{id}:respond`, members with BOOKINGS_RESPOND); payload = request card. */
+    const val BOOKING_REQUESTED = "booking.requested"
+
+    /** Booking summary changed (room `salon:{id}:all` for BOOKINGS_VIEW_ALL, `member:{id}` for the assigned staff). */
+    const val BOOKING_UPDATED = "booking.updated"
+
+    /** A booking was (re)assigned to this member (room `member:{id}`). */
+    const val BOOKING_ASSIGNED = "booking.assigned"
+
+    /** The owner changed this member's permissions: re-fetch them. */
+    const val PERMISSIONS_UPDATED = "permissions.updated"
+
+    /** The member was deactivated: sign out. */
+    const val ACCESS_REVOKED = "access.revoked"
     const val NOTIFICATIONS_UNREAD = "notifications.unread"
 }
 
-/** One event from the customer room; features decode [payload] into their own models. */
+/** One event from the member's rooms; features decode [payload] into their own models. */
 data class RealtimeEvent(
     val name: String,
     val payload: JsonElement = JsonNull,
@@ -35,7 +47,7 @@ enum class RealtimeStatus {
 }
 
 /**
- * The authenticated Socket.IO connection of a registered customer: connected while the app is in the
+ * The authenticated Socket.IO connection of the signed-in member: connected while the app is in the
  * foreground and signed in, reconnects on its own, exposes the server events and the connection status.
  */
 interface RealtimeClient {

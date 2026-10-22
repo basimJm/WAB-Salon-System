@@ -16,7 +16,7 @@ import kotlin.test.assertTrue
 private const val OPEN_FRAME = """0{"sid":"s1","pingInterval":100,"pingTimeout":50}"""
 private const val CONNECTED_FRAME = """40/merchant,{"sid":"n1"}"""
 private const val UNAUTHORIZED_FRAME = """44/merchant,{"message":"UNAUTHORIZED","data":{"code":"UNAUTHORIZED"}}"""
-private const val EVENT_FRAME = """42/merchant,["entity.updated",{"id":"b1"}]"""
+private const val EVENT_FRAME = """42/merchant,["booking.updated",{"id":"b1"}]"""
 private const val PING_BUDGET_MS = 150L
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -51,7 +51,7 @@ class SocketIoRealtimeClientTest {
         connection.push(EVENT_FRAME)
         testScheduler.runCurrent()
         assertEquals("3", connection.sent.last())
-        assertEquals(RealtimeEvents.ENTITY_UPDATED, received.single().name)
+        assertEquals(RealtimeEvents.BOOKING_UPDATED, received.single().name)
         assertEquals("b1", received.single().payload.jsonObject["id"]?.jsonPrimitive?.content)
         client.disconnect()
         testScheduler.runCurrent()

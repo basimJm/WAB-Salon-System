@@ -9,6 +9,18 @@
 
 ## Current task
 
+### MER-011 — Realtime client
+- Branch: `feat/mer-011-realtime-client` (from `feat/mer-009-permissions`)
+- Status: IN PROGRESS (batch 2)
+- Acceptance criteria (PRD §3 real-time; BUSINESS_DOMAIN §7):
+  - [x] Socket.IO client on namespace `/merchant` (template) + `FakeRealtimeClient`; connect while resumed and signed in, reconnect on foreground (`RealtimeConnectionEffect`)
+  - [x] Event constants: `booking.requested`, `booking.updated`, `booking.assigned`, `permissions.updated`, `access.revoked`, `notifications.unread`; `bookingId` payload key restored
+  - [x] Permission filter mirroring the rooms (`isVisibleTo` / `visibleTo`): requests need BOOKINGS_RESPOND, booking updates need a view permission, account events always pass
+  - [x] Shell `RealtimeAccountEvents`: `permissions.updated` → `PermissionsSync.refresh()`, `access.revoked` → sign-out + "Your access was removed by the salon owner" banner (AR/EN)
+- Tests: `RealtimeEventFilterTest` (3), `RealtimeAccountEventsTest`, realtime protocol/client/refresh tests, `MainViewModelTest`; realtime + composeApp tests + `assembleDevDebug` green
+- Loops: 0/1
+- Review: PENDING
+
 ### MER-009 — Permissions model
 - Branch: `feat/mer-009-permissions` (from `feat/mer-008-session-store`)
 - Status: IN PROGRESS (batch 2)

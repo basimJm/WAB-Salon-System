@@ -10,5 +10,8 @@ sealed interface MainContract {
         data object OnSessionTimeOut : UiAction
     }
 
-    sealed interface SideEffect
+    sealed interface SideEffect {
+        /** The salon owner deactivated this member (socket `access.revoked`); already signed out. */
+        data object AccessRevoked : SideEffect
+    }
 }

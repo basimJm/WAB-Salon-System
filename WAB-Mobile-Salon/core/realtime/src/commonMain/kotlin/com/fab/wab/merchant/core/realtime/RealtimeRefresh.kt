@@ -9,17 +9,18 @@ import kotlinx.serialization.json.jsonPrimitive
 /** Why a screen refreshes its data: a socket event, an FCM message while open, or the app returning. */
 enum class RefreshReason { Realtime, Push, Foreground }
 
-/** Payload keys shared by the `entity.updated` summary and the FCM data message. */
+/** Payload keys shared by the `booking.updated` summary and the FCM data message. */
 object RealtimePayloadKeys {
     const val ID = "id"
+    const val BOOKING_ID = "bookingId"
     const val STATUS = "status"
     const val UPDATED_AT = "updatedAt"
 }
 
-/** The entity a `entity.updated` event is about; null when the payload carries no id. */
+/** The booking a `booking.updated` event is about; null when the payload carries no id. */
 fun RealtimeEvent.entityId(): String? = runCatching {
     val obj = payload.jsonObject
-    obj[RealtimePayloadKeys.ID]?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
+    (obj[RealtimePayloadKeys.ID] ?: obj[RealtimePayloadKeys.BOOKING_ID])?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
 }.getOrNull()
 
 /**
