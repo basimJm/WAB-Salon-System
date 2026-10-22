@@ -11,6 +11,7 @@ import com.fab.wab.merchant.core.domain.repository.SessionTimeOut
 import com.fab.wab.merchant.core.network.di.networkModule
 import com.fab.wab.merchant.core.storage.di.storageModule
 import com.fab.wab.merchant.core.ui.external.externalActionsModule
+import com.fab.wab.merchant.core.ui.alert.requestAlertModule
 import com.fab.wab.merchant.core.ui.permission.permissionModule
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.bind
@@ -24,5 +25,13 @@ val coreDiModule = module {
     singleOf(::PlacesRepositoryImpl) { bind<PlacesRepository>() }
     singleOf(::SessionTimeOutImpl) { bind<SessionTimeOut>() }
     singleOf(::AppearanceSettings)
-    includes(storageModule, dataModule, networkModule, deviceLocationProviderModule, permissionModule, externalActionsModule)
+    includes(
+        storageModule,
+        dataModule,
+        networkModule,
+        deviceLocationProviderModule,
+        permissionModule,
+        externalActionsModule,
+        requestAlertModule,
+    )
 }

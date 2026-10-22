@@ -164,4 +164,21 @@
     <string name="merchant_tab_calendar">التقويم</string>
     <string name="merchant_tab_salon">الصالون</string>
     <string name="merchant_tab_more">المزيد</string>
+    <string name="request_new_title">طلب حجز جديد</string>
+    <string name="request_bride_title">حجز عروس</string>
+    <string name="request_bride_subtitle">يتضمن خدمات العروس — أولوية عالية</string>
+    <string name="request_total">الإجمالي</string>
+    <string name="request_accept">قبول</string>
+    <string name="request_reject">رفض</string>
+    <string name="request_view_details">عرض التفاصيل</string>
+    <string name="request_queue">%1$d من %2$d</string>
+    <string name="request_handled_by">تم التعامل مع هذا الطلب بواسطة %1$s</string>
+    <string name="request_handled_approved">تمت الموافقة عليه — سيُغلق تلقائياً</string>
+    <string name="request_handled_rejected">تم رفضه — سيُغلق تلقائياً</string>
+    <string name="request_handled_closing">سيُغلق تلقائياً</string>
+    <string name="request_accepted_title">تم قبول الحجز</string>
+    <string name="request_accepted_body">تم إشعار الزبون وإضافة الموعد إلى التقويم.</string>
+    <string name="request_next">الطلب التالي</string>
+    <string name="request_view_booking">عرض الحجز</string>
+    <string name="request_done">تم</string>
 </resources>

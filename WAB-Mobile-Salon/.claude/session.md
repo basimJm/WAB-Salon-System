@@ -9,6 +9,21 @@
 
 ## Current task
 
+### MER-015 — Request sheet component
+- Branch: `feat/mer-015-request-sheet` (batch 3 start, from `feat/mer-014-components`)
+- Status: IN PROGRESS (batch 3)
+- Acceptance criteria (PRD M10 in-app; Design Script M10; design 02 Home `sheetOn`):
+  - [x] `AppBookingRequestSheetContent(RequestSheetUi, onAction)`: "New booking request" + age · reference, "1 of 3" queue chip (only with more than one), bride banner ("Bridal booking — high priority"), customer + persons + time/date, one card per person (services, staff · time, bride badge), total + payment badge, Reject (outlined rose) / Accept (green, check icon, spinner while accepting), View details
+  - [x] "Handled by {member}" state: content dimmed, actions off, dark toast with the outcome line (approved / rejected / closing); `RequestSheetDefaults.HANDLED_DISMISS_MS` for the host
+  - [x] Accepted state: check, "Booking accepted", reference, body, Next request (when queued) / View booking / Done
+  - [x] Sound + vibration hook: `RequestAlert` port (`play(sound, vibrate)` / `stop()`), `RequestAlertSound` NOTIFICATION / ALARM / SILENT (configurable, stored by code), Android ringtone + `VibrationEffect` waveform (`VIBRATE` permission), iOS `AudioServicesPlaySystemSound` + vibrate, `SilentRequestAlert`; bound in Koin (`requestAlertModule` in `coreModule`)
+  - [x] `ButtonKind.Success` (green accept) and an outlined Destructive button (design reject)
+  - [x] AR + EN strings; previews (queued bride light RTL, handled dark, accepted LTR)
+- Tests: `RequestSheetTest` (4), `RequestAlertTest` (2); `:core:ui` + `:core:design-system` host tests, `assembleDevDebug`, `:core:ui:compileKotlinIosSimulatorArm64` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: hosting, queue, de-duplication, reason picker and the Android overlay / iOS time-sensitive paths are MER-028/029/030; the design's pulsing "ring" animations are not drawn.
+
 ### MER-014 — Merchant components
 - Branch: `feat/mer-014-components` (from `feat/mer-013-theme`; backlog name `feat/mer-014-merchant-components`)
 - Status: IN REVIEW (batch 2 PR)

@@ -61,6 +61,10 @@ data class SizeTokens(
     val timelineHalo: Dp = 4.dp,
     val timelineLead: Dp = 14.dp,
     val pendingCount: Dp = 30.dp,
+    val requestIcon: Dp = 48.dp,
+    val requestAvatar: Dp = 42.dp,
+    val requestDone: Dp = 80.dp,
+    val requestDoneIcon: Dp = 40.dp,
 )
 
 val DefaultSizes = SizeTokens()

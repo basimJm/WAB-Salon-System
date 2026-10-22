@@ -150,4 +150,21 @@
     <string name="merchant_tab_calendar">Calendar</string>
     <string name="merchant_tab_salon">Salon</string>
     <string name="merchant_tab_more">More</string>
+    <string name="request_new_title">New booking request</string>
+    <string name="request_bride_title">Bridal booking</string>
+    <string name="request_bride_subtitle">Includes bridal services — high priority</string>
+    <string name="request_total">Total</string>
+    <string name="request_accept">Accept</string>
+    <string name="request_reject">Reject</string>
+    <string name="request_view_details">View details</string>
+    <string name="request_queue">%1$d of %2$d</string>
+    <string name="request_handled_by">This request was handled by %1$s</string>
+    <string name="request_handled_approved">Approved — closing automatically</string>
+    <string name="request_handled_rejected">Rejected — closing automatically</string>
+    <string name="request_handled_closing">Closing automatically</string>
+    <string name="request_accepted_title">Booking accepted</string>
+    <string name="request_accepted_body">The customer was notified and the appointment added to your calendar.</string>
+    <string name="request_next">Next request</string>
+    <string name="request_view_booking">View booking</string>
+    <string name="request_done">Done</string>
 </resources>
