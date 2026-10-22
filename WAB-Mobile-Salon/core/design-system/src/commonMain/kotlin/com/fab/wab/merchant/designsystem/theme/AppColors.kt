@@ -47,6 +47,9 @@ data class AppColors(
     val heroStart: Color,
     val heroMiddle: Color,
     val heroEnd: Color,
+    // Bride badge gradient (design `#B83268 → #D9467A`)
+    val brideStart: Color,
+    val brideEnd: Color,
     // Loading shimmer
     val shimmerBase: Color,
     val shimmerHighlight: Color,

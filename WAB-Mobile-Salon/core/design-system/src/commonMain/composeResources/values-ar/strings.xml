@@ -91,4 +91,77 @@
     <string name="date_picker_cancel">إلغاء</string>
     <string name="date_picker_title">اختر التاريخ</string>
     <string name="date_picker_none">لم يتم اختيار تاريخ</string>
+    <!-- MER-014 merchant components -->
+    <string name="booking_status_pending">معلّق</string>
+    <string name="booking_status_approved">مقبول</string>
+    <string name="booking_status_rejected">مرفوض</string>
+    <string name="booking_status_cancelled_by_customer">ملغي من الزبون</string>
+    <string name="booking_status_cancelled_by_salon">ملغي من الصالون</string>
+    <string name="booking_status_auto_cancelled">ملغي تلقائياً</string>
+    <string name="booking_status_completed">مكتمل</string>
+    <string name="booking_status_no_show">لم يحضر</string>
+    <string name="payment_status_pay_on_arrival">الدفع عند الوصول</string>
+    <string name="payment_status_deposit_paid">تم دفع العربون</string>
+    <string name="payment_status_fully_paid">تم الدفع كاملاً</string>
+    <string name="payment_status_paid">مدفوع</string>
+    <string name="refund_status_pending">قيد الاسترجاع</string>
+    <string name="refund_status_refunded">تم الاسترجاع</string>
+    <string name="refund_status_failed">فشل الاسترجاع</string>
+    <string name="booking_bride">عروس</string>
+    <string name="booking_reference">#%1$s</string>
+    <string name="meta_pair">%1$s · %2$s</string>
+    <plurals name="booking_persons">
+        <item quantity="zero">%1$d أشخاص</item>
+        <item quantity="one">شخص واحد</item>
+        <item quantity="two">شخصان</item>
+        <item quantity="few">%1$d أشخاص</item>
+        <item quantity="many">%1$d شخصاً</item>
+        <item quantity="other">%1$d شخص</item>
+    </plurals>
+    <string name="booking_age_now">الآن</string>
+    <plurals name="booking_age_minutes">
+        <item quantity="zero">منذ %1$d دقيقة</item>
+        <item quantity="one">منذ دقيقة</item>
+        <item quantity="two">منذ دقيقتين</item>
+        <item quantity="few">منذ %1$d دقائق</item>
+        <item quantity="many">منذ %1$d دقيقة</item>
+        <item quantity="other">منذ %1$d دقيقة</item>
+    </plurals>
+    <plurals name="booking_age_hours">
+        <item quantity="zero">منذ %1$d ساعة</item>
+        <item quantity="one">منذ ساعة</item>
+        <item quantity="two">منذ ساعتين</item>
+        <item quantity="few">منذ %1$d ساعات</item>
+        <item quantity="many">منذ %1$d ساعة</item>
+        <item quantity="other">منذ %1$d ساعة</item>
+    </plurals>
+    <plurals name="booking_age_days">
+        <item quantity="zero">منذ %1$d يوم</item>
+        <item quantity="one">منذ يوم</item>
+        <item quantity="two">منذ يومين</item>
+        <item quantity="few">منذ %1$d أيام</item>
+        <item quantity="many">منذ %1$d يوماً</item>
+        <item quantity="other">منذ %1$d يوم</item>
+    </plurals>
+    <string name="booking_auto_cancel_in">يُلغى تلقائياً خلال %1$s إن لم يتم الرد</string>
+    <string name="booking_auto_cancel_due">يُلغى تلقائياً الآن</string>
+    <string name="duration_hours_minutes">%1$d س %2$d د</string>
+    <string name="duration_minutes">%1$d د</string>
+    <string name="pending_requests_title">طلبات بانتظار ردك</string>
+    <string name="action_view_all">عرض الكل</string>
+    <string name="salon_state_live">مباشر</string>
+    <string name="salon_state_offline">غير متصل</string>
+    <string name="salon_state_incomplete">غير مكتمل</string>
+    <string name="salon_state_pending">قيد المراجعة</string>
+    <string name="salon_state_rejected">مرفوض</string>
+    <string name="salon_state_live_hint">يستقبل الحجوزات الآن</string>
+    <string name="salon_state_offline_hint">لا يستقبل حجوزات جديدة</string>
+    <string name="salon_state_incomplete_hint">غير ظاهر للزبائن بعد</string>
+    <string name="salon_state_pending_hint">تراجع WAB طلبك</string>
+    <string name="salon_state_rejected_hint">لم تتم الموافقة على طلبك</string>
+    <string name="merchant_tab_home">الرئيسية</string>
+    <string name="merchant_tab_bookings">الحجوزات</string>
+    <string name="merchant_tab_calendar">التقويم</string>
+    <string name="merchant_tab_salon">الصالون</string>
+    <string name="merchant_tab_more">المزيد</string>
 </resources>

@@ -93,4 +93,61 @@
     <string name="date_picker_cancel">Cancel</string>
     <string name="date_picker_title">Select date</string>
     <string name="date_picker_none">No date selected</string>
+    <!-- MER-014 merchant components -->
+    <string name="booking_status_pending">Pending</string>
+    <string name="booking_status_approved">Approved</string>
+    <string name="booking_status_rejected">Rejected</string>
+    <string name="booking_status_cancelled_by_customer">Cancelled by customer</string>
+    <string name="booking_status_cancelled_by_salon">Cancelled by salon</string>
+    <string name="booking_status_auto_cancelled">Auto-cancelled</string>
+    <string name="booking_status_completed">Completed</string>
+    <string name="booking_status_no_show">No-show</string>
+    <string name="payment_status_pay_on_arrival">Pay on arrival</string>
+    <string name="payment_status_deposit_paid">Deposit paid</string>
+    <string name="payment_status_fully_paid">Paid in full</string>
+    <string name="payment_status_paid">Paid</string>
+    <string name="refund_status_pending">Refund pending</string>
+    <string name="refund_status_refunded">Refunded</string>
+    <string name="refund_status_failed">Refund failed</string>
+    <string name="booking_bride">Bride</string>
+    <string name="booking_reference">#%1$s</string>
+    <string name="meta_pair">%1$s · %2$s</string>
+    <plurals name="booking_persons">
+        <item quantity="one">%1$d person</item>
+        <item quantity="other">%1$d people</item>
+    </plurals>
+    <string name="booking_age_now">Now</string>
+    <plurals name="booking_age_minutes">
+        <item quantity="one">%1$d minute ago</item>
+        <item quantity="other">%1$d minutes ago</item>
+    </plurals>
+    <plurals name="booking_age_hours">
+        <item quantity="one">%1$d hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
+    </plurals>
+    <plurals name="booking_age_days">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+    <string name="booking_auto_cancel_in">Auto-cancels in %1$s if not answered</string>
+    <string name="booking_auto_cancel_due">Auto-cancelling now</string>
+    <string name="duration_hours_minutes">%1$dh %2$dm</string>
+    <string name="duration_minutes">%1$dm</string>
+    <string name="pending_requests_title">Requests awaiting reply</string>
+    <string name="action_view_all">View all</string>
+    <string name="salon_state_live">Live</string>
+    <string name="salon_state_offline">Offline</string>
+    <string name="salon_state_incomplete">Incomplete</string>
+    <string name="salon_state_pending">Under review</string>
+    <string name="salon_state_rejected">Rejected</string>
+    <string name="salon_state_live_hint">Accepting bookings</string>
+    <string name="salon_state_offline_hint">Not receiving new bookings</string>
+    <string name="salon_state_incomplete_hint">Not visible to customers yet</string>
+    <string name="salon_state_pending_hint">WAB is reviewing your application</string>
+    <string name="salon_state_rejected_hint">Your application was not approved</string>
+    <string name="merchant_tab_home">Home</string>
+    <string name="merchant_tab_bookings">Bookings</string>
+    <string name="merchant_tab_calendar">Calendar</string>
+    <string name="merchant_tab_salon">Salon</string>
+    <string name="merchant_tab_more">More</string>
 </resources>

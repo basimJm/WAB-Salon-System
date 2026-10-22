@@ -43,6 +43,8 @@ val LightColors = AppColors(
     heroStart = Color(0xFFFFFFFF),
     heroMiddle = Color(0xFFF7F1FF),
     heroEnd = Color(0xFFECDDFC),
+    brideStart = Color(0xFFB83268),
+    brideEnd = Pink,
     shimmerBase = Violet.copy(alpha = 0.08f),
     shimmerHighlight = Color.White.copy(alpha = 0.6f),
     onMedia = Color(0xFFFFFFFF),

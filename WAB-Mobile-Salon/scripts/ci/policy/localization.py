@@ -26,6 +26,13 @@ def _entries(path: Path) -> dict[str, str]:
     return entries
 
 
+def _placeholders(key: str, text: str) -> list[str]:
+    """Placeholders of an entry; a plural compares the distinct set, since languages have different item counts
+    (Arabic has six quantities and may spell out "one"/"two" without the number)."""
+    found = _PLACEHOLDER.findall(text)
+    return sorted(set(found)) if key.startswith("plurals:") else sorted(found)
+
+
 def _find_default_files(config: Config) -> list[Path]:
     section = config.section("localization")
     excluded = set(config.data["excludeDirs"])
@@ -56,7 +63,7 @@ def check(config: Config) -> list[Violation]:
             for key in sorted(translated.keys() - default.keys()):
                 found.append(Violation(target_rel, 1, RULE, f"{key} has no default (English) entry"))
             for key in sorted(default.keys() & translated.keys()):
-                if sorted(_PLACEHOLDER.findall(default[key])) != sorted(_PLACEHOLDER.findall(translated[key])):
+                if _placeholders(key, default[key]) != _placeholders(key, translated[key]):
                     found.append(Violation(target_rel, 1, RULE, f"placeholders of {key} differ between languages"))
                 if not translated[key].strip():
                     found.append(Violation(target_rel, 1, RULE, f"{key} is empty in {language}"))

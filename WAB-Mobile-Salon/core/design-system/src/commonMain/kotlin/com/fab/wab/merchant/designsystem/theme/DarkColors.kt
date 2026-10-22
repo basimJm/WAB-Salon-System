@@ -44,6 +44,8 @@ val DarkColors = AppColors(
     heroStart = Color(0xFF14172B),
     heroMiddle = Color(0xFF1B1030),
     heroEnd = Color(0xFF2A1450),
+    brideStart = Color(0xFFB83268),
+    brideEnd = Color(0xFFD9467A),
     shimmerBase = Lilac.copy(alpha = 0.08f),
     shimmerHighlight = Lilac.copy(alpha = 0.16f),
     onMedia = Color(0xFFFFFFFF),

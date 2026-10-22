@@ -9,6 +9,24 @@
 
 ## Current task
 
+### MER-014 — Merchant components
+- Branch: `feat/mer-014-components` (from `feat/mer-013-theme`; backlog name `feat/mer-014-merchant-components`)
+- Status: IN PROGRESS (batch 2)
+- Acceptance criteria (Design Script §1.2; PRD §8.1, M07–M09; BUSINESS_DOMAIN §2 enums, §5 `respondBy`; design 02 Home / 03 Bookings):
+  - [x] Shared booking enums in core/domain `booking/` (`BookingStatus` 8, `PaymentStatus` 4, `RefundStatus` incl. NONE, tolerant `fromCode`) + `BookingTimers` (pending age, auto-cancel remaining from `respondBy`; pure, never negative)
+  - [x] Badges: status (design hues: pending amber, approved green, completed violet, rejected/no-show rose, cancellations grey), payment (violet), refund (pending/refunded/failed), bride (crown on the rose gradient, new `brideStart/End` tokens)
+  - [x] `AppBookingCard(BookingCardUi)`: customer + bride badge, `#reference` (LTR), status, date · time, persons (plural), staff, payment + refund badges, pending age, auto-cancel strip only while pending
+  - [x] Pending age ("now", minutes, hours, days) and countdown ("6h 50m", minutes rounded up, "auto-cancelling now" when due) with AR plurals (zero/one/two/few/many/other)
+  - [x] Home: `AppSalonStateStrip` (chip + dot + hint per salon state), `AppWarningBanner` (trial notice), `AppPendingRequestsCard` (count circle, view all, rows with bride badge / age / countdown), `AppKpiTile` / `AppStatTile` / `AppNextBookingTile`
+  - [x] `AppStatusTimeline(StatusHistoryEntryUi)`: dots + connector, latest highlighted, optional reason note
+  - [x] Permission-gated bottom nav: `MerchantTab` (5 tabs, PRD §8.1 rules; Salon = any management permission or owner), `visibleMerchantTabs`, `defaultMerchantTab` (first visible), `resolveMerchantTab` (falls back when a permission is revoked), `merchantNavItems` for `AppNavScaffold`; new design icons (bookings list, store, menu, crown)
+  - [x] Glass: cards on `AppCard` / `glassBackground`; preview gallery `MerchantGalleryPreviews` (light/dark, RTL/LTR)
+  - [x] Localization policy: plural placeholders compared as a set (Arabic spells out one/two); test added
+- Tests: `BookingStatusTest` (4), `MerchantComponentsTest` (6), `MerchantTabsTest` (6), `test_localization.py` (+1); policy `all: ok`
+- Loops: 0/1
+- Review: PENDING
+- Notes: the shell adopts the tabs when the first tab screens land (MER-024/025); pending-card "ring" pulse animation of the design not drawn (static count circle).
+
 ### MER-013 — Theme, tokens and base kit
 - Branch: `feat/mer-013-theme` (from `feat/mer-011-realtime-client`)
 - Status: IN PROGRESS (batch 2)

@@ -53,6 +53,14 @@ data class SizeTokens(
     val cardImageHeight: Dp = 140.dp,
     val cardCompactWidth: Dp = 220.dp,
     val listItemImage: Dp = 64.dp,
+    // Merchant components (MER-014, design 02 Home / 03 Bookings)
+    val brideBadgeHeight: Dp = 18.dp,
+    val brideIcon: Dp = 10.dp,
+    val metaIcon: Dp = 14.dp,
+    val timelineDot: Dp = 12.dp,
+    val timelineHalo: Dp = 4.dp,
+    val timelineLead: Dp = 14.dp,
+    val pendingCount: Dp = 30.dp,
 )
 
 val DefaultSizes = SizeTokens()

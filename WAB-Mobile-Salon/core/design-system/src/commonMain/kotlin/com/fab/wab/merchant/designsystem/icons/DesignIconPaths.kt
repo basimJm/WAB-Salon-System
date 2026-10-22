@@ -167,4 +167,11 @@ internal object DesignIconPaths {
         "M8 9a4 4 0 1 0 8 0a4 4 0 1 0 -8 0z",
         "M4 22a8 8 0 0 1 16 0z",
     )
+    val BOOKINGS = listOf("M8 6h11M8 12h11M8 18h11M4 6h.01M4 12h.01M4 18h.01")
+    val STORE = listOf(
+        "M4 9.5 5.5 4h13L20 9.5M4 9.5h16",
+        "M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0M5.5 12v8h13v-8",
+    )
+    val MENU = listOf("M4 6h16M4 12h16M4 18h16")
+    val CROWN = listOf("M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z")
 }
