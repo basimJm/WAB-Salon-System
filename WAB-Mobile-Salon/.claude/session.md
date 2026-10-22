@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-039 — Staff profile + leaves M17
+- Branch: `feat/mer-039-staff-profile`
+- Branched: (from `feat/mer-038-team`)
+- Status: IN PROGRESS (batch 7)
+- Acceptance criteria (PRD M17 staff section; operations `GET/PUT /team/members/{id}/staff`, leaves `GET/POST/PATCH/DELETE`, `GET /salon/services`, `GET /salon/hours`; design 06 `on.staffForm`):
+  - [x] Read-only rating, reviews count and customers served; provides-services toggle, bio ≤ 1000, years 0..80, skills multi-select from the salon services, bride-qualified on women's salons only
+  - [x] Working days only on open salon days (Saturday → Friday), optional custom hours on 15-minute steps inside that day's salon hours (validated before saving)
+  - [x] Leaves: list, add / edit (future only) with date range + note ≤ 300 (cleared note → null), remove with confirmation
+  - [x] Save or add-leave `409 SCHEDULE_CONFLICT` → shared affected-bookings sheet (Reassign opens M09, Cancel affected = `STAFF_UNAVAILABLE` + reason, then re-send, Go back); saving refreshes the shared salon; opened from the team list (STAFF_MANAGE) and the member form
+- Tests: `StaffTest` (2), `StaffMappersTest` (2), `StaffProfileViewModelTest` (4); `/tmp/claude/quick.sh m39` + `m39b` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the team data layer reads `/salon/services` and `/salon/hours` itself (a feature does not depend on another feature).
+
 ### MER-038 — Team list + member form M17
 - Branch: `feat/mer-038-team`
 - Branched: (from `feat/mer-037-catalog-requests`)

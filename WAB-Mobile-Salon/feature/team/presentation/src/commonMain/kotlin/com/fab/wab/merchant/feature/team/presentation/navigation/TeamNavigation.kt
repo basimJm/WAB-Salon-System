@@ -14,30 +14,37 @@ import com.fab.wab.merchant.core.navigation.route.Screen
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.MemberEditContract
+import com.fab.wab.merchant.feature.team.presentation.controller.contract.StaffMessage
+import com.fab.wab.merchant.feature.team.presentation.controller.contract.StaffProfileContract
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.TeamContract
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.MemberEditViewModel
+import com.fab.wab.merchant.feature.team.presentation.controller.vm.StaffProfileViewModel
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.TeamViewModel
 import com.fab.wab.merchant.feature.team.presentation.resources.Res
 import com.fab.wab.merchant.feature.team.presentation.resources.member_added
 import com.fab.wab.merchant.feature.team.presentation.resources.member_saved
+import com.fab.wab.merchant.feature.team.presentation.resources.staff_leave_deleted
+import com.fab.wab.merchant.feature.team.presentation.resources.staff_leave_saved
+import com.fab.wab.merchant.feature.team.presentation.resources.staff_saved
 import com.fab.wab.merchant.feature.team.presentation.resources.team_deactivated
 import com.fab.wab.merchant.feature.team.presentation.resources.team_reactivated
 import com.fab.wab.merchant.feature.team.presentation.screen.MemberEditScreen
+import com.fab.wab.merchant.feature.team.presentation.screen.StaffProfileScreen
 import com.fab.wab.merchant.feature.team.presentation.screen.TeamScreen
 import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-/** Staff profile (MER-039) and permissions editor (MER-040) ship next; their links stay hidden until then. */
-internal const val STAFF_PROFILE_READY = false
+/** The permissions editor (MER-040) ships next; its link stays hidden until then. */
 internal const val PERMISSIONS_READY = false
 
-/** M17 team list and member form (screens inside the Salon tab, opened from the hub). */
+/** M17 team list, member form and staff profile (screens inside the Salon tab, opened from the hub). */
 class TeamNavigation(override val navController: NavHostController) : Navigator by NavigatorDelegation(navController) {
 
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
         navGraphBuilder.composable<Screen.Team> { TeamDestination() }
         navGraphBuilder.composable<Screen.MemberEdit> { entry -> MemberDestination(entry.toRoute<Screen.MemberEdit>().memberId) }
+        navGraphBuilder.composable<Screen.StaffProfile> { entry -> StaffDestination(entry.toRoute<Screen.StaffProfile>().memberId) }
     }
 
     @Composable
@@ -48,7 +55,7 @@ class TeamNavigation(override val navController: NavHostController) : Navigator 
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is TeamContract.SideEffect.OpenMember -> navigateTo(Screen.MemberEdit(effect.id))
-                is TeamContract.SideEffect.OpenStaff -> if (STAFF_PROFILE_READY) navigateTo(Screen.StaffProfile(effect.id))
+                is TeamContract.SideEffect.OpenStaff -> navigateTo(Screen.StaffProfile(effect.id))
                 TeamContract.SideEffect.AddMember -> navigateTo(Screen.MemberEdit())
                 is TeamContract.SideEffect.OpenBooking -> navigateTo(Screen.BookingDetails(effect.bookingId))
                 is TeamContract.SideEffect.ActiveChanged -> notifications.show(
@@ -73,16 +80,40 @@ class TeamNavigation(override val navController: NavHostController) : Navigator 
                     navigateBack()
                 }
                 is MemberEditContract.SideEffect.OpenPermissions -> if (PERMISSIONS_READY) navigateTo(Screen.PermissionsEditor(effect.memberId))
-                is MemberEditContract.SideEffect.OpenStaff -> if (STAFF_PROFILE_READY) navigateTo(Screen.StaffProfile(effect.memberId))
+                is MemberEditContract.SideEffect.OpenStaff -> navigateTo(Screen.StaffProfile(effect.memberId))
                 is MemberEditContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }
         MemberEditScreen(
             state = state,
             permissionsReady = PERMISSIONS_READY,
-            staffReady = STAFF_PROFILE_READY && state.providesServices,
+            staffReady = state.providesServices,
             onAction = viewModel::onEvent,
             onBack = { navigateBack() },
         )
+    }
+
+    @Composable
+    private fun StaffDestination(memberId: String) {
+        val viewModel: StaffProfileViewModel = koinViewModel(key = memberId) { parametersOf(memberId) }
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val notifications = rememberNotificationManager()
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                is StaffProfileContract.SideEffect.Done -> notifications.show(
+                    getString(
+                        when (effect.message) {
+                            StaffMessage.PROFILE_SAVED -> Res.string.staff_saved
+                            StaffMessage.LEAVE_SAVED -> Res.string.staff_leave_saved
+                            StaffMessage.LEAVE_DELETED -> Res.string.staff_leave_deleted
+                        },
+                    ),
+                    style = NotificationStyle.Success,
+                )
+                is StaffProfileContract.SideEffect.OpenBooking -> navigateTo(Screen.BookingDetails(effect.bookingId))
+                is StaffProfileContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+            }
+        }
+        StaffProfileScreen(state = state, onAction = viewModel::onEvent, onBack = { navigateBack() })
     }
 }

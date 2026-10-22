@@ -19,10 +19,8 @@ import com.fab.wab.merchant.designsystem.components.avatar.AppAvatar
 import com.fab.wab.merchant.designsystem.components.badge.AppStatusBadge
 import com.fab.wab.merchant.designsystem.components.badge.StatusTone
 import com.fab.wab.merchant.designsystem.components.button.AppButton
-import com.fab.wab.merchant.designsystem.components.button.ButtonKind
 import com.fab.wab.merchant.designsystem.components.card.AppCard
 import com.fab.wab.merchant.designsystem.components.control.AppSwitch
-import com.fab.wab.merchant.designsystem.components.dialog.AppBottomSheet
 import com.fab.wab.merchant.designsystem.components.dialog.AppDialog
 import com.fab.wab.merchant.designsystem.components.feedback.AppEmptyState
 import com.fab.wab.merchant.designsystem.components.feedback.AppErrorState
@@ -40,12 +38,7 @@ import com.fab.wab.merchant.feature.team.presentation.controller.contract.TeamCo
 import com.fab.wab.merchant.feature.team.presentation.resources.Res
 import com.fab.wab.merchant.feature.team.presentation.resources.team_add
 import com.fab.wab.merchant.feature.team.presentation.resources.team_cancel
-import com.fab.wab.merchant.feature.team.presentation.resources.team_conflict_back
 import com.fab.wab.merchant.feature.team.presentation.resources.team_conflict_body
-import com.fab.wab.merchant.feature.team.presentation.resources.team_conflict_cancel
-import com.fab.wab.merchant.feature.team.presentation.resources.team_conflict_reassign
-import com.fab.wab.merchant.feature.team.presentation.resources.team_conflict_refund
-import com.fab.wab.merchant.feature.team.presentation.resources.team_conflict_title
 import com.fab.wab.merchant.feature.team.presentation.resources.team_deactivate
 import com.fab.wab.merchant.feature.team.presentation.resources.team_deactivate_body
 import com.fab.wab.merchant.feature.team.presentation.resources.team_deactivate_title
@@ -130,21 +123,11 @@ private fun TeamDialogs(state: UiState, onAction: (UiAction) -> Unit) {
         )
     }
     if (state.conflict != null) {
-        ConflictSheet(onAction)
-    }
-}
-
-@Composable
-private fun ConflictSheet(onAction: (UiAction) -> Unit) {
-    val spacing = AppTheme.spacing
-    AppBottomSheet(onDismiss = { onAction(UiAction.OnDismiss) }) {
-        Column(modifier = Modifier.fillMaxWidth().padding(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
-            AppText(text = stringResource(Res.string.team_conflict_title), style = AppTheme.typography.titleMedium)
-            AppText(text = stringResource(Res.string.team_conflict_body), style = AppTheme.typography.bodyMedium)
-            AppText(text = stringResource(Res.string.team_conflict_refund), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
-            AppButton(stringResource(Res.string.team_conflict_reassign), { onAction(UiAction.OnConflictReassign) }, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined)
-            AppButton(stringResource(Res.string.team_conflict_cancel), { onAction(UiAction.OnConflictCancelBookings) }, Modifier.fillMaxWidth(), kind = ButtonKind.Destructive)
-            AppButton(stringResource(Res.string.team_conflict_back), { onAction(UiAction.OnDismiss) }, Modifier.fillMaxWidth(), kind = ButtonKind.Text)
-        }
+        AffectedBookingsSheet(
+            body = stringResource(Res.string.team_conflict_body),
+            onReassign = { onAction(UiAction.OnConflictReassign) },
+            onCancelBookings = { onAction(UiAction.OnConflictCancelBookings) },
+            onBack = { onAction(UiAction.OnDismiss) },
+        )
     }
 }
