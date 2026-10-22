@@ -239,7 +239,7 @@
 
 ### CUS-081 — Liquid Glass (iOS 26 style) across the app
 - Branch: `feat/cus-081-liquid-glass`
-- Status: DONE (PR into `customer`)
+- Status: DONE (PR #349)
 - Acceptance criteria (owner requests 2026-10-22: liquid glass everywhere like iOS native, comfortable with the current design; bottom sheet must show):
   - [x] Material (`components/glass`): Haze 1.7.2 backdrop blur for chrome; content glass = see-through gradient body, specular sheen, refractive diagonal rim; tokens in `GlassTokens` (light + dark, palette-derived); liquid press (spring scale, no ripple) `rememberGlassPress`/`glassPressScale`/`glassClickable`; violet ambient `glassBackdrop` behind every `AppScreen`
   - [x] Applied: tab bar (+ glass lens on the selected tab), rail, top bars, sheets, dialogs, sticky bars, toasts, buttons (primary keeps gradient + sheen/rim), icon buttons, cards, chips, time slots, segmented tabs, text field, dropdown, search bar, OTP boxes
