@@ -1,7 +1,5 @@
 package com.fab.wab.customer.feature.auth.presentation.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +24,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.core.domain.ThemeMode
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -64,8 +63,7 @@ internal fun AuthPillButton(
             .defaultMinSize(minWidth = AuthDesign.pillMinWidth)
             .clip(shape)
             .clickable(role = Role.Button, onClickLabel = contentDescription, onClick = onClick)
-            .background(colors.card)
-            .border(AppTheme.sizes.hairline, colors.line, shape)
+            .glassBackground(AppTheme.glass, shape)
             .padding(horizontal = if (label != null) AuthDesign.pillHorizontalPadding else AppTheme.spacing.space0),
         contentAlignment = Alignment.Center,
     ) {
@@ -188,8 +186,7 @@ internal fun AuthCard(
             .fillMaxWidth()
             .softShadow(AppTheme.elevation.overlay, colors.shadow.copy(alpha = AuthDesign.cardShadowAlpha), shape)
             .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.hairline, colors.line, shape)
+            .glassBackground(AppTheme.glass, shape)
             .padding(vertical = verticalPadding, horizontal = horizontalPadding),
     ) {
         content()

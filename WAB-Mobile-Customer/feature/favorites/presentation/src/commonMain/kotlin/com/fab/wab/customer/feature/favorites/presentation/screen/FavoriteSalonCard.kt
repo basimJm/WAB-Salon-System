@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.favorites.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.fab.wab.customer.core.domain.salon.SalonSummary
 import com.fab.wab.customer.designsystem.components.domain.ratingValueText
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.image.AppImage
 import com.fab.wab.customer.designsystem.components.image.AppImageFallback
 import com.fab.wab.customer.designsystem.components.text.AppText
@@ -47,8 +47,7 @@ internal fun FavoriteSalonCard(salon: SalonSummary, onClick: () -> Unit, onRemov
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.hairline, colors.line, shape)
+            .glassBackground(AppTheme.glass, shape)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(FavoritesDesign.cardPadding),
         horizontalArrangement = Arrangement.spacedBy(FavoritesDesign.cardGap),

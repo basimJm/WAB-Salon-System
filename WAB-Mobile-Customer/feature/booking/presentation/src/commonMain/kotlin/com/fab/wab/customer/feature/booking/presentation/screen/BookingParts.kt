@@ -27,9 +27,11 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerBox
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.designsystem.theme.GlassStyle
 import com.fab.wab.customer.feature.booking.presentation.resources.Res
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_bride_badge
 import org.jetbrains.compose.resources.stringResource
@@ -56,7 +58,7 @@ internal fun SelectionCard(
 ) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.large
-    val fill = fillModifier ?: Modifier.background(if (selected) colors.soft else colors.card)
+    val fill = fillModifier ?: Modifier.glassBackground(AppTheme.glass, shape, if (selected) GlassStyle.Prominent else GlassStyle.Regular)
     Row(
         modifier = modifier
             .fillMaxWidth()

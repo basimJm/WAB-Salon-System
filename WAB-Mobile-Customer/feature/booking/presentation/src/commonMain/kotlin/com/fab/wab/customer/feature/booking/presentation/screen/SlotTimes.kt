@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.LayoutDirection
 import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerBox
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -121,7 +122,7 @@ private fun SlotChip(slot: AvailabilitySlot, selected: Boolean, onClick: () -> U
     val fill = when {
         selected -> Modifier.brandBackground(brandBrush(), shape)
         full -> Modifier.clip(shape).background(colors.surface)
-        else -> Modifier.clip(shape).background(colors.card)
+        else -> Modifier.glassBackground(AppTheme.glass, shape)
     }
     val content = when {
         selected -> colors.onGradient

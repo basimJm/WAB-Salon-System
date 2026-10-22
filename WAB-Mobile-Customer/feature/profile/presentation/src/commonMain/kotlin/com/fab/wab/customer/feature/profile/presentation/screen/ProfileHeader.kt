@@ -23,11 +23,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.image.AppImage
 import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerListItem
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.designsystem.theme.GlassStyle
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ProfileContract.UiAction
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ProfileContract.UiState
 import com.fab.wab.customer.feature.profile.presentation.resources.Res
@@ -46,8 +48,7 @@ internal fun ProfileHeader(state: UiState, onAction: (UiAction) -> Unit, modifie
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(AppTheme.shapes.extraLarge)
-            .background(AppTheme.colors.surface)
+            .glassBackground(AppTheme.glass, AppTheme.shapes.extraLarge, GlassStyle.Prominent)
             .padding(AppTheme.spacing.space16),
         horizontalArrangement = Arrangement.spacedBy(ProfileDesign.headerGap),
         verticalAlignment = Alignment.CenterVertically,
@@ -97,8 +98,7 @@ private fun RowScope.GuestHeader(state: UiState, onAction: (UiAction) -> Unit) {
     Box(
         modifier = Modifier
             .height(ProfileDesign.editHeight)
-            .clip(RoundedCornerShape(ProfileDesign.editRadius))
-            .background(colors.card)
+            .glassBackground(AppTheme.glass, RoundedCornerShape(ProfileDesign.editRadius))
             .clickable(role = Role.Button) { onAction(UiAction.OnEditGuestClick) }
             .padding(horizontal = ProfileDesign.editHorizontal),
         contentAlignment = Alignment.Center,

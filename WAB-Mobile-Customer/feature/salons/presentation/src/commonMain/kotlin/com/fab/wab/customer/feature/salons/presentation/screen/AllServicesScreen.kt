@@ -1,7 +1,5 @@
 package com.fab.wab.customer.feature.salons.presentation.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.core.domain.catalog.CatalogService
 import com.fab.wab.customer.designsystem.components.domain.ServiceCardUi
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.layout.AppPagedList
 import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
@@ -100,8 +99,7 @@ private fun ServiceCard(service: CatalogService, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.hairline, colors.line, shape)
+            .glassBackground(AppTheme.glass, shape)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(spacing.space12),
         horizontalArrangement = Arrangement.spacedBy(spacing.space12),

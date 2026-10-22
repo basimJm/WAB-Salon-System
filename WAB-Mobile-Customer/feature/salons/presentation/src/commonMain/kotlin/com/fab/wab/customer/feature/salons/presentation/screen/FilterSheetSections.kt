@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.salons.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,17 +16,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.core.domain.salon.GeneralFilter
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerBox
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.resources.Res as DsRes
 import com.fab.wab.customer.designsystem.resources.price_jod
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.designsystem.theme.GlassStyle
 import com.fab.wab.customer.feature.home.presentation.screen.DiscoveryDesign
 import com.fab.wab.customer.feature.home.presentation.screen.discoveryBody
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.FilterSheetContract.UiAction
@@ -45,8 +47,8 @@ import com.fab.wab.customer.feature.salons.presentation.resources.salons_chip_ne
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_chip_price
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_chip_rating
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_chip_recommended
-import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.stringResource
 
 /** Design `fReady` services block: 15 sp bold title, wrapped 38 dp chips, shimmer chips while paging, "See more". */
 @Composable
@@ -163,8 +165,7 @@ private fun FilterChoiceChip(label: String, selected: Boolean, onClick: () -> Un
         modifier = Modifier
             .height(SalonsDesign.FILTER_CHIP_HEIGHT)
             .clip(shape)
-            .background(if (selected) colors.soft else colors.card)
-            .border(AppTheme.sizes.borderWidth, if (selected) colors.gradientEnd else colors.line, shape)
+            .glassBackground(AppTheme.glass, shape, style = if (selected) GlassStyle.Prominent else GlassStyle.Regular, stateBorder = if (selected) colors.gradientEnd else Color.Unspecified)
             .semantics { this.selected = selected }
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = AppTheme.spacing.space16),

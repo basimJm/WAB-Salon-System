@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.ThemeMode
+import com.fab.wab.customer.designsystem.components.layout.tabBarInset
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
@@ -58,7 +59,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun ProfileScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(ProfileAnalytics.SCREEN)
-    AppScreen(modifier = modifier) {
+    AppScreen(modifier = modifier, scrollsUnderTabBar = true) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -68,7 +69,7 @@ fun ProfileScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifi
                     start = ProfileDesign.screenHorizontal,
                     top = ProfileDesign.screenTop,
                     end = ProfileDesign.screenHorizontal,
-                    bottom = ProfileDesign.screenBottom,
+                    bottom = ProfileDesign.screenBottom + tabBarInset(),
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

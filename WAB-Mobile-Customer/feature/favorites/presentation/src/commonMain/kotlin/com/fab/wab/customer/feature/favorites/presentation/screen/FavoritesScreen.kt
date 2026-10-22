@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
+import com.fab.wab.customer.designsystem.components.layout.tabBarInset
 import com.fab.wab.customer.designsystem.components.feedback.AppOfflineState
 import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
@@ -51,7 +52,7 @@ private const val FOOTER_KEY = "paging"
 @Composable
 fun FavoritesScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(FavoritesAnalytics.SCREEN)
-    AppScreen(modifier = modifier) {
+    AppScreen(modifier = modifier, scrollsUnderTabBar = true) {
         Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
             Header(state.greetingName)
             when (state.signedIn) {
@@ -149,7 +150,7 @@ private fun FavoritesList(state: UiState, onAction: (UiAction) -> Unit) {
         contentPadding = PaddingValues(
             start = FavoritesDesign.screenHorizontal,
             end = FavoritesDesign.screenHorizontal,
-            bottom = FavoritesDesign.listBottom,
+            bottom = FavoritesDesign.listBottom + tabBarInset(),
         ),
         verticalArrangement = Arrangement.spacedBy(FavoritesDesign.listGap),
     ) {

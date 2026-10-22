@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.bookings.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +21,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -55,8 +55,7 @@ internal fun BookingsSearchField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(AppTheme.sizes.touchTarget)
-                    .background(colors.card, shape)
-                    .border(AppTheme.sizes.borderWidth, colors.line, shape)
+                    .glassBackground(AppTheme.glass, shape)
                     .padding(horizontal = AppTheme.spacing.space14),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space10),

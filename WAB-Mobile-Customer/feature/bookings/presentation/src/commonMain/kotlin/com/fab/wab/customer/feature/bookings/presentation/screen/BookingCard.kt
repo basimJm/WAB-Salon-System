@@ -1,7 +1,5 @@
 package com.fab.wab.customer.feature.bookings.presentation.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +25,7 @@ import com.fab.wab.customer.core.domain.booking.BookingSummary
 import com.fab.wab.customer.core.domain.booking.PaymentStatus
 import com.fab.wab.customer.designsystem.components.badge.AppStatusBadge
 import com.fab.wab.customer.designsystem.components.badge.StatusTone
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.resources.Res as CoreRes
@@ -71,8 +70,7 @@ fun BookingCard(booking: BookingSummary, onClick: () -> Unit, modifier: Modifier
             .fillMaxWidth()
             .softShadow(AppTheme.elevation.card, colors.shadow.copy(alpha = AppTheme.elevation.cardShadowAlpha), shape)
             .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.hairline, colors.line, shape)
+            .glassBackground(AppTheme.glass, shape)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(spacing.space14),
     ) {

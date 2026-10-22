@@ -229,10 +229,27 @@
 
 ### CUS-080 — iOS dev API base URL cut at `//` (splash called `http://https/customer/v1/config`)
 - Branch: `fix/cus-080-ios-dev-api-url`
-- Status: IN REVIEW
+- Status: DONE (PR #347)
 - Acceptance criteria (owner report 2026-10-22 on the real iPhone):
   - [x] `Dev.xcconfig` `API_BASE_URL` written as `https:/$()/wab-server-dev.onrender.com` (`//` starts an xcconfig comment, the value became `https:`)
   - [x] iOS dev uses the real dev server like Android (`DATA_SOURCE = remote`, owner change)
 - Tests: built app Info.plist `API_BASE_URL` checked after the device build; config only
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — config only. LESSON: every URL in an xcconfig needs the `$()` split.
+
+### CUS-081 — Liquid Glass (iOS 26 style) across the app
+- Branch: `feat/cus-081-liquid-glass`
+- Status: IN PROGRESS (uncommitted; PR next)
+- Acceptance criteria (owner requests 2026-10-22: liquid glass everywhere like iOS native, comfortable with the current design; bottom sheet must show):
+  - [x] Material (`components/glass`): Haze 1.7.2 backdrop blur for chrome; content glass = see-through gradient body, specular sheen, refractive diagonal rim; tokens in `GlassTokens` (light + dark, palette-derived); liquid press (spring scale, no ripple) `rememberGlassPress`/`glassPressScale`/`glassClickable`; violet ambient `glassBackdrop` behind every `AppScreen`
+  - [x] Applied: tab bar (+ glass lens on the selected tab), rail, top bars, sheets, dialogs, sticky bars, toasts, buttons (primary keeps gradient + sheen/rim), icon buttons, cards, chips, time slots, segmented tabs, text field, dropdown, search bar, OTP boxes
+  - [x] Bottom sheet visible again (own window has no backdrop → card colour + sheen/rim)
+  - [x] Home, Bookings, Favorites, Profile scroll under the floating tab bar (`scrollsUnderTabBar` + `tabBarInset()`)
+  - [x] Tests `GlassTokensTest` (+3: content transparency, rim/press/ambient, Content mode)
+  - [x] Base primitive `AppGlassSurface(modifier, shape, style: GlassStyle.Subtle|Regular|Prominent, contentPadding, clipContent, blurBackdrop, content)`: glass on a background layer (children not clipped, no click/padding/size imposed), variants from `GlassTokens.level/fillTop/fillBottom/sheen`; shared `glassMaterial` used by `liquidGlass` (compat) and the surface; `AppCard` adopts it; `GlassGalleryPreviews` (variants × plain/brand/hero backgrounds, long text, nested, narrow, light/dark, RTL, font scale 2)
+  - [x] Owner feedback round 2: `glassBackground(AppTheme.glass, shape, style, stateBorder)` (non-clipping) replaces `.background(colors.card).border(...)` in 25 feature files (cards, sections, rows, auth/profile/notification fields, OTP, search rows, filter options, salon Call/WhatsApp buttons, booking rows, slots); top bar + sticky bar drawn without rim; icon buttons = inset glass circle (no more touching circles in the top bar); emulator: Home, Profile, Salon details checked
+  - [x] Owner feedback round 3: top bar back to opaque (no glass); light mode visible (lighter body 0.62→0.34, ambient 0.26, violet edge `gradientStart`@0.22, violet soft shadow per level 2/6/14 dp); text fields, search, dropdown, OTP, segmented, chips, secondary/outlined buttons and the tab lens use `glassBackground` (edge + shadow); OTP: no double border, no clip; Profile header card + Edit = glass; emulator light + dark Home/Profile checked
+  - [x] Tests: `GlassTokensTest` 11 (variant ordering, alphas ≤ 1, WCAG AA ink contrast for every style light/dark, blur-vs-fallback decision)
+- Tests: `:core:design-system:testAndroidHostTest :androidApp:assembleDevDebug` exit 0; policy ok
+- Loops: 1/1 — emulator (dev, EN light) Home: tab bar glass over scrolled content, lens, search, segmented tabs, backdrop OK; found and fixed on the way: stale composeApp build, invisible sheet, pruned delegate/`GlassTokens` imports
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — design-system only, token-driven, no feature logic. DEVIATIONS: only EN light Home checked on device; AR/RTL, dark, other screens, iOS simulator and detekt not yet run; glass is a Compose imitation (no true refraction); content-level glass has no real blur (nothing separate behind it).

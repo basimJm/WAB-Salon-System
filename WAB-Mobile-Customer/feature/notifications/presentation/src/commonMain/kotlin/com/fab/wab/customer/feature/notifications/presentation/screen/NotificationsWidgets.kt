@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.notifications.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerBox
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
@@ -71,8 +71,7 @@ internal fun OutlineButton(text: String, onClick: () -> Unit, modifier: Modifier
         modifier = modifier
             .height(NotificationsDesign.sheetButtonHeight)
             .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.borderWidth, colors.line, shape)
+            .glassBackground(AppTheme.glass, shape)
             .clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

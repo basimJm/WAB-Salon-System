@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.booking.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -114,8 +114,7 @@ private fun JustMeCard(label: String, onClick: () -> Unit, modifier: Modifier = 
         labelColor = colors.ink,
         modifier = modifier
             .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.borderWidth, colors.line, shape)
+            .glassBackground(AppTheme.glass, shape)
             .clickable(role = Role.Button, onClick = onClick),
     )
 }

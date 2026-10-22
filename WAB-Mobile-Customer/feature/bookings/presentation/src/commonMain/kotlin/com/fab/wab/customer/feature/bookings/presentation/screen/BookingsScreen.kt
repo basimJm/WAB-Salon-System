@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.core.domain.booking.BookingTab
+import com.fab.wab.customer.designsystem.components.layout.tabBarInset
 import com.fab.wab.customer.designsystem.components.layout.AppPagedList
 import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
@@ -47,7 +48,7 @@ import org.jetbrains.compose.resources.stringResource
 fun BookingsScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(BookingsAnalytics.SCREEN)
     val spacing = AppTheme.spacing
-    AppScreen(modifier = modifier, handleIme = false) { padding ->
+    AppScreen(modifier = modifier, handleIme = false, scrollsUnderTabBar = true) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             Column(modifier = Modifier.padding(top = spacing.space8, bottom = spacing.space14)) {
                 AppText(
@@ -139,7 +140,7 @@ private fun ListContent(state: UiState, onAction: (UiAction) -> Unit) {
             loadingMore = state.loadingMore,
             onLoadMore = { onAction(UiAction.OnLoadMore) },
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = spacing.space20),
+            contentPadding = PaddingValues(bottom = spacing.space20 + tabBarInset()),
             footer = { BookingsShimmerCard(BookingsDesign.listShimmerHeight) },
         ) { booking -> BookingCard(booking = booking, onClick = { onAction(UiAction.OnBookingClick(booking.id)) }) }
     }

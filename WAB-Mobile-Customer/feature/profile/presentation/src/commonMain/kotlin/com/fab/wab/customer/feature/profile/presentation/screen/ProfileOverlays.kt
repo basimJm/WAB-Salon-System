@@ -1,7 +1,5 @@
 package com.fab.wab.customer.feature.profile.presentation.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -22,9 +21,11 @@ import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.domain.config.ContactInfo
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.ui.media.ImageSource
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.designsystem.theme.GlassStyle
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ContactChannel
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ProfileContract.UiAction
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ProfileContract.UiState
@@ -210,8 +211,7 @@ private fun NicknameField(value: String, onValueChange: (String) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(AppTheme.sizes.fieldHeight)
-                    .background(colors.card, shape)
-                    .border(AppTheme.sizes.borderWidth, colors.line, shape)
+                    .glassBackground(AppTheme.glass, shape)
                     .padding(horizontal = AppTheme.spacing.space14),
                 contentAlignment = Alignment.CenterStart,
             ) { inner() }
@@ -232,8 +232,7 @@ private fun GenderButton(
         modifier = modifier
             .height(ProfileDesign.genderHeight)
             .clip(shape)
-            .background(if (selected) colors.soft else colors.card)
-            .border(AppTheme.sizes.borderWidth, if (selected) colors.gradientEnd else colors.line, shape)
+            .glassBackground(AppTheme.glass, shape, style = if (selected) GlassStyle.Prominent else GlassStyle.Regular, stateBorder = if (selected) colors.gradientEnd else Color.Unspecified)
             .clickable(role = Role.RadioButton, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

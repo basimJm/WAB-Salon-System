@@ -1,12 +1,12 @@
 package com.fab.wab.customer.designsystem.components.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,24 +18,40 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.designsystem.components.badge.AppCountBadge
+import com.fab.wab.customer.designsystem.components.glass.LocalFloatingBarPadding
+import com.fab.wab.customer.designsystem.components.glass.LocalGlassSource
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
+import com.fab.wab.customer.designsystem.components.glass.glassClickable
+import com.fab.wab.customer.designsystem.components.glass.glassPressScale
+import com.fab.wab.customer.designsystem.components.glass.glassSource
+import com.fab.wab.customer.designsystem.components.glass.liquidGlass
+import com.fab.wab.customer.designsystem.components.glass.rememberGlass
+import com.fab.wab.customer.designsystem.components.glass.rememberGlassPress
+import com.fab.wab.customer.designsystem.components.glass.rememberGlassSource
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.designsystem.theme.GlassStyle
 import com.fab.wab.customer.designsystem.theme.NavigationStyle
+import dev.chrisbanes.haze.HazeState
 
 /** A top-level destination. [id] is any stable key owned by the app (route name); the design system never imports routes. */
 @Immutable
@@ -64,7 +80,7 @@ private fun NavItemContent(item: AppNavItem, selected: Boolean, modifier: Modifi
     }
 }
 
-/** Bottom bar for compact portrait windows (Home, Favorites, Bookings, Profile). */
+/** Floating glass tab bar for compact portrait windows (Home, Favorites, Bookings, Profile): an inset pill over the content. */
 @Composable
 fun AppBottomBar(
     items: List<AppNavItem>,
@@ -72,24 +88,28 @@ fun AppBottomBar(
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val glassTokens = AppTheme.glass
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(AppTheme.colors.card)
-            .topHairline(AppTheme.colors.line, AppTheme.sizes.hairline)
             .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(start = glassTokens.tabBarInset, end = glassTokens.tabBarInset, bottom = glassTokens.tabBarBottomGap)
+            .liquidGlass(rememberGlass(), glassTokens.tabBarShape)
             .padding(horizontal = AppTheme.spacing.space6, vertical = AppTheme.spacing.space8),
     ) {
         items.forEach { item ->
             val selected = item.id == selectedId
+            val press = rememberGlassPress()
             NavItemContent(
                 item = item,
                 selected = selected,
                 modifier = Modifier
                     .weight(1f)
+                    .glassPressScale(press)
                     .size(width = AppTheme.sizes.touchTarget, height = AppTheme.sizes.bottomBarHeight)
+                    .then(if (selected) Modifier.glassBackground(glassTokens, glassTokens.tabBarShape, GlassStyle.Prominent) else Modifier)
                     .semantics { this.selected = selected }
-                    .clickable(role = Role.Tab) { onSelect(item.id) },
+                    .glassClickable(press, role = Role.Tab) { onSelect(item.id) },
             )
         }
     }
@@ -107,7 +127,7 @@ fun AppNavigationRail(
         modifier = modifier
             .fillMaxHeight()
             .width(AppTheme.sizes.railWidth)
-            .background(AppTheme.colors.card)
+            .liquidGlass(rememberGlass(), RectangleShape, elevated = false)
             .windowInsetsPadding(WindowInsets.systemBars)
             .padding(vertical = AppTheme.spacing.space12),
         verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12, Alignment.CenterVertically),
@@ -144,19 +164,37 @@ fun AppNavScaffold(
         Box(modifier.fillMaxSize()) { body() }
         return
     }
+    val source = rememberGlassSource()
     when (AppTheme.adaptive.navigation) {
-        NavigationStyle.BottomBar -> Column(modifier.fillMaxSize()) {
-            Box(Modifier.weight(1f)) { body() }
-            AppBottomBar(items, selectedId, onSelect)
+        NavigationStyle.BottomBar -> FloatingBarLayout(source, body, modifier) { barModifier ->
+            AppBottomBar(items, selectedId, onSelect, barModifier)
         }
         NavigationStyle.Rail -> Row(modifier.fillMaxSize()) {
-            AppNavigationRail(items, selectedId, onSelect)
-            Box(Modifier.weight(1f)) { body() }
+            CompositionLocalProvider(LocalGlassSource provides source) { AppNavigationRail(items, selectedId, onSelect) }
+            Box(Modifier.weight(1f).glassSource(source)) { body() }
         }
     }
 }
 
-/** 1 px line along the top edge, as the design draws `border-top:1px solid var(--line)` on the tab bar. */
-private fun Modifier.topHairline(color: Color, thickness: Dp): Modifier = drawBehind {
-    drawLine(color, Offset.Zero, Offset(size.width, 0f), thickness.toPx())
+/**
+ * Content fills the window and is the glass backdrop; the bar floats over its bottom edge. The bar's measured height
+ * (with its insets and gap) is published as [LocalFloatingBarPadding] so screens keep their last items reachable.
+ */
+@Composable
+private fun FloatingBarLayout(
+    source: HazeState,
+    body: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    bar: @Composable (Modifier) -> Unit,
+) {
+    val density = LocalDensity.current
+    var barHeight by remember { mutableStateOf(Dp.Hairline) }
+    Box(modifier.fillMaxSize()) {
+        CompositionLocalProvider(LocalFloatingBarPadding provides barHeight) {
+            Box(Modifier.fillMaxSize().glassSource(source).consumeWindowInsets(WindowInsets.navigationBars)) { body() }
+        }
+        CompositionLocalProvider(LocalGlassSource provides source) {
+            bar(Modifier.align(Alignment.BottomCenter).onSizeChanged { barHeight = with(density) { it.height.toDp() } })
+        }
+    }
 }

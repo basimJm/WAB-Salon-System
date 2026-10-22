@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.salons.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +24,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import com.fab.wab.customer.designsystem.components.chip.ActiveFilterChip
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -69,8 +69,7 @@ private fun SearchField(value: String, onValueChange: (String) -> Unit, modifier
         modifier = modifier
             .height(SalonsDesign.SEARCH_FIELD_HEIGHT)
             .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.borderWidth, colors.line, shape)
+            .glassBackground(AppTheme.glass, shape)
             .padding(horizontal = AppTheme.spacing.space14),
         horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space10),
         verticalAlignment = Alignment.CenterVertically,

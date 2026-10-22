@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.profile.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import com.fab.wab.customer.designsystem.components.dialog.AppBottomSheet
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -72,8 +72,7 @@ internal fun OutlineButton(text: String, onClick: () -> Unit, modifier: Modifier
             .height(ProfileDesign.buttonHeight)
             .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
             .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.borderWidth, colors.line, shape)
+            .glassBackground(AppTheme.glass, shape)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

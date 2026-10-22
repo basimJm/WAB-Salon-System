@@ -1,7 +1,5 @@
 package com.fab.wab.customer.feature.home.presentation.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.customer.core.domain.salon.SalonSummary
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.designsystem.utils.softShadow
@@ -43,8 +42,7 @@ fun DiscoverySalonRow(
             .fillMaxWidth()
             .softShadow(DiscoveryDesign.ROW_SHADOW, colors.shadow.copy(alpha = DiscoveryDesign.ROW_SHADOW_ALPHA), shape)
             .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.hairline, colors.line, shape)
+            .glassBackground(AppTheme.glass, shape)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(spacing.space12),
         horizontalArrangement = Arrangement.spacedBy(spacing.space12),
