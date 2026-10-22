@@ -12,67 +12,67 @@
 ### MER-023 — Application status M05
 - Branch: `feat/mer-023-application-status`
 - Branched: (from `feat/mer-022-registration`; same `feature/application` module)
-- Status: IN PROGRESS (batch 4)
+- Status: IN REVIEW (batch 4 PR)
 - Acceptance criteria (PRD M05; operation `GET /salon/application`; design 01 `on.status`):
   - [x] Pending: "Your application is under review", submitted date, "Prepare your salon profile" → setup checklist (M06), refresh + pull-to-refresh
   - [x] Rejected: reason card + "Edit & resubmit" → M04 in resubmission mode (`POST /salon/application/resubmit`, back to pending)
   - [x] Approved (APPROVED_INCOMPLETE / LIVE / OFFLINE): "Your salon is approved!" + Continue → checklist or home; the cached salon state follows every load
   - [x] First-load error with retry; refresh errors as a banner; `Graph.Onboarding` navigation (status, registration, resubmission)
 - Tests: `ApplicationStatusViewModelTest` (4), `ApplicationUseCasesTest` (3), `ApplicationMappersTest` (2)
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-4 run: policy `all: ok`, 81 policy-script tests OK, `testAndroidHostTest` (all modules, fresh results: 80 suites, 303 tests, 0 failures) + `:androidApp:assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-4 code read: analytics fields, auth feature ported from the customer app and narrowed to the merchant contract (no register / change-phone / push switch), `feature/application` (registration, status, resubmit) on the shared upload pipeline; Clean Architecture + MVI by delegate, AR + EN from design 01, tokens only, files < 300 lines. Deviations: real SMS / analytics need the owner's Firebase files (MER-004); no email in the application contract; resubmission not prefilled (contract); detekt, full gate and device checks once after the backlog.
 - Notes: DEVIATION: "opens M04 prefilled" — `GET /salon/application` returns no name / type / documents, so the resubmission form starts empty (name, type and documents only, as the resubmit operation accepts). The push on approval / rejection is MER-012/047.
 
 ### MER-022 — Salon registration M04
 - Branch: `feat/mer-022-registration`
 - Branched: (from `feat/mer-021-otp`)
-- Status: IN PROGRESS (batch 4)
+- Status: IN REVIEW (batch 4 PR)
 - Acceptance criteria (PRD M04, §12; operations `POST /uploads/license/presign|confirm`, `POST /salon/applications`, `GET /locations/cities|areas`; design 01 `on.register`):
   - [x] `feature/application` (domain / data / presentation / di): salon name, type Men / Women (choice cards + "cannot be changed later"), owner first / last name, city → area (area disabled until a city; cities of the phone's country), 1–5 license documents (`AppDocumentUploader`, `FilePicker` + `UploadFileUseCase` with the public license purpose, progress, remove, retry, refusal messages), terms checkbox + terms page link
   - [x] Pure validation (`registrationErrors`: required fields, lengths 80 / 50, 1–5 confirmed documents, nothing still uploading, terms); errors shown after the first submit; Submit with spinner
   - [x] Submit with the REGISTER proof → salon `APPLICATION_PENDING` + owner signed in (all permissions, salon state cached) → M05; missing proof → back to login
 - Tests: `RegistrationRulesTest` (5), `RegistrationViewModelTest` (5: missing proof, cities/areas, valid submit signs in, upload failure + retry + refusal + remove, resubmission); application domain / data / presentation tests + `assembleDevDebug` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-4 run: policy `all: ok`, 81 policy-script tests OK, `testAndroidHostTest` (all modules, fresh results: 80 suites, 303 tests, 0 failures) + `:androidApp:assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-4 code read: analytics fields, auth feature ported from the customer app and narrowed to the merchant contract (no register / change-phone / push switch), `feature/application` (registration, status, resubmit) on the shared upload pipeline; Clean Architecture + MVI by delegate, AR + EN from design 01, tokens only, files < 300 lines. Deviations: real SMS / analytics need the owner's Firebase files (MER-004); no email in the application contract; resubmission not prefilled (contract); detekt, full gate and device checks once after the backlog.
 - Notes: DEVIATION: PRD lists an optional email, but `POST /salon/applications` has no email field — not collected (server gap; add when the contract has it).
 
 ### MER-021 — OTP M03
 - Branch: `feat/mer-021-otp`
 - Branched: (from `feat/mer-020-login`; the OTP screen came with the auth port of MER-020)
-- Status: IN PROGRESS (batch 4)
+- Status: IN REVIEW (batch 4 PR)
 - Acceptance criteria (PRD M03 "same rules as the customer app"; operations `POST /auth/otp/request`, `/auth/otp/wrong-attempt`, `/auth/login`):
   - [x] Modes LOGIN / REGISTER / CHANGE_PHONE / BANK_DETAILS (`AuthPurpose`); OTP pre-check (`allowed`, `otpLength` boxes from the backend, `resendAfterSeconds`, `blockedUntil`), Firebase phone verification through the `PhoneAuthGateway` facade (fake in mock mode), wrong-attempt reporting with remaining attempts and the 15-minute block, resend countdown, expiry popup
   - [x] LOGIN → `POST /auth/login` with the ID token + installation (app-instance id, platform, versions, FCM token) → session stores tokens, member, role and permission keys → home; REGISTER → proof published → salon registration (M04); BANK_DETAILS / CHANGE_PHONE → proof published → back to the caller
 - Tests: `OtpViewModelTest` (8: request + countdown, login stores the member, wrong code + block, expiry + server errors, register → registration, bank details → back, block remaining time, Firebase send failure), `AuthMappersTest` (3)
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-4 run: policy `all: ok`, 81 policy-script tests OK, `testAndroidHostTest` (all modules, fresh results: 80 suites, 303 tests, 0 failures) + `:androidApp:assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-4 code read: analytics fields, auth feature ported from the customer app and narrowed to the merchant contract (no register / change-phone / push switch), `feature/application` (registration, status, resubmit) on the shared upload pipeline; Clean Architecture + MVI by delegate, AR + EN from design 01, tokens only, files < 300 lines. Deviations: real SMS / analytics need the owner's Firebase files (MER-004); no email in the application contract; resubmission not prefilled (contract); detekt, full gate and device checks once after the backlog.
 - Notes: DEVIATION: needs MER-010 (code done) and the owner's Firebase files (MER-004) for a real SMS; mock mode verifies any code.
 
 ### MER-020 — Welcome & login M02
 - Branch: `feat/mer-020-login`
 - Branched: (from `feat/mer-010-analytics`)
-- Status: IN PROGRESS (batch 4)
+- Status: IN REVIEW (batch 4 PR)
 - Acceptance criteria (PRD M02, §4.4; operations `GET /locations/countries`, `POST /auth/check-phone`; design 01 `on.login`):
   - [x] `feature/auth` ported from the customer app (domain / data / presentation / di) and adapted to the merchant contract; core `locations` (countries, cities, areas; cache per language) ported and bound
   - [x] Country picker (server list, Jordan default) + phone field with the country regex; Continue → `check-phone`: active member → OTP; `PHONE_NOT_REGISTERED` → "not linked to any salon" dialog → Register a new salon (OTP REGISTER → M04); `MEMBER_INACTIVE` → "Your access was removed"; `ACCOUNT_BLOCKED` → blocked → contact WAB; "New salon? Register your salon" link (valid number → registration OTP)
   - [x] Language + theme toggles, legal links (privacy / terms / contact content pages), invalid / loading states; texts from design 01 in AR + EN
   - [x] Merchant navigation map (`Graph` auth / onboarding / tabs, `Screen` M02–M25); shell starts guests at login (launch router = MER-024); `InstallationInfoProvider` bound by the shell
 - Tests: `LoginViewModelTest` (7: default country + regex, registered → OTP, not linked → register, deactivated popup, register link, blocked + errors, toggles, countries retry), `PhoneCheckMapperTest` (2), `SessionUseCasesTest` (2), `InstallationMapperTest`, `LocationsTest`; auth / domain / data / composeApp host tests + `assembleDevDebug` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-4 run: policy `all: ok`, 81 policy-script tests OK, `testAndroidHostTest` (all modules, fresh results: 80 suites, 303 tests, 0 failures) + `:androidApp:assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-4 code read: analytics fields, auth feature ported from the customer app and narrowed to the merchant contract (no register / change-phone / push switch), `feature/application` (registration, status, resubmit) on the shared upload pipeline; Clean Architecture + MVI by delegate, AR + EN from design 01, tokens only, files < 300 lines. Deviations: real SMS / analytics need the owner's Firebase files (MER-004); no email in the application contract; resubmission not prefilled (contract); detekt, full gate and device checks once after the backlog.
 - Notes: customer register screen, change-phone and push switch dropped (no merchant operations); the form fields stay for the salon registration (MER-022).
 
 ### MER-010 — Analytics tracker + Crashlytics facade
 - Branch: `feat/mer-010-analytics`
 - Branched: (batch 4 start, from `feat/mer-019-splash-config`)
-- Status: IN PROGRESS (batch 4)
+- Status: IN REVIEW (batch 4 PR)
 - Acceptance criteria (PRD §14):
   - [x] Common fields on every event: user type, language, app version, platform, environment (template) + `app = MERCHANT`, and while signed in `member_id`, `salon_id`, `member_role` (`AnalyticsContext`, `AppAnalyticsContextProvider`)
   - [x] Firebase user id = member id on sign-in, cleared on sign-out, on analytics and Crashlytics; `salon_id` / `member_role` user properties set and cleared with it (`SessionAnalyticsSync`)
   - [x] App-instance id for the backend: `AppInstanceIdProvider` port (core/firebase, template) — sent by login (MER-020/021)
 - Tests: `AppAnalyticsContextProviderTest` (+1), `SessionAnalyticsSyncTest` (extended); core/analytics + composeApp host tests green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-4 run: policy `all: ok`, 81 policy-script tests OK, `testAndroidHostTest` (all modules, fresh results: 80 suites, 303 tests, 0 failures) + `:androidApp:assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-4 code read: analytics fields, auth feature ported from the customer app and narrowed to the merchant contract (no register / change-phone / push switch), `feature/application` (registration, status, resubmit) on the shared upload pipeline; Clean Architecture + MVI by delegate, AR + EN from design 01, tokens only, files < 300 lines. Deviations: real SMS / analytics need the owner's Firebase files (MER-004); no email in the application contract; resubmission not prefilled (contract); detekt, full gate and device checks once after the backlog.
 - Notes: DEVIATION: depends on MER-004 (owner Firebase files, PENDING); the code path is complete and runs on the no-op bridges with the placeholder configs; real events and crash reports are verified once the owner adds the files.
 
 ### MER-019 — Splash + config + system screens
