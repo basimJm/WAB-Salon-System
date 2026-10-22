@@ -9,9 +9,18 @@ import com.fab.wab.merchant.core.domain.AppLanguage
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.AppearanceSettings
 import com.fab.wab.merchant.core.domain.ThemeMode
+import com.fab.wab.merchant.core.domain.auth.AuthTokens
+import com.fab.wab.merchant.core.domain.auth.TokenRefreshResult
+import com.fab.wab.merchant.core.domain.permission.PermissionsSync
 import com.fab.wab.merchant.core.domain.repository.SessionTimeOut
+import com.fab.wab.merchant.core.domain.session.MemberProfile
+import com.fab.wab.merchant.core.domain.session.MemberRole
+import com.fab.wab.merchant.core.domain.session.SalonState
 import com.fab.wab.merchant.core.domain.session.SessionState
+import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.core.firebase.FakeCrashReporter
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -20,8 +29,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 private class FakeSessionTimeOut : SessionTimeOut {
     override val sessionEventTimeOut: Channel<Boolean> = Channel(Channel.BUFFERED)
@@ -62,12 +69,33 @@ private class MinimalAppSettings : AppSettings {
     }
 }
 
+/** Session store that only reports a fixed state (the shell reads `state`; nothing here writes). */
+private class StaticSessionStore(initial: SessionState) : SessionStore {
+    override val state: Flow<SessionState> = MutableStateFlow(initial)
+    override val pushEnabled: Flow<Boolean> = MutableStateFlow(true)
+    override val overlayPermissionPrompted: Flow<Boolean> = MutableStateFlow(false)
+    override suspend fun tokens(): AuthTokens? = null
+    override suspend fun signIn(tokens: AuthTokens, member: MemberProfile, permissions: Set<String>, salonState: SalonState?) = Unit
+    override suspend fun updateTokens(tokens: AuthTokens) = Unit
+    override suspend fun updateMember(member: MemberProfile) = Unit
+    override suspend fun updatePermissions(permissions: Set<String>) = Unit
+    override suspend fun updateSalonState(salonState: SalonState?) = Unit
+    override suspend fun setPushEnabled(enabled: Boolean) = Unit
+    override suspend fun setOverlayPermissionPrompted(prompted: Boolean) = Unit
+    override suspend fun signOut() = Unit
+    override suspend fun clearAll() = Unit
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModelTest {
 
     private val environment = AppEnvironment("dev", "https://api.example", "https://web.example", "1.2.3", 7, isDebug = true)
     private val settings = MinimalAppSettings()
     private val sessionTimeOut = FakeSessionTimeOut()
+    private val sessionStore = StaticSessionStore(
+        SessionState.SignedIn(MemberProfile("m1", "s1", "Rami", MemberRole.OWNER)),
+    )
+    private var refreshes = 0
 
     private fun TestScope.viewModel() = MainViewModel(
         appSettings = settings,
@@ -75,12 +103,19 @@ class MainViewModelTest {
         sessionTimeOut = sessionTimeOut,
         environment = environment,
         sessionAnalyticsSync = SessionAnalyticsSync(MutableStateFlow(SessionState.Guest), NoOpAnalyticsTracker, FakeCrashReporter()),
+        permissionsSync = PermissionsSync({ refreshes++; TokenRefreshResult.Unavailable }, sessionStore),
         testScope = backgroundScope,
     )
 
     @Test
     fun stateCarriesTheAppVersion() = runTest(UnconfinedTestDispatcher()) {
         assertEquals("1.2.3", viewModel().state.first().appVersion)
+    }
+
+    @Test
+    fun permissionsAreReFetchedOnAppStart() = runTest(UnconfinedTestDispatcher()) {
+        viewModel()
+        assertEquals(1, refreshes)
     }
 
     @Test

@@ -9,6 +9,18 @@
 
 ## Current task
 
+### MER-009 — Permissions model
+- Branch: `feat/mer-009-permissions` (from `feat/mer-008-session-store`)
+- Status: IN PROGRESS (batch 2)
+- Acceptance criteria (PRD §3, §6; BUSINESS_DOMAIN §6):
+  - [x] `Permission` (15 grantable keys), `OwnerCapability` (TEAM_MANAGE, PAYOUT_DETAILS_MANAGE, SALON_DELETE_REQUEST), `PermissionSet` with `has` / `anyOf` / `allOf` / `can` (owner has all), `SessionState.permissionSet()`, `PermissionTemplates` (PRD §6.3)
+  - [x] `PermissionGated` (hidden-not-disabled) + `LocalPermissions` provided by the shell from the session
+  - [x] Re-fetch: `PermissionsSync` rotates through the shared single-flight refresher (`SessionRefresher` = the `TokenRefreshCoordinator` now in Koin; the merchant refresh returns the member), stores member + keys; refused session → sign-out; called on app start (Home refresh, push and socket triggers call the same `refresh()`)
+- Tests: `PermissionsTest` (4), `PermissionsSyncTest` (3), `RefreshMemberTest` (2), coordinator `refreshNow` test, `MainViewModelTest` start re-fetch; domain/network/data/design-system/composeApp tests + `assembleDevDebug` green
+- Loops: 0/1
+- Review: PENDING
+- Notes: duplicate `createHttpClient` expect/actuals removed (identical); `BaseHttpClient` registered in Koin.
+
 ### MER-008 — Secure local storage of PRD §5 keys via one SessionStore
 - Branch: `feat/mer-008-session-store` (batch 2 start, from `feat/mer-007-mock-source`)
 - Status: IN PROGRESS (batch 2)

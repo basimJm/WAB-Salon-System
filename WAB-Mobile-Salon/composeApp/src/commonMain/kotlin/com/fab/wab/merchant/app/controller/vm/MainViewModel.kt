@@ -10,6 +10,7 @@ import com.fab.wab.merchant.core.domain.AppLanguage
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.AppearanceSettings
 import com.fab.wab.merchant.core.domain.ThemeMode
+import com.fab.wab.merchant.core.domain.permission.PermissionsSync
 import com.fab.wab.merchant.core.domain.repository.SessionTimeOut
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -27,11 +28,14 @@ class MainViewModel(
     private val sessionTimeOut: SessionTimeOut,
     environment: AppEnvironment,
     sessionAnalyticsSync: SessionAnalyticsSync,
+    private val permissionsSync: PermissionsSync,
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(appVersion = environment.appVersion), testScope) {
 
     init {
         sessionAnalyticsSync.start(scope)
+        // PRD §3: permissions are re-fetched on app start (Home refresh and the PERMISSIONS_UPDATED push call it too).
+        scope.launch { permissionsSync.refresh() }
     }
 
     override fun handle(event: UiAction) {

@@ -124,11 +124,11 @@ class BaseHttpClient(
         expectSuccess = false
     }
 
-    fun buildHttpClient(): HttpClient {
-        val coordinator = TokenRefreshCoordinator(appSettings, RemoteTokenRefreshApi(buildRefreshClient()))
-        return HttpClient(engineProvider.create()) {
-            installCommon(logRequests = true)
-            expectSuccess = true
-        }.also { it.installAuthRefresh(appSettings, coordinator, sessionTimeOut) }
-    }
+    /** The one refresh coordinator: the 401 interceptor and explicit re-fetches (permissions) share its lock. */
+    val refresher: TokenRefreshCoordinator by lazy { TokenRefreshCoordinator(appSettings, RemoteTokenRefreshApi(buildRefreshClient())) }
+
+    fun buildHttpClient(): HttpClient = HttpClient(engineProvider.create()) {
+        installCommon(logRequests = true)
+        expectSuccess = true
+    }.also { it.installAuthRefresh(appSettings, refresher, sessionTimeOut) }
 }

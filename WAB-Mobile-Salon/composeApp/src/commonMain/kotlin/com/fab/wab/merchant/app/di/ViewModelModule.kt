@@ -13,6 +13,7 @@ val viewModelModule = module {
             sessionTimeOut = get(),
             environment = get(),
             sessionAnalyticsSync = get(),
+            permissionsSync = get(),
         )
     }
 }

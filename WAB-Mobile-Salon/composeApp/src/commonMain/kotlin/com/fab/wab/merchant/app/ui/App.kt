@@ -28,6 +28,8 @@ import com.fab.wab.merchant.core.analytics.di.analyticsModule
 import com.fab.wab.merchant.core.data.mock.di.mockDataModule
 import com.fab.wab.merchant.core.di.coreDiModule
 import com.fab.wab.merchant.core.domain.ThemeMode
+import com.fab.wab.merchant.core.domain.permission.permissionSet
+import com.fab.wab.merchant.core.domain.session.SessionState
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.core.firebase.di.platformFirebaseModule
 import com.fab.wab.merchant.core.navigation.route.Graph
@@ -41,6 +43,7 @@ import com.fab.wab.merchant.core.ui.utils.LocalAppLocale
 import com.fab.wab.merchant.core.ui.utils.LocalDarkTheme
 import com.fab.wab.merchant.designsystem.components.image.LocalImageLoader
 import com.fab.wab.merchant.designsystem.components.image.rememberImageLoader
+import com.fab.wab.merchant.designsystem.components.permission.LocalPermissions
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.sample.di.sampleModule
 import com.fab.wab.merchant.feature.sample.presentation.di.samplePresentationModule
@@ -94,16 +97,19 @@ fun App() {
                 TrackNavigationScreens(navController)
                 val sessionState by koinInject<SessionStore>().state.collectAsStateWithLifecycle(initialValue = null)
                 RealtimeConnectionEffect(koinInject<RealtimeClient>(), isSignedIn = sessionState?.isSignedIn == true)
-                NotificationHost(theme = appNotificationTheme()) {
-                    val notificationManager = rememberNotificationManager()
-                    LaunchedEffect(sessionTimeOut) {
-                        if (sessionTimeOut) {
-                            notificationManager.show(unauthorizedLogoutMessage, style = NotificationStyle.Error)
-                            mainViewModel.onEvent(UiAction.OnSessionTimeOut)
+                val permissions = (sessionState ?: SessionState.Guest).permissionSet()
+                CompositionLocalProvider(LocalPermissions provides permissions) {
+                    NotificationHost(theme = appNotificationTheme()) {
+                        val notificationManager = rememberNotificationManager()
+                        LaunchedEffect(sessionTimeOut) {
+                            if (sessionTimeOut) {
+                                notificationManager.show(unauthorizedLogoutMessage, style = NotificationStyle.Error)
+                                mainViewModel.onEvent(UiAction.OnSessionTimeOut)
+                            }
                         }
+                        PushEffect(deepLinks = koinInject<DeepLinkStore>())
+                        MainNavigation(Graph.Home, navController)
                     }
-                    PushEffect(deepLinks = koinInject<DeepLinkStore>())
-                    MainNavigation(Graph.Home, navController)
                 }
             }
         }

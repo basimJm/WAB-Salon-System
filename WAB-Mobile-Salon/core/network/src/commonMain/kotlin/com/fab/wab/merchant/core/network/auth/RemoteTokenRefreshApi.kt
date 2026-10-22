@@ -3,6 +3,8 @@ package com.fab.wab.merchant.core.network.auth
 import com.fab.wab.merchant.core.domain.auth.AuthTokens
 import com.fab.wab.merchant.core.domain.auth.TokenRefreshApi
 import com.fab.wab.merchant.core.domain.auth.TokenRefreshResult
+import com.fab.wab.merchant.core.domain.session.MemberProfile
+import com.fab.wab.merchant.core.domain.session.MemberRole
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpRequestTimeoutException
@@ -22,10 +24,26 @@ internal data class RefreshRequestDto(
 )
 
 @Serializable
+internal data class RefreshMemberDto(
+    @SerialName("id") val id: String? = null,
+    @SerialName("salonId") val salonId: String? = null,
+    @SerialName("firstName") val firstName: String? = null,
+    @SerialName("role") val role: String? = null,
+    @SerialName("permissions") val permissions: List<String>? = null,
+)
+
+@Serializable
 internal data class RefreshTokensDto(
     @SerialName("accessToken") val accessToken: String,
     @SerialName("refreshToken") val refreshToken: String,
+    @SerialName("member") val member: RefreshMemberDto? = null,
 )
+
+/** The member of a merchant refresh, when it is complete enough to identify the session. */
+internal fun RefreshMemberDto.toProfile(): MemberProfile? {
+    val role = MemberRole.fromCode(role) ?: return null
+    return MemberProfile(id = id ?: return null, salonId = salonId ?: return null, firstName = firstName.orEmpty(), role = role)
+}
 
 /** Base success envelope of the backend (`WAB-Server/CLAUDE.md` §6): `{ success, message, data }`. */
 @Serializable
@@ -47,7 +65,13 @@ internal class RemoteTokenRefreshApi(
         when {
             response.status.isSuccess() -> response.body<RefreshResponseDto>().data
                 ?.takeIf { it.accessToken.isNotBlank() && it.refreshToken.isNotBlank() }
-                ?.let { TokenRefreshResult.Refreshed(AuthTokens(it.accessToken, it.refreshToken)) }
+                ?.let {
+                    TokenRefreshResult.Refreshed(
+                        tokens = AuthTokens(it.accessToken, it.refreshToken),
+                        member = it.member?.toProfile(),
+                        permissions = it.member?.permissions?.toSet(),
+                    )
+                }
                 ?: TokenRefreshResult.Unavailable
 
             response.status in REJECTING_STATUSES -> TokenRefreshResult.Rejected
