@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-018 — Calendar grid component
+- Branch: `feat/mer-018-calendar-grid` (from `feat/mer-017-map-picker`)
+- Status: IN PROGRESS (batch 3)
+- Acceptance criteria (PRD M11; Design Script M11; design 04 Calendar):
+  - [x] Models + pure helpers: blocks / shades (closed, leave) / columns in local minutes, `TimeWindow.covering` (working hours widened to every block, snapped to whole hours), `spanIn` (15-minute resolution, clamped), `weekOf` (Saturday-first week), `pageDate` (day ±1, week ±7)
+  - [x] `AppCalendarDayView`: staff header (avatar, name, leave tag), time column (pre-formatted 12-hour labels), hour grid, hatched closed hours and amber leave, status-coloured blocks (pending dashed on the card colour, completed faded, bride crown + rose outline; tap → details), now line, empty / closed card, horizontal swipe (mirrored in RTL)
+  - [x] `AppCalendarWeekView` (compact day columns, tap a day) + `AppCalendarLegend`; `AppCalendarHeader` (title, month → date picker, Today, staff filter with count, Day / Week switch, previous / next, week strip with today outline, selection gradient and booking dots)
+  - [x] Tokens (56 dp per hour, columns, hatch, now line), AR + EN strings, previews (day light/dark RTL, week LTR)
+- Tests: `CalendarTest` (5); design-system host tests, `assembleDevDebug`, design-system iOS compile green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATION (PRD over design): the design colours blocks per staff member; PRD M11 says "colored by status", so blocks use the status hues and the legend shows statuses. Data, staff filter, employee single column and permissions are the calendar screen (MER-031). Only the visible window is drawn (no virtualisation needed: ≤ 24 h × staff columns).
+
 ### MER-017 — Map picker
 - Branch: `feat/mer-017-map-picker` (from `feat/mer-016-uploaders`)
 - Status: IN PROGRESS (batch 3)

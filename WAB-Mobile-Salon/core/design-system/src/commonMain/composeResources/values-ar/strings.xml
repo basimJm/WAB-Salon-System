@@ -211,4 +211,12 @@
     <string name="map_resolving">جارٍ تحديد العنوان…</string>
     <string name="map_unknown_address">الموقع المحدد</string>
     <string name="map_pin">دبوس موقع الصالون</string>
+    <string name="calendar_today">اليوم</string>
+    <string name="calendar_day">يوم</string>
+    <string name="calendar_week">أسبوع</string>
+    <string name="calendar_closed">مغلق</string>
+    <string name="calendar_leave">إجازة</string>
+    <string name="calendar_previous">السابق</string>
+    <string name="calendar_next">التالي</string>
+    <string name="calendar_filter">تصفية الموظفين</string>
 </resources>

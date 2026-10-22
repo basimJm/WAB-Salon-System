@@ -54,7 +54,7 @@
 | MER-015 | Request sheet component (M10 content: title + BRIDE badge, summary, Accept / Reject / View details, "1 of 3" queue, "Handled by {member}" state) with sound + vibration hooks | `feat/mer-015-request-sheet` | MER-014 | IN PROGRESS | PRD M10 in-app |
 | MER-016 | Uploaders: document uploader (1–5 files, image/PDF, ≤ 10 MB, thumbnails, remove, progress, retry), image uploader with crop 16:9 / 1:1, media (image/video ≤ 60 s / 50 MB) multi-select grid with reorder and select-to-delete; presign → upload → confirm flow | `feat/mer-016-uploaders` | MER-013 | IN PROGRESS | PRD M04, M13, M14, §12 |
 | MER-017 | Map picker (draggable pin, use my location, reverse geocoding text) behind a `MapProvider` interface with a fake; maps key from config | `feat/mer-017-map-picker` | MER-013 | IN PROGRESS | PRD M13; maps key is env/CI only |
-| MER-018 | Calendar grid component: day view (columns per staff, 15-min grid), week view, shaded non-working / closures / leaves, status colours, bride icon, swipe + date picker + Today | `feat/mer-018-calendar-grid` | MER-014 | TODO | PRD M11 |
+| MER-018 | Calendar grid component: day view (columns per staff, 15-min grid), week view, shaded non-working / closures / leaves, status colours, bride icon, swipe + date picker + Today | `feat/mer-018-calendar-grid` | MER-014 | IN PROGRESS | PRD M11 |
 
 ## Phase 4 — Features
 | ID | Task | Branch | Needs | Status | Notes |

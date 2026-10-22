@@ -197,4 +197,12 @@
     <string name="map_resolving">Finding the address…</string>
     <string name="map_unknown_address">Pinned location</string>
     <string name="map_pin">Salon location pin</string>
+    <string name="calendar_today">Today</string>
+    <string name="calendar_day">Day</string>
+    <string name="calendar_week">Week</string>
+    <string name="calendar_closed">Closed</string>
+    <string name="calendar_leave">Leave</string>
+    <string name="calendar_previous">Previous</string>
+    <string name="calendar_next">Next</string>
+    <string name="calendar_filter">Filter staff</string>
 </resources>
