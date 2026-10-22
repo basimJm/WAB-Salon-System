@@ -7,7 +7,7 @@
 | server | `server` | none (backlog Stage A–M done; Stage N/O added) | SRV-111 contract guard, then SRV-117… | SRV-011/059/115/116 owner deployment; SRV-034/092/110/112 SDK publish | `WAB-Server/.claude/session.md` |
 | admin | `admin` | none (ADM-001…081 done except owner-pending rows) | none ready (all remaining rows PENDING/BLOCKED) | SRV-117…127 (Stage N), SRV-011, owner hosting/CI | `WAB-Admin-Dashboard/.claude/session.md` |
 | customer | `customer` | none (CUS-069 design fidelity merged, PR #322) | none (remaining rows blocked/pending) | CUS-047 ← PAY-011; CUS-060 ← SRV-011 | `WAB-Mobile-Customer/.claude/session.md` |
-| merchant | `merchant` | none (no code yet) | MER-001 scaffold from the customer template | MER-004 owner Firebase; MER-042/043/049/050 ← SRV-129…134 | `WAB-Mobile-Salon/.claude/session.md` |
+| merchant | `merchant` | MER-001 scaffold (KMP_TEMPLATE) | MER-002 variants + CI | MER-004 owner Firebase; MER-042/043/049/050 ← SRV-129…134 | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
 | otp | `server` | none | OTP-001 scaffold | — | `wab-otp/.claude/session.md` |
 | notifications | `server` | none (SDK built, wired in the server) | NOT-010 publish | NOT-011 owner App Password | `wab-notifications/.claude/session.md` |
@@ -108,13 +108,13 @@
 ### T-132 — Masters into main, then every master synced from main (owner request 2026-10-22)
 - Project: repo root
 - Branch: PRs `<master>` → `main` and `main` → `<master>` (no task branch unless a conflict needs one)
-- Status: IN PROGRESS
+- Status: DONE (PRs #355 customer→main, #356 main→server sync, #357 server→main, #358–#361 main→server/admin/customer/merchant)
 - Acceptance criteria:
-  - [ ] `server`, `admin`, `customer`, `merchant` merged into `main` by PR (conflicts resolved on a sync branch)
-  - [ ] `main` merged back into each master; local masters pulled
+  - [x] `server`, `admin`, `customer`, `merchant` merged into `main` by PR (admin and merchant had nothing new; server's board conflict resolved on `chore/sync-main-into-server-2`)
+  - [x] `main` merged back into each master; local masters pulled (each 0 behind main)
 - Tests: hook tests + `tasks.py check` after the merges
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — re-checked ahead/behind counts of every master against main after the merges (all 0/0 before the sync PRs, 0 behind after)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges only; the one conflict was the generated board.
 
 ### T-132a — Sync main into server (part of T-132)
 - Project: repo root
