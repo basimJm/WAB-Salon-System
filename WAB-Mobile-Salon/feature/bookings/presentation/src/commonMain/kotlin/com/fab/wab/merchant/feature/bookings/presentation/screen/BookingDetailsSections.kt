@@ -14,6 +14,7 @@ import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
 import com.fab.wab.merchant.designsystem.components.divider.AppDivider
 import com.fab.wab.merchant.designsystem.components.format.dateTimeText
+import com.fab.wab.merchant.designsystem.components.format.jodText
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingAction
@@ -62,7 +63,7 @@ private fun PersonBlock(person: BookingPerson) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(spacing.space6)) {
             AppText(text = person.name, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
             if (person.isBride) AppBrideBadge()
-            AppText(text = person.subtotal, style = AppTheme.typography.labelLarge)
+            AppText(text = jodText(person.subtotal), style = AppTheme.typography.labelLarge)
         }
         val start = person.start
         val end = person.end
@@ -76,7 +77,7 @@ private fun PersonBlock(person: BookingPerson) {
         }
         person.services.forEach { service ->
             AppText(
-                text = stringResource(Res.string.service_line, service.name, service.durationMinutes, service.price),
+                text = stringResource(Res.string.service_line, service.name, service.durationMinutes, jodText(service.price)),
                 style = AppTheme.typography.bodySmall,
             )
         }
@@ -99,7 +100,7 @@ private fun MoneyRow(label: StringResource, value: String, bold: Boolean = false
     val style = if (bold) AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold) else AppTheme.typography.bodyMedium
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         AppText(text = stringResource(label), style = style, modifier = Modifier.weight(1f))
-        AppText(text = value, style = style)
+        AppText(text = jodText(value), style = style)
     }
 }
 

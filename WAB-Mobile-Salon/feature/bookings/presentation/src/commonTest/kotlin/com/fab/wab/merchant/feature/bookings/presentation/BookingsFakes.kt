@@ -37,8 +37,12 @@ internal fun summary(id: String, status: BookingStatus = BookingStatus.PENDING) 
     staff = listOf(SARA),
 )
 
-internal fun details(id: String = "b1", actions: Set<BookingAction> = setOf(BookingAction.APPROVE, BookingAction.REJECT)) = BookingDetails(
-    summary = summary(id),
+internal fun details(
+    id: String = "b1",
+    actions: Set<BookingAction> = setOf(BookingAction.APPROVE, BookingAction.REJECT),
+    status: BookingStatus = BookingStatus.PENDING,
+) = BookingDetails(
+    summary = summary(id, status),
     refundStatus = RefundStatus.NONE,
     persons = listOf(BookingPerson("Rana", false, START, START, "20", SARA, emptyList())),
     money = BookingMoney("20", "5", "5", "15", ""),
@@ -60,6 +64,7 @@ internal class FakeBookingsRepository : BookingsRepository {
     val queries = mutableListOf<Pair<BookingQuery, Int>>()
     var detailsResult: AppResult<BookingDetails> = AppResult.Success(details())
     var detailsCalls = 0
+    val detailsById = mutableMapOf<String, BookingDetails>()
     var actionResult: AppResult<Unit> = AppResult.Success(Unit)
     val actions = mutableListOf<String>()
 
@@ -70,7 +75,7 @@ internal class FakeBookingsRepository : BookingsRepository {
 
     override suspend fun details(bookingId: String): AppResult<BookingDetails> {
         detailsCalls += 1
-        return detailsResult
+        return detailsById[bookingId]?.let { AppResult.Success(it) } ?: detailsResult
     }
 
     override suspend fun approve(bookingId: String) = act("approve:$bookingId")

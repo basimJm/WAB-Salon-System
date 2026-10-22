@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-028 — Real-time request M10 in-app
+- Branch: `feat/mer-028-request-in-app`
+- Branched: (from `feat/mer-027-booking-details`)
+- Status: IN PROGRESS (batch 5)
+- Acceptance criteria (PRD M10 in-app; BUSINESS_DOMAIN §7 `booking.requested` / `booking.updated`; push data `event` + `bookingId`):
+  - [x] Requests from the socket (`booking.requested`) and FCM data messages, de-duplicated by booking id (also across answers), details fetched, only PENDING queued; unanswered pending bookings queue on app open
+  - [x] Sheet over any screen (shell, `HOME` route, `BOOKINGS_RESPOND` only): bride badge, customer, persons / services / staff / time, total (JOD), payment, time since request, "1 of 3"; distinct sound / vibration (`RequestAlert`) while shown, stopped on answer
+  - [x] Accept in place → confirmation (next / view booking / done); Reject → reason sheet (shared with M09); View details → M09; swipe away = later (stays in Pending)
+  - [x] `ALREADY_HANDLED` or a `booking.updated` that left PENDING → "handled by another team member" then dismiss after `HANDLED_DISMISS_MS`; conflicts leave the queue with an error; other errors keep the request pending; foreground FCM requests no longer show a banner
+- Tests: `BookingRequestsViewModelTest` (7), `BookingSignalsTest` (2); `/tmp/claude/quick.sh m28d` bookings + notification + composeApp tests + `assembleDevDebug` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the contract names no member for "handled by", so the sheet says "another team member". Outside-the-app overlay / actionable notifications are MER-029/030. Also fixed: M09 money rows and the "collected X" dialog now format JOD.
+
 ### MER-027 — Booking details & actions M09
 - Branch: `feat/mer-027-booking-details`
 - Branched: (from `feat/mer-026-bookings-list`; code committed together with MER-026)

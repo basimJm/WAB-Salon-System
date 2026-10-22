@@ -13,6 +13,9 @@ object PushKeys {
     const val EVENT = "event"
     const val NOTIFICATION_ID = "notificationId"
     const val DEEP_LINK = "deepLink"
+
+    /** Booking id of booking events (`booking.requested` data message, PRD M10). */
+    const val BOOKING_ID = "bookingId"
 }
 
 /** Builds the shared model from a platform message; null when there is nothing to show. */

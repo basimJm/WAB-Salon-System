@@ -58,7 +58,7 @@ private fun BookingDetailsRoute(bookingId: String, navigator: Navigator) {
     BookingDetailsScreen(state = state, onAction = viewModel::onEvent, onBack = { navigator.navigateBack() })
 }
 
-private fun ActionMessage.text(): StringResource = when (this) {
+internal fun ActionMessage.text(): StringResource = when (this) {
     ActionMessage.APPROVED -> Res.string.done_approved
     ActionMessage.REJECTED -> Res.string.done_rejected
     ActionMessage.CANCELLED -> Res.string.done_cancelled

@@ -97,4 +97,6 @@
     <string name="person_staff_time">%1$s · %2$s – %3$s</string>
     <string name="service_line">%1$s · %2$d د · %3$s</string>
     <string name="history_line">%1$s · %2$s</string>
+    <string name="request_time_range">%1$s – %2$s</string>
+    <string name="request_another_member">عضو آخر في الفريق</string>
 </resources>

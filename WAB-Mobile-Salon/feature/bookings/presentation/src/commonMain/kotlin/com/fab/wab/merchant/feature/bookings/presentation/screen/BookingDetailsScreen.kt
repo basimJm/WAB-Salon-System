@@ -34,7 +34,6 @@ import com.fab.wab.merchant.designsystem.components.card.AppCard
 import com.fab.wab.merchant.designsystem.components.feedback.AppErrorState
 import com.fab.wab.merchant.designsystem.components.feedback.AppLoadingIndicator
 import com.fab.wab.merchant.designsystem.components.format.dateTimeText
-import com.fab.wab.merchant.designsystem.components.format.jodText
 import com.fab.wab.merchant.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.merchant.designsystem.components.layout.AppScreen
 import com.fab.wab.merchant.designsystem.components.navigation.AppTopBar

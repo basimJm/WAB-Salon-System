@@ -19,6 +19,7 @@ import com.fab.wab.merchant.designsystem.components.button.ButtonKind
 import com.fab.wab.merchant.designsystem.components.control.AppRadioButton
 import com.fab.wab.merchant.designsystem.components.dialog.AppBottomSheet
 import com.fab.wab.merchant.designsystem.components.dialog.AppDialog
+import com.fab.wab.merchant.designsystem.components.format.jodText
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppTextField
 import com.fab.wab.merchant.designsystem.icons.AppIcons
@@ -71,7 +72,14 @@ import org.jetbrains.compose.resources.stringResource
 internal fun BookingDetailsDialogs(state: UiState, onAction: (UiAction) -> Unit) {
     val dismiss = { onAction(UiAction.OnDialogDismiss) }
     when (val dialog = state.dialog) {
-        is DetailsDialog.Reason -> ReasonSheet(dialog, state.acting != null, onAction)
+        is DetailsDialog.Reason -> ReasonSheet(
+            dialog = dialog,
+            acting = state.acting != null,
+            onSelect = { onAction(UiAction.OnReasonSelect(it)) },
+            onText = { onAction(UiAction.OnReasonText(it)) },
+            onConfirm = { onAction(UiAction.OnDialogConfirm) },
+            onDismiss = dismiss,
+        )
         is DetailsDialog.Confirm -> ConfirmDialog(dialog.action, state, onAction)
         is DetailsDialog.Reassign -> ReassignSheet(dialog, state, onAction)
         DetailsDialog.AlreadyHandled -> AppDialog(
@@ -87,22 +95,29 @@ internal fun BookingDetailsDialogs(state: UiState, onAction: (UiAction) -> Unit)
 }
 
 @Composable
-private fun ReasonSheet(dialog: DetailsDialog.Reason, acting: Boolean, onAction: (UiAction) -> Unit) {
+internal fun ReasonSheet(
+    dialog: DetailsDialog.Reason,
+    acting: Boolean,
+    onSelect: (ResponseReason) -> Unit,
+    onText: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     val reject = dialog.action == BookingAction.REJECT
     val reasons = if (reject) REJECT_REASONS else CANCEL_REASONS
     val valid = isReasonValid(dialog.selected, dialog.text, BookingsDefaults.REASON_TEXT_MAX)
     SheetColumn(
         title = stringResource(if (reject) Res.string.reject_title else Res.string.cancel_title),
         subtitle = stringResource(if (reject) Res.string.reject_sub else Res.string.cancel_sub),
-        onDismiss = { onAction(UiAction.OnDialogDismiss) },
+        onDismiss = onDismiss,
     ) {
         reasons.forEach { reason ->
-            ChoiceRow(stringResource(reason.label()), dialog.selected == reason) { onAction(UiAction.OnReasonSelect(reason)) }
+            ChoiceRow(stringResource(reason.label()), dialog.selected == reason) { onSelect(reason) }
         }
         if (dialog.selected == ResponseReason.OTHER) {
             AppTextField(
                 value = dialog.text,
-                onValueChange = { onAction(UiAction.OnReasonText(it)) },
+                onValueChange = onText,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = stringResource(Res.string.reason_other_hint),
                 singleLine = false,
@@ -111,7 +126,7 @@ private fun ReasonSheet(dialog: DetailsDialog.Reason, acting: Boolean, onAction:
         if (!reject) AppText(text = stringResource(Res.string.cancel_full_refund), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
         AppButton(
             text = stringResource(if (reject) Res.string.confirm_reject else Res.string.confirm_cancel),
-            onClick = { onAction(UiAction.OnDialogConfirm) },
+            onClick = onConfirm,
             modifier = Modifier.fillMaxWidth(),
             kind = ButtonKind.Destructive,
             enabled = valid,
@@ -123,7 +138,7 @@ private fun ReasonSheet(dialog: DetailsDialog.Reason, acting: Boolean, onAction:
 @Composable
 private fun ConfirmDialog(action: BookingAction, state: UiState, onAction: (UiAction) -> Unit) {
     val complete = action == BookingAction.COMPLETE
-    val remaining = state.details?.money?.remaining.orEmpty()
+    val remaining = jodText(state.details?.money?.remaining.orEmpty())
     AppDialog(
         title = stringResource(if (complete) Res.string.complete_title else Res.string.no_show_title),
         confirmText = stringResource(if (complete) Res.string.confirm_complete else Res.string.confirm_no_show),

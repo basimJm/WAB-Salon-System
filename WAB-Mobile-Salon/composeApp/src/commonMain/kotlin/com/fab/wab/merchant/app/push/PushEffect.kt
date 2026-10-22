@@ -8,7 +8,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
+import com.fab.wab.merchant.core.notification.push.PushKeys
 import com.fab.wab.merchant.core.notification.push.PushSignals
+import com.fab.wab.merchant.core.realtime.RealtimeEvents
 
 /**
  * Foreground pushes become an in-app banner; a tapped system push that carries a link the app handles is published to
@@ -22,7 +24,12 @@ fun PushEffect(deepLinks: DeepLinkStore) {
         onPauseOrDispose { PushSignals.setAppForeground(false) }
     }
     LaunchedEffect(Unit) {
-        PushSignals.messages.collect { push -> notifications.show(push.message, style = NotificationStyle.Info, title = push.title) }
+        // Booking requests open the request sheet (PRD M10) instead of a banner.
+        PushSignals.messages.collect { push ->
+            if (push.data[PushKeys.EVENT] != RealtimeEvents.BOOKING_REQUESTED) {
+                notifications.show(push.message, style = NotificationStyle.Info, title = push.title)
+            }
+        }
     }
     val tap by PushSignals.tap.collectAsStateWithLifecycle()
     LaunchedEffect(tap) {
