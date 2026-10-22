@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { API_PREFIXES, type ApiNamespace } from '../constants/server';
 import { createAdminRouter } from '../modules/admin';
 import { createCustomerRouter } from '../modules/customer';
+import { createAppLinksRouter } from './appLinks';
 import { createHealthRouter } from './health';
 import { mount } from './mount';
 import { createMerchantRouter } from '../modules/merchant';
@@ -27,7 +28,10 @@ export const defaultWebhooks = (services: ApiServices): { path: string; router: 
 export const createRootRouter = (
   routers: NamespaceRouters = defaultRouters({}),
   health: Router = createHealthRouter(),
-  extra: readonly { path: string; router: Router }[] = [defaultWebhooks({})],
+  extra: readonly { path: string; router: Router }[] = [
+    defaultWebhooks({}),
+    { path: '', router: createAppLinksRouter() },
+  ],
 ): Router => {
   const root = Router();
   mount(root, '', health);

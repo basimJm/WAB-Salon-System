@@ -102,12 +102,15 @@ describe('route ↔ OpenAPI coverage', () => {
 describe('OpenAPI documents', () => {
   const documents = buildOpenApiDocuments();
 
-  it('are OpenAPI 3.1 and describe health, readiness and gateway callbacks once, in common', () => {
+  it('are OpenAPI 3.1 and describe health, readiness, gateway callbacks and app links once, in common', () => {
     for (const name of DOC_NAMES) expect(documents[name].openapi).toBe('3.1.0');
     expect(Object.keys(documents.common.paths ?? {})).toEqual([
       '/health',
       '/ready',
       '/webhooks/payments',
+      '/.well-known/assetlinks.json',
+      '/.well-known/apple-app-site-association',
+      '/salon/{salonId}',
     ]);
   });
 
@@ -260,6 +263,9 @@ describe('Swagger UI (outside production)', () => {
       '/health',
       '/ready',
       '/webhooks/payments',
+      '/.well-known/assetlinks.json',
+      '/.well-known/apple-app-site-association',
+      '/salon/{salonId}',
     ]);
   });
 
