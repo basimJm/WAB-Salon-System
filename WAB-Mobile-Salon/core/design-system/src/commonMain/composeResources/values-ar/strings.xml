@@ -219,4 +219,6 @@
     <string name="calendar_previous">السابق</string>
     <string name="calendar_next">التالي</string>
     <string name="calendar_filter">تصفية الموظفين</string>
+    <string name="offline_banner_message">صالونك غير ظاهر للزبائن حالياً. تواصل مع WAB لإعادة التفعيل</string>
+    <string name="offline_banner_contact">تواصل</string>
 </resources>

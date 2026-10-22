@@ -8,6 +8,8 @@ sealed interface Graph {
 
     @Serializable data object Onboarding : Graph
 
+    @Serializable data object Setup : Graph
+
     @Serializable data object Home : Graph
 
     @Serializable data object Bookings : Graph

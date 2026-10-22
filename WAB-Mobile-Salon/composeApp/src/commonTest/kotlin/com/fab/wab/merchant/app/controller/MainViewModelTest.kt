@@ -191,6 +191,30 @@ class MainViewModelTest {
         assertEquals(2, config.calls)
     }
 
+    @Test
+    fun theSalonIsRefreshedWhenAMemberSignsIn() = runTest(UnconfinedTestDispatcher()) {
+        val session = MutableStateFlow<SessionState>(SessionState.Guest)
+        var refreshes = 0
+        val vm = MainViewModel(
+            appConfigRepository = FakeAppConfigRepository(AppResult.Success(READY_CONFIG)),
+            appSettings = settings,
+            appearanceSettings = AppearanceSettings(settings),
+            sessionTimeOut = sessionTimeOut,
+            environment = environment,
+            sessionAnalyticsSync = SessionAnalyticsSync(MutableStateFlow(SessionState.Guest), NoOpAnalyticsTracker, FakeCrashReporter()),
+            permissionsSync = permissionsSync,
+            accountEvents = RealtimeAccountEvents(FakeRealtimeClient(), permissionsSync, sessionStore),
+            testScope = backgroundScope,
+            errorText = { CONFIG_ERROR_TEXT },
+            session = session,
+            refreshSalon = { refreshes++ },
+        )
+        vm.state.first()
+        assertEquals(0, refreshes)
+        session.value = SessionState.SignedIn(MemberProfile("m1", "s1", "Rami", MemberRole.OWNER))
+        assertEquals(1, refreshes)
+    }
+
     private companion object {
         const val CONFIG_ERROR_TEXT = "No connection"
     }

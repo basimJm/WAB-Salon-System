@@ -20,7 +20,15 @@ import com.fab.wab.merchant.core.domain.permission.PermissionsSync
 import com.fab.wab.merchant.core.domain.repository.SessionTimeOut
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
+import com.fab.wab.merchant.core.domain.session.SessionState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -40,6 +48,8 @@ class MainViewModel(
     accountEvents: RealtimeAccountEvents,
     testScope: CoroutineScope? = null,
     private val errorText: suspend (AppError) -> String = ::appErrorText,
+    session: Flow<SessionState> = emptyFlow(),
+    private val refreshSalon: suspend () -> Unit = {},
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(appVersion = environment.appVersion), testScope) {
 
     private var storeUrl: String? = null
@@ -50,6 +60,8 @@ class MainViewModel(
         scope.launch { permissionsSync.refresh() }
         accountEvents.start(scope) { emitSideEffect(SideEffect.AccessRevoked) }
         loadConfig()
+        // PRD §4.3: a member's salon state decides the route; refresh it at launch and right after every sign-in.
+        session.map { it.isSignedIn }.distinctUntilChanged().filter { it }.onEach { refreshSalon() }.launchIn(scope)
     }
 
     override fun handle(event: UiAction) {

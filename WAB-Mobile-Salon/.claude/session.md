@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-024 — Launch router + offline banner
+- Branch: `feat/mer-024-launch-router`
+- Branched: (batch 5 start, from `feat/mer-023-application-status`)
+- Status: IN PROGRESS (batch 5)
+- Acceptance criteria (PRD §4.2–4.3, §3 offline banner, §8.1; operation `GET /salon`):
+  - [x] Core salon source: `SalonProfile` (state, completeness `missing` items from the server: COVER, PROFILE_IMAGE, NAME, DESCRIPTION, LOCATION, PHONE, WORKING_HOURS, SERVICE, STAFF, POLICY; location, contacts, rating) + `SalonRepository` (`current` + `refresh`, stores the salon state in the session); refreshed at launch and after every sign-in
+  - [x] `launchRouteOf(session)`: guest → login; pending / rejected → application status; approved incomplete → setup checklist; live / offline (or unknown yet) → home; deactivated members are signed out by the permission refresh / `access.revoked` (MER-009/011) and see the login message
+  - [x] Shell `MerchantShell`: NavHost restarts at the route's graph when the route changes; permission-gated bottom bar / rail (`visibleMerchantTabs` ∩ tabs shipped), shown on tab destinations only; the first visible tab is the home start
+  - [x] Offline banner on every screen while the salon is OFFLINE ("Your salon is currently offline…", Contact → WAB WhatsApp from the config contact)
+- Tests: `LaunchRouteTest` (2), `SalonMapperTest` (2), `MerchantRootTabsTest` (2), `MainViewModelTest` (+1 salon refresh on sign-in); domain / data / composeApp tests, `assembleDevDebug`, iOS framework link green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: tabs register themselves in `REGISTERED_TABS` as their features land (bookings, calendar, salon, more, home).
+
 ### MER-023 — Application status M05
 - Branch: `feat/mer-023-application-status`
 - Branched: (from `feat/mer-022-registration`; same `feature/application` module)

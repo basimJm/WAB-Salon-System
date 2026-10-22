@@ -205,4 +205,6 @@
     <string name="calendar_previous">Previous</string>
     <string name="calendar_next">Next</string>
     <string name="calendar_filter">Filter staff</string>
+    <string name="offline_banner_message">Your salon is currently offline and hidden from customers. Contact WAB to reactivate.</string>
+    <string name="offline_banner_contact">Contact</string>
 </resources>

@@ -6,12 +6,15 @@ import com.fab.wab.merchant.core.data.config.AppConfigRepositoryImpl
 import com.fab.wab.merchant.core.data.locations.LocationsApi
 import com.fab.wab.merchant.core.data.locations.LocationsRepositoryImpl
 import com.fab.wab.merchant.core.data.places.PlacesApiConfig
+import com.fab.wab.merchant.core.data.salon.SalonApi
+import com.fab.wab.merchant.core.data.salon.SalonRepositoryImpl
 import com.fab.wab.merchant.core.data.places.PlacesApiService
 import com.fab.wab.merchant.core.domain.config.AppConfigRepository
 import com.fab.wab.merchant.core.domain.config.ClientPlatform
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.locations.LocationsRepository
 import com.fab.wab.merchant.core.domain.permission.PermissionsSync
+import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import io.ktor.client.HttpClient
 import org.koin.dsl.module
 
@@ -26,4 +29,6 @@ val dataModule = module {
     single<LocationsRepository> { LocationsRepositoryImpl(api = get(), language = get<AppSettings>().language) }
     single { PlacesApiService(get<HttpClient>(), PlacesApiConfig.apiKey) }
     single { PermissionsSync(refresher = get(), sessionStore = get()) }
+    single { SalonApi(get()) }
+    single<SalonRepository> { SalonRepositoryImpl(api = get(), sessionStore = get()) }
 }

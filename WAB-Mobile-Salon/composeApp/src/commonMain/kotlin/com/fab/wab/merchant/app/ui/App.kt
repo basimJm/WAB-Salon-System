@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -19,7 +20,7 @@ import com.fab.wab.merchant.app.deeplink.deepLinkModule
 import com.fab.wab.merchant.app.di.analyticsAppModule
 import com.fab.wab.merchant.app.di.appPlatformModule
 import com.fab.wab.merchant.app.di.viewModelModule
-import com.fab.wab.merchant.app.navigation.MainNavigation
+import com.fab.wab.merchant.app.navigation.MerchantShell
 import com.fab.wab.merchant.app.push.PushEffect
 import com.fab.wab.merchant.app.realtime.RealtimeConnectionEffect
 import com.fab.wab.merchant.app.resources.Res
@@ -34,9 +35,12 @@ import com.fab.wab.merchant.core.domain.ThemeMode
 import com.fab.wab.merchant.core.domain.permission.permissionSet
 import com.fab.wab.merchant.core.domain.session.SessionState
 import com.fab.wab.merchant.core.domain.session.SessionStore
+import com.fab.wab.merchant.core.domain.session.launchRouteOf
+import com.fab.wab.merchant.core.domain.session.showsOfflineBanner
+import com.fab.wab.merchant.core.domain.config.AppConfigRepository
+import com.fab.wab.merchant.core.ui.external.ExternalActions
 import com.fab.wab.merchant.core.firebase.di.platformFirebaseModule
 import com.fab.wab.merchant.core.mvi.CollectSideEffect
-import com.fab.wab.merchant.core.navigation.route.Graph
 import com.fab.wab.merchant.core.notification.composable.NotificationHost
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.di.notificationModule
@@ -132,9 +136,19 @@ fun App() {
                         PushEffect(deepLinks = koinInject<DeepLinkStore>())
                         val mainState by mainViewModel.state.collectAsStateWithLifecycle()
                         LaunchGateContent(mainState, mainViewModel::onEvent) {
-                            // Until the launch router (MER-024): guests start at login, members at home.
-                            val start = if (sessionState?.isSignedIn == true) Graph.Home else Graph.Auth
-                            MainNavigation(start, navController)
+                            val session = sessionState ?: SessionState.Guest
+                            val route = launchRouteOf(session)
+                            val externalActions = koinInject<ExternalActions>()
+                            val contact = koinInject<AppConfigRepository>().current.collectAsStateWithLifecycle().value?.contact
+                            key(route) {
+                                MerchantShell(
+                                    route = route,
+                                    permissions = permissions,
+                                    offline = session.showsOfflineBanner(),
+                                    onContactWab = { contact?.let { externalActions.openWhatsApp(it.whatsapp) } },
+                                    navController = navController,
+                                )
+                            }
                         }
                     }
                 }
