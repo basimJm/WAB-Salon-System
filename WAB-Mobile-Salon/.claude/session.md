@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-031 — Calendar M11
+- Branch: `feat/mer-031-calendar`
+- Branched: (batch 6 start, from `feat/mer-028-request-in-app`)
+- Status: IN PROGRESS (batch 6)
+- Acceptance criteria (PRD M11; operations `GET /bookings/calendar?from&to&staffId`, `GET /salon/hours`; design 04):
+  - [x] `CalendarRepository` (entries ≤ 7 days, salon hours + closures) with mappers; Calendar tab registered (`Graph.Calendar`)
+  - [x] Day view: one column per staff (filtered / all providers + anyone booked), blocks at 15-min resolution in Asia/Amman minutes, colored by status + bride icon, closed hours / day off / closure shaded, now line (1-minute tick), empty / closed states; Week view: Saturday-first compact day columns, tap → that day
+  - [x] Header: month label (AR/EN month names), Today, date picker, Day/Week, previous/next + swipe, week strip (today, selected, has bookings, day off); staff filter sheet ("all staff" = none); `BOOKINGS_VIEW_OWN` → own column only, no filter; read-only; tap → M09; realtime booking events reload silently
+- Tests: `CalendarLayoutTest` (5), `CalendarViewModelTest` (3), `CalendarMappersTest` (2); `/tmp/claude/quick.sh m31b` bookings data + presentation + composeApp tests + `assembleDevDebug` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: staff leaves are not in any merchant read contract the calendar can use per day, so only salon closures / off days are shaded; block subtitle shows the reference (calendar rows carry no service names).
+
 ### MER-028 — Real-time request M10 in-app
 - Branch: `feat/mer-028-request-in-app`
 - Branched: (from `feat/mer-027-booking-details`)

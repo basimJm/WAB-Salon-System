@@ -15,11 +15,14 @@ import com.fab.wab.merchant.core.navigation.route.Screen
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingsContract
+import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.CalendarContract
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingsViewModel
+import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.CalendarViewModel
 import com.fab.wab.merchant.feature.bookings.presentation.screen.BookingsScreen
+import com.fab.wab.merchant.feature.bookings.presentation.screen.CalendarScreen
 import org.koin.compose.viewmodel.koinViewModel
 
-/** `Graph.Bookings` tab: list (M08) and booking details (M09). */
+/** `Graph.Bookings` tab: list (M08) and booking details (M09); `Graph.Calendar` tab (M11). */
 class BookingsNavigation(override val navController: NavHostController) : Navigator by NavigatorDelegation(navController) {
 
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
@@ -27,6 +30,23 @@ class BookingsNavigation(override val navController: NavHostController) : Naviga
             composable<Screen.Bookings> { ListDestination() }
             bookingDetailsDestination(this@BookingsNavigation)
         }
+        navGraphBuilder.navigation<Graph.Calendar>(startDestination = Screen.Calendar) {
+            composable<Screen.Calendar> { CalendarDestination() }
+        }
+    }
+
+    @Composable
+    private fun CalendarDestination() {
+        val viewModel: CalendarViewModel = koinViewModel()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val notifications = rememberNotificationManager()
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                is CalendarContract.SideEffect.OpenDetails -> navigateTo(Screen.BookingDetails(effect.bookingId))
+                is CalendarContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+            }
+        }
+        CalendarScreen(state = state, onAction = viewModel::onEvent)
     }
 
     @Composable

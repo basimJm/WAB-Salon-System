@@ -1,6 +1,11 @@
 package com.fab.wab.merchant.feature.bookings.presentation.di
 
+import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.core.notification.push.PushSignals
+import com.fab.wab.merchant.feature.bookings.presentation.controller.calendar.localDate
+import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.CalendarDependencies
+import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.CalendarViewModel
+import kotlin.time.Clock
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingDetailsViewModel
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingRequestsDependencies
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingRequestsViewModel
@@ -37,4 +42,20 @@ val bookingsPresentationModule = module {
             ),
         )
     }
+    viewModel {
+        CalendarViewModel(
+            CalendarDependencies(
+                calendar = get(),
+                bookings = get(),
+                session = get<SessionStore>().state,
+                changes = bookingChanges(get()),
+                clock = clockTicks(tickMs = CALENDAR_TICK_MS),
+                today = { Clock.System.now().localDate() },
+                analytics = get(),
+            ),
+        )
+    }
 }
+
+/** The calendar's "now" line moves once a minute. */
+private const val CALENDAR_TICK_MS = 60_000L
