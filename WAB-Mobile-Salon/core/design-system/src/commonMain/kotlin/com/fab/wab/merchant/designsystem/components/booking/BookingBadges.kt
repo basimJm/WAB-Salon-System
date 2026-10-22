@@ -88,6 +88,9 @@ internal val bookingBadgeTexts: Map<Enum<*>, StringResource> = STATUS_TEXT + PAY
 fun bookingStatusLabel(status: BookingStatus): String = stringResource(STATUS_TEXT.getValue(status))
 
 @Composable
+fun paymentStatusLabel(payment: PaymentStatus): String = stringResource(PAYMENT_TEXT.getValue(payment))
+
+@Composable
 fun AppBookingStatusBadge(status: BookingStatus, modifier: Modifier = Modifier) {
     AppStatusBadge(text = bookingStatusLabel(status), tone = bookingStatusTone(status), modifier = modifier)
 }
@@ -95,7 +98,7 @@ fun AppBookingStatusBadge(status: BookingStatus, modifier: Modifier = Modifier) 
 /** Payment badges are always violet in the design (`C.purple`). */
 @Composable
 fun AppPaymentBadge(payment: PaymentStatus, modifier: Modifier = Modifier) {
-    AppStatusBadge(text = stringResource(PAYMENT_TEXT.getValue(payment)), tone = StatusTone.Accent, modifier = modifier)
+    AppStatusBadge(text = paymentStatusLabel(payment), tone = StatusTone.Accent, modifier = modifier)
 }
 
 /** Nothing is drawn for [RefundStatus.NONE]. */

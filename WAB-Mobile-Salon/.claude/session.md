@@ -9,6 +9,33 @@
 
 ## Current task
 
+### MER-027 — Booking details & actions M09
+- Branch: `feat/mer-027-booking-details`
+- Branched: (from `feat/mer-026-bookings-list`; code committed together with MER-026)
+- Status: IN PROGRESS (batch 5)
+- Acceptance criteria (PRD M09, §10; operations `GET /bookings/{id}`, approve/reject/cancel/complete/no-show/reassign; design 03 `on.details`):
+  - [x] Header (reference + copy, status / payment / refund / bride badges, date-time, pending auto-cancel countdown, refund note, reject/cancel reason), customer with Call / WhatsApp, persons (staff, time, services), payment rows (total, paid online, remaining, refunded), snapshotted policy, status history
+  - [x] Sticky action bar = the server's `actions` for this member (hidden, not disabled); accept at once; reject / cancel need a reason (OTHER needs text ≤ 300) with the full-refund note on cancel; complete ("collected X") and no-show confirmations; reassign sheet (person + active provider)
+  - [x] `ALREADY_HANDLED` → "already handled" dialog + refresh; schedule / transition conflicts close the sheet + refresh; other errors keep the sheet; never a blind retry; success banners; realtime booking events refresh
+  - [x] `ExternalActions.copyText` (Android clipboard, iOS pasteboard) for the reference
+- Tests: `BookingDetailsViewModelTest` (7); `/tmp/claude/quick.sh m26c` bookings + design-system + ui + composeApp tests + `assembleDevDebug` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: reassign lists every active provider (no eligible-staff endpoint in the contract); the server validates and a `STAFF_NOT_ELIGIBLE` refreshes.
+
+### MER-026 — Bookings list M08
+- Branch: `feat/mer-026-bookings-list`
+- Branched: (from `feat/mer-025-setup-checklist`)
+- Status: IN PROGRESS (batch 5)
+- Acceptance criteria (PRD M08; operation `GET /bookings`; design 03 `on.list`):
+  - [x] `feature/bookings` (domain models, repository, API + mappers, Koin); tabs Pending / Upcoming / Today / Past; search debounced 500 ms; filter sheet (dates, staff, status, bride, payment) with active chips; paging (10) with de-duplication
+  - [x] Cards with status / payment badges and live pending countdown (1 s clock); shimmer / empty per tab / no-results / error + retry; pull-to-refresh; realtime `booking.requested|updated|assigned` reload the first page; scope by the server (`BOOKINGS_VIEW_OWN`)
+  - [x] Bookings tab registered in the shell; `jodText` / `dateTimeText` formats (12-hour, Asia/Amman) in the design system
+- Tests: `BookingRulesTest`, `BookingMappersTest`, `BookingsViewModelTest` (4), `FormatsTest`; green with MER-027 run
+- Loops: 0/1
+- Review: PENDING
+- Notes: list rows carry no `createdAt`, so no request age is shown.
+
 ### MER-025 — Setup checklist M06
 - Branch: `feat/mer-025-setup-checklist`
 - Branched: (from `feat/mer-024-launch-router`)

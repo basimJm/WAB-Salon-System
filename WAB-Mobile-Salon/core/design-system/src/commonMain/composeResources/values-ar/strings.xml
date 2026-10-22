@@ -221,4 +221,7 @@
     <string name="calendar_filter">تصفية الموظفين</string>
     <string name="offline_banner_message">صالونك غير ظاهر للزبائن حالياً. تواصل مع WAB لإعادة التفعيل</string>
     <string name="offline_banner_contact">تواصل</string>
+    <string name="time_am">ص</string>
+    <string name="time_pm">م</string>
+    <string name="price_jod">%1$s د.أ</string>
 </resources>

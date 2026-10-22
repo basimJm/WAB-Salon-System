@@ -57,6 +57,8 @@ import com.fab.wab.merchant.feature.auth.di.authModule
 import com.fab.wab.merchant.feature.auth.presentation.di.authPresentationModule
 import com.fab.wab.merchant.feature.application.di.applicationModule
 import com.fab.wab.merchant.feature.application.presentation.di.applicationPresentationModule
+import com.fab.wab.merchant.feature.bookings.di.bookingsModule
+import com.fab.wab.merchant.feature.bookings.presentation.di.bookingsPresentationModule
 import com.fab.wab.merchant.feature.sample.di.sampleModule
 import com.fab.wab.merchant.openStoreLink
 import com.fab.wab.merchant.feature.sample.presentation.di.samplePresentationModule
@@ -82,6 +84,8 @@ val appModules = listOf(
     authPresentationModule,
     applicationModule,
     applicationPresentationModule,
+    bookingsModule,
+    bookingsPresentationModule,
     sampleModule,
     samplePresentationModule,
 )

@@ -207,4 +207,7 @@
     <string name="calendar_filter">Filter staff</string>
     <string name="offline_banner_message">Your salon is currently offline and hidden from customers. Contact WAB to reactivate.</string>
     <string name="offline_banner_contact">Contact</string>
+    <string name="time_am">AM</string>
+    <string name="time_pm">PM</string>
+    <string name="price_jod">%1$s JOD</string>
 </resources>

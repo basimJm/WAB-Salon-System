@@ -5,6 +5,7 @@ import org.koin.dsl.module
 import platform.Foundation.NSURL
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
+import platform.UIKit.UIPasteboard
 
 actual val platformExternalActionsModule: Module = module {
     single<ExternalActions> { IosExternalActions() }
@@ -31,6 +32,10 @@ class IosExternalActions : ExternalActions {
     override fun openUrl(url: String) = open(url)
 
     override fun email(address: String) = open(ExternalLinks.mailto(address))
+
+    override fun copyText(text: String) {
+        UIPasteboard.generalPasteboard.string = text
+    }
 
     /** [appId] is the partner app's URL scheme (declared in `LSApplicationQueriesSchemes`). */
     override fun openApp(appUrl: String, appId: String, fallbackUrl: String) {
