@@ -11,6 +11,8 @@ import com.fab.wab.merchant.feature.salon.presentation.navigation.SalonNavigatio
 import com.fab.wab.merchant.feature.team.presentation.navigation.TeamNavigation
 import com.fab.wab.merchant.feature.finance.presentation.navigation.FinanceNavigation
 import com.fab.wab.merchant.feature.notifications.presentation.navigation.NotificationsNavigation
+import com.fab.wab.merchant.feature.content.presentation.navigation.ContentNavigation
+import com.fab.wab.merchant.feature.more.presentation.navigation.MoreNavigation
 import com.fab.wab.merchant.feature.sample.presentation.navigation.SampleNavigation
 
 /** Root NavHost: every feature registers its own graph here. */
@@ -27,6 +29,8 @@ fun MainNavigation(
         TeamNavigation(navController).registerGraph(this)
         FinanceNavigation(navController).registerGraph(this)
         NotificationsNavigation(navController).registerGraph(this)
+        ContentNavigation(navController).registerGraph(this)
+        MoreNavigation(navController).registerGraph(this)
         SampleNavigation(navController).registerGraph(this)
     }
 }

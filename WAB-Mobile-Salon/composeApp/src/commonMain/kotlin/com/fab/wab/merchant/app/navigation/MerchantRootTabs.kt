@@ -16,7 +16,7 @@ fun MerchantTab.graph(): Graph = when (this) {
 }
 
 /** Tabs whose screens ship in this build (each tab feature adds itself; the bar shows visible ∩ registered). */
-val REGISTERED_TABS: Set<MerchantTab> = setOf(MerchantTab.BOOKINGS, MerchantTab.CALENDAR, MerchantTab.SALON)
+val REGISTERED_TABS: Set<MerchantTab> = setOf(MerchantTab.BOOKINGS, MerchantTab.CALENDAR, MerchantTab.SALON, MerchantTab.MORE)
 
 private val MerchantTab.routeName: String get() = graph()::class.qualifiedName.orEmpty()
 

@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-048 — More M25 part 1
+- Branch: `feat/mer-048-more`
+- Branched: (batch 9 start, from `feat/mer-047-notifications`)
+- Status: IN PROGRESS (batch 9)
+- Acceptance criteria (PRD M25 part 1; `GET /content/pages/{slug}`, `GET /content/faqs`, config contact; design 08 `on.more`):
+  - [x] New `feature/more` (More tab registered): account header (name, role badge), language toggle, dark mode, push toggle (stored preference), Android "Display over other apps" status + shortcut to the system screen (refreshed on resume; hidden on iOS), alert sound test (`RequestAlert`), notifications inbox entry
+  - [x] Support & legal: Contact WAB (shared contact sheet), FAQ, Terms, Privacy, About; log out with confirmation (`LogoutUseCase`: server revoke, session cleared whatever it answers → login); app version + code
+  - [x] `feature/content` ported from the customer app (content pages by slug, the config-driven contact page, FAQ) — `Screen.ContentPage` was navigated to from login without a destination before
+  - [x] Core `OverlayPermission` port (Android `canDrawOverlays` + `ACTION_MANAGE_OVERLAY_PERMISSION` with an app-settings fallback; iOS `NoOverlayPermission`) and `SYSTEM_ALERT_WINDOW` in the manifest
+- Tests: `MoreViewModelTest` (2) + ported content tests (6); `/tmp/claude/quick.sh m48` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: my-account photo / phone / change phone / delete account are MER-049 (blocked on SRV-129 / SRV-133); the push toggle is a local preference until the server toggle exists (SRV-133).
+
 ### MER-047 — Notifications M24
 - Branch: `feat/mer-047-notifications`
 - Branched: (from `feat/mer-046-subscription`)

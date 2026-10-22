@@ -20,4 +20,5 @@ actual val platformPermissionModule: Module = module {
     single { AndroidFilePickerBridge() }
     single<FilePicker> { AndroidFilePicker(get<Context>(), get()) }
     single<ImageCropper> { AndroidImageCropper() }
+    single<OverlayPermission> { AndroidOverlayPermission(get<Context>()) }
 }

@@ -14,4 +14,5 @@ actual val platformPermissionModule: Module = module {
     single<ImagePicker> { IosImagePicker() }
     single<FilePicker> { IosFilePicker() }
     single<ImageCropper> { IosImageCropper() }
+    single<OverlayPermission> { NoOverlayPermission }
 }
