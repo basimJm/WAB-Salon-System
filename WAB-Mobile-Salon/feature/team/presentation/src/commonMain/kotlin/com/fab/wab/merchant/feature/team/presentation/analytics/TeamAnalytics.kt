@@ -9,6 +9,8 @@ object TeamAnalytics {
     val SCREEN_STAFF = AnalyticsScreen("team_staff_profile")
     const val ACTION_STAFF_SAVE = "staff_profile_save"
     const val ACTION_LEAVE_SAVE = "staff_leave_save"
+    val SCREEN_PERMISSIONS = AnalyticsScreen("team_permissions")
+    const val ACTION_PERMISSIONS_SAVE = "team_permissions_save"
     const val ACTION_MEMBER_SAVE = "team_member_save"
     const val ACTION_MEMBER_ACTIVE = "team_member_active"
     const val ACTION_CANCEL_AFFECTED = "cancel_affected_bookings"

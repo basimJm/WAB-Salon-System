@@ -4,6 +4,7 @@ import com.fab.wab.merchant.core.common.BusinessTime
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.MemberEditDependencies
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.MemberEditViewModel
+import com.fab.wab.merchant.feature.team.presentation.controller.vm.PermissionsViewModel
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.StaffProfileDependencies
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.StaffProfileViewModel
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.TeamDependencies
@@ -43,4 +44,5 @@ val teamPresentationModule = module {
         )
     }
     viewModel { (memberId: String) -> StaffProfileViewModel(memberId, deps = get()) }
+    viewModel { (memberId: String) -> PermissionsViewModel(memberId, team = get(), analytics = get()) }
 }

@@ -9,6 +9,18 @@
 
 ## Current task
 
+### MER-040 — Permissions editor M18
+- Branch: `feat/mer-040-permissions`
+- Branched: (from `feat/mer-039-staff-profile`)
+- Status: IN PROGRESS (batch 7)
+- Acceptance criteria (PRD M18, §6.2–6.3; operation `PATCH /team/members/{id}` permissions; design 06 `on.perms`):
+  - [x] Owner only (opened from the member form): member header (photo, name, role, "n permissions on" AR plurals), "Apply role template" (PRD §6.3 templates), toggles grouped Bookings / Salon / Staff / Finance / Insights with a description per key (every one of the 15 keys in exactly one group, tested)
+  - [x] Owner-only capabilities (team & permissions, bank details, salon deletion) shown locked "Owner only"; the OWNER's own permissions are locked; save only when changed; the member's app refreshes on `PERMISSIONS_UPDATED` (MER-009)
+- Tests: `PermissionGroupsTest` (2), `PermissionsViewModelTest` (2); `/tmp/claude/quick.sh m40b` green after escaping an `&` in one string; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the PATCH also re-sends name and role unchanged (the contract updates them together).
+
 ### MER-039 — Staff profile + leaves M17
 - Branch: `feat/mer-039-staff-profile`
 - Branched: (from `feat/mer-038-team`)

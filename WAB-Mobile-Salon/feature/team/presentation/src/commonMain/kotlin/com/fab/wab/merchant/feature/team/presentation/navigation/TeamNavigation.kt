@@ -14,37 +14,39 @@ import com.fab.wab.merchant.core.navigation.route.Screen
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.MemberEditContract
+import com.fab.wab.merchant.feature.team.presentation.controller.contract.PermissionsContract
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.StaffMessage
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.StaffProfileContract
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.TeamContract
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.MemberEditViewModel
+import com.fab.wab.merchant.feature.team.presentation.controller.vm.PermissionsViewModel
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.StaffProfileViewModel
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.TeamViewModel
 import com.fab.wab.merchant.feature.team.presentation.resources.Res
 import com.fab.wab.merchant.feature.team.presentation.resources.member_added
 import com.fab.wab.merchant.feature.team.presentation.resources.member_saved
+import com.fab.wab.merchant.feature.team.presentation.resources.perm_saved
 import com.fab.wab.merchant.feature.team.presentation.resources.staff_leave_deleted
 import com.fab.wab.merchant.feature.team.presentation.resources.staff_leave_saved
 import com.fab.wab.merchant.feature.team.presentation.resources.staff_saved
 import com.fab.wab.merchant.feature.team.presentation.resources.team_deactivated
 import com.fab.wab.merchant.feature.team.presentation.resources.team_reactivated
 import com.fab.wab.merchant.feature.team.presentation.screen.MemberEditScreen
+import com.fab.wab.merchant.feature.team.presentation.screen.PermissionsScreen
 import com.fab.wab.merchant.feature.team.presentation.screen.StaffProfileScreen
 import com.fab.wab.merchant.feature.team.presentation.screen.TeamScreen
 import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-/** The permissions editor (MER-040) ships next; its link stays hidden until then. */
-internal const val PERMISSIONS_READY = false
-
-/** M17 team list, member form and staff profile (screens inside the Salon tab, opened from the hub). */
+/** M17 team list, member form, staff profile and the M18 permissions editor (screens inside the Salon tab, opened from the hub). */
 class TeamNavigation(override val navController: NavHostController) : Navigator by NavigatorDelegation(navController) {
 
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
         navGraphBuilder.composable<Screen.Team> { TeamDestination() }
         navGraphBuilder.composable<Screen.MemberEdit> { entry -> MemberDestination(entry.toRoute<Screen.MemberEdit>().memberId) }
         navGraphBuilder.composable<Screen.StaffProfile> { entry -> StaffDestination(entry.toRoute<Screen.StaffProfile>().memberId) }
+        navGraphBuilder.composable<Screen.PermissionsEditor> { entry -> PermissionsDestination(entry.toRoute<Screen.PermissionsEditor>().memberId) }
     }
 
     @Composable
@@ -79,14 +81,14 @@ class TeamNavigation(override val navController: NavHostController) : Navigator 
                     notifications.show(getString(if (effect.added) Res.string.member_added else Res.string.member_saved), style = NotificationStyle.Success)
                     navigateBack()
                 }
-                is MemberEditContract.SideEffect.OpenPermissions -> if (PERMISSIONS_READY) navigateTo(Screen.PermissionsEditor(effect.memberId))
+                is MemberEditContract.SideEffect.OpenPermissions -> navigateTo(Screen.PermissionsEditor(effect.memberId))
                 is MemberEditContract.SideEffect.OpenStaff -> navigateTo(Screen.StaffProfile(effect.memberId))
                 is MemberEditContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }
         MemberEditScreen(
             state = state,
-            permissionsReady = PERMISSIONS_READY,
+            permissionsReady = true,
             staffReady = state.providesServices,
             onAction = viewModel::onEvent,
             onBack = { navigateBack() },
@@ -115,5 +117,19 @@ class TeamNavigation(override val navController: NavHostController) : Navigator 
             }
         }
         StaffProfileScreen(state = state, onAction = viewModel::onEvent, onBack = { navigateBack() })
+    }
+
+    @Composable
+    private fun PermissionsDestination(memberId: String) {
+        val viewModel: PermissionsViewModel = koinViewModel(key = memberId) { parametersOf(memberId) }
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val notifications = rememberNotificationManager()
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                PermissionsContract.SideEffect.Saved -> notifications.show(getString(Res.string.perm_saved), style = NotificationStyle.Success)
+                is PermissionsContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+            }
+        }
+        PermissionsScreen(state = state, onAction = viewModel::onEvent, onBack = { navigateBack() })
     }
 }
