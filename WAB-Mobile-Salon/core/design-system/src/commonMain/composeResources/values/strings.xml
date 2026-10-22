@@ -86,7 +86,8 @@
     <string name="state_action_login">Log in</string>
     <string name="state_action_contact">Contact us</string>
     <string name="state_action_update">Update the app</string>
-    <string name="brand_name" translatable="false">WAB Merchant</string>
+    <string name="brand_name" translatable="false">WAB</string>
+    <string name="brand_business">Business</string>
     <string name="brand_tagline" translatable="false">WEDDING &amp; BEAUTY</string>
     <string name="date_picker_ok">OK</string>
     <string name="date_picker_cancel">Cancel</string>

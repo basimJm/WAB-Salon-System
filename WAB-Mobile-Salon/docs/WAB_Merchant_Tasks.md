@@ -49,7 +49,7 @@
 ## Phase 3 — Design system and merchant components
 | ID | Task | Branch | Needs | Status | Notes |
 |---|---|---|---|---|---|
-| MER-013 | Theme and tokens reused from the customer design system; merchant brand accents; universal states, pagination list, pull-to-refresh, form kit (phone + country, OTP boxes, dropdowns, validation) brought over | `feat/mer-013-design-base` | MER-003 | TODO | Design Script §1.1; customer CUS-018/020 |
+| MER-013 | Theme and tokens reused from the customer design system; merchant brand accents; universal states, pagination list, pull-to-refresh, form kit (phone + country, OTP boxes, dropdowns, validation) brought over | `feat/mer-013-design-base` | MER-003 | IN PROGRESS | Design Script §1.1; customer CUS-018/020 |
 | MER-014 | Merchant components (Design Script §1.2): booking card (reference, customer, time, persons, staff, status + payment badges, bride badge, pending age + auto-cancel countdown), status strip, pending-requests card, KPI tile, status-history timeline, permission-gated bottom nav (5 tabs, first visible is default) | `feat/mer-014-merchant-components` | MER-013, MER-009 | TODO | PRD M07–M09 |
 | MER-015 | Request sheet component (M10 content: title + BRIDE badge, summary, Accept / Reject / View details, "1 of 3" queue, "Handled by {member}" state) with sound + vibration hooks | `feat/mer-015-request-sheet` | MER-014 | TODO | PRD M10 in-app |
 | MER-016 | Uploaders: document uploader (1–5 files, image/PDF, ≤ 10 MB, thumbnails, remove, progress, retry), image uploader with crop 16:9 / 1:1, media (image/video ≤ 60 s / 50 MB) multi-select grid with reorder and select-to-delete; presign → upload → confirm flow | `feat/mer-016-uploaders` | MER-013 | TODO | PRD M04, M13, M14, §12 |

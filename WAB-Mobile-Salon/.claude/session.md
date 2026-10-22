@@ -9,6 +9,18 @@
 
 ## Current task
 
+### MER-013 — Theme, tokens and base kit
+- Branch: `feat/mer-013-theme` (from `feat/mer-011-realtime-client`)
+- Status: IN PROGRESS (batch 2)
+- Acceptance criteria (Design Script §0–§1.1; customer CUS-018/020):
+  - [x] Same theme and tokens as the customer app (light + dark, typography, spacing, radii, elevation, Liquid Glass) — from the template, no new colors
+  - [x] Merchant identity: `AppWordmark` = "WAB" + gradient "Business / أعمال" pill (LTR in both languages) in `AppBrandHeader`; app names "WAB Business" / "WAB أعمال" (dev "… Dev" / "… تجريبي"), iOS display names "WAB Business (Dev)"
+  - [x] Universal states (`AppStateContent`, shimmer), pagination (`AppPagedList`, `AppAdaptiveGrid`), pull-to-refresh, form kit (`AppPhoneField` + `AppCountryPicker`, `AppOtpInput`, `AppDropdownField`, `FormValidators`) present from the template
+- Tests: design-system tests (`UniversalStatesTest`, `FormKitTest`, `ComponentLogicTest`, …); policy (localization AR/EN) ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: display name changed from "WAB Merchant" (MER-001) to the design's "WAB Business".
+
 ### MER-011 — Realtime client
 - Branch: `feat/mer-011-realtime-client` (from `feat/mer-009-permissions`)
 - Status: IN PROGRESS (batch 2)
