@@ -1,7 +1,6 @@
 package com.fab.wab.merchant.feature.salon.data
 
 import com.fab.wab.merchant.core.data.contract.generated.PatchSalonHoursClosuresByIdBody
-import com.fab.wab.merchant.core.data.contract.generated.PostBookingsCancelAffectedBody
 import com.fab.wab.merchant.core.data.contract.generated.PostSalonHoursClosuresBody
 import com.fab.wab.merchant.core.data.contract.generated.PutSalonHoursWeeklyBody
 import com.fab.wab.merchant.core.domain.AppError
@@ -17,7 +16,6 @@ import kotlinx.datetime.LocalDate
 
 /** Diagnostic text when a closure comes back with unreadable dates (never shown to users). */
 private const val UNREADABLE_CLOSURE = "closure dates not readable"
-private const val OUTCOME_DONE = "DONE"
 
 private fun Closure?.asResult(): AppResult<Closure> = this?.let { AppResult.Success(it) } ?: AppResult.Error(AppError.UnknownError(UNREADABLE_CLOSURE))
 
@@ -44,8 +42,4 @@ class HoursRepositoryImpl(private val api: HoursApi, private val salon: SalonRep
         }
 
     override suspend fun deleteClosure(id: String): AppResult<Unit> = safeApiCall { api.deleteClosure(id) }.mapSuccess { }
-
-    override suspend fun cancelAffected(bookingIds: List<String>, reasonCode: String, reasonText: String): AppResult<Boolean> =
-        safeApiCall { api.cancelAffected(PostBookingsCancelAffectedBody(reasonCode, reasonText.trim().ifEmpty { null }, bookingIds)) }
-            .mapSuccess { response -> response.data.all { it.outcome == OUTCOME_DONE } }
 }

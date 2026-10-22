@@ -63,6 +63,7 @@ val salonPresentationModule = module {
         HoursViewModel(
             HoursDependencies(
                 repository = get(),
+                affected = get(),
                 analytics = get(),
                 today = { Clock.System.now().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
                 scheduleChangeReason = { getString(Res.string.schedule_change_reason) },

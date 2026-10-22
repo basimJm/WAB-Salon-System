@@ -5,7 +5,8 @@ import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.ErrorCode
 import com.fab.wab.merchant.core.domain.FieldError
-import com.fab.wab.merchant.feature.salon.domain.AffectedReasons
+import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
+import com.fab.wab.merchant.core.domain.booking.AffectedReasons
 import com.fab.wab.merchant.feature.salon.domain.Closure
 import com.fab.wab.merchant.feature.salon.domain.DaySchedule
 import com.fab.wab.merchant.feature.salon.domain.HoursData
@@ -42,7 +43,6 @@ private class FakeHours : HoursRepository {
         Closure("next", LocalDate(2026, 11, 1), LocalDate(2026, 11, 1), "Maintenance", true),
     )
     val conflicts = ArrayDeque<AppResult.Error>()
-    val cancelled = mutableListOf<Triple<List<String>, String, String>>()
     var saved: List<DaySchedule>? = null
     override suspend fun load(): AppResult<HoursData> = AppResult.Success(HoursData(week, closures))
     override suspend fun saveWeek(days: List<DaySchedule>): AppResult<HoursData> =
@@ -52,7 +52,11 @@ private class FakeHours : HoursRepository {
     override suspend fun updateClosure(id: String, from: LocalDate, to: LocalDate, reason: String): AppResult<Closure> =
         AppResult.Success(Closure(id, from, to, reason, true))
     override suspend fun deleteClosure(id: String): AppResult<Unit> = AppResult.Success(Unit)
-    override suspend fun cancelAffected(bookingIds: List<String>, reasonCode: String, reasonText: String): AppResult<Boolean> {
+}
+
+private class FakeAffected : AffectedBookingsRepository {
+    val cancelled = mutableListOf<Triple<List<String>, String, String>>()
+    override suspend fun cancel(bookingIds: List<String>, reasonCode: String, reasonText: String): AppResult<Boolean> {
         cancelled += Triple(bookingIds, reasonCode, reasonText)
         return AppResult.Success(true)
     }
@@ -62,9 +66,10 @@ private class FakeHours : HoursRepository {
 class HoursViewModelTest {
 
     private val hours = FakeHours()
+    private val affected = FakeAffected()
 
     private fun TestScope.viewModel() = HoursViewModel(
-        HoursDependencies(hours, NoOpAnalyticsTracker, { TODAY }, { "Hours changed" }, { "failed" }),
+        HoursDependencies(hours, affected, NoOpAnalyticsTracker, { TODAY }, { "Hours changed" }, { "failed" }),
         testScope = backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 
@@ -103,7 +108,7 @@ class HoursViewModelTest {
         assertEquals(listOf("b1", "b2"), viewModel.state.first().conflict?.bookingIds)
         assertNull(hours.saved)
         viewModel.onEvent(UiAction.OnConflictCancelBookings)
-        assertEquals(Triple(listOf("b1", "b2"), AffectedReasons.SCHEDULE_CHANGE, "Hours changed"), hours.cancelled.single())
+        assertEquals(Triple(listOf("b1", "b2"), AffectedReasons.OTHER, "Hours changed"), affected.cancelled.single())
         assertTrue(hours.saved?.first { it.day == DayOfWeek.SATURDAY }?.isOff == true)
         assertEquals(SideEffect.Done(HoursMessage.WEEK_SAVED, 2), effects.last())
     }
@@ -118,7 +123,7 @@ class HoursViewModelTest {
         viewModel.onEvent(UiAction.OnClosureFrom(LocalDate(2026, 11, 5)))
         assertEquals(LocalDate(2026, 11, 5), viewModel.state.first().closureSheet?.to)
         viewModel.onEvent(UiAction.OnClosureSave)
-        assertTrue(hours.cancelled.isEmpty())
+        assertTrue(affected.cancelled.isEmpty())
         viewModel.onEvent(UiAction.OnClosureReason("Eid holiday"))
         viewModel.onEvent(UiAction.OnClosureSave)
         assertEquals(listOf("b9"), viewModel.state.first().conflict?.bookingIds)

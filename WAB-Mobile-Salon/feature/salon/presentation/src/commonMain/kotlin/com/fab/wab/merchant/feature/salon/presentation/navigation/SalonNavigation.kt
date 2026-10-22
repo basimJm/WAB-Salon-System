@@ -50,6 +50,7 @@ private val TILE_SCREENS: Map<HubTile, Screen> = mapOf(
     HubTile.GALLERY to Screen.Gallery,
     HubTile.HOURS to Screen.WorkingHours,
     HubTile.SERVICES to Screen.Services,
+    HubTile.TEAM to Screen.Team,
 )
 
 /** `Graph.Salon` tab: hub (M12) and the management screens (M13–M19, M22, M23). */

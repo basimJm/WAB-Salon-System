@@ -5,8 +5,6 @@ import com.fab.wab.merchant.core.data.contract.generated.GetSalonHoursData
 import com.fab.wab.merchant.core.data.contract.generated.MerchantOperations
 import com.fab.wab.merchant.core.data.contract.generated.PatchSalonHoursClosuresByIdBody
 import com.fab.wab.merchant.core.data.contract.generated.PatchSalonHoursClosuresByIdData
-import com.fab.wab.merchant.core.data.contract.generated.PostBookingsCancelAffectedBody
-import com.fab.wab.merchant.core.data.contract.generated.PostBookingsCancelAffectedDataItem
 import com.fab.wab.merchant.core.data.contract.generated.PostSalonHoursClosuresBody
 import com.fab.wab.merchant.core.data.contract.generated.PostSalonHoursClosuresData
 import com.fab.wab.merchant.core.data.contract.generated.PutSalonHoursWeeklyBody
@@ -38,6 +36,4 @@ class HoursApi(private val client: HttpClient) {
 
     suspend fun deleteClosure(id: String): BaseResponse<JsonElement?> = client.delete(MerchantOperations.deleteSalonHoursClosuresById.pathWith(ID to id)).body()
 
-    suspend fun cancelAffected(body: PostBookingsCancelAffectedBody): BaseResponse<List<PostBookingsCancelAffectedDataItem>> =
-        client.post(MerchantOperations.postBookingsCancelAffected.path) { setBody(body) }.body()
 }

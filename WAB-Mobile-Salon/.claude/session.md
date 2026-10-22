@@ -9,6 +9,21 @@
 
 ## Current task
 
+### MER-038 — Team list + member form M17
+- Branch: `feat/mer-038-team`
+- Branched: (from `feat/mer-037-catalog-requests`)
+- Status: IN PROGRESS (batch 7)
+- Acceptance criteria (PRD M17; operations `GET/POST /team/members`, `GET/PATCH /team/members/{id}`, `POST …/deactivate|reactivate`, `POST /bookings/cancel-affected`; design 06 `on.team`, `on.memberForm`):
+  - [x] New `feature/team`; list with photo, name, role, provides-services and inactive badges; the owner row cannot be edited or deactivated ("owner cannot be deactivated"); hub tile TEAM registered
+  - [x] Owner (`TEAM_MANAGE`): add member (first / last name ≤ 50, phone with country picker + country regex, photo cropped 1:1 as `MEMBER_PHOTO`, role Manager / Employee), edit name / photo / role (phone read-only: the contract cannot change it), remove / restore access (confirmed)
+  - [x] `STAFF_MANAGE` without `TEAM_MANAGE`: no add / edit / toggle; providers open their staff profile (MER-039)
+  - [x] Deactivation `409 SCHEDULE_CONFLICT` → sheet: Reassign (opens the first affected booking, M09), Cancel affected bookings (`STAFF_UNAVAILABLE` + localized reason, full refunds) then deactivate again, Go back
+  - [x] Shared `AffectedBookingsRepository` + `conflictBookingIds()` moved to core (hours use it too)
+- Tests: `TeamTest` (2), `TeamMappersTest` (2), `TeamViewModelTest` (6), core `AffectedBookingsTest` (1); `/tmp/claude/quick.sh m38c` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: "on leave today" is not in the members contract, so it is not shown; the permissions and staff-profile links appear when MER-039 / MER-040 land; a removed photo goes out as `photoKey: null`.
+
 ### MER-037 — Catalog requests M16
 - Branch: `feat/mer-037-catalog-requests`
 - Branched: (from `feat/mer-036-services`)

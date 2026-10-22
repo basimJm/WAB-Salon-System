@@ -1,5 +1,8 @@
 package com.fab.wab.merchant.core.data.di
 
+import com.fab.wab.merchant.core.data.booking.AffectedBookingsApi
+import com.fab.wab.merchant.core.data.booking.AffectedBookingsRepositoryImpl
+import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
 import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.data.config.AppConfigApi
 import com.fab.wab.merchant.core.data.config.AppConfigRepositoryImpl
@@ -30,5 +33,7 @@ val dataModule = module {
     single { PlacesApiService(get<HttpClient>(), PlacesApiConfig.apiKey) }
     single { PermissionsSync(refresher = get(), sessionStore = get()) }
     single { SalonApi(get()) }
+    single { AffectedBookingsApi(get()) }
+    single<AffectedBookingsRepository> { AffectedBookingsRepositoryImpl(get()) }
     single<SalonRepository> { SalonRepositoryImpl(api = get(), sessionStore = get()) }
 }

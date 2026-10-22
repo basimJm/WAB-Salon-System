@@ -1,8 +1,6 @@
 package com.fab.wab.merchant.feature.salon.domain
 
-import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
-import com.fab.wab.merchant.core.domain.ErrorCode
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
@@ -47,14 +45,7 @@ fun List<DaySchedule>.copyHoursFrom(source: DaySchedule): List<DaySchedule> =
 fun closureValid(from: LocalDate?, to: LocalDate?, reason: String, today: LocalDate): Boolean =
     from != null && to != null && from <= to && from >= today && reason.trim().length in 1..HoursLimits.REASON_MAX
 
-/** Booking ids a change would break (`409 SCHEDULE_CONFLICT`, ids in `details[].field`), or null for any other error. */
-fun AppError.conflictBookingIds(): List<String>? {
-    val server = this as? AppError.ServerError ?: return null
-    if (server.code != ErrorCode.SCHEDULE_CONFLICT) return null
-    return server.details.map { it.field }.filter { it.isNotBlank() }.distinct()
-}
-
-/** `/salon/hours*` (WORKING_HOURS_MANAGE) and the affected-bookings cancellation. */
+/** `/salon/hours*` (WORKING_HOURS_MANAGE). */
 interface HoursRepository {
     suspend fun load(): AppResult<HoursData>
 
@@ -65,13 +56,4 @@ interface HoursRepository {
     suspend fun updateClosure(id: String, from: LocalDate, to: LocalDate, reason: String): AppResult<Closure>
 
     suspend fun deleteClosure(id: String): AppResult<Unit>
-
-    /** `POST /bookings/cancel-affected`: rejects / cancels with a full refund; true when every booking was handled. */
-    suspend fun cancelAffected(bookingIds: List<String>, reasonCode: String, reasonText: String): AppResult<Boolean>
-}
-
-/** Reason codes sent with the affected-bookings cancellation (shown to customers by the server). */
-object AffectedReasons {
-    const val CLOSURE = "EXCEPTIONAL_CLOSURE"
-    const val SCHEDULE_CHANGE = "OTHER"
 }

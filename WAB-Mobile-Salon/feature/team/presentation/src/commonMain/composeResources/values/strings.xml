@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="team_title">Staff &amp; team</string>
+    <string name="team_add">Add member</string>
+    <string name="team_empty">No members yet</string>
+    <string name="team_owner">Owner</string>
+    <string name="team_manager">Manager</string>
+    <string name="team_employee">Employee</string>
+    <string name="team_provides">Provides services</string>
+    <string name="team_inactive">Inactive</string>
+    <string name="team_owner_locked">The owner cannot be deactivated or removed</string>
+    <string name="team_deactivate_title">Remove this member’s access?</string>
+    <string name="team_deactivate_body">They are signed out on every device and can no longer log in.</string>
+    <string name="team_deactivate">Remove access</string>
+    <string name="team_deactivated">Access removed</string>
+    <string name="team_reactivated">Access restored</string>
+    <string name="team_cancel">Cancel</string>
+    <string name="team_conflict_title">Affected bookings</string>
+    <string name="team_conflict_body">This member has upcoming bookings. Choose how to handle them:</string>
+    <string name="team_conflict_cancel">Cancel affected bookings</string>
+    <string name="team_conflict_reassign">Reassign</string>
+    <string name="team_conflict_back">Go back</string>
+    <string name="team_conflict_refund">Cancelled bookings are fully refunded and customers notified.</string>
+    <string name="team_unavailable_reason">The staff member is no longer available</string>
+    <string name="member_new">Add member</string>
+    <string name="member_info">Member info</string>
+    <string name="member_first">First name</string>
+    <string name="member_last">Last name</string>
+    <string name="member_phone">Phone number</string>
+    <string name="member_phone_error">Invalid phone number</string>
+    <string name="member_phone_hint">The member can log in with this number after saving</string>
+    <string name="member_phone_locked">The phone number cannot be changed</string>
+    <string name="member_required">This field is required</string>
+    <string name="member_photo">Photo</string>
+    <string name="member_role">Role</string>
+    <string name="member_save">Save</string>
+    <string name="member_added">Member added — they can log in now</string>
+    <string name="member_saved">Member saved</string>
+    <string name="member_permissions">Permissions</string>
+    <string name="member_staff_profile">Service-provider profile</string>
+    <string name="member_active">Can log in</string>
+    <string name="member_active_sub">Can log in and use the app</string>
+</resources>

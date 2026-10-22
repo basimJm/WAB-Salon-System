@@ -1,14 +1,10 @@
 package com.fab.wab.merchant.feature.salon.domain
 
-import com.fab.wab.merchant.core.domain.AppError
-import com.fab.wab.merchant.core.domain.ErrorCode
-import com.fab.wab.merchant.core.domain.FieldError
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class WorkingHoursTest {
@@ -35,18 +31,11 @@ class WorkingHoursTest {
     }
 
     @Test
-    fun closureRulesAndConflictIds() {
+    fun closureRules() {
         val today = LocalDate(2026, 10, 24)
         assertTrue(closureValid(today, today, "Eid", today))
         assertFalse(closureValid(LocalDate(2026, 10, 23), today, "Eid", today))
         assertFalse(closureValid(LocalDate(2026, 10, 26), LocalDate(2026, 10, 25), "Eid", today))
         assertFalse(closureValid(today, today, " ", today))
-        val conflict = AppError.ServerError(ErrorCode.SCHEDULE_CONFLICT, CONFLICT_STATUS, null, listOf(FieldError("b1", "SCHEDULE_CONFLICT", ""), FieldError("b1", "", ""), FieldError("b2", "", "")))
-        assertEquals(listOf("b1", "b2"), conflict.conflictBookingIds())
-        assertNull(AppError.NetworkError("x").conflictBookingIds())
-    }
-
-    private companion object {
-        const val CONFLICT_STATUS = 409
     }
 }

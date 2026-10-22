@@ -5,14 +5,15 @@ import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
+import com.fab.wab.merchant.core.domain.booking.AffectedReasons
+import com.fab.wab.merchant.core.domain.booking.conflictBookingIds
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
-import com.fab.wab.merchant.feature.salon.domain.AffectedReasons
 import com.fab.wab.merchant.feature.salon.domain.DaySchedule
 import com.fab.wab.merchant.feature.salon.domain.HoursLimits
 import com.fab.wab.merchant.feature.salon.domain.HoursRepository
 import com.fab.wab.merchant.feature.salon.domain.closureValid
-import com.fab.wab.merchant.feature.salon.domain.conflictBookingIds
 import com.fab.wab.merchant.feature.salon.domain.copyHoursFrom
 import com.fab.wab.merchant.feature.salon.presentation.analytics.SalonAnalytics
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.ClosureForm
@@ -29,6 +30,7 @@ import kotlinx.datetime.LocalDate
 
 class HoursDependencies(
     val repository: HoursRepository,
+    val affected: AffectedBookingsRepository,
     val analytics: AnalyticsTracker,
     val today: () -> LocalDate,
     /** Text the customers see when a working-hours change cancels their booking. */
@@ -151,9 +153,9 @@ class HoursViewModel(
             updateState { copy(saving = true) }
             val (code, text) = when (val change = conflict.change) {
                 is PendingChange.SaveClosure -> AffectedReasons.CLOSURE to change.form.reason
-                is PendingChange.Week -> AffectedReasons.SCHEDULE_CHANGE to deps.scheduleChangeReason()
+                is PendingChange.Week -> AffectedReasons.OTHER to deps.scheduleChangeReason()
             }
-            when (val result = deps.repository.cancelAffected(conflict.bookingIds, code, text)) {
+            when (val result = deps.affected.cancel(conflict.bookingIds, code, text)) {
                 is AppResult.Success -> {
                     deps.analytics.trackAction(
                         AnalyticsAction(SalonAnalytics.ACTION_CANCEL_AFFECTED, analyticsParams { number(SalonAnalytics.PARAM_COUNT, conflict.bookingIds.size.toLong()) }),
