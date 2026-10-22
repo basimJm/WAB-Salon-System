@@ -51,6 +51,8 @@ import com.fab.wab.merchant.designsystem.components.permission.LocalPermissions
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.auth.di.authModule
 import com.fab.wab.merchant.feature.auth.presentation.di.authPresentationModule
+import com.fab.wab.merchant.feature.application.di.applicationModule
+import com.fab.wab.merchant.feature.application.presentation.di.applicationPresentationModule
 import com.fab.wab.merchant.feature.sample.di.sampleModule
 import com.fab.wab.merchant.openStoreLink
 import com.fab.wab.merchant.feature.sample.presentation.di.samplePresentationModule
@@ -74,6 +76,8 @@ val appModules = listOf(
     // feature modules (add each new feature here, in settings.gradle.kts and in ComposeAppPlugin.FEATURE_MODULES)
     authModule,
     authPresentationModule,
+    applicationModule,
+    applicationPresentationModule,
     sampleModule,
     samplePresentationModule,
 )

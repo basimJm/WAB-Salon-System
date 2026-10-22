@@ -9,6 +9,33 @@
 
 ## Current task
 
+### MER-023 — Application status M05
+- Branch: `feat/mer-023-application-status`
+- Branched: (from `feat/mer-022-registration`; same `feature/application` module)
+- Status: IN PROGRESS (batch 4)
+- Acceptance criteria (PRD M05; operation `GET /salon/application`; design 01 `on.status`):
+  - [x] Pending: "Your application is under review", submitted date, "Prepare your salon profile" → setup checklist (M06), refresh + pull-to-refresh
+  - [x] Rejected: reason card + "Edit & resubmit" → M04 in resubmission mode (`POST /salon/application/resubmit`, back to pending)
+  - [x] Approved (APPROVED_INCOMPLETE / LIVE / OFFLINE): "Your salon is approved!" + Continue → checklist or home; the cached salon state follows every load
+  - [x] First-load error with retry; refresh errors as a banner; `Graph.Onboarding` navigation (status, registration, resubmission)
+- Tests: `ApplicationStatusViewModelTest` (4), `ApplicationUseCasesTest` (3), `ApplicationMappersTest` (2)
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATION: "opens M04 prefilled" — `GET /salon/application` returns no name / type / documents, so the resubmission form starts empty (name, type and documents only, as the resubmit operation accepts). The push on approval / rejection is MER-012/047.
+
+### MER-022 — Salon registration M04
+- Branch: `feat/mer-022-registration`
+- Branched: (from `feat/mer-021-otp`)
+- Status: IN PROGRESS (batch 4)
+- Acceptance criteria (PRD M04, §12; operations `POST /uploads/license/presign|confirm`, `POST /salon/applications`, `GET /locations/cities|areas`; design 01 `on.register`):
+  - [x] `feature/application` (domain / data / presentation / di): salon name, type Men / Women (choice cards + "cannot be changed later"), owner first / last name, city → area (area disabled until a city; cities of the phone's country), 1–5 license documents (`AppDocumentUploader`, `FilePicker` + `UploadFileUseCase` with the public license purpose, progress, remove, retry, refusal messages), terms checkbox + terms page link
+  - [x] Pure validation (`registrationErrors`: required fields, lengths 80 / 50, 1–5 confirmed documents, nothing still uploading, terms); errors shown after the first submit; Submit with spinner
+  - [x] Submit with the REGISTER proof → salon `APPLICATION_PENDING` + owner signed in (all permissions, salon state cached) → M05; missing proof → back to login
+- Tests: `RegistrationRulesTest` (5), `RegistrationViewModelTest` (5: missing proof, cities/areas, valid submit signs in, upload failure + retry + refusal + remove, resubmission); application domain / data / presentation tests + `assembleDevDebug` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATION: PRD lists an optional email, but `POST /salon/applications` has no email field — not collected (server gap; add when the contract has it).
+
 ### MER-021 — OTP M03
 - Branch: `feat/mer-021-otp`
 - Branched: (from `feat/mer-020-login`; the OTP screen came with the auth port of MER-020)

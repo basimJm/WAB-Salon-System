@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reg_title">Register your salon</string>
+    <string name="reg_subtitle">Submit your application — we’ll review it in 1–2 business days.</string>
+    <string name="reg_resubmit_title">Edit &amp; resubmit</string>
+    <string name="reg_salon_name">Salon name</string>
+    <string name="reg_salon_name_hint">e.g. Bella House</string>
+    <string name="reg_type">Salon type</string>
+    <string name="reg_men">Men</string>
+    <string name="reg_women">Women</string>
+    <string name="reg_type_warning">Salon type cannot be changed later</string>
+    <string name="reg_first_name">Owner first name</string>
+    <string name="reg_last_name">Last name</string>
+    <string name="reg_city">City</string>
+    <string name="reg_area">Area</string>
+    <string name="reg_select">Select</string>
+    <string name="reg_area_hint">Select a city first</string>
+    <string name="reg_documents">License documents</string>
+    <string name="reg_documents_hint">Upload 1–5 files proving your salon exists and is licensed (image or PDF, max 10 MB each).</string>
+    <string name="reg_agree">I agree to the</string>
+    <string name="reg_terms_link">WAB Salon Terms &amp; Conditions</string>
+    <string name="reg_terms_error">You must accept the terms</string>
+    <string name="reg_submit">Submit application</string>
+    <string name="reg_resubmit">Resubmit application</string>
+    <string name="reg_required">This field is required</string>
+    <string name="reg_documents_error">Upload at least one document</string>
+    <string name="reg_size_mb">%1$s MB</string>
+    <string name="reg_back">Back</string>
+    <string name="status_pending_title">Your application is under review</string>
+    <string name="status_pending_body">WAB usually reviews documents within 1–2 business days. We’ll notify you as soon as there’s a decision.</string>
+    <string name="status_submitted">Submitted on %1$s</string>
+    <string name="status_prepare">Prepare your salon profile</string>
+    <string name="status_prepare_body">Set up your profile now so your salon goes live right after approval.</string>
+    <string name="status_refresh">Refresh status</string>
+    <string name="status_rejected_title">Your application was not approved</string>
+    <string name="status_rejected_body">Review the reason, edit your application and resubmit.</string>
+    <string name="status_reason">Rejection reason</string>
+    <string name="status_resubmit">Edit &amp; resubmit</string>
+    <string name="status_approved_title">Your salon is approved!</string>
+    <string name="status_approved_body">Complete the remaining steps so customers can see and book your salon.</string>
+    <string name="status_continue">Continue setup</string>
+    <string name="status_resubmissions">Resubmitted %1$d times</string>
+</resources>

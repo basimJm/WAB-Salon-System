@@ -18,6 +18,8 @@ sealed interface Screen {
 
     @Serializable data object ApplicationStatus : Screen
 
+    @Serializable data object ApplicationResubmit : Screen
+
     @Serializable data object SetupChecklist : Screen
 
     // Tabs (M07, M08, M11, M12, M25)

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reg_title">سجّل صالونك</string>
+    <string name="reg_subtitle">أرسل طلبك وسنراجعه خلال 1–2 يوم عمل.</string>
+    <string name="reg_resubmit_title">تعديل وإعادة الإرسال</string>
+    <string name="reg_salon_name">اسم الصالون</string>
+    <string name="reg_salon_name_hint">مثال: بيلا هاوس</string>
+    <string name="reg_type">نوع الصالون</string>
+    <string name="reg_men">رجالي</string>
+    <string name="reg_women">نسائي</string>
+    <string name="reg_type_warning">لا يمكن تغيير نوع الصالون لاحقاً</string>
+    <string name="reg_first_name">الاسم الأول للمالك</string>
+    <string name="reg_last_name">الاسم الأخير</string>
+    <string name="reg_city">المدينة</string>
+    <string name="reg_area">المنطقة</string>
+    <string name="reg_select">اختر</string>
+    <string name="reg_area_hint">اختر المدينة أولاً</string>
+    <string name="reg_documents">وثائق الترخيص</string>
+    <string name="reg_documents_hint">ارفع من 1 إلى 5 ملفات تثبت وجود الصالون وترخيصه (صورة أو PDF، حتى 10 ميغابايت للملف).</string>
+    <string name="reg_agree">أوافق على</string>
+    <string name="reg_terms_link">شروط وأحكام WAB للصالونات</string>
+    <string name="reg_terms_error">يجب الموافقة على الشروط والأحكام</string>
+    <string name="reg_submit">إرسال الطلب</string>
+    <string name="reg_resubmit">إعادة إرسال الطلب</string>
+    <string name="reg_required">هذا الحقل مطلوب</string>
+    <string name="reg_documents_error">ارفع وثيقة واحدة على الأقل</string>
+    <string name="reg_size_mb">%1$s ميغابايت</string>
+    <string name="reg_back">رجوع</string>
+    <string name="status_pending_title">طلبك قيد المراجعة</string>
+    <string name="status_pending_body">يراجع فريق WAB وثائقك عادةً خلال 1–2 يوم عمل، وسنرسل لك إشعاراً فور اتخاذ القرار.</string>
+    <string name="status_submitted">تاريخ التقديم: %1$s</string>
+    <string name="status_prepare">جهّز ملف صالونك</string>
+    <string name="status_prepare_body">ابدأ بتجهيز ملفك الآن ليصبح صالونك مباشراً فور الموافقة.</string>
+    <string name="status_refresh">تحديث الحالة</string>
+    <string name="status_rejected_title">لم تتم الموافقة على طلبك</string>
+    <string name="status_rejected_body">راجع سبب الرفض، عدّل طلبك ثم أعد إرساله.</string>
+    <string name="status_reason">سبب الرفض</string>
+    <string name="status_resubmit">تعديل وإعادة الإرسال</string>
+    <string name="status_approved_title">تمت الموافقة على صالونك!</string>
+    <string name="status_approved_body">أكمل الخطوات المتبقية ليظهر صالونك للزبائن ويبدأ باستقبال الحجوزات.</string>
+    <string name="status_continue">أكمل الإعداد</string>
+    <string name="status_resubmissions">أعيد الإرسال %1$d مرات</string>
+</resources>
