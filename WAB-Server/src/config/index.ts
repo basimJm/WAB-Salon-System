@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseEnv } from 'node:util';
+import type { AppLinksSettings } from '../constants/appLinks';
 import { ENV_KEY_HINTS } from '../constants/envHints';
 import {
   DEFAULT_ENVIRONMENT,
@@ -57,12 +58,27 @@ export interface StorageSettings {
   };
 }
 
+/** Lists default to empty; a store URL is left out when unset (the page then hides its button). */
+const buildAppLinksSettings = (values: RawEnv): AppLinksSettings => {
+  const playStoreUrl = values[ENV_KEYS.appLinksPlayStoreUrl];
+  const appStoreUrl = values[ENV_KEYS.appLinksAppStoreUrl];
+  return Object.freeze({
+    androidPackages: Object.freeze(values[ENV_KEYS.appLinksAndroidPackages]),
+    androidSha256: Object.freeze(values[ENV_KEYS.appLinksAndroidSha256]),
+    iosAppIds: Object.freeze(values[ENV_KEYS.appLinksIosAppIds]),
+    ...(playStoreUrl === undefined ? {} : { playStoreUrl }),
+    ...(appStoreUrl === undefined ? {} : { appStoreUrl }),
+  });
+};
+
 export interface AppConfig {
   readonly env: Environment;
   readonly isProduction: boolean;
   readonly port: number;
   readonly logLevel: LogLevel;
   readonly corsAllowedOrigins: readonly string[];
+  /** Android App Links + iOS Universal Links for shared salon links. */
+  readonly appLinks: AppLinksSettings;
   /** Number of reverse proxies in front of the app (load balancer = 1); 0 = trust none. */
   readonly trustProxyHops: number;
   readonly mongo: { readonly uri: string };
@@ -238,6 +254,7 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
     port: values[ENV_KEYS.port],
     logLevel: values[ENV_KEYS.logLevel],
     corsAllowedOrigins: Object.freeze(values[ENV_KEYS.corsAllowedOrigins]),
+    appLinks: buildAppLinksSettings(values),
     trustProxyHops: values[ENV_KEYS.trustProxyHops],
     mongo: Object.freeze({ uri: values[ENV_KEYS.mongoUri] }),
     redis: Object.freeze({ url: values[ENV_KEYS.redisUrl] }),

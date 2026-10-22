@@ -116,3 +116,13 @@
 - Loops: 0/1
 - Review: PENDING
 
+### T-132a — Sync main into server (part of T-132)
+- Project: repo root
+- Branch: `chore/sync-main-into-server-2`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `main` merged into `server` so `server` → `main` merges; only conflict = generated board in `INTEGRATION.md` (main's side taken, regenerated with `tasks.py board`)
+- Tests: `python3 .claude/hooks/test_hooks.py` OK; `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.
+
