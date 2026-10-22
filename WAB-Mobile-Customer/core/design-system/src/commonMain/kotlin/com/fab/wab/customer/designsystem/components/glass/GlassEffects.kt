@@ -79,7 +79,8 @@ fun Modifier.glassBackground(
             )
         }
     }.glassRim(t, shape)
-    return glassShadow(t, t.level(style).elevation, shape).then(glass).then(if (stateBorder.isSpecified) Modifier.border(t.borderWidth, stateBorder, shape) else Modifier)
+    // No elevation shadow: under a see-through body it shows through as a dark inner rectangle.
+    return then(glass).then(if (stateBorder.isSpecified) Modifier.border(t.borderWidth, stateBorder, shape) else Modifier)
 }
 
 /** Press state of a glass control: drives the liquid shrink-and-spring-back. */

@@ -45,7 +45,12 @@ internal fun NotificationRow(item: Notification, onClick: () -> Unit, modifier: 
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .glassBackground(AppTheme.glass, shape, style = if (unread) GlassStyle.Prominent else GlassStyle.Regular, stateBorder = borderColor)
+            .glassBackground(
+                AppTheme.glass,
+                shape,
+                style = if (unread) GlassStyle.Prominent else GlassStyle.Regular,
+                stateBorder = borderColor,
+            )
             .clickable(role = Role.Button, onClick = onClick)
             .padding(NotificationsDesign.itemPadding),
         horizontalArrangement = Arrangement.spacedBy(spacing.space12),

@@ -18,7 +18,6 @@ import com.fab.wab.customer.core.domain.salon.SalonSummary
 import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
-import com.fab.wab.customer.designsystem.utils.softShadow
 import com.fab.wab.customer.feature.home.presentation.resources.Res
 import com.fab.wab.customer.feature.home.presentation.resources.home_distance_km
 import org.jetbrains.compose.resources.stringResource
@@ -40,7 +39,6 @@ fun DiscoverySalonRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .softShadow(DiscoveryDesign.ROW_SHADOW, colors.shadow.copy(alpha = DiscoveryDesign.ROW_SHADOW_ALPHA), shape)
             .clip(shape)
             .glassBackground(AppTheme.glass, shape)
             .clickable(role = Role.Button, onClick = onClick)

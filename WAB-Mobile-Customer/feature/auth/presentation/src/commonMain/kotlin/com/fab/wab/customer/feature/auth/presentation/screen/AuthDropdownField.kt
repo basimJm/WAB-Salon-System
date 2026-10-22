@@ -27,7 +27,6 @@ import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
-import com.fab.wab.customer.designsystem.utils.softShadow
 
 /**
  * S12 dropdown as the design draws it: a 52 dp field (radius 14, 1.5 dp border, chevron 14 faint) that expands an
@@ -98,7 +97,6 @@ private fun OptionList(options: List<String>, selectedIndex: Int?, onSelect: (In
         modifier = modifier
             .fillMaxWidth()
             .padding(top = AppTheme.spacing.space6)
-            .softShadow(AppTheme.elevation.raised, colors.shadow.copy(alpha = AuthDesign.listShadowAlpha), shape)
             .clip(shape)
             .glassBackground(AppTheme.glass, shape),
     ) {

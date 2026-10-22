@@ -63,7 +63,8 @@ fun Modifier.glassSource(state: HazeState?): Modifier = if (state == null) this 
 
 /**
  * Liquid Glass on a modifier chain (bars, sheets, controls): optional soft shadow, then [glassMaterial] clipped to
- * [shape] (this clips the element's own content too; [rim] = false for edge-to-edge chrome such as the top bar; use [AppGlassSurface] for containers whose children must not be
+ * [shape] (this clips the element's own content too; [rim] = false for edge-to-edge chrome such as the top bar; use
+ * [AppGlassSurface] for containers whose children must not be
  * clipped). [elevated] = false for edge-to-edge chrome (top bar, sheet) and flat controls.
  */
 fun Modifier.liquidGlass(

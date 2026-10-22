@@ -32,7 +32,6 @@ import com.fab.wab.customer.designsystem.resources.Res as CoreRes
 import com.fab.wab.customer.designsystem.resources.time_am
 import com.fab.wab.customer.designsystem.resources.time_pm
 import com.fab.wab.customer.designsystem.theme.AppTheme
-import com.fab.wab.customer.designsystem.utils.softShadow
 import com.fab.wab.customer.feature.bookings.presentation.resources.Res
 import com.fab.wab.customer.feature.bookings.presentation.resources.booking_status_approved
 import com.fab.wab.customer.feature.bookings.presentation.resources.booking_status_auto_cancelled
@@ -68,7 +67,6 @@ fun BookingCard(booking: BookingSummary, onClick: () -> Unit, modifier: Modifier
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .softShadow(AppTheme.elevation.card, colors.shadow.copy(alpha = AppTheme.elevation.cardShadowAlpha), shape)
             .clip(shape)
             .glassBackground(AppTheme.glass, shape)
             .clickable(role = Role.Button, onClick = onClick)

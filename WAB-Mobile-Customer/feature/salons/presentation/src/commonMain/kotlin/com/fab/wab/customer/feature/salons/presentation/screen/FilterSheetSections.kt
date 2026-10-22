@@ -165,7 +165,12 @@ private fun FilterChoiceChip(label: String, selected: Boolean, onClick: () -> Un
         modifier = Modifier
             .height(SalonsDesign.FILTER_CHIP_HEIGHT)
             .clip(shape)
-            .glassBackground(AppTheme.glass, shape, style = if (selected) GlassStyle.Prominent else GlassStyle.Regular, stateBorder = if (selected) colors.gradientEnd else Color.Unspecified)
+            .glassBackground(
+                AppTheme.glass,
+                shape,
+                style = if (selected) GlassStyle.Prominent else GlassStyle.Regular,
+                stateBorder = if (selected) colors.gradientEnd else Color.Unspecified,
+            )
             .semantics { this.selected = selected }
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = AppTheme.spacing.space16),

@@ -28,7 +28,6 @@ import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
-import com.fab.wab.customer.designsystem.utils.softShadow
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.LegalSlugs
 import com.fab.wab.customer.feature.auth.presentation.resources.Res
 import com.fab.wab.customer.feature.auth.presentation.resources.auth_language_switch
@@ -184,7 +183,6 @@ internal fun AuthCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .softShadow(AppTheme.elevation.overlay, colors.shadow.copy(alpha = AuthDesign.cardShadowAlpha), shape)
             .clip(shape)
             .glassBackground(AppTheme.glass, shape)
             .padding(vertical = verticalPadding, horizontal = horizontalPadding),

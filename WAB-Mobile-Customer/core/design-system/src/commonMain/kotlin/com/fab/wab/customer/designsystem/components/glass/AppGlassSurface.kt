@@ -13,8 +13,8 @@ import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.designsystem.theme.GlassStyle
 
 /**
- * Base Liquid Glass container of the design system: a translucent, shining surface with a refractive rim and,
- * for [GlassStyle.Prominent], a soft shadow. It is purely visual: no click, focus, padding or size is added unless
+ * Base Liquid Glass container of the design system: a translucent, shining surface with a refractive rim (no elevation
+ * shadow: under a see-through body it would show through). It is purely visual: no click, focus, padding or size is added unless
  * passed in, and children keep their own measurement, input and semantics.
  *
  * - The glass is drawn on a background layer the size of the surface, so children are NOT clipped unless
@@ -42,8 +42,7 @@ fun AppGlassSurface(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val glass = if (blurBackdrop) rememberGlass() else rememberContentGlass()
-    val elevation = glass.tokens.level(style).elevation
-    Box(modifier = modifier.glassShadow(glass.tokens, elevation, shape), propagateMinConstraints = true) {
+    Box(modifier = modifier, propagateMinConstraints = true) {
         Spacer(Modifier.matchParentSize().clip(shape).glassMaterial(glass, style, shape))
         Box(
             modifier = (if (clipContent) Modifier.clip(shape) else Modifier).padding(contentPadding),

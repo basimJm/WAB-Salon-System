@@ -59,10 +59,17 @@ private fun GlassGallery() {
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(spacing.space12)) {
-                    AppGlassSurface(shape = AppTheme.shapes.circle, style = GlassStyle.Prominent, contentPadding = PaddingValues(spacing.space12)) {
+                    AppGlassSurface(
+                        shape = AppTheme.shapes.circle,
+                        style = GlassStyle.Prominent,
+                        contentPadding = PaddingValues(spacing.space12),
+                    ) {
                         Icon(AppIcons.Bookings, contentDescription = null, tint = colors.ink)
                     }
-                    AppGlassSurface(modifier = Modifier.widthIn(max = AppTheme.sizes.touchTarget * 2), contentPadding = PaddingValues(spacing.space8)) {
+                    AppGlassSurface(
+                        modifier = Modifier.widthIn(max = AppTheme.sizes.touchTarget * 2),
+                        contentPadding = PaddingValues(spacing.space8),
+                    ) {
                         AppText(text = LONG_TEXT, maxLines = 2)
                     }
                 }

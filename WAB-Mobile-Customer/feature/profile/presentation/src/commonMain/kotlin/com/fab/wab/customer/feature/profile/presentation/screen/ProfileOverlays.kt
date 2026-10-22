@@ -232,7 +232,12 @@ private fun GenderButton(
         modifier = modifier
             .height(ProfileDesign.genderHeight)
             .clip(shape)
-            .glassBackground(AppTheme.glass, shape, style = if (selected) GlassStyle.Prominent else GlassStyle.Regular, stateBorder = if (selected) colors.gradientEnd else Color.Unspecified)
+            .glassBackground(
+                AppTheme.glass,
+                shape,
+                style = if (selected) GlassStyle.Prominent else GlassStyle.Regular,
+                stateBorder = if (selected) colors.gradientEnd else Color.Unspecified,
+            )
             .clickable(role = Role.RadioButton, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

@@ -3,9 +3,12 @@ package com.fab.wab.customer.feature.bookings.presentation.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -13,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.core.domain.booking.BookingTab
-import com.fab.wab.customer.designsystem.components.layout.tabBarInset
 import com.fab.wab.customer.designsystem.components.layout.AppPagedList
 import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
+import com.fab.wab.customer.designsystem.components.layout.tabBarInset
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.resources.Res as CoreRes
@@ -49,7 +52,7 @@ fun BookingsScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modif
     TrackScreen(BookingsAnalytics.SCREEN)
     val spacing = AppTheme.spacing
     AppScreen(modifier = modifier, handleIme = false, scrollsUnderTabBar = true) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars).padding(padding)) {
             Column(modifier = Modifier.padding(top = spacing.space8, bottom = spacing.space14)) {
                 AppText(
                     text = stringResource(Res.string.bookings_welcome, state.welcomeName),

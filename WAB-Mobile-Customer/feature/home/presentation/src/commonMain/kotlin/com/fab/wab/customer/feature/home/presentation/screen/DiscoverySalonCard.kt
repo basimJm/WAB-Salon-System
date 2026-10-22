@@ -57,7 +57,6 @@ fun DiscoverySalonCard(
     Column(
         modifier = modifier
             .width(DiscoveryDesign.SALON_CARD_WIDTH)
-            .softShadow(AppTheme.elevation.card, colors.shadow.copy(alpha = DiscoveryDesign.SALON_CARD_SHADOW_ALPHA), shape)
             .clip(shape)
             .glassBackground(AppTheme.glass, shape)
             .clickable(role = Role.Button, onClick = onClick),

@@ -37,6 +37,7 @@ import com.fab.wab.customer.designsystem.components.image.AppImage
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.designsystem.theme.GlassStyle
 
 /** Accent 12/600 label above the field box, 11.5 pink error below. */
 @Composable
@@ -61,7 +62,7 @@ internal fun EditFieldFrame(label: String, modifier: Modifier = Modifier, error:
     }
 }
 
-/** `height:52px;border-radius:14px;border:1.5px solid` (pink on error); card background, surface when read-only. */
+/** `height:52px;border-radius:14px;border:1.5px solid` (pink on error); regular glass, subtle glass when read-only. */
 @Composable
 private fun fieldBox(error: Boolean, readOnly: Boolean, enabled: Boolean = true): Modifier {
     val colors = AppTheme.colors
@@ -70,8 +71,12 @@ private fun fieldBox(error: Boolean, readOnly: Boolean, enabled: Boolean = true)
         .fillMaxWidth()
         .height(AppTheme.sizes.fieldHeight)
         .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
-        .clip(shape)
-        .glassBackground(AppTheme.glass, shape, stateBorder = if (error) colors.danger else Color.Unspecified)
+        .glassBackground(
+            AppTheme.glass,
+            shape,
+            style = if (readOnly) GlassStyle.Subtle else GlassStyle.Regular,
+            stateBorder = if (error) colors.danger else Color.Unspecified,
+        )
 }
 
 @Composable
