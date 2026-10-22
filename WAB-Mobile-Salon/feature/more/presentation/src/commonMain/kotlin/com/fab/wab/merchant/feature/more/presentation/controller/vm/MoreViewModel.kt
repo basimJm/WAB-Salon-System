@@ -42,6 +42,9 @@ class MoreViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(version = deps.version, versionCode = deps.versionCode), testScope) {
 
+    /** Set when the member opened the overlay settings; the next resume reports the result. */
+    private var overlayAsked = false
+
     override fun onStart() {
         deps.session.state.onEach { session ->
             val member = (session as? SessionState.SignedIn)?.member
@@ -71,9 +74,13 @@ class MoreViewModel(
             }
             UiAction.OnOverlay -> if (uiState.value.overlaySupported && !uiState.value.overlayGranted) {
                 deps.analytics.trackAction(AnalyticsAction(MoreAnalytics.ACTION_OVERLAY))
+                overlayAsked = true
                 deps.overlay.openSettings()
             }
-            UiAction.OnResume -> refreshOverlay()
+            UiAction.OnResume -> {
+                refreshOverlay()
+                reportOverlayResult()
+            }
             UiAction.OnSoundTest -> {
                 deps.analytics.trackAction(AnalyticsAction(MoreAnalytics.ACTION_SOUND))
                 deps.alert.play()
@@ -93,6 +100,14 @@ class MoreViewModel(
     }
 
     private fun track(name: String, value: String) = deps.analytics.trackAction(AnalyticsAction(name, analyticsParams { text(MoreAnalytics.PARAM_VALUE, value) }))
+
+    /** PRD §14 `overlay_permission_result`: once, when the member comes back from the system screen. */
+    private fun reportOverlayResult() {
+        if (!overlayAsked) return
+        overlayAsked = false
+        val granted = uiState.value.overlayGranted
+        deps.analytics.trackAction(AnalyticsAction(MoreAnalytics.ACTION_OVERLAY_RESULT, analyticsParams { flag(MoreAnalytics.PARAM_GRANTED, granted) }))
+    }
 
     private fun refreshOverlay() = updateState { copy(overlaySupported = deps.overlay.isSupported, overlayGranted = deps.overlay.isGranted()) }
 

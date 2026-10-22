@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from policy import baseline, error_codes, file_length, hardcoded, localization, quality, security, variants  # noqa: E402
+from policy import analytics, baseline, error_codes, file_length, hardcoded, localization, quality, security, variants  # noqa: E402
 from policy.budget import check as check_budget  # noqa: E402
 from policy.files import Config  # noqa: E402
 
@@ -19,6 +19,7 @@ RATCHETED = {
 }
 STRICT = {
     "localization": localization.check, "variants": variants.check, "security": security.check, "error-codes": error_codes.check,
+    "analytics": analytics.check,
 }
 COMMANDS = [*RATCHETED, *STRICT, "budget", "all"]
 

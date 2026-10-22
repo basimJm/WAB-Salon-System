@@ -9,10 +9,23 @@
 
 ## Current task
 
+### MER-051 — Analytics events of PRD §14
+- Branch: `feat/mer-051-analytics-events`
+- Branched: (from `feat/mer-052-error-codes`)
+- Status: IN PROGRESS (batch 9)
+- Acceptance criteria (PRD §14):
+  - [x] New strict policy `analytics` (`scripts/ci/policy/analytics.py`): every feature `*Screen` composable calls `TrackScreen` (screen_view, 29 screens), every `ACTION_*` event name is Firebase-safe (snake_case, ≤ 40), and the PRD events of the shipped features (`config/policy.json` `analytics.requiredEvents`, 16) are declared
+  - [x] `request_shown` with `channel = in_app` (+ bride flag) once per request on the sheet; `request_accept` / `request_reject` carry `response_time_s` (sheet shown → answer) next to the reason
+  - [x] `overlay_permission_result` (granted) once when the member returns from the system screen (More); `push_open` (server event, opens-a-screen flag) on a tapped system notification (`ShellAnalytics`)
+- Tests: `test_analytics.py` (3; 84 policy-script tests OK), `BookingRequestsAnalyticsTest` (1), `MoreViewModelTest` (extended), `ShellAnalyticsTest` (1); `/tmp/claude/quick.sh m51` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATION — "every UiAction maps to an event" is narrowed to every screen + the PRD event list: text-input actions carry no analytics value; `overlay` / `notification` request channels come with MER-029/030 (blocked on MER-004); `statistics_view`, `review_report`, `delete_request` belong to blocked tasks (MER-042/043/049).
+
 ### MER-052 — Error-code coverage + permission refusals
 - Branch: `feat/mer-052-error-codes`
 - Branched: (from `feat/mer-048-more`; backlog name `feat/mer-052-error-coverage`)
-- Status: IN PROGRESS (batch 9)
+- Status: IN PROGRESS (batch 9; code committed)
 - Acceptance criteria (BUSINESS_DOMAIN §11; `openapi.merchant.json` error codes; PRD §3, §6 hidden-not-disabled):
   - [x] Every §11 code and every contract code is in `ErrorCode` with AR + EN `error_code_*` text and an `ErrorHandling` action (audited: 43 + UNKNOWN; enforced by the `error-codes` policy since MER-005)
   - [x] A `FORBIDDEN` / `PERMISSION_DENIED` answer from any call (`safeApiCall`) is reported to `PermissionDeniedSignals` (bursts collapse); the shell (`RealtimeAccountEvents`) re-fetches the permissions through `PermissionsSync`, so gated tabs, tiles and buttons hide; other codes and plain HTTP 403s do not trigger it

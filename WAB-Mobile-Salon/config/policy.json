@@ -148,5 +148,25 @@
       "PROD_DATA_SOURCE"
     ],
     "workflow": ".github/workflows/merchant-ci.yml"
+  },
+  "analytics": {
+    "requiredEvents": [
+      "request_shown",
+      "request_accept",
+      "request_reject",
+      "booking_cancel_by_salon",
+      "booking_complete",
+      "booking_no_show",
+      "booking_reassign",
+      "registration_submit",
+      "document_upload",
+      "application_resubmit",
+      "contact_wab",
+      "overlay_permission_result",
+      "push_open",
+      "logout",
+      "otp_request",
+      "login_start"
+    ]
   }
 }

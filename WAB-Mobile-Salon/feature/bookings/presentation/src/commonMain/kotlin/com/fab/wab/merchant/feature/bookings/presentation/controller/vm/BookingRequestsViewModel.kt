@@ -12,6 +12,7 @@ import com.fab.wab.merchant.designsystem.components.booking.HandledBy
 import com.fab.wab.merchant.designsystem.components.booking.RequestSheetDefaults
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingAction
+import com.fab.wab.merchant.feature.bookings.domain.model.BookingDetails
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingQuery
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingsDefaults
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingsTab
@@ -54,6 +55,10 @@ class BookingRequestsViewModel(
 
     /** Every id already queued or answered here: a repeated socket event or push never re-opens it. */
     private val seen = mutableSetOf<String>()
+
+    /** The request on screen and when it appeared, for `request_shown` (once each) and the response time. */
+    private var shownId: String? = null
+    private var shownAtMs = 0L
 
     override fun onStart() {
         deps.requests.onEach { enqueue(it) }.launchIn(scope)
@@ -189,7 +194,34 @@ class BookingRequestsViewModel(
     /** Distinct sound / vibration while a request is on screen; silent once the queue is empty. */
     private fun alertForCurrent() {
         val state = uiState.value
-        if (state.current != null && state.acceptedReference == null) deps.alert.play() else deps.alert.stop()
+        val current = state.current
+        if (current != null && state.acceptedReference == null) {
+            deps.alert.play()
+            trackShown(current)
+        } else {
+            deps.alert.stop()
+        }
+    }
+
+    private fun trackShown(current: BookingDetails) {
+        if (shownId == current.summary.id) return
+        shownId = current.summary.id
+        shownAtMs = uiState.value.nowMs
+        deps.analytics.trackAction(
+            AnalyticsAction(
+                BookingsAnalytics.ACTION_SHOWN,
+                analyticsParams {
+                    text(BookingsAnalytics.PARAM_CHANNEL, BookingsAnalytics.CHANNEL_IN_APP)
+                    flag(BookingsAnalytics.PARAM_BRIDE, current.summary.hasBride)
+                },
+            ),
+        )
+    }
+
+    /** Whole seconds from the sheet showing the request to the answer; null before the clock has ticked. */
+    private fun responseSeconds(): Long? {
+        val now = uiState.value.nowMs
+        return if (shownAtMs > 0L && now >= shownAtMs) (now - shownAtMs) / MILLIS_PER_SECOND else null
     }
 
     private fun sheetAction(name: String, reason: String? = null) = AnalyticsAction(
@@ -197,6 +229,9 @@ class BookingRequestsViewModel(
         analyticsParams {
             text(BookingsAnalytics.PARAM_SOURCE, BookingsAnalytics.SOURCE_SHEET)
             reason?.let { text(BookingsAnalytics.PARAM_REASON, it) }
+            responseSeconds()?.let { number(BookingsAnalytics.PARAM_RESPONSE_SECONDS, it) }
         },
     )
 }
+
+private const val MILLIS_PER_SECOND = 1_000L

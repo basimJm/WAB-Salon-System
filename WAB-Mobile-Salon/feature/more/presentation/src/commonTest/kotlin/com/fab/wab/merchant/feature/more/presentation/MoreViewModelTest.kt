@@ -1,6 +1,10 @@
 package com.fab.wab.merchant.feature.more.presentation
 
-import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
+import com.fab.wab.merchant.core.analytics.AnalyticsAction
+import com.fab.wab.merchant.core.analytics.AnalyticsScreen
+import com.fab.wab.merchant.core.analytics.AnalyticsTracker
+import com.fab.wab.merchant.core.analytics.AnalyticsValue
+import com.fab.wab.merchant.feature.more.presentation.analytics.MoreAnalytics
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppLanguage
 import com.fab.wab.merchant.core.domain.AppResult
@@ -138,8 +142,19 @@ class MoreViewModelTest {
     private val alert = CountingAlert()
     private val auth = FakeAuth()
 
+    private val tracker = object : AnalyticsTracker {
+        val actions = mutableListOf<AnalyticsAction>()
+        override fun trackScreen(screen: AnalyticsScreen) = Unit
+        override fun trackAction(action: AnalyticsAction) {
+            actions += action
+        }
+        override fun trackRoute(route: String?) = Unit
+        override fun setUserId(userId: String?) = Unit
+        override fun setUserProperty(key: String, value: String?) = Unit
+    }
+
     private fun TestScope.viewModel() = MoreViewModel(
-        MoreDependencies(session, AppearanceSettings(settings), NoConfig(), overlay, alert, LogoutUseCase(auth, session), NoOpAnalyticsTracker, "1.2.0", 12),
+        MoreDependencies(session, AppearanceSettings(settings), NoConfig(), overlay, alert, LogoutUseCase(auth, session), tracker, "1.2.0", 12),
         testScope = backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 
@@ -162,6 +177,10 @@ class MoreViewModelTest {
         overlay.granted = true
         viewModel.onEvent(UiAction.OnResume)
         assertTrue(viewModel.state.first().overlayGranted)
+        val result = tracker.actions.single { it.name == MoreAnalytics.ACTION_OVERLAY_RESULT }
+        assertEquals(AnalyticsValue.Flag(true), result.params[MoreAnalytics.PARAM_GRANTED])
+        viewModel.onEvent(UiAction.OnResume)
+        assertEquals(1, tracker.actions.count { it.name == MoreAnalytics.ACTION_OVERLAY_RESULT }, "reported once per visit")
         viewModel.onEvent(UiAction.OnOverlay)
         assertEquals(1, overlay.opened)
         viewModel.onEvent(UiAction.OnSoundTest)

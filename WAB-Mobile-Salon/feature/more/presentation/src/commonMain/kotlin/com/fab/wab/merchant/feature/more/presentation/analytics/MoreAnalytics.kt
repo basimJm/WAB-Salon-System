@@ -9,6 +9,8 @@ object MoreAnalytics {
     const val ACTION_THEME = "settings_theme"
     const val ACTION_PUSH = "settings_push"
     const val ACTION_OVERLAY = "settings_overlay_open"
+    const val ACTION_OVERLAY_RESULT = "overlay_permission_result"
+    const val PARAM_GRANTED = "granted"
     const val ACTION_SOUND = "settings_sound_test"
     const val ACTION_LOGOUT = "logout"
     const val PARAM_VALUE = "value"

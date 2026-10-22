@@ -5,7 +5,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fab.wab.merchant.app.analytics.ShellAnalytics
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
+import com.fab.wab.merchant.core.analytics.compose.LocalAnalyticsTracker
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.core.notification.push.PushKeys
@@ -14,7 +16,8 @@ import com.fab.wab.merchant.core.realtime.RealtimeEvents
 
 /**
  * Foreground pushes become an in-app banner; a tapped system push that carries a link the app handles is published to
- * the [DeepLinkStore]. Also reports the app's foreground state to the platform push services.
+ * the [DeepLinkStore] and tracked as `push_open` (PRD §14). Also reports the app's foreground state to the platform
+ * push services.
  */
 @Composable
 fun PushEffect(deepLinks: DeepLinkStore) {
@@ -32,9 +35,11 @@ fun PushEffect(deepLinks: DeepLinkStore) {
         }
     }
     val tap by PushSignals.tap.collectAsStateWithLifecycle()
+    val tracker = LocalAnalyticsTracker.current
     LaunchedEffect(tap) {
         val current = tap ?: return@LaunchedEffect
         PushSignals.consumeTap(current)
+        tracker.trackAction(ShellAnalytics.pushOpen(current))
         current.deepLink?.let(deepLinks::publish)
     }
 }
