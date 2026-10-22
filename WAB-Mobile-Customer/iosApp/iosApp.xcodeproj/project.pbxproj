@@ -10,6 +10,7 @@
 		EB7CF7502F939A080047E568 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = EB7CF74F2F939A080047E568 /* FirebaseMessaging */; };
 		07BFF023E1AA46FF8EE6C5EC /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 21C9A4BF455543E2A76162A5 /* FirebaseAnalytics */; };
 		FDCD3B6CB5F14EE59E129D14 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 6A107386930E42B098A46B44 /* FirebaseAuth */; };
+		C0FFEE00F12EBA5E00000011 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = C0FFEE00F12EBA5E00000012 /* FirebaseAppCheck */; };
 		7E05A56F3EF6490FAD99AF86 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = CB382D4044434E988246347E /* FirebaseCrashlytics */; };
 /* End PBXBuildFile section */
 
@@ -51,6 +52,7 @@
 				EB7CF7502F939A080047E568 /* FirebaseMessaging in Frameworks */,
 				07BFF023E1AA46FF8EE6C5EC /* FirebaseAnalytics in Frameworks */,
 				FDCD3B6CB5F14EE59E129D14 /* FirebaseAuth in Frameworks */,
+				C0FFEE00F12EBA5E00000011 /* FirebaseAppCheck in Frameworks */,
 				7E05A56F3EF6490FAD99AF86 /* FirebaseCrashlytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -86,6 +88,8 @@
 				B9C57ADE4F90F743E71D79BD /* Sources */,
 				F8D73E55B6901A569DB9E567 /* Frameworks */,
 				90793939BDFDE6E876075F7F /* Resources */,
+				C0FFEE00F12EBA5E00000001 /* Copy Firebase Config */,
+				C0FFEE00F12EBA5E00000002 /* Upload Crashlytics Symbols */,
 			);
 			buildRules = (
 			);
@@ -99,6 +103,7 @@
 				EB7CF74F2F939A080047E568 /* FirebaseMessaging */,
 				21C9A4BF455543E2A76162A5 /* FirebaseAnalytics */,
 				6A107386930E42B098A46B44 /* FirebaseAuth */,
+				C0FFEE00F12EBA5E00000012 /* FirebaseAppCheck */,
 				CB382D4044434E988246347E /* FirebaseCrashlytics */,
 			);
 			productName = iosApp;
@@ -173,6 +178,49 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
 		};
+		C0FFEE00F12EBA5E00000001 /* Copy Firebase Config */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Firebase Config";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$SRCROOT/scripts/firebase_config.sh\"\n";
+		};
+		C0FFEE00F12EBA5E00000002 /* Upload Crashlytics Symbols */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			name = "Upload Crashlytics Symbols";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$SRCROOT/scripts/crashlytics_upload.sh\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -196,7 +244,6 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = X6UZ9NMK56;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iosApp/Info.plist;
@@ -226,7 +273,6 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = X6UZ9NMK56;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iosApp/Info.plist;
@@ -256,7 +302,6 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = X6UZ9NMK56;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iosApp/Info.plist;
@@ -286,7 +331,6 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = X6UZ9NMK56;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iosApp/Info.plist;
@@ -617,6 +661,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EB7CF74E2F939A080047E568 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		C0FFEE00F12EBA5E00000012 /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EB7CF74E2F939A080047E568 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
 		};
 		CB382D4044434E988246347E /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;

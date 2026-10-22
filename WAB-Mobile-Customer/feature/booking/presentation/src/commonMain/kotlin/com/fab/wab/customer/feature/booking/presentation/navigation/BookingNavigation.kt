@@ -18,12 +18,16 @@ import com.fab.wab.customer.core.notification.composable.rememberNotificationMan
 import com.fab.wab.customer.core.notification.model.NotificationStyle
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract.SideEffect
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingSuccessContract
+import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingVerifyContract
+import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.customer.feature.booking.presentation.controller.vm.BookingFlowViewModel
 import com.fab.wab.customer.feature.booking.presentation.controller.vm.BookingSuccessViewModel
+import com.fab.wab.customer.feature.booking.presentation.controller.vm.BookingVerifyViewModel
 import com.fab.wab.customer.feature.booking.presentation.resources.Res
 import com.fab.wab.customer.feature.booking.presentation.resources.success_copied
 import com.fab.wab.customer.feature.booking.presentation.screen.BookingFlowScreen
 import com.fab.wab.customer.feature.booking.presentation.screen.BookingSuccessScreen
+import com.fab.wab.customer.feature.booking.presentation.screen.BookingVerifyScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -33,7 +37,30 @@ class BookingNavigation(override val navController: NavHostController) : Navigat
 
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
         navGraphBuilder.composable<Screen.BookingStart> { entry -> BookingFlowDestination(entry.toRoute<Screen.BookingStart>().salonId) }
+        navGraphBuilder.composable<Screen.BookingVerify> { entry ->
+            BookingVerifyDestination(entry.toRoute<Screen.BookingVerify>().draftId)
+        }
         navGraphBuilder.composable<Screen.BookingSuccess> { entry -> BookingSuccessDestination(entry.toRoute<Screen.BookingSuccess>()) }
+    }
+
+    /** S16 step 6: OTP (BOOKING_CONFIRMATION) on the customer's own phone; success replaces this screen with S17. */
+    @Composable
+    private fun BookingVerifyDestination(draftId: String) {
+        val viewModel: BookingVerifyViewModel = koinViewModel(key = draftId) { parametersOf(draftId) }
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                is BookingVerifyContract.SideEffect.OpenOtp ->
+                    navigateTo(Screen.Otp(AuthPurpose.BOOKING_CONFIRMATION.code, effect.phone.countryCode, effect.phone.number))
+                // The booking is created: drop the whole flow (start, summary, verify) so Back from S17 leaves booking.
+                is BookingVerifyContract.SideEffect.OpenSuccess ->
+                    navController.navigate(Screen.BookingSuccess(effect.bookingId, effect.referenceNumber)) {
+                        popUpTo<Screen.BookingStart> { inclusive = true }
+                    }
+                BookingVerifyContract.SideEffect.BackToBooking -> navigateBack()
+            }
+        }
+        BookingVerifyScreen(state = state, onAction = viewModel::onEvent)
     }
 
     /** S17: View booking replaces the success screen with S15 so Back from S15 does not return here. */

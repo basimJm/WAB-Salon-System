@@ -21,7 +21,7 @@ internal class DraftCoordinator(
     private val state: () -> UiState,
     private val update: (UiState.() -> UiState) -> Unit,
 ) {
-    fun create(method: PaymentMethod, remaining: List<PaymentMethod> = PAYMENT_PREFERENCE - method) {
+    fun create(method: PaymentMethod, remaining: List<PaymentMethod> = PAYMENT_PREFERENCE.filter { it in ENABLED_METHODS } - method) {
         val current = state()
         val salon = current.salon ?: return
         scope().launch {
@@ -45,7 +45,7 @@ internal class DraftCoordinator(
     /** Changing the method re-creates the draft so the server recomputes deposit / due amounts. */
     fun changePaymentMethod(method: PaymentMethod) {
         val current = state().draft ?: return
-        if (current.paymentMethod == method || method !in current.policy.paymentOptions) return
+        if (current.paymentMethod == method || method !in current.policy.paymentOptions || method !in ENABLED_METHODS) return
         val params = analyticsParams { text(BookingAnalytics.PARAM_VALUE, method.code.lowercase()) }
         deps.analytics.trackAction(AnalyticsAction(BookingAnalytics.ACTION_PAYMENT_METHOD, params))
         scope().launch {
@@ -66,5 +66,8 @@ internal class DraftCoordinator(
     companion object {
         /** Fallback order when the salon does not allow the preferred method (PRD S16 step 5 options). */
         val PAYMENT_PREFERENCE = listOf(PaymentMethod.PAY_ON_ARRIVAL, PaymentMethod.DEPOSIT, PaymentMethod.FULL_ONLINE)
+
+        /** Online payment is not live yet (CUS-047 ← PAY-011): only pay on arrival can be chosen; online options show as disabled. */
+        val ENABLED_METHODS = setOf(PaymentMethod.PAY_ON_ARRIVAL)
     }
 }

@@ -254,4 +254,18 @@ class OtpViewModelTest {
         testScheduler.runCurrent()
         assertEquals(listOf<SideEffect>(SideEffect.NavigateHome), effects)
     }
+
+    @Test
+    fun firebaseSendFailureKeepsVerifyOffAndShowsTheError() = runTest(UnconfinedTestDispatcher()) {
+        gateway.startResult = FirebaseResult.Failure(FirebaseFailure.Unknown("17006"))
+        val viewModel = viewModel()
+        val failed = viewModel.state.first { !it.requesting }
+        assertFalse(failed.codeSent)
+        assertTrue(failed.requestError != null)
+        viewModel.onEvent(UiAction.OnCodeChange("123456"))
+        assertFalse(viewModel.state.first().canVerify)
+        viewModel.onEvent(UiAction.OnVerifyClick)
+        testScheduler.runCurrent()
+        assertTrue(gateway.confirmedCodes.isEmpty())
+    }
 }

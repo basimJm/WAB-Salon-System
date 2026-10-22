@@ -10,6 +10,8 @@
 - Requirements: `<project>/docs/` (PRD > BRD > Design Script > `design/*.dc.html`); the `design/uploads/*.md` copies were deleted (2026-10-18). `BUSINESS_DOMAIN.md` = schemas, enums, rules, state machine, permissions, jobs, settings, error codes (money = integer fils; UTC stored, Asia/Amman computed).
 - Contract = the generated server OpenAPI in `WAB-Server/docs/api/openapi.{common,customer,merchant,admin}.json` (+ Postman). There is no `contracts/` folder; INT-01 was redefined to this (`INTEGRATION.md` §3). Admin regenerates DTOs with `npm run api:sync`; apps will use `./gradlew apiSync` (CUS-009 / MER-006).
 
+- KMP_TEMPLATE (T-130): `.claude/tools/KMP_TEMPLATE/KMP_TEMPLATE` generates a new KMP app from the live `WAB-Mobile-Customer` (core + build-logic + SDKs + sample feature, slim shell in `shell/`, package/name/Firebase prompts). A change to the customer core/build reaches new projects automatically; a new customer composeApp dependency on a feature must be mirrored in `shell/` or `SHELL_REMOVALS`. Tool tests run a full generation.
+
 ## Key decisions (details in root `CLAUDE.md` and `INTEGRATION.md`)
 - OTP: Firebase Phone Auth (SMS), `otpLength` from the backend (6), backend verifies the Firebase ID token (`wab-otp`). Admin: email + password + email OTP.
 - Real-time Socket.IO + Redis; push FCM (one Firebase project per env: dev `wab-dev-397ab`, prod `wab-prod-9c58f`; keys outside git, `*firebase-adminsdk*.json` ignored); jobs BullMQ + cron; storage S3 + CDN presigned; email Gmail SMTP from `basim.abusnaimeh@gmail.com` (`EMAIL_FROM_ADDRESS`, `SMTP_USER`, `SMTP_PASS` env only); analytics Firebase → BigQuery + server events in Mongo.

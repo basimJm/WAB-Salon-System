@@ -1,5 +1,6 @@
 <resources>
-    <string name="home_welcome">مرحباً %1$s</string>
+    <string name="home_hello_sub">ماذا تودّ أن تحجز اليوم؟</string>
+    <string name="home_welcome">مرحباً، %1$s</string>
     <string name="home_notifications">الإشعارات</string>
     <string name="home_search_hint">ابحث عن اسم الصالون، الخدمة أو الفئة</string>
     <string name="home_tab_men">رجال</string>
@@ -8,8 +9,12 @@
     <string name="home_see_more">عرض المزيد</string>
     <string name="home_recommended">صالونات موصى بها</string>
     <string name="home_see_all">عرض الكل</string>
-    <string name="home_nearest">أقرب الصالونات</string>
-    <string name="home_nearest_empty">لا توجد صالونات قريبة منك حالياً.</string>
-    <string name="home_nearest_location_off">فعّل الموقع لرؤية الصالونات القريبة منك.</string>
+    <string name="home_nearest">الأقرب إليك</string>
+    <string name="home_nearest_empty">لا توجد صالونات ضمن نطاق 10 كم من موقعك حالياً.</string>
+    <string name="home_nearest_location_off">فعّل خدمات الموقع لعرض الصالونات القريبة منك</string>
     <string name="home_enable_location">تفعيل خدمات الموقع</string>
+    <string name="home_reviews_count">(%1$d)</string>
+    <string name="home_distance_km">%1$s كم</string>
+    <string name="discovery_retry">إعادة المحاولة</string>
+    <string name="discovery_error_server_body">نعتذر، حدثت مشكلة غير متوقعة.</string>
 </resources>

@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="notifications_title">Notifications</string>
-    <string name="notifications_filter">Filter</string>
+    <string name="notifications_filter">Filter notifications</string>
     <string name="notifications_empty">No notifications</string>
+    <string name="notifications_error">Something went wrong</string>
+    <string name="notifications_retry">Retry</string>
     <string name="notifications_chip_dates">%1$s – %2$s</string>
     <string name="notifications_chip_from">From %1$s</string>
     <string name="notifications_chip_to">Until %1$s</string>
     <string name="notifications_chip_text">“%1$s”</string>
+    <string name="notifications_chip_remove">Remove filter %1$s</string>
     <string name="notifications_filter_title">Filter notifications</string>
-    <string name="notifications_from_label">From (YYYY-MM-DD)</string>
-    <string name="notifications_to_label">To (YYYY-MM-DD)</string>
+    <string name="notifications_from_label">From</string>
+    <string name="notifications_to_label">To</string>
     <string name="notifications_dates_error">The end date must be after the start date</string>
-    <string name="notifications_search_hint">Search (e.g. salon name)</string>
+    <string name="notifications_search_label">Search</string>
+    <string name="notifications_search_hint">Salon name…</string>
     <string name="notifications_apply">Apply</string>
     <string name="notifications_reset">Reset</string>
     <string name="notifications_view_booking">View booking</string>
-    <string name="notifications_close">Close</string>
-    <string name="notifications_unread">Unread</string>
     <string name="time_now">Now</string>
-    <string name="time_minutes_ago">%1$d min ago</string>
-    <string name="time_hours_ago">%1$d h ago</string>
+    <string name="time_minutes_ago">%1$d minutes ago</string>
+    <string name="time_hours_ago">%1$d hours ago</string>
     <string name="time_yesterday">Yesterday</string>
     <string name="time_days_ago">%1$d days ago</string>
 </resources>

@@ -18,6 +18,7 @@ data class SizeTokens(
     val iconSmall: Dp = 16.dp,
     val icon: Dp = 20.dp,
     val iconLarge: Dp = 24.dp,
+    val tabIcon: Dp = 22.dp,
     val topBarHeight: Dp = 50.dp,
     val bottomBarHeight: Dp = 64.dp,
     val railWidth: Dp = 88.dp,

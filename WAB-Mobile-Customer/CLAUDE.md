@@ -22,7 +22,7 @@
 8. **No source file longer than 300 lines** (Kotlin, Swift, Gradle, XML, Python). Split by responsibility. CI fails above the limit.
 9. **Portrait and landscape, phone to tablet.** Every screen and component works in portrait and landscape, on small phones, large phones, foldables and tablets/iPads, with system font scaling up to 200 %, RTL and LTR, light and dark. See §7.
 10. **Branching.** One new branch per task (`feat/cus-NNN-<key>` as named in the backlog) from the freshly fetched `origin/customer` (the customer master branch); the PR targets `customer`; the owner merges `customer` into `main`. **Never commit or push to `main` or `customer` directly.** Cloud sessions pinned to a branch (for example `claude/<name>`) use that branch and restart it from `origin/customer` after its PR merges.
-11. Never commit secrets (API keys, keystores, `local.properties`, signing configs). Do not edit `iosApp/iosApp/GoogleService-Info.plist` or `androidApp/google-services.json` without the owner.
+11. Never commit secrets (API keys, keystores, `local.properties`, signing configs). Do not edit the Firebase files (`androidApp/src/{dev,prod}/google-services.json`, `iosApp/Firebase/{dev,prod}/GoogleService-Info.plist`) without the owner; setup in `docs/FIREBASE_SETUP.md`.
 12. Do not add a library or change a version without a reason recorded in the task; use `gradle/libs.versions.toml`.
 
 ## 2. Module Map (real, not generated)

@@ -20,5 +20,4 @@
     <string name="nav_favorites">المفضلة</string>
     <string name="nav_bookings">الحجوزات</string>
     <string name="nav_profile">الملف الشخصي</string>
-    <string name="placeholder_verify">التحقق والدفع (قريباً)</string>
 </resources>

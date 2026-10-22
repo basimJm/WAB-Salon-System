@@ -11,7 +11,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.fab.wab.customer.core.domain.salon.SalonService
-import com.fab.wab.customer.designsystem.components.media.AppMediaViewer
 import com.fab.wab.customer.designsystem.components.media.MediaItemUi
 import com.fab.wab.customer.designsystem.components.media.MediaKind
 import com.fab.wab.customer.core.mvi.CollectSideEffect
@@ -29,10 +28,10 @@ import com.fab.wab.customer.feature.salon.presentation.controller.vm.ReviewsView
 import com.fab.wab.customer.feature.salon.presentation.controller.vm.SalonDetailsViewModel
 import com.fab.wab.customer.feature.salon.presentation.controller.vm.StaffSheetViewModel
 import com.fab.wab.customer.feature.salon.presentation.resources.Res
-import com.fab.wab.customer.feature.salon.presentation.resources.review_submitted
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_not_available
 import com.fab.wab.customer.feature.salon.presentation.screen.ReviewsScreen
 import com.fab.wab.customer.feature.salon.presentation.screen.SalonDetailsScreen
+import com.fab.wab.customer.feature.salon.presentation.screen.SalonMediaViewer
 import com.fab.wab.customer.feature.salon.presentation.screen.ServiceSheet
 import com.fab.wab.customer.feature.salon.presentation.screen.StaffSheet
 import com.fab.wab.customer.feature.salon.presentation.screen.toUi
@@ -60,11 +59,10 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
         val viewModel: ReviewsViewModel = koinViewModel(key = target.toString()) { parametersOf(target, addReview) }
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
-        val submitted = stringResource(Res.string.review_submitted)
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 ReviewsContract.SideEffect.OpenLogin -> navigateTo(Graph.Auth)
-                ReviewsContract.SideEffect.Submitted -> notifications.show(submitted, style = NotificationStyle.Success)
+                ReviewsContract.SideEffect.Submitted -> Unit // the sheet shows the S09 success panel itself
                 is ReviewsContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }
@@ -98,7 +96,7 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
         }
         SalonDetailsScreen(state = state, onAction = viewModel::onEvent, onBack = ::navigateBack)
         staffSheet?.let { request -> StaffSheetDestination(request, onDismiss = { staffSheet = null }) }
-        viewer?.let { request -> AppMediaViewer(items = request.items, startIndex = request.index, onClose = { viewer = null }) }
+        viewer?.let { request -> SalonMediaViewer(items = request.items, startIndex = request.index, onClose = { viewer = null }) }
         serviceSheet?.let { service ->
             ServiceSheet(
                 service = service,

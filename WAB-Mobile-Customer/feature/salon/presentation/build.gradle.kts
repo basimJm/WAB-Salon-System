@@ -13,6 +13,7 @@ kotlin {
         implementation(projects.feature.salon.domain)
         implementation(projects.feature.home.domain)
         implementation(projects.feature.home.presentation)
+        implementation(libs.kotlinx.datetime) // S07 hours card: today's day in Asia/Amman
     }
     sourceSets.commonTest.dependencies {
         implementation(libs.kotlinx.coroutines.test)

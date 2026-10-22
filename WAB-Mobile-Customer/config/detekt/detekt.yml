@@ -88,7 +88,7 @@ Compose:
     active: true
   CompositionLocalAllowlist:
     active: true
-    allowedCompositionLocals: LocalAppColors, LocalSpacing, LocalShapes, LocalTypography, LocalSizes, LocalElevation, LocalAlpha, LocalMotion, LocalAdaptive, LocalDarkTheme, LocalImageLoader, LocalAppLocale, LocalAnalyticsTracker
+    allowedCompositionLocals: LocalAppColors, LocalSpacing, LocalShapes, LocalTypography, LocalSizes, LocalElevation, LocalAlpha, LocalMotion, LocalAdaptive, LocalDarkTheme, LocalImageLoader, LocalAppLocale, LocalAnalyticsTracker, LocalGlass, LocalGlassSource, LocalFloatingBarPadding
   CompositionLocalNaming:
     active: true
   ContentEmitterReturningValues:

@@ -13,6 +13,7 @@ data class ElevationTokens(
     val overlay: Dp = 16.dp,
     val buttonShadowAlpha: Float = 0.28f,
     val cardShadowAlpha: Float = 0.06f,
+    val logoShadowAlpha: Float = 0.30f,
 )
 
 val DefaultElevation = ElevationTokens()
