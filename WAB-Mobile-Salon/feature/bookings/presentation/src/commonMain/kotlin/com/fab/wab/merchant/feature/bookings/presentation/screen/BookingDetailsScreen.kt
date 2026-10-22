@@ -45,6 +45,10 @@ import com.fab.wab.merchant.feature.bookings.presentation.analytics.BookingsAnal
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiAction
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiState
 import com.fab.wab.merchant.feature.bookings.presentation.resources.Res
+import com.fab.wab.merchant.feature.bookings.presentation.resources.actor_system
+import com.fab.wab.merchant.feature.bookings.presentation.resources.actor_admin
+import com.fab.wab.merchant.feature.bookings.presentation.resources.actor_member
+import com.fab.wab.merchant.feature.bookings.presentation.resources.actor_customer
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_call
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_cancel_reason
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_copy
@@ -177,8 +181,22 @@ private fun com.fab.wab.merchant.feature.bookings.domain.model.StatusChange.toUi
     val title = status?.let { bookingStatusLabel(it) }.orEmpty()
     return StatusHistoryEntryUi(
         title = title,
-        actor = actorType,
+        actor = actorLabel(actorType)?.let { stringResource(it) } ?: actorType,
         time = time?.let { stringResource(Res.string.history_line, it.date, it.time) }.orEmpty(),
         note = reason,
     )
 }
+
+/** BUSINESS_DOMAIN §1 `ActorType`; an unknown value is shown as sent. */
+private fun actorLabel(actorType: String) = when (actorType.uppercase()) {
+    ACTOR_CUSTOMER -> Res.string.actor_customer
+    ACTOR_MEMBER -> Res.string.actor_member
+    ACTOR_ADMIN -> Res.string.actor_admin
+    ACTOR_SYSTEM -> Res.string.actor_system
+    else -> null
+}
+
+private const val ACTOR_CUSTOMER = "CUSTOMER"
+private const val ACTOR_MEMBER = "MEMBER"
+private const val ACTOR_ADMIN = "ADMIN"
+private const val ACTOR_SYSTEM = "SYSTEM"

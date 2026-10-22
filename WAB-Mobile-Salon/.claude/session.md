@@ -12,69 +12,69 @@
 ### MER-028 — Real-time request M10 in-app
 - Branch: `feat/mer-028-request-in-app`
 - Branched: (from `feat/mer-027-booking-details`)
-- Status: IN PROGRESS (batch 5)
+- Status: IN REVIEW (batch 5 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M10 in-app; BUSINESS_DOMAIN §7 `booking.requested` / `booking.updated`; push data `event` + `bookingId`):
   - [x] Requests from the socket (`booking.requested`) and FCM data messages, de-duplicated by booking id (also across answers), details fetched, only PENDING queued; unanswered pending bookings queue on app open
   - [x] Sheet over any screen (shell, `HOME` route, `BOOKINGS_RESPOND` only): bride badge, customer, persons / services / staff / time, total (JOD), payment, time since request, "1 of 3"; distinct sound / vibration (`RequestAlert`) while shown, stopped on answer
   - [x] Accept in place → confirmation (next / view booking / done); Reject → reason sheet (shared with M09); View details → M09; swipe away = later (stays in Pending)
   - [x] `ALREADY_HANDLED` or a `booking.updated` that left PENDING → "handled by another team member" then dismiss after `HANDLED_DISMISS_MS`; conflicts leave the queue with an error; other errors keep the request pending; foreground FCM requests no longer show a banner
 - Tests: `BookingRequestsViewModelTest` (7), `BookingSignalsTest` (2); `/tmp/claude/quick.sh m28d` bookings + notification + composeApp tests + `assembleDevDebug` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 5 run: policy ok, 81 policy-script tests, 342 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 5 code reading; fixed: M09 history actor localized (CUSTOMER/MEMBER/ADMIN/SYSTEM), JOD formatting in M09, alert after "view booking". DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: the contract names no member for "handled by", so the sheet says "another team member". Outside-the-app overlay / actionable notifications are MER-029/030. Also fixed: M09 money rows and the "collected X" dialog now format JOD.
 
 ### MER-027 — Booking details & actions M09
 - Branch: `feat/mer-027-booking-details`
 - Branched: (from `feat/mer-026-bookings-list`; code committed together with MER-026)
-- Status: IN PROGRESS (batch 5)
+- Status: IN REVIEW (batch 5 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M09, §10; operations `GET /bookings/{id}`, approve/reject/cancel/complete/no-show/reassign; design 03 `on.details`):
   - [x] Header (reference + copy, status / payment / refund / bride badges, date-time, pending auto-cancel countdown, refund note, reject/cancel reason), customer with Call / WhatsApp, persons (staff, time, services), payment rows (total, paid online, remaining, refunded), snapshotted policy, status history
   - [x] Sticky action bar = the server's `actions` for this member (hidden, not disabled); accept at once; reject / cancel need a reason (OTHER needs text ≤ 300) with the full-refund note on cancel; complete ("collected X") and no-show confirmations; reassign sheet (person + active provider)
   - [x] `ALREADY_HANDLED` → "already handled" dialog + refresh; schedule / transition conflicts close the sheet + refresh; other errors keep the sheet; never a blind retry; success banners; realtime booking events refresh
   - [x] `ExternalActions.copyText` (Android clipboard, iOS pasteboard) for the reference
 - Tests: `BookingDetailsViewModelTest` (7); `/tmp/claude/quick.sh m26c` bookings + design-system + ui + composeApp tests + `assembleDevDebug` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 5 run: policy ok, 81 policy-script tests, 342 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 5 code reading; fixed: M09 history actor localized (CUSTOMER/MEMBER/ADMIN/SYSTEM), JOD formatting in M09, alert after "view booking". DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: reassign lists every active provider (no eligible-staff endpoint in the contract); the server validates and a `STAFF_NOT_ELIGIBLE` refreshes.
 
 ### MER-026 — Bookings list M08
 - Branch: `feat/mer-026-bookings-list`
 - Branched: (from `feat/mer-025-setup-checklist`)
-- Status: IN PROGRESS (batch 5)
+- Status: IN REVIEW (batch 5 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M08; operation `GET /bookings`; design 03 `on.list`):
   - [x] `feature/bookings` (domain models, repository, API + mappers, Koin); tabs Pending / Upcoming / Today / Past; search debounced 500 ms; filter sheet (dates, staff, status, bride, payment) with active chips; paging (10) with de-duplication
   - [x] Cards with status / payment badges and live pending countdown (1 s clock); shimmer / empty per tab / no-results / error + retry; pull-to-refresh; realtime `booking.requested|updated|assigned` reload the first page; scope by the server (`BOOKINGS_VIEW_OWN`)
   - [x] Bookings tab registered in the shell; `jodText` / `dateTimeText` formats (12-hour, Asia/Amman) in the design system
 - Tests: `BookingRulesTest`, `BookingMappersTest`, `BookingsViewModelTest` (4), `FormatsTest`; green with MER-027 run
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 5 run: policy ok, 81 policy-script tests, 342 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 5 code reading; fixed: M09 history actor localized (CUSTOMER/MEMBER/ADMIN/SYSTEM), JOD formatting in M09, alert after "view booking". DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: list rows carry no `createdAt`, so no request age is shown.
 
 ### MER-025 — Setup checklist M06
 - Branch: `feat/mer-025-setup-checklist`
 - Branched: (from `feat/mer-024-launch-router`)
-- Status: IN PROGRESS (batch 5)
+- Status: IN REVIEW (batch 5 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M06, §4.2 completeness; `GET /salon` completeness; design 01 `on.check`):
   - [x] Steps from the server's missing items (profile & images, location & contact, hours, services, staff, policies) + optional gallery / team; ✓ when complete; progress "n of 6" + bar + steps left (AR plurals)
   - [x] Pending-approval note; each step opens its screen (profile, hours, services, team, policies, gallery); pull-to-refresh; live → "Your salon is live!" → home
   - [x] `Graph.Setup` start for the APPROVED_INCOMPLETE route
 - Tests: `SetupChecklistTest` (2), `SetupChecklistViewModelTest` (3); application tests + `assembleDevDebug` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 5 run: policy ok, 81 policy-script tests, 342 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 5 code reading; fixed: M09 history actor localized (CUSTOMER/MEMBER/ADMIN/SYSTEM), JOD formatting in M09, alert after "view booking". DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: optional steps have no completeness signal from the server, so they never show ✓.
 
 ### MER-024 — Launch router + offline banner
 - Branch: `feat/mer-024-launch-router`
 - Branched: (batch 5 start, from `feat/mer-023-application-status`)
-- Status: IN PROGRESS (batch 5)
+- Status: IN REVIEW (batch 5 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD §4.2–4.3, §3 offline banner, §8.1; operation `GET /salon`):
   - [x] Core salon source: `SalonProfile` (state, completeness `missing` items from the server: COVER, PROFILE_IMAGE, NAME, DESCRIPTION, LOCATION, PHONE, WORKING_HOURS, SERVICE, STAFF, POLICY; location, contacts, rating) + `SalonRepository` (`current` + `refresh`, stores the salon state in the session); refreshed at launch and after every sign-in
   - [x] `launchRouteOf(session)`: guest → login; pending / rejected → application status; approved incomplete → setup checklist; live / offline (or unknown yet) → home; deactivated members are signed out by the permission refresh / `access.revoked` (MER-009/011) and see the login message
   - [x] Shell `MerchantShell`: NavHost restarts at the route's graph when the route changes; permission-gated bottom bar / rail (`visibleMerchantTabs` ∩ tabs shipped), shown on tab destinations only; the first visible tab is the home start
   - [x] Offline banner on every screen while the salon is OFFLINE ("Your salon is currently offline…", Contact → WAB WhatsApp from the config contact)
 - Tests: `LaunchRouteTest` (2), `SalonMapperTest` (2), `MerchantRootTabsTest` (2), `MainViewModelTest` (+1 salon refresh on sign-in); domain / data / composeApp tests, `assembleDevDebug`, iOS framework link green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 5 run: policy ok, 81 policy-script tests, 342 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 5 code reading; fixed: M09 history actor localized (CUSTOMER/MEMBER/ADMIN/SYSTEM), JOD formatting in M09, alert after "view booking". DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: tabs register themselves in `REGISTERED_TABS` as their features land (bookings, calendar, salon, more, home).
 
 ### MER-023 — Application status M05

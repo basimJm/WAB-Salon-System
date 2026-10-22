@@ -99,4 +99,8 @@
     <string name="history_line">%1$s · %2$s</string>
     <string name="request_time_range">%1$s – %2$s</string>
     <string name="request_another_member">another team member</string>
+    <string name="actor_customer">Customer</string>
+    <string name="actor_member">Salon</string>
+    <string name="actor_admin">WAB admin</string>
+    <string name="actor_system">Automatic</string>
 </resources>

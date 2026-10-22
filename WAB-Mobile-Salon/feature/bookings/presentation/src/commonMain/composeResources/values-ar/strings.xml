@@ -99,4 +99,8 @@
     <string name="history_line">%1$s · %2$s</string>
     <string name="request_time_range">%1$s – %2$s</string>
     <string name="request_another_member">عضو آخر في الفريق</string>
+    <string name="actor_customer">العميل</string>
+    <string name="actor_member">الصالون</string>
+    <string name="actor_admin">إدارة WAB</string>
+    <string name="actor_system">تلقائي</string>
 </resources>
