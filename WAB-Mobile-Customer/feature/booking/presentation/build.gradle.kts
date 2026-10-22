@@ -13,6 +13,8 @@ kotlin {
         implementation(projects.feature.booking.domain)
         implementation(projects.feature.salon.domain)
         implementation(projects.feature.salon.presentation)
+        implementation(projects.feature.auth.domain)
+        implementation(projects.feature.profile.domain)
         implementation(libs.kotlinx.datetime)
     }
     sourceSets.commonTest.dependencies {

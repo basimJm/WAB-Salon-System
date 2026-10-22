@@ -12,10 +12,12 @@ sealed interface ReviewsContract {
         val rating: Int = 0,
         val comment: String = "",
         val submitting: Boolean = false,
+        /** S09 success panel: the sheet stays open with "Thank you" + Done until dismissed. */
+        val submitted: Boolean = false,
     ) {
         val canSubmit: Boolean
             get() = rating in ReviewDefaults.MIN_RATING..ReviewDefaults.MAX_RATING &&
-                comment.length <= ReviewDefaults.MAX_COMMENT_LENGTH && !submitting
+                comment.length <= ReviewDefaults.MAX_COMMENT_LENGTH && !submitting && !submitted
     }
 
     data class UiState(

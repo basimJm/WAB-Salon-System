@@ -148,5 +148,10 @@
   "emails.alert.subject": "تنبيه WAB: {title}",
   "emails.alert.body": "{title}\nالأهمية: {severity}\nالوقت: {time}\nافتح صفحة التنبيهات في لوحة الإدارة للتفاصيل.",
   "emails.alertDigest.subject": "ملخص تنبيهات WAB ({count})",
-  "emails.alertDigest.body": "{count} تنبيهات جديدة:\n{lines}\nافتح صفحة التنبيهات في لوحة الإدارة للتفاصيل."
+  "emails.alertDigest.body": "{count} تنبيهات جديدة:\n{lines}\nافتح صفحة التنبيهات في لوحة الإدارة للتفاصيل.",
+  "appLinks.salon.title": "صالون على WAB",
+  "appLinks.salon.heading": "افتح في تطبيق WAB",
+  "appLinks.salon.body": "ثبّت تطبيق WAB أو افتحه لعرض هذا الصالون وحجز موعدك.",
+  "appLinks.salon.playStore": "احصل عليه من Google Play",
+  "appLinks.salon.appStore": "حمّله من App Store"
 }

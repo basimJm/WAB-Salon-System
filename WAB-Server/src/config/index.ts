@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseEnv } from 'node:util';
+import type { AppLinksSettings } from '../constants/appLinks';
+import { ENV_KEY_HINTS } from '../constants/envHints';
 import {
   DEFAULT_ENVIRONMENT,
   ENVIRONMENTS,
@@ -56,12 +58,27 @@ export interface StorageSettings {
   };
 }
 
+/** Lists default to empty; a store URL is left out when unset (the page then hides its button). */
+const buildAppLinksSettings = (values: RawEnv): AppLinksSettings => {
+  const playStoreUrl = values[ENV_KEYS.appLinksPlayStoreUrl];
+  const appStoreUrl = values[ENV_KEYS.appLinksAppStoreUrl];
+  return Object.freeze({
+    androidPackages: Object.freeze(values[ENV_KEYS.appLinksAndroidPackages]),
+    androidSha256: Object.freeze(values[ENV_KEYS.appLinksAndroidSha256]),
+    iosAppIds: Object.freeze(values[ENV_KEYS.appLinksIosAppIds]),
+    ...(playStoreUrl === undefined ? {} : { playStoreUrl }),
+    ...(appStoreUrl === undefined ? {} : { appStoreUrl }),
+  });
+};
+
 export interface AppConfig {
   readonly env: Environment;
   readonly isProduction: boolean;
   readonly port: number;
   readonly logLevel: LogLevel;
   readonly corsAllowedOrigins: readonly string[];
+  /** Android App Links + iOS Universal Links for shared salon links. */
+  readonly appLinks: AppLinksSettings;
   /** Number of reverse proxies in front of the app (load balancer = 1); 0 = trust none. */
   readonly trustProxyHops: number;
   readonly mongo: { readonly uri: string };
@@ -85,14 +102,42 @@ export interface AppConfig {
   };
 }
 
-/** Thrown at startup when the environment is invalid. Names the bad keys, never their values. */
+/** One invalid environment key and why. Never carries the value. */
+export interface ConfigProblem {
+  readonly key: string;
+  readonly reason: string;
+}
+
+const PROBLEM_MISSING = 'is not set';
+const PROBLEM_EMPTY = 'is set but empty';
+const PROBLEM_INVALID = 'has an invalid value';
+
+const describeProblem = (key: string, source: NodeJS.ProcessEnv): ConfigProblem => {
+  const raw = source[key];
+  const state =
+    raw === undefined ? PROBLEM_MISSING : raw.trim() === '' ? PROBLEM_EMPTY : PROBLEM_INVALID;
+  const hint = ENV_KEY_HINTS[key];
+  return { key, reason: hint === undefined ? state : `${state}; ${hint}` };
+};
+
+/**
+ * Thrown at startup when the environment is invalid. Names every bad key and why (missing, empty
+ * or invalid, with what a valid value looks like), never the values.
+ */
 export class ConfigError extends Error {
   readonly invalidKeys: readonly string[];
+  readonly problems: readonly ConfigProblem[];
 
-  constructor(invalidKeys: readonly string[]) {
-    super(`Invalid environment configuration: ${invalidKeys.join(', ')}`);
+  constructor(problems: readonly ConfigProblem[]) {
+    super(
+      [
+        `Invalid environment configuration: ${String(problems.length)} problem(s). Fix them in the host's environment settings and redeploy:`,
+        ...problems.map((problem) => `  - ${problem.key} ${problem.reason}`),
+      ].join('\n'),
+    );
     this.name = 'ConfigError';
-    this.invalidKeys = invalidKeys;
+    this.problems = problems;
+    this.invalidKeys = problems.map((problem) => problem.key);
   }
 }
 
@@ -192,7 +237,7 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   const parsed = envSchema.safeParse(source);
   if (!parsed.success) {
     const keys = new Set(parsed.error.issues.map((issue) => String(issue.path[0])));
-    throw new ConfigError([...keys]);
+    throw new ConfigError([...keys].map((key) => describeProblem(key, source)));
   }
   const values = parsed.data;
   const env = values[ENV_KEYS.nodeEnv];
@@ -209,6 +254,7 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
     port: values[ENV_KEYS.port],
     logLevel: values[ENV_KEYS.logLevel],
     corsAllowedOrigins: Object.freeze(values[ENV_KEYS.corsAllowedOrigins]),
+    appLinks: buildAppLinksSettings(values),
     trustProxyHops: values[ENV_KEYS.trustProxyHops],
     mongo: Object.freeze({ uri: values[ENV_KEYS.mongoUri] }),
     redis: Object.freeze({ url: values[ENV_KEYS.redisUrl] }),

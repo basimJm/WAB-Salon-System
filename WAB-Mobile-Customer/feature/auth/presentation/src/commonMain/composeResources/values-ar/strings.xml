@@ -21,7 +21,7 @@
     <string name="login_blocked_contact">تواصل معنا</string>
     <string name="otp_title">تحقق من رقمك</string>
     <string name="otp_title_booking">تأكيد الحجز</string>
-    <string name="otp_sent_to">أرسلنا رمزاً إلى %1$s</string>
+    <string name="otp_sent_to">أرسلنا رمزاً إلى</string>
     <string name="otp_verify">تحقق</string>
     <string name="otp_resend_in">إعادة الإرسال خلال %1$s</string>
     <string name="otp_resend">إعادة إرسال الرمز</string>
@@ -48,4 +48,10 @@
     <string name="register_button">تسجيل</string>
     <string name="register_have_account">لدي حساب،</string>
     <string name="register_login_link">تسجيل الدخول</string>
+    <string name="auth_language_switch">EN</string>
+    <string name="login_phone_placeholder">مثال: 7X XXX XXXX</string>
+    <string name="register_email_placeholder">مثال: name@example.com</string>
+    <string name="auth_dialog_glyph_alert">!</string>
+    <string name="auth_dialog_glyph_blocked">⛔</string>
+    <string name="auth_dialog_glyph_expired">⏱</string>
 </resources>

@@ -123,25 +123,36 @@ class BookingFlowStaffAndSummaryTest : BookingFlowHarness() {
     }
 
     @Test
-    fun summaryCreatesTheDraftWithPaymentFallbackSwitchesMethodsAndReleasesOnBack() = runTest(UnconfinedTestDispatcher()) {
+    fun summaryCreatesAPayOnArrivalDraftIgnoresOnlineMethodsAndReleasesOnBack() = runTest(UnconfinedTestDispatcher()) {
         val vm = viewModel()
         vm.reachStaffStep()
         vm.onEvent(UiAction.OnAnyStaffSelect)
         vm.onEvent(UiAction.OnContinue)
         vm.onEvent(UiAction.OnJustMe)
         assertEquals(BookingStep.SUMMARY, vm.state.value.step)
-        assertEquals(listOf(PaymentMethod.PAY_ON_ARRIVAL, PaymentMethod.DEPOSIT), drafts.created)
-        assertEquals(PaymentMethod.DEPOSIT, vm.state.value.draft?.paymentMethod)
+        assertEquals(listOf(PaymentMethod.PAY_ON_ARRIVAL), drafts.created)
+        assertEquals(PaymentMethod.PAY_ON_ARRIVAL, vm.state.value.draft?.paymentMethod)
         assertTrue(vm.state.value.canConfirm)
         vm.onEvent(UiAction.OnPaymentMethodSelect(PaymentMethod.FULL_ONLINE))
-        assertEquals(listOf("d2"), drafts.deleted)
-        assertEquals(PaymentMethod.FULL_ONLINE, vm.state.value.draft?.paymentMethod)
-        vm.onEvent(UiAction.OnPaymentMethodSelect(PaymentMethod.PAY_ON_ARRIVAL))
-        assertEquals(3, drafts.created.size)
+        vm.onEvent(UiAction.OnPaymentMethodSelect(PaymentMethod.DEPOSIT))
+        assertEquals(1, drafts.created.size)
+        assertTrue(drafts.deleted.isEmpty())
         vm.onEvent(UiAction.OnConfirm)
-        assertEquals(SideEffect.OpenVerification("d3"), effects.last())
+        assertEquals(SideEffect.OpenVerification("d1"), effects.last())
         vm.onEvent(UiAction.OnBack)
         assertEquals(BookingStep.COMPANIONS, vm.state.value.step)
-        assertEquals(listOf("d2", "d3"), drafts.deleted)
+        assertEquals(listOf("d1"), drafts.deleted)
+    }
+
+    @Test
+    fun aSalonWithoutPayOnArrivalShowsTheDraftErrorInsteadOfFallingBackOnline() = runTest(UnconfinedTestDispatcher()) {
+        drafts = DraftFake(setOf(PaymentMethod.DEPOSIT))
+        val vm = viewModel()
+        vm.reachStaffStep()
+        vm.onEvent(UiAction.OnAnyStaffSelect)
+        vm.onEvent(UiAction.OnContinue)
+        vm.onEvent(UiAction.OnJustMe)
+        assertEquals(listOf(PaymentMethod.PAY_ON_ARRIVAL), drafts.created)
+        assertEquals("error", vm.state.value.draftError)
     }
 }

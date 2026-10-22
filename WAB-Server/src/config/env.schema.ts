@@ -40,6 +40,12 @@ const splitList = (value: string): string[] =>
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
 
+/** An optional URL where an empty value (a host form left blank) means unset. */
+const optionalUrlOrEmpty = z
+  .union([z.literal(''), z.url()])
+  .optional()
+  .transform((value) => (value === '' ? undefined : value));
+
 /** Raw environment variables → validated, typed values. Secrets have no defaults. */
 const booleanText = z.enum(['true', 'false']).transform((value) => value === 'true');
 const providerMode = z.enum(PROVIDER_MODES).optional();
@@ -51,6 +57,11 @@ export const envSchema = z
     [ENV_KEYS.port]: z.coerce.number().int().min(PORT_MIN).max(PORT_MAX).default(DEFAULT_PORT),
     [ENV_KEYS.logLevel]: z.enum(LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
     [ENV_KEYS.corsAllowedOrigins]: z.string().default('').transform(splitList),
+    [ENV_KEYS.appLinksAndroidPackages]: z.string().default('').transform(splitList),
+    [ENV_KEYS.appLinksAndroidSha256]: z.string().default('').transform(splitList),
+    [ENV_KEYS.appLinksIosAppIds]: z.string().default('').transform(splitList),
+    [ENV_KEYS.appLinksPlayStoreUrl]: optionalUrlOrEmpty,
+    [ENV_KEYS.appLinksAppStoreUrl]: optionalUrlOrEmpty,
     [ENV_KEYS.trustProxyHops]: z.coerce
       .number()
       .int()

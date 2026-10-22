@@ -25,6 +25,14 @@ ADMIN_EMAIL=… ADMIN_PASSWORD=… npm run seed:admin   # first admin (≥ 12 ch
 npm start                    # http://localhost:<PORT>/health  and  /ready
 ```
 
+### Demo data (development databases only)
+
+`npm run seed:demo` fills every collection of a **development** database with linked sample data (refused when `NODE_ENV=production`): 10 salons in Amman in every state (6 live, offline, incomplete, pending, rejected) with owners, staff, services, hours, gallery, closures, leaves, policies and subscriptions; 24 customers; bookings over the last 4 weeks and the next 10 days in every status, with payments, refunds, ledger and payouts; reviews, favorites, notifications, banners, content pages, FAQs, contact info, app versions, campaigns, alerts, audit logs, exports and 14 daily reports. It needs `npm run seed:admin` first, runs the reference seed itself, and is insert-only and deterministic: a second run adds nothing and never overwrites what an admin changed. Not seeded on purpose: settings (missing = default), refresh tokens and booking drafts (short-lived sessions).
+
+Photos: put them in a folder with the sub-folders `covers`, `profiles`, `gallery`, `staff`, `customers`, `banners`, `catalog`, `licenses` (any `.jpg/.jpeg/.png/.webp/.heic`; a file named like the key, e.g. `catalog/haircut.jpg`, is used for that key, the others are shared in turn), then run `npm run seed:demo-images -- <folder>` with `STORAGE_PROVIDER=real`. Photos are re-encoded as JPEG (max 1600 px) and the list thumbnails are generated.
+
+Demo phone numbers are invented Jordanian mobiles (`+96279900xxxx` customers, `+96278900xxxx` staff). To sign in as one, add it as a test number in Firebase → Authentication → Phone (dev project only) so no SMS goes to a real person.
+
 The full local gate, run before every push: `npm run docs && npm run format:check && npm run lint && npm run typecheck && npm run build && npm test && npm audit --omit=dev`.
 
 ## 2. The image
@@ -39,7 +47,7 @@ It runs as the unprivileged `node` user, reads `PORT`, and has a health check on
 
 ## 3. Configure an environment
 
-Start from `docker/env.production.example` (used for dev-hosted and prod; only the values differ), put the values in the host's secret store, then check the same variables with the real tool:
+Start from `docker/env.dev.example` (hosted dev) or `docker/env.prod.example` (production); every key has a comment saying what it is and where to get it, put the values in the host's secret store, then check the same variables with the real tool:
 
 ```sh
 npm run env:check -- <env file>      # prints key names only, never values

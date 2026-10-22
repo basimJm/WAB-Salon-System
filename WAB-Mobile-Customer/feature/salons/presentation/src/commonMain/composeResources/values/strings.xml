@@ -1,17 +1,20 @@
 <resources>
     <string name="salons_title">All Salons</string>
     <string name="salons_search_hint">Search by salon name</string>
-    <string name="salons_filter">Filters</string>
+    <string name="salons_filter">Filter</string>
+    <string name="salons_chip_remove">Remove %1$s</string>
     <string name="salons_empty">No salons match your search</string>
+    <string name="salons_empty_body">Try other keywords or adjust the filters.</string>
     <string name="salons_chip_recommended">Recommended</string>
     <string name="salons_chip_nearest">Nearest</string>
     <string name="salons_chip_price">%1$s–%2$s JOD</string>
-    <string name="salons_chip_rating">%1$d★ and up</string>
+    <string name="salons_chip_rating">%1$d★ &amp; up</string>
     <string name="salons_nearest_dropped">Location is off, so the Nearest filter was removed.</string>
     <string name="filter_title">Filter</string>
     <string name="filter_close">Close</string>
     <string name="filter_reset">Reset</string>
     <string name="filter_apply">Apply filter</string>
+    <string name="filter_retry">Retry</string>
     <string name="filter_services">Services</string>
     <string name="filter_see_more">See more</string>
     <string name="filter_price">Price range</string>

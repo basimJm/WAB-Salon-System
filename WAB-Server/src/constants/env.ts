@@ -28,6 +28,12 @@ export const ENV_KEYS = {
   logLevel: 'LOG_LEVEL',
   corsAllowedOrigins: 'CORS_ALLOWED_ORIGINS',
   trustProxyHops: 'TRUST_PROXY_HOPS',
+  /** App Links / Universal Links (comma lists; empty = no app claims the links). */
+  appLinksAndroidPackages: 'APP_LINKS_ANDROID_PACKAGES',
+  appLinksAndroidSha256: 'APP_LINKS_ANDROID_SHA256',
+  appLinksIosAppIds: 'APP_LINKS_IOS_APP_IDS',
+  appLinksPlayStoreUrl: 'APP_LINKS_PLAY_STORE_URL',
+  appLinksAppStoreUrl: 'APP_LINKS_APP_STORE_URL',
   mongoUri: 'MONGODB_URI',
   redisUrl: 'REDIS_URL',
   jwtAccessSecret: 'JWT_ACCESS_SECRET',

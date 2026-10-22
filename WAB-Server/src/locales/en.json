@@ -148,5 +148,10 @@
   "emails.alert.subject": "WAB alert: {title}",
   "emails.alert.body": "{title}\nSeverity: {severity}\nTime: {time}\nOpen the Alerts page in the admin panel for details.",
   "emails.alertDigest.subject": "WAB alerts digest ({count})",
-  "emails.alertDigest.body": "{count} new alerts:\n{lines}\nOpen the Alerts page in the admin panel for details."
+  "emails.alertDigest.body": "{count} new alerts:\n{lines}\nOpen the Alerts page in the admin panel for details.",
+  "appLinks.salon.title": "WAB salon",
+  "appLinks.salon.heading": "Open in the WAB app",
+  "appLinks.salon.body": "Install or open the WAB app to see this salon and book your appointment.",
+  "appLinks.salon.playStore": "Get it on Google Play",
+  "appLinks.salon.appStore": "Download on the App Store"
 }

@@ -7,6 +7,9 @@
     <issue id="AndroidGradlePluginVersion" severity="ignore" />
     <issue id="OldTargetApi" severity="informational" />
 
+    <!-- FCM 26 (CUS-076): the token arrives in onRegistered(); onNewToken() is deprecated, so this check no longer applies. -->
+    <issue id="MissingFirebaseInstanceTokenRefresh" severity="ignore" />
+
     <!-- Always errors: missing Arabic/English text, RTL support, hardcoded text, security. -->
     <issue id="MissingTranslation" severity="error" />
     <issue id="ExtraTranslation" severity="error" />

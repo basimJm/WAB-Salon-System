@@ -16,6 +16,8 @@ import { createMerchantRouter } from './modules/merchant';
 import { createAdminRouter } from './modules/admin';
 import type { ApiServices } from './modules/services';
 import { createHealthRouter } from './routes/health';
+import { EMPTY_APP_LINKS, type AppLinksSettings } from './constants/appLinks';
+import { createAppLinksRouter } from './routes/appLinks';
 import type { ReadinessCheck } from './utils/health';
 import type { Logger } from './utils/logger';
 
@@ -33,6 +35,8 @@ export interface AppDependencies {
   readonly docs?: boolean;
   /** Services for the feature routers (OTP gate...); built by `server.ts` once Redis is up. */
   readonly services?: ApiServices;
+  /** App Links / Universal Links settings; default = no app claims the links. */
+  readonly appLinks?: AppLinksSettings;
 }
 
 /** Builds the Express app. Order matters: ids and language first, errors last. */
@@ -44,6 +48,7 @@ export const createApp = ({
   trustProxyHops = DEFAULT_TRUST_PROXY_HOPS,
   docs = false,
   services = {},
+  appLinks = EMPTY_APP_LINKS,
 }: AppDependencies): Express => {
   const app = express();
   app.disable('x-powered-by');
@@ -71,7 +76,7 @@ export const createApp = ({
           admin: createAdminRouter(services),
         },
         createHealthRouter(readinessChecks),
-        [defaultWebhooks(services)],
+        [defaultWebhooks(services), { path: '', router: createAppLinksRouter(appLinks) }],
       ),
   );
   app.use(notFound);
