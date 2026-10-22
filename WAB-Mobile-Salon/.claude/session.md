@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-003 — Project rules and quality gates
+- Branch: `feat/mer-003-rules-gates` (from `feat/mer-002-variants-ci`)
+- Status: IN PROGRESS (batch 1)
+- Acceptance criteria (backlog MER-003; root rules §3):
+  - [x] `WAB-Mobile-Salon/CLAUDE.md`: the customer rules adapted to the merchant app (real module map, `/merchant/v1`, `merchant` master, merchant PRD/design paths, Liquid Glass usage) + merchant specifics (permission gating, conflict-safe booking actions, overlay permission, request sound)
+  - [x] Policy baseline `{}` and detekt baseline without issues: the 53 policy findings and 49 detekt findings inherited from the template fixed in code (named constants, tokens, typed catches, `error()`, lifecycle-aware collection, Compose parameter order / effect lambdas, `NotificationTheme` supplied by the shell because `core/notification` sits below the design system); dead template code removed (`Utils`, `NumberFormatter`, `FeatureFlags` + old analytics stubs, `Encryptor`/`Algorithm`, `AppPagingDataSource`); `App()` without the unused platform parameter
+  - [x] 300-line rule enforced by `policy_checks.py file-length` (unchanged)
+  - [x] Tests: `test_baselines_empty.py` (baselines stay empty), `NotificationThemeTest`
+- Tests: policy `all: ok` with empty baseline; detekt exit 0 with empty baseline; `testAndroidHostTest` + `assembleDevDebug` + iOS framework link green
+- Loops: 0/1
+- Review: PENDING
+- Notes: the fixes live in the merchant copy only; the customer core still carries them in its baselines (port later; KMP_TEMPLATE copies the customer core).
+
 ### MER-002 — Build variants + CI
 - Branch: `feat/mer-002-variants-ci` (batch 1 start, from `origin/merchant`)
 - Status: IN PROGRESS (batch 1)

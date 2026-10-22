@@ -15,16 +15,20 @@ import com.fab.wab.merchant.core.domain.provider.DeviceLocationProvider
 import org.koin.mp.KoinPlatform
 
 
+private const val ANDROID_CONTEXT_PROPERTY = "androidContext"
+private const val LOCATION_INTERVAL_MS = 10_000L
+private const val LOCATION_MIN_INTERVAL_MS = 5_000L
+
 class DeviceLocationProviderAndroid : DeviceLocationProvider {
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun fetchCurrentLocation(onResult: (LocationData?) -> Unit) {
-        val context = KoinPlatform.getKoin().getProperty<Context>("androidContext")
+        val context = KoinPlatform.getKoin().getProperty<Context>(ANDROID_CONTEXT_PROPERTY) ?: return onResult(null)
         val fusedLocationClient: FusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(context!!)
+            LocationServices.getFusedLocationProviderClient(context)
 
-        val locationRequest = LocationRequest.Builder(PRIORITY_BALANCED_POWER_ACCURACY, 10000)
+        val locationRequest = LocationRequest.Builder(PRIORITY_BALANCED_POWER_ACCURACY, LOCATION_INTERVAL_MS)
             .setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(5000)
+            .setMinUpdateIntervalMillis(LOCATION_MIN_INTERVAL_MS)
             .setMaxUpdates(1)
             .build()
 

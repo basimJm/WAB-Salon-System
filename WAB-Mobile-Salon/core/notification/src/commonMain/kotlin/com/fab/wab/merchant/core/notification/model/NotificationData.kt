@@ -2,6 +2,7 @@ package com.fab.wab.merchant.core.notification.model
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
@@ -20,8 +21,8 @@ sealed class NotificationContent {
         val messageRes: StringResource,
     ) : NotificationContent() {
         @Composable
-        fun Display() {
-            Text(text = stringResource(messageRes))
+        fun Display(modifier: Modifier = Modifier) {
+            Text(text = stringResource(messageRes), modifier = modifier)
         }
     }
 }
@@ -35,5 +36,5 @@ data class NotificationConfiguration(
     val customBackgroundColor: Color? = null,
     val customCornerRadius: Dp? = null,
     val showDismissButton: Boolean = true,
-    val autoDismissDelayMs: Long = 5000L,
+    val autoDismissDelayMs: Long = NotificationDefaults.AUTO_DISMISS_MS,
 )

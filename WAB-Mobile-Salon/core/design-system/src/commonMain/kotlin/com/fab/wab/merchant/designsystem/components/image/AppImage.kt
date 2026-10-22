@@ -20,8 +20,8 @@ import com.fab.wab.merchant.designsystem.theme.AppTheme
  */
 @Composable
 fun AppImage(
-    modifier: Modifier = Modifier,
     url: String,
+    modifier: Modifier = Modifier,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.Crop,
 ) {

@@ -51,35 +51,8 @@ class AndroidAppPlugin : Plugin<Project> {
                     create("dev") { environment(id = "dev", prefix = "DEV", property = property) }
                     create("prod") { environment(id = "prod", prefix = "PROD", property = property) }
                 }
-                buildTypes {
-                    getByName("debug") {
-                        isMinifyEnabled = false
-                    }
-                    getByName("release") {
-                        isMinifyEnabled = true
-                        isShrinkResources = true
-                        proguardFiles(
-                            getDefaultProguardFile(PROGUARD_DEFAULT_FILE),
-                            PROGUARD_APP_FILE,
-                            rootProject.file(PROGUARD_DATA_FILE),
-                        )
-                    }
-                }
-                lint {
-                    warningsAsErrors = true
-                    abortOnError = true
-                    checkDependencies = true
-                    checkReleaseBuilds = true
-                    lintConfig = rootProject.file(LINT_CONFIG_FILE)
-                    htmlReport = true
-                    xmlReport = true
-                    sarifReport = true
-                }
-                packaging {
-                    resources {
-                        excludes += "/META-INF/{AL2.0,LGPL2.1}"
-                    }
-                }
+                configureBuildTypes(rootProject)
+                configureLintAndPackaging(rootProject)
                 buildFeatures {
                     buildConfig = true
                 }
@@ -89,25 +62,66 @@ class AndroidAppPlugin : Plugin<Project> {
                 }
             }
 
-            dependencies {
-                add("implementation", project(":composeApp"))
-                add("implementation", project(":core:common"))
-                add("implementation", project(":core:data"))
-                add("implementation", project(":core:domain"))
-                add("implementation", project(":core:storage"))
-                add("implementation", project(":core:ui"))
-                add("implementation", project(":core:mvi"))
-                add("implementation", project(":core:firebase"))
-                add("implementation", project(":core:notification"))
-                add("implementation", libs.findLibrary("androidx-activity-compose").get())
-                add("implementation", libs.findBundle("koin-android").get())
-                add("implementation", libs.findBundle("lifecycle").get())
-                add("implementation", libs.findLibrary("firebase-messaging").get())
-                add("releaseImplementation", libs.findLibrary("firebase-appcheck-playintegrity").get())
-                add("debugImplementation", libs.findLibrary("firebase-appcheck-debug").get())
-                add("debugImplementation", libs.findLibrary("compose-uiTooling").get())
-            }
+            addAppDependencies()
         }
+    }
+}
+
+/** Debug unminified; release minified + shrunk with the default, app and data keep rules. */
+private fun ApplicationExtension.configureBuildTypes(rootProject: Project) {
+buildTypes {
+        getByName("debug") {
+            isMinifyEnabled = false
+        }
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile(PROGUARD_DEFAULT_FILE),
+                PROGUARD_APP_FILE,
+                rootProject.file(PROGUARD_DATA_FILE),
+            )
+        }
+    }
+}
+
+/** Lint warnings are errors (config in `config/lint.xml`); license files excluded from the APK. */
+private fun ApplicationExtension.configureLintAndPackaging(rootProject: Project) {
+    lint {
+        warningsAsErrors = true
+        abortOnError = true
+        checkDependencies = true
+        checkReleaseBuilds = true
+        lintConfig = rootProject.file(LINT_CONFIG_FILE)
+        htmlReport = true
+        xmlReport = true
+        sarifReport = true
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+}
+
+private fun Project.addAppDependencies() {
+    dependencies {
+        add("implementation", project(":composeApp"))
+        add("implementation", project(":core:common"))
+        add("implementation", project(":core:data"))
+        add("implementation", project(":core:domain"))
+        add("implementation", project(":core:storage"))
+        add("implementation", project(":core:ui"))
+        add("implementation", project(":core:mvi"))
+        add("implementation", project(":core:firebase"))
+        add("implementation", project(":core:notification"))
+        add("implementation", libs.findLibrary("androidx-activity-compose").get())
+        add("implementation", libs.findBundle("koin-android").get())
+        add("implementation", libs.findBundle("lifecycle").get())
+        add("implementation", libs.findLibrary("firebase-messaging").get())
+        add("releaseImplementation", libs.findLibrary("firebase-appcheck-playintegrity").get())
+        add("debugImplementation", libs.findLibrary("firebase-appcheck-debug").get())
+        add("debugImplementation", libs.findLibrary("compose-uiTooling").get())
     }
 }
 

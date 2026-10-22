@@ -2,6 +2,8 @@ package com.fab.wab.merchant.core.domain
 
 import kotlinx.coroutines.flow.Flow
 
+// One facade over the stored settings: every key has a flow and a setter, so the count follows the keys.
+@Suppress("TooManyFunctions")
 interface AppSettings {
     val language: Flow<String>
     val themeMode: Flow<ThemeMode>

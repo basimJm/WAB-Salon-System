@@ -67,7 +67,7 @@ val appModules = listOf(
 
 /** App shell: theme, language direction, dark mode, image loading, in-app notifications, analytics and navigation. */
 @Composable
-fun App(androidContext: Any?) {
+fun App() {
     val navController: NavHostController = rememberNavController()
     val mainViewModel: MainViewModel = koinViewModel<MainViewModel>()
     val sessionTimeOut by mainViewModel.sessionTimeOutState.collectAsStateWithLifecycle()
@@ -94,7 +94,7 @@ fun App(androidContext: Any?) {
                 TrackNavigationScreens(navController)
                 val sessionState by koinInject<SessionStore>().state.collectAsStateWithLifecycle(initialValue = null)
                 RealtimeConnectionEffect(koinInject<RealtimeClient>(), isSignedIn = sessionState?.isSignedIn == true)
-                NotificationHost {
+                NotificationHost(theme = appNotificationTheme()) {
                     val notificationManager = rememberNotificationManager()
                     LaunchedEffect(sessionTimeOut) {
                         if (sessionTimeOut) {

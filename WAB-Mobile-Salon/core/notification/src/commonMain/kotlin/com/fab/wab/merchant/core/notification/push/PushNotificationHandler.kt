@@ -6,6 +6,8 @@ import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
 import kotlin.concurrent.Volatile
 
+private const val NOT_INITIALIZED = "PushNotificationHandler must be initialized before use."
+
 class PushNotificationHandler(
     private val tokenStorage: PushTokenStorage,
     private val onNotificationReceived: ((PushNotification) -> Unit)? = null,
@@ -37,9 +39,7 @@ class PushNotificationHandler(
         }
 
         fun getInstance(): PushNotificationHandler {
-            return instance ?: throw IllegalStateException(
-                "PushNotificationHandler must be initialized before use."
-            )
+            return instance ?: error(NOT_INITIALIZED)
         }
     }
 }

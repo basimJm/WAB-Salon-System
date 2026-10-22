@@ -5,6 +5,8 @@ import com.fab.wab.merchant.core.domain.provider.DeviceLocationProvider
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import platform.CoreLocation.CLLocationManager
+import platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
+import platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse
 
 
 class DeviceLocationProviderIOS : DeviceLocationProvider {
@@ -12,7 +14,9 @@ class DeviceLocationProviderIOS : DeviceLocationProvider {
     override fun fetchCurrentLocation(onResult: (LocationData?) -> Unit) {
         val locationManager = CLLocationManager()
 
-        if (locationManager.authorizationStatus != 3 && locationManager.authorizationStatus != 4) {
+        if (locationManager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways &&
+            locationManager.authorizationStatus != kCLAuthorizationStatusAuthorizedWhenInUse
+        ) {
             locationManager.requestWhenInUseAuthorization()
             onResult(null)
             return
