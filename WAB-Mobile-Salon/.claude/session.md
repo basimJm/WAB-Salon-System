@@ -12,33 +12,33 @@
 ### MER-040 — Permissions editor M18
 - Branch: `feat/mer-040-permissions`
 - Branched: (from `feat/mer-039-staff-profile`)
-- Status: IN PROGRESS (batch 7)
+- Status: IN REVIEW (batch 7 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M18, §6.2–6.3; operation `PATCH /team/members/{id}` permissions; design 06 `on.perms`):
   - [x] Owner only (opened from the member form): member header (photo, name, role, "n permissions on" AR plurals), "Apply role template" (PRD §6.3 templates), toggles grouped Bookings / Salon / Staff / Finance / Insights with a description per key (every one of the 15 keys in exactly one group, tested)
   - [x] Owner-only capabilities (team & permissions, bank details, salon deletion) shown locked "Owner only"; the OWNER's own permissions are locked; save only when changed; the member's app refreshes on `PERMISSIONS_UPDATED` (MER-009)
 - Tests: `PermissionGroupsTest` (2), `PermissionsViewModelTest` (2); `/tmp/claude/quick.sh m40b` green after escaping an `&` in one string; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 7 run: policy ok, 81 policy-script tests, 417 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 7 code reading; no blocking finding (non-blocking: team screens sit at the root of the nav graph, so the tab bar hides there like other detail screens). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: the PATCH also re-sends name and role unchanged (the contract updates them together).
 
 ### MER-039 — Staff profile + leaves M17
 - Branch: `feat/mer-039-staff-profile`
 - Branched: (from `feat/mer-038-team`)
-- Status: IN PROGRESS (batch 7)
+- Status: IN REVIEW (batch 7 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M17 staff section; operations `GET/PUT /team/members/{id}/staff`, leaves `GET/POST/PATCH/DELETE`, `GET /salon/services`, `GET /salon/hours`; design 06 `on.staffForm`):
   - [x] Read-only rating, reviews count and customers served; provides-services toggle, bio ≤ 1000, years 0..80, skills multi-select from the salon services, bride-qualified on women's salons only
   - [x] Working days only on open salon days (Saturday → Friday), optional custom hours on 15-minute steps inside that day's salon hours (validated before saving)
   - [x] Leaves: list, add / edit (future only) with date range + note ≤ 300 (cleared note → null), remove with confirmation
   - [x] Save or add-leave `409 SCHEDULE_CONFLICT` → shared affected-bookings sheet (Reassign opens M09, Cancel affected = `STAFF_UNAVAILABLE` + reason, then re-send, Go back); saving refreshes the shared salon; opened from the team list (STAFF_MANAGE) and the member form
 - Tests: `StaffTest` (2), `StaffMappersTest` (2), `StaffProfileViewModelTest` (4); `/tmp/claude/quick.sh m39` + `m39b` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 7 run: policy ok, 81 policy-script tests, 417 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 7 code reading; no blocking finding (non-blocking: team screens sit at the root of the nav graph, so the tab bar hides there like other detail screens). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: the team data layer reads `/salon/services` and `/salon/hours` itself (a feature does not depend on another feature).
 
 ### MER-038 — Team list + member form M17
 - Branch: `feat/mer-038-team`
 - Branched: (from `feat/mer-037-catalog-requests`)
-- Status: IN PROGRESS (batch 7)
+- Status: IN REVIEW (batch 7 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M17; operations `GET/POST /team/members`, `GET/PATCH /team/members/{id}`, `POST …/deactivate|reactivate`, `POST /bookings/cancel-affected`; design 06 `on.team`, `on.memberForm`):
   - [x] New `feature/team`; list with photo, name, role, provides-services and inactive badges; the owner row cannot be edited or deactivated ("owner cannot be deactivated"); hub tile TEAM registered
   - [x] Owner (`TEAM_MANAGE`): add member (first / last name ≤ 50, phone with country picker + country regex, photo cropped 1:1 as `MEMBER_PHOTO`, role Manager / Employee), edit name / photo / role (phone read-only: the contract cannot change it), remove / restore access (confirmed)
@@ -46,34 +46,34 @@
   - [x] Deactivation `409 SCHEDULE_CONFLICT` → sheet: Reassign (opens the first affected booking, M09), Cancel affected bookings (`STAFF_UNAVAILABLE` + localized reason, full refunds) then deactivate again, Go back
   - [x] Shared `AffectedBookingsRepository` + `conflictBookingIds()` moved to core (hours use it too)
 - Tests: `TeamTest` (2), `TeamMappersTest` (2), `TeamViewModelTest` (6), core `AffectedBookingsTest` (1); `/tmp/claude/quick.sh m38c` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 7 run: policy ok, 81 policy-script tests, 417 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 7 code reading; no blocking finding (non-blocking: team screens sit at the root of the nav graph, so the tab bar hides there like other detail screens). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: "on leave today" is not in the members contract, so it is not shown; the permissions and staff-profile links appear when MER-039 / MER-040 land; a removed photo goes out as `photoKey: null`.
 
 ### MER-037 — Catalog requests M16
 - Branch: `feat/mer-037-catalog-requests`
 - Branched: (from `feat/mer-036-services`)
-- Status: IN PROGRESS (batch 7)
+- Status: IN REVIEW (batch 7 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M16 catalog requests; operations `GET/POST /catalog/requests`; design 06 `on.catReq`):
   - [x] List with status (Pending / Approved / Rejected), date and the WAB note; empty state
   - [x] "Request a service" sheet: name (1..100), description (1..500), optional picture uploaded as `CATALOG_IMAGE` (new core upload purpose; the server allows it for SERVICES_MANAGE); sent request appears on top; failures keep the form
   - [x] Reached from the catalog picker ("Can't find your service? Request it"); services destinations moved to `ServicesDestinations.kt` (navigation file under 300 lines)
 - Tests: `CatalogRequestsViewModelTest` (2); `/tmp/claude/quick.sh m37` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 7 run: policy ok, 81 policy-script tests, 417 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 7 code reading; no blocking finding (non-blocking: team screens sit at the root of the nav graph, so the tab bar hides there like other detail screens). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: only the first page of requests is shown (a salon has few).
 
 ### MER-036 — Services M16
 - Branch: `feat/mer-036-services`
 - Branched: (batch 7 start, from `feat/mer-035-hours`)
-- Status: IN PROGRESS (batch 7)
+- Status: IN REVIEW (batch 7 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M16; operations `GET/POST /salon/services`, `PATCH /salon/services/{id}`, `GET /catalog/services?gender=`; design 06 `on.services`, `on.catalog`, `on.svcForm`):
   - [x] List: image, name, price (JOD), duration, bride-only and inactive badges, active switch (deactivation confirmed: existing bookings stay valid), client-side search (no query parameter in the contract), empty state CTA, pull-to-refresh, live updates after a save
   - [x] Catalog picker for the salon's gender only, paged (50), searchable over loaded rows, "Added" marks → opens the existing service; new → form
   - [x] Form: catalog name / image read-only, price > 0 with ≤ 2 decimals (Arabic digits accepted) + "includes tax and fees", duration multiple of 5 within 5..1440, bride-only toggle on women's salons only, description ≤ 500 (cleared → explicit null), media ≤ 10 uploaded as `SERVICE_MEDIA`, active toggle, "price changes apply to new bookings" note; saving refreshes the shared salon (completeness `SERVICE`); hub tile SERVICES registered
 - Tests: `ServicesTest` (3), `ServicesMappersTest` (2), `ServicesViewModelTest` (5); `/tmp/claude/quick.sh m36` green after naming two magic numbers; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 7 run: policy ok, 81 policy-script tests, 417 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 7 code reading; no blocking finding (non-blocking: team screens sit at the root of the nav graph, so the tab bar hides there like other detail screens). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: DEVIATIONS — the contract has no upcoming-bookings list for a service, so deactivation shows a generic confirmation instead of the bookings; the "no staff provides this service" warning is not shown (it would need every member's staff profile); editing media replaces the whole set (existing media come back as URLs only, no keys), the form says so.
 
 ### MER-035 — Working hours & closures M15
