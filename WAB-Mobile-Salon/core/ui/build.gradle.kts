@@ -18,6 +18,7 @@ kotlin {
         implementation(libs.compose.foundation)
         implementation(libs.koin.core)
         api(projects.core.notification)
+        implementation(projects.core.domain)
     }
     sourceSets.commonTest.dependencies {
         implementation(libs.kotlin.test)
@@ -26,5 +27,6 @@ kotlin {
     sourceSets.androidMain.dependencies {
         implementation(libs.androidx.activity.compose)
         implementation(libs.androidx.core.ktx)
+        implementation(libs.bundles.map.location)
     }
 }

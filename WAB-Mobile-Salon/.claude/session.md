@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-017 — Map picker
+- Branch: `feat/mer-017-map-picker` (from `feat/mer-016-uploaders`)
+- Status: IN PROGRESS (batch 3)
+- Acceptance criteria (PRD M13; design 05 Salon `on.map`; maps key env/CI only):
+  - [x] `MapProvider` port (core/ui): Google Maps (maps-compose) on Android when `MAPS_API_KEY` is set (local.properties or CI env → manifest meta-data), MapKit on iOS (no key), `NoMapProvider` otherwise; camera follows `target`, reports the idle centre and moving state
+  - [x] `ReverseGeocoder` port (core/domain) with platform `Geocoder` (Android 13+ listener, older blocking call on IO) and `CLGeocoder`, in the app language; `addressLineOf` (trim, de-duplicate, Arabic/Latin comma), `isSamePointAs` (≈ 1 m), Amman default centre
+  - [x] `AppMapPicker(MapPickerUi, mapProvider, onAction)`: map under a fixed centre pin (lifts while moving), search field + suggestions, "Use my location" (spinner while locating), bottom card with pin hint, address / "Finding the address…", error, Confirm (off while resolving or locating); stylized design map (grid, roads, park; drag to move) when no platform map
+  - [x] Tokens: map colours (light/dark from the design), pin/grid/road sizes; AR + EN strings; previews
+- Tests: `ReverseGeocoderTest` (2), `MapPickerTest` (2); domain + design-system host tests, `assembleDevDebug`, iOS compile of core/ui (MapKit), core/data (CLGeocoder), design-system, core/di green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: "use my location" permission + device position and the Places search wiring belong to the profile screen (MER-033), which owns the view model; the pin is "drag the map" (design hint), not a draggable marker.
+
 ### MER-016 — Uploaders
 - Branch: `feat/mer-016-uploaders` (from `feat/mer-015-request-sheet`)
 - Status: IN PROGRESS (batch 3)

@@ -31,7 +31,8 @@ class AndroidAppPlugin : Plugin<Project> {
             if (localPropertiesFile.exists()) {
                 localPropertiesFile.inputStream().use { localProperties.load(it) }
             }
-            val mapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
+            // local.properties for developers, the environment for CI; blank = the app falls back to its stylized map.
+            val mapsApiKey = localProperties.getProperty(MAPS_API_KEY) ?: providers.environmentVariable(MAPS_API_KEY).orNull ?: ""
             val property = { name: String -> projectProperty(localProperties, name) }
 
             extensions.configure<ApplicationExtension> {
@@ -44,7 +45,7 @@ class AndroidAppPlugin : Plugin<Project> {
                     versionCode = requireNotNull(property("APP_VERSION_CODE")) { missing("APP_VERSION_CODE") }.toInt()
                     versionName = requireNotNull(property("APP_VERSION_NAME")) { missing("APP_VERSION_NAME") }
 
-                    manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+                    manifestPlaceholders[MAPS_API_KEY] = mapsApiKey
                 }
                 flavorDimensions += ENVIRONMENT_DIMENSION
                 productFlavors {
@@ -149,3 +150,5 @@ private fun ApplicationProductFlavor.environment(id: String, prefix: String, pro
 private fun hostOf(url: String): String = url.substringAfter("://").substringBefore('/').trim()
 
 private fun quoted(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+
+private const val MAPS_API_KEY = "MAPS_API_KEY"

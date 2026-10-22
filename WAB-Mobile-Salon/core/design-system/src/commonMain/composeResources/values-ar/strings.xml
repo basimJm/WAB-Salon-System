@@ -203,4 +203,12 @@
     <string name="media_duration">%1$d:%2$s</string>
     <string name="media_selected">محدد</string>
     <string name="media_order_position">الترتيب %1$d</string>
+    <string name="map_title">الموقع على الخريطة</string>
+    <string name="map_search_hint">ابحث عن عنوان أو معلم</string>
+    <string name="map_use_my_location">استخدم موقعي</string>
+    <string name="map_pin_hint">حرّك الخريطة لتثبيت الدبوس على مدخل الصالون</string>
+    <string name="map_confirm">تأكيد الموقع</string>
+    <string name="map_resolving">جارٍ تحديد العنوان…</string>
+    <string name="map_unknown_address">الموقع المحدد</string>
+    <string name="map_pin">دبوس موقع الصالون</string>
 </resources>

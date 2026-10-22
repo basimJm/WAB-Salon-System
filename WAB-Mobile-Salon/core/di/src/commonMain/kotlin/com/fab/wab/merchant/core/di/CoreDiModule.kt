@@ -13,6 +13,7 @@ import com.fab.wab.merchant.core.network.di.networkModule
 import com.fab.wab.merchant.core.storage.di.storageModule
 import com.fab.wab.merchant.core.ui.external.externalActionsModule
 import com.fab.wab.merchant.core.ui.alert.requestAlertModule
+import com.fab.wab.merchant.core.ui.map.mapModule
 import com.fab.wab.merchant.core.ui.permission.permissionModule
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.bind
@@ -35,5 +36,6 @@ val coreDiModule = module {
         permissionModule,
         externalActionsModule,
         requestAlertModule,
+        mapModule,
     )
 }

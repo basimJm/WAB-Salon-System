@@ -72,6 +72,13 @@ data class SizeTokens(
     val pdfMarkHeight: Dp = 46.dp,
     val removeBadge: Dp = 24.dp,
     val cropZoomTrack: Dp = 4.dp,
+    // Map picker (MER-017)
+    val mapPin: Dp = 44.dp,
+    val mapPinShadowWidth: Dp = 14.dp,
+    val mapPinShadowHeight: Dp = 6.dp,
+    val mapGridCell: Dp = 44.dp,
+    val mapRoadWide: Dp = 18.dp,
+    val mapRoadNarrow: Dp = 12.dp,
 )
 
 val DefaultSizes = SizeTokens()

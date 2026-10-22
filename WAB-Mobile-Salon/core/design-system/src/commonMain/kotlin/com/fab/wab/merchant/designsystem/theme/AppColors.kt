@@ -50,6 +50,10 @@ data class AppColors(
     // Bride badge gradient (design `#B83268 → #D9467A`)
     val brideStart: Color,
     val brideEnd: Color,
+    // Stylized map fallback (design 05 Salon `--map1`, `--mapline`, `--maproad`)
+    val mapBackground: Color,
+    val mapGrid: Color,
+    val mapRoad: Color,
     // Loading shimmer
     val shimmerBase: Color,
     val shimmerHighlight: Color,
