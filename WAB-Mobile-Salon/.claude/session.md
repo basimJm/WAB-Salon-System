@@ -11,60 +11,60 @@
 
 ### MER-007 — Mock data source
 - Branch: `feat/mer-007-mock-source` (from `feat/mer-006-api-sync`)
-- Status: IN PROGRESS (batch 1)
+- Status: DONE (batch 1 PR)
 - Acceptance criteria (backlog MER-007; INTEGRATION.md §4):
   - [x] `DATA_SOURCE=mock|remote` (template); mock engine serves feature fixtures first, then one generated fixture per contract operation (`contractFixtures()`, 71 operations)
   - [x] Scenario switcher API: `MockScenarios` (transport scenario, salon state override, signed-in member override, `reset()`); UI entry lands with More (MER-048)
   - [x] Every salon state (`MockSalonState`: APPLICATION_PENDING / REJECTED, APPROVED_INCOMPLETE, LIVE, OFFLINE) and permission set (`MockPresets`: owner = all 15 keys, manager, employee, none) patched into any response (`patchFixture`: salon `state`, member `role` / `permissions`)
 - Tests: `MockWorldTest` (5), `MockTransportTest`; `:core:data:testAndroidHostTest` green
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-1 run: policy `all: ok` (empty baseline), 78 policy-script tests, `testAndroidHostTest` (all modules) + `assembleDevDebug` green; per-task checks above (detekt clean in MER-003)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-1 code read: config/tooling and core plumbing only, no screens; contract + error catalog from the server spec; mock world covers every salon state and permission set.
 
 ### MER-006 — Contract tooling
 - Branch: `feat/mer-006-api-sync` (from `feat/mer-005-network-kernel`)
-- Status: IN PROGRESS (batch 1)
+- Status: DONE (batch 1 PR)
 - Acceptance criteria (backlog MER-006; same generator as CUS-009):
   - [x] `python3 scripts/api_sync.py` / `./gradlew apiSync` generates DTOs + `MerchantOperations` (71 operations) + fixtures + snapshot from `../WAB-Server/docs/api/openapi.merchant.json` into `core/data/.../contract/generated`
   - [x] Stale check: `api_sync.py --check` (`./gradlew apiSyncCheck`) in the gate (always on now; the spec is in the monorepo)
   - [x] Operation registry helper `Operation.pathWith` (from the customer app) for repositories
 - Tests: `OperationPathTest`, `test_api_sync.py`; core data/network/domain/design-system/notification host tests green; policy ok (error-codes now also checks the snapshot)
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-1 run: policy `all: ok` (empty baseline), 78 policy-script tests, `testAndroidHostTest` (all modules) + `assembleDevDebug` green; per-task checks above (detekt clean in MER-003)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-1 code read: config/tooling and core plumbing only, no screens; contract + error catalog from the server spec; mock world covers every salon state and permission set.
 
 ### MER-005 — Network kernel reused
 - Branch: `feat/mer-005-network-kernel` (from `feat/mer-003-rules-gates`)
-- Status: IN PROGRESS (batch 1)
+- Status: DONE (batch 1 PR)
 - Acceptance criteria (backlog MER-005; same as CUS-006/007, merchant token scope):
   - [x] Ktor per environment (`ApiConfig` from `AppEnvironment`), `Accept-Language` on every request, base envelope + `safeApiCall` (from the template)
   - [x] Refresh interceptor on `POST /merchant/v1/auth/refresh` (request `refreshToken`, rotating pair in `data`; matches `openapi.merchant.json`)
   - [x] Error-code catalog = the 43 codes of BUSINESS_DOMAIN §11 / `openapi.merchant.json` + `UNKNOWN`, AR + EN `error_code_*`, handling actions; the error policy reads the root BUSINESS_DOMAIN (local generic copy removed)
 - Tests: `AuthEndpointsTest`, `ErrorCodeTest`, `ErrorTextTest`, existing `SafeApiCallTest` / `AuthRefreshInterceptorTest` / `TokenRefreshCoordinatorTest`; policy `all: ok`
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-1 run: policy `all: ok` (empty baseline), 78 policy-script tests, `testAndroidHostTest` (all modules) + `assembleDevDebug` green; per-task checks above (detekt clean in MER-003)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-1 code read: config/tooling and core plumbing only, no screens; contract + error catalog from the server spec; mock world covers every salon state and permission set.
 
 ### MER-003 — Project rules and quality gates
 - Branch: `feat/mer-003-rules-gates` (from `feat/mer-002-variants-ci`)
-- Status: IN PROGRESS (batch 1)
+- Status: DONE (batch 1 PR)
 - Acceptance criteria (backlog MER-003; root rules §3):
   - [x] `WAB-Mobile-Salon/CLAUDE.md`: the customer rules adapted to the merchant app (real module map, `/merchant/v1`, `merchant` master, merchant PRD/design paths, Liquid Glass usage) + merchant specifics (permission gating, conflict-safe booking actions, overlay permission, request sound)
   - [x] Policy baseline `{}` and detekt baseline without issues: the 53 policy findings and 49 detekt findings inherited from the template fixed in code (named constants, tokens, typed catches, `error()`, lifecycle-aware collection, Compose parameter order / effect lambdas, `NotificationTheme` supplied by the shell because `core/notification` sits below the design system); dead template code removed (`Utils`, `NumberFormatter`, `FeatureFlags` + old analytics stubs, `Encryptor`/`Algorithm`, `AppPagingDataSource`); `App()` without the unused platform parameter
   - [x] 300-line rule enforced by `policy_checks.py file-length` (unchanged)
   - [x] Tests: `test_baselines_empty.py` (baselines stay empty), `NotificationThemeTest`
 - Tests: policy `all: ok` with empty baseline; detekt exit 0 with empty baseline; `testAndroidHostTest` + `assembleDevDebug` + iOS framework link green
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-1 run: policy `all: ok` (empty baseline), 78 policy-script tests, `testAndroidHostTest` (all modules) + `assembleDevDebug` green; per-task checks above (detekt clean in MER-003)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-1 code read: config/tooling and core plumbing only, no screens; contract + error catalog from the server spec; mock world covers every salon state and permission set.
 - Notes: the fixes live in the merchant copy only; the customer core still carries them in its baselines (port later; KMP_TEMPLATE copies the customer core).
 
 ### MER-002 — Build variants + CI
 - Branch: `feat/mer-002-variants-ci` (batch 1 start, from `origin/merchant`)
-- Status: IN PROGRESS (batch 1)
+- Status: DONE (batch 1 PR)
 - Acceptance criteria (backlog MER-002, mirror `customer-ci.yml`):
   - [x] Android dev/prod × debug/release and iOS Debug/Release-Dev/Prod (schemes iosApp-Dev/Prod) from the template; `variants` policy ok
   - [x] Root `.github/workflows/merchant-ci.yml` (paths `WAB-Mobile-Salon/**`): policy checks, detekt, secret scan, Android matrix (assemble + lint + unit tests + R8/APK budget `config/budgets.json`), iOS matrix; the in-folder copy removed (GitHub reads only the root)
   - [x] `config/policy.json` + policy tests + `run_ios_checks.sh` point at `merchant-ci.yml`
 - Tests: `python3 -m unittest discover -s scripts/ci/tests` (77 OK); `policy_checks.py variants` ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-1 run: policy `all: ok` (empty baseline), 78 policy-script tests, `testAndroidHostTest` (all modules) + `assembleDevDebug` green; per-task checks above (detekt clean in MER-003)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-1 code read: config/tooling and core plumbing only, no screens; contract + error catalog from the server spec; mock world covers every salon state and permission set.
 
 ### MER-001 — Scaffold the KMP app from the customer template
 - Branch: `feat/mer-001-scaffold`
