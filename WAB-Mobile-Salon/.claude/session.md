@@ -11,7 +11,7 @@
 
 ### MER-014 — Merchant components
 - Branch: `feat/mer-014-components` (from `feat/mer-013-theme`; backlog name `feat/mer-014-merchant-components`)
-- Status: IN PROGRESS (batch 2)
+- Status: IN REVIEW (batch 2 PR)
 - Acceptance criteria (Design Script §1.2; PRD §8.1, M07–M09; BUSINESS_DOMAIN §2 enums, §5 `respondBy`; design 02 Home / 03 Bookings):
   - [x] Shared booking enums in core/domain `booking/` (`BookingStatus` 8, `PaymentStatus` 4, `RefundStatus` incl. NONE, tolerant `fromCode`) + `BookingTimers` (pending age, auto-cancel remaining from `respondBy`; pure, never negative)
   - [x] Badges: status (design hues: pending amber, approved green, completed violet, rejected/no-show rose, cancellations grey), payment (violet), refund (pending/refunded/failed), bride (crown on the rose gradient, new `brideStart/End` tokens)
@@ -23,56 +23,56 @@
   - [x] Glass: cards on `AppCard` / `glassBackground`; preview gallery `MerchantGalleryPreviews` (light/dark, RTL/LTR)
   - [x] Localization policy: plural placeholders compared as a set (Arabic spells out one/two); test added
 - Tests: `BookingStatusTest` (4), `MerchantComponentsTest` (6), `MerchantTabsTest` (6), `test_localization.py` (+1); policy `all: ok`
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-2 run: policy `all: ok` (empty baseline), 80 policy-script tests OK, `testAndroidHostTest` (all modules: 102 suites, 393 tests, 0 failures) + `:androidApp:assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-2 code read (77 files): session/permissions/realtime plumbing and design-system components only; no `!!`/`println`/`runBlocking`/unexplained suppressions, every file < 300 lines, AR+EN for every new key (plurals with all Arabic quantities), tokens only; permission gating pure and tested. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); components are not yet on a screen (no emulator check).
 - Notes: the shell adopts the tabs when the first tab screens land (MER-024/025); pending-card "ring" pulse animation of the design not drawn (static count circle).
 
 ### MER-013 — Theme, tokens and base kit
 - Branch: `feat/mer-013-theme` (from `feat/mer-011-realtime-client`)
-- Status: IN PROGRESS (batch 2)
+- Status: IN REVIEW (batch 2 PR)
 - Acceptance criteria (Design Script §0–§1.1; customer CUS-018/020):
   - [x] Same theme and tokens as the customer app (light + dark, typography, spacing, radii, elevation, Liquid Glass) — from the template, no new colors
   - [x] Merchant identity: `AppWordmark` = "WAB" + gradient "Business / أعمال" pill (LTR in both languages) in `AppBrandHeader`; app names "WAB Business" / "WAB أعمال" (dev "… Dev" / "… تجريبي"), iOS display names "WAB Business (Dev)"
   - [x] Universal states (`AppStateContent`, shimmer), pagination (`AppPagedList`, `AppAdaptiveGrid`), pull-to-refresh, form kit (`AppPhoneField` + `AppCountryPicker`, `AppOtpInput`, `AppDropdownField`, `FormValidators`) present from the template
 - Tests: design-system tests (`UniversalStatesTest`, `FormKitTest`, `ComponentLogicTest`, …); policy (localization AR/EN) ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-2 run: policy `all: ok` (empty baseline), 80 policy-script tests OK, `testAndroidHostTest` (all modules: 102 suites, 393 tests, 0 failures) + `:androidApp:assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-2 code read (77 files): session/permissions/realtime plumbing and design-system components only; no `!!`/`println`/`runBlocking`/unexplained suppressions, every file < 300 lines, AR+EN for every new key (plurals with all Arabic quantities), tokens only; permission gating pure and tested. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); components are not yet on a screen (no emulator check).
 - Notes: display name changed from "WAB Merchant" (MER-001) to the design's "WAB Business".
 
 ### MER-011 — Realtime client
 - Branch: `feat/mer-011-realtime-client` (from `feat/mer-009-permissions`)
-- Status: IN PROGRESS (batch 2)
+- Status: IN REVIEW (batch 2 PR)
 - Acceptance criteria (PRD §3 real-time; BUSINESS_DOMAIN §7):
   - [x] Socket.IO client on namespace `/merchant` (template) + `FakeRealtimeClient`; connect while resumed and signed in, reconnect on foreground (`RealtimeConnectionEffect`)
   - [x] Event constants: `booking.requested`, `booking.updated`, `booking.assigned`, `permissions.updated`, `access.revoked`, `notifications.unread`; `bookingId` payload key restored
   - [x] Permission filter mirroring the rooms (`isVisibleTo` / `visibleTo`): requests need BOOKINGS_RESPOND, booking updates need a view permission, account events always pass
   - [x] Shell `RealtimeAccountEvents`: `permissions.updated` → `PermissionsSync.refresh()`, `access.revoked` → sign-out + "Your access was removed by the salon owner" banner (AR/EN)
 - Tests: `RealtimeEventFilterTest` (3), `RealtimeAccountEventsTest`, realtime protocol/client/refresh tests, `MainViewModelTest`; realtime + composeApp tests + `assembleDevDebug` green
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-2 run: policy `all: ok` (empty baseline), 80 policy-script tests OK, `testAndroidHostTest` (all modules: 102 suites, 393 tests, 0 failures) + `:androidApp:assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-2 code read (77 files): session/permissions/realtime plumbing and design-system components only; no `!!`/`println`/`runBlocking`/unexplained suppressions, every file < 300 lines, AR+EN for every new key (plurals with all Arabic quantities), tokens only; permission gating pure and tested. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); components are not yet on a screen (no emulator check).
 
 ### MER-009 — Permissions model
 - Branch: `feat/mer-009-permissions` (from `feat/mer-008-session-store`)
-- Status: IN PROGRESS (batch 2)
+- Status: IN REVIEW (batch 2 PR)
 - Acceptance criteria (PRD §3, §6; BUSINESS_DOMAIN §6):
   - [x] `Permission` (15 grantable keys), `OwnerCapability` (TEAM_MANAGE, PAYOUT_DETAILS_MANAGE, SALON_DELETE_REQUEST), `PermissionSet` with `has` / `anyOf` / `allOf` / `can` (owner has all), `SessionState.permissionSet()`, `PermissionTemplates` (PRD §6.3)
   - [x] `PermissionGated` (hidden-not-disabled) + `LocalPermissions` provided by the shell from the session
   - [x] Re-fetch: `PermissionsSync` rotates through the shared single-flight refresher (`SessionRefresher` = the `TokenRefreshCoordinator` now in Koin; the merchant refresh returns the member), stores member + keys; refused session → sign-out; called on app start (Home refresh, push and socket triggers call the same `refresh()`)
 - Tests: `PermissionsTest` (4), `PermissionsSyncTest` (3), `RefreshMemberTest` (2), coordinator `refreshNow` test, `MainViewModelTest` start re-fetch; domain/network/data/design-system/composeApp tests + `assembleDevDebug` green
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-2 run: policy `all: ok` (empty baseline), 80 policy-script tests OK, `testAndroidHostTest` (all modules: 102 suites, 393 tests, 0 failures) + `:androidApp:assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-2 code read (77 files): session/permissions/realtime plumbing and design-system components only; no `!!`/`println`/`runBlocking`/unexplained suppressions, every file < 300 lines, AR+EN for every new key (plurals with all Arabic quantities), tokens only; permission gating pure and tested. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); components are not yet on a screen (no emulator check).
 - Notes: duplicate `createHttpClient` expect/actuals removed (identical); `BaseHttpClient` registered in Koin.
 
 ### MER-008 — Secure local storage of PRD §5 keys via one SessionStore
 - Branch: `feat/mer-008-session-store` (batch 2 start, from `feat/mer-007-mock-source`)
-- Status: IN PROGRESS (batch 2)
+- Status: IN REVIEW (batch 2 PR)
 - Acceptance criteria (PRD §5):
   - [x] `SessionStore` holds tokens (secure store only), `member_id`, `salon_id`, member first name, `member_role`, `permissions` cache, `salon_state`, `push_enabled`, `overlay_permission_prompted`; language/theme stay in `AppSettings`
   - [x] `SessionState.SignedIn(member: MemberProfile, permissions, salonState)`; `MemberRole` / `SalonState` enums with tolerant `fromCode`
   - [x] Sign-out drops tokens + identity, keeps push / overlay flags; `clearAll` empties everything; incomplete identity = guest
 - Tests: `DataStoreSessionStoreTest` (6), `AppSettingsImplTokensTest`, shell analytics tests; storage/composeApp/realtime host tests green
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch-2 run: policy `all: ok` (empty baseline), 80 policy-script tests OK, `testAndroidHostTest` (all modules: 102 suites, 393 tests, 0 failures) + `:androidApp:assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-2 code read (77 files): session/permissions/realtime plumbing and design-system components only; no `!!`/`println`/`runBlocking`/unexplained suppressions, every file < 300 lines, AR+EN for every new key (plurals with all Arabic quantities), tokens only; permission gating pure and tested. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); components are not yet on a screen (no emulator check).
 
 ### MER-007 — Mock data source
 - Branch: `feat/mer-007-mock-source` (from `feat/mer-006-api-sync`)
