@@ -75,7 +75,8 @@ fun createMockEngine(
                 respond(errorEnvelope(ErrorCode.NOT_FOUND, request.url.encodedPath), HttpStatusCode.NotFound, json)
             } else {
                 val body = if (scenarios.current.value == MockScenario.Empty) emptyData(fixture) else fixture
-                respond(localizeFixture(body, language), HttpStatusCode.OK, json)
+                val patched = patchFixture(body, scenarios.salonState.value, scenarios.member.value)
+                respond(localizeFixture(patched, language), HttpStatusCode.OK, json)
             }
         }
     }

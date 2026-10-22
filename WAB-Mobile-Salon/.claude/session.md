@@ -9,6 +9,17 @@
 
 ## Current task
 
+### MER-007 — Mock data source
+- Branch: `feat/mer-007-mock-source` (from `feat/mer-006-api-sync`)
+- Status: IN PROGRESS (batch 1)
+- Acceptance criteria (backlog MER-007; INTEGRATION.md §4):
+  - [x] `DATA_SOURCE=mock|remote` (template); mock engine serves feature fixtures first, then one generated fixture per contract operation (`contractFixtures()`, 71 operations)
+  - [x] Scenario switcher API: `MockScenarios` (transport scenario, salon state override, signed-in member override, `reset()`); UI entry lands with More (MER-048)
+  - [x] Every salon state (`MockSalonState`: APPLICATION_PENDING / REJECTED, APPROVED_INCOMPLETE, LIVE, OFFLINE) and permission set (`MockPresets`: owner = all 15 keys, manager, employee, none) patched into any response (`patchFixture`: salon `state`, member `role` / `permissions`)
+- Tests: `MockWorldTest` (5), `MockTransportTest`; `:core:data:testAndroidHostTest` green
+- Loops: 0/1
+- Review: PENDING
+
 ### MER-006 — Contract tooling
 - Branch: `feat/mer-006-api-sync` (from `feat/mer-005-network-kernel`)
 - Status: IN PROGRESS (batch 1)

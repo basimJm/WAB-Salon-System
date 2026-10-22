@@ -30,7 +30,7 @@ class MockTransportTest {
     private val client = HttpClient(createMockEngine(requestTimeoutMs = 10, fixtures = FIXTURES))
 
     @AfterTest
-    fun reset() = MockScenarios.set(MockScenario.Success)
+    fun reset() = MockScenarios.reset()
 
     @Test
     fun matchesTemplatesByMethodAndPath() {
