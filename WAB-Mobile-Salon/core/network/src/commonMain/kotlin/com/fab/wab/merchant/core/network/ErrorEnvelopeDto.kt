@@ -6,7 +6,7 @@ import com.fab.wab.merchant.core.domain.FieldError
 import kotlinx.serialization.Serializable
 
 /**
- * The backend error envelope (`-Server/CLAUDE.md` §6):
+ * The backend error envelope (`WAB-Server/CLAUDE.md` §6):
  * `{ "success": false, "message": "<localized>", "error": { "code", "details": [ { field, code, message } ], "traceId" } }`.
  */
 @Serializable
