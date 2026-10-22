@@ -17,6 +17,7 @@ import com.fab.wab.merchant.app.controller.vm.MainViewModel
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
 import com.fab.wab.merchant.app.deeplink.deepLinkModule
 import com.fab.wab.merchant.app.di.analyticsAppModule
+import com.fab.wab.merchant.app.di.appPlatformModule
 import com.fab.wab.merchant.app.di.viewModelModule
 import com.fab.wab.merchant.app.navigation.MainNavigation
 import com.fab.wab.merchant.app.push.PushEffect
@@ -49,6 +50,7 @@ import com.fab.wab.merchant.designsystem.components.image.rememberImageLoader
 import com.fab.wab.merchant.designsystem.components.permission.LocalPermissions
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.sample.di.sampleModule
+import com.fab.wab.merchant.openStoreLink
 import com.fab.wab.merchant.feature.sample.presentation.di.samplePresentationModule
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -61,6 +63,7 @@ val appModules = listOf(
     realtimeModule,
     notificationModule,
     viewModelModule,
+    appPlatformModule,
     deepLinkModule,
     platformFirebaseModule(),
     analyticsModule(),
@@ -115,10 +118,12 @@ fun App() {
                             when (effect) {
                                 MainContract.SideEffect.AccessRevoked ->
                                     notificationManager.show(accessRemovedMessage, style = NotificationStyle.Error)
+                                is MainContract.SideEffect.OpenStore -> openStoreLink(effect.url)
                             }
                         }
                         PushEffect(deepLinks = koinInject<DeepLinkStore>())
-                        MainNavigation(Graph.Home, navController)
+                        val mainState by mainViewModel.state.collectAsStateWithLifecycle()
+                        LaunchGateContent(mainState, mainViewModel::onEvent) { MainNavigation(Graph.Home, navController) }
                     }
                 }
             }

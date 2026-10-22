@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-019 — Splash + config + system screens
+- Branch: `feat/mer-019-splash-config` (from `feat/mer-018-calendar-grid`; backlog name `feat/mer-019-config-system`)
+- Status: IN PROGRESS (batch 3)
+- Acceptance criteria (PRD M01, M26 "same as the customer app"; operation `GET /merchant/v1/config?platform&version`; design 01 `on.splash`, `on.sys`):
+  - [x] Domain `core/domain/config` (from the customer app): `AppConfig` (update policy, maintenance, OTP length + resend, contact), `UpdateStatus` (unknown → OK), `ClientPlatform`, `LaunchGate` + `launchGateOf` (maintenance over force update over optional update)
+  - [x] Data `core/data/config`: `AppConfigApi` (platform + installed version), mapper (blank texts → null, numbers → ints), `AppConfigRepositoryImpl` (`current` StateFlow for OTP / contact); bound in `dataModule`; `ClientPlatform` bound by the shell (`appPlatformModule`)
+  - [x] Shell: `MainContract` (loading, gate, error, `OpenStore`), `MainViewModel` loads the config at start, retry, optional-update dismiss, store link; `LaunchGateContent`: splash until the gate is known, maintenance / force update blocking, optional update dialog over the app
+  - [x] Splash (app icon 108 + WAB Business wordmark + tagline, loader, version, error + retry) and system screens (icon + wordmark row, circle icon, title, body, button) per design 01; AR + EN strings; previews
+- Tests: `LaunchGateTest` (3), `AppConfigMapperTest` (2), `MainViewModelTest` (+4: gate ready, maintenance / force update, optional update → store / dismiss, error → retry); domain / data / composeApp host tests, `assembleDevDebug`, `linkDebugFrameworkIosSimulatorArm64` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the post-gate launch router (session, salon state) is MER-024; mock mode answers the config with the generated fixture (status OK, maintenance off).
+
 ### MER-018 — Calendar grid component
 - Branch: `feat/mer-018-calendar-grid` (from `feat/mer-017-map-picker`)
 - Status: IN PROGRESS (batch 3)

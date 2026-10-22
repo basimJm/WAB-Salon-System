@@ -9,6 +9,7 @@ import org.koin.dsl.module
 val viewModelModule = module {
     viewModel {
         MainViewModel(
+            appConfigRepository = get(),
             appSettings = get(),
             appearanceSettings = get(),
             sessionTimeOut = get(),

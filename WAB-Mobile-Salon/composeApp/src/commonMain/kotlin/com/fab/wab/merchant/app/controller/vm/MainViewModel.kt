@@ -7,13 +7,19 @@ import com.fab.wab.merchant.app.controller.contract.MainContract.UiAction
 import com.fab.wab.merchant.app.controller.contract.MainContract.UiState
 import com.fab.wab.merchant.app.realtime.RealtimeAccountEvents
 import com.fab.wab.merchant.core.common.AppEnvironment
+import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppLanguage
+import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.AppearanceSettings
 import com.fab.wab.merchant.core.domain.ThemeMode
+import com.fab.wab.merchant.core.domain.config.AppConfigRepository
+import com.fab.wab.merchant.core.domain.config.LaunchGate
+import com.fab.wab.merchant.core.domain.config.launchGateOf
 import com.fab.wab.merchant.core.domain.permission.PermissionsSync
 import com.fab.wab.merchant.core.domain.repository.SessionTimeOut
 import com.fab.wab.merchant.core.mvi.BaseViewModel
+import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -22,8 +28,9 @@ import kotlinx.coroutines.launch
 
 private const val STATE_SUBSCRIPTION_MS = 5_000L
 
-/** App shell: appearance flows (language, theme), analytics user sync and session expiry. */
+/** App shell: launch gate from the config call (PRD M01, M26), appearance flows, analytics user sync, session expiry. */
 class MainViewModel(
+    private val appConfigRepository: AppConfigRepository,
     private val appSettings: AppSettings,
     appearanceSettings: AppearanceSettings,
     private val sessionTimeOut: SessionTimeOut,
@@ -32,18 +39,42 @@ class MainViewModel(
     private val permissionsSync: PermissionsSync,
     accountEvents: RealtimeAccountEvents,
     testScope: CoroutineScope? = null,
+    private val errorText: suspend (AppError) -> String = ::appErrorText,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(appVersion = environment.appVersion), testScope) {
+
+    private var storeUrl: String? = null
 
     init {
         sessionAnalyticsSync.start(scope)
         // PRD §3: permissions are re-fetched on app start (Home refresh and the PERMISSIONS_UPDATED push call it too).
         scope.launch { permissionsSync.refresh() }
         accountEvents.start(scope) { emitSideEffect(SideEffect.AccessRevoked) }
+        loadConfig()
     }
 
     override fun handle(event: UiAction) {
         when (event) {
+            UiAction.OnUpdateClicked -> emitSideEffect(SideEffect.OpenStore(storeUrl))
+            UiAction.OnOptionalUpdateDismissed -> updateState { copy(gate = LaunchGate.Ready) }
+            UiAction.OnRetryClicked -> loadConfig()
             UiAction.OnSessionTimeOut -> scope.launch { handleSessionTimeOut() }
+        }
+    }
+
+    private fun loadConfig() {
+        scope.launch {
+            updateState { copy(loading = true, error = null) }
+            when (val result = appConfigRepository.refresh()) {
+                is AppResult.Success -> {
+                    storeUrl = result.data.update.storeUrl
+                    updateState { copy(loading = false, gate = launchGateOf(result.data), error = null) }
+                }
+                is AppResult.Error -> {
+                    val message = errorText(result.appError)
+                    updateState { copy(loading = false, error = message) }
+                }
+                AppResult.Loading -> Unit
+            }
         }
     }
 

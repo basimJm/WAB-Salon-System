@@ -1,17 +1,23 @@
 package com.fab.wab.merchant.app.controller
 
 import com.fab.wab.merchant.app.analytics.SessionAnalyticsSync
+import com.fab.wab.merchant.app.controller.contract.MainContract.SideEffect
 import com.fab.wab.merchant.app.controller.contract.MainContract.UiAction
 import com.fab.wab.merchant.app.controller.vm.MainViewModel
 import com.fab.wab.merchant.app.realtime.RealtimeAccountEvents
 import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.common.AppEnvironment
+import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppLanguage
+import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.AppearanceSettings
 import com.fab.wab.merchant.core.domain.ThemeMode
 import com.fab.wab.merchant.core.domain.auth.AuthTokens
 import com.fab.wab.merchant.core.domain.auth.TokenRefreshResult
+import com.fab.wab.merchant.core.domain.config.LaunchGate
+import com.fab.wab.merchant.core.domain.config.MaintenancePolicy
+import com.fab.wab.merchant.core.domain.config.UpdateStatus
 import com.fab.wab.merchant.core.domain.permission.PermissionsSync
 import com.fab.wab.merchant.core.domain.repository.SessionTimeOut
 import com.fab.wab.merchant.core.domain.session.MemberProfile
@@ -23,11 +29,14 @@ import com.fab.wab.merchant.core.firebase.FakeCrashReporter
 import com.fab.wab.merchant.core.realtime.FakeRealtimeClient
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -100,7 +109,8 @@ class MainViewModelTest {
     private var refreshes = 0
     private val permissionsSync = PermissionsSync({ refreshes++; TokenRefreshResult.Unavailable }, sessionStore)
 
-    private fun TestScope.viewModel() = MainViewModel(
+    private fun TestScope.viewModel(config: FakeAppConfigRepository = FakeAppConfigRepository(AppResult.Success(READY_CONFIG))) = MainViewModel(
+        appConfigRepository = config,
         appSettings = settings,
         appearanceSettings = AppearanceSettings(settings),
         sessionTimeOut = sessionTimeOut,
@@ -109,6 +119,7 @@ class MainViewModelTest {
         permissionsSync = permissionsSync,
         accountEvents = RealtimeAccountEvents(FakeRealtimeClient(), permissionsSync, sessionStore),
         testScope = backgroundScope,
+        errorText = { CONFIG_ERROR_TEXT },
     )
 
     @Test
@@ -128,5 +139,59 @@ class MainViewModelTest {
         viewModel.onEvent(UiAction.OnSessionTimeOut)
         assertEquals(1, settings.sessionCleared)
         assertEquals(listOf(false), sessionTimeOut.sent)
+    }
+
+    @Test
+    fun configDecidesTheGateAndOkMeansReady() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.state.collect {} }
+        val state = vm.state.first { it.gate != null }
+        assertEquals(LaunchGate.Ready, state.gate)
+        assertEquals(false, state.loading)
+    }
+
+    @Test
+    fun maintenanceAndForceUpdateBlock() = runTest(UnconfinedTestDispatcher()) {
+        val maintenance = READY_CONFIG.copy(maintenance = MaintenancePolicy(enabled = true, message = "back soon"))
+        val vm = viewModel(FakeAppConfigRepository(AppResult.Success(maintenance)))
+        backgroundScope.launch { vm.state.collect {} }
+        assertEquals(LaunchGate.Maintenance("back soon"), vm.state.first { it.gate != null }.gate)
+
+        val required = READY_CONFIG.copy(update = READY_CONFIG.update.copy(status = UpdateStatus.UPDATE_REQUIRED))
+        val forced = viewModel(FakeAppConfigRepository(AppResult.Success(required)))
+        backgroundScope.launch { forced.state.collect {} }
+        assertEquals(LaunchGate.ForceUpdate(STORE_URL), forced.state.first { it.gate != null }.gate)
+    }
+
+    @Test
+    fun optionalUpdateOpensTheStoreOrIsDismissed() = runTest(UnconfinedTestDispatcher()) {
+        val available = READY_CONFIG.copy(update = READY_CONFIG.update.copy(status = UpdateStatus.UPDATE_AVAILABLE))
+        val vm = viewModel(FakeAppConfigRepository(AppResult.Success(available)))
+        val effects = mutableListOf<SideEffect>()
+        backgroundScope.launch { vm.state.collect {} }
+        backgroundScope.launch { vm.sideEffect.collect { effects += it } }
+        assertEquals(LaunchGate.OptionalUpdate(STORE_URL), vm.state.first { it.gate != null }.gate)
+        vm.onEvent(UiAction.OnUpdateClicked)
+        assertEquals(listOf<SideEffect>(SideEffect.OpenStore(STORE_URL)), effects)
+        vm.onEvent(UiAction.OnOptionalUpdateDismissed)
+        assertEquals(LaunchGate.Ready, vm.state.first { it.gate == LaunchGate.Ready }.gate)
+    }
+
+    @Test
+    fun aFailedConfigKeepsTheSplashWithAnErrorUntilRetrySucceeds() = runTest(UnconfinedTestDispatcher()) {
+        val config = FakeAppConfigRepository(AppResult.Error(AppError.NetworkError("offline")), AppResult.Success(READY_CONFIG))
+        val vm = viewModel(config)
+        backgroundScope.launch { vm.state.collect {} }
+        val failed = vm.state.first { it.error != null }
+        assertNull(failed.gate)
+        assertTrue(failed.showSplash)
+        assertEquals(CONFIG_ERROR_TEXT, failed.error)
+        vm.onEvent(UiAction.OnRetryClicked)
+        assertEquals(LaunchGate.Ready, vm.state.first { it.gate != null }.gate)
+        assertEquals(2, config.calls)
+    }
+
+    private companion object {
+        const val CONFIG_ERROR_TEXT = "No connection"
     }
 }
