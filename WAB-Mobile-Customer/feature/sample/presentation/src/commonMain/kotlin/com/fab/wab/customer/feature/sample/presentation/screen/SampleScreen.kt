@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.designsystem.components.card.AppCard
@@ -48,11 +49,11 @@ fun SampleScreen(
                     AppShimmerBox(Modifier.fillMaxWidth().height(AppTheme.sizes.avatarLarge), AppTheme.shapes.medium)
                 }
 
-                state.errorMessage != null -> Box(Modifier.fillMaxSize()) {
+                state.errorMessage != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     AppErrorState(onRetry = { onEvent(UiAction.OnRefresh) }, message = state.errorMessage)
                 }
 
-                state.isEmpty -> Box(Modifier.fillMaxSize()) {
+                state.isEmpty -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     AppEmptyState(title = stringResource(Res.string.sample_empty))
                 }
 
