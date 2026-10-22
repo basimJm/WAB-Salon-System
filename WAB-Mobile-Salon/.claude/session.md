@@ -9,6 +9,17 @@
 
 ## Current task
 
+### MER-006 — Contract tooling
+- Branch: `feat/mer-006-api-sync` (from `feat/mer-005-network-kernel`)
+- Status: IN PROGRESS (batch 1)
+- Acceptance criteria (backlog MER-006; same generator as CUS-009):
+  - [x] `python3 scripts/api_sync.py` / `./gradlew apiSync` generates DTOs + `MerchantOperations` (71 operations) + fixtures + snapshot from `../WAB-Server/docs/api/openapi.merchant.json` into `core/data/.../contract/generated`
+  - [x] Stale check: `api_sync.py --check` (`./gradlew apiSyncCheck`) in the gate (always on now; the spec is in the monorepo)
+  - [x] Operation registry helper `Operation.pathWith` (from the customer app) for repositories
+- Tests: `OperationPathTest`, `test_api_sync.py`; core data/network/domain/design-system/notification host tests green; policy ok (error-codes now also checks the snapshot)
+- Loops: 0/1
+- Review: PENDING
+
 ### MER-005 — Network kernel reused
 - Branch: `feat/mer-005-network-kernel` (from `feat/mer-003-rules-gates`)
 - Status: IN PROGRESS (batch 1)

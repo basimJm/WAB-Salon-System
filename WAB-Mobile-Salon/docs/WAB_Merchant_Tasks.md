@@ -38,7 +38,7 @@
 | ID | Task | Branch | Needs | Status | Notes |
 |---|---|---|---|---|---|
 | MER-005 | Network kernel reused: Ktor per environment, `Accept-Language`, base envelope, error-code catalog AR/EN, refresh-token interceptor (`POST /merchant/v1/auth/refresh`) | `feat/mer-005-network-kernel` | MER-003 | IN PROGRESS | Same as CUS-006/007; merchant token scope only |
-| MER-006 | Contract tooling: generate DTOs from `openapi.merchant.json` (`./gradlew apiSync`), stale-check test, operation registry | `feat/mer-006-api-sync` | MER-005 | TODO | Same generator as CUS-009 |
+| MER-006 | Contract tooling: generate DTOs from `openapi.merchant.json` (`./gradlew apiSync`), stale-check test, operation registry | `feat/mer-006-api-sync` | MER-005 | IN PROGRESS | Same generator as CUS-009 |
 | MER-007 | Mock data source with fixtures per operation, `DATA_SOURCE=mock|remote`, scenario switcher in dev; fixtures cover every salon state and permission set | `feat/mer-007-mock-source` | MER-006 | TODO | `INTEGRATION.md` §4 |
 | MER-008 | Secure local storage of PRD §5 keys (tokens encrypted, member id, salon id, salon state, permissions cache, language, theme, push, overlay-permission-asked) via one `SessionStore` | `feat/mer-008-session-store` | MER-005 | TODO | PRD §5 |
 | MER-009 | Permissions model: the 15 grantable keys + owner-only keys (PRD §6.2), `hasPermission`/`anyOf` helpers, `PermissionGated` composable (hidden-not-disabled), re-fetch on app start, Home pull-to-refresh and `PERMISSIONS_UPDATED` data push; default templates | `feat/mer-009-permissions` | MER-008 | TODO | PRD §3, §6; BUSINESS_DOMAIN permissions |

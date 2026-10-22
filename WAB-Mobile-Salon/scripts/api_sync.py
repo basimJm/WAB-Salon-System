@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate the Kotlin contract (DTOs + operation registry) from the server's OpenAPI snapshot (CUS-009).
+"""Generate the Kotlin contract (DTOs + operation registry) from the server's OpenAPI snapshot (MER-006).
 
 Usage: python3 scripts/api_sync.py [--check] [--spec PATH] [--out DIR]
-  default spec: ../WAB-Server/docs/api/openapi.customer.json (the contract, INTEGRATION.md §3)
+  default spec: ../WAB-Server/docs/api/openapi.merchant.json (the contract, INTEGRATION.md §3)
   default out:  core/data/src/commonMain/kotlin/com/fab/wab/merchant/core/data/contract/generated
 --check exits 1 when any generated file differs from what the spec produces (CI and the local gate run it).
 Generated files are excluded from the 300-line and hardcoded-value policies (config/policy.json).
@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SPEC = PROJECT_ROOT / "docs" / "api" / "openapi.json"
+DEFAULT_SPEC = PROJECT_ROOT.parent / "WAB-Server" / "docs" / "api" / "openapi.merchant.json"
 DEFAULT_OUT = PROJECT_ROOT / "core/data/src/commonMain/kotlin/com/fab/wab/merchant/core/data/contract/generated"
 PACKAGE = "com.fab.wab.merchant.core.data.contract.generated"
 NAMESPACE_PREFIX = "/merchant/v1"
@@ -138,7 +138,7 @@ class Renderer:
             "/** One entry per operation of the contract; repositories build requests from it, never from literals. */\n"
             "data class Operation(\n    val method: Method,\n    val path: String,\n    val tag: String,\n"
             "    val pathParams: List<String>,\n    val queryParams: List<String>,\n    val bodyType: String?,\n    val dataType: String?,\n)\n\n"
-            "object CustomerOperations {\n" + "\n\n".join(operations) + "\n\n    val all: List<Operation> = listOf(\n"
+            "object MerchantOperations {\n" + "\n\n".join(operations) + "\n\n    val all: List<Operation> = listOf(\n"
             + "".join(f"        {operation_id(m, p)[:1].lower() + operation_id(m, p)[1:]},\n" for p, ms in self.spec.get("paths", {}).items() for m in ms if m in METHODS)
             + "    )\n}\n"
         )
