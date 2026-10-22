@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.auth.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.LayoutDirection
 import com.fab.wab.customer.designsystem.components.form.AppKeyboards
 import com.fab.wab.customer.designsystem.components.form.CountryUi
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.image.AppImage
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
@@ -70,8 +71,7 @@ internal fun AuthPhoneField(
                 .height(AppTheme.sizes.fieldHeight)
                 .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
                 .clip(shape)
-                .background(if (enabled) colors.card else colors.surface)
-                .border(AppTheme.sizes.borderWidth, if (error) colors.danger else colors.line, shape),
+                .glassBackground(AppTheme.glass, shape, stateBorder = if (error) colors.danger else Color.Unspecified),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             CountryPrefix(country, onCountryClick, enabled, showChevron)

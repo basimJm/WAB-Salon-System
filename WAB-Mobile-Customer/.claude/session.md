@@ -195,7 +195,7 @@
 
 ### CUS-077 — Booking verification (OTP) + success, no online payment; FCM token stored again
 - Branch: `feat/cus-077-booking-verify`
-- Status: IN REVIEW
+- Status: DONE (PR #342)
 - Acceptance criteria (owner requests 2026-10-21):
   - [x] `Screen.BookingVerify(draftId)` real screen (placeholder `PlaceholderNavigation.kt` removed): loads the draft (salon, date/time, people, pay on arrival, total), "Verify with code" → OTP (BOOKING_CONFIRMATION, own phone from the profile) → `verify-otp` → `POST /bookings` → `BookingSuccess`; the whole booking flow (start, summary, verify) is popped so Back from S17 leaves booking
   - [x] Errors: DRAFT_EXPIRED → message + back to booking; failed verify → retry reopens OTP; failed create → retry create without a new code
@@ -205,3 +205,53 @@
 - Tests: `./gradlew :androidApp:assembleDevDebug testAndroidHostTest` exit 0 (all modules), detekt exit 0, policy ok; dev build installed on the emulator
 - Loops: 1/1 — re-checked every criterion against the code and the test run; found and fixed: Back after success landed on the summary step (now `popUpTo<Screen.BookingStart>(inclusive)`)
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — reuses the OTP hand-off pattern (`PendingOtpVerification`), contract ops from the generated snapshot, no payment code. DEVIATIONS: emulator walk-through stopped at login (Firebase rejected 123456 for the test number +962799000004 — owner to confirm the test code), so the verify/success screens were not exercised on a device; iOS not built for this change; FCM token delivery not tested with a console push.
+
+### CUS-078 — Dev deep links on the dev server host (owner request 2026-10-21)
+- Branch: `feat/cus-078-dev-app-links`
+- Status: DONE (PR #345)
+- Acceptance criteria (PRD §4.4; server SRV-135 serves the .well-known files + fallback page):
+  - [x] Dev web/deep-link host = `wab-server-dev.onrender.com` (Android `DEV_WEB_BASE_URL`, iOS Dev `WEB_BASE_URL` + `DEEP_LINK_HOST`), so shared salon links are `https://wab-server-dev.onrender.com/salon/{id}`; prod unchanged (placeholder until the domain exists)
+  - [x] `docs/DEEP_LINKS_CHECKLIST.md`: current setup + Render env values
+- Tests: config only (no code); emulator: `am start -a VIEW -d https://wab-server-dev.onrender.com/salon/08c23382575950264c482f48` opens Salon Details "Gentlemen's Corner"; policy ok
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — config + doc only. PENDING (owner): set `APP_LINKS_*` on Render dev and deploy `server` (dev host still answers 404 for assetlinks.json), then verify the tap-from-WhatsApp path on a device; iOS needs the Team ID + Associated Domains capability.
+
+### CUS-079 — iOS signing: entitlements actually applied; team + free-account mode configurable
+- Branch: `fix/cus-079-ios-signing`
+- Status: DONE (PR #346)
+- Acceptance criteria (owner request 2026-10-21 "run on my iPhone 17 Pro"):
+  - [x] Bug: `CODE_SIGN_ENTITLEMENTS` was never set, so push, Associated Domains and App Attest were never signed into the app; now `CODE_SIGN_ENTITLEMENTS = $(WAB_ENTITLEMENTS)` (default `iosApp/iosApp.entitlements`) in `Config.xcconfig`
+  - [x] Team no longer hardcoded in the target: `DEVELOPMENT_TEAM = $(TEAM_ID)` (default X6UZ9NMK56); bundle id no longer appends `$(TEAM_ID)`
+  - [x] Optional git-ignored `Local.xcconfig` (included last by Dev/Prod) + `Local.xcconfig.example`: own `TEAM_ID`, and `WAB_ENTITLEMENTS = iosApp/iosApp-Personal.entitlements` (empty) for free Apple IDs
+- Tests: policy ok; xcodebuild Debug-Dev simulator green; generated entitlements = aps-environment development, applinks:wab-server-dev.onrender.com, appattest development; bundle id com.fab.wab.customer.dev
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — build config only. PENDING (owner): sign in to Xcode with an Apple ID and enable Developer Mode on the iPhone before a device build can run.
+
+### CUS-080 — iOS dev API base URL cut at `//` (splash called `http://https/customer/v1/config`)
+- Branch: `fix/cus-080-ios-dev-api-url`
+- Status: DONE (PR #347)
+- Acceptance criteria (owner report 2026-10-22 on the real iPhone):
+  - [x] `Dev.xcconfig` `API_BASE_URL` written as `https:/$()/wab-server-dev.onrender.com` (`//` starts an xcconfig comment, the value became `https:`)
+  - [x] iOS dev uses the real dev server like Android (`DATA_SOURCE = remote`, owner change)
+- Tests: built app Info.plist `API_BASE_URL` checked after the device build; config only
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — config only. LESSON: every URL in an xcconfig needs the `$()` split.
+
+### CUS-081 — Liquid Glass (iOS 26 style) across the app
+- Branch: `feat/cus-081-liquid-glass`
+- Status: DONE (PR #349)
+- Acceptance criteria (owner requests 2026-10-22: liquid glass everywhere like iOS native, comfortable with the current design; bottom sheet must show):
+  - [x] Material (`components/glass`): Haze 1.7.2 backdrop blur for chrome; content glass = see-through gradient body, specular sheen, refractive diagonal rim; tokens in `GlassTokens` (light + dark, palette-derived); liquid press (spring scale, no ripple) `rememberGlassPress`/`glassPressScale`/`glassClickable`; violet ambient `glassBackdrop` behind every `AppScreen`
+  - [x] Applied: tab bar (+ glass lens on the selected tab), rail, top bars, sheets, dialogs, sticky bars, toasts, buttons (primary keeps gradient + sheen/rim), icon buttons, cards, chips, time slots, segmented tabs, text field, dropdown, search bar, OTP boxes
+  - [x] Bottom sheet visible again (own window has no backdrop → card colour + sheen/rim)
+  - [x] Home, Bookings, Favorites, Profile scroll under the floating tab bar (`scrollsUnderTabBar` + `tabBarInset()`)
+  - [x] Tests `GlassTokensTest` (+3: content transparency, rim/press/ambient, Content mode)
+  - [x] Base primitive `AppGlassSurface(modifier, shape, style: GlassStyle.Subtle|Regular|Prominent, contentPadding, clipContent, blurBackdrop, content)`: glass on a background layer (children not clipped, no click/padding/size imposed), variants from `GlassTokens.level/fillTop/fillBottom/sheen`; shared `glassMaterial` used by `liquidGlass` (compat) and the surface; `AppCard` adopts it; `GlassGalleryPreviews` (variants × plain/brand/hero backgrounds, long text, nested, narrow, light/dark, RTL, font scale 2)
+  - [x] Owner feedback round 2: `glassBackground(AppTheme.glass, shape, style, stateBorder)` (non-clipping) replaces `.background(colors.card).border(...)` in 25 feature files (cards, sections, rows, auth/profile/notification fields, OTP, search rows, filter options, salon Call/WhatsApp buttons, booking rows, slots); top bar + sticky bar drawn without rim; icon buttons = inset glass circle (no more touching circles in the top bar); emulator: Home, Profile, Salon details checked
+  - [x] Owner feedback round 3: top bar back to opaque (no glass); light mode visible (lighter body 0.62→0.34, ambient 0.26, violet edge `gradientStart`@0.22, violet soft shadow per level 2/6/14 dp); text fields, search, dropdown, OTP, segmented, chips, secondary/outlined buttons and the tab lens use `glassBackground` (edge + shadow); OTP: no double border, no clip; Profile header card + Edit = glass; emulator light + dark Home/Profile checked
+  - [x] Round 4: inner fills `soft`/`surface`/shimmer are translucent tints (no solid boxes inside glass); no elevation shadows under see-through glass (showed through as a dark inner rectangle): removed from `glassBackground`, `AppGlassSurface`, `AppCard` and 5 feature cards; Bookings header gets the status-bar inset (pre-existing overlap); emulator light + dark: Home, Home scrolled, Salon details, Bookings, Profile, Login
+  - [x] Adaptive layout: navigation rail = floating glass capsule (inset, tab-bar shape) with a glass lens + liquid press on the selected item
+  - [x] Tests: `GlassTokensTest` 11 (variant ordering, alphas ≤ 1, WCAG AA ink contrast for every style light/dark, blur-vs-fallback decision)
+- Tests: gate on the final tree: policy ok, detekt ok, `testAndroidHostTest` (all modules) + `assembleDevDebug` + `assembleProdRelease` ok, `linkDebugFrameworkIosSimulatorArm64` ok
+- Loops: 1/1 — re-checked every criterion on the emulator (light + dark: Home, Home scrolled, Salon details, Bookings, Profile, Login) after four owner feedback rounds; found and fixed: invisible sheet, top-bar rim and touching icon circles, invisible light glass, solid inner fills, see-through shadows, OTP double border, Bookings status-bar overlap, detekt findings
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one base primitive (`AppGlassSurface` / `glassBackground` / `liquidGlass` share `glassMaterial`), token-driven light/dark, no feature logic touched, contrast AA tested. DEVIATIONS: landscape rail not seen on a device (emulator refused to rotate; builds + gate only); Arabic/RTL, OTP and booking-flow screens and the iOS simulator not checked visually; glass is a Compose imitation (no refraction), real blur only behind the floating bars; dialogs/sheets stay opaque (separate windows).

@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
+import com.fab.wab.customer.designsystem.components.layout.tabBarInset
 import com.fab.wab.customer.designsystem.components.badge.countBadgeLabel
 import com.fab.wab.customer.designsystem.components.dialog.AppGlobalDialog
 import com.fab.wab.customer.designsystem.components.dialog.GlobalDialogKind
@@ -47,7 +48,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun HomeScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(HomeAnalytics.SCREEN)
-    AppScreen(modifier = modifier, handleIme = false) { _ ->
+    AppScreen(modifier = modifier, handleIme = false, scrollsUnderTabBar = true) { _ ->
         AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }) {
             Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
                 when {
@@ -74,7 +75,7 @@ fun HomeScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
 @Composable
 private fun HomeReady(state: UiState, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = spacing.space20)) {
+    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = spacing.space20 + tabBarInset())) {
         HomeHeader(state, onAction)
         HomeBanners(state.banners, onAction, Modifier.padding(horizontal = spacing.space20))
         HomeSearchButton(

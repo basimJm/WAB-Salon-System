@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
@@ -28,9 +29,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.LayoutDirection
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
-import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.components.textfield.sanitizeOtp
+import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.resources.Res as CoreRes
 import com.fab.wab.customer.designsystem.resources.otp_description
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -99,7 +101,7 @@ private fun OtpCell(digit: String, current: Boolean, filled: Boolean, error: Boo
         current -> colors.gradientEnd
         // Design `#D8B4FE` = the gradient's light violet softened over the card.
         filled -> colors.gradientEnd.copy(alpha = AppTheme.alpha.disabled)
-        else -> colors.line
+        else -> Color.Unspecified
     }
     val ring = if (current && !error) {
         Modifier.border(AuthDesign.otpFocusRing, colors.gradientEnd.copy(alpha = AuthDesign.otpFocusRingAlpha), shape)
@@ -111,9 +113,7 @@ private fun OtpCell(digit: String, current: Boolean, filled: Boolean, error: Boo
             .height(AuthDesign.otpBoxHeight)
             .then(ring)
             .padding(if (current && !error) AuthDesign.otpFocusRing else AppTheme.spacing.space0)
-            .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.borderWidth, borderColor, shape),
+            .glassBackground(AppTheme.glass, shape, stateBorder = borderColor),
         contentAlignment = Alignment.Center,
     ) {
         AppText(

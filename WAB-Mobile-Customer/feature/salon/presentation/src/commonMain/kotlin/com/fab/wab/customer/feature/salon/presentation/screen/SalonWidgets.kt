@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.salon.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
@@ -23,8 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.designsystem.theme.GlassStyle
 
 /** Visual weight of the design's secondary buttons: `border 1.5px line + card` or `soft + accent`. */
 internal enum class SalonButtonKind { Outlined, Soft }
@@ -46,8 +46,8 @@ internal fun SalonButton(
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.medium
     val container = when (kind) {
-        SalonButtonKind.Outlined -> Modifier.border(AppTheme.sizes.borderWidth, colors.line, shape).clip(shape).background(colors.card)
-        SalonButtonKind.Soft -> Modifier.clip(shape).background(colors.soft)
+        SalonButtonKind.Outlined -> Modifier.glassBackground(AppTheme.glass, shape)
+        SalonButtonKind.Soft -> Modifier.glassBackground(AppTheme.glass, shape, GlassStyle.Prominent)
     }
     val content = if (kind == SalonButtonKind.Outlined) colors.ink else colors.accent
     Row(

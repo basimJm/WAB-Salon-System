@@ -1,7 +1,5 @@
 package com.fab.wab.customer.designsystem.components.selector
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -10,10 +8,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
+import com.fab.wab.customer.designsystem.components.glass.glassClickable
+import com.fab.wab.customer.designsystem.components.glass.glassHighlight
+import com.fab.wab.customer.designsystem.components.glass.glassPressScale
+import com.fab.wab.customer.designsystem.components.glass.rememberContentGlass
+import com.fab.wab.customer.designsystem.components.glass.rememberGlassPress
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.designsystem.utils.brandBackground
@@ -30,23 +33,25 @@ fun AppSegmentedTabs(
     val colors = AppTheme.colors
     val spacing = AppTheme.spacing
     val shape = AppTheme.shapes.medium
+    val glass = rememberContentGlass()
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(shape)
-            .background(colors.soft)
+            .glassBackground(AppTheme.glass, shape)
             .padding(spacing.space4),
     ) {
         tabs.forEachIndexed { index, label ->
             val selected = index == selectedIndex
             val tabShape = AppTheme.shapes.small
+            val press = rememberGlassPress()
             Box(
                 modifier = Modifier
                     .weight(1f)
+                    .glassPressScale(press)
                     .defaultMinSize(minHeight = AppTheme.sizes.touchTarget - spacing.space8)
-                    .then(if (selected) Modifier.brandBackground(brandBrush(), tabShape) else Modifier)
+                    .then(if (selected) Modifier.brandBackground(brandBrush(), tabShape).glassHighlight(glass, tabShape) else Modifier)
                     .semantics { this.selected = selected }
-                    .clickable(role = Role.Tab) { onSelect(index) }
+                    .glassClickable(press, role = Role.Tab) { onSelect(index) }
                     .padding(vertical = spacing.space8),
                 contentAlignment = Alignment.Center,
             ) {

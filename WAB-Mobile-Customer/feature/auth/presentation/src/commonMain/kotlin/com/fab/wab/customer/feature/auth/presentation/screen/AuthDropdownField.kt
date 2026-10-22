@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.auth.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,12 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
-import com.fab.wab.customer.designsystem.utils.softShadow
 
 /**
  * S12 dropdown as the design draws it: a 52 dp field (radius 14, 1.5 dp border, chevron 14 faint) that expands an
@@ -56,8 +56,7 @@ internal fun AuthDropdownField(
                 .height(AppTheme.sizes.fieldHeight)
                 .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
                 .clip(shape)
-                .background(if (enabled) colors.card else colors.surface)
-                .border(AppTheme.sizes.borderWidth, if (error) colors.danger else colors.line, shape)
+                .glassBackground(AppTheme.glass, shape, stateBorder = if (error) colors.danger else Color.Unspecified)
                 .clickable(enabled = enabled, role = Role.DropdownList) { expanded = !expanded }
                 .padding(horizontal = AppTheme.spacing.space14),
             verticalAlignment = Alignment.CenterVertically,
@@ -98,10 +97,8 @@ private fun OptionList(options: List<String>, selectedIndex: Int?, onSelect: (In
         modifier = modifier
             .fillMaxWidth()
             .padding(top = AppTheme.spacing.space6)
-            .softShadow(AppTheme.elevation.raised, colors.shadow.copy(alpha = AuthDesign.listShadowAlpha), shape)
             .clip(shape)
-            .background(colors.card)
-            .border(AppTheme.sizes.hairline, colors.line, shape),
+            .glassBackground(AppTheme.glass, shape),
     ) {
         options.forEachIndexed { index, option ->
             val isSelected = index == selectedIndex

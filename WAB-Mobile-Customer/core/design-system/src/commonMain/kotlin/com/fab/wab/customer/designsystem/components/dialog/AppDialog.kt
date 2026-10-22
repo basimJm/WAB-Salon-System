@@ -20,6 +20,8 @@ import com.fab.wab.customer.designsystem.components.badge.StatusTone
 import com.fab.wab.customer.designsystem.components.badge.statusColors
 import com.fab.wab.customer.designsystem.components.button.AppOutlinedButton
 import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
+import com.fab.wab.customer.designsystem.components.glass.liquidGlass
+import com.fab.wab.customer.designsystem.components.glass.rememberGlass
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -48,7 +50,7 @@ fun AppDialog(
             modifier = modifier
                 .widthIn(max = AppTheme.sizes.dialogMaxWidth)
                 .fillMaxWidth()
-                .background(AppTheme.colors.card, AppTheme.shapes.extraLarge)
+                .liquidGlass(rememberGlass(), AppTheme.shapes.extraLarge)
                 .padding(spacing.space24),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(spacing.space12),
