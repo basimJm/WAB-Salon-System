@@ -60,7 +60,7 @@
 | ID | Task | Branch | Needs | Status | Notes |
 |---|---|---|---|---|---|
 | MER-019 | Splash + config + system screens M01/M26: `GET /merchant/v1/config`, force update, optional update, maintenance | `feat/mer-019-config-system` | MER-007, MER-013 | IN REVIEW | PRD M01, M26 |
-| MER-020 | Welcome & login M02: phone + country (`GET /locations/countries`), `POST /auth/check-phone`, "not linked" dialog → register, deactivated / blocked messages, language + theme, legal links | `feat/mer-020-login` | MER-019 | TODO | PRD M02, §4.4; server SRV-029 |
+| MER-020 | Welcome & login M02: phone + country (`GET /locations/countries`), `POST /auth/check-phone`, "not linked" dialog → register, deactivated / blocked messages, language + theme, legal links | `feat/mer-020-login` | MER-019 | IN PROGRESS | PRD M02, §4.4; server SRV-029 |
 | MER-021 | OTP M03 (modes LOGIN / REGISTER / CHANGE_PHONE / BANK_DETAILS): `POST /auth/otp/request`, Firebase phone verification facade, `POST /auth/login` with ID token, `/auth/otp/wrong-attempt`, countdown, limits | `feat/mer-021-otp` | MER-020, MER-010 | TODO | PRD M03; same rules as customer S13 |
 | MER-022 | Salon registration M04: fields (name, type MEN/WOMEN with warning, owner names, city → area, email), license documents via `POST /uploads/license/presign|confirm`, terms checkbox, `POST /salon/applications` → M05 | `feat/mer-022-registration` | MER-021, MER-016 | TODO | PRD M04; server SRV-041 |
 | MER-023 | Application status M05: `GET /salon/application` (pending with documents, rejected with reason), `POST /salon/application/resubmit` prefilled, push on decision | `feat/mer-023-application-status` | MER-022 | TODO | PRD M05 |

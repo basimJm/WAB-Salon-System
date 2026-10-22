@@ -9,6 +9,32 @@
 
 ## Current task
 
+### MER-021 — OTP M03
+- Branch: `feat/mer-021-otp`
+- Branched: (from `feat/mer-020-login`; the OTP screen came with the auth port of MER-020)
+- Status: IN PROGRESS (batch 4)
+- Acceptance criteria (PRD M03 "same rules as the customer app"; operations `POST /auth/otp/request`, `/auth/otp/wrong-attempt`, `/auth/login`):
+  - [x] Modes LOGIN / REGISTER / CHANGE_PHONE / BANK_DETAILS (`AuthPurpose`); OTP pre-check (`allowed`, `otpLength` boxes from the backend, `resendAfterSeconds`, `blockedUntil`), Firebase phone verification through the `PhoneAuthGateway` facade (fake in mock mode), wrong-attempt reporting with remaining attempts and the 15-minute block, resend countdown, expiry popup
+  - [x] LOGIN → `POST /auth/login` with the ID token + installation (app-instance id, platform, versions, FCM token) → session stores tokens, member, role and permission keys → home; REGISTER → proof published → salon registration (M04); BANK_DETAILS / CHANGE_PHONE → proof published → back to the caller
+- Tests: `OtpViewModelTest` (8: request + countdown, login stores the member, wrong code + block, expiry + server errors, register → registration, bank details → back, block remaining time, Firebase send failure), `AuthMappersTest` (3)
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATION: needs MER-010 (code done) and the owner's Firebase files (MER-004) for a real SMS; mock mode verifies any code.
+
+### MER-020 — Welcome & login M02
+- Branch: `feat/mer-020-login`
+- Branched: (from `feat/mer-010-analytics`)
+- Status: IN PROGRESS (batch 4)
+- Acceptance criteria (PRD M02, §4.4; operations `GET /locations/countries`, `POST /auth/check-phone`; design 01 `on.login`):
+  - [x] `feature/auth` ported from the customer app (domain / data / presentation / di) and adapted to the merchant contract; core `locations` (countries, cities, areas; cache per language) ported and bound
+  - [x] Country picker (server list, Jordan default) + phone field with the country regex; Continue → `check-phone`: active member → OTP; `PHONE_NOT_REGISTERED` → "not linked to any salon" dialog → Register a new salon (OTP REGISTER → M04); `MEMBER_INACTIVE` → "Your access was removed"; `ACCOUNT_BLOCKED` → blocked → contact WAB; "New salon? Register your salon" link (valid number → registration OTP)
+  - [x] Language + theme toggles, legal links (privacy / terms / contact content pages), invalid / loading states; texts from design 01 in AR + EN
+  - [x] Merchant navigation map (`Graph` auth / onboarding / tabs, `Screen` M02–M25); shell starts guests at login (launch router = MER-024); `InstallationInfoProvider` bound by the shell
+- Tests: `LoginViewModelTest` (7: default country + regex, registered → OTP, not linked → register, deactivated popup, register link, blocked + errors, toggles, countries retry), `PhoneCheckMapperTest` (2), `SessionUseCasesTest` (2), `InstallationMapperTest`, `LocationsTest`; auth / domain / data / composeApp host tests + `assembleDevDebug` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: customer register screen, change-phone and push switch dropped (no merchant operations); the form fields stay for the salon registration (MER-022).
+
 ### MER-010 — Analytics tracker + Crashlytics facade
 - Branch: `feat/mer-010-analytics`
 - Branched: (batch 4 start, from `feat/mer-019-splash-config`)

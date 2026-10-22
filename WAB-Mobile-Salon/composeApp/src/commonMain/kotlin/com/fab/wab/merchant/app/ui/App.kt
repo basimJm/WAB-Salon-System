@@ -49,6 +49,8 @@ import com.fab.wab.merchant.designsystem.components.image.LocalImageLoader
 import com.fab.wab.merchant.designsystem.components.image.rememberImageLoader
 import com.fab.wab.merchant.designsystem.components.permission.LocalPermissions
 import com.fab.wab.merchant.designsystem.theme.AppTheme
+import com.fab.wab.merchant.feature.auth.di.authModule
+import com.fab.wab.merchant.feature.auth.presentation.di.authPresentationModule
 import com.fab.wab.merchant.feature.sample.di.sampleModule
 import com.fab.wab.merchant.openStoreLink
 import com.fab.wab.merchant.feature.sample.presentation.di.samplePresentationModule
@@ -70,6 +72,8 @@ val appModules = listOf(
     analyticsAppModule,
 
     // feature modules (add each new feature here, in settings.gradle.kts and in ComposeAppPlugin.FEATURE_MODULES)
+    authModule,
+    authPresentationModule,
     sampleModule,
     samplePresentationModule,
 )
@@ -123,7 +127,11 @@ fun App() {
                         }
                         PushEffect(deepLinks = koinInject<DeepLinkStore>())
                         val mainState by mainViewModel.state.collectAsStateWithLifecycle()
-                        LaunchGateContent(mainState, mainViewModel::onEvent) { MainNavigation(Graph.Home, navController) }
+                        LaunchGateContent(mainState, mainViewModel::onEvent) {
+                            // Until the launch router (MER-024): guests start at login, members at home.
+                            val start = if (sessionState?.isSignedIn == true) Graph.Home else Graph.Auth
+                            MainNavigation(start, navController)
+                        }
                     }
                 }
             }

@@ -84,6 +84,10 @@ class ComposeAppPlugin : Plugin<Project> {
 
 /** Feature modules compiled into the app shell (add a feature here, in `settings.gradle.kts` and in `App.kt`). */
 private val FEATURE_MODULES = listOf(
+    ":feature:auth:presentation",
+    ":feature:auth:data",
+    ":feature:auth:domain",
+    ":feature:auth:di",
     ":feature:sample:presentation",
     ":feature:sample:data",
     ":feature:sample:domain",
