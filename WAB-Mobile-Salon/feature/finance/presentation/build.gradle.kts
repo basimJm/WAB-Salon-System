@@ -11,6 +11,7 @@ kotlin {
     }
     sourceSets.commonMain.dependencies {
         implementation(projects.feature.finance.domain)
+        implementation(projects.feature.auth.domain)
         implementation(projects.core.designSystem)
         implementation(projects.core.ui)
         implementation(libs.kotlinx.datetime)

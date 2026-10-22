@@ -9,6 +9,18 @@
 
 ## Current task
 
+### MER-045 — Bank details (owner)
+- Branch: `feat/mer-045-bank-details`
+- Branched: (from `feat/mer-044-finance`)
+- Status: IN PROGRESS (batch 8)
+- Acceptance criteria (PRD M22 bank details; operations `GET/PUT /salon/payout-details`, `POST /auth/otp/request` purpose BANK_DETAILS; design 08 `on.bank`):
+  - [x] Owner only (`PAYOUT_DETAILS_MANAGE`, entry on the finance screen): masked current account ("ending 0302"), bank name and holder ≤ 80, IBAN normalized (spaces, case) and checked (JO prefix, 30 characters, ISO 13616 mod-97)
+  - [x] "Continue & verify": the owner's phone (`GET /team/members/{ownerId}`, split on the longest dial code) opens the existing OTP screen with purpose BANK_DETAILS; back on resume a BANK_DETAILS proof is consumed once and the PUT carries its `idToken`; no proof (user went back) saves nothing
+- Tests: `BankDetailsTest` (2), `BankDetailsViewModelTest` (3); `/tmp/claude/quick.sh m45` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the contract has no self-profile endpoint (SRV-129), so the owner's phone comes from the team member read; the finance presentation depends on `feature/auth/domain` for the OTP hand-off (same as `feature/application`).
+
 ### MER-044 — Finance M22
 - Branch: `feat/mer-044-finance`
 - Branched: (from `feat/mer-041-policies`)

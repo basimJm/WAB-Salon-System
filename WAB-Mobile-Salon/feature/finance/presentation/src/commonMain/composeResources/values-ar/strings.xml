@@ -48,4 +48,15 @@
     <string name="payout_pending">قيد التحويل</string>
     <string name="payout_transferred">تم التحويل</string>
     <string name="booking_ref">الحجز %1$s</string>
+    <string name="bank_title">بيانات البنك</string>
+    <string name="bank_note">لحماية أموالك، يتطلب تغيير بيانات البنك رمز تحقق يُرسل إلى هاتف المالك.</string>
+    <string name="bank_name">اسم البنك</string>
+    <string name="bank_holder">اسم صاحب الحساب</string>
+    <string name="bank_iban">رقم الآيبان (IBAN)</string>
+    <string name="bank_iban_hint">يبدأ بـ JO ويتكون من 30 خانة</string>
+    <string name="bank_iban_error">رقم الآيبان غير صحيح</string>
+    <string name="bank_required">هذا الحقل مطلوب</string>
+    <string name="bank_continue">متابعة والتحقق</string>
+    <string name="bank_verified">تم تأكيد وحفظ بيانات البنك</string>
+    <string name="bank_current">الحساب الحالي ينتهي بـ %1$s</string>
 </resources>

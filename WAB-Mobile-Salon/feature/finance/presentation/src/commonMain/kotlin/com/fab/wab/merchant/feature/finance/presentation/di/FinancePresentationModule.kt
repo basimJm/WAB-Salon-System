@@ -2,6 +2,8 @@ package com.fab.wab.merchant.feature.finance.presentation.di
 
 import com.fab.wab.merchant.core.common.BusinessTime
 import com.fab.wab.merchant.core.domain.session.SessionStore
+import com.fab.wab.merchant.feature.finance.presentation.controller.vm.BankDetailsDependencies
+import com.fab.wab.merchant.feature.finance.presentation.controller.vm.BankDetailsViewModel
 import com.fab.wab.merchant.feature.finance.presentation.controller.vm.FinanceDependencies
 import com.fab.wab.merchant.feature.finance.presentation.controller.vm.FinanceViewModel
 import kotlinx.datetime.TimeZone
@@ -19,6 +21,11 @@ val financePresentationModule = module {
                 analytics = get(),
                 today = { Clock.System.now().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
             ),
+        )
+    }
+    viewModel {
+        BankDetailsViewModel(
+            BankDetailsDependencies(bank = get(), locations = get(), session = get<SessionStore>().state, pending = get(), analytics = get()),
         )
     }
 }

@@ -48,4 +48,15 @@
     <string name="payout_pending">Pending</string>
     <string name="payout_transferred">Transferred</string>
     <string name="booking_ref">Booking %1$s</string>
+    <string name="bank_title">Bank details</string>
+    <string name="bank_note">To protect your money, changing bank details requires a code sent to the owner’s phone.</string>
+    <string name="bank_name">Bank name</string>
+    <string name="bank_holder">Account holder</string>
+    <string name="bank_iban">IBAN</string>
+    <string name="bank_iban_hint">Starts with JO, 30 characters</string>
+    <string name="bank_iban_error">Invalid IBAN</string>
+    <string name="bank_required">This field is required</string>
+    <string name="bank_continue">Continue &amp; verify</string>
+    <string name="bank_verified">Bank details verified and saved</string>
+    <string name="bank_current">Current account ending %1$s</string>
 </resources>
