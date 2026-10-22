@@ -9,6 +9,17 @@
 
 ## Current task
 
+### MER-008 — Secure local storage of PRD §5 keys via one SessionStore
+- Branch: `feat/mer-008-session-store` (batch 2 start, from `feat/mer-007-mock-source`)
+- Status: IN PROGRESS (batch 2)
+- Acceptance criteria (PRD §5):
+  - [x] `SessionStore` holds tokens (secure store only), `member_id`, `salon_id`, member first name, `member_role`, `permissions` cache, `salon_state`, `push_enabled`, `overlay_permission_prompted`; language/theme stay in `AppSettings`
+  - [x] `SessionState.SignedIn(member: MemberProfile, permissions, salonState)`; `MemberRole` / `SalonState` enums with tolerant `fromCode`
+  - [x] Sign-out drops tokens + identity, keeps push / overlay flags; `clearAll` empties everything; incomplete identity = guest
+- Tests: `DataStoreSessionStoreTest` (6), `AppSettingsImplTokensTest`, shell analytics tests; storage/composeApp/realtime host tests green
+- Loops: 0/1
+- Review: PENDING
+
 ### MER-007 — Mock data source
 - Branch: `feat/mer-007-mock-source` (from `feat/mer-006-api-sync`)
 - Status: DONE (batch 1 PR)

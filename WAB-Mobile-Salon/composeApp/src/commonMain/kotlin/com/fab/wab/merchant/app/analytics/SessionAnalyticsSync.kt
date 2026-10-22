@@ -25,7 +25,7 @@ class SessionAnalyticsSync(
         session.distinctUntilChanged().onEach(::apply).launchIn(scope)
 
     private fun apply(state: SessionState) {
-        val userId = (state as? SessionState.SignedIn)?.user?.id
+        val userId = (state as? SessionState.SignedIn)?.member?.id
         tracker.setUserId(userId)
         crashReporter.setUserId(userId)
         val userType = if (state.isSignedIn) AnalyticsUserType.REGISTERED else AnalyticsUserType.GUEST

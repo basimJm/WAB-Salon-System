@@ -4,7 +4,8 @@ import com.fab.wab.merchant.core.analytics.AnalyticsUserType
 import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.domain.AppLanguage
 import com.fab.wab.merchant.core.domain.session.SessionState
-import com.fab.wab.merchant.core.domain.session.UserProfile
+import com.fab.wab.merchant.core.domain.session.MemberProfile
+import com.fab.wab.merchant.core.domain.session.MemberRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -49,7 +50,7 @@ class AppAnalyticsContextProviderTest {
         session.value = SessionState.Guest
         val guest = provider().current()
         assertEquals(AnalyticsUserType.GUEST, guest.userType)
-        session.value = SessionState.SignedIn(UserProfile(id = "c1", firstName = "Omar"))
+        session.value = SessionState.SignedIn(MemberProfile(id = "c1", salonId = "s1", firstName = "Omar", role = MemberRole.OWNER))
         val registered = provider().current()
         assertEquals(AnalyticsUserType.REGISTERED, registered.userType)
     }
