@@ -3,6 +3,7 @@ package com.fab.wab.merchant.feature.salon.data
 import com.fab.wab.merchant.feature.salon.domain.CatalogRequestsRepository
 import com.fab.wab.merchant.feature.salon.domain.GalleryRepository
 import com.fab.wab.merchant.feature.salon.domain.HoursRepository
+import com.fab.wab.merchant.feature.salon.domain.PolicyRepository
 import com.fab.wab.merchant.feature.salon.domain.SalonProfileRepository
 import com.fab.wab.merchant.feature.salon.domain.ServicesRepository
 import org.koin.dsl.module
@@ -19,4 +20,6 @@ val salonDataModule = module {
     single<ServicesRepository> { ServicesRepositoryImpl(get(), get()) }
     single { CatalogRequestsApi(get()) }
     single<CatalogRequestsRepository> { CatalogRequestsRepositoryImpl(get()) }
+    single { PolicyApi(get()) }
+    single<PolicyRepository> { PolicyRepositoryImpl(get(), get()) }
 }

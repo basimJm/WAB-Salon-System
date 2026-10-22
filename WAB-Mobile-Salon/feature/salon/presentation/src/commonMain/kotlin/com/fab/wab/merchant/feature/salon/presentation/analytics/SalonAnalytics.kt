@@ -28,6 +28,9 @@ object SalonAnalytics {
     const val PARAM_STATE = "state"
     val SCREEN_CATALOG_REQUESTS = AnalyticsScreen("salon_catalog_requests")
     const val ACTION_CATALOG_REQUEST = "catalog_request_send"
+    val SCREEN_POLICY = AnalyticsScreen("salon_policies")
+    val SCREEN_POLICY_PREVIEW = AnalyticsScreen("salon_policies_preview")
+    const val ACTION_POLICY_SAVE = "policy_save"
     const val PARAM_NEW = "new"
     const val PARAM_COUNT = "count"
 }

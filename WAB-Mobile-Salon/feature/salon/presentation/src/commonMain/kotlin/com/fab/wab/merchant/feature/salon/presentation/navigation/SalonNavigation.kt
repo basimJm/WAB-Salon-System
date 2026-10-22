@@ -20,10 +20,12 @@ import com.fab.wab.merchant.feature.salon.domain.HubTile
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.GalleryContract
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.HoursContract
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.HoursMessage
+import com.fab.wab.merchant.feature.salon.presentation.controller.contract.PolicyContract
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonHubContract
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.GalleryViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.HoursViewModel
+import com.fab.wab.merchant.feature.salon.presentation.controller.vm.PolicyViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonHubViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonProfileViewModel
 import com.fab.wab.merchant.feature.salon.presentation.resources.Res
@@ -33,10 +35,12 @@ import com.fab.wab.merchant.feature.salon.presentation.resources.closure_deleted
 import com.fab.wab.merchant.feature.salon.presentation.resources.closure_updated
 import com.fab.wab.merchant.feature.salon.presentation.resources.gallery_deleted
 import com.fab.wab.merchant.feature.salon.presentation.resources.hours_saved
+import com.fab.wab.merchant.feature.salon.presentation.resources.policy_saved
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_location_blocked
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_saved
 import com.fab.wab.merchant.feature.salon.presentation.screen.GalleryScreen
 import com.fab.wab.merchant.feature.salon.presentation.screen.HoursScreen
+import com.fab.wab.merchant.feature.salon.presentation.screen.PolicyScreen
 import com.fab.wab.merchant.feature.salon.presentation.screen.SalonHubScreen
 import com.fab.wab.merchant.feature.salon.presentation.screen.SalonProfileScreen
 import org.jetbrains.compose.resources.getPluralString
@@ -51,6 +55,7 @@ private val TILE_SCREENS: Map<HubTile, Screen> = mapOf(
     HubTile.HOURS to Screen.WorkingHours,
     HubTile.SERVICES to Screen.Services,
     HubTile.TEAM to Screen.Team,
+    HubTile.POLICIES to Screen.Policies,
 )
 
 /** `Graph.Salon` tab: hub (M12) and the management screens (M13–M19, M22, M23). */
@@ -63,6 +68,7 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
             composable<Screen.Gallery> { GalleryDestination() }
             composable<Screen.WorkingHours> { HoursDestination() }
             servicesDestinations(this@SalonNavigation)
+            composable<Screen.Policies> { PolicyDestination() }
         }
     }
 
@@ -128,6 +134,20 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
         HoursScreen(state = state, onAction = viewModel::onEvent, onBack = { navigateBack() })
     }
 
+
+    @Composable
+    private fun PolicyDestination() {
+        val viewModel: PolicyViewModel = koinViewModel()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val notifications = rememberNotificationManager()
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                PolicyContract.SideEffect.Saved -> notifications.show(getString(Res.string.policy_saved), style = NotificationStyle.Success)
+                is PolicyContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+            }
+        }
+        PolicyScreen(state = state, onAction = viewModel::onEvent, onBack = { navigateBack() })
+    }
 }
 
 private suspend fun hoursMessage(message: HoursMessage, cancelled: Int): String {

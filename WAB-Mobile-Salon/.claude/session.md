@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-041 — Policies M19
+- Branch: `feat/mer-041-policies`
+- Branched: (batch 8 start, from `feat/mer-040-permissions`)
+- Status: IN PROGRESS (batch 8)
+- Acceptance criteria (PRD M19; operations `GET/PUT /salon/policy`; design 07 `on.policies`, `sh.preview`):
+  - [x] Cancellation window chips 1/2/3/6/12/24/48 h + custom (1..720, contract limit), payment options ≥ 1 (pay on arrival / deposit / full online), deposit % 1..100 required with DEPOSIT and the live "On a 50 JOD booking the deposit is X" example (integer fils → JOD)
+  - [x] Within-window cancellation (deposit refundable / non-refundable; full payment refund in full / minus deposit) and no-show outcomes (deposit keep / refund; full payment keep / minus deposit / full), each block only for the offered options; notes ≤ 1000; "changes apply to new bookings only"
+  - [x] Customer "Salon rules" preview built from the draft (domain `customerRules`); a missing policy (null) starts from defaults; saving refreshes the shared salon (completeness `POLICY`); hub tile POLICIES registered; design-system `filsToDecimal` / `jodTextOfFils`
+- Tests: `PolicyTest` (3), `PolicyMappersTest` (2), `PolicyViewModelTest` (2), `FormatsTest` +1; `/tmp/claude/quick.sh m41b` green after naming the window presets and removing duplicated constants; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the design caps the custom window at 168 h; the contract allows 720 and the PRD names no limit, so 720 is used.
+
 ### MER-040 — Permissions editor M18
 - Branch: `feat/mer-040-permissions`
 - Branched: (from `feat/mer-039-staff-profile`)

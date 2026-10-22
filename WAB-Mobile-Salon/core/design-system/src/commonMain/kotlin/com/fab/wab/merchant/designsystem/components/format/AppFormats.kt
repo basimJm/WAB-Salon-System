@@ -31,3 +31,15 @@ fun trimAmount(amount: String): String {
     if (DECIMAL_POINT !in text) return text
     return text.trimEnd(ZERO).trimEnd(DECIMAL_POINT)
 }
+
+private const val FILS_PER_JOD = 1_000L
+private const val FILS_DIGITS = 3
+
+/** Integer fils (CLAUDE.md money rule) as a JOD decimal text ("12.500"). */
+fun filsToDecimal(fils: Long): String =
+    (fils / FILS_PER_JOD).toString() + DECIMAL_POINT.toString() + (fils % FILS_PER_JOD).toString().padStart(FILS_DIGITS, ZERO)
+
+/** Localized JOD amount of integer fils ("10 JOD"). */
+@Composable
+fun jodTextOfFils(fils: Long): String = jodText(filsToDecimal(fils))
+
