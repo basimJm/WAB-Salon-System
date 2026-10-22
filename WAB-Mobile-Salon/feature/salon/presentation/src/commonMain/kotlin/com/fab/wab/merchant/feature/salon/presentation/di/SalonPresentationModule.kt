@@ -4,6 +4,7 @@ import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapController
 import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapDependencies
+import com.fab.wab.merchant.feature.salon.presentation.controller.vm.GalleryViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonHubViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonProfileDependencies
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonProfileViewModel
@@ -38,4 +39,5 @@ val salonPresentationModule = module {
         )
     }
     viewModel { SalonProfileViewModel(deps = get()) }
+    viewModel { GalleryViewModel(gallery = get(), picker = get(), upload = get(), analytics = get()) }
 }

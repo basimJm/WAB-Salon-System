@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-034 — Gallery M14
+- Branch: `feat/mer-034-gallery`
+- Branched: (from `feat/mer-033-salon-profile`)
+- Status: IN PROGRESS (batch 6)
+- Acceptance criteria (PRD M14; operations `GET/POST /salon/gallery`, `PUT /salon/gallery/order`, `DELETE /salon/gallery/{id}`; design 05 `on.gallery`):
+  - [x] Grid of photos and videos (thumbnail falls back to url, video duration), hint with the limits, empty state "Add your work", tap → full-screen viewer
+  - [x] Multi-select add within the free slots (50 photos / 10 videos, `acceptUploads` per kind: size, type, 60 s), each file uploaded (`GALLERY_IMAGE` / `GALLERY_VIDEO`) with progress then `POST /salon/gallery` (duration rounded up to seconds); failures stay as retry cells; refused files explained
+  - [x] Reorder mode saved with `PUT /salon/gallery/order` on Done (restored on failure); select mode with "n selected" (AR plurals) → delete confirm → `DELETE` each, partial failures kept selected + reload; hub tile GALLERY registered
+- Tests: `GalleryTest` (2), `GalleryViewModelTest` (5); `/tmp/claude/quick.sh m34` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: no video thumbnail is generated on the device (`thumbnailKey` optional; the server falls back to the url).
+
 ### MER-033 — Salon profile edit M13
 - Branch: `feat/mer-033-salon-profile`
 - Branched: (from `feat/mer-032-salon-hub`)

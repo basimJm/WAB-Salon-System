@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.salon.data
 
+import com.fab.wab.merchant.feature.salon.domain.GalleryRepository
 import com.fab.wab.merchant.feature.salon.domain.SalonProfileRepository
 import org.koin.dsl.module
 
@@ -7,4 +8,6 @@ import org.koin.dsl.module
 val salonDataModule = module {
     single { SalonProfileApi(get()) }
     single<SalonProfileRepository> { SalonProfileRepositoryImpl(get(), get()) }
+    single { GalleryApi(get()) }
+    single<GalleryRepository> { GalleryRepositoryImpl(get()) }
 }
