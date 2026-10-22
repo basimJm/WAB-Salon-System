@@ -218,7 +218,7 @@
 
 ### CUS-079 — iOS signing: entitlements actually applied; team + free-account mode configurable
 - Branch: `fix/cus-079-ios-signing`
-- Status: IN REVIEW
+- Status: DONE (PR #346)
 - Acceptance criteria (owner request 2026-10-21 "run on my iPhone 17 Pro"):
   - [x] Bug: `CODE_SIGN_ENTITLEMENTS` was never set, so push, Associated Domains and App Attest were never signed into the app; now `CODE_SIGN_ENTITLEMENTS = $(WAB_ENTITLEMENTS)` (default `iosApp/iosApp.entitlements`) in `Config.xcconfig`
   - [x] Team no longer hardcoded in the target: `DEVELOPMENT_TEAM = $(TEAM_ID)` (default X6UZ9NMK56); bundle id no longer appends `$(TEAM_ID)`
@@ -226,3 +226,13 @@
 - Tests: policy ok; xcodebuild Debug-Dev simulator green; generated entitlements = aps-environment development, applinks:wab-server-dev.onrender.com, appattest development; bundle id com.fab.wab.customer.dev
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — build config only. PENDING (owner): sign in to Xcode with an Apple ID and enable Developer Mode on the iPhone before a device build can run.
+
+### CUS-080 — iOS dev API base URL cut at `//` (splash called `http://https/customer/v1/config`)
+- Branch: `fix/cus-080-ios-dev-api-url`
+- Status: IN REVIEW
+- Acceptance criteria (owner report 2026-10-22 on the real iPhone):
+  - [x] `Dev.xcconfig` `API_BASE_URL` written as `https:/$()/wab-server-dev.onrender.com` (`//` starts an xcconfig comment, the value became `https:`)
+  - [x] iOS dev uses the real dev server like Android (`DATA_SOURCE = remote`, owner change)
+- Tests: built app Info.plist `API_BASE_URL` checked after the device build; config only
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — config only. LESSON: every URL in an xcconfig needs the `$()` split.
