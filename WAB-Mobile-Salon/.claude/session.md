@@ -12,66 +12,66 @@
 ### MER-047 — Notifications M24
 - Branch: `feat/mer-047-notifications`
 - Branched: (from `feat/mer-046-subscription`)
-- Status: IN PROGRESS (batch 8)
+- Status: IN REVIEW (batch 8 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M24; operations `GET /notifications` (page, from, to, q), `GET /notifications/unread-count`, `POST /notifications/read`):
   - [x] `feature/notifications` ported from the customer app (same pattern, as the PRD asks): paginated list, title, body, relative time, read / unread with read-on-visible (once each, failures roll back), filter sheet (date range + search, chips), realtime refresh, popup on tap
   - [x] Merchant tap routing (`Notification.target()`): booking id → M09, `application.*` → M05, `catalog_request.*` → M16 requests, `payout.*` / `refund.*` → M22, `subscription.*` → M23; the popup shows "View booking" / "Open" only when there is a target
   - [x] `Screen.Notifications` registered (opened from More, MER-048); search hint made generic
 - Tests: `NotificationTargetTest` (1) + ported `RelativeTimeTest` (2), `NotificationsApiTest` (3), `NotificationsViewModelTest` (6); `/tmp/claude/quick.sh m47` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 8 run: policy ok, 81 policy-script tests, 449 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 8 code reading; no blocking finding. DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: `review.*` opens nothing until the reviews screen (MER-042 ← SRV-131); the unread count badge has no host yet (Home MER-050 is blocked), More shows the entry.
 
 ### MER-046 — Subscription & status M23
 - Branch: `feat/mer-046-subscription`
 - Branched: (from `feat/mer-045-bank-details`)
-- Status: IN PROGRESS (batch 8)
+- Status: IN REVIEW (batch 8 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M23; operation `GET /subscription`, config contact; design 08 `on.sub`, `sh.contact`):
   - [x] Salon state card (Live / Offline / Incomplete with its meaning), subscription card (Free trial / Monthly plan active / Expired, badge, days left in AR plurals, ends / renews / expired date, "ending soon")
   - [x] "Subscriptions are paid outside the app" + CTA by status (activate / renew / contact), "Get featured in Recommended Salons" → Contact WAB with its note; contact channels (call / WhatsApp / email) from the server config, each hidden when missing; pull-to-refresh; hub tile SUBSCRIPTION registered
   - [x] Shared design-system `AppContactSheet` (reused by More, MER-048)
 - Tests: `SubscriptionMappersTest` (1), `SubscriptionViewModelTest` (2); `/tmp/claude/quick.sh m46` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 8 run: policy ok, 81 policy-script tests, 449 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 8 code reading; no blocking finding. DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: the end date shown is the one that matches the status (trial end, period end or expiry).
 
 ### MER-045 — Bank details (owner)
 - Branch: `feat/mer-045-bank-details`
 - Branched: (from `feat/mer-044-finance`)
-- Status: IN PROGRESS (batch 8)
+- Status: IN REVIEW (batch 8 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M22 bank details; operations `GET/PUT /salon/payout-details`, `POST /auth/otp/request` purpose BANK_DETAILS; design 08 `on.bank`):
   - [x] Owner only (`PAYOUT_DETAILS_MANAGE`, entry on the finance screen): masked current account ("ending 0302"), bank name and holder ≤ 80, IBAN normalized (spaces, case) and checked (JO prefix, 30 characters, ISO 13616 mod-97)
   - [x] "Continue & verify": the owner's phone (`GET /team/members/{ownerId}`, split on the longest dial code) opens the existing OTP screen with purpose BANK_DETAILS; back on resume a BANK_DETAILS proof is consumed once and the PUT carries its `idToken`; no proof (user went back) saves nothing
 - Tests: `BankDetailsTest` (2), `BankDetailsViewModelTest` (3); `/tmp/claude/quick.sh m45` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 8 run: policy ok, 81 policy-script tests, 449 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 8 code reading; no blocking finding. DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: the contract has no self-profile endpoint (SRV-129), so the owner's phone comes from the team member read; the finance presentation depends on `feature/auth/domain` for the OTP hand-off (same as `feature/application`).
 
 ### MER-044 — Finance M22
 - Branch: `feat/mer-044-finance`
 - Branched: (from `feat/mer-041-policies`)
-- Status: IN PROGRESS (batch 8)
+- Status: IN REVIEW (batch 8 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M22; operations `GET /finance/balance|transactions|refunds|payouts`; design 08 `on.finance`):
   - [x] New `feature/finance`; balance card (pending payout amount, last payout amount + date), WAB info text; hub tile FINANCE registered
   - [x] Tabs Transactions (reference, date, deposit / full, amount, gateway fee, net), Refunds (amount, booking, reason or source label, status Pending / Refunded / Failed, requested / refunded dates), Payouts (period, gross, fees, refunds deducted, adjustments, net, Pending / Transferred, transfer date + reference)
   - [x] Date presets This month / Last 3 months / This year / Custom (from / to pickers, `to` never before `from`), infinite scroll pages of 20, pull-to-refresh, empty "try another period", error + retry; rows open the booking (M09)
   - [x] Bank-details entry only for the owner (`PAYOUT_DETAILS_MANAGE`), shown once MER-045 ships
 - Tests: `FinanceTest` (1), `FinanceMappersTest` (1), `FinanceViewModelTest` (2); `/tmp/claude/quick.sh m44b` green after rewording two KDoc lines (`/finance/*` opened a nested comment); policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 8 run: policy ok, 81 policy-script tests, 449 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 8 code reading; no blocking finding. DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: amounts are the contract's JOD decimal strings shown through `jodText`.
 
 ### MER-041 — Policies M19
 - Branch: `feat/mer-041-policies`
 - Branched: (batch 8 start, from `feat/mer-040-permissions`)
-- Status: IN PROGRESS (batch 8)
+- Status: IN REVIEW (batch 8 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M19; operations `GET/PUT /salon/policy`; design 07 `on.policies`, `sh.preview`):
   - [x] Cancellation window chips 1/2/3/6/12/24/48 h + custom (1..720, contract limit), payment options ≥ 1 (pay on arrival / deposit / full online), deposit % 1..100 required with DEPOSIT and the live "On a 50 JOD booking the deposit is X" example (integer fils → JOD)
   - [x] Within-window cancellation (deposit refundable / non-refundable; full payment refund in full / minus deposit) and no-show outcomes (deposit keep / refund; full payment keep / minus deposit / full), each block only for the offered options; notes ≤ 1000; "changes apply to new bookings only"
   - [x] Customer "Salon rules" preview built from the draft (domain `customerRules`); a missing policy (null) starts from defaults; saving refreshes the shared salon (completeness `POLICY`); hub tile POLICIES registered; design-system `filsToDecimal` / `jodTextOfFils`
 - Tests: `PolicyTest` (3), `PolicyMappersTest` (2), `PolicyViewModelTest` (2), `FormatsTest` +1; `/tmp/claude/quick.sh m41b` green after naming the window presets and removing duplicated constants; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 8 run: policy ok, 81 policy-script tests, 449 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 8 code reading; no blocking finding. DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: the design caps the custom window at 168 h; the contract allows 720 and the PRD names no limit, so 720 is used.
 
 ### MER-040 — Permissions editor M18
