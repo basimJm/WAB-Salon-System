@@ -17,6 +17,10 @@ import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.feature.application.presentation.controller.contract.ApplicationStatusContract
 import com.fab.wab.merchant.feature.application.presentation.controller.contract.RegistrationContract
 import com.fab.wab.merchant.feature.application.presentation.controller.contract.RegistrationMode
+import com.fab.wab.merchant.feature.application.presentation.controller.contract.SetupChecklistContract
+import com.fab.wab.merchant.feature.application.presentation.controller.vm.SetupChecklistViewModel
+import com.fab.wab.merchant.feature.application.presentation.screen.SetupChecklistScreen
+import com.fab.wab.merchant.feature.application.domain.model.SetupStep
 import com.fab.wab.merchant.feature.application.presentation.controller.vm.ApplicationStatusViewModel
 import com.fab.wab.merchant.feature.application.presentation.controller.vm.RegistrationViewModel
 import com.fab.wab.merchant.feature.application.presentation.screen.ApplicationStatusScreen
@@ -32,6 +36,9 @@ class ApplicationNavigation(override val navController: NavHostController) : Nav
             composable<Screen.ApplicationStatus> { StatusDestination() }
             composable<Screen.Registration> { RegistrationDestination(RegistrationMode.NEW) }
             composable<Screen.ApplicationResubmit> { RegistrationDestination(RegistrationMode.RESUBMIT) }
+        }
+        navGraphBuilder.navigation<Graph.Setup>(startDestination = Screen.SetupChecklist) {
+            composable<Screen.SetupChecklist> { ChecklistDestination() }
         }
     }
 
@@ -52,6 +59,21 @@ class ApplicationNavigation(override val navController: NavHostController) : Nav
     }
 
     @Composable
+    private fun ChecklistDestination() {
+        val viewModel: SetupChecklistViewModel = koinViewModel()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val notifications = rememberNotificationManager()
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                is SetupChecklistContract.SideEffect.OpenStep -> navigateTo(effect.step.screen())
+                SetupChecklistContract.SideEffect.NavigateHome -> navigateAndClearBackstack(Graph.Home)
+                is SetupChecklistContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+            }
+        }
+        SetupChecklistScreen(state = state, onAction = viewModel::onEvent)
+    }
+
+    @Composable
     private fun RegistrationDestination(mode: RegistrationMode) {
         val viewModel: RegistrationViewModel = koinViewModel(key = mode.name) { parametersOf(mode) }
         val state by viewModel.state.collectAsStateWithLifecycle()
@@ -66,4 +88,14 @@ class ApplicationNavigation(override val navController: NavHostController) : Nav
         }
         RegistrationScreen(state = state, onAction = viewModel::onEvent, onBack = ::navigateBack)
     }
+}
+
+/** Where each checklist step is edited (PRD M06 → M13 / M15 / M16 / M17 / M19 / M14). */
+internal fun SetupStep.screen(): Screen = when (this) {
+    SetupStep.PROFILE, SetupStep.LOCATION -> Screen.SalonProfile
+    SetupStep.HOURS -> Screen.WorkingHours
+    SetupStep.SERVICES -> Screen.Services
+    SetupStep.STAFF, SetupStep.TEAM -> Screen.Team
+    SetupStep.POLICIES -> Screen.Policies
+    SetupStep.GALLERY -> Screen.Gallery
 }

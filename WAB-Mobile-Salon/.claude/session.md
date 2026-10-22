@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-025 — Setup checklist M06
+- Branch: `feat/mer-025-setup-checklist`
+- Branched: (from `feat/mer-024-launch-router`)
+- Status: IN PROGRESS (batch 5)
+- Acceptance criteria (PRD M06, §4.2 completeness; `GET /salon` completeness; design 01 `on.check`):
+  - [x] Steps from the server's missing items (profile & images, location & contact, hours, services, staff, policies) + optional gallery / team; ✓ when complete; progress "n of 6" + bar + steps left (AR plurals)
+  - [x] Pending-approval note; each step opens its screen (profile, hours, services, team, policies, gallery); pull-to-refresh; live → "Your salon is live!" → home
+  - [x] `Graph.Setup` start for the APPROVED_INCOMPLETE route
+- Tests: `SetupChecklistTest` (2), `SetupChecklistViewModelTest` (3); application tests + `assembleDevDebug` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: optional steps have no completeness signal from the server, so they never show ✓.
+
 ### MER-024 — Launch router + offline banner
 - Branch: `feat/mer-024-launch-router`
 - Branched: (batch 5 start, from `feat/mer-023-application-status`)

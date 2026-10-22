@@ -40,4 +40,35 @@
     <string name="status_approved_body">Complete the remaining steps so customers can see and book your salon.</string>
     <string name="status_continue">Continue setup</string>
     <string name="status_resubmissions">Resubmitted %1$d times</string>
+    <string name="setup_title">Set up your salon</string>
+    <string name="setup_progress">%1$d of %2$d</string>
+    <string name="setup_done">Done</string>
+    <string name="setup_required">Required steps</string>
+    <string name="setup_optional">Optional</string>
+    <string name="setup_pending_note">Waiting for WAB approval — you can prepare your profile now.</string>
+    <string name="setup_all_pending">Your profile is ready! Your salon goes live once approved.</string>
+    <string name="setup_hint">Customers can see your salon only when all required steps are complete and WAB has approved it.</string>
+    <string name="setup_profile">Profile &amp; images</string>
+    <string name="setup_profile_sub">Cover, profile image, name and description</string>
+    <string name="setup_location">Location &amp; contact</string>
+    <string name="setup_location_sub">Map location and phone number</string>
+    <string name="setup_hours">Working hours</string>
+    <string name="setup_hours_sub">At least one working day</string>
+    <string name="setup_services">Services</string>
+    <string name="setup_services_sub">At least one active service with price and duration</string>
+    <string name="setup_staff">Staff</string>
+    <string name="setup_staff_sub">A provider with at least one service and working days</string>
+    <string name="setup_policies">Policies</string>
+    <string name="setup_policies_sub">Cancellation window and at least one payment option</string>
+    <string name="setup_gallery">Gallery</string>
+    <string name="setup_gallery_sub">Add photos and videos of your work</string>
+    <string name="setup_team">Team access</string>
+    <string name="setup_team_sub">Add team members and set permissions</string>
+    <string name="setup_live_title">Your salon is live!</string>
+    <string name="setup_live_body">Your salon is now visible to customers and they can book. Booking requests reach you instantly.</string>
+    <string name="setup_go_home">Go to home</string>
+    <plurals name="setup_left">
+        <item quantity="one">%1$d step left until your salon goes live.</item>
+        <item quantity="other">%1$d steps left until your salon goes live.</item>
+    </plurals>
 </resources>
