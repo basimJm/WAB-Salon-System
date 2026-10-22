@@ -55,6 +55,10 @@ internal val salonStateTexts: Map<SalonState, Pair<StringResource, StringResourc
     SalonState.APPLICATION_REJECTED to (Res.string.salon_state_rejected to Res.string.salon_state_rejected_hint),
 )
 
+/** Localized name of a salon state (hub / home chips). */
+@Composable
+fun salonStateLabel(state: SalonState): String = stringResource(salonStateTexts.getValue(state).first)
+
 /** Home state strip (PRD M07): the salon state chip with its dot, then what the state means for bookings. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hub_title">Manage salon</string>
+    <string name="hub_no_access">You have no permissions to manage the salon. Contact the owner.</string>
+    <string name="hub_missing">Missing</string>
+    <string name="hub_women">Women’s salon</string>
+    <string name="hub_men">Men’s salon</string>
+    <string name="tile_profile">Profile &amp; images</string>
+    <string name="tile_profile_sub">Name, description, location, contact</string>
+    <string name="tile_gallery">Gallery</string>
+    <string name="tile_gallery_sub">Photos and videos of your work</string>
+    <string name="tile_hours">Working hours</string>
+    <string name="tile_hours_sub">and temporary closures</string>
+    <string name="tile_services">Services</string>
+    <string name="tile_services_sub">Your services and prices</string>
+    <string name="tile_team">Staff &amp; team</string>
+    <string name="tile_team_sub">Members and service providers</string>
+    <string name="tile_policies">Policies</string>
+    <string name="tile_policies_sub">Cancellation, payment, deposit</string>
+    <string name="tile_reviews">Reviews</string>
+    <string name="tile_reviews_sub">What customers say</string>
+    <string name="tile_statistics">Statistics</string>
+    <string name="tile_statistics_sub">Bookings and revenue</string>
+    <string name="tile_finance">Finance</string>
+    <string name="tile_finance_sub">Balance, transactions, payouts</string>
+    <string name="tile_subscription">Subscription &amp; status</string>
+    <string name="tile_subscription_sub">Plan and salon status</string>
+</resources>

@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-032 — Salon hub M12
+- Branch: `feat/mer-032-salon-hub`
+- Branched: (from `feat/mer-031-calendar`)
+- Status: IN PROGRESS (batch 6)
+- Acceptance criteria (PRD M12, §6 hidden-not-disabled; `GET /salon` completeness; design 05 `on.hub`):
+  - [x] New `feature/salon` (domain / data / presentation / di) wired in the shell; Salon tab registered (`Graph.Salon`, start = hub)
+  - [x] `hubEntries(permissions, missing)`: tiles per permission (team also for owner `TEAM_MANAGE`), "Missing" when a tile fixes a completeness item (profile ← cover/profile image/name/description/location/phone, hours, services, staff, policies)
+  - [x] Header: salon avatar, name, women/men type, state chip; "no permissions" text when nothing is granted; pull-to-refresh reloads `GET /salon`; adaptive grid columns
+  - [x] A tile shows only once its screen is registered (`TILE_SCREENS`, filled by MER-033…046)
+- Tests: `SalonHubTest` (3), `SalonHubViewModelTest` (2); `/tmp/claude/quick.sh m32` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: tile subtitles are static descriptions (no counts endpoint for gallery / services / team / reviews in one call).
+
 ### MER-031 — Calendar M11
 - Branch: `feat/mer-031-calendar`
 - Branched: (batch 6 start, from `feat/mer-028-request-in-app`)

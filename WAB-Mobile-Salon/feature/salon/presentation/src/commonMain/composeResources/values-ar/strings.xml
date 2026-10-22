@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hub_title">إدارة الصالون</string>
+    <string name="hub_no_access">لا تملك صلاحيات لإدارة الصالون. تواصل مع المالك.</string>
+    <string name="hub_missing">ناقص</string>
+    <string name="hub_women">صالون نسائي</string>
+    <string name="hub_men">صالون رجالي</string>
+    <string name="tile_profile">الملف والصور</string>
+    <string name="tile_profile_sub">الاسم، الوصف، الموقع والتواصل</string>
+    <string name="tile_gallery">المعرض</string>
+    <string name="tile_gallery_sub">صور وفيديوهات أعمالك</string>
+    <string name="tile_hours">ساعات العمل</string>
+    <string name="tile_hours_sub">والإغلاقات المؤقتة</string>
+    <string name="tile_services">الخدمات</string>
+    <string name="tile_services_sub">خدماتك وأسعارها</string>
+    <string name="tile_team">الطاقم والفريق</string>
+    <string name="tile_team_sub">الأعضاء ومقدمو الخدمات</string>
+    <string name="tile_policies">السياسات</string>
+    <string name="tile_policies_sub">الإلغاء، الدفع، العربون</string>
+    <string name="tile_reviews">التقييمات</string>
+    <string name="tile_reviews_sub">آراء الزبائن</string>
+    <string name="tile_statistics">الإحصائيات</string>
+    <string name="tile_statistics_sub">الحجوزات والإيرادات</string>
+    <string name="tile_finance">المالية</string>
+    <string name="tile_finance_sub">الرصيد، المعاملات، الدفعات</string>
+    <string name="tile_subscription">الاشتراك والحالة</string>
+    <string name="tile_subscription_sub">الخطة وحالة الصالون</string>
+</resources>
