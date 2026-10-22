@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """WAB-Mobile-Customer policy checks (CLAUDE.md §1). Usage: policy_checks.py <command> [--root DIR] [--update-baseline]."""
+from __future__ import annotations
+
 import argparse
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from policy import baseline, file_length, hardcoded, localization, quality, security, variants  # noqa: E402
+from policy import baseline, error_codes, file_length, hardcoded, localization, quality, security, variants  # noqa: E402
 from policy.budget import check as check_budget  # noqa: E402
 from policy.files import Config  # noqa: E402
 
@@ -15,7 +17,9 @@ RATCHETED = {
     "hardcoded": (hardcoded.check, ("H",)),
     "quality": (quality.check, ("Q", "P")),
 }
-STRICT = {"localization": localization.check, "variants": variants.check, "security": security.check}
+STRICT = {
+    "localization": localization.check, "variants": variants.check, "security": security.check, "error-codes": error_codes.check,
+}
 COMMANDS = [*RATCHETED, *STRICT, "budget", "all"]
 
 

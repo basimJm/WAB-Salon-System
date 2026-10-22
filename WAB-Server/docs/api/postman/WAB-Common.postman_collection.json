@@ -75,8 +75,19 @@
                 "value": "application/json"
               },
               {
+                "key": "x-authentication-tag",
+                "value": "",
+                "disabled": true
+              },
+              {
                 "key": "x-signature",
-                "value": ""
+                "value": "",
+                "disabled": true
+              },
+              {
+                "key": "x-initialization-vector",
+                "value": "",
+                "disabled": true
               }
             ],
             "url": {
@@ -91,7 +102,7 @@
               "query": [],
               "variable": []
             },
-            "description": "Authenticated by the gateway signature over the raw body (header `X-Signature`); a bad or missing signature is 401. The outcome is confirmed with a status query before anything is settled, so a repeated or forged-content notification changes nothing. Unknown sessions are acknowledged. Answers 200 `{settled}`.",
+            "description": "Authenticated by the gateway signature over the raw body (HyperPay: AES-256-GCM `X-Authentication-Tag` + `X-Initialization-Vector`, body is the encrypted message; the fake gateway: `X-Signature`); a bad or missing signature is 401. The outcome is confirmed with a status query before anything is settled, so a repeated or forged-content notification changes nothing. Unknown sessions are acknowledged. Answers 200 `{settled}`.",
             "body": {
               "mode": "raw",
               "raw": "{}",
@@ -101,6 +112,91 @@
                 }
               }
             }
+          }
+        }
+      ]
+    },
+    {
+      "name": "App links",
+      "item": [
+        {
+          "name": "Android App Links verification (Digital Asset Links)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/.well-known/assetlinks.json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ".well-known",
+                "assetlinks.json"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "One entry per configured Android package. Platform format, not the base envelope. Public; always 200, never redirected."
+          }
+        },
+        {
+          "name": "iOS Universal Links verification (apple-app-site-association)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/.well-known/apple-app-site-association",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ".well-known",
+                "apple-app-site-association"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Configured app IDs claim the salon path. Platform format, not the base envelope. Public; always 200, never redirected."
+          }
+        },
+        {
+          "name": "Shared salon link: fallback page for a phone without the app",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/salon/:salonId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "salon",
+                ":salonId"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "salonId",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Small localized HTML page (noindex) with store buttons. The app opens this URL directly when installed."
           }
         }
       ]

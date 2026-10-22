@@ -1,4 +1,6 @@
 """Config loading, glob matching and source file discovery."""
+from __future__ import annotations
+
 import json
 import re
 from functools import lru_cache

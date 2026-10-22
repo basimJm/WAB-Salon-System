@@ -1,0 +1,25 @@
+<resources>
+    <string name="salons_title">جميع الصالونات</string>
+    <string name="salons_search_hint">ابحث باسم الصالون</string>
+    <string name="salons_filter">فلتر</string>
+    <string name="salons_chip_remove">إزالة %1$s</string>
+    <string name="salons_empty">لا توجد صالونات مطابقة</string>
+    <string name="salons_empty_body">جرّب كلمات بحث أخرى أو عدّل الفلاتر.</string>
+    <string name="salons_chip_recommended">الموصى بها</string>
+    <string name="salons_chip_nearest">الأقرب</string>
+    <string name="salons_chip_price">%1$s–%2$s د.أ</string>
+    <string name="salons_chip_rating">%1$d★ فأعلى</string>
+    <string name="salons_nearest_dropped">الموقع غير مفعّل، لذا تمت إزالة فلتر الأقرب.</string>
+    <string name="filter_title">فلتر</string>
+    <string name="filter_close">إغلاق</string>
+    <string name="filter_reset">إعادة تعيين</string>
+    <string name="filter_apply">تطبيق الفلتر</string>
+    <string name="filter_retry">إعادة المحاولة</string>
+    <string name="filter_services">الخدمات</string>
+    <string name="filter_see_more">عرض المزيد</string>
+    <string name="filter_price">نطاق السعر</string>
+    <string name="filter_general">فلاتر عامة</string>
+    <string name="filter_rating">التقييم</string>
+    <string name="services_title">جميع الخدمات</string>
+    <string name="services_empty">لا توجد خدمات حالياً</string>
+</resources>

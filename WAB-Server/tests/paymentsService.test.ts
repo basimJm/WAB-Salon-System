@@ -216,6 +216,29 @@ describe('POST /customer/v1/payments/:id/verify', () => {
   });
 });
 
+describe('checkout data for the app', () => {
+  it('returns what the app opens the gateway UI with while the attempt is payable', async () => {
+    gateway.scenarioForNextSession('pending');
+    const started = bodyOf(await start(draft())).data as unknown as {
+      transactionId: string;
+      sessionId: string;
+      checkout: Record<string, unknown> | null;
+    };
+    expect(started.checkout).toEqual({
+      provider: 'fake',
+      environment: 'dev',
+      checkoutId: started.sessionId,
+      brands: ['VISA', 'MASTER'],
+      shopperResultUrl: 'fake://payment/result',
+    });
+    gateway.settle(started.sessionId, 'success');
+    const done = bodyOf(await verify(started.transactionId)).data as unknown as {
+      checkout: unknown;
+    };
+    expect(done.checkout).toBeNull();
+  });
+});
+
 describe('POST /webhooks/payments', () => {
   const hook = (
     body: object | string,
@@ -261,6 +284,27 @@ describe('POST /webhooks/payments', () => {
     expect((await hook(event(sessionId), 'forged')).status).toBe(401);
     expect((await hook(event(sessionId), null)).status).toBe(401);
     expect((await hook('not json')).status).toBe(400);
+    expect(stored()[0]?.['status']).toBe('PENDING');
+  });
+  it('reads the signature from the gateway tag header and passes every header through', async () => {
+    const { sessionId } = await startPending();
+    gateway.settle(sessionId, 'success');
+    const res = await request(app)
+      .post('/webhooks/payments')
+      .set('Content-Type', 'application/json')
+      .set('X-Authentication-Tag', FAKE_WEBHOOK_SIGNATURE)
+      .set('X-Initialization-Vector', 'aa')
+      .send(JSON.stringify(event(sessionId)));
+    expect((res.body as { data: { settled: boolean } }).data.settled).toBe(true);
+  });
+  it('acknowledges refund and ignored notifications without settling anything', async () => {
+    const { sessionId } = await startPending();
+    gateway.settle(sessionId, 'success');
+    for (const kind of ['REFUND', 'IGNORED']) {
+      const res = await hook({ ...event(sessionId), kind });
+      expect(res.status).toBe(200);
+      expect((res.body as { data: { settled: boolean } }).data.settled).toBe(false);
+    }
     expect(stored()[0]?.['status']).toBe('PENDING');
   });
   it('acknowledges an unknown session', async () => {

@@ -13,12 +13,16 @@ kotlin {
     }
     sourceSets.commonMain.dependencies {
         implementation(projects.core.domain)
+        implementation(projects.core.security)
         implementation(projects.core.ui)
         implementation(libs.bundles.coroutines)
         implementation(libs.bundles.storage)
         implementation(libs.koin.core)
         implementation(libs.androidx.room.runtime)
         implementation(libs.androidx.sqlite.bundled)
+    }
+    sourceSets.commonTest.dependencies {
+        implementation(libs.kotlinx.coroutines.test)
     }
     sourceSets.androidMain.dependencies {
         implementation(libs.androidx.datastore.preferences)

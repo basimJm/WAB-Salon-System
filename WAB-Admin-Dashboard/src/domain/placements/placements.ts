@@ -46,14 +46,7 @@ export interface PlacementsRepository {
 }
 
 /** Moves one item up (-1) or down (+1) in a list; out-of-range moves leave it unchanged. */
-export function moveId(ids: readonly string[], id: string, direction: -1 | 1): string[] {
-  const from = ids.indexOf(id);
-  const to = from + direction;
-  if (from < 0 || to < 0 || to >= ids.length) return [...ids];
-  const next = [...ids];
-  [next[from], next[to]] = [next[to] as string, next[from] as string];
-  return next;
-}
+export { moveId } from '@/domain/shared/order';
 export const MAX_NOTE = 500;
 export const MAX_REORDER = 200;
 

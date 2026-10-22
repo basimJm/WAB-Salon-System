@@ -6,6 +6,20 @@
 	<string>$(APP_ENV)</string>
 	<key>API_BASE_URL</key>
 	<string>$(API_BASE_URL)</string>
+	<key>WEB_BASE_URL</key>
+	<string>$(WEB_BASE_URL)</string>
+	<key>DATA_SOURCE</key>
+	<string>$(DATA_SOURCE)</string>
+	<key>MERCHANT_REGISTER_URL</key>
+	<string>$(MERCHANT_REGISTER_URL)</string>
+	<key>MERCHANT_STORE_URL</key>
+	<string>$(MERCHANT_STORE_URL)</string>
+	<key>MERCHANT_APP_SCHEME</key>
+	<string>$(MERCHANT_APP_SCHEME)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>$(MERCHANT_APP_SCHEME)</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIBackgroundModes</key>

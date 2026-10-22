@@ -2,6 +2,7 @@ import { EXPORT_MAX_ROWS, EXPORT_PAGE_SIZE, type ExportKind } from '../../consta
 import { formatJod } from '../../utils/money';
 import type { AdminSettingsService } from '../adminSettings/adminSettings.service';
 import type { AdminTransactionsService } from '../finance/adminTransactions.service';
+import type { BookingQueriesService } from '../bookings/bookingQueries.service';
 import type { DailyFacts } from '../reports/reportSource';
 import type { ReportsService } from '../reports/reports.service';
 import type { Cell, ExportTable } from './writers';
@@ -60,6 +61,7 @@ export const createTableBuilders = (deps: {
   reports: Pick<ReportsService, 'daily' | 'weekly' | 'monthly'>;
   transactions: Pick<AdminTransactionsService, 'list'>;
   adminSettings: Pick<AdminSettingsService, 'auditLogs'>;
+  bookings: Pick<BookingQueriesService, 'list'>;
 }): TableBuilders => ({
   async REPORT_DAILY(params) {
     const r = await deps.reports.daily(text(params['date']));
@@ -156,6 +158,54 @@ export const createTableBuilders = (deps: {
         a.entityId,
         a.reason,
         a.ip,
+      ]),
+    };
+  },
+  async BOOKINGS(params) {
+    const query = {
+      statuses: params['statuses'] as never,
+      paymentStatus: params['paymentStatus'] as never,
+      salonId: params['salonId'] as string | undefined,
+      customerId: params['customerId'] as string | undefined,
+      from: typeof params['from'] === 'string' ? params['from'] : undefined,
+      to: typeof params['to'] === 'string' ? params['to'] : undefined,
+      q: typeof params['q'] === 'string' ? params['q'] : undefined,
+    };
+    const items = await collect((page) =>
+      deps.bookings.list({
+        audience: { kind: 'ADMIN' },
+        query,
+        params: { page, pageSize: EXPORT_PAGE_SIZE },
+        language: 'en',
+      }),
+    );
+    return {
+      title: 'Bookings',
+      columns: [
+        'Reference',
+        'Status',
+        'Appointment start',
+        'Salon',
+        'Customer',
+        'Phone',
+        'Persons',
+        'Staff',
+        'Payment',
+        'Payment status',
+        'Total (JOD)',
+      ],
+      rows: items.map((b): Cell[] => [
+        b.referenceNumber,
+        b.status,
+        b.appointmentStart,
+        b.salon?.name ?? null,
+        b.customer?.name ?? null,
+        b.customer?.phone ?? null,
+        b.personsCount,
+        b.staff.map((s) => s.name).join(', '),
+        b.paymentMethod,
+        b.paymentStatus,
+        b.total,
       ]),
     };
   },

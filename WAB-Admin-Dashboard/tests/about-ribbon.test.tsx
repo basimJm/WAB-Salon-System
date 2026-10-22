@@ -23,7 +23,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe('EnvRibbon', () => {
   it.each(['dev-debug', 'dev-release'])('shows the DEV ribbon in %s (English)', (variant) => {
-    renderWithApp(<EnvRibbon />, containerFor(variant));
+    renderWithApp(<EnvRibbon />, containerFor(variant, REMOTE));
     expect(screen.getByRole('status')).toHaveTextContent(en.env.devRibbon);
   });
 

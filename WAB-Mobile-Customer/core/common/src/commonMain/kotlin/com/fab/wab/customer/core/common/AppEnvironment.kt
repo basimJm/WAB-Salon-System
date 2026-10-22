@@ -1,5 +1,19 @@
 package com.fab.wab.customer.core.common
 
+/** Where repositories get their data (INTEGRATION.md §4): fixtures in dev builds, the real API otherwise. */
+enum class DataSource(val configValue: String) {
+    MOCK("mock"),
+    REMOTE("remote"),
+    ;
+
+    companion object {
+        /** Build config / Info.plist value → source; anything unknown is a configuration error, never a silent default. */
+        fun fromConfig(value: String): DataSource =
+            entries.firstOrNull { it.configValue.equals(value.trim(), ignoreCase = true) }
+                ?: error("DATA_SOURCE must be one of ${entries.map { it.configValue }}, was '$value'")
+    }
+}
+
 /**
  * Values that differ per build variant (dev/prod, debug/release).
  *
@@ -10,19 +24,35 @@ package com.fab.wab.customer.core.common
 data class AppEnvironment(
     val name: String,
     val apiBaseUrl: String,
+    /** Public web origin of the platform: deep links shared from the app (`DeepLinks`). */
+    val webBaseUrl: String,
     val appVersion: String,
     val appVersionCode: Int,
     val isDebug: Boolean,
+    val dataSource: DataSource = DataSource.REMOTE,
+    /** Merchant app hand-off (PRD S21 "For business", Merchant PRD §4.5); empty values mean "not configured yet". */
+    val merchant: MerchantLinks = MerchantLinks(),
 ) {
     init {
         require(name.isNotBlank()) { "Environment name must not be blank" }
         require(apiBaseUrl.isNotBlank()) { "API base URL must not be blank for environment '$name'" }
+        require(webBaseUrl.isNotBlank()) { "Web base URL must not be blank for environment '$name'" }
         require(appVersion.isNotBlank()) { "App version must not be blank for environment '$name'" }
         require(appVersionCode >= 0) { "App version code must not be negative" }
+        require(!(isProd && dataSource == DataSource.MOCK)) { "The prod environment must use the remote data source" }
     }
 
     val isDev: Boolean get() = name == AppEnvironmentNames.DEV
     val isProd: Boolean get() = name == AppEnvironmentNames.PROD
+    val usesMock: Boolean get() = dataSource == DataSource.MOCK
+}
+
+/**
+ * [registerUrl] = the merchant app's registration deep link (`<merchant-domain>/register`), [storeUrl] = this platform's
+ * store page of the merchant app, [appId] = Android package name / iOS URL scheme used to detect the installed app.
+ */
+data class MerchantLinks(val registerUrl: String = "", val storeUrl: String = "", val appId: String = "") {
+    val isConfigured: Boolean get() = registerUrl.isNotBlank() && storeUrl.isNotBlank()
 }
 
 object AppEnvironmentNames {

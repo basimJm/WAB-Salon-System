@@ -12,7 +12,7 @@ import com.fab.wab.customer.core.navigation.route.Graph
 import com.fab.wab.customer.core.navigation.route.Screen
 import com.fab.wab.customer.core.notification.composable.rememberNotificationManager
 import com.fab.wab.customer.core.notification.model.NotificationStyle
-import com.fab.wab.customer.core.ui.mvi.CollectSideEffect
+import com.fab.wab.customer.core.mvi.CollectSideEffect
 import com.fab.wab.customer.feature.sample.presentation.controller.contract.SampleContract
 import com.fab.wab.customer.feature.sample.presentation.controller.vm.SampleViewModel
 import com.fab.wab.customer.feature.sample.presentation.screen.SampleScreen

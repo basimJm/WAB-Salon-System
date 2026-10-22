@@ -16,5 +16,8 @@ export const ANONYMIZED_PHONE_NUMBER = 'deleted';
 export const ACCOUNT_AUDIT_ACTIONS = {
   customerBlock: 'CUSTOMER_BLOCK',
   customerUnblock: 'CUSTOMER_UNBLOCK',
+  customerForceDelete: 'CUSTOMER_FORCE_DELETE',
 } as const;
+/** Statuses an admin may force-delete from (a deleted account has nothing left to delete). */
+export const FORCE_DELETE_FROM = ['ACTIVE', 'BLOCKED', 'DELETION_PENDING'] as const;
 export const CUSTOMER_AUDIT_ENTITY = 'customer';

@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.designsystem.components.card.AppCard
 import com.fab.wab.customer.designsystem.components.feedback.AppEmptyState
 import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
@@ -19,6 +21,7 @@ import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerBox
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.sample.domain.model.SampleItem
+import com.fab.wab.customer.feature.sample.presentation.analytics.SampleAnalytics
 import com.fab.wab.customer.feature.sample.presentation.controller.contract.SampleContract.UiAction
 import com.fab.wab.customer.feature.sample.presentation.controller.contract.SampleContract.UiState
 import com.fab.wab.customer.feature.sample.presentation.resources.Res
@@ -35,6 +38,7 @@ fun SampleScreen(
     onEvent: (UiAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    TrackScreen(SampleAnalytics.SCREEN)
     AppScreen(
         modifier = modifier,
         topBar = { AppTopBar(title = stringResource(Res.string.sample_title)) },
@@ -45,11 +49,11 @@ fun SampleScreen(
                     AppShimmerBox(Modifier.fillMaxWidth().height(AppTheme.sizes.avatarLarge), AppTheme.shapes.medium)
                 }
 
-                state.errorMessage != null -> Box(Modifier.fillMaxSize()) {
+                state.errorMessage != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     AppErrorState(onRetry = { onEvent(UiAction.OnRefresh) }, message = state.errorMessage)
                 }
 
-                state.isEmpty -> Box(Modifier.fillMaxSize()) {
+                state.isEmpty -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     AppEmptyState(title = stringResource(Res.string.sample_empty))
                 }
 

@@ -54,7 +54,13 @@ import { createBullJobScheduler } from './jobs/bullmq';
 import type { JobHandler, JobScheduler } from './jobs/jobs';
 import { CAMPAIGN_JOB_NAME } from './constants/campaigns';
 import { createAdminCustomersService } from './domain/customers/adminCustomers.service';
+import { createAdminCustomerExtrasService } from './domain/customers/adminCustomerExtras.service';
 import { createAdminSettingsService } from './domain/adminSettings/adminSettings.service';
+import { createAdminProfileService } from './domain/adminProfile/adminProfile.service';
+import { createAdminSearchService } from './domain/adminSearch/adminSearch.service';
+import { createSalonInsightsService } from './domain/salons/salonInsights.service';
+import { createSalonDeletionService } from './domain/salons/salonDeletion.service';
+import { createAdminSalonEditService } from './domain/adminSalonEdit/adminSalonEdit.service';
 import { createCampaignsService } from './domain/campaigns/campaigns.service';
 import { CampaignsRepository } from './repositories/campaigns.repository';
 import { createFavoritesService } from './domain/favorites/favorites.service';
@@ -69,6 +75,7 @@ import { createPaymentsService } from './domain/payments/payments.service';
 import { TransactionsRepository } from './repositories/transactions.repository';
 import { createBookingBulkService } from './domain/bookings/bookingBulk.service';
 import { createBookingAdminService } from './domain/bookings/bookingAdmin.service';
+import { createBookingAdminExtrasService } from './domain/bookings/bookingAdminExtras.service';
 import { createBookingQueriesService } from './domain/bookings/bookingQueries.service';
 import { createBookingReassignService } from './domain/bookings/bookingReassign.service';
 import { createBookingCancelService } from './domain/bookings/bookingCancel.service';
@@ -238,6 +245,7 @@ export const startServer = async (
     trustProxyHops: config.trustProxyHops,
     docs: !config.isProduction,
     readinessChecks,
+    appLinks: config.appLinks,
     ...(services === undefined ? {} : { services }),
   });
   // Plain http server: Express 5's `app.listen` passes listen errors to its callback as if started.
@@ -284,6 +292,11 @@ const buildServices = (
 ): ApiServices => {
   const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
   const serverEventsRepository = new ServerEventsRepository();
+  // Server events live in the server's own MongoDB; installation links and admin queries share them.
+  const serverAnalytics = createMongoAnalytics({
+    events: createServerEvents({ store: serverEventsRepository, logger }),
+    counter: serverEventsRepository,
+  });
   const otpGate = createOtpGate({ redis, settings });
   const providers = createProviders(config.providers, config.isProduction, {
     redis,
@@ -331,7 +344,7 @@ const buildServices = (
     installations: new InstallationsRepository(),
     customers: new CustomersRepository(),
     members: new MembersRepository(),
-    analytics: providers.analytics,
+    analytics: serverAnalytics,
     logger,
   });
   const appConfig = createAppConfigService({
@@ -345,6 +358,7 @@ const buildServices = (
     cities: new CitiesRepository(),
     areas: new AreasRepository(),
     storage: providers.storage,
+    logger,
   });
   const faqs = new FaqsRepository();
   const pages = new ContentPagesRepository();
@@ -558,6 +572,7 @@ const buildServices = (
     bookings: bookingsRepository,
     availability,
     settings,
+    members: new MembersRepository(),
   });
   const bookingQueries = createBookingQueriesService({
     bookings: bookingsRepository,
@@ -573,6 +588,12 @@ const buildServices = (
     members: new MembersRepository(),
     audit,
     settings,
+  });
+  const bookingAdminExtras = createBookingAdminExtrasService({
+    reassign: bookingReassign,
+    admin: bookingAdmin,
+    refunds: fullRefunds,
+    audit,
   });
   const payments = createPaymentsService({
     transactions: transactionsRepository,
@@ -622,6 +643,17 @@ const buildServices = (
     auditLogs: new AuditLogsRepository(),
     audit,
   });
+  const adminProfileService = createAdminProfileService({
+    admins,
+    auth: adminAuthService,
+    refreshTokens: phoneServices.refreshTokens,
+    audit,
+    redis,
+    notifier: providers.notifier,
+    settings,
+    logger,
+    secret: config.auth.accessSecret,
+  });
   const adminTransactionsService = createAdminTransactionsService({
     transactions: transactionsRepository,
   });
@@ -631,6 +663,7 @@ const buildServices = (
       reports: reportsService,
       transactions: adminTransactionsService,
       adminSettings: adminSettingsService,
+      bookings: bookingQueries,
     }),
     storage: providers.storage,
     scheduler: jobs.scheduler,
@@ -706,10 +739,73 @@ const buildServices = (
   const catalogService = createCatalogService({
     catalog: new CatalogServicesRepository(),
     storage: providers.storage,
+    logger,
   });
   const bannersService = createBannersService({
     banners: new BannersRepository(),
     storage: providers.storage,
+    logger,
+  });
+  const galleryService = createGalleryService({
+    gallery: new GalleryRepository(),
+    storage: providers.storage,
+    uploads,
+    settings,
+  });
+  const salonProfileService = createSalonProfileService({
+    salons: new SalonsRepository(),
+    cities: new CitiesRepository(),
+    areas: new AreasRepository(),
+    storage: providers.storage,
+    state: salonState,
+    uploads,
+  });
+  const policyService = createPolicyService({ salons: new SalonsRepository(), state: salonState });
+  const staffService = createStaffService({
+    members: new MembersRepository(),
+    salons: new SalonsRepository(),
+    salonServices,
+    settings,
+    state: salonState,
+    conflicts: {
+      check: ({ salonId, memberId, after }) =>
+        conflictFinder.staff.check({ salonId, memberId, after }),
+    },
+  });
+  const salonServicesService = createSalonServicesService({
+    salons: new SalonsRepository(),
+    catalog: new CatalogServicesRepository(),
+    services: salonServices,
+    storage: providers.storage,
+    uploads,
+    state: salonState,
+  });
+  const hoursService = createHoursService({
+    salons: new SalonsRepository(),
+    closures: new ClosuresRepository(),
+    settings,
+    state: salonState,
+    conflicts: conflictFinder.schedule,
+  });
+  const adminSalonEditService = createAdminSalonEditService({
+    profile: salonProfileService,
+    gallery: galleryService,
+    hours: hoursService,
+    conflicts: conflictFinder.schedule,
+    salonServices: salonServicesService,
+    staff: staffService,
+    policy: policyService,
+    audit,
+    notifier: producers.salonStateNotifier,
+    logger,
+  });
+  const adminReviewsService = createAdminReviewsService({
+    reviews: new ReviewsRepository(),
+    salons: new SalonsRepository(),
+    members: new MembersRepository(),
+    customers: new CustomersRepository(),
+    audit,
+    logger,
   });
   return {
     otpGate,
@@ -739,10 +835,7 @@ const buildServices = (
     adminReports: reportsService,
     adminExports: exportsService,
     adminAnalytics: createAnalyticsService({
-      analytics: createMongoAnalytics({
-        events: createServerEvents({ store: serverEventsRepository, logger }),
-        counter: serverEventsRepository,
-      }),
+      analytics: serverAnalytics,
       settings,
       redis,
       logger,
@@ -802,25 +895,35 @@ const buildServices = (
       logger,
       bookings: conflictFinder.salon,
       notifier: producers.salonStateNotifier,
+      placements: new PlacementsRepository(),
+      bookingCounts: bookingsRepository,
     }),
-    policy: createPolicyService({ salons: new SalonsRepository(), state: salonState }),
+    adminSalonInsights: {
+      insights: createSalonInsightsService({
+        salons: new SalonsRepository(),
+        bookings: bookingsRepository,
+        salonServices,
+        members: new MembersRepository(),
+        auditLogs: new AuditLogsRepository(),
+        settings,
+      }),
+      deletion: createSalonDeletionService({
+        salons: new SalonsRepository(),
+        state: salonState,
+        bookings: conflictFinder.salon,
+        audit,
+        notifier: producers.salonStateNotifier,
+        logger,
+      }),
+    },
+    policy: policyService,
     leaves: createLeavesService({
       leaves: new LeavesRepository(),
       members: new MembersRepository(),
       settings,
       conflicts: conflictFinder.leave,
     }),
-    staff: createStaffService({
-      members: new MembersRepository(),
-      salons: new SalonsRepository(),
-      salonServices,
-      settings,
-      state: salonState,
-      conflicts: {
-        check: ({ salonId, memberId, after }) =>
-          conflictFinder.staff.check({ salonId, memberId, after }),
-      },
-    }),
+    staff: staffService,
     team: createTeamService({
       access: accessEvents,
       members: new MembersRepository(),
@@ -839,36 +942,11 @@ const buildServices = (
       logger,
       notifier: producers.catalogRequestNotifier,
     }),
-    salonServices: createSalonServicesService({
-      salons: new SalonsRepository(),
-      catalog: new CatalogServicesRepository(),
-      services: salonServices,
-      storage: providers.storage,
-      uploads,
-      state: salonState,
-    }),
-    hours: createHoursService({
-      salons: new SalonsRepository(),
-      closures: new ClosuresRepository(),
-      settings,
-      state: salonState,
-      conflicts: conflictFinder.schedule,
-    }),
-    gallery: createGalleryService({
-      gallery: new GalleryRepository(),
-      storage: providers.storage,
-      uploads,
-      settings,
-    }),
+    salonServices: salonServicesService,
+    hours: hoursService,
+    gallery: galleryService,
     salonProfile: {
-      service: createSalonProfileService({
-        salons: new SalonsRepository(),
-        cities: new CitiesRepository(),
-        areas: new AreasRepository(),
-        storage: providers.storage,
-        state: salonState,
-        uploads,
-      }),
+      service: salonProfileService,
       guard: [
         requireAuth('merchant', config.auth.accessSecret),
         loadMember(new MembersRepository()),
@@ -878,6 +956,14 @@ const buildServices = (
     adminPlacements: placements,
     adminCampaigns: campaigns,
     adminSettings: adminSettingsService,
+    adminProfile: adminProfileService,
+    adminSalonEdit: adminSalonEditService,
+    adminSearch: createAdminSearchService({
+      customers: new CustomersRepository(),
+      salons: new SalonsRepository(),
+      members: new MembersRepository(),
+      bookings: bookingsRepository,
+    }),
     adminCustomers: createAdminCustomersService({
       customers: new CustomersRepository(),
       installations: new InstallationsRepository(),
@@ -885,13 +971,17 @@ const buildServices = (
       lifecycle: accountLifecycle,
       audit,
     }),
-    adminReviews: createAdminReviewsService({
-      reviews: new ReviewsRepository(),
-      salons: new SalonsRepository(),
-      members: new MembersRepository(),
+    adminReviews: adminReviewsService,
+    bookingAdminExtras,
+    adminCustomerExtras: createAdminCustomerExtrasService({
       customers: new CustomersRepository(),
+      cities: new CitiesRepository(),
+      areas: new AreasRepository(),
+      reviews: adminReviewsService,
+      notifications: notificationsRepository,
+      campaigns,
+      lifecycle: accountLifecycle,
       audit,
-      logger,
     }),
     adminApplications: createSalonReviewService({
       completeness: salonState,

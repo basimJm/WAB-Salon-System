@@ -1,5 +1,12 @@
 /** Identity and session collections (SRV-024, BUSINESS_DOMAIN.md §3.1, §3.4). */
 export const CUSTOMERS_COLLECTION = 'customers';
+/** Admin search index on names and phone. */
+export const CUSTOMER_TEXT_INDEX_NAME = 'customer_search_text';
+/**
+ * A field no customer document has. Without it MongoDB reads the customer's `language` (ar/en) as
+ * the text-search language of the row and refuses `ar`, so the insert itself fails.
+ */
+export const CUSTOMER_TEXT_LANGUAGE_OVERRIDE = 'textSearchLanguage';
 export const MEMBERS_COLLECTION = 'members';
 export const INSTALLATIONS_COLLECTION = 'installations';
 export const REFRESH_TOKENS_COLLECTION = 'refreshTokens';

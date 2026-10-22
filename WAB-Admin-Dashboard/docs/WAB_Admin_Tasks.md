@@ -63,7 +63,7 @@ Environments, build variants, CI, quality gates and the API contract tooling. Th
 | ADM-003 | Quality gates: coverage threshold, `jest-axe` accessibility tests in CI, complexity and max-params lint rules, dependency-cruiser layer graph as a CI artifact | `feat/adm-003-quality-gates` | ADM-001 | — | DONE | Zero-warning policy stays; gates fail the build, never warn. Delivered locally (no CI): coverage floor 85/80/80/85 (`npm run test:coverage`, part of `verify`), axe-core tests (`tests/a11y.test.tsx`; `vitest-axe`/`jest-axe` are unmaintained so axe-core is called directly), lint rules complexity 15 / max-params 4 / max-depth 4 / `no-deprecated`, dependency-cruiser layer + no-cycle rules (`npm run check:layers`, graph via `npm run graph:layers` -> `reports/layers.mmd`). |
 | ADM-004 | API contract tooling: `npm run api:sync` snapshots `WAB-Server/docs/api/openapi.admin.json` into `src/data/contract/`, generates TypeScript types and zod DTOs from it, and a test fails when the snapshot is older than the server file; hand-written DTO schemas are replaced by generated ones | `feat/adm-004-contract-tooling` | ADM-001 | — | DONE | `contracts/` (INT-01) still does not exist, so the server's generated OpenAPI is the contract (91 admin operations today). Replaces the old "contract drift" task. Delivered: `npm run api:sync` copies the server spec to `contract/openapi.admin.json` and generates lazy zod DTO factories + inferred types (`src/data/contract/generated/dto.ts`) and operation metadata (`operations.ts`, 116 operations, ids like `postAuthLogin`); `npm run api:check` / `tests/contract.test.ts` fail when stale. Types come from `z.infer` (no `openapi-typescript`: its peer range excludes TypeScript 6). Generated dir is exempt from the 300-line, hardcoded and format checks. The hand-written auth DTOs in `data/auth` are replaced in ADM-030 (the real auth flow differs). |
 | ADM-005 | Deploy pipeline: dev deploys on merge to `main`; prod deploys on release tag `vX.Y.Z` with manual approval; smoke test after deploy | `feat/adm-005-deploy` | ADM-002 | — | PENDING | Hosting product and platform domain are open decisions (root `CLAUDE.md` §7) — **user input**. |
-| ADM-006 | Hosting security-headers spec (CSP with API + socket origins, `nosniff`, `frame-ancestors none`, HSTS) as a versioned file + test of the header list | `feat/adm-006-headers` | ADM-001 | — | PENDING | Hosting/CDN choice and domain — **user input**. |
+| ADM-006 | Hosting security-headers spec (CSP with API + socket origins, `nosniff`, `frame-ancestors none`, HSTS) as a versioned file + test of the header list | `feat/adm-006-headers` | ADM-001 | — | DONE | Hosting/CDN choice and domain — **user input**. |
 
 ---
 
@@ -206,16 +206,16 @@ The admin PRD asks for these, the server does not offer them yet (Appendix D). S
 
 | ID | Task | Branch | Needs | Server (SRV) | Status | Notes |
 |---|---|---|---|---|---|---|
-| ADM-068 | Admin profile (PRD §4): change password, change email with verification, alert-email recipients | `feat/adm-068-admin-profile` | ADM-030, ADM-013 | SRV-117 | BLOCKED | Server gap G1: no profile endpoints (alert recipients are a setting key). |
-| ADM-069 | Global search (PRD §3): customers, salons, bookings, members grouped; wire the topbar search UI | `feat/adm-069-global-search` | ADM-022, ADM-028 | SRV-118 | BLOCKED | Server gap G2: no search endpoint. |
-| ADM-070 | Salon editing by admin (A13): profile and location, gallery, working hours and closures, services, staff, policies | `feat/adm-070-salon-edit` | ADM-041, ADM-020 | SRV-119, SRV-120 | BLOCKED | Server gap G3: those endpoints are merchant-scoped; admin variants (with reason + audit) are missing. |
-| ADM-071 | Booking extras (A15): reassign staff with eligible list, issue a refund of a chosen amount, explicit cancel modes, related notifications and events, bookings export | `feat/adm-071-booking-extras` | ADM-049 | SRV-123 | BLOCKED | Server gap G6. |
-| ADM-072 | Customer extras (A12): edit profile, reviews written by the customer, notifications sent, immediate force delete, push to one customer from the profile | `feat/adm-072-customer-extras` | ADM-046, ADM-059 | SRV-122 | BLOCKED | Server gap G5 (push to one customer works through a campaign with `SPECIFIC_USERS`). |
-| ADM-073 | Salon list columns and insights (A13): subscription filter, recommended flag, bookings (30d), per-salon KPIs, analytics and activity tabs, deletion-request decision | `feat/adm-073-salon-insights` | ADM-041, ADM-058 | SRV-121 | BLOCKED | Server gaps G4: not returned or not offered today. |
-| ADM-074 | Analytics — Traffic & Users (A02) and Screens & Events explorer (A03) with raw events | `feat/adm-074-analytics-traffic` | ADM-064 | SRV-110, SRV-127 | BLOCKED | Needs BigQuery-backed analytics (SRV-110, **user input**); UI can be prototyped on fixtures. |
-| ADM-075 | Analytics — Funnels (A04) with drop-off users and custom builder; Retention (A06) | `feat/adm-075-analytics-funnels` | ADM-064 | SRV-110 | BLOCKED | SRV-110. |
-| ADM-076 | Analytics — Search & Discovery (A05) and Merchants analytics (A10) | `feat/adm-076-analytics-search-merchants` | ADM-064 | SRV-110 | BLOCKED | SRV-110 (merchant counts partly derivable from salons and subscriptions lists). |
-| ADM-077 | User Journey (A11): search by phone, name, ids or booking reference; identity header; timeline with Guest marker, highlighted errors and payments; export | `feat/adm-077-journey` | ADM-018, ADM-045 | SRV-110, SRV-122 | BLOCKED | SRV-110; the customer detail already returns `journeyUserId`. |
+| ADM-068 | Admin profile (PRD §4): change password, change email with verification, alert-email recipients | `feat/adm-068-admin-profile` | ADM-030, ADM-013 | SRV-117 | DONE | Server gap G1: no profile endpoints (alert recipients are a setting key). unblocked by SRV-117 on 2026-10-19 |
+| ADM-069 | Global search (PRD §3): customers, salons, bookings, members grouped; wire the topbar search UI | `feat/adm-069-global-search` | ADM-022, ADM-028 | SRV-118 | DONE | Server gap G2: no search endpoint. unblocked by SRV-118 on 2026-10-19 |
+| ADM-070 | Salon editing by admin (A13): profile and location, gallery, working hours and closures, services, staff, policies | `feat/adm-070-salon-edit` | ADM-041, ADM-020 | SRV-119, SRV-120 | DONE | Server gap G3: those endpoints are merchant-scoped; admin variants (with reason + audit) are missing. unblocked by SRV-120 on 2026-10-19 |
+| ADM-071 | Booking extras (A15): reassign staff with eligible list, issue a refund of a chosen amount, explicit cancel modes, related notifications and events, bookings export | `feat/adm-071-booking-extras` | ADM-049 | SRV-123 | DONE | Server gap G6. unblocked by SRV-123 on 2026-10-19 |
+| ADM-072 | Customer extras (A12): edit profile, reviews written by the customer, notifications sent, immediate force delete, push to one customer from the profile | `feat/adm-072-customer-extras` | ADM-046, ADM-059 | SRV-122 | DONE | Server gap G5 (push to one customer works through a campaign with `SPECIFIC_USERS`). unblocked by SRV-122 on 2026-10-19 |
+| ADM-073 | Salon list columns and insights (A13): subscription filter, recommended flag, bookings (30d), per-salon KPIs, analytics and activity tabs, deletion-request decision | `feat/adm-073-salon-insights` | ADM-041, ADM-058 | SRV-121 | DONE | Server gaps G4: not returned or not offered today. unblocked by SRV-121 on 2026-10-19 |
+| ADM-074 | Analytics — Traffic & Users (A02) and Screens & Events explorer (A03) with raw events | `feat/adm-074-analytics-traffic` | ADM-064 | SRV-110, SRV-127 | PENDING | Needs BigQuery-backed analytics (SRV-110, **user input**); UI can be prototyped on fixtures. dropped by owner 2026-10-19: analytics excluded; admin hides or skips this screen |
+| ADM-075 | Analytics — Funnels (A04) with drop-off users and custom builder; Retention (A06) | `feat/adm-075-analytics-funnels` | ADM-064 | SRV-110 | PENDING | SRV-110. unblocked by SRV-110 on 2026-10-18 Waits on SRV-110 (BigQuery analytics dropped by owner 2026-10-19). dropped by owner 2026-10-19: analytics excluded; admin hides or skips this screen |
+| ADM-076 | Analytics — Search & Discovery (A05) and Merchants analytics (A10) | `feat/adm-076-analytics-search-merchants` | ADM-064 | SRV-110 | PENDING | SRV-110 (merchant counts partly derivable from salons and subscriptions lists). unblocked by SRV-110 on 2026-10-18 Waits on SRV-110 (BigQuery analytics dropped by owner 2026-10-19). dropped by owner 2026-10-19: analytics excluded; admin hides or skips this screen |
+| ADM-077 | User Journey (A11): search by phone, name, ids or booking reference; identity header; timeline with Guest marker, highlighted errors and payments; export | `feat/adm-077-journey` | ADM-018, ADM-045 | SRV-110, SRV-122 | PENDING | SRV-110; the customer detail already returns `journeyUserId`. dropped by owner 2026-10-19: analytics excluded; admin hides or skips this screen |
 
 ---
 
@@ -230,6 +230,10 @@ Integration and release tasks for the admin panel (`INTEGRATION.md` §6).
 | ADM-081 | RTL, accessibility and performance pass over all pages: keyboard paths, contrast in both themes, bundle budget per route chunk, 2-second load on a 30-day range with mock latency | `feat/adm-081-qa-pass` | ADM-080 | — | DONE | REL-01; budgets recorded in `scripts/budget.json`. |
 | ADM-082 | Error tracking and source-map upload for release builds | `feat/adm-082-error-tracking` | ADM-005 | SRV-115 | BLOCKED | Tool selection (open item #4) and DSN — **user input**. |
 | ADM-083 | Prod go-live checklist for the admin panel (env values, domain, CSP, rollback, smoke tests) | `feat/adm-083-go-live` | ADM-081, ADM-005, ADM-006, ADM-079 | — | PENDING | Hosting, domain and the pending tasks above (REL-03). |
+| ADM-084 | Real data by default: only dev-debug uses the mock; dev-release, prod-debug and prod-release call the API through placeholder base URLs (`.env.dev`, `.env.prod`) the owner replaces | `feat/adm-084-remote-default` | ADM-081 | — | DONE | Owner request 2026-10-19. |
+| ADM-085 | Real-server QA: every screen against a real WAB-Server (MongoDB, Redis, MinIO) with real data, and the defects it found | `feat/adm-085-real-server-fixes` | ADM-084 | — | DONE | Owner request 2026-10-19. |
+| ADM-086 | A new deploy no longer breaks open tabs: a page whose code file is gone reloads once, and a route error shows the panel's error state instead of the router's crash screen | `feat/adm-086-chunk-reload` | ADM-085 | — | DONE | Found by the real-server QA (stale tab after a rebuild). |
+| ADM-087 | Dev and prod base URLs point at the Render server and a one-command free deploy is documented | `feat/adm-087-onrender-urls` | ADM-086 | — | DONE | Owner request 2026-10-20. |
 
 ---
 
@@ -464,6 +468,45 @@ Integration and release tasks for the admin panel (`INTEGRATION.md` §6).
 | Variant to build | `dev-debug` (`npm run dev`) | `dev-release` (`dev-debug` for diagnosis) | `prod-release` (`prod-debug` for diagnosis) |
 | `VITE_DATA_SOURCE` | `mock` | `remote` (mock allowed through the dev scenario switcher) | `remote` only; mock code compiled out |
 | `VITE_API_BASE_URL` / `VITE_SOCKET_URL` | optional | dev API / socket (GitHub `vars`) | prod API / socket, **https only** |
+| `POST /bookings/{id}/cancel` | Cancel a PENDING or APPROVED booking by mode | ADM-071 |
+| `GET /bookings/{id}/eligible-staff` | Staff who could take over one person of an APPROVED booking | ADM-071 |
+| `POST /bookings/{id}/reassign` | Reassign one person of an APPROVED booking to another staff member | ADM-071 |
+| `POST /bookings/{id}/refund` | Refund a chosen amount of the online payment | ADM-071 |
+| `PATCH /customers/{id}` | Correct a customer’s profile (name, email, gender, city/area, language) | ADM-072 |
+| `POST /customers/{id}/force-delete` | Delete a customer at once, without the 30-day grace period | ADM-072 |
+| `GET /customers/{id}/notifications` | Notifications the platform sent to the customer, newest first | ADM-072 |
+| `POST /customers/{id}/push` | Send a push to this one customer, now | ADM-072 |
+| `GET /customers/{id}/reviews` | Reviews the customer wrote, every moderation status, newest first | ADM-072 |
+| `GET /profile` | The signed-in admin’s profile | ADM-068 |
+| `PATCH /profile` | Replace the alert recipients | ADM-068 |
+| `POST /profile/email/request` | Step 1 of an email change: code to the new address | ADM-068 |
+| `POST /profile/email/verify` | Step 2 of an email change: confirm the code | ADM-068 |
+| `POST /profile/password` | Change the password | ADM-068 |
+| `GET /salons/{id}/activity` | What admins did to the salon (approval, offline/online, edits, deletion decision), newest first | ADM-073 |
+| `GET /salons/{id}/analytics` | Bookings created per day (Asia/Amman) for a date range | ADM-073 |
+| `POST /salons/{id}/closures` | Add a closure | ADM-070 |
+| `PATCH /salons/{id}/closures/{closureId}` | Change a closure that has not started | ADM-070 |
+| `POST /salons/{id}/closures/{closureId}/remove` | Remove a closure that has not started | ADM-070 |
+| `POST /salons/{id}/closures/preview` | Preview: bookings a closure would break (nothing is changed) | ADM-070 |
+| `POST /salons/{id}/deletion-request/decision` | Decide the owner’s deletion request | ADM-073 |
+| `GET /salons/{id}/gallery` | A salon’s gallery | ADM-070 |
+| `POST /salons/{id}/gallery` | Add an uploaded image or video to a salon’s gallery (appended last) | ADM-070 |
+| `POST /salons/{id}/gallery/{itemId}/remove` | Remove a gallery item and its files | ADM-070 |
+| `PUT /salons/{id}/gallery/order` | Reorder a salon’s gallery: every item id exactly once | ADM-070 |
+| `GET /salons/{id}/hours` | Weekly hours, upcoming closures and today’s state | ADM-070 |
+| `PUT /salons/{id}/hours` | Replace the weekly working hours | ADM-070 |
+| `POST /salons/{id}/hours/preview` | Preview: bookings a new weekly schedule would break (nothing is changed) | ADM-070 |
+| `GET /salons/{id}/kpis` | Salon KPIs: rating, bookings by status (all time and last 30 days), active services and staff | ADM-073 |
+| `GET /salons/{id}/members/{memberId}/staff` | A member’s staff profile | ADM-070 |
+| `PUT /salons/{id}/members/{memberId}/staff` | Replace a member’s staff profile (services, bride qualification, working days) | ADM-070 |
+| `GET /salons/{id}/policy` | A salon’s booking policy (null until one is set) | ADM-070 |
+| `PUT /salons/{id}/policy` | Replace a salon’s booking policy | ADM-070 |
+| `GET /salons/{id}/profile` | A salon’s editable profile | ADM-070 |
+| `PATCH /salons/{id}/profile` | Edit a salon’s profile, location and contacts | ADM-070 |
+| `GET /salons/{id}/services` | A salon’s services, paginated | ADM-070 |
+| `POST /salons/{id}/services` | Add a catalog service to the salon | ADM-070 |
+| `PATCH /salons/{id}/services/{serviceId}` | Change a salon service (price, duration, bride-only, media, active) | ADM-070 |
+| `GET /search` | Global search: customers, salons, bookings and team members | ADM-069 |
 | Ribbon / `/about` / dev gallery | shown | shown | hidden / shown without internals / compiled out |
 | Source maps | yes (debug) | yes in debug, no in release | no in release |
 | Secrets | none: every `VITE_*` value is public | none | none |

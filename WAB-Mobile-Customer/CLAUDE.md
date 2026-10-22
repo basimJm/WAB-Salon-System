@@ -22,7 +22,7 @@
 8. **No source file longer than 300 lines** (Kotlin, Swift, Gradle, XML, Python). Split by responsibility. CI fails above the limit.
 9. **Portrait and landscape, phone to tablet.** Every screen and component works in portrait and landscape, on small phones, large phones, foldables and tablets/iPads, with system font scaling up to 200 %, RTL and LTR, light and dark. See §7.
 10. **Branching.** One new branch per task (`feat/cus-NNN-<key>` as named in the backlog) from the freshly fetched `origin/customer` (the customer master branch); the PR targets `customer`; the owner merges `customer` into `main`. **Never commit or push to `main` or `customer` directly.** Cloud sessions pinned to a branch (for example `claude/<name>`) use that branch and restart it from `origin/customer` after its PR merges.
-11. Never commit secrets (API keys, keystores, `local.properties`, signing configs). Do not edit `iosApp/iosApp/GoogleService-Info.plist` or `androidApp/google-services.json` without the owner.
+11. Never commit secrets (API keys, keystores, `local.properties`, signing configs). Do not edit the Firebase files (`androidApp/src/{dev,prod}/google-services.json`, `iosApp/Firebase/{dev,prod}/GoogleService-Info.plist`) without the owner; setup in `docs/FIREBASE_SETUP.md`.
 12. Do not add a library or change a version without a reason recorded in the task; use `gradle/libs.versions.toml`.
 
 ## 2. Module Map (real, not generated)
@@ -33,15 +33,20 @@ composeApp/            Shared app shell: App(), theme wiring, navigation host, D
 core/common            Platform-free helpers (formatters, validators, AppInfoProvider)
 core/domain            Result/error types, settings contracts, shared models
 core/data, storage     Repositories' shared plumbing, DataStore-backed settings
-core/network           Ktor client, env-driven ApiConfig, safeApiCall
+core/network           Ktor client, env-driven ApiConfig, safeApiCall (WAB envelope → AppError.ServerError)
+core/realtime          RealtimeClient port (status, events, connect/disconnect) + Socket.IO v4 client over Ktor WebSockets (same host as the API, `/customer` namespace, token in the handshake) + FakeRealtimeClient (mock data source); `RealtimeEvents` constants
+core/data/contract     GENERATED DTOs + `CustomerOperations` from `WAB-Server/docs/api/openapi.customer.json` (`./gradlew apiSync`; `apiSyncCheck` in the gate; never edit by hand)
 core/navigation        Typed routes (Graph/Screen), Navigator
 core/notification      In-app toast host + push handling
 core/security          Security helpers (keep secrets out of logs, secure storage seam)
-core/ui                MVI base (MVI, MVIDelegate, BaseViewModel), CollectSideEffect, locale/dark-mode locals
+core/mvi               MVI base (MVI, MVIDelegate, BaseViewModel, CollectSideEffect) — standalone, depends only on Compose runtime + lifecycle
+core/firebase          Firebase behind ports: PhoneAuthGateway, PushTokenProvider, CrashReporter, AnalyticsBackend; Android = Firebase Android SDK, iOS = Swift bridges (FirebaseBridges.swift); fakes for tests
+core/analytics         AnalyticsTracker port (screens + actions, user id/properties), common-field context, validation, TrackScreen, no-op/recording/composite backends — vendor backend is wired by the app
+core/ui                Locale/dark-mode locals, permission flow
 core/design-system     Theme, tokens, adaptive layout, base components, icons, string resources
 core/di                Koin aggregation
-feature/<name>/{domain,data,presentation,di}   One folder per feature (see `feature/sample`)
-build-logic/convention Convention plugins (KMP library, Android app, feature layers)
+feature/<name>/{domain,data,presentation,di}   One folder per feature (see `feature/sample`; `feature/onboarding` = first product feature, no data module: it reads `SessionStore`)
+build-logic/convention Convention plugins: KMP library, Android app, feature layers, core.library / core.compose (namespace from the path, SDK levels from `AndroidSdk.kt`)
 scripts/ci, config/    Policy checks (with tests) and linter configuration used by CI
 ```
 Dependency direction: `presentation → domain ← data`; `di` wires them. `domain` depends on nothing UI/Android/iOS/Ktor. `core/design-system` depends only on `core/ui` and Compose; it never imports a feature.
@@ -56,11 +61,12 @@ feature/<name>/presentation   controller/contract/<Name>Contract.kt   sealed int
                               navigation/, di/
 feature/<name>/di             Koin module that binds data → domain
 ```
-- **MVI by delegate:** `BaseViewModel` is `ViewModel(), MVI<UiState, UiAction, SideEffect> by mvi(initialState)`. State lives in the delegate and changes only through `updateState { copy(...) }`; one-shot work (navigation, toast) goes through `emitSideEffect`. A ViewModel overrides `onEvent(UiAction)` and optionally `onStart()`. Do not create ad hoc `MutableStateFlow`s in a ViewModel.
+- **MVI by delegate** (`core/mvi`, package `com.fab.wab.customer.core.mvi`, added to every feature presentation module by the convention plugin): `BaseViewModel` is `ViewModel(), MVI<UiState, UiAction, SideEffect> by mvi(initialState)`. State lives in the delegate and changes only through `updateState { copy(...) }`; one-shot work (navigation, toast) goes through `emitSideEffect`. A ViewModel overrides `onEvent(UiAction)` and optionally `onStart()`. Do not create ad hoc `MutableStateFlow`s in a ViewModel.
 - `UiState` is an immutable data class with defaults and derived properties; `UiAction` is a sealed interface of user intents; `SideEffect` is a sealed interface of one-time effects.
 - A screen composable takes `state` and `onAction`, owns no business logic, and has a `@Preview` for each state (loading, content, empty, error, offline) in Arabic RTL and English LTR.
 - Use cases and repositories return `AppResult` (`Loading | Success | Error`); ViewModels map `AppError` to localized text via string resources, never raw server text.
 - Platform code lives behind `expect/actual` or an interface in `core`; Firebase, payments and maps are wrapped behind app-level interfaces (root `CLAUDE.md` §6).
+- **Analytics on every screen and action** (PRD §14, `core/analytics`, added to every feature presentation module by the convention plugin): the app shell reports every route change (`TrackNavigationScreens`, screen name derived from the route class); a screen composable whose view needs ids starts with `TrackScreen(<Feature>Analytics.SCREEN)` and that richer view replaces the route view; ViewModels receive `AnalyticsTracker` and call `trackAction(AnalyticsAction(name, params))` for every `UiAction` that is a user intent; event/param names are snake_case constants in a `<Feature>Analytics` object, never literals at call sites.
 - Every ViewModel, use case, mapper and token/utility has a unit test in `commonTest` (kotlin-test + coroutines test, fakes instead of mocks).
 
 ## 4. Design System (the only source of visual values)
@@ -74,6 +80,7 @@ feature/<name>/di             Koin module that binds data → domain
 |---|---|---|
 | Dev | flavor `dev`: `assembleDevDebug`, `assembleDevRelease` | configs `Debug-Dev`, `Release-Dev`, scheme `iosApp-Dev` |
 | Prod | flavor `prod`: `assembleProdDebug`, `assembleProdRelease` | configs `Debug-Prod`, `Release-Prod`, scheme `iosApp-Prod` |
+- `DATA_SOURCE` (`mock` | `remote`) is part of the environment: Android `DEV_DATA_SOURCE` / `PROD_DATA_SOURCE` in `gradle.properties`, iOS `DATA_SOURCE` in the xcconfig; `mock` serves the generated fixtures through `core/data/mock` (scenarios: success, empty, 401, 404, 500, timeout, offline via `MockScenarios`); prod refuses `mock` at startup.
 - Environment values (API base URL, display name, environment label) are config, not code: Android `gradle.properties` keys `DEV_API_BASE_URL` / `PROD_API_BASE_URL` → `BuildConfig`; iOS `iosApp/Configuration/<Env>.xcconfig` → `Info.plist`. Shared code reads them through `core/network` `ApiConfig`, never a literal.
 - Release builds are minified and shrunk (R8) with explicit keep rules; every reflective lookup needs a rule and a test.
 - Secrets (maps key, signing) come from `local.properties` / CI secrets; CI builds release variants unsigned.
@@ -95,6 +102,6 @@ feature/<name>/di             Koin module that binds data → domain
 
 ## 8. Definition of Done (per task)
 1. Acceptance criteria written in `.claude/session.md` before coding; each covered by a unit test.
-2. `scripts/ci/run_local_checks.sh` green (policy checks, detekt, unit tests) and, where the toolchain exists, `./gradlew` build/lint for all four variants. Android/iOS builds that cannot run in the current environment run in CI; the PR is not done until CI is green.
+2. `scripts/ci/run_local_checks.sh` green (policy checks, detekt, unit tests, the four Android variants + lint when the SDK exists, and `scripts/ci/run_ios_checks.sh` = the four iOS configurations + Kotlin/Native tests when Xcode exists; `WAB_SKIP_IOS=1` skips iOS). Android/iOS builds that cannot run in the current environment run in CI; the PR is not done until CI is green.
 3. One verification loop and the four-role review recorded in `.claude/session.md` (`Loops: 1/1`, `Review: PASSED`); `python3 scripts/tasks.py set CUS-NNN <STATUS>` at start, PR and merge.
 4. Branch pushed (never `main`), draft PR opened, `memory.md` updated with durable facts.

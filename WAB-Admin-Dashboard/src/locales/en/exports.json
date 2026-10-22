@@ -12,7 +12,8 @@
       "REPORT_WEEKLY": "Weekly report",
       "REPORT_MONTHLY": "Monthly report",
       "TRANSACTIONS": "Transactions",
-      "AUDIT_LOGS": "Audit log"
+      "AUDIT_LOGS": "Audit log",
+      "BOOKINGS": "Bookings"
     },
     "failures": {
       "TOO_MANY_ROWS": "Too many rows: narrow the filters",

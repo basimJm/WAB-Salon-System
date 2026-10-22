@@ -64,6 +64,12 @@ import {
 } from '../modules/admin/catalogRequests/requests.openapi';
 import { registerAdminCustomerDocs } from '../modules/admin/customers/customers.openapi';
 import { registerAdminSettingsDocs } from '../modules/admin/settings/settings.openapi';
+import { registerAdminProfileDocs } from '../modules/admin/profile/profile.openapi';
+import { registerAdminSearchDocs } from '../modules/admin/search/search.openapi';
+import { registerAdminSalonEditDocs } from '../modules/admin/salonEdit/salonEdit.openapi';
+import { registerAdminBookingExtrasDocs } from '../modules/admin/bookingExtras/bookingExtras.openapi';
+import { registerAdminCustomerExtrasDocs } from '../modules/admin/customerExtras/customerExtras.openapi';
+import { registerAdminSalonInsightsDocs } from '../modules/admin/salonInsights/salonInsights.openapi';
 import { registerAdminCampaignDocs } from '../modules/admin/campaigns/campaigns.openapi';
 import { registerAdminPlacementDocs } from '../modules/admin/placements/placements.openapi';
 import {
@@ -98,6 +104,7 @@ import { registerCustomerBannerDocs } from '../modules/customer/banners/banners.
 import { registerAdminContentDocs } from '../modules/admin/content/content.openapi';
 import { registerAdminLocationDocs } from '../modules/admin/locations/locations.openapi';
 import { registerHealthDocs } from '../routes/health.openapi';
+import { registerAppLinksDocs } from '../routes/appLinks.openapi';
 import { errorResponseSchema, paginationMetaSchema } from './schemas';
 
 type DocumentConfig = Parameters<OpenApiGeneratorV31['generateDocument']>[0];
@@ -108,10 +115,10 @@ type Registrar = (registry: OpenAPIRegistry) => void;
  * (WAB-Server/CLAUDE.md §11). Order is the order paths appear in the generated files.
  */
 const REGISTRARS: Readonly<Record<DocName, readonly Registrar[]>> = {
-  common: [registerHealthDocs, registerPaymentWebhookDocs],
+  common: [registerHealthDocs, registerPaymentWebhookDocs, registerAppLinksDocs],
   customer: [registerCustomerOtpDocs, registerCustomerAuthDocs, registerCustomerInstallationDocs, registerCustomerAppConfigDocs, registerCustomerLocationDocs, registerCustomerContentDocs, registerCustomerBannerDocs, registerCustomerCatalogDocs, registerCustomerUploadDocs, registerCustomerSearchDocs, registerCustomerSalonDetailsDocs, registerCustomerHomeDocs, registerCustomerFavoritesDocs, registerCustomerReviewDocs, registerCustomerProfileDocs, registerCustomerAvailabilityDocs, registerCustomerBookingDraftDocs, registerCustomerBookingDocs, registerCustomerBookingQueryDocs, registerCustomerPaymentDocs, registerNotificationDocs(API_PREFIXES.customer, 'S19')],
   merchant: [registerMerchantOtpDocs, registerMerchantAuthDocs, registerMerchantInstallationDocs, registerMerchantAppConfigDocs, registerMerchantLocationDocs, registerMerchantContentDocs, registerMerchantCatalogDocs, registerMerchantSalonDocs, registerMerchantProfileDocs, registerMerchantUploadDocs, registerMerchantGalleryDocs, registerMerchantHoursDocs, registerMerchantServicesDocs, registerMerchantCatalogRequestDocs, registerMerchantTeamDocs, registerMerchantStaffDocs, registerMerchantLeavesDocs, registerMerchantPolicyDocs, registerMerchantBookingDocs, registerMerchantBookingQueryDocs, registerMerchantPayoutDetailsDocs, registerMerchantFinanceDocs, registerNotificationDocs(API_PREFIXES.merchant, 'M24')],
-  admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs, registerAdminSalonStateDocs, registerAdminSalonsDocs, registerAdminUploadDocs, registerAdminCatalogRequestDocs, registerAdminReviewDocs, registerAdminPlacementDocs, registerAdminBookingQueryDocs, registerAdminRefundDocs, registerAdminPayoutDocs, registerAdminFinanceDocs, registerAdminAnalyticsDocs, registerAdminAlertDocs, registerAdminReportDocs, registerAdminExportDocs, registerAdminSubscriptionDocs, registerAdminPayoutDetailsDocs, registerAdminCampaignDocs, registerAdminCustomerDocs, registerAdminSettingsDocs],
+  admin: [registerAdminAuthDocs, registerAdminLocationDocs, registerAdminContentDocs, registerAdminBannerDocs, registerAdminCatalogDocs, registerAdminApplicationDocs, registerAdminSalonStateDocs, registerAdminSalonsDocs, registerAdminUploadDocs, registerAdminCatalogRequestDocs, registerAdminReviewDocs, registerAdminPlacementDocs, registerAdminBookingQueryDocs, registerAdminRefundDocs, registerAdminPayoutDocs, registerAdminFinanceDocs, registerAdminAnalyticsDocs, registerAdminAlertDocs, registerAdminReportDocs, registerAdminExportDocs, registerAdminSubscriptionDocs, registerAdminPayoutDetailsDocs, registerAdminCampaignDocs, registerAdminCustomerDocs, registerAdminSettingsDocs, registerAdminProfileDocs, registerAdminSearchDocs, registerAdminSalonEditDocs, registerAdminSalonInsightsDocs, registerAdminCustomerExtrasDocs, registerAdminBookingExtrasDocs],
 };
 
 const buildDocument = (name: DocName): ReturnType<OpenApiGeneratorV31['generateDocument']> => {

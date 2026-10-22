@@ -16,13 +16,15 @@
     "start": "node dist/server.js",
     "seed": "node dist/seeds/run.js",
     "seed:demo": "node dist/seeds/runDemo.js",
+    "seed:demo-images": "node dist/seeds/runDemoImages.js",
     "seed:admin": "node dist/seeds/runAdmin.js",
     "docs": "npm run build && node dist/docs/generate.js",
     "loadtest": "node dist/utils/loadtest/cli.js",
     "ensure-sdks": "node scripts/ensure-sdks.cjs",
     "prebuild": "npm run ensure-sdks",
     "pretypecheck": "npm run ensure-sdks",
-    "pretest": "npm run ensure-sdks"
+    "pretest": "npm run ensure-sdks",
+    "env:check": "node dist/config/checkEnvCli.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
@@ -47,7 +49,11 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.5.0",
+    "@google-cloud/bigquery": "^9.3.0",
     "@socket.io/redis-adapter": "^8.3.0",
+    "@wab/notifications": "file:../wab-notifications",
+    "@wab/otp": "file:../wab-otp",
+    "@wab/storage": "file:../wab-storage",
     "bcryptjs": "^3.0.3",
     "bullmq": "^6.3.14",
     "cors": "^2.8.6",
@@ -63,7 +69,6 @@
     "sharp": "^0.35.5",
     "socket.io": "^4.8.4",
     "swagger-ui-express": "^5.0.1",
-    "wab-notifications": "file:../wab-notifications",
     "zod": "^4.6.6"
   },
   "overrides": {

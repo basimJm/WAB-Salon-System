@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorites_title">Favorites</string>
+    <string name="favorites_hello">Hello, %1$s</string>
+    <string name="favorites_guest_title">Log in to save favorite salons</string>
+    <string name="favorites_guest_message">Salons you love will show up here.</string>
+    <string name="favorites_login">Log in</string>
+    <string name="favorites_empty">No favorite salons yet</string>
+    <string name="favorites_empty_message">Tap the heart on any salon to save it here.</string>
+    <string name="favorites_explore">Explore salons</string>
+    <string name="favorites_error">Something went wrong</string>
+    <string name="favorites_retry">Retry</string>
+    <string name="favorites_remove">Remove from favorites</string>
+    <string name="favorites_reviews">(%1$d)</string>
+    <string name="favorites_more">more</string>
+    <string name="favorites_open">Open · %1$s</string>
+    <string name="favorites_closed_today">Closed today</string>
+</resources>

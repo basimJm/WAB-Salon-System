@@ -81,8 +81,21 @@ export const SALON_STATE_EVENTS = [
   'salon.offline',
   'salon.online',
   'salon.gender_changed',
+  'salon.edited_by_admin',
+  'salon.deletion_rejected',
 ] as const;
 export type SalonStateEvent = (typeof SALON_STATE_EVENTS)[number];
+
+/** What an admin can change on behalf of a salon (SRV-119/120); also names the owner notice text. */
+export const SALON_EDIT_AREAS = [
+  'profile',
+  'gallery',
+  'hours',
+  'services',
+  'staff',
+  'policy',
+] as const;
+export type SalonEditArea = (typeof SALON_EDIT_AREAS)[number];
 export const ADMIN_SALON_STATE_ROUTES = {
   base: '/salons',
   list: '/',

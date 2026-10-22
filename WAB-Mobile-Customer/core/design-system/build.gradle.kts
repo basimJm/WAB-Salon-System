@@ -22,9 +22,13 @@ kotlin {
         implementation(libs.bundles.compose)
         api(libs.compose.uiToolingPreview)
         implementation(projects.core.ui)
+        implementation(projects.core.domain)
+        implementation(libs.kotlinx.datetime)
+        implementation(libs.haze)
         api(libs.material.icons.extended)
     }
     sourceSets.androidMain.dependencies {
         implementation(libs.compose.uiTooling)
+        implementation(libs.androidx.core.ktx)
     }
 }

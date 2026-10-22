@@ -39,6 +39,14 @@ gradlePlugin {
             id = "com.fab.wab.customer.android.app"
             implementationClass = "com.fab.wab.customer.buildlogic.AndroidAppPlugin"
         }
+        register("coreLibrary") {
+            id = "com.fab.wab.customer.core.library"
+            implementationClass = "com.fab.wab.customer.buildlogic.KmpCoreLibraryPlugin"
+        }
+        register("coreCompose") {
+            id = "com.fab.wab.customer.core.compose"
+            implementationClass = "com.fab.wab.customer.buildlogic.KmpCoreComposePlugin"
+        }
         register("featureDomain") {
             id = "com.fab.wab.customer.feature.domain"
             implementationClass = "com.fab.wab.customer.buildlogic.KmpFeatureDomainPlugin"

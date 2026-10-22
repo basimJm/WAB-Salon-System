@@ -3,6 +3,7 @@
 > Loaded on every turn while working in this folder. Keep the current task block + the last 2 blocks; move older blocks nowhere (git history keeps them). Next task: `python3 scripts/tasks.py next admin`. Status changes: `tasks.py set <ID> <STATUS>`. Cross-project view: root `.claude/session.md` and `INTEGRATION.md`.
 
 ## Integration status (one glance)
+
 - Consumes all 116 `/admin/v1` operations through the generated contract (`npm run api:sync`); mock transport on fixtures in dev; realtime `/admin` namespace client done.
 - Remote dev switch (ADM-079) waits for SRV-011; Phase 4C (ADM-068…077) BLOCKED on SRV-117…127 + SRV-110; ADM-002/005/006/082/083 PENDING owner hosting/CI; ADM-080 e2e waived by the owner.
 - Gate: `sh scripts/gate.sh` + browser UI check before every commit; no GitHub CI.
@@ -13,17 +14,29 @@
 
 ## Last blocks
 
-### T-097 — ADM-081 QA pass: accessibility and RTL
-- Branch: `feat/adm-081-qa-pass`
-- Status: DONE
-- Acceptance criteria: axe finds no violations on the 29 module screens in ar + en; chart titles keep heading levels
-- Tests: tests/pages-a11y.test.tsx (58); gate PASS
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision).
+### ADM-085 — real-server QA and fixes
 
-### T-096 — ADM-078 fixture tests
-- Branch: `feat/adm-078-fixture-tests`
+- Branch: `feat/adm-085-real-server-fixes`
 - Status: DONE
-- Tests: 3 new tests; gate green
+- Acceptance criteria: all 33 list screens, the detail pages and every write flow of ADM-068..073 (salon edit with real MinIO uploads, bookings, customers, reviews, recommended, subscriptions, settings, locations, versions, maintenance, catalog, banners, contact, FAQ, campaigns, profile, applications) driven in a browser against a real local WAB-Server with seeded data; fixed what it found: alerts and exports lists failed on real answers (empty data/params left out), send-now campaigns were stored as 1 Jan 1970, exports sent a header the server refuses, reassign offered for bookings the server refuses
+- Tests: tests/realServerShapes.test.ts (4), tests/bookingExtras.test.tsx (+2), full suite + gate PASS; qa/ tooling + docs/REAL_SERVER_QA.md + docs/SERVER_ISSUES.md; contract check of every real GET answer against the generated schemas: only getAlerts and getExports were BAD (fixed)
 - Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: no e2e (user decision).
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: browser check done in the built-in browser with JS-driven clicks (not e2e); payouts creation, refunds of paid bookings and the realtime socket were not exercised (no money settled).
+
+### ADM-086 — a new deploy no longer breaks open tabs
+
+- Branch: `feat/adm-086-chunk-reload`
+- Status: DONE
+- Acceptance criteria: route pages load through lazyPage(): when a page's code file is gone (a new deploy replaced the hashed files) the tab reloads once (not again within 10 s) and lands on the sign-in page with the destination kept; any other route error shows the panel's error state with a retry instead of the router's crash screen
+- Tests: tests/lazyPage.test.tsx (6), tests/routeError.test.tsx (1); full suite + gate PASS; browser check: built twice with a changed About chunk while a tab was open: the tab reloaded once and showed /login?next=/about
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: the reload signs the admin out (tokens live in memory only): accepted instead of a broken screen.
+
+### ADM-087 — Render base URLs and fast deploy guide
+
+- Branch: `feat/adm-087-onrender-urls`
+- Status: DONE
+- Acceptance criteria: .env.dev and .env.prod name https://wab-server-dev.onrender.com for the API and the socket; docs/DEPLOY.md has the Netlify CLI deploy commands
+- Tests: tests/envFiles, hosting, config (33) green; server health 200 checked; gate not rerun (values and docs only)
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: full gate not rerun for a values-and-docs change; the server answers 200 on /health but does not yet allow a Netlify origin in CORS.

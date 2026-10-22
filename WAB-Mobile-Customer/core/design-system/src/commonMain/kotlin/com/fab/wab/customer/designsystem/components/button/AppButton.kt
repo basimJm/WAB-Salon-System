@@ -1,8 +1,6 @@
 package com.fab.wab.customer.designsystem.components.button
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -17,8 +15,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import com.fab.wab.customer.designsystem.components.glass.glassBackground
+import com.fab.wab.customer.designsystem.components.glass.glassClickable
+import com.fab.wab.customer.designsystem.components.glass.glassHighlight
+import com.fab.wab.customer.designsystem.components.glass.glassPressScale
+import com.fab.wab.customer.designsystem.components.glass.rememberContentGlass
+import com.fab.wab.customer.designsystem.components.glass.rememberGlassPress
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.designsystem.utils.brandBackground
@@ -27,6 +31,9 @@ import com.fab.wab.customer.designsystem.utils.softShadow
 
 /** Visual weight of a button; the layout, height, shape and states are shared. */
 enum class ButtonKind { Primary, Secondary, Outlined, Text, Destructive }
+
+/** Labels wrap to a second line instead of truncating (narrow cards, 200 % font scale). */
+private const val BUTTON_MAX_LINES = 2
 
 @Composable
 fun AppPrimaryButton(
@@ -90,6 +97,7 @@ fun AppButton(
     val active = enabled && !loading
     val brush = brandBrush()
     val contentColor = buttonContentColor(kind, active)
+    val glass = rememberContentGlass()
     val container = Modifier
         .defaultMinSize(minHeight = sizes.buttonHeight)
         .let { base ->
@@ -97,18 +105,22 @@ fun AppButton(
                 kind == ButtonKind.Primary && active ->
                     base.softShadow(AppTheme.elevation.raised, colors.accent.copy(alpha = AppTheme.elevation.buttonShadowAlpha), shape)
                         .brandBackground(brush, shape)
+                        .glassHighlight(glass, shape)
                 kind == ButtonKind.Primary -> base.clip(shape).background(colors.soft)
-                kind == ButtonKind.Secondary -> base.clip(shape).background(colors.soft)
+                kind == ButtonKind.Secondary -> base.glassBackground(AppTheme.glass, shape)
                 kind == ButtonKind.Destructive -> base.clip(shape).background(colors.dangerContainer)
-                kind == ButtonKind.Outlined -> base.border(sizes.borderWidth, colors.line, shape).clip(shape)
+                kind == ButtonKind.Outlined -> base.glassBackground(AppTheme.glass, shape)
                 else -> base.clip(shape)
             }
         }
+    val press = rememberGlassPress()
     Row(
         modifier = modifier
+            .glassPressScale(press)
+            .defaultMinSize(minHeight = sizes.touchTarget)
             .then(container)
             .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
-            .clickable(enabled = active, role = Role.Button, onClick = onClick)
+            .glassClickable(press, enabled = active, onClick = onClick)
             .padding(horizontal = spacing.space20, vertical = spacing.space12),
         horizontalArrangement = Arrangement.spacedBy(spacing.space8, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
@@ -123,7 +135,13 @@ fun AppButton(
             if (leadingIcon != null) {
                 Icon(leadingIcon, contentDescription = null, tint = contentColor, modifier = Modifier.size(sizes.icon))
             }
-            AppText(text = text, style = AppTheme.typography.labelLarge, color = contentColor, maxLines = 1)
+            AppText(
+                text = text,
+                style = AppTheme.typography.labelLarge,
+                color = contentColor,
+                maxLines = BUTTON_MAX_LINES,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }
@@ -149,12 +167,15 @@ fun AppIconButton(
     tint: Color = AppTheme.colors.ink,
     size: Dp = AppTheme.sizes.touchTarget,
 ) {
+    val press = rememberGlassPress()
     Row(
         modifier = modifier
+            .glassPressScale(press)
             .size(size)
-            .clip(AppTheme.shapes.circle)
-            .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
+            .glassClickable(press, enabled = enabled, onClick = onClick)
+            .padding(AppTheme.spacing.space4)
+            .glassBackground(AppTheme.glass, AppTheme.shapes.circle)
+            .alpha(if (enabled) 1f else AppTheme.alpha.disabled),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {

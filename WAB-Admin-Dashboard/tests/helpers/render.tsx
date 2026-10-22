@@ -36,6 +36,9 @@ import { RemotePlacementsRepository } from '@/data/placements/RemotePlacementsRe
 import { RemoteCampaignsRepository } from '@/data/campaigns/RemoteCampaignsRepository';
 import { RemoteAlertsRepository } from '@/data/alerts/RemoteAlertsRepository';
 import { RemoteAnalyticsRepository } from '@/data/analytics/RemoteAnalyticsRepository';
+import { RemoteSalonEditRepository } from '@/data/salonEdit/RemoteSalonEditRepository';
+import { RemoteSearchRepository } from '@/data/search/RemoteSearchRepository';
+import { RemoteProfileRepository } from '@/data/profile/RemoteProfileRepository';
 import { RemoteReportsRepository } from '@/data/reports/RemoteReportsRepository';
 import { RemoteAuditRepository } from '@/data/audit/RemoteAuditRepository';
 import { RemoteExportsRepository } from '@/data/exports/RemoteExportsRepository';
@@ -87,6 +90,9 @@ export function makeContainer(
       reports: new RemoteReportsRepository(api),
       analytics: new RemoteAnalyticsRepository(api),
       alerts: new RemoteAlertsRepository(api),
+      profile: new RemoteProfileRepository(api),
+      search: new RemoteSearchRepository(api),
+      salonEdit: new RemoteSalonEditRepository(api),
       campaigns: new RemoteCampaignsRepository(api),
       placements: new RemotePlacementsRepository(api),
       subscriptions: new RemoteSubscriptionsRepository(api),

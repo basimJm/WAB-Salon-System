@@ -15,6 +15,8 @@ import { Badge } from '../components/core/Badge';
 import { Button } from '../components/core/Button';
 import { KeyValue } from '../components/core/KeyValue';
 import { StatusBadge } from '../components/core/StatusBadge';
+import { CustomerExtraActions } from './CustomerExtraActions';
+import { CustomerNotificationsTab, CustomerReviewsTab } from './CustomerListTabs';
 import { DataTable } from '../components/data/DataTable';
 import type { Column } from '../components/data/tableTypes';
 import { ReasonDialog } from '../components/overlay/ReasonDialog';
@@ -98,6 +100,7 @@ export default function CustomerDetailsPage() {
   const queryClient = useQueryClient();
   const { repositories } = useContainer();
   const [asking, setAsking] = useState<CustomerAction | null>(null);
+  const [tab, setTab] = useState('profile');
   const query = useQuery({
     queryKey: ['getCustomersById', { id }],
     queryFn: () => repositories.customers.get(id),
@@ -120,8 +123,10 @@ export default function CustomerDetailsPage() {
         back={{ to: ROUTES.customers, label: t('nav.customers') }}
         status={c ? <StatusBadge kind="customer" value={c.status} /> : null}
         actions={
-          c
-            ? actionsFor(c.status).map((a) => (
+          c ? (
+            <>
+              <CustomerExtraActions c={c} />
+              {actionsFor(c.status).map((a) => (
                 <Button
                   key={a}
                   variant={a === 'delete' || a === 'block' ? 'secondary' : 'primary'}
@@ -132,14 +137,21 @@ export default function CustomerDetailsPage() {
                 >
                   {t(`customers.actions.${a}`)}
                 </Button>
-              ))
-            : null
+              ))}
+            </>
+          ) : null
         }
         tabs={[
           { id: 'profile', label: t('customers.profile'), content: c ? <Profile c={c} /> : null },
+          { id: 'reviews', label: t('customers.reviews'), content: <CustomerReviewsTab id={id} /> },
+          {
+            id: 'notifications',
+            label: t('customers.notifications'),
+            content: <CustomerNotificationsTab id={id} />,
+          },
         ]}
-        activeTab="profile"
-        onTabChange={() => undefined}
+        activeTab={tab}
+        onTabChange={setTab}
         tabsLabel={t('customers.profile')}
         loading={query.isPending}
         error={query.error}

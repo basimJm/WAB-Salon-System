@@ -11,7 +11,7 @@ SCHEME_XML = (
     '<ProfileAction buildConfiguration="Release-{e}"/><AnalyzeAction buildConfiguration="Debug-{e}"/>'
     '<ArchiveAction buildConfiguration="Release-{e}"/></Scheme>'
 )
-XCCONFIG = "APP_ENV = {e}\nAPI_BASE_URL = https:/$()/x\nAPP_DISPLAY_NAME = WAB\nPRODUCT_BUNDLE_IDENTIFIER = com.x\n"
+XCCONFIG = "APP_ENV = {e}\nAPI_BASE_URL = https:/$()/x\nAPP_DISPLAY_NAME = WAB\nPRODUCT_BUNDLE_IDENTIFIER = com.x\nDATA_SOURCE = mock\n"
 
 
 class VariantsTest(TempProject):
@@ -21,7 +21,7 @@ class VariantsTest(TempProject):
 
     def build_valid(self):
         self.write(PLUGIN, 'productFlavors { create("dev") {} create("prod") {} }\nbuildTypes { getByName("debug") {} getByName("release") {} }')
-        self.write("gradle.properties", "DEV_API_BASE_URL=https://dev.example\nPROD_API_BASE_URL=https://example\n")
+        self.write("gradle.properties", "DEV_API_BASE_URL=https://dev.example\nPROD_API_BASE_URL=https://example\nDEV_DATA_SOURCE=mock\nPROD_DATA_SOURCE=remote\n")
         names = "\n".join(f"\t\t\tname = {n};" for n in ["Debug-Dev", "Release-Dev", "Debug-Prod", "Release-Prod"])
         self.write(PBXPROJ, names)
         for scheme, env in (("iosApp-Dev", "Dev"), ("iosApp-Prod", "Prod")):

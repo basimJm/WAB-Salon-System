@@ -18,15 +18,34 @@ TEST_MARKERS = ("/test/", "/tests/", "__tests__/", "commonTest/", "androidUnitTe
 IGNORED_PREFIXES = (".claude/", "docs/")
 
 
+_ROOT_OVERRIDE = None
+
+
 def project_dir():
-    return os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
+    """The repository checkout the command runs in (a git worktree has its own branch and session files)."""
+    return _ROOT_OVERRIDE or os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
+
+
+def worktree_root(cwd):
+    """Top-level folder of the git checkout containing `cwd`, or '' when it cannot be resolved."""
+    try:
+        out = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=cwd, capture_output=True, text=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return out.stdout.strip() if out.returncode == 0 else ""
 
 
 def read_input():
+    """Parse the hook payload; its `cwd` (the Bash tool's directory) selects the checkout the rules apply to."""
+    global _ROOT_OVERRIDE
     try:
-        return json.load(sys.stdin)
+        data = json.load(sys.stdin)
     except (ValueError, OSError):
         return {}
+    cwd = data.get("cwd") if isinstance(data, dict) else None
+    if isinstance(cwd, str) and os.path.isdir(cwd):
+        _ROOT_OVERRIDE = worktree_root(cwd) or None
+    return data
 
 
 def git(*args):
@@ -61,6 +80,18 @@ def is_source_file(path):
     if any(path.startswith(p) or f"/{p}" in path for p in IGNORED_PREFIXES):
         return False
     return path.endswith(SOURCE_EXTENSIONS) and not is_test_file(path)
+
+
+def master_branches():
+    """Branches that only receive merged PRs: main/master plus every project master in .claude/projects.json."""
+    branches = set(PROTECTED_BRANCHES)
+    try:
+        with open(os.path.join(project_dir(), REGISTRY_FILE), encoding="utf-8") as fh:
+            registry = json.load(fh)
+        branches.update(p["master"] for p in registry.get("projects", {}).values() if p.get("master"))
+    except (OSError, ValueError, TypeError):
+        pass
+    return branches
 
 
 def session_files():

@@ -9,55 +9,28 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.io.IOException
 import kotlinx.serialization.SerializationException
 
-private const val SAFE_API_TAG = "SafeApiCall"
-
-private fun ApiErrorDto.displayMessage(): String? =
-    listOfNotNull(
-        message,
-        fieldErrors.orEmpty().mapNotNull { it.message }.firstOrNull(),
-        errors.values.flatten().firstOrNull(),
-        error,
-    ).firstOrNull { it.isNotBlank() }
-
-private suspend fun parseBackendErrorMessage(e: ResponseException): String? =
-    runCatching { e.response.body<ApiErrorDto>().displayMessage() }.getOrNull()
-
-suspend fun <T> safeApiCall(block: suspend () -> T): AppResult<T> {
-    return try {
-        AppResult.Success(block())
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: ResponseException) {
-        val serverMessage = parseBackendErrorMessage(e)
-        val displayMessage = serverMessage?.take(MAX_ERROR_MESSAGE_LENGTH)
-            ?: e.message?.take(MAX_ERROR_MESSAGE_LENGTH)
-            ?: "Request failed (${e.response.status.value})"
-        AppResult.Error(
-            AppError.HttpError(
-                statusCode = e.response.status.value,
-                message = displayMessage
-            )
-        )
-    } catch (e: SerializationException) {
-        AppResult.Error(
-            AppError.ParseError(
-                message = e.message?.take(MAX_ERROR_MESSAGE_LENGTH) ?: "Parse error"
-            )
-        )
-    } catch (e: HttpRequestTimeoutException) {
-        AppResult.Error(
-            AppError.NetworkError(e.message ?: "Request timeout")
-        )
-    } catch (e: IOException) {
-        AppResult.Error(
-            AppError.NetworkError(e.message ?: "Network error")
-        )
-    } catch (e: Exception) {
-        println("$SAFE_API_TAG: ${e}")
-        AppResult.Error(
-            AppError.UnknownError(e.message ?: "Unknown error")
-        )
-    }
+/**
+ * Turns any API call into an [AppResult]: the backend envelope becomes [AppError.ServerError] (code-driven),
+ * other HTTP failures [AppError.HttpError], transport problems [AppError.NetworkError]. Never throws except for
+ * cancellation, never logs bodies (they can carry personal data).
+ */
+suspend fun <T> safeApiCall(block: suspend () -> T): AppResult<T> = try {
+    AppResult.Success(block())
+} catch (e: CancellationException) {
+    throw e
+} catch (e: ResponseException) {
+    AppResult.Error(e.toAppError())
+} catch (e: SerializationException) {
+    AppResult.Error(AppError.ParseError(e.message?.take(NetworkDefaults.MAX_ERROR_MESSAGE_LENGTH)))
+} catch (e: HttpRequestTimeoutException) {
+    AppResult.Error(AppError.NetworkError(e.message.orEmpty().take(NetworkDefaults.MAX_ERROR_MESSAGE_LENGTH)))
+} catch (e: IOException) {
+    AppResult.Error(AppError.NetworkError(e.message.orEmpty().take(NetworkDefaults.MAX_ERROR_MESSAGE_LENGTH)))
 }
 
-private const val MAX_ERROR_MESSAGE_LENGTH = 500
+private suspend fun ResponseException.toAppError(): AppError {
+    val status = response.status.value
+    val envelope = runCatching { response.body<ErrorEnvelopeDto>() }.getOrNull()
+    return envelope?.toServerError(status)
+        ?: AppError.HttpError(statusCode = status, message = envelope?.message?.take(NetworkDefaults.MAX_ERROR_MESSAGE_LENGTH))
+}

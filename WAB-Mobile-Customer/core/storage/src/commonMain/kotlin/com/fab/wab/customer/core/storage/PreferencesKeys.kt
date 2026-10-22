@@ -9,8 +9,6 @@ object PreferencesKeys {
     val LANGUAGE: Key<String> = stringPreferencesKey("language")
     val THEME_MODE: Key<String> = stringPreferencesKey("theme_mode")
 
-    val TOKEN: Key<String> = stringPreferencesKey("token")
-    val REFRESH_TOKEN: Key<String> = stringPreferencesKey("refresh_token")
     val FCM_TOKEN: Key<String> = stringPreferencesKey("fcm_token")
 
     val USER_ID: Key<String> = stringPreferencesKey("user_id")

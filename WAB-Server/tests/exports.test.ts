@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs';
+import { exportRequestSchema } from '../src/domain/exports/exportRequest';
 import { Types } from 'mongoose';
 import request from 'supertest';
 import { createApp } from '../src/app';
@@ -306,6 +307,7 @@ describe('table builders', () => {
     const b = createTableBuilders({
       reports: {} as never,
       adminSettings: {} as never,
+      bookings: {} as never,
       transactions: {
         list: ({ params }) => {
           pages.push(params.page);
@@ -325,6 +327,7 @@ describe('table builders', () => {
     const b = createTableBuilders({
       reports: {} as never,
       adminSettings: {} as never,
+      bookings: {} as never,
       transactions: {
         list: () => Promise.resolve({ items: [txItem(1)], total: EXPORT_MAX_ROWS + 1 }),
       },
@@ -334,6 +337,7 @@ describe('table builders', () => {
 
   it('audit logs and reports build tables', async () => {
     const b = createTableBuilders({
+      bookings: {} as never,
       reports: {
         daily: () =>
           Promise.resolve({ date: '2026-10-01', facts: emptyFacts(), snapshot: {} as never }),
@@ -392,5 +396,121 @@ describe('table builders', () => {
       '3.000',
     ]);
     expect((await b.AUDIT_LOGS({})).rows[0]?.[2]).toBe('X');
+  });
+});
+
+describe('BOOKINGS export', () => {
+  const row = (i: number): Record<string, unknown> => ({
+    id: `b${String(i)}`,
+    referenceNumber: `WAB-${String(i).padStart(6, '0')}`,
+    status: 'APPROVED',
+    paymentMethod: 'PAY_ON_ARRIVAL',
+    paymentStatus: 'PENDING',
+    hasBride: false,
+    appointmentStart: '2026-10-20T09:00:00.000Z',
+    appointmentEnd: '2026-10-20T10:00:00.000Z',
+    respondBy: '2026-10-19T09:00:00.000Z',
+    personsCount: 2,
+    total: '25.000',
+    salon: { id: 's1', name: 'Glow' },
+    customer: { id: 'c1', name: 'Layla H', phone: '+962786135059' },
+    staff: [
+      { id: 'm1', name: 'Rana' },
+      { id: 'm2', name: 'Dina' },
+    ],
+  });
+
+  it('pages through every page as the admin audience and keeps the filters', async () => {
+    const calls: {
+      page: number;
+      query: Record<string, unknown>;
+      kind: string;
+      language: string;
+    }[] = [];
+    const b = createTableBuilders({
+      reports: {} as never,
+      adminSettings: {} as never,
+      transactions: {} as never,
+      bookings: {
+        list: ({ audience, query, params, language }) => {
+          calls.push({ page: params.page, query: query as never, kind: audience.kind, language });
+          const all = Array.from({ length: 250 }, (_, i) => row(i));
+          const start = (params.page - 1) * params.pageSize;
+          return Promise.resolve({
+            items: all.slice(start, start + params.pageSize) as never,
+            total: 250,
+          });
+        },
+      },
+    });
+    const table = await b.BOOKINGS({
+      statuses: ['APPROVED'],
+      salonId: 's1',
+      from: '2026-10-01',
+      to: '2026-10-31',
+      q: 'Layla',
+    });
+    expect(table.rows).toHaveLength(250);
+    expect(calls.map((c) => c.page)).toEqual([1, 2, 3]);
+    expect(calls[0]).toMatchObject({
+      kind: 'ADMIN',
+      language: 'en',
+      query: {
+        statuses: ['APPROVED'],
+        salonId: 's1',
+        from: '2026-10-01',
+        to: '2026-10-31',
+        q: 'Layla',
+      },
+    });
+    expect(table.rows[0]).toEqual([
+      'WAB-000000',
+      'APPROVED',
+      '2026-10-20T09:00:00.000Z',
+      'Glow',
+      'Layla H',
+      '+962786135059',
+      2,
+      'Rana, Dina',
+      'PAY_ON_ARRIVAL',
+      'PENDING',
+      '25.000',
+    ]);
+    expect(table.columns).toHaveLength(table.rows[0]?.length ?? 0);
+  });
+
+  it('refuses a table bigger than one export', async () => {
+    const b = createTableBuilders({
+      reports: {} as never,
+      adminSettings: {} as never,
+      transactions: {} as never,
+      bookings: {
+        list: () => Promise.resolve({ items: [row(1)] as never, total: EXPORT_MAX_ROWS + 1 }),
+      },
+    });
+    await expect(b.BOOKINGS({})).rejects.toBeInstanceOf(TooManyRowsError);
+  });
+
+  it('the export request accepts the booking filters and refuses a bad one', () => {
+    const ok = exportRequestSchema.safeParse({
+      kind: 'BOOKINGS',
+      format: 'CSV',
+      params: { statuses: ['PENDING', 'APPROVED'], from: '2026-10-01', paymentStatus: 'PAID' },
+    });
+    expect(ok.success).toBe(true);
+    expect(
+      exportRequestSchema.safeParse({
+        kind: 'BOOKINGS',
+        format: 'CSV',
+        params: { statuses: ['NOPE'] },
+      }).success,
+    ).toBe(false);
+    expect(
+      exportRequestSchema.safeParse({
+        kind: 'BOOKINGS',
+        format: 'CSV',
+        params: { from: '10/01/2026' },
+      }).success,
+    ).toBe(false);
   });
 });

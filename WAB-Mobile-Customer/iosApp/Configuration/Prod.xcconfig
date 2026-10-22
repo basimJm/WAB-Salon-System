@@ -6,5 +6,18 @@ APP_DISPLAY_NAME = WAB
 // PLACEHOLDER host until the platform domain is decided. In xcconfig '//' starts a comment, so the
 // scheme separator is written as ':/$()/'.
 API_BASE_URL = https:/$()/api.template.app
+WEB_BASE_URL = https:/$()/template.app
+// Universal Links domain (PRD §4.4) = the WEB_BASE_URL host; used by iosApp.entitlements.
+DEEP_LINK_HOST = template.app
+DATA_SOURCE = remote
 BUNDLE_ID_SUFFIX =
-PRODUCT_BUNDLE_IDENTIFIER = com.fab.wab.customer$(BUNDLE_ID_SUFFIX)$(TEAM_ID)
+PRODUCT_BUNDLE_IDENTIFIER = com.fab.wab.customer$(BUNDLE_ID_SUFFIX)
+// Merchant app hand-off (CUS-056, PLACEHOLDERS until the merchant app ships): deep link, App Store page, URL scheme.
+MERCHANT_REGISTER_URL = https:/$()/merchant.template.app/register
+MERCHANT_STORE_URL = https:/$()/apps.apple.com/app/id0000000000
+MERCHANT_APP_SCHEME = wabmerchant
+// App Check (App Attest) environment for the entitlement
+APP_ATTEST_ENVIRONMENT = production
+
+// Per-developer overrides (team, free-account entitlements); optional and git-ignored.
+#include? "Local.xcconfig"
