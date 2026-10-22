@@ -9,6 +9,7 @@ import com.fab.wab.merchant.feature.application.presentation.navigation.Applicat
 import com.fab.wab.merchant.feature.bookings.presentation.navigation.BookingsNavigation
 import com.fab.wab.merchant.feature.salon.presentation.navigation.SalonNavigation
 import com.fab.wab.merchant.feature.team.presentation.navigation.TeamNavigation
+import com.fab.wab.merchant.feature.finance.presentation.navigation.FinanceNavigation
 import com.fab.wab.merchant.feature.sample.presentation.navigation.SampleNavigation
 
 /** Root NavHost: every feature registers its own graph here. */
@@ -23,6 +24,7 @@ fun MainNavigation(
         BookingsNavigation(navController).registerGraph(this)
         SalonNavigation(navController).registerGraph(this)
         TeamNavigation(navController).registerGraph(this)
+        FinanceNavigation(navController).registerGraph(this)
         SampleNavigation(navController).registerGraph(this)
     }
 }

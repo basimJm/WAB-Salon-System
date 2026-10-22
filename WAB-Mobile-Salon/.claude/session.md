@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-044 — Finance M22
+- Branch: `feat/mer-044-finance`
+- Branched: (from `feat/mer-041-policies`)
+- Status: IN PROGRESS (batch 8)
+- Acceptance criteria (PRD M22; operations `GET /finance/balance|transactions|refunds|payouts`; design 08 `on.finance`):
+  - [x] New `feature/finance`; balance card (pending payout amount, last payout amount + date), WAB info text; hub tile FINANCE registered
+  - [x] Tabs Transactions (reference, date, deposit / full, amount, gateway fee, net), Refunds (amount, booking, reason or source label, status Pending / Refunded / Failed, requested / refunded dates), Payouts (period, gross, fees, refunds deducted, adjustments, net, Pending / Transferred, transfer date + reference)
+  - [x] Date presets This month / Last 3 months / This year / Custom (from / to pickers, `to` never before `from`), infinite scroll pages of 20, pull-to-refresh, empty "try another period", error + retry; rows open the booking (M09)
+  - [x] Bank-details entry only for the owner (`PAYOUT_DETAILS_MANAGE`), shown once MER-045 ships
+- Tests: `FinanceTest` (1), `FinanceMappersTest` (1), `FinanceViewModelTest` (2); `/tmp/claude/quick.sh m44b` green after rewording two KDoc lines (`/finance/*` opened a nested comment); policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: amounts are the contract's JOD decimal strings shown through `jodText`.
+
 ### MER-041 — Policies M19
 - Branch: `feat/mer-041-policies`
 - Branched: (batch 8 start, from `feat/mer-040-permissions`)
