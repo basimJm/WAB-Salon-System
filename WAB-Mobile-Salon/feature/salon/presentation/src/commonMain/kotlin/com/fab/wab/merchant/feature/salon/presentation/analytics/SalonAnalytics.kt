@@ -20,5 +20,12 @@ object SalonAnalytics {
     const val ACTION_HOURS_SAVE = "working_hours_save"
     const val ACTION_CLOSURE_SAVE = "closure_save"
     const val ACTION_CANCEL_AFFECTED = "cancel_affected_bookings"
+    val SCREEN_SERVICES = AnalyticsScreen("salon_services")
+    val SCREEN_CATALOG = AnalyticsScreen("salon_catalog_picker")
+    val SCREEN_SERVICE_EDIT = AnalyticsScreen("salon_service_edit")
+    const val ACTION_SERVICE_TOGGLE = "service_toggle_active"
+    const val ACTION_SERVICE_SAVE = "service_save"
+    const val PARAM_STATE = "state"
+    const val PARAM_NEW = "new"
     const val PARAM_COUNT = "count"
 }

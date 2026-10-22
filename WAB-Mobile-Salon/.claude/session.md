@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-036 — Services M16
+- Branch: `feat/mer-036-services`
+- Branched: (batch 7 start, from `feat/mer-035-hours`)
+- Status: IN PROGRESS (batch 7)
+- Acceptance criteria (PRD M16; operations `GET/POST /salon/services`, `PATCH /salon/services/{id}`, `GET /catalog/services?gender=`; design 06 `on.services`, `on.catalog`, `on.svcForm`):
+  - [x] List: image, name, price (JOD), duration, bride-only and inactive badges, active switch (deactivation confirmed: existing bookings stay valid), client-side search (no query parameter in the contract), empty state CTA, pull-to-refresh, live updates after a save
+  - [x] Catalog picker for the salon's gender only, paged (50), searchable over loaded rows, "Added" marks → opens the existing service; new → form
+  - [x] Form: catalog name / image read-only, price > 0 with ≤ 2 decimals (Arabic digits accepted) + "includes tax and fees", duration multiple of 5 within 5..1440, bride-only toggle on women's salons only, description ≤ 500 (cleared → explicit null), media ≤ 10 uploaded as `SERVICE_MEDIA`, active toggle, "price changes apply to new bookings" note; saving refreshes the shared salon (completeness `SERVICE`); hub tile SERVICES registered
+- Tests: `ServicesTest` (3), `ServicesMappersTest` (2), `ServicesViewModelTest` (5); `/tmp/claude/quick.sh m36` green after naming two magic numbers; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATIONS — the contract has no upcoming-bookings list for a service, so deactivation shows a generic confirmation instead of the bookings; the "no staff provides this service" warning is not shown (it would need every member's staff profile); editing media replaces the whole set (existing media come back as URLs only, no keys), the form says so.
+
 ### MER-035 — Working hours & closures M15
 - Branch: `feat/mer-035-hours`
 - Branched: (from `feat/mer-034-gallery`)

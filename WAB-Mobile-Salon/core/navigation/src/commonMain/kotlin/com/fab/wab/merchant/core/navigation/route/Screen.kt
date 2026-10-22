@@ -45,7 +45,10 @@ sealed interface Screen {
 
     @Serializable data object Services : Screen
 
-    @Serializable data class ServiceEdit(val serviceId: String? = null) : Screen
+    /** Edit [serviceId], or add the catalog service [catalogServiceId]. */
+    @Serializable data class ServiceEdit(val serviceId: String? = null, val catalogServiceId: String? = null) : Screen
+
+    @Serializable data object CatalogPicker : Screen
 
     @Serializable data object CatalogRequests : Screen
 

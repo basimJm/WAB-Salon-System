@@ -5,7 +5,11 @@ import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapController
 import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapDependencies
+import com.fab.wab.merchant.feature.salon.presentation.controller.vm.CatalogPickerViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.GalleryViewModel
+import com.fab.wab.merchant.feature.salon.presentation.controller.vm.ServiceEditDependencies
+import com.fab.wab.merchant.feature.salon.presentation.controller.vm.ServiceEditViewModel
+import com.fab.wab.merchant.feature.salon.presentation.controller.vm.ServicesViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.HoursDependencies
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.HoursViewModel
 import com.fab.wab.merchant.feature.salon.presentation.resources.Res
@@ -48,6 +52,10 @@ val salonPresentationModule = module {
         )
     }
     viewModel { SalonProfileViewModel(deps = get()) }
+    viewModel { ServicesViewModel(repository = get(), analytics = get()) }
+    viewModel { CatalogPickerViewModel(services = get(), salon = get()) }
+    factory { ServiceEditDependencies(services = get(), salon = get(), picker = get(), upload = get(), analytics = get()) }
+    viewModel { (serviceId: String?, catalogServiceId: String?) -> ServiceEditViewModel(serviceId, catalogServiceId, deps = get()) }
     viewModel { GalleryViewModel(gallery = get(), picker = get(), upload = get(), analytics = get()) }
     viewModel {
         HoursViewModel(
