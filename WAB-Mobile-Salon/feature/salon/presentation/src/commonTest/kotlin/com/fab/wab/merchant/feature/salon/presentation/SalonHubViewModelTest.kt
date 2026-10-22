@@ -27,23 +27,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-private fun salon(missing: Set<CompletenessItem>) = SalonProfile(
-    id = "s1", name = "Lina", gender = SalonGenderType.FEMALE, state = SalonState.APPROVED_INCOMPLETE, description = null,
-    coverUrl = null, profileUrl = null, location = null, locationText = null, cityId = null, areaId = null, phone = null,
-    whatsapp = null, missing = missing, ratingAverage = 0.0, ratingCount = 0,
-)
-
-private class FakeSalon(var result: AppResult<SalonProfile>) : SalonRepository {
-    val state = MutableStateFlow<SalonProfile?>(null)
-    var refreshes = 0
-    override val current: StateFlow<SalonProfile?> = state
-    override suspend fun refresh(): AppResult<SalonProfile> {
-        refreshes += 1
-        (result as? AppResult.Success)?.let { state.value = it.data }
-        return result
-    }
-}
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class SalonHubViewModelTest {
 

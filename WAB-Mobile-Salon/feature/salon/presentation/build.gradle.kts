@@ -14,6 +14,7 @@ kotlin {
         implementation(projects.core.designSystem)
         implementation(projects.core.ui)
         implementation(libs.kotlinx.datetime)
+        implementation(libs.navigationevent.compose)
     }
     sourceSets.commonTest.dependencies {
         implementation(libs.kotlinx.coroutines.test)

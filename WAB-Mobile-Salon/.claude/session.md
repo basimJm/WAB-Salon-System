@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-033 — Salon profile edit M13
+- Branch: `feat/mer-033-salon-profile`
+- Branched: (from `feat/mer-032-salon-hub`)
+- Status: IN PROGRESS (batch 6)
+- Acceptance criteria (PRD M13; operations `GET /salon`, `PATCH /salon/profile`, uploads presign/confirm; design 05 `on.profile`, `sh.crop`, `on.map`, `on.preview`):
+  - [x] Form from the shared salon: cover (16:9) and profile (1:1) images picked → cropped (`ImageCropper`) → uploaded (`SALON_COVER` / `SALON_PROFILE`) with progress and retry; name (≤ 80, required), description (≤ 1000 with counter), address text (≤ 300), city / area (areas reload per city), phone (required) and WhatsApp (optional) in E.164; salon type read-only
+  - [x] Full-screen map picker: pin moves re-geocode (`ReverseGeocoder`), place search debounced 400 ms (`PlacesRepository`), "Use my location" through the location permission (blocked → settings), confirm fills location + address
+  - [x] Save sends only changed fields; cleared description / address / WhatsApp go out as explicit `null` (the client drops nulls, so the body is built as JSON); success refreshes the shared salon (hub completeness, home); validation errors shown on save
+  - [x] Unsaved-changes guard on the top-bar back and the system back (`NavigationBackHandler`): save & leave / discard; customer preview sheet; hub tile PROFILE registered
+- Tests: `ProfileFormTest` (3), `ProfileBodyTest` (1), `SalonProfileViewModelTest` (7); `/tmp/claude/quick.sh m33c` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: new library `org.jetbrains.androidx.navigationevent:navigationevent-compose:1.0.1` (already a transitive dependency of navigation-compose; `BackHandler` is deprecated in Compose 1.10 and warnings fail the build). The preview is a simplified customer header (cover, logo, name, rating, description, address), not the full customer salon screen.
+
 ### MER-032 — Salon hub M12
 - Branch: `feat/mer-032-salon-hub`
 - Branched: (from `feat/mer-031-calendar`)
