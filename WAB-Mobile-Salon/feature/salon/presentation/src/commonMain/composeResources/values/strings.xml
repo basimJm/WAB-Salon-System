@@ -167,4 +167,17 @@
     <string name="service_deactivated">Service hidden for new bookings</string>
     <string name="service_activated">Service is bookable again</string>
     <string name="service_cancel">Cancel</string>
+    <string name="requests_title">Catalog requests</string>
+    <string name="requests_new">Request a service</string>
+    <string name="requests_empty">No requests yet</string>
+    <string name="requests_name">Service name</string>
+    <string name="requests_description">Description</string>
+    <string name="requests_description_hint">Briefly describe the service…</string>
+    <string name="requests_image">Picture (optional)</string>
+    <string name="requests_send">Send request</string>
+    <string name="requests_sent">Request sent for review</string>
+    <string name="requests_pending">Pending</string>
+    <string name="requests_approved">Approved</string>
+    <string name="requests_rejected">Rejected</string>
+    <string name="requests_admin_note">WAB note: %1$s</string>
 </resources>

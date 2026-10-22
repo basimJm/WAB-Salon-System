@@ -183,4 +183,17 @@
     <string name="service_deactivated">تم إيقاف الخدمة للحجوزات الجديدة</string>
     <string name="service_activated">أصبحت الخدمة متاحة للحجز</string>
     <string name="service_cancel">إلغاء</string>
+    <string name="requests_title">طلبات الكتالوج</string>
+    <string name="requests_new">طلب خدمة جديدة</string>
+    <string name="requests_empty">لا توجد طلبات بعد</string>
+    <string name="requests_name">اسم الخدمة</string>
+    <string name="requests_description">الوصف</string>
+    <string name="requests_description_hint">صف الخدمة باختصار…</string>
+    <string name="requests_image">صورة (اختياري)</string>
+    <string name="requests_send">إرسال الطلب</string>
+    <string name="requests_sent">تم إرسال الطلب للمراجعة</string>
+    <string name="requests_pending">قيد المراجعة</string>
+    <string name="requests_approved">مقبول</string>
+    <string name="requests_rejected">مرفوض</string>
+    <string name="requests_admin_note">ملاحظة WAB: %1$s</string>
 </resources>

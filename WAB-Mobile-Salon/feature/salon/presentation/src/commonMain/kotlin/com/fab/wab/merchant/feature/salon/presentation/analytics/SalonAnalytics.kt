@@ -26,6 +26,8 @@ object SalonAnalytics {
     const val ACTION_SERVICE_TOGGLE = "service_toggle_active"
     const val ACTION_SERVICE_SAVE = "service_save"
     const val PARAM_STATE = "state"
+    val SCREEN_CATALOG_REQUESTS = AnalyticsScreen("salon_catalog_requests")
+    const val ACTION_CATALOG_REQUEST = "catalog_request_send"
     const val PARAM_NEW = "new"
     const val PARAM_COUNT = "count"
 }

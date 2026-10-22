@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.salon.data
 
+import com.fab.wab.merchant.feature.salon.domain.CatalogRequestsRepository
 import com.fab.wab.merchant.feature.salon.domain.GalleryRepository
 import com.fab.wab.merchant.feature.salon.domain.HoursRepository
 import com.fab.wab.merchant.feature.salon.domain.SalonProfileRepository
@@ -16,4 +17,6 @@ val salonDataModule = module {
     single<HoursRepository> { HoursRepositoryImpl(get(), get()) }
     single { ServicesApi(get()) }
     single<ServicesRepository> { ServicesRepositoryImpl(get(), get()) }
+    single { CatalogRequestsApi(get()) }
+    single<CatalogRequestsRepository> { CatalogRequestsRepositoryImpl(get()) }
 }

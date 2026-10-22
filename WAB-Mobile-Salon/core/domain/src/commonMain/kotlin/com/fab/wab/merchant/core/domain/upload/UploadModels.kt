@@ -11,6 +11,9 @@ enum class UploadPurpose {
     GALLERY_VIDEO,
     SERVICE_MEDIA,
 
+    /** Picture attached to a catalog request (SERVICES_MANAGE). */
+    CATALOG_IMAGE,
+
     /** Public flow before the salon exists: `POST /uploads/license/presign` + `/confirm` (private file). */
     LICENSE_DOCUMENT,
 }

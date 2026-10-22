@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-037 — Catalog requests M16
+- Branch: `feat/mer-037-catalog-requests`
+- Branched: (from `feat/mer-036-services`)
+- Status: IN PROGRESS (batch 7)
+- Acceptance criteria (PRD M16 catalog requests; operations `GET/POST /catalog/requests`; design 06 `on.catReq`):
+  - [x] List with status (Pending / Approved / Rejected), date and the WAB note; empty state
+  - [x] "Request a service" sheet: name (1..100), description (1..500), optional picture uploaded as `CATALOG_IMAGE` (new core upload purpose; the server allows it for SERVICES_MANAGE); sent request appears on top; failures keep the form
+  - [x] Reached from the catalog picker ("Can't find your service? Request it"); services destinations moved to `ServicesDestinations.kt` (navigation file under 300 lines)
+- Tests: `CatalogRequestsViewModelTest` (2); `/tmp/claude/quick.sh m37` green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: only the first page of requests is shown (a salon has few).
+
 ### MER-036 — Services M16
 - Branch: `feat/mer-036-services`
 - Branched: (batch 7 start, from `feat/mer-035-hours`)
