@@ -10,7 +10,8 @@
 ## Current task
 
 ### MER-019 — Splash + config + system screens
-- Branch: `feat/mer-019-splash-config` (from `feat/mer-018-calendar-grid`; backlog name `feat/mer-019-config-system`)
+- Branch: `feat/mer-019-splash-config`
+- Branched: (from `feat/mer-018-calendar-grid`; backlog name `feat/mer-019-config-system`)
 - Status: IN REVIEW (batch 3 PR)
 - Acceptance criteria (PRD M01, M26 "same as the customer app"; operation `GET /merchant/v1/config?platform&version`; design 01 `on.splash`, `on.sys`):
   - [x] Domain `core/domain/config` (from the customer app): `AppConfig` (update policy, maintenance, OTP length + resend, contact), `UpdateStatus` (unknown → OK), `ClientPlatform`, `LaunchGate` + `launchGateOf` (maintenance over force update over optional update)
@@ -23,7 +24,8 @@
 - Notes: the post-gate launch router (session, salon state) is MER-024; mock mode answers the config with the generated fixture (status OK, maintenance off).
 
 ### MER-018 — Calendar grid component
-- Branch: `feat/mer-018-calendar-grid` (from `feat/mer-017-map-picker`)
+- Branch: `feat/mer-018-calendar-grid`
+- Branched: (from `feat/mer-017-map-picker`)
 - Status: IN REVIEW (batch 3 PR)
 - Acceptance criteria (PRD M11; Design Script M11; design 04 Calendar):
   - [x] Models + pure helpers: blocks / shades (closed, leave) / columns in local minutes, `TimeWindow.covering` (working hours widened to every block, snapped to whole hours), `spanIn` (15-minute resolution, clamped), `weekOf` (Saturday-first week), `pageDate` (day ±1, week ±7)
@@ -36,7 +38,8 @@
 - Notes: DEVIATION (PRD over design): the design colours blocks per staff member; PRD M11 says "colored by status", so blocks use the status hues and the legend shows statuses. Data, staff filter, employee single column and permissions are the calendar screen (MER-031). Only the visible window is drawn (no virtualisation needed: ≤ 24 h × staff columns).
 
 ### MER-017 — Map picker
-- Branch: `feat/mer-017-map-picker` (from `feat/mer-016-uploaders`)
+- Branch: `feat/mer-017-map-picker`
+- Branched: (from `feat/mer-016-uploaders`)
 - Status: IN REVIEW (batch 3 PR)
 - Acceptance criteria (PRD M13; design 05 Salon `on.map`; maps key env/CI only):
   - [x] `MapProvider` port (core/ui): Google Maps (maps-compose) on Android when `MAPS_API_KEY` is set (local.properties or CI env → manifest meta-data), MapKit on iOS (no key), `NoMapProvider` otherwise; camera follows `target`, reports the idle centre and moving state
@@ -49,7 +52,8 @@
 - Notes: "use my location" permission + device position and the Places search wiring belong to the profile screen (MER-033), which owns the view model; the pin is "drag the map" (design hint), not a draggable marker.
 
 ### MER-016 — Uploaders
-- Branch: `feat/mer-016-uploaders` (from `feat/mer-015-request-sheet`)
+- Branch: `feat/mer-016-uploaders`
+- Branched: (from `feat/mer-015-request-sheet`)
 - Status: IN REVIEW (batch 3 PR)
 - Acceptance criteria (PRD M04, M13, M14, §12; operations `POST /uploads/presign|confirm`, `POST /uploads/license/presign|confirm`; design 01 Onboarding documents, 05 Salon crop + gallery):
   - [x] Domain `core/domain/upload`: purposes, `LocalFile` (kind from MIME), limits (documents 1–5, image/PDF, ≤ 10 MB; images ≤ 10 MB; videos ≤ 50 MB and ≤ 60 s; gallery 50 photos / 10 videos), `validateUpload` / `acceptUploads` (refusals WRONG_TYPE / TOO_LARGE / TOO_LONG / TOO_MANY), `UploadsRepository`, `UploadFileUseCase` (presign → PUT with progress → confirm; failures stop the chain; retry = new run)
@@ -63,7 +67,8 @@
 - Notes: whole files are read into memory before upload (videos up to 50 MB); a streaming upload would need a file-source port (later if memory shows up). Screens (registration, profile, gallery, services) wire these in MER-022/033/034/036.
 
 ### MER-015 — Request sheet component
-- Branch: `feat/mer-015-request-sheet` (batch 3 start, from `feat/mer-014-components`)
+- Branch: `feat/mer-015-request-sheet`
+- Branched: (batch 3 start, from `feat/mer-014-components`)
 - Status: IN REVIEW (batch 3 PR)
 - Acceptance criteria (PRD M10 in-app; Design Script M10; design 02 Home `sheetOn`):
   - [x] `AppBookingRequestSheetContent(RequestSheetUi, onAction)`: "New booking request" + age · reference, "1 of 3" queue chip (only with more than one), bride banner ("Bridal booking — high priority"), customer + persons + time/date, one card per person (services, staff · time, bride badge), total + payment badge, Reject (outlined rose) / Accept (green, check icon, spinner while accepting), View details
@@ -78,7 +83,8 @@
 - Notes: hosting, queue, de-duplication, reason picker and the Android overlay / iOS time-sensitive paths are MER-028/029/030; the design's pulsing "ring" animations are not drawn.
 
 ### MER-014 — Merchant components
-- Branch: `feat/mer-014-components` (from `feat/mer-013-theme`; backlog name `feat/mer-014-merchant-components`)
+- Branch: `feat/mer-014-components`
+- Branched: (from `feat/mer-013-theme`; backlog name `feat/mer-014-merchant-components`)
 - Status: IN REVIEW (batch 2 PR)
 - Acceptance criteria (Design Script §1.2; PRD §8.1, M07–M09; BUSINESS_DOMAIN §2 enums, §5 `respondBy`; design 02 Home / 03 Bookings):
   - [x] Shared booking enums in core/domain `booking/` (`BookingStatus` 8, `PaymentStatus` 4, `RefundStatus` incl. NONE, tolerant `fromCode`) + `BookingTimers` (pending age, auto-cancel remaining from `respondBy`; pure, never negative)
@@ -96,7 +102,8 @@
 - Notes: the shell adopts the tabs when the first tab screens land (MER-024/025); pending-card "ring" pulse animation of the design not drawn (static count circle).
 
 ### MER-013 — Theme, tokens and base kit
-- Branch: `feat/mer-013-theme` (from `feat/mer-011-realtime-client`)
+- Branch: `feat/mer-013-theme`
+- Branched: (from `feat/mer-011-realtime-client`)
 - Status: IN REVIEW (batch 2 PR)
 - Acceptance criteria (Design Script §0–§1.1; customer CUS-018/020):
   - [x] Same theme and tokens as the customer app (light + dark, typography, spacing, radii, elevation, Liquid Glass) — from the template, no new colors
@@ -108,7 +115,8 @@
 - Notes: display name changed from "WAB Merchant" (MER-001) to the design's "WAB Business".
 
 ### MER-011 — Realtime client
-- Branch: `feat/mer-011-realtime-client` (from `feat/mer-009-permissions`)
+- Branch: `feat/mer-011-realtime-client`
+- Branched: (from `feat/mer-009-permissions`)
 - Status: IN REVIEW (batch 2 PR)
 - Acceptance criteria (PRD §3 real-time; BUSINESS_DOMAIN §7):
   - [x] Socket.IO client on namespace `/merchant` (template) + `FakeRealtimeClient`; connect while resumed and signed in, reconnect on foreground (`RealtimeConnectionEffect`)
@@ -120,7 +128,8 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-2 code read (77 files): session/permissions/realtime plumbing and design-system components only; no `!!`/`println`/`runBlocking`/unexplained suppressions, every file < 300 lines, AR+EN for every new key (plurals with all Arabic quantities), tokens only; permission gating pure and tested. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); components are not yet on a screen (no emulator check).
 
 ### MER-009 — Permissions model
-- Branch: `feat/mer-009-permissions` (from `feat/mer-008-session-store`)
+- Branch: `feat/mer-009-permissions`
+- Branched: (from `feat/mer-008-session-store`)
 - Status: IN REVIEW (batch 2 PR)
 - Acceptance criteria (PRD §3, §6; BUSINESS_DOMAIN §6):
   - [x] `Permission` (15 grantable keys), `OwnerCapability` (TEAM_MANAGE, PAYOUT_DETAILS_MANAGE, SALON_DELETE_REQUEST), `PermissionSet` with `has` / `anyOf` / `allOf` / `can` (owner has all), `SessionState.permissionSet()`, `PermissionTemplates` (PRD §6.3)
@@ -132,7 +141,8 @@
 - Notes: duplicate `createHttpClient` expect/actuals removed (identical); `BaseHttpClient` registered in Koin.
 
 ### MER-008 — Secure local storage of PRD §5 keys via one SessionStore
-- Branch: `feat/mer-008-session-store` (batch 2 start, from `feat/mer-007-mock-source`)
+- Branch: `feat/mer-008-session-store`
+- Branched: (batch 2 start, from `feat/mer-007-mock-source`)
 - Status: IN REVIEW (batch 2 PR)
 - Acceptance criteria (PRD §5):
   - [x] `SessionStore` holds tokens (secure store only), `member_id`, `salon_id`, member first name, `member_role`, `permissions` cache, `salon_state`, `push_enabled`, `overlay_permission_prompted`; language/theme stay in `AppSettings`
@@ -143,7 +153,8 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-2 code read (77 files): session/permissions/realtime plumbing and design-system components only; no `!!`/`println`/`runBlocking`/unexplained suppressions, every file < 300 lines, AR+EN for every new key (plurals with all Arabic quantities), tokens only; permission gating pure and tested. Deviations: detekt, the full gate and device checks run once after the backlog (rules §3.13); components are not yet on a screen (no emulator check).
 
 ### MER-007 — Mock data source
-- Branch: `feat/mer-007-mock-source` (from `feat/mer-006-api-sync`)
+- Branch: `feat/mer-007-mock-source`
+- Branched: (from `feat/mer-006-api-sync`)
 - Status: DONE (batch 1 PR)
 - Acceptance criteria (backlog MER-007; INTEGRATION.md §4):
   - [x] `DATA_SOURCE=mock|remote` (template); mock engine serves feature fixtures first, then one generated fixture per contract operation (`contractFixtures()`, 71 operations)
@@ -154,7 +165,8 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-1 code read: config/tooling and core plumbing only, no screens; contract + error catalog from the server spec; mock world covers every salon state and permission set.
 
 ### MER-006 — Contract tooling
-- Branch: `feat/mer-006-api-sync` (from `feat/mer-005-network-kernel`)
+- Branch: `feat/mer-006-api-sync`
+- Branched: (from `feat/mer-005-network-kernel`)
 - Status: DONE (batch 1 PR)
 - Acceptance criteria (backlog MER-006; same generator as CUS-009):
   - [x] `python3 scripts/api_sync.py` / `./gradlew apiSync` generates DTOs + `MerchantOperations` (71 operations) + fixtures + snapshot from `../WAB-Server/docs/api/openapi.merchant.json` into `core/data/.../contract/generated`
@@ -165,7 +177,8 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-1 code read: config/tooling and core plumbing only, no screens; contract + error catalog from the server spec; mock world covers every salon state and permission set.
 
 ### MER-005 — Network kernel reused
-- Branch: `feat/mer-005-network-kernel` (from `feat/mer-003-rules-gates`)
+- Branch: `feat/mer-005-network-kernel`
+- Branched: (from `feat/mer-003-rules-gates`)
 - Status: DONE (batch 1 PR)
 - Acceptance criteria (backlog MER-005; same as CUS-006/007, merchant token scope):
   - [x] Ktor per environment (`ApiConfig` from `AppEnvironment`), `Accept-Language` on every request, base envelope + `safeApiCall` (from the template)
@@ -176,7 +189,8 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch-1 code read: config/tooling and core plumbing only, no screens; contract + error catalog from the server spec; mock world covers every salon state and permission set.
 
 ### MER-003 — Project rules and quality gates
-- Branch: `feat/mer-003-rules-gates` (from `feat/mer-002-variants-ci`)
+- Branch: `feat/mer-003-rules-gates`
+- Branched: (from `feat/mer-002-variants-ci`)
 - Status: DONE (batch 1 PR)
 - Acceptance criteria (backlog MER-003; root rules §3):
   - [x] `WAB-Mobile-Salon/CLAUDE.md`: the customer rules adapted to the merchant app (real module map, `/merchant/v1`, `merchant` master, merchant PRD/design paths, Liquid Glass usage) + merchant specifics (permission gating, conflict-safe booking actions, overlay permission, request sound)
@@ -189,7 +203,8 @@
 - Notes: the fixes live in the merchant copy only; the customer core still carries them in its baselines (port later; KMP_TEMPLATE copies the customer core).
 
 ### MER-002 — Build variants + CI
-- Branch: `feat/mer-002-variants-ci` (batch 1 start, from `origin/merchant`)
+- Branch: `feat/mer-002-variants-ci`
+- Branched: (batch 1 start, from `origin/merchant`)
 - Status: DONE (batch 1 PR)
 - Acceptance criteria (backlog MER-002, mirror `customer-ci.yml`):
   - [x] Android dev/prod × debug/release and iOS Debug/Release-Dev/Prod (schemes iosApp-Dev/Prod) from the template; `variants` policy ok
