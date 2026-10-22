@@ -9,10 +9,10 @@ import com.fab.wab.merchant.designsystem.resources.state_action_update
 import com.fab.wab.merchant.designsystem.resources.state_retry
 import org.jetbrains.compose.resources.StringResource
 
-/** What the user can do about an error: retry the request, sign in, contact support, update, or go back. */
+/** What the user can do about an error (CUS-059 handling path): retry the request, sign in, contact support, update, or go back. */
 enum class ErrorAction { RETRY, LOGIN, CONTACT, UPDATE, DISMISS }
 
-/** The handling path of every server code; the policy check `error-codes` keeps this exhaustive. */
+/** The handling path of every server code (BUSINESS_DOMAIN §11); the policy check `error-codes` keeps this exhaustive. */
 fun errorActionOf(code: ErrorCode): ErrorAction = when (code) {
     in LOGIN_CODES -> ErrorAction.LOGIN
     in CONTACT_CODES -> ErrorAction.CONTACT
@@ -22,20 +22,26 @@ fun errorActionOf(code: ErrorCode): ErrorAction = when (code) {
 }
 
 private val LOGIN_CODES = setOf(
-    ErrorCode.UNAUTHORIZED, ErrorCode.ACCOUNT_BLOCKED, ErrorCode.PHONE_NOT_REGISTERED,
+    ErrorCode.UNAUTHORIZED, ErrorCode.ACCOUNT_BLOCKED, ErrorCode.MEMBER_INACTIVE, ErrorCode.PHONE_NOT_REGISTERED,
 )
 private val CONTACT_CODES = setOf(
-    ErrorCode.FORBIDDEN, ErrorCode.PERMISSION_DENIED, ErrorCode.INTERNAL, ErrorCode.UNKNOWN,
+    ErrorCode.FORBIDDEN, ErrorCode.PERMISSION_DENIED, ErrorCode.OWNER_REQUIRED, ErrorCode.LAST_OWNER, ErrorCode.INTERNAL, ErrorCode.UNKNOWN,
 )
 private val RETRY_CODES = setOf(
-    ErrorCode.RATE_LIMITED, ErrorCode.MAINTENANCE, ErrorCode.NOT_FOUND, ErrorCode.CONFLICT,
-    ErrorCode.OTP_EXPIRED, ErrorCode.UPLOAD_INVALID, ErrorCode.UPLOAD_TOO_LARGE,
+    ErrorCode.RATE_LIMITED, ErrorCode.MAINTENANCE, ErrorCode.NOT_FOUND, ErrorCode.CONFLICT, ErrorCode.SALON_NOT_FOUND,
+    ErrorCode.SERVICE_UNAVAILABLE, ErrorCode.SLOT_UNAVAILABLE, ErrorCode.SLOT_TAKEN, ErrorCode.DRAFT_EXPIRED, ErrorCode.PAYMENT_FAILED,
+    ErrorCode.PAYMENT_NOT_VERIFIED, ErrorCode.OTP_EXPIRED, ErrorCode.UPLOAD_INVALID, ErrorCode.UPLOAD_TOO_LARGE,
+    ErrorCode.SCHEDULE_CONFLICT,
 )
 
 /** Business-rule codes whose message is the whole handling (no button). Listed so the policy check sees every code. */
 private val DISMISS_CODES = setOf(
     ErrorCode.VALIDATION_ERROR, ErrorCode.OTP_BLOCKED, ErrorCode.OTP_INVALID, ErrorCode.PHONE_ALREADY_REGISTERED,
-    ErrorCode.CURRENT_PASSWORD_INVALID, ErrorCode.EMAIL_ALREADY_USED,
+    ErrorCode.SALON_NOT_BOOKABLE,
+    ErrorCode.SALON_CLOSED, ErrorCode.GENDER_MISMATCH, ErrorCode.TOO_MANY_COMPANIONS, ErrorCode.BRIDE_ONLY_SERVICE,
+    ErrorCode.STAFF_NOT_ELIGIBLE,
+    ErrorCode.DATE_OUT_OF_RANGE, ErrorCode.PAYMENT_OPTION_NOT_ALLOWED, ErrorCode.INVALID_TRANSITION, ErrorCode.CANCELLATION_WINDOW_PASSED,
+    ErrorCode.TOO_EARLY_TO_COMPLETE, ErrorCode.ALREADY_HANDLED, ErrorCode.CURRENT_PASSWORD_INVALID, ErrorCode.EMAIL_ALREADY_USED,
 )
 
 /** All codes are classified exactly once (checked by `ErrorTextTest`). */

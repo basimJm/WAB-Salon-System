@@ -37,7 +37,7 @@
 ## Phase 2 — Structure, contract tooling, permissions, platform facades
 | ID | Task | Branch | Needs | Status | Notes |
 |---|---|---|---|---|---|
-| MER-005 | Network kernel reused: Ktor per environment, `Accept-Language`, base envelope, error-code catalog AR/EN, refresh-token interceptor (`POST /merchant/v1/auth/refresh`) | `feat/mer-005-network-kernel` | MER-003 | TODO | Same as CUS-006/007; merchant token scope only |
+| MER-005 | Network kernel reused: Ktor per environment, `Accept-Language`, base envelope, error-code catalog AR/EN, refresh-token interceptor (`POST /merchant/v1/auth/refresh`) | `feat/mer-005-network-kernel` | MER-003 | IN PROGRESS | Same as CUS-006/007; merchant token scope only |
 | MER-006 | Contract tooling: generate DTOs from `openapi.merchant.json` (`./gradlew apiSync`), stale-check test, operation registry | `feat/mer-006-api-sync` | MER-005 | TODO | Same generator as CUS-009 |
 | MER-007 | Mock data source with fixtures per operation, `DATA_SOURCE=mock|remote`, scenario switcher in dev; fixtures cover every salon state and permission set | `feat/mer-007-mock-source` | MER-006 | TODO | `INTEGRATION.md` §4 |
 | MER-008 | Secure local storage of PRD §5 keys (tokens encrypted, member id, salon id, salon state, permissions cache, language, theme, push, overlay-permission-asked) via one `SessionStore` | `feat/mer-008-session-store` | MER-005 | TODO | PRD §5 |

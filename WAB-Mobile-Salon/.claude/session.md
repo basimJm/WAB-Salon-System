@@ -9,6 +9,17 @@
 
 ## Current task
 
+### MER-005 — Network kernel reused
+- Branch: `feat/mer-005-network-kernel` (from `feat/mer-003-rules-gates`)
+- Status: IN PROGRESS (batch 1)
+- Acceptance criteria (backlog MER-005; same as CUS-006/007, merchant token scope):
+  - [x] Ktor per environment (`ApiConfig` from `AppEnvironment`), `Accept-Language` on every request, base envelope + `safeApiCall` (from the template)
+  - [x] Refresh interceptor on `POST /merchant/v1/auth/refresh` (request `refreshToken`, rotating pair in `data`; matches `openapi.merchant.json`)
+  - [x] Error-code catalog = the 43 codes of BUSINESS_DOMAIN §11 / `openapi.merchant.json` + `UNKNOWN`, AR + EN `error_code_*`, handling actions; the error policy reads the root BUSINESS_DOMAIN (local generic copy removed)
+- Tests: `AuthEndpointsTest`, `ErrorCodeTest`, `ErrorTextTest`, existing `SafeApiCallTest` / `AuthRefreshInterceptorTest` / `TokenRefreshCoordinatorTest`; policy `all: ok`
+- Loops: 0/1
+- Review: PENDING
+
 ### MER-003 — Project rules and quality gates
 - Branch: `feat/mer-003-rules-gates` (from `feat/mer-002-variants-ci`)
 - Status: IN PROGRESS (batch 1)

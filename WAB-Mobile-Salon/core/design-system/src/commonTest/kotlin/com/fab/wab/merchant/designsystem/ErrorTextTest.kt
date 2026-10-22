@@ -26,8 +26,8 @@ class ErrorTextTest {
 
     @Test
     fun errorsMapToTheRightResource() {
-        val server = AppError.ServerError(ErrorCode.CONFLICT, statusCode = 409, message = "raw")
-        assertEquals(errorCodeResource(ErrorCode.CONFLICT), errorResource(server))
+        val server = AppError.ServerError(ErrorCode.SLOT_TAKEN, statusCode = 409, message = "raw")
+        assertEquals(errorCodeResource(ErrorCode.SLOT_TAKEN), errorResource(server))
         assertEquals(Res.string.state_offline_message, errorResource(AppError.NetworkError("x")))
         assertEquals(Res.string.state_error_message, errorResource(AppError.ParseError("x")))
         assertEquals(Res.string.state_error_message, errorResource(AppError.HttpError(502, null)))
@@ -38,8 +38,8 @@ class ErrorTextTest {
         assertEquals(ErrorCode.entries.toSet(), CLASSIFIED_CODES)
         assertEquals(ErrorAction.LOGIN, errorActionOf(ErrorCode.UNAUTHORIZED))
         assertEquals(ErrorAction.UPDATE, errorActionOf(ErrorCode.UPDATE_REQUIRED))
-        assertEquals(ErrorAction.RETRY, errorActionOf(ErrorCode.RATE_LIMITED))
-        assertEquals(ErrorAction.DISMISS, errorActionOf(ErrorCode.VALIDATION_ERROR))
+        assertEquals(ErrorAction.RETRY, errorActionOf(ErrorCode.SLOT_TAKEN))
+        assertEquals(ErrorAction.DISMISS, errorActionOf(ErrorCode.GENDER_MISMATCH))
         assertEquals(ErrorAction.RETRY, errorActionOf(AppError.NetworkError("offline")))
         assertEquals(ErrorAction.CONTACT, errorActionOf(AppError.UnknownError("boom")))
         assertEquals(Res.string.state_retry, errorActionLabel(ErrorAction.RETRY))
