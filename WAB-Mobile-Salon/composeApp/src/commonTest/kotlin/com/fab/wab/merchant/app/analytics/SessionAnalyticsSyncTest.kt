@@ -48,10 +48,14 @@ class SessionAnalyticsSyncTest {
         assertEquals("c1", tracker.lastUserId)
         assertEquals("c1", crashReporter.userId)
         assertEquals("registered", tracker.properties[AnalyticsKeys.USER_TYPE])
+        assertEquals("s1", tracker.properties[AnalyticsKeys.SALON_ID])
+        assertEquals("OWNER", tracker.properties[AnalyticsKeys.ROLE])
 
         session.value = SessionState.Guest
         assertNull(tracker.lastUserId)
         assertNull(crashReporter.userId)
+        assertNull(tracker.properties[AnalyticsKeys.SALON_ID])
+        assertNull(tracker.properties[AnalyticsKeys.ROLE])
         job.cancel()
     }
 }

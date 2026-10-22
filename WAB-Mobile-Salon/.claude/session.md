@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-010 — Analytics tracker + Crashlytics facade
+- Branch: `feat/mer-010-analytics`
+- Branched: (batch 4 start, from `feat/mer-019-splash-config`)
+- Status: IN PROGRESS (batch 4)
+- Acceptance criteria (PRD §14):
+  - [x] Common fields on every event: user type, language, app version, platform, environment (template) + `app = MERCHANT`, and while signed in `member_id`, `salon_id`, `member_role` (`AnalyticsContext`, `AppAnalyticsContextProvider`)
+  - [x] Firebase user id = member id on sign-in, cleared on sign-out, on analytics and Crashlytics; `salon_id` / `member_role` user properties set and cleared with it (`SessionAnalyticsSync`)
+  - [x] App-instance id for the backend: `AppInstanceIdProvider` port (core/firebase, template) — sent by login (MER-020/021)
+- Tests: `AppAnalyticsContextProviderTest` (+1), `SessionAnalyticsSyncTest` (extended); core/analytics + composeApp host tests green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATION: depends on MER-004 (owner Firebase files, PENDING); the code path is complete and runs on the no-op bridges with the placeholder configs; real events and crash reports are verified once the owner adds the files.
+
 ### MER-019 — Splash + config + system screens
 - Branch: `feat/mer-019-splash-config`
 - Branched: (from `feat/mer-018-calendar-grid`; backlog name `feat/mer-019-config-system`)

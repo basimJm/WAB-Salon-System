@@ -14,7 +14,8 @@ import kotlinx.coroutines.flow.onEach
 
 /**
  * Keeps the vendor user id and user properties in step with the session: set on login / registration,
- * cleared on logout, on analytics and crash reports alike. Only the id leaves the device, never the name.
+ * cleared on logout, on analytics and crash reports alike; salon id and role become user properties (PRD §14).
+ * Only ids leave the device, never the name.
  */
 class SessionAnalyticsSync(
     private val session: Flow<SessionState>,
@@ -25,10 +26,12 @@ class SessionAnalyticsSync(
         session.distinctUntilChanged().onEach(::apply).launchIn(scope)
 
     private fun apply(state: SessionState) {
-        val userId = (state as? SessionState.SignedIn)?.member?.id
-        tracker.setUserId(userId)
-        crashReporter.setUserId(userId)
+        val member = (state as? SessionState.SignedIn)?.member
+        tracker.setUserId(member?.id)
+        crashReporter.setUserId(member?.id)
         val userType = if (state.isSignedIn) AnalyticsUserType.REGISTERED else AnalyticsUserType.GUEST
         tracker.setUserProperty(AnalyticsKeys.USER_TYPE, userType.value)
+        tracker.setUserProperty(AnalyticsKeys.SALON_ID, member?.salonId)
+        tracker.setUserProperty(AnalyticsKeys.ROLE, member?.role?.name)
     }
 }
