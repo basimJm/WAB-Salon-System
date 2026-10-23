@@ -16,7 +16,10 @@ class TeamTest {
         val draft = MemberDraft("Rana", "Ali")
         assertTrue(memberErrors(draft, isNew = false, phoneValid = false).isEmpty())
         assertEquals(setOf(MemberField.PHONE), memberErrors(draft, isNew = true, phoneValid = false))
-        assertEquals(setOf(MemberField.FIRST_NAME, MemberField.LAST_NAME), memberErrors(MemberDraft(" ", "x".repeat(MemberLimits.NAME_MAX + 1)), false, true))
+        assertEquals(
+            setOf(MemberField.FIRST_NAME, MemberField.LAST_NAME),
+            memberErrors(MemberDraft(" ", "x".repeat(MemberLimits.NAME_MAX + 1)), false, true),
+        )
         assertEquals("Rana Ali", member(MemberRole.EMPLOYEE).fullName)
     }
 

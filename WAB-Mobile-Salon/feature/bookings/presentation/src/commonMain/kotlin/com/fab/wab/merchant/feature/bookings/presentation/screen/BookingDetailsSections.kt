@@ -61,7 +61,11 @@ private fun PersonBlock(person: BookingPerson) {
     val spacing = AppTheme.spacing
     Column(verticalArrangement = Arrangement.spacedBy(spacing.space4), modifier = Modifier.padding(vertical = spacing.space4)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(spacing.space6)) {
-            AppText(text = person.name, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
+            AppText(
+                text = person.name,
+                style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.weight(1f),
+            )
             if (person.isBride) AppBrideBadge()
             AppText(text = jodText(person.subtotal), style = AppTheme.typography.labelLarge)
         }

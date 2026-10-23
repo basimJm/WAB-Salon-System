@@ -28,7 +28,7 @@ enum class MerchantTab(internal val label: StringResource, internal val icon: ()
     fun isVisibleTo(permissions: PermissionSet): Boolean = when (this) {
         HOME -> permissions.has(Permission.DASHBOARD_VIEW)
         BOOKINGS, CALENDAR -> permissions.anyOf(Permission.BOOKINGS_VIEW_ALL, Permission.BOOKINGS_VIEW_OWN)
-        SALON -> permissions.anyOf(*SALON_MANAGEMENT) || permissions.can(OwnerCapability.TEAM_MANAGE)
+        SALON -> SALON_MANAGEMENT.any(permissions::has) || permissions.can(OwnerCapability.TEAM_MANAGE)
         MORE -> true
     }
 

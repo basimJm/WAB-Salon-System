@@ -129,7 +129,11 @@ internal fun OwnerFields(state: UiState, onAction: (UiAction) -> Unit) {
 internal fun TermsRow(state: UiState, onAction: (UiAction) -> Unit) {
     Column {
         Row(
-            modifier = Modifier.toggleable(value = state.input.termsAccepted, role = Role.Checkbox, onValueChange = { onAction(UiAction.OnTermsToggle) }),
+            modifier = Modifier.toggleable(
+                value = state.input.termsAccepted,
+                role = Role.Checkbox,
+                onValueChange = { onAction(UiAction.OnTermsToggle) },
+            ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AppCheckbox(checked = state.input.termsAccepted, onCheckedChange = { onAction(UiAction.OnTermsToggle) })
@@ -142,7 +146,11 @@ internal fun TermsRow(state: UiState, onAction: (UiAction) -> Unit) {
             modifier = Modifier.toggleable(value = false, role = Role.Button, onValueChange = { onAction(UiAction.OnTermsClick) }),
         )
         if (state.errorOf(RegistrationField.TERMS)) {
-            AppText(text = stringResource(Res.string.reg_terms_error), style = AppTheme.typography.bodySmall, color = AppTheme.colors.danger)
+            AppText(
+                text = stringResource(Res.string.reg_terms_error),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.danger,
+            )
         }
     }
 }

@@ -20,14 +20,20 @@ import kotlinx.datetime.LocalDate
 private const val UNREADABLE_LEAVE = "leave dates not readable"
 private const val FIRST_PAGE = 1
 
-private fun Leave?.asResult(): AppResult<Leave> = this?.let { AppResult.Success(it) } ?: AppResult.Error(AppError.UnknownError(UNREADABLE_LEAVE))
+private fun Leave?.asResult(): AppResult<Leave> = this?.let {
+    AppResult.Success(it)
+} ?: AppResult.Error(AppError.UnknownError(UNREADABLE_LEAVE))
 
 /** Saving a staff profile refreshes the shared salon (completeness `STAFF`). */
 class StaffRepositoryImpl(private val api: StaffApi, private val salon: SalonRepository) : StaffRepository {
-    override suspend fun profile(memberId: String): AppResult<StaffProfile> = safeApiCall { api.profile(memberId) }.mapSuccess { it.data.toDomain() }
+    override suspend fun profile(memberId: String): AppResult<StaffProfile> = safeApiCall {
+        api.profile(memberId)
+    }.mapSuccess { it.data.toDomain() }
 
     override suspend fun save(memberId: String, draft: StaffDraft): AppResult<StaffProfile> =
-        safeApiCall { api.save(memberId, draft.toBody()) }.mapSuccess { it.data.toDomain() }.also { if (it is AppResult.Success) salon.refresh() }
+        safeApiCall {
+            api.save(memberId, draft.toBody())
+        }.mapSuccess { it.data.toDomain() }.also { if (it is AppResult.Success) salon.refresh() }
 
     override suspend fun leaves(memberId: String): AppResult<List<Leave>> =
         safeApiCall { api.leaves(memberId) }.mapSuccess { response ->
@@ -35,7 +41,9 @@ class StaffRepositoryImpl(private val api: StaffApi, private val salon: SalonRep
         }
 
     override suspend fun addLeave(memberId: String, from: LocalDate, to: LocalDate, note: String): AppResult<Leave> =
-        when (val result = safeApiCall { api.addLeave(memberId, PostTeamMembersByIdLeavesBody(from.toString(), to.toString(), note.trim().ifEmpty { null })) }) {
+        when (val result = safeApiCall {
+            api.addLeave(memberId, PostTeamMembersByIdLeavesBody(from.toString(), to.toString(), note.trim().ifEmpty { null }))
+        }) {
             is AppResult.Success -> result.data.data.let { leave(it.id, it.from, it.to, it.note, it.editable) }.asResult()
             is AppResult.Error -> result
             AppResult.Loading -> AppResult.Loading
@@ -48,7 +56,10 @@ class StaffRepositoryImpl(private val api: StaffApi, private val salon: SalonRep
             AppResult.Loading -> AppResult.Loading
         }
 
-    override suspend fun deleteLeave(memberId: String, leaveId: String): AppResult<Unit> = safeApiCall { api.deleteLeave(memberId, leaveId) }.mapSuccess { }
+    override suspend fun deleteLeave(
+        memberId: String,
+        leaveId: String,
+    ): AppResult<Unit> = safeApiCall { api.deleteLeave(memberId, leaveId) }.mapSuccess { }
 
     override suspend fun services(): AppResult<List<ServiceOption>> {
         val all = mutableListOf<ServiceOption>()
@@ -72,7 +83,11 @@ class StaffRepositoryImpl(private val api: StaffApi, private val salon: SalonRep
                 val weekday = DAY_CODES[day.day.uppercase()] ?: return@mapNotNull null
                 val open = minutesOf(day.open)
                 val close = minutesOf(day.close)
-                weekday to if (day.isOff || open == null || close == null || close <= open) null else OpenHours(open, close)
+                weekday to if (day.isOff) null else openHoursOf(open, close)
             }.toMap()
         }
 }
+
+/** Open and close minutes of a salon day; null when either is missing or the day would be empty. */
+private fun openHoursOf(open: Int?, close: Int?): OpenHours? =
+    if (open != null && close != null && close > open) OpenHours(open, close) else null

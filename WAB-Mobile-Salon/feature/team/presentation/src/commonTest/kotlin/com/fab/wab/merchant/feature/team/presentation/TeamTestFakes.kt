@@ -30,7 +30,9 @@ internal class FakeTeam : TeamRepository {
     val calls = mutableListOf<String>()
     override suspend fun members(): AppResult<List<TeamMember>> = AppResult.Success(list)
     override fun cached(id: String): TeamMember? = list.firstOrNull { it.id == id }
-    override suspend fun member(id: String): AppResult<TeamMember> = cached(id)?.let { AppResult.Success(it) } ?: AppResult.Error(AppError.NetworkError("x"))
+    override suspend fun member(id: String): AppResult<TeamMember> = cached(id)?.let {
+        AppResult.Success(it)
+    } ?: AppResult.Error(AppError.NetworkError("x"))
     override suspend fun create(draft: MemberDraft, permissions: Set<Permission>?): AppResult<TeamMember> {
         created += draft
         return AppResult.Success(teamMember("new"))
@@ -50,7 +52,9 @@ internal class FakeTeam : TeamRepository {
 }
 
 internal fun scheduleConflict(vararg ids: String) =
-    AppResult.Error(AppError.ServerError(ErrorCode.SCHEDULE_CONFLICT, HTTP_CONFLICT, null, ids.map { FieldError(it, "SCHEDULE_CONFLICT", "") }))
+    AppResult.Error(
+        AppError.ServerError(ErrorCode.SCHEDULE_CONFLICT, HTTP_CONFLICT, null, ids.map { FieldError(it, "SCHEDULE_CONFLICT", "") }),
+    )
 
 private const val HTTP_CONFLICT = 409
 
@@ -73,6 +77,14 @@ internal class FakeLocations : LocationsRepository {
 internal class FakeUploads : UploadsRepository {
     override suspend fun presign(purpose: UploadPurpose, contentType: String, size: Long): AppResult<PresignedUpload> =
         AppResult.Success(PresignedUpload("${purpose.name}-key", "u", "PUT", emptyMap(), size))
-    override suspend fun upload(target: PresignedUpload, bytes: ByteArray, contentType: String, onProgress: (Float) -> Unit): AppResult<Unit> = AppResult.Success(Unit)
-    override suspend fun confirm(purpose: UploadPurpose, key: String): AppResult<ConfirmedUpload> = AppResult.Success(ConfirmedUpload(key, "https://cdn/$key"))
+    override suspend fun upload(
+        target: PresignedUpload,
+        bytes: ByteArray,
+        contentType: String,
+        onProgress: (Float) -> Unit,
+    ): AppResult<Unit> = AppResult.Success(Unit)
+    override suspend fun confirm(
+        purpose: UploadPurpose,
+        key: String,
+    ): AppResult<ConfirmedUpload> = AppResult.Success(ConfirmedUpload(key, "https://cdn/$key"))
 }

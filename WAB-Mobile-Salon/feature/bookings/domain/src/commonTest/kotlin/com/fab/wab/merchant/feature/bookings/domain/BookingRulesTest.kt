@@ -35,7 +35,12 @@ class BookingRulesTest {
     @Test
     fun filterCountsEachActiveCriterionOnce() {
         assertEquals(0, BookingFilter().activeCount)
-        val filter = BookingFilter(from = LocalDate(2026, 10, 1), to = LocalDate(2026, 10, 7), statuses = setOf(BookingStatus.APPROVED), brideOnly = true)
+        val filter = BookingFilter(
+            from = LocalDate(2026, 10, 1),
+            to = LocalDate(2026, 10, 7),
+            statuses = setOf(BookingStatus.APPROVED),
+            brideOnly = true,
+        )
         assertEquals(3, filter.activeCount)
     }
 }

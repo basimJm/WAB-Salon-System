@@ -47,23 +47,37 @@ private class FakeStaff : StaffRepository {
     override suspend fun profile(memberId: String): AppResult<StaffProfile> = AppResult.Success(profile)
     override suspend fun save(memberId: String, draft: StaffDraft): AppResult<StaffProfile> {
         saved += draft
-        return saveResults.removeFirstOrNull() ?: AppResult.Success(profile.copy(serviceIds = draft.serviceIds, workingDays = draft.workingDays, providesServices = draft.providesServices))
+        return saveResults.removeFirstOrNull() ?: AppResult.Success(
+            profile.copy(serviceIds = draft.serviceIds, workingDays = draft.workingDays, providesServices = draft.providesServices),
+        )
     }
-    override suspend fun leaves(memberId: String): AppResult<List<Leave>> = AppResult.Success(listOf(Leave("l1", LocalDate(2026, 11, 1), LocalDate(2026, 11, 2), null, true)))
+    override suspend fun leaves(memberId: String): AppResult<List<Leave>> = AppResult.Success(
+        listOf(Leave("l1", LocalDate(2026, 11, 1), LocalDate(2026, 11, 2), null, true)),
+    )
     override suspend fun addLeave(memberId: String, from: LocalDate, to: LocalDate, note: String): AppResult<Leave> =
         leaveResults.removeFirstOrNull() ?: AppResult.Success(Leave("l2", from, to, note, true))
     override suspend fun updateLeave(memberId: String, leaveId: String, from: LocalDate, to: LocalDate, note: String): AppResult<Leave> =
         AppResult.Success(Leave(leaveId, from, to, note, true))
-    override suspend fun deleteLeave(memberId: String, leaveId: String): AppResult<Unit> = AppResult.Success(Unit).also { deleted += leaveId }
-    override suspend fun services(): AppResult<List<ServiceOption>> = AppResult.Success(listOf(ServiceOption("s1", "Cut", true), ServiceOption("s2", "Color", true)))
+    override suspend fun deleteLeave(
+        memberId: String,
+        leaveId: String,
+    ): AppResult<Unit> = AppResult.Success(Unit).also { deleted += leaveId }
+    override suspend fun services(): AppResult<List<ServiceOption>> = AppResult.Success(
+        listOf(ServiceOption("s1", "Cut", true), ServiceOption("s2", "Color", true)),
+    )
     override suspend fun salonDays(): AppResult<Map<DayOfWeek, OpenHours?>> =
-        AppResult.Success(mapOf(DayOfWeek.SATURDAY to OpenHours(540, 1_260), DayOfWeek.SUNDAY to OpenHours(600, 1_200), DayOfWeek.FRIDAY to null))
+        AppResult.Success(
+            mapOf(DayOfWeek.SATURDAY to OpenHours(540, 1_260), DayOfWeek.SUNDAY to OpenHours(600, 1_200), DayOfWeek.FRIDAY to null),
+        )
 }
 
 private class FakeSalon : SalonRepository {
     override val current: StateFlow<SalonProfile?> = MutableStateFlow(
-        SalonProfile("s", "Lina", SalonGenderType.FEMALE, SalonState.LIVE, null, null, null, location = null, locationText = null, cityId = null,
-            areaId = null, phone = null, whatsapp = null, missing = emptySet(), ratingAverage = 0.0, ratingCount = 0),
+        SalonProfile(
+            "s", "Lina", SalonGenderType.FEMALE, SalonState.LIVE, null, null, null,
+            location = null, locationText = null, cityId = null, areaId = null, phone = null, whatsapp = null,
+            missing = emptySet(), ratingAverage = 0.0, ratingCount = 0,
+        ),
     )
     override suspend fun refresh(): AppResult<SalonProfile> = AppResult.Error(AppError.NetworkError("x"))
 }

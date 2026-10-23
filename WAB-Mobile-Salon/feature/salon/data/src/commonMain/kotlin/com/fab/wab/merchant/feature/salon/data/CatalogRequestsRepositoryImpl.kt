@@ -52,7 +52,9 @@ class CatalogRequestsRepositoryImpl(private val api: CatalogRequestsApi) : Catal
 
     override suspend fun create(name: String, description: String, imageKey: String?): AppResult<CatalogRequest> =
         when (val result = safeApiCall { api.create(PostCatalogRequestsBody(name.trim(), description.trim(), imageKey)) }) {
-            is AppResult.Success -> result.data.data.toDomain()?.let { AppResult.Success(it) } ?: AppResult.Error(AppError.UnknownError(UNREADABLE_REQUEST))
+            is AppResult.Success -> result.data.data.toDomain()?.let {
+                AppResult.Success(it)
+            } ?: AppResult.Error(AppError.UnknownError(UNREADABLE_REQUEST))
             is AppResult.Error -> result
             AppResult.Loading -> AppResult.Loading
         }

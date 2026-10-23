@@ -102,7 +102,10 @@ fun ServicesScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> U
                                 modifier = Modifier.padding(spacing.space16),
                             )
                         }
-                        LazyColumn(contentPadding = PaddingValues(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
+                        LazyColumn(
+                            contentPadding = PaddingValues(spacing.space16),
+                            verticalArrangement = Arrangement.spacedBy(spacing.space10),
+                        ) {
                             items(state.shown, key = { it.id }, contentType = { SalonService::class }) { service ->
                                 ServiceRow(service, toggling = service.id in state.toggling, onAction = onAction)
                             }
@@ -134,7 +137,11 @@ private fun ServiceRow(service: SalonService, toggling: Boolean, onAction: (UiAc
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.space4)) {
                 AppText(text = service.name, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
                 AppText(
-                    text = stringResource(Res.string.services_meta, jodText(service.price), stringResource(Res.string.services_duration, service.durationMinutes)),
+                    text = stringResource(
+                        Res.string.services_meta,
+                        jodText(service.price),
+                        stringResource(Res.string.services_duration, service.durationMinutes),
+                    ),
                     style = AppTheme.typography.bodySmall,
                     color = AppTheme.colors.muted,
                 )

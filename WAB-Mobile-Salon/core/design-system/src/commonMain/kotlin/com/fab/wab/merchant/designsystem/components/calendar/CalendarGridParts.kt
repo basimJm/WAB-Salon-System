@@ -144,7 +144,11 @@ internal fun BoxScope.BlockBox(block: CalendarBlockUi, window: TimeWindow, hourH
             .drawBehind {
                 if (outline != Color.Unspecified) {
                     val dash = if (style.dashed && !block.isBride) PathEffect.dashPathEffect(floatArrayOf(DASH_ON, DASH_OFF)) else null
-                    drawRoundRect(outline, style = Stroke(width = borderWidth.toPx(), pathEffect = dash), cornerRadius = CornerRadius(borderWidth.toPx() * DASH_OFF))
+                    drawRoundRect(
+                        outline,
+                        style = Stroke(width = borderWidth.toPx(), pathEffect = dash),
+                        cornerRadius = CornerRadius(borderWidth.toPx() * DASH_OFF),
+                    )
                 }
             }
             .then(if (onClick != null) Modifier.glassClickable(press, role = Role.Button, onClick = onClick) else Modifier)
@@ -152,7 +156,12 @@ internal fun BoxScope.BlockBox(block: CalendarBlockUi, window: TimeWindow, hourH
         horizontalAlignment = if (compact) Alignment.CenterHorizontally else Alignment.Start,
     ) {
         if (compact) {
-            if (block.isBride) Icon(AppIcons.Crown, contentDescription = null, tint = colors.brideEnd, modifier = Modifier.size(AppTheme.sizes.brideIcon))
+            if (block.isBride) Icon(
+                AppIcons.Crown,
+                contentDescription = null,
+                tint = colors.brideEnd,
+                modifier = Modifier.size(AppTheme.sizes.brideIcon),
+            )
         } else {
             BlockText(block, style.content)
         }
@@ -162,8 +171,18 @@ internal fun BoxScope.BlockBox(block: CalendarBlockUi, window: TimeWindow, hourH
 @Composable
 private fun BlockText(block: CalendarBlockUi, color: Color) {
     Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space2), verticalAlignment = Alignment.CenterVertically) {
-        if (block.isBride) Icon(AppIcons.Crown, contentDescription = null, tint = AppTheme.colors.brideEnd, modifier = Modifier.size(AppTheme.sizes.brideIcon))
-        AppText(text = block.customerName, style = AppTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = color, maxLines = 1)
+        if (block.isBride) Icon(
+            AppIcons.Crown,
+            contentDescription = null,
+            tint = AppTheme.colors.brideEnd,
+            modifier = Modifier.size(AppTheme.sizes.brideIcon),
+        )
+        AppText(
+            text = block.customerName,
+            style = AppTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = color,
+            maxLines = 1,
+        )
     }
     AppText(text = block.servicesText, style = AppTheme.typography.labelSmall, color = color, maxLines = 1)
     AppText(text = block.timeText, style = AppTheme.typography.labelSmall, color = color, maxLines = 1)

@@ -23,4 +23,6 @@ fun actionFailureOf(error: AppError): ActionFailure = when ((error as? AppError.
 }
 
 /** Unwraps an action result into its failure kind (null on success). */
-fun AppResult<Unit>.failure(): Pair<ActionFailure, AppError>? = (this as? AppResult.Error)?.let { actionFailureOf(it.appError) to it.appError }
+fun AppResult<Unit>.failure(): Pair<ActionFailure, AppError>? = (this as? AppResult.Error)?.let {
+    actionFailureOf(it.appError) to it.appError
+}

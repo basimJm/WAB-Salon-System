@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-057 — Accessibility and RTL QA pass (+ end-of-backlog gate)
+- Branch: `feat/mer-057-a11y-rtl-qa`
+- Branched: (from `feat/mer-053-deep-link-register`)
+- Status: IN PROGRESS (final batch)
+- Acceptance criteria (rules §3.13 end of backlog; backlog MER-057):
+  - [x] Template `feature/sample` removed (module, Koin, navigation graph, `Screen.SampleDetails`, compose-app module list); CLAUDE.md reference = `feature/bookings`
+  - [x] detekt clean with the empty baseline (was 435 findings across batches 2–9): long lines wrapped (string-aware script, then hand-fixed odd splits), every complex `handle` split into named sub-handlers (form / dialogs / …), shared mapper fields as private raw data classes, complex conditions extracted, Compose rules (modifier defaults and order, present-tense lambdas, single emitter, `rememberUpdatedState` in the load-more effect), `StaffSections.kt` split (< 300 lines)
+  - [ ] Full gate `scripts/ci/run_local_checks.sh` green (policy, detekt, unit tests, 4 Android variants + lint, 4 iOS configurations, K/N tests)
+  - [ ] Emulator + simulator journey: AR + EN, light + dark, phone + tablet/landscape, font 200 %, TalkBack / VoiceOver labels, 48 dp targets
+- Tests: `PermissionCopyTest` (1); batch run: policy ok, 84 policy-script tests, 466 host tests 0 failures, `assembleDevDebug` green
+- Loops: 0/1
+- Review: PENDING
+- Notes: —
+
 ### MER-053 — Deep link `/register` + App Links checklist
 - Branch: `feat/mer-053-deep-link-register`
 - Branched: (from `feat/mer-051-analytics-events`)

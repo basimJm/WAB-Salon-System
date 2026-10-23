@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,15 +73,26 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun FinanceScreen(state: UiState, bankReady: Boolean, onAction: (UiAction) -> Unit, onBack: () -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(FinanceAnalytics.SCREEN_FINANCE)
+    val currentOnAction by rememberUpdatedState(onAction)
     val spacing = AppTheme.spacing
     AppScreen(modifier = modifier, topBar = { AppTopBar(title = stringResource(Res.string.finance_title), onBack = onBack) }) { padding ->
-        AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }, modifier = Modifier.padding(padding)) {
+        AppPullToRefresh(
+            refreshing = state.refreshing,
+            onRefresh = { onAction(UiAction.OnRefresh) },
+            modifier = Modifier.padding(padding),
+        ) {
             LazyColumn(contentPadding = PaddingValues(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
                 item(key = HEADER) { Header(state, bankReady, onAction) }
                 when {
-                    state.loading -> item(key = LOADING) { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { AppLoadingIndicator() } }
-                    state.error != null -> item(key = ERROR) { AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error) }
-                    state.isEmpty -> item(key = EMPTY) { AppEmptyState(title = stringResource(emptyTitle(state.tab)), message = stringResource(Res.string.empty_body)) }
+                    state.loading -> item(key = LOADING) {
+                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
+                    }
+                    state.error != null -> item(key = ERROR) {
+                        AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
+                    }
+                    state.isEmpty -> item(key = EMPTY) {
+                        AppEmptyState(title = stringResource(emptyTitle(state.tab)), message = stringResource(Res.string.empty_body))
+                    }
                     state.tab == FinanceTab.TRANSACTIONS -> items(state.transactions, key = { it.id }) { TransactionRow(it, onAction) }
                     state.tab == FinanceTab.REFUNDS -> items(state.refunds, key = { it.id }) { RefundRow(it, onAction) }
                     else -> items(state.payouts, key = { it.id }) { PayoutRow(it) }
@@ -88,7 +100,11 @@ fun FinanceScreen(state: UiState, bankReady: Boolean, onAction: (UiAction) -> Un
                 if (state.hasMore && !state.loading) {
                     // The footer appearing at the end of the list asks for the next page (infinite scroll).
                     item(key = MORE) {
-                        LaunchedEffect(state.transactions.size, state.refunds.size, state.payouts.size) { onAction(UiAction.OnLoadMore) }
+                        LaunchedEffect(
+                            state.transactions.size,
+                            state.refunds.size,
+                            state.payouts.size,
+                        ) { currentOnAction(UiAction.OnLoadMore) }
                         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
                     }
                 }
@@ -110,10 +126,20 @@ private fun Header(state: UiState, bankReady: Boolean, onAction: (UiAction) -> U
         BalanceCard(state)
         AppText(text = stringResource(Res.string.finance_info), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
         if (bankReady && state.canManageBank) {
-            AppButton(stringResource(Res.string.finance_bank), { onAction(UiAction.OnBank) }, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined, leadingIcon = AppIcons.Business)
+            AppButton(
+                stringResource(Res.string.finance_bank),
+                { onAction(UiAction.OnBank) },
+                Modifier.fillMaxWidth(),
+                kind = ButtonKind.Outlined,
+                leadingIcon = AppIcons.Business,
+            )
         }
         AppSegmentedTabs(
-            tabs = listOf(stringResource(Res.string.tab_transactions), stringResource(Res.string.tab_refunds), stringResource(Res.string.tab_payouts)),
+            tabs = listOf(
+                stringResource(Res.string.tab_transactions),
+                stringResource(Res.string.tab_refunds),
+                stringResource(Res.string.tab_payouts),
+            ),
             selectedIndex = state.tab.ordinal,
             onSelect = { onAction(UiAction.OnTab(FinanceTab.entries[it])) },
         )
@@ -126,8 +152,15 @@ private fun BalanceCard(state: UiState) {
     val balance = state.balance
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
-            AppText(text = stringResource(Res.string.finance_pending), style = AppTheme.typography.labelLarge, color = AppTheme.colors.muted)
-            AppText(text = balance?.let { jodText(it.dueNow) }.orEmpty(), style = AppTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold))
+            AppText(
+                text = stringResource(Res.string.finance_pending),
+                style = AppTheme.typography.labelLarge,
+                color = AppTheme.colors.muted,
+            )
+            AppText(
+                text = balance?.let { jodText(it.dueNow) }.orEmpty(),
+                style = AppTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            )
             val last = balance?.lastPayoutNet
             val date = balance?.lastPayoutDate?.let { TimeFormat.isoDateText(it) }
             val text = when {
@@ -153,8 +186,8 @@ private fun RangeFilter(state: UiState, onAction: (UiAction) -> Unit) {
         }
         if (state.range == FinanceRange.CUSTOM) {
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.space10)) {
-                DateChip(stringResource(Res.string.range_from), state.from, Modifier.weight(1f)) { picking = true }
-                DateChip(stringResource(Res.string.range_to), state.to, Modifier.weight(1f)) { picking = false }
+                DateChip(stringResource(Res.string.range_from), state.from, onClick = { picking = true }, modifier = Modifier.weight(1f))
+                DateChip(stringResource(Res.string.range_to), state.to, onClick = { picking = false }, modifier = Modifier.weight(1f))
             }
         }
     }
@@ -171,10 +204,16 @@ private fun RangeFilter(state: UiState, onAction: (UiAction) -> Unit) {
 }
 
 @Composable
-private fun DateChip(label: String, date: LocalDate, modifier: Modifier, onClick: () -> Unit) {
+private fun DateChip(label: String, date: LocalDate, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
         AppText(text = label, style = AppTheme.typography.labelMedium, color = AppTheme.colors.muted)
-        AppButton(TimeFormat.isoDateText(date.toString()).orEmpty(), onClick, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined, leadingIcon = AppIcons.Calendar)
+        AppButton(
+            TimeFormat.isoDateText(date.toString()).orEmpty(),
+            onClick,
+            Modifier.fillMaxWidth(),
+            kind = ButtonKind.Outlined,
+            leadingIcon = AppIcons.Calendar,
+        )
     }
 }
 

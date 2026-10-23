@@ -49,11 +49,18 @@ class CatalogPickerViewModel(
             updateState { copy(loading = true, error = null) }
             val type = gender ?: salonGender() ?: return@launch
             gender = type
-            (services.services() as? AppResult.Success)?.let { mine -> updateState { copy(added = mine.data.associate { it.catalogId to it.id }) } }
+            (services.services() as? AppResult.Success)?.let { mine ->
+                updateState { copy(added = mine.data.associate { it.catalogId to it.id }) }
+            }
             page = FIRST_PAGE
             when (val result = services.catalog(type, page)) {
                 is AppResult.Success -> updateState {
-                    copy(loading = false, womenSalon = type == SalonGenderType.FEMALE, items = result.data, hasMore = result.data.size >= ServiceLimits.PAGE_SIZE)
+                    copy(
+                        loading = false,
+                        womenSalon = type == SalonGenderType.FEMALE,
+                        items = result.data,
+                        hasMore = result.data.size >= ServiceLimits.PAGE_SIZE,
+                    )
                 }
                 is AppResult.Error -> fail(result.appError)
                 AppResult.Loading -> Unit
@@ -87,7 +94,13 @@ class CatalogPickerViewModel(
             when (val result = services.catalog(type, page + 1)) {
                 is AppResult.Success -> {
                     page += 1
-                    updateState { copy(loadingMore = false, items = (items + result.data).distinctBy { it.id }, hasMore = result.data.size >= ServiceLimits.PAGE_SIZE) }
+                    updateState {
+                        copy(
+                            loadingMore = false,
+                            items = (items + result.data).distinctBy { it.id },
+                            hasMore = result.data.size >= ServiceLimits.PAGE_SIZE,
+                        )
+                    }
                 }
                 is AppResult.Error -> {
                     updateState { copy(loadingMore = false) }

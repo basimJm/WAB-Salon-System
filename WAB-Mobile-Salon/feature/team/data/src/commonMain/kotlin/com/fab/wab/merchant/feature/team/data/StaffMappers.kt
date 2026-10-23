@@ -44,7 +44,10 @@ internal fun minutesOf(hhmm: String?): Int? {
 }
 
 internal fun hhmmOf(minutes: Int): String =
-    (minutes / MINUTES_PER_HOUR).toString().padStart(TIME_PAD, ZERO) + TIME_SEPARATOR + (minutes % MINUTES_PER_HOUR).toString().padStart(TIME_PAD, ZERO)
+    (minutes / MINUTES_PER_HOUR).toString().padStart(
+        TIME_PAD,
+        ZERO,
+    ) + TIME_SEPARATOR + (minutes % MINUTES_PER_HOUR).toString().padStart(TIME_PAD, ZERO)
 
 internal fun dateOf(value: String): LocalDate? = runCatching { LocalDate.parse(value.trim().take(ISO_DATE_LENGTH)) }.getOrNull()
 
@@ -55,20 +58,34 @@ private fun day(code: String, start: String?, end: String?): StaffDay? {
     return if (from != null && to != null) StaffDay(weekday, from, to) else StaffDay(weekday)
 }
 
-private fun profile(
-    memberId: String, provides: Boolean, bio: String?, years: Double?, serviceIds: List<String>, bride: Boolean,
-    days: List<StaffDay>, avg: Double, count: Double, customers: Double,
-) = StaffProfile(memberId, provides, bio.orEmpty(), years?.toInt(), serviceIds.toSet(), bride, days, avg, count.toInt(), customers.toInt())
-
-fun GetTeamMembersByIdStaffData.toDomain() = profile(
-    memberId, providesServices, bio, yearsOfExperience, serviceIds, brideQualified,
-    workingDays.mapNotNull { day(it.day, it.start, it.end) }, rating.avg, rating.count, customersCount,
+/** The fields both staff-profile DTOs share, before parsing. */
+private data class RawStaffProfile(
+    val memberId: String, val provides: Boolean, val bio: String?, val years: Double?, val serviceIds: List<String>, val bride: Boolean,
+    val days: List<StaffDay>, val avg: Double, val count: Double, val customers: Double,
 )
 
-fun PutTeamMembersByIdStaffData.toDomain() = profile(
+private fun RawStaffProfile.toDomain() = StaffProfile(
+    memberId,
+    provides,
+    bio.orEmpty(),
+    years?.toInt(),
+    serviceIds.toSet(),
+    bride,
+    days,
+    avg,
+    count.toInt(),
+    customers.toInt(),
+)
+
+fun GetTeamMembersByIdStaffData.toDomain() = RawStaffProfile(
     memberId, providesServices, bio, yearsOfExperience, serviceIds, brideQualified,
     workingDays.mapNotNull { day(it.day, it.start, it.end) }, rating.avg, rating.count, customersCount,
-)
+).toDomain()
+
+fun PutTeamMembersByIdStaffData.toDomain() = RawStaffProfile(
+    memberId, providesServices, bio, yearsOfExperience, serviceIds, brideQualified,
+    workingDays.mapNotNull { day(it.day, it.start, it.end) }, rating.avg, rating.count, customersCount,
+).toDomain()
 
 /** PUT replaces the profile: an empty bio clears it; days without custom hours follow the salon. */
 fun StaffDraft.toBody(): PutTeamMembersByIdStaffBody = PutTeamMembersByIdStaffBody(

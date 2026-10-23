@@ -17,7 +17,11 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlin.time.Clock
 
 /** Socket events after which a bookings screen reloads (BUSINESS_DOMAIN §7, permission-filtered by the rooms). */
-internal val BOOKING_CHANGE_EVENTS = setOf(RealtimeEvents.BOOKING_REQUESTED, RealtimeEvents.BOOKING_UPDATED, RealtimeEvents.BOOKING_ASSIGNED)
+internal val BOOKING_CHANGE_EVENTS = setOf(
+    RealtimeEvents.BOOKING_REQUESTED,
+    RealtimeEvents.BOOKING_UPDATED,
+    RealtimeEvents.BOOKING_ASSIGNED,
+)
 
 /** Countdowns refresh every second. */
 internal const val CLOCK_TICK_MS = 1_000L

@@ -79,7 +79,12 @@ fun AppNextBookingTile(
             .background(colors.soft, AppTheme.shapes.large)
             .padding(AppTheme.spacing.space12),
     ) {
-        AppText(text = caption, style = AppTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = colors.accent, maxLines = 1)
+        AppText(
+            text = caption,
+            style = AppTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = colors.accent,
+            maxLines = 1,
+        )
         AppText(text = time, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), maxLines = 1)
         AppText(text = subtitle, style = AppTheme.typography.labelSmall, color = colors.muted, maxLines = 1)
     }

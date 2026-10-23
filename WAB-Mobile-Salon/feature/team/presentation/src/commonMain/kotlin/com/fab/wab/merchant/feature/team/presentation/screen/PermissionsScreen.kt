@@ -91,11 +91,19 @@ private fun Header(state: UiState, onAction: (UiAction) -> Unit) {
             AppText(text = member.fullName, style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.space6)) {
                 AppStatusBadge(text = stringResource(member.role.label()), tone = StatusTone.Accent)
-                AppText(text = pluralStringResource(Res.plurals.perm_count, state.selected.size, state.selected.size), style = AppTheme.typography.labelSmall, color = AppTheme.colors.muted)
+                AppText(
+                    text = pluralStringResource(Res.plurals.perm_count, state.selected.size, state.selected.size),
+                    style = AppTheme.typography.labelSmall,
+                    color = AppTheme.colors.muted,
+                )
             }
         }
     }
-    if (!member.isOwner) AppButton(stringResource(Res.string.perm_apply_template), { onAction(UiAction.OnApplyTemplate) }, kind = ButtonKind.Outlined)
+    if (!member.isOwner) AppButton(
+        stringResource(Res.string.perm_apply_template),
+        { onAction(UiAction.OnApplyTemplate) },
+        kind = ButtonKind.Outlined,
+    )
 }
 
 @Composable
@@ -106,7 +114,11 @@ private fun GroupCard(group: PermissionGroup, state: UiState, onAction: (UiActio
             AppText(text = stringResource(group.title()), style = AppTheme.typography.labelLarge, color = AppTheme.colors.accent)
             group.permissions.forEachIndexed { index, permission ->
                 if (index > 0) AppDivider()
-                PermissionRow(permission, checked = locked || permission in state.selected, enabled = !locked) { onAction(UiAction.OnToggle(permission)) }
+                PermissionRow(
+                    permission,
+                    checked = locked || permission in state.selected,
+                    enabled = !locked,
+                ) { onAction(UiAction.OnToggle(permission)) }
             }
             group.ownerOnly.forEach { capability -> OwnerOnlyRow(capability) }
         }
@@ -115,7 +127,7 @@ private fun GroupCard(group: PermissionGroup, state: UiState, onAction: (UiActio
 
 @Composable
 private fun PermissionRow(permission: Permission, checked: Boolean, enabled: Boolean, onToggle: () -> Unit) {
-    val (title, subtitle) = permission.copy()
+    val (title, subtitle) = permission.copy() ?: return
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(1f)) {
             AppText(text = stringResource(title), style = AppTheme.typography.bodyLarge)
@@ -129,7 +141,12 @@ private fun PermissionRow(permission: Permission, checked: Boolean, enabled: Boo
 private fun OwnerOnlyRow(capability: OwnerCapability) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
         Icon(AppIcons.Lock, contentDescription = null, tint = AppTheme.colors.faint)
-        AppText(text = stringResource(capability.title()), style = AppTheme.typography.bodyMedium, color = AppTheme.colors.faint, modifier = Modifier.weight(1f))
+        AppText(
+            text = stringResource(capability.title()),
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.colors.faint,
+            modifier = Modifier.weight(1f),
+        )
         AppText(text = stringResource(Res.string.perm_owner_only), style = AppTheme.typography.labelSmall, color = AppTheme.colors.faint)
     }
 }

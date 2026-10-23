@@ -112,14 +112,33 @@ private fun GalleryBar(state: UiState, onAction: (UiAction) -> Unit) {
         when (state.mode) {
             MediaGridMode.Normal -> {
                 if (state.items.size > 1) {
-                    AppButton(stringResource(Res.string.gallery_reorder), { onAction(UiAction.OnMode(MediaGridMode.Reorder)) }, kind = ButtonKind.Text)
+                    AppButton(
+                        stringResource(Res.string.gallery_reorder),
+                        { onAction(UiAction.OnMode(MediaGridMode.Reorder)) },
+                        kind = ButtonKind.Text,
+                    )
                 }
                 if (state.items.isNotEmpty()) {
-                    AppButton(stringResource(Res.string.gallery_select), { onAction(UiAction.OnMode(MediaGridMode.Select)) }, kind = ButtonKind.Text)
+                    AppButton(
+                        stringResource(Res.string.gallery_select),
+                        { onAction(UiAction.OnMode(MediaGridMode.Select)) },
+                        kind = ButtonKind.Text,
+                    )
                 }
-                AppButton(stringResource(Res.string.gallery_add), { onAction(UiAction.OnAdd) }, Modifier.weight(1f), leadingIcon = AppIcons.Add, enabled = !state.busy)
+                AppButton(
+                    stringResource(Res.string.gallery_add),
+                    { onAction(UiAction.OnAdd) },
+                    Modifier.weight(1f),
+                    leadingIcon = AppIcons.Add,
+                    enabled = !state.busy,
+                )
             }
-            MediaGridMode.Reorder -> AppButton(stringResource(Res.string.gallery_done), { onAction(UiAction.OnDone) }, Modifier.weight(1f), loading = state.busy)
+            MediaGridMode.Reorder -> AppButton(
+                stringResource(Res.string.gallery_done),
+                { onAction(UiAction.OnDone) },
+                Modifier.weight(1f),
+                loading = state.busy,
+            )
             MediaGridMode.Select -> {
                 AppText(
                     text = pluralStringResource(Res.plurals.gallery_selected, state.selected.size, state.selected.size),

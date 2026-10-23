@@ -73,7 +73,9 @@ fun SalonPolicy.toDraft(): PolicyDraft = PolicyDraft(
 
 /** PRD M19: window required, ≥ 1 payment option, deposit 1..100 when DEPOSIT is offered, notes ≤ 1000. */
 fun policyErrors(draft: PolicyDraft): Set<PolicyField> = buildSet {
-    if (draft.windowHours.trim().toIntOrNull()?.let { it in PolicyLimits.WINDOW_MIN..PolicyLimits.WINDOW_MAX } != true) add(PolicyField.WINDOW)
+    if (draft.windowHours.trim().toIntOrNull()?.let {
+        it in PolicyLimits.WINDOW_MIN..PolicyLimits.WINDOW_MAX
+    } != true) add(PolicyField.WINDOW)
     if (draft.options.isEmpty()) add(PolicyField.OPTIONS)
     if (PaymentOption.DEPOSIT in draft.options &&
         draft.depositPercentage.trim().toIntOrNull()?.let { it in PolicyLimits.DEPOSIT_MIN..PolicyLimits.DEPOSIT_MAX } != true

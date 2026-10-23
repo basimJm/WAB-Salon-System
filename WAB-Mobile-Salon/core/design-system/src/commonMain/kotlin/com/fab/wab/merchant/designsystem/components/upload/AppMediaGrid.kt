@@ -151,19 +151,31 @@ private fun BoxScope.CellBadges(item: UploadItemUi, index: Int, mode: MediaGridM
                 .border(AppTheme.sizes.hairline, colors.onMedia, AppTheme.shapes.circle),
             contentAlignment = Alignment.Center,
         ) {
-            if (isSelected) Icon(AppIcons.Check, contentDescription = null, tint = colors.onMedia, modifier = Modifier.size(AppTheme.sizes.iconSmall))
+            if (isSelected) Icon(
+                AppIcons.Check,
+                contentDescription = null,
+                tint = colors.onMedia,
+                modifier = Modifier.size(AppTheme.sizes.iconSmall),
+            )
         }
     }
     val duration = item.durationMs
     if (item.kind == UploadKind.VIDEO && duration != null) {
         val (minutes, seconds) = durationParts(duration)
         Row(
-            modifier = corner.align(Alignment.BottomStart).background(colors.scrim, AppTheme.shapes.small).padding(horizontal = spacing.space6),
+            modifier = corner.align(Alignment.BottomStart).background(
+                colors.scrim,
+                AppTheme.shapes.small,
+            ).padding(horizontal = spacing.space6),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(spacing.space2),
         ) {
             Icon(AppIcons.Play, contentDescription = null, tint = colors.onMedia, modifier = Modifier.size(AppTheme.sizes.brideIcon))
-            AppText(text = stringResource(Res.string.media_duration, minutes, seconds), style = AppTheme.typography.labelSmall, color = colors.onMedia)
+            AppText(
+                text = stringResource(Res.string.media_duration, minutes, seconds),
+                style = AppTheme.typography.labelSmall,
+                color = colors.onMedia,
+            )
         }
     }
 }
@@ -185,7 +197,11 @@ private fun BoxScope.CellStatus(item: UploadItemUi) {
     val colors = AppTheme.colors
     when (val status = item.status) {
         is UploadStatus.Uploading -> Box(Modifier.matchParentSize().background(colors.scrim), contentAlignment = Alignment.Center) {
-            AppText(text = stringResource(Res.string.upload_percent, uploadPercent(status.progress)), style = AppTheme.typography.labelMedium, color = colors.onMedia)
+            AppText(
+                text = stringResource(Res.string.upload_percent, uploadPercent(status.progress)),
+                style = AppTheme.typography.labelMedium,
+                color = colors.onMedia,
+            )
             LinearProgressIndicator(
                 progress = { status.progress },
                 modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(AppTheme.spacing.space6),
@@ -194,7 +210,12 @@ private fun BoxScope.CellStatus(item: UploadItemUi) {
             )
         }
         UploadStatus.Failed -> Box(Modifier.matchParentSize().background(colors.dangerContainer), contentAlignment = Alignment.Center) {
-            Icon(AppIcons.Refresh, contentDescription = null, tint = colors.onDangerContainer, modifier = Modifier.size(AppTheme.sizes.iconLarge))
+            Icon(
+                AppIcons.Refresh,
+                contentDescription = null,
+                tint = colors.onDangerContainer,
+                modifier = Modifier.size(AppTheme.sizes.iconLarge),
+            )
         }
         UploadStatus.Uploaded -> Unit
     }

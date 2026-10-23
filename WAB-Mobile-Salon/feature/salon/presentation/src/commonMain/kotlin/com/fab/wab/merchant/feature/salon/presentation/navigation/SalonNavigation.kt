@@ -97,7 +97,10 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
         val permissions = koinInject<PermissionFlow>()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
-                SalonProfileContract.SideEffect.Saved -> notifications.show(getString(Res.string.profile_saved), style = NotificationStyle.Success)
+                SalonProfileContract.SideEffect.Saved -> notifications.show(
+                    getString(Res.string.profile_saved),
+                    style = NotificationStyle.Success,
+                )
                 SalonProfileContract.SideEffect.NavigateBack -> navigateBack()
                 is SalonProfileContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
                 SalonProfileContract.SideEffect.LocationBlocked -> {
@@ -116,7 +119,10 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
         val notifications = rememberNotificationManager()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
-                GalleryContract.SideEffect.Deleted -> notifications.show(getString(Res.string.gallery_deleted), style = NotificationStyle.Success)
+                GalleryContract.SideEffect.Deleted -> notifications.show(
+                    getString(Res.string.gallery_deleted),
+                    style = NotificationStyle.Success,
+                )
                 is GalleryContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }
@@ -130,7 +136,10 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
         val notifications = rememberNotificationManager()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
-                is HoursContract.SideEffect.Done -> notifications.show(hoursMessage(effect.message, effect.cancelledBookings), style = NotificationStyle.Success)
+                is HoursContract.SideEffect.Done -> notifications.show(
+                    hoursMessage(effect.message, effect.cancelledBookings),
+                    style = NotificationStyle.Success,
+                )
                 is HoursContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }

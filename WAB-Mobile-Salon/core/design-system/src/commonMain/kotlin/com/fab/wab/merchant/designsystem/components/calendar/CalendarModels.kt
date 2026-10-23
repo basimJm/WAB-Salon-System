@@ -54,7 +54,10 @@ data class TimeWindow(val startMinute: Int, val endMinute: Int) {
             val end = (listOf(workEnd) + blocks.map { it.endMinute }).max()
             val snappedStart = (start / MINUTES_PER_HOUR) * MINUTES_PER_HOUR
             val snappedEnd = ((end + MINUTES_PER_HOUR - 1) / MINUTES_PER_HOUR) * MINUTES_PER_HOUR
-            return TimeWindow(snappedStart.coerceAtLeast(0), snappedEnd.coerceAtMost(MINUTES_PER_DAY).coerceAtLeast(snappedStart + MINUTES_PER_HOUR))
+            return TimeWindow(
+                snappedStart.coerceAtLeast(0),
+                snappedEnd.coerceAtMost(MINUTES_PER_DAY).coerceAtLeast(snappedStart + MINUTES_PER_HOUR),
+            )
         }
     }
 }

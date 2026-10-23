@@ -29,16 +29,45 @@ fun AppContactSheet(
     onCall: (() -> Unit)?,
     onWhatsApp: (() -> Unit)?,
     onEmail: (() -> Unit)?,
+    modifier: Modifier = Modifier,
     note: String? = null,
 ) {
     val spacing = AppTheme.spacing
-    AppBottomSheet(onDismiss = onDismiss) {
+    AppBottomSheet(onDismiss = onDismiss, modifier = modifier) {
         Column(modifier = Modifier.fillMaxWidth().padding(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
             AppText(text = stringResource(Res.string.contact_title), style = AppTheme.typography.titleMedium)
-            AppText(text = note ?: stringResource(Res.string.contact_hours), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
-            onCall?.let { AppButton(stringResource(Res.string.contact_call), it, Modifier.fillMaxWidth(), kind = ButtonKind.Secondary, leadingIcon = AppIcons.Call) }
-            onWhatsApp?.let { AppButton(stringResource(Res.string.contact_whatsapp), it, Modifier.fillMaxWidth(), kind = ButtonKind.Secondary, leadingIcon = AppIcons.Chat) }
-            onEmail?.let { AppButton(stringResource(Res.string.contact_email), it, Modifier.fillMaxWidth(), kind = ButtonKind.Secondary, leadingIcon = AppIcons.Email) }
+            AppText(
+                text = note ?: stringResource(Res.string.contact_hours),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
+            onCall?.let {
+                AppButton(
+                    stringResource(Res.string.contact_call),
+                    it,
+                    Modifier.fillMaxWidth(),
+                    kind = ButtonKind.Secondary,
+                    leadingIcon = AppIcons.Call,
+                )
+            }
+            onWhatsApp?.let {
+                AppButton(
+                    stringResource(Res.string.contact_whatsapp),
+                    it,
+                    Modifier.fillMaxWidth(),
+                    kind = ButtonKind.Secondary,
+                    leadingIcon = AppIcons.Chat,
+                )
+            }
+            onEmail?.let {
+                AppButton(
+                    stringResource(Res.string.contact_email),
+                    it,
+                    Modifier.fillMaxWidth(),
+                    kind = ButtonKind.Secondary,
+                    leadingIcon = AppIcons.Email,
+                )
+            }
         }
     }
 }

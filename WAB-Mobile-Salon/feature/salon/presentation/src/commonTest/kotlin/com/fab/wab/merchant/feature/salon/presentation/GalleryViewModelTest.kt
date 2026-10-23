@@ -27,7 +27,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-private fun item(id: String, type: GalleryType = GalleryType.IMAGE, order: Int = 0) = GalleryItem(id, type, "https://cdn/$id", null, null, order)
+private fun item(
+    id: String,
+    type: GalleryType = GalleryType.IMAGE,
+    order: Int = 0,
+) = GalleryItem(id, type, "https://cdn/$id", null, null, order)
 
 private class FakeGallery : GalleryRepository {
     var items = listOf(item("a"), item("b", order = 1), item("c", GalleryType.VIDEO, 2))
@@ -43,10 +47,14 @@ private class FakeGallery : GalleryRepository {
     }
     override suspend fun reorder(ids: List<String>): AppResult<List<GalleryItem>> {
         order = ids
-        return if (reorderFails) AppResult.Error(AppError.NetworkError("x")) else AppResult.Success(ids.map { id -> items.first { it.id == id } })
+        return if (reorderFails) AppResult.Error(AppError.NetworkError("x")) else AppResult.Success(ids.map { id ->
+            items.first { it.id == id }
+        })
     }
     override suspend fun delete(id: String): AppResult<Unit> =
-        if (id in deleteFails) AppResult.Error(AppError.NetworkError("x")) else AppResult.Success(Unit).also { items = items.filterNot { it.id == id } }
+        if (id in deleteFails) AppResult.Error(AppError.NetworkError("x")) else AppResult.Success(Unit).also {
+            items = items.filterNot { it.id == id }
+        }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -62,7 +70,14 @@ class GalleryViewModelTest {
         ),
     )
 
-    private fun TestScope.viewModel() = GalleryViewModel(gallery, picker, UploadFileUseCase(uploads), NoOpAnalyticsTracker, { "failed" }, backgroundScope)
+    private fun TestScope.viewModel() = GalleryViewModel(
+        gallery,
+        picker,
+        UploadFileUseCase(uploads),
+        NoOpAnalyticsTracker,
+        { "failed" },
+        backgroundScope,
+    )
         .also { vm -> backgroundScope.launch { vm.state.collect { } } }
 
     private fun TestScope.effectsOf(viewModel: GalleryViewModel) =
@@ -74,7 +89,10 @@ class GalleryViewModelTest {
         viewModel.state.first { !it.loading }
         viewModel.onEvent(UiAction.OnAdd)
         val state = viewModel.state.first()
-        assertEquals(listOf(GalleryType.IMAGE to "GALLERY_IMAGE-key", GalleryType.VIDEO to "GALLERY_VIDEO-key"), gallery.added.map { it.first to it.second })
+        assertEquals(
+            listOf(GalleryType.IMAGE to "GALLERY_IMAGE-key", GalleryType.VIDEO to "GALLERY_VIDEO-key"),
+            gallery.added.map { it.first to it.second },
+        )
         assertEquals(13, gallery.added.last().third)
         assertEquals(5, state.items.size)
         assertTrue(state.pending.isEmpty())

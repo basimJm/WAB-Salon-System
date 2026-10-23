@@ -72,10 +72,20 @@ fun TeamScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Unit,
             when {
                 state.loading -> AppLoadingIndicator(Modifier.align(Alignment.Center))
                 state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
-                state.members.isEmpty() -> AppEmptyState(title = stringResource(Res.string.team_empty), modifier = Modifier.align(Alignment.Center))
+                state.members.isEmpty() -> AppEmptyState(
+                    title = stringResource(Res.string.team_empty),
+                    modifier = Modifier.align(Alignment.Center),
+                )
                 else -> AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }) {
-                    LazyColumn(contentPadding = PaddingValues(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
-                        items(state.members, key = { it.id }, contentType = { TeamMember::class }) { member -> MemberRow(member, state, onAction) }
+                    LazyColumn(
+                        contentPadding = PaddingValues(spacing.space16),
+                        verticalArrangement = Arrangement.spacedBy(spacing.space10),
+                    ) {
+                        items(
+                            state.members,
+                            key = { it.id },
+                            contentType = { TeamMember::class },
+                        ) { member -> MemberRow(member, state, onAction) }
                     }
                 }
             }
@@ -99,11 +109,19 @@ private fun MemberRow(member: TeamMember, state: UiState, onAction: (UiAction) -
                     if (!member.active) AppStatusBadge(text = stringResource(Res.string.team_inactive), tone = StatusTone.Neutral)
                 }
                 if (member.isOwner && state.access.manageTeam) {
-                    AppText(text = stringResource(Res.string.team_owner_locked), style = AppTheme.typography.labelSmall, color = AppTheme.colors.faint)
+                    AppText(
+                        text = stringResource(Res.string.team_owner_locked),
+                        style = AppTheme.typography.labelSmall,
+                        color = AppTheme.colors.faint,
+                    )
                 }
             }
             if (state.access.canToggleActive(member)) {
-                AppSwitch(checked = member.active, onCheckedChange = { onAction(UiAction.OnActiveChange(member.id, it)) }, enabled = member.id !in state.busy)
+                AppSwitch(
+                    checked = member.active,
+                    onCheckedChange = { onAction(UiAction.OnActiveChange(member.id, it)) },
+                    enabled = member.id !in state.busy,
+                )
             }
         }
     }

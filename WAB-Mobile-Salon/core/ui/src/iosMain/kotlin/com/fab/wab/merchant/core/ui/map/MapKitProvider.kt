@@ -30,12 +30,12 @@ class MapKitProvider : MapProvider {
     @Composable
     override fun Map(
         target: LocationData,
-        onCenterChanged: (LocationData) -> Unit,
-        onMovingChanged: (Boolean) -> Unit,
+        onCenterChange: (LocationData) -> Unit,
+        onMovingChange: (Boolean) -> Unit,
         modifier: Modifier,
     ) {
-        val currentOnCenter by rememberUpdatedState(onCenterChanged)
-        val currentOnMoving by rememberUpdatedState(onMovingChanged)
+        val currentOnCenter by rememberUpdatedState(onCenterChange)
+        val currentOnMoving by rememberUpdatedState(onMovingChange)
         val delegate = remember { RegionDelegate() }
         delegate.onMoving = { currentOnMoving(it) }
         delegate.onCenter = { currentOnCenter(it) }

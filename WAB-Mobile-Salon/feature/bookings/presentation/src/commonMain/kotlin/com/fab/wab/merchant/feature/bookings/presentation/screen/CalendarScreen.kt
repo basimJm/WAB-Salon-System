@@ -84,7 +84,10 @@ fun CalendarScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modif
 @Composable
 private fun CalendarBody(state: UiState, onAction: (UiAction) -> Unit) {
     when {
-        state.loading && state.entries.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
+        state.loading && state.entries.isEmpty() -> Box(
+            Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) { AppLoadingIndicator() }
         state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
         else -> {
             val texts = CalendarTexts(timeRange = rangeText(), closed = stringResource(Res.string.calendar_closed_label))
@@ -119,7 +122,10 @@ private fun emptyOf(state: UiState, noBlocks: Boolean): CalendarEmptyUi? {
     if (!noBlocks) return null
     val closed = state.hours != null && state.hours.hoursOn(state.date) == null
     return if (closed) {
-        CalendarEmptyUi(stringResource(Res.string.calendar_closed_title), state.hours.closureOn(state.date)?.reason ?: stringResource(Res.string.calendar_closed_body))
+        CalendarEmptyUi(
+            stringResource(Res.string.calendar_closed_title),
+            state.hours.closureOn(state.date)?.reason ?: stringResource(Res.string.calendar_closed_body),
+        )
     } else {
         CalendarEmptyUi(stringResource(Res.string.calendar_empty_title), stringResource(Res.string.calendar_empty_body))
     }

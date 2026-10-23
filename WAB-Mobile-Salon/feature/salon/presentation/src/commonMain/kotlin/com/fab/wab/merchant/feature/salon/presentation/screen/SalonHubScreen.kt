@@ -51,7 +51,11 @@ fun SalonHubScreen(state: UiState, available: Set<HubTile>, onAction: (UiAction)
     val spacing = AppTheme.spacing
     val tiles = state.entries.filter { it.tile in available }
     AppScreen(modifier = modifier, scrollsUnderTabBar = true) { padding ->
-        AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }, modifier = Modifier.padding(padding)) {
+        AppPullToRefresh(
+            refreshing = state.refreshing,
+            onRefresh = { onAction(UiAction.OnRefresh) },
+            modifier = Modifier.padding(padding),
+        ) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(AppTheme.adaptive.gridColumns),
                 modifier = Modifier.fillMaxSize(),
@@ -74,7 +78,11 @@ private fun Header(state: UiState) {
     Column(verticalArrangement = Arrangement.spacedBy(spacing.space12)) {
         AppText(text = stringResource(Res.string.hub_title), style = AppTheme.typography.headlineMedium)
         state.salon?.let { SalonRow(it) }
-        if (state.noAccess) AppText(text = stringResource(Res.string.hub_no_access), style = AppTheme.typography.bodyMedium, color = AppTheme.colors.muted)
+        if (state.noAccess) AppText(
+            text = stringResource(Res.string.hub_no_access),
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.colors.muted,
+        )
     }
 }
 

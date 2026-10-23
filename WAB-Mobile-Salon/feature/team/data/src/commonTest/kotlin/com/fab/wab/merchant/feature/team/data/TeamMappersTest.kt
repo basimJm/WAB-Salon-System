@@ -15,7 +15,17 @@ class TeamMappersTest {
 
     @Test
     fun membersMapRolesAndKnownPermissions() {
-        val member = GetTeamMembersDataItem("m1", "Rana", "Ali", "+962791234567", " ", "manager", listOf("SERVICES_MANAGE", "SOMETHING_NEW"), true, false).toDomain()
+        val member = GetTeamMembersDataItem(
+            "m1",
+            "Rana",
+            "Ali",
+            "+962791234567",
+            " ",
+            "manager",
+            listOf("SERVICES_MANAGE", "SOMETHING_NEW"),
+            true,
+            false,
+        ).toDomain()
         assertEquals(MemberRole.MANAGER, member.role)
         assertEquals(setOf(Permission.SERVICES_MANAGE), member.permissions)
         assertNull(member.photoUrl)

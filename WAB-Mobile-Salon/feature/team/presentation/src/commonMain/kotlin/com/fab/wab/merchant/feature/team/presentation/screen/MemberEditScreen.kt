@@ -90,7 +90,13 @@ fun MemberEditScreen(
 }
 
 @Composable
-private fun Form(state: UiState, permissionsReady: Boolean, staffReady: Boolean, onAction: (UiAction) -> Unit, modifier: Modifier) {
+private fun Form(
+    state: UiState,
+    permissionsReady: Boolean,
+    staffReady: Boolean,
+    onAction: (UiAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val spacing = AppTheme.spacing
     val errors = state.visibleErrors
     val required = stringResource(Res.string.member_required)
@@ -127,10 +133,24 @@ private fun Form(state: UiState, permissionsReady: Boolean, staffReady: Boolean,
                 label = stringResource(Res.string.member_phone),
                 error = if (MemberField.PHONE in errors) stringResource(Res.string.member_phone_error) else null,
             )
-            AppText(text = stringResource(Res.string.member_phone_hint), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(Res.string.member_phone_hint),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
         } else {
-            AppTextField(value = state.phone, onValueChange = {}, label = stringResource(Res.string.member_phone), readOnly = true, enabled = false)
-            AppText(text = stringResource(Res.string.member_phone_locked), style = AppTheme.typography.labelSmall, color = AppTheme.colors.faint)
+            AppTextField(
+                value = state.phone,
+                onValueChange = {},
+                label = stringResource(Res.string.member_phone),
+                readOnly = true,
+                enabled = false,
+            )
+            AppText(
+                text = stringResource(Res.string.member_phone_locked),
+                style = AppTheme.typography.labelSmall,
+                color = AppTheme.colors.faint,
+            )
         }
         AppText(text = stringResource(Res.string.member_role), style = AppTheme.typography.labelLarge)
         AppSegmentedTabs(
@@ -139,10 +159,20 @@ private fun Form(state: UiState, permissionsReady: Boolean, staffReady: Boolean,
             onSelect = { onAction(UiAction.OnRole(ASSIGNABLE_ROLES[it])) },
         )
         if (!state.isNew && permissionsReady) {
-            AppButton(stringResource(Res.string.member_permissions), { onAction(UiAction.OnPermissions) }, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined)
+            AppButton(
+                stringResource(Res.string.member_permissions),
+                { onAction(UiAction.OnPermissions) },
+                Modifier.fillMaxWidth(),
+                kind = ButtonKind.Outlined,
+            )
         }
         if (!state.isNew && staffReady) {
-            AppButton(stringResource(Res.string.member_staff_profile), { onAction(UiAction.OnStaffProfile) }, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined)
+            AppButton(
+                stringResource(Res.string.member_staff_profile),
+                { onAction(UiAction.OnStaffProfile) },
+                Modifier.fillMaxWidth(),
+                kind = ButtonKind.Outlined,
+            )
         }
     }
 }
@@ -170,4 +200,10 @@ private fun Overlays(state: UiState, onAction: (UiAction) -> Unit) {
     }
 }
 
-internal fun Country.toUi(): CountryUi = CountryUi(code = code, name = name, dialCode = dialCode, flagUrl = flagUrl, phoneRegex = phoneRegex)
+internal fun Country.toUi(): CountryUi = CountryUi(
+    code = code,
+    name = name,
+    dialCode = dialCode,
+    flagUrl = flagUrl,
+    phoneRegex = phoneRegex,
+)

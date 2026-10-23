@@ -33,7 +33,10 @@ class ProfileFormTest {
     fun onlyChangedFieldsAreSentAndClearedTextBecomesNull() {
         val original = valid.copy(description = "Old", whatsapp = "+962791234567")
         assertTrue(changesOf(original, original.copy(phone = "+962791234567")).isEmpty)
-        val changes = changesOf(original, original.copy(name = " Lina Salon ", description = "", whatsapp = "", coverKey = "salons/1/cover.jpg"))
+        val changes = changesOf(
+            original,
+            original.copy(name = " Lina Salon ", description = "", whatsapp = "", coverKey = "salons/1/cover.jpg"),
+        )
         assertEquals("Lina Salon", changes.name)
         assertEquals(Change<String?>(null), changes.description)
         assertEquals(Change<String?>(null), changes.whatsapp)

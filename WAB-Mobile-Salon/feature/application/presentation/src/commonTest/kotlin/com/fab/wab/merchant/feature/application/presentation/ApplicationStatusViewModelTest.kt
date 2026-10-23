@@ -22,7 +22,11 @@ class ApplicationStatusViewModelTest {
     private val applications = FakeApplications()
     private val session = RecordingSessionStore()
 
-    private fun TestScope.viewModel() = ApplicationStatusViewModel(GetApplicationUseCase(applications, session), { "failed" }, backgroundScope)
+    private fun TestScope.viewModel() = ApplicationStatusViewModel(
+        GetApplicationUseCase(applications, session),
+        { "failed" },
+        backgroundScope,
+    )
         .also { vm -> backgroundScope.launch { vm.state.collect {} } }
 
     @Test
@@ -38,7 +42,9 @@ class ApplicationStatusViewModelTest {
 
     @Test
     fun rejectedShowsTheReasonAndResubmits() = runTest(UnconfinedTestDispatcher()) {
-        applications.current = AppResult.Success(PENDING_APPLICATION.copy(state = SalonState.APPLICATION_REJECTED, rejectionReason = "Blurry"))
+        applications.current = AppResult.Success(
+            PENDING_APPLICATION.copy(state = SalonState.APPLICATION_REJECTED, rejectionReason = "Blurry"),
+        )
         val vm = viewModel()
         val effects = mutableListOf<SideEffect>()
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }

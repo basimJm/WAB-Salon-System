@@ -65,6 +65,10 @@ class RegistrationViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handleForm(event) || handleDocuments(event)
+    }
+
+    private fun handleForm(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnSalonNameChange -> edit { copy(salonName = event.value) }
             is UiAction.OnGenderSelect -> edit { copy(gender = event.gender) }
@@ -72,13 +76,22 @@ class RegistrationViewModel(
             is UiAction.OnLastNameChange -> edit { copy(lastName = event.value) }
             is UiAction.OnCitySelect -> selectCity(event.index)
             is UiAction.OnAreaSelect -> uiState.value.areas.getOrNull(event.index)?.let { area -> edit { copy(areaId = area.id) } }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleDocuments(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnAddDocuments -> scope.launch { addDocuments() }
             is UiAction.OnRemoveDocument -> setUploads(uploads.filterNot { it.file.id == event.id })
             is UiAction.OnRetryDocument -> uploads.firstOrNull { it.file.id == event.id }?.let { startUpload(it) }
             UiAction.OnTermsToggle -> edit { copy(termsAccepted = !termsAccepted) }
             UiAction.OnTermsClick -> emitSideEffect(SideEffect.OpenContent(ApplicationSlugs.SALON_TERMS))
             UiAction.OnSubmit -> submit()
+            else -> return false
         }
+        return true
     }
 
     private fun edit(change: RegistrationInput.() -> RegistrationInput) {
@@ -124,7 +137,10 @@ class RegistrationViewModel(
         val id = upload.file.id
         setUploads(uploads.filterNot { it.file.id == id } + upload.copy(status = UploadStatus.Uploading(0f)))
         scope.launch {
-            deps.uploadFile(upload.file, UploadPurpose.LICENSE_DOCUMENT).collect { progress -> setUploads(uploads.withProgress(id, progress)) }
+            deps.uploadFile(
+                upload.file,
+                UploadPurpose.LICENSE_DOCUMENT,
+            ).collect { progress -> setUploads(uploads.withProgress(id, progress)) }
             deps.analytics.trackAction(AnalyticsAction(ApplicationAnalytics.ACTION_DOCUMENT_UPLOAD))
         }
     }

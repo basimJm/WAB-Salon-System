@@ -71,9 +71,7 @@ import com.fab.wab.merchant.feature.content.di.contentModule
 import com.fab.wab.merchant.feature.content.presentation.di.contentPresentationModule
 import com.fab.wab.merchant.feature.more.di.moreModule
 import com.fab.wab.merchant.feature.more.presentation.di.morePresentationModule
-import com.fab.wab.merchant.feature.sample.di.sampleModule
 import com.fab.wab.merchant.openStoreLink
-import com.fab.wab.merchant.feature.sample.presentation.di.samplePresentationModule
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -110,8 +108,6 @@ val appModules = listOf(
     contentPresentationModule,
     moreModule,
     morePresentationModule,
-    sampleModule,
-    samplePresentationModule,
 )
 
 /** App shell: theme, language direction, dark mode, image loading, in-app notifications, analytics and navigation. */

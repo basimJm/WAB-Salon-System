@@ -65,10 +65,20 @@ internal fun LocationSection(state: UiState, onAction: (UiAction) -> Unit) {
             Icon(AppIcons.Location, contentDescription = null, tint = if (missing) AppTheme.colors.danger else AppTheme.colors.accent)
             Column(modifier = Modifier.weight(1f)) {
                 AppText(text = stringResource(Res.string.profile_location), style = AppTheme.typography.labelLarge)
-                val hint = if (missing) stringResource(Res.string.profile_location_error) else form.locationText.ifBlank { stringResource(Res.string.profile_location_pick) }
-                AppText(text = hint, style = AppTheme.typography.bodySmall, color = if (missing) AppTheme.colors.danger else AppTheme.colors.muted)
+                val hint = if (missing) stringResource(Res.string.profile_location_error) else form.locationText.ifBlank {
+                    stringResource(Res.string.profile_location_pick)
+                }
+                AppText(
+                    text = hint,
+                    style = AppTheme.typography.bodySmall,
+                    color = if (missing) AppTheme.colors.danger else AppTheme.colors.muted,
+                )
             }
-            AppText(text = stringResource(Res.string.profile_change), style = AppTheme.typography.labelLarge, color = AppTheme.colors.accent)
+            AppText(
+                text = stringResource(Res.string.profile_change),
+                style = AppTheme.typography.labelLarge,
+                color = AppTheme.colors.accent,
+            )
         }
     }
     AppTextField(
@@ -97,7 +107,9 @@ internal fun ProfileOverlays(state: UiState, onAction: (UiAction) -> Unit) {
     state.map?.let { map ->
         Dialog(onDismissRequest = { onAction(UiAction.OnCloseMap) }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
             TrackScreen(SalonAnalytics.SCREEN_PROFILE_MAP)
-            AppScreen(topBar = { AppTopBar(title = stringResource(Res.string.profile_location), onBack = { onAction(UiAction.OnCloseMap) }) }) { padding ->
+            AppScreen(
+                topBar = { AppTopBar(title = stringResource(Res.string.profile_location), onBack = { onAction(UiAction.OnCloseMap) }) },
+            ) { padding ->
                 AppMapPicker(
                     state = map,
                     mapProvider = koinInject<MapProvider>(),
@@ -122,7 +134,11 @@ private fun PreviewSheet(state: UiState, onAction: (UiAction) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(spacing.space10),
         ) {
             AppText(text = stringResource(Res.string.profile_preview_title), style = AppTheme.typography.titleMedium)
-            AppText(text = stringResource(Res.string.profile_preview_note), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(Res.string.profile_preview_note),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
             val cover = state.cover?.preview?.bytes
             val coverUrl = form.coverUrl
             val shape = AppTheme.shapes.large
@@ -145,8 +161,17 @@ private fun PreviewSheet(state: UiState, onAction: (UiAction) -> Unit) {
                 }
             }
             if (form.description.isNotBlank()) AppText(text = form.description, style = AppTheme.typography.bodyMedium)
-            if (form.locationText.isNotBlank()) AppText(text = form.locationText, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
-            AppButton(stringResource(Res.string.profile_close), { onAction(UiAction.OnClosePreview) }, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined)
+            if (form.locationText.isNotBlank()) AppText(
+                text = form.locationText,
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
+            AppButton(
+                stringResource(Res.string.profile_close),
+                { onAction(UiAction.OnClosePreview) },
+                Modifier.fillMaxWidth(),
+                kind = ButtonKind.Outlined,
+            )
         }
     }
 }

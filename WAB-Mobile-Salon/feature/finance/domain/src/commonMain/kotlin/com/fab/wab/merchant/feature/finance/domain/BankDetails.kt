@@ -29,7 +29,11 @@ fun normalizeIban(raw: String): String = raw.filterNot { it.isWhitespace() }.upp
 /** ISO 13616: Jordanian prefix and length, then the mod-97 check on the rearranged digits. */
 fun isValidIban(raw: String): Boolean {
     val iban = normalizeIban(raw)
-    if (!iban.startsWith(BankLimits.JORDAN_PREFIX) || iban.length != BankLimits.JORDAN_LENGTH || !iban.all { it.isLetterOrDigit() }) return false
+    if (
+        !iban.startsWith(BankLimits.JORDAN_PREFIX) ||
+        iban.length != BankLimits.JORDAN_LENGTH ||
+        !iban.all { it.isLetterOrDigit() }
+    ) return false
     val rearranged = iban.drop(BankLimits.CHECK_START) + iban.take(BankLimits.CHECK_START)
     var remainder = 0
     rearranged.forEach { ch ->

@@ -76,14 +76,22 @@ fun SubscriptionScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () 
         when {
             state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
             subscription == null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
-            else -> AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }, modifier = Modifier.padding(padding)) {
+            else -> AppPullToRefresh(
+                refreshing = state.refreshing,
+                onRefresh = { onAction(UiAction.OnRefresh) },
+                modifier = Modifier.padding(padding),
+            ) {
                 Column(
                     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(spacing.space16),
                     verticalArrangement = Arrangement.spacedBy(spacing.space14),
                 ) {
                     subscription.salonState?.let { StateCard(it) }
                     SubscriptionCard(subscription)
-                    AppText(text = stringResource(Res.string.sub_paid_outside), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+                    AppText(
+                        text = stringResource(Res.string.sub_paid_outside),
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.colors.muted,
+                    )
                     AppButton(
                         text = stringResource(
                             when (subscription.status) {
@@ -121,7 +129,11 @@ private fun StateCard(state: SalonState) {
     }
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6)) {
-            AppText(text = stringResource(Res.string.sub_salon_state), style = AppTheme.typography.labelLarge, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(Res.string.sub_salon_state),
+                style = AppTheme.typography.labelLarge,
+                color = AppTheme.colors.muted,
+            )
             AppSalonStateChip(state, salonStateLabel(state))
             AppText(text = stringResource(hint), style = AppTheme.typography.bodySmall)
         }
@@ -139,12 +151,20 @@ private fun SubscriptionCard(subscription: Subscription) {
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AppText(text = stringResource(Res.string.sub_subscription), style = AppTheme.typography.labelLarge, color = AppTheme.colors.muted, modifier = Modifier.weight(1f))
+                AppText(
+                    text = stringResource(Res.string.sub_subscription),
+                    style = AppTheme.typography.labelLarge,
+                    color = AppTheme.colors.muted,
+                    modifier = Modifier.weight(1f),
+                )
                 AppStatusBadge(text = stringResource(badge), tone = tone)
             }
             AppText(text = stringResource(title), style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
             if (subscription.status != SubscriptionStatus.EXPIRED) {
-                AppText(text = pluralStringResource(Res.plurals.sub_days_left, subscription.daysRemaining, subscription.daysRemaining), style = AppTheme.typography.bodyMedium)
+                AppText(
+                    text = pluralStringResource(Res.plurals.sub_days_left, subscription.daysRemaining, subscription.daysRemaining),
+                    style = AppTheme.typography.bodyMedium,
+                )
             }
             date?.let {
                 val line = when (subscription.status) {
@@ -168,7 +188,11 @@ private fun FeaturedCard(onClick: () -> Unit) {
             Icon(AppIcons.Crown, contentDescription = null, tint = AppTheme.colors.accent)
             Column(modifier = Modifier.weight(1f)) {
                 AppText(text = stringResource(Res.string.sub_featured), style = AppTheme.typography.bodyLarge)
-                AppText(text = stringResource(Res.string.sub_featured_sub), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+                AppText(
+                    text = stringResource(Res.string.sub_featured_sub),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.muted,
+                )
             }
             Icon(AppIcons.Forward, contentDescription = null, tint = AppTheme.colors.faint)
         }

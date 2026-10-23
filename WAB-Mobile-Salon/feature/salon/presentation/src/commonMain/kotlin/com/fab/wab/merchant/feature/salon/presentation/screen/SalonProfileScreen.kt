@@ -102,7 +102,7 @@ fun SalonProfileScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: M
 }
 
 @Composable
-private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier) {
+private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
     val form = state.form
     val errors = state.visibleErrors

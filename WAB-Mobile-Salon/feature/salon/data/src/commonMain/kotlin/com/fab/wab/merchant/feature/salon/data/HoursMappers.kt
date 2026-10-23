@@ -33,7 +33,10 @@ internal fun minutesOf(hhmm: String): Int? {
 }
 
 internal fun hhmmOf(minutes: Int): String =
-    (minutes / MINUTES_PER_HOUR).toString().padStart(TIME_PAD, ZERO) + TIME_SEPARATOR + (minutes % MINUTES_PER_HOUR).toString().padStart(TIME_PAD, ZERO)
+    (minutes / MINUTES_PER_HOUR).toString().padStart(
+        TIME_PAD,
+        ZERO,
+    ) + TIME_SEPARATOR + (minutes % MINUTES_PER_HOUR).toString().padStart(TIME_PAD, ZERO)
 
 internal fun dateOf(value: String): LocalDate? = runCatching { LocalDate.parse(value.trim().take(ISO_DATE_LENGTH)) }.getOrNull()
 

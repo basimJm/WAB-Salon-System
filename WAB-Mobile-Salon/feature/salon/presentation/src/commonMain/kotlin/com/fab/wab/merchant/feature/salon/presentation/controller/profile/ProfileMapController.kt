@@ -33,7 +33,10 @@ sealed interface LocateResult {
 /** Geocoding, place search and the device position for the map picker; the view model owns the state. */
 class ProfileMapController(private val deps: ProfileMapDependencies) {
 
-    fun startPoint(current: LocationData?): LocationData = current ?: LocationData(MapDefaults.DEFAULT_LATITUDE, MapDefaults.DEFAULT_LONGITUDE)
+    fun startPoint(current: LocationData?): LocationData = current ?: LocationData(
+        MapDefaults.DEFAULT_LATITUDE,
+        MapDefaults.DEFAULT_LONGITUDE,
+    )
 
     fun isSamePoint(a: LocationData, b: LocationData): Boolean =
         abs(a.latitude - b.latitude) < MapDefaults.SAME_POINT_DEGREES && abs(a.longitude - b.longitude) < MapDefaults.SAME_POINT_DEGREES
@@ -41,7 +44,9 @@ class ProfileMapController(private val deps: ProfileMapDependencies) {
     suspend fun addressOf(point: LocationData): String? = deps.geocoder.addressOf(point, deps.language())
 
     suspend fun search(query: String): List<PlaceSuggestionUi> =
-        if (query.isBlank()) emptyList() else deps.places.searchPlaces(query.trim()).map { PlaceSuggestionUi(it.placeId, it.primaryText, it.secondaryText) }
+        if (query.isBlank()) emptyList() else deps.places.searchPlaces(query.trim()).map {
+            PlaceSuggestionUi(it.placeId, it.primaryText, it.secondaryText)
+        }
 
     suspend fun pointOf(placeId: String): LocationData? {
         val place = deps.places.fetchPlaceDetails(placeId) ?: return null
@@ -55,7 +60,9 @@ class ProfileMapController(private val deps: ProfileMapDependencies) {
             LocateResult.Unavailable
         } else {
             suspendCancellableCoroutine<LocateResult> { continuation ->
-                deps.location.fetchCurrentLocation { point -> if (continuation.isActive) continuation.resume(point?.let(LocateResult::Found) ?: LocateResult.Unavailable) }
+                deps.location.fetchCurrentLocation { point ->
+                    if (continuation.isActive) continuation.resume(point?.let(LocateResult::Found) ?: LocateResult.Unavailable)
+                }
             }
         }
         PermissionOutcome.Denied -> LocateResult.Denied

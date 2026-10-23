@@ -26,7 +26,9 @@ object MerchantDeepLinkPaths {
  */
 fun deepLinkTarget(link: DeepLink, route: LaunchRoute): Screen? = when (link.first) {
     MerchantDeepLinkPaths.REGISTER -> if (route == LaunchRoute.LOGIN) Screen.Login(register = true) else null
-    MerchantDeepLinkPaths.BOOKINGS -> link.segments.takeIf { route == LaunchRoute.HOME && it.size == MerchantDeepLinkPaths.BOOKING_SEGMENTS }
+    MerchantDeepLinkPaths.BOOKINGS -> link.segments.takeIf {
+        route == LaunchRoute.HOME && it.size == MerchantDeepLinkPaths.BOOKING_SEGMENTS
+    }
         ?.let { Screen.BookingDetails(it[1]) }
     else -> null
 }

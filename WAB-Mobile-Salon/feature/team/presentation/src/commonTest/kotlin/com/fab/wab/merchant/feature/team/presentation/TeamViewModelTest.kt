@@ -40,9 +40,14 @@ class TeamViewModelTest {
     private val team = FakeTeam()
     private val affected = FakeAffected()
 
-    private fun session(role: MemberRole, vararg keys: String) = SessionState.SignedIn(MemberProfile("me", "s1", "Huda", role), keys.toSet())
+    private fun session(
+        role: MemberRole,
+        vararg keys: String,
+    ) = SessionState.SignedIn(MemberProfile("me", "s1", "Huda", role), keys.toSet())
 
-    private fun <T : Any> TestScope.collect(flow: Flow<T>) = mutableListOf<T>().also { list -> backgroundScope.launch { flow.collect { list += it } } }
+    private fun <T : Any> TestScope.collect(flow: Flow<T>) = mutableListOf<T>().also { list ->
+        backgroundScope.launch { flow.collect { list += it } }
+    }
 
     private fun TestScope.teamVm(state: SessionState = session(MemberRole.OWNER)) = TeamViewModel(
         TeamDependencies(team, affected, flowOf(state), NoOpAnalyticsTracker, { "Staff left" }, { "failed" }),
@@ -53,7 +58,10 @@ class TeamViewModelTest {
         id,
         MemberEditDependencies(
             team, FakeLocations(), FakeFilePicker(media = listOf(PickedFile("p.jpg", byteArrayOf(1), "image/jpeg"))),
-            FakeImageCropper(PickedImage(byteArrayOf(2), "image/jpeg")), UploadFileUseCase(FakeUploads()), NoOpAnalyticsTracker, { "failed" },
+            FakeImageCropper(PickedImage(
+                byteArrayOf(2),
+                "image/jpeg",
+            )), UploadFileUseCase(FakeUploads()), NoOpAnalyticsTracker, { "failed" },
         ),
         testScope = backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }

@@ -67,12 +67,25 @@ internal fun BookingsFilterSheet(state: UiState, onAction: (UiAction) -> Unit) {
             AppText(text = stringResource(Res.string.bookings_filter), style = AppTheme.typography.titleMedium)
             Label(stringResource(Res.string.bookings_filter_dates))
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.space10)) {
-                DateButton(stringResource(Res.string.bookings_filter_from), draft.from, Modifier.weight(1f)) { picking = DateEnd.FROM }
-                DateButton(stringResource(Res.string.bookings_filter_to), draft.to, Modifier.weight(1f)) { picking = DateEnd.TO }
+                DateButton(
+                    stringResource(Res.string.bookings_filter_from),
+                    draft.from,
+                    onClick = { picking = DateEnd.FROM },
+                    modifier = Modifier.weight(1f),
+                )
+                DateButton(
+                    stringResource(Res.string.bookings_filter_to),
+                    draft.to,
+                    onClick = { picking = DateEnd.TO },
+                    modifier = Modifier.weight(1f),
+                )
             }
             if (state.staffOptions.isNotEmpty()) {
                 Label(stringResource(Res.string.bookings_filter_staff))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(spacing.space8),
+                    verticalArrangement = Arrangement.spacedBy(spacing.space8),
+                ) {
                     state.staffOptions.forEach { staff ->
                         val selected = staff.id in draft.staffIds
                         AppFilterChip(text = staff.name, selected = selected, onClick = {
@@ -82,7 +95,10 @@ internal fun BookingsFilterSheet(state: UiState, onAction: (UiAction) -> Unit) {
                 }
             }
             Label(stringResource(Res.string.bookings_filter_status))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.space8),
+                verticalArrangement = Arrangement.spacedBy(spacing.space8),
+            ) {
                 BookingStatus.entries.forEach { status ->
                     val selected = status in draft.statuses
                     AppFilterChip(text = bookingStatusLabel(status), selected = selected, onClick = {
@@ -91,7 +107,10 @@ internal fun BookingsFilterSheet(state: UiState, onAction: (UiAction) -> Unit) {
                 }
             }
             Label(stringResource(Res.string.bookings_filter_payment))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.space8),
+                verticalArrangement = Arrangement.spacedBy(spacing.space8),
+            ) {
                 PaymentStatus.entries.forEach { payment ->
                     val selected = draft.paymentStatus == payment
                     AppFilterChip(text = paymentStatusLabel(payment), selected = selected, onClick = {
@@ -100,12 +119,25 @@ internal fun BookingsFilterSheet(state: UiState, onAction: (UiAction) -> Unit) {
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AppText(text = stringResource(Res.string.bookings_filter_bride), style = AppTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                AppText(
+                    text = stringResource(Res.string.bookings_filter_bride),
+                    style = AppTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                )
                 AppSwitch(checked = draft.brideOnly, onCheckedChange = { draft = draft.copy(brideOnly = it) })
             }
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.space10)) {
-                AppButton(stringResource(Res.string.bookings_filter_reset), { onAction(UiAction.OnFilterClear) }, Modifier.weight(RESET_WEIGHT), kind = ButtonKind.Outlined)
-                AppButton(stringResource(Res.string.bookings_filter_apply), { onAction(UiAction.OnFilterApply(draft)) }, Modifier.weight(APPLY_WEIGHT))
+                AppButton(
+                    stringResource(Res.string.bookings_filter_reset),
+                    { onAction(UiAction.OnFilterClear) },
+                    Modifier.weight(RESET_WEIGHT),
+                    kind = ButtonKind.Outlined,
+                )
+                AppButton(
+                    stringResource(Res.string.bookings_filter_apply),
+                    { onAction(UiAction.OnFilterApply(draft)) },
+                    Modifier.weight(APPLY_WEIGHT),
+                )
             }
         }
     }
@@ -139,7 +171,7 @@ private fun Label(text: String) {
 }
 
 @Composable
-private fun DateButton(label: String, date: LocalDate?, modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun DateButton(label: String, date: LocalDate?, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val value = date?.let { DatePickerDates.display(it.toString()) } ?: stringResource(Res.string.bookings_any_date)
     Column(modifier = modifier) {
         AppText(text = label, style = AppTheme.typography.labelSmall, color = AppTheme.colors.muted)

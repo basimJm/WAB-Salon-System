@@ -60,7 +60,9 @@ class FinanceNavigation(override val navController: NavHostController) : Navigat
         }
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
-                is BankDetailsContract.SideEffect.VerifyPhone -> navigateTo(Screen.Otp(AuthPurpose.BANK_DETAILS.code, effect.countryCode, effect.number))
+                is BankDetailsContract.SideEffect.VerifyPhone -> navigateTo(
+                    Screen.Otp(AuthPurpose.BANK_DETAILS.code, effect.countryCode, effect.number),
+                )
                 BankDetailsContract.SideEffect.Saved -> {
                     notifications.show(getString(Res.string.bank_verified), style = NotificationStyle.Success)
                     navigateBack()

@@ -34,6 +34,8 @@ class HoursApi(private val client: HttpClient) {
     suspend fun updateClosure(id: String, body: PatchSalonHoursClosuresByIdBody): BaseResponse<PatchSalonHoursClosuresByIdData> =
         client.patch(MerchantOperations.patchSalonHoursClosuresById.pathWith(ID to id)) { setBody(body) }.body()
 
-    suspend fun deleteClosure(id: String): BaseResponse<JsonElement?> = client.delete(MerchantOperations.deleteSalonHoursClosuresById.pathWith(ID to id)).body()
+    suspend fun deleteClosure(id: String): BaseResponse<JsonElement?> = client.delete(
+        MerchantOperations.deleteSalonHoursClosuresById.pathWith(ID to id),
+    ).body()
 
 }

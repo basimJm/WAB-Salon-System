@@ -49,7 +49,15 @@ class BookingMappersTest {
             hasBride = false, appointmentStart = START, appointmentEnd = END, respondBy = END, personsCount = 1.0, total = "25.000",
             customer = GetBookingsByIdDataCustomer("c1", "Noor", "+962790000000"), staff = emptyList(), refundStatus = "NONE",
             persons = listOf(
-                GetBookingsByIdDataPersonsItem("Noor", false, START, END, "25.000", null, listOf(GetBookingsByIdDataPersonsItemServicesItem("Cut", "25.000", 45.0))),
+                GetBookingsByIdDataPersonsItem(
+                    "Noor",
+                    false,
+                    START,
+                    END,
+                    "25.000",
+                    null,
+                    listOf(GetBookingsByIdDataPersonsItemServicesItem("Cut", "25.000", 45.0)),
+                ),
             ),
             money = GetBookingsByIdDataMoney("25.000", "0.000", "0.000", "25.000", "0.000"),
             policy = JsonObject(mapOf("cancellationWindowHours" to JsonPrimitive(24))),

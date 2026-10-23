@@ -55,7 +55,11 @@ internal fun BrideBanner(modifier: Modifier = Modifier) {
                 style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 color = colors.onGradient,
             )
-            AppText(text = stringResource(Res.string.request_bride_subtitle), style = AppTheme.typography.labelSmall, color = colors.onGradient)
+            AppText(
+                text = stringResource(Res.string.request_bride_subtitle),
+                style = AppTheme.typography.labelSmall,
+                color = colors.onGradient,
+            )
         }
     }
 }
@@ -125,7 +129,11 @@ internal fun TotalLine(request: BookingRequestUi, modifier: Modifier = Modifier)
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                AppText(text = stringResource(Res.string.request_total), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+                AppText(
+                    text = stringResource(Res.string.request_total),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.muted,
+                )
                 AppText(text = request.total, style = AppTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), maxLines = 1)
             }
             val payment = request.payment

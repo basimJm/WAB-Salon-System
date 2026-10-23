@@ -33,7 +33,7 @@ fun GetSalonHoursData.toDomain(): SalonHours = SalonHours(
         val weekday = DAY_CODES[day.day.uppercase()] ?: return@mapNotNull null
         val open = minuteOf(day.open)
         val close = minuteOf(day.close)
-        weekday to if (day.isOff || open == null || close == null || close <= open) null else DayHours(open, close)
+        weekday to if (day.isOff) null else dayHoursOf(open, close)
     }.toMap(),
     closures = closures.mapNotNull { closure ->
         val from = dateOf(closure.from) ?: return@mapNotNull null
@@ -52,3 +52,7 @@ internal fun minuteOf(hhmm: String): Int? {
 
 /** A civil date or the date part of an ISO instant. */
 internal fun dateOf(value: String): LocalDate? = runCatching { LocalDate.parse(value.trim().take(ISO_DATE_LENGTH)) }.getOrNull()
+
+/** Open and close minutes of a working day; null when either is missing or the day would be empty. */
+private fun dayHoursOf(open: Int?, close: Int?): DayHours? =
+    if (open != null && close != null && close > open) DayHours(open, close) else null

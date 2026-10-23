@@ -46,7 +46,9 @@ class TeamNavigation(override val navController: NavHostController) : Navigator 
         navGraphBuilder.composable<Screen.Team> { TeamDestination() }
         navGraphBuilder.composable<Screen.MemberEdit> { entry -> MemberDestination(entry.toRoute<Screen.MemberEdit>().memberId) }
         navGraphBuilder.composable<Screen.StaffProfile> { entry -> StaffDestination(entry.toRoute<Screen.StaffProfile>().memberId) }
-        navGraphBuilder.composable<Screen.PermissionsEditor> { entry -> PermissionsDestination(entry.toRoute<Screen.PermissionsEditor>().memberId) }
+        navGraphBuilder.composable<Screen.PermissionsEditor> { entry ->
+            PermissionsDestination(entry.toRoute<Screen.PermissionsEditor>().memberId)
+        }
     }
 
     @Composable
@@ -78,7 +80,10 @@ class TeamNavigation(override val navController: NavHostController) : Navigator 
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is MemberEditContract.SideEffect.Saved -> {
-                    notifications.show(getString(if (effect.added) Res.string.member_added else Res.string.member_saved), style = NotificationStyle.Success)
+                    notifications.show(
+                        getString(if (effect.added) Res.string.member_added else Res.string.member_saved),
+                        style = NotificationStyle.Success,
+                    )
                     navigateBack()
                 }
                 is MemberEditContract.SideEffect.OpenPermissions -> navigateTo(Screen.PermissionsEditor(effect.memberId))
@@ -126,7 +131,10 @@ class TeamNavigation(override val navController: NavHostController) : Navigator 
         val notifications = rememberNotificationManager()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
-                PermissionsContract.SideEffect.Saved -> notifications.show(getString(Res.string.perm_saved), style = NotificationStyle.Success)
+                PermissionsContract.SideEffect.Saved -> notifications.show(
+                    getString(Res.string.perm_saved),
+                    style = NotificationStyle.Success,
+                )
                 is PermissionsContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }

@@ -123,7 +123,11 @@ internal fun ReasonSheet(
                 singleLine = false,
             )
         }
-        if (!reject) AppText(text = stringResource(Res.string.cancel_full_refund), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+        if (!reject) AppText(
+            text = stringResource(Res.string.cancel_full_refund),
+            style = AppTheme.typography.bodySmall,
+            color = AppTheme.colors.muted,
+        )
         AppButton(
             text = stringResource(if (reject) Res.string.confirm_reject else Res.string.confirm_cancel),
             onClick = onConfirm,
@@ -169,7 +173,13 @@ private fun ReassignSheet(dialog: DetailsDialog.Reassign, state: UiState, onActi
                 ChoiceRow(item.name, index == dialog.personIndex) { onAction(UiAction.OnReassignPerson(index)) }
             }
         }
-        person?.staff?.let { AppText(text = stringResource(Res.string.reassign_current, it.name), style = AppTheme.typography.labelMedium, color = AppTheme.colors.muted) }
+        person?.staff?.let {
+            AppText(
+                text = stringResource(Res.string.reassign_current, it.name),
+                style = AppTheme.typography.labelMedium,
+                color = AppTheme.colors.muted,
+            )
+        }
         state.staffOptions.filter { it.id != person?.staff?.id }.forEach { staff ->
             ChoiceRow(staff.name, staff.id == dialog.staffId) { onAction(UiAction.OnReassignStaff(staff.id)) }
         }

@@ -26,15 +26,15 @@ class GoogleMapProvider : MapProvider {
     @Composable
     override fun Map(
         target: LocationData,
-        onCenterChanged: (LocationData) -> Unit,
-        onMovingChanged: (Boolean) -> Unit,
+        onCenterChange: (LocationData) -> Unit,
+        onMovingChange: (Boolean) -> Unit,
         modifier: Modifier,
     ) {
         val camera = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(target.toLatLng(), MapDefaults.DEFAULT_ZOOM)
         }
-        val currentOnCenter by rememberUpdatedState(onCenterChanged)
-        val currentOnMoving by rememberUpdatedState(onMovingChanged)
+        val currentOnCenter by rememberUpdatedState(onCenterChange)
+        val currentOnMoving by rememberUpdatedState(onMovingChange)
         LaunchedEffect(target) {
             val here = camera.position.target.toLocation()
             if (!here.isSamePointAs(target)) camera.animate(CameraUpdateFactory.newLatLng(target.toLatLng()))

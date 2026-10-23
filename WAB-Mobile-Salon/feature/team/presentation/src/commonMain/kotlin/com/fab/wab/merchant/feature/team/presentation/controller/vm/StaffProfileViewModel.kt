@@ -53,26 +53,55 @@ class StaffProfileViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handleProfile(event) || handleSchedule(event) || handleLeaves(event) || handleDialogs(event)
+    }
+
+    private fun handleProfile(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnProvides -> edit { copy(providesServices = event.value) }
             is UiAction.OnBio -> edit { copy(bio = event.value.take(StaffLimits.BIO_MAX)) }
             is UiAction.OnYears -> edit { copy(years = event.value.filter(Char::isDigit)) }
-            is UiAction.OnService -> edit { copy(serviceIds = if (event.id in serviceIds) serviceIds - event.id else serviceIds + event.id) }
-            is UiAction.OnBride -> if (uiState.value.womenSalon) edit { copy(brideQualified = event.value) }
+            is UiAction.OnService -> edit {
+                copy(serviceIds = if (event.id in serviceIds) serviceIds - event.id else serviceIds + event.id)
+            }
+            is UiAction.OnBride -> {
+                if (uiState.value.womenSalon) edit { copy(brideQualified = event.value) }
+            }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleSchedule(event: UiAction): Boolean {
+        when (event) {
             is UiAction.OnDay -> edit {
-                copy(workingDays = if (event.working) (workingDays + StaffDay(event.day)).distinctBy { it.day } else workingDays.filterNot { it.day == event.day })
+                val days = if (event.working) {
+                    (workingDays + StaffDay(event.day)).distinctBy { it.day }
+                } else {
+                    workingDays.filterNot { it.day == event.day }
+                }
+                copy(workingDays = days)
             }
             is UiAction.OnCustomHours -> {
                 val open = uiState.value.salonDays[event.day]
-                editDay(event.day) { if (event.custom && open != null) copy(startMinute = open.openMinute, endMinute = open.closeMinute) else StaffDay(day) }
+                editDay(event.day) {
+                    if (event.custom && open != null) copy(startMinute = open.openMinute, endMinute = open.closeMinute) else StaffDay(day)
+                }
             }
             is UiAction.OnDayStart -> editDay(event.day) { copy(startMinute = event.minute) }
             is UiAction.OnDayEnd -> editDay(event.day) { copy(endMinute = event.minute) }
             UiAction.OnSave -> {
                 val state = uiState.value
-                if (!state.canSave) return
+                if (!state.canSave) return true
                 if (state.errors.isNotEmpty()) updateState { copy(showErrors = true) } else apply(StaffChange.Save(state.draft))
             }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleLeaves(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnAddLeave -> updateState { copy(leaveSheet = LeaveForm(from = today, to = today)) }
             is UiAction.OnEditLeave -> uiState.value.leaves.firstOrNull { it.id == event.id && it.editable }?.let { leave ->
                 updateState { copy(leaveSheet = LeaveForm(leave.id, leave.from, leave.to, leave.note.orEmpty())) }
@@ -80,8 +109,17 @@ class StaffProfileViewModel(
             is UiAction.OnLeaveFrom -> editLeave { copy(from = event.date, to = to?.takeIf { it >= event.date } ?: event.date) }
             is UiAction.OnLeaveTo -> editLeave { copy(to = event.date) }
             is UiAction.OnLeaveNote -> editLeave { copy(note = event.value.take(StaffLimits.NOTE_MAX)) }
-            UiAction.OnLeaveSave -> uiState.value.leaveSheet?.let { form -> if (uiState.value.leaveValid) apply(StaffChange.SaveLeave(form)) }
+            UiAction.OnLeaveSave -> uiState.value.leaveSheet?.let { form ->
+                if (uiState.value.leaveValid) apply(StaffChange.SaveLeave(form))
+            }
             UiAction.OnLeaveDismiss -> updateState { copy(leaveSheet = null) }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleDialogs(event: UiAction): Boolean {
+        when (event) {
             is UiAction.OnDeleteLeave -> updateState { copy(deleteLeaveId = event.id) }
             UiAction.OnDeleteConfirm -> deleteLeave()
             UiAction.OnConflictCancelBookings -> resolveConflict()
@@ -91,12 +129,17 @@ class StaffProfileViewModel(
             }
             UiAction.OnDismiss -> updateState { copy(conflict = null, deleteLeaveId = null) }
             UiAction.OnRetry -> load()
+            else -> return false
         }
+        return true
     }
 
     private fun edit(change: StaffDraft.() -> StaffDraft) = updateState { copy(draft = draft.change()) }
 
-    private fun editDay(day: DayOfWeek, change: StaffDay.() -> StaffDay) = edit { copy(workingDays = workingDays.map { if (it.day == day) it.change() else it }) }
+    private fun editDay(
+        day: DayOfWeek,
+        change: StaffDay.() -> StaffDay,
+    ) = edit { copy(workingDays = workingDays.map { if (it.day == day) it.change() else it }) }
 
     private fun editLeave(change: LeaveForm.() -> LeaveForm) = updateState { copy(leaveSheet = leaveSheet?.change()) }
 
@@ -106,7 +149,8 @@ class StaffProfileViewModel(
             when (val result = deps.staff.profile(memberId)) {
                 is AppResult.Success -> {
                     val draft = result.data.toDraft()
-                    val women = (deps.salon.current.value ?: (deps.salon.refresh() as? AppResult.Success)?.data)?.gender == SalonGenderType.FEMALE
+                    val salon = deps.salon.current.value ?: (deps.salon.refresh() as? AppResult.Success)?.data
+                    val women = salon?.gender == SalonGenderType.FEMALE
                     updateState {
                         copy(
                             loading = false,
@@ -142,7 +186,9 @@ class StaffProfileViewModel(
             updateState { copy(saving = false) }
             if (error == null) return@launch
             val ids = error.conflictBookingIds()
-            if (!ids.isNullOrEmpty()) updateState { copy(conflict = StaffConflict(ids, change)) } else emitSideEffect(SideEffect.ShowError(deps.errorText(error)))
+            if (!ids.isNullOrEmpty()) updateState {
+                copy(conflict = StaffConflict(ids, change))
+            } else emitSideEffect(SideEffect.ShowError(deps.errorText(error)))
         }
     }
 
@@ -162,11 +208,18 @@ class StaffProfileViewModel(
         val from = form.from ?: return null
         val to = form.to ?: return null
         val id = form.id
-        val result = if (id == null) deps.staff.addLeave(memberId, from, to, form.note) else deps.staff.updateLeave(memberId, id, from, to, form.note)
+        val result = if (id == null) deps.staff.addLeave(
+            memberId,
+            from,
+            to,
+            form.note,
+        ) else deps.staff.updateLeave(memberId, id, from, to, form.note)
         return when (result) {
             is AppResult.Success -> {
                 deps.analytics.trackAction(AnalyticsAction(TeamAnalytics.ACTION_LEAVE_SAVE))
-                updateState { copy(leaveSheet = null, leaves = (leaves.filterNot { it.id == result.data.id } + result.data).sortedBy { it.from }) }
+                updateState {
+                    copy(leaveSheet = null, leaves = (leaves.filterNot { it.id == result.data.id } + result.data).sortedBy { it.from })
+                }
                 emitSideEffect(SideEffect.Done(StaffMessage.LEAVE_SAVED))
                 null
             }

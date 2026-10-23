@@ -91,7 +91,9 @@ class IosFilePicker : FilePicker {
     private fun readVideo(url: NSURL): PickedFile? {
         val data = NSData.dataWithContentsOfURL(url) ?: return null
         val seconds = CMTimeGetSeconds(AVURLAsset(uRL = url, options = null).duration)
-        val type = url.pathExtension?.let { UTType.typeWithFilenameExtension(it)?.preferredMIMEType } ?: FilePickerDefaults.VIDEO_CONTENT_TYPE
+        val type = url.pathExtension?.let {
+            UTType.typeWithFilenameExtension(it)?.preferredMIMEType
+        } ?: FilePickerDefaults.VIDEO_CONTENT_TYPE
         return PickedFile(
             name = url.lastPathComponent ?: FilePickerDefaults.FALLBACK_NAME,
             bytes = data.toByteArray(),

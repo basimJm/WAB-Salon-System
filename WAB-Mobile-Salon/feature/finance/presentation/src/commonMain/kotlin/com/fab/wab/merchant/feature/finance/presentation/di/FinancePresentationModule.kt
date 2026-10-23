@@ -25,7 +25,13 @@ val financePresentationModule = module {
     }
     viewModel {
         BankDetailsViewModel(
-            BankDetailsDependencies(bank = get(), locations = get(), session = get<SessionStore>().state, pending = get(), analytics = get()),
+            BankDetailsDependencies(
+                bank = get(),
+                locations = get(),
+                session = get<SessionStore>().state,
+                pending = get(),
+                analytics = get(),
+            ),
         )
     }
 }

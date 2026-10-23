@@ -30,7 +30,9 @@ class TeamApi(private val client: HttpClient) {
             parameter(PAGE_SIZE, pageSize)
         }.body()
 
-    suspend fun member(id: String): BaseResponse<GetTeamMembersByIdData> = client.get(MerchantOperations.getTeamMembersById.pathWith(ID to id)).body()
+    suspend fun member(id: String): BaseResponse<GetTeamMembersByIdData> = client.get(
+        MerchantOperations.getTeamMembersById.pathWith(ID to id),
+    ).body()
 
     suspend fun create(body: PostTeamMembersBody): BaseResponse<PostTeamMembersData> =
         client.post(MerchantOperations.postTeamMembers.path) { setBody(body) }.body()

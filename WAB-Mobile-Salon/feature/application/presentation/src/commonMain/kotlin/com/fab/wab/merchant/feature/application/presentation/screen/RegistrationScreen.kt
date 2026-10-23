@@ -57,7 +57,11 @@ fun RegistrationScreen(
             verticalArrangement = Arrangement.spacedBy(spacing.space16),
         ) {
             if (!state.isResubmission) {
-                AppText(text = stringResource(Res.string.reg_subtitle), style = AppTheme.typography.bodyMedium, color = AppTheme.colors.muted)
+                AppText(
+                    text = stringResource(Res.string.reg_subtitle),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.colors.muted,
+                )
             }
             AppCard { SalonFields(state, onAction) }
             if (!state.isResubmission) AppCard { OwnerFields(state, onAction) }

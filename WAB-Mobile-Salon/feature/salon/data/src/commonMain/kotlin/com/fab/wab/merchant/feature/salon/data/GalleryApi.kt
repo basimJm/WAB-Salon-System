@@ -28,5 +28,7 @@ class GalleryApi(private val client: HttpClient) {
     suspend fun reorder(body: PutSalonGalleryOrderBody): BaseResponse<List<PutSalonGalleryOrderDataItem>> =
         client.put(MerchantOperations.putSalonGalleryOrder.path) { setBody(body) }.body()
 
-    suspend fun delete(id: String): BaseResponse<JsonElement?> = client.delete(MerchantOperations.deleteSalonGalleryById.pathWith(ID to id)).body()
+    suspend fun delete(id: String): BaseResponse<JsonElement?> = client.delete(
+        MerchantOperations.deleteSalonGalleryById.pathWith(ID to id),
+    ).body()
 }

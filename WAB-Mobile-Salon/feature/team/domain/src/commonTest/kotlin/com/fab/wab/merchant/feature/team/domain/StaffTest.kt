@@ -26,7 +26,10 @@ class StaffTest {
         assertTrue(staffErrors(StaffDraft(years = "5", workingDays = listOf(StaffDay(DayOfWeek.SATURDAY))), salon).isEmpty())
         assertEquals(
             setOf(StaffField.BIO, StaffField.YEARS, StaffField.DAYS),
-            staffErrors(StaffDraft(bio = "b".repeat(StaffLimits.BIO_MAX + 1), years = "81", workingDays = listOf(StaffDay(DayOfWeek.FRIDAY))), salon),
+            staffErrors(
+                StaffDraft(bio = "b".repeat(StaffLimits.BIO_MAX + 1), years = "81", workingDays = listOf(StaffDay(DayOfWeek.FRIDAY))),
+                salon,
+            ),
         )
         val today = LocalDate(2026, 10, 24)
         assertTrue(leaveValid(today, LocalDate(2026, 10, 26), "", today))

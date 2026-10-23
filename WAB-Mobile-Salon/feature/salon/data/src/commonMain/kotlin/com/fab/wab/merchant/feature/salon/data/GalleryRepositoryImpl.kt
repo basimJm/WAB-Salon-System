@@ -33,13 +33,17 @@ class GalleryRepositoryImpl(private val api: GalleryApi) : GalleryRepository {
 
     override suspend fun add(type: GalleryType, key: String, durationSec: Int?): AppResult<GalleryItem> =
         when (val result = safeApiCall { api.add(PostSalonGalleryBody(type.name, key, durationSec = durationSec)) }) {
-            is AppResult.Success -> result.data.data.toDomain()?.let { AppResult.Success(it) } ?: AppResult.Error(AppError.UnknownError(UNREADABLE_ITEM))
+            is AppResult.Success -> result.data.data.toDomain()?.let {
+                AppResult.Success(it)
+            } ?: AppResult.Error(AppError.UnknownError(UNREADABLE_ITEM))
             is AppResult.Error -> result
             AppResult.Loading -> AppResult.Loading
         }
 
     override suspend fun reorder(ids: List<String>): AppResult<List<GalleryItem>> =
-        safeApiCall { api.reorder(PutSalonGalleryOrderBody(ids)) }.mapSuccess { response -> response.data.mapNotNull { it.toDomain() }.sortedBy { it.order } }
+        safeApiCall {
+            api.reorder(PutSalonGalleryOrderBody(ids))
+        }.mapSuccess { response -> response.data.mapNotNull { it.toDomain() }.sortedBy { it.order } }
 
     override suspend fun delete(id: String): AppResult<Unit> = safeApiCall { api.delete(id) }.mapSuccess { }
 }

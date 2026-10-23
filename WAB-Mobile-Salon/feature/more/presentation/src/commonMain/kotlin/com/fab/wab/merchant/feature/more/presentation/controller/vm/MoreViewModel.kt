@@ -40,7 +40,10 @@ class MoreDependencies(
 class MoreViewModel(
     private val deps: MoreDependencies,
     testScope: CoroutineScope? = null,
-) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(version = deps.version, versionCode = deps.versionCode), testScope) {
+) : BaseViewModel<UiState, UiAction, SideEffect>(
+    initialState = UiState(version = deps.version, versionCode = deps.versionCode),
+    testScope,
+) {
 
     /** Set when the member opened the overlay settings; the next resume reports the result. */
     private var overlayAsked = false
@@ -58,7 +61,10 @@ class MoreViewModel(
     }
 
     override fun handle(event: UiAction) {
-        val contact = uiState.value.contact
+        handleSettings(event) || handleSupport(event) || handleLogout(event)
+    }
+
+    private fun handleSettings(event: UiAction): Boolean {
         when (event) {
             UiAction.OnLanguageToggle -> scope.launch {
                 val language = deps.appearance.toggleLanguage()
@@ -85,6 +91,14 @@ class MoreViewModel(
                 deps.analytics.trackAction(AnalyticsAction(MoreAnalytics.ACTION_SOUND))
                 deps.alert.play()
             }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleSupport(event: UiAction): Boolean {
+        val contact = uiState.value.contact
+        when (event) {
             UiAction.OnNotifications -> emitSideEffect(SideEffect.OpenNotifications)
             UiAction.OnContact -> updateState { copy(contactOpen = true) }
             UiAction.OnDismissContact -> updateState { copy(contactOpen = false) }
@@ -93,23 +107,39 @@ class MoreViewModel(
             UiAction.OnEmail -> contact?.email?.takeIf { it.isNotBlank() }?.let { emitSideEffect(SideEffect.Email(it)) }
             UiAction.OnFaq -> emitSideEffect(SideEffect.OpenFaq)
             is UiAction.OnContent -> emitSideEffect(SideEffect.OpenContent(event.slug))
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleLogout(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnLogout -> updateState { copy(logoutDialog = true) }
             UiAction.OnLogoutConfirm -> logout()
             UiAction.OnDismiss -> updateState { copy(logoutDialog = false) }
+            else -> return false
         }
+        return true
     }
 
-    private fun track(name: String, value: String) = deps.analytics.trackAction(AnalyticsAction(name, analyticsParams { text(MoreAnalytics.PARAM_VALUE, value) }))
+    private fun track(
+        name: String,
+        value: String,
+    ) = deps.analytics.trackAction(AnalyticsAction(name, analyticsParams { text(MoreAnalytics.PARAM_VALUE, value) }))
 
     /** PRD §14 `overlay_permission_result`: once, when the member comes back from the system screen. */
     private fun reportOverlayResult() {
         if (!overlayAsked) return
         overlayAsked = false
         val granted = uiState.value.overlayGranted
-        deps.analytics.trackAction(AnalyticsAction(MoreAnalytics.ACTION_OVERLAY_RESULT, analyticsParams { flag(MoreAnalytics.PARAM_GRANTED, granted) }))
+        deps.analytics.trackAction(
+            AnalyticsAction(MoreAnalytics.ACTION_OVERLAY_RESULT, analyticsParams { flag(MoreAnalytics.PARAM_GRANTED, granted) }),
+        )
     }
 
-    private fun refreshOverlay() = updateState { copy(overlaySupported = deps.overlay.isSupported, overlayGranted = deps.overlay.isGranted()) }
+    private fun refreshOverlay() = updateState {
+        copy(overlaySupported = deps.overlay.isSupported, overlayGranted = deps.overlay.isGranted())
+    }
 
     /** The session is cleared whatever the backend answers; the shell routes to login when the session ends. */
     private fun logout() {

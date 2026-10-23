@@ -45,7 +45,12 @@ private val Staff = listOf(
         ),
         Closed,
     ),
-    CalendarColumnUi("s2", "هبة", listOf(CalendarBlockUi("b3", 660, 750, "ريم", "صبغة شعر", "11:00–12:30", BookingStatus.COMPLETED)), Closed),
+    CalendarColumnUi(
+        "s2",
+        "هبة",
+        listOf(CalendarBlockUi("b3", 660, 750, "ريم", "صبغة شعر", "11:00–12:30", BookingStatus.COMPLETED)),
+        Closed,
+    ),
     CalendarColumnUi(
         "s3", "دانة", emptyList(),
         Closed + CalendarShadeUi(840, CLOSE, ShadeKind.LEAVE, "إجازة"), tag = "إجازة من 2 م",
@@ -64,7 +69,9 @@ private fun CalendarFrame(mode: CalendarMode, dark: Boolean, rtl: Boolean) {
                         monthLabel = "أكتوبر 2026",
                         selectedDate = Selected,
                         mode = mode,
-                        strip = Week.map { WeekStripDayUi(it, it.dayOfWeek.name.take(3), it == Selected, it == Selected, it.day % 2 == 0, false) },
+                        strip = Week.map {
+                            WeekStripDayUi(it, it.dayOfWeek.name.take(3), it == Selected, it == Selected, it.day % 2 == 0, false)
+                        },
                         onAction = {},
                         filterCount = Staff.size,
                         modifier = Modifier.padding(AppTheme.spacing.space16),
@@ -72,8 +79,16 @@ private fun CalendarFrame(mode: CalendarMode, dark: Boolean, rtl: Boolean) {
                     if (mode == CalendarMode.DAY) {
                         AppCalendarDayView(Staff, Window, Labels, onBlockClick = {}, onSwipe = {}, nowMinute = NOW)
                     } else {
-                        AppCalendarLegend(listOf(BookingStatus.PENDING, BookingStatus.APPROVED, BookingStatus.COMPLETED, BookingStatus.NO_SHOW))
-                        AppCalendarWeekView(Week.map { CalendarColumnUi(it.toString(), it.toString(), Staff.first().blocks, Closed) }, Window, Labels, onDayClick = {}, onSwipe = {})
+                        AppCalendarLegend(
+                            listOf(BookingStatus.PENDING, BookingStatus.APPROVED, BookingStatus.COMPLETED, BookingStatus.NO_SHOW),
+                        )
+                        AppCalendarWeekView(
+                            Week.map { CalendarColumnUi(it.toString(), it.toString(), Staff.first().blocks, Closed) },
+                            Window,
+                            Labels,
+                            onDayClick = {},
+                            onSwipe = {},
+                        )
                     }
                 }
             }

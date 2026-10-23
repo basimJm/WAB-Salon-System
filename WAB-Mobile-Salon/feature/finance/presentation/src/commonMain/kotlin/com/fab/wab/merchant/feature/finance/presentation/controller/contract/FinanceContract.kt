@@ -31,6 +31,9 @@ sealed interface FinanceContract {
                 FinanceTab.REFUNDS -> refunds.isEmpty()
                 FinanceTab.PAYOUTS -> payouts.isEmpty()
             }
+
+        /** Rows of any tab are on screen: a failed load keeps them and shows a banner instead of the error state. */
+        val hasRows: Boolean get() = transactions.isNotEmpty() || refunds.isNotEmpty() || payouts.isNotEmpty()
     }
 
     sealed interface UiAction {

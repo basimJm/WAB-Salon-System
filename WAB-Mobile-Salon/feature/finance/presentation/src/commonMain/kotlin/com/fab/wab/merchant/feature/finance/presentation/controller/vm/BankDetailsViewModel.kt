@@ -63,7 +63,10 @@ class BankDetailsViewModel(
             updateState { copy(loading = true, error = null) }
             when (val result = deps.bank.details()) {
                 is AppResult.Success -> updateState {
-                    copy(loading = false, saved = result.data, draft = draft.copy(bankName = result.data?.bankName.orEmpty(), accountHolder = result.data?.accountHolder.orEmpty()))
+                    copy(loading = false, saved = result.data, draft = draft.copy(
+                        bankName = result.data?.bankName.orEmpty(),
+                        accountHolder = result.data?.accountHolder.orEmpty(),
+                    ))
                 }
                 is AppResult.Error -> {
                     val message = deps.errorText(result.appError)

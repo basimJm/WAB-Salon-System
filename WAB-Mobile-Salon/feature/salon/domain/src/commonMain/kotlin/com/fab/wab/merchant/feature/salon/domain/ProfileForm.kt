@@ -85,7 +85,10 @@ data class ProfileChanges(
 data class Change<T>(val value: T)
 
 fun changesOf(original: ProfileForm, edited: ProfileForm): ProfileChanges {
-    fun text(before: String, after: String): Change<String?>? = after.trim().takeIf { it != before.trim() }?.let { Change(it.ifEmpty { null }) }
+    fun text(
+        before: String,
+        after: String,
+    ): Change<String?>? = after.trim().takeIf { it != before.trim() }?.let { Change(it.ifEmpty { null }) }
     return ProfileChanges(
         name = edited.name.trim().takeIf { it != original.name.trim() },
         description = text(original.description, edited.description),

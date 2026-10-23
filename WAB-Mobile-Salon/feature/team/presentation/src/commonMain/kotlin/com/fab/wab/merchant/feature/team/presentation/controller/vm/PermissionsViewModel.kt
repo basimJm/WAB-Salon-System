@@ -33,7 +33,9 @@ class PermissionsViewModel(
 
     override fun handle(event: UiAction) {
         when (event) {
-            is UiAction.OnToggle -> if (uiState.value.member?.isOwner == false) updateState { copy(selected = selected.toggled(event.permission)) }
+            is UiAction.OnToggle -> if (uiState.value.member?.isOwner == false) updateState {
+                copy(selected = selected.toggled(event.permission))
+            }
             UiAction.OnApplyTemplate -> uiState.value.member?.takeIf { !it.isOwner }?.let { member ->
                 updateState { copy(selected = PermissionTemplates.forRole(member.role)) }
             }
@@ -68,7 +70,10 @@ class PermissionsViewModel(
             updateState { copy(saving = false) }
             when (result) {
                 is AppResult.Success -> {
-                    analytics.trackAction(AnalyticsAction(TeamAnalytics.ACTION_PERMISSIONS_SAVE, analyticsParams { number(TeamAnalytics.PARAM_COUNT, state.selected.size.toLong()) }))
+                    analytics.trackAction(AnalyticsAction(
+                        TeamAnalytics.ACTION_PERMISSIONS_SAVE,
+                        analyticsParams { number(TeamAnalytics.PARAM_COUNT, state.selected.size.toLong()) },
+                    ))
                     updateState { copy(member = result.data, original = result.data.permissions, selected = result.data.permissions) }
                     emitSideEffect(SideEffect.Saved)
                 }

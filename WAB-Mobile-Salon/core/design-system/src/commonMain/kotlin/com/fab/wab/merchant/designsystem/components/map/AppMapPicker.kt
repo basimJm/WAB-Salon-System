@@ -88,7 +88,10 @@ private fun CenterPin(lifted: Boolean, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val sizes = AppTheme.sizes
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Box(Modifier.size(sizes.mapPinShadowWidth, sizes.mapPinShadowHeight).background(colors.scrim.copy(alpha = AppTheme.alpha.hover), AppTheme.shapes.pill))
+        Box(Modifier.size(
+            sizes.mapPinShadowWidth,
+            sizes.mapPinShadowHeight,
+        ).background(colors.scrim.copy(alpha = AppTheme.alpha.hover), AppTheme.shapes.pill))
         Icon(
             imageVector = AppIcons.Location,
             contentDescription = stringResource(Res.string.map_pin),
@@ -105,7 +108,10 @@ private fun CenterPin(lifted: Boolean, modifier: Modifier = Modifier) {
 private fun SearchArea(state: MapPickerUi, onAction: (MapPickerAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
     Column(
-        modifier = modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars).padding(horizontal = spacing.space16, vertical = spacing.space12),
+        modifier = modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars).padding(
+            horizontal = spacing.space16,
+            vertical = spacing.space12,
+        ),
         verticalArrangement = Arrangement.spacedBy(spacing.space6),
     ) {
         AppSearchBar(
@@ -115,7 +121,9 @@ private fun SearchArea(state: MapPickerUi, onAction: (MapPickerAction) -> Unit, 
         )
         if (state.suggestions.isNotEmpty()) {
             Column(modifier = Modifier.fillMaxWidth().glassBackground(AppTheme.glass, AppTheme.shapes.medium, GlassStyle.Prominent)) {
-                state.suggestions.forEach { suggestion -> SuggestionRow(suggestion) { onAction(MapPickerAction.SuggestionPicked(suggestion.id)) } }
+                state.suggestions.forEach { suggestion ->
+                    SuggestionRow(suggestion) { onAction(MapPickerAction.SuggestionPicked(suggestion.id)) }
+                }
             }
         }
     }

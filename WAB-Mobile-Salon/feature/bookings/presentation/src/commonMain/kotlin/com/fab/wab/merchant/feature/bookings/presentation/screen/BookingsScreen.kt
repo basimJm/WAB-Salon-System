@@ -81,7 +81,11 @@ private fun ListBody(state: UiState, onAction: (UiAction) -> Unit) {
         state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
         state.isEmpty -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             val searching = state.query.isNotBlank() || state.filter.activeCount > 0
-            val (title, body) = if (searching) Res.string.bookings_no_results to Res.string.bookings_no_results_body else emptyCopy(state.tab)
+            val (title, body) = if (searching) {
+                Res.string.bookings_no_results to Res.string.bookings_no_results_body
+            } else {
+                emptyCopy(state.tab)
+            }
             AppEmptyState(title = stringResource(title), message = stringResource(body))
         }
         else -> AppPagedList(
@@ -117,7 +121,9 @@ internal fun BookingSummary.toCard(nowMs: Long): BookingCardUi {
         status = status,
         payment = paymentStatus,
         isBride = hasBride,
-        autoCancelIn = respondBy?.takeIf { pending && nowMs > 0 }?.let { BookingTimers.autoCancelRemaining(it.toEpochMilliseconds(), nowMs) },
+        autoCancelIn = respondBy?.takeIf {
+            pending && nowMs > 0
+        }?.let { BookingTimers.autoCancelRemaining(it.toEpochMilliseconds(), nowMs) },
     )
 }
 

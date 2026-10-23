@@ -77,7 +77,11 @@ fun BookingDetailsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: (
         when {
             state.loading && details == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
             details == null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
-            else -> AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }, modifier = Modifier.padding(padding)) {
+            else -> AppPullToRefresh(
+                refreshing = state.refreshing,
+                onRefresh = { onAction(UiAction.OnRefresh) },
+                modifier = Modifier.padding(padding),
+            ) {
                 DetailsContent(details, state.nowMs, onAction)
             }
         }
@@ -115,10 +119,17 @@ private fun Header(details: BookingDetails, nowMs: Long, onAction: (UiAction) ->
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AppText(text = summary.reference, style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
+                AppText(
+                    text = summary.reference,
+                    style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.weight(1f),
+                )
                 AppButton(stringResource(Res.string.details_copy), { onAction(UiAction.OnCopyReference) }, kind = ButtonKind.Text)
             }
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.space6), verticalArrangement = Arrangement.spacedBy(spacing.space6)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.space6),
+                verticalArrangement = Arrangement.spacedBy(spacing.space6),
+            ) {
                 AppBookingStatusBadge(summary.status)
                 summary.paymentStatus?.let { AppPaymentBadge(it) }
                 AppRefundBadge(details.refundStatus)
@@ -130,7 +141,9 @@ private fun Header(details: BookingDetails, nowMs: Long, onAction: (UiAction) ->
             if (summary.status == BookingStatus.PENDING && respondBy != null && nowMs > 0) {
                 AutoCancelStrip(autoCancelText(BookingTimers.autoCancelRemaining(respondBy.toEpochMilliseconds(), nowMs)))
             }
-            refundNote(details.refundStatus)?.let { AppText(text = stringResource(it), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted) }
+            refundNote(details.refundStatus)?.let {
+                AppText(text = stringResource(it), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            }
             details.rejectionReason?.let { ReasonLine(stringResource(Res.string.details_reject_reason), it) }
             details.cancellationReason?.let { ReasonLine(stringResource(Res.string.details_cancel_reason), it) }
         }
@@ -145,8 +158,20 @@ private fun CustomerCard(details: BookingDetails, onAction: (UiAction) -> Unit) 
         details.summary.customerPhone?.let { phone ->
             AppText(text = phone, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.space10)) {
-                AppButton(stringResource(Res.string.details_call), { onAction(UiAction.OnCallCustomer) }, Modifier.weight(1f), kind = ButtonKind.Secondary, leadingIcon = AppIcons.Call)
-                AppButton(stringResource(Res.string.details_whatsapp), { onAction(UiAction.OnWhatsAppCustomer) }, Modifier.weight(1f), kind = ButtonKind.Secondary, leadingIcon = AppIcons.Chat)
+                AppButton(
+                    stringResource(Res.string.details_call),
+                    { onAction(UiAction.OnCallCustomer) },
+                    Modifier.weight(1f),
+                    kind = ButtonKind.Secondary,
+                    leadingIcon = AppIcons.Call,
+                )
+                AppButton(
+                    stringResource(Res.string.details_whatsapp),
+                    { onAction(UiAction.OnWhatsAppCustomer) },
+                    Modifier.weight(1f),
+                    kind = ButtonKind.Secondary,
+                    leadingIcon = AppIcons.Chat,
+                )
             }
         }
     }

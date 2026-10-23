@@ -43,20 +43,40 @@ class BookingDetailsViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handleActions(event) || handleDialogs(event) || handleContact(event)
+    }
+
+    private fun handleActions(event: UiAction): Boolean {
         when (event) {
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnRetry -> load(refresh = false)
             is UiAction.OnActionClick -> open(event.action)
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleDialogs(event: UiAction): Boolean {
+        when (event) {
             is UiAction.OnReasonSelect -> editReason { copy(selected = event.reason) }
             is UiAction.OnReasonText -> editReason { copy(text = event.value.take(BookingsDefaults.REASON_TEXT_MAX)) }
             is UiAction.OnReassignPerson -> editReassign { copy(personIndex = event.index) }
             is UiAction.OnReassignStaff -> editReassign { copy(staffId = event.staffId) }
             UiAction.OnDialogConfirm -> confirm()
             UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleContact(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnCallCustomer -> uiState.value.details?.summary?.customerPhone?.let { emitSideEffect(SideEffect.Dial(it)) }
             UiAction.OnWhatsAppCustomer -> uiState.value.details?.summary?.customerPhone?.let { emitSideEffect(SideEffect.WhatsApp(it)) }
             UiAction.OnCopyReference -> uiState.value.details?.summary?.reference?.let { emitSideEffect(SideEffect.CopyReference(it)) }
+            else -> return false
         }
+        return true
     }
 
     private fun editReason(change: DetailsDialog.Reason.() -> DetailsDialog.Reason) =
@@ -85,7 +105,11 @@ class BookingDetailsViewModel(
                 if (reason == null || !isReasonValid(reason, dialog.text, BookingsDefaults.REASON_TEXT_MAX)) return
                 val text = dialog.text.takeIf { it.isNotBlank() }
                 run(dialog.action, reason.name) {
-                    if (dialog.action == BookingAction.REJECT) repository.reject(bookingId, reason, text) else repository.cancel(bookingId, reason, text)
+                    if (dialog.action == BookingAction.REJECT) repository.reject(
+                        bookingId,
+                        reason,
+                        text,
+                    ) else repository.cancel(bookingId, reason, text)
                 }
             }
             is DetailsDialog.Confirm -> run(dialog.action) {

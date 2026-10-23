@@ -12,7 +12,10 @@ class PolicyTest {
         assertTrue(policyErrors(PolicyDraft()).isEmpty())
         assertEquals(setOf(PolicyField.WINDOW, PolicyField.OPTIONS), policyErrors(PolicyDraft(windowHours = "0", options = emptySet())))
         assertEquals(setOf(PolicyField.WINDOW), policyErrors(PolicyDraft(windowHours = "721")))
-        assertEquals(setOf(PolicyField.DEPOSIT), policyErrors(PolicyDraft(options = setOf(PaymentOption.DEPOSIT), depositPercentage = "101")))
+        assertEquals(
+            setOf(PolicyField.DEPOSIT),
+            policyErrors(PolicyDraft(options = setOf(PaymentOption.DEPOSIT), depositPercentage = "101")),
+        )
         assertTrue(policyErrors(PolicyDraft(options = setOf(PaymentOption.FULL_ONLINE), depositPercentage = "")).isEmpty())
         assertEquals(setOf(PolicyField.NOTES), policyErrors(PolicyDraft(notes = "n".repeat(PolicyLimits.NOTES_MAX + 1))))
     }

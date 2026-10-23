@@ -45,11 +45,15 @@ private class FakeFinance : FinanceRepository {
         calls += "tx:$from:$to:$page"
         if (fail) return AppResult.Error(AppError.NetworkError("x"))
         val size = if (page == 1) FinanceDefaults.PAGE_SIZE else 1
-        return AppResult.Success(List(size) { Transaction("t$page-$it", "b$it", "WAB-$it", PaymentType.DEPOSIT, "5.000", "0.100", "4.900", "2026-10-02") })
+        return AppResult.Success(
+            List(size) { Transaction("t$page-$it", "b$it", "WAB-$it", PaymentType.DEPOSIT, "5.000", "0.100", "4.900", "2026-10-02") },
+        )
     }
     override suspend fun refunds(from: LocalDate, to: LocalDate, page: Int): AppResult<List<Refund>> {
         calls += "rf:$from:$to:$page"
-        return AppResult.Success(listOf(Refund("r1", null, null, "5.000", RefundSource.AUTO_CANCEL, null, RefundStatus.REFUNDED, "2026-10-02", null)))
+        return AppResult.Success(
+            listOf(Refund("r1", null, null, "5.000", RefundSource.AUTO_CANCEL, null, RefundStatus.REFUNDED, "2026-10-02", null)),
+        )
     }
     override suspend fun payouts(from: LocalDate, to: LocalDate, page: Int): AppResult<List<Payout>> {
         calls += "po:$from:$to:$page"
@@ -63,7 +67,13 @@ class FinanceViewModelTest {
     private val finance = FakeFinance()
 
     private fun TestScope.viewModel(role: MemberRole = MemberRole.OWNER) = FinanceViewModel(
-        FinanceDependencies(finance, flowOf(SessionState.SignedIn(MemberProfile("m", "s", "Huda", role), setOf("FINANCE_VIEW"))), NoOpAnalyticsTracker, { TODAY }, { "failed" }),
+        FinanceDependencies(
+            finance,
+            flowOf(SessionState.SignedIn(MemberProfile("m", "s", "Huda", role), setOf("FINANCE_VIEW"))),
+            NoOpAnalyticsTracker,
+            { TODAY },
+            { "failed" },
+        ),
         testScope = backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 

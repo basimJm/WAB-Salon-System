@@ -59,7 +59,7 @@ fun AppBookingRequestSheetContent(
 }
 
 @Composable
-private fun RequestContent(state: RequestSheetUi.Request, onAction: (RequestSheetAction) -> Unit, modifier: Modifier) {
+private fun RequestContent(state: RequestSheetUi.Request, onAction: (RequestSheetAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
     val request = state.request
     Box(modifier = modifier.fillMaxWidth()) {
@@ -113,7 +113,12 @@ private fun RequestHeader(request: BookingRequestUi, queue: RequestQueue) {
                 .background(Brush.linearGradient(listOf(colors.gradientStart, colors.gradientEnd)), AppTheme.shapes.circle),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(AppIcons.Notifications, contentDescription = null, tint = colors.onGradient, modifier = Modifier.size(AppTheme.sizes.iconLarge))
+            Icon(
+                AppIcons.Notifications,
+                contentDescription = null,
+                tint = colors.onGradient,
+                modifier = Modifier.size(AppTheme.sizes.iconLarge),
+            )
         }
         Column(modifier = Modifier.weight(1f)) {
             AppText(text = stringResource(Res.string.request_new_title), style = AppTheme.typography.headlineMedium)
@@ -139,7 +144,7 @@ private fun RequestHeader(request: BookingRequestUi, queue: RequestQueue) {
 }
 
 @Composable
-private fun AcceptedContent(state: RequestSheetUi.Accepted, onAction: (RequestSheetAction) -> Unit, modifier: Modifier) {
+private fun AcceptedContent(state: RequestSheetUi.Accepted, onAction: (RequestSheetAction) -> Unit, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val spacing = AppTheme.spacing
     Column(
@@ -151,11 +156,24 @@ private fun AcceptedContent(state: RequestSheetUi.Accepted, onAction: (RequestSh
             modifier = Modifier.size(AppTheme.sizes.requestDone).background(colors.success, AppTheme.shapes.circle),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(AppIcons.Check, contentDescription = null, tint = colors.onGradient, modifier = Modifier.size(AppTheme.sizes.requestDoneIcon))
+            Icon(
+                AppIcons.Check,
+                contentDescription = null,
+                tint = colors.onGradient,
+                modifier = Modifier.size(AppTheme.sizes.requestDoneIcon),
+            )
         }
-        AppText(text = stringResource(Res.string.request_accepted_title), style = AppTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+        AppText(
+            text = stringResource(Res.string.request_accepted_title),
+            style = AppTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+        )
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            AppText(text = state.reference, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = colors.accent)
+            AppText(
+                text = state.reference,
+                style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = colors.accent,
+            )
         }
         AppText(
             text = stringResource(Res.string.request_accepted_body),

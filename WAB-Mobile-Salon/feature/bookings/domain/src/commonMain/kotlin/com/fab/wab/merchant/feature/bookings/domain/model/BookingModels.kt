@@ -39,7 +39,13 @@ data class BookingFilter(
 ) {
     /** Number of active criteria (the filter icon badge and the chips). */
     val activeCount: Int
-        get() = listOf(from != null || to != null, staffIds.isNotEmpty(), statuses.isNotEmpty(), brideOnly, paymentStatus != null).count { it }
+        get() = listOf(
+            from != null || to != null,
+            staffIds.isNotEmpty(),
+            statuses.isNotEmpty(),
+            brideOnly,
+            paymentStatus != null,
+        ).count { it }
 }
 
 data class BookingQuery(val tab: BookingsTab, val text: String = "", val filter: BookingFilter = BookingFilter())
@@ -81,10 +87,20 @@ data class BookingDetails(
 enum class ResponseReason { FULLY_BOOKED, STAFF_UNAVAILABLE, SERVICE_UNAVAILABLE, SALON_EMERGENCY, EXCEPTIONAL_CLOSURE, OTHER }
 
 /** Rejection reasons of a pending request (design 03 `reasons`). */
-val REJECT_REASONS = listOf(ResponseReason.FULLY_BOOKED, ResponseReason.STAFF_UNAVAILABLE, ResponseReason.SERVICE_UNAVAILABLE, ResponseReason.OTHER)
+val REJECT_REASONS = listOf(
+    ResponseReason.FULLY_BOOKED,
+    ResponseReason.STAFF_UNAVAILABLE,
+    ResponseReason.SERVICE_UNAVAILABLE,
+    ResponseReason.OTHER,
+)
 
 /** Cancellation reasons of an approved booking (design 03 `cancelReasons`). */
-val CANCEL_REASONS = listOf(ResponseReason.SALON_EMERGENCY, ResponseReason.STAFF_UNAVAILABLE, ResponseReason.EXCEPTIONAL_CLOSURE, ResponseReason.OTHER)
+val CANCEL_REASONS = listOf(
+    ResponseReason.SALON_EMERGENCY,
+    ResponseReason.STAFF_UNAVAILABLE,
+    ResponseReason.EXCEPTIONAL_CLOSURE,
+    ResponseReason.OTHER,
+)
 
 object BookingsDefaults {
     const val FIRST_PAGE = 1

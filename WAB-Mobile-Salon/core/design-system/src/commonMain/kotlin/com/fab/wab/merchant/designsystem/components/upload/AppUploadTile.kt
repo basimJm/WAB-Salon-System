@@ -80,7 +80,10 @@ private fun BoxScope.TilePreview(item: UploadItemUi) {
 private fun PdfMark(modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     Box(
-        modifier = modifier.size(AppTheme.sizes.pdfMarkWidth, AppTheme.sizes.pdfMarkHeight).background(colors.dangerContainer, AppTheme.shapes.small),
+        modifier = modifier.size(
+            AppTheme.sizes.pdfMarkWidth,
+            AppTheme.sizes.pdfMarkHeight,
+        ).background(colors.dangerContainer, AppTheme.shapes.small),
         contentAlignment = Alignment.BottomCenter,
     ) {
         AppText(
@@ -113,7 +116,11 @@ private fun BoxScope.TileOverlay(item: UploadItemUi) {
             verticalArrangement = Arrangement.Center,
         ) {
             Icon(AppIcons.Error, contentDescription = null, tint = colors.onDangerContainer, modifier = Modifier.size(AppTheme.sizes.icon))
-            AppText(text = stringResource(Res.string.upload_failed), style = AppTheme.typography.labelSmall, color = colors.onDangerContainer)
+            AppText(
+                text = stringResource(Res.string.upload_failed),
+                style = AppTheme.typography.labelSmall,
+                color = colors.onDangerContainer,
+            )
         }
         UploadStatus.Uploaded -> Unit
     }
@@ -165,14 +172,23 @@ internal fun RemoveButton(onRemove: () -> Unit, modifier: Modifier = Modifier) {
             modifier = Modifier.size(AppTheme.sizes.removeBadge).background(colors.scrim, AppTheme.shapes.circle),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(AppIcons.Close, contentDescription = stringResource(Res.string.upload_remove), tint = colors.onMedia, modifier = Modifier.size(AppTheme.sizes.brideIcon))
+            Icon(
+                AppIcons.Close,
+                contentDescription = stringResource(Res.string.upload_remove),
+                tint = colors.onMedia,
+                modifier = Modifier.size(AppTheme.sizes.brideIcon),
+            )
         }
     }
 }
 
 /** The dashed "+ Add" tile that ends a document grid (design `addTile`). */
 @Composable
-fun AppUploadAddTile(onClick: () -> Unit, modifier: Modifier = Modifier, hint: String = stringResource(Res.string.upload_add_document_hint)) {
+fun AppUploadAddTile(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    hint: String = stringResource(Res.string.upload_add_document_hint),
+) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.medium
     val press = rememberGlassPress()

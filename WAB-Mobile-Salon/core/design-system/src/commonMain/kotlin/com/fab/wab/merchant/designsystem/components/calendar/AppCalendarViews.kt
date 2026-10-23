@@ -155,7 +155,10 @@ private fun StaffHeader(columns: List<CalendarColumnUi>, leading: Dp) {
                         style = AppTheme.typography.labelSmall,
                         color = AppTheme.colors.onWarningContainer,
                         maxLines = 1,
-                        modifier = Modifier.background(AppTheme.colors.warningContainer, AppTheme.shapes.extraSmall).padding(horizontal = spacing.space4),
+                        modifier = Modifier.background(
+                            AppTheme.colors.warningContainer,
+                            AppTheme.shapes.extraSmall,
+                        ).padding(horizontal = spacing.space4),
                     )
                 }
             }
@@ -167,14 +170,18 @@ private fun StaffHeader(columns: List<CalendarColumnUi>, leading: Dp) {
 private fun NowLine(top: Dp, leading: Dp) {
     val colors = AppTheme.colors
     val sizes = AppTheme.sizes
-    Box(modifier = Modifier.fillMaxWidth().offset(y = top).padding(start = leading).height(sizes.calendarNowLine).background(colors.danger))
-    Box(
-        modifier = Modifier
-            .offset(x = leading - sizes.calendarNowDot * HALF, y = top - sizes.calendarNowDot * HALF + sizes.calendarNowLine * HALF)
-            .width(sizes.calendarNowDot)
-            .height(sizes.calendarNowDot)
-            .background(colors.danger, AppTheme.shapes.circle),
-    )
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth().offset(
+            y = top,
+        ).padding(start = leading).height(sizes.calendarNowLine).background(colors.danger))
+        Box(
+            modifier = Modifier
+                .offset(x = leading - sizes.calendarNowDot * HALF, y = top - sizes.calendarNowDot * HALF + sizes.calendarNowLine * HALF)
+                .width(sizes.calendarNowDot)
+                .height(sizes.calendarNowDot)
+                .background(colors.danger, AppTheme.shapes.circle),
+        )
+    }
 }
 
 /** Horizontal swipe pages the calendar; toward the reading end = forward (mirrored in RTL). */
@@ -206,11 +213,17 @@ private fun Modifier.swipePages(onSwipe: (forward: Boolean) -> Unit): Modifier {
 fun AppCalendarLegend(statuses: List<BookingStatus>, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val spacing = AppTheme.spacing
-    Row(modifier = modifier.fillMaxWidth().padding(horizontal = spacing.space16, vertical = spacing.space8), horizontalArrangement = Arrangement.spacedBy(spacing.space12)) {
+    Row(
+        modifier = modifier.fillMaxWidth().padding(horizontal = spacing.space16, vertical = spacing.space8),
+        horizontalArrangement = Arrangement.spacedBy(spacing.space12),
+    ) {
         statuses.forEach { status ->
             val style = calendarBlockStyle(status, colors)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(spacing.space4)) {
-                Box(Modifier.width(AppTheme.sizes.statusDot).height(AppTheme.sizes.statusDot).background(style.content, AppTheme.shapes.extraSmall))
+                Box(Modifier.width(AppTheme.sizes.statusDot).height(AppTheme.sizes.statusDot).background(
+                    style.content,
+                    AppTheme.shapes.extraSmall,
+                ))
                 AppText(text = bookingStatusLabel(status), style = AppTheme.typography.labelSmall, color = colors.muted, maxLines = 1)
             }
         }

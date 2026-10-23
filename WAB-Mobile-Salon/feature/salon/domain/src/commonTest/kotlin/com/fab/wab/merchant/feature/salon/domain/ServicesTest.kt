@@ -23,7 +23,10 @@ class ServicesTest {
         assertEquals(setOf(ServiceField.DURATION), serviceErrors(valid.copy(durationMinutes = "42")))
         assertEquals(setOf(ServiceField.DURATION), serviceErrors(valid.copy(durationMinutes = "0")))
         assertEquals(setOf(ServiceField.DURATION), serviceErrors(valid.copy(durationMinutes = "1445")))
-        assertEquals(setOf(ServiceField.DESCRIPTION), serviceErrors(valid.copy(description = "d".repeat(ServiceLimits.DESCRIPTION_MAX + 1))))
+        assertEquals(
+            setOf(ServiceField.DESCRIPTION),
+            serviceErrors(valid.copy(description = "d".repeat(ServiceLimits.DESCRIPTION_MAX + 1))),
+        )
         assertEquals(setOf(ServiceField.MEDIA), serviceErrors(valid.copy(mediaKeys = List(ServiceLimits.MEDIA_MAX + 1) { "k$it" })))
     }
 

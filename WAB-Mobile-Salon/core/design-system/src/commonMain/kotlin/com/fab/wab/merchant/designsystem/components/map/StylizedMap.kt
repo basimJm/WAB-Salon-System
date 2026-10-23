@@ -28,14 +28,14 @@ import com.fab.wab.merchant.designsystem.components.map.StylizedMapConstants as 
 @Composable
 internal fun StylizedMap(
     target: LocationData,
-    onCenterChanged: (LocationData) -> Unit,
-    onMovingChanged: (Boolean) -> Unit,
+    onCenterChange: (LocationData) -> Unit,
+    onMovingChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var drag by remember { mutableStateOf(Offset.Zero) }
     val currentTarget by rememberUpdatedState(target)
-    val currentOnCenter by rememberUpdatedState(onCenterChanged)
-    val currentOnMoving by rememberUpdatedState(onMovingChanged)
+    val currentOnCenter by rememberUpdatedState(onCenterChange)
+    val currentOnMoving by rememberUpdatedState(onMovingChange)
     val colors = AppTheme.colors
     val sizes = AppTheme.sizes
     Canvas(
@@ -96,5 +96,7 @@ private fun DrawScope.drawRoads(wide: Float, narrow: Float, color: Color) {
     rotate(S.ROAD_A_ANGLE) { drawRect(color, Offset(-overW, size.height * S.ROAD_A_TOP), Size(size.width + overW * S.BOTH_SIDES, wide)) }
     rotate(S.ROAD_B_ANGLE) { drawRect(color, Offset(-overW, size.height * S.ROAD_B_TOP), Size(size.width + overW * S.BOTH_SIDES, narrow)) }
     rotate(S.ROAD_C_ANGLE) { drawRect(color, Offset(size.width * S.ROAD_C_START, -overH), Size(wide, size.height + overH * S.BOTH_SIDES)) }
-    rotate(S.ROAD_D_ANGLE) { drawRect(color, Offset(size.width * S.ROAD_D_START, -overH), Size(narrow, size.height + overH * S.BOTH_SIDES)) }
+    rotate(S.ROAD_D_ANGLE) {
+        drawRect(color, Offset(size.width * S.ROAD_D_START, -overH), Size(narrow, size.height + overH * S.BOTH_SIDES))
+    }
 }

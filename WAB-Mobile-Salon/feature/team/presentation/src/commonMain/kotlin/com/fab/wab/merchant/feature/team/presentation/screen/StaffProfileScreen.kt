@@ -78,7 +78,11 @@ fun StaffProfileScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () 
                 verticalArrangement = Arrangement.spacedBy(spacing.space14),
             ) {
                 Stats(state)
-                SwitchRow(stringResource(Res.string.staff_provides), stringResource(Res.string.staff_provides_sub), state.draft.providesServices) {
+                SwitchRow(
+                    stringResource(Res.string.staff_provides),
+                    stringResource(Res.string.staff_provides_sub),
+                    state.draft.providesServices,
+                ) {
                     onAction(UiAction.OnProvides(it))
                 }
                 AppTextField(
@@ -97,7 +101,11 @@ fun StaffProfileScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () 
                 )
                 Services(state, onAction)
                 if (state.womenSalon) {
-                    SwitchRow(stringResource(Res.string.staff_bride), stringResource(Res.string.staff_bride_sub), state.draft.brideQualified) { onAction(UiAction.OnBride(it)) }
+                    SwitchRow(
+                        stringResource(Res.string.staff_bride),
+                        stringResource(Res.string.staff_bride_sub),
+                        state.draft.brideQualified,
+                    ) { onAction(UiAction.OnBride(it)) }
                 }
                 WorkingDays(state, onAction)
                 Leaves(state, onAction)
@@ -114,8 +122,15 @@ private fun Stats(state: UiState) {
     val ratingText = "${rating / RATING_SCALE}.${rating % RATING_SCALE}"
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
-            AppText(text = stringResource(Res.string.staff_rating, ratingText, profile.ratingCount), style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
-            AppText(text = stringResource(Res.string.staff_customers, profile.customersCount), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(Res.string.staff_rating, ratingText, profile.ratingCount),
+                style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            )
+            AppText(
+                text = stringResource(Res.string.staff_customers, profile.customersCount),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
         }
     }
 }
@@ -124,11 +139,19 @@ private fun Stats(state: UiState) {
 private fun Services(state: UiState, onAction: (UiAction) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6)) {
         AppText(text = stringResource(Res.string.staff_services), style = AppTheme.typography.labelLarge)
-        if (state.services.isEmpty()) AppText(text = stringResource(Res.string.staff_services_empty), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+        if (state.services.isEmpty()) AppText(
+            text = stringResource(Res.string.staff_services_empty),
+            style = AppTheme.typography.bodySmall,
+            color = AppTheme.colors.muted,
+        )
         state.services.forEach { service ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AppCheckbox(checked = service.id in state.draft.serviceIds, onCheckedChange = { onAction(UiAction.OnService(service.id)) })
-                AppText(text = service.name, style = AppTheme.typography.bodyMedium, color = if (service.active) AppTheme.colors.ink else AppTheme.colors.faint)
+                AppText(
+                    text = service.name,
+                    style = AppTheme.typography.bodyMedium,
+                    color = if (service.active) AppTheme.colors.ink else AppTheme.colors.faint,
+                )
             }
         }
     }

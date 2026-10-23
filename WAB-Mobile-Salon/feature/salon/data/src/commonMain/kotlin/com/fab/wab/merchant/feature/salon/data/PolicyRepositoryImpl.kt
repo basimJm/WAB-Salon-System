@@ -30,12 +30,18 @@ class PolicyApi(private val client: HttpClient) {
         client.put(MerchantOperations.putSalonPolicy.path) { setBody(body) }.body()
 }
 
-private inline fun <reified T : Enum<T>> enumOf(value: String, fallback: T): T = enumValues<T>().firstOrNull { it.name == value.uppercase() } ?: fallback
+private inline fun <reified T : Enum<T>> enumOf(
+    value: String,
+    fallback: T,
+): T = enumValues<T>().firstOrNull { it.name == value.uppercase() } ?: fallback
 
-private fun policy(
-    window: Double, options: List<String>, deposit: Double?, depositRefundable: Boolean, fullRefund: String,
-    noShowDeposit: String, noShowFull: String, notes: String?,
-) = SalonPolicy(
+/** The fields both policy DTOs share, before parsing (one mapper for GET and PUT). */
+private data class RawPolicy(
+    val window: Double, val options: List<String>, val deposit: Double?, val depositRefundable: Boolean, val fullRefund: String,
+    val noShowDeposit: String, val noShowFull: String, val notes: String?,
+)
+
+private fun RawPolicy.toDomain() = SalonPolicy(
     windowHours = window.toInt(),
     options = options.mapNotNull { code -> PaymentOption.entries.firstOrNull { it.name == code.uppercase() } }.toSet(),
     depositPercentage = deposit?.toInt(),
@@ -46,15 +52,15 @@ private fun policy(
     notes = notes.orEmpty(),
 )
 
-fun GetSalonPolicyData.toDomain() = policy(
+fun GetSalonPolicyData.toDomain() = RawPolicy(
     cancellationWindowHours, paymentOptions, depositPercentage, depositRefundableOnCustomerCancel,
     fullPaymentRefundOnCustomerCancel, noShowDeposit, noShowFullPayment, notes,
-)
+).toDomain()
 
-fun PutSalonPolicyData.toDomain() = policy(
+fun PutSalonPolicyData.toDomain() = RawPolicy(
     cancellationWindowHours, paymentOptions, depositPercentage, depositRefundableOnCustomerCancel,
     fullPaymentRefundOnCustomerCancel, noShowDeposit, noShowFullPayment, notes,
-)
+).toDomain()
 
 /** PUT replaces the policy: the deposit percentage only travels while DEPOSIT is offered; empty notes clear them. */
 fun PolicyDraft.toBody(): PutSalonPolicyBody = PutSalonPolicyBody(

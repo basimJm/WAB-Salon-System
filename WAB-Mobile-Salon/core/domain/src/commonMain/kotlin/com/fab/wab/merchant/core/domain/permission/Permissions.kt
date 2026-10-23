@@ -43,6 +43,7 @@ data class PermissionSet(val role: MemberRole?, val granted: Set<Permission>) {
 
     fun allOf(vararg permissions: Permission): Boolean = permissions.all(::has)
 
+    @Suppress("UnusedParameter") // every capability is owner-only today; naming it keeps call sites explicit (PRD §6.2)
     fun can(capability: OwnerCapability): Boolean = isOwner
 
     companion object {

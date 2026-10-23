@@ -82,11 +82,25 @@ fun MoreScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
             AppText(text = stringResource(Res.string.more_title), style = AppTheme.typography.headlineMedium)
             AccountCard(state)
             Group(stringResource(Res.string.more_settings)) {
-                Item(AppIcons.Language, stringResource(Res.string.more_language), stringResource(Res.string.more_language_value)) { onAction(UiAction.OnLanguageToggle) }
+                Item(
+                    AppIcons.Language,
+                    stringResource(Res.string.more_language),
+                    stringResource(Res.string.more_language_value),
+                ) { onAction(UiAction.OnLanguageToggle) }
                 AppDivider()
-                SwitchItem(AppIcons.ThemeDark, stringResource(Res.string.more_dark_mode), null, state.themeMode == ThemeMode.DARK) { onAction(UiAction.OnDarkMode(it)) }
+                SwitchItem(
+                    AppIcons.ThemeDark,
+                    stringResource(Res.string.more_dark_mode),
+                    null,
+                    state.themeMode == ThemeMode.DARK,
+                ) { onAction(UiAction.OnDarkMode(it)) }
                 AppDivider()
-                SwitchItem(AppIcons.Notifications, stringResource(Res.string.more_push), stringResource(Res.string.more_push_sub), state.pushEnabled) { onAction(UiAction.OnPush(it)) }
+                SwitchItem(
+                    AppIcons.Notifications,
+                    stringResource(Res.string.more_push),
+                    stringResource(Res.string.more_push_sub),
+                    state.pushEnabled,
+                ) { onAction(UiAction.OnPush(it)) }
                 if (state.overlaySupported) {
                     AppDivider()
                     Item(
@@ -96,7 +110,11 @@ fun MoreScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
                     ) { onAction(UiAction.OnOverlay) }
                 }
                 AppDivider()
-                Item(AppIcons.Play, stringResource(Res.string.more_sound), stringResource(Res.string.more_sound_sub)) { onAction(UiAction.OnSoundTest) }
+                Item(
+                    AppIcons.Play,
+                    stringResource(Res.string.more_sound),
+                    stringResource(Res.string.more_sound_sub),
+                ) { onAction(UiAction.OnSoundTest) }
                 AppDivider()
                 Item(AppIcons.Notifications, stringResource(Res.string.more_notifications), null) { onAction(UiAction.OnNotifications) }
             }
@@ -142,7 +160,11 @@ private fun AccountCard(state: UiState) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12)) {
             AppAvatar(name = state.memberName)
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
-                AppText(text = stringResource(Res.string.more_account), style = AppTheme.typography.labelMedium, color = AppTheme.colors.muted)
+                AppText(
+                    text = stringResource(Res.string.more_account),
+                    style = AppTheme.typography.labelMedium,
+                    color = AppTheme.colors.muted,
+                )
                 AppText(text = state.memberName, style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
             }
             role?.let { AppStatusBadge(text = stringResource(it), tone = StatusTone.Accent) }
@@ -169,7 +191,9 @@ private fun Item(icon: ImageVector, title: String, subtitle: String?, onClick: (
 
 @Composable
 private fun SwitchItem(icon: ImageVector, title: String, subtitle: String?, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(modifier = Modifier.padding(AppTheme.spacing.space8)) { Line(icon, title, subtitle) { AppSwitch(checked = checked, onCheckedChange = onChange) } }
+    Row(
+        modifier = Modifier.padding(AppTheme.spacing.space8),
+    ) { Line(icon, title, subtitle) { AppSwitch(checked = checked, onCheckedChange = onChange) } }
 }
 
 @Composable

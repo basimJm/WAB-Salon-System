@@ -94,7 +94,7 @@ fun ServiceEditScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -
 }
 
 @Composable
-private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier) {
+private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
     val errors = state.visibleErrors
     val draft = state.draft
@@ -104,7 +104,11 @@ private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifie
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(spacing.space12)) {
             AppImage(state.imageUrl, Modifier.size(AppTheme.sizes.avatar).clip(AppTheme.shapes.medium))
-            AppText(text = state.title, style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
+            AppText(
+                text = state.title,
+                style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.weight(1f),
+            )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(spacing.space10)) {
             AppTextField(
@@ -126,7 +130,11 @@ private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifie
         }
         AppText(text = stringResource(Res.string.service_price_hint), style = AppTheme.typography.labelSmall, color = AppTheme.colors.muted)
         if (state.womenSalon) {
-            ToggleRow(stringResource(Res.string.service_bride_only), stringResource(Res.string.service_bride_only_sub), draft.brideOnly) { onAction(UiAction.OnBrideOnly(it)) }
+            ToggleRow(
+                stringResource(Res.string.service_bride_only),
+                stringResource(Res.string.service_bride_only_sub),
+                draft.brideOnly,
+            ) { onAction(UiAction.OnBrideOnly(it)) }
         }
         AppTextField(
             value = draft.description,
@@ -136,8 +144,16 @@ private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifie
             error = if (ServiceField.DESCRIPTION in errors) stringResource(Res.string.service_description_error) else null,
         )
         Media(state, onAction)
-        ToggleRow(stringResource(Res.string.service_active), stringResource(Res.string.service_active_sub), draft.active) { onAction(UiAction.OnActive(it)) }
-        if (!state.isNew) AppText(text = stringResource(Res.string.service_price_note), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+        ToggleRow(
+            stringResource(Res.string.service_active),
+            stringResource(Res.string.service_active_sub),
+            draft.active,
+        ) { onAction(UiAction.OnActive(it)) }
+        if (!state.isNew) AppText(
+            text = stringResource(Res.string.service_price_note),
+            style = AppTheme.typography.bodySmall,
+            color = AppTheme.colors.muted,
+        )
     }
 }
 
@@ -150,12 +166,23 @@ private fun Media(state: UiState, onAction: (UiAction) -> Unit) {
         if (showCurrent) {
             state.currentMedia.forEach { url -> AppImage(url, Modifier.fillMaxWidth().clip(AppTheme.shapes.medium)) }
         } else if (!state.isNew && state.currentMedia.isNotEmpty()) {
-            AppText(text = stringResource(Res.string.service_media_replace), style = AppTheme.typography.bodySmall, color = AppTheme.colors.warning)
+            AppText(
+                text = stringResource(Res.string.service_media_replace),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.warning,
+            )
         }
         state.uploads.forEach { item ->
-            AppUploadTile(item = item, onRemove = { onAction(UiAction.OnRemoveMedia(item.id)) }, onRetry = { onAction(UiAction.OnRetryMedia(item.id)) })
+            AppUploadTile(
+                item = item,
+                onRemove = { onAction(UiAction.OnRemoveMedia(item.id)) },
+                onRetry = { onAction(UiAction.OnRetryMedia(item.id)) },
+            )
         }
-        if (state.uploads.size < ServiceLimits.MEDIA_MAX) AppUploadAddTile(onClick = { onAction(UiAction.OnAddMedia) }, hint = stringResource(Res.string.service_media))
+        if (state.uploads.size < ServiceLimits.MEDIA_MAX) AppUploadAddTile(
+            onClick = { onAction(UiAction.OnAddMedia) },
+            hint = stringResource(Res.string.service_media),
+        )
     }
 }
 

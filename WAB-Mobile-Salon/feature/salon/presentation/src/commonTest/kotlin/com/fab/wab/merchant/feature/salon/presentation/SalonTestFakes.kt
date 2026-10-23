@@ -56,20 +56,37 @@ internal class FakeLocations : LocationsRepository {
     override suspend fun countries(refresh: Boolean): AppResult<List<Country>> = AppResult.Success(emptyList())
     override suspend fun cities(countryCode: String, refresh: Boolean): AppResult<List<City>> =
         AppResult.Success(listOf(City("c1", "Amman"), City("c2", "Irbid")))
-    override suspend fun areas(cityId: String, refresh: Boolean): AppResult<List<Area>> = AppResult.Success(listOf(Area("a-$cityId", "Area $cityId")))
+    override suspend fun areas(
+        cityId: String,
+        refresh: Boolean,
+    ): AppResult<List<Area>> = AppResult.Success(listOf(Area("a-$cityId", "Area $cityId")))
 }
 
 internal class FakeUploads(var fail: Boolean = false) : UploadsRepository {
     override suspend fun presign(purpose: UploadPurpose, contentType: String, size: Long): AppResult<PresignedUpload> =
         AppResult.Success(PresignedUpload("${purpose.name}-key", "u", "PUT", emptyMap(), size))
-    override suspend fun upload(target: PresignedUpload, bytes: ByteArray, contentType: String, onProgress: (Float) -> Unit): AppResult<Unit> =
+    override suspend fun upload(
+        target: PresignedUpload,
+        bytes: ByteArray,
+        contentType: String,
+        onProgress: (Float) -> Unit,
+    ): AppResult<Unit> =
         if (fail) AppResult.Error(com.fab.wab.merchant.core.domain.AppError.NetworkError("offline")) else AppResult.Success(Unit)
-    override suspend fun confirm(purpose: UploadPurpose, key: String): AppResult<ConfirmedUpload> = AppResult.Success(ConfirmedUpload(key, "https://cdn/$key"))
+    override suspend fun confirm(
+        purpose: UploadPurpose,
+        key: String,
+    ): AppResult<ConfirmedUpload> = AppResult.Success(ConfirmedUpload(key, "https://cdn/$key"))
 }
 
 internal class FakePlaces : PlacesRepository {
     override suspend fun searchPlaces(query: String): List<PlacePrediction> = listOf(PlacePrediction("p1", "Mall", "Amman"))
-    override suspend fun fetchPlaceDetails(placeId: String): PlacePrediction? = PlacePrediction(placeId, "Mall", "Amman", PLACE_LAT, PLACE_LNG)
+    override suspend fun fetchPlaceDetails(placeId: String): PlacePrediction? = PlacePrediction(
+        placeId,
+        "Mall",
+        "Amman",
+        PLACE_LAT,
+        PLACE_LNG,
+    )
 }
 
 internal const val PLACE_LAT = 31.97

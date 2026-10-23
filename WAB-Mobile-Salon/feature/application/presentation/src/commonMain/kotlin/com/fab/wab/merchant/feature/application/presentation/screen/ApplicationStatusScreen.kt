@@ -58,9 +58,16 @@ fun ApplicationStatusScreen(state: UiState, onAction: (UiAction) -> Unit, modifi
     AppScreen(modifier = modifier) { padding ->
         val application = state.application
         when {
-            state.loading && application == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
+            state.loading && application == null -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) { AppLoadingIndicator() }
             application == null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
-            else -> AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }, modifier = Modifier.padding(padding)) {
+            else -> AppPullToRefresh(
+                refreshing = state.refreshing,
+                onRefresh = { onAction(UiAction.OnRefresh) },
+                modifier = Modifier.padding(padding),
+            ) {
                 StatusContent(application, state.phase ?: ApplicationPhase.PENDING, onAction)
             }
         }
@@ -91,11 +98,19 @@ private fun StatusContent(application: SalonApplication, phase: ApplicationPhase
         verticalArrangement = Arrangement.spacedBy(spacing.space14),
     ) {
         AppWordmark()
-        Box(Modifier.size(AppTheme.sizes.illustration).background(colors.soft, AppTheme.shapes.circle), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier.size(AppTheme.sizes.illustration).background(colors.soft, AppTheme.shapes.circle),
+            contentAlignment = Alignment.Center,
+        ) {
             Icon(copy.icon, contentDescription = null, tint = tint, modifier = Modifier.size(AppTheme.sizes.stateIcon))
         }
         AppText(text = stringResource(copy.title), style = AppTheme.typography.headlineMedium, textAlign = TextAlign.Center)
-        AppText(text = stringResource(copy.body), style = AppTheme.typography.bodyMedium, color = colors.muted, textAlign = TextAlign.Center)
+        AppText(
+            text = stringResource(copy.body),
+            style = AppTheme.typography.bodyMedium,
+            color = colors.muted,
+            textAlign = TextAlign.Center,
+        )
         application.submittedAt?.let { submitted ->
             val date = TimeFormat.isoDateText(submitted.toString()).orEmpty()
             AppText(text = stringResource(Res.string.status_submitted, date), style = AppTheme.typography.labelMedium, color = colors.faint)
@@ -107,29 +122,52 @@ private fun StatusContent(application: SalonApplication, phase: ApplicationPhase
 @Composable
 private fun PhaseActions(application: SalonApplication, phase: ApplicationPhase, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
-    when (phase) {
-        ApplicationPhase.PENDING -> {
-            AppCard(modifier = Modifier.fillMaxWidth()) {
-                Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
-                    AppText(text = stringResource(Res.string.status_prepare), style = AppTheme.typography.titleSmall)
-                    AppText(text = stringResource(Res.string.status_prepare_body), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
-                    AppButton(stringResource(Res.string.status_prepare), { onAction(UiAction.OnPrepareProfile) }, Modifier.fillMaxWidth())
-                }
-            }
-            AppButton(stringResource(Res.string.status_refresh), { onAction(UiAction.OnRefresh) }, Modifier.fillMaxWidth(), kind = ButtonKind.Text)
-        }
-        ApplicationPhase.REJECTED -> {
-            application.rejectionReason?.let { reason ->
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(spacing.space14),
+    ) {
+        when (phase) {
+            ApplicationPhase.PENDING -> {
                 AppCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(verticalArrangement = Arrangement.spacedBy(spacing.space6)) {
-                        AppText(text = stringResource(Res.string.status_reason), style = AppTheme.typography.labelMedium, color = AppTheme.colors.danger)
-                        AppText(text = reason, style = AppTheme.typography.bodyMedium)
+                    Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
+                        AppText(text = stringResource(Res.string.status_prepare), style = AppTheme.typography.titleSmall)
+                        AppText(
+                            text = stringResource(Res.string.status_prepare_body),
+                            style = AppTheme.typography.bodySmall,
+                            color = AppTheme.colors.muted,
+                        )
+                        AppButton(
+                            stringResource(Res.string.status_prepare),
+                            { onAction(UiAction.OnPrepareProfile) },
+                            Modifier.fillMaxWidth(),
+                        )
                     }
                 }
+                AppButton(
+                    stringResource(Res.string.status_refresh),
+                    { onAction(UiAction.OnRefresh) },
+                    Modifier.fillMaxWidth(),
+                    kind = ButtonKind.Text,
+                )
             }
-            AppButton(stringResource(Res.string.status_resubmit), { onAction(UiAction.OnResubmit) }, Modifier.fillMaxWidth())
+            ApplicationPhase.REJECTED -> {
+                application.rejectionReason?.let { reason ->
+                    AppCard(modifier = Modifier.fillMaxWidth()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(spacing.space6)) {
+                            AppText(
+                                text = stringResource(Res.string.status_reason),
+                                style = AppTheme.typography.labelMedium,
+                                color = AppTheme.colors.danger,
+                            )
+                            AppText(text = reason, style = AppTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+                AppButton(stringResource(Res.string.status_resubmit), { onAction(UiAction.OnResubmit) }, Modifier.fillMaxWidth())
+            }
+            ApplicationPhase.APPROVED ->
+                AppButton(stringResource(Res.string.status_continue), { onAction(UiAction.OnContinue) }, Modifier.fillMaxWidth())
         }
-        ApplicationPhase.APPROVED ->
-            AppButton(stringResource(Res.string.status_continue), { onAction(UiAction.OnContinue) }, Modifier.fillMaxWidth())
     }
 }

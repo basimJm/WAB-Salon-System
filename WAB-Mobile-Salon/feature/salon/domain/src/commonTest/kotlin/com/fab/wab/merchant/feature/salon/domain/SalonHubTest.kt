@@ -19,7 +19,10 @@ class SalonHubTest {
 
     @Test
     fun managerSeesOnlyGrantedTiles() {
-        val manager = PermissionSet(MemberRole.MANAGER, setOf(Permission.SERVICES_MANAGE, Permission.REVIEWS_VIEW, Permission.BOOKINGS_VIEW_ALL))
+        val manager = PermissionSet(
+            MemberRole.MANAGER,
+            setOf(Permission.SERVICES_MANAGE, Permission.REVIEWS_VIEW, Permission.BOOKINGS_VIEW_ALL),
+        )
         assertEquals(listOf(HubTile.SERVICES, HubTile.REVIEWS), hubEntries(manager, emptySet()).map { it.tile })
     }
 

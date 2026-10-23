@@ -27,7 +27,9 @@ class ServicesViewModel(
 
     override fun onStart() {
         repository.changes.onEach { saved ->
-            updateState { copy(services = if (services.any { it.id == saved.id }) services.map { if (it.id == saved.id) saved else it } else services + saved) }
+            updateState { copy(services = if (services.any {
+                it.id == saved.id
+            }) services.map { if (it.id == saved.id) saved else it } else services + saved) }
         }.launchIn(scope)
         load(refresh = false)
     }
@@ -35,7 +37,10 @@ class ServicesViewModel(
     override fun handle(event: UiAction) {
         when (event) {
             is UiAction.OnQuery -> updateState { copy(query = event.value) }
-            is UiAction.OnToggle -> if (event.active) toggle(event.id, active = true) else updateState { copy(confirmDeactivate = event.id) }
+            is UiAction.OnToggle -> if (event.active) toggle(
+                event.id,
+                active = true,
+            ) else updateState { copy(confirmDeactivate = event.id) }
             UiAction.OnConfirmDeactivate -> uiState.value.confirmDeactivate?.let { id ->
                 updateState { copy(confirmDeactivate = null) }
                 toggle(id, active = false)
@@ -72,7 +77,10 @@ class ServicesViewModel(
             updateState { copy(toggling = toggling - id) }
             when (result) {
                 is AppResult.Success -> {
-                    analytics.trackAction(AnalyticsAction(SalonAnalytics.ACTION_SERVICE_TOGGLE, analyticsParams { text(SalonAnalytics.PARAM_STATE, active.toString()) }))
+                    analytics.trackAction(AnalyticsAction(
+                        SalonAnalytics.ACTION_SERVICE_TOGGLE,
+                        analyticsParams { text(SalonAnalytics.PARAM_STATE, active.toString()) },
+                    ))
                     emitSideEffect(SideEffect.Toggled(active))
                 }
                 is AppResult.Error -> emitSideEffect(SideEffect.ShowError(errorText(result.appError)))

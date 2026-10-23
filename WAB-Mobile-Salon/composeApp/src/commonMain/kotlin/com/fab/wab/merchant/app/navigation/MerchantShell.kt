@@ -36,6 +36,7 @@ fun MerchantShell(
     offline: Boolean,
     onContactWab: () -> Unit,
     navController: NavHostController,
+    modifier: Modifier = Modifier,
 ) {
     val tabs = visibleMerchantTabs(permissions).filter { it in REGISTERED_TABS }
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -46,6 +47,7 @@ fun MerchantShell(
         selectedId = (currentTab ?: tabs.firstOrNull() ?: MerchantTab.MORE).name,
         onSelect = { id -> MerchantTab.fromId(id)?.let(navController::switchTab) },
         navigationVisible = currentTab != null && tabs.isNotEmpty(),
+        modifier = modifier,
     ) {
         Column {
             if (offline) AppOfflineSalonBanner(onContact = onContactWab, modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars))

@@ -62,7 +62,14 @@ class BankDetailsViewModelTest {
     private val pending = PendingOtpVerification()
 
     private fun TestScope.viewModel() = BankDetailsViewModel(
-        BankDetailsDependencies(bank, FakeCountries(), flowOf(SessionState.SignedIn(MemberProfile("owner", "s", "Huda", MemberRole.OWNER))), pending, NoOpAnalyticsTracker, { "failed" }),
+        BankDetailsDependencies(
+            bank,
+            FakeCountries(),
+            flowOf(SessionState.SignedIn(MemberProfile("owner", "s", "Huda", MemberRole.OWNER))),
+            pending,
+            NoOpAnalyticsTracker,
+            { "failed" },
+        ),
         testScope = backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 

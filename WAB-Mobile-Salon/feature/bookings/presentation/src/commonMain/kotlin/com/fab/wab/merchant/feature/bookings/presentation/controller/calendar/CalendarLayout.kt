@@ -88,7 +88,9 @@ fun dayColumns(
     val people = when {
         own != null -> listOf(own)
         filter.isNotEmpty() -> staff.filter { it.id in filter }
-        else -> staff + ofDay.map { it.staffId }.distinct().filter { id -> staff.none { it.id == id } }.map { StaffRef(it, UNKNOWN_STAFF_TITLE) }
+        else -> staff + ofDay.map {
+            it.staffId
+        }.distinct().filter { id -> staff.none { it.id == id } }.map { StaffRef(it, UNKNOWN_STAFF_TITLE) }
     }
     val shades = dayShades(day, hours, texts)
     return people.map { person ->

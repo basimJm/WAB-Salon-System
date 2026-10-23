@@ -57,6 +57,10 @@ class MemberEditViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handleForm(event) || handlePhoto(event) || handleActions(event)
+    }
+
+    private fun handleForm(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnFirstName -> edit { copy(firstName = event.value.take(MemberLimits.NAME_MAX)) }
             is UiAction.OnLastName -> edit { copy(lastName = event.value.take(MemberLimits.NAME_MAX)) }
@@ -67,6 +71,13 @@ class MemberEditViewModel(
                 updateState { copy(countryPickerOpen = false) }
             }
             UiAction.OnCountryDismiss -> updateState { copy(countryPickerOpen = false) }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handlePhoto(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnPickPhoto -> pickPhoto()
             is UiAction.OnCropConfirm -> crop(event.region)
             UiAction.OnCropCancel -> updateState { copy(cropBytes = null) }
@@ -74,12 +85,21 @@ class MemberEditViewModel(
                 edit { copy(photoKey = null, photoUrl = null) }
                 updateState { copy(photo = null) }
             }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleActions(event: UiAction): Boolean {
+        when (event) {
             is UiAction.OnRole -> if (event.role in ASSIGNABLE_ROLES) edit { copy(role = event.role) }
             UiAction.OnSave -> save()
             UiAction.OnPermissions -> memberId?.let { emitSideEffect(SideEffect.OpenPermissions(it)) }
             UiAction.OnStaffProfile -> memberId?.let { emitSideEffect(SideEffect.OpenStaff(it)) }
             UiAction.OnRetry -> load()
+            else -> return false
         }
+        return true
     }
 
     private fun edit(change: MemberDraft.() -> MemberDraft) = updateState { copy(draft = draft.change()) }
@@ -106,7 +126,15 @@ class MemberEditViewModel(
             val draft = member.toDraft()
             val photo = member.photoUrl?.let { UploadItemUi(PHOTO_ID, PHOTO_ID, UploadKind.IMAGE, UploadStatus.Uploaded, url = it) }
             updateState {
-                copy(loading = false, countries = countries, phone = member.phone, providesServices = member.providesServices, original = draft, draft = draft, photo = photo)
+                copy(
+                    loading = false,
+                    countries = countries,
+                    phone = member.phone,
+                    providesServices = member.providesServices,
+                    original = draft,
+                    draft = draft,
+                    photo = photo,
+                )
             }
         }
     }
@@ -154,7 +182,10 @@ class MemberEditViewModel(
             updateState { copy(saving = false) }
             when (result) {
                 is AppResult.Success -> {
-                    deps.analytics.trackAction(AnalyticsAction(TeamAnalytics.ACTION_MEMBER_SAVE, analyticsParams { text(TeamAnalytics.PARAM_NEW, (id == null).toString()) }))
+                    deps.analytics.trackAction(AnalyticsAction(
+                        TeamAnalytics.ACTION_MEMBER_SAVE,
+                        analyticsParams { text(TeamAnalytics.PARAM_NEW, (id == null).toString()) },
+                    ))
                     emitSideEffect(SideEffect.Saved(added = id == null))
                 }
                 is AppResult.Error -> emitSideEffect(SideEffect.ShowError(deps.errorText(result.appError)))

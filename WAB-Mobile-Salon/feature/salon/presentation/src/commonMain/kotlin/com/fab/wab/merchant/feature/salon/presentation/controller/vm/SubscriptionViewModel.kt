@@ -36,7 +36,10 @@ class SubscriptionViewModel(
         val contact = uiState.value.contact
         when (event) {
             is UiAction.OnContact -> {
-                analytics.trackAction(AnalyticsAction(SalonAnalytics.ACTION_CONTACT_WAB, analyticsParams { text(SalonAnalytics.PARAM_REASON, event.reason.name) }))
+                analytics.trackAction(AnalyticsAction(
+                    SalonAnalytics.ACTION_CONTACT_WAB,
+                    analyticsParams { text(SalonAnalytics.PARAM_REASON, event.reason.name) },
+                ))
                 updateState { copy(contactSheet = event.reason) }
             }
             UiAction.OnDismissContact -> updateState { copy(contactSheet = null) }

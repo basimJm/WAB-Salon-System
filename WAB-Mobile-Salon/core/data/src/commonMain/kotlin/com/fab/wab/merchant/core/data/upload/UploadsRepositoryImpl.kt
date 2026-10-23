@@ -56,7 +56,13 @@ class UploadsRepositoryImpl(private val api: UploadsApi) : UploadsRepository {
     }
 }
 
-internal fun PostUploadsPresignData.toDomain() = PresignedUpload(key, upload.url, upload.method, upload.headers.strings(), maxBytes.toLong())
+internal fun PostUploadsPresignData.toDomain() = PresignedUpload(
+    key,
+    upload.url,
+    upload.method,
+    upload.headers.strings(),
+    maxBytes.toLong(),
+)
 
 internal fun PostUploadsLicensePresignData.toDomain() =
     PresignedUpload(key, upload.url, upload.method, upload.headers.strings(), maxBytes.toLong())

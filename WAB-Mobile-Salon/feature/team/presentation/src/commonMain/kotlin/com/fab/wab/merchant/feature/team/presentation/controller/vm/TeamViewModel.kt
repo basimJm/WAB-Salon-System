@@ -46,24 +46,37 @@ class TeamViewModel(
     override fun onStart() {
         deps.session.onEach { session ->
             val permissions = session.permissionSet()
-            updateState { copy(access = TeamAccess(permissions.can(OwnerCapability.TEAM_MANAGE), permissions.has(Permission.STAFF_MANAGE))) }
+            updateState {
+                copy(access = TeamAccess(permissions.can(OwnerCapability.TEAM_MANAGE), permissions.has(Permission.STAFF_MANAGE)))
+            }
         }.launchIn(scope)
         load(refresh = false)
     }
 
     override fun handle(event: UiAction) {
+        handleMembers(event) || handleDialogs(event)
+    }
+
+    private fun handleMembers(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnMemberClick -> open(event.id)
             UiAction.OnAdd -> if (uiState.value.access.canAdd) emitSideEffect(SideEffect.AddMember)
             is UiAction.OnActiveChange -> {
-                val member = uiState.value.members.firstOrNull { it.id == event.id } ?: return
-                if (!uiState.value.access.canToggleActive(member)) return
+                val member = uiState.value.members.firstOrNull { it.id == event.id } ?: return true
+                if (!uiState.value.access.canToggleActive(member)) return true
                 if (event.active) setActive(event.id, active = true) else updateState { copy(confirmDeactivate = event.id) }
             }
             UiAction.OnConfirmDeactivate -> uiState.value.confirmDeactivate?.let { id ->
                 updateState { copy(confirmDeactivate = null) }
                 setActive(id, active = false)
             }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleDialogs(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnConflictCancelBookings -> cancelAffected()
             UiAction.OnConflictReassign -> uiState.value.conflict?.let { conflict ->
                 updateState { copy(conflict = null) }
@@ -72,7 +85,9 @@ class TeamViewModel(
             UiAction.OnDismiss -> updateState { copy(confirmDeactivate = null, conflict = null) }
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnRetry -> load(refresh = false)
+            else -> return false
         }
+        return true
     }
 
     private fun open(id: String) {
@@ -108,7 +123,10 @@ class TeamViewModel(
             updateState { copy(busy = busy - id) }
             when (result) {
                 is AppResult.Success -> {
-                    deps.analytics.trackAction(AnalyticsAction(TeamAnalytics.ACTION_MEMBER_ACTIVE, analyticsParams { text(TeamAnalytics.PARAM_STATE, active.toString()) }))
+                    deps.analytics.trackAction(AnalyticsAction(
+                        TeamAnalytics.ACTION_MEMBER_ACTIVE,
+                        analyticsParams { text(TeamAnalytics.PARAM_STATE, active.toString()) },
+                    ))
                     updateState { copy(members = members.map { if (it.id == id) result.data else it }) }
                     emitSideEffect(SideEffect.ActiveChanged(active))
                 }
@@ -133,7 +151,10 @@ class TeamViewModel(
             when (val result = deps.affected.cancel(conflict.bookingIds, AffectedReasons.STAFF_UNAVAILABLE, deps.unavailableReason())) {
                 is AppResult.Success -> {
                     deps.analytics.trackAction(
-                        AnalyticsAction(TeamAnalytics.ACTION_CANCEL_AFFECTED, analyticsParams { number(TeamAnalytics.PARAM_COUNT, conflict.bookingIds.size.toLong()) }),
+                        AnalyticsAction(
+                            TeamAnalytics.ACTION_CANCEL_AFFECTED,
+                            analyticsParams { number(TeamAnalytics.PARAM_COUNT, conflict.bookingIds.size.toLong()) },
+                        ),
                     )
                     setActive(conflict.memberId, active = false)
                 }

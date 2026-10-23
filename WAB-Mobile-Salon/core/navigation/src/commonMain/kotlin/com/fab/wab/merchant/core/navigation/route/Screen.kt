@@ -73,7 +73,4 @@ sealed interface Screen {
     @Serializable data object Notifications : Screen
 
     @Serializable data object Settings : Screen
-
-    // Template reference feature (removed with feature/sample)
-    @Serializable data class SampleDetails(val itemId: Int) : Screen
 }

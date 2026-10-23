@@ -42,7 +42,11 @@ internal fun CalendarFilterSheet(state: UiState, onAction: (UiAction) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(spacing.space8),
         ) {
             AppText(text = stringResource(Res.string.calendar_filter_title), style = AppTheme.typography.titleMedium)
-            AppText(text = stringResource(Res.string.calendar_filter_sub), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(Res.string.calendar_filter_sub),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
             CheckRow(stringResource(Res.string.calendar_filter_all), selected.isEmpty()) { selected = emptySet() }
             state.staff.forEach { staff ->
                 CheckRow(staff.name, staff.id in selected) {

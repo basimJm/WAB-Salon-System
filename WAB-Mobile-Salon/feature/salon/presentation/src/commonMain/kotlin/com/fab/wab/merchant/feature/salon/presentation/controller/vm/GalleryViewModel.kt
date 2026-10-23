@@ -53,19 +53,34 @@ class GalleryViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handleGrid(event) || handleDialogs(event)
+    }
+
+    private fun handleGrid(event: UiAction): Boolean {
         when (event) {
             UiAction.OnAdd -> add()
             is UiAction.OnItemClick -> click(event.id)
             is UiAction.OnRetryItem -> uiState.value.pending.firstOrNull { it.id == event.id }?.let { scope.launch { send(it) } }
-            is UiAction.OnMove -> if (uiState.value.mode == MediaGridMode.Reorder) updateState { copy(items = items.moved(event.from, event.to)) }
+            is UiAction.OnMove -> if (uiState.value.mode == MediaGridMode.Reorder) updateState {
+                copy(items = items.moved(event.from, event.to))
+            }
             is UiAction.OnMode -> enter(event.mode)
             UiAction.OnDone -> done()
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleDialogs(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnDeleteClick -> if (uiState.value.selected.isNotEmpty()) updateState { copy(deleteDialog = true) }
             UiAction.OnDeleteConfirm -> delete()
             UiAction.OnDialogDismiss -> updateState { copy(deleteDialog = false, rejection = null) }
             UiAction.OnCloseViewer -> updateState { copy(viewerIndex = null) }
             UiAction.OnRetry -> load()
+            else -> return false
         }
+        return true
     }
 
     private fun load() {
@@ -86,7 +101,9 @@ class GalleryViewModel(
         val state = uiState.value
         when (state.mode) {
             MediaGridMode.Select -> updateState { copy(selected = if (id in selected) selected - id else selected + id) }
-            MediaGridMode.Normal -> state.items.indexOfFirst { it.id == id }.takeIf { it >= 0 }?.let { index -> updateState { copy(viewerIndex = index) } }
+            MediaGridMode.Normal -> state.items.indexOfFirst {
+                it.id == id
+            }.takeIf { it >= 0 }?.let { index -> updateState { copy(viewerIndex = index) } }
             MediaGridMode.Reorder -> Unit
         }
     }
@@ -100,7 +117,11 @@ class GalleryViewModel(
     private fun add() {
         scope.launch {
             val state = uiState.value
-            val (images, videos) = gallerySlots(state.items, state.pending.count { it.type == GalleryType.IMAGE }, state.pending.count { it.type == GalleryType.VIDEO })
+            val (images, videos) = gallerySlots(
+                state.items,
+                state.pending.count { it.type == GalleryType.IMAGE },
+                state.pending.count { it.type == GalleryType.VIDEO },
+            )
             if (images + videos == 0) return@launch
             val picked = picker.pickMedia(maxCount = images + videos, includeVideo = videos > 0).map { file ->
                 LocalFile(PENDING_PREFIX + nextPending++, file.name, file.bytes, file.contentType, file.durationMs)
@@ -110,7 +131,12 @@ class GalleryViewModel(
             val (okClips, refusedClips) = acceptUploads(clips, UploadSlot.MEDIA, videos)
             val refused = refusedPhotos + refusedClips
             val pending = (okPhotos + okClips).map { file ->
-                PendingMedia(file.id, file, if (file.kind == UploadKind.VIDEO) GalleryType.VIDEO else GalleryType.IMAGE, UploadStatus.Uploading(0f))
+                PendingMedia(
+                    file.id,
+                    file,
+                    if (file.kind == UploadKind.VIDEO) GalleryType.VIDEO else GalleryType.IMAGE,
+                    UploadStatus.Uploading(0f),
+                )
             }
             updateState { copy(pending = this.pending + pending, rejection = refused.firstOrNull()) }
             pending.forEach { send(it) }
@@ -130,7 +156,10 @@ class GalleryViewModel(
                     val seconds = media.file.durationMs?.let { ((it + MILLIS_PER_SECOND - 1) / MILLIS_PER_SECOND).toInt() }
                     when (val added = gallery.add(media.type, progress.upload.key, seconds)) {
                         is AppResult.Success -> {
-                            analytics.trackAction(AnalyticsAction(SalonAnalytics.ACTION_GALLERY_ADD, analyticsParams { text(SalonAnalytics.PARAM_TYPE, media.type.name) }))
+                            analytics.trackAction(AnalyticsAction(
+                                SalonAnalytics.ACTION_GALLERY_ADD,
+                                analyticsParams { text(SalonAnalytics.PARAM_TYPE, media.type.name) },
+                            ))
                             updateState { copy(items = items + added.data, pending = pending.filterNot { it.id == media.id }) }
                         }
                         is AppResult.Error -> {
@@ -181,8 +210,18 @@ class GalleryViewModel(
         scope.launch {
             val errors = ids.associateWith { id -> gallery.delete(id) as? AppResult.Error }.filterValues { it != null }
             val failed = errors.keys
-            updateState { copy(busy = false, items = items.filter { it.id !in ids || it.id in failed }, selected = failed, mode = if (failed.isEmpty()) MediaGridMode.Normal else mode) }
-            analytics.trackAction(AnalyticsAction(SalonAnalytics.ACTION_GALLERY_DELETE, analyticsParams { number(SalonAnalytics.PARAM_COUNT, (ids.size - failed.size).toLong()) }))
+            updateState {
+                copy(
+                    busy = false,
+                    items = items.filter { it.id !in ids || it.id in failed },
+                    selected = failed,
+                    mode = if (failed.isEmpty()) MediaGridMode.Normal else mode,
+                )
+            }
+            analytics.trackAction(AnalyticsAction(
+                SalonAnalytics.ACTION_GALLERY_DELETE,
+                analyticsParams { number(SalonAnalytics.PARAM_COUNT, (ids.size - failed.size).toLong()) },
+            ))
             val firstError = errors.values.firstNotNullOfOrNull { it }
             if (firstError == null) {
                 emitSideEffect(SideEffect.Deleted)

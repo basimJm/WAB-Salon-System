@@ -44,7 +44,7 @@ core/firebase          Phone auth, push token, crash reporting, analytics behind
 core/ui                Locale/dark-mode locals, permissions, external actions, image picker
 core/design-system     Tokens, Liquid Glass (AppGlassSurface, glassBackground, liquidGlass), App* components, icons, strings
 core/di                Koin aggregation
-feature/<name>/{domain,data,presentation,di}   One folder per feature (reference: feature/sample)
+feature/<name>/{domain,data,presentation,di}   One folder per feature (reference: feature/bookings)
 build-logic/convention Convention plugins
 scripts/ci, config/    Policy checks (with tests), detekt, lint, budgets
 ```

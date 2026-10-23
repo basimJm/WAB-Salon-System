@@ -109,7 +109,9 @@ class MainViewModelTest {
     private var refreshes = 0
     private val permissionsSync = PermissionsSync({ refreshes++; TokenRefreshResult.Unavailable }, sessionStore)
 
-    private fun TestScope.viewModel(config: FakeAppConfigRepository = FakeAppConfigRepository(AppResult.Success(READY_CONFIG))) = MainViewModel(
+    private fun TestScope.viewModel(
+        config: FakeAppConfigRepository = FakeAppConfigRepository(AppResult.Success(READY_CONFIG)),
+    ) = MainViewModel(
         appConfigRepository = config,
         appSettings = settings,
         appearanceSettings = AppearanceSettings(settings),

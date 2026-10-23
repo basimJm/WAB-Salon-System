@@ -67,9 +67,15 @@ fun BankDetailsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -
                 verticalArrangement = Arrangement.spacedBy(spacing.space14),
             ) {
                 AppCard(modifier = Modifier.fillMaxWidth()) {
-                    AppText(text = stringResource(Res.string.bank_note), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+                    AppText(
+                        text = stringResource(Res.string.bank_note),
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.colors.muted,
+                    )
                 }
-                state.saved?.let { AppText(text = stringResource(Res.string.bank_current, it.ibanLast4), style = AppTheme.typography.labelLarge) }
+                state.saved?.let {
+                    AppText(text = stringResource(Res.string.bank_current, it.ibanLast4), style = AppTheme.typography.labelLarge)
+                }
                 AppTextField(
                     value = state.draft.bankName,
                     onValueChange = { onAction(UiAction.OnBankName(it)) },

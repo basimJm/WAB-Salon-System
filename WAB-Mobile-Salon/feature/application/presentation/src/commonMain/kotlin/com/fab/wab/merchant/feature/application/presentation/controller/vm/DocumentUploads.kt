@@ -8,7 +8,13 @@ import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 /** One license document of the form: the picked file (kept for retries), its upload state and confirmed key. */
 data class DocumentUpload(val file: LocalFile, val status: UploadStatus, val key: String? = null)
 
-internal fun PickedFile.toLocalFile(id: String) = LocalFile(id = id, name = name, bytes = bytes, contentType = contentType, durationMs = durationMs)
+internal fun PickedFile.toLocalFile(id: String) = LocalFile(
+    id = id,
+    name = name,
+    bytes = bytes,
+    contentType = contentType,
+    durationMs = durationMs,
+)
 
 /** Folds one progress step of [id] into the list. */
 internal fun List<DocumentUpload>.withProgress(id: String, progress: UploadProgress): List<DocumentUpload> = map { upload ->

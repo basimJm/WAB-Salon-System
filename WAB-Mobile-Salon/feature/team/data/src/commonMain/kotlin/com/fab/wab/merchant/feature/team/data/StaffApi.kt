@@ -43,7 +43,9 @@ class StaffApi(private val client: HttpClient) {
 
     /** JSON body so a cleared note goes out as `null`. */
     suspend fun updateLeave(id: String, leaveId: String, body: JsonObject): BaseResponse<PatchTeamMembersByIdLeavesByLeaveIdData> =
-        client.patch(MerchantOperations.patchTeamMembersByIdLeavesByLeaveId.pathWith(ID to id, LEAVE_ID to leaveId)) { setBody(body) }.body()
+        client.patch(
+            MerchantOperations.patchTeamMembersByIdLeavesByLeaveId.pathWith(ID to id, LEAVE_ID to leaveId),
+        ) { setBody(body) }.body()
 
     suspend fun deleteLeave(id: String, leaveId: String): BaseResponse<JsonElement?> =
         client.delete(MerchantOperations.deleteTeamMembersByIdLeavesByLeaveId.pathWith(ID to id, LEAVE_ID to leaveId)).body()

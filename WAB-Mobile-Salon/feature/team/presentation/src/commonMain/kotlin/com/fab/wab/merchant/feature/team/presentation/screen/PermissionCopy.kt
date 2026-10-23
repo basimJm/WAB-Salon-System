@@ -44,24 +44,26 @@ import com.fab.wab.merchant.feature.team.presentation.resources.perm_working_hou
 import com.fab.wab.merchant.feature.team.presentation.resources.perm_working_hours_manage_sub
 import org.jetbrains.compose.resources.StringResource
 
-/** Titles and descriptions of PRD §6.2. */
-internal fun Permission.copy(): Pair<StringResource, StringResource> = when (this) {
-    Permission.DASHBOARD_VIEW -> Res.string.perm_dashboard_view to Res.string.perm_dashboard_view_sub
-    Permission.BOOKINGS_VIEW_ALL -> Res.string.perm_bookings_view_all to Res.string.perm_bookings_view_all_sub
-    Permission.BOOKINGS_VIEW_OWN -> Res.string.perm_bookings_view_own to Res.string.perm_bookings_view_own_sub
-    Permission.BOOKINGS_RESPOND -> Res.string.perm_bookings_respond to Res.string.perm_bookings_respond_sub
-    Permission.BOOKINGS_OPERATE -> Res.string.perm_bookings_operate to Res.string.perm_bookings_operate_sub
-    Permission.SALON_PROFILE_MANAGE -> Res.string.perm_salon_profile_manage to Res.string.perm_salon_profile_manage_sub
-    Permission.GALLERY_MANAGE -> Res.string.perm_gallery_manage to Res.string.perm_gallery_manage_sub
-    Permission.WORKING_HOURS_MANAGE -> Res.string.perm_working_hours_manage to Res.string.perm_working_hours_manage_sub
-    Permission.SERVICES_MANAGE -> Res.string.perm_services_manage to Res.string.perm_services_manage_sub
-    Permission.STAFF_MANAGE -> Res.string.perm_staff_manage to Res.string.perm_staff_manage_sub
-    Permission.POLICIES_MANAGE -> Res.string.perm_policies_manage to Res.string.perm_policies_manage_sub
-    Permission.REVIEWS_VIEW -> Res.string.perm_reviews_view to Res.string.perm_reviews_view_sub
-    Permission.STATISTICS_VIEW -> Res.string.perm_statistics_view to Res.string.perm_statistics_view_sub
-    Permission.FINANCE_VIEW -> Res.string.perm_finance_view to Res.string.perm_finance_view_sub
-    Permission.SUBSCRIPTION_VIEW -> Res.string.perm_subscription_view to Res.string.perm_subscription_view_sub
-}
+/** Titles and descriptions of PRD §6.2 (every key has one: `PermissionCopyTest`). */
+internal val PERMISSION_COPY: Map<Permission, Pair<StringResource, StringResource>> = mapOf(
+    Permission.DASHBOARD_VIEW to (Res.string.perm_dashboard_view to Res.string.perm_dashboard_view_sub),
+    Permission.BOOKINGS_VIEW_ALL to (Res.string.perm_bookings_view_all to Res.string.perm_bookings_view_all_sub),
+    Permission.BOOKINGS_VIEW_OWN to (Res.string.perm_bookings_view_own to Res.string.perm_bookings_view_own_sub),
+    Permission.BOOKINGS_RESPOND to (Res.string.perm_bookings_respond to Res.string.perm_bookings_respond_sub),
+    Permission.BOOKINGS_OPERATE to (Res.string.perm_bookings_operate to Res.string.perm_bookings_operate_sub),
+    Permission.SALON_PROFILE_MANAGE to (Res.string.perm_salon_profile_manage to Res.string.perm_salon_profile_manage_sub),
+    Permission.GALLERY_MANAGE to (Res.string.perm_gallery_manage to Res.string.perm_gallery_manage_sub),
+    Permission.WORKING_HOURS_MANAGE to (Res.string.perm_working_hours_manage to Res.string.perm_working_hours_manage_sub),
+    Permission.SERVICES_MANAGE to (Res.string.perm_services_manage to Res.string.perm_services_manage_sub),
+    Permission.STAFF_MANAGE to (Res.string.perm_staff_manage to Res.string.perm_staff_manage_sub),
+    Permission.POLICIES_MANAGE to (Res.string.perm_policies_manage to Res.string.perm_policies_manage_sub),
+    Permission.REVIEWS_VIEW to (Res.string.perm_reviews_view to Res.string.perm_reviews_view_sub),
+    Permission.STATISTICS_VIEW to (Res.string.perm_statistics_view to Res.string.perm_statistics_view_sub),
+    Permission.FINANCE_VIEW to (Res.string.perm_finance_view to Res.string.perm_finance_view_sub),
+    Permission.SUBSCRIPTION_VIEW to (Res.string.perm_subscription_view to Res.string.perm_subscription_view_sub),
+)
+
+internal fun Permission.copy(): Pair<StringResource, StringResource>? = PERMISSION_COPY[this]
 
 internal fun OwnerCapability.title(): StringResource = when (this) {
     OwnerCapability.TEAM_MANAGE -> Res.string.cap_team_manage

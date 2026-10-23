@@ -33,10 +33,14 @@ class BookingsRepositoryImpl(private val api: BookingsApi) : BookingsRepository 
     override suspend fun approve(bookingId: String) = safeApiCall { api.approve(bookingId) }.mapSuccess { }
 
     override suspend fun reject(bookingId: String, reason: ResponseReason, text: String?) =
-        safeApiCall { api.reject(bookingId, PostBookingsByIdRejectBody(reason.name, text?.trim()?.takeIf { it.isNotEmpty() })) }.mapSuccess { }
+        safeApiCall {
+            api.reject(bookingId, PostBookingsByIdRejectBody(reason.name, text?.trim()?.takeIf { it.isNotEmpty() }))
+        }.mapSuccess { }
 
     override suspend fun cancel(bookingId: String, reason: ResponseReason, text: String?) =
-        safeApiCall { api.cancel(bookingId, PostBookingsByIdCancelBody(reason.name, text?.trim()?.takeIf { it.isNotEmpty() })) }.mapSuccess { }
+        safeApiCall {
+            api.cancel(bookingId, PostBookingsByIdCancelBody(reason.name, text?.trim()?.takeIf { it.isNotEmpty() }))
+        }.mapSuccess { }
 
     override suspend fun complete(bookingId: String) = safeApiCall { api.complete(bookingId) }.mapSuccess { }
 

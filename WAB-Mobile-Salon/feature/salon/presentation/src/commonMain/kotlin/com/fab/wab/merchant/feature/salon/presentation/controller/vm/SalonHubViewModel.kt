@@ -42,7 +42,9 @@ class SalonHubViewModel(
         when (event) {
             UiAction.OnRefresh -> refresh()
             is UiAction.OnTileClick -> {
-                analytics.trackAction(AnalyticsAction(SalonAnalytics.ACTION_HUB_OPEN, analyticsParams { text(SalonAnalytics.PARAM_TILE, event.tile.name) }))
+                analytics.trackAction(
+                    AnalyticsAction(SalonAnalytics.ACTION_HUB_OPEN, analyticsParams { text(SalonAnalytics.PARAM_TILE, event.tile.name) }),
+                )
                 emitSideEffect(SideEffect.Open(event.tile))
             }
         }

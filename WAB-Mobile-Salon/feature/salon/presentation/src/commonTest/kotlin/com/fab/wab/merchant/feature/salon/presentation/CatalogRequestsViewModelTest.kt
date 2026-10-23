@@ -30,7 +30,9 @@ private class FakeRequests : CatalogRequestsRepository {
     var fail = false
     val sent = mutableListOf<Triple<String, String, String?>>()
     override suspend fun list(page: Int): AppResult<List<CatalogRequest>> =
-        AppResult.Success(listOf(CatalogRequest("r1", "Henna", "Bridal henna", CatalogRequestStatus.REJECTED, "Already in catalog", "2026-10-20T10:00:00Z")))
+        AppResult.Success(listOf(
+            CatalogRequest("r1", "Henna", "Bridal henna", CatalogRequestStatus.REJECTED, "Already in catalog", "2026-10-20T10:00:00Z"),
+        ))
     override suspend fun create(name: String, description: String, imageKey: String?): AppResult<CatalogRequest> {
         if (fail) return AppResult.Error(AppError.NetworkError("offline"))
         sent += Triple(name, description, imageKey)
@@ -44,7 +46,14 @@ class CatalogRequestsViewModelTest {
     private val requests = FakeRequests()
     private val picker = FakeFilePicker(media = listOf(PickedFile("a.jpg", byteArrayOf(1), "image/jpeg")))
 
-    private fun TestScope.viewModel() = CatalogRequestsViewModel(requests, picker, UploadFileUseCase(FakeUploads()), NoOpAnalyticsTracker, { "failed" }, backgroundScope)
+    private fun TestScope.viewModel() = CatalogRequestsViewModel(
+        requests,
+        picker,
+        UploadFileUseCase(FakeUploads()),
+        NoOpAnalyticsTracker,
+        { "failed" },
+        backgroundScope,
+    )
         .also { vm -> backgroundScope.launch { vm.state.collect { } } }
 
     @Test

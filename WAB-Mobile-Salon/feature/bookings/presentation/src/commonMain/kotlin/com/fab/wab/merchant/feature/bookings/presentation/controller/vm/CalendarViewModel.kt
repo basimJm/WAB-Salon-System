@@ -61,6 +61,10 @@ class CalendarViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handleNavigation(event) || handleSelection(event)
+    }
+
+    private fun handleNavigation(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnModeChange -> if (event.mode != uiState.value.mode) {
                 updateState { copy(mode = event.mode) }
@@ -70,6 +74,13 @@ class CalendarViewModel(
             UiAction.OnToday -> show(deps.today().also { today -> updateState { copy(today = today) } })
             is UiAction.OnPage -> show(pageDate(uiState.value.date, uiState.value.mode, event.forward))
             is UiAction.OnDatePick -> show(event.date)
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleSelection(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnFilterClick -> if (uiState.value.canFilter) updateState { copy(filterOpen = true) }
             UiAction.OnFilterDismiss -> updateState { copy(filterOpen = false) }
             is UiAction.OnFilterApply -> {
@@ -83,7 +94,9 @@ class CalendarViewModel(
                 show(day, force = true)
             }
             UiAction.OnRetry -> load()
+            else -> return false
         }
+        return true
     }
 
     private fun show(date: LocalDate, force: Boolean = false) {

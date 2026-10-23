@@ -57,7 +57,11 @@ fun AppDocumentUploader(
                 modifier = Modifier.weight(1f),
             )
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                AppText(text = stringResource(Res.string.upload_count, items.size, maxFiles), style = AppTheme.typography.labelSmall, color = colors.faint)
+                AppText(
+                    text = stringResource(Res.string.upload_count, items.size, maxFiles),
+                    style = AppTheme.typography.labelSmall,
+                    color = colors.faint,
+                )
             }
         }
         AppText(text = hint, style = AppTheme.typography.bodySmall, color = colors.muted)
@@ -68,7 +72,12 @@ fun AppDocumentUploader(
                     if (item == null) {
                         AppUploadAddTile(onClick = onAdd, modifier = Modifier.weight(1f))
                     } else {
-                        AppUploadTile(item, onRemove = { onRemove(item.id) }, onRetry = { onRetry(item.id) }, modifier = Modifier.weight(1f))
+                        AppUploadTile(
+                            item,
+                            onRemove = { onRemove(item.id) },
+                            onRetry = { onRetry(item.id) },
+                            modifier = Modifier.weight(1f),
+                        )
                     }
                 }
                 repeat(DOCUMENT_GRID_COLUMNS - row.size) { Spacer(Modifier.weight(1f)) }
@@ -80,10 +89,17 @@ fun AppDocumentUploader(
 
 /** Message for a refused pick; [maxFiles] fills "up to n files". */
 @Composable
-fun uploadRejectionText(rejection: UploadRejection, maxFiles: Int = UploadLimits.DOCUMENT_MAX_FILES, maxBytes: Long = UploadLimits.DOCUMENT_MAX_BYTES): String =
+fun uploadRejectionText(
+    rejection: UploadRejection,
+    maxFiles: Int = UploadLimits.DOCUMENT_MAX_FILES,
+    maxBytes: Long = UploadLimits.DOCUMENT_MAX_BYTES,
+): String =
     when (rejection) {
         UploadRejection.TOO_LARGE -> stringResource(Res.string.upload_too_large, (maxBytes / BYTES_PER_MB).toInt())
         UploadRejection.WRONG_TYPE -> stringResource(Res.string.upload_wrong_type)
-        UploadRejection.TOO_LONG -> stringResource(Res.string.upload_too_long, (UploadLimits.VIDEO_MAX_DURATION_MS / MILLIS_PER_SECOND).toInt())
+        UploadRejection.TOO_LONG -> stringResource(
+            Res.string.upload_too_long,
+            (UploadLimits.VIDEO_MAX_DURATION_MS / MILLIS_PER_SECOND).toInt(),
+        )
         UploadRejection.TOO_MANY -> stringResource(Res.string.upload_too_many, maxFiles)
     }

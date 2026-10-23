@@ -61,6 +61,10 @@ class ServiceEditViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handleForm(event) || handleActions(event)
+    }
+
+    private fun handleForm(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnPrice -> edit { copy(price = event.value) }
             is UiAction.OnDuration -> edit { copy(durationMinutes = event.value) }
@@ -75,6 +79,13 @@ class ServiceEditViewModel(
                 updateState { copy(uploads = uploads.filterNot { it.id == event.id }) }
                 edit { copy(mediaKeys = uiState.value.uploads.mapNotNull { keys[it.id] }.takeIf { uiState.value.uploads.isNotEmpty() }) }
             }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleActions(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnSave -> save(confirmed = false)
             UiAction.OnConfirmDeactivate -> {
                 updateState { copy(confirmDeactivate = false) }
@@ -82,7 +93,9 @@ class ServiceEditViewModel(
             }
             UiAction.OnDismiss -> updateState { copy(confirmDeactivate = false, rejection = null) }
             UiAction.OnRetry -> load()
+            else -> return false
         }
+        return true
     }
 
     private fun edit(change: ServiceDraft.() -> ServiceDraft) = updateState { copy(draft = draft.change()) }
@@ -93,11 +106,22 @@ class ServiceEditViewModel(
             val women = (deps.salon.current.value ?: (deps.salon.refresh() as? AppResult.Success)?.data)?.gender == SalonGenderType.FEMALE
             val id = serviceId
             if (id != null) {
-                val service = deps.services.cachedService(id) ?: (deps.services.services() as? AppResult.Success)?.data?.firstOrNull { it.id == id }
+                val service = deps.services.cachedService(id) ?: (deps.services.services() as? AppResult.Success)?.data?.firstOrNull {
+                    it.id == id
+                }
                 if (service == null) return@launch notFound()
                 val draft = service.toDraft()
                 updateState {
-                    copy(loading = false, isNew = false, title = service.name, imageUrl = service.imageUrl, womenSalon = women, original = draft, draft = draft, currentMedia = service.mediaUrls)
+                    copy(
+                        loading = false,
+                        isNew = false,
+                        title = service.name,
+                        imageUrl = service.imageUrl,
+                        womenSalon = women,
+                        original = draft,
+                        draft = draft,
+                        currentMedia = service.mediaUrls,
+                    )
                 }
             } else {
                 val catalog = catalogServiceId?.let(deps.services::cachedCatalog) ?: return@launch notFound()
@@ -137,7 +161,9 @@ class ServiceEditViewModel(
             }
             val preview = if (file.kind == UploadKind.IMAGE) LocalPreview(file.bytes) else null
             val item = UploadItemUi(file.id, file.name, file.kind, status, preview = preview, durationMs = file.durationMs)
-            updateState { copy(uploads = if (uploads.any { it.id == file.id }) uploads.map { if (it.id == file.id) item else it } else uploads + item) }
+            updateState {
+                copy(uploads = if (uploads.any { it.id == file.id }) uploads.map { if (it.id == file.id) item else it } else uploads + item)
+            }
             when (progress) {
                 is UploadProgress.Done -> {
                     keys[file.id] = progress.upload.key
@@ -156,7 +182,8 @@ class ServiceEditViewModel(
             updateState { copy(showErrors = true) }
             return
         }
-        if (!confirmed && !state.isNew && state.original.active && !state.draft.active) {
+        val deactivating = !state.isNew && state.original.active && !state.draft.active
+        if (!confirmed && deactivating) {
             updateState { copy(confirmDeactivate = true) }
             return
         }
@@ -172,7 +199,10 @@ class ServiceEditViewModel(
             updateState { copy(saving = false) }
             when (result) {
                 is AppResult.Success -> {
-                    deps.analytics.trackAction(AnalyticsAction(SalonAnalytics.ACTION_SERVICE_SAVE, analyticsParams { text(SalonAnalytics.PARAM_NEW, state.isNew.toString()) }))
+                    deps.analytics.trackAction(AnalyticsAction(
+                        SalonAnalytics.ACTION_SERVICE_SAVE,
+                        analyticsParams { text(SalonAnalytics.PARAM_NEW, state.isNew.toString()) },
+                    ))
                     emitSideEffect(SideEffect.Saved)
                 }
                 is AppResult.Error -> emitSideEffect(SideEffect.ShowError(deps.errorText(result.appError)))

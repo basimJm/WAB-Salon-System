@@ -23,7 +23,10 @@ class CalendarTest {
 
     @Test
     fun windowCoversWorkingHoursAndEveryBlockOnWholeHours() {
-        val columns = listOf(CalendarColumnUi("s1", "Rana", listOf(block(8 * 60 + 45, 9 * 60 + 30))), CalendarColumnUi("s2", "Hiba", listOf(block(21 * 60, 22 * 60 + 15))))
+        val columns = listOf(
+            CalendarColumnUi("s1", "Rana", listOf(block(8 * 60 + 45, 9 * 60 + 30))),
+            CalendarColumnUi("s2", "Hiba", listOf(block(21 * 60, 22 * 60 + 15))),
+        )
         val window = TimeWindow.covering(workStart = 9 * 60, workEnd = 21 * 60, columns = columns)
         assertEquals(TimeWindow(8 * 60, 23 * 60), window)
         assertEquals(15, window.hours.size)

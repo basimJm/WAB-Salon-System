@@ -9,7 +9,7 @@ import org.koin.dsl.module
 /**
  * Interactive map behind a port (PRD M13 map picker): Google Maps on Android when a maps key is configured, MapKit on
  * iOS, [NoMapProvider] otherwise (the picker then draws its own stylized map). [target] moves the camera when it
- * differs from where the map already is; the map reports where the user left it through [onCenterChanged].
+ * differs from where the map already is; the map reports where the user left it through [onCenterChange].
  */
 interface MapProvider {
     val isAvailable: Boolean
@@ -17,8 +17,8 @@ interface MapProvider {
     @Composable
     fun Map(
         target: LocationData,
-        onCenterChanged: (LocationData) -> Unit,
-        onMovingChanged: (Boolean) -> Unit,
+        onCenterChange: (LocationData) -> Unit,
+        onMovingChange: (Boolean) -> Unit,
         modifier: Modifier,
     )
 }
@@ -30,8 +30,8 @@ object NoMapProvider : MapProvider {
     @Composable
     override fun Map(
         target: LocationData,
-        onCenterChanged: (LocationData) -> Unit,
-        onMovingChanged: (Boolean) -> Unit,
+        onCenterChange: (LocationData) -> Unit,
+        onMovingChange: (Boolean) -> Unit,
         modifier: Modifier,
     ) = Unit
 }

@@ -50,7 +50,13 @@ fun RegistrationForm.toApplyBody(phone: PhoneNumber, idToken: String, installati
     idToken = idToken,
     firstName = firstName,
     lastName = lastName,
-    salon = PostSalonApplicationsBodySalon(name = salonName, gender = gender.code, description = description, cityId = cityId, areaId = areaId),
+    salon = PostSalonApplicationsBodySalon(
+        name = salonName,
+        gender = gender.code,
+        description = description,
+        cityId = cityId,
+        areaId = areaId,
+    ),
     documentKeys = documentKeys,
     installation = PostSalonApplicationsBodyInstallation(
         installationId = installation.installationId,
@@ -73,10 +79,28 @@ fun PostSalonApplicationsData.toDomain() = ApplicationSession(
 )
 
 fun PostSalonApplicationsDataApplication.toDomain() =
-    SalonApplication(salonId, stateOf(state), instantOrNull(submittedAt), resubmissionCount.toInt(), rejectionReason?.takeIf { it.isNotBlank() })
+    SalonApplication(
+        salonId,
+        stateOf(state),
+        instantOrNull(submittedAt),
+        resubmissionCount.toInt(),
+        rejectionReason?.takeIf { it.isNotBlank() },
+    )
 
 fun GetSalonApplicationData.toDomain() =
-    SalonApplication(salonId, stateOf(state), instantOrNull(submittedAt), resubmissionCount.toInt(), rejectionReason?.takeIf { it.isNotBlank() })
+    SalonApplication(
+        salonId,
+        stateOf(state),
+        instantOrNull(submittedAt),
+        resubmissionCount.toInt(),
+        rejectionReason?.takeIf { it.isNotBlank() },
+    )
 
 fun PostSalonApplicationResubmitData.toDomain() =
-    SalonApplication(salonId, stateOf(state), instantOrNull(submittedAt), resubmissionCount.toInt(), rejectionReason?.takeIf { it.isNotBlank() })
+    SalonApplication(
+        salonId,
+        stateOf(state),
+        instantOrNull(submittedAt),
+        resubmissionCount.toInt(),
+        rejectionReason?.takeIf { it.isNotBlank() },
+    )

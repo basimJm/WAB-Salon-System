@@ -107,7 +107,11 @@ private fun DayRow(day: DaySchedule, invalid: Boolean, labels: Map<Int, String>,
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
                 AppText(text = dayName(day.day), style = AppTheme.typography.bodyLarge)
-                if (day.isOff) AppText(text = stringResource(Res.string.hours_day_off), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+                if (day.isOff) AppText(
+                    text = stringResource(Res.string.hours_day_off),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.muted,
+                )
             }
             AppSwitch(checked = !day.isOff, onCheckedChange = { onAction(UiAction.OnToggleDay(day.day, it)) })
         }
@@ -143,9 +147,18 @@ private fun ClosuresSection(state: UiState, onAction: (UiAction) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
         AppText(text = stringResource(Res.string.closures_title), style = AppTheme.typography.titleSmall)
         AppText(text = stringResource(Res.string.closures_hint), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
-        if (state.upcoming.isEmpty()) AppText(text = stringResource(Res.string.closures_empty), style = AppTheme.typography.bodyMedium, color = AppTheme.colors.faint)
+        if (state.upcoming.isEmpty()) AppText(
+            text = stringResource(Res.string.closures_empty),
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.colors.faint,
+        )
         state.upcoming.forEach { ClosureRow(it, onAction) }
-        AppButton(stringResource(Res.string.closures_add), { onAction(UiAction.OnAddClosure) }, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined)
+        AppButton(
+            stringResource(Res.string.closures_add),
+            { onAction(UiAction.OnAddClosure) },
+            Modifier.fillMaxWidth(),
+            kind = ButtonKind.Outlined,
+        )
         if (state.past.isNotEmpty()) {
             AppButton(stringResource(Res.string.closures_past), { showPast = !showPast }, kind = ButtonKind.Text)
             if (showPast) state.past.forEach { ClosureRow(it, onAction) }
@@ -163,7 +176,11 @@ private fun ClosureRow(closure: Closure, onAction: (UiAction) -> Unit) {
             }
             if (closure.editable) {
                 AppButton(stringResource(Res.string.closure_edit), { onAction(UiAction.OnEditClosure(closure.id)) }, kind = ButtonKind.Text)
-                AppButton(stringResource(Res.string.closure_delete), { onAction(UiAction.OnDeleteClosure(closure.id)) }, kind = ButtonKind.Text)
+                AppButton(
+                    stringResource(Res.string.closure_delete),
+                    { onAction(UiAction.OnDeleteClosure(closure.id)) },
+                    kind = ButtonKind.Text,
+                )
             }
         }
     }

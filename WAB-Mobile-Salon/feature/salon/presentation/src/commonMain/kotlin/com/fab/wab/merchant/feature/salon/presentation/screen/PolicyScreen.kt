@@ -93,7 +93,11 @@ fun PolicyScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Uni
                 modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(spacing.space16),
                 verticalArrangement = Arrangement.spacedBy(spacing.space14),
             ) {
-                AppText(text = stringResource(Res.string.policy_new_only), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+                AppText(
+                    text = stringResource(Res.string.policy_new_only),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.muted,
+                )
                 WindowSection(state, onAction)
                 PaymentSection(state, onAction)
                 OutcomeSections(state, onAction)
@@ -105,7 +109,12 @@ fun PolicyScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Uni
                     singleLine = false,
                     error = if (PolicyField.NOTES in state.visibleErrors) stringResource(Res.string.policy_notes_error) else null,
                 )
-                AppButton(stringResource(Res.string.policy_preview), { onAction(UiAction.OnPreview) }, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined)
+                AppButton(
+                    stringResource(Res.string.policy_preview),
+                    { onAction(UiAction.OnPreview) },
+                    Modifier.fillMaxWidth(),
+                    kind = ButtonKind.Outlined,
+                )
             }
         }
     }
@@ -119,7 +128,11 @@ private fun WindowSection(state: UiState, onAction: (UiAction) -> Unit) {
     Section(stringResource(Res.string.policy_window), stringResource(Res.string.policy_window_sub)) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
             PolicyLimits.WINDOW_PRESETS.forEach { hours ->
-                AppFilterChip(stringResource(Res.string.policy_window_chip, hours), state.presetWindow == hours, { onAction(UiAction.OnWindowPreset(hours)) })
+                AppFilterChip(
+                    stringResource(Res.string.policy_window_chip, hours),
+                    state.presetWindow == hours,
+                    { onAction(UiAction.OnWindowPreset(hours)) },
+                )
             }
             AppFilterChip(stringResource(Res.string.policy_custom), state.customWindow, { onAction(UiAction.OnWindowCustom) })
         }
@@ -150,7 +163,11 @@ private fun PaymentSection(state: UiState, onAction: (UiAction) -> Unit) {
                 error = if (PolicyField.DEPOSIT in state.visibleErrors) stringResource(Res.string.policy_deposit_error) else null,
             )
             depositExampleFils(draft.depositPercentage)?.let { fils ->
-                AppText(text = stringResource(Res.string.policy_example, jodTextOfFils(fils)), style = AppTheme.typography.bodySmall, color = AppTheme.colors.accent)
+                AppText(
+                    text = stringResource(Res.string.policy_example, jodTextOfFils(fils)),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.accent,
+                )
             }
         }
         OptionRow(PaymentOption.FULL_ONLINE, Res.string.policy_full, Res.string.policy_full_sub, draft.options, onAction)
@@ -159,7 +176,13 @@ private fun PaymentSection(state: UiState, onAction: (UiAction) -> Unit) {
 }
 
 @Composable
-private fun OptionRow(option: PaymentOption, title: StringResource, subtitle: StringResource, selected: Set<PaymentOption>, onAction: (UiAction) -> Unit) {
+private fun OptionRow(
+    option: PaymentOption,
+    title: StringResource,
+    subtitle: StringResource,
+    selected: Set<PaymentOption>,
+    onAction: (UiAction) -> Unit,
+) {
     AppCard(modifier = Modifier.fillMaxWidth(), onClick = { onAction(UiAction.OnOption(option)) }) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
             AppCheckbox(checked = option in selected, onCheckedChange = { onAction(UiAction.OnOption(option)) })

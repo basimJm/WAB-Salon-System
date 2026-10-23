@@ -55,10 +55,17 @@ fun SetupChecklistScreen(state: UiState, onAction: (UiAction) -> Unit, modifier:
     TrackScreen(ApplicationAnalytics.SCREEN_CHECKLIST)
     AppScreen(modifier = modifier) { padding ->
         when {
-            state.loading && state.steps.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
+            state.loading && state.steps.isEmpty() -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) { AppLoadingIndicator() }
             state.steps.isEmpty() -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
             state.isLive -> LiveSuccess(onAction)
-            else -> AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }, modifier = Modifier.padding(padding)) {
+            else -> AppPullToRefresh(
+                refreshing = state.refreshing,
+                onRefresh = { onAction(UiAction.OnRefresh) },
+                modifier = Modifier.padding(padding),
+            ) {
                 ChecklistContent(state, onAction)
             }
         }
@@ -74,7 +81,11 @@ private fun ChecklistContent(state: UiState, onAction: (UiAction) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(spacing.space12),
     ) {
         AppText(text = stringResource(Res.string.setup_title), style = AppTheme.typography.headlineMedium)
-        AppText(text = stringResource(Res.string.setup_progress, state.done, state.total), style = AppTheme.typography.labelLarge, color = colors.accent)
+        AppText(
+            text = stringResource(Res.string.setup_progress, state.done, state.total),
+            style = AppTheme.typography.labelLarge,
+            color = colors.accent,
+        )
         LinearProgressIndicator(
             progress = { if (state.total == 0) 0f else state.done.toFloat() / state.total },
             modifier = Modifier.fillMaxWidth(),
@@ -107,9 +118,17 @@ private fun StepRow(status: SetupStepStatus, onAction: (UiAction) -> Unit) {
     val colors = AppTheme.colors
     val spacing = AppTheme.spacing
     val copy = stepCopy(status.step)
-    AppCard(modifier = Modifier.fillMaxWidth(), onClick = { onAction(UiAction.OnStepClick(status.step)) }, contentPadding = spacing.space14) {
+    AppCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { onAction(UiAction.OnStepClick(status.step)) },
+        contentPadding = spacing.space14,
+    ) {
         Row(horizontalArrangement = Arrangement.spacedBy(spacing.space12), verticalAlignment = Alignment.CenterVertically) {
-            val (icon, tint, fill) = if (status.done) Triple(AppIcons.Check, colors.onSuccessContainer, colors.successContainer) else Triple(copy.icon, colors.accent, colors.soft)
+            val (icon, tint, fill) = if (status.done) Triple(
+                AppIcons.Check,
+                colors.onSuccessContainer,
+                colors.successContainer,
+            ) else Triple(copy.icon, colors.accent, colors.soft)
             Box(Modifier.size(AppTheme.sizes.avatarSmall).background(fill, AppTheme.shapes.circle), contentAlignment = Alignment.Center) {
                 Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(AppTheme.sizes.icon))
             }
@@ -118,7 +137,11 @@ private fun StepRow(status: SetupStepStatus, onAction: (UiAction) -> Unit) {
                 AppText(text = stringResource(copy.subtitle), style = AppTheme.typography.bodySmall, color = colors.muted)
             }
             if (status.done) {
-                AppText(text = stringResource(Res.string.setup_done), style = AppTheme.typography.labelSmall, color = colors.onSuccessContainer)
+                AppText(
+                    text = stringResource(Res.string.setup_done),
+                    style = AppTheme.typography.labelSmall,
+                    color = colors.onSuccessContainer,
+                )
             } else {
                 Icon(AppIcons.Forward, contentDescription = null, tint = colors.faint, modifier = Modifier.size(AppTheme.sizes.iconSmall))
             }
@@ -135,7 +158,10 @@ private fun LiveSuccess(onAction: (UiAction) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing.space14, Alignment.CenterVertically),
     ) {
-        Box(Modifier.size(AppTheme.sizes.illustration).background(colors.successContainer, AppTheme.shapes.circle), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier.size(AppTheme.sizes.illustration).background(colors.successContainer, AppTheme.shapes.circle),
+            contentAlignment = Alignment.Center,
+        ) {
             Icon(AppIcons.Check, contentDescription = null, tint = colors.success, modifier = Modifier.size(AppTheme.sizes.stateIcon))
         }
         AppText(text = stringResource(Res.string.setup_live_title), style = AppTheme.typography.headlineMedium)

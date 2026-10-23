@@ -115,7 +115,10 @@ class RegistrationViewModelTest {
         assertTrue(RegistrationField.DOCUMENTS in vm.state.first().errors)
         uploads.fail = false
         vm.onEvent(UiAction.OnRetryDocument(failed.file.id))
-        assertEquals(UploadStatus.Uploaded, vm.state.first { it.documents.single().status == UploadStatus.Uploaded }.documents.single().status)
+        assertEquals(
+            UploadStatus.Uploaded,
+            vm.state.first { it.documents.single().status == UploadStatus.Uploaded }.documents.single().status,
+        )
         picker.documents = listOf(PickedFile("notes.docx", ByteArray(2), "application/msword"))
         vm.onEvent(UiAction.OnAddDocuments)
         assertEquals(UploadRejection.WRONG_TYPE, vm.state.first().documentRejection)

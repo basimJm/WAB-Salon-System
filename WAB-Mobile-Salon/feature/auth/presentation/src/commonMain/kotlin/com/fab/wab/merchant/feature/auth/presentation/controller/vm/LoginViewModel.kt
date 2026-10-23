@@ -43,6 +43,10 @@ class LoginViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handlePhone(event) || handleSubmit(event) || handlePreferences(event)
+    }
+
+    private fun handlePhone(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnNumberChange -> updateState { copy(number = event.value, numberTouched = true).revalidated() }
             UiAction.OnCountryClick -> updateState { copy(pickerOpen = true) }
@@ -50,16 +54,32 @@ class LoginViewModel(
                 copy(country = countries.firstOrNull { it.code == event.code } ?: country, pickerOpen = false).revalidated()
             }
             UiAction.OnPickerDismiss -> updateState { copy(pickerOpen = false) }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleSubmit(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnLoginClick -> if (state.value.registerMode) register() else submit()
             UiAction.OnRegisterClick -> register()
             UiAction.OnRegisterIntent -> updateState { copy(registerMode = true) }
             UiAction.OnDialogConfirm -> confirmDialog()
             UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handlePreferences(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnLanguageToggle -> scope.launch { toggleLanguage() }
             UiAction.OnThemeToggle -> scope.launch { toggleTheme() }
             is UiAction.OnLegalClick -> emitSideEffect(SideEffect.OpenContent(event.slug))
             UiAction.OnRetryCountries -> loadCountries()
+            else -> return false
         }
+        return true
     }
 
     private fun UiState.revalidated(): UiState =

@@ -32,7 +32,10 @@ class SetupChecklistViewModel(
             UiAction.OnRetry -> load(refresh = false)
             is UiAction.OnStepClick -> {
                 analytics.trackAction(
-                    AnalyticsAction(ApplicationAnalytics.ACTION_SETUP_ITEM, analyticsParams { text(ApplicationAnalytics.PARAM_STEP, event.step.name) }),
+                    AnalyticsAction(
+                        ApplicationAnalytics.ACTION_SETUP_ITEM,
+                        analyticsParams { text(ApplicationAnalytics.PARAM_STEP, event.step.name) },
+                    ),
                 )
                 emitSideEffect(SideEffect.OpenStep(event.step))
             }

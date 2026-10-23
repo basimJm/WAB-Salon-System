@@ -5,7 +5,12 @@ import com.fab.wab.merchant.feature.salon.domain.CatalogRequest
 import com.fab.wab.merchant.feature.salon.domain.catalogRequestValid
 
 /** "Request a service" sheet; [image] is the optional picture (uploaded as `CATALOG_IMAGE`). */
-data class CatalogRequestForm(val name: String = "", val description: String = "", val image: UploadItemUi? = null, val imageKey: String? = null) {
+data class CatalogRequestForm(
+    val name: String = "",
+    val description: String = "",
+    val image: UploadItemUi? = null,
+    val imageKey: String? = null,
+) {
     val valid: Boolean get() = catalogRequestValid(name, description)
 }
 

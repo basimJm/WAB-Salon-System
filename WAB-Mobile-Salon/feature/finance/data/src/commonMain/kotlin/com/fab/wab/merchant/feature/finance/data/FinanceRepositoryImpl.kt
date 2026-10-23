@@ -54,7 +54,10 @@ private fun HttpRequestBuilder.range(from: LocalDate, to: LocalDate, page: Int) 
     parameter(FinanceParams.TO, to.toString())
 }
 
-private inline fun <reified T : Enum<T>> enumOf(value: String?, fallback: T): T = enumValues<T>().firstOrNull { it.name == value?.uppercase() } ?: fallback
+private inline fun <reified T : Enum<T>> enumOf(
+    value: String?,
+    fallback: T,
+): T = enumValues<T>().firstOrNull { it.name == value?.uppercase() } ?: fallback
 
 fun GetFinanceBalanceData.toDomain() = FinanceBalance(
     balance = balance,
@@ -84,7 +87,19 @@ fun GetFinanceRefundsDataItem.toDomain() = Refund(
 )
 
 fun GetFinancePayoutsDataItem.toDomain() =
-    Payout(id, periodFrom, periodTo, gross, fees, refunds, adjustments, net, enumOf(status, PayoutStatus.PENDING), transferredAt, transferReference)
+    Payout(
+        id,
+        periodFrom,
+        periodTo,
+        gross,
+        fees,
+        refunds,
+        adjustments,
+        net,
+        enumOf(status, PayoutStatus.PENDING),
+        transferredAt,
+        transferReference,
+    )
 
 class FinanceRepositoryImpl(private val api: FinanceApi) : FinanceRepository {
     override suspend fun balance(): AppResult<FinanceBalance> = safeApiCall { api.balance() }.mapSuccess { it.data.toDomain() }

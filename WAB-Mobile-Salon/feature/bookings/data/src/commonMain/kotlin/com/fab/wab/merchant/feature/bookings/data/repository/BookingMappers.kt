@@ -69,4 +69,7 @@ fun GetBookingsByIdData.toDomain(): BookingDetails? {
     )
 }
 
-fun GetTeamMembersDataItem.toStaff(): StaffRef = StaffRef(id, listOf(firstName, lastName).filter { it.isNotBlank() }.joinToString(NAME_SEPARATOR))
+fun GetTeamMembersDataItem.toStaff(): StaffRef = StaffRef(
+    id,
+    listOf(firstName, lastName).filter { it.isNotBlank() }.joinToString(NAME_SEPARATOR),
+)

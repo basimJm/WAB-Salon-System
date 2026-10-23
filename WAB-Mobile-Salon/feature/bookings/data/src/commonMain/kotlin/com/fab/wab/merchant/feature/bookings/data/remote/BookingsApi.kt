@@ -42,7 +42,9 @@ class BookingsApi(private val client: HttpClient) {
     suspend fun details(id: String): BaseResponse<GetBookingsByIdData> =
         client.get(MerchantOperations.getBookingsById.pathWith(ID to id)).body()
 
-    suspend fun approve(id: String): BaseResponse<JsonElement?> = client.post(MerchantOperations.postBookingsByIdApprove.pathWith(ID to id)).body()
+    suspend fun approve(id: String): BaseResponse<JsonElement?> = client.post(
+        MerchantOperations.postBookingsByIdApprove.pathWith(ID to id),
+    ).body()
 
     suspend fun reject(id: String, body: PostBookingsByIdRejectBody): BaseResponse<JsonElement?> =
         client.post(MerchantOperations.postBookingsByIdReject.pathWith(ID to id)) { setBody(body) }.body()
@@ -50,9 +52,13 @@ class BookingsApi(private val client: HttpClient) {
     suspend fun cancel(id: String, body: PostBookingsByIdCancelBody): BaseResponse<JsonElement?> =
         client.post(MerchantOperations.postBookingsByIdCancel.pathWith(ID to id)) { setBody(body) }.body()
 
-    suspend fun complete(id: String): BaseResponse<JsonElement?> = client.post(MerchantOperations.postBookingsByIdComplete.pathWith(ID to id)).body()
+    suspend fun complete(id: String): BaseResponse<JsonElement?> = client.post(
+        MerchantOperations.postBookingsByIdComplete.pathWith(ID to id),
+    ).body()
 
-    suspend fun noShow(id: String): BaseResponse<JsonElement?> = client.post(MerchantOperations.postBookingsByIdNoShow.pathWith(ID to id)).body()
+    suspend fun noShow(id: String): BaseResponse<JsonElement?> = client.post(
+        MerchantOperations.postBookingsByIdNoShow.pathWith(ID to id),
+    ).body()
 
     suspend fun reassign(id: String, body: PostBookingsByIdReassignBody): BaseResponse<JsonElement?> =
         client.post(MerchantOperations.postBookingsByIdReassign.pathWith(ID to id)) { setBody(body) }.body()

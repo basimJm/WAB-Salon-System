@@ -154,7 +154,17 @@ class MoreViewModelTest {
     }
 
     private fun TestScope.viewModel() = MoreViewModel(
-        MoreDependencies(session, AppearanceSettings(settings), NoConfig(), overlay, alert, LogoutUseCase(auth, session), tracker, "1.2.0", 12),
+        MoreDependencies(
+            session,
+            AppearanceSettings(settings),
+            NoConfig(),
+            overlay,
+            alert,
+            LogoutUseCase(auth, session),
+            tracker,
+            "1.2.0",
+            12,
+        ),
         testScope = backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 

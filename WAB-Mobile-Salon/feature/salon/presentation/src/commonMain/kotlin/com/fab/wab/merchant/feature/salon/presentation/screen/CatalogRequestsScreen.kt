@@ -77,8 +77,14 @@ fun CatalogRequestsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: 
             when {
                 state.loading -> AppLoadingIndicator(Modifier.align(Alignment.Center))
                 state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
-                state.requests.isEmpty() -> AppEmptyState(title = stringResource(Res.string.requests_empty), modifier = Modifier.align(Alignment.Center))
-                else -> LazyColumn(contentPadding = PaddingValues(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
+                state.requests.isEmpty() -> AppEmptyState(
+                    title = stringResource(Res.string.requests_empty),
+                    modifier = Modifier.align(Alignment.Center),
+                )
+                else -> LazyColumn(
+                    contentPadding = PaddingValues(spacing.space16),
+                    verticalArrangement = Arrangement.spacedBy(spacing.space10),
+                ) {
                     items(state.requests, key = { it.id }, contentType = { CatalogRequest::class }) { RequestRow(it) }
                 }
             }
@@ -97,12 +103,20 @@ private fun RequestRow(request: CatalogRequest) {
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AppText(text = request.name, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
+                AppText(
+                    text = request.name,
+                    style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.weight(1f),
+                )
                 AppStatusBadge(text = stringResource(label), tone = tone)
             }
             AppText(text = request.description, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
-            TimeFormat.isoDateText(request.createdAt)?.let { AppText(text = it, style = AppTheme.typography.labelSmall, color = AppTheme.colors.faint) }
-            request.adminNote?.let { AppText(text = stringResource(Res.string.requests_admin_note, it), style = AppTheme.typography.bodySmall) }
+            TimeFormat.isoDateText(request.createdAt)?.let {
+                AppText(text = it, style = AppTheme.typography.labelSmall, color = AppTheme.colors.faint)
+            }
+            request.adminNote?.let {
+                AppText(text = stringResource(Res.string.requests_admin_note, it), style = AppTheme.typography.bodySmall)
+            }
         }
     }
 }
@@ -116,7 +130,11 @@ private fun RequestSheet(form: CatalogRequestForm, sending: Boolean, onAction: (
             verticalArrangement = Arrangement.spacedBy(spacing.space12),
         ) {
             AppText(text = stringResource(Res.string.requests_new), style = AppTheme.typography.titleMedium)
-            AppTextField(value = form.name, onValueChange = { onAction(UiAction.OnName(it)) }, label = stringResource(Res.string.requests_name))
+            AppTextField(
+                value = form.name,
+                onValueChange = { onAction(UiAction.OnName(it)) },
+                label = stringResource(Res.string.requests_name),
+            )
             AppTextField(
                 value = form.description,
                 onValueChange = { onAction(UiAction.OnDescription(it)) },

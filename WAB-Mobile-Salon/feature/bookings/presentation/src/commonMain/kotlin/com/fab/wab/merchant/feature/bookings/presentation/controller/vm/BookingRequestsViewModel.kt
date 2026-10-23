@@ -72,6 +72,10 @@ class BookingRequestsViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handleSheet(event) || handleReason(event)
+    }
+
+    private fun handleSheet(event: UiAction): Boolean {
         when (event) {
             UiAction.OnAccept -> accept()
             UiAction.OnReject -> if (canAct()) updateState { copy(reject = DetailsDialog.Reason(BookingAction.REJECT)) }
@@ -86,11 +90,22 @@ class BookingRequestsViewModel(
                 emitSideEffect(SideEffect.OpenDetails(id))
             }
             UiAction.OnDismiss -> uiState.value.current?.let { drop(it.summary.id) }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleReason(event: UiAction): Boolean {
+        when (event) {
             is UiAction.OnReasonSelect -> updateState { copy(reject = reject?.copy(selected = event.reason)) }
-            is UiAction.OnReasonText -> updateState { copy(reject = reject?.copy(text = event.value.take(BookingsDefaults.REASON_TEXT_MAX))) }
+            is UiAction.OnReasonText -> updateState {
+                copy(reject = reject?.copy(text = event.value.take(BookingsDefaults.REASON_TEXT_MAX)))
+            }
             UiAction.OnRejectConfirm -> reject()
             UiAction.OnRejectDismiss -> updateState { copy(reject = null) }
+            else -> return false
         }
+        return true
     }
 
     private fun canAct(): Boolean = uiState.value.let { it.current != null && !it.accepting && !it.rejecting && it.handledBy == null }

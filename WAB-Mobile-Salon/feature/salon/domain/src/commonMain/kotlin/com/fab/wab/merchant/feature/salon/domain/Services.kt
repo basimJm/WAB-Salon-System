@@ -65,15 +65,21 @@ fun normalizeNumber(raw: String): String = buildString {
 
 /** PRD M16: price > 0 with at most 2 decimals; duration a multiple of 5 within 5..1440; description ≤ 500; ≤ 10 media. */
 fun serviceErrors(draft: ServiceDraft): Set<ServiceField> = buildSet {
-    val price = normalizeNumber(draft.price)
-    val parts = price.split(DECIMAL_POINT)
-    val priceValue = price.toDoubleOrNull()
-    if (priceValue == null || priceValue <= 0.0 || parts.size > PRICE_PARTS || (parts.getOrNull(1)?.length ?: 0) > ServiceLimits.PRICE_DECIMALS) add(ServiceField.PRICE)
-    val duration = normalizeNumber(draft.durationMinutes).toIntOrNull()
-    if (duration == null || duration !in ServiceLimits.DURATION_MIN..ServiceLimits.DURATION_MAX || duration % ServiceLimits.DURATION_STEP != 0) add(ServiceField.DURATION)
+    if (!isValidPrice(normalizeNumber(draft.price))) add(ServiceField.PRICE)
+    if (!isValidDuration(normalizeNumber(draft.durationMinutes).toIntOrNull())) add(ServiceField.DURATION)
     if (draft.description.trim().length > ServiceLimits.DESCRIPTION_MAX) add(ServiceField.DESCRIPTION)
     if ((draft.mediaKeys?.size ?: 0) > ServiceLimits.MEDIA_MAX) add(ServiceField.MEDIA)
 }
+
+private fun isValidPrice(price: String): Boolean {
+    val value = price.toDoubleOrNull() ?: return false
+    val parts = price.split(DECIMAL_POINT)
+    val decimals = parts.getOrNull(1)?.length ?: 0
+    return value > 0.0 && parts.size <= PRICE_PARTS && decimals <= ServiceLimits.PRICE_DECIMALS
+}
+
+private fun isValidDuration(minutes: Int?): Boolean =
+    minutes != null && minutes in ServiceLimits.DURATION_MIN..ServiceLimits.DURATION_MAX && minutes % ServiceLimits.DURATION_STEP == 0
 
 /** Drops a trailing ".000" style tail so the field shows "12.5" for the server's "12.500". */
 fun priceForEditing(serverPrice: String): String {

@@ -27,9 +27,18 @@ internal fun AffectedBookingsSheet(body: String, onReassign: () -> Unit, onCance
         Column(modifier = Modifier.fillMaxWidth().padding(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
             AppText(text = stringResource(Res.string.team_conflict_title), style = AppTheme.typography.titleMedium)
             AppText(text = body, style = AppTheme.typography.bodyMedium)
-            AppText(text = stringResource(Res.string.team_conflict_refund), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(Res.string.team_conflict_refund),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
             AppButton(stringResource(Res.string.team_conflict_reassign), onReassign, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined)
-            AppButton(stringResource(Res.string.team_conflict_cancel), onCancelBookings, Modifier.fillMaxWidth(), kind = ButtonKind.Destructive)
+            AppButton(
+                stringResource(Res.string.team_conflict_cancel),
+                onCancelBookings,
+                Modifier.fillMaxWidth(),
+                kind = ButtonKind.Destructive,
+            )
             AppButton(stringResource(Res.string.team_conflict_back), onBack, Modifier.fillMaxWidth(), kind = ButtonKind.Text)
         }
     }

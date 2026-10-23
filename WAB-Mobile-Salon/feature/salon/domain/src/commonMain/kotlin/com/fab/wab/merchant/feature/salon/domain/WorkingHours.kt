@@ -13,7 +13,8 @@ val SALON_WEEK: List<DayOfWeek> = listOf(
 /** One weekday; minutes from local midnight (Asia/Amman). */
 data class DaySchedule(val day: DayOfWeek, val isOff: Boolean, val openMinute: Int, val closeMinute: Int) {
     val isValid: Boolean
-        get() = isOff || (closeMinute > openMinute && openMinute % HoursLimits.STEP_MINUTES == 0 && closeMinute % HoursLimits.STEP_MINUTES == 0)
+        get() = isOff
+            || (closeMinute > openMinute && openMinute % HoursLimits.STEP_MINUTES == 0 && closeMinute % HoursLimits.STEP_MINUTES == 0)
 }
 
 data class Closure(val id: String, val from: LocalDate, val to: LocalDate, val reason: String, val editable: Boolean)
@@ -34,7 +35,9 @@ val CLOSE_STEPS: List<Int> = TIME_STEPS.drop(1) + HoursLimits.MINUTES_PER_DAY
 
 /** The week in salon order, every day present (missing days are off with default hours). */
 fun normalizeWeek(days: List<DaySchedule>): List<DaySchedule> = SALON_WEEK.map { day ->
-    days.firstOrNull { it.day == day } ?: DaySchedule(day, isOff = true, openMinute = HoursLimits.DEFAULT_OPEN, closeMinute = HoursLimits.DEFAULT_CLOSE)
+    days.firstOrNull {
+        it.day == day
+    } ?: DaySchedule(day, isOff = true, openMinute = HoursLimits.DEFAULT_OPEN, closeMinute = HoursLimits.DEFAULT_CLOSE)
 }
 
 /** "Copy to all days": every working day takes [source]'s hours; days off stay off. */

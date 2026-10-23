@@ -33,7 +33,16 @@ private class FakePolicy(var current: SalonPolicy? = null) : PolicyRepository {
         if (fail) return AppResult.Error(AppError.NetworkError("x"))
         saved += draft
         return AppResult.Success(
-            SalonPolicy(draft.windowHours.toInt(), draft.options, draft.depositPercentage.toIntOrNull(), draft.depositRefundable, draft.fullRefund, draft.noShowDeposit, draft.noShowFull, draft.notes),
+            SalonPolicy(
+                draft.windowHours.toInt(),
+                draft.options,
+                draft.depositPercentage.toIntOrNull(),
+                draft.depositRefundable,
+                draft.fullRefund,
+                draft.noShowDeposit,
+                draft.noShowFull,
+                draft.notes,
+            ),
         )
     }
 }
@@ -41,7 +50,12 @@ private class FakePolicy(var current: SalonPolicy? = null) : PolicyRepository {
 @OptIn(ExperimentalCoroutinesApi::class)
 class PolicyViewModelTest {
 
-    private fun TestScope.viewModel(repository: PolicyRepository) = PolicyViewModel(repository, NoOpAnalyticsTracker, { "failed" }, backgroundScope)
+    private fun TestScope.viewModel(repository: PolicyRepository) = PolicyViewModel(
+        repository,
+        NoOpAnalyticsTracker,
+        { "failed" },
+        backgroundScope,
+    )
         .also { vm -> backgroundScope.launch { vm.state.collect { } } }
 
     @Test
@@ -69,7 +83,16 @@ class PolicyViewModelTest {
 
     @Test
     fun customWindowAndOutcomesFromAnExistingPolicy() = runTest(UnconfinedTestDispatcher()) {
-        val existing = SalonPolicy(36, setOf(PaymentOption.FULL_ONLINE), null, true, FullPaymentRefund.FULL, NoShowDeposit.KEEP, NoShowFullPayment.KEEP, "Arrive early")
+        val existing = SalonPolicy(
+            36,
+            setOf(PaymentOption.FULL_ONLINE),
+            null,
+            true,
+            FullPaymentRefund.FULL,
+            NoShowDeposit.KEEP,
+            NoShowFullPayment.KEEP,
+            "Arrive early",
+        )
         val viewModel = viewModel(FakePolicy(existing))
         val state = viewModel.state.first { !it.loading }
         assertTrue(state.customWindow)

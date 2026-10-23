@@ -79,7 +79,10 @@ class BookingsViewModel(
     private fun applyFilter(filter: BookingFilter) {
         updateState { copy(filter = filter, filterOpen = false) }
         deps.analytics.trackAction(
-            AnalyticsAction(BookingsAnalytics.ACTION_FILTER, analyticsParams { number(BookingsAnalytics.PARAM_COUNT, filter.activeCount.toLong()) }),
+            AnalyticsAction(
+                BookingsAnalytics.ACTION_FILTER,
+                analyticsParams { number(BookingsAnalytics.PARAM_COUNT, filter.activeCount.toLong()) },
+            ),
         )
         reload()
     }
@@ -93,7 +96,13 @@ class BookingsViewModel(
             updateState { if (refreshing) copy(refreshing = true) else copy(loading = true, error = null) }
             when (val result = deps.repository.list(currentQuery(), page, BookingsDefaults.PAGE_SIZE)) {
                 is AppResult.Success -> updateState {
-                    copy(items = result.data, loading = false, refreshing = false, error = null, hasMore = result.data.size >= BookingsDefaults.PAGE_SIZE)
+                    copy(
+                        items = result.data,
+                        loading = false,
+                        refreshing = false,
+                        error = null,
+                        hasMore = result.data.size >= BookingsDefaults.PAGE_SIZE,
+                    )
                 }
                 is AppResult.Error -> {
                     val message = deps.errorText(result.appError)
@@ -115,7 +124,11 @@ class BookingsViewModel(
                 is AppResult.Success -> {
                     page += 1
                     updateState {
-                        copy(items = (items + result.data).distinctBy { it.id }, loadingMore = false, hasMore = result.data.size >= BookingsDefaults.PAGE_SIZE)
+                        copy(
+                            items = (items + result.data).distinctBy { it.id },
+                            loadingMore = false,
+                            hasMore = result.data.size >= BookingsDefaults.PAGE_SIZE,
+                        )
                     }
                 }
                 is AppResult.Error -> {

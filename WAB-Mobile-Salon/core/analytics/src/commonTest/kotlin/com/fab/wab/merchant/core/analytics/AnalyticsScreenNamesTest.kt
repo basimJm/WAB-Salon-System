@@ -11,7 +11,7 @@ class AnalyticsScreenNamesTest {
         val typed = "com.fab.wab.merchant.core.navigation.route.Screen.ItemDetails/{itemId}"
         assertEquals("item_details", AnalyticsScreenNames.fromRoute(typed))
         assertEquals("home", AnalyticsScreenNames.fromRoute("com.fab.wab.merchant.core.navigation.route.Graph.Home"))
-        assertEquals("sample_details", AnalyticsScreenNames.fromRoute("route.Screen\$SampleDetails?itemId={itemId}"))
+        assertEquals("booking_details", AnalyticsScreenNames.fromRoute("route.Screen\$BookingDetails?bookingId={bookingId}"))
         assertEquals("otp", AnalyticsScreenNames.fromRoute("OTP"))
         assertEquals("order_step_otp", AnalyticsScreenNames.fromRoute("OrderStepOTP"))
     }

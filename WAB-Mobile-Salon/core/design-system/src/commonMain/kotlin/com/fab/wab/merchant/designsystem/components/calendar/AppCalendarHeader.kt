@@ -80,11 +80,21 @@ fun AppCalendarHeader(
                 onSelect = { onAction(CalendarHeaderAction.ModeChanged(CalendarMode.entries[it])) },
                 modifier = Modifier.weight(1f),
             )
-            AppIconButton(AppIcons.Back, stringResource(Res.string.calendar_previous), onClick = { onAction(CalendarHeaderAction.Page(forward = false)) })
-            AppIconButton(AppIcons.Forward, stringResource(Res.string.calendar_next), onClick = { onAction(CalendarHeaderAction.Page(forward = true)) })
+            AppIconButton(
+                AppIcons.Back,
+                stringResource(Res.string.calendar_previous),
+                onClick = { onAction(CalendarHeaderAction.Page(forward = false)) },
+            )
+            AppIconButton(
+                AppIcons.Forward,
+                stringResource(Res.string.calendar_next),
+                onClick = { onAction(CalendarHeaderAction.Page(forward = true)) },
+            )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(spacing.space4)) {
-            strip.forEach { day -> StripDay(day, Modifier.weight(1f)) { onAction(CalendarHeaderAction.DayPicked(day.date)) } }
+            strip.forEach { day ->
+                StripDay(day, onClick = { onAction(CalendarHeaderAction.DayPicked(day.date)) }, modifier = Modifier.weight(1f))
+            }
         }
     }
     if (picking) {
@@ -100,7 +110,13 @@ fun AppCalendarHeader(
 }
 
 @Composable
-private fun TitleRow(title: String, monthLabel: String, filterCount: Int?, onPickDate: () -> Unit, onAction: (CalendarHeaderAction) -> Unit) {
+private fun TitleRow(
+    title: String,
+    monthLabel: String,
+    filterCount: Int?,
+    onPickDate: () -> Unit,
+    onAction: (CalendarHeaderAction) -> Unit,
+) {
     val press = rememberGlassPress()
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
         Column(modifier = Modifier.weight(1f).glassClickable(press, role = Role.Button, onClick = onPickDate)) {
@@ -114,7 +130,11 @@ private fun TitleRow(title: String, monthLabel: String, filterCount: Int?, onPic
         )
         if (filterCount != null) {
             Box {
-                AppIconButton(AppIcons.Filter, stringResource(Res.string.calendar_filter), onClick = { onAction(CalendarHeaderAction.Filter) })
+                AppIconButton(
+                    AppIcons.Filter,
+                    stringResource(Res.string.calendar_filter),
+                    onClick = { onAction(CalendarHeaderAction.Filter) },
+                )
                 AppCountBadge(filterCount, Modifier.align(Alignment.TopEnd))
             }
         }
@@ -122,7 +142,7 @@ private fun TitleRow(title: String, monthLabel: String, filterCount: Int?, onPic
 }
 
 @Composable
-private fun StripDay(day: WeekStripDayUi, modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun StripDay(day: WeekStripDayUi, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.large
     val press = rememberGlassPress()

@@ -62,6 +62,10 @@ class SalonProfileViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handleForm(event) || handleMedia(event) || handleExit(event)
+    }
+
+    private fun handleForm(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnName -> edit { copy(name = event.value.take(ProfileLimits.NAME_MAX)) }
             is UiAction.OnDescription -> edit { copy(description = event.value.take(ProfileLimits.DESCRIPTION_MAX)) }
@@ -70,6 +74,13 @@ class SalonProfileViewModel(
             is UiAction.OnArea -> uiState.value.areas.getOrNull(event.index)?.let { area -> edit { copy(areaId = area.id) } }
             is UiAction.OnPhone -> edit { copy(phone = event.value) }
             is UiAction.OnWhatsapp -> edit { copy(whatsapp = event.value) }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleMedia(event: UiAction): Boolean {
+        when (event) {
             is UiAction.OnPickImage -> pick(event.target)
             is UiAction.OnCropConfirm -> crop(event.region)
             UiAction.OnCropCancel -> updateState { copy(crop = null) }
@@ -81,19 +92,30 @@ class SalonProfileViewModel(
             UiAction.OnCloseMap -> updateState { copy(map = null) }
             UiAction.OnPreview -> updateState { copy(previewOpen = true) }
             UiAction.OnClosePreview -> updateState { copy(previewOpen = false) }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleExit(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnSave -> save(leave = false)
             UiAction.OnSaveAndLeave -> {
                 updateState { copy(unsavedDialog = false) }
                 save(leave = true)
             }
-            UiAction.OnBack -> if (uiState.value.dirty) updateState { copy(unsavedDialog = true) } else emitSideEffect(SideEffect.NavigateBack)
+            UiAction.OnBack -> if (uiState.value.dirty) updateState {
+                copy(unsavedDialog = true)
+            } else emitSideEffect(SideEffect.NavigateBack)
             UiAction.OnDiscard -> {
                 updateState { copy(unsavedDialog = false) }
                 emitSideEffect(SideEffect.NavigateBack)
             }
             UiAction.OnKeepEditing -> updateState { copy(unsavedDialog = false) }
             UiAction.OnRetry -> load()
+            else -> return false
         }
+        return true
     }
 
     private fun uiStateValue(): UiState = uiState.value
@@ -135,7 +157,9 @@ class SalonProfileViewModel(
     }
 
     private suspend fun loadCities(cityId: String?) {
-        (deps.locations.cities(LocationDefaults.DEFAULT_COUNTRY_CODE) as? AppResult.Success)?.let { cities -> updateState { copy(cities = cities.data) } }
+        (deps.locations.cities(LocationDefaults.DEFAULT_COUNTRY_CODE) as? AppResult.Success)?.let { cities ->
+            updateState { copy(cities = cities.data) }
+        }
         if (cityId != null) (deps.locations.areas(cityId) as? AppResult.Success)?.let { areas -> updateState { copy(areas = areas.data) } }
     }
 
@@ -184,7 +208,10 @@ class SalonProfileViewModel(
             updateState { if (target == ProfileImage.COVER) copy(cover = item) else copy(profile = item) }
             when (progress) {
                 is UploadProgress.Done -> edit {
-                    if (target == ProfileImage.COVER) copy(coverKey = progress.upload.key, coverUrl = progress.upload.url) else copy(profileKey = progress.upload.key, profileUrl = progress.upload.url)
+                    if (target == ProfileImage.COVER) copy(
+                        coverKey = progress.upload.key,
+                        coverUrl = progress.upload.url,
+                    ) else copy(profileKey = progress.upload.key, profileUrl = progress.upload.url)
                 }
                 is UploadProgress.Failed -> emitSideEffect(SideEffect.ShowError(deps.errorText(progress.error)))
                 is UploadProgress.Uploading -> Unit
@@ -218,5 +245,8 @@ class SalonProfileViewModel(
         }
     }
 
-    private fun uploaded(target: ProfileImage, url: String) = UploadItemUi(target.name, target.name, UploadKind.IMAGE, UploadStatus.Uploaded, url = url)
+    private fun uploaded(
+        target: ProfileImage,
+        url: String,
+    ) = UploadItemUi(target.name, target.name, UploadKind.IMAGE, UploadStatus.Uploaded, url = url)
 }

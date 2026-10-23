@@ -17,7 +17,9 @@ import kotlinx.datetime.LocalDate
 /** Diagnostic text when a closure comes back with unreadable dates (never shown to users). */
 private const val UNREADABLE_CLOSURE = "closure dates not readable"
 
-private fun Closure?.asResult(): AppResult<Closure> = this?.let { AppResult.Success(it) } ?: AppResult.Error(AppError.UnknownError(UNREADABLE_CLOSURE))
+private fun Closure?.asResult(): AppResult<Closure> = this?.let {
+    AppResult.Success(it)
+} ?: AppResult.Error(AppError.UnknownError(UNREADABLE_CLOSURE))
 
 /** Saving the weekly hours refreshes the shared salon (completeness `WORKING_HOURS`). */
 class HoursRepositoryImpl(private val api: HoursApi, private val salon: SalonRepository) : HoursRepository {
@@ -35,7 +37,9 @@ class HoursRepositoryImpl(private val api: HoursApi, private val salon: SalonRep
         }
 
     override suspend fun updateClosure(id: String, from: LocalDate, to: LocalDate, reason: String): AppResult<Closure> =
-        when (val result = safeApiCall { api.updateClosure(id, PatchSalonHoursClosuresByIdBody(from.toString(), to.toString(), reason.trim())) }) {
+        when (val result = safeApiCall {
+            api.updateClosure(id, PatchSalonHoursClosuresByIdBody(from.toString(), to.toString(), reason.trim()))
+        }) {
             is AppResult.Success -> result.data.data.let { closureOf(it.id, it.from, it.to, it.reason, it.editable) }.asResult()
             is AppResult.Error -> result
             AppResult.Loading -> AppResult.Loading

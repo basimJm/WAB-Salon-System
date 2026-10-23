@@ -36,10 +36,13 @@ internal object MemberKeys {
 
 private const val FIRST_PAGE = 1
 
-internal fun member(
-    id: String, firstName: String, lastName: String, phone: String, photoUrl: String?, role: String,
-    permissions: List<String>, active: Boolean, providesServices: Boolean,
-) = TeamMember(
+/** The fields every member DTO shares, before parsing. */
+private data class RawMember(
+    val id: String, val firstName: String, val lastName: String, val phone: String, val photoUrl: String?, val role: String,
+    val permissions: List<String>, val active: Boolean, val providesServices: Boolean,
+)
+
+private fun RawMember.toDomain() = TeamMember(
     id = id,
     firstName = firstName,
     lastName = lastName,
@@ -51,12 +54,18 @@ internal fun member(
     providesServices = providesServices,
 )
 
-fun GetTeamMembersDataItem.toDomain() = member(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices)
-fun GetTeamMembersByIdData.toDomain() = member(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices)
-fun PostTeamMembersData.toDomain() = member(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices)
-fun PatchTeamMembersByIdData.toDomain() = member(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices)
-fun PostTeamMembersByIdDeactivateData.toDomain() = member(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices)
-fun PostTeamMembersByIdReactivateData.toDomain() = member(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices)
+fun GetTeamMembersDataItem.toDomain() =
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+fun GetTeamMembersByIdData.toDomain() =
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+fun PostTeamMembersData.toDomain() =
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+fun PatchTeamMembersByIdData.toDomain() =
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+fun PostTeamMembersByIdDeactivateData.toDomain() =
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+fun PostTeamMembersByIdReactivateData.toDomain() =
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
 
 /** Name, role and permissions always; the photo only when it changed ([photoChanged]) — null removes it. */
 fun MemberDraft.toPatch(photoChanged: Boolean, permissions: Set<Permission>?): JsonObject = buildJsonObject {
@@ -109,7 +118,9 @@ class TeamRepositoryImpl(private val api: TeamApi, private val salon: SalonRepos
 
     override suspend fun update(id: String, draft: MemberDraft, permissions: Set<Permission>?): AppResult<TeamMember> {
         val photoChanged = draft.photoKey != null || (cache[id]?.photoUrl != null && draft.photoUrl == null)
-        return safeApiCall { api.update(id, draft.toPatch(photoChanged, permissions)) }.mapSuccess { it.data.toDomain() }.also { remember(it) }
+        return safeApiCall {
+            api.update(id, draft.toPatch(photoChanged, permissions))
+        }.mapSuccess { it.data.toDomain() }.also { remember(it) }
     }
 
     override suspend fun deactivate(id: String): AppResult<TeamMember> =

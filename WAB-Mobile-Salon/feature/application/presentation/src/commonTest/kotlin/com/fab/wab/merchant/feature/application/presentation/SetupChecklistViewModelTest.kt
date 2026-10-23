@@ -37,7 +37,9 @@ internal class FakeSalonRepository(var result: AppResult<SalonProfile>) : SalonR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SetupChecklistViewModelTest {
-    private val repository = FakeSalonRepository(AppResult.Success(salon(SalonState.APPLICATION_PENDING, setOf(CompletenessItem.COVER, CompletenessItem.POLICY))))
+    private val repository = FakeSalonRepository(
+        AppResult.Success(salon(SalonState.APPLICATION_PENDING, setOf(CompletenessItem.COVER, CompletenessItem.POLICY))),
+    )
 
     private fun TestScope.viewModel() = SetupChecklistViewModel(repository, NoOpAnalyticsTracker, { "failed" }, backgroundScope)
         .also { vm -> backgroundScope.launch { vm.state.collect {} } }

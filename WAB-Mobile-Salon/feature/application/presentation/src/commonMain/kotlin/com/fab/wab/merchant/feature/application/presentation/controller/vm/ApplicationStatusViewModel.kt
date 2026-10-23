@@ -44,7 +44,9 @@ class ApplicationStatusViewModel(
                 is AppResult.Error -> {
                     val message = errorText(result.appError)
                     updateState { copy(loading = false, refreshing = false) }
-                    if (uiState.value.application == null) updateState { copy(error = message) } else emitSideEffect(SideEffect.ShowError(message))
+                    if (uiState.value.application == null) updateState {
+                        copy(error = message)
+                    } else emitSideEffect(SideEffect.ShowError(message))
                 }
                 AppResult.Loading -> Unit
             }

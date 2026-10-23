@@ -49,6 +49,10 @@ class HoursViewModel(
     }
 
     override fun handle(event: UiAction) {
+        handleWeek(event) || handleClosures(event) || handleDialogs(event)
+    }
+
+    private fun handleWeek(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnToggleDay -> editDay(event.day) { copy(isOff = !event.working) }
             is UiAction.OnOpenTime -> editDay(event.day) { copy(openMinute = event.minute) }
@@ -56,7 +60,16 @@ class HoursViewModel(
             is UiAction.OnCopyToAll -> uiState.value.week.firstOrNull { it.day == event.day }?.let { source ->
                 updateState { copy(week = week.copyHoursFrom(source)) }
             }
-            UiAction.OnSaveWeek -> if (uiState.value.canSaveWeek) apply(PendingChange.Week(uiState.value.week))
+            UiAction.OnSaveWeek -> {
+                if (uiState.value.canSaveWeek) apply(PendingChange.Week(uiState.value.week))
+            }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleClosures(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnAddClosure -> updateState { copy(closureSheet = ClosureForm(from = today, to = today)) }
             is UiAction.OnEditClosure -> uiState.value.closures.firstOrNull { it.id == event.id && it.editable }?.let { closure ->
                 updateState { copy(closureSheet = ClosureForm(closure.id, closure.from, closure.to, closure.reason)) }
@@ -68,12 +81,21 @@ class HoursViewModel(
                 if (closureValid(form.from, form.to, form.reason, uiState.value.today)) apply(PendingChange.SaveClosure(form))
             }
             UiAction.OnClosureDismiss -> updateState { copy(closureSheet = null) }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleDialogs(event: UiAction): Boolean {
+        when (event) {
             is UiAction.OnDeleteClosure -> updateState { copy(deleteClosureId = event.id) }
             UiAction.OnDeleteConfirm -> deleteClosure()
             UiAction.OnConflictCancelBookings -> resolveConflict()
             UiAction.OnDialogDismiss -> updateState { copy(conflict = null, deleteClosureId = null) }
             UiAction.OnRetry -> load()
+            else -> return false
         }
+        return true
     }
 
     private fun editDay(day: DayOfWeek, change: DaySchedule.() -> DaySchedule) =
@@ -132,11 +154,20 @@ class HoursViewModel(
         val from = form.from ?: return null
         val to = form.to ?: return null
         val id = form.id
-        val result = if (id == null) deps.repository.addClosure(from, to, form.reason) else deps.repository.updateClosure(id, from, to, form.reason)
+        val result = if (id == null) deps.repository.addClosure(
+            from,
+            to,
+            form.reason,
+        ) else deps.repository.updateClosure(id, from, to, form.reason)
         return when (result) {
             is AppResult.Success -> {
                 deps.analytics.trackAction(AnalyticsAction(SalonAnalytics.ACTION_CLOSURE_SAVE))
-                updateState { copy(closureSheet = null, closures = (closures.filterNot { it.id == result.data.id } + result.data).sortedBy { it.from }) }
+                updateState {
+                    copy(
+                        closureSheet = null,
+                        closures = (closures.filterNot { it.id == result.data.id } + result.data).sortedBy { it.from },
+                    )
+                }
                 emitSideEffect(SideEffect.Done(if (id == null) HoursMessage.CLOSURE_ADDED else HoursMessage.CLOSURE_UPDATED, cancelled))
                 null
             }
@@ -158,7 +189,10 @@ class HoursViewModel(
             when (val result = deps.affected.cancel(conflict.bookingIds, code, text)) {
                 is AppResult.Success -> {
                     deps.analytics.trackAction(
-                        AnalyticsAction(SalonAnalytics.ACTION_CANCEL_AFFECTED, analyticsParams { number(SalonAnalytics.PARAM_COUNT, conflict.bookingIds.size.toLong()) }),
+                        AnalyticsAction(
+                            SalonAnalytics.ACTION_CANCEL_AFFECTED,
+                            analyticsParams { number(SalonAnalytics.PARAM_COUNT, conflict.bookingIds.size.toLong()) },
+                        ),
                     )
                     updateState { copy(saving = false) }
                     apply(conflict.change, cancelled = conflict.bookingIds.size)

@@ -64,7 +64,10 @@ private const val TIME_SEPARATOR = ":"
 /** Minutes → `HH:mm` (24:00 shows as midnight). */
 internal fun hhmm(minutes: Int): String {
     val wrapped = minutes % HoursLimits.MINUTES_PER_DAY
-    return (wrapped / MINUTES_PER_HOUR).toString().padStart(TIME_PAD, ZERO) + TIME_SEPARATOR + (wrapped % MINUTES_PER_HOUR).toString().padStart(TIME_PAD, ZERO)
+    return (wrapped / MINUTES_PER_HOUR).toString().padStart(
+        TIME_PAD,
+        ZERO,
+    ) + TIME_SEPARATOR + (wrapped % MINUTES_PER_HOUR).toString().padStart(TIME_PAD, ZERO)
 }
 
 @Composable
@@ -91,7 +94,11 @@ internal fun HoursDialogs(state: UiState, onAction: (UiAction) -> Unit) {
             confirmText = stringResource(Res.string.conflict_cancel),
             onConfirm = { onAction(UiAction.OnConflictCancelBookings) },
             onDismiss = { onAction(UiAction.OnDialogDismiss) },
-            message = pluralStringResource(Res.plurals.conflict_body, count, count) + PARAGRAPH + stringResource(Res.string.conflict_refund),
+            message = pluralStringResource(
+                Res.plurals.conflict_body,
+                count,
+                count,
+            ) + PARAGRAPH + stringResource(Res.string.conflict_refund),
             dismissText = stringResource(Res.string.conflict_back),
             icon = AppIcons.Calendar,
             tone = StatusTone.Warning,
@@ -120,11 +127,28 @@ private fun ClosureSheet(form: ClosureForm, state: UiState, onAction: (UiAction)
     val spacing = AppTheme.spacing
     AppBottomSheet(onDismiss = { onAction(UiAction.OnClosureDismiss) }) {
         Column(modifier = Modifier.fillMaxWidth().padding(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space12)) {
-            AppText(text = stringResource(if (form.id == null) Res.string.closures_add else Res.string.closure_edit), style = AppTheme.typography.titleMedium)
-            AppText(text = stringResource(Res.string.closure_sheet_sub), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(if (form.id == null) Res.string.closures_add else Res.string.closure_edit),
+                style = AppTheme.typography.titleMedium,
+            )
+            AppText(
+                text = stringResource(Res.string.closure_sheet_sub),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.space10)) {
-                DateButton(stringResource(Res.string.closure_from), form.from, Modifier.weight(1f)) { picking = DateField.FROM }
-                DateButton(stringResource(Res.string.closure_to), form.to, Modifier.weight(1f)) { picking = DateField.TO }
+                DateButton(
+                    stringResource(Res.string.closure_from),
+                    form.from,
+                    onClick = { picking = DateField.FROM },
+                    modifier = Modifier.weight(1f),
+                )
+                DateButton(
+                    stringResource(Res.string.closure_to),
+                    form.to,
+                    onClick = { picking = DateField.TO },
+                    modifier = Modifier.weight(1f),
+                )
             }
             AppTextField(
                 value = form.reason,
@@ -156,7 +180,7 @@ private fun ClosureSheet(form: ClosureForm, state: UiState, onAction: (UiAction)
 }
 
 @Composable
-private fun DateButton(label: String, date: LocalDate?, modifier: Modifier, onClick: () -> Unit) {
+private fun DateButton(label: String, date: LocalDate?, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
         AppText(text = label, style = AppTheme.typography.labelMedium, color = AppTheme.colors.muted)
         AppButton(

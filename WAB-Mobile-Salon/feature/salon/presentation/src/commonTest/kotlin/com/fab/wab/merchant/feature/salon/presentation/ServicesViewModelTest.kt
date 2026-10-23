@@ -35,14 +35,33 @@ class ServicesViewModelTest {
     private val uploads = FakeUploads()
     private val picker = FakeFilePicker(media = listOf(PickedFile("a.jpg", byteArrayOf(1), "image/jpeg")))
 
-    private fun <T : Any> TestScope.effects(flow: kotlinx.coroutines.flow.Flow<T>) = mutableListOf<T>().also { list -> backgroundScope.launch { flow.collect { list += it } } }
+    private fun <T : Any> TestScope.effects(flow: kotlinx.coroutines.flow.Flow<T>) = mutableListOf<T>().also { list ->
+        backgroundScope.launch { flow.collect { list += it } }
+    }
 
-    private fun TestScope.list() = ServicesViewModel(services, NoOpAnalyticsTracker, { "failed" }, backgroundScope).also { vm -> backgroundScope.launch { vm.state.collect { } } }
+    private fun TestScope.list() = ServicesViewModel(
+        services,
+        NoOpAnalyticsTracker,
+        { "failed" },
+        backgroundScope,
+    ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 
-    private fun TestScope.picker() = CatalogPickerViewModel(services, salon, { "failed" }, backgroundScope).also { vm -> backgroundScope.launch { vm.state.collect { } } }
+    private fun TestScope.picker() = CatalogPickerViewModel(
+        services,
+        salon,
+        { "failed" },
+        backgroundScope,
+    ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 
     private fun TestScope.edit(serviceId: String?, catalogId: String?) = ServiceEditViewModel(
-        serviceId, catalogId, ServiceEditDependencies(services, salon, picker, UploadFileUseCase(uploads), NoOpAnalyticsTracker, { "failed" }), backgroundScope,
+        serviceId, catalogId, ServiceEditDependencies(
+            services,
+            salon,
+            picker,
+            UploadFileUseCase(uploads),
+            NoOpAnalyticsTracker,
+            { "failed" },
+        ), backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 
     @Test

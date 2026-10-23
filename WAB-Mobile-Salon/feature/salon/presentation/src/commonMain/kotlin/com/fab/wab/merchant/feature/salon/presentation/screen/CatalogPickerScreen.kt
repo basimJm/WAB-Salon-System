@@ -49,7 +49,13 @@ private const val DESCRIPTION_LINES = 2
 
 /** PRD M16 catalog picker (design 06 `on.catalog`): gender catalog, search, "Added" marks, request link. */
 @Composable
-fun CatalogPickerScreen(state: UiState, canRequest: Boolean, onAction: (UiAction) -> Unit, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun CatalogPickerScreen(
+    state: UiState,
+    canRequest: Boolean,
+    onAction: (UiAction) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     TrackScreen(SalonAnalytics.SCREEN_CATALOG)
     val spacing = AppTheme.spacing
     AppScreen(modifier = modifier, topBar = { AppTopBar(title = stringResource(Res.string.catalog_title), onBack = onBack) }) { padding ->
@@ -58,8 +64,15 @@ fun CatalogPickerScreen(state: UiState, canRequest: Boolean, onAction: (UiAction
                 state.loading -> AppLoadingIndicator(Modifier.align(Alignment.Center))
                 state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
                 else -> Column {
-                    Column(modifier = Modifier.padding(horizontal = spacing.space16, vertical = spacing.space8), verticalArrangement = Arrangement.spacedBy(spacing.space6)) {
-                        AppSearchBar(value = state.query, onValueChange = { onAction(UiAction.OnQuery(it)) }, placeholder = stringResource(Res.string.catalog_search))
+                    Column(
+                        modifier = Modifier.padding(horizontal = spacing.space16, vertical = spacing.space8),
+                        verticalArrangement = Arrangement.spacedBy(spacing.space6),
+                    ) {
+                        AppSearchBar(
+                            value = state.query,
+                            onValueChange = { onAction(UiAction.OnQuery(it)) },
+                            placeholder = stringResource(Res.string.catalog_search),
+                        )
                         AppText(
                             text = stringResource(if (state.womenSalon) Res.string.catalog_note_women else Res.string.catalog_note_men),
                             style = AppTheme.typography.labelMedium,
@@ -67,13 +80,24 @@ fun CatalogPickerScreen(state: UiState, canRequest: Boolean, onAction: (UiAction
                         )
                         if (canRequest) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                AppText(text = stringResource(Res.string.catalog_cant_find), style = AppTheme.typography.bodySmall, modifier = Modifier.weight(1f))
-                                AppButton(stringResource(Res.string.catalog_request), { onAction(UiAction.OnRequest) }, kind = ButtonKind.Text)
+                                AppText(
+                                    text = stringResource(Res.string.catalog_cant_find),
+                                    style = AppTheme.typography.bodySmall,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                AppButton(
+                                    stringResource(Res.string.catalog_request),
+                                    { onAction(UiAction.OnRequest) },
+                                    kind = ButtonKind.Text,
+                                )
                             }
                         }
                     }
                     if (state.items.isEmpty()) {
-                        AppEmptyState(title = stringResource(Res.string.catalog_empty), modifier = Modifier.fillMaxWidth().padding(spacing.space24))
+                        AppEmptyState(
+                            title = stringResource(Res.string.catalog_empty),
+                            modifier = Modifier.fillMaxWidth().padding(spacing.space24),
+                        )
                     }
                     AppPagedList(
                         items = state.shown,
@@ -97,7 +121,12 @@ private fun CatalogRow(item: CatalogService, added: Boolean, onClick: () -> Unit
             AppImage(item.imageUrl, Modifier.size(AppTheme.sizes.avatar).clip(AppTheme.shapes.medium))
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.space4)) {
                 AppText(text = item.name, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
-                AppText(text = item.description, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted, maxLines = DESCRIPTION_LINES)
+                AppText(
+                    text = item.description,
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.muted,
+                    maxLines = DESCRIPTION_LINES,
+                )
             }
             if (added) AppStatusBadge(text = stringResource(Res.string.catalog_added), tone = StatusTone.Success)
         }

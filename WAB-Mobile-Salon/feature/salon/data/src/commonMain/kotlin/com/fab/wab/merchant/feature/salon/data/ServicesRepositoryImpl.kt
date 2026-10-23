@@ -40,19 +40,33 @@ internal object ServiceKeys {
 private const val FIRST_PAGE = 1
 private const val CHANGE_BUFFER = 8
 
-private fun service(
-    id: String, catalogId: String, name: String, imageUrl: String, price: String, duration: Double,
-    brideOnly: Boolean, description: String?, media: List<String>, active: Boolean,
-) = SalonService(id, catalogId, name, imageUrl, price, duration.toInt(), brideOnly, description?.takeIf { it.isNotBlank() }, media, active)
+/** The fields the three service DTOs share, before parsing. */
+private data class RawService(
+    val id: String, val catalogId: String, val name: String, val imageUrl: String, val price: String, val duration: Double,
+    val brideOnly: Boolean, val description: String?, val media: List<String>, val active: Boolean,
+)
+
+private fun RawService.toDomain() = SalonService(
+    id,
+    catalogId,
+    name,
+    imageUrl,
+    price,
+    duration.toInt(),
+    brideOnly,
+    description?.takeIf { it.isNotBlank() },
+    media,
+    active,
+)
 
 fun GetSalonServicesDataItem.toDomain() =
-    service(id, catalogServiceId, name, imageUrl, price, durationMinutes, brideOnly, extraDescription, mediaUrls, active)
+    RawService(id, catalogServiceId, name, imageUrl, price, durationMinutes, brideOnly, extraDescription, mediaUrls, active).toDomain()
 
 fun PostSalonServicesData.toDomain() =
-    service(id, catalogServiceId, name, imageUrl, price, durationMinutes, brideOnly, extraDescription, mediaUrls, active)
+    RawService(id, catalogServiceId, name, imageUrl, price, durationMinutes, brideOnly, extraDescription, mediaUrls, active).toDomain()
 
 fun PatchSalonServicesByIdData.toDomain() =
-    service(id, catalogServiceId, name, imageUrl, price, durationMinutes, brideOnly, extraDescription, mediaUrls, active)
+    RawService(id, catalogServiceId, name, imageUrl, price, durationMinutes, brideOnly, extraDescription, mediaUrls, active).toDomain()
 
 fun GetCatalogServicesDataItem.toDomain(): CatalogService? {
     val type = SalonGenderType.entries.firstOrNull { it.name == gender.uppercase() } ?: return null
@@ -120,7 +134,9 @@ class ServicesRepositoryImpl(private val api: ServicesApi, private val salon: Sa
         safeApiCall { api.update(id, draft.toPatch()) }.mapSuccess { it.data.toDomain() }.also { remember(it) }
 
     override suspend fun setActive(id: String, active: Boolean): AppResult<SalonService> =
-        safeApiCall { api.update(id, buildJsonObject { put(ServiceKeys.ACTIVE, active) }) }.mapSuccess { it.data.toDomain() }.also { remember(it) }
+        safeApiCall {
+            api.update(id, buildJsonObject { put(ServiceKeys.ACTIVE, active) })
+        }.mapSuccess { it.data.toDomain() }.also { remember(it) }
 
     private suspend fun remember(result: AppResult<SalonService>) {
         if (result !is AppResult.Success) return

@@ -19,7 +19,7 @@ class AndroidOverlayPermission(private val context: Context) : OverlayPermission
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         try {
             context.startActivity(intent)
-        } catch (missing: ActivityNotFoundException) {
+        } catch (ignored: ActivityNotFoundException) {
             // Some OEM builds hide the screen; the member can still enable it from the app's system settings.
             runCatching {
                 context.startActivity(

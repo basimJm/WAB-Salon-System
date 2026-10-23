@@ -46,15 +46,26 @@ internal class FakeLocations : LocationsRepository {
     override suspend fun countries(refresh: Boolean): AppResult<List<Country>> = AppResult.Success(emptyList())
     override suspend fun cities(countryCode: String, refresh: Boolean): AppResult<List<City>> =
         AppResult.Success(listOf(City("c1", "Amman"), City("c2", "Irbid"))).also { requestedCities += countryCode }
-    override suspend fun areas(cityId: String, refresh: Boolean): AppResult<List<Area>> = AppResult.Success(listOf(Area("$cityId-a1", "Abdoun")))
+    override suspend fun areas(
+        cityId: String,
+        refresh: Boolean,
+    ): AppResult<List<Area>> = AppResult.Success(listOf(Area("$cityId-a1", "Abdoun")))
 }
 
 internal class FakeUploads(var fail: Boolean = false) : UploadsRepository {
     override suspend fun presign(purpose: UploadPurpose, contentType: String, size: Long): AppResult<PresignedUpload> =
         AppResult.Success(PresignedUpload("key-$size", "u", "PUT", emptyMap(), size))
-    override suspend fun upload(target: PresignedUpload, bytes: ByteArray, contentType: String, onProgress: (Float) -> Unit): AppResult<Unit> =
+    override suspend fun upload(
+        target: PresignedUpload,
+        bytes: ByteArray,
+        contentType: String,
+        onProgress: (Float) -> Unit,
+    ): AppResult<Unit> =
         if (fail) AppResult.Error(com.fab.wab.merchant.core.domain.AppError.HttpError(403, null)) else AppResult.Success(Unit)
-    override suspend fun confirm(purpose: UploadPurpose, key: String): AppResult<ConfirmedUpload> = AppResult.Success(ConfirmedUpload(key, null))
+    override suspend fun confirm(
+        purpose: UploadPurpose,
+        key: String,
+    ): AppResult<ConfirmedUpload> = AppResult.Success(ConfirmedUpload(key, null))
 }
 
 internal class RecordingSessionStore : SessionStore {

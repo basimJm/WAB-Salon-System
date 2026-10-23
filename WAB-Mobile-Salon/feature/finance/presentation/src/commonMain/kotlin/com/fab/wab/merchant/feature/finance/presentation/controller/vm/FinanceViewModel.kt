@@ -53,12 +53,18 @@ class FinanceViewModel(
     private var loadJob: Job? = null
 
     override fun onStart() {
-        deps.session.onEach { session -> updateState { copy(canManageBank = session.permissionSet().can(OwnerCapability.PAYOUT_DETAILS_MANAGE)) } }.launchIn(scope)
+        deps.session.onEach { session ->
+            updateState { copy(canManageBank = session.permissionSet().can(OwnerCapability.PAYOUT_DETAILS_MANAGE)) }
+        }.launchIn(scope)
         loadBalance()
         reload(refreshing = false)
     }
 
     override fun handle(event: UiAction) {
+        handleFilters(event) || handleList(event)
+    }
+
+    private fun handleFilters(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnTab -> if (event.tab != uiState.value.tab) {
                 updateState { copy(tab = event.tab) }
@@ -67,7 +73,9 @@ class FinanceViewModel(
             }
             is UiAction.OnRange -> {
                 val dates = event.range.dates(deps.today())
-                updateState { if (dates != null) copy(range = event.range, from = dates.first, to = dates.second) else copy(range = event.range) }
+                updateState {
+                    if (dates != null) copy(range = event.range, from = dates.first, to = dates.second) else copy(range = event.range)
+                }
                 track(FinanceAnalytics.ACTION_RANGE, FinanceAnalytics.PARAM_RANGE, event.range.name)
                 if (dates != null) reload(refreshing = false)
             }
@@ -75,10 +83,19 @@ class FinanceViewModel(
                 updateState { copy(range = FinanceRange.CUSTOM, from = event.date, to = if (to < event.date) event.date else to) }
                 reload(refreshing = false)
             }
-            is UiAction.OnTo -> if (event.date >= uiState.value.from) {
-                updateState { copy(range = FinanceRange.CUSTOM, to = event.date) }
-                reload(refreshing = false)
+            is UiAction.OnTo -> {
+                if (event.date >= uiState.value.from) {
+                    updateState { copy(range = FinanceRange.CUSTOM, to = event.date) }
+                    reload(refreshing = false)
+                }
             }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleList(event: UiAction): Boolean {
+        when (event) {
             UiAction.OnLoadMore -> loadMore()
             UiAction.OnRefresh -> {
                 loadBalance()
@@ -87,7 +104,9 @@ class FinanceViewModel(
             UiAction.OnRetry -> reload(refreshing = false)
             UiAction.OnBank -> if (uiState.value.canManageBank) emitSideEffect(SideEffect.OpenBank)
             is UiAction.OnBooking -> emitSideEffect(SideEffect.OpenBooking(event.bookingId))
+            else -> return false
         }
+        return true
     }
 
     private fun track(name: String, key: String, value: String) =
@@ -101,21 +120,21 @@ class FinanceViewModel(
     private suspend fun fetch(targetPage: Int, append: Boolean): Int? {
         val state = uiState.value
         val result = when (state.tab) {
-            FinanceTab.TRANSACTIONS -> deps.finance.transactions(state.from, state.to, targetPage).also { r ->
-                (r as? AppResult.Success)?.let { rows -> updateState { copy(transactions = if (append) (transactions + rows.data).distinctBy { it.id } else rows.data) } }
+            FinanceTab.TRANSACTIONS -> deps.finance.transactions(state.from, state.to, targetPage).onRows { rows ->
+                updateState { copy(transactions = mergePage(transactions, rows, append) { it.id }) }
             }
-            FinanceTab.REFUNDS -> deps.finance.refunds(state.from, state.to, targetPage).also { r ->
-                (r as? AppResult.Success)?.let { rows -> updateState { copy(refunds = if (append) (refunds + rows.data).distinctBy { it.id } else rows.data) } }
+            FinanceTab.REFUNDS -> deps.finance.refunds(state.from, state.to, targetPage).onRows { rows ->
+                updateState { copy(refunds = mergePage(refunds, rows, append) { it.id }) }
             }
-            FinanceTab.PAYOUTS -> deps.finance.payouts(state.from, state.to, targetPage).also { r ->
-                (r as? AppResult.Success)?.let { rows -> updateState { copy(payouts = if (append) (payouts + rows.data).distinctBy { it.id } else rows.data) } }
+            FinanceTab.PAYOUTS -> deps.finance.payouts(state.from, state.to, targetPage).onRows { rows ->
+                updateState { copy(payouts = mergePage(payouts, rows, append) { it.id }) }
             }
         }
         return when (result) {
             is AppResult.Success -> result.data.size
             is AppResult.Error -> {
                 val message = deps.errorText(result.appError)
-                if (append || uiState.value.let { it.transactions.isNotEmpty() || it.refunds.isNotEmpty() || it.payouts.isNotEmpty() }) {
+                if (append || uiState.value.hasRows) {
                     emitSideEffect(SideEffect.ShowError(message))
                 } else {
                     updateState { copy(error = message) }
@@ -147,3 +166,10 @@ class FinanceViewModel(
         }
     }
 }
+
+private inline fun <T> AppResult<List<T>>.onRows(block: (List<T>) -> Unit): AppResult<List<T>> =
+    also { if (it is AppResult.Success) block(it.data) }
+
+/** A next page is appended without duplicates (rows can shift between pages); a first page replaces the list. */
+private inline fun <T> mergePage(current: List<T>, page: List<T>, append: Boolean, key: (T) -> String): List<T> =
+    if (append) (current + page).distinctBy(key) else page

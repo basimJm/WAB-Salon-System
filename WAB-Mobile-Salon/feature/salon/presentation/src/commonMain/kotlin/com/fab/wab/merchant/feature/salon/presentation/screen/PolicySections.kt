@@ -95,7 +95,11 @@ internal fun OutcomeSections(state: UiState, onAction: (UiAction) -> Unit) {
         if (full) {
             Choice(
                 stringResource(Res.string.policy_full_ref),
-                listOf(stringResource(Res.string.policy_keep), stringResource(Res.string.policy_refund_minus), stringResource(Res.string.policy_refund_full)),
+                listOf(
+                    stringResource(Res.string.policy_keep),
+                    stringResource(Res.string.policy_refund_minus),
+                    stringResource(Res.string.policy_refund_full),
+                ),
                 NoShowFullPayment.entries.indexOf(draft.noShowFull),
             ) { onAction(UiAction.OnNoShowFull(NoShowFullPayment.entries[it])) }
         }
@@ -120,7 +124,11 @@ internal fun PolicyPreviewSheet(draft: PolicyDraft, onClose: () -> Unit) {
             modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(spacing.space16),
             verticalArrangement = Arrangement.spacedBy(spacing.space10),
         ) {
-            AppText(text = stringResource(Res.string.policy_preview_note), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(Res.string.policy_preview_note),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
             AppCard(modifier = Modifier.fillMaxWidth()) {
                 Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
                     AppText(text = stringResource(Res.string.policy_rules), style = AppTheme.typography.titleSmall)
@@ -130,7 +138,11 @@ internal fun PolicyPreviewSheet(draft: PolicyDraft, onClose: () -> Unit) {
                             AppText(text = ruleText(rule), style = AppTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                         }
                     }
-                    if (draft.notes.isNotBlank()) AppText(text = draft.notes.trim(), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+                    if (draft.notes.isNotBlank()) AppText(
+                        text = draft.notes.trim(),
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.colors.muted,
+                    )
                 }
             }
             AppButton(stringResource(Res.string.policy_close), onClose, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined)
@@ -145,8 +157,12 @@ private fun ruleText(rule: PolicyRule): String = when (rule) {
     is PolicyRule.Deposit -> stringResource(Res.string.rule_deposit, rule.percentage)
     PolicyRule.FullOnline -> stringResource(Res.string.rule_full)
     is PolicyRule.DepositOnCancel -> stringResource(if (rule.refundable) Res.string.rule_dep_yes else Res.string.rule_dep_no)
-    is PolicyRule.FullOnCancel -> stringResource(if (rule.refund == FullPaymentRefund.FULL) Res.string.rule_full_full else Res.string.rule_full_minus)
-    is PolicyRule.DepositOnNoShow -> stringResource(if (rule.outcome == NoShowDeposit.KEEP) Res.string.rule_ns_keep else Res.string.rule_ns_ref)
+    is PolicyRule.FullOnCancel -> stringResource(
+        if (rule.refund == FullPaymentRefund.FULL) Res.string.rule_full_full else Res.string.rule_full_minus,
+    )
+    is PolicyRule.DepositOnNoShow -> stringResource(
+        if (rule.outcome == NoShowDeposit.KEEP) Res.string.rule_ns_keep else Res.string.rule_ns_ref,
+    )
     is PolicyRule.FullOnNoShow -> stringResource(
         when (rule.outcome) {
             NoShowFullPayment.KEEP -> Res.string.rule_ns_full_keep

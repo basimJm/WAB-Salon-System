@@ -102,7 +102,10 @@ private fun CatalogRequestsDestination(navigator: Navigator) {
     val notifications = rememberNotificationManager()
     CollectSideEffect(viewModel.sideEffect) { effect ->
         when (effect) {
-            CatalogRequestsContract.SideEffect.Sent -> notifications.show(getString(Res.string.requests_sent), style = NotificationStyle.Success)
+            CatalogRequestsContract.SideEffect.Sent -> notifications.show(
+                getString(Res.string.requests_sent),
+                style = NotificationStyle.Success,
+            )
             is CatalogRequestsContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
         }
     }

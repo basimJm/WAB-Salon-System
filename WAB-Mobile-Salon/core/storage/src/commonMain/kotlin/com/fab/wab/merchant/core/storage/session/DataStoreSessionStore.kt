@@ -115,17 +115,22 @@ class DataStoreSessionStore(
 
 /** Pure: the signed-in marker plus a complete member identity is a session; anything else is a guest. */
 fun stateOf(prefs: Preferences): SessionState {
-    val id = prefs[SessionKeys.MEMBER_ID]
-    val salonId = prefs[SessionKeys.SALON_ID]
-    val firstName = prefs[SessionKeys.MEMBER_FIRST_NAME]
-    val role = MemberRole.fromCode(prefs[SessionKeys.MEMBER_ROLE])
-    return if (prefs[SessionKeys.SIGNED_IN] == true && id != null && salonId != null && firstName != null && role != null) {
+    val member = if (prefs[SessionKeys.SIGNED_IN] == true) memberOf(prefs) else null
+    return if (member != null) {
         SessionState.SignedIn(
-            member = MemberProfile(id, salonId, firstName, role),
+            member = member,
             permissions = prefs[SessionKeys.PERMISSIONS].orEmpty(),
             salonState = SalonState.fromCode(prefs[SessionKeys.SALON_STATE]),
         )
     } else {
         SessionState.Guest
     }
+}
+
+private fun memberOf(prefs: Preferences): MemberProfile? {
+    val id = prefs[SessionKeys.MEMBER_ID]
+    val salonId = prefs[SessionKeys.SALON_ID]
+    val firstName = prefs[SessionKeys.MEMBER_FIRST_NAME]
+    val role = MemberRole.fromCode(prefs[SessionKeys.MEMBER_ROLE]) ?: return null
+    return if (id != null && salonId != null && firstName != null) MemberProfile(id, salonId, firstName, role) else null
 }
