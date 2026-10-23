@@ -1,5 +1,6 @@
 <resources>
     <string name="login_welcome">Grow your salon with WAB</string>
+    <string name="login_register_subtitle">Enter your mobile number to register your salon. We will send you a verification code.</string>
     <string name="login_subtitle">Log in with the mobile number linked to your salon.</string>
     <string name="login_phone_label">Mobile number</string>
     <string name="login_phone_error">Invalid mobile number</string>

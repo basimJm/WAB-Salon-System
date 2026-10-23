@@ -9,10 +9,22 @@
 
 ## Current task
 
+### MER-053 — Deep link `/register` + App Links checklist
+- Branch: `feat/mer-053-deep-link-register`
+- Branched: (from `feat/mer-051-analytics-events`)
+- Status: IN PROGRESS (batch 9)
+- Acceptance criteria (PRD §4.5, §16 #11; `DeepLinks`, Android `autoVerify` filter, iOS `applinks:` entitlement):
+  - [x] The shell routes opened links (`DeepLinkEffect` in `MerchantShell`, store consumed once): `/register` for a guest → `Screen.Login(register = true)` (subtitle "Enter your mobile number to register your salon", Continue → registration OTP → M04); signed-in members ignore it (one phone = one salon); `/bookings/<id>` on the home route → M09 (notification links had no router before); other paths / hosts dropped
+  - [x] `docs/DEEP_LINKS.md`: domain per environment (owner input), `assetlinks.json` (dev + prod packages, upload + Play signing fingerprints), `apple-app-site-association` (`/register`, `/bookings/*`), verification commands, customer CUS-056 fallback to the stores
+- Tests: `MerchantDeepLinksTest` (2), `LoginViewModelTest` (+1); `/tmp/claude/quick.sh m53` auth + composeApp tests, `assembleDevDebug`, iOS framework link green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the merchant domain is still the template placeholder in prod (owner input); the hosted association files are owner/infra work.
+
 ### MER-051 — Analytics events of PRD §14
 - Branch: `feat/mer-051-analytics-events`
 - Branched: (from `feat/mer-052-error-codes`)
-- Status: IN PROGRESS (batch 9)
+- Status: IN PROGRESS (batch 9; code committed)
 - Acceptance criteria (PRD §14):
   - [x] New strict policy `analytics` (`scripts/ci/policy/analytics.py`): every feature `*Screen` composable calls `TrackScreen` (screen_view, 29 screens), every `ACTION_*` event name is Firebase-safe (snake_case, ≤ 40), and the PRD events of the shipped features (`config/policy.json` `analytics.requiredEvents`, 16) are declared
   - [x] `request_shown` with `channel = in_app` (+ bride flag) once per request on the sheet; `request_accept` / `request_reject` carry `response_time_s` (sheet shown → answer) next to the reason

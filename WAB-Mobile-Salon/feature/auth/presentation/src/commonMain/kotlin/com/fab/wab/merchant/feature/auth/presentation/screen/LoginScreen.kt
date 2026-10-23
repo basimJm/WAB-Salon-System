@@ -27,6 +27,7 @@ import com.fab.wab.merchant.feature.auth.presentation.resources.login_phone_erro
 import com.fab.wab.merchant.feature.auth.presentation.resources.login_phone_label
 import com.fab.wab.merchant.feature.auth.presentation.resources.login_phone_placeholder
 import com.fab.wab.merchant.feature.auth.presentation.resources.login_register_now
+import com.fab.wab.merchant.feature.auth.presentation.resources.login_register_subtitle
 import com.fab.wab.merchant.feature.auth.presentation.resources.login_subtitle
 import com.fab.wab.merchant.feature.auth.presentation.resources.login_welcome
 import org.jetbrains.compose.resources.stringResource
@@ -88,7 +89,7 @@ private fun LoginCard(state: UiState, onAction: (UiAction) -> Unit, modifier: Mo
             )
             AuthGap(AppTheme.spacing.space4)
             AppText(
-                text = stringResource(Res.string.login_subtitle),
+                text = stringResource(if (state.registerMode) Res.string.login_register_subtitle else Res.string.login_subtitle),
                 style = typography.bodyMedium.copy(fontSize = AuthDesign.subtitleSize, lineHeight = AuthDesign.subtitleLineHeight),
                 color = AppTheme.colors.muted,
             )

@@ -170,6 +170,19 @@ class LoginViewModelTest {
     }
 
     @Test
+    fun theRegisterLinkMakesContinueStartTheRegistration() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        val effects = mutableListOf<SideEffect>()
+        backgroundScope.launch { viewModel.sideEffect.collect { effects += it } }
+        viewModel.state.first { !it.countriesLoading }
+        viewModel.onEvent(UiAction.OnRegisterIntent)
+        assertTrue(viewModel.state.first().registerMode)
+        viewModel.onEvent(UiAction.OnNumberChange("0791234567"))
+        viewModel.onEvent(UiAction.OnLoginClick)
+        assertEquals(listOf<SideEffect>(SideEffect.NavigateToRegister(PhoneNumber("JO", "791234567"))), effects)
+    }
+
+    @Test
     fun blockedAccountOffersContactAndErrorsAreShown() = runTest(UnconfinedTestDispatcher()) {
         auth.check = AppResult.Success(PhoneCheck.BLOCKED)
         val viewModel = viewModel()

@@ -18,6 +18,8 @@ sealed interface LoginContract {
         val submitting: Boolean = false,
         val dialog: LoginDialog? = null,
         val themeMode: ThemeMode = ThemeMode.SYSTEM,
+        /** PRD §4.5: opened from the `/register` link; Continue sends the registration OTP. */
+        val registerMode: Boolean = false,
     ) {
         val showNumberError: Boolean get() = numberTouched && number.isNotBlank() && !isNumberValid
         val canSubmit: Boolean get() = isNumberValid && country != null && !submitting
@@ -33,6 +35,7 @@ sealed interface LoginContract {
         data object OnPickerDismiss : UiAction
         data object OnLoginClick : UiAction
         data object OnRegisterClick : UiAction
+        data object OnRegisterIntent : UiAction
         data object OnDialogConfirm : UiAction
         data object OnDialogDismiss : UiAction
         data object OnLanguageToggle : UiAction

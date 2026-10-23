@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 /** Typed destinations of the merchant app (PRD §8.2 screens index M01–M26). */
 sealed interface Screen {
     // Auth (M02, M03) and shared content
-    @Serializable data object Login : Screen
+    /** [register]: opened from the `/register` link (PRD §4.5), Continue starts the salon registration. */
+    @Serializable data class Login(val register: Boolean = false) : Screen
 
     @Serializable data class Otp(val purpose: String, val countryCode: String, val number: String) : Screen
 

@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.fab.wab.merchant.app.deeplink.DeepLinkEffect
+import com.fab.wab.merchant.app.deeplink.DeepLinkStore
 import com.fab.wab.merchant.core.domain.permission.Permission
 import com.fab.wab.merchant.core.domain.permission.PermissionSet
 import com.fab.wab.merchant.core.domain.session.LaunchRoute
@@ -20,11 +22,12 @@ import com.fab.wab.merchant.designsystem.components.navigation.MerchantTab
 import com.fab.wab.merchant.designsystem.components.navigation.merchantNavItems
 import com.fab.wab.merchant.designsystem.components.navigation.visibleMerchantTabs
 import com.fab.wab.merchant.feature.bookings.presentation.screen.BookingRequestHost
+import org.koin.compose.koinInject
 
 /**
  * PRD §4.3 + §8.1: the NavHost starts at the launch route; the permission-gated bottom bar / rail shows on tab
  * destinations; the offline banner (PRD §3) sits above every screen while the salon is suspended; the M10 request
- * sheet opens over any screen.
+ * sheet opens over any screen; opened links (`/register`, `/bookings/<id>`) are routed here.
  */
 @Composable
 fun MerchantShell(
@@ -49,6 +52,7 @@ fun MerchantShell(
             MainNavigation(route.startGraph(tabs), navController)
         }
     }
+    DeepLinkEffect(koinInject<DeepLinkStore>(), route, navController)
     // PRD M10: the request sheet over any screen, for members who may answer requests.
     if (route == LaunchRoute.HOME && permissions.has(Permission.BOOKINGS_RESPOND)) {
         BookingRequestHost(onOpenDetails = { id -> navController.navigate(Screen.BookingDetails(id)) })

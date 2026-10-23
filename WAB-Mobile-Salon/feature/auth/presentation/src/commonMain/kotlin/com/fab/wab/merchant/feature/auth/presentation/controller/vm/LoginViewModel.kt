@@ -50,8 +50,9 @@ class LoginViewModel(
                 copy(country = countries.firstOrNull { it.code == event.code } ?: country, pickerOpen = false).revalidated()
             }
             UiAction.OnPickerDismiss -> updateState { copy(pickerOpen = false) }
-            UiAction.OnLoginClick -> submit()
+            UiAction.OnLoginClick -> if (state.value.registerMode) register() else submit()
             UiAction.OnRegisterClick -> register()
+            UiAction.OnRegisterIntent -> updateState { copy(registerMode = true) }
             UiAction.OnDialogConfirm -> confirmDialog()
             UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
             UiAction.OnLanguageToggle -> scope.launch { toggleLanguage() }
