@@ -12,52 +12,52 @@
 ### MER-053 — Deep link `/register` + App Links checklist
 - Branch: `feat/mer-053-deep-link-register`
 - Branched: (from `feat/mer-051-analytics-events`)
-- Status: IN PROGRESS (batch 9)
+- Status: IN REVIEW (batch 9 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD §4.5, §16 #11; `DeepLinks`, Android `autoVerify` filter, iOS `applinks:` entitlement):
   - [x] The shell routes opened links (`DeepLinkEffect` in `MerchantShell`, store consumed once): `/register` for a guest → `Screen.Login(register = true)` (subtitle "Enter your mobile number to register your salon", Continue → registration OTP → M04); signed-in members ignore it (one phone = one salon); `/bookings/<id>` on the home route → M09 (notification links had no router before); other paths / hosts dropped
   - [x] `docs/DEEP_LINKS.md`: domain per environment (owner input), `assetlinks.json` (dev + prod packages, upload + Play signing fingerprints), `apple-app-site-association` (`/register`, `/bookings/*`), verification commands, customer CUS-056 fallback to the stores
 - Tests: `MerchantDeepLinksTest` (2), `LoginViewModelTest` (+1); `/tmp/claude/quick.sh m53` auth + composeApp tests, `assembleDevDebug`, iOS framework link green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 9 run: policy ok, 84 policy-script tests (after fixing the import order of `test_analytics.py`), 465 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 9 code reading (MER-048/051/052/053; a batch of four: the remaining rows are blocked or end-of-backlog passes); checked: a refused `/auth/refresh` never re-triggers the permission refresh (it bypasses `safeApiCall`, 403 = sign-out). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: the merchant domain is still the template placeholder in prod (owner input); the hosted association files are owner/infra work.
 
 ### MER-051 — Analytics events of PRD §14
 - Branch: `feat/mer-051-analytics-events`
 - Branched: (from `feat/mer-052-error-codes`)
-- Status: IN PROGRESS (batch 9; code committed)
+- Status: IN REVIEW (batch 9 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD §14):
   - [x] New strict policy `analytics` (`scripts/ci/policy/analytics.py`): every feature `*Screen` composable calls `TrackScreen` (screen_view, 29 screens), every `ACTION_*` event name is Firebase-safe (snake_case, ≤ 40), and the PRD events of the shipped features (`config/policy.json` `analytics.requiredEvents`, 16) are declared
   - [x] `request_shown` with `channel = in_app` (+ bride flag) once per request on the sheet; `request_accept` / `request_reject` carry `response_time_s` (sheet shown → answer) next to the reason
   - [x] `overlay_permission_result` (granted) once when the member returns from the system screen (More); `push_open` (server event, opens-a-screen flag) on a tapped system notification (`ShellAnalytics`)
 - Tests: `test_analytics.py` (3; 84 policy-script tests OK), `BookingRequestsAnalyticsTest` (1), `MoreViewModelTest` (extended), `ShellAnalyticsTest` (1); `/tmp/claude/quick.sh m51` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 9 run: policy ok, 84 policy-script tests (after fixing the import order of `test_analytics.py`), 465 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 9 code reading (MER-048/051/052/053; a batch of four: the remaining rows are blocked or end-of-backlog passes); checked: a refused `/auth/refresh` never re-triggers the permission refresh (it bypasses `safeApiCall`, 403 = sign-out). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: DEVIATION — "every UiAction maps to an event" is narrowed to every screen + the PRD event list: text-input actions carry no analytics value; `overlay` / `notification` request channels come with MER-029/030 (blocked on MER-004); `statistics_view`, `review_report`, `delete_request` belong to blocked tasks (MER-042/043/049).
 
 ### MER-052 — Error-code coverage + permission refusals
 - Branch: `feat/mer-052-error-codes`
 - Branched: (from `feat/mer-048-more`; backlog name `feat/mer-052-error-coverage`)
-- Status: IN PROGRESS (batch 9; code committed)
+- Status: IN REVIEW (batch 9 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (BUSINESS_DOMAIN §11; `openapi.merchant.json` error codes; PRD §3, §6 hidden-not-disabled):
   - [x] Every §11 code and every contract code is in `ErrorCode` with AR + EN `error_code_*` text and an `ErrorHandling` action (audited: 43 + UNKNOWN; enforced by the `error-codes` policy since MER-005)
   - [x] A `FORBIDDEN` / `PERMISSION_DENIED` answer from any call (`safeApiCall`) is reported to `PermissionDeniedSignals` (bursts collapse); the shell (`RealtimeAccountEvents`) re-fetches the permissions through `PermissionsSync`, so gated tabs, tiles and buttons hide; other codes and plain HTTP 403s do not trigger it
 - Tests: `PermissionDeniedSignalsTest` (1), `SafeApiCallTest` (+1), `RealtimeAccountEventsTest` (+1); `/tmp/claude/quick.sh m52b` domain + network + composeApp tests + `assembleDevDebug` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 9 run: policy ok, 84 policy-script tests (after fixing the import order of `test_analytics.py`), 465 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 9 code reading (MER-048/051/052/053; a batch of four: the remaining rows are blocked or end-of-backlog passes); checked: a refused `/auth/refresh` never re-triggers the permission refresh (it bypasses `safeApiCall`, 403 = sign-out). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: the refused screen itself shows the CONTACT error text; it disappears once the refreshed permissions remove its entry.
 
 ### MER-048 — More M25 part 1
 - Branch: `feat/mer-048-more`
 - Branched: (batch 9 start, from `feat/mer-047-notifications`)
-- Status: IN PROGRESS (batch 9)
+- Status: IN REVIEW (batch 9 verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (PRD M25 part 1; `GET /content/pages/{slug}`, `GET /content/faqs`, config contact; design 08 `on.more`):
   - [x] New `feature/more` (More tab registered): account header (name, role badge), language toggle, dark mode, push toggle (stored preference), Android "Display over other apps" status + shortcut to the system screen (refreshed on resume; hidden on iOS), alert sound test (`RequestAlert`), notifications inbox entry
   - [x] Support & legal: Contact WAB (shared contact sheet), FAQ, Terms, Privacy, About; log out with confirmation (`LogoutUseCase`: server revoke, session cleared whatever it answers → login); app version + code
   - [x] `feature/content` ported from the customer app (content pages by slug, the config-driven contact page, FAQ) — `Screen.ContentPage` was navigated to from login without a destination before
   - [x] Core `OverlayPermission` port (Android `canDrawOverlays` + `ACTION_MANAGE_OVERLAY_PERMISSION` with an app-settings fallback; iOS `NoOverlayPermission`) and `SYSTEM_ALERT_WINDOW` in the manifest
 - Tests: `MoreViewModelTest` (2) + ported content tests (6); `/tmp/claude/quick.sh m48` green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 9 run: policy ok, 84 policy-script tests (after fixing the import order of `test_analytics.py`), 465 host tests 0 failures, `assembleDevDebug` green
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 9 code reading (MER-048/051/052/053; a batch of four: the remaining rows are blocked or end-of-backlog passes); checked: a refused `/auth/refresh` never re-triggers the permission refresh (it bypasses `safeApiCall`, 403 = sign-out). DEVIATION: UI check on emulator/simulator deferred to the end-of-backlog journey (rules §3.13).
 - Notes: my-account photo / phone / change phone / delete account are MER-049 (blocked on SRV-129 / SRV-133); the push toggle is a local preference until the server toggle exists (SRV-133).
 
 ### MER-047 — Notifications M24

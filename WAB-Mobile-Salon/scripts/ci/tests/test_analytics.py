@@ -1,7 +1,8 @@
 import unittest
 
-from policy import analytics
 from support import TempProject
+
+from policy import analytics  # noqa: E402  (support puts scripts/ci on the path)
 
 SCREEN_DIR = "feature/x/presentation/src/commonMain/kotlin/a/screen/"
 EVENTS_DIR = "feature/x/presentation/src/commonMain/kotlin/a/analytics/"
