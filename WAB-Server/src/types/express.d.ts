@@ -30,6 +30,8 @@ declare global {
         /** The member's branch; absent for the owner (every branch, §6 branch scope). */
         branchId?: string | undefined;
       };
+      /** The branch a `/branches/{branchId}/…` route addresses (set by `scopeToBranch`). */
+      branchScope?: string;
     }
   }
 }

@@ -26,16 +26,19 @@ export const createMerchantBranchesRouter = (
   const salonOf = (req: Request): string => req.member?.salonId ?? '';
   const actorOf = (req: Request): BranchActor => ({ type: 'MEMBER', id: req.member?.id ?? '' });
   const idOf = (req: Request): string => part<typeof branchParams>(req, 'params').branchId;
-  router.use(...guard, requireOwner);
+  // Per route, not `router.use`: `/branches/{id}/hours|services` (managers too) share the prefix.
+  const owner = [...guard, requireOwner];
 
   router.get(
     '/',
+    ...owner,
     asyncHandler(async (req: Request, res: Response) => {
       sendSuccess(req, res, { data: await service.list(salonOf(req)) });
     }),
   );
   router.post(
     '/',
+    ...owner,
     validate({ body: createBranchSchema }),
     asyncHandler(async (req: Request, res: Response) => {
       const body = part<typeof createBranchSchema>(req, 'body');
@@ -44,6 +47,7 @@ export const createMerchantBranchesRouter = (
   );
   router.get(
     routes.byId,
+    ...owner,
     validate({ params: branchParams }),
     asyncHandler(async (req: Request, res: Response) => {
       sendSuccess(req, res, { data: await service.get(salonOf(req), idOf(req)) });
@@ -51,6 +55,7 @@ export const createMerchantBranchesRouter = (
   );
   router.patch(
     routes.byId,
+    ...owner,
     validate({ params: branchParams, body: updateBranchSchema }),
     asyncHandler(async (req: Request, res: Response) => {
       const patch = part<typeof updateBranchSchema>(req, 'body');
@@ -59,6 +64,7 @@ export const createMerchantBranchesRouter = (
   );
   router.post(
     routes.main,
+    ...owner,
     validate({ params: branchParams }),
     asyncHandler(async (req: Request, res: Response) => {
       sendSuccess(req, res, { data: await service.setMain(salonOf(req), idOf(req)) });
@@ -66,6 +72,7 @@ export const createMerchantBranchesRouter = (
   );
   router.post(
     routes.offline,
+    ...owner,
     validate({ params: branchParams, body: branchReasonSchema }),
     asyncHandler(async (req: Request, res: Response) => {
       const { reason } = part<typeof branchReasonSchema>(req, 'body');
@@ -80,6 +87,7 @@ export const createMerchantBranchesRouter = (
   );
   router.post(
     routes.online,
+    ...owner,
     validate({ params: branchParams }),
     asyncHandler(async (req: Request, res: Response) => {
       const data = await service.setOnline({
@@ -92,6 +100,7 @@ export const createMerchantBranchesRouter = (
   );
   router.post(
     routes.close,
+    ...owner,
     validate({ params: branchParams }),
     asyncHandler(async (req: Request, res: Response) => {
       const data = await service.close({

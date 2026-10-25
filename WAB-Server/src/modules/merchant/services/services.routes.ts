@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { MERCHANT_SERVICES_ROUTES } from '../../../constants/salonServices';
 import type { SalonServicesService } from '../../../domain/salonServices/salonServices.service';
 import { requirePermission } from '../../../middlewares/permission';
+import { branchScopeOf } from '../../../middlewares/branchScope';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { sendCreated, sendPaginated, sendSuccess } from '../../../utils/response/successResponse';
@@ -33,7 +34,7 @@ export const createMerchantServicesRouter = (
         salonId: salonOf(req),
         language: req.language,
         params: { page, pageSize },
-        scope: req.member?.branchId,
+        scope: branchScopeOf(req),
       });
       sendPaginated(req, res, result.items, { page, pageSize }, result.meta.total);
     }),
@@ -49,7 +50,7 @@ export const createMerchantServicesRouter = (
         await service.add({
           salonId: salonOf(req),
           language: req.language,
-          scope: req.member?.branchId,
+          scope: branchScopeOf(req),
           catalogServiceId,
           fields,
         }),
@@ -66,7 +67,7 @@ export const createMerchantServicesRouter = (
         data: await service.update({
           salonId: salonOf(req),
           language: req.language,
-          scope: req.member?.branchId,
+          scope: branchScopeOf(req),
           id,
           fields,
         }),

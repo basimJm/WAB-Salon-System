@@ -808,6 +808,7 @@ const buildServices = (
     },
   });
   const salonServicesService = createSalonServicesService({
+    branches: branchesRepository,
     mainBranches,
     salons: new SalonsRepository(),
     catalog: new CatalogServicesRepository(),

@@ -13,7 +13,10 @@ const photoKey = z.string().max(STORAGE_KEY_MAX_LENGTH).regex(STORAGE_KEY_PATTER
 /** Strings, not the enum: unknown and owner-only keys get their own error from `normalizeGrant`. */
 const permissions = z.array(z.string().max(64)).max(PERMISSIONS.length + 8);
 
-export const teamQuery = paginationQuery(APP_PAGE_SIZE);
+/** `branchId`: the owner narrows the list to one branch (a manager always sees their own). */
+export const teamQuery = paginationQuery(APP_PAGE_SIZE).extend({
+  branchId: z.string().regex(OBJECT_ID_PATTERN).optional(),
+});
 export const memberParams = z.object({ id: z.string().regex(OBJECT_ID_PATTERN) });
 const branchIdSchema = z.string().regex(OBJECT_ID_PATTERN);
 
