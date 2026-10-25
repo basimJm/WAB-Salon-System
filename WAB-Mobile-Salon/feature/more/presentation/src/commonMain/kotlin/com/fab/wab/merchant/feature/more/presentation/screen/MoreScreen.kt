@@ -47,6 +47,7 @@ import com.fab.wab.merchant.feature.more.presentation.resources.more_account
 import com.fab.wab.merchant.feature.more.presentation.resources.more_cancel
 import com.fab.wab.merchant.feature.more.presentation.resources.more_contact
 import com.fab.wab.merchant.feature.more.presentation.resources.more_dark_mode
+import com.fab.wab.merchant.feature.more.presentation.resources.more_delete_account
 import com.fab.wab.merchant.feature.more.presentation.resources.more_employee
 import com.fab.wab.merchant.feature.more.presentation.resources.more_faq
 import com.fab.wab.merchant.feature.more.presentation.resources.more_language
@@ -83,7 +84,7 @@ fun MoreScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
             verticalArrangement = Arrangement.spacedBy(spacing.space14),
         ) {
             AppText(text = stringResource(Res.string.more_title), style = AppTheme.typography.headlineMedium)
-            AccountCard(state)
+            AccountCard(state) { onAction(UiAction.OnAccount) }
             Group(stringResource(Res.string.more_settings)) {
                 Item(
                     AppIcons.Language,
@@ -140,6 +141,13 @@ fun MoreScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
                 loading = state.loggingOut,
                 leadingIcon = AppIcons.Logout,
             )
+            AppButton(
+                text = stringResource(Res.string.more_delete_account),
+                onClick = { onAction(UiAction.OnDeleteAccount) },
+                modifier = Modifier.fillMaxWidth(),
+                kind = ButtonKind.Text,
+                leadingIcon = AppIcons.Delete,
+            )
             AppText(
                 text = stringResource(Res.string.more_version, state.version, state.versionCode),
                 style = AppTheme.typography.labelSmall,
@@ -153,16 +161,16 @@ fun MoreScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
 }
 
 @Composable
-private fun AccountCard(state: UiState) {
+private fun AccountCard(state: UiState, onClick: () -> Unit) {
     val role = when (state.role) {
         MemberRole.OWNER -> Res.string.more_owner
         MemberRole.MANAGER -> Res.string.more_manager
         MemberRole.EMPLOYEE -> Res.string.more_employee
         null -> null
     }
-    AppCard(modifier = Modifier.fillMaxWidth()) {
+    AppCard(modifier = Modifier.fillMaxWidth(), onClick = onClick) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12)) {
-            AppAvatar(name = state.memberName)
+            AppAvatar(name = state.memberName, imageUrl = state.photoUrl)
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
                 AppText(
                     text = stringResource(Res.string.more_account),
@@ -172,6 +180,7 @@ private fun AccountCard(state: UiState) {
                 AppText(text = state.memberName, style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
             }
             role?.let { AppStatusBadge(text = stringResource(it), tone = StatusTone.Accent) }
+            Icon(AppIcons.Forward, contentDescription = null, tint = AppTheme.colors.faint)
         }
     }
 }
@@ -230,6 +239,7 @@ private fun MoreDialogs(state: UiState, onAction: (UiAction) -> Unit) {
             tone = StatusTone.Danger,
         )
     }
+    DeleteAccountSheet(state, onAction)
     if (state.contactOpen) {
         val contact = state.contact
         AppContactSheet(

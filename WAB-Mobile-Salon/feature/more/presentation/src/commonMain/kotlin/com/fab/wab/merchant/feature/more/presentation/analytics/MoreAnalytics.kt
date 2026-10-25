@@ -14,6 +14,13 @@ object MoreAnalytics {
     const val ACTION_SOUND = "settings_sound_test"
     const val ACTION_LOGOUT = "logout"
     const val PARAM_VALUE = "value"
+    val SCREEN_ACCOUNT = AnalyticsScreen("my_account")
+    const val ACTION_ACCOUNT_UPDATE = "account_update"
+    const val ACTION_CHANGE_PHONE = "account_change_phone"
+    const val ACTION_DELETE_REQUEST = "delete_request"
+    const val PARAM_KIND = "kind"
+    const val KIND_LEAVE = "leave"
+    const val KIND_SALON = "salon_deletion"
 }
 
 /** Content page slugs (`GET /content/pages/{slug}`). */

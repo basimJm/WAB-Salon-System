@@ -43,6 +43,7 @@ class NotificationsNavigation(override val navController: NavHostController) : N
                         NotificationTarget.CatalogRequests -> Screen.CatalogRequests
                         NotificationTarget.Finance -> Screen.Finance
                         NotificationTarget.Subscription -> Screen.Subscription
+                        NotificationTarget.Reviews -> Screen.Reviews
                     },
                 )
                 is SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)

@@ -37,6 +37,19 @@ object ExternalLinks {
 
     fun mailto(address: String): String = "$MAILTO_SCHEME:${address.trim()}"
 
+    /** WhatsApp chat with [text] already typed (`https://wa.me/<digits>?text=…`), e.g. a reported review reference. */
+    fun whatsAppMessage(phoneE164: String, text: String): String = whatsApp(phoneE164) + QUERY_START + TEXT_PARAM + queryEncode(text)
+
+    /** Mail composer with [subject] and [body] filled in. */
+    fun mailtoMessage(address: String, subject: String, body: String): String =
+        mailto(address) + QUERY_START + SUBJECT_PARAM + queryEncode(subject) + PARAM_SEPARATOR + BODY_PARAM + queryEncode(body)
+
+    private const val QUERY_START = '?'
+    private const val PARAM_SEPARATOR = '&'
+    private const val TEXT_PARAM = "text="
+    private const val SUBJECT_PARAM = "subject="
+    private const val BODY_PARAM = "body="
+
     /** RFC 3986 query encoding of a label (UTF-8 bytes as %XX; unreserved characters kept). */
     fun queryEncode(value: String): String = buildString {
         value.encodeToByteArray().forEach { byte ->

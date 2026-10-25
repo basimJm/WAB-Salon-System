@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_hello">مرحباً، %1$s</string>
+    <string name="home_notifications">الإشعارات</string>
+    <string name="home_incomplete_title">أكمل ملف صالونك</string>
+    <string name="home_incomplete_body">صالونك غير ظاهر للزبائن بعد. أكمل الإعداد ليصبح مباشراً.</string>
+    <plurals name="home_subscription_title">
+        <item quantity="zero">ينتهي اشتراكك اليوم</item>
+        <item quantity="one">ينتهي اشتراكك خلال يوم واحد</item>
+        <item quantity="two">ينتهي اشتراكك خلال يومين</item>
+        <item quantity="few">ينتهي اشتراكك خلال %1$d أيام</item>
+        <item quantity="many">ينتهي اشتراكك خلال %1$d يوماً</item>
+        <item quantity="other">ينتهي اشتراكك خلال %1$d يوم</item>
+    </plurals>
+    <string name="home_subscription_body">تواصل مع WAB لتفعيل اشتراكك الشهري</string>
+    <string name="home_today">اليوم</string>
+    <string name="home_today_count">حجوزات اليوم</string>
+    <string name="home_completed">مكتملة</string>
+    <string name="home_next">التالي</string>
+    <string name="home_next_none">—</string>
+    <string name="home_timeline">جدول اليوم</string>
+    <string name="home_my_timeline">مواعيدي اليوم</string>
+    <string name="home_no_today">لا توجد حجوزات اليوم</string>
+    <string name="home_no_today_body">ستظهر هنا حجوزات اليوم فور قبولها.</string>
+    <string name="home_open_calendar">فتح التقويم</string>
+    <string name="home_week">هذا الأسبوع</string>
+    <string name="home_stat_bookings">الحجوزات</string>
+    <string name="home_stat_revenue">الإيرادات</string>
+    <string name="home_stat_rating">التقييم</string>
+    <string name="home_rating_value">★ %1$s</string>
+    <string name="home_time_range">%1$s – %2$s</string>
+    <string name="home_date_time">%1$s · %2$s</string>
+    <string name="home_list_separator">، </string>
+    <string name="home_view_all">عرض الكل</string>
+</resources>

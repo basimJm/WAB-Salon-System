@@ -166,7 +166,10 @@
       "push_open",
       "logout",
       "otp_request",
-      "login_start"
+      "login_start",
+      "review_report",
+      "statistics_view",
+      "delete_request"
     ]
   }
 }
