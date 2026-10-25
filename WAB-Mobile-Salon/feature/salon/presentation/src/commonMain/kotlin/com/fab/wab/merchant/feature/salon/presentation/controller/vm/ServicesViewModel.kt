@@ -14,6 +14,7 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.contract.Servi
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.ServicesContract.UiAction
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.ServicesContract.UiState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -66,8 +67,12 @@ class ServicesViewModel(
         }
     }
 
+    /** A newer load (branch switch, retry) cancels the older one, so a slow answer never overwrites a newer branch. */
+    private var loadJob: Job? = null
+
     private fun load(refresh: Boolean) {
-        scope.launch {
+        loadJob?.cancel()
+        loadJob = scope.launch {
             updateState { if (refresh) copy(refreshing = true) else copy(loading = true, error = null) }
             when (val result = repository.services(branchId)) {
                 is AppResult.Success -> updateState { copy(loading = false, refreshing = false, services = result.data, error = null) }

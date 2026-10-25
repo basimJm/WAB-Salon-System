@@ -23,6 +23,7 @@ import com.fab.wab.merchant.feature.team.presentation.controller.contract.TeamCo
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.TeamContract.UiAction
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.TeamContract.UiState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -110,8 +111,12 @@ class TeamViewModel(
         }
     }
 
+    /** A newer load (branch switch, retry) cancels the older one, so a slow answer never overwrites a newer branch. */
+    private var loadJob: Job? = null
+
     private fun load(refresh: Boolean) {
-        scope.launch {
+        loadJob?.cancel()
+        loadJob = scope.launch {
             updateState { if (refresh) copy(refreshing = true) else copy(loading = true, error = null) }
             when (val result = deps.team.members(uiState.value.branchScope.filter)) {
                 is AppResult.Success -> updateState { copy(loading = false, refreshing = false, error = null, members = result.data) }

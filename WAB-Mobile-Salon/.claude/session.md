@@ -20,8 +20,8 @@
   - [x] Permission editor hides `FINANCE_VIEW`, `SUBSCRIPTION_VIEW`, `POLICIES_MANAGE` for branch members (`visiblePermissions`), refuses toggling them and drops stale ones on save
   - [x] Staff profile reads the services and open days of the member's branch (`/branches/{branchId}/services|hours`)
 - Tests: `TeamBranchesTest` (2), `TeamBranchesViewModelTest` (3), `TeamMappersTest` (+1), `PermissionsViewModelTest` (updated: FINANCE_VIEW toggle ignored); team + composeApp host tests green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 10 run (MER-061…065): policy ok, `testAndroidHostTest` all modules 151 suites / 511 tests / 0 failures, `:androidApp:assembleDevDebug` green; every criterion re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 10 code reading of the five commits; fixed during review: Hours / Services / Team loads now cancel the previous load (a slow answer for the old branch could overwrite the newly chosen one), `branchScopeOf` reloads the branch list per owner account and trusts it only after a successful reload (no other account's branches after a re-login). DEVIATION: UI check on emulator / simulator deferred to the end-of-backlog journey (rules §3.13); no screen previews (none in the feature modules).
 - Notes: the move's "pick services of the new branch" happens in the staff profile (skills list now follows the member's branch); there is no separate post-move wizard.
 
 ### MER-064 — Per-branch hours, closures, services / prices (+ finance by branch)
@@ -33,8 +33,8 @@
   - [x] Owner: switcher without "All branches" on Working hours and Services (the main branch until another is picked); changing branch reloads (services list cleared first); the service form and the catalog picker ("Added" marks) follow the same branch; branch members see no switcher and keep the salon-level calls (their own branch on the server)
   - [x] Finance (owner only): switcher on Transactions / Refunds sends `?branchId=`; Payouts stay salon-wide (no switcher)
 - Tests: `HoursViewModelTest` (+2), `ServicesViewModelTest` (+1), `FinanceViewModelTest` (+1); salon data / presentation, finance, composeApp host tests green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 10 run (MER-061…065): policy ok, `testAndroidHostTest` all modules 151 suites / 511 tests / 0 failures, `:androidApp:assembleDevDebug` green; every criterion re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 10 code reading of the five commits; fixed during review: Hours / Services / Team loads now cancel the previous load (a slow answer for the old branch could overwrite the newly chosen one), `branchScopeOf` reloads the branch list per owner account and trusts it only after a successful reload (no other account's branches after a re-login). DEVIATION: UI check on emulator / simulator deferred to the end-of-backlog journey (rules §3.13); no screen previews (none in the feature modules).
 - Notes: a manager addressing another branch would get 403 `BRANCH_SCOPE_DENIED` (localized, CONTACT action); the app never sends a branch id for branch members, so it cannot happen from the UI.
 
 ### MER-063 — Branch-scoped bookings, requests and calendar
@@ -47,8 +47,8 @@
   - [x] Calendar (the contract has no `branchId`): for a chosen branch the server call asks for that branch's staff and the columns / blocks are narrowed to them (team members carry `branchId`)
   - [x] Booking details show a "Branch" section (name + address); reassignment lists only staff of the booking's branch; the in-app request card shows the branch name
 - Tests: `BookingsViewModelTest` (+2), `CalendarViewModelTest` (+1), `BookingMappersTest` (+1, branch + staff `branchId`); bookings / design-system / domain / branches / composeApp host tests green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 10 run (MER-061…065): policy ok, `testAndroidHostTest` all modules 151 suites / 511 tests / 0 failures, `:androidApp:assembleDevDebug` green; every criterion re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 10 code reading of the five commits; fixed during review: Hours / Services / Team loads now cancel the previous load (a slow answer for the old branch could overwrite the newly chosen one), `branchScopeOf` reloads the branch list per owner account and trusts it only after a successful reload (no other account's branches after a re-login). DEVIATION: UI check on emulator / simulator deferred to the end-of-backlog journey (rules §3.13); no screen previews (none in the feature modules).
 - Notes: SERVER GAPS (stated, not built): Home dashboard (MER-050 ← SRV-130), merchant reviews read (SRV-131) and statistics (SRV-132) do not exist, so their branch scoping waits for those rows; the calendar endpoint has no `branchId` filter (client-side narrowing by staff branch). Long-line fixes of MER-062 files ride along in this commit.
 
 ### MER-062 — Owner branch management + branch switcher
@@ -61,8 +61,8 @@
   - [x] New `feature/branches/presentation` (data in core because every scoped feature reads it): list (main / status / incomplete badges, address, phone, offline reason, only the allowed actions), set main (confirm), offline (reason sheet, 1..1000), online, close (confirm; `409 BRANCH_HAS_UPCOMING_BOOKINGS` → sheet listing the blocking bookings, each opens M09), add / edit form (names AR + EN, map picker + address, city / area, phone, WhatsApp); salon hub tile "Branches" for the owner only (`OwnerCapability.BRANCHES_MANAGE`)
   - [x] Map picker controller / handler moved from `feature/salon` to the design system (`MapPickerController`, `MapPickerHandler`) and shared by the profile and branch forms
 - Tests: `BranchesTest` (8), `BranchesMapperTest` (4), `BranchesViewModelTest` (4), `BranchEditViewModelTest` (3), `SalonHubTest` / `SalonProfileViewModelTest` unchanged and green; policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 10 run (MER-061…065): policy ok, `testAndroidHostTest` all modules 151 suites / 511 tests / 0 failures, `:androidApp:assembleDevDebug` green; every criterion re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 10 code reading of the five commits; fixed during review: Hours / Services / Team loads now cancel the previous load (a slow answer for the old branch could overwrite the newly chosen one), `branchScopeOf` reloads the branch list per owner account and trusts it only after a successful reload (no other account's branches after a re-login). DEVIATION: UI check on emulator / simulator deferred to the end-of-backlog journey (rules §3.13); no screen previews (none in the feature modules).
 - Notes: no screen previews (no feature module has them; same as before). Reopening a closed branch has no merchant endpoint, so closed branches show no actions.
 
 ### MER-061 — Branches contract, member scope, branch error codes
@@ -75,8 +75,8 @@
   - [x] `PermissionSet.isBranchMember`; `FINANCE_VIEW`, `SUBSCRIPTION_VIEW`, `POLICIES_MANAGE` never count for a branch member (`BranchPermissions.OWNER_SCOPE_ONLY`); MANAGER template = every grantable branch permission (§6); owner-only `BRANCHES_MANAGE` capability (locked row "Branches" in the permission editor)
   - [x] Error codes `BRANCH_NOT_FOUND`, `BRANCH_NOT_BOOKABLE`, `BRANCH_REQUIRED`, `BRANCH_LIMIT_REACHED`, `BRANCH_HAS_UPCOMING_BOOKINGS`, `LAST_BRANCH`, `BRANCH_SCOPE_DENIED` in `ErrorCode` + AR/EN text + handling action
 - Tests: `BranchScopeTest` (4), `RefreshMemberTest` (+1), `DataStoreSessionStoreTest` (+1), `ErrorCodeTest` (updated), `PermissionsTest` / `MerchantTabsTest` (updated for the branch rule); all host tests green (`testAndroidHostTest`), policy ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch 10 run (MER-061…065): policy ok, `testAndroidHostTest` all modules 151 suites / 511 tests / 0 failures, `:androidApp:assembleDevDebug` green; every criterion re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 10 code reading of the five commits; fixed during review: Hours / Services / Team loads now cancel the previous load (a slow answer for the old branch could overwrite the newly chosen one), `branchScopeOf` reloads the branch list per owner account and trusts it only after a successful reload (no other account's branches after a re-login). DEVIATION: UI check on emulator / simulator deferred to the end-of-backlog journey (rules §3.13); no screen previews (none in the feature modules).
 - Notes: SERVER GAP — the contract's `MemberProfile` (login / refresh member) has no `branchId` yet (Integration.md says it should); the app parses it when present and otherwise relies on the server scoping every call to the member's branch (role ≠ OWNER = branch member). Gradle runs through the terminal panel (the sandbox cannot write `~/.gradle`).
 
 ### MER-030 — Real-time request outside the app, iOS

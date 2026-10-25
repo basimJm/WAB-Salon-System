@@ -25,6 +25,7 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.contract.Hours
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.PendingChange
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.ScheduleConflict
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -119,8 +120,12 @@ class HoursViewModel(
 
     private fun editClosure(change: ClosureForm.() -> ClosureForm) = updateState { copy(closureSheet = closureSheet?.change()) }
 
+    /** A newer load (branch switch, retry) cancels the older one, so a slow answer never overwrites a newer branch. */
+    private var loadJob: Job? = null
+
     private fun load() {
-        scope.launch {
+        loadJob?.cancel()
+        loadJob = scope.launch {
             updateState { copy(loading = true, error = null) }
             when (val result = deps.repository.load(branchId)) {
                 is AppResult.Success -> updateState {
