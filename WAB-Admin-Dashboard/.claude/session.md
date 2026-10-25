@@ -10,37 +10,20 @@
 
 ## Current task
 
-### ADM-091 — Branch filter and column across bookings, reviews, members, money and exports
+### ADM-092 — Branches QA (every branch screen, AR/EN, light/dark, phone/tablet/desktop)
 
-- Branch: `feat/adm-091-branch-filters` (from `feat/adm-090-branch-editing`)
+- Branch: `feat/adm-092-branches-qa` (from `feat/adm-091-branch-filters`)
 - Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §3.3a; operations getBookings/getBookingsById `branch`, getReviews `branchId`+`branch`, getSalonsByIdMembers `branchId`, getTransactions/getRefunds/getFinanceReconciliation `salonId`+`branchId`, postExports TRANSACTIONS/BOOKINGS `branchId`):
-  - [x] Shared `SalonBranchFilters` (salon combobox → branch select of that salon; changing the salon clears the branch; both written in one URL change via the new `setFilters`) on bookings, reviews, transactions, refunds and reconciliation; a branch is only sent together with its salon
-  - [x] Branch column: bookings (server name), reviews and customer reviews (`{ar,en}` in the admin's language), transactions / refunds / reconciliation (name looked up from the branch list of each salon on the page), salon members (owner = "All branches (owner)") with a branch filter on the members tab
-  - [x] Booking details show the branch with its address
-  - [x] Exports: BOOKINGS and TRANSACTIONS jobs carry `branchId`; the export body no longer uses the generated union whose id pattern refused every real salon/branch id (ids checked with OBJECT_ID instead)
-  - [x] Mock: `branchId` filtering on bookings, reviews, transactions, refunds, reconciliation; money fixtures belong to Noor Salon so branch names resolve
-- Tests: tests/branchFilters.test.tsx (7 screens), tests/branchQueries.test.ts (3: query mapping, export ids); full suite; `sh scripts/gate.sh` GATE OK
-- Browser check (dev-debug from this worktree): bookings, transactions, refunds, reconciliation and reviews with `?salon=Noor&branch=Khalda` and booking details, AR RTL dark 375 px and EN LTR light 1280 px (bookings, refunds, salon members); one row each with the Khalda column, labels Salon/Branch, no horizontal scroll, console clean
+- Acceptance criteria (task row: every branch screen against the real server, AR/EN, light/dark, desktop/phone):
+  - [x] Browser pass on the mock (dev-debug from this worktree) of 14 screens: Branches tab, salon edit Hours / Services / Staff, Members, Bookings (+ details), Reviews, Transactions, Refunds, Reconciliation (all with `?salon=Noor&branch=Khalda`), Settings, plus Live and Customers as layout controls — in AR RTL dark 375 px, EN LTR light 375 px, AR RTL light 768 px, EN LTR light + dark 1280/1440 px: horizontal page overflow, error states, untranslated keys
+  - [x] Found and fixed: Reconciliation overflowed at 375 px (cards in `.wab-stack` grew to the table width) and Settings overflowed at 375 px in English (tab strip widened `.wab-settings`): both single-column grids now use `minmax(0, 1fr)` (tables and tab strips scroll inside); all screens clean afterwards
+  - [x] Row menu stays inside the viewport on phone (RTL); add-branch drawer is full width on phone, 459 px on desktop; console: no errors in the final run
+  - [x] Repeatable checks: tests/branches-qa.test.tsx (Arabic render + axe of the branches tab, salon-edit picker, bookings and reconciliation filters; CSS regression for the two grids)
+- Tests: tests/branches-qa.test.tsx (5); full suite; `sh scripts/gate.sh` GATE OK
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — filters live in a shared presentation component + hooks (`useBranchOptions`, `useBranchNames`), no feature imports another. DEVIATIONS: no e2e (user decision); the salon picker lists the first 100 salons (no server-side typeahead endpoint for options); reviews have no separate detail page, so the branch is a column of the list (and of the customer's reviews tab); booking branch names come localized by the server (the mock answers in English); "ledger" = the reconciliation screen (the admin has no ledger list endpoint).
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — CSS fix is global but only constrains single-column grids to the page width. DEVIATIONS: NOT run against the real server (no WAB-Server reachable from this sandbox: local ports are blocked and the dev server on Render was not used), so this is a mock QA; the owner should repeat the pass on a server with `seed:demo` (Lamar Beauty Lounge, 3 branches). No e2e (user decision). The browser pane was hidden, so checks are JS measurements, not screenshots. Earlier console 404s came from chunks replaced by rebuilds while the tab was open (lazyPage reload), not from the app.
 
 ## Last blocks
-
-### ADM-089 — Salon detail → Branches tab (full CRUD)
-
-- Branch: `feat/adm-089-salon-branches` (from `feat/adm-088-branches-contract`)
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.16; operations getSalonsByIdBranches, postSalonsByIdBranches, patchSalonsByIdBranchesByBranchId, postSalonsByIdBranchesByBranchId{Main,Offline,Online,Close}):
-  - [x] Branches tab on the salon page: main first, closed last; name + Main badge, status (+ offline reason), readiness (complete / missing parts), area, staff count (members by `branchId`), phone; "N open of max" from `salon.maxBranches`, Add disabled at the limit
-  - [x] Create / edit drawer: names AR/EN, city → area, address, latitude/longitude with an "Open on the map" link, phone, optional WhatsApp; field validation (E.164, 1–60, 1–300, coordinates), only changed fields sent, "Nothing changed" guard, reason required
-  - [x] Row menu: make main (active non-main only), take offline (reason shown to the owner) / bring online, close (non-main only); every action asks a reason; closed branches are read-only
-  - [x] A refused close (409 BRANCH_HAS_UPCOMING_BOOKINGS) opens a dialog listing the blocking bookings with links; other refusals (LAST_BRANCH, INVALID_TRANSITION, BRANCH_LIMIT_REACHED, …) show the localized message above the table
-  - [x] Mock server: shared branch store (salon detail + branch routes), server refusals via `MockBusinessError` (limit, last branch, main branch, upcoming bookings, not found)
-- Tests: tests/domain/branches.test.ts (11), tests/salon-branches.test.tsx (11, incl. axe and the mock rules); `sh scripts/gate.sh` GATE OK (one earlier run had 2 timeouts in unrelated suites under machine load; the rerun was green)
-- Browser check (dev-debug from this worktree, port 4191): Noor Salon → Branches in AR RTL dark at 375 px (list, add-drawer validation messages, drawer 375 px wide, close Khalda → blocked dialog with booking link) and EN LTR light at 1280 px (close Dabouq → Closed, read-only row); no horizontal scroll; console: only the app logger's expected `http.failed` warning for the 409
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — branch types/rules in `domain/shared/branches.ts` (shared kernel: salons, salon editing, bookings and finance all need them), repo `repositories.branches`. DEVIATIONS: no e2e (user decision); "location on map" is coordinates + a link to open them in a map, not an embedded map picker (no map library/tiles in the panel; adding one is an owner decision); missing parts show the server codes (same as the salon completeness list); the admin PRD has no branch section yet (BUSINESS_DOMAIN is the source).
 
 ### ADM-090 — Branch-aware salon editing (hours, closures, services, staff; move staff)
 
@@ -56,3 +39,18 @@
 - Browser check (dev-debug from this worktree): salon edit → Staff in EN light 1280 px (picker Abdoun/Dabouq/Khalda, move Sara to Khalda → Abdoun empty, Khalda lists Sara + Lina, toast) and AR RTL dark 375 px (Hours tab picker → Khalda, Staff → Dabouq empty message, hint shown); no horizontal scroll, no new console messages
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — repository signatures moved from `salonId` to `BranchScope` for the branch-scoped methods (max-params 4 kept). DEVIATIONS: no e2e (user decision); the mock seeds every branch with the same starting menu/hours (the real server keeps each branch's own data); the admin PRD has no branch section yet.
+
+### ADM-091 — Branch filter and column across bookings, reviews, members, money and exports
+
+- Branch: `feat/adm-091-branch-filters` (from `feat/adm-090-branch-editing`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a; operations getBookings/getBookingsById `branch`, getReviews `branchId`+`branch`, getSalonsByIdMembers `branchId`, getTransactions/getRefunds/getFinanceReconciliation `salonId`+`branchId`, postExports TRANSACTIONS/BOOKINGS `branchId`):
+  - [x] Shared `SalonBranchFilters` (salon combobox → branch select of that salon; changing the salon clears the branch; both written in one URL change via the new `setFilters`) on bookings, reviews, transactions, refunds and reconciliation; a branch is only sent together with its salon
+  - [x] Branch column: bookings (server name), reviews and customer reviews (`{ar,en}` in the admin's language), transactions / refunds / reconciliation (name looked up from the branch list of each salon on the page), salon members (owner = "All branches (owner)") with a branch filter on the members tab
+  - [x] Booking details show the branch with its address
+  - [x] Exports: BOOKINGS and TRANSACTIONS jobs carry `branchId`; the export body no longer uses the generated union whose id pattern refused every real salon/branch id (ids checked with OBJECT_ID instead)
+  - [x] Mock: `branchId` filtering on bookings, reviews, transactions, refunds, reconciliation; money fixtures belong to Noor Salon so branch names resolve
+- Tests: tests/branchFilters.test.tsx (7 screens), tests/branchQueries.test.ts (3: query mapping, export ids); full suite; `sh scripts/gate.sh` GATE OK
+- Browser check (dev-debug from this worktree): bookings, transactions, refunds, reconciliation and reviews with `?salon=Noor&branch=Khalda` and booking details, AR RTL dark 375 px and EN LTR light 1280 px (bookings, refunds, salon members); one row each with the Khalda column, labels Salon/Branch, no horizontal scroll, console clean
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — filters live in a shared presentation component + hooks (`useBranchOptions`, `useBranchNames`), no feature imports another. DEVIATIONS: no e2e (user decision); the salon picker lists the first 100 salons (no server-side typeahead endpoint for options); reviews have no separate detail page, so the branch is a column of the list (and of the customer's reviews tab); booking branch names come localized by the server (the mock answers in English); "ledger" = the reconciliation screen (the admin has no ledger list endpoint).
