@@ -126,3 +126,16 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.
 
+
+### T-133 — Masters synced with main; salon branches in the domain + tasks for every master (owner request 2026-10-25)
+- Project: repo root (`BUSINESS_DOMAIN.md`, the four backlogs, `INTEGRATION.md` board)
+- Branch: `docs/branches-domain` (from `server`; reaches the other masters through `server` → `main` → masters)
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `server`, `customer`, `admin`, `merchant` merged into `main` (PRs #366–#369) and `main` merged back into each (PRs #370–#373); every master 0 behind `main`; local masters fast-forwarded
+  - [x] Owner asked about every open branch rule (4 rounds); answers recorded in `BUSINESS_DOMAIN.md` §12.7
+  - [x] `BUSINESS_DOMAIN.md`: `branches` collection (§3.3a), `BranchStatus`, `branchId` on services, closures, members, leaves, drafts, bookings (+ snapshot), transactions, reviews; two-level completeness (§5.2); branch lifecycle, migration, discovery, booking (§5.16–§5.18); branch-scoped permissions (§6); branch rooms and recipients (§7, §8); `salon.maxBranches`; `BRANCH_*` error codes
+  - [x] Tasks: SRV-136…148 (Stage P, TODO), ADM-088…092, CUS-082…087, MER-061…066 (BLOCKED on their SRV tasks); `tasks.py check` OK (only the known CUS-047 note); board regenerated
+- Tests: `python3 scripts/tasks.py check`
+- Loops: 1/1 — re-read every changed domain section against the owner's answers and the original requirements (branch per staff, branch first step, staff per branch in details, salon-wide reviews, "Salon - Branch" in nearest, salon-only search cards, owner/manager/admin scopes)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs and backlog only; no product code. DEVIATION: the customer/merchant/admin PRDs are not edited yet; tasks point at `BUSINESS_DOMAIN.md` §5.16–§5.18 until each PRD gets its branch section.
