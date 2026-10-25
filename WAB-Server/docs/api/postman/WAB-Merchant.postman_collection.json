@@ -952,10 +952,10 @@
       ]
     },
     {
-      "name": "Salon gallery",
+      "name": "Salon branches",
       "item": [
         {
-          "name": "Gallery in display order (GALLERY_MANAGE)",
+          "name": "Branches of the salon, main first (OWNER)",
           "request": {
             "method": "GET",
             "header": [
@@ -975,15 +975,14 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/merchant/v1/salon/gallery",
+              "raw": "{{baseUrl}}/merchant/v1/branches",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "merchant",
                 "v1",
-                "salon",
-                "gallery"
+                "branches"
               ],
               "query": [],
               "variable": []
@@ -991,7 +990,7 @@
           }
         },
         {
-          "name": "Add a confirmed upload to the gallery (appended last)",
+          "name": "Add a branch; the first one is the main branch (OWNER; BRANCH_LIMIT_REACHED at salon.maxBranches)",
           "request": {
             "method": "POST",
             "header": [
@@ -1015,22 +1014,21 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/merchant/v1/salon/gallery",
+              "raw": "{{baseUrl}}/merchant/v1/branches",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "merchant",
                 "v1",
-                "salon",
-                "gallery"
+                "branches"
               ],
               "query": [],
               "variable": []
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"type\": \"IMAGE\",\n  \"key\": \"string\",\n  \"thumbnailKey\": \"string\",\n  \"durationSec\": 0\n}",
+              "raw": "{\n  \"name\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"location\": {\n    \"latitude\": 0,\n    \"longitude\": 0\n  },\n  \"locationText\": \"string\",\n  \"cityId\": \"string\",\n  \"areaId\": \"string\",\n  \"phone\": \"string\",\n  \"whatsapp\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1040,7 +1038,330 @@
           }
         },
         {
-          "name": "Reorder: send every item id exactly once in the new order",
+          "name": "One branch (OWNER)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Edit name, location, address, city/area or contacts (OWNER)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"location\": {\n    \"latitude\": 0,\n    \"longitude\": 0\n  },\n  \"locationText\": \"string\",\n  \"cityId\": \"string\",\n  \"areaId\": \"string\",\n  \"phone\": \"string\",\n  \"whatsapp\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Make this branch the main one (OWNER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/main",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "main"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Hide the branch from customers; the other branches stay bookable (OWNER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/offline",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "offline"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Bring an offline branch back (OWNER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/online",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "online"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Close for good (history kept); 409 BRANCH_HAS_UPCOMING_BOOKINGS lists the bookings, 422 LAST_BRANCH, 422 INVALID_TRANSITION for the main branch (OWNER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "close"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Working hours",
+      "item": [
+        {
+          "name": "Weekly schedule, upcoming closures and today’s hours (WORKING_HOURS_MANAGE)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "hours"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Replace the weekly schedule (7 days, slot-aligned, close after open). 409 SCHEDULE_CONFLICT lists bookings the change would break.",
           "request": {
             "method": "PUT",
             "header": [
@@ -1064,23 +1385,29 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/merchant/v1/salon/gallery/order",
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/hours/weekly",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "merchant",
                 "v1",
-                "salon",
-                "gallery",
-                "order"
+                "branches",
+                ":branchId",
+                "hours",
+                "weekly"
               ],
               "query": [],
-              "variable": []
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ids\": [\n    \"string\"\n  ]\n}",
+              "raw": "{\n  \"days\": [\n    {\n      \"day\": \"SUN\",\n      \"isOff\": false,\n      \"open\": \"string\",\n      \"close\": \"string\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1090,7 +1417,124 @@
           }
         },
         {
-          "name": "Delete an item and its files",
+          "name": "Add an exceptional closure (dates in the salon calendar, `to` inclusive, not in the past)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/hours/closures",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "hours",
+                "closures"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"string\",\n  \"to\": \"string\",\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Change a closure that has not started",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/hours/closures/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "hours",
+                "closures",
+                ":id"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"string\",\n  \"to\": \"string\",\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove a closure that has not started",
           "request": {
             "method": "DELETE",
             "header": [
@@ -1110,15 +1554,17 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/merchant/v1/salon/gallery/:id",
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/hours/closures/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "merchant",
                 "v1",
-                "salon",
-                "gallery",
+                "branches",
+                ":branchId",
+                "hours",
+                "closures",
                 ":id"
               ],
               "query": [],
@@ -1126,16 +1572,15 @@
                 {
                   "key": "id",
                   "value": ""
+                },
+                {
+                  "key": "branchId",
+                  "value": ""
                 }
               ]
             }
           }
-        }
-      ]
-    },
-    {
-      "name": "Working hours",
-      "item": [
+        },
         {
           "name": "Weekly schedule, upcoming closures and today’s hours (WORKING_HOURS_MANAGE)",
           "request": {
@@ -1397,6 +1842,174 @@
               ]
             },
             "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "services"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Offer a catalog service (same gender as the salon; bride-only only in women’s salons; once per salon)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "services"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"catalogServiceId\": \"string\",\n  \"price\": \"string\",\n  \"durationMinutes\": 0,\n  \"brideOnly\": false,\n  \"extraDescription\": \"string\",\n  \"mediaKeys\": [\n    \"string\"\n  ],\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Change price, duration, bride-only, description, media or switch the service off (active=false)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/services/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "services",
+                ":id"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": \"string\",\n  \"durationMinutes\": 0,\n  \"brideOnly\": false,\n  \"extraDescription\": \"string\",\n  \"mediaKeys\": [\n    \"string\"\n  ],\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "The salon’s services (SERVICES_MANAGE), paginated",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
               "raw": "{{baseUrl}}/merchant/v1/salon/services",
               "host": [
                 "{{baseUrl}}"
@@ -1524,6 +2137,188 @@
                   "language": "json"
                 }
               }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Salon gallery",
+      "item": [
+        {
+          "name": "Gallery in display order (GALLERY_MANAGE)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/salon/gallery",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "salon",
+                "gallery"
+              ],
+              "query": [],
+              "variable": []
+            }
+          }
+        },
+        {
+          "name": "Add a confirmed upload to the gallery (appended last)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/salon/gallery",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "salon",
+                "gallery"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"IMAGE\",\n  \"key\": \"string\",\n  \"thumbnailKey\": \"string\",\n  \"durationSec\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reorder: send every item id exactly once in the new order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/salon/gallery/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "salon",
+                "gallery",
+                "order"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"string\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete an item and its files",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/salon/gallery/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "salon",
+                "gallery",
+                ":id"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
             }
           }
         }
@@ -1674,6 +2469,11 @@
                   "key": "pageSize",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []
@@ -1720,7 +2520,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"role\": \"MANAGER\",\n  \"permissions\": [\n    \"string\"\n  ],\n  \"photoKey\": \"string\"\n}",
+              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"role\": \"MANAGER\",\n  \"permissions\": [\n    \"string\"\n  ],\n  \"photoKey\": \"string\",\n  \"branchId\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1817,7 +2617,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"photoKey\": \"string\",\n  \"role\": \"MANAGER\",\n  \"permissions\": [\n    \"string\"\n  ]\n}",
+              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"photoKey\": \"string\",\n  \"role\": \"MANAGER\",\n  \"permissions\": [\n    \"string\"\n  ],\n  \"branchId\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2751,6 +3551,11 @@
                   "key": "paymentStatus",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []
@@ -3031,6 +3836,11 @@
                   "key": "to",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []
@@ -3086,6 +3896,11 @@
                 },
                 {
                   "key": "to",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
                   "value": "",
                   "disabled": true
                 }

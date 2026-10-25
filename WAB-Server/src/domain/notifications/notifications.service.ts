@@ -39,6 +39,8 @@ export interface NotifyInput {
   readonly customerId?: string;
   /** Members audiences: the salon, and the staff named by the event (assigned / old / new). */
   readonly salonId?: string;
+  /** The booking's or branch's branch: non-owner members of other branches are left out (§8). */
+  readonly branchId?: string;
   readonly staffIds?: readonly string[];
   /** Extra FCM data in the recipient's language (the details of a booking request). */
   readonly pushData?: (language: Language) => Record<string, string>;
@@ -128,6 +130,14 @@ export const createNotificationService = (deps: NotificationDeps): NotificationS
     const chosen = team.filter((member) => {
       if (audience.who === 'owner') return member.role === 'OWNER';
       if (audience.who !== 'members') return false;
+      // Branch members only hear about their own branch; the owner hears about every branch.
+      if (
+        input.branchId !== undefined &&
+        member.role !== 'OWNER' &&
+        member.branchId !== input.branchId
+      ) {
+        return false;
+      }
       const permissions = effectivePermissions(member);
       const byPermission = audience.permissions.some((p) => permissions.includes(p));
       const assigned =

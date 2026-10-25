@@ -9,6 +9,8 @@ import { toActor } from '../crud/actor';
 import {
   addGalleryBody,
   addServiceBody,
+  branchQuery,
+  moveStaffBody,
   closureBody,
   closureParams,
   closurePatchBody,
@@ -39,6 +41,8 @@ export const createAdminSalonEditRouter = (
   const router = Router();
   router.use(guard);
   const routes = ADMIN_SALON_EDIT_ROUTES;
+  const branchOf = (req: Request): string | undefined =>
+    part<typeof branchQuery>(req, 'query').branchId;
 
   router.get(
     routes.profile,
@@ -105,72 +109,97 @@ export const createAdminSalonEditRouter = (
   // Working hours and closures (the previews change nothing and list the bookings a change would break).
   router.get(
     routes.hours,
-    validate({ params: salonParams }),
+    validate({ params: salonParams, query: branchQuery }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof salonParams>(req, 'params');
-      sendSuccess(req, res, { data: await service.hours(id) });
+      sendSuccess(req, res, { data: await service.hours(id, branchOf(req)) });
     }),
   );
   router.post(
     routes.hoursPreview,
-    validate({ params: salonParams, body: previewHoursBody }),
+    validate({ params: salonParams, query: branchQuery, body: previewHoursBody }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof salonParams>(req, 'params');
       const { days } = part<typeof previewHoursBody>(req, 'body');
-      sendSuccess(req, res, { data: await service.previewWeekly({ salonId: id, days }) });
+      const data = await service.previewWeekly({ salonId: id, days, branchId: branchOf(req) });
+      sendSuccess(req, res, { data });
     }),
   );
   router.put(
     routes.hours,
-    validate({ params: salonParams, body: hoursBody }),
+    validate({ params: salonParams, query: branchQuery, body: hoursBody }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof salonParams>(req, 'params');
       const { days, reason } = part<typeof hoursBody>(req, 'body');
       sendSuccess(req, res, {
-        data: await service.setWeekly({ salonId: id, days, reason, actor: toActor(req) }),
+        data: await service.setWeekly({
+          salonId: id,
+          branchId: branchOf(req),
+          days,
+          reason,
+          actor: toActor(req),
+        }),
       });
     }),
   );
   router.post(
     routes.closuresPreview,
-    validate({ params: salonParams, body: previewClosureBody }),
+    validate({ params: salonParams, query: branchQuery, body: previewClosureBody }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof salonParams>(req, 'params');
       const { from, to } = part<typeof previewClosureBody>(req, 'body');
-      sendSuccess(req, res, { data: await service.previewClosure({ salonId: id, from, to }) });
+      const data = await service.previewClosure({ salonId: id, from, to, branchId: branchOf(req) });
+      sendSuccess(req, res, { data });
     }),
   );
   router.post(
     routes.closures,
-    validate({ params: salonParams, body: closureBody }),
+    validate({ params: salonParams, query: branchQuery, body: closureBody }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof salonParams>(req, 'params');
       const body = part<typeof closureBody>(req, 'body');
       sendCreated(
         req,
         res,
-        await service.addClosure({ ...body, salonId: id, actor: toActor(req) }),
+        await service.addClosure({
+          ...body,
+          salonId: id,
+          branchId: branchOf(req),
+          actor: toActor(req),
+        }),
       );
     }),
   );
   router.patch(
     routes.closure,
-    validate({ params: closureParams, body: closurePatchBody }),
+    validate({ params: closureParams, query: branchQuery, body: closurePatchBody }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id, closureId } = part<typeof closureParams>(req, 'params');
       const body = part<typeof closurePatchBody>(req, 'body');
       sendSuccess(req, res, {
-        data: await service.updateClosure({ ...body, salonId: id, closureId, actor: toActor(req) }),
+        data: await service.updateClosure({
+          ...body,
+          salonId: id,
+          branchId: branchOf(req),
+          closureId,
+          actor: toActor(req),
+        }),
       });
     }),
   );
   router.post(
     routes.closureRemove,
-    validate({ params: closureParams, body: reasonBody }),
+    validate({ params: closureParams, query: branchQuery, body: reasonBody }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id, closureId } = part<typeof closureParams>(req, 'params');
       const { reason } = part<typeof reasonBody>(req, 'body');
-      await service.removeClosure({ salonId: id, closureId, reason, actor: toActor(req) });
+      await service.removeClosure({
+        salonId: id,
+        branchId: branchOf(req),
+        closureId,
+        reason,
+        actor: toActor(req),
+      });
       sendSuccess(req, res, { data: null });
     }),
   );
@@ -181,18 +210,19 @@ export const createAdminSalonEditRouter = (
     validate({ params: salonParams, query: servicesQuery }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof salonParams>(req, 'params');
-      const { page, pageSize } = part<typeof servicesQuery>(req, 'query');
+      const { page, pageSize, branchId } = part<typeof servicesQuery>(req, 'query');
       const result = await service.services({
         salonId: id,
         language: req.language,
         params: { page, pageSize },
+        branchId,
       });
       sendPaginated(req, res, result.items, { page, pageSize }, result.meta.total);
     }),
   );
   router.post(
     routes.services,
-    validate({ params: salonParams, body: addServiceBody }),
+    validate({ params: salonParams, query: branchQuery, body: addServiceBody }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof salonParams>(req, 'params');
       const { catalogServiceId, reason, ...fields } = part<typeof addServiceBody>(req, 'body');
@@ -201,6 +231,7 @@ export const createAdminSalonEditRouter = (
         res,
         await service.addService({
           salonId: id,
+          branchId: branchOf(req),
           language: req.language,
           catalogServiceId,
           fields,
@@ -212,13 +243,14 @@ export const createAdminSalonEditRouter = (
   );
   router.patch(
     routes.service,
-    validate({ params: serviceParams, body: updateServiceBody }),
+    validate({ params: serviceParams, query: branchQuery, body: updateServiceBody }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id, serviceId } = part<typeof serviceParams>(req, 'params');
       const { reason, ...fields } = part<typeof updateServiceBody>(req, 'body');
       sendSuccess(req, res, {
         data: await service.updateService({
           salonId: id,
+          branchId: branchOf(req),
           language: req.language,
           serviceId,
           fields,
@@ -226,6 +258,24 @@ export const createAdminSalonEditRouter = (
           actor: toActor(req),
         }),
       });
+    }),
+  );
+
+  // Move a member to another branch (skills are cleared; upcoming bookings refuse the move).
+  router.post(
+    routes.staffBranch,
+    validate({ params: staffParams, body: moveStaffBody }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { id, memberId } = part<typeof staffParams>(req, 'params');
+      const { branchId, reason } = part<typeof moveStaffBody>(req, 'body');
+      const data = await service.moveStaff({
+        salonId: id,
+        memberId,
+        toBranchId: branchId,
+        reason,
+        actor: toActor(req),
+      });
+      sendSuccess(req, res, { data });
     }),
   );
 

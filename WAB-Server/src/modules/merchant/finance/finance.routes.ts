@@ -14,7 +14,7 @@ import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { formatJod } from '../../../utils/money';
 import { sendPaginated, sendSuccess } from '../../../utils/response/successResponse';
-import { financeListQuery } from './finance.validation';
+import { branchFinanceListQuery, financeListQuery } from './finance.validation';
 
 const iso = (d: Date | null): string | null => d?.toISOString() ?? null;
 
@@ -42,6 +42,7 @@ const presentTransaction = (t: FinanceTransactionRow): Record<string, unknown> =
   amount: formatJod(t.amount),
   gatewayFee: formatJod(t.gatewayFee),
   net: formatJod(t.net),
+  branchId: t.branchId,
   createdAt: iso(t.createdAt),
 });
 const presentRefund = (r: FinanceRefundRow): Record<string, unknown> => ({
@@ -77,8 +78,8 @@ export const createMerchantFinanceRouter = (
   guard: readonly RequestHandler[],
 ): { finance: Router; subscription: Router } => {
   const salonOf = (req: Request): string => req.member?.salonId ?? '';
-  const query = (req: Request): z.infer<typeof financeListQuery> =>
-    (req.validated as { query: z.infer<typeof financeListQuery> }).query;
+  const query = (req: Request): z.infer<typeof branchFinanceListQuery> =>
+    (req.validated as { query: z.infer<typeof branchFinanceListQuery> }).query;
   const routes = MERCHANT_FINANCE_ROUTES;
 
   const finance = Router();
@@ -95,16 +96,18 @@ export const createMerchantFinanceRouter = (
       input: Parameters<MerchantFinanceService['transactions']>[0],
     ) => Promise<{ items: unknown[]; total: number }>,
     present: (row: never) => Record<string, unknown>,
+    schema: typeof financeListQuery | typeof branchFinanceListQuery = financeListQuery,
   ): void => {
     finance.get(
       path,
-      validate({ query: financeListQuery }),
+      validate({ query: schema }),
       asyncHandler(async (req: Request, res: Response) => {
-        const { page, pageSize, from, to } = query(req);
+        const { page, pageSize, from, to, branchId } = query(req);
         const result = await load({
           salonId: salonOf(req),
           params: { page, pageSize },
           range: { from, to },
+          branchId,
         });
         sendPaginated(
           req,
@@ -116,8 +119,13 @@ export const createMerchantFinanceRouter = (
       }),
     );
   };
-  list(routes.transactions, (i) => service.transactions(i), presentTransaction);
-  list(routes.refunds, (i) => service.refunds(i), presentRefund);
+  list(
+    routes.transactions,
+    (i) => service.transactions(i),
+    presentTransaction,
+    branchFinanceListQuery,
+  );
+  list(routes.refunds, (i) => service.refunds(i), presentRefund, branchFinanceListQuery);
   list(routes.payouts, (i) => service.payouts(i), presentPayout);
 
   const subscription = Router();

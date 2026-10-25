@@ -1,3 +1,15 @@
+import { BRANCH_TITLE_SEPARATOR } from '../../constants/branches';
+import type { Language } from '../../constants/enums';
+import { DEFAULT_LANGUAGE } from '../../constants/i18n';
+import type { BranchRaw } from '../../models/branch.model';
+import type { BranchesRepository } from '../../repositories/branches.repository';
+import {
+  cheapestSums,
+  greatCircleKm,
+  pointOf,
+  representativeBranch,
+  type Point,
+} from './branchPlaces';
 import type { QueryFilter } from 'mongoose';
 import type { Gender } from '../../constants/enums';
 import {
@@ -32,6 +44,15 @@ export interface SalonCard {
   readonly isFavorite: boolean;
   /** Distance in km from the customer, `null` when no position was sent or the salon has none. */
   readonly distanceKm: number | null;
+  /** Bookable branches of the salon (§5.17); the card shows one place, the nearest or the main. */
+  readonly branchCount: number;
+  /** The branch the card's place, hours and distance come from (`null` before branches). */
+  readonly branch: { id: string; name: string } | null;
+}
+
+/** One entry of the nearest list: a bookable branch, titled "Salon - Branch" when it has siblings. */
+export interface BranchCard extends SalonCard {
+  readonly title: string;
 }
 
 export interface SearchQuery {
@@ -65,13 +86,31 @@ export interface FavoriteLookup {
 export const noFavorites: FavoriteLookup = { among: () => Promise.resolve(new Set()) };
 
 export interface SearchService {
+  /** One card per salon, never per branch (§5.17). */
   search(input: {
     query: SearchQuery;
     params: PaginationParams;
     customerId?: string | undefined;
+    language?: Language | undefined;
   }): Promise<{ items: SalonCard[]; meta: PaginationMeta }>;
   /** Cards of these salons in the given order; salons that are not visible are left out. */
-  cards(input: { ids: readonly string[]; customerId?: string | undefined }): Promise<SalonCard[]>;
+  cards(input: {
+    ids: readonly string[];
+    customerId?: string | undefined;
+    language?: Language | undefined;
+  }): Promise<SalonCard[]>;
+  /**
+   * Nearest list (§5.17): one entry per bookable branch inside the discovery radius, by distance;
+   * a salon with several branches reads "Salon - Branch".
+   */
+  nearestBranches(input: {
+    gender: Gender;
+    lat: number;
+    lng: number;
+    params: PaginationParams;
+    customerId?: string | undefined;
+    language?: Language | undefined;
+  }): Promise<{ items: BranchCard[]; meta: PaginationMeta }>;
   /** Slider bounds for the price filter: min/max of the sums over salons offering all services. */
   priceBounds(input: {
     gender: Gender;
@@ -88,22 +127,13 @@ export interface SearchDeps {
   readonly recommended?: RecommendedLookup;
   readonly favorites?: FavoriteLookup;
   readonly now?: () => Date;
+  /** Branch wiring (§5.17); without it a salon is one place (its own fields). */
+  readonly branches?: Pick<BranchesRepository, 'findMany'>;
 }
 
-const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
-
 /** Great-circle distance between two points, in km. */
-export const distanceKm = (
-  from: { lat: number; lng: number },
-  to: { lat: number; lng: number },
-): number => {
-  const dLat = toRadians(to.lat - from.lat);
-  const dLng = toRadians(to.lng - from.lng);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(from.lat)) * Math.cos(toRadians(to.lat)) * Math.sin(dLng / 2) ** 2;
-  return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(a)));
-};
+export const distanceKm = (from: Point, to: Point): number =>
+  greatCircleKm(from, to, EARTH_RADIUS_KM);
 
 const escapeRegex = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -139,24 +169,47 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
   const offering = async (ids: readonly string[]): Promise<Map<string, number>> => {
     const unique = [...new Set(ids)];
     const rows = await salonServices.findMany({ catalogServiceId: { $in: unique }, active: true });
-    return priceSums(rows, unique);
+    // With branches a salon matches when one of its branches offers them all (cheapest branch).
+    return deps.branches === undefined ? priceSums(rows, unique) : cheapestSums(rows, unique);
   };
 
-  const card = (
-    s: Entity<SalonRaw>,
-    ranges: { from: string; to: string; reason: string }[],
-    timeZone: string,
-    favorite: boolean,
-    distance: number | null,
-  ): SalonCard => {
-    const today = todaysHours(s.weeklySchedule, ranges, now(), timeZone);
+  /** Bookable branches (ACTIVE and complete) of these salons, by salon. */
+  const bookableBranches = async (
+    salonIds: readonly string[],
+  ): Promise<Map<string, Entity<BranchRaw>[]>> => {
+    const bySalon = new Map<string, Entity<BranchRaw>[]>();
+    if (deps.branches === undefined || salonIds.length === 0) return bySalon;
+    const rows = await deps.branches.findMany({
+      salonId: { $in: [...salonIds] },
+      status: 'ACTIVE',
+      'completeness.isComplete': true,
+    } as never);
+    for (const branch of rows)
+      bySalon.set(branch.salonId, [...(bySalon.get(branch.salonId) ?? []), branch]);
+    return bySalon;
+  };
+
+  const card = (input: {
+    salon: Entity<SalonRaw>;
+    place: { branch: Entity<BranchRaw>; distanceKm: number | null } | null;
+    branchCount: number;
+    ranges: { from: string; to: string; reason: string }[];
+    timeZone: string;
+    favorite: boolean;
+    distance: number | null;
+    language: Language;
+  }): SalonCard => {
+    const { salon: s, place, ranges, timeZone, favorite, language } = input;
+    const schedule = place?.branch.weeklySchedule ?? s.weeklySchedule;
+    const today = todaysHours(schedule, ranges, now(), timeZone);
+    const distance = place?.distanceKm ?? input.distance;
     return {
       id: s.id,
       name: s.name,
       profileImageUrl: s.profileKey === undefined ? null : storage.getPublicUrl(s.profileKey),
       rating: s.rating.avg,
       reviewsCount: s.rating.count,
-      locationText: s.locationText ?? null,
+      locationText: (place === null ? s.locationText : place.branch.locationText) ?? null,
       shortDescription:
         s.description === undefined ? null : s.description.slice(0, SHORT_DESCRIPTION_LENGTH),
       isOpenNow: today.isOpenNow,
@@ -167,36 +220,80 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       isFavorite: favorite,
       distanceKm:
         distance === null ? null : Math.round(distance * DISTANCE_DECIMALS) / DISTANCE_DECIMALS,
+      branchCount: input.branchCount,
+      branch: place === null ? null : { id: place.branch.id, name: place.branch.name[language] },
     };
   };
 
   const toCards = async (
     items: readonly Entity<SalonRaw>[],
-    customerId: string | undefined,
-    distances: ReadonlyMap<string, number>,
+    options: {
+      customerId: string | undefined;
+      distances: ReadonlyMap<string, number>;
+      here: Point | null;
+      language: Language;
+    },
   ): Promise<SalonCard[]> => {
     const ids = items.map((s) => s.id);
     const timeZone = await settings.get('timezone');
     const date = localDateOf(now(), timeZone);
-    const [ranges, saved] = await Promise.all([
+    const [ranges, saved, places] = await Promise.all([
       ids.length === 0 ? [] : closures.findMany({ salonId: { $in: ids }, to: { $gte: date } }),
-      customerId === undefined
+      options.customerId === undefined
         ? Promise.resolve(new Set<string>())
-        : favorites.among(customerId, ids),
+        : favorites.among(options.customerId, ids),
+      bookableBranches(ids),
     ]);
-    return items.map((s) =>
-      card(
-        s,
-        ranges.filter((r) => r.salonId === s.id),
+    return items.map((s) => {
+      const branches = places.get(s.id) ?? [];
+      const place = representativeBranch(branches, options.here, EARTH_RADIUS_KM);
+      return card({
+        salon: s,
+        place,
+        branchCount: branches.length,
+        ranges: ranges.filter((r) =>
+          place === null ? r.salonId === s.id : r.branchId === place.branch.id,
+        ),
         timeZone,
-        saved.has(s.id),
-        distances.get(s.id) ?? null,
-      ),
-    );
+        favorite: saved.has(s.id),
+        distance: options.distances.get(s.id) ?? null,
+        language: options.language,
+      });
+    });
+  };
+
+  /** Visible salons of an audience by id (LIVE, complete, that gender). */
+  const visibleSalons = async (
+    ids: readonly string[],
+    gender: Gender,
+  ): Promise<Map<string, Entity<SalonRaw>>> => {
+    const found =
+      ids.length === 0
+        ? []
+        : await salons.findMany({
+            _id: { $in: [...ids] },
+            state: 'LIVE',
+            'completeness.isComplete': true,
+            gender,
+          });
+    return new Map(found.map((salon) => [salon.id, salon]));
+  };
+
+  /** Bookable branches inside the discovery radius around a point (§5.17). */
+  const branchesNear = async (here: Point): Promise<Entity<BranchRaw>[]> => {
+    if (deps.branches === undefined) return [];
+    const radiusKm = await settings.get('discovery.nearbyRadiusKm');
+    return deps.branches.findMany({
+      status: 'ACTIVE',
+      'completeness.isComplete': true,
+      location: {
+        $geoWithin: { $centerSphere: [[here.lng, here.lat], radiusKm / EARTH_RADIUS_KM] },
+      },
+    } as never);
   };
 
   return {
-    async search({ query, params, customerId }) {
+    async search({ query, params, customerId, language = DEFAULT_LANGUAGE }) {
       const empty = { items: [], meta: { page: params.page, pageSize: params.pageSize, total: 0 } };
       let allowed: string[] | undefined;
       if (query.serviceIds !== undefined && query.serviceIds.length > 0) {
@@ -224,6 +321,21 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       const origin = (query.sort ?? 'NEAREST') === 'NEAREST' ? here : null;
       const nearest = origin !== null;
       const radiusKm = nearest ? await settings.get('discovery.nearbyRadiusKm') : 0;
+      // With branches, "near" means a bookable branch inside the radius; distance = nearest branch.
+      const branchDistances = new Map<string, number>();
+      if (origin !== null && deps.branches !== undefined) {
+        for (const branch of await branchesNear(origin)) {
+          const point = pointOf(branch);
+          if (point === null) continue;
+          const d = distanceKm(origin, point);
+          const current = branchDistances.get(branch.salonId);
+          if (current === undefined || d < current) branchDistances.set(branch.salonId, d);
+        }
+        const inRange = [...branchDistances.keys()];
+        allowed = allowed === undefined ? inRange : allowed.filter((id) => inRange.includes(id));
+        if (allowed.length === 0) return empty;
+      }
+      const geoOnSalon = origin !== null && deps.branches === undefined;
       const filter: QueryFilter<SalonRaw> = {
         state: 'LIVE',
         'completeness.isComplete': true,
@@ -233,7 +345,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
         ...(query.q === undefined || query.q === ''
           ? {}
           : { searchText: { $regex: escapeRegex(query.q), $options: 'i' } }),
-        ...(origin !== null
+        ...(geoOnSalon
           ? {
               location: {
                 $geoWithin: {
@@ -245,6 +357,8 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       };
       const distances = new Map<string, number>();
       const distanceOf = (s: Entity<SalonRaw>): number | null => {
+        const viaBranch = branchDistances.get(s.id);
+        if (viaBranch !== undefined) return viaBranch;
         if (here === null || s.location === undefined) return null;
         const [lng, lat] = s.location.coordinates;
         if (lng === undefined || lat === undefined) return null;
@@ -282,12 +396,61 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
         }
       }
       return {
-        items: await toCards(page.items, customerId, distances),
+        items: await toCards(page.items, { customerId, distances, here, language }),
         meta: page.meta,
       };
     },
 
-    async cards({ ids, customerId }) {
+    async nearestBranches({ gender, lat, lng, params, customerId, language = DEFAULT_LANGUAGE }) {
+      const here = { lat, lng };
+      const near = await branchesNear(here);
+      const visible = await visibleSalons([...new Set(near.map((b) => b.salonId))], gender);
+      const entries = near
+        .filter((b) => visible.has(b.salonId))
+        .map((branch) => ({ branch, distance: distanceKm(here, pointOf(branch) ?? here) }))
+        .sort((a, b) => a.distance - b.distance);
+      const start = (params.page - 1) * params.pageSize;
+      const pageEntries = entries.slice(start, start + params.pageSize);
+      const salonIds = [...new Set(pageEntries.map((e) => e.branch.salonId))];
+      const timeZone = await settings.get('timezone');
+      const date = localDateOf(now(), timeZone);
+      const [ranges, saved, siblings] = await Promise.all([
+        pageEntries.length === 0
+          ? []
+          : closures.findMany({
+              branchId: { $in: pageEntries.map((e) => e.branch.id) },
+              to: { $gte: date },
+            }),
+        customerId === undefined
+          ? Promise.resolve(new Set<string>())
+          : favorites.among(customerId, salonIds),
+        bookableBranches(salonIds),
+      ]);
+      const items = pageEntries.flatMap(({ branch, distance }): BranchCard[] => {
+        const salon = visible.get(branch.salonId);
+        if (salon === undefined) return [];
+        const count = siblings.get(salon.id)?.length ?? 1;
+        const base = card({
+          salon,
+          place: { branch, distanceKm: distance },
+          branchCount: count,
+          ranges: ranges.filter((r) => r.branchId === branch.id),
+          timeZone,
+          favorite: saved.has(salon.id),
+          distance,
+          language,
+        });
+        const title =
+          count > 1 ? `${salon.name}${BRANCH_TITLE_SEPARATOR}${branch.name[language]}` : salon.name;
+        return [{ ...base, title }];
+      });
+      return {
+        items,
+        meta: { page: params.page, pageSize: params.pageSize, total: entries.length },
+      };
+    },
+
+    async cards({ ids, customerId, language = DEFAULT_LANGUAGE }) {
       if (ids.length === 0) return [];
       const found = await salons.findMany({
         _id: { $in: [...ids] },
@@ -296,7 +459,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       });
       const byId = new Map(found.map((s) => [s.id, s]));
       const ordered = ids.flatMap((id) => byId.get(id) ?? []);
-      return toCards(ordered, customerId, new Map());
+      return toCards(ordered, { customerId, distances: new Map(), here: null, language });
     },
 
     async priceBounds({ gender, serviceIds }) {

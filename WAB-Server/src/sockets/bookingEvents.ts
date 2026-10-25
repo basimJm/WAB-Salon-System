@@ -76,6 +76,8 @@ export const createBookingEvents = (deps: {
     const payload = summaryOf(b);
     hub.emit('customer', SOCKET_ROOMS.customer(b.customerId), event, payload);
     hub.emit('merchant', SOCKET_ROOMS.salonAll(b.salonId), event, payload);
+    if (b.branchId !== undefined)
+      hub.emit('merchant', SOCKET_ROOMS.branchAll(b.branchId), event, payload);
     hub.emit('admin', SOCKET_ROOMS.admin, event, payload);
     for (const id of await viewers([...b.persons.map((p) => p.staffId), ...extraStaff])) {
       hub.emit('merchant', SOCKET_ROOMS.member(id), event, payload);
@@ -89,7 +91,7 @@ export const createBookingEvents = (deps: {
         if (hub === undefined) return;
         const customer = await customers.findById(b.customerId);
         // The request card of M10; members answering requests see it, everyone else the update.
-        hub.emit('merchant', SOCKET_ROOMS.salonRespond(b.salonId), SOCKET_EVENTS.bookingRequested, {
+        const card = {
           ...summaryOf(b),
           customerName: `${customer?.firstName ?? ''} ${customer?.lastName ?? ''}`.trim(),
           services: [
@@ -97,7 +99,22 @@ export const createBookingEvents = (deps: {
               b.persons.flatMap((p) => p.services).map((s) => [s.salonServiceId, s.name]),
             ).values(),
           ],
-        });
+        };
+        // The owner (salon room) and the responders of the booking's branch (branch room).
+        hub.emit(
+          'merchant',
+          SOCKET_ROOMS.salonRespond(b.salonId),
+          SOCKET_EVENTS.bookingRequested,
+          card,
+        );
+        if (b.branchId !== undefined) {
+          hub.emit(
+            'merchant',
+            SOCKET_ROOMS.branchRespond(b.branchId),
+            SOCKET_EVENTS.bookingRequested,
+            card,
+          );
+        }
         await updated(b, SOCKET_EVENTS.bookingUpdated);
       }),
     changed: (b) => safely('changed', () => updated(b, SOCKET_EVENTS.bookingUpdated)),

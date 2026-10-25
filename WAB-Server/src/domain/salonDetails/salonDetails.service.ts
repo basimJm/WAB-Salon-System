@@ -1,3 +1,6 @@
+import { pointOf } from '../search/branchPlaces';
+import type { BranchRaw } from '../../models/branch.model';
+import type { BranchesRepository } from '../../repositories/branches.repository';
 import { REVIEW_PREVIEW_COUNT } from '../../constants/reviews';
 import type { Language } from '../../constants/enums';
 import { ERROR_CODES } from '../../constants/errorCodes';
@@ -26,6 +29,24 @@ export interface StaffSummary {
   readonly firstName: string;
   readonly photoUrl: string | null;
   readonly status: StaffStatus;
+  /** The staff member's branch: the app shows the staff of the selected branch (§5.17). */
+  readonly branchId: string | null;
+}
+
+/** A bookable branch as the salon page shows it (§5.17). */
+export interface BranchSummary {
+  readonly id: string;
+  readonly name: string;
+  readonly isMain: boolean;
+  readonly locationText: string | null;
+  readonly location: { lat: number; lng: number } | null;
+  readonly phone: string | null;
+  readonly whatsapp: string | null;
+  readonly isOpenNow: boolean;
+  readonly todayHours: { open: string; close: string } | null;
+  readonly closedReason: string | null;
+  readonly weeklySchedule: ScheduleDay[];
+  readonly upcomingClosures: { from: string; to: string; reason: string }[];
 }
 
 export interface StaffDetails extends StaffSummary {
@@ -57,8 +78,12 @@ export interface SalonDetails {
   readonly weeklySchedule: ScheduleDay[];
   readonly upcomingClosures: { from: string; to: string; reason: string }[];
   readonly staff: StaffSummary[];
+  /** Bookable branches, main first; the place fields above are the main branch's (§5.17). */
+  readonly branches: BranchSummary[];
   readonly services: {
     id: string;
+    /** The branch offering it at this price (each branch has its own services). */
+    branchId: string | null;
     catalogServiceId: string;
     name: string;
     imageUrl: string;
@@ -101,14 +126,21 @@ export interface SalonDetailsDeps {
   readonly favorites?: FavoriteLookup;
   readonly reviews?: Pick<ReviewsService, 'latest'>;
   readonly now?: () => Date;
+  /** Branch wiring (§5.17); without it the salon is one place (its own fields). */
+  readonly branches?: Pick<BranchesRepository, 'findMany'>;
 }
 
 export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsService => {
   const { salons, members, salonServices, catalog, gallery, closures, leaves, storage, settings } =
     deps;
   const favorites = deps.favorites ?? noFavorites;
-  const latestReviews = (salonId: string, staffId?: string): Promise<ReviewView[]> =>
-    deps.reviews?.latest({ salonId, staffId, limit: REVIEW_PREVIEW_COUNT }) ?? Promise.resolve([]);
+  const latestReviews = (
+    language: Language,
+    salonId: string,
+    staffId?: string,
+  ): Promise<ReviewView[]> =>
+    deps.reviews?.latest({ salonId, staffId, limit: REVIEW_PREVIEW_COUNT, language }) ??
+    Promise.resolve([]);
   const now = deps.now ?? ((): Date => new Date());
   const url = (key: string | undefined): string | null =>
     key === undefined ? null : storage.getPublicUrl(key);
@@ -145,14 +177,26 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
     firstName: m.firstName,
     photoUrl: url(m.photoKey),
     status,
+    branchId: m.branchId ?? null,
   });
+
+  /** Bookable branches (ACTIVE and complete), main first. */
+  const bookableBranches = async (salonId: string): Promise<Entity<BranchRaw>[]> =>
+    deps.branches === undefined
+      ? []
+      : deps.branches.findMany(
+          { salonId, status: 'ACTIVE', 'completeness.isComplete': true } as never,
+          { isMain: -1, 'name.en': 1 } as never,
+        );
+
+  const placeOf = pointOf;
 
   return {
     async get({ salonId, language, customerId }) {
       const salon = await visible(salonId);
       const timeZone = await settings.get('timezone');
       const today = localDateOf(now(), timeZone);
-      const [ranges, team, onLeave, offered, items, saved, latest] = await Promise.all([
+      const [ranges, team, onLeave, offered, items, saved, latest, branches] = await Promise.all([
         closures.findMany({ salonId, to: { $gte: today } }, { from: 1 }),
         staffMembers(salonId),
         leavesToday(salonId, today),
@@ -161,8 +205,16 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
         customerId === undefined
           ? Promise.resolve(new Set<string>())
           : favorites.among(customerId, [salonId]),
-        latestReviews(salonId),
+        latestReviews(language, salonId),
+        bookableBranches(salonId),
       ]);
+      // Only what customers can book: staff and services of bookable branches (§5.17).
+      const bookableIds = new Set(branches.map((b) => b.id));
+      const inBookable = (branchId: string | undefined): boolean =>
+        branches.length === 0 || (branchId !== undefined && bookableIds.has(branchId));
+      const main = branches.find((b) => b.isMain) ?? branches[0];
+      const closuresOf = (branchId?: string): typeof ranges =>
+        branchId === undefined ? ranges : ranges.filter((r) => r.branchId === branchId);
       const entries =
         offered.length === 0
           ? []
@@ -170,8 +222,10 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
               _id: { $in: offered.map((s) => s.catalogServiceId) },
             });
       const byId = new Map(entries.map((c) => [c.id, c]));
-      const hours = todaysHours(salon.weeklySchedule, ranges, now(), timeZone);
-      const [lng, lat] = salon.location?.coordinates ?? [];
+      const place = main ?? salon;
+      const placeClosures = closuresOf(main?.id);
+      const hours = todaysHours(place.weeklySchedule, placeClosures, now(), timeZone);
+      const location = placeOf(place);
       return {
         id: salon.id,
         name: salon.name,
@@ -179,10 +233,10 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
         coverUrl: url(salon.coverKey),
         profileImageUrl: url(salon.profileKey),
         description: salon.description ?? null,
-        locationText: salon.locationText ?? null,
-        location: lat === undefined || lng === undefined ? null : { lat, lng },
-        phone: salon.phone ?? null,
-        whatsapp: salon.whatsapp ?? null,
+        locationText: place.locationText ?? null,
+        location,
+        phone: place.phone ?? null,
+        whatsapp: place.whatsapp ?? null,
         rating: salon.rating,
         isOpenNow: hours.isOpenNow,
         todayHours:
@@ -190,15 +244,39 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
             ? null
             : { open: hours.open, close: hours.close },
         closedReason: hours.closedReason,
-        weeklySchedule: salon.weeklySchedule,
-        upcomingClosures: ranges.map(({ from, to, reason }) => ({ from, to, reason })),
-        staff: team.map((m) => summary(m, statusOf(m, today, onLeave))),
+        weeklySchedule: place.weeklySchedule,
+        upcomingClosures: placeClosures.map(({ from, to, reason }) => ({ from, to, reason })),
+        staff: team
+          .filter((m) => inBookable(m.branchId))
+          .map((m) => summary(m, statusOf(m, today, onLeave))),
+        branches: branches.map((b): BranchSummary => {
+          const own = closuresOf(b.id);
+          const branchHours = todaysHours(b.weeklySchedule, own, now(), timeZone);
+          return {
+            id: b.id,
+            name: b.name[language],
+            isMain: b.isMain,
+            locationText: b.locationText ?? null,
+            location: placeOf(b),
+            phone: b.phone ?? null,
+            whatsapp: b.whatsapp ?? null,
+            isOpenNow: branchHours.isOpenNow,
+            todayHours:
+              branchHours.open === null || branchHours.close === null
+                ? null
+                : { open: branchHours.open, close: branchHours.close },
+            closedReason: branchHours.closedReason,
+            weeklySchedule: b.weeklySchedule,
+            upcomingClosures: own.map(({ from, to, reason }) => ({ from, to, reason })),
+          };
+        }),
         services: offered.flatMap((s) => {
           const entry = byId.get(s.catalogServiceId);
-          if (entry === undefined) return [];
+          if (entry === undefined || !inBookable(s.branchId)) return [];
           return [
             {
               id: s.id,
+              branchId: s.branchId ?? null,
               catalogServiceId: s.catalogServiceId,
               name: entry.name[language],
               imageUrl: storage.getPublicUrl(entry.imageKey),
@@ -233,7 +311,7 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
       const today = localDateOf(now(), await settings.get('timezone'));
       const [onLeave, latest] = await Promise.all([
         leavesToday(salonId, today),
-        latestReviews(salonId, memberId),
+        latestReviews(language, salonId, memberId),
       ]);
       const wanted = member.staff.serviceIds;
       const offered = await salonServices.findMany({

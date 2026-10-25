@@ -10,6 +10,8 @@ import { makeAppendOnly } from './appendOnly';
  */
 export interface LedgerEntryRaw {
   salonId: Types.ObjectId;
+  /** Branch (§3.3a); set on every new row, backfilled by the branch migration. */
+  branchId?: Types.ObjectId;
   type: LedgerType;
   amount: number;
   bookingId?: Types.ObjectId;
@@ -23,6 +25,7 @@ export interface LedgerEntryRaw {
 const ledgerSchema = new Schema<LedgerEntryRaw>(
   {
     salonId: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
     type: { type: String, enum: LEDGER_TYPES, required: true },
     amount: {
       type: Number,
@@ -60,6 +63,7 @@ ledgerSchema.index(
   { payoutId: 1 },
   { unique: true, partialFilterExpression: { type: 'PAYOUT', payoutId: { $exists: true } } },
 );
+ledgerSchema.index({ branchId: 1, createdAt: -1 });
 makeAppendOnly(ledgerSchema);
 
 export const LedgerEntryModel = model<LedgerEntryRaw>('LedgerEntry', ledgerSchema);

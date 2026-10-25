@@ -22,6 +22,7 @@ import type { AdminSettingsService } from '../domain/adminSettings/adminSettings
 import type { AdminProfileService } from '../domain/adminProfile/adminProfile.service';
 import type { AdminSearchService } from '../domain/adminSearch/adminSearch.service';
 import type { AdminSalonEditService } from '../domain/adminSalonEdit/adminSalonEdit.service';
+import type { AdminBranchesService } from '../domain/branches/adminBranches.service';
 import type { BookingAdminExtrasService } from '../domain/bookings/bookingAdminExtras.service';
 import type { AdminCustomerExtrasService } from '../domain/customers/adminCustomerExtras.service';
 import type { SalonDeletionService } from '../domain/salons/salonDeletion.service';
@@ -56,6 +57,7 @@ import type { TeamService } from '../domain/team/team.service';
 import type { CatalogRequestsService } from '../domain/catalog/catalogRequests.service';
 import type { SalonServicesService } from '../domain/salonServices/salonServices.service';
 import type { HoursService } from '../domain/salons/hoursService';
+import type { BranchesService } from '../domain/branches/branches.service';
 import type { GalleryService } from '../domain/gallery/gallery.service';
 import type { UploadsService } from '../domain/uploads/uploads.service';
 import type { SalonProfileService } from '../domain/salons/salonProfile.service';
@@ -91,6 +93,7 @@ export interface ApiServices {
   readonly adminProfile?: AdminProfileService;
   readonly adminSearch?: AdminSearchService;
   readonly adminSalonEdit?: AdminSalonEditService;
+  readonly adminBranches?: AdminBranchesService;
   readonly adminCustomerExtras?: AdminCustomerExtrasService;
   readonly bookingAdminExtras?: BookingAdminExtrasService;
   readonly adminSalonInsights?: {
@@ -130,6 +133,8 @@ export interface ApiServices {
   readonly search?: SearchService;
   readonly uploads?: UploadsService;
   readonly gallery?: GalleryService;
+  /** Salon branches (§5.16): owner management in the merchant app. */
+  readonly branches?: BranchesService;
   readonly hours?: HoursService;
   readonly salonServices?: SalonServicesService;
   readonly catalogRequests?: CatalogRequestsService;
@@ -290,6 +295,17 @@ export const unavailableSalonProfile: SalonProfileService = {
 
 export const unavailableUploads: UploadsService = { presign: unavailable, confirm: unavailable };
 
+export const unavailableBranches: BranchesService = {
+  list: unavailable,
+  get: unavailable,
+  create: unavailable,
+  update: unavailable,
+  setMain: unavailable,
+  setOffline: unavailable,
+  setOnline: unavailable,
+  close: unavailable,
+};
+
 export const unavailableGallery: GalleryService = {
   list: unavailable,
   add: unavailable,
@@ -424,6 +440,7 @@ export const unavailableAdminSalonEdit: AdminSalonEditService = {
   updateService: unavailable,
   staff: unavailable,
   setStaff: unavailable,
+  moveStaff: unavailable,
   policy: unavailable,
   setPolicy: unavailable,
 };
@@ -613,4 +630,16 @@ export const unavailableSearch: SearchService = {
   search: unavailable,
   cards: unavailable,
   priceBounds: unavailable,
+  nearestBranches: unavailable,
+};
+
+export const unavailableAdminBranches: AdminBranchesService = {
+  list: unavailable,
+  get: unavailable,
+  create: unavailable,
+  update: unavailable,
+  setMain: unavailable,
+  setOffline: unavailable,
+  setOnline: unavailable,
+  close: unavailable,
 };

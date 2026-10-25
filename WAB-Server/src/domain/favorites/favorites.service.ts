@@ -1,3 +1,4 @@
+import type { Language } from '../../constants/enums';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import type { FavoritesRepository } from '../../repositories/favorites.repository';
 import type { SalonsRepository } from '../../repositories/salons.repository';
@@ -16,6 +17,7 @@ export interface FavoritesService {
   list(input: {
     customerId: string;
     params: PaginationParams;
+    language?: Language | undefined;
   }): Promise<{ items: SalonCard[]; meta: PaginationMeta }>;
 }
 
@@ -51,9 +53,13 @@ export const createFavoritesService = ({
     await favorites.remove(customerId, salonId);
   },
 
-  async list({ customerId, params }) {
+  async list({ customerId, params, language }) {
     const page = await favorites.findPage({ customerId }, params, { createdAt: -1 });
-    const items = await search.cards({ ids: page.items.map((f) => f.salonId), customerId });
+    const items = await search.cards({
+      ids: page.items.map((f) => f.salonId),
+      customerId,
+      language,
+    });
     return { items, meta: page.meta };
   },
 });

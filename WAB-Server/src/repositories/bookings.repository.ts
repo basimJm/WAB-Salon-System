@@ -125,6 +125,15 @@ export class BookingsRepository
   }
 
   /** Live bookings of a salon that have not ended yet, for the schedule-conflict checks. */
+  /** PENDING/APPROVED bookings of one branch that have not ended (closing a branch, §5.16). */
+  async upcomingForBranch(branchId: string, from: Date): Promise<{ id: string; startsAt: Date }[]> {
+    const found = await this.findMany(
+      { branchId, status: holdingStatus, appointmentEnd: { $gt: from } },
+      { appointmentStart: 1 },
+    );
+    return found.map((booking) => ({ id: booking.id, startsAt: booking.appointmentStart }));
+  }
+
   async upcomingForSalon(salonId: string, from: Date): Promise<UpcomingBooking[]> {
     const found = await this.findMany(
       { salonId, status: holdingStatus, appointmentEnd: { $gt: from } },
@@ -133,6 +142,7 @@ export class BookingsRepository
     return found.map((booking) => ({
       id: booking.id,
       status: booking.status,
+      ...(booking.branchId === undefined ? {} : { branchId: booking.branchId }),
       startsAt: booking.appointmentStart,
       persons: booking.persons.map((p) => ({
         staffId: p.staffId,

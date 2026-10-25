@@ -1,15 +1,25 @@
 import { PERMISSIONS, type MemberRole, type Permission } from '../../constants/enums';
-import { OWNER_ONLY_CAPABILITIES, ROLE_TEMPLATES } from '../../constants/permissions';
+import {
+  OWNER_ONLY_CAPABILITIES,
+  OWNER_ONLY_PERMISSIONS,
+  ROLE_TEMPLATES,
+} from '../../constants/permissions';
 import { ValidationError, type ErrorDetail } from '../../utils/errors';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 
 const known = new Set<string>(PERMISSIONS);
 
-/** The owner always has every permission; others get what they were granted. */
+/** The owner always has every permission; others get what they were granted, minus the salon-wide ones. */
 export const effectivePermissions = (member: {
   role: MemberRole;
   permissions: readonly Permission[];
-}): readonly Permission[] => (member.role === 'OWNER' ? PERMISSIONS : member.permissions);
+}): readonly Permission[] =>
+  member.role === 'OWNER'
+    ? PERMISSIONS
+    : // A member stored without a grant has none (older rows may lack the field).
+      ((member.permissions as readonly Permission[] | undefined) ?? []).filter(
+        (p) => !OWNER_ONLY_PERMISSIONS.includes(p),
+      );
 
 export const hasAllPermissions = (
   member: { role: MemberRole; permissions: readonly Permission[] },
@@ -51,5 +61,7 @@ export const normalizeGrant = (
     }));
   if (details.length > 0) throw new ValidationError({ details });
   const wanted = new Set(requested);
-  return PERMISSIONS.filter((p) => wanted.has(p));
+  // Finance, subscription and policy cannot go to a branch member: dropped, not refused, so older
+  // clients that still offer them keep working (§6 branch scope).
+  return PERMISSIONS.filter((p) => wanted.has(p) && !OWNER_ONLY_PERMISSIONS.includes(p));
 };
