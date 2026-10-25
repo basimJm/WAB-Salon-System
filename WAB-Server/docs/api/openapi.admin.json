@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.4.0"
+    "version": "1.5.0"
   },
   "servers": [
     {
@@ -2467,7 +2467,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "cityId",
@@ -2662,7 +2662,7 @@
                 "properties": {
                   "cityId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "name": {
                     "type": "object",
@@ -9533,7 +9533,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -9772,7 +9772,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -10009,7 +10009,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -10246,7 +10246,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -10433,7 +10433,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -10669,7 +10669,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "cityId",
@@ -10951,7 +10951,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -11474,7 +11474,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -11483,7 +11483,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -11666,7 +11666,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -12802,7 +12802,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -12834,7 +12834,7 @@
                     "properties": {
                       "catalogServiceId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "reason": {
                         "type": "string",
@@ -13095,7 +13095,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -13361,7 +13361,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "salonId",
@@ -13370,7 +13370,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "staffId",
@@ -13379,7 +13379,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -13689,7 +13689,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -14001,7 +14001,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -14313,7 +14313,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -14649,7 +14649,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "pattern": "^[a-f0-9]{24}$/i"
+                      "pattern": "^[a-fA-F0-9]{24}$"
                     },
                     "minItems": 1,
                     "maxItems": 100
@@ -14856,7 +14856,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "salonId",
@@ -15090,7 +15090,7 @@
                 "properties": {
                   "salonId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "startAt": {
                     "type": [
@@ -15327,7 +15327,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -15587,7 +15587,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -15847,7 +15847,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "pattern": "^[a-f0-9]{24}$/i"
+                      "pattern": "^[a-fA-F0-9]{24}$"
                     },
                     "minItems": 1,
                     "maxItems": 200
@@ -16174,7 +16174,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "salonId",
@@ -16183,7 +16183,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "customerId",
@@ -16192,7 +16192,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -16457,7 +16457,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -16933,7 +16933,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -17158,7 +17158,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "bookingId",
@@ -17167,7 +17167,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "salonId",
@@ -17176,7 +17176,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -17422,7 +17422,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -17665,7 +17665,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -17927,7 +17927,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -18424,7 +18424,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -18633,7 +18633,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "salonId",
@@ -18886,7 +18886,7 @@
                 "properties": {
                   "salonId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "periodTo": {
                     "type": "string",
@@ -19104,7 +19104,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -19324,7 +19324,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -19625,7 +19625,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "salonId",
@@ -19634,7 +19634,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -19643,7 +19643,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "customerId",
@@ -19652,7 +19652,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "bookingId",
@@ -19917,7 +19917,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -20304,7 +20304,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "salonId",
@@ -20313,7 +20313,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -21544,7 +21544,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -22855,19 +22855,19 @@
                           },
                           "salonId": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "branchId": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "customerId": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "bookingId": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "from": {
                             "type": "string",
@@ -22908,7 +22908,7 @@
                         "properties": {
                           "adminId": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "action": {
                             "type": "string",
@@ -22991,15 +22991,15 @@
                           },
                           "salonId": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "branchId": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "customerId": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "from": {
                             "type": "string"
@@ -23059,7 +23059,7 @@
                           },
                           "cityId": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "q": {
                             "type": "string",
@@ -23114,7 +23114,7 @@
                           },
                           "cityId": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "subscription": {
                             "type": "string",
@@ -23538,7 +23538,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -24044,7 +24044,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -24308,7 +24308,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -24620,7 +24620,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -24769,7 +24769,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -25369,20 +25369,20 @@
                         "type": "array",
                         "items": {
                           "type": "string",
-                          "pattern": "^[a-f0-9]{24}$/i"
+                          "pattern": "^[a-fA-F0-9]{24}$"
                         },
                         "minItems": 1,
                         "maxItems": 50
                       },
                       "salonId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "customerIds": {
                         "type": "array",
                         "items": {
                           "type": "string",
-                          "pattern": "^[a-f0-9]{24}$/i"
+                          "pattern": "^[a-fA-F0-9]{24}$"
                         },
                         "minItems": 1,
                         "maxItems": 500
@@ -25743,20 +25743,20 @@
                         "type": "array",
                         "items": {
                           "type": "string",
-                          "pattern": "^[a-f0-9]{24}$/i"
+                          "pattern": "^[a-fA-F0-9]{24}$"
                         },
                         "minItems": 1,
                         "maxItems": 50
                       },
                       "salonId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "customerIds": {
                         "type": "array",
                         "items": {
                           "type": "string",
-                          "pattern": "^[a-f0-9]{24}$/i"
+                          "pattern": "^[a-fA-F0-9]{24}$"
                         },
                         "minItems": 1,
                         "maxItems": 500
@@ -25900,7 +25900,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -26191,7 +26191,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -26549,7 +26549,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "cityId",
@@ -26752,7 +26752,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -27013,7 +27013,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -27067,11 +27067,11 @@
                       },
                       "cityId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "areaId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "language": {
                         "type": "string",
@@ -27270,7 +27270,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -27434,7 +27434,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -27598,7 +27598,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -27762,7 +27762,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -28247,7 +28247,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "adminId",
@@ -28471,7 +28471,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -29803,7 +29803,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -30094,7 +30094,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -30183,11 +30183,11 @@
                       },
                       "cityId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "areaId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "phone": {
                         "type": "string",
@@ -30491,7 +30491,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -30668,7 +30668,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -30887,7 +30887,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -30919,7 +30919,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "pattern": "^[a-f0-9]{24}$/i"
+                      "pattern": "^[a-fA-F0-9]{24}$"
                     },
                     "maxItems": 100
                   },
@@ -31095,7 +31095,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -31104,7 +31104,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "itemId",
@@ -31261,7 +31261,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -31270,7 +31270,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -31520,7 +31520,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -31529,7 +31529,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -31836,7 +31836,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -31845,7 +31845,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -32052,7 +32052,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -32061,7 +32061,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -32241,7 +32241,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -32250,7 +32250,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -32448,7 +32448,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -32457,7 +32457,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "closureId",
@@ -32466,7 +32466,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -32670,7 +32670,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -32679,7 +32679,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "closureId",
@@ -32688,7 +32688,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -32845,7 +32845,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -32876,7 +32876,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -33067,7 +33067,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -33076,7 +33076,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -33106,7 +33106,7 @@
                 "properties": {
                   "catalogServiceId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "price": {
                     "type": "string"
@@ -33319,7 +33319,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -33328,7 +33328,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "serviceId",
@@ -33337,7 +33337,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": false,
             "name": "branchId",
@@ -33584,7 +33584,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -33593,7 +33593,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "memberId",
@@ -33824,7 +33824,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -33833,7 +33833,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "memberId",
@@ -33877,7 +33877,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "pattern": "^[a-f0-9]{24}$/i"
+                      "pattern": "^[a-fA-F0-9]{24}$"
                     },
                     "maxItems": 200
                   },
@@ -34143,7 +34143,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -34152,7 +34152,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "memberId",
@@ -34182,7 +34182,7 @@
                 "properties": {
                   "branchId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "reason": {
                     "type": "string",
@@ -34391,7 +34391,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -34593,7 +34593,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -34881,7 +34881,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -35194,7 +35194,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -35269,11 +35269,11 @@
                       },
                       "cityId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "areaId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "phone": {
                         "type": "string",
@@ -35602,7 +35602,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -35611,7 +35611,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "branchId",
@@ -35921,7 +35921,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -35930,7 +35930,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "branchId",
@@ -36005,11 +36005,11 @@
                       },
                       "cityId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "areaId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       },
                       "phone": {
                         "type": "string",
@@ -36333,7 +36333,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -36342,7 +36342,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "branchId",
@@ -36682,7 +36682,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -36691,7 +36691,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "branchId",
@@ -37040,7 +37040,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -37049,7 +37049,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "branchId",
@@ -37389,7 +37389,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -37398,7 +37398,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "branchId",
@@ -37738,7 +37738,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -38011,7 +38011,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -38249,7 +38249,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -38448,7 +38448,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -38635,7 +38635,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -38966,7 +38966,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -39215,7 +39215,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -39450,7 +39450,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -39618,7 +39618,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -39794,7 +39794,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -39829,7 +39829,7 @@
                   },
                   "staffId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "reason": {
                     "type": "string",
@@ -40031,7 +40031,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -40270,7 +40270,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",

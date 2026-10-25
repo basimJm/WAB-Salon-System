@@ -5,7 +5,8 @@ export const MONGO_SOCKET_TIMEOUT_MS = 45_000;
 export const MONGO_MAX_POOL_SIZE = 20;
 export const MONGO_MIN_POOL_SIZE = 2;
 
-export const OBJECT_ID_PATTERN = /^[a-f0-9]{24}$/i;
+/** No regex flags: the OpenAPI generator copies `toString()`, so a flag would leak into `pattern` (SRV-151). */
+export const OBJECT_ID_PATTERN = /^[a-fA-F0-9]{24}$/;
 export const MONGO_READINESS_CHECK_NAME = 'mongodb';
 
 export const SORT_ASCENDING = 1;

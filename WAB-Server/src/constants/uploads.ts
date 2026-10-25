@@ -115,6 +115,8 @@ export const UPLOAD_POLICIES: Readonly<Record<UploadPurpose, UploadPolicy>> = {
 export const BYTES_PER_MB = 1_048_576;
 /** Lifetime of a presigned upload URL and of the pending record. */
 export const UPLOAD_URL_TTL_SEC = 300;
+/** Per-IP budget of presign/confirm (public licence uploads included); its own counter (SRV-151). */
+export const UPLOAD_ROUTE_RATE_LIMIT = { windowMs: 60_000, max: 20 } as const;
 export const UPLOAD_ROUTES = {
   base: '/uploads',
   presign: '/presign',

@@ -9,6 +9,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
+import { memberSchema } from '../auth/auth.openapi';
 import { applySchema, resubmitSchema } from './salon.validation';
 
 const status = z.object({
@@ -23,7 +24,8 @@ const session = z.object({
   accessTokenExpiresAt: z.string(),
   refreshToken: z.string(),
   refreshTokenExpiresAt: z.string(),
-  member: z.looseObject({ id: z.string(), salonId: z.string(), role: z.string() }),
+  /** Same profile as sign-in (SRV-149); declared in full so clients decode every field (SRV-151). */
+  member: memberSchema,
   application: status,
 });
 
