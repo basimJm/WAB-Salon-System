@@ -1,0 +1,61 @@
+package com.fab.wab.merchant.core.notification.composable
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fab.wab.merchant.core.notification.manager.LocalNotificationManager
+import com.fab.wab.merchant.core.notification.manager.NotificationManager
+import com.fab.wab.merchant.core.notification.model.NotificationTheme
+import com.fab.wab.merchant.core.notification.state.NotificationViewModel
+import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+fun NotificationHost(
+    theme: NotificationTheme,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val viewModel: NotificationViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val notificationManager = remember {
+        NotificationManager(viewModel::handleEvent)
+    }
+
+    CompositionLocalProvider(LocalNotificationManager provides notificationManager) {
+        Box(modifier = modifier.fillMaxSize()) {
+            content()
+
+            if (uiState.notifications.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .windowInsetsPadding(WindowInsets.statusBars),
+                ) {
+                    NotificationDisplay(
+                        bodyTextStyle = MaterialTheme.typography.bodyMedium,
+                        viewModel = viewModel,
+                        theme = theme,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun rememberNotificationManager(): NotificationManager {
+    return LocalNotificationManager.current
+}

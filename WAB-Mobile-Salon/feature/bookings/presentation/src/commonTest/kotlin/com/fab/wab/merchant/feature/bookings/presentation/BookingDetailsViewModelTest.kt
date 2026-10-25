@@ -1,0 +1,146 @@
+package com.fab.wab.merchant.feature.bookings.presentation
+
+import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
+import com.fab.wab.merchant.core.domain.AppError
+import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.ErrorCode
+import com.fab.wab.merchant.feature.bookings.domain.model.BookingAction
+import com.fab.wab.merchant.feature.bookings.domain.model.BookingsDefaults
+import com.fab.wab.merchant.feature.bookings.domain.model.ResponseReason
+import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.ActionMessage
+import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingDetailsContract.SideEffect
+import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiAction
+import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.DetailsDialog
+import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingDetailsViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class BookingDetailsViewModelTest {
+
+    private val repository = FakeBookingsRepository()
+    private val changes = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    private fun TestScope.viewModel() = BookingDetailsViewModel(
+        bookingId = "b1",
+        repository = repository,
+        changes = changes,
+        clock = emptyFlow(),
+        analytics = NoOpAnalyticsTracker,
+        errorText = { "failed" },
+        testScope = backgroundScope,
+    )
+
+    private fun TestScope.effectsOf(viewModel: BookingDetailsViewModel) =
+        mutableListOf<SideEffect>().also { list -> backgroundScope.launch { viewModel.sideEffect.collect { list += it } } }
+
+    @Test
+    fun loadsDetailsAndExposesTheServerActions() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        val state = viewModel.state.first { !it.loading }
+        assertEquals("WAB-b1", state.details?.summary?.reference)
+        assertEquals(setOf(BookingAction.APPROVE, BookingAction.REJECT), state.actions)
+        changes.emit(Unit)
+        assertEquals(2, repository.detailsCalls)
+    }
+
+    @Test
+    fun acceptRunsAtOnceThenRefreshes() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        val effects = effectsOf(viewModel)
+        viewModel.state.first { !it.loading }
+        viewModel.onEvent(UiAction.OnActionClick(BookingAction.APPROVE))
+        assertEquals(listOf("approve:b1"), repository.actions)
+        assertEquals(SideEffect.ShowMessage(ActionMessage.APPROVED), effects.single())
+        assertEquals(2, repository.detailsCalls)
+    }
+
+    @Test
+    fun rejectNeedsAReasonAndOtherNeedsItsText() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        viewModel.state.first { !it.loading }
+        viewModel.onEvent(UiAction.OnActionClick(BookingAction.REJECT))
+        viewModel.onEvent(UiAction.OnDialogConfirm)
+        assertTrue(repository.actions.isEmpty())
+        viewModel.onEvent(UiAction.OnReasonSelect(ResponseReason.OTHER))
+        viewModel.onEvent(UiAction.OnDialogConfirm)
+        assertTrue(repository.actions.isEmpty())
+        viewModel.onEvent(UiAction.OnReasonText("x".repeat(BookingsDefaults.REASON_TEXT_MAX + 1)))
+        assertEquals(BookingsDefaults.REASON_TEXT_MAX, (viewModel.state.first().dialog as DetailsDialog.Reason).text.length)
+        viewModel.onEvent(UiAction.OnReasonText("Closed today"))
+        viewModel.onEvent(UiAction.OnDialogConfirm)
+        assertEquals(listOf("reject:OTHER:Closed today"), repository.actions)
+        assertNull(viewModel.state.first().dialog)
+    }
+
+    @Test
+    fun alreadyHandledShowsThePopupAndRefreshesWithoutRetrying() = runTest(UnconfinedTestDispatcher()) {
+        repository.actionResult = serverError(ErrorCode.ALREADY_HANDLED)
+        val viewModel = viewModel()
+        val effects = effectsOf(viewModel)
+        viewModel.state.first { !it.loading }
+        viewModel.onEvent(UiAction.OnActionClick(BookingAction.APPROVE))
+        assertEquals(DetailsDialog.AlreadyHandled, viewModel.state.first().dialog)
+        assertEquals(SideEffect.ShowError("failed"), effects.last())
+        assertEquals(1, repository.actions.size)
+        assertEquals(2, repository.detailsCalls)
+    }
+
+    @Test
+    fun scheduleConflictClosesTheSheetAndRefreshesButOtherErrorsKeepIt() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        viewModel.state.first { !it.loading }
+        repository.actionResult = AppResult.Error(AppError.NetworkError("offline"))
+        viewModel.onEvent(UiAction.OnActionClick(BookingAction.COMPLETE))
+        viewModel.onEvent(UiAction.OnDialogConfirm)
+        assertIs<DetailsDialog.Confirm>(viewModel.state.first().dialog)
+        assertEquals(1, repository.detailsCalls)
+        repository.actionResult = serverError(ErrorCode.SCHEDULE_CONFLICT)
+        viewModel.onEvent(UiAction.OnDialogConfirm)
+        assertNull(viewModel.state.first().dialog)
+        assertEquals(2, repository.detailsCalls)
+    }
+
+    @Test
+    fun reassignLoadsStaffAndSendsThePersonAndStaff() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        val effects = effectsOf(viewModel)
+        viewModel.state.first { !it.loading }
+        viewModel.onEvent(UiAction.OnActionClick(BookingAction.REASSIGN))
+        assertEquals(listOf(SARA, LINA), viewModel.state.first().staffOptions)
+        viewModel.onEvent(UiAction.OnDialogConfirm)
+        assertTrue(repository.actions.isEmpty())
+        viewModel.onEvent(UiAction.OnReassignStaff(LINA.id))
+        viewModel.onEvent(UiAction.OnDialogConfirm)
+        assertEquals(listOf("reassign:0:s2"), repository.actions)
+        assertEquals(SideEffect.ShowMessage(ActionMessage.REASSIGNED), effects.last())
+    }
+
+    @Test
+    fun contactAndCopyEmitEffectsAndLoadFailureShowsRetry() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        val effects = effectsOf(viewModel)
+        viewModel.state.first { !it.loading }
+        viewModel.onEvent(UiAction.OnCallCustomer)
+        viewModel.onEvent(UiAction.OnWhatsAppCustomer)
+        viewModel.onEvent(UiAction.OnCopyReference)
+        assertEquals(
+            listOf(SideEffect.Dial("+962791234567"), SideEffect.WhatsApp("+962791234567"), SideEffect.CopyReference("WAB-b1")),
+            effects,
+        )
+        repository.detailsResult = AppResult.Error(AppError.NetworkError("offline"))
+        val failing = viewModel()
+        assertEquals("failed", failing.state.first { !it.loading }.error)
+    }
+}
