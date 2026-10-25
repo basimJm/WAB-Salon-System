@@ -1,5 +1,5 @@
 import { DOC_NAMES } from '../src/constants/docs';
-import { contractFingerprint, nextMinor } from '../src/docs/contract';
+import { contractFingerprint, nextMinor, replaceContractEntry } from '../src/docs/contract';
 import { CONTRACT_VERSIONS } from '../src/docs/contractVersions';
 import { buildOpenApiDocuments } from '../src/docs/index';
 
@@ -34,5 +34,31 @@ describe('contract snapshot guard (SRV-111)', () => {
     expect(contractFingerprint(sameButVersion)).toBe(contractFingerprint(doc));
     expect(contractFingerprint(changed)).not.toBe(contractFingerprint(doc));
     expect(nextMinor('1.4.2')).toBe('1.5.0');
+  });
+
+  it('contract:bump replaces a whole entry even when its note has braces', () => {
+    const source = [
+      '  merchant: {',
+      "    version: '1.2.0',",
+      "    sha256: 'old',",
+      "    note: 'GET /bookings/{id}/eligible-staff',",
+      '  },',
+      '  admin: {',
+      "    version: '1.0.0',",
+      "    sha256: 'keep',",
+      "    note: 'x',",
+      '  },',
+    ].join('\n');
+    const next = replaceContractEntry(source, 'merchant', {
+      version: '1.3.0',
+      sha256: 'new',
+      note: "it's {id}",
+    });
+    expect(next).toContain("version: '1.3.0'");
+    expect(next).toContain("note: 'it\\'s {id}'");
+    expect(next).toContain("sha256: 'keep'");
+    expect(next).not.toContain("sha256: 'old'");
+    const unknown = { version: '9.0.0', sha256: 'z', note: 'n' };
+    expect(replaceContractEntry(source, 'customer', unknown)).toBe(source);
   });
 });

@@ -17,7 +17,6 @@ import { MERCHANT_SALON_ROUTES } from '../../../constants/salon';
 
 const meSchema = memberSchema.extend({
   photoUrl: z.string().nullable(),
-  branchId: z.string().nullable().describe('null for the owner (every branch)'),
   pushEnabled: z.boolean(),
 });
 

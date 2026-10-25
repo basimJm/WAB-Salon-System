@@ -20,9 +20,9 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'CUS-086: booking draft response has branch {id, name, locationText} (SRV-128b)',
   },
   merchant: {
-    version: '1.2.0',
-    sha256: '4589684966d2eb0db164dc87f08a859e5121ad682aafedd0f2294443a9e07c74',
-    note: 'MER-021/MER-063: GET /merchant/v1/bookings/{id}/eligible-staff (SRV-128a)',
+    version: '1.3.0',
+    sha256: '82839e59c834c510e442d81fa8ad209ab3320b0559ae28bbd9ab4816cd7ab166',
+    note: 'MER-061: MemberProfile (login, refresh, application, /me) has branchId (SRV-149)',
   },
   admin: {
     version: '1.3.0',

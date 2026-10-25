@@ -25,6 +25,10 @@ export const memberSchema = z
     permissions: z.array(z.enum(PERMISSIONS)).describe('The OWNER always has all of them.'),
     providesServices: z.boolean(),
     photoKey: z.string().optional(),
+    branchId: z
+      .string()
+      .nullable()
+      .describe('The member’s branch; null for the owner (every branch)'),
   })
   .openapi('MemberProfile');
 

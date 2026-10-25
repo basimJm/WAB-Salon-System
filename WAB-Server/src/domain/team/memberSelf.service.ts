@@ -14,8 +14,6 @@ import type { UploadVerifier } from '../uploads/uploads.service';
 /** "My account" (M25): the session profile plus what the screen shows. */
 export interface MemberSelfView extends MemberProfile {
   readonly photoUrl: string | null;
-  /** `null` for the owner (every branch). */
-  readonly branchId: string | null;
   readonly pushEnabled: boolean;
 }
 
@@ -64,7 +62,6 @@ export const createMemberSelfService = (deps: MemberSelfDeps): MemberSelfService
   const view = (m: Entity<MemberRaw>): MemberSelfView => ({
     ...toMemberProfile(m),
     photoUrl: m.photoKey === undefined ? null : storage.getPublicUrl(m.photoKey),
-    branchId: m.role === 'OWNER' ? null : (m.branchId ?? null),
     pushEnabled: m.pushEnabled !== false,
   });
 
