@@ -155,10 +155,10 @@ private fun SalonRow(salons: List<SalonSummary>, onAction: (UiAction) -> Unit, s
         contentPadding = PaddingValues(start = AppTheme.spacing.space20, end = AppTheme.spacing.space20, bottom = AppTheme.spacing.space6),
         horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12),
     ) {
-        items(salons, key = { it.id }, contentType = { SALON_TYPE }) { salon ->
+        items(salons, key = { it.entryKey }, contentType = { SALON_TYPE }) { salon ->
             DiscoverySalonCard(
                 salon = salon,
-                onClick = { onAction(UiAction.OnSalonClick(salon.id)) },
+                onClick = { onAction(UiAction.OnSalonClick(salon.id, salon.preselectedBranchId)) },
                 onFavoriteClick = { onAction(UiAction.OnFavoriteClick(salon.id)) },
                 showDistance = showDistance,
             )

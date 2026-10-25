@@ -11,6 +11,19 @@
 
 - Batch 7 = salon branches (CUS-082…086, then CUS-087), chained branches from `feat/cus-082-branches-contract`; per task policy checks + tests written, host unit tests after five (rules §3.13). The parent agent pushes and merges the chain.
 
+### CUS-084 — Nearest section and map: one entry per branch titled "Salon - Branch" (e.g. Hifa Salon - Mecca Street); single-branch salons show the salon name
+- Branch: `feat/cus-084-nearest-branches` (from `feat/cus-083-search-branches`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.17; `GET /customer/v1/home` `nearest[]`):
+  - [x] Home nearest maps one entry per bookable branch with the server `title` ("Salon - Branch", or the salon name when single-branch; blank → salon name) and its `branch`; recommended cards map `branchCount`/`branch`
+  - [x] Nearest cards show the title, the branch's area and distance, never a branch count; list keys are unique per branch (`entryKey` = salon/branch) so a salon with two near branches does not crash the LazyRow
+  - [x] Tapping a nearest entry opens the salon with that branch preselected (`OnSalonClick(salonId, branchId)` → `OpenSalon` → `Screen.SalonDetails(salonId, branchId)`); salon cards open without a branch
+  - [x] "Map": the app has no in-app map; the maps hand-off of the selected branch is CUS-085
+- Tests: `SalonSummaryTest` (3), `HomeMappersTest` (+1, recommended count), `HomeViewModelTest` (+1); full `testAndroidHostTest --continue` green
+- Loops: 0/1
+- Review: PENDING
+- Notes: favorite toggles stay per salon (every entry of that salon follows).
+
 ### CUS-083 — Search and filtered lists: one card per salon (never per branch) with the nearest branch's distance/area and "N branches"
 - Branch: `feat/cus-083-search-branches` (from `feat/cus-082-branches-contract`)
 - Status: IN REVIEW

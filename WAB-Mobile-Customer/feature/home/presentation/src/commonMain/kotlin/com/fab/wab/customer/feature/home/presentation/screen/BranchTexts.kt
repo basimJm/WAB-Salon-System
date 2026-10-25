@@ -33,4 +33,4 @@ fun branchCountText(branchCount: Int): String? {
 /** Card place line of [SalonSummary]: area of the nearest bookable branch + branch count. */
 @Composable
 fun SalonSummary.placeText(): String =
-    salonPlaceText(locationText, branchCountText(branchCount), stringResource(Res.string.salon_hours_separator))
+    salonPlaceText(locationText, branchCountText(shownBranchCount), stringResource(Res.string.salon_hours_separator))
