@@ -10,10 +10,22 @@
 
 ## Current task
 
+### SRV-148 — Branches end to end (Stage P)
+
+- Branch: `feat/srv-148-branches-e2e`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.16; API docs: no change in this task — contract checked after SRV-136…147):
+  - [x] `seed:demo`: after the main-branch migration, Lamar gets Khalda + Dabouq and Al-Ostaz gets Shmeisani, each complete with own place, hours, prices (percent of the main branch), a branch manager (bride-qualified in women's salons) and an employee; deterministic ids, insert-only; `branchCount` synced
+  - [x] `Branch` is a demo collection; every demo branch row passes the real Mongoose schemas
+  - [x] Contract regenerated and compared (docs test green); client impact list per task (ADM-088…091, CUS-082…087, MER-061…066) in `.claude/Integration.md`; DEPLOYMENT.md demo section updated
+- Tests: `tests/demoBranches.test.ts` (3), `tests/demoSeed.test.ts` (Branch filled later); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (salon legacy place/hours fields stay mirrored until every client reads branches — dropping them is a later contract change), QA ✔) — the demo seed itself was not run against the hosted dev database in this task (owner runs `npm run seed:demo`).
+
 ### SRV-147 — Admin branches, full CRUD for any salon (Stage P)
 
 - Branch: `feat/srv-147-admin-branches`
-- Status: IN REVIEW
+- Status: DONE (PR #393)
 - Acceptance criteria (BUSINESS_DOMAIN §5.16, §6 admin, root CLAUDE.md §4.12; operations admin `/salons/{id}/branches[/{branchId}[/main|offline|online|close]]`, `/salons/{id}` detail, `/salons/{id}/members`, salon edit hours/closures/services `?branchId=`, `POST /salons/{id}/members/{memberId}/branch`, `GET /bookings?branchId=` + BOOKINGS export — client impact ADM-089/090/091; merchant `GET /bookings?branchId=` for the owner, MER-063):
   - [x] Admin list/get/create/update/set main/offline/online/close any salon's branch through the owner's branches service (limit, last branch, main, upcoming bookings unchanged); every write needs a reason, writes an audit record (`entityType: branch`) and tells the owner (`salon.edited_by_admin`, area `branches`; offline/online use the existing branch events, no second notice)
   - [x] Salon detail returns `branches[]` (closed included); members show `branchId` and filter by `?branchId=`
@@ -37,20 +49,6 @@
 - Tests: `tests/financeBranch.test.ts` (5), `tests/paymentsService.test.ts` (+1), `tests/exports.test.ts` (column shift); full gate 146 suites / 2735 tests
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔ (additive fields), Architect ✔ (payouts per salon unchanged; Phase 2 split payments unaffected), QA ✔) — legacy rows without a branch are backfilled by SRV-137's migration.
-
-### SRV-145 — Reviews with branch label (Stage P)
-
-- Branch: `feat/srv-145-review-branch`
-- Status: DONE (PR #391)
-- Acceptance criteria (BUSINESS_DOMAIN §5.11, §3 reviews `branchId`; operations customer `POST/GET /salons/{salonId}[/staff/{memberId}]/reviews`, `GET /salons/{salonId}`, admin `GET /reviews` — client impact CUS-085/087, ADM-091):
-  - [x] Submit takes an optional `branchId`: it must be an open branch of that salon (404 `BRANCH_NOT_FOUND`); a staff review takes the staff member's branch (a different pick → `BRANCH_NOT_FOUND`); no pick = no label
-  - [x] Review views (list, salon/staff details previews) show `branch {id, name}` in the request language, `null` when unlabelled
-  - [x] Salon rating stays the average of APPROVED reviews of all branches together (no per-branch rating)
-  - [x] Admin list filter `branchId`; admin rows show `branch {id, name {ar, en}}`
-  - [x] Merchant reviews read does not exist yet: its branch scope is written into SRV-131's row
-- Tests: `tests/reviewBranch.test.ts` (5) + reviews/adminReviews/salonDetails suites; full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔ (additive fields; picking a branch is optional for older builds), Architect ✔, QA ✔) — reviews written before branches carry the migrated main-branch label (SRV-137 backfill).
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

@@ -35,7 +35,9 @@ npm start                    # http://localhost:<PORT>/health  and  /ready
 
 Photos: put them in a folder with the sub-folders `covers`, `profiles`, `gallery`, `staff`, `customers`, `banners`, `catalog`, `licenses` (any `.jpg/.jpeg/.png/.webp/.heic`; a file named like the key, e.g. `catalog/haircut.jpg`, is used for that key, the others are shared in turn), then run `npm run seed:demo-images -- <folder>` with `STORAGE_PROVIDER=real`. Photos are re-encoded as JPEG (max 1600 px) and the list thumbnails are generated.
 
-Demo phone numbers are invented Jordanian mobiles (`+96279900xxxx` customers, `+96278900xxxx` staff). To sign in as one, add it as a test number in Firebase → Authentication → Phone (dev project only) so no SMS goes to a real person.
+Branches: after the main-branch migration, Lamar Beauty Lounge gets two more branches (Khalda, Dabouq) and Al-Ostaz Barber Shop one (Shmeisani), each with its own hours, prices and staff (a branch manager and an employee), so the branch screens, the "Salon - Branch" nearest list and branch-scoped managers can be tried.
+
+Demo phone numbers are invented Jordanian mobiles (`+96279900xxxx` customers, `+96278900xxxx` staff, `+96278901xxxx` branch staff). To sign in as one, add it as a test number in Firebase → Authentication → Phone (dev project only) so no SMS goes to a real person.
 
 The full local gate, run before every push: `npm run docs && npm run format:check && npm run lint && npm run typecheck && npm run build && npm test && npm audit --omit=dev`.
 

@@ -32,3 +32,28 @@ Every endpoint change: update `*.openapi.ts`, run `npm run docs`, commit `docs/a
 ## Gate
 
 `npm run format:check && npm run lint && npm run typecheck && npm run build && npm test` (no GitHub CI; GitGuardian scans PRs). Docs test must be green. Merge own PR into `server` after the gate.
+
+## Salon branches contract (Stage P, SRV-136…148, 2026-10-26)
+
+Regenerated `docs/api/openapi.{customer,merchant,admin}.json` + Postman. Every change is additive; single-branch salons and older app builds keep working (salon-level endpoints act on the main branch or the member's branch, salon place/hours fields mirror the main branch). Error codes: `BRANCH_NOT_FOUND`, `BRANCH_NOT_BOOKABLE`, `BRANCH_REQUIRED`, `BRANCH_LIMIT_REACHED`, `BRANCH_HAS_UPCOMING_BOOKINGS`, `LAST_BRANCH`, `BRANCH_SCOPE_DENIED`. Setting `salon.maxBranches` (20).
+
+| Client task | Server operations to use                                                                                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CUS-082     | re-sync; `Branch*` schemas; booking `branch {id,name,locationText}`                                                                                                      |
+| CUS-083     | `GET /customer/v1/salons` cards: `branchCount`, `branch {id,name}`, place/hours/distance of the nearest bookable branch; price filter = one branch offering all services |
+| CUS-084     | `GET /customer/v1/home` `nearest[]`: one entry per branch, `title` = "Salon - Branch" (salon name when single-branch)                                                    |
+| CUS-085     | `GET /customer/v1/salons/{id}`: `branches[]` (main first, own place/contacts/hours/closures); `staff[].branchId`, `services[].branchId`; reviews `branch {id,name}`      |
+| CUS-086     | `POST /salons/{id}/availability` and `POST /booking-drafts` take `branchId` (422 `BRANCH_REQUIRED` when several bookable branches)                                       |
+| CUS-087     | booking rows/details `branch`; `POST /salons/{id}[/staff/{memberId}]/reviews` takes optional `branchId`                                                                  |
+| MER-061     | re-sync; profile `branchId` (null for the owner); permissions: `FINANCE_VIEW`, `SUBSCRIPTION_VIEW`, `POLICIES_MANAGE` never granted to branch members                    |
+| MER-062     | `/merchant/v1/branches[/{branchId}[/main                                                                                                                                 | offline                    | online | close]]` (owner only)                                         |
+| MER-063     | booking list/calendar scoped to the member's branch; owner `GET /bookings?branchId=`; merchant reviews read (SRV-131) and statistics (SRV-132) are still TODO rows       |
+| MER-064     | `/merchant/v1/branches/{branchId}/hours` and `/services` (same bodies as the salon-level ones); finance `GET /finance/transactions                                       | refunds?branchId=` (owner) |
+| MER-065     | team `?branchId=`, create with `branchId`, `PATCH /team/members/{id}` `branchId` moves (409 `SCHEDULE_CONFLICT`)                                                         |
+| MER-066     | socket rooms: owner `salon:{id}:*`, branch members `branch:{id}:*`; pushes for a booking reach the owner + that branch's members                                         |
+| ADM-088     | re-sync; setting `salon.maxBranches`                                                                                                                                     |
+| ADM-089     | `/admin/v1/salons/{id}/branches[/{branchId}[/main                                                                                                                        | offline                    | online | close]]`(every write with`reason`); salon detail `branches[]` |
+| ADM-090     | salon edit hours/closures/services `?branchId=`; `POST /admin/v1/salons/{id}/members/{memberId}/branch`                                                                  |
+| ADM-091     | `branchId` filter + field on bookings, reviews, members, transactions, refunds, reconciliation, TRANSACTIONS/BOOKINGS exports                                            |
+
+Demo data (`seed:demo`): Lamar Beauty Lounge has 3 branches (Abdoun main, Khalda, Dabouq; different prices), Al-Ostaz Barber Shop 2 (main, Shmeisani); each extra branch has its own manager + employee (`+96278901xxxx`).
