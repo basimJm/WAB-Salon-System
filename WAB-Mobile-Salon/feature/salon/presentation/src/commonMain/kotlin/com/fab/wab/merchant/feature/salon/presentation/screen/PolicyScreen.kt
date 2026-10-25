@@ -30,7 +30,7 @@ import com.fab.wab.merchant.designsystem.components.navigation.AppTopBar
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppTextField
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.feature.salon.domain.PaymentOption
+import com.fab.wab.merchant.core.domain.policy.PaymentOption
 import com.fab.wab.merchant.feature.salon.domain.PolicyField
 import com.fab.wab.merchant.feature.salon.domain.PolicyLimits
 import com.fab.wab.merchant.feature.salon.domain.depositExampleFils

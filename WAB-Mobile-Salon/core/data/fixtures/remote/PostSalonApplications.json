@@ -1,0 +1,44 @@
+{
+  "success": true,
+  "message": "Created successfully.",
+  "data": {
+    "accessToken": "<redacted>",
+    "accessTokenExpiresAt": "2026-10-25T18:40:38.000Z",
+    "refreshToken": "<redacted>",
+    "refreshTokenExpiresAt": "2027-01-23T18:25:38.973Z",
+    "member": {
+      "id": "6ade49a2c2cfb0cb993a17cc",
+      "salonId": "6ade49a2c2cfb0cb993a17cb",
+      "firstName": "Capture",
+      "lastName": "Owner",
+      "phone": "+962799864579",
+      "role": "OWNER",
+      "permissions": [
+        "DASHBOARD_VIEW",
+        "BOOKINGS_VIEW_ALL",
+        "BOOKINGS_VIEW_OWN",
+        "BOOKINGS_RESPOND",
+        "BOOKINGS_OPERATE",
+        "SALON_PROFILE_MANAGE",
+        "GALLERY_MANAGE",
+        "WORKING_HOURS_MANAGE",
+        "SERVICES_MANAGE",
+        "STAFF_MANAGE",
+        "POLICIES_MANAGE",
+        "REVIEWS_VIEW",
+        "STATISTICS_VIEW",
+        "FINANCE_VIEW",
+        "SUBSCRIPTION_VIEW"
+      ],
+      "providesServices": false,
+      "branchId": null
+    },
+    "application": {
+      "salonId": "6ade49a2c2cfb0cb993a17cb",
+      "state": "APPLICATION_PENDING",
+      "submittedAt": "2026-10-25T18:25:38.952Z",
+      "resubmissionCount": 0,
+      "rejectionReason": null
+    }
+  }
+}

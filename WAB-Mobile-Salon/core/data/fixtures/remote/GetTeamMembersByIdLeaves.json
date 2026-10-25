@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "cb4ed8dfaca5d41db8e2882a",
+      "memberId": "eaf41e0bf439c48d15ee4269",
+      "from": "2026-11-10",
+      "to": "2026-11-12",
+      "note": "Annual leave",
+      "editable": true
+    }
+  ]
+}

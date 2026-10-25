@@ -1,0 +1,145 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "6ade49a2c2cfb0cb993a17c9",
+      "type": "BOOKING",
+      "event": "booking.requested",
+      "title": "New booking request",
+      "body": "Capture requested WAB-H75ENZ for 30/10/2026, 11:00 am.",
+      "data": {
+        "bookingId": "6ade49a2c2cfb0cb993a17c5",
+        "salonId": "7fe703cdf5e7eec204bb193d",
+        "deepLink": "/bookings/6ade49a2c2cfb0cb993a17c5"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T18:25:38.903Z"
+    },
+    {
+      "id": "6ade49a2c2cfb0cb993a17bd",
+      "type": "SYSTEM",
+      "event": "branch.online",
+      "title": "Branch is back online",
+      "body": "The MER-054 contract capture (throwaway, please ignore) branch of Lamar Beauty Lounge is visible to customers again.",
+      "data": {
+        "salonId": "7fe703cdf5e7eec204bb193d",
+        "deepLink": "/salon"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T18:25:38.589Z"
+    },
+    {
+      "id": "6ade49a2c2cfb0cb993a17bc",
+      "type": "SYSTEM",
+      "event": "branch.offline",
+      "title": "Branch is offline",
+      "body": "The MER-054 contract capture (throwaway, please ignore) branch of Lamar Beauty Lounge is hidden from customers. Reason: MER-054 contract capture (throwaway, please ignore)",
+      "data": {
+        "salonId": "7fe703cdf5e7eec204bb193d",
+        "deepLink": "/salon"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T18:25:38.561Z"
+    },
+    {
+      "id": "6ade4972c2cfb0cb993a17ac",
+      "type": "BOOKING",
+      "event": "booking.requested",
+      "title": "New booking request",
+      "body": "Capture requested WAB-5VPPSA for 01/11/2026, 10:00 am.",
+      "data": {
+        "bookingId": "6ade4972c2cfb0cb993a17a8",
+        "salonId": "7fe703cdf5e7eec204bb193d",
+        "deepLink": "/bookings/6ade4972c2cfb0cb993a17a8"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T18:24:50.960Z"
+    },
+    {
+      "id": "6ade4972c2cfb0cb993a17a6",
+      "type": "BOOKING",
+      "event": "booking.requested",
+      "title": "New booking request",
+      "body": "Capture requested WAB-0ASAQ3 for 31/10/2026, 10:00 am.",
+      "data": {
+        "bookingId": "6ade4972c2cfb0cb993a17a2",
+        "salonId": "7fe703cdf5e7eec204bb193d",
+        "deepLink": "/bookings/6ade4972c2cfb0cb993a17a2"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T18:24:50.885Z"
+    },
+    {
+      "id": "6ade4972c2cfb0cb993a17a0",
+      "type": "BOOKING",
+      "event": "booking.requested",
+      "title": "New booking request",
+      "body": "Capture requested WAB-RXM7NA for 31/10/2026, 10:00 am.",
+      "data": {
+        "bookingId": "6ade4972c2cfb0cb993a179c",
+        "salonId": "7fe703cdf5e7eec204bb193d",
+        "deepLink": "/bookings/6ade4972c2cfb0cb993a179c"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T18:24:50.801Z"
+    },
+    {
+      "id": "03dc002b651d83859678b604",
+      "type": "BOOKING",
+      "event": "booking.requested",
+      "title": "New booking request",
+      "body": "Rasha requested WAB-MDXZ7N for 02/11/2026, 10:00 am.",
+      "data": {
+        "bookingId": "c53ae8d16389ab821f10964f",
+        "salonId": "7fe703cdf5e7eec204bb193d"
+      },
+      "isRead": true,
+      "createdAt": "2026-10-25T17:03:44.887Z"
+    },
+    {
+      "id": "fa956e7a63b216d8e75d1d54",
+      "type": "BOOKING",
+      "event": "booking.requested",
+      "title": "New booking request",
+      "body": "Zeina requested WAB-W41CVC for 28/10/2026, 11:30 am.",
+      "data": {
+        "bookingId": "5c2e8cd3917ba37f01b1b97f",
+        "salonId": "7fe703cdf5e7eec204bb193d"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T17:03:44.887Z"
+    },
+    {
+      "id": "0436b340693fe0dbdea46e03",
+      "type": "BOOKING",
+      "event": "booking.requested",
+      "title": "New booking request",
+      "body": "Salma requested WAB-8JVBQE for 04/11/2026, 11:15 am.",
+      "data": {
+        "bookingId": "aca963ec2a0acb6795639430",
+        "salonId": "7fe703cdf5e7eec204bb193d"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T16:46:44.887Z"
+    },
+    {
+      "id": "dd244ceb69d9bacf55179613",
+      "type": "BOOKING",
+      "event": "booking.requested",
+      "title": "New booking request",
+      "body": "Shahd requested WAB-PVX7Y7 for 04/11/2026, 3:15 pm.",
+      "data": {
+        "bookingId": "33f565ded79cd8e35b074e8f",
+        "salonId": "7fe703cdf5e7eec204bb193d"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T16:42:44.887Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 32
+  }
+}

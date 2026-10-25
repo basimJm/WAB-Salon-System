@@ -1,5 +1,7 @@
 package com.fab.wab.merchant.feature.bookings.presentation.screen
 
+import com.fab.wab.merchant.core.domain.policy.customerRules
+import com.fab.wab.merchant.designsystem.components.policy.policyRuleText
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -107,9 +109,10 @@ private fun DetailsContent(details: BookingDetails, nowMs: Long, onAction: (UiAc
         }
         PersonsCard(details)
         PaymentCard(details)
-        if (details.policy.isNotEmpty()) {
+        val rules = details.policy?.customerRules().orEmpty()
+        if (rules.isNotEmpty()) {
             SectionCard(stringResource(Res.string.details_policy)) {
-                details.policy.values.forEach { AppText(text = it, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted) }
+                rules.forEach { AppText(text = policyRuleText(it), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted) }
             }
         }
         if (details.history.isNotEmpty()) {

@@ -98,7 +98,7 @@
 ## Phase 5 — Integration, quality and release
 | ID | Task | Branch | Needs | Status | Notes |
 |---|---|---|---|---|---|
-| MER-054 | Switch dev builds to `DATA_SOURCE=remote` against the dev API: per-feature gap list, socket events and permission filtering verified | `feat/mer-054-remote-dev` | MER-052, SRV-011a | TODO | Needs the dev API URL (deployment, owner) |
+| MER-054 | Switch dev builds to `DATA_SOURCE=remote` against the dev API: per-feature gap list, socket events and permission filtering verified | `feat/mer-054-remote-dev` | MER-052, SRV-011a | IN PROGRESS | Needs the dev API URL (deployment, owner) |
 | MER-055 | Real OTP on devices (Firebase Phone Auth test numbers, `wab-otp` in the server) | `feat/mer-055-real-otp` | MER-054, SRV-034 | BLOCKED | Firebase registrations (MER-004) |
 | MER-056 | Booking request end to end on devices: customer books (dev API) → merchant receives socket + FCM, overlay / heads-up / time-sensitive paths, accept from notification | `feat/mer-056-request-e2e` | MER-029, MER-030, MER-054 | BLOCKED | Needs the dev API; SRV-100 is done |
 | MER-057 | Accessibility and RTL QA pass (TalkBack / VoiceOver, 48 dp, font 200 %, RTL, dark, landscape, alert sound + vibration + visual cue) | `feat/mer-057-a11y-rtl-qa` | MER-052 | DONE | PRD §13 |

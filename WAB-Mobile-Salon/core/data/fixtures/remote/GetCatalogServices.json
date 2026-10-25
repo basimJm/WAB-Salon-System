@@ -1,0 +1,81 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "6ad867149e63b9a6a612d49e",
+      "name": "Haircut",
+      "description": "Cut and shape to your taste",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/haircut.jpg",
+      "gender": "FEMALE"
+    },
+    {
+      "id": "6ad867159e63b9a6a612d49f",
+      "name": "Blow dry",
+      "description": "Wash and blow-dry styling",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/blow-dry.jpg",
+      "gender": "FEMALE"
+    },
+    {
+      "id": "6ad867159e63b9a6a612d4a0",
+      "name": "Hair coloring",
+      "description": "Full color or highlights",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/hair-color.jpg",
+      "gender": "FEMALE"
+    },
+    {
+      "id": "6ad867159e63b9a6a612d4a1",
+      "name": "Keratin treatment",
+      "description": "Smoothing treatment for the hair",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/keratin.jpg",
+      "gender": "FEMALE"
+    },
+    {
+      "id": "6ad867169e63b9a6a612d4a2",
+      "name": "Manicure",
+      "description": "Nail care and polish",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/manicure.jpg",
+      "gender": "FEMALE"
+    },
+    {
+      "id": "6ad867169e63b9a6a612d4a3",
+      "name": "Pedicure",
+      "description": "Foot and toenail care",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/pedicure.jpg",
+      "gender": "FEMALE"
+    },
+    {
+      "id": "6ad867169e63b9a6a612d4a4",
+      "name": "Makeup",
+      "description": "Makeup for occasions",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/makeup.jpg",
+      "gender": "FEMALE"
+    },
+    {
+      "id": "6ad867179e63b9a6a612d4a5",
+      "name": "Bridal makeup",
+      "description": "Complete bridal makeup",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/bridal-makeup.jpg",
+      "gender": "FEMALE"
+    },
+    {
+      "id": "6ad867179e63b9a6a612d4a6",
+      "name": "Facial",
+      "description": "Deep cleansing and hydration",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/facial.jpg",
+      "gender": "FEMALE"
+    },
+    {
+      "id": "6ad867179e63b9a6a612d4a7",
+      "name": "Waxing",
+      "description": "Hair removal with wax",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/waxing.jpg",
+      "gender": "FEMALE"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 11
+  }
+}

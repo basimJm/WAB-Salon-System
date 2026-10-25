@@ -5,6 +5,7 @@ import com.fab.wab.merchant.core.notification.push.PushNotification
 import com.fab.wab.merchant.core.realtime.RealtimeClient
 import com.fab.wab.merchant.core.realtime.RealtimeEvent
 import com.fab.wab.merchant.core.realtime.RealtimeEvents
+import com.fab.wab.merchant.core.realtime.withoutEchoes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
@@ -27,7 +28,7 @@ internal val BOOKING_CHANGE_EVENTS = setOf(
 internal const val CLOCK_TICK_MS = 1_000L
 
 internal fun bookingChanges(realtime: RealtimeClient): Flow<Unit> =
-    realtime.events.filter { it.name in BOOKING_CHANGE_EVENTS }.map { }
+    realtime.events.filter { it.name in BOOKING_CHANGE_EVENTS }.withoutEchoes().map { }
 
 internal fun clockTicks(clock: Clock = Clock.System, tickMs: Long = CLOCK_TICK_MS): Flow<Long> = flow {
     while (true) {
@@ -54,4 +55,4 @@ internal fun bookingRequests(realtime: RealtimeClient, pushes: Flow<PushNotifica
 
 /** Ids of bookings whose summary changed (another member may have answered a queued request). */
 internal fun bookingUpdates(realtime: RealtimeClient): Flow<String> =
-    realtime.events.filter { it.name == RealtimeEvents.BOOKING_UPDATED }.mapNotNull { it.bookingId() }
+    realtime.events.filter { it.name == RealtimeEvents.BOOKING_UPDATED }.withoutEchoes().mapNotNull { it.bookingId() }
