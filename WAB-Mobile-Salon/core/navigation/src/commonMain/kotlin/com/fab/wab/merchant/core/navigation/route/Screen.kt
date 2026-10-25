@@ -63,6 +63,11 @@ sealed interface Screen {
 
     @Serializable data object Policies : Screen
 
+    // Insights (M20, M21)
+    @Serializable data object Reviews : Screen
+
+    @Serializable data object Statistics : Screen
+
     // Branches (MER-062, owner only)
     @Serializable data object Branches : Screen
 
@@ -79,4 +84,6 @@ sealed interface Screen {
     @Serializable data object Notifications : Screen
 
     @Serializable data object Settings : Screen
+
+    @Serializable data object MyAccount : Screen
 }

@@ -20,6 +20,13 @@ class MerchantRootTabsTest {
     }
 
     @Test
+    fun homeTabIsRegisteredAndOpensFirstWhenPermitted() {
+        assertTrue(MerchantTab.HOME in REGISTERED_TABS)
+        assertEquals(Graph.Home, LaunchRoute.HOME.startGraph(listOf(MerchantTab.HOME, MerchantTab.BOOKINGS, MerchantTab.MORE)))
+        assertEquals(Graph.Home, MerchantTab.HOME.graph())
+    }
+
+    @Test
     fun theBarShowsOnTabRootsOfTheHomeRouteOnly() {
         val tabs = listOf(MerchantTab.BOOKINGS, MerchantTab.SALON, MerchantTab.MORE)
         assertTrue(showsNavigation(LaunchRoute.HOME, onTabRoot = true, currentTab = MerchantTab.SALON, tabs = tabs))
