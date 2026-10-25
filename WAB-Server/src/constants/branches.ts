@@ -46,3 +46,6 @@ export const MERCHANT_BRANCH_ROUTES = {
   hours: '/branches/:branchId/hours',
   services: '/branches/:branchId/services',
 } as const;
+
+/** Nearest list title of a salon with several branches: "Hifa Salon - Mecca Street" (§5.17). */
+export const BRANCH_TITLE_SEPARATOR = ' - ';

@@ -10,10 +10,24 @@
 
 ## Current task
 
+### SRV-144 — Discovery with branches (Stage P)
+
+- Branch: `feat/srv-144-discovery-branches`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.17, §3.3a; operations customer `GET /salons`, `GET /salons/{salonId}`, `GET /home`, `GET /favorites` — client impact CUS-083/084/085):
+  - [x] Search: one card per salon (never per branch), place/hours/distance from the nearest bookable branch (main branch without a position); cards gain `branchCount` and `branch {id, name}` in the request language
+  - [x] Price filter/slider: a salon matches when ONE branch offers all selected services; the sum is that branch's cheapest
+  - [x] Nearest sort keeps salons with a bookable branch inside the discovery radius
+  - [x] Home nearest list: one entry per bookable branch inside the radius, by distance; `title` = "Salon - Branch" when the salon has several branches, else the salon name; paginated; gender respected
+  - [x] Salon details: `branches[]` (bookable, main first, own place/contacts/hours/closures); staff and services carry `branchId` and only bookable branches' ones are shown; top-level place fields are the main branch's (backward compatible)
+- Tests: `tests/discoveryBranches.test.ts` (10) + search/salonDetails/home/favorites suites; full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔ (fields are additive; older builds keep reading the main-branch fields), Architect ✔, QA ✔) — NOTE: the nearest list pages in memory over branches inside the radius (bounded by the radius; same approach as SRV-058).
+
 ### SRV-143 — Real-time, notifications and jobs per branch (Stage P)
 
 - Branch: `feat/srv-143-branch-realtime`
-- Status: IN REVIEW
+- Status: DONE (PR #389)
 - Acceptance criteria (BUSINESS_DOMAIN §7, §8, §9; API docs: no change — socket room names change for branch members, client impact MER-066):
   - [x] Socket rooms: the owner joins `salon:{id}:respond|all` (every branch); a branch member `branch:{id}:respond|all` of their branch, by permission; refreshes leave the salon rooms too
   - [x] Booking events emit to the salon rooms and to the booking's branch rooms (request card to `…:respond`, updates to `…:all`); assigned staff keep their `member:{id}` room
@@ -36,89 +50,6 @@
 - Tests: `tests/bookingBranch.test.ts` (4); full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔ (apps send `branchId` from step 1; older builds keep working for single-branch salons), Architect ✔, QA ✔)
-
-### SRV-141 — Per-branch operations (Stage P)
-
-- Branch: `feat/srv-141-branch-operations`
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.3, §5.12; API docs: `/merchant/v1/branches/{branchId}/hours[/weekly|/closures…]` and `/branches/{branchId}/services[/{id}]` + team list `?branchId=` — client impact MER-064/MER-065):
-  - [x] Hours, closures and services of one branch through the existing routers mounted under `/branches/{branchId}/…` (`scopeToBranch` + `branchScopeOf`): owner any branch of the salon, manager only their own (403 `BRANCH_SCOPE_DENIED`), another salon's branch or a malformed id 404 `BRANCH_NOT_FOUND`; same permissions as the salon-level routes
-  - [x] Services per branch: the same catalog service may be offered by several branches (unique per branch), 409 within one branch; the addressed branch must be the salon's
-  - [x] Owner filters the team list by branch (`?branchId=`); managers always get their own
-  - [x] Availability/conflicts per branch come from SRV-140 (branch-aware hours service and conflict finder); staff skills/schedules follow the member's branch
-  - [x] Branch management routes check the owner per route, so the per-branch operations under `/branches/{id}/…` stay open to managers
-- Tests: `tests/branchOperations.test.ts` (5 HTTP); docs regenerated
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — reuses the salon-level routers and services (no duplicate logic); staff skills/leaves stay member-addressed (`/team/members/{id}/…`), the branch is implied by the member.
-
-### SRV-140 — Branch scope for merchant members (Stage P)
-
-- Branch: `feat/srv-140-branch-scope`
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §6 branch scope, §5.12, §5.16; API docs: team member gains `branchId` (view, create, move) — client impact MER-061/MER-065):
-  - [x] `loadMember` puts the member's `branchId` on the request (never for the owner); `BRANCH_SCOPE_DENIED` (403) when a branch member reaches another branch's booking, member, service or closure
-  - [x] Bookings: list/detail/calendar filtered to the member's branch; approve/reject/complete/no-show/cancel/reassign/bulk refuse other branches
-  - [x] Permissions: `FINANCE_VIEW`, `SUBSCRIPTION_VIEW`, `POLICIES_MANAGE` never effective for non-owners (dropped from grants and from older members); MANAGER template = the 12 branch permissions; `BRANCHES_MANAGE` added to owner-only capabilities; finance notifications reach the owner only
-  - [x] Team: managers list/see their branch; owner picks the branch of a new member (default main, `BRANCH_NOT_FOUND` for another salon's or a closed branch); owner moves a member (`branchId` patch) — refused with SCHEDULE_CONFLICT while they have upcoming bookings, skills cleared, live app refreshed
-  - [x] Staff skills only from the member's branch services; working days inside the branch's hours; leaves follow the member's branch
-  - [x] Salon-level endpoints work on the caller's branch (owner: main branch): services list/add/edit, hours get/set (salon copy kept for the main branch), closures add/edit/remove; schedule conflict checks only see that branch's bookings; the old salon-wide unique service index is retired (`RETIRED_INDEXES`) so a catalog service can exist in several branches
-  - [x] Profile: a branch member's address/contact edit goes to their branch; salon-wide fields → 403 `OWNER_REQUIRED`
-- Tests: `tests/branchScope.test.ts` (new); permissions/team/policy/merchantFinance/notifications adapted to the new rule; `effectivePermissions` tolerates a member stored without a grant (found by `conflicts.test.ts`)
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATIONS: grants of the three owner-only permissions are dropped (not refused) so older merchant builds keep working; dashboard/reviews/statistics endpoints (SRV-130…132) do not exist yet and get the scope when built; socket rooms move in SRV-143.
-
-### SRV-139 — Merchant branch management, owner only (Stage P)
-
-- Branch: `feat/srv-139-merchant-branches`
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §5.16, §6 `BRANCHES_MANAGE` owner only, §8 branch events, §11; API docs: 8 merchant operations under `/merchant/v1/branches` — client impact MER-061/MER-062):
-  - [x] `GET/POST /branches`, `GET/PATCH /branches/{branchId}`, `POST …/main|offline|online|close`, all `requireOwner`; bodies validated (name AR+EN 1–60, pin, address, city/area that match, E.164 phone, optional whatsapp; reason for offline)
-  - [x] First branch = main (linked on the salon); `salon.maxBranches` → 422 `BRANCH_LIMIT_REACHED`; `branchCount` kept; another salon's branch → 404 `BRANCH_NOT_FOUND`
-  - [x] Set main: one main at a time (old flag cleared first, unique index); edits of the main branch keep the salon's legacy address/contacts in step (readers move to branches in SRV-144)
-  - [x] Offline (reason, actor) / online with `branch.offline` / `branch.online` owner notifications (AR/EN); wrong transitions → 422 `INVALID_TRANSITION`
-  - [x] Close: 422 `LAST_BRANCH`, 422 `INVALID_TRANSITION` (`isMain`) for the main branch, 409 `BRANCH_HAS_UPCOMING_BOOKINGS` listing booking ids (`BookingsRepository.upcomingForBranch`); closed = kept with `closedAt/closedBy`, out of lists; closed branches cannot be edited
-  - [x] Completeness recomputed after every change
-- Tests: `tests/merchantBranches.test.ts` (service 7 + routes 2); docs regenerated
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — service shared with the admin endpoints (SRV-147: actor ADMIN + audit). DEVIATION: closing the main branch reuses `INVALID_TRANSITION` with field `isMain` instead of a new error code (domain list unchanged).
-
-### SRV-138 — Two-level completeness and visibility (Stage P)
-
-- Branch: `feat/srv-138-branch-completeness`
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §5.2, §5.16; API docs: no change — `completeness.missing` stays a string list, gains `BRANCH`):
-  - [x] Branch completeness per open branch (location, phone, hours, service, staff counted **by branch**) stored on the branch; salon completeness = cover, profile, name, description, policy + a bookable branch; without one the salon lists the main branch's gaps (else `BRANCH`), so single-branch checklists read as before; domain §5.2 updated
-  - [x] `isBranchBookable` / `assertBranchBookable` (`SALON_NOT_BOOKABLE` then `BRANCH_NOT_BOOKABLE`); salon visibility unchanged (`LIVE` + complete now implies a bookable branch)
-  - [x] `branch.live` / `branch.not_bookable` notifications to the owner for multi-branch salons (AR/EN); single-branch salons keep the salon events
-  - [x] Main branch for the salon-level endpoints (`createMainBranches`, created from the salon on first use, race-safe): new services, staff, closures, leaves, drafts and bookings (+ snapshot) get its `branchId`; hours and address/contact edits are mirrored onto it — today's merchant app and admin keep working
-- Tests: `tests/branchState.test.ts` (9), `tests/salonState.test.ts` adapted; full suite green before the new tests (137/2675)
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — backward compatible: no route or schema change. NOTE: `branch.offline` notifications come with the offline action in SRV-139 (the backlog row lists them here).
-
-### SRV-137 — Branch migration (Stage P)
-
-- Branch: `feat/srv-137-branch-migration`
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §5.16 migration, §5.2 branch completeness; API docs: no change):
-  - [x] `npm run migrate:branches` (dry run by default, `-- --apply` writes): one main branch per salon without `mainBranchId`, from its location, locationText, city/area, phone/whatsapp and weekly schedule; name = area `{ar,en}` else الفرع الرئيسي / Main branch; branch completeness computed (`computeBranchMissing`)
-  - [x] Backfill `branchId` (only rows without one) on salonServices, salonClosures, members (not the owner), staffLeaves, bookingDrafts, bookings (+ `branchSnapshot`), transactions, refunds, ledgerEntries (driver-level, the append-only guard only protects amounts/history), reviews; salon linked last (`mainBranchId`, `branchCount: 1`) so a stopped run resumes and reuses its branch
-  - [x] Partial unique `{branchId, catalogServiceId}` on salon services (rows without a branch ignored); `seed:demo` runs the migration for demo salons; runbook section in `docs/DEPLOYMENT.md`
-- Tests: `tests/branchMigration.test.ts` (8: completeness, branch from salon, area/default name, backfill + snapshot, idempotent, resume, dry run, index); full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATIONS: the salon location/hours fields are not dropped here (SRV-148, after discovery/booking read branches); the Mongo store has no unit test (driver updates; the fake model has no driver collection) — it is exercised by the dev-database run after merge.
-
-### SRV-136 — Branch model (Stage P, salon branches)
-
-- Branch: `feat/srv-136-branch-model`
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §3.3a branches, §3.3/§3.4/§3.5/§3.6 `branchId` fields, §10 `salon.maxBranches`, §11 `BRANCH_*`; API docs: the error-code enum gains the 7 `BRANCH_*` codes in all four contracts — clients pick them up at their branch contract task ADM-088, CUS-082, MER-061):
-  - [x] `branches` collection: `salonId`, name `{ar,en}` (1–60), `isMain` (partial unique per salon), `BranchStatus` ACTIVE/OFFLINE/CLOSED, location (2dsphere), locationText, city/area, phone/whatsapp (E.164), 7-day schedule, offline `{reason, at, actorType ADMIN|MEMBER, by}`, completeness, closedAt/By; registered in `ALL_MODELS`
-  - [x] Optional `branchId` (+ index) on salonServices, salonClosures, members, staffLeaves, bookingDrafts, bookings (+ `branchSnapshot {name, locationText, phone}`), transactions, refunds, ledgerEntries, reviews; salons get `mainBranchId` + `branchCount` (default 0)
-  - [x] `BranchesRepository` (forSalon main-first, countOpen, main, findInSalon scope, patch)
-  - [x] Setting `salon.maxBranches` = 20; error codes `BRANCH_NOT_FOUND`, `BRANCH_NOT_BOOKABLE`, `BRANCH_REQUIRED`, `BRANCH_LIMIT_REACHED`, `BRANCH_HAS_UPCOMING_BOOKINGS`, `LAST_BRANCH`, `BRANCH_SCOPE_DENIED` with AR/EN messages
-- Tests: `tests/branches.test.ts` (new), `tests/settings.test.ts`, `tests/errors.test.ts` adapted; full gate in the Terminal panel
-- Loops: 1/1 — fields re-checked against §3.3a/§3.5; branchId stays optional until SRV-137 backfills (no behaviour change in this task, as planned)
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — schema/repository only. DEVIATION from the backlog row: the salon location/hours fields are kept until discovery and booking read branches (dropped in SRV-148), so nothing breaks mid-stage; the old unique `{salonId, catalogServiceId}` index is retired in SRV-137 after the backfill.
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 
