@@ -15,14 +15,14 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'Baseline (SRV-111): health, readiness, payment webhook.',
   },
   customer: {
-    version: '1.1.0',
-    sha256: 'c2c4681b6941e89081906b3028eb232715b2d191ab1e161bcc9b760b90d46e4d',
-    note: 'Baseline (SRV-111) after salon branches: search/home/details branches, branchId on availability, drafts, bookings, reviews; requestedAt on booking rows (CUS-082…087).',
+    version: '1.2.0',
+    sha256: '9a6ea813fb84460a92b247bf3c6a46193f1ec696ff2a89e00a88a9d34a4227c5',
+    note: 'CUS-086: booking draft response has branch {id, name, locationText} (SRV-128b)',
   },
   merchant: {
-    version: '1.1.0',
-    sha256: 'ed3b6cb065372923f78be945ca0ae3b7b723ba33d9f0ae95461e4883df001cc9',
-    note: 'Baseline (SRV-111) after salon branches and M07/M20/M21/M25 endpoints: branches CRUD, branch-scoped hours/services/bookings/finance, reviews, statistics, dashboard, /me, change-phone, push switch, leave, deletion request, conflict previews (MER-042/043/049/050, MER-061…066).',
+    version: '1.2.0',
+    sha256: '4589684966d2eb0db164dc87f08a859e5121ad682aafedd0f2294443a9e07c74',
+    note: 'MER-021/MER-063: GET /merchant/v1/bookings/{id}/eligible-staff (SRV-128a)',
   },
   admin: {
     version: '1.3.0',

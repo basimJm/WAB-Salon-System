@@ -15,6 +15,8 @@ export const MERCHANT_BOOKING_ROUTES = {
   noShow: '/:id/no-show',
   cancel: '/:id/cancel',
   reassign: '/:id/reassign',
+  /** SRV-128a: who could take over one person, before reassigning. */
+  eligibleStaff: '/:id/eligible-staff',
 } as const;
 export const REASON_CODE_PATTERN = /^[A-Z][A-Z0-9_]{1,39}$/;
 export const REASON_TEXT_MAX_LENGTH = 300;

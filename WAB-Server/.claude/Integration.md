@@ -57,3 +57,7 @@ Regenerated `docs/api/openapi.{customer,merchant,admin}.json` + Postman. Every c
 | ADM-091     | `branchId` filter + field on bookings, reviews, members, transactions, refunds, reconciliation, TRANSACTIONS/BOOKINGS exports                                            |
 
 Demo data (`seed:demo`): Lamar Beauty Lounge has 3 branches (Abdoun main, Khalda, Dabouq; different prices), Al-Ostaz Barber Shop 2 (main, Shmeisani); each extra branch has its own manager + employee (`+96278901xxxx`).
+
+## Contract review against the client PRDs (SRV-128, 2026-10-26)
+
+Customer PRD §13 and Merchant PRD §15 were checked against `openapi.customer.json` (43 paths) and `openapi.merchant.json` (86 paths). Every listed capability has an operation. Gaps found and fixed: merchant eligible staff before a reassign (SRV-128a) and the branch on the customer booking draft (SRV-128b). Not gaps: notification rows carry no branch field (the server writes the text; tapping opens the booking, which shows the branch); analytics go to Firebase, not the server (PRD §14).
