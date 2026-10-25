@@ -8,6 +8,7 @@ import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
 import com.fab.wab.merchant.core.domain.booking.AffectedReasons
 import com.fab.wab.merchant.core.domain.booking.conflictBookingIds
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.feature.salon.domain.DaySchedule
@@ -24,6 +25,11 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.contract.Hours
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.PendingChange
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.ScheduleConflict
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -36,6 +42,9 @@ class HoursDependencies(
     /** Text the customers see when a working-hours change cancels their booking. */
     val scheduleChangeReason: suspend () -> String,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    /** Owner: hours of the switcher's branch (main by default); branch members: their own branch. */
+    val branchScope: Flow<BranchScope> = flowOf(BranchScope()),
+    val selectBranch: (String?) -> Unit = {},
 )
 
 /** PRD M15: weekly schedule (15-min steps, close after open, copy to all), closures, affected-bookings conflict flow. */
@@ -45,8 +54,15 @@ class HoursViewModel(
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(today = deps.today()), testScope) {
 
     override fun onStart() {
+        deps.branchScope.onEach { branches ->
+            val changed = branches.edited != uiState.value.branchScope.edited
+            updateState { copy(branchScope = branches) }
+            if (changed) load()
+        }.launchIn(scope)
         load()
     }
+
+    private val branchId: String? get() = uiState.value.branchScope.edited
 
     override fun handle(event: UiAction) {
         handleWeek(event) || handleClosures(event) || handleDialogs(event)
@@ -93,6 +109,7 @@ class HoursViewModel(
             UiAction.OnConflictCancelBookings -> resolveConflict()
             UiAction.OnDialogDismiss -> updateState { copy(conflict = null, deleteClosureId = null) }
             UiAction.OnRetry -> load()
+            is UiAction.OnBranchSelect -> deps.selectBranch(event.branchId)
             else -> return false
         }
         return true
@@ -103,10 +120,14 @@ class HoursViewModel(
 
     private fun editClosure(change: ClosureForm.() -> ClosureForm) = updateState { copy(closureSheet = closureSheet?.change()) }
 
+    /** A newer load (branch switch, retry) cancels the older one, so a slow answer never overwrites a newer branch. */
+    private var loadJob: Job? = null
+
     private fun load() {
-        scope.launch {
+        loadJob?.cancel()
+        loadJob = scope.launch {
             updateState { copy(loading = true, error = null) }
-            when (val result = deps.repository.load()) {
+            when (val result = deps.repository.load(branchId)) {
                 is AppResult.Success -> updateState {
                     copy(loading = false, week = result.data.week, savedWeek = result.data.week, closures = result.data.closures)
                 }
@@ -139,7 +160,7 @@ class HoursViewModel(
     }
 
     private suspend fun saveWeek(days: List<DaySchedule>, cancelled: Int): AppError? =
-        when (val result = deps.repository.saveWeek(days)) {
+        when (val result = deps.repository.saveWeek(days, branchId)) {
             is AppResult.Success -> {
                 deps.analytics.trackAction(AnalyticsAction(SalonAnalytics.ACTION_HOURS_SAVE))
                 updateState { copy(week = result.data.week, savedWeek = result.data.week, closures = result.data.closures) }
@@ -154,11 +175,11 @@ class HoursViewModel(
         val from = form.from ?: return null
         val to = form.to ?: return null
         val id = form.id
-        val result = if (id == null) deps.repository.addClosure(
-            from,
-            to,
-            form.reason,
-        ) else deps.repository.updateClosure(id, from, to, form.reason)
+        val result = if (id == null) {
+            deps.repository.addClosure(from, to, form.reason, branchId)
+        } else {
+            deps.repository.updateClosure(id, from, to, form.reason, branchId)
+        }
         return when (result) {
             is AppResult.Success -> {
                 deps.analytics.trackAction(AnalyticsAction(SalonAnalytics.ACTION_CLOSURE_SAVE))
@@ -211,7 +232,7 @@ class HoursViewModel(
         val id = uiState.value.deleteClosureId ?: return
         updateState { copy(deleteClosureId = null) }
         scope.launch {
-            when (val result = deps.repository.deleteClosure(id)) {
+            when (val result = deps.repository.deleteClosure(id, branchId)) {
                 is AppResult.Success -> {
                     updateState { copy(closures = closures.filterNot { it.id == id }) }
                     emitSideEffect(SideEffect.Done(HoursMessage.CLOSURE_DELETED))

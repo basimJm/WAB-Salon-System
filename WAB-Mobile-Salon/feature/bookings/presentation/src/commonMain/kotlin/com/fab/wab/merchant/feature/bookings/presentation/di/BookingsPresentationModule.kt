@@ -1,5 +1,7 @@
 package com.fab.wab.merchant.feature.bookings.presentation.di
 
+import com.fab.wab.merchant.core.domain.branch.BranchSelection
+import com.fab.wab.merchant.core.domain.branch.branchScopeOf
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.core.notification.push.PushSignals
 import com.fab.wab.merchant.feature.bookings.presentation.controller.calendar.localDate
@@ -18,7 +20,16 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val bookingsPresentationModule = module {
-    factory { BookingsDependencies(repository = get(), changes = bookingChanges(get()), clock = clockTicks(), analytics = get()) }
+    factory {
+        BookingsDependencies(
+            repository = get(),
+            changes = bookingChanges(get()),
+            clock = clockTicks(),
+            analytics = get(),
+            branchScope = branchScopeOf(get<SessionStore>().state, get(), get()),
+            selectBranch = get<BranchSelection>()::select,
+        )
+    }
     viewModel { BookingsViewModel(deps = get()) }
     viewModel { (bookingId: String) ->
         BookingDetailsViewModel(
@@ -52,6 +63,8 @@ val bookingsPresentationModule = module {
                 clock = clockTicks(tickMs = CALENDAR_TICK_MS),
                 today = { Clock.System.now().localDate() },
                 analytics = get(),
+                branchScope = branchScopeOf(get<SessionStore>().state, get(), get()),
+                selectBranch = get<BranchSelection>()::select,
             ),
         )
     }

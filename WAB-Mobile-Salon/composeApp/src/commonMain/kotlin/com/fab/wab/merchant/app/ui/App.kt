@@ -64,6 +64,7 @@ import com.fab.wab.merchant.feature.content.di.contentModule
 import com.fab.wab.merchant.feature.content.presentation.di.contentPresentationModule
 import com.fab.wab.merchant.feature.finance.di.financeModule
 import com.fab.wab.merchant.feature.finance.presentation.di.financePresentationModule
+import com.fab.wab.merchant.feature.branches.presentation.di.branchesPresentationModule
 import com.fab.wab.merchant.feature.more.di.moreModule
 import com.fab.wab.merchant.feature.more.presentation.di.morePresentationModule
 import com.fab.wab.merchant.feature.notifications.di.notificationsModule
@@ -109,6 +110,7 @@ val appModules = listOf(
     contentPresentationModule,
     moreModule,
     morePresentationModule,
+    branchesPresentationModule,
 )
 
 /** App shell: theme, language direction, dark mode, image loading, in-app notifications, analytics and navigation. */

@@ -169,8 +169,10 @@ class StaffProfileViewModel(
                 }
                 AppResult.Loading -> return@launch
             }
-            (deps.staff.services() as? AppResult.Success)?.let { services -> updateState { copy(services = services.data) } }
-            (deps.staff.salonDays() as? AppResult.Success)?.let { days -> updateState { copy(salonDays = days.data) } }
+            // The member's branch decides the services they can do and the days they can work (MER-065).
+            val branchId = deps.team.cached(memberId)?.branchId
+            (deps.staff.services(branchId) as? AppResult.Success)?.let { services -> updateState { copy(services = services.data) } }
+            (deps.staff.salonDays(branchId) as? AppResult.Success)?.let { days -> updateState { copy(salonDays = days.data) } }
             (deps.staff.leaves(memberId) as? AppResult.Success)?.let { leaves -> updateState { copy(leaves = leaves.data) } }
         }
     }

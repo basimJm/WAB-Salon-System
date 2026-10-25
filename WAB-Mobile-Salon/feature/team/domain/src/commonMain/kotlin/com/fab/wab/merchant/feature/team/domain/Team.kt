@@ -15,6 +15,8 @@ data class TeamMember(
     val permissions: Set<Permission>,
     val active: Boolean,
     val providesServices: Boolean,
+    /** Branch of a manager / employee (BUSINESS_DOMAIN §6); null for the owner. */
+    val branchId: String? = null,
 ) {
     val fullName: String get() = listOf(firstName, lastName).filter { it.isNotBlank() }.joinToString(NAME_SEPARATOR)
     val isOwner: Boolean get() = role == MemberRole.OWNER
@@ -31,9 +33,11 @@ data class MemberDraft(
     val photoKey: String? = null,
     val photoUrl: String? = null,
     val role: MemberRole = MemberRole.EMPLOYEE,
+    /** Required for every new member (MER-065); changing it moves the member to another branch. */
+    val branchId: String? = null,
 )
 
-enum class MemberField { FIRST_NAME, LAST_NAME, PHONE }
+enum class MemberField { FIRST_NAME, LAST_NAME, PHONE, BRANCH }
 
 object MemberLimits {
     const val NAME_MAX = 50
@@ -43,14 +47,19 @@ object MemberLimits {
 /** Roles the owner can assign. */
 val ASSIGNABLE_ROLES: List<MemberRole> = listOf(MemberRole.MANAGER, MemberRole.EMPLOYEE)
 
-/** [phoneValid] = the country regex check (done by the caller with the country list). */
-fun memberErrors(draft: MemberDraft, isNew: Boolean, phoneValid: Boolean): Set<MemberField> = buildSet {
+/**
+ * [phoneValid] = the country regex check (done by the caller with the country list); [branchRequired] = the salon has
+ * branches to choose from (every manager / employee belongs to one, `BRANCH_REQUIRED` otherwise).
+ */
+fun memberErrors(draft: MemberDraft, isNew: Boolean, phoneValid: Boolean, branchRequired: Boolean = false): Set<MemberField> = buildSet {
     if (draft.firstName.trim().length !in 1..MemberLimits.NAME_MAX) add(MemberField.FIRST_NAME)
     if (draft.lastName.trim().length !in 1..MemberLimits.NAME_MAX) add(MemberField.LAST_NAME)
     if (isNew && !phoneValid) add(MemberField.PHONE)
+    if (branchRequired && draft.branchId == null) add(MemberField.BRANCH)
 }
 
-fun TeamMember.toDraft(): MemberDraft = MemberDraft(firstName = firstName, lastName = lastName, photoUrl = photoUrl, role = role)
+fun TeamMember.toDraft(): MemberDraft =
+    MemberDraft(firstName = firstName, lastName = lastName, photoUrl = photoUrl, role = role, branchId = branchId)
 
 /** Who may do what on M17 (hidden, not disabled). */
 data class TeamAccess(val manageTeam: Boolean, val manageStaff: Boolean) {
@@ -67,7 +76,8 @@ data class TeamAccess(val manageTeam: Boolean, val manageStaff: Boolean) {
 
 /** `/team/members*`; loaded members are kept for the form screens. */
 interface TeamRepository {
-    suspend fun members(): AppResult<List<TeamMember>>
+    /** [branchId] = the owner's branch choice (`?branchId=`); branch members get their branch from the server. */
+    suspend fun members(branchId: String? = null): AppResult<List<TeamMember>>
 
     fun cached(id: String): TeamMember?
 
@@ -75,6 +85,7 @@ interface TeamRepository {
 
     suspend fun create(draft: MemberDraft, permissions: Set<Permission>?): AppResult<TeamMember>
 
+    /** A changed [MemberDraft.branchId] moves the member (`409 SCHEDULE_CONFLICT` with the bookings that would break). */
     suspend fun update(id: String, draft: MemberDraft, permissions: Set<Permission>? = null): AppResult<TeamMember>
 
     suspend fun deactivate(id: String): AppResult<TeamMember>

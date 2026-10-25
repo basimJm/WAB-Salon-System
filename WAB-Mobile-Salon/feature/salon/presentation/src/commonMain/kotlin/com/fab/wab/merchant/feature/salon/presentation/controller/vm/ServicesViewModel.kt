@@ -5,6 +5,7 @@ import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.feature.salon.domain.ServicesRepository
@@ -13,19 +14,31 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.contract.Servi
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.ServicesContract.UiAction
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.ServicesContract.UiState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-/** PRD M16 list: search, active toggle (deactivation confirmed), open / add. */
+/** PRD M16 list: search, active toggle (deactivation confirmed), open / add; per branch for the owner (MER-064). */
 class ServicesViewModel(
     private val repository: ServicesRepository,
     private val analytics: AnalyticsTracker,
     private val errorText: suspend (AppError) -> String = ::appErrorText,
     testScope: CoroutineScope? = null,
+    private val branchScope: Flow<BranchScope> = flowOf(BranchScope()),
+    private val selectBranch: (String?) -> Unit = {},
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
+    private val branchId: String? get() = uiState.value.branchScope.edited
+
     override fun onStart() {
+        branchScope.onEach { branches ->
+            val changed = branches.edited != uiState.value.branchScope.edited
+            updateState { copy(branchScope = branches, services = if (changed) emptyList() else services) }
+            if (changed) load(refresh = false)
+        }.launchIn(scope)
         repository.changes.onEach { saved ->
             updateState { copy(services = if (services.any {
                 it.id == saved.id
@@ -50,13 +63,18 @@ class ServicesViewModel(
             UiAction.OnAdd -> emitSideEffect(SideEffect.OpenCatalog)
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnRetry -> load(refresh = false)
+            is UiAction.OnBranchSelect -> selectBranch(event.branchId)
         }
     }
 
+    /** A newer load (branch switch, retry) cancels the older one, so a slow answer never overwrites a newer branch. */
+    private var loadJob: Job? = null
+
     private fun load(refresh: Boolean) {
-        scope.launch {
+        loadJob?.cancel()
+        loadJob = scope.launch {
             updateState { if (refresh) copy(refreshing = true) else copy(loading = true, error = null) }
-            when (val result = repository.services()) {
+            when (val result = repository.services(branchId)) {
                 is AppResult.Success -> updateState { copy(loading = false, refreshing = false, services = result.data, error = null) }
                 is AppResult.Error -> {
                     val message = errorText(result.appError)
@@ -73,7 +91,7 @@ class ServicesViewModel(
         if (id in uiState.value.toggling) return
         scope.launch {
             updateState { copy(toggling = toggling + id) }
-            val result = repository.setActive(id, active)
+            val result = repository.setActive(id, active, branchId)
             updateState { copy(toggling = toggling - id) }
             when (result) {
                 is AppResult.Success -> {

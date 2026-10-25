@@ -80,13 +80,13 @@ internal fun BookingsFilterSheet(state: UiState, onAction: (UiAction) -> Unit) {
                     modifier = Modifier.weight(1f),
                 )
             }
-            if (state.staffOptions.isNotEmpty()) {
+            if (state.visibleStaff.isNotEmpty()) {
                 Label(stringResource(Res.string.bookings_filter_staff))
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(spacing.space8),
                     verticalArrangement = Arrangement.spacedBy(spacing.space8),
                 ) {
-                    state.staffOptions.forEach { staff ->
+                    state.visibleStaff.forEach { staff ->
                         val selected = staff.id in draft.staffIds
                         AppFilterChip(text = staff.name, selected = selected, onClick = {
                             draft = draft.copy(staffIds = if (selected) draft.staffIds - staff.id else draft.staffIds + staff.id)

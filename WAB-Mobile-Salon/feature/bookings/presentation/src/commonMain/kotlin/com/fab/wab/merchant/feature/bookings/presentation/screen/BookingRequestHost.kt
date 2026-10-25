@@ -99,6 +99,7 @@ private fun BookingDetails.toRequest(nowMs: Long): BookingRequestUi {
         id = summary.id,
         reference = summary.reference,
         customerName = summary.customerName,
+        branch = summary.branch?.name,
         persons = persons.map { person ->
             val from = person.start?.let { dateTimeText(it).time }.orEmpty()
             val to = person.end?.let { dateTimeText(it).time }.orEmpty()

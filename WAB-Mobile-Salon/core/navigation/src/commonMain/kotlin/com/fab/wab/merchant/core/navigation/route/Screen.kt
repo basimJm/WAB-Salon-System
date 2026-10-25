@@ -63,6 +63,12 @@ sealed interface Screen {
 
     @Serializable data object Policies : Screen
 
+    // Branches (MER-062, owner only)
+    @Serializable data object Branches : Screen
+
+    /** Edit [branchId], or add a new branch when null. */
+    @Serializable data class BranchEdit(val branchId: String? = null) : Screen
+
     // Money and account (M22–M25)
     @Serializable data object Finance : Screen
 

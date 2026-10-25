@@ -22,6 +22,13 @@ import com.fab.wab.merchant.designsystem.resources.error_code_member_inactive
 import com.fab.wab.merchant.designsystem.resources.error_code_salon_not_found
 import com.fab.wab.merchant.designsystem.resources.error_code_salon_not_bookable
 import com.fab.wab.merchant.designsystem.resources.error_code_salon_closed
+import com.fab.wab.merchant.designsystem.resources.error_code_branch_not_found
+import com.fab.wab.merchant.designsystem.resources.error_code_branch_not_bookable
+import com.fab.wab.merchant.designsystem.resources.error_code_branch_required
+import com.fab.wab.merchant.designsystem.resources.error_code_branch_limit_reached
+import com.fab.wab.merchant.designsystem.resources.error_code_branch_has_upcoming_bookings
+import com.fab.wab.merchant.designsystem.resources.error_code_last_branch
+import com.fab.wab.merchant.designsystem.resources.error_code_branch_scope_denied
 import com.fab.wab.merchant.designsystem.resources.error_code_gender_mismatch
 import com.fab.wab.merchant.designsystem.resources.error_code_too_many_companions
 import com.fab.wab.merchant.designsystem.resources.error_code_service_unavailable
@@ -74,6 +81,13 @@ internal val ERROR_CODE_STRINGS: Map<ErrorCode, StringResource> = mapOf(
     ErrorCode.SALON_NOT_FOUND to Res.string.error_code_salon_not_found,
     ErrorCode.SALON_NOT_BOOKABLE to Res.string.error_code_salon_not_bookable,
     ErrorCode.SALON_CLOSED to Res.string.error_code_salon_closed,
+    ErrorCode.BRANCH_NOT_FOUND to Res.string.error_code_branch_not_found,
+    ErrorCode.BRANCH_NOT_BOOKABLE to Res.string.error_code_branch_not_bookable,
+    ErrorCode.BRANCH_REQUIRED to Res.string.error_code_branch_required,
+    ErrorCode.BRANCH_LIMIT_REACHED to Res.string.error_code_branch_limit_reached,
+    ErrorCode.BRANCH_HAS_UPCOMING_BOOKINGS to Res.string.error_code_branch_has_upcoming_bookings,
+    ErrorCode.LAST_BRANCH to Res.string.error_code_last_branch,
+    ErrorCode.BRANCH_SCOPE_DENIED to Res.string.error_code_branch_scope_denied,
     ErrorCode.GENDER_MISMATCH to Res.string.error_code_gender_mismatch,
     ErrorCode.TOO_MANY_COMPANIONS to Res.string.error_code_too_many_companions,
     ErrorCode.SERVICE_UNAVAILABLE to Res.string.error_code_service_unavailable,

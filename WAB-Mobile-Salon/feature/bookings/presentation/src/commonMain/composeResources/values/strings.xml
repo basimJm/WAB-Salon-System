@@ -44,6 +44,7 @@
     <string name="details_remaining">Remaining to collect</string>
     <string name="details_refunded">Refunded</string>
     <string name="details_policy">Policy (at booking time)</string>
+    <string name="details_branch">Branch</string>
     <string name="details_history">Status history</string>
     <string name="details_reject_reason">Rejection reason</string>
     <string name="details_cancel_reason">Cancellation reason</string>

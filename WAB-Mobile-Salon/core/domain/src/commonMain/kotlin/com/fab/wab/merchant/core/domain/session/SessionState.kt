@@ -26,13 +26,27 @@ enum class SalonState {
     }
 }
 
-/** The signed-in member (PRD §5 `member_id`, `salon_id`, `member_role`); the id keys analytics and crash reports. */
+/**
+ * The signed-in member (PRD §5 `member_id`, `salon_id`, `member_role`); the id keys analytics and crash reports.
+ * [branchId] = the branch of a manager / employee (BUSINESS_DOMAIN §6 branch scope); null for the owner, and null for
+ * a branch member until the server reports it (the server scopes every call to the member's branch either way).
+ */
 data class MemberProfile(
     val id: String,
     val salonId: String,
     val firstName: String,
     val role: MemberRole,
-)
+    val branchId: String? = null,
+) {
+    val scope: MemberScope get() = if (role == MemberRole.OWNER) MemberScope.AllBranches else MemberScope.OneBranch(branchId)
+}
+
+/** BUSINESS_DOMAIN §6 branch scope: the owner works across every branch; managers and employees inside one branch. */
+sealed interface MemberScope {
+    data object AllBranches : MemberScope
+
+    data class OneBranch(val branchId: String?) : MemberScope
+}
 
 /** Who is using the app right now; derived from the session store, never built by features. */
 sealed interface SessionState {

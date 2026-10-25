@@ -126,8 +126,13 @@
     <string name="cap_team_manage">Team &amp; permissions</string>
     <string name="cap_payout_details_manage">Bank details</string>
     <string name="cap_salon_delete_request">Delete the salon</string>
+    <string name="cap_branches_manage">Branches</string>
     <plurals name="perm_count">
         <item quantity="one">%1$d permission on</item>
         <item quantity="other">%1$d permissions on</item>
     </plurals>
+    <string name="member_branch">Branch</string>
+    <string name="member_branch_choose">Choose a branch</string>
+    <string name="member_branch_move_note">Moving to another branch removes their services; pick the new branch services in their staff profile.</string>
+    <string name="member_move_conflict_body">This member has upcoming bookings in the current branch. Choose how to handle them before the move:</string>
 </resources>
