@@ -302,7 +302,7 @@ TEST_WORDS: Tuple[Tuple[str, str], ...] = (
 )
 COMMENT_WORDS: Tuple[Tuple[str, str], ...] = (
     (r" ?\((?:PRD|CUS|BRD|INTEGRATION|BUSINESS_DOMAIN)[^()]*\)", ""), (r"PRD §[\d.]+(?: [A-Z]\d+)?:? ?", ""),
-    (r"\bS\d{2}\b ?", ""), (r"CUS-\d+:? ?", ""), (r"\bWAB\b ?", ""),
+    (r"\bS\d{2}\b ?", ""), (r"CUS-\d+:? ?", ""), (r"\bWAB\b(?![-_]) ?", ""),
     (r"SALON", "ITEM"), (r"[Ss]alon cards?", "cards"), (r"[Ss]alons?", "items"), (r"[Bb]ooking[- ]flow", "multi-step flow"),
     (r"[Bb]ookings?", "orders"), (r"[Gg]ender", "segment"), (r"[Mm]erchant", "partner"), (r"\b[Bb]ride\b", "special"),
     (r"[Ss]taff", "team"), (r"[Ff]avorites?", "saved items"),
