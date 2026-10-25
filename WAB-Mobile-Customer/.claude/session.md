@@ -10,6 +10,7 @@
 ## Current task
 
 - Batch 7 = salon branches (CUS-082…086, then CUS-087), chained branches from `feat/cus-082-branches-contract`; per task policy checks + tests written, host unit tests after five (rules §3.13). The parent agent pushes and merges the chain.
+- Final gate on `feat/cus-087-bookings-branch` (2026-10-25): `scripts/ci/run_local_checks.sh` exit 0 — policy tests, policy checks, contract check, detekt, `testAndroidHostTest` + the four Android variants + lint (BUILD SUCCESSFUL 7m58s), the four iOS configurations and the Kotlin/Native tests; SwiftLint not installed locally (CI runs it). Not done: emulator / simulator journey of the branch screens.
 
 ### CUS-087 — Bookings list/details, notifications and the review flow show the branch (name + address); review attaches the branch
 - Branch: `feat/cus-087-bookings-branch` (from `feat/cus-086-booking-branch`)
