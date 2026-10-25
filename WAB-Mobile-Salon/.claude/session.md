@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-067 — iOS launch crash in `IosBookingRequests.registerCategory`
+- Branch: `fix/mer-067-ios-category-crash`
+- Branched: (from `origin/merchant`)
+- Status: IN REVIEW
+- Acceptance criteria (backlog MER-067; PRD M10 iOS actionable request alert, MER-030):
+  - [x] Root cause from evidence: crash reports (x2 / x21 = the `identifier` argument with a garbage isa) + disassembly of `registerCategory`'s coroutine: K/N converted `BookingRequestCategory.ACCEPT` to an NSString (`Kotlin_Interop_refToObjC`) before the suspending `getString`, spilled the raw pointer into the continuation and passed it after resuming, when the autorelease pool of the earlier dispatch had freed it
+  - [x] Fix: titles loaded first (`BookingRequestTitles`), Objective-C objects built in the non-suspend `bookingRequestCategory(titles)`; AR/EN titles from resources; re-registration on language change unchanged
+  - [x] Regression test (iosTest, runs on the simulator): category identifiers / titles / options, titles produced across real suspensions and thread hops
+  - [x] Debug-Dev app launches on the iPhone 17 Pro simulator and stays up: maintenance screen in Arabic, relaunched with the stored language `en` → English maintenance screen, back to Arabic; no new crash report, process alive, booking request push delivered as time-sensitive
+- Tests: `:composeApp:iosSimulatorArm64Test` (32 tests, 0 failures, incl. `BookingRequestCategoryTest` 2) · `:composeApp:testAndroidHostTest` green · `:composeApp:linkDebugFrameworkIosSimulatorArm64` + `xcodebuild` iosApp-Dev Debug-Dev (simulator) OK · `policy_checks.py all: ok`
+- Loops: 1/1 — re-checked each criterion against the rebuilt dylib (new `bookingRequestCategory` symbol present), three simulator launches (AR, EN, AR) and the crash-report folder (last report 22:25, before the fix)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — minimal change in the iOS shell layer only; no new strings/constants in app code; Android untouched; no other iosMain call passes a suspend result inside an Objective-C argument list (only `getString` user in iosMain). DEVIATIONS: no detekt / full gate (batched rule, lead runs it); the language switch was done by writing the stored preference (the maintenance screen has no language toggle), so the live in-process re-registration on a language change was not exercised; the notification's Accept / Reject buttons were not opened (simulated long-press did not expand the alert); the unit test cannot reproduce the native use-after-free itself, the simulator launch is the proof.
+- Notes: K/N gotcha — never call a suspend function inside the argument list of an Objective-C call; load values first.
+
 ### MER-054 — Dev builds on the remote dev API: gap list, socket events, permission filtering
 - Branch: `feat/mer-054-remote-dev`
 - Branched: (from `origin/merchant`)
@@ -38,18 +52,3 @@
 - Loops: 1/1 — batch 12 run (MER-050, 042, 043, 049): policy ok, `testAndroidHostTest` all modules 163 suites / 547 tests / 0 failures (after fixing `BookingMappersTest` for the new required `requestedAt`); full gate `scripts/ci/run_local_checks.sh`: policy tests (86) + checks, contract, detekt (0 after wrapping 17 long lines and the `MoreDependencies` parameter count), unit tests + 4 Android variants + lint green, iOS Debug-Dev / Release-Dev green; the machine's disk filled during Debug-Prod, so Debug-Prod, Release-Prod and the Kotlin/Native tests were re-run one by one after removing this worktree's build outputs: all green; criteria re-checked against the diff
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 12 code reading of the four commits: one call per screen, permission-gated blocks hidden (not disabled), owner-only branch filters, AR + EN for every key, tokens only, files < 300 lines, mock fixtures for every new endpoint; fixed during review: contract regeneration broke a bookings mapper test, detekt findings. DEVIATION: UI not exercised on emulator / simulator (rules §3.13 end-of-backlog journey); no screen previews (feature modules have none).
 - Notes: the owner never calls `/me/leave` (the button sends the deletion request instead), so `LAST_OWNER` cannot come from the UI.
-
-### MER-043 — Statistics M21
-- Branch: `feat/mer-043-statistics`
-- Branched: (from `feat/mer-042-reviews`)
-- Status: IN REVIEW
-- Acceptance criteria (PRD M21, §14 `statistics_view`; operation `GET /statistics?from&to&branchId` (STATISTICS_VIEW, civil days, max 92); design 07 `on.stats`):
-  - [x] `Screen.Statistics` in `feature/insights`; salon hub tile STATISTICS registered; Home quick stats "View all" opens it (STATISTICS_VIEW only)
-  - [x] Period selector Today / Week (Saturday-first) / Month / Custom (from / to pickers, ordered, at most 92 days, never after today, Asia/Amman dates); owner branch switcher (`?branchId=`)
-  - [x] KPIs: bookings, approval / cancellation / no-show rates (percent, one decimal, "—" when null), average response minutes, bride bookings, profile views, new reviews, average rating; revenue card (total, online, at salon, JOD); bookings by status
-  - [x] Charts: bookings per day / revenue per day (switch), one bar per day scaled to the busiest day, day numbers up to 14 days, a11y description per bar; rankings: top services (bookings), top staff (bookings, rating)
-  - [x] Shimmer, "No data for this period" empty state, error + retry, pull-to-refresh (a failed refresh keeps the figures); `statistics_view` (period, days) per load, `statistics_chart`; mock fixture with a full week
-- Tests: `StatisticsTest` (3), `StatisticsMapperTest` (2), `StatisticsViewModelTest` (2), `HomeViewModelTest` (updated: statistics link + permission); insights + home + salon + composeApp host tests green; policy ok
-- Loops: 1/1 — batch 12 run (MER-050, 042, 043, 049): policy ok, `testAndroidHostTest` all modules 163 suites / 547 tests / 0 failures (after fixing `BookingMappersTest` for the new required `requestedAt`); full gate `scripts/ci/run_local_checks.sh`: policy tests (86) + checks, contract, detekt (0 after wrapping 17 long lines and the `MoreDependencies` parameter count), unit tests + 4 Android variants + lint green, iOS Debug-Dev / Release-Dev green; the machine's disk filled during Debug-Prod, so Debug-Prod, Release-Prod and the Kotlin/Native tests were re-run one by one after removing this worktree's build outputs: all green; criteria re-checked against the diff
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 12 code reading of the four commits: one call per screen, permission-gated blocks hidden (not disabled), owner-only branch filters, AR + EN for every key, tokens only, files < 300 lines, mock fixtures for every new endpoint; fixed during review: contract regeneration broke a bookings mapper test, detekt findings. DEVIATION: UI not exercised on emulator / simulator (rules §3.13 end-of-backlog journey); no screen previews (feature modules have none).
-- Notes: the bars are drawn with plain boxes (no chart library added); in RTL the days run right to left like the rest of the layout.
