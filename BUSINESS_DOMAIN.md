@@ -3,6 +3,7 @@
 > **What this is:** the whole business consolidated into one implementable spec: entities and fields, enums, relations, indexes, state machines, algorithms, money rules, permissions, notifications, jobs, settings and error codes.
 > **Who uses it:** WAB-Server (schemas, services, rules), the generated OpenAPI contract (`INTEGRATION.md` §3), and all clients for shared enums/rules.
 > **Sources:** consolidated from the Customer, Merchant and Admin PRDs and BRDs, the Backend BRD, the package BRDs and `CLAUDE.md`. If this file conflicts with a PRD on **screen behavior**, the PRD wins. If it conflicts on **data/rules**, raise it and fix both.
+> **Branches (owner decisions 2026-10-25):** a salon (the brand) has one or more **branches**; location, contacts, hours, closures, services/prices and staff belong to a branch; name, gender, logo/cover/gallery, description, policy, subscription, payouts, rating and Recommended placement stay salon-wide. See §3.3a, §5.2, §5.16–§5.18 and decision log §12.
 > **Conventions:** MongoDB + Mongoose; `_id` ObjectId; timestamps `createdAt`/`updatedAt` (UTC) on every collection; money stored as **integer fils** (1 JOD = 1000 fils) to avoid float errors and exposed in the API as a decimal string with 3 decimals; localized admin-managed text as `{ ar, en }`; files stored as **storage keys** (never full URLs); soft-delete via status fields, not physical deletes, unless stated.
 
 ---
@@ -31,6 +32,7 @@ Platform               = ANDROID | IOS | WEB
 CustomerStatus         = ACTIVE | BLOCKED | DELETION_PENDING | DELETED
 SalonState             = APPLICATION_PENDING | APPLICATION_REJECTED | APPROVED_INCOMPLETE | LIVE | OFFLINE
 MemberRole             = OWNER | MANAGER | EMPLOYEE
+BranchStatus           = ACTIVE | OFFLINE | CLOSED      // CLOSED = deactivated, kept for history, never deleted
 Permission             = DASHBOARD_VIEW | BOOKINGS_VIEW_ALL | BOOKINGS_VIEW_OWN | BOOKINGS_RESPOND | BOOKINGS_OPERATE
                        | SALON_PROFILE_MANAGE | GALLERY_MANAGE | WORKING_HOURS_MANAGE | SERVICES_MANAGE | STAFF_MANAGE
                        | POLICIES_MANAGE | REVIEWS_VIEW | STATISTICS_VIEW | FINANCE_VIEW | SUBSCRIPTION_VIEW
@@ -143,18 +145,17 @@ name: String (1–80)   gender: Gender (immutable after approval except by admin
 state: SalonState
 description?: String (≤1000)
 coverKey?: String   profileKey?: String
-location?: { type: "Point", coordinates: [lng, lat] }    locationText?: String
-cityId?: → cities   areaId?: → areas
-phone?: E164 String   whatsapp?: E164 String
-weeklySchedule: [ { day: DayOfWeek, isOff: Boolean, open: "HH:mm", close: "HH:mm" } ] (exactly 7)
-policy?: SalonPolicy (current, see below)
+// location, locationText, cityId, areaId, phone, whatsapp and weeklySchedule MOVED to branches (§3.3a)
+mainBranchId?: → branches        // the salon's main branch (always one once the first branch exists)
+branchCount: Int                 // non-CLOSED branches (denormalized for cards)
+policy?: SalonPolicy (current, see below; salon-wide, applies to every branch)
 application: { submittedAt, reviewedAt?, reviewedBy? → admins, rejectionReason?, resubmissionCount: Number, documentKeys: String[] (private, 1–5) }
 offline?: { reason: String, at: Date, by → admins }
-completeness: { missing: String[], isComplete: Boolean }   // recomputed on every relevant write
-rating: { avg: Number (1 decimal), count: Number }          // APPROVED salon reviews only
+completeness: { missing: String[], isComplete: Boolean }   // salon-level items only (§5.2); recomputed on every relevant write
+rating: { avg: Number (1 decimal), count: Number }          // APPROVED salon reviews of ALL branches together
 payoutDetails?: { bankName, accountHolderName, ibanEncrypted, ibanLast4 }   // AES-GCM, key from secrets
 deletionRequestedAt?: Date    deletionApprovedAt?: Date   (admin approved: salon OFFLINE, waits for the purge; a rejection clears deletionRequestedAt)
-searchText: String (normalized Arabic/English name + area; for Atlas Search)
+searchText: String (normalized Arabic/English salon name + branch names/areas; for Atlas Search)
 ```
 **SalonPolicy** (embedded; copied as snapshot into every booking)
 ```
@@ -167,27 +168,44 @@ noShowDeposit: NoShowDepositRule
 noShowFullPayment: NoShowFullPaymentRule
 notes?: String
 ```
-Indexes: `location` 2dsphere; `{state, gender}`; `{cityId, areaId}`; Atlas Search index on `searchText` (ar + en analyzers).
+Indexes: `{state, gender}`; Atlas Search index on `searchText` (ar + en analyzers). (Geo and city/area indexes are on `branches`.)
 
-**salonClosures** `{ salonId, from: Date (date, Amman), to: Date (inclusive), reason: String }` — index `{salonId, to}`.
+**branches** (§5.16)
+```
+salonId → salons
+name: { ar, en } (1–60 each)          // e.g. { ar: "شارع مكة", en: "Mecca Street" }
+isMain: Boolean                       // exactly one per salon
+status: BranchStatus
+location: { type: "Point", coordinates: [lng, lat] }    locationText: String
+cityId → cities   areaId → areas
+phone: E164 String   whatsapp?: E164 String
+weeklySchedule: [ { day: DayOfWeek, isOff: Boolean, open: "HH:mm", close: "HH:mm" } ] (exactly 7)
+offline?: { reason: String, at: Date, actorType: ADMIN | MEMBER, by }   // admin or owner
+completeness: { missing: String[], isComplete: Boolean }   // branch-level items (§5.2)
+closedAt?: Date   closedBy?
+```
+Indexes: `location` 2dsphere; `{salonId, status}`; `{cityId, areaId}`; partial unique `{salonId}` where `isMain = true`.
+
+**salonClosures** `{ salonId, branchId → branches, from: Date (date, Amman), to: Date (inclusive), reason: String }` — index `{branchId, to}`. Closures are per branch.
 
 **galleryItems** `{ salonId, type: IMAGE|VIDEO, key, thumbnailKey?, durationSec?, order }` — index `{salonId, order}`.
 
-**salonServices**
+**salonServices** (per branch: each branch picks its own services, prices and durations)
 ```
-salonId → salons   catalogServiceId → catalogServices
+salonId → salons   branchId → branches   catalogServiceId → catalogServices
 price: Int (fils, >0)   durationMinutes: Int (≥5, multiple of 5)
 brideOnly: Boolean (only allowed when salon.gender = FEMALE)
 extraDescription?: String   mediaKeys: String[]
 active: Boolean
 ```
-Unique `{salonId, catalogServiceId}`; index `{catalogServiceId, active}` (search by service).
+Unique `{branchId, catalogServiceId}`; index `{catalogServiceId, active}` (search by service); `{salonId, active}`.
 
 ### 3.4 Team & staff
 
 **members**
 ```
 salonId → salons
+branchId?: → branches       // required for MANAGER and EMPLOYEE (exactly one branch); absent for OWNER (all branches)
 firstName, lastName: String
 phone: E164 (unique across members)
 photoKey?: String
@@ -197,21 +215,21 @@ active: Boolean
 providesServices: Boolean
 staff?: {                    // required when providesServices
   bio?: String   yearsOfExperience?: Int
-  serviceIds: → salonServices[]
+  serviceIds: → salonServices[]   // services of the member's own branch only
   brideQualified: Boolean (FEMALE salons only)
-  workingDays: [ { day: DayOfWeek, start?: "HH:mm", end?: "HH:mm" } ]   // subset of salon open days; custom hours within salon hours
+  workingDays: [ { day: DayOfWeek, start?: "HH:mm", end?: "HH:mm" } ]   // subset of the branch's open days; custom hours within branch hours
   rating: { avg, count }     customersCount: Int   // distinct customers with COMPLETED bookings served
 }
 ```
-Indexes: `phone` unique; `{salonId, active}`; `{salonId, providesServices, "staff.serviceIds"}`.
+Indexes: `phone` unique; `{salonId, active}`; `{branchId, active}`; `{branchId, providesServices, "staff.serviceIds"}`.
 
-**staffLeaves** `{ memberId, salonId, from: Date, to: Date (inclusive, Amman dates), note? }` — index `{memberId, to}`.
+**staffLeaves** `{ memberId, salonId, branchId, from: Date, to: Date (inclusive, Amman dates), note? }` — index `{memberId, to}`.
 
 ### 3.5 Bookings & payments
 
 **bookingDrafts** (pre-booking; TTL) — exists only between Summary and booking creation.
 ```
-customerId, salonId, persons: BookingPerson[] (as below, priced), totals: { total, dueOnline }
+customerId, salonId, branchId, persons: BookingPerson[] (as below, priced), totals: { total, dueOnline }
 paymentMethod: PaymentOption   policySnapshot: SalonPolicy
 otpVerifiedAt?: Date   transactionId?: → transactions
 holdKeys: String[]   // Redis slot-hold keys
@@ -223,6 +241,7 @@ TTL index on `expiresAt`.
 ```
 referenceNumber: String (unique, human-friendly, e.g. "WAB-" + 6–8 base32 chars)
 customerId → customers   salonId → salons   salonGender: Gender
+branchId → branches   branchSnapshot: { name: {ar,en}, locationText, phone }   // copied at creation
 persons: [ BookingPerson ]  (1 main + ≤ settings.booking.maxCompanions)
 appointmentStart: Date (min person start)   appointmentEnd: Date (max person end)
 hasBride: Boolean
@@ -244,11 +263,11 @@ services: [ { salonServiceId, catalogServiceId, name{ar,en} (snapshot), price: I
 staffId → members   staffSelection: SPECIFIC | ANY
 start: Date   end: Date (start + Σ durations)   subtotal: Int
 ```
-Indexes: `referenceNumber` unique; `{customerId, appointmentStart}`; `{salonId, appointmentStart}`; `{salonId, status}`; `{"persons.staffId", "persons.start", status}` (overlap checks); `{status, respondBy}`.
+Indexes: `referenceNumber` unique; `{customerId, appointmentStart}`; `{salonId, appointmentStart}`; `{branchId, appointmentStart}`; `{branchId, status}`; `{salonId, status}`; `{"persons.staffId", "persons.start", status}` (overlap checks); `{status, respondBy}`.
 
 **transactions** (every payment attempt)
 ```
-bookingDraftId?  bookingId?  customerId  salonId
+bookingDraftId?  bookingId?  customerId  salonId  branchId   // branchId lets the owner filter finance by branch
 type: TransactionType   amount: Int   currency: "JOD"
 idempotencyKey: String (unique)   provider: String   providerRef?: String
 status: TransactionStatus
@@ -290,7 +309,7 @@ payments: [ { amount: Int, paidAt, periodFrom, periodTo, method, reference, note
 
 **reviews**
 ```
-target: ReviewTarget   salonId   staffId? (if STAFF)   customerId   bookingId?
+target: ReviewTarget   salonId   branchId? (from the booking, or chosen by the customer; shown as a label)   staffId? (if STAFF)   customerId   bookingId?
 rating: Int (1–5)   comment?: String (≤1000)
 status: ReviewStatus   moderation?: { by → admins, at, reason? }
 ```
@@ -328,9 +347,9 @@ Index `{recipientType, recipientId, createdAt}`; `{recipientType, recipientId, r
 
 ```
 country 1─* city 1─* area
-salon 1─* member (1 OWNER) ; member(providesServices) 1─* staffLeave
-salon 1─* salonService *─1 catalogService ; member.staff.serviceIds *─* salonService
-salon 1─* salonClosure, galleryItem, booking, review, ledgerEntry, payout ; salon 1─1 subscription
+salon 1─* branch (1 main) ; salon 1─1 member OWNER ; branch 1─* member (MANAGER/EMPLOYEE) ; member(providesServices) 1─* staffLeave
+branch 1─* salonService *─1 catalogService ; member.staff.serviceIds *─* salonService (same branch)
+branch 1─* salonClosure, booking ; salon 1─* galleryItem, review, ledgerEntry, payout ; salon 1─1 subscription
 customer 1─* booking, review, favorite, installation, refreshToken
 booking 1─* transaction, refund ; booking.persons[*].staffId → member
 ```
@@ -343,22 +362,26 @@ booking 1─* transaction, refund ; booking.persons[*].staffId → member
 - All instants stored UTC. Business dates and hours are **Asia/Amman** (`settings.timezone`). Schedule strings `HH:mm` are Amman local time.
 - Day boundaries for closures/leaves/slots use Amman dates.
 
-### 5.2 Salon completeness → state
-`missing[]` contains any of: `COVER`, `PROFILE_IMAGE`, `NAME`, `DESCRIPTION`, `LOCATION`, `PHONE`, `WORKING_HOURS` (≥1 open day), `SERVICE` (≥1 active salonService), `STAFF` (≥1 active member with providesServices, ≥1 service, ≥1 working day), `POLICY` (policy present & valid).
-- On admin approval: state = `LIVE` if complete else `APPROVED_INCOMPLETE`.
+### 5.2 Salon and branch completeness → state
+Two levels:
+- **Salon** `missing[]` (salon-wide items): `COVER`, `PROFILE_IMAGE`, `NAME`, `DESCRIPTION`, `POLICY` (present & valid), `BRANCH` (≥1 branch that is ACTIVE and complete).
+- **Branch** `missing[]`: `LOCATION`, `PHONE`, `WORKING_HOURS` (≥1 open day), `SERVICE` (≥1 active salonService of the branch), `STAFF` (≥1 active member of the branch with providesServices, ≥1 service, ≥1 working day).
+- On admin approval: state = `LIVE` if the salon is complete else `APPROVED_INCOMPLETE`.
 - On any write while `APPROVED_INCOMPLETE`: if complete → `LIVE` (notify owner "salon live").
-- If a `LIVE` salon becomes incomplete (e.g., last service deactivated): stays `LIVE` but blocked from **new** bookings with error `SALON_NOT_BOOKABLE`; owner notified. (Assumption — keeps existing bookings safe.)
-- `OFFLINE` only by admin; back to `LIVE`/`APPROVED_INCOMPLETE` by admin.
-- **Customer-visible** ⇔ `state = LIVE` and complete.
+- New branches need **no admin approval**: a branch becomes bookable as soon as it is ACTIVE and complete (notify owner "branch live").
+- If a `LIVE` salon or a bookable branch becomes incomplete (e.g., the branch's last service deactivated): it stays visible but **new** bookings are refused with `SALON_NOT_BOOKABLE` / `BRANCH_NOT_BOOKABLE`; owner notified. (Assumption — keeps existing bookings safe.)
+- Salon `OFFLINE` only by admin; back to `LIVE`/`APPROVED_INCOMPLETE` by admin. Branch `OFFLINE` by admin **or owner** (the other branches stay bookable); back to ACTIVE by the same roles. Upcoming bookings of an offline salon/branch are kept.
+- **Customer-visible salon** ⇔ `state = LIVE`, salon complete, and ≥1 bookable branch.
+- **Bookable branch** ⇔ salon customer-visible, branch `ACTIVE` and branch complete.
 
 ### 5.3 Open/closed & today's hours
-For an Amman date D: closed if a `salonClosure` covers D or `weeklySchedule[day(D)].isOff`; otherwise open between `open`–`close`. `isOpenNow` = open today and now ∈ [open, close).
+For a branch and an Amman date D: closed if a `salonClosure` of that branch covers D or the branch's `weeklySchedule[day(D)].isOff`; otherwise open between `open`–`close`. `isOpenNow` = open today and now ∈ [open, close).
 
 ### 5.4 Availability (slots)
-Input: salonId, date D, services per person, isBride, optional staffId.
-1. Reject if D < today or D > today + `booking.maxDaysAhead` (90), or salon closed on D.
+Input: salonId, **branchId**, date D, services per person (services of that branch), isBride, optional staffId.
+1. Reject if the branch is not bookable (`BRANCH_NOT_BOOKABLE`), D < today or D > today + `booking.maxDaysAhead` (90), or the branch is closed on D.
 2. `duration` = Σ service durations. Candidate starts = every `booking.slotMinutes` (15) from `open` while `start + duration ≤ close`; drop starts < now + `booking.minLeadMinutes` (0) for today.
-3. Eligible staff for the person: active, providesServices, works on day(D) (custom hours ⊆ salon hours), no leave covering D, `serviceIds ⊇ selected services`, `brideQualified` if isBride, and if a service is `brideOnly` the person must be a bride.
+3. Eligible staff for the person: member of **that branch**, active, providesServices, works on day(D) (custom hours ⊆ branch hours), no leave covering D, `serviceIds ⊇ selected services`, `brideQualified` if isBride, and if a service is `brideOnly` the person must be a bride.
 4. Staff busy intervals = persons of bookings with status `PENDING|APPROVED` on D + active Redis payment holds + other persons in the same draft.
 5. Slot is available if ≥1 eligible staff has `[start, start+duration)` free inside their working hours. Return per slot: `available`, `eligibleStaffIds`.
 6. "Any available staff" → choose the eligible free staff with the fewest bookings that day (tie → lowest `_id`).
@@ -408,23 +431,41 @@ Outside window → error `CANCELLATION_WINDOW_PASSED`.
 Create `refunds` (REFUND_PENDING) → `wab-payments.refund` (idempotent) → REFUNDED (ledger `REFUND −amount`, booking `money.refunded`, `refundStatus`) or REFUND_FAILED (retry with backoff ×`refund.maxRetries`, then admin alert). Pending > `refund.delayAlertHours` (48) → alert.
 
 ### 5.11 Ratings
-- Salon `rating` and each staff `rating` = average of APPROVED reviews of that target (1 decimal) + count; recompute on approve/reject/remove.
+- Salon `rating` = average of APPROVED SALON reviews of **all branches together** (1 decimal) + count — there is no per-branch rating. Each staff `rating` = average of that staff's APPROVED reviews. Recompute on approve/reject/remove.
+- A review keeps `branchId` (from its booking, or picked by the customer) only to show a label such as "Mecca Street branch".
 - Any ACTIVE customer may review any LIVE salon or its staff (no booking required). Rate limit: `reviews.maxPerTargetPerCustomer` (assumption 1 active PENDING per target).
 
 ### 5.12 Conflicts on schedule/team changes
-Before saving weekly hours, closures, leaves, staff deactivation, removing `providesServices`, removing a service from staff, or reducing working days: compute upcoming PENDING/APPROVED bookings that would violate §5.4. Return them (`409 SCHEDULE_CONFLICT` with list). Client chooses: cancel affected (PENDING→REJECTED, APPROVED→CANCELLED_BY_SALON, reason from change, full refunds) or reassign (per booking) or abort.
+Before saving a branch's weekly hours or closures, leaves, staff deactivation, **moving a staff member to another branch**, closing or taking a branch offline (§5.16), removing `providesServices`, removing a service from staff or from a branch, or reducing working days: compute upcoming PENDING/APPROVED bookings that would violate §5.4. Return them (`409 SCHEDULE_CONFLICT` with list). Client chooses: cancel affected (PENDING→REJECTED, APPROVED→CANCELLED_BY_SALON, reason from change, full refunds) or reassign (per booking) or abort.
 
 ### 5.13 Subscriptions & placements
 - On approval: create subscription TRIAL, `trialEndsAt` = approval + `subscription.trialDays` (90).
 - Daily job: TRIAL past end with no period → EXPIRED; ACTIVE past `currentPeriodEnd` → EXPIRED; alert admin at T−7 days and on expiry. Admin decides OFFLINE (not automatic).
 - Recording a payment sets ACTIVE and `currentPeriodEnd` = max(existing, periodTo).
-- Recommended section = active placements for the gender, ordered by `order`, salons must be customer-visible.
+- One subscription per **salon** covers all its branches (trial starts at salon approval).
+- Recommended placements are bought per **salon** (not per branch); Recommended section = active placements for the gender, ordered by `order`, salons must be customer-visible; booking from it starts at branch choice.
 
 ### 5.14 Payouts (manual, Phase 1)
-Net due = Σ ledger since last payout. Admin creates payout (period, computed gross/fees/refunds/net), records transfer → ledger `PAYOUT −net`, status TRANSFERRED, notify owner + FINANCE_VIEW members.
+One bank account and one payout per **salon** (all branches); ledger, transactions and refunds carry `branchId` so the owner and admin can filter by branch. Net due = Σ ledger since last payout. Admin creates payout (period, computed gross/fees/refunds/net), records transfer → ledger `PAYOUT −net`, status TRANSFERRED, notify owner + FINANCE_VIEW members.
 
 ### 5.15 Account deletion
 Customer: `DELETION_PENDING`, tokens revoked, `deletionScheduledAt` = +30 days; login within grace restores ACTIVE; job anonymizes after grace (keep bookings/transactions for accounting with anonymized customer). Member (non-owner): access removed (active=false). Owner: `salon.deletionRequestedAt` → admin handles.
+
+### 5.16 Branches lifecycle
+- The owner (and admin) creates branches; the first branch is the main one (`isMain`). Limit `salon.maxBranches` (setting) → `BRANCH_LIMIT_REACHED`.
+- **Closing** a branch (status `CLOSED`) is refused with `409 BRANCH_HAS_UPCOMING_BOOKINGS` (list) while it has PENDING/APPROVED bookings; they must be cancelled, completed or the branch kept. Closed branches keep all history; nothing is hard-deleted. The last non-closed branch cannot be closed (`LAST_BRANCH`); closing the main branch requires choosing a new main branch first.
+- Moving a staff member to another branch removes their services (they pick services of the new branch) and runs the §5.12 conflict check.
+- **Migration** of existing salons: each salon gets one main branch built from its current location, contacts, hours, closures, services and non-owner members; every booking, draft, transaction, refund, ledger entry and review gets that `branchId`. Default branch name: the salon's area name `{ar, en}`, else `الفرع الرئيسي` / `Main branch`.
+
+### 5.17 Discovery with branches (customer)
+- **Search / lists by filter**: one card per customer-visible salon (never one per branch). Distance and area come from the **nearest bookable branch** to the customer's location (no location → main branch); the card shows the branch count when > 1. A salon matches a filter (city, area, service, open now, rating) if **any** bookable branch matches.
+- **Nearest**: one entry per **bookable branch** inside `discovery.nearbyRadiusKm`, sorted by distance; a salon with several branches shows **"Salon name - Branch name"** (e.g. "Hifa Salon - Mecca Street"); a single-branch salon shows the salon name only.
+- **Salon details**: salon-wide header (name, rating, gallery, description, policy); a branch selector/list with each branch's address, map, phone, hours and open/closed state; staff and services are shown **per branch**; reviews are salon-wide, each labelled with its branch.
+- Favorites, banners (action SALON) and deep links point at the salon; a deep link may carry `branchId` to preselect a branch.
+
+### 5.18 Booking with branches
+- **Step 1 = choose branch** when the salon has more than one bookable branch (skipped and auto-selected when it has exactly one). Every later step (services, staff, slots) uses that branch only; a draft and its booking keep `branchId` + `branchSnapshot`.
+- Booking requests go to the owner and to members **of that branch** with `BOOKINGS_RESPOND` (socket + FCM); jobs and reminders follow the same recipients.
 
 ---
 
@@ -451,7 +492,9 @@ Customer: `DELETION_PENDING`, tokens revoked, `deletionScheduledAt` = +30 days; 
 | Bank details | OWNER only (PAYOUT_DETAILS_MANAGE) + OTP |
 | Salon deletion request | OWNER only |
 
-Default templates: MANAGER = all grantable except FINANCE_VIEW, POLICIES_MANAGE; EMPLOYEE = BOOKINGS_VIEW_OWN, REVIEWS_VIEW. Enforced on REST, socket rooms/events and notification recipients. Permission change → silent push + socket `permissions.updated`.
+**Branch scope (2026-10-25):** the OWNER sees and manages every branch and is the only one who creates, edits, closes or takes branches offline (OWNER only: `BRANCHES_MANAGE`), manages members/roles/permissions, sets the salon-wide profile (name, description, logo, cover), policy, finance, subscription and bank details. Every MANAGER/EMPLOYEE belongs to one branch and **each permission applies to that branch only** (its bookings, calendar, staff, hours, closures, services, branch location/contacts, reviews of its staff and branch, statistics). For branch members `FINANCE_VIEW`, `SUBSCRIPTION_VIEW` and `POLICIES_MANAGE` cannot be granted; `SALON_PROFILE_MANAGE` covers the branch's location/contacts; `GALLERY_MANAGE` stays salon-wide. A branch can have one or more managers.
+
+Default templates: MANAGER = all grantable branch permissions (BOOKINGS_*, SALON_PROFILE_MANAGE (branch), GALLERY_MANAGE, WORKING_HOURS_MANAGE, SERVICES_MANAGE, STAFF_MANAGE, REVIEWS_VIEW, STATISTICS_VIEW, DASHBOARD_VIEW); EMPLOYEE = BOOKINGS_VIEW_OWN, REVIEWS_VIEW. Enforced on REST, socket rooms/events and notification recipients. Permission change → silent push + socket `permissions.updated`.
 
 ---
 
@@ -461,8 +504,8 @@ Default templates: MANAGER = all grantable except FINANCE_VIEW, POLICIES_MANAGE;
 |---|---|---|---|
 | `customer:{id}` | `booking.updated` | booking summary | booking customer |
 | `customer:{id}` | `notifications.unread` | `{count}` | customer |
-| `salon:{id}:respond` | `booking.requested` | request card | members with BOOKINGS_RESPOND |
-| `salon:{id}:all` | `booking.updated` | booking summary | members with BOOKINGS_VIEW_ALL |
+| `branch:{id}:respond` | `booking.requested` | request card | owner + members of the branch with BOOKINGS_RESPOND |
+| `branch:{id}:all` | `booking.updated` | booking summary | owner + members of the branch with BOOKINGS_VIEW_ALL |
 | `member:{id}` | `booking.updated` / `booking.assigned` | booking summary | assigned staff (VIEW_OWN) |
 | `member:{id}` | `permissions.updated` / `access.revoked` | `{}` | member |
 | `admin` | `booking.updated`, `application.created`, `review.created`, `refund.updated`, `alert.created`, `overview.tick` | summaries | admin |
@@ -485,11 +528,11 @@ Default templates: MANAGER = all grantable except FINANCE_VIEW, POLICIES_MANAGE;
 | application.approved / rejected | — | ✔ owner | application.created |
 | catalog_request.decided | — | ✔ (SERVICES_MANAGE) | catalog_request.created |
 | payout.transferred | — | ✔ owner + FINANCE_VIEW | — |
-| subscription.ending_7d / expired, salon.offline / live | — | ✔ owner | subscription ending/trial ended |
+| subscription.ending_7d / expired, salon.offline / live, branch.offline / live | — | ✔ owner (+ branch managers for branch events) | subscription ending/trial ended |
 | payment.failed spike, 5xx/crash spike | — | — | ✔ |
 | promotion | ✔ | — | — |
 
-Push respects `pushEnabled`; in-app notification is always stored.
+Merchant recipients are the owner plus members **of the booking's branch** with the permission shown. Push respects `pushEnabled`; in-app notification is always stored.
 
 ---
 
@@ -517,7 +560,7 @@ On any status change: remove jobs that no longer apply; schedule new ones.
 
 ```
 timezone = "Asia/Amman"                     currency = "JOD"
-discovery.nearbyRadiusKm = 10
+discovery.nearbyRadiusKm = 10                salon.maxBranches = 20
 booking.slotMinutes = 15                    booking.maxDaysAhead = 90
 booking.maxCompanions = 5                   booking.minLeadMinutes = 0
 booking.paymentHoldMinutes = 10             booking.autoCancelAfterStartMinutes = 60
@@ -544,6 +587,7 @@ alerts.api5xxRatePct = 2 (window 10 min)    alerts.crashesPerHour = 10
 VALIDATION_ERROR  UNAUTHORIZED  FORBIDDEN  PERMISSION_DENIED  NOT_FOUND  CONFLICT  RATE_LIMITED  INTERNAL
 OTP_BLOCKED  OTP_INVALID  OTP_EXPIRED  PHONE_NOT_REGISTERED  PHONE_ALREADY_REGISTERED  ACCOUNT_BLOCKED  MEMBER_INACTIVE  CURRENT_PASSWORD_INVALID  EMAIL_ALREADY_USED
 SALON_NOT_FOUND  SALON_NOT_BOOKABLE  SALON_CLOSED  GENDER_MISMATCH  TOO_MANY_COMPANIONS
+BRANCH_NOT_FOUND  BRANCH_NOT_BOOKABLE  BRANCH_REQUIRED  BRANCH_LIMIT_REACHED  BRANCH_HAS_UPCOMING_BOOKINGS  LAST_BRANCH  BRANCH_SCOPE_DENIED
 SERVICE_UNAVAILABLE  BRIDE_ONLY_SERVICE  STAFF_NOT_ELIGIBLE  SLOT_UNAVAILABLE  SLOT_TAKEN  DATE_OUT_OF_RANGE
 PAYMENT_FAILED  PAYMENT_NOT_VERIFIED  PAYMENT_OPTION_NOT_ALLOWED  DRAFT_EXPIRED
 INVALID_TRANSITION  CANCELLATION_WINDOW_PASSED  TOO_EARLY_TO_COMPLETE  ALREADY_HANDLED
@@ -560,3 +604,4 @@ MAINTENANCE  UPDATE_REQUIRED
 4. "Any available staff" picks the least-loaded eligible staff that day.
 5. Payment hold during checkout: 10 minutes.
 6. Reference number format `WAB-XXXXXX` (base32, no ambiguous chars).
+7. Branches (owner decisions 2026-10-25): per branch = location & contacts, hours & closures, services & prices, staff (one branch per member); salon-wide = name, gender, logo/cover/gallery, description, policy, subscription (3 free months per salon), payouts (one bank account), rating, Recommended placement. No admin approval for new branches (live when complete). Managers: one or more per branch, branch data only, no finance/subscription/policy; team members and permissions stay owner-only. Search card = nearest branch; nearest list = one entry per branch, "Salon - Branch". Closing a branch is blocked while it has upcoming bookings; branch or whole salon can go offline; existing salons migrate to one main branch; reviews show their branch; branch limit = setting `salon.maxBranches`.

@@ -237,6 +237,18 @@ Integration and release tasks for the admin panel (`INTEGRATION.md` §6).
 
 ---
 
+## Phase 6 — Salon branches
+Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2, §5.16–§5.18, §6, §12.7). Admin has full CRUD on every branch; every write carries a reason and lands in the audit log.
+
+| ID | Task | Branch | Needs | Server (SRV) | Status | Notes |
+|---|---|---|---|---|---|---|
+| ADM-088 | Re-sync the contract (`npm run api:sync`) with branches: types, branch error codes in AR/EN messages, setting `salon.maxBranches` on the Settings page | `feat/adm-088-branches-contract` | ADM-087 | SRV-136, SRV-148 | BLOCKED | Waits for the server contract. |
+| ADM-089 | Salon detail → Branches tab: list (main, status, completeness, area, staff count), create / edit (location on map, contacts, name AR/EN), set main, offline / online, close (shows the blocking bookings), all with reason | `feat/adm-089-salon-branches` | ADM-088 | SRV-147 | BLOCKED | Full CRUD. |
+| ADM-090 | Branch-aware salon editing: hours, closures, services/prices and staff per branch; move staff between branches | `feat/adm-090-branch-editing` | ADM-089 | SRV-141, SRV-147 | BLOCKED | |
+| ADM-091 | Branch filter and column across bookings, reviews, members/staff, transactions, refunds, ledger and exports; booking and review detail show the branch | `feat/adm-091-branch-filters` | ADM-088 | SRV-145, SRV-146, SRV-147 | BLOCKED | |
+| ADM-092 | Branches QA: every branch screen against the real server, AR/EN, light/dark, desktop/phone | `feat/adm-092-branches-qa` | ADM-089, ADM-090, ADM-091 | SRV-148 | BLOCKED | |
+
+---
 ## 5. Traceability matrix (nothing in the PRD or BRD is left without a task)
 
 ### 5.1 PRD pages
