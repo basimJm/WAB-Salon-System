@@ -121,4 +121,8 @@ private val FEATURE_MODULES = listOf(
     ":feature:more:domain",
     ":feature:more:di",
     ":feature:branches:presentation",
+    ":feature:home:presentation",
+    ":feature:home:data",
+    ":feature:home:domain",
+    ":feature:home:di",
 )

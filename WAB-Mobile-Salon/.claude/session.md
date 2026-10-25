@@ -9,6 +9,23 @@
 
 ## Current task
 
+### MER-050 — Home M07
+- Branch: `feat/mer-050-home-dashboard`
+- Branched: (batch 12 start, from `origin/merchant`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD M07, §6, §8.1; operation `GET /dashboard` (DASHBOARD_VIEW, merchant contract 1.3.0); design 02 Home `on.home`):
+  - [x] `./gradlew apiSync` (`scripts/api_sync.py`) re-run for contract 1.3.0 (dashboard, reviews, statistics, my account, push switch, previews, eligible staff, `requestedAt` on booking rows); compiles unchanged elsewhere
+  - [x] New `feature/home` (domain / data / presentation / di); Home tab registered (`Graph.Home`, `REGISTERED_TABS` + HOME, first tab when DASHBOARD_VIEW)
+  - [x] One `GET /dashboard` for the whole screen: header (salon photo + name, "Hello, {member}", bell with unread badge 1–99 / "99+" → notifications), status strip (salon state chip; incomplete → "Complete your salon profile" → checklist), subscription warning (≤ 7 days from the server; only with SUBSCRIPTION_VIEW) → M23
+  - [x] Pending requests card (BOOKINGS_RESPOND): server count + newest rows (bride badge, time since `requestedAt`, appointment time, auto-cancel countdown from `respondBy`); row → M09, "View all" → Bookings tab (Pending is its first tab)
+  - [x] Today at a glance (approved, completed, next booking time + customer · staff) and today's timeline (time range, customer, staff, status, bride; "My schedule today" without BOOKINGS_VIEW_ALL — the server scopes it); empty → "No bookings today" + Open calendar
+  - [x] Quick stats (STATISTICS_VIEW): this week's bookings, revenue (JOD), rating
+  - [x] Unified shimmer, error + retry, pull-to-refresh also refreshes permissions (`PermissionsSync.refresh`); refresh failures keep the content (banner); booking socket events and app resume reload silently; mock fixture with every block (`mockDashboardFixture`)
+- Tests: `DashboardMapperTest` (2), `HomeViewModelTest` (5), `HomeUiMappersTest` (2), `FormatsTest` (+1 `oneDecimalText`), `MerchantRootTabsTest` (+1); home + design-system + composeApp host tests green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the dashboard repository is called by the view model directly (no use case), as in the finance / team features; no screen previews (feature modules have none).
+
 ### MER-066 — Real-time and push per branch
 - Branch: `feat/mer-066-branch-realtime`
 - Branched: (from `feat/mer-065-team-branches`, after the batch 10 review commit)
