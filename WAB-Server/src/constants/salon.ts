@@ -103,6 +103,7 @@ export const SALON_EDIT_AREAS = [
   'services',
   'staff',
   'policy',
+  'branches',
 ] as const;
 export type SalonEditArea = (typeof SALON_EDIT_AREAS)[number];
 export const ADMIN_SALON_STATE_ROUTES = {

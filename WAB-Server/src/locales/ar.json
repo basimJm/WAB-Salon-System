@@ -158,6 +158,7 @@
   "notifications.salon.area.services": "الخدمات",
   "notifications.salon.area.staff": "الفريق",
   "notifications.salon.area.policy": "السياسات",
+  "notifications.salon.area.branches": "الفروع",
   "notifications.decision.approved": "تمت الموافقة على",
   "notifications.decision.rejected": "تم رفض",
   "alerts.PAYMENT_FAILURE_SPIKE.title": "ارتفاع في فشل عمليات الدفع",

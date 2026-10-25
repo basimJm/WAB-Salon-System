@@ -1,3 +1,4 @@
+import { createAdminBranchesService } from './domain/branches/adminBranches.service';
 import { createBranchesService } from './domain/branches/branches.service';
 import { createBranchFacts, createBranchStateService } from './domain/branches/branchState.service';
 import { createMainBranches } from './domain/branches/mainBranch';
@@ -829,6 +830,17 @@ const buildServices = (
     state: salonState,
     conflicts: conflictFinder.schedule,
   });
+  const teamService = createTeamService({
+    branches: branchesRepository,
+    mainBranches,
+    access: accessEvents,
+    members: new MembersRepository(),
+    lifecycle: accountLifecycle,
+    phones: createPhoneVerifier(phoneServices),
+    storage: providers.storage,
+    uploads,
+    deactivationConflicts: conflictFinder.deactivation,
+  });
   const adminSalonEditService = createAdminSalonEditService({
     profile: salonProfileService,
     gallery: galleryService,
@@ -837,6 +849,14 @@ const buildServices = (
     salonServices: salonServicesService,
     staff: staffService,
     policy: policyService,
+    audit,
+    notifier: producers.salonStateNotifier,
+    logger,
+    branches: branchesRepository,
+    team: teamService,
+  });
+  const adminBranchesService = createAdminBranchesService({
+    branches: branchesService,
     audit,
     notifier: producers.salonStateNotifier,
     logger,
@@ -941,6 +961,7 @@ const buildServices = (
       notifier: producers.salonStateNotifier,
       placements: new PlacementsRepository(),
       bookingCounts: bookingsRepository,
+      branches: branchesRepository,
     }),
     adminSalonInsights: {
       insights: createSalonInsightsService({
@@ -968,17 +989,7 @@ const buildServices = (
       conflicts: conflictFinder.leave,
     }),
     staff: staffService,
-    team: createTeamService({
-      branches: branchesRepository,
-      mainBranches,
-      access: accessEvents,
-      members: new MembersRepository(),
-      lifecycle: accountLifecycle,
-      phones: createPhoneVerifier(phoneServices),
-      storage: providers.storage,
-      uploads,
-      deactivationConflicts: conflictFinder.deactivation,
-    }),
+    team: teamService,
     catalogRequests: createCatalogRequestsService({
       requests: new CatalogRequestsRepository(),
       salons: new SalonsRepository(),
@@ -1005,6 +1016,7 @@ const buildServices = (
     adminSettings: adminSettingsService,
     adminProfile: adminProfileService,
     adminSalonEdit: adminSalonEditService,
+    adminBranches: adminBranchesService,
     adminSearch: createAdminSearchService({
       customers: new CustomersRepository(),
       salons: new SalonsRepository(),

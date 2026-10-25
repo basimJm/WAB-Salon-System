@@ -52,6 +52,8 @@ export interface BookingQuery {
   /** Admin only. */
   readonly salonId?: string | undefined;
   readonly customerId?: string | undefined;
+  /** Admin and the salon owner: one branch only (a branch member always sees their own). */
+  readonly branchId?: string | undefined;
 }
 
 export interface BookingRow {
@@ -198,6 +200,9 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     if (audience.kind === 'ADMIN') {
       if (query.salonId !== undefined) and.push({ salonId: toObjectId(query.salonId) });
       if (query.customerId !== undefined) and.push({ customerId: toObjectId(query.customerId) });
+    }
+    if (audience.kind !== 'CUSTOMER' && query.branchId !== undefined) {
+      and.push({ branchId: toObjectId(query.branchId) });
     }
 
     switch (query.tab) {

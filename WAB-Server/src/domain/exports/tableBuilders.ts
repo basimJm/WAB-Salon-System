@@ -169,6 +169,7 @@ export const createTableBuilders = (deps: {
       statuses: params['statuses'] as never,
       paymentStatus: params['paymentStatus'] as never,
       salonId: params['salonId'] as string | undefined,
+      branchId: params['branchId'] as string | undefined,
       customerId: params['customerId'] as string | undefined,
       from: typeof params['from'] === 'string' ? params['from'] : undefined,
       to: typeof params['to'] === 'string' ? params['to'] : undefined,

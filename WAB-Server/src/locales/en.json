@@ -158,6 +158,7 @@
   "notifications.salon.area.services": "the services",
   "notifications.salon.area.staff": "the staff",
   "notifications.salon.area.policy": "the policies",
+  "notifications.salon.area.branches": "the branches",
   "notifications.decision.approved": "approved",
   "notifications.decision.rejected": "rejected",
   "alerts.PAYMENT_FAILURE_SPIKE.title": "Payment failures are spiking",

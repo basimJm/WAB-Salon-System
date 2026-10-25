@@ -10,10 +10,25 @@
 
 ## Current task
 
+### SRV-147 — Admin branches, full CRUD for any salon (Stage P)
+
+- Branch: `feat/srv-147-admin-branches`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.16, §6 admin, root CLAUDE.md §4.12; operations admin `/salons/{id}/branches[/{branchId}[/main|offline|online|close]]`, `/salons/{id}` detail, `/salons/{id}/members`, salon edit hours/closures/services `?branchId=`, `POST /salons/{id}/members/{memberId}/branch`, `GET /bookings?branchId=` + BOOKINGS export — client impact ADM-089/090/091; merchant `GET /bookings?branchId=` for the owner, MER-063):
+  - [x] Admin list/get/create/update/set main/offline/online/close any salon's branch through the owner's branches service (limit, last branch, main, upcoming bookings unchanged); every write needs a reason, writes an audit record (`entityType: branch`) and tells the owner (`salon.edited_by_admin`, area `branches`; offline/online use the existing branch events, no second notice)
+  - [x] Salon detail returns `branches[]` (closed included); members show `branchId` and filter by `?branchId=`
+  - [x] Admin salon edit: hours, closures and services take `?branchId=` (default the main branch); previews check that branch; audit names the branch
+  - [x] Admin moves a member to another branch (`SALON_STAFF_MOVE`, skills cleared and upcoming bookings refuse it via the team service)
+  - [x] Booking lists (admin, and merchant for the owner) and the BOOKINGS export filter by `branchId`; reviews already filter by branch (SRV-145)
+  - [x] Merchant team member docs now show `branchId` (shared `teamMemberDoc`)
+- Tests: `tests/adminBranches.test.ts` (7); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔ (no rule duplicated: admin wraps the owner's services), Mobile N/A, Architect ✔ (admin namespace only; adminGuard on every route), QA ✔)
+
 ### SRV-146 — Finance by branch (Stage P)
 
 - Branch: `feat/srv-146-finance-branch`
-- Status: IN REVIEW
+- Status: DONE (PR #392)
 - Acceptance criteria (BUSINESS_DOMAIN §5.14, §3 transactions/refunds/ledger `branchId`; operations merchant `GET /finance/transactions|refunds`, admin `GET /transactions`, `GET /finance/reconciliation`, `GET /refunds`, `POST /exports` TRANSACTIONS — client impact ADM-091, MER-064):
   - [x] A payment attempt keeps the draft's `branchId`; refunds and ledger CHARGE/GATEWAY_FEE/REFUND entries take the payment's branch; payouts stay salon-wide (no branch)
   - [x] Owner finance: payments and refunds accept `branchId` and show `branchId` per row; balance and payouts stay salon-wide
@@ -36,20 +51,6 @@
 - Tests: `tests/reviewBranch.test.ts` (5) + reviews/adminReviews/salonDetails suites; full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔ (additive fields; picking a branch is optional for older builds), Architect ✔, QA ✔) — reviews written before branches carry the migrated main-branch label (SRV-137 backfill).
-
-### SRV-144 — Discovery with branches (Stage P)
-
-- Branch: `feat/srv-144-discovery-branches`
-- Status: DONE (PR #390)
-- Acceptance criteria (BUSINESS_DOMAIN §5.17, §3.3a; operations customer `GET /salons`, `GET /salons/{salonId}`, `GET /home`, `GET /favorites` — client impact CUS-083/084/085):
-  - [x] Search: one card per salon (never per branch), place/hours/distance from the nearest bookable branch (main branch without a position); cards gain `branchCount` and `branch {id, name}` in the request language
-  - [x] Price filter/slider: a salon matches when ONE branch offers all selected services; the sum is that branch's cheapest
-  - [x] Nearest sort keeps salons with a bookable branch inside the discovery radius
-  - [x] Home nearest list: one entry per bookable branch inside the radius, by distance; `title` = "Salon - Branch" when the salon has several branches, else the salon name; paginated; gender respected
-  - [x] Salon details: `branches[]` (bookable, main first, own place/contacts/hours/closures); staff and services carry `branchId` and only bookable branches' ones are shown; top-level place fields are the main branch's (backward compatible)
-- Tests: `tests/discoveryBranches.test.ts` (10) + search/salonDetails/home/favorites suites; full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔ (fields are additive; older builds keep reading the main-branch fields), Architect ✔, QA ✔) — NOTE: the nearest list pages in memory over branches inside the radius (bounded by the radius; same approach as SRV-058).
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

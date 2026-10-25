@@ -39,6 +39,8 @@ export const merchantBookingsQuery = paginationQuery(APP_PAGE_SIZE).extend({
   status: list(z.enum(BOOKING_STATUSES)),
   brideOnly: flag.optional(),
   paymentStatus: z.enum(BOOKING_PAYMENT_STATUSES).optional(),
+  /** Owner: one branch only (a branch member always sees their own branch). */
+  branchId: id.optional(),
 });
 
 export const calendarQuery = z.object({
@@ -57,6 +59,7 @@ export const adminBookingsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
   paymentStatus: z.enum(BOOKING_PAYMENT_STATUSES).optional(),
   salonId: id.optional(),
   customerId: id.optional(),
+  branchId: id.optional(),
 });
 
 export type MerchantBookingsQuery = z.infer<typeof merchantBookingsQuery>;

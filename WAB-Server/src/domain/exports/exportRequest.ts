@@ -64,6 +64,7 @@ export const exportRequestSchema = z.discriminatedUnion('kind', [
       statuses: z.array(z.enum(BOOKING_STATUSES)).min(1).max(BOOKING_STATUSES.length).optional(),
       paymentStatus: z.enum(BOOKING_PAYMENT_STATUSES).optional(),
       salonId: objectId.optional(),
+      branchId: objectId.optional(),
       customerId: objectId.optional(),
       /** Appointment days (Asia/Amman), both inclusive. */
       from: day.optional(),
