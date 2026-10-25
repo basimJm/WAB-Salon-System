@@ -37,6 +37,7 @@ import type { MerchantFinanceService } from '../domain/finance/merchantFinance.s
 import type { MerchantReviewsService } from '../domain/reviews/merchantReviews.service';
 import type { MerchantStatisticsService } from '../domain/statistics/merchantStatistics.service';
 import type { MerchantDashboardService } from '../domain/dashboard/merchantDashboard.service';
+import type { MemberSelfService } from '../domain/team/memberSelf.service';
 import type { PayoutDetailsService } from '../domain/salons/payoutDetails.service';
 import type { SubscriptionsService } from '../domain/subscriptions/subscriptions.service';
 import type { PayoutsService } from '../domain/payouts/payouts.service';
@@ -125,6 +126,7 @@ export interface ApiServices {
   readonly merchantReviews?: MerchantReviewsService;
   readonly merchantStatistics?: MerchantStatisticsService;
   readonly merchantDashboard?: MerchantDashboardService;
+  readonly memberSelf?: MemberSelfService;
   readonly adminSubscriptions?: SubscriptionsService;
   readonly bookingBulk?: BookingBulkService;
   readonly bookingAdmin?: BookingAdminService;
@@ -227,6 +229,7 @@ export const unavailableAdminLogin: AdminLoginService = {
 export const unavailableInstallationService: InstallationService = {
   register: unavailableCustomerAuthError,
   setPushEnabled: unavailableCustomerAuthError,
+  setMemberPushEnabled: unavailableCustomerAuthError,
 };
 
 export const unavailableAppConfigService: AppConfigService = { get: unavailable };
@@ -655,3 +658,9 @@ export const unavailableMerchantReviews: MerchantReviewsService = { list: unavai
 export const unavailableMerchantStatistics: MerchantStatisticsService = { get: unavailable };
 
 export const unavailableMerchantDashboard: MerchantDashboardService = { get: unavailable };
+
+export const unavailableMemberSelf: MemberSelfService = {
+  get: unavailable,
+  update: unavailable,
+  changePhone: unavailable,
+};

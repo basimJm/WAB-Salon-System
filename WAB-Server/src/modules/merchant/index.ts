@@ -45,6 +45,7 @@ import {
   unavailableMerchantReviews,
   unavailableMerchantStatistics,
   unavailableMerchantDashboard,
+  unavailableMemberSelf,
   unavailablePayoutDetails,
   unavailableBranches,
   unavailableGallery,
@@ -79,6 +80,8 @@ import { createMerchantGalleryRouter } from './gallery/gallery.routes';
 import { createMerchantProfileRouter } from './salon/profile.routes';
 import { createMerchantSalonRouter } from './salon/salon.routes';
 import { createMerchantAuthRouter } from './auth/auth.routes';
+import { createMerchantChangePhoneRouter, createMerchantMeRouter } from './me/me.routes';
+import { MERCHANT_ME_ROUTES } from '../../constants/merchantAuth';
 
 /** Router for the /merchant/v1 namespace. Feature routers are mounted here as they are built. */
 export const createMerchantRouter = (services: ApiServices = {}): Router => {
@@ -91,6 +94,23 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       service: services.merchantAuth ?? unavailableMerchantAuth,
       limiter: createOtpRouteLimiter(services),
     }),
+  );
+  mount(
+    router,
+    MERCHANT_AUTH_ROUTES.base,
+    createMerchantChangePhoneRouter(
+      services.memberSelf ?? unavailableMemberSelf,
+      services.salonProfile?.guard ?? [unavailableGuard],
+      createOtpRouteLimiter(services),
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_ME_ROUTES.base,
+    createMerchantMeRouter(
+      services.memberSelf ?? unavailableMemberSelf,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
   );
   mount(router, INSTALLATION_ROUTES.base, createMerchantInstallationsRouter(services));
   mount(router, APP_CONFIG_ROUTES.base, createMerchantAppConfigRouter(services));

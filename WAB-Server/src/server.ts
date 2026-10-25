@@ -90,6 +90,7 @@ import { createMerchantFinanceService } from './domain/finance/merchantFinance.s
 import { createMerchantReviewsService } from './domain/reviews/merchantReviews.service';
 import { createMerchantStatisticsService } from './domain/statistics/merchantStatistics.service';
 import { createMerchantDashboardService } from './domain/dashboard/merchantDashboard.service';
+import { createMemberSelfService } from './domain/team/memberSelf.service';
 import { createJsonCache } from './utils/redis/jsonCache';
 import { DASHBOARD_CACHE_PREFIX, DASHBOARD_CACHE_TTL_SEC } from './constants/dashboard';
 import { createSubscriptionsService } from './domain/subscriptions/subscriptions.service';
@@ -959,6 +960,13 @@ const buildServices = (
     adminSubscriptions: subscriptionsService,
     merchantStatistics: merchantStatisticsService,
     merchantDashboard: merchantDashboardService,
+    memberSelf: createMemberSelfService({
+      members: new MembersRepository(),
+      storage: providers.storage,
+      uploads,
+      phones: createPhoneVerifier(phoneServices),
+      otpGate,
+    }),
     merchantReviews: createMerchantReviewsService({
       reviews: new ReviewsRepository(),
       members: new MembersRepository(),
