@@ -3,6 +3,7 @@ import { OPERATIONS } from '../contract/generated/operations';
 import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
+import { MOCK_BRANCH_IDS, reviewBranchRef } from './branchesFixture';
 
 type Status = 'ACTIVE' | 'BLOCKED' | 'DELETION_PENDING' | 'DELETED';
 const AMMAN = '64a000000000000000000001';
@@ -154,6 +155,7 @@ export function customersRoutes(): readonly MockRoute[] {
               comment: 'Lovely service',
               salon: { id: '64f000000000000000000001', name: 'Noor Salon' },
               staff: null,
+              branch: reviewBranchRef(MOCK_BRANCH_IDS.noorMain),
               author: { id: r?.id ?? '', firstName: 'Dana', lastName: 'Khoury' },
               authorOtherReviews: 1,
               createdAt: '2026-10-05T08:00:00.000Z',

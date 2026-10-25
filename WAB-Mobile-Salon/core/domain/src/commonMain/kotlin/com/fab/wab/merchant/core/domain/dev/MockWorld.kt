@@ -15,12 +15,16 @@ interface MockControls {
     val enabled: Boolean
     fun setSalonState(state: SalonState)
     fun setMember(preset: MockMemberPreset)
+
+    /** The booking-request triggers mark their booking PENDING so the request sheet / overlay can show it. */
+    fun markBookingPending(bookingId: String)
 }
 
 object NoMockControls : MockControls {
     override val enabled: Boolean = false
     override fun setSalonState(state: SalonState) = Unit
     override fun setMember(preset: MockMemberPreset) = Unit
+    override fun markBookingPending(bookingId: String) = Unit
 }
 
 /** Switches the mock world, then re-reads the salon / the member so the launch route, tabs and tiles follow. */

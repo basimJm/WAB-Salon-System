@@ -106,7 +106,8 @@ interface ServicesRepository {
     /** Every saved service (create, edit, on/off) so open lists update without reloading. */
     val changes: Flow<SalonService>
 
-    suspend fun services(): AppResult<List<SalonService>>
+    /** [branchId] null = salon-level (the member's own branch / the main branch); else that branch (MER-064, owner). */
+    suspend fun services(branchId: String? = null): AppResult<List<SalonService>>
 
     suspend fun catalog(gender: SalonGenderType, page: Int): AppResult<List<CatalogService>>
 
@@ -114,9 +115,9 @@ interface ServicesRepository {
 
     fun cachedCatalog(id: String): CatalogService?
 
-    suspend fun create(catalogId: String, draft: ServiceDraft): AppResult<SalonService>
+    suspend fun create(catalogId: String, draft: ServiceDraft, branchId: String? = null): AppResult<SalonService>
 
-    suspend fun update(id: String, draft: ServiceDraft): AppResult<SalonService>
+    suspend fun update(id: String, draft: ServiceDraft, branchId: String? = null): AppResult<SalonService>
 
-    suspend fun setActive(id: String, active: Boolean): AppResult<SalonService>
+    suspend fun setActive(id: String, active: Boolean, branchId: String? = null): AppResult<SalonService>
 }

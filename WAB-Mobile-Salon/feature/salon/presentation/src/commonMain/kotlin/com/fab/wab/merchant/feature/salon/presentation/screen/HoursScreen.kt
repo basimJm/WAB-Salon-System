@@ -64,15 +64,20 @@ import com.fab.wab.merchant.designsystem.resources.Res as DesignRes
 fun HoursScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(SalonAnalytics.SCREEN_HOURS)
     AppScreen(modifier = modifier, topBar = { AppTopBar(title = stringResource(Res.string.hours_title), onBack = onBack) }) { padding ->
-        when {
-            state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
-            state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
-            else -> Column(
-                modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(AppTheme.spacing.space16),
-                verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space16),
-            ) {
-                WeeklyCard(state, onAction)
-                ClosuresSection(state, onAction)
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            BranchPicker(state.branchScope, onSelect = { onAction(UiAction.OnBranchSelect(it)) })
+            Box(modifier = Modifier.weight(1f)) {
+                when {
+                    state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
+                    state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
+                    else -> Column(
+                        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(AppTheme.spacing.space16),
+                        verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space16),
+                    ) {
+                        WeeklyCard(state, onAction)
+                        ClosuresSection(state, onAction)
+                    }
+                }
             }
         }
     }

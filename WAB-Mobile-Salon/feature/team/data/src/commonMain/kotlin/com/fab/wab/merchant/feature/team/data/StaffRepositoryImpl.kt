@@ -61,11 +61,11 @@ class StaffRepositoryImpl(private val api: StaffApi, private val salon: SalonRep
         leaveId: String,
     ): AppResult<Unit> = safeApiCall { api.deleteLeave(memberId, leaveId) }.mapSuccess { }
 
-    override suspend fun services(): AppResult<List<ServiceOption>> {
+    override suspend fun services(branchId: String?): AppResult<List<ServiceOption>> {
         val all = mutableListOf<ServiceOption>()
         var page = FIRST_PAGE
         while (true) {
-            when (val result = safeApiCall { api.services(page, MemberLimits.PAGE_SIZE) }) {
+            when (val result = safeApiCall { api.services(branchId, page, MemberLimits.PAGE_SIZE) }) {
                 is AppResult.Success -> {
                     all += result.data.data.map { ServiceOption(it.id, it.name, it.active) }
                     if (result.data.data.size < MemberLimits.PAGE_SIZE) return AppResult.Success(all)
@@ -77,8 +77,8 @@ class StaffRepositoryImpl(private val api: StaffApi, private val salon: SalonRep
         }
     }
 
-    override suspend fun salonDays(): AppResult<Map<DayOfWeek, OpenHours?>> =
-        safeApiCall { api.hours() }.mapSuccess { response ->
+    override suspend fun salonDays(branchId: String?): AppResult<Map<DayOfWeek, OpenHours?>> =
+        safeApiCall { api.hours(branchId) }.mapSuccess { response ->
             response.data.weeklySchedule.mapNotNull { day ->
                 val weekday = DAY_CODES[day.day.uppercase()] ?: return@mapNotNull null
                 val open = minutesOf(day.open)

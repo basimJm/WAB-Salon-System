@@ -33,6 +33,7 @@ class FinanceMappersTest {
             "SALON_REJECT",
             " ",
             "REFUNDED",
+            null,
             "2026-10-02T10:00:00Z",
             null,
         ).toDomain()
@@ -41,7 +42,7 @@ class FinanceMappersTest {
         assertNull(refund.reason)
         assertEquals(
             RefundSource.OTHER,
-            GetFinanceRefundsDataItem("r2", null, null, "1.000", "NEW_THING", null, "WHAT", "x", null).toDomain().source,
+            GetFinanceRefundsDataItem("r2", null, null, "1.000", "NEW_THING", null, "WHAT", null, "x", null).toDomain().source,
         )
     }
 }

@@ -49,6 +49,13 @@ export const ERROR_CODE_KIND = {
   UPLOAD_TOO_LARGE: 'validation',
   MAINTENANCE: 'server',
   UPDATE_REQUIRED: 'conflict',
+  BRANCH_NOT_FOUND: 'notFound',
+  BRANCH_NOT_BOOKABLE: 'conflict',
+  BRANCH_REQUIRED: 'validation',
+  BRANCH_LIMIT_REACHED: 'conflict',
+  BRANCH_HAS_UPCOMING_BOOKINGS: 'conflict',
+  LAST_BRANCH: 'conflict',
+  BRANCH_SCOPE_DENIED: 'forbidden',
 } as const satisfies Record<string, ErrorKind>;
 
 export type ErrorCode = keyof typeof ERROR_CODE_KIND;

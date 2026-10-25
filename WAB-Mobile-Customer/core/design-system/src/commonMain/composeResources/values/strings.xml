@@ -100,6 +100,13 @@
     <string name="state_action_update">Update the app</string>
     <string name="error_code_current_password_invalid">The current password is incorrect.</string>
     <string name="error_code_email_already_used">This email is already in use.</string>
+    <string name="error_code_branch_not_found">This branch was not found.</string>
+    <string name="error_code_branch_not_bookable">This branch is not accepting bookings right now. Choose another branch.</string>
+    <string name="error_code_branch_required">Choose a branch first.</string>
+    <string name="error_code_branch_limit_reached">The salon has reached the maximum number of branches.</string>
+    <string name="error_code_branch_has_upcoming_bookings">This branch still has upcoming bookings.</string>
+    <string name="error_code_last_branch">The salon must keep at least one branch.</string>
+    <string name="error_code_branch_scope_denied">This action is not allowed for this branch.</string>
     <string name="brand_name" translatable="false">WAB</string>
     <string name="brand_tagline" translatable="false">WEDDING &amp; BEAUTY</string>
     <string name="date_picker_ok">OK</string>

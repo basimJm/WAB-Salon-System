@@ -60,4 +60,7 @@
     <string name="media_counter">%1$d / %2$d</string>
     <string name="media_zoom_hint">اضغط مرتين أو باعد بإصبعين للتكبير</string>
     <string name="salon_not_available">الصالون غير متاح</string>
+    <string name="salon_branches">الفروع</string>
+    <string name="salon_branch_main">الرئيسي</string>
+    <string name="salon_review_branch">فرع %1$s</string>
 </resources>

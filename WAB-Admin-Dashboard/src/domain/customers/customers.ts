@@ -58,6 +58,10 @@ export interface CustomerReview {
   readonly comment: string | null;
   readonly salon: { readonly id: string; readonly name: string };
   readonly staff: { readonly id: string; readonly firstName: string } | null;
+  readonly branch: {
+    readonly id: string;
+    readonly name: { readonly ar: string; readonly en: string };
+  } | null;
   readonly createdAt: string;
 }
 

@@ -84,10 +84,10 @@ fun DiscoverySalonCard(
             verticalArrangement = Arrangement.spacedBy(DiscoveryDesign.SALON_BODY_GAP),
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8), verticalAlignment = Alignment.CenterVertically) {
-                SalonName(salon.name, Modifier.weight(1f))
+                SalonName(salon.displayName, Modifier.weight(1f))
                 DiscoveryRatingLine(salon.rating, salon.reviewsCount, DiscoveryDesign.TEXT_12_5)
             }
-            LocationLine(salon.locationText.orEmpty())
+            LocationLine(salon.placeText())
             DescriptionLine(salon.shortDescription.orEmpty())
             StatusLine(salon)
         }

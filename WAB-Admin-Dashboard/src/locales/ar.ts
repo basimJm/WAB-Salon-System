@@ -13,6 +13,7 @@ import content from './ar/content.json';
 import banners from './ar/banners.json';
 import catalog from './ar/catalog.json';
 import salons from './ar/salons.json';
+import branches from './ar/branches.json';
 import applications from './ar/applications.json';
 import customers from './ar/customers.json';
 import bookings from './ar/bookings.json';
@@ -69,6 +70,7 @@ const ar = {
   ...customers,
   ...applications,
   ...salons,
+  ...branches,
   ...catalog,
   ...banners,
   ...content,

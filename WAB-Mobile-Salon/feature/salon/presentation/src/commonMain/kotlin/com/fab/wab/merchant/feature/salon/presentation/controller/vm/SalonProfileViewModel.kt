@@ -18,6 +18,7 @@ import com.fab.wab.merchant.core.ui.media.CropRegion
 import com.fab.wab.merchant.core.ui.media.FilePicker
 import com.fab.wab.merchant.core.ui.media.ImageCropper
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
+import com.fab.wab.merchant.designsystem.components.map.MapPickerUi
 import com.fab.wab.merchant.designsystem.components.upload.LocalPreview
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
@@ -32,8 +33,8 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.contract.Profi
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract.SideEffect
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract.UiAction
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract.UiState
-import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapController
-import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapHandler
+import com.fab.wab.merchant.designsystem.components.map.MapPickerController
+import com.fab.wab.merchant.designsystem.components.map.MapPickerHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -44,7 +45,7 @@ class SalonProfileDependencies(
     val filePicker: FilePicker,
     val cropper: ImageCropper,
     val upload: UploadFileUseCase,
-    val map: ProfileMapController,
+    val map: MapPickerController,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
 )
@@ -55,7 +56,7 @@ class SalonProfileViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
-    private val mapHandler = ProfileMapHandler(deps.map, scope, ::uiStateValue, ::updateMap, ::emitSideEffect)
+    private val mapHandler = MapPickerHandler(deps.map, scope, ::readMap, ::writeMap) { emitSideEffect(SideEffect.LocationBlocked) }
 
     override fun onStart() {
         load()
@@ -85,7 +86,7 @@ class SalonProfileViewModel(
             is UiAction.OnCropConfirm -> crop(event.region)
             UiAction.OnCropCancel -> updateState { copy(crop = null) }
             is UiAction.OnRetryImage -> retry(event.target)
-            UiAction.OnOpenMap -> mapHandler.open()
+            UiAction.OnOpenMap -> uiState.value.form.let { mapHandler.open(it.location, it.locationText) }
             is UiAction.OnMap -> mapHandler.handle(event.action, onConfirm = { point, address ->
                 edit { copy(location = point, locationText = address ?: locationText) }
             })
@@ -118,9 +119,9 @@ class SalonProfileViewModel(
         return true
     }
 
-    private fun uiStateValue(): UiState = uiState.value
+    private fun readMap() = uiState.value.map
 
-    private fun updateMap(change: UiState.() -> UiState) = updateState(change)
+    private fun writeMap(map: MapPickerUi?) = updateState { copy(map = map) }
 
     private fun edit(change: ProfileForm.() -> ProfileForm) =
         updateState { copy(form = form.change()) }

@@ -110,7 +110,7 @@ class HomeViewModel(
             UiAction.OnServicesSeeMore -> uiState.value.gender?.let { emitSideEffect(SideEffect.OpenAllServices(it)) }
             is UiAction.OnSalonClick -> {
                 track(HomeAnalytics.ACTION_SALON_CLICK, HomeAnalytics.PARAM_ID to event.salonId)
-                emitSideEffect(SideEffect.OpenSalon(event.salonId))
+                emitSideEffect(SideEffect.OpenSalon(event.salonId, event.branchId))
             }
             is UiAction.OnSeeAll -> openSalons(filter = event.section.filter())
             else -> Unit

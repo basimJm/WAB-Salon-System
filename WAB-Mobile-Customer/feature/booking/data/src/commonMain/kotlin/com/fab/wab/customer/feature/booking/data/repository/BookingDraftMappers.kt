@@ -17,8 +17,14 @@ import com.fab.wab.customer.feature.booking.domain.model.StaffChoice
 
 private const val STAFF_ANY = "ANY"
 
-fun draftBodyOf(salonId: String, paymentMethod: PaymentMethod, persons: List<DraftPerson>): PostBookingsDraftsBody = PostBookingsDraftsBody(
+fun draftBodyOf(
+    salonId: String,
+    paymentMethod: PaymentMethod,
+    persons: List<DraftPerson>,
+    branchId: String? = null,
+): PostBookingsDraftsBody = PostBookingsDraftsBody(
     salonId = salonId,
+    branchId = branchId,
     paymentMethod = paymentMethod.code,
     persons = persons.map {
         PostBookingsDraftsBodyPersonsItem(

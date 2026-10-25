@@ -57,6 +57,13 @@ function Facts({ b }: { b: BookingDetails }) {
             ) : null,
           },
           {
+            key: 'branch',
+            label: t('branches.name'),
+            value: b.branch
+              ? [b.branch.name, b.branch.locationText].filter(Boolean).join(' · ')
+              : null,
+          },
+          {
             key: 'salon',
             label: t('bookings.salon'),
             value: b.salon ? (

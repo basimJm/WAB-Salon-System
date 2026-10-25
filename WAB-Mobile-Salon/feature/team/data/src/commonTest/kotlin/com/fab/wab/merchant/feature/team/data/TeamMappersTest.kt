@@ -42,5 +42,14 @@ class TeamMappersTest {
         val removed = draft.toPatch(photoChanged = true, permissions = setOf(Permission.REVIEWS_VIEW))
         assertEquals(JsonNull, removed["photoKey"])
         assertEquals(JsonArray(listOf(JsonPrimitive("REVIEWS_VIEW"))), removed["permissions"])
+        assertNull(removed["branchId"])
+    }
+
+    @Test
+    fun branchIsReadAndOnlyAMoveSendsIt() {
+        val dto = GetTeamMembersDataItem("m1", "Rana", "Ali", "+962791234567", null, "MANAGER", emptyList(), true, true, "b2")
+        assertEquals("b2", dto.toDomain().branchId)
+        val moved = MemberDraft("Rana", "Ali", branchId = "b3").toPatch(photoChanged = false, permissions = null, branchChanged = true)
+        assertEquals(JsonPrimitive("b3"), moved["branchId"])
     }
 }

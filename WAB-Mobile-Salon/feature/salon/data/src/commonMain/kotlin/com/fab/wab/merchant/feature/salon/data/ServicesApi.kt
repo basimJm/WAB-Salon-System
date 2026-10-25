@@ -7,7 +7,6 @@ import com.fab.wab.merchant.core.data.contract.generated.MerchantOperations
 import com.fab.wab.merchant.core.data.contract.generated.PatchSalonServicesByIdData
 import com.fab.wab.merchant.core.data.contract.generated.PostSalonServicesBody
 import com.fab.wab.merchant.core.data.contract.generated.PostSalonServicesData
-import com.fab.wab.merchant.core.data.contract.pathWith
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -23,8 +22,8 @@ private const val PAGE_SIZE = "pageSize"
 private const val GENDER = "gender"
 
 class ServicesApi(private val client: HttpClient) {
-    suspend fun services(page: Int, pageSize: Int): BaseResponse<List<GetSalonServicesDataItem>> =
-        client.get(MerchantOperations.getSalonServices.path) {
+    suspend fun services(branchId: String?, page: Int, pageSize: Int): BaseResponse<List<GetSalonServicesDataItem>> =
+        client.get(branchPath(MerchantOperations.getSalonServices, MerchantOperations.getBranchesByBranchIdServices, branchId)) {
             parameter(PAGE, page)
             parameter(PAGE_SIZE, pageSize)
         }.body()
@@ -36,10 +35,13 @@ class ServicesApi(private val client: HttpClient) {
             parameter(PAGE_SIZE, pageSize)
         }.body()
 
-    suspend fun create(body: PostSalonServicesBody): BaseResponse<PostSalonServicesData> =
-        client.post(MerchantOperations.postSalonServices.path) { setBody(body) }.body()
+    suspend fun create(branchId: String?, body: PostSalonServicesBody): BaseResponse<PostSalonServicesData> =
+        client.post(branchPath(MerchantOperations.postSalonServices, MerchantOperations.postBranchesByBranchIdServices, branchId)) {
+            setBody(body)
+        }.body()
 
     /** JSON body so a cleared description goes out as `null` (the client omits nulls). */
-    suspend fun update(id: String, body: JsonObject): BaseResponse<PatchSalonServicesByIdData> =
-        client.patch(MerchantOperations.patchSalonServicesById.pathWith(ID to id)) { setBody(body) }.body()
+    suspend fun update(branchId: String?, id: String, body: JsonObject): BaseResponse<PatchSalonServicesByIdData> = client.patch(
+        branchPath(MerchantOperations.patchSalonServicesById, MerchantOperations.patchBranchesByBranchIdServicesById, branchId, ID to id),
+    ) { setBody(body) }.body()
 }

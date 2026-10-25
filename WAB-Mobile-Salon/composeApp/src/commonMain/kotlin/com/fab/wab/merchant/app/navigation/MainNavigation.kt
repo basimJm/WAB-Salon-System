@@ -7,6 +7,7 @@ import com.fab.wab.merchant.core.navigation.route.Graph
 import com.fab.wab.merchant.feature.auth.presentation.navigation.AuthNavigation
 import com.fab.wab.merchant.feature.application.presentation.navigation.ApplicationNavigation
 import com.fab.wab.merchant.feature.bookings.presentation.navigation.BookingsNavigation
+import com.fab.wab.merchant.feature.branches.presentation.navigation.BranchesNavigation
 import com.fab.wab.merchant.feature.salon.presentation.navigation.SalonNavigation
 import com.fab.wab.merchant.feature.team.presentation.navigation.TeamNavigation
 import com.fab.wab.merchant.feature.finance.presentation.navigation.FinanceNavigation
@@ -26,6 +27,7 @@ fun MainNavigation(
         BookingsNavigation(navController).registerGraph(this)
         SalonNavigation(navController).registerGraph(this)
         TeamNavigation(navController).registerGraph(this)
+        BranchesNavigation(navController).registerGraph(this)
         FinanceNavigation(navController).registerGraph(this)
         NotificationsNavigation(navController).registerGraph(this)
         ContentNavigation(navController).registerGraph(this)

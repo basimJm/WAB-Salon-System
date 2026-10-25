@@ -87,6 +87,8 @@ class DataStoreSessionStore(
         this[SessionKeys.SALON_ID] = member.salonId
         this[SessionKeys.MEMBER_FIRST_NAME] = member.firstName
         this[SessionKeys.MEMBER_ROLE] = member.role.name
+        val branchId = member.branchId
+        if (branchId == null) remove(SessionKeys.MEMBER_BRANCH_ID) else this[SessionKeys.MEMBER_BRANCH_ID] = branchId
     }
 
     private fun MutablePreferences.putSalonState(salonState: SalonState?) {
@@ -101,6 +103,7 @@ class DataStoreSessionStore(
             SessionKeys.SALON_ID,
             SessionKeys.MEMBER_FIRST_NAME,
             SessionKeys.MEMBER_ROLE,
+            SessionKeys.MEMBER_BRANCH_ID,
             SessionKeys.PERMISSIONS,
             SessionKeys.SALON_STATE,
         )
@@ -132,5 +135,6 @@ private fun memberOf(prefs: Preferences): MemberProfile? {
     val salonId = prefs[SessionKeys.SALON_ID]
     val firstName = prefs[SessionKeys.MEMBER_FIRST_NAME]
     val role = MemberRole.fromCode(prefs[SessionKeys.MEMBER_ROLE]) ?: return null
-    return if (id != null && salonId != null && firstName != null) MemberProfile(id, salonId, firstName, role) else null
+    val branchId = prefs[SessionKeys.MEMBER_BRANCH_ID]
+    return if (id != null && salonId != null && firstName != null) MemberProfile(id, salonId, firstName, role, branchId) else null
 }

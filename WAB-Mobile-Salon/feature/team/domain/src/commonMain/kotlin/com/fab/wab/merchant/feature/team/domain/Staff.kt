@@ -86,8 +86,9 @@ interface StaffRepository {
 
     suspend fun deleteLeave(memberId: String, leaveId: String): AppResult<Unit>
 
-    suspend fun services(): AppResult<List<ServiceOption>>
+    /** Services of the member's branch ([branchId], MER-065); null = the salon-level list. */
+    suspend fun services(branchId: String? = null): AppResult<List<ServiceOption>>
 
-    /** Open salon days (null = day off). */
-    suspend fun salonDays(): AppResult<Map<DayOfWeek, OpenHours?>>
+    /** Open days of the member's branch ([branchId]; null = salon level) — null value = day off. */
+    suspend fun salonDays(branchId: String? = null): AppResult<Map<DayOfWeek, OpenHours?>>
 }

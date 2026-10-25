@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application>
+        <!-- Debug builds only: fake a booking request without FCM (MER-029 test trigger).
+             adb broadcast action <applicationId>.DEBUG_BOOKING_REQUEST, string extra bookingId, package <applicationId>. -->
+        <receiver
+            android:name="com.fab.wab.merchant.request.DebugBookingRequestReceiver"
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="${applicationId}.DEBUG_BOOKING_REQUEST" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

@@ -6,6 +6,7 @@ import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.ErrorCode
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.core.domain.salon.SalonGenderType
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.upload.LocalFile
@@ -30,6 +31,9 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.contract.Servi
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.ServiceEditContract.UiAction
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.ServiceEditContract.UiState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 private const val MEDIA_PREFIX = "media-"
@@ -42,6 +46,8 @@ class ServiceEditDependencies(
     val upload: UploadFileUseCase,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    /** MER-064: the branch the services list is editing (owner switcher); null scope = the member's own branch. */
+    val branchScope: Flow<BranchScope> = flowOf(BranchScope()),
 )
 
 /** PRD M16 form: add [catalogServiceId] or edit [serviceId]; price / duration / bride-only (women) / description / media / active. */
@@ -100,15 +106,16 @@ class ServiceEditViewModel(
 
     private fun edit(change: ServiceDraft.() -> ServiceDraft) = updateState { copy(draft = draft.change()) }
 
+    private suspend fun branchId(): String? = deps.branchScope.first().edited
+
     private fun load() {
         scope.launch {
             updateState { copy(loading = true, error = null) }
             val women = (deps.salon.current.value ?: (deps.salon.refresh() as? AppResult.Success)?.data)?.gender == SalonGenderType.FEMALE
             val id = serviceId
             if (id != null) {
-                val service = deps.services.cachedService(id) ?: (deps.services.services() as? AppResult.Success)?.data?.firstOrNull {
-                    it.id == id
-                }
+                val service = deps.services.cachedService(id)
+                    ?: (deps.services.services(branchId()) as? AppResult.Success)?.data?.firstOrNull { it.id == id }
                 if (service == null) return@launch notFound()
                 val draft = service.toDraft()
                 updateState {
@@ -191,9 +198,10 @@ class ServiceEditViewModel(
             updateState { copy(saving = true) }
             val id = serviceId
             val catalog = catalogServiceId
+            val branchId = branchId()
             val result = when {
-                id != null -> deps.services.update(id, state.draft)
-                catalog != null -> deps.services.create(catalog, state.draft)
+                id != null -> deps.services.update(id, state.draft, branchId)
+                catalog != null -> deps.services.create(catalog, state.draft, branchId)
                 else -> return@launch
             }
             updateState { copy(saving = false) }

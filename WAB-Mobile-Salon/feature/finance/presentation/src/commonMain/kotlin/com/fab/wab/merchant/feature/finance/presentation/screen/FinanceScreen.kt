@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
 import com.fab.wab.merchant.core.common.TimeFormat
+import com.fab.wab.merchant.designsystem.components.branch.AppBranchSwitcher
 import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
 import com.fab.wab.merchant.designsystem.components.card.AppCard
@@ -154,6 +155,13 @@ private fun Header(state: UiState, bankReady: Boolean, onAction: (UiAction) -> U
             selectedIndex = state.tab.ordinal,
             onSelect = { onAction(UiAction.OnTab(FinanceTab.entries[it])) },
         )
+        if (state.showsBranchSwitcher) {
+            AppBranchSwitcher(
+                branches = state.branchScope.branches,
+                selectedId = state.branchScope.filter,
+                onSelect = { onAction(UiAction.OnBranchSelect(it)) },
+            )
+        }
         RangeFilter(state, onAction)
     }
 }

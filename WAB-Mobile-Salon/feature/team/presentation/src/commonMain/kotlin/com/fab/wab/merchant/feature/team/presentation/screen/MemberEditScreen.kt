@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
 import com.fab.wab.merchant.core.domain.locations.Country
+import com.fab.wab.merchant.core.ui.utils.LocalAppLocale
 import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
 import com.fab.wab.merchant.designsystem.components.dialog.AppBottomSheet
@@ -26,6 +27,7 @@ import com.fab.wab.merchant.designsystem.components.layout.AppScreen
 import com.fab.wab.merchant.designsystem.components.navigation.AppTopBar
 import com.fab.wab.merchant.designsystem.components.selector.AppSegmentedTabs
 import com.fab.wab.merchant.designsystem.components.text.AppText
+import com.fab.wab.merchant.designsystem.components.textfield.AppDropdownField
 import com.fab.wab.merchant.designsystem.components.textfield.AppTextField
 import com.fab.wab.merchant.designsystem.components.upload.AppImageCropper
 import com.fab.wab.merchant.designsystem.components.upload.AppImageUploader
@@ -37,9 +39,13 @@ import com.fab.wab.merchant.feature.team.presentation.analytics.TeamAnalytics
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.MemberEditContract.UiAction
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.MemberEditContract.UiState
 import com.fab.wab.merchant.feature.team.presentation.resources.Res
+import com.fab.wab.merchant.feature.team.presentation.resources.member_branch
+import com.fab.wab.merchant.feature.team.presentation.resources.member_branch_choose
+import com.fab.wab.merchant.feature.team.presentation.resources.member_branch_move_note
 import com.fab.wab.merchant.feature.team.presentation.resources.member_first
 import com.fab.wab.merchant.feature.team.presentation.resources.member_info
 import com.fab.wab.merchant.feature.team.presentation.resources.member_last
+import com.fab.wab.merchant.feature.team.presentation.resources.member_move_conflict_body
 import com.fab.wab.merchant.feature.team.presentation.resources.member_new
 import com.fab.wab.merchant.feature.team.presentation.resources.member_permissions
 import com.fab.wab.merchant.feature.team.presentation.resources.member_phone
@@ -158,6 +164,7 @@ private fun Form(
             selectedIndex = ASSIGNABLE_ROLES.indexOf(state.draft.role).coerceAtLeast(0),
             onSelect = { onAction(UiAction.OnRole(ASSIGNABLE_ROLES[it])) },
         )
+        if (state.branches.isNotEmpty()) BranchField(state, onAction)
         if (!state.isNew && permissionsReady) {
             AppButton(
                 stringResource(Res.string.member_permissions),
@@ -197,6 +204,35 @@ private fun Overlays(state: UiState, onAction: (UiAction) -> Unit) {
                 modifier = Modifier.padding(AppTheme.spacing.space16),
             )
         }
+    }
+    if (state.moveConflict != null) {
+        AffectedBookingsSheet(
+            body = stringResource(Res.string.member_move_conflict_body),
+            onReassign = { onAction(UiAction.OnConflictReassign) },
+            onCancelBookings = { onAction(UiAction.OnConflictCancelBookings) },
+            onBack = { onAction(UiAction.OnConflictDismiss) },
+        )
+    }
+}
+
+/** MER-065: every manager / employee belongs to one branch; changing it moves the member (their services stay behind). */
+@Composable
+private fun BranchField(state: UiState, onAction: (UiAction) -> Unit) {
+    val language = LocalAppLocale.current
+    AppDropdownField(
+        options = state.branches.map { it.name.localized(language) },
+        selectedIndex = state.branches.indexOfFirst { it.id == state.draft.branchId }.takeIf { it >= 0 },
+        onSelect = { onAction(UiAction.OnBranch(it)) },
+        placeholder = stringResource(Res.string.member_branch_choose),
+        label = stringResource(Res.string.member_branch),
+        error = if (MemberField.BRANCH in state.visibleErrors) stringResource(Res.string.member_required) else null,
+    )
+    if (!state.isNew && state.draft.branchId != state.original.branchId) {
+        AppText(
+            text = stringResource(Res.string.member_branch_move_note),
+            style = AppTheme.typography.labelSmall,
+            color = AppTheme.colors.muted,
+        )
     }
 }
 

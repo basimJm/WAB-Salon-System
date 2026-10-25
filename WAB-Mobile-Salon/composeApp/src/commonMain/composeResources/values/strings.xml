@@ -22,4 +22,13 @@
     <string name="mock_manager">Manager</string>
     <string name="mock_employee">Employee</string>
     <string name="mock_none">No permissions</string>
+    <!-- Booking requests outside the app (PRD M10, Android) -->
+    <string name="request_channel">Booking requests</string>
+    <string name="request_title">New booking request</string>
+    <string name="request_body">%1$s · %2$s %3$s · %4$s</string>
+    <string name="request_accept">Accept</string>
+    <string name="request_reject">Reject</string>
+    <string name="request_accepted">Booking accepted</string>
+    <string name="request_handled">Already handled by another team member</string>
+    <string name="request_failed">Could not accept the booking. Open the app to try again.</string>
 </resources>

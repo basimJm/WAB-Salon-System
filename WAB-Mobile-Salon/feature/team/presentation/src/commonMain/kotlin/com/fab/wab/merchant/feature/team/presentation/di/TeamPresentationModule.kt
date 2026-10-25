@@ -1,6 +1,8 @@
 package com.fab.wab.merchant.feature.team.presentation.di
 
 import com.fab.wab.merchant.core.common.BusinessTime
+import com.fab.wab.merchant.core.domain.branch.BranchSelection
+import com.fab.wab.merchant.core.domain.branch.branchScopeOf
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.MemberEditDependencies
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.MemberEditViewModel
@@ -11,12 +13,12 @@ import com.fab.wab.merchant.feature.team.presentation.controller.vm.TeamDependen
 import com.fab.wab.merchant.feature.team.presentation.controller.vm.TeamViewModel
 import com.fab.wab.merchant.feature.team.presentation.resources.Res
 import com.fab.wab.merchant.feature.team.presentation.resources.team_unavailable_reason
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getString
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
-import kotlin.time.Clock
 
 val teamPresentationModule = module {
     viewModel {
@@ -27,10 +29,24 @@ val teamPresentationModule = module {
                 session = get<SessionStore>().state,
                 analytics = get(),
                 unavailableReason = { getString(Res.string.team_unavailable_reason) },
+                branchScope = branchScopeOf(get<SessionStore>().state, get(), get()),
+                selectBranch = get<BranchSelection>()::select,
             ),
         )
     }
-    factory { MemberEditDependencies(team = get(), locations = get(), picker = get(), cropper = get(), upload = get(), analytics = get()) }
+    factory {
+        MemberEditDependencies(
+            team = get(),
+            locations = get(),
+            picker = get(),
+            cropper = get(),
+            upload = get(),
+            analytics = get(),
+            branchScope = branchScopeOf(get<SessionStore>().state, get(), get()),
+            affected = get(),
+            unavailableReason = { getString(Res.string.team_unavailable_reason) },
+        )
+    }
     viewModel { (memberId: String?) -> MemberEditViewModel(memberId, deps = get()) }
     factory {
         StaffProfileDependencies(

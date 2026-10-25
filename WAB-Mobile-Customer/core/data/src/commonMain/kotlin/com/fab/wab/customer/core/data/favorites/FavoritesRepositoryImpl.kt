@@ -4,8 +4,10 @@ import com.fab.wab.customer.core.data.contract.generated.GetFavoritesDataItem
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
 import com.fab.wab.customer.core.domain.mapSuccess
+import com.fab.wab.customer.core.domain.salon.BranchRef
 import com.fab.wab.customer.core.domain.salon.OpeningHours
 import com.fab.wab.customer.core.domain.salon.SalonSummary
+import com.fab.wab.customer.core.domain.salon.cardBranchCount
 import com.fab.wab.customer.core.network.safeApiCall
 
 class FavoritesRepositoryImpl(private val api: FavoritesApi) : FavoritesRepository {
@@ -33,4 +35,6 @@ fun GetFavoritesDataItem.toDomain(): SalonSummary = SalonSummary(
     todayHours = todayHours?.let { OpeningHours(it.open, it.close) },
     isFavorite = true,
     distanceKm = distanceKm,
+    branchCount = cardBranchCount(branchCount),
+    branch = branch?.let { BranchRef(it.id, it.name) },
 )

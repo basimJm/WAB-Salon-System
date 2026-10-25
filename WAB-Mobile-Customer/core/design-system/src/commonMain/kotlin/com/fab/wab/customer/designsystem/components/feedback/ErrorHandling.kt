@@ -26,12 +26,13 @@ private val LOGIN_CODES = setOf(
 )
 private val CONTACT_CODES = setOf(
     ErrorCode.FORBIDDEN, ErrorCode.PERMISSION_DENIED, ErrorCode.OWNER_REQUIRED, ErrorCode.LAST_OWNER, ErrorCode.INTERNAL, ErrorCode.UNKNOWN,
+    ErrorCode.BRANCH_SCOPE_DENIED,
 )
 private val RETRY_CODES = setOf(
     ErrorCode.RATE_LIMITED, ErrorCode.MAINTENANCE, ErrorCode.NOT_FOUND, ErrorCode.CONFLICT, ErrorCode.SALON_NOT_FOUND,
     ErrorCode.SERVICE_UNAVAILABLE, ErrorCode.SLOT_UNAVAILABLE, ErrorCode.SLOT_TAKEN, ErrorCode.DRAFT_EXPIRED, ErrorCode.PAYMENT_FAILED,
     ErrorCode.PAYMENT_NOT_VERIFIED, ErrorCode.OTP_EXPIRED, ErrorCode.UPLOAD_INVALID, ErrorCode.UPLOAD_TOO_LARGE,
-    ErrorCode.SCHEDULE_CONFLICT,
+    ErrorCode.SCHEDULE_CONFLICT, ErrorCode.BRANCH_NOT_FOUND,
 )
 
 /** Business-rule codes whose message is the whole handling (no button). Listed so the policy check sees every code. */
@@ -42,6 +43,8 @@ private val DISMISS_CODES = setOf(
     ErrorCode.STAFF_NOT_ELIGIBLE,
     ErrorCode.DATE_OUT_OF_RANGE, ErrorCode.PAYMENT_OPTION_NOT_ALLOWED, ErrorCode.INVALID_TRANSITION, ErrorCode.CANCELLATION_WINDOW_PASSED,
     ErrorCode.TOO_EARLY_TO_COMPLETE, ErrorCode.ALREADY_HANDLED, ErrorCode.CURRENT_PASSWORD_INVALID, ErrorCode.EMAIL_ALREADY_USED,
+    ErrorCode.BRANCH_NOT_BOOKABLE, ErrorCode.BRANCH_REQUIRED, ErrorCode.BRANCH_LIMIT_REACHED, ErrorCode.BRANCH_HAS_UPCOMING_BOOKINGS,
+    ErrorCode.LAST_BRANCH,
 )
 
 /** All codes are classified exactly once (checked by `ErrorTextTest`). */

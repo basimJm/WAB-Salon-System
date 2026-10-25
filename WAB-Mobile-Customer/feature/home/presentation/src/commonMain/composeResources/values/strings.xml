@@ -17,4 +17,9 @@
     <string name="home_distance_km">%1$s km</string>
     <string name="discovery_retry">Retry</string>
     <string name="discovery_error_server_body">Sorry, an unexpected problem occurred.</string>
+    <plurals name="home_branch_count">
+        <item quantity="one">%1$d branch</item>
+        <item quantity="many">%1$d branches</item>
+        <item quantity="other">%1$d branches</item>
+    </plurals>
 </resources>

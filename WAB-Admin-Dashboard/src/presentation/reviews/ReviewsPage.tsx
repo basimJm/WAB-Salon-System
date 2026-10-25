@@ -12,9 +12,10 @@ import { useLanguage } from '../hooks/useLanguage';
 import { reviewColumns } from './reviewColumns';
 import { ReviewReasonDialog, ReviewRowActions, type Ask } from './reviewParts';
 import { RATINGS, reviewFilters } from './reviewFilters';
+import { SalonBranchFilters } from '../shared/SalonBranchFilters';
 import { useReviewActions } from './useReviewActions';
 
-const OPTIONS = { filterKeys: ['status', 'target', 'rating'] };
+const OPTIONS = { filterKeys: ['status', 'target', 'rating', 'salon', 'branch'] };
 
 /** Admin PRD A22 · Reviews: the moderation queue (oldest first), published reviews, bulk decisions, removal. */
 export default function ReviewsPage() {
@@ -66,6 +67,16 @@ export default function ReviewsPage() {
           onClearAll: list.clearFilters,
           controls: (
             <>
+              <SalonBranchFilters
+                salon={state.filters['salon']?.[0] ?? ''}
+                branch={state.filters['branch']?.[0] ?? ''}
+                onChange={(v) =>
+                  list.setFilters({
+                    salon: v.salon ? [v.salon] : [],
+                    branch: v.branch ? [v.branch] : [],
+                  })
+                }
+              />
               <Select
                 label={t('reviews.target')}
                 value={target ?? ''}

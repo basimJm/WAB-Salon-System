@@ -8,7 +8,13 @@ import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
 
 /** `POST /bookings/drafts`, `GET/DELETE /bookings/drafts/{id}` (BUSINESS_DOMAIN §5.6: holds for 10 minutes). */
 interface BookingDraftRepository {
-    suspend fun create(salonId: String, paymentMethod: PaymentMethod, persons: List<DraftPerson>): AppResult<BookingDraft>
+    /** [branchId] is the branch chosen in step 0 (BUSINESS_DOMAIN §5.18); the draft and its booking keep it. */
+    suspend fun create(
+        salonId: String,
+        branchId: String?,
+        paymentMethod: PaymentMethod,
+        persons: List<DraftPerson>,
+    ): AppResult<BookingDraft>
 
     suspend fun get(draftId: String): AppResult<BookingDraft>
 
