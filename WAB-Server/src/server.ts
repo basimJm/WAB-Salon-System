@@ -87,6 +87,7 @@ import { createBookingCancelService } from './domain/bookings/bookingCancel.serv
 import { createPayoutDetailsService } from './domain/salons/payoutDetails.service';
 import { createFieldEncryption } from './utils/crypto/aesGcm';
 import { createMerchantFinanceService } from './domain/finance/merchantFinance.service';
+import { createMerchantReviewsService } from './domain/reviews/merchantReviews.service';
 import { createSubscriptionsService } from './domain/subscriptions/subscriptions.service';
 import { createPayoutsService } from './domain/payouts/payouts.service';
 import { PayoutsRepository } from './repositories/payouts.repository';
@@ -917,6 +918,12 @@ const buildServices = (
           }),
         }),
     adminSubscriptions: subscriptionsService,
+    merchantReviews: createMerchantReviewsService({
+      reviews: new ReviewsRepository(),
+      members: new MembersRepository(),
+      customers: new CustomersRepository(),
+      branches: branchesRepository,
+    }),
     merchantFinance: createMerchantFinanceService({
       payoutsService: adminPayouts,
       transactions: transactionsRepository,

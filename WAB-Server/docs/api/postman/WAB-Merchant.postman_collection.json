@@ -4004,6 +4004,72 @@
       ]
     },
     {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Published reviews of the salon or one staff member with average, count and star distribution (REVIEWS_VIEW; branch members: their branch only, else 403 BRANCH_SCOPE_DENIED)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "target",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "memberId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Notifications",
       "item": [
         {

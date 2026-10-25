@@ -34,6 +34,7 @@ import type { ReviewsService } from '../domain/reviews/reviews.service';
 import type { CustomerProfileService } from '../domain/customers/customerProfile.service';
 import type { BookingActionsService } from '../domain/bookings/bookingActions.service';
 import type { MerchantFinanceService } from '../domain/finance/merchantFinance.service';
+import type { MerchantReviewsService } from '../domain/reviews/merchantReviews.service';
 import type { PayoutDetailsService } from '../domain/salons/payoutDetails.service';
 import type { SubscriptionsService } from '../domain/subscriptions/subscriptions.service';
 import type { PayoutsService } from '../domain/payouts/payouts.service';
@@ -119,6 +120,7 @@ export interface ApiServices {
   readonly adminExports?: ExportsService;
   readonly payoutDetails?: PayoutDetailsService;
   readonly merchantFinance?: MerchantFinanceService;
+  readonly merchantReviews?: MerchantReviewsService;
   readonly adminSubscriptions?: SubscriptionsService;
   readonly bookingBulk?: BookingBulkService;
   readonly bookingAdmin?: BookingAdminService;
@@ -643,3 +645,5 @@ export const unavailableAdminBranches: AdminBranchesService = {
   setOnline: unavailable,
   close: unavailable,
 };
+
+export const unavailableMerchantReviews: MerchantReviewsService = { list: unavailable };
