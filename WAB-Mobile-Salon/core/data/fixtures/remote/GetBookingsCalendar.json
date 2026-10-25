@@ -1,0 +1,56 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "bookingId": "9c4da123781722a22f8c9e77",
+      "referenceNumber": "WAB-BMTWC8",
+      "status": "COMPLETED",
+      "staffId": "fc827df71cbabf2b54c74373",
+      "personName": "Salma",
+      "isBride": false,
+      "start": "2026-10-25T07:30:00.000Z",
+      "end": "2026-10-25T08:15:00.000Z"
+    },
+    {
+      "bookingId": "9c4da123781722a22f8c9e77",
+      "referenceNumber": "WAB-BMTWC8",
+      "status": "COMPLETED",
+      "staffId": "f19e6e99f356e698383204b7",
+      "personName": "Salma +1",
+      "isBride": false,
+      "start": "2026-10-25T07:30:00.000Z",
+      "end": "2026-10-25T08:30:00.000Z"
+    },
+    {
+      "bookingId": "9c4da123781722a22f8c9e77",
+      "referenceNumber": "WAB-BMTWC8",
+      "status": "COMPLETED",
+      "staffId": "f355da90c5d06e3c62149bab",
+      "personName": "Salma +2",
+      "isBride": false,
+      "start": "2026-10-25T07:30:00.000Z",
+      "end": "2026-10-25T08:00:00.000Z"
+    },
+    {
+      "bookingId": "5c2e8cd3917ba37f01b1b97f",
+      "referenceNumber": "WAB-W41CVC",
+      "status": "PENDING",
+      "staffId": "fc827df71cbabf2b54c74373",
+      "personName": "Zeina",
+      "isBride": false,
+      "start": "2026-10-28T08:30:00.000Z",
+      "end": "2026-10-28T09:15:00.000Z"
+    },
+    {
+      "bookingId": "6ade49a2c2cfb0cb993a17c5",
+      "referenceNumber": "WAB-H75ENZ",
+      "status": "PENDING",
+      "staffId": "58261b8d40ccc13279b480c6",
+      "personName": "Capture",
+      "isBride": false,
+      "start": "2026-10-30T08:00:00.000Z",
+      "end": "2026-10-30T09:00:00.000Z"
+    }
+  ]
+}

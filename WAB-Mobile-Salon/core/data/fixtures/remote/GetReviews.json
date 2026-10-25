@@ -1,0 +1,84 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "items": [
+      {
+        "id": "facafa118075bd96ffb63d69",
+        "customerName": "Dima",
+        "rating": 4,
+        "comment": "خدمة جيدة لكن المكان كان مزدحمًا.",
+        "createdAt": "2026-10-24T17:02:00.000Z",
+        "branch": {
+          "id": "6ade379d6cbc8f4cb1047d91",
+          "name": "Abdoun"
+        },
+        "staff": null
+      },
+      {
+        "id": "227032ea0934910d7307e85c",
+        "customerName": "Rasha",
+        "rating": 2,
+        "comment": "Clean, calm and professional. Loved it.",
+        "createdAt": "2026-10-19T13:25:00.000Z",
+        "branch": {
+          "id": "6ade379d6cbc8f4cb1047d91",
+          "name": "Abdoun"
+        },
+        "staff": null
+      },
+      {
+        "id": "bf6864872c208b2bc29b0cc6",
+        "customerName": "Zeina",
+        "rating": 4,
+        "comment": "تجربة ممتازة، الموظفين محترفين والمكان نظيف جدًا.",
+        "createdAt": "2026-10-11T19:22:00.000Z",
+        "branch": {
+          "id": "6ade379d6cbc8f4cb1047d91",
+          "name": "Abdoun"
+        },
+        "staff": null
+      },
+      {
+        "id": "499b5156d6ad04fd8c360ace",
+        "customerName": "Haya",
+        "rating": 5,
+        "comment": "تجربة ممتازة، الموظفين محترفين والمكان نظيف جدًا.",
+        "createdAt": "2026-10-03T20:26:00.000Z",
+        "branch": {
+          "id": "6ade379d6cbc8f4cb1047d91",
+          "name": "Abdoun"
+        },
+        "staff": null
+      },
+      {
+        "id": "bec22e2cffed46d3943ff213",
+        "customerName": "Nada",
+        "rating": 4,
+        "comment": "Friendly staff, but I waited ten minutes past my time.",
+        "createdAt": "2026-09-30T19:23:00.000Z",
+        "branch": {
+          "id": "6ade379d6cbc8f4cb1047d91",
+          "name": "Abdoun"
+        },
+        "staff": null
+      }
+    ],
+    "summary": {
+      "avg": 3.8,
+      "count": 5,
+      "distribution": {
+        "1": 0,
+        "2": 1,
+        "3": 0,
+        "4": 3,
+        "5": 1
+      }
+    }
+  },
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 5
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "from": "2026-10-19",
+    "to": "2026-10-25",
+    "branchId": null,
+    "bookings": {
+      "total": 7,
+      "byStatus": {
+        "PENDING": 0,
+        "APPROVED": 0,
+        "REJECTED": 0,
+        "CANCELLED_BY_CUSTOMER": 1,
+        "CANCELLED_BY_SALON": 0,
+        "AUTO_CANCELLED": 1,
+        "COMPLETED": 5,
+        "NO_SHOW": 0
+      },
+      "approvalRate": 100,
+      "cancellationRate": 28.6,
+      "noShowRate": 0,
+      "averageResponseMinutes": 34,
+      "brideBookings": 0,
+      "revenue": {
+        "online": "70.920",
+        "atSalon": "100.200",
+        "total": "171.120"
+      }
+    },
+    "profileViews": 0,
+    "reviews": {
+      "new": 3,
+      "averageRating": 3.8
+    },
+    "days": [
+      {
+        "date": "2026-10-19",
+        "bookings": 1,
+        "revenue": "26.400"
+      },
+      {
+        "date": "2026-10-20",
+        "bookings": 0,
+        "revenue": "0.000"
+      },
+      {
+        "date": "2026-10-21",
+        "bookings": 2,
+        "revenue": "30.000"
+      },
+      {
+        "date": "2026-10-22",
+        "bookings": 0,
+        "revenue": "0.000"
+      },
+      {
+        "date": "2026-10-23",
+        "bookings": 0,
+        "revenue": "0.000"
+      },
+      {
+        "date": "2026-10-24",
+        "bookings": 2,
+        "revenue": "51.120"
+      },
+      {
+        "date": "2026-10-25",
+        "bookings": 2,
+        "revenue": "63.600"
+      }
+    ],
+    "topServices": [
+      {
+        "id": "76393cc8569e0fe79b4e7f95",
+        "name": "Blow dry",
+        "bookings": 2
+      },
+      {
+        "id": "178eff5d56cd322ee48edcb4",
+        "name": "Haircut",
+        "bookings": 1
+      },
+      {
+        "id": "4cbcba00cab6988a97e0e242",
+        "name": "Manicure",
+        "bookings": 1
+      },
+      {
+        "id": "7be39931e2ea12cf18ca0dc2",
+        "name": "Pedicure",
+        "bookings": 1
+      },
+      {
+        "id": "8c9fae3316b3b03b4bc1ef4b",
+        "name": "Waxing",
+        "bookings": 1
+      }
+    ],
+    "topStaff": [
+      {
+        "id": "fc827df71cbabf2b54c74373",
+        "firstName": "Lina",
+        "bookings": 4,
+        "rating": 5
+      },
+      {
+        "id": "f19e6e99f356e698383204b7",
+        "firstName": "Dana",
+        "bookings": 2,
+        "rating": 4
+      },
+      {
+        "id": "f355da90c5d06e3c62149bab",
+        "firstName": "Hala",
+        "bookings": 1,
+        "rating": 0
+      }
+    ]
+  }
+}

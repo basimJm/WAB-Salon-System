@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "bookingId": "6ade4972c2cfb0cb993a17a8",
+      "outcome": "DONE",
+      "status": "REJECTED"
+    }
+  ]
+}

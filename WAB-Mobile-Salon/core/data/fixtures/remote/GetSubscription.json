@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "status": "ACTIVE",
+    "salonState": "LIVE",
+    "trialEndsAt": "2026-07-10T17:08:44.887Z",
+    "currentPeriodEnd": "2026-10-08T17:08:44.887Z",
+    "endsAt": "2026-10-08T17:08:44.887Z",
+    "daysRemaining": -17,
+    "endingSoon": false,
+    "lastPaymentAt": "2026-07-10T17:08:44.887Z"
+  }
+}

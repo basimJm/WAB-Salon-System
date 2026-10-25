@@ -1,0 +1,17 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "balance": "0.000",
+    "dueNow": "0.000",
+    "collected": "0.000",
+    "gatewayFees": "0.000",
+    "refunds": "0.000",
+    "paidOut": "0.000",
+    "lastPayout": {
+      "net": "73.332",
+      "periodTo": "2026-10-11T17:08:44.887Z",
+      "status": "TRANSFERRED"
+    }
+  }
+}

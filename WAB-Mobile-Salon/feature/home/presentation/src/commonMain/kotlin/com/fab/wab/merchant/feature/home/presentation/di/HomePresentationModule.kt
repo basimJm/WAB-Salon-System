@@ -4,6 +4,7 @@ import com.fab.wab.merchant.core.domain.permission.PermissionsSync
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.core.realtime.RealtimeClient
 import com.fab.wab.merchant.core.realtime.RealtimeEvents
+import com.fab.wab.merchant.core.realtime.withoutEchoes
 import com.fab.wab.merchant.feature.home.presentation.controller.vm.HomeDependencies
 import com.fab.wab.merchant.feature.home.presentation.controller.vm.HomeViewModel
 import kotlinx.coroutines.delay
@@ -42,7 +43,7 @@ val homePresentationModule = module {
                 refreshPermissions = { sync.refresh() },
                 analytics = get(),
                 clock = clockTicks(),
-                bookingChanges = get<RealtimeClient>().events.filter { it.name in DASHBOARD_EVENTS }.map { },
+                bookingChanges = get<RealtimeClient>().events.filter { it.name in DASHBOARD_EVENTS }.withoutEchoes().map { },
             ),
         )
     }

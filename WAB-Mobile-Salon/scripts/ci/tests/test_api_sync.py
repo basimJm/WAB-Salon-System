@@ -43,7 +43,9 @@ class ApiSyncTest(unittest.TestCase):
         self.spec = Path(self.tmp.name) / "openapi.customer.json"
         self.spec.write_text(json.dumps(SPEC), encoding="utf-8")
         self.out = Path(self.tmp.name) / "generated"
-        self.files, self.sha = api_sync.generate(self.spec)
+        self.test_out = Path(self.tmp.name) / "generated-test"
+        self.captured = Path(self.tmp.name) / "captured"
+        self.files, self.sha, self.test_files = api_sync.generate(self.spec)
 
     def tearDown(self) -> None:
         self.tmp.cleanup()
@@ -90,14 +92,41 @@ class ApiSyncTest(unittest.TestCase):
         otp = api_sync.sample_value({"type": "object", "properties": {"allowed": {"type": "boolean"}, "otpLength": {"type": "integer"}, "enabled": {"type": "boolean"}}}, "o", {})
         self.assertEqual({"allowed": True, "otpLength": 6, "enabled": False}, otp)
 
+    def args(self, *extra: str) -> list[str]:
+        return [*extra, "--spec", str(self.spec), "--out", str(self.out), "--test-out", str(self.test_out), "--captured", str(self.captured)]
+
     def test_check_mode_detects_stale_and_extra_files(self) -> None:
-        self.assertEqual(1, api_sync.main(["--check", "--spec", str(self.spec), "--out", str(self.out)]))
-        self.assertEqual(0, api_sync.main(["--spec", str(self.spec), "--out", str(self.out)]))
-        self.assertEqual(0, api_sync.main(["--check", "--spec", str(self.spec), "--out", str(self.out)]))
+        self.assertEqual(1, api_sync.main(self.args("--check")))
+        self.assertEqual(0, api_sync.main(self.args()))
+        self.assertEqual(0, api_sync.main(self.args("--check")))
         (self.out / "Old.kt").write_text("x", encoding="utf-8")
-        self.assertEqual(1, api_sync.main(["--check", "--spec", str(self.spec), "--out", str(self.out)]))
-        self.assertEqual(0, api_sync.main(["--spec", str(self.spec), "--out", str(self.out)]))
+        self.assertEqual(1, api_sync.main(self.args("--check")))
+        self.assertEqual(0, api_sync.main(self.args()))
         self.assertFalse((self.out / "Old.kt").exists())
+        self.assertTrue((self.test_out / api_sync.DECODERS_FILE).is_file())
+
+    def test_captured_response_replaces_the_schema_fixture_with_data_last(self) -> None:
+        self.captured.mkdir()
+        real = {"success": True, "data": [{"id": "s1"}], "meta": {"page": 1, "pageSize": 10, "total": 1}, "message": "Done"}
+        (self.captured / "GetSalonsBySalonId.json").write_text(json.dumps(real), encoding="utf-8")
+        files, _, _ = api_sync.generate(self.spec, self.captured)
+        fixtures = files["MockFixtures.kt"]
+        self.assertIn('\\"meta\\": {\\"page\\": 1, \\"pageSize\\": 10, \\"total\\": 1}, \\"data\\": [{\\"id\\": \\"s1\\"}]}', fixtures)
+        self.assertIn('val captured: Set<String> = setOf(\n        "GetSalonsBySalonId",\n    )', fixtures)
+        self.assertIn('val captured: Set<String> = setOf(\n    )', self.files["MockFixtures.kt"])
+
+    def test_decoders_map_every_operation_to_its_data_serializer(self) -> None:
+        decoders = self.test_files[api_sync.DECODERS_FILE]
+        self.assertIn('"GetSalonsBySalonId" to serializer<GetSalonsBySalonIdData>(),', decoders)
+        self.assertIn('"PutFavoritesBySalonId" to serializer<JsonElement>(),', decoders)
+        self.assertIn(self.sha, decoders)
+
+    def test_nullable_data_decodes_as_a_nullable_type(self) -> None:
+        spec = {"paths": {"/merchant/v1/salon/policy": {"get": {"tags": ["Salon policy"], "responses": {"200": {"content": {"application/json": {
+            "schema": {"type": "object", "properties": {"data": {"type": ["object", "null"], "properties": {"notes": {"type": "string"}}}}}}}}}}}}}
+        renderer = api_sync.Renderer(spec)
+        renderer.render("openapi.merchant.json", "sha")
+        self.assertEqual("GetSalonPolicyData?", renderer.data_types["GetSalonPolicy"])
 
 
 if __name__ == "__main__":

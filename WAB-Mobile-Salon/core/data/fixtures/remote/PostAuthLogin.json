@@ -1,0 +1,37 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "accessToken": "<redacted>",
+    "accessTokenExpiresAt": "2026-10-25T18:46:37.000Z",
+    "refreshToken": "<redacted>",
+    "refreshTokenExpiresAt": "2027-01-23T18:31:37.401Z",
+    "member": {
+      "id": "5d5a2009d2ef7b7693d075ed",
+      "salonId": "7fe703cdf5e7eec204bb193d",
+      "firstName": "Rana",
+      "lastName": "Haddad",
+      "phone": "+962789000001",
+      "role": "OWNER",
+      "permissions": [
+        "DASHBOARD_VIEW",
+        "BOOKINGS_VIEW_ALL",
+        "BOOKINGS_VIEW_OWN",
+        "BOOKINGS_RESPOND",
+        "BOOKINGS_OPERATE",
+        "SALON_PROFILE_MANAGE",
+        "GALLERY_MANAGE",
+        "WORKING_HOURS_MANAGE",
+        "SERVICES_MANAGE",
+        "STAFF_MANAGE",
+        "POLICIES_MANAGE",
+        "REVIEWS_VIEW",
+        "STATISTICS_VIEW",
+        "FINANCE_VIEW",
+        "SUBSCRIPTION_VIEW"
+      ],
+      "providesServices": false,
+      "branchId": null
+    }
+  }
+}

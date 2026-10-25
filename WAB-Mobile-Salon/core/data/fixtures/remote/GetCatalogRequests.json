@@ -1,0 +1,35 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "6ade49a2c2cfb0cb993a17b8",
+      "salonId": "7fe703cdf5e7eec204bb193d",
+      "salonName": null,
+      "name": "MER-054 contract capture (throwaway, please ignore)",
+      "description": "MER-054 contract capture (throwaway, please ignore)",
+      "imageKey": null,
+      "status": "PENDING",
+      "adminNote": null,
+      "catalogServiceId": null,
+      "createdAt": "2026-10-25T18:25:38.385Z"
+    },
+    {
+      "id": "d9fe6cc83b32ed9b0a61ce99",
+      "salonId": "7fe703cdf5e7eec204bb193d",
+      "salonName": null,
+      "name": "Lash lifting",
+      "description": "Lift and tint for natural lashes",
+      "imageKey": null,
+      "status": "PENDING",
+      "adminNote": null,
+      "catalogServiceId": null,
+      "createdAt": "2026-10-24T17:08:44.887Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 2
+  }
+}

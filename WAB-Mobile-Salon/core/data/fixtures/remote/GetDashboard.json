@@ -1,0 +1,155 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "salon": {
+      "id": "7fe703cdf5e7eec204bb193d",
+      "name": "Lamar Beauty Lounge",
+      "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/profile.jpg",
+      "state": "LIVE",
+      "missing": []
+    },
+    "subscriptionWarning": null,
+    "unreadNotifications": 19,
+    "pending": {
+      "count": 4,
+      "items": [
+        {
+          "id": "5c2e8cd3917ba37f01b1b97f",
+          "referenceNumber": "WAB-W41CVC",
+          "status": "PENDING",
+          "paymentMethod": "PAY_ON_ARRIVAL",
+          "paymentStatus": "PAY_ON_ARRIVAL",
+          "hasBride": false,
+          "appointmentStart": "2026-10-28T08:30:00.000Z",
+          "appointmentEnd": "2026-10-28T09:15:00.000Z",
+          "respondBy": "2026-10-28T09:30:00.000Z",
+          "requestedAt": "2026-10-25T17:03:44.887Z",
+          "personsCount": 1,
+          "total": "18.000",
+          "salon": null,
+          "branch": {
+            "id": "6ade379d6cbc8f4cb1047d91",
+            "name": "Abdoun",
+            "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون"
+          },
+          "customer": {
+            "id": "638e4440cfd0228b33fd0a08",
+            "name": "Zeina Khoury",
+            "phone": "+962799000014"
+          },
+          "staff": [
+            {
+              "id": "fc827df71cbabf2b54c74373",
+              "name": "Lina Hijazi"
+            }
+          ]
+        },
+        {
+          "id": "6ade49a2c2cfb0cb993a17c5",
+          "referenceNumber": "WAB-H75ENZ",
+          "status": "PENDING",
+          "paymentMethod": "PAY_ON_ARRIVAL",
+          "paymentStatus": "PAY_ON_ARRIVAL",
+          "hasBride": false,
+          "appointmentStart": "2026-10-30T08:00:00.000Z",
+          "appointmentEnd": "2026-10-30T09:00:00.000Z",
+          "respondBy": "2026-10-30T09:00:00.000Z",
+          "requestedAt": "2026-10-25T18:25:38.867Z",
+          "personsCount": 1,
+          "total": "46.200",
+          "salon": null,
+          "branch": {
+            "id": "3acd84491492d014f9fc54a0",
+            "name": "Dabouq",
+            "locationText": "Dabouq, King Abdullah II Street, Plaza 7"
+          },
+          "customer": {
+            "id": "6ade4972c2cfb0cb993a1799",
+            "name": "Capture Customer",
+            "phone": "+962799835263"
+          },
+          "staff": [
+            {
+              "id": "58261b8d40ccc13279b480c6",
+              "name": "Aya Abbadi"
+            }
+          ]
+        },
+        {
+          "id": "f9038d8d828940a5818b1025",
+          "referenceNumber": "WAB-ZY5F38",
+          "status": "PENDING",
+          "paymentMethod": "PAY_ON_ARRIVAL",
+          "paymentStatus": "PAY_ON_ARRIVAL",
+          "hasBride": false,
+          "appointmentStart": "2026-11-03T11:30:00.000Z",
+          "appointmentEnd": "2026-11-03T13:00:00.000Z",
+          "respondBy": "2026-11-03T12:30:00.000Z",
+          "requestedAt": "2026-10-25T16:40:44.887Z",
+          "personsCount": 1,
+          "total": "51.600",
+          "salon": null,
+          "branch": {
+            "id": "6ade379d6cbc8f4cb1047d91",
+            "name": "Abdoun",
+            "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون"
+          },
+          "customer": {
+            "id": "f025165b75ad7cc0fdf6effe",
+            "name": "Yara Khoury",
+            "phone": "+962799000023"
+          },
+          "staff": [
+            {
+              "id": "fc827df71cbabf2b54c74373",
+              "name": "Lina Hijazi"
+            }
+          ]
+        },
+        {
+          "id": "33f565ded79cd8e35b074e8f",
+          "referenceNumber": "WAB-PVX7Y7",
+          "status": "PENDING",
+          "paymentMethod": "PAY_ON_ARRIVAL",
+          "paymentStatus": "PAY_ON_ARRIVAL",
+          "hasBride": false,
+          "appointmentStart": "2026-11-04T12:15:00.000Z",
+          "appointmentEnd": "2026-11-04T12:45:00.000Z",
+          "respondBy": "2026-11-04T13:15:00.000Z",
+          "requestedAt": "2026-10-25T16:42:44.887Z",
+          "personsCount": 1,
+          "total": "9.600",
+          "salon": null,
+          "branch": {
+            "id": "6ade379d6cbc8f4cb1047d91",
+            "name": "Abdoun",
+            "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون"
+          },
+          "customer": {
+            "id": "5b2b19bd531aef32970b6407",
+            "name": "Shahd Rawashdeh",
+            "phone": "+962799000019"
+          },
+          "staff": [
+            {
+              "id": "fc827df71cbabf2b54c74373",
+              "name": "Lina Hijazi"
+            }
+          ]
+        }
+      ]
+    },
+    "today": {
+      "approved": 0,
+      "completed": 1,
+      "next": null,
+      "timeline": []
+    },
+    "quickStats": {
+      "bookings": 7,
+      "revenue": "171.120",
+      "rating": 3.8
+    }
+  }
+}
