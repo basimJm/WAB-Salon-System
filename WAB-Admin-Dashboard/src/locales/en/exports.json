@@ -13,7 +13,9 @@
       "REPORT_MONTHLY": "Monthly report",
       "TRANSACTIONS": "Transactions",
       "AUDIT_LOGS": "Audit log",
-      "BOOKINGS": "Bookings"
+      "BOOKINGS": "Bookings",
+      "CUSTOMERS": "Customers",
+      "SALONS": "Salons"
     },
     "failures": {
       "TOO_MANY_ROWS": "Too many rows: narrow the filters",

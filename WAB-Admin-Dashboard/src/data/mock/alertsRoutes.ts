@@ -25,8 +25,9 @@ const alert = (
 });
 export const MOCK_ALERTS = [
   alert(1, 'PAYMENT_FAILURE_SPIKE', 'CRITICAL', null),
-  alert(2, 'REFUND_FAILED', 'WARNING', 'refund'),
-  alert(3, 'SALON_APPLICATION', 'INFO', 'salon'),
+  // Subjects spelled like the real server (UPPER_SNAKE entity types, ADM-079).
+  alert(2, 'REFUND_FAILED', 'WARNING', 'REFUND'),
+  alert(3, 'SALON_APPLICATION', 'INFO', 'SALON'),
 ];
 
 export function alertsRoutes(): readonly MockRoute[] {

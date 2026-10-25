@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 import {
   buildCsp,
+  buildEnv,
   connectSources,
   headerRules,
   hostingFiles,
@@ -159,9 +160,55 @@ describe('write-hosting script', () => {
     rmSync(out, { recursive: true });
   });
 
+  it('reads the variant .env file when the host sets no variables (ADM-079)', () => {
+    const env = Object.fromEntries(
+      Object.entries(process.env).filter(
+        ([k]) => !k.startsWith('VITE_') && k !== 'CSP_CONNECT_EXTRA',
+      ),
+    );
+    const out = mkdtempSync(join(tmpdir(), 'wab-hosting-'));
+    const result = spawnSync(
+      process.execPath,
+      ['scripts/write-hosting.ts', 'prod-release', '--out', out],
+      { env, encoding: 'utf8' },
+    );
+    // The committed file itself (vite's loadEnv would mix in the VITE_ variables of this test process).
+    const file = Object.fromEntries(
+      readFileSync('.env.prod', 'utf8')
+        .split('\n')
+        .filter((line) => /^VITE_\w+=/.test(line))
+        .map((line) => [
+          line.slice(0, line.indexOf('=')),
+          line.slice(line.indexOf('=') + 1).trim(),
+        ]),
+    );
+    expect(result.status).toBe(0);
+    const csp = readFileSync(join(out, '_headers'), 'utf8');
+    expect(csp).toContain(httpsOrigin(file['VITE_API_BASE_URL'] ?? ''));
+    expect(csp).toContain(httpsOrigin(file['VITE_SOCKET_URL'] ?? '').replace('https:', 'wss:'));
+    rmSync(out, { recursive: true });
+  });
+
   it('fails for a prod variant without the origins', () => {
     const { out, result } = run(['prod-release'], { VITE_API_BASE_URL: '', VITE_SOCKET_URL: '' });
     expect(result.status).not.toBe(0);
     rmSync(out, { recursive: true, force: true });
+  });
+});
+
+describe('buildEnv', () => {
+  it('lets real variables win over the file, like vite.config.ts (an empty variable still wins)', () => {
+    const file = {
+      VITE_API_BASE_URL: 'https://file.example',
+      VITE_SOCKET_URL: 'https://file.example',
+    };
+    expect(buildEnv({}, file)).toEqual(file);
+    expect(buildEnv({ VITE_API_BASE_URL: 'https://env.example' }, file)['VITE_API_BASE_URL']).toBe(
+      'https://env.example',
+    );
+    expect(buildEnv({ VITE_SOCKET_URL: '' }, file)['VITE_SOCKET_URL']).toBe('');
+    expect(buildEnv({ VITE_SOCKET_URL: undefined }, file)['VITE_SOCKET_URL']).toBe(
+      'https://file.example',
+    );
   });
 });
