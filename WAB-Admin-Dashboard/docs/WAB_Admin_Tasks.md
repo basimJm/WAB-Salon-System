@@ -247,8 +247,8 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 | ADM-090 | Branch-aware salon editing: hours, closures, services/prices and staff per branch; move staff between branches | `feat/adm-090-branch-editing` | ADM-089 | SRV-141, SRV-147 | DONE |  |
 | ADM-091 | Branch filter and column across bookings, reviews, members/staff, transactions, refunds, ledger and exports; booking and review detail show the branch | `feat/adm-091-branch-filters` | ADM-088 | SRV-145, SRV-146, SRV-147 | DONE |  |
 | ADM-092 | Branches QA: every branch screen against the real server, AR/EN, light/dark, desktop/phone | `feat/adm-092-branches-qa` | ADM-089, ADM-090, ADM-091 | SRV-148 | DONE |  |
-| ADM-093 | Catalog request approval can map to an existing catalog service (SRV-125) instead of always creating a new one | `feat/adm-093-catalog-map-existing` | ADM-079 | SRV-125 | TODO | Gap G13 from ADM-079 (`docs/REMOTE_DEV_GAPS.md`). |
-| ADM-094 | Export menu on the customers and salons lists (export kinds `CUSTOMERS`, `SALONS`, SRV-126) | `feat/adm-094-list-exports` | ADM-079 | SRV-126 | TODO | Gap G14 from ADM-079. |
+| ADM-093 | Catalog request approval can map to an existing catalog service (SRV-125) instead of always creating a new one | `feat/adm-093-catalog-map-existing` | ADM-079 | SRV-125 | IN REVIEW | Gap G13 from ADM-079 (`docs/REMOTE_DEV_GAPS.md`). |
+| ADM-094 | Export menu on the customers and salons lists (export kinds `CUSTOMERS`, `SALONS`, SRV-126) | `feat/adm-094-list-exports` | ADM-079 | SRV-126 | IN REVIEW | Gap G14 from ADM-079. |
 | ADM-095 | Booking list/detail show the request time `requestedAt` (12-hour, Asia/Amman) | `feat/adm-095-booking-requested-at` | ADM-079 |  | IN REVIEW | Gap G15 from ADM-079. |
 
 ---

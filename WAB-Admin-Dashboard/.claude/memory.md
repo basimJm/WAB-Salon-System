@@ -49,7 +49,7 @@
 - ADM-036 done: content.faqs / content.contactInfo (AdminResource, filter app); shared ResourceDrawer (reason + errors + buttons) lives in components/overlay
 - ADM-037 done: uploads kit: repositories.uploads.upload(purpose, file, onProgress) = presign -> PUT (fakePutFile in mock) -> confirm; banners = repositories.banners.banners; date helpers dateToInstant/endDateToInstant (Amman days, end day included)
 - ADM-038 done: catalog services = repositories.catalog.services (AdminResource, filter gender); pages with a required audience use SegmentedControl in the header actions
-- ADM-039 done: catalog requests = repositories.catalog.requests {list, approve(id,input,reason), reject(id,reason)}; approve always creates a service (no map-to-existing option on the server)
+- ADM-039/093 done: catalog requests = repositories.catalog.requests {list, approve(id,input,reason), reject(id,reason)}; ApproveInput = create {name,description,imageKey?} | map {catalogServiceId} (ApproveDrawer, approveBodySchema with OBJECT_ID)
 - ADM-040 done: salons list = repositories.salons.list(query); shared hook useLocationOptions('cities'|'countries'); SearchField pages use list.setSearch(value) (immediate URL write)
 - ADM-041 done: record pages with a path param go in DETAIL_PAGES (app/routes.tsx); salons = repositories.salons.{list,get,members}
 - ADM-042 done: salon actions in SalonActions.tsx; payout details read = explicit click, gcTime 0; IBAN helpers isIban/normalizeIban in domain/salons. LESSON: after prettier, string replace anchors break silently - assert that a replacement happened.
@@ -69,7 +69,7 @@
 - ADM-063 done: analytics = repositories.analytics {overview,events}; useAnalyticsRange gives instants (and the previous period when comparing); EventsAnalyticsPage(prefix) is the shared event-family page
 - ADM-065 done: reports = repositories.reports {daily(date),weekly(from),monthly(YYYY-MM)}; ReportBody renders any of them
 - ADM-066 done: audit = repositories.audit.list(query); humanizeAction/hasDiff pure helpers
-- ADM-067 done: exports = repositories.exports {list,request,get}; useExportRunner()(kind, params) -> onExport(format) for ExportMenu; only REPORT_*, TRANSACTIONS and AUDIT_LOGS exist on the server
+- ADM-067 done: exports = repositories.exports {list,request,get}; useExportRunner()(kind, params) -> onExport(format) for ExportMenu; kinds REPORT_*, TRANSACTIONS, AUDIT_LOGS, BOOKINGS, CUSTOMERS, SALONS (list params via bookingExportParams / customerExportParams / salonExportParams, ADM-094)
 - ADM-078 done: fixtures coverage lives in tests/fixtures.test.ts (WITHOUT_FIXTURE has the 19 exempt operations: auth on MockAuthRepository and by-id reads no screen uses)
 - ADM-081 done: tests/pages-a11y.test.tsx renders every module screen in ar+en and runs axe; ChartFrame title is h2 styled as h3
 - ADM-068 done: profile = repositories.profile {get,saveAlertEmails,changePassword,requestEmailChange,verifyEmailChange}; page /profile from the topbar menu. LESSON: .gitignore had 'reports/' which hid src/{domain,data,presentation}/reports: the pattern is now '/reports/' and the files were rebuilt (ADM-064/065 sources had never been committed). tests/fixtures.test.ts NOT_BUILT_YET lists the new server operations; each ADM-069..073 task deletes its lines and has its Appendix A rows already
