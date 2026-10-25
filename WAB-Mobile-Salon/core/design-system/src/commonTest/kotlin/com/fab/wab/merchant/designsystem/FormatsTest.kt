@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.designsystem
 
 import com.fab.wab.merchant.designsystem.components.format.filsToDecimal
+import com.fab.wab.merchant.designsystem.components.format.oneDecimalText
 import com.fab.wab.merchant.designsystem.components.format.trimAmount
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,5 +20,14 @@ class FormatsTest {
         assertEquals("12.500", filsToDecimal(12_500))
         assertEquals("0.050", filsToDecimal(50))
         assertEquals("10", trimAmount(filsToDecimal(10_000)))
+    }
+
+    @Test
+    fun ratingsAndRatesShowOneDecimal() {
+        assertEquals("4.8", oneDecimalText(4.75))
+        assertEquals("5.0", oneDecimalText(5.0))
+        assertEquals("0.0", oneDecimalText(0.0))
+        assertEquals("12.5", oneDecimalText(12.46))
+        assertEquals("-1.5", oneDecimalText(-1.5))
     }
 }

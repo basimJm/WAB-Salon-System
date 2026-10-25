@@ -7,6 +7,7 @@ sealed interface NotificationTarget {
     data object CatalogRequests : NotificationTarget
     data object Finance : NotificationTarget
     data object Subscription : NotificationTarget
+    data object Reviews : NotificationTarget
 }
 
 /** Event prefixes of the server notifications (`booking.*`, `application.*`, …). */
@@ -16,11 +17,12 @@ private object EventPrefix {
     const val PAYOUT = "payout."
     const val REFUND = "refund."
     const val SUBSCRIPTION = "subscription."
+    const val REVIEW = "review."
 }
 
 /**
  * Booking → M09 (any event carrying a booking id), application → M05, catalog request → M16 requests,
- * payout / refund → M22, subscription → M23. Reviews (M20) wait for SRV-131, so they open nothing yet.
+ * payout / refund → M22, subscription → M23, review → M20 (sent only to members with REVIEWS_VIEW).
  */
 fun Notification.target(): NotificationTarget? {
     bookingId?.takeIf { it.isNotBlank() }?.let { return NotificationTarget.Booking(it) }
@@ -29,6 +31,7 @@ fun Notification.target(): NotificationTarget? {
         event.startsWith(EventPrefix.CATALOG) -> NotificationTarget.CatalogRequests
         event.startsWith(EventPrefix.PAYOUT) || event.startsWith(EventPrefix.REFUND) -> NotificationTarget.Finance
         event.startsWith(EventPrefix.SUBSCRIPTION) -> NotificationTarget.Subscription
+        event.startsWith(EventPrefix.REVIEW) -> NotificationTarget.Reviews
         else -> null
     }
 }

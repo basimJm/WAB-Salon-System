@@ -53,6 +53,7 @@ private class FakeSession : SessionStore {
     val sessionState = MutableStateFlow<SessionState>(SessionState.SignedIn(MemberProfile("m", "s", "Huda", MemberRole.OWNER)))
     val push = MutableStateFlow(true)
     var signedOut = 0
+    var cleared = 0
     override val state: Flow<SessionState> = sessionState
     override val pushEnabled: Flow<Boolean> = push
     override val overlayPermissionPrompted: Flow<Boolean> = MutableStateFlow(false)
@@ -70,7 +71,10 @@ private class FakeSession : SessionStore {
         signedOut += 1
         sessionState.value = SessionState.Guest
     }
-    override suspend fun clearAll() = Unit
+    override suspend fun clearAll() {
+        cleared += 1
+        sessionState.value = SessionState.Guest
+    }
 }
 
 private class FakeSettings : AppSettings {
@@ -141,6 +145,7 @@ class MoreViewModelTest {
     private val overlay = FakeOverlayPermission()
     private val alert = CountingAlert()
     private val auth = FakeAuth()
+    private val account = FakeAccount()
 
     private val tracker = object : AnalyticsTracker {
         val actions = mutableListOf<AnalyticsAction>()
@@ -164,6 +169,8 @@ class MoreViewModelTest {
             tracker,
             "1.2.0",
             12,
+            account,
+            { "failed" },
         ),
         testScope = backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
@@ -213,5 +220,39 @@ class MoreViewModelTest {
         viewModel.onEvent(UiAction.OnLogoutConfirm)
         assertEquals(listOf("r"), auth.loggedOut)
         assertEquals(1, session.signedOut)
+    }
+
+    @Test
+    fun accountPhotoPushSwitchOnTheServerAndRollbackOnFailure() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        val effects = mutableListOf<SideEffect>().also { list -> backgroundScope.launch { viewModel.sideEffect.collect { list += it } } }
+        assertEquals(ACCOUNT.photoUrl, viewModel.state.first { it.photoUrl != null }.photoUrl)
+        viewModel.onEvent(UiAction.OnAccount)
+        viewModel.onEvent(UiAction.OnPush(false))
+        assertEquals("push:false", account.calls.last())
+        assertFalse(session.push.value)
+        account.fail = true
+        viewModel.onEvent(UiAction.OnPush(true))
+        assertFalse(session.push.value, "the old value comes back")
+        assertEquals(listOf(SideEffect.OpenAccount, SideEffect.ShowError("failed")), effects)
+    }
+
+    @Test
+    fun ownerSendsADeletionRequestAndMembersLeave() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        viewModel.state.first { it.memberName.isNotEmpty() }
+        viewModel.onEvent(UiAction.OnDeleteAccount)
+        viewModel.onEvent(UiAction.OnDeletionNote("Closing the salon"))
+        viewModel.onEvent(UiAction.OnDeleteConfirm)
+        assertEquals("deletion:Closing the salon", account.calls.last())
+        assertEquals("2026-10-25T09:00:00Z", viewModel.state.first().deletionRequestedAt)
+        assertEquals(0, session.cleared)
+        assertTrue(tracker.actions.any { it.name == MoreAnalytics.ACTION_DELETE_REQUEST })
+        session.sessionState.value = SessionState.SignedIn(MemberProfile("m2", "s", "Sara", MemberRole.EMPLOYEE, "b1"))
+        viewModel.onEvent(UiAction.OnDeleteAccount)
+        viewModel.onEvent(UiAction.OnDeleteConfirm)
+        assertEquals("leave", account.calls.last())
+        assertEquals(1, session.cleared)
+        assertFalse(viewModel.state.first().deleteSheet)
     }
 }
