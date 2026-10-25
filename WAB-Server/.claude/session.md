@@ -10,6 +10,19 @@
 
 ## Current task
 
+### SRV-143 — Real-time, notifications and jobs per branch (Stage P)
+
+- Branch: `feat/srv-143-branch-realtime`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §7, §8, §9; API docs: no change — socket room names change for branch members, client impact MER-066):
+  - [x] Socket rooms: the owner joins `salon:{id}:respond|all` (every branch); a branch member `branch:{id}:respond|all` of their branch, by permission; refreshes leave the salon rooms too
+  - [x] Booking events emit to the salon rooms and to the booking's branch rooms (request card to `…:respond`, updates to `…:all`); assigned staff keep their `member:{id}` room
+  - [x] Notifications carry the booking's / branch's `branchId`: non-owner members of other branches are left out, the owner always included — so request, pending, reminder and auto-cancel recipients (jobs use the same producers) are the owner + members of that branch with the permission
+  - [x] Branch events (`branch.live|not_bookable|offline|online`) reach the owner and that branch's managers (`SALON_PROFILE_MANAGE`)
+- Tests: `tests/branchRealtime.test.ts` (4)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔ (merchant app keeps one socket; rooms are server-side), Architect ✔, QA ✔) — NOTE: a member moved to another branch stays in the old branch room until their socket reconnects (the move already triggers a permissions refresh on the device).
+
 ### SRV-142 — Booking with branch (Stage P)
 
 - Branch: `feat/srv-142-booking-branch`

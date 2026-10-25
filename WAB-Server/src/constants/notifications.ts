@@ -42,6 +42,9 @@ const customer: Audience = { who: 'customer' };
 const owner: Audience = { who: 'owner' };
 
 /** The matrix of BUSINESS_DOMAIN.md §8 (admin e-mails are sent by the alerts engine, not here). */
+/** Members who manage a branch's profile: with `branchId` on the event, that branch's managers. */
+const branchManagers: Audience = { who: 'members', permissions: ['SALON_PROFILE_MANAGE'] };
+
 export const NOTIFICATION_EVENTS = {
   'booking.created': { type: 'BOOKING', audiences: [customer] },
   'booking.requested': {
@@ -108,10 +111,10 @@ export const NOTIFICATION_EVENTS = {
   'salon.gender_changed': { type: 'SYSTEM', audiences: [owner] },
   'salon.edited_by_admin': { type: 'SYSTEM', audiences: [owner] },
   'salon.deletion_rejected': { type: 'SYSTEM', audiences: [owner] },
-  'branch.live': { type: 'SYSTEM', audiences: [owner] },
-  'branch.not_bookable': { type: 'SYSTEM', audiences: [owner] },
-  'branch.offline': { type: 'SYSTEM', audiences: [owner] },
-  'branch.online': { type: 'SYSTEM', audiences: [owner] },
+  'branch.live': { type: 'SYSTEM', audiences: [owner, branchManagers] },
+  'branch.not_bookable': { type: 'SYSTEM', audiences: [owner, branchManagers] },
+  'branch.offline': { type: 'SYSTEM', audiences: [owner, branchManagers] },
+  'branch.online': { type: 'SYSTEM', audiences: [owner, branchManagers] },
 } as const satisfies Record<string, EventDefinition>;
 
 export type NotificationEvent = keyof typeof NOTIFICATION_EVENTS;
