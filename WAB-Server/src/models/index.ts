@@ -19,6 +19,7 @@ import { FaqModel } from './faq.model';
 import { MaintenanceModel } from './maintenance.model';
 import { AreaModel } from './area.model';
 import { BannerModel } from './banner.model';
+import { BranchModel } from './branch.model';
 import { SalonModel } from './salon.model';
 import { SubscriptionModel } from './subscription.model';
 import { UploadModel } from './upload.model';
@@ -60,6 +61,7 @@ export const ALL_MODELS = [
   MaintenanceModel,
   BannerModel,
   SalonModel,
+  BranchModel,
   StaffLeaveModel,
   SalonServiceModel,
   CatalogRequestModel,

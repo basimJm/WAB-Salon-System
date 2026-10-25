@@ -10,6 +10,8 @@ import {
 /** A catalog service a salon offers, with its own price and duration (BUSINESS_DOMAIN.md §3.3). */
 export interface SalonServiceRaw {
   salonId: Types.ObjectId;
+  /** Branch (§3.3a); set on every new row, backfilled by the branch migration. */
+  branchId?: Types.ObjectId;
   catalogServiceId: Types.ObjectId;
   /** Integer fils, > 0. */
   price: number;
@@ -26,6 +28,7 @@ export interface SalonServiceRaw {
 const salonServiceSchema = new Schema<SalonServiceRaw>(
   {
     salonId: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
     catalogServiceId: { type: Schema.Types.ObjectId, ref: 'CatalogService', required: true },
     price: { type: Number, required: true, min: 1, validate: Number.isInteger },
     durationMinutes: {
@@ -45,5 +48,6 @@ const salonServiceSchema = new Schema<SalonServiceRaw>(
 );
 salonServiceSchema.index({ salonId: 1, catalogServiceId: 1 }, { unique: true });
 salonServiceSchema.index({ catalogServiceId: 1, active: 1 });
+salonServiceSchema.index({ branchId: 1, active: 1 });
 
 export const SalonServiceModel = model<SalonServiceRaw>('SalonService', salonServiceSchema);
