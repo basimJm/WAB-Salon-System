@@ -21,10 +21,10 @@ Delivers **push** (FCM, customer + merchant apps) and **email** (SMTP) behind on
 consumer ──> createNotifier(options) ──> Notifier  (sendPush / sendEmail / close)
                   │  validate → idempotency store → channel → events
                   ├── PushChannel   : fake | fcm | custom
-                  └── EmailChannel  : fake | smtp | custom
+                  └── EmailChannel  : fake | smtp | brevo | custom
 ```
 - **Swap any third party:** implement `PushChannel` or `EmailChannel` (one `send` method) and pass `{ provider: 'custom', channel }`. Nothing else changes.
-- Source layout: `constants/` (all defaults, FCM/SMTP code lists) · `errors/` · `config/` (zod-validated options, service-account parsing, prod rules) · `validation.ts` · `retry/` · `idempotency/` (memory, Redis) · `adapters/push/{fcm,fcmMessage,fcmErrors,fake}` · `adapters/email/{smtp,smtpErrors,fake}` · `adapters/vendors.ts` (the only file that touches firebase-admin / nodemailer, loaded lazily) · `templates/` · `notifier.ts` (composition).
+- Source layout: `constants/` (all defaults, FCM/SMTP code lists) · `errors/` · `config/` (zod-validated options, service-account parsing, prod rules) · `validation.ts` · `retry/` · `idempotency/` (memory, Redis) · `adapters/push/{fcm,fcmMessage,fcmErrors,fake}` · `adapters/email/{smtp,smtpErrors,brevo,httpErrors,fake}` · `adapters/vendors.ts` (the only file that touches firebase-admin / nodemailer, loaded lazily) · `templates/` · `notifier.ts` (composition).
 - `firebase-admin` is imported lazily on the first push, so projects that only send email never load it.
 
 ## 3. Public API
@@ -64,14 +64,15 @@ createNotifier({
   push:  { provider: 'fake' } | { provider: 'custom', channel }
        | { provider: 'fcm', credentials, projectId?, dryRun?, timeoutMs?, httpAgent?, legacyHttpTransport?, messaging? },
   email: { provider: 'fake' } | { provider: 'custom', channel }
-       | { provider: 'smtp', from: { name, address }, smtp: { host, port?, secure?, user?, pass?, timeoutMs? }, transport? },
+       | { provider: 'smtp', from: { name, address }, smtp: { host, port?, secure?, user?, pass?, timeoutMs? }, transport? }
+       | { provider: 'brevo', from: { name, address }, brevo: { apiKey, baseUrl?, timeoutMs? }, fetch? },
   retry?, limits?, idempotency?: { store?, ttlSec? }, logger?, onEvent?, retryDeps?,
 })
 ```
 | Option | Dev | Prod |
 |---|---|---|
 | `push` | `fake`, or `fcm` with the **dev** key and `dryRun: true` | `fcm` with the **prod** key; `fake` and `dryRun` refused |
-| `email` | `fake`, or `smtp` to Mailpit (`localhost:1025`, no auth) | `smtp` with `user` + `pass` (STARTTLS required); `fake` refused |
+| `email` | `fake`, or `smtp` to Mailpit (`localhost:1025`, no auth), or `brevo` with `baseUrl` pointing at a local mock | `smtp` with `user` + `pass` (STARTTLS required), or `brevo` (API key; `baseUrl` must be https); `fake` refused |
 | `idempotency.store` | memory (default) | **required**: `RedisIdempotencyStore` (shared by all instances) |
 | `push.projectId` | optional guard | recommended: must equal the key's project (catches a dev/prod key mix-up) |
 | `retry` | defaults: 3 attempts, 200 ms base, 5 s cap, ±20 % jitter | same |
@@ -88,6 +89,8 @@ Invalid options throw `NotificationError(NOTIFY_CONFIG_INVALID)` at creation, na
 ## 5. Status and result mapping (every vendor status handled)
 **FCM per token** (`messaging/*`): success → `SENT` · `registration-token-not-registered`, `invalid-registration-token`, and `invalid-argument` whose message says "registration token" (what real FCM returns for a malformed token) → `INVALID_TOKEN` (returned in `invalidTokens`) · `internal-error`, `server-unavailable`, `unknown-error`, `message-rate-exceeded`, `device-message-rate-exceeded`, `topics-message-rate-exceeded`, `quota-exceeded` → retried per token with backoff, then `FAILED` · `invalid-argument` / `invalid-payload` / `payload-size-limit-exceeded` → `FAILED` for that token; if **every** token in a batch is refused for the payload → throws `NOTIFY_PAYLOAD_INVALID` · auth codes (`authentication-error`, `third-party-auth-error`, `mismatched-credential`, `invalid-apns-credentials`, `app/invalid-credential`) → throws `NOTIFY_AUTH_FAILED` immediately · any other code → `FAILED` and a warning is logged.
 **FCM call-level** (whole request): retryable codes / no answer → retried; if nothing was delivered after the last attempt the last error is thrown, otherwise remaining tokens are `FAILED` · a response whose length differs from the batch → `NOTIFY_MALFORMED_RESPONSE` (retryable) · request timeout → `NOTIFY_TIMEOUT` (retryable).
+**Brevo HTTP API (NOT-012):** 200/201/202 → sent (body must be JSON, else `MALFORMED_RESPONSE`) · 401/403 (bad key, or an IP not on Brevo's authorised list) → `AUTH_FAILED` · 402 (no credits) → `QUOTA_EXCEEDED` · 429 → `RATE_LIMITED` (retryable) · 400 → `PAYLOAD_INVALID` · 5xx → `VENDOR_ERROR` (retryable) · fetch failure → `NETWORK_ERROR` (retryable) · abort/timeout → `TIMEOUT` (retryable) · any other status → `UNKNOWN` (logged). Brevo accepts or refuses the whole message, so `accepted` = every recipient on success. Vendor `code` from the error body goes to `details.vendorCode`.
+
 **SMTP:** `EAUTH`/535 → `AUTH_FAILED` · `550 5.4.5` / "sending limit" → `QUOTA_EXCEEDED` (not retried; Gmail personal accounts: 500 messages per rolling 24 h) · `ETIMEDOUT` → `TIMEOUT` · `ECONNECTION`/`ECONNREFUSED`/`ESOCKET`/`EDNS` → `NETWORK_ERROR` (retryable) · 421/450/451/452 → retryable `VENDOR_ERROR` · other 5xx → `VENDOR_ERROR` · `EENVELOPE` + 5xx (server refused all recipients) → **no throw**, every recipient is returned in `rejected` · partial refusals come back in `rejected` · unknown → `UNKNOWN`.
 Unknown vendor values are never treated as success.
 
@@ -174,3 +177,4 @@ NOT-01…07, NOT-10…14 ✅ (see §3–§6, §9). NOT-08 ✅ (sender name/addre
 |---|---|---|
 | 2026-10-14 | 0.0.0 | Design document created from the BRD. |
 | 2026-10-14 | 0.1.0 | First implementation: notifier, FCM + SMTP + fake + custom channels, templates, idempotency (memory/Redis), retry, config with dev/prod rules, 200 tests, loop test, package smoke; verified against the dev Firebase project. |
+| 2026-10-26 | 0.2.0 | NOT-012: Brevo transactional email over HTTPS (`provider: 'brevo'`) behind the same `EmailChannel`, for hosts that block SMTP ports (Render); global `fetch`, no new dependency; every status mapped; prod requires an https base URL; Brevo flow added to the loop test. |

@@ -13,5 +13,6 @@ export { FakePushChannel } from './adapters/push/fake';
 export { FakeEmailChannel } from './adapters/email/fake';
 export type { MessagingLike, FcmBatchResponse } from './adapters/push/fcm';
 export type { TransportLike, MailMessage } from './adapters/email/smtp';
+export type { FetchLike } from './adapters/email/brevo';
 export type { RetryPolicy, RetryDeps } from './retry';
 export type * from './types';
