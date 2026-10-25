@@ -9,12 +9,9 @@ import com.fab.wab.merchant.app.resources.request_handled
 import com.fab.wab.merchant.core.analytics.AnalyticsAction
 import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.analyticsParams
-import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
-import com.fab.wab.merchant.core.domain.ErrorCode
 import com.fab.wab.merchant.core.domain.booking.BookingStatus
 import com.fab.wab.merchant.core.notification.push.PushKeys
-import com.fab.wab.merchant.core.notification.push.PushNotification
 import com.fab.wab.merchant.core.notification.push.PushSignals
 import com.fab.wab.merchant.core.realtime.RealtimeEvents
 import com.fab.wab.merchant.core.ui.permission.OverlayPermission
@@ -47,7 +44,7 @@ class OutsideBookingRequests(
     /** An FCM data message: true when it was a booking request (handled here), false for the other notifications. */
     fun onPush(data: Map<String, String>): Boolean {
         if (data[PushKeys.EVENT] != RealtimeEvents.BOOKING_REQUESTED) return false
-        data[PushKeys.BOOKING_ID]?.let(::onBookingRequested)
+        bookingRequestId(data)?.let(::onBookingRequested)
         return true
     }
 
@@ -101,12 +98,3 @@ class OutsideBookingRequests(
         AnalyticsAction(name, analyticsParams { text(BookingsAnalytics.PARAM_CHANNEL, BookingsAnalytics.CHANNEL_NOTIFICATION) }),
     )
 }
-
-/** The same data an FCM booking-request message carries, for the in-app path. */
-internal fun requestPush(bookingId: String) = PushNotification(
-    title = "",
-    message = "",
-    data = mapOf(PushKeys.EVENT to RealtimeEvents.BOOKING_REQUESTED, PushKeys.BOOKING_ID to bookingId),
-)
-
-internal fun AppError.isAlreadyHandled(): Boolean = this is AppError.ServerError && code == ErrorCode.ALREADY_HANDLED

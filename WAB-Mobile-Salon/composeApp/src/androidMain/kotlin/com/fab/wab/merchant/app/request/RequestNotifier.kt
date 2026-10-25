@@ -39,7 +39,11 @@ internal class RequestNotifier(
     suspend fun show(details: BookingDetails) {
         ensureChannel()
         val id = details.summary.id
-        val start = TimeFormat.instantText(details.summary.start.toString(), getString(DesignRes.string.time_am), getString(DesignRes.string.time_pm))
+        val start = TimeFormat.instantText(
+            details.summary.start.toString(),
+            getString(DesignRes.string.time_am),
+            getString(DesignRes.string.time_pm),
+        )
         val total = getString(DesignRes.string.price_jod, trimAmount(details.money.total))
         val body = getString(Res.string.request_body, details.summary.customerName, start?.date.orEmpty(), start?.time.orEmpty(), total)
         val open = activityIntent(id)

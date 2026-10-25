@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -48,6 +49,7 @@ fun BookingRequestOverlayCard(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var error by remember { mutableStateOf<String?>(null) }
     var shown by remember { mutableStateOf(false) }
+    val currentOnClose by rememberUpdatedState(onClose)
     CollectSideEffect(viewModel.sideEffect) { effect ->
         when (effect) {
             is SideEffect.OpenDetails -> onOpenBooking(effect.id)
@@ -57,7 +59,7 @@ fun BookingRequestOverlayCard(
     }
     val sheet = state.toSheet()
     LaunchedEffect(sheet == null) {
-        if (sheet != null) shown = true else if (shown) onClose()
+        if (sheet != null) shown = true else if (shown) currentOnClose()
     }
     if (sheet == null) return
     TrackScreen(BookingsAnalytics.SCREEN_REQUEST_OVERLAY)
