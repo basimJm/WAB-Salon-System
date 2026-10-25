@@ -97,11 +97,13 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
   ): {
     customerId: string;
     salonId: string;
+    branchId?: string;
     staffIds: string[];
     data: { bookingId: string; salonId: string; deepLink: string };
   } => ({
     customerId: booking.customerId,
     salonId: booking.salonId,
+    ...(booking.branchId === undefined ? {} : { branchId: booking.branchId }),
     staffIds: [...new Set(booking.persons.map((p) => p.staffId))],
     data: {
       bookingId: booking.id,
@@ -255,6 +257,7 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
       await notifications.notify(event, {
         key: `${event}:${salonId}:${branch?.id ?? ''}:${area ?? ''}:${reason ?? ''}`,
         salonId,
+        ...(branch === undefined ? {} : { branchId: branch.id }),
         params: {
           salon: await salonName(salonId),
           branch: (language: Language) => (branch === undefined ? '' : branch.name[language]),
