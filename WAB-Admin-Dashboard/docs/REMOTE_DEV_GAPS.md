@@ -27,7 +27,7 @@ feature not built yet, needs a backlog row), **OK** (checked, no gap).
 | G12 | Alerts | `SALON_APPLICATION`, `REVIEW_PENDING`, `CATALOG_REQUEST` alerts come from the periodic `alerts:evaluate` job, so `alert.created` arrives minutes after the event (the `application.created` event itself is immediate) | — | OK (by design) |
 | G13 | Catalog requests | SRV-125: approval may map to an existing catalog service (`{catalogServiceId, reason}`) | ADM-093: approve drawer offers "Use an existing service" (active services of the salon's gender); id re-checked with OBJECT_ID | FIXED |
 | G14 | Exports | SRV-126: customers and salons exports exist on the server | ADM-094: export menu on the customers and salons lists (CUSTOMERS / SALONS with the list filters); `cityId` checked with OBJECT_ID | FIXED |
-| G15 | Bookings | `requestedAt` (when the customer sent the request) is not shown | — | OPEN |
+| G15 | Bookings | `requestedAt` (when the customer sent the request) | ADM-095: "Requested" column on the bookings list and a row in the booking details (Amman, 12-hour) | FIXED |
 | G16 | QA kit | `qa/stack.sh` failed to start the server when `WAB-Server/.env.development` enables the real notifier; repeated runs hit the admin login rate limit | `stack.sh` exports `NOTIFIER_PROVIDER`/`OTP_PROVIDER`/`PAYMENT_PROVIDER=fake`; `QA_ADMIN_TOKEN` reuses one sign-in | FIXED |
 
 Contract check result after the fix: 66 `OK`, 2 `BAD` = S3 only (handled in the repositories), 5 `SKIP`/`STATUS 400` =

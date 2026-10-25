@@ -10,6 +10,20 @@
 
 ## Current task
 
+### ADM-095 — Booking list/detail show the request time `requestedAt` (12-hour, Asia/Amman)
+
+- Branch: `feat/adm-095-booking-requested-at` (from `origin/admin`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD A15 list "created at" + details; design `06 Bookings` has a 100 px "Created" column; gap G15; operations getBookings / getBookingsById `requestedAt`):
+  - [x] `BookingSummary.requestedAt` (domain) read from the contract (list and details DTOs both carry it; the mock already sends it)
+  - [x] Bookings list: "Requested" / "وقت الطلب" column after Total (the PRD and the design both list the creation time, so the list has room), `formatInstant(…, 'dateTime')` = Asia/Amman, 12-hour, language digits
+  - [x] Booking details: "Requested" row between the appointment and the salon's answer deadline
+  - [x] G15 FIXED in `docs/REMOTE_DEV_GAPS.md`
+- Tests: tests/booking-requested-at.test.tsx (3: 21:30 UTC → "25 Oct 2026, 12:30 am" Amman day change, list column in EN, details row in AR); bookings tests unchanged green; `sh scripts/gate.sh` GATE OK (the first gate run had one test failing under machine load while other agents ran builds; a full `vitest run` then showed timeouts in the a11y/app/layers files, each passed alone, and the second gate run was green)
+- Browser check (dev-release against the local real stack, preview :4174, QA admin): EN LTR dark 1280 px bookings list: "Requested" is the last column (e.g. WAB-BW1JEZ appointment 27 Sept 9:30 am, requested 25 Sept 6:30 pm); AR RTL light 375 px list + details: "وقت الطلب = ٢٥ أيلول ٢٠٢٦، ٦:٣٠ م" for server `requestedAt` 2026-09-25T15:30:00Z (= 18:30 Amman), no horizontal page scroll, console clean
+- Loops: 1/1 — re-checked the shown values against the raw server answer (UTC → Amman) and each criterion against the tests
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — one domain field, one column, one detail row, existing date utility. DEVIATIONS: the bookings table already scrolled inside its wrapper at 1280 px (128 px minimum per column, 1008 px wrapper); the new column adds 128 px to that inner scroll (page itself does not scroll); no e2e (user decision).
+
 ### ADM-094 — Export menu on the customers and salons lists (export kinds `CUSTOMERS`, `SALONS`, SRV-126)
 
 - Branch: `feat/adm-094-list-exports` (from `origin/admin`)
