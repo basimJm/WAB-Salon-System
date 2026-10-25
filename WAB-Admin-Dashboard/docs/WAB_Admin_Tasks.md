@@ -250,7 +250,7 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 | ADM-093 | Catalog request approval can map to an existing catalog service (SRV-125) instead of always creating a new one | `feat/adm-093-catalog-map-existing` | ADM-079 | SRV-125 | DONE | Gap G13 from ADM-079 (`docs/REMOTE_DEV_GAPS.md`). |
 | ADM-094 | Export menu on the customers and salons lists (export kinds `CUSTOMERS`, `SALONS`, SRV-126) | `feat/adm-094-list-exports` | ADM-079 | SRV-126 | DONE | Gap G14 from ADM-079. |
 | ADM-095 | Booking list/detail show the request time `requestedAt` (12-hour, Asia/Amman) | `feat/adm-095-booking-requested-at` | ADM-079 |  | DONE | Gap G15 from ADM-079. |
-| ADM-096 | Re-sync the admin contract 1.5.0 after SRV-151 (`npm run api:sync`): correct id patterns (drop `data/api/objectId.ts` re-checks), branch status messages, gate + browser check of affected screens | `feat/adm-096-contract-sync` | ADM-095 | SRV-151 | IN REVIEW |  |
+| ADM-096 | Re-sync the admin contract 1.5.0 after SRV-151 (`npm run api:sync`): correct id patterns (drop `data/api/objectId.ts` re-checks), branch status messages, gate + browser check of affected screens | `feat/adm-096-contract-sync` | ADM-095 | SRV-151 | DONE |  |
 
 ---
 ## 5. Traceability matrix (nothing in the PRD or BRD is left without a task)
