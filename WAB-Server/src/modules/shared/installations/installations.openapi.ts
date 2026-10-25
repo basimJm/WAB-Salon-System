@@ -80,4 +80,26 @@ export const registerCustomerInstallationDocs = (registry: OpenAPIRegistry): voi
 
 export const registerMerchantInstallationDocs = (registry: OpenAPIRegistry): void => {
   registerDocs(registry, 'merchant');
+  registry.registerPath({
+    method: 'patch',
+    path: `${API_PREFIXES.merchant}${INSTALLATION_ROUTES.base}${INSTALLATION_ROUTES.pushEnabled}`,
+    tags: ['Installations'],
+    summary: 'Turn push notifications on or off',
+    description:
+      'The member’s switch (M25). Off means no push is sent (booking requests too), but notifications still appear in the in-app list.',
+    request: {
+      headers: z.object({ 'Accept-Language': acceptLanguageHeader }),
+      body: { required: true, content: { [JSON_CONTENT_TYPE]: { schema: pushEnabledSchema } } },
+    },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse('Saved', emptySchema),
+      ...errorResponses(
+        HTTP_STATUS.badRequest,
+        HTTP_STATUS.unauthorized,
+        HTTP_STATUS.forbidden,
+        HTTP_STATUS.tooManyRequests,
+        HTTP_STATUS.serviceUnavailable,
+      ),
+    },
+  });
 };

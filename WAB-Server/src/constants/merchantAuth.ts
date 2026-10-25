@@ -5,4 +5,7 @@ export const MERCHANT_AUTH_ROUTES = {
   login: '/login',
   refresh: '/refresh',
   logout: '/logout',
+  changePhone: '/change-phone',
 } as const;
+/** A member's own account (SRV-129, Merchant PRD M25). */
+export const MERCHANT_ME_ROUTES = { base: '/me' } as const;

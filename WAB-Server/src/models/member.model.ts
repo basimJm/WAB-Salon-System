@@ -42,6 +42,8 @@ export interface MemberRaw {
   /** Ignored for the OWNER, who has all permissions. */
   permissions: Permission[];
   active: boolean;
+  /** M25 push switch; in-app notifications are stored either way (§8). */
+  pushEnabled?: boolean;
   providesServices: boolean;
   staff?: StaffProfile;
   createdAt: Date;
@@ -114,6 +116,7 @@ const memberSchema = new Schema<MemberRaw>(
     role: { type: String, enum: MEMBER_ROLES, required: true },
     permissions: { type: [{ type: String, enum: PERMISSIONS }], default: [] },
     active: { type: Boolean, default: true },
+    pushEnabled: { type: Boolean, default: true },
     providesServices: { type: Boolean, default: false },
     staff: {
       type: staffSchema,

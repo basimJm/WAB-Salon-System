@@ -26,5 +26,6 @@ export const createMerchantInstallationsRouter = (services: ApiServices): Router
     app: 'MERCHANT',
     limiter: createOtpRouteLimiter(services),
     registerAuth: wiring?.merchantRequired ?? unavailable,
+    pushAuth: wiring?.merchantRequired ?? unavailable,
   });
 };

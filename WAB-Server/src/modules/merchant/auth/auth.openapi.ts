@@ -13,7 +13,8 @@ import {
 import { z } from '../../../docs/zod';
 import { checkPhoneSchema, loginSchema, refreshSchema } from './auth.validation';
 
-const memberSchema = z
+/** The session profile; also the base of `GET /merchant/v1/me`. */
+export const memberSchema = z
   .object({
     id: z.string(),
     salonId: z.string(),

@@ -10,10 +10,24 @@
 
 ## Current task
 
+### SRV-129 — Merchant member self-service (M25)
+
+- Branch: `feat/srv-129-member-self-service`
+- Status: IN REVIEW
+- Acceptance criteria (Merchant PRD M25, BUSINESS_DOMAIN §3.1 members (+`pushEnabled`), §8; operations `GET/PATCH /merchant/v1/me`, `POST /merchant/v1/auth/change-phone`, `PATCH /merchant/v1/installations/push-enabled` — client impact MER-049):
+  - [x] `GET /merchant/v1/me`: session profile + photo URL, branch (null for the owner), push switch
+  - [x] `PATCH /merchant/v1/me`: names and photo (only a confirmed MEMBER_PHOTO the member uploaded; `null` removes); role/permissions/branch stay owner-only
+  - [x] `POST /merchant/v1/auth/change-phone` (session + OTP limiter): OTP to the new number (purpose CHANGE_PHONE), 409 `PHONE_ALREADY_REGISTERED` when another member has it, OTP counters reset
+  - [x] `PATCH /merchant/v1/installations/push-enabled`: member switch; notifications to a member with push off are stored in-app but not pushed (requests too)
+  - [x] BUSINESS_DOMAIN members gain `pushEnabled: Boolean (default true)` (from PRD M25 and §8 "push respects pushEnabled")
+- Tests: `tests/memberSelf.test.ts` (5), `tests/installations.test.ts` (merchant switch now exists: customer token 403, member switch 200); full gate 152 suites green except that one stale assertion, fixed and its suites re-run (79 tests green)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔ (merchant namespace; same OTP verifier as customers), QA ✔) — DOMAIN NOTE: `members.pushEnabled` added in this PR (derived from PRD M25 + §8, not a new business decision).
+
 ### SRV-130 — Merchant dashboard aggregate (M07)
 
 - Branch: `feat/srv-130-merchant-dashboard`
-- Status: IN REVIEW
+- Status: DONE (PR #403)
 - Acceptance criteria (Merchant PRD M07, BUSINESS_DOMAIN §6; operation `GET /merchant/v1/dashboard`, booking rows gain `requestedAt` — client impact MER-050, MER-063):
   - [x] `GET /merchant/v1/dashboard` (`DASHBOARD_VIEW`): salon (name, profile image, state, missing checklist), subscription warning while ending soon (approved salons), unread notifications
   - [x] Pending requests card (`BOOKINGS_RESPOND`): count + newest 5; today (`BOOKINGS_VIEW_ALL|OWN`, own bookings only for VIEW_OWN): approved and completed counts, next approved booking, timeline of upcoming pending/approved; quick stats (`STATISTICS_VIEW`): last 7 days bookings, revenue (JOD), rating — sections the member may not see are `null`
@@ -37,20 +51,6 @@
 - Tests: `tests/merchantStatistics.test.ts` (5), `tests/salonDetails.test.ts` (+1 view tracked), `tests/audit.test.ts` (read-only `countFor` allowed); full gate 150 suites / 2755 tests
 - Loops: 1/1
 - Review: PASSED (SE ✔ (pure calculator + thin service; bookings of the period are loaded once, bounded by the 92-day cap), Mobile ✔, Architect ✔, QA ✔) — profile views start counting from this release (no history before).
-
-### SRV-131 — Merchant reviews read (M20), branch-scoped
-
-- Branch: `feat/srv-131-merchant-reviews`
-- Status: DONE (PR #401)
-- Acceptance criteria (Merchant PRD M20, BUSINESS_DOMAIN §5.11, §6 branch scope; operation `GET /merchant/v1/reviews` — client impact MER-042, MER-063):
-  - [x] `GET /merchant/v1/reviews?target=SALON|STAFF&memberId=&branchId=` (`REVIEWS_VIEW`): published reviews newest first, paginated; first name, stars, comment, date, branch label, staff for STAFF; review id = Report reference
-  - [x] Summary of the same scope: average (1 decimal), count, distribution per star
-  - [x] Branch members see their branch only (salon reviews by branch label, staff reviews of their branch's staff; another branch → 403 `BRANCH_SCOPE_DENIED`); the owner sees all with an optional `branchId`
-  - [x] `memberId` required for STAFF (400); unknown staff 404
-  - [x] Review view mapping shared with the customer list (`createReviewViews`), no duplication
-- Tests: `tests/merchantReviews.test.ts` (4) + reviews suites; full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔ (M20 fields), Architect ✔ (merchant namespace, permission + branch scope), QA ✔)
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 
