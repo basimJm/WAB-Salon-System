@@ -1,4 +1,4 @@
-import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import type { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi';
 import { HTTP_STATUS } from '../../../constants/http';
 import { MERCHANT_SERVICES_ROUTES } from '../../../constants/salonServices';
 import { API_PREFIXES } from '../../../constants/server';
@@ -30,8 +30,23 @@ const view = z.object({
   active: z.boolean(),
 });
 
-export const registerMerchantServicesDocs = (registry: OpenAPIRegistry): void => {
-  const base = `${API_PREFIXES.merchant}${MERCHANT_SERVICES_ROUTES.base}`;
+/**
+ * `options` registers the same paths under another base (the per-branch routes
+ * `/merchant/v1/branches/{branchId}/…`) with extra path params.
+ */
+export const registerMerchantServicesDocs = (
+  registry: OpenAPIRegistry,
+  options: { base?: string; params?: z.ZodObject; tagSuffix?: string } = {},
+): void => {
+  const base = options.base ?? `${API_PREFIXES.merchant}${MERCHANT_SERVICES_ROUTES.base}`;
+  const scope = options.params;
+  /** Adds the extra path params to a request (or the only params when it had none). */
+  type Request = NonNullable<RouteConfig['request']>;
+  const withScope = (request: Request): Request => {
+    if (scope === undefined) return request;
+    const params = request.params as z.ZodObject | undefined;
+    return { ...request, params: params === undefined ? scope : params.extend(scope.shape) };
+  };
   const headers = z.object({ 'Accept-Language': acceptLanguageHeader });
   const tags = ['Salon services'];
   const failures = errorResponses(
@@ -54,7 +69,7 @@ export const registerMerchantServicesDocs = (registry: OpenAPIRegistry): void =>
     path: base,
     tags,
     summary: 'The salon’s services (SERVICES_MANAGE), paginated',
-    request: { headers, query: servicesQuery },
+    request: withScope({ headers, query: servicesQuery }),
     responses: {
       [HTTP_STATUS.ok]: jsonResponse(
         'Services',
@@ -74,7 +89,7 @@ export const registerMerchantServicesDocs = (registry: OpenAPIRegistry): void =>
     tags,
     summary:
       'Offer a catalog service (same gender as the salon; bride-only only in women’s salons; once per salon)',
-    request: { headers, body: body(addServiceSchema) },
+    request: withScope({ headers, body: body(addServiceSchema) }),
     responses: {
       [HTTP_STATUS.created]: jsonResponse('Added', successResponseSchema(view)),
       ...failures,
@@ -86,7 +101,7 @@ export const registerMerchantServicesDocs = (registry: OpenAPIRegistry): void =>
     tags,
     summary:
       'Change price, duration, bride-only, description, media or switch the service off (active=false)',
-    request: { headers, params: serviceParams, body: body(updateServiceSchema) },
+    request: withScope({ headers, params: serviceParams, body: body(updateServiceSchema) }),
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Saved', successResponseSchema(view)),
       ...failures,

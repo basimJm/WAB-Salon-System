@@ -1,3 +1,4 @@
+import { scopeToBranch } from '../../middlewares/branchScope';
 import { Router } from 'express';
 import { MERCHANT_AUTH_ROUTES } from '../../constants/merchantAuth';
 import { OTP_ROUTES } from '../../constants/otp';
@@ -163,6 +164,33 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     createMerchantServicesRouter(
       services.salonServices ?? unavailableSalonServices,
       services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  // The same routers addressed to one branch (§3.3a): owner any branch, manager their own.
+  const branchScoped = (child: Router): Router => {
+    const scoped = Router({ mergeParams: true });
+    scoped.use(scopeToBranch);
+    mount(scoped, '', child);
+    return scoped;
+  };
+  mount(
+    router,
+    MERCHANT_BRANCH_ROUTES.hours,
+    branchScoped(
+      createMerchantHoursRouter(
+        services.hours ?? unavailableHours,
+        services.salonProfile?.guard ?? [unavailableGuard],
+      ),
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_BRANCH_ROUTES.services,
+    branchScoped(
+      createMerchantServicesRouter(
+        services.salonServices ?? unavailableSalonServices,
+        services.salonProfile?.guard ?? [unavailableGuard],
+      ),
     ),
   );
   mount(

@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { MERCHANT_HOURS_ROUTES } from '../../../constants/hours';
 import type { HoursService } from '../../../domain/salons/hoursService';
 import { requirePermission } from '../../../middlewares/permission';
+import { branchScopeOf } from '../../../middlewares/branchScope';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { sendCreated, sendSuccess } from '../../../utils/response/successResponse';
@@ -23,7 +24,7 @@ export const createMerchantHoursRouter = (
   router.get(
     '/',
     asyncHandler(async (req: Request, res: Response) => {
-      sendSuccess(req, res, { data: await service.get(salonOf(req), req.member?.branchId) });
+      sendSuccess(req, res, { data: await service.get(salonOf(req), branchScopeOf(req)) });
     }),
   );
   router.put(
@@ -32,7 +33,7 @@ export const createMerchantHoursRouter = (
     asyncHandler(async (req: Request, res: Response) => {
       const { days } = part<typeof weeklySchema>(req, 'body');
       sendSuccess(req, res, {
-        data: await service.setWeekly(salonOf(req), days, req.member?.branchId),
+        data: await service.setWeekly(salonOf(req), days, branchScopeOf(req)),
       });
     }),
   );
@@ -46,7 +47,7 @@ export const createMerchantHoursRouter = (
         res,
         await service.addClosure({
           salonId: salonOf(req),
-          scope: req.member?.branchId,
+          scope: branchScopeOf(req),
           ...input,
         }),
       );
@@ -61,7 +62,7 @@ export const createMerchantHoursRouter = (
       sendSuccess(req, res, {
         data: await service.updateClosure({
           salonId: salonOf(req),
-          scope: req.member?.branchId,
+          scope: branchScopeOf(req),
           id,
           ...patch,
         }),
@@ -73,7 +74,7 @@ export const createMerchantHoursRouter = (
     validate({ params: closureParams }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof closureParams>(req, 'params');
-      await service.removeClosure({ salonId: salonOf(req), id, scope: req.member?.branchId });
+      await service.removeClosure({ salonId: salonOf(req), id, scope: branchScopeOf(req) });
       sendSuccess(req, res);
     }),
   );

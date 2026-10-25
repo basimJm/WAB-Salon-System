@@ -1,3 +1,4 @@
+import type { BranchesRepository } from '../../repositories/branches.repository';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { Language } from '../../constants/enums';
 import type { CatalogServiceRaw } from '../../models/catalogService.model';
@@ -96,6 +97,8 @@ export interface SalonServicesDeps {
   readonly state: Pick<SalonStateService, 'recompute'>;
   /** Salon-level endpoint: new services belong to the salon's main branch (§5.16). */
   readonly mainBranches?: Pick<MainBranches, 'idOf'>;
+  /** An addressed branch must be one of this salon's (`BRANCH_NOT_FOUND`). */
+  readonly branches?: Pick<BranchesRepository, 'findInSalon'>;
 }
 
 const invalid = (
@@ -117,10 +120,16 @@ export const createSalonServicesService = ({
   uploads,
   state,
   mainBranches,
+  branches,
 }: SalonServicesDeps): SalonServicesService => {
   /** The caller's branch, else the salon's main branch (none before branch wiring: salon-wide). */
-  const branchFor = async (salonId: string, scope?: string): Promise<string | undefined> =>
-    scope ?? (await mainBranches?.idOf(salonId))?.toString();
+  const branchFor = async (salonId: string, scope?: string): Promise<string | undefined> => {
+    if (scope === undefined) return (await mainBranches?.idOf(salonId))?.toString();
+    if (branches !== undefined && (await branches.findInSalon(salonId, scope)) === null) {
+      throw new NotFoundError({ code: ERROR_CODES.BRANCH_NOT_FOUND });
+    }
+    return scope;
+  };
 
   const toView = (
     s: Entity<SalonServiceRaw>,

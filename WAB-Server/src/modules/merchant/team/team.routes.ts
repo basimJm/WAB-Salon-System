@@ -28,11 +28,11 @@ export const createMerchantTeamRouter = (
     requirePermission(['STAFF_MANAGE']),
     validate({ query: teamQuery }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { page, pageSize } = part<typeof teamQuery>(req, 'query');
+      const { page, pageSize, branchId } = part<typeof teamQuery>(req, 'query');
       const result = await service.list({
         salonId: salonOf(req),
         params: { page, pageSize },
-        branchId: req.member?.branchId,
+        branchId: req.member?.branchId ?? branchId,
       });
       sendPaginated(req, res, result.items, { page, pageSize }, result.meta.total);
     }),

@@ -42,4 +42,7 @@ export const MERCHANT_BRANCH_ROUTES = {
   offline: '/:branchId/offline',
   online: '/:branchId/online',
   close: '/:branchId/close',
+  /** The branch's hours/closures and services: the salon-level routers, addressed to one branch. */
+  hours: '/branches/:branchId/hours',
+  services: '/branches/:branchId/services',
 } as const;

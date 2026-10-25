@@ -10,6 +10,20 @@
 
 ## Current task
 
+### SRV-141 — Per-branch operations (Stage P)
+
+- Branch: `feat/srv-141-branch-operations`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.3, §5.12; API docs: `/merchant/v1/branches/{branchId}/hours[/weekly|/closures…]` and `/branches/{branchId}/services[/{id}]` + team list `?branchId=` — client impact MER-064/MER-065):
+  - [x] Hours, closures and services of one branch through the existing routers mounted under `/branches/{branchId}/…` (`scopeToBranch` + `branchScopeOf`): owner any branch of the salon, manager only their own (403 `BRANCH_SCOPE_DENIED`), another salon's branch or a malformed id 404 `BRANCH_NOT_FOUND`; same permissions as the salon-level routes
+  - [x] Services per branch: the same catalog service may be offered by several branches (unique per branch), 409 within one branch; the addressed branch must be the salon's
+  - [x] Owner filters the team list by branch (`?branchId=`); managers always get their own
+  - [x] Availability/conflicts per branch come from SRV-140 (branch-aware hours service and conflict finder); staff skills/schedules follow the member's branch
+  - [x] Branch management routes check the owner per route, so the per-branch operations under `/branches/{id}/…` stay open to managers
+- Tests: `tests/branchOperations.test.ts` (5 HTTP); docs regenerated
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — reuses the salon-level routers and services (no duplicate logic); staff skills/leaves stay member-addressed (`/team/members/{id}/…`), the branch is implied by the member.
+
 ### SRV-140 — Branch scope for merchant members (Stage P)
 
 - Branch: `feat/srv-140-branch-scope`
