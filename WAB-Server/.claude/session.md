@@ -13,7 +13,7 @@
 ### SRV-148 — Branches end to end (Stage P)
 
 - Branch: `feat/srv-148-branches-e2e`
-- Status: IN REVIEW
+- Status: DONE (PR #394)
 - Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.16; API docs: no change in this task — contract checked after SRV-136…147):
   - [x] `seed:demo`: after the main-branch migration, Lamar gets Khalda + Dabouq and Al-Ostaz gets Shmeisani, each complete with own place, hours, prices (percent of the main branch), a branch manager (bride-qualified in women's salons) and an employee; deterministic ids, insert-only; `branchCount` synced
   - [x] `Branch` is a demo collection; every demo branch row passes the real Mongoose schemas
