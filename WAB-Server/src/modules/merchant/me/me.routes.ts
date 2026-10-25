@@ -1,6 +1,6 @@
 import { Router, type Request, type RequestHandler, type Response } from 'express';
 import type { z } from 'zod';
-import { MERCHANT_AUTH_ROUTES } from '../../../constants/merchantAuth';
+import { MERCHANT_AUTH_ROUTES, MERCHANT_ME_ROUTES } from '../../../constants/merchantAuth';
 import type { MemberSelfService } from '../../../domain/team/memberSelf.service';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
@@ -31,6 +31,14 @@ export const createMerchantMeRouter = (
     asyncHandler(async (req: Request, res: Response) => {
       const patch = bodyOf<typeof updateMeSchema>(req);
       sendSuccess(req, res, { data: await service.update({ memberId: me(req), patch }) });
+    }),
+  );
+  router.post(
+    MERCHANT_ME_ROUTES.leave,
+    ...guard,
+    asyncHandler(async (req: Request, res: Response) => {
+      await service.leave({ memberId: me(req), salonId: req.member?.salonId ?? '' });
+      sendSuccess(req, res);
     }),
   );
   return router;

@@ -12,6 +12,8 @@ import {
 import { z } from '../../../docs/zod';
 import { memberSchema } from '../auth/auth.openapi';
 import { changePhoneSchema, updateMeSchema } from './me.validation';
+import { deletionRequestSchema } from '../salon/deletion.routes';
+import { MERCHANT_SALON_ROUTES } from '../../../constants/salon';
 
 const meSchema = memberSchema.extend({
   photoUrl: z.string().nullable(),
@@ -49,6 +51,39 @@ export const registerMerchantMeDocs = (registry: OpenAPIRegistry): void => {
       body: { required: true, content: { [JSON_CONTENT_TYPE]: { schema: updateMeSchema } } },
     },
     responses: { [HTTP_STATUS.ok]: ok, ...failures },
+  });
+  registry.registerPath({
+    method: 'post',
+    path: `${me}${MERCHANT_ME_ROUTES.leave}`,
+    tags: ['My account'],
+    summary:
+      'Delete my account (non-owner): removes my own access and ends my sessions; the owner gets 422 LAST_OWNER (use the salon deletion request)',
+    request: { headers },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse('Access removed', successResponseSchema(z.null())),
+      ...failures,
+    },
+  });
+  registry.registerPath({
+    method: 'post',
+    path: `${API_PREFIXES.merchant}${MERCHANT_SALON_ROUTES.base}${MERCHANT_SALON_ROUTES.deletionRequest}`,
+    tags: ['My account'],
+    summary:
+      'Owner: ask WAB to delete the salon (admin is alerted and contacts the owner); asking again while a request is open returns the same date',
+    request: {
+      headers,
+      body: {
+        required: false,
+        content: { [JSON_CONTENT_TYPE]: { schema: deletionRequestSchema } },
+      },
+    },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Request recorded',
+        successResponseSchema(z.object({ requestedAt: z.string() })),
+      ),
+      ...failures,
+    },
   });
   registry.registerPath({
     method: 'post',

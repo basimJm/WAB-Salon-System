@@ -127,6 +127,8 @@ export interface ApiServices {
   readonly merchantStatistics?: MerchantStatisticsService;
   readonly merchantDashboard?: MerchantDashboardService;
   readonly memberSelf?: MemberSelfService;
+  /** Owner deletion requests (merchant) and admin decisions share one service. */
+  readonly salonDeletion?: SalonDeletionService;
   readonly adminSubscriptions?: SubscriptionsService;
   readonly bookingBulk?: BookingBulkService;
   readonly bookingAdmin?: BookingAdminService;
@@ -427,7 +429,7 @@ export const unavailableAdminSalonInsights = {
     analytics: unavailable,
     activity: unavailable,
   } satisfies SalonInsightsService,
-  deletion: { decide: unavailable } satisfies SalonDeletionService,
+  deletion: { decide: unavailable, request: unavailable } satisfies SalonDeletionService,
 };
 
 export const unavailableAdminSalonEdit: AdminSalonEditService = {
@@ -663,4 +665,5 @@ export const unavailableMemberSelf: MemberSelfService = {
   get: unavailable,
   update: unavailable,
   changePhone: unavailable,
+  leave: unavailable,
 };

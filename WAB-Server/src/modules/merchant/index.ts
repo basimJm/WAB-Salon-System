@@ -46,6 +46,7 @@ import {
   unavailableMerchantStatistics,
   unavailableMerchantDashboard,
   unavailableMemberSelf,
+  unavailableAdminSalonInsights,
   unavailablePayoutDetails,
   unavailableBranches,
   unavailableGallery,
@@ -81,6 +82,7 @@ import { createMerchantProfileRouter } from './salon/profile.routes';
 import { createMerchantSalonRouter } from './salon/salon.routes';
 import { createMerchantAuthRouter } from './auth/auth.routes';
 import { createMerchantChangePhoneRouter, createMerchantMeRouter } from './me/me.routes';
+import { createSalonDeletionRequestRouter } from './salon/deletion.routes';
 import { MERCHANT_ME_ROUTES } from '../../constants/merchantAuth';
 
 /** Router for the /merchant/v1 namespace. Feature routers are mounted here as they are built. */
@@ -102,6 +104,14 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       services.memberSelf ?? unavailableMemberSelf,
       services.salonProfile?.guard ?? [unavailableGuard],
       createOtpRouteLimiter(services),
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_SALON_ROUTES.base,
+    createSalonDeletionRequestRouter(
+      services.salonDeletion ?? unavailableAdminSalonInsights.deletion,
+      services.salonProfile?.guard ?? [unavailableGuard],
     ),
   );
   mount(

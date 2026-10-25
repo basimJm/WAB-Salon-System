@@ -848,6 +848,15 @@ const buildServices = (
     uploads,
     deactivationConflicts: conflictFinder.deactivation,
   });
+  const salonDeletionService = createSalonDeletionService({
+    salons: new SalonsRepository(),
+    state: salonState,
+    bookings: conflictFinder.salon,
+    audit,
+    notifier: producers.salonStateNotifier,
+    logger,
+    alerts: adminAlerts,
+  });
   const merchantStatisticsService = createMerchantStatisticsService({
     bookings: bookingsRepository,
     reviews: new ReviewsRepository(),
@@ -960,12 +969,14 @@ const buildServices = (
     adminSubscriptions: subscriptionsService,
     merchantStatistics: merchantStatisticsService,
     merchantDashboard: merchantDashboardService,
+    salonDeletion: salonDeletionService,
     memberSelf: createMemberSelfService({
       members: new MembersRepository(),
       storage: providers.storage,
       uploads,
       phones: createPhoneVerifier(phoneServices),
       otpGate,
+      lifecycle: accountLifecycle,
     }),
     merchantReviews: createMerchantReviewsService({
       reviews: new ReviewsRepository(),
@@ -1020,14 +1031,7 @@ const buildServices = (
         auditLogs: new AuditLogsRepository(),
         settings,
       }),
-      deletion: createSalonDeletionService({
-        salons: new SalonsRepository(),
-        state: salonState,
-        bookings: conflictFinder.salon,
-        audit,
-        notifier: producers.salonStateNotifier,
-        logger,
-      }),
+      deletion: salonDeletionService,
     },
     policy: policyService,
     leaves: createLeavesService({
