@@ -1,5 +1,7 @@
 package com.fab.wab.merchant.feature.bookings.presentation.di
 
+import com.fab.wab.merchant.core.domain.session.SessionStore
+import com.fab.wab.merchant.core.domain.session.memberScope
 import com.fab.wab.merchant.feature.bookings.presentation.analytics.BookingsAnalytics
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingRequestsDependencies
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingRequestsViewModel
@@ -7,6 +9,7 @@ import com.fab.wab.merchant.feature.bookings.presentation.resources.Res
 import com.fab.wab.merchant.feature.bookings.presentation.resources.request_another_member
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.getString
 import org.koin.core.Koin
 
@@ -26,6 +29,7 @@ fun overlayRequestsViewModel(koin: Koin, requests: Flow<String>, scope: Coroutin
             analytics = koin.get(),
             anotherMember = { getString(Res.string.request_another_member) },
             channel = BookingsAnalytics.CHANNEL_OVERLAY,
+            memberScope = { koin.get<SessionStore>().state.first().memberScope() },
         ),
         testScope = scope,
     )

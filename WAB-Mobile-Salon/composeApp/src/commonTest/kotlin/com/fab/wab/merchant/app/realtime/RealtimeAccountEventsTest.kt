@@ -23,8 +23,8 @@ import kotlin.test.assertTrue
 
 private class RecordingSessionStore : SessionStore {
     var signOuts = 0
-    override val state: Flow<SessionState> =
-        MutableStateFlow(SessionState.SignedIn(MemberProfile("m1", "s1", "Rami", MemberRole.EMPLOYEE)))
+    val session = MutableStateFlow<SessionState>(SessionState.SignedIn(MemberProfile("m1", "s1", "Rami", MemberRole.EMPLOYEE)))
+    override val state: Flow<SessionState> = session
     override val pushEnabled: Flow<Boolean> = MutableStateFlow(true)
     override val overlayPermissionPrompted: Flow<Boolean> = MutableStateFlow(false)
     override suspend fun tokens(): AuthTokens? = null
@@ -74,5 +74,20 @@ class RealtimeAccountEventsTest {
         denied.emit(Unit)
         assertEquals(1, refreshes)
         assertEquals(0, store.signOuts)
+    }
+
+    @Test
+    fun aBranchMoveRenewsALiveConnectionSoTheServerJoinsTheNewRooms() = runTest(UnconfinedTestDispatcher()) {
+        val client = FakeRealtimeClient()
+        val store = RecordingSessionStore()
+        val sync = PermissionsSync({ TokenRefreshResult.Unavailable }, store)
+        RealtimeAccountEvents(client, sync, store, MutableSharedFlow()).start(backgroundScope) {}
+        store.session.value = SessionState.SignedIn(MemberProfile("m1", "s1", "Rami", MemberRole.EMPLOYEE, branchId = "b1"))
+        assertEquals(0, client.connectCalls, "a disconnected socket stays disconnected")
+        client.connect()
+        store.session.value = SessionState.SignedIn(MemberProfile("m1", "s1", "Rami", MemberRole.EMPLOYEE, branchId = "b2"))
+        assertEquals(2, client.connectCalls)
+        store.session.value = SessionState.SignedIn(MemberProfile("m1", "s1", "Rami Odeh", MemberRole.EMPLOYEE, branchId = "b2"))
+        assertEquals(2, client.connectCalls, "other profile changes keep the connection")
     }
 }

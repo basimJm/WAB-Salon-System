@@ -5,16 +5,22 @@ import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.ErrorCode
 import com.fab.wab.merchant.core.domain.booking.BookingStatus
+import com.fab.wab.merchant.core.domain.session.MemberScope
 import com.fab.wab.merchant.core.ui.alert.RequestAlert
 import com.fab.wab.merchant.core.ui.alert.RequestAlertSound
 import com.fab.wab.merchant.designsystem.components.booking.HandledBy
 import com.fab.wab.merchant.designsystem.components.booking.RequestSheetDefaults
+import com.fab.wab.merchant.feature.bookings.domain.model.BranchRef
 import com.fab.wab.merchant.feature.bookings.domain.model.ResponseReason
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.ActionMessage
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingRequestsContract.SideEffect
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingRequestsContract.UiAction
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingRequestsDependencies
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingRequestsViewModel
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -24,10 +30,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 private class RecordingAlert : RequestAlert {
     var plays = 0
@@ -80,6 +82,24 @@ class BookingRequestsViewModelTest {
         repository.detailsById["r3"] = details("r3", status = BookingStatus.APPROVED)
         requests.emit("r3")
         assertEquals(2, viewModel.state.first().queue.size)
+    }
+
+    @Test
+    fun branchMembersOnlyQueueRequestsOfTheirBranch() = runTest(UnconfinedTestDispatcher()) {
+        val mine = details("r1").let { it.copy(summary = it.summary.copy(branch = BranchRef("b1", "Abdoun", null))) }
+        val other = details("r2").let { it.copy(summary = it.summary.copy(branch = BranchRef("b2", "Khalda", null))) }
+        repository.detailsById["r1"] = mine
+        repository.detailsById["r2"] = other
+        val viewModel = BookingRequestsViewModel(
+            BookingRequestsDependencies(
+                repository, requests, updates, emptyFlow(), alert, NoOpAnalyticsTracker, { "another member" }, { "failed" },
+                memberScope = { MemberScope.OneBranch("b1") },
+            ),
+            testScope = backgroundScope,
+        ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
+        requests.emit("r2")
+        requests.emit("r1")
+        assertEquals(listOf("r1"), viewModel.state.first().queue.map { it.summary.id }, "MER-066: another branch's request is dropped")
     }
 
     @Test

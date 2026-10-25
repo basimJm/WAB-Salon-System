@@ -4,6 +4,7 @@ import com.fab.wab.merchant.core.domain.session.MemberProfile
 import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.domain.session.MemberScope
 import com.fab.wab.merchant.core.domain.session.SessionState
+import com.fab.wab.merchant.core.domain.session.memberScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -42,5 +43,15 @@ class BranchScopeTest {
         assertEquals(BranchPermissions.GRANTABLE, PermissionTemplates.MANAGER)
         BranchPermissions.OWNER_SCOPE_ONLY.forEach { assertFalse(it in BranchPermissions.GRANTABLE, it.name) }
         assertEquals(Permission.entries.size, BranchPermissions.GRANTABLE.size + BranchPermissions.OWNER_SCOPE_ONLY.size)
+    }
+
+    @Test
+    fun bookingsOfAnotherBranchAreRefusedForBranchMembersOnly() {
+        assertTrue(MemberScope.AllBranches.accepts("b9"))
+        assertTrue(MemberScope.OneBranch("b1").accepts("b1"))
+        assertFalse(MemberScope.OneBranch("b1").accepts("b2"))
+        assertTrue(MemberScope.OneBranch(null).accepts("b2"), "unknown member branch: the server already routed it")
+        assertTrue(MemberScope.OneBranch("b1").accepts(null), "a booking without a branch (older data)")
+        assertEquals(MemberScope.OneBranch(null), SessionState.Guest.memberScope())
     }
 }

@@ -46,7 +46,20 @@ sealed interface MemberScope {
     data object AllBranches : MemberScope
 
     data class OneBranch(val branchId: String?) : MemberScope
+
+    /**
+     * MER-066 (BUSINESS_DOMAIN §7–§8): does a booking of [bookingBranchId] belong to this member? The owner gets every
+     * branch; a branch member only theirs. Unknown on either side (older server, booking without a branch) = trust the
+     * server, which already routes rooms and pushes per branch.
+     */
+    fun accepts(bookingBranchId: String?): Boolean = when (this) {
+        AllBranches -> true
+        is OneBranch -> branchId == null || bookingBranchId == null || bookingBranchId == branchId
+    }
 }
+
+/** The member's scope from the session (a guest = no branch known). */
+fun SessionState.memberScope(): MemberScope = (this as? SessionState.SignedIn)?.member?.scope ?: MemberScope.OneBranch(null)
 
 /** Who is using the app right now; derived from the session store, never built by features. */
 sealed interface SessionState {

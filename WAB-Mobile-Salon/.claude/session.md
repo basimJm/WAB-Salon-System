@@ -9,6 +9,18 @@
 
 ## Current task
 
+### MER-066 — Real-time and push per branch
+- Branch: `feat/mer-066-branch-realtime`
+- Branched: (from `feat/mer-065-team-branches`, after the batch 10 review commit)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §7 rooms `salon:{id}:*` / `branch:{id}:*`, §8 recipients, §5.18 requests to the owner + that branch's responders):
+  - [x] Rooms stay server-side (joined at connection from the member's role / branch); the app reconnects a live socket when the signed-in member's scope changes (moved to another branch, role change) so the server joins the new rooms; other profile changes and a disconnected socket are left alone
+  - [x] Request alerts only for the member's branch: the in-app / overlay request queue and the Android outside-the-app path drop a request whose booking `branch.id` is not the branch member's (`MemberScope.accepts`); the owner gets every branch; an unknown branch on either side trusts the server routing
+  - [x] The owner's request card names the branch (MER-063)
+- Tests: `BranchScopeTest` (+1, `accepts` / `memberScope`), `BookingRequestsViewModelTest` (+1), `RealtimeAccountEventsTest` (+1); domain / bookings / composeApp host tests + `assembleDevDebug` green; policy ok
+- Loops: 1/1 — batch 11 run (MER-066 alone, last row): policy ok, `testAndroidHostTest` all modules 151 suites / 514 tests / 0 failures, `:androidApp:assembleDevDebug` green; criteria re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — small, defensive change on top of the server routing; no new dependency; the socket renew is limited to live connections. DEVIATIONS: socket payloads and push data carry no `branchId` (server), so branch filtering happens after the details fetch; iOS alerts are shown by APNs before the app runs (no notification service extension), so an already-sent push for another branch cannot be suppressed there — the server routes them per branch; UI check deferred to the end-of-backlog journey.
+
 ### MER-065 — Team with branches
 - Branch: `feat/mer-065-team-branches`
 - Branched: (from `feat/mer-064-branch-operations`)

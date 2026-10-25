@@ -3,19 +3,21 @@ package com.fab.wab.merchant.feature.bookings.presentation.di
 import com.fab.wab.merchant.core.domain.branch.BranchSelection
 import com.fab.wab.merchant.core.domain.branch.branchScopeOf
 import com.fab.wab.merchant.core.domain.session.SessionStore
+import com.fab.wab.merchant.core.domain.session.memberScope
 import com.fab.wab.merchant.core.notification.push.PushSignals
 import com.fab.wab.merchant.feature.bookings.presentation.controller.calendar.localDate
-import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.CalendarDependencies
-import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.CalendarViewModel
-import kotlin.time.Clock
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingDetailsViewModel
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingRequestsDependencies
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingRequestsViewModel
-import com.fab.wab.merchant.feature.bookings.presentation.resources.Res
-import com.fab.wab.merchant.feature.bookings.presentation.resources.request_another_member
-import org.jetbrains.compose.resources.getString
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingsDependencies
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingsViewModel
+import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.CalendarDependencies
+import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.CalendarViewModel
+import com.fab.wab.merchant.feature.bookings.presentation.resources.Res
+import com.fab.wab.merchant.feature.bookings.presentation.resources.request_another_member
+import kotlin.time.Clock
+import kotlinx.coroutines.flow.first
+import org.jetbrains.compose.resources.getString
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -50,6 +52,7 @@ val bookingsPresentationModule = module {
                 alert = get(),
                 analytics = get(),
                 anotherMember = { getString(Res.string.request_another_member) },
+                memberScope = { get<SessionStore>().state.first().memberScope() },
             ),
         )
     }

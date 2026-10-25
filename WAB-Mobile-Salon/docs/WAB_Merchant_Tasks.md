@@ -116,7 +116,7 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 | MER-063 | Branch-scoped bookings, requests, calendar, dashboard, statistics and reviews (manager: own branch only; owner: switcher) | `feat/mer-063-branch-scope` | MER-062, SRV-140, SRV-142 | IN REVIEW | §6 branch scope. |
 | MER-064 | Per-branch hours, closures and services/prices | `feat/mer-064-branch-operations` | MER-062, SRV-141 | IN REVIEW |  |
 | MER-065 | Team with branches: new member requires a branch; owner moves staff between branches (conflict flow); managers see their branch's staff; permission editor hides FINANCE_VIEW / SUBSCRIPTION_VIEW / POLICIES_MANAGE for branch members | `feat/mer-065-team-branches` | MER-062, SRV-140, SRV-141 | IN REVIEW |  |
-| MER-066 | Real-time and push per branch: branch rooms, request alerts only for the member's branch (owner: all) | `feat/mer-066-branch-realtime` | MER-063, SRV-143 | BLOCKED | §7, §8. |
+| MER-066 | Real-time and push per branch: branch rooms, request alerts only for the member's branch (owner: all) | `feat/mer-066-branch-realtime` | MER-063, SRV-143 | IN REVIEW | §7, §8. |
 
 ## 4. Traceability (PRD screen → task)
 M01 MER-019 · M02 MER-020 · M03 MER-021 · M04 MER-022 · M05 MER-023 · M06 MER-025 · M07 MER-050 · M08 MER-026 · M09 MER-027 · M10 MER-028/029/030 · M11 MER-031 · M12 MER-032 · M13 MER-033 · M14 MER-034 · M15 MER-035 · M16 MER-036/037 · M17 MER-038/039 · M18 MER-040 · M19 MER-041 · M20 MER-042 · M21 MER-043 · M22 MER-044/045 · M23 MER-046 · M24 MER-047 · M25 MER-048/049 · M26 MER-019 · §4 MER-024 · §6 MER-009/040 · §11 MER-012/047 · §14 MER-010/051.
