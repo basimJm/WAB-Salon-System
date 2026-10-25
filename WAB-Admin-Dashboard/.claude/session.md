@@ -10,6 +10,23 @@
 
 ## Current task
 
+### ADM-096 — Re-sync the admin contract 1.5.0 after SRV-150/151; drop the S6 id workarounds; alert titles; branch status messages
+
+- Branch: `feat/adm-096-contract-sync` (from `origin/admin`)
+- Status: IN REVIEW
+- Acceptance criteria (task row; SRV-150 alerts `titles {ar,en}` + `entityType` enum, SRV-151 id patterns `^[a-fA-F0-9]{24}$` + branch status messages; operations: every admin operation with an id field, getAlerts/postAlertsByIdAcknowledge, postSalonsByIdBranchesByBranchId{Main,Close,...}):
+  - [x] `npm run api:sync` (contract 1.3.0 → 1.5.0); typecheck/test fallout fixed (mock alerts now send `titles` + enum subject)
+  - [x] S6 workarounds removed everywhere the generated schema is now correct: `data/api/objectId.ts` deleted; bookings, catalog approve, customers (list + patch), exports (generated per-kind union), branches create/update, transactions + reconciliation, locations areas, reviews (list + bulk), refunds, salons (list + members), salon edit (profile, gallery order, hours/closures/services query + body, member branch, staff), audit, recommended, payouts, campaigns, and the mocks; branch-aware endpoints use `optionalQuery(dto.<op>QuerySchema)` (`data/api/endpoint.ts`)
+  - [x] Alerts: `alertTitle(alert, language)` = `titles[language]`, fallback `title`; the list uses it (no socket toast shows titles; realtime only invalidates queries); repository tolerates servers before 1.4.0 (`titles` optional, `entityType` string, `alertLink` keeps normalizing)
+  - [x] Branch status refusals: the panel already shows the server `message` in the branches-tab `InlineAlert`; mock now answers `INVALID_TRANSITION` with the server's branch wording (AR+EN, `MockBusinessError` messageKey)
+  - [x] `docs/SERVER_ISSUES.md` S6 (SRV-151), S11/S12 (SRV-150) FIXED; `docs/REMOTE_DEV_GAPS.md` G10 FIXED, G13/G14 wording, G17 added
+- Tests: new tests/contract-ids.test.ts (snapshot has only `^[a-fA-F0-9]{24}$`; 32 former override sites accept lower/upper-case real ids and refuse malformed; optionalQuery; no `{24}` left in `src/data`; export + reconciliation through the repositories), tests/alert-titles.test.tsx (4), tests/branch-status-messages.test.tsx (3); catalog-approve / branchesContract / locations tests moved to the generated schemas; `vitest run` 110 files, 1285 tests green; `sh scripts/gate.sh` GATE OK
+- Browser check (dev-release built against the local real stack, preview :4174, QA admin, AR RTL; the stack still runs the OLD server build, before SRV-150/151): with real ids `bookings?salon=`, `transactions?salon=`, `reviews?salon=`, `refunds?salon=`, reconciliation, salon details, salon edit hours (no branch query = main) + "check affected bookings" preview (POST with optional query) + services, catalog requests, payouts, recommended, audit: every screen loads with no error alert; a malformed id (`undefined`) is refused client-side with the validation alert; alerts list 20 rows, links to /catalog/requests, /salons/applications/:id, /salons/:id (old-server titles are English: fallback works), 1280 px dark and 375 px light, no horizontal page scroll; console: only the 400s of my own `/salons/undefined` probes and one 401 from an unauthenticated manual fetch
+- Loops: 1/1 — re-checked every criterion against the diff, the tests and the old real stack; the new "no `{24}` in data" test found four sites the task row did not name (audit, recommended, payouts, campaigns) and they were moved too
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — generated schemas only (one guarded cast for the export body: the screens build `params` as a record, the generated union validates them before the request); tolerances for pre-1.4.0 alert answers are documented in the repository. DEVIATIONS: the new Arabic alert titles and the branch status messages could not be seen on a real server (local stack runs the pre-SRV-150 build; covered by mock + unit tests); branch-filtered real calls not exercised (Noor has one branch on the stack); EN language not switched in the real-stack pass (EN covered by tests); domain-level form checks in `banners.ts` / `campaigns.ts` keep their own case-insensitive id regex (user input validation, not an S6 workaround); no e2e (user decision).
+
+## Last blocks
+
 ### ADM-095 — Booking list/detail show the request time `requestedAt` (12-hour, Asia/Amman)
 
 - Branch: `feat/adm-095-booking-requested-at` (from `origin/admin`)
@@ -37,45 +54,3 @@
 - Browser check (dev-release against the local real stack, preview :4174, QA admin): AR RTL light 375 px customers `?status=ACTIVE`: "تصدير" menu with three formats, Excel → server job `CUSTOMERS {status: ACTIVE}` DONE, 25 rows, signed download link opened; EN LTR dark 1280 px salons `?state=LIVE&gender=FEMALE`: Export at the header end, Excel → `SALONS {state, gender}` DONE and opened; CSV → job FAILED `GENERATION_FAILED` on the server (known S5: CSV/PDF fail on the real S3 storage) and the menu shows its failure toast; no horizontal page scroll; console clean
 - Loops: 1/1 — re-checked every criterion against the contract params, the tests and the real job answers
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — reuses ExportMenu/useExportRunner, no contract hand edit, customers page query logic moved to a tested pure function. DEVIATIONS: salons export ignores the recommended / deletion-request switches (server has no such params); CSV/PDF fail on the real stack because of S5 (server); a city filter was not exercised against the real server (schema covered by unit test); no e2e (user decision).
-
-### ADM-093 — Catalog request approval can map to an existing catalog service (SRV-125)
-
-- Branch: `feat/adm-093-catalog-map-existing` (from `origin/admin`)
-- Status: IN REVIEW
-- Acceptance criteria (PRD A23 Requests "creates or maps to a catalog service"; gap G13; operation postCatalogRequestsByIdApprove body = `{catalogServiceId, reason}` | `{name, description, imageKey?, sortOrder?, reason}`; getSalonsById, getCatalogServices):
-  - [x] Approve drawer has a "Create a new service" / "Use an existing service" switch (SegmentedControl, AR+EN); create keeps the old translate-and-create form
-  - [x] Map lists only ACTIVE catalog services of the salon's gender (the server answers 404 / GENDER_MISMATCH otherwise) and sends only `{catalogServiceId, reason}`; loading, empty ("no active service for this audience") and error states; a service and a reason are required
-  - [x] Domain: `ApproveInput` = `CreateServiceApproval | MapServiceApproval`, pure `approveProblems` / `approveInputOf`; data: `approveBodySchema` re-checks the id with OBJECT_ID (the generated pattern refuses every real id, S6)
-  - [x] Mock: the request belongs to Noor Salon (women's) of the salon fixtures; approve keeps the mapped id; G13 FIXED in `docs/REMOTE_DEV_GAPS.md`
-- Tests: tests/catalog-approve.test.tsx (8: draft rules, body mapping, schema vs S6, gender-filtered options + sent id, empty + field error, salon read error); tests/catalog-requests.test.tsx unchanged green; `sh scripts/gate.sh` GATE OK
-- Browser check (dev-release built against the local real stack on 127.0.0.1:4000, preview :4174, signed in as the QA admin; two QA requests created for Noor Salon through the merchant API): EN LTR dark 1280 px: map mode lists the 11 women's services, empty reason refused, mapped "Hair spa QA" to "Blow dry" → server 200 `status APPROVED, catalogServiceId` = the picked id, row left the pending list; AR RTL light 375 px: Arabic labels and service names, drawer 392 px of 405, no horizontal page scroll, create mode shows the four AR/EN fields; console clean
-- Loops: 1/1 — re-checked each criterion against the code, the tests and the real server answer; found the missing salon-error test and added it
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — no contract hand edit, uses already-consumed operations, salon/catalog queries only run in map mode. DEVIATIONS: options = first page of 100 services of that gender (same limit as the salon menu picker; no typeahead endpoint); no e2e (user decision); the "Blow dry QA" request was left pending on the shared stack.
-
-## Last blocks
-
-### ADM-079 — Switch to `remote` on dev (INT-05): per-module gap list and fixes, socket events verified against the real server
-
-- Branch: `feat/adm-079-remote-dev` (from `origin/admin`)
-- Status: IN REVIEW
-- Acceptance criteria (task row; operations: all 116 admin GETs via `qa/contract-check.mjs`, getAlerts/postAlertsByIdAcknowledge, getExports*, getBookings*, postCatalogRequestsByIdApprove; realtime `/admin` namespace, BUSINESS_DOMAIN §7):
-  - [x] Gap list per module in `docs/REMOTE_DEV_GAPS.md` (G1–G16: FIXED / SERVER / OPEN / OK) from the contract check, the socket check and a signed-in browser pass of `dev-release` on the local real stack (same server code as dev)
-  - [x] Client fixes: contract re-synced (SRV-125/126, `requestedAt`); alert kind `SALON_DELETION_REQUEST` and export kinds `CUSTOMERS`/`SALONS` (AR+EN); `alertLink` reads the server's UPPER_SNAKE/camelCase subjects and sends applications to their page; mocks use the real shapes
-  - [x] Realtime: event names match `WAB-Server/src/constants/{sockets,alerts}.ts`; received `booking.updated`, `application.created`, `overview.tick` live; handshake refusals measured (`active=false`): client now retries `UNAVAILABLE` with backoff and `UNAUTHORIZED` once the token changed, `FORBIDDEN` stops
-  - [x] Hosted dev wiring: `.env.dev`/`.env.prod` resolve to the Render host in the bundle; `write-hosting.ts` now reads the variant `.env` file (CSP `connect-src` had only `'self'`); hosted health/ready 200, 401/404 envelopes, `/admin` websocket refuses no/malformed token with UNAUTHORIZED; CORS preflight has no allow-origin (S10)
-  - [x] Server-side defects in `docs/SERVER_ISSUES.md` (S10 hosted CORS, S11 English alert titles, S12 entity type spelling); QA kit: `qa/socket-check.mjs`, `qa/hosted-check.mjs`, `QA_ADMIN_TOKEN`, fake providers in `qa/stack.sh`
-- Tests: tests/socket-client.test.ts (+5: FORBIDDEN, UNAUTHORIZED token wait, UNAVAILABLE backoff, transport errors, backoff cap), tests/alerts.test.tsx (+2 + updated link), tests/exports.test.tsx (+1), tests/hosting.test.ts (+2); `sh scripts/gate.sh` GATE OK (1226+ tests)
-- Browser check (dev-release built against the local stack, signed in as the QA admin): 36 screens in AR RTL light desktop, every request 200, no error alerts, console clean; alerts in EN LTR dark 375 px (links to /reviews and /salons/applications/:id, "Salon deletion request" filter, no horizontal overflow) and exports list
-- Loops: 1/1 — re-ran the contract check and socket check after the fixes (66 OK, 2 BAD = S3 handled), re-checked each gap row against the code and the measured answers; found the CSP/env gap (G7) and the stale contract (G1) in this pass
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — fixes stay in data/domain/scripts, no contract hand edits, retry timers cleared on disconnect. DEVIATIONS: hosted checks are unauthenticated only (by instruction, no credentials to Render), so module flows were run on the local stack, not on Render; `alert.created`/`review.created`/`refund.updated` not received live (raised by the evaluate job / need a completed or paid booking; checked in the server code); G13–G15 (catalog map-to-existing, customers/salons export buttons, `requestedAt`) left OPEN for new backlog rows; no e2e (user decision); root `session.md` index line left to the lead.
-
-### DOCS — ADM-079 DONE; gap rows ADM-093…095 + SRV-150
-
-- Branch: `docs/adm-079-done-gap-rows`
-- Status: DONE
-- Acceptance criteria:
-  - [x] ADM-079 DONE (PR #449); open gaps G13–G15 become ADM-093 (catalog map to existing), ADM-094 (customers/salons exports), ADM-095 (booking `requestedAt`); server issues S11/S12 become SRV-150
-  - [x] `tasks.py check` OK (only the known CUS-047 note); board regenerated
-- Tests: `python3 scripts/tasks.py check`
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — backlog only, no code.

@@ -8,26 +8,24 @@ import type { AlertsRepository } from '@/domain/alerts/alerts';
 
 const O = OPERATIONS;
 /**
- * The server leaves `data` out of an alert that has none, although the contract lists it as required; the repository
- * reads a missing one as an empty object (open item for the server owner).
+ * Tolerances on top of the generated alert (open items for the server owner):
+ * - the server leaves `data` out of an alert that has none, although the contract lists it as required: read as `{}`;
+ * - servers before contract 1.4.0 (SRV-150; the local QA stack may still run one) send no `titles` and may send a
+ *   lowercase `entityType`: `titles` is optional (the page falls back to `title`) and `alertLink` normalizes the type.
  */
-export const alertListSchema = () =>
-  z.array(
-    dto
-      .getAlertsDataSchema()
-      .element.extend({ data: z.record(z.string(), z.unknown()).default({}) }),
-  );
+const tolerant = {
+  data: z.record(z.string(), z.unknown()).default({}),
+  titles: z.object({ ar: z.string(), en: z.string() }).optional(),
+  entityType: z.string().nullable(),
+};
+export const alertListSchema = () => z.array(dto.getAlertsDataSchema().element.extend(tolerant));
+export const alertSchema = () => dto.postAlertsByIdAcknowledgeDataSchema().extend(tolerant);
 const list = defineEndpoint(O.getAlerts, {
   data: alertListSchema,
   query: dto.getAlertsQuerySchema,
 });
 const count = defineEndpoint(O.getAlertsCount, { data: dto.getAlertsCountDataSchema });
-const ack = defineEndpoint(O.postAlertsByIdAcknowledge, {
-  data: () =>
-    dto
-      .postAlertsByIdAcknowledgeDataSchema()
-      .extend({ data: z.record(z.string(), z.unknown()).default({}) }),
-});
+const ack = defineEndpoint(O.postAlertsByIdAcknowledge, { data: alertSchema });
 
 export class RemoteAlertsRepository implements AlertsRepository {
   constructor(private readonly api: ApiClient) {}

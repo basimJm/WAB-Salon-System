@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { ERROR_CODE_KIND, isErrorCode } from '@/constants/errorCatalog';
 import { SETTING_TABS } from '@/constants/settings';
-import { branchQuerySchema, salonBranchQuerySchema } from '@/data/api/objectId';
-import { getSalonsByIdDataSchema } from '@/data/contract/generated/dto';
+import { optionalQuery } from '@/data/api/endpoint';
+import {
+  getFinanceReconciliationQuerySchema,
+  getSalonsByIdDataSchema,
+  putSalonsByIdHoursQuerySchema,
+} from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import { MOCK_BRANCHES, bookingBranchRef, reviewBranchRef } from '@/data/mock/branchesFixture';
 import { MOCK_SETTING_DEFAULTS } from '@/data/mock/settingsFixture';
@@ -46,12 +50,14 @@ describe('branches contract (ADM-088)', () => {
   });
 
   it('branch query schemas accept real ids, nothing or no branch, and refuse a bad id', () => {
-    expect(branchQuerySchema().safeParse(undefined).success).toBe(true);
-    expect(branchQuerySchema().safeParse({}).success).toBe(true);
-    expect(branchQuerySchema().safeParse({ branchId: ID }).success).toBe(true);
-    expect(branchQuerySchema().safeParse({ branchId: 'nope' }).success).toBe(false);
-    expect(salonBranchQuerySchema().safeParse({ salonId: ID, branchId: ID }).success).toBe(true);
-    expect(salonBranchQuerySchema().safeParse({ salonId: 'x' }).success).toBe(false);
+    const branchQuery = optionalQuery(putSalonsByIdHoursQuerySchema);
+    const salonBranchQuery = optionalQuery(getFinanceReconciliationQuerySchema);
+    expect(branchQuery().safeParse(undefined).success).toBe(true);
+    expect(branchQuery().safeParse({}).success).toBe(true);
+    expect(branchQuery().safeParse({ branchId: ID }).success).toBe(true);
+    expect(branchQuery().safeParse({ branchId: 'nope' }).success).toBe(false);
+    expect(salonBranchQuery().safeParse({ salonId: ID, branchId: ID }).success).toBe(true);
+    expect(salonBranchQuery().safeParse({ salonId: 'x' }).success).toBe(false);
   });
 
   it('the re-synced contract has the branch operations and query flags', () => {

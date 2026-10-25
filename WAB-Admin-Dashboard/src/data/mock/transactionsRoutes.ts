@@ -1,7 +1,6 @@
 import * as dto from '../contract/generated/dto';
 import { OPERATIONS } from '../contract/generated/operations';
-import { defineEndpoint } from '../api/endpoint';
-import { salonBranchQuerySchema } from '../api/objectId';
+import { defineEndpoint, optionalQuery } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
 import { MOCK_BRANCH_IDS } from './branchesFixture';
@@ -46,7 +45,7 @@ export function transactionsRoutes(): readonly MockRoute[] {
     mockRoute(
       defineEndpoint(O.getFinanceReconciliation, {
         data: dto.getFinanceReconciliationDataSchema,
-        query: salonBranchQuerySchema,
+        query: optionalQuery(dto.getFinanceReconciliationQuerySchema),
       }),
       ({ query }) => {
         const branchId = query.get('branchId');

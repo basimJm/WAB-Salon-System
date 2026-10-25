@@ -1,46 +1,15 @@
-import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
-import { defineEndpoint } from '@/data/api/endpoint';
-import { OBJECT_ID, branchQuerySchema } from '@/data/api/objectId';
+import { defineEndpoint, optionalQuery } from '@/data/api/endpoint';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { BranchScope, SalonEditRepository } from '@/domain/salonEdit/salonEdit';
 
 const O = OPERATIONS;
-const KEY = z
-  .string()
-  .max(1024)
-  .regex(/^[A-Za-z0-9_-]+(\/[A-Za-z0-9._-]+)*$/);
-const E164 = z.string().regex(/^\+[1-9][0-9]{6,14}$/);
-const REASON = z.string().min(1).max(1000);
-const LATITUDE_LIMIT = 90;
-const LONGITUDE_LIMIT = 180;
-/** The generated profile body is an intersection that cannot be extended, so it is restated with the id override. */
-const profileBody = () =>
-  z.object({
-    name: z.string().min(1).max(80).optional(),
-    description: z.string().max(1000).nullable().optional(),
-    coverKey: KEY.nullable().optional(),
-    profileKey: KEY.nullable().optional(),
-    location: z
-      .object({
-        latitude: z.number().min(-LATITUDE_LIMIT).max(LATITUDE_LIMIT),
-        longitude: z.number().min(-LONGITUDE_LIMIT).max(LONGITUDE_LIMIT),
-      })
-      .nullable()
-      .optional(),
-    locationText: z.string().max(300).nullable().optional(),
-    cityId: OBJECT_ID.optional(),
-    areaId: OBJECT_ID.optional(),
-    phone: E164.optional(),
-    whatsapp: E164.nullable().optional(),
-    reason: REASON,
-  });
 const E = {
   profile: defineEndpoint(O.getSalonsByIdProfile, { data: dto.getSalonsByIdProfileDataSchema }),
   patchProfile: defineEndpoint(O.patchSalonsByIdProfile, {
     data: dto.patchSalonsByIdProfileDataSchema,
-    body: profileBody,
+    body: dto.patchSalonsByIdProfileBodySchema,
   }),
   gallery: defineEndpoint(O.getSalonsByIdGallery, { data: dto.getSalonsByIdGalleryDataSchema }),
   addGallery: defineEndpoint(O.postSalonsByIdGallery, {
@@ -53,71 +22,66 @@ const E = {
   }),
   orderGallery: defineEndpoint(O.putSalonsByIdGalleryOrder, {
     data: dto.putSalonsByIdGalleryOrderDataSchema,
-    body: () =>
-      dto.putSalonsByIdGalleryOrderBodySchema().extend({ ids: z.array(OBJECT_ID).max(100) }),
+    body: dto.putSalonsByIdGalleryOrderBodySchema,
   }),
   hours: defineEndpoint(O.getSalonsByIdHours, {
     data: dto.getSalonsByIdHoursDataSchema,
-    query: branchQuerySchema,
+    query: optionalQuery(dto.getSalonsByIdHoursQuerySchema),
   }),
   putHours: defineEndpoint(O.putSalonsByIdHours, {
-    query: branchQuerySchema,
+    query: optionalQuery(dto.putSalonsByIdHoursQuerySchema),
     data: dto.putSalonsByIdHoursDataSchema,
     body: dto.putSalonsByIdHoursBodySchema,
   }),
   previewHours: defineEndpoint(O.postSalonsByIdHoursPreview, {
-    query: branchQuerySchema,
+    query: optionalQuery(dto.postSalonsByIdHoursPreviewQuerySchema),
     data: dto.postSalonsByIdHoursPreviewDataSchema,
     body: dto.postSalonsByIdHoursPreviewBodySchema,
   }),
   previewClosure: defineEndpoint(O.postSalonsByIdClosuresPreview, {
-    query: branchQuerySchema,
+    query: optionalQuery(dto.postSalonsByIdClosuresPreviewQuerySchema),
     data: dto.postSalonsByIdClosuresPreviewDataSchema,
     body: dto.postSalonsByIdClosuresPreviewBodySchema,
   }),
   addClosure: defineEndpoint(O.postSalonsByIdClosures, {
-    query: branchQuerySchema,
+    query: optionalQuery(dto.postSalonsByIdClosuresQuerySchema),
     data: dto.postSalonsByIdClosuresDataSchema,
     body: dto.postSalonsByIdClosuresBodySchema,
   }),
   patchClosure: defineEndpoint(O.patchSalonsByIdClosuresByClosureId, {
-    query: branchQuerySchema,
+    query: optionalQuery(dto.patchSalonsByIdClosuresByClosureIdQuerySchema),
     data: dto.patchSalonsByIdClosuresByClosureIdDataSchema,
     body: dto.patchSalonsByIdClosuresByClosureIdBodySchema,
   }),
   removeClosure: defineEndpoint(O.postSalonsByIdClosuresByClosureIdRemove, {
-    query: branchQuerySchema,
+    query: optionalQuery(dto.postSalonsByIdClosuresByClosureIdRemoveQuerySchema),
     data: dto.postSalonsByIdClosuresByClosureIdRemoveDataSchema,
     body: dto.postSalonsByIdClosuresByClosureIdRemoveBodySchema,
   }),
   services: defineEndpoint(O.getSalonsByIdServices, {
     data: dto.getSalonsByIdServicesDataSchema,
-    query: () => dto.getSalonsByIdServicesQuerySchema().extend({ branchId: OBJECT_ID.optional() }),
+    query: dto.getSalonsByIdServicesQuerySchema,
   }),
   addService: defineEndpoint(O.postSalonsByIdServices, {
-    query: branchQuerySchema,
+    query: optionalQuery(dto.postSalonsByIdServicesQuerySchema),
     data: dto.postSalonsByIdServicesDataSchema,
-    body: () => dto.postSalonsByIdServicesBodySchema().extend({ catalogServiceId: OBJECT_ID }),
+    body: dto.postSalonsByIdServicesBodySchema,
   }),
   patchService: defineEndpoint(O.patchSalonsByIdServicesByServiceId, {
-    query: branchQuerySchema,
+    query: optionalQuery(dto.patchSalonsByIdServicesByServiceIdQuerySchema),
     data: dto.patchSalonsByIdServicesByServiceIdDataSchema,
     body: dto.patchSalonsByIdServicesByServiceIdBodySchema,
   }),
   moveMember: defineEndpoint(O.postSalonsByIdMembersByMemberIdBranch, {
     data: dto.postSalonsByIdMembersByMemberIdBranchDataSchema,
-    body: () =>
-      dto.postSalonsByIdMembersByMemberIdBranchBodySchema().extend({ branchId: OBJECT_ID }),
+    body: dto.postSalonsByIdMembersByMemberIdBranchBodySchema,
   }),
   staff: defineEndpoint(O.getSalonsByIdMembersByMemberIdStaff, {
     data: dto.getSalonsByIdMembersByMemberIdStaffDataSchema,
   }),
   putStaff: defineEndpoint(O.putSalonsByIdMembersByMemberIdStaff, {
     data: dto.putSalonsByIdMembersByMemberIdStaffDataSchema,
-    body: () =>
-      dto.putSalonsByIdMembersByMemberIdStaffBodySchema().extend({
-        serviceIds: z.array(OBJECT_ID).max(200),
-      }),
+    body: dto.putSalonsByIdMembersByMemberIdStaffBodySchema,
   }),
   policy: defineEndpoint(O.getSalonsByIdPolicy, { data: dto.getSalonsByIdPolicyDataSchema }),
   putPolicy: defineEndpoint(O.putSalonsByIdPolicy, {
