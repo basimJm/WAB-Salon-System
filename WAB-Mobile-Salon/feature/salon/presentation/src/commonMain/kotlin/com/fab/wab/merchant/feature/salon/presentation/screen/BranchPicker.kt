@@ -12,7 +12,7 @@ import com.fab.wab.merchant.designsystem.theme.AppTheme
  * "All branches" chip and shows the edited branch (the main one until another is picked). Hidden for branch members.
  */
 @Composable
-internal fun BranchPicker(scope: BranchScope, modifier: Modifier = Modifier, onSelect: (String?) -> Unit) {
+internal fun BranchPicker(scope: BranchScope, onSelect: (String?) -> Unit, modifier: Modifier = Modifier) {
     if (!scope.showsSwitcher) return
     AppBranchSwitcher(
         branches = scope.branches,

@@ -2,7 +2,7 @@ package com.fab.wab.merchant.request
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import com.fab.wab.merchant.R
 import com.fab.wab.merchant.app.deeplink.MerchantDeepLinkPaths
 import com.fab.wab.merchant.app.request.OutsideBookingRequests
@@ -20,7 +20,7 @@ internal val requestModule = module {
         OutsideBookingRequests(context, getKoin(), R.mipmap.ic_launcher_foreground) { bookingId ->
             Intent(context, MainActivity::class.java)
                 .setAction(Intent.ACTION_VIEW)
-                .setData(Uri.parse(DeepLinks.of(environment.webBaseUrl, MerchantDeepLinkPaths.BOOKINGS, bookingId)))
+                .setData(DeepLinks.of(environment.webBaseUrl, MerchantDeepLinkPaths.BOOKINGS, bookingId).toUri())
         }
     }
 }

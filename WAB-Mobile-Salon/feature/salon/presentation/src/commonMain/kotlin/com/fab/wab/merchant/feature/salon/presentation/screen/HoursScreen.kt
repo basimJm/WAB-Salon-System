@@ -65,7 +65,7 @@ fun HoursScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Unit
     TrackScreen(SalonAnalytics.SCREEN_HOURS)
     AppScreen(modifier = modifier, topBar = { AppTopBar(title = stringResource(Res.string.hours_title), onBack = onBack) }) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            BranchPicker(state.branchScope) { onAction(UiAction.OnBranchSelect(it)) }
+            BranchPicker(state.branchScope, onSelect = { onAction(UiAction.OnBranchSelect(it)) })
             Box(modifier = Modifier.weight(1f)) {
                 when {
                     state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
