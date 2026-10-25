@@ -49,7 +49,8 @@ export function reviewsRoutes(): readonly MockRoute[] {
           (r) =>
             (!query.get('status') || r.status === query.get('status')) &&
             (!query.get('target') || r.target === query.get('target')) &&
-            (!query.get('rating') || r.rating === Number(query.get('rating'))),
+            (!query.get('rating') || r.rating === Number(query.get('rating'))) &&
+            (!query.get('branchId') || r.branch?.id === query.get('branchId')),
         );
         return {
           data: items,
