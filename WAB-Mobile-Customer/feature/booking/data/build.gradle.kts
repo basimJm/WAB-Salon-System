@@ -12,4 +12,8 @@ kotlin {
     sourceSets.commonMain.dependencies {
         implementation(projects.feature.booking.domain)
     }
+    sourceSets.commonTest.dependencies {
+        implementation(libs.kotlinx.coroutines.test)
+        implementation(libs.ktor.client.mock)
+    }
 }
