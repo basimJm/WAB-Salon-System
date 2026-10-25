@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AVAILABILITY_MAX_OTHER_PICKS } from '../../../constants/availability';
 import { OBJECT_ID_PATTERN } from '../../../constants/database';
 import {
   CANCEL_AFFECTED_MAX_BOOKINGS,
@@ -20,4 +21,8 @@ export const reassignBody = z.object({
 
 export const cancelAffectedBody = decisionBody.extend({
   bookingIds: z.array(z.string().regex(OBJECT_ID_PATTERN)).min(1).max(CANCEL_AFFECTED_MAX_BOOKINGS),
+});
+/** Which person of the booking (0 = the customer, then the companions). */
+export const eligibleStaffQuery = z.object({
+  personIndex: z.coerce.number().int().min(0).max(AVAILABILITY_MAX_OTHER_PICKS),
 });

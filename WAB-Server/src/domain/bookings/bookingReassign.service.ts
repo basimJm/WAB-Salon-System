@@ -48,7 +48,13 @@ export interface BookingReassignService {
    * qualification, hours, leave and a free slot), the current one excluded. Advisory: the
    * reassignment itself re-checks everything under the staff lock.
    */
-  eligibleStaff(input: { bookingId: string; personIndex: number }): Promise<EligibleStaff[]>;
+  eligibleStaff(input: {
+    bookingId: string;
+    personIndex: number;
+    /** Merchant path (SRV-128a): the caller's salon and branch scope; admins pass neither. */
+    salonId?: string | undefined;
+    member?: MemberActor | undefined;
+  }): Promise<EligibleStaff[]>;
 }
 
 export interface EligibleStaff {
@@ -160,9 +166,12 @@ export const createBookingReassignService = (deps: {
     reassignAny: ({ bookingId, personIndex, staffId }) =>
       perform({ bookingId, personIndex, staffId }),
 
-    async eligibleStaff({ bookingId, personIndex }) {
+    async eligibleStaff({ bookingId, personIndex, salonId, member }) {
       const booking = await bookings.findById(bookingId);
-      if (booking === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+      if (booking === null || (salonId !== undefined && booking.salonId !== salonId)) {
+        throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+      }
+      if (member !== undefined) assertBookingInScope(booking, member);
       const person = personOf(booking, personIndex);
       if (booking.status !== 'APPROVED' || person.start <= now()) {
         throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });

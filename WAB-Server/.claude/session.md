@@ -10,10 +10,21 @@
 
 ## Current task
 
+### SRV-128 — Customer/merchant contract review (+ SRV-128a, SRV-128b)
+
+- Branch: `feat/srv-128-contract-review`
+- Status: IN REVIEW
+- Acceptance criteria (Customer PRD §13, Merchant PRD §15, INTEGRATION.md §3; contracts merchant 1.2.0, customer 1.2.0):
+  - [x] Every capability listed in both PRDs mapped to an operation (notes in `.claude/Integration.md`)
+  - [x] Gaps added as rows and fixed here: SRV-128a `GET /merchant/v1/bookings/{id}/eligible-staff?personIndex=` (BOOKINGS_OPERATE, salon + branch scope, same rules as the admin list); SRV-128b customer draft response `branch {id, name, locationText}`
+- Tests: `tests/contractGaps.test.ts` (3); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔ (the admin eligible list gained an optional merchant scope instead of a copy), Mobile ✔, Architect ✔ (both contracts bumped), QA ✔) — NOTE: SRV-128a/b were built in this PR rather than separate branches.
+
 ### SRV-126 — Exports: customers and salons kinds; Arabic-capable PDF
 
 - Branch: `feat/srv-126-exports-arabic-pdf`
-- Status: IN REVIEW
+- Status: DONE (PR #410)
 - Acceptance criteria (Admin PRD exports (G9), BUSINESS_DOMAIN exports; operation `POST /admin/v1/exports` — contract admin 1.3.0, client impact ADM-047):
   - [x] BOOKINGS kind already existed (SRV-123); new kinds CUSTOMERS (status, gender, city, search) and SALONS (state, gender, city, subscription, search) with the columns of their admin lists
   - [x] PDF exports embed IBM Plex Sans Arabic (OFL, the font the apps already ship; `assets/fonts` + NOTICE, copied into the Docker runtime image): Arabic letters are shaped and read right to left; Arabic cells are right-aligned
@@ -32,18 +43,6 @@
 - Tests: `tests/salonServices.test.ts` (+1 mapping case); full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (contract bumped through SRV-111), QA ✔) — DEVIATION: half of the row (segments) not built; it needs an owner decision.
-
-### SRV-111 — Contract snapshot guard + per-namespace contract version
-
-- Branch: `feat/srv-111-contract-guard`
-- Status: DONE (PR #408)
-- Acceptance criteria (INTEGRATION.md §3; API docs: `info.version` per namespace changes — common 1.0.0, customer/merchant/admin 1.1.0):
-  - [x] `src/docs/contractVersions.ts` records per namespace the published version, the fingerprint (sha256 of the generated document without its version) and the client-impact note of the last change; `openapi.info.version` comes from it
-  - [x] `tests/contractGuard.test.ts` fails when a generated contract no longer matches its fingerprint, or a namespace has no version/note
-  - [x] `npm run contract:bump -- <name> "<client impact>"` records the new fingerprint, bumps the minor version and stores the note; then `npm run docs`
-- Tests: `tests/contractGuard.test.ts` (9); full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (clients can compare `info.version` after api:sync / apiSync), QA ✔) — FLOW CHANGE for every later API task: `npm run docs` → guard fails → `npm run contract:bump -- <ns> "<CUS/MER/ADM tasks>"` → `npm run docs`.
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

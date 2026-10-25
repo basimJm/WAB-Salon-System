@@ -483,6 +483,7 @@ const buildServices = (
     settings,
   });
   const bookingDrafts = createBookingDraftService({
+    branches: branchesRepository,
     mainBranches,
     redis,
     drafts: bookingDraftsRepository,
