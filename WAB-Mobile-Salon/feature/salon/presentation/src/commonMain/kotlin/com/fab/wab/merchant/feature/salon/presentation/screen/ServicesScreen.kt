@@ -77,7 +77,7 @@ fun ServicesScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> U
         },
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            BranchPicker(state.branchScope) { onAction(UiAction.OnBranchSelect(it)) }
+            BranchPicker(state.branchScope, onSelect = { onAction(UiAction.OnBranchSelect(it)) })
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) { ServicesBody(state, onAction) }
         }
     }

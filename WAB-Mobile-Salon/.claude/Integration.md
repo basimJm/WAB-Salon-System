@@ -6,6 +6,7 @@
 | Dependency | Contract | How (planned task) | State |
 |---|---|---|---|
 | Server `/merchant/v1` (71 operations) | `WAB-Server/docs/api/openapi.merchant.json` | DTOs by `./gradlew apiSync` (MER-006); envelope + error catalog (MER-005); permission middleware errors hide features (MER-009/052) | 6 gaps on the server: SRV-129 (member profile, change phone, push toggle), SRV-130 (dashboard), SRV-131 (reviews), SRV-132 (statistics), SRV-133 (leave / deletion request), SRV-134 (conflict preview) |
+| Server `/merchant/v1/branches…` + `?branchId=` filters (Stage P) | `WAB-Server/.claude/Integration.md` "Salon branches contract" | MER-061…066 (core `branch/`, `feature/branches`) | owner management + switcher done; member `branchId` missing in the auth profile (server) |
 | Server Socket.IO (salon rooms filtered by permission) | BUSINESS_DOMAIN §7: `booking.requested`, booking changes, unread count, `PERMISSIONS_UPDATED` | `RealtimeClient` + fake (MER-011) | — |
 | Firebase | Phone Auth, FCM (high-priority data messages; Android full-screen intent; iOS time-sensitive + actionable category), Analytics, Crashlytics | facade reused from the customer app (MER-010/012); **merchant apps not yet registered** in the Firebase projects (MER-004, owner) | pending owner |
 | Uploads | `/uploads/presign|confirm`, `/uploads/license/presign|confirm` | MER-016, MER-022 | — |

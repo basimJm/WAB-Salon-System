@@ -11,6 +11,8 @@ import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.booking.BookingStatus
+import com.fab.wab.merchant.core.domain.session.SessionStore
+import com.fab.wab.merchant.core.domain.session.memberScope
 import com.fab.wab.merchant.core.notification.push.PushKeys
 import com.fab.wab.merchant.core.notification.push.PushSignals
 import com.fab.wab.merchant.core.realtime.RealtimeEvents
@@ -20,6 +22,7 @@ import com.fab.wab.merchant.feature.bookings.presentation.analytics.BookingsAnal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.core.Koin
@@ -61,6 +64,8 @@ class OutsideBookingRequests(
         scope.launch {
             val details = (repository.details(bookingId) as? AppResult.Success)?.data ?: return@launch
             if (details.summary.status != BookingStatus.PENDING) return@launch
+            // MER-066: a stale push for another branch (member moved) never alerts.
+            if (!koin.get<SessionStore>().state.first().memberScope().accepts(details.summary.branch?.id)) return@launch
             if (koin.get<OverlayPermission>().isGranted()) {
                 overlay.show(bookingId)
             } else {
