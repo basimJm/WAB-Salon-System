@@ -11,6 +11,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fab.wab.merchant.app.deeplink.DeepLinkEffect
+import com.fab.wab.merchant.app.dev.MockWorldSwitcher
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
 import com.fab.wab.merchant.core.domain.permission.Permission
 import com.fab.wab.merchant.core.domain.permission.PermissionSet
@@ -42,11 +43,13 @@ fun MerchantShell(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val hierarchy = backStackEntry?.destination?.hierarchy?.map { it.route }?.toList().orEmpty()
     val currentTab = tabForRoutes(hierarchy)
+    val destination = backStackEntry?.destination
+    val onTabRoot = destination != null && destination.parent?.startDestinationId == destination.id
     AppNavScaffold(
         items = merchantNavItems(tabs),
         selectedId = (currentTab ?: tabs.firstOrNull() ?: MerchantTab.MORE).name,
         onSelect = { id -> MerchantTab.fromId(id)?.let(navController::switchTab) },
-        navigationVisible = currentTab != null && tabs.isNotEmpty(),
+        navigationVisible = showsNavigation(route, onTabRoot, currentTab, tabs),
         modifier = modifier,
     ) {
         Column {
@@ -55,6 +58,7 @@ fun MerchantShell(
         }
     }
     DeepLinkEffect(koinInject<DeepLinkStore>(), route, navController)
+    MockWorldSwitcher(koinInject())
     // PRD M10: the request sheet over any screen, for members who may answer requests.
     if (route == LaunchRoute.HOME && permissions.has(Permission.BOOKINGS_RESPOND)) {
         BookingRequestHost(onOpenDetails = { id -> navController.navigate(Screen.BookingDetails(id)) })

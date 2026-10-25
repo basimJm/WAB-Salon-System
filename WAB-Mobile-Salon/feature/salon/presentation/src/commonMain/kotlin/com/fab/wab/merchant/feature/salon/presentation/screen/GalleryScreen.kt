@@ -110,25 +110,28 @@ private fun GalleryBar(state: UiState, onAction: (UiAction) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         when (state.mode) {
-            MediaGridMode.Normal -> {
-                if (state.items.size > 1) {
-                    AppButton(
-                        stringResource(Res.string.gallery_reorder),
-                        { onAction(UiAction.OnMode(MediaGridMode.Reorder)) },
-                        kind = ButtonKind.Text,
-                    )
-                }
+            // The add button keeps the full width (its label does not fit next to the two text buttons).
+            MediaGridMode.Normal -> Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.space6)) {
                 if (state.items.isNotEmpty()) {
-                    AppButton(
-                        stringResource(Res.string.gallery_select),
-                        { onAction(UiAction.OnMode(MediaGridMode.Select)) },
-                        kind = ButtonKind.Text,
-                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(spacing.space10)) {
+                        if (state.items.size > 1) {
+                            AppButton(
+                                stringResource(Res.string.gallery_reorder),
+                                { onAction(UiAction.OnMode(MediaGridMode.Reorder)) },
+                                kind = ButtonKind.Text,
+                            )
+                        }
+                        AppButton(
+                            stringResource(Res.string.gallery_select),
+                            { onAction(UiAction.OnMode(MediaGridMode.Select)) },
+                            kind = ButtonKind.Text,
+                        )
+                    }
                 }
                 AppButton(
                     stringResource(Res.string.gallery_add),
                     { onAction(UiAction.OnAdd) },
-                    Modifier.weight(1f),
+                    Modifier.fillMaxWidth(),
                     leadingIcon = AppIcons.Add,
                     enabled = !state.busy,
                 )

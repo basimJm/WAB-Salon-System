@@ -4,8 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -31,6 +33,7 @@ import com.fab.wab.merchant.designsystem.components.dialog.AppContactSheet
 import com.fab.wab.merchant.designsystem.components.dialog.AppDialog
 import com.fab.wab.merchant.designsystem.components.divider.AppDivider
 import com.fab.wab.merchant.designsystem.components.layout.AppScreen
+import com.fab.wab.merchant.designsystem.components.layout.tabBarInset
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
@@ -143,6 +146,7 @@ fun MoreScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
                 color = AppTheme.colors.faint,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             )
+            Spacer(Modifier.height(tabBarInset()))
         }
     }
     MoreDialogs(state, onAction)

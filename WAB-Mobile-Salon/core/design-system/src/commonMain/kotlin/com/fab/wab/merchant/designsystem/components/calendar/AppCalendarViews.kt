@@ -60,13 +60,14 @@ fun AppCalendarDayView(
     modifier: Modifier = Modifier,
     nowMinute: Int? = null,
     empty: CalendarEmptyUi? = null,
+    bottomInset: Dp = Dp.Hairline,
 ) {
     val sizes = AppTheme.sizes
     Box(modifier = modifier.fillMaxSize().swipePages(onSwipe)) {
         Column(modifier = Modifier.fillMaxSize()) {
             StaffHeader(columns, sizes.calendarTimeColumn)
             Box(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
-                Row {
+                Row(modifier = Modifier.padding(bottom = bottomInset)) {
                     TimeColumn(window, hourLabels, sizes.calendarHour, sizes.calendarTimeColumn)
                     columns.forEach { column -> GridColumn(column, window, compact = false, onBlockClick = onBlockClick) }
                 }
@@ -97,10 +98,11 @@ fun AppCalendarWeekView(
     onDayClick: (String) -> Unit,
     onSwipe: (forward: Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    bottomInset: Dp = Dp.Hairline,
 ) {
     val sizes = AppTheme.sizes
     Box(modifier = modifier.fillMaxSize().swipePages(onSwipe).verticalScroll(rememberScrollState())) {
-        Row {
+        Row(modifier = Modifier.padding(bottom = bottomInset)) {
             TimeColumn(window, hourLabels, sizes.calendarHour, sizes.calendarWeekTimeColumn)
             days.forEach { day -> GridColumn(day, window, compact = true, onColumnClick = { onDayClick(day.id) }) }
         }

@@ -25,6 +25,8 @@ import com.fab.wab.merchant.designsystem.components.feedback.AppErrorState
 import com.fab.wab.merchant.designsystem.components.feedback.AppLoadingIndicator
 import com.fab.wab.merchant.designsystem.components.format.dateTimeText
 import com.fab.wab.merchant.designsystem.components.layout.AppScreen
+import com.fab.wab.merchant.designsystem.components.layout.tabBarInset
+import com.fab.wab.merchant.designsystem.resources.Res as DesignRes
 import com.fab.wab.merchant.designsystem.resources.time_am
 import com.fab.wab.merchant.designsystem.resources.time_pm
 import com.fab.wab.merchant.designsystem.theme.AppTheme
@@ -44,13 +46,12 @@ import com.fab.wab.merchant.feature.bookings.presentation.resources.calendar_clo
 import com.fab.wab.merchant.feature.bookings.presentation.resources.calendar_empty_body
 import com.fab.wab.merchant.feature.bookings.presentation.resources.calendar_empty_title
 import com.fab.wab.merchant.feature.bookings.presentation.resources.calendar_month
+import com.fab.wab.merchant.feature.bookings.presentation.resources.calendar_range_separator
 import com.fab.wab.merchant.feature.bookings.presentation.resources.calendar_title
 import com.fab.wab.merchant.feature.bookings.presentation.resources.calendar_week_day
-import com.fab.wab.merchant.feature.bookings.presentation.resources.calendar_range_separator
-import org.jetbrains.compose.resources.stringResource
-import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
-import com.fab.wab.merchant.designsystem.resources.Res as DesignRes
+import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.stringResource
 
 /** Statuses the calendar draws (server `CALENDAR_STATUSES`). */
 private val LEGEND = listOf(BookingStatus.PENDING, BookingStatus.APPROVED, BookingStatus.COMPLETED, BookingStatus.NO_SHOW)
@@ -109,9 +110,17 @@ private fun CalendarBody(state: UiState, onAction: (UiAction) -> Unit) {
                     onSwipe = onSwipe,
                     nowMinute = nowMinute(state),
                     empty = emptyOf(state, columns.all { it.blocks.isEmpty() }),
+                    bottomInset = tabBarInset(),
                 )
             } else {
-                AppCalendarWeekView(columns, window, labels, onDayClick = { onAction(UiAction.OnDayClick(it)) }, onSwipe = onSwipe)
+                AppCalendarWeekView(
+                    columns,
+                    window,
+                    labels,
+                    onDayClick = { onAction(UiAction.OnDayClick(it)) },
+                    onSwipe = onSwipe,
+                    bottomInset = tabBarInset(),
+                )
             }
         }
     }

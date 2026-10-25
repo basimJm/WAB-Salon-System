@@ -150,6 +150,7 @@ private fun Header(details: BookingDetails, nowMs: Long, onAction: (UiAction) ->
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CustomerCard(details: BookingDetails, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
@@ -157,18 +158,21 @@ private fun CustomerCard(details: BookingDetails, onAction: (UiAction) -> Unit) 
         AppText(text = details.summary.customerName, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
         details.summary.customerPhone?.let { phone ->
             AppText(text = phone, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
-            Row(horizontalArrangement = Arrangement.spacedBy(spacing.space10)) {
+            // Side by side when both labels fit, stacked otherwise (narrow phones, large font scales).
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.space10),
+                verticalArrangement = Arrangement.spacedBy(spacing.space10),
+                maxItemsInEachRow = CONTACT_BUTTONS,
+            ) {
                 AppButton(
                     stringResource(Res.string.details_call),
                     { onAction(UiAction.OnCallCustomer) },
-                    Modifier.weight(1f),
                     kind = ButtonKind.Secondary,
                     leadingIcon = AppIcons.Call,
                 )
                 AppButton(
                     stringResource(Res.string.details_whatsapp),
                     { onAction(UiAction.OnWhatsAppCustomer) },
-                    Modifier.weight(1f),
                     kind = ButtonKind.Secondary,
                     leadingIcon = AppIcons.Chat,
                 )
@@ -225,3 +229,5 @@ private const val ACTOR_CUSTOMER = "CUSTOMER"
 private const val ACTOR_MEMBER = "MEMBER"
 private const val ACTOR_ADMIN = "ADMIN"
 private const val ACTOR_SYSTEM = "SYSTEM"
+
+private const val CONTACT_BUTTONS = 2

@@ -16,7 +16,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-private class FakeSessionStore(initial: SessionState) : SessionStore {
+internal class FakeSessionStore(initial: SessionState) : SessionStore {
     val session = MutableStateFlow(initial)
     var signedOut = false
     override val state: Flow<SessionState> = session

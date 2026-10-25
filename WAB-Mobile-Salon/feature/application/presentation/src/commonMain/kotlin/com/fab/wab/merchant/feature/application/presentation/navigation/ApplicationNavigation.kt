@@ -51,7 +51,7 @@ class ApplicationNavigation(override val navController: NavHostController) : Nav
             when (effect) {
                 ApplicationStatusContract.SideEffect.NavigateToChecklist -> navigateTo(Screen.SetupChecklist)
                 ApplicationStatusContract.SideEffect.NavigateToResubmit -> navigateTo(Screen.ApplicationResubmit)
-                ApplicationStatusContract.SideEffect.NavigateHome -> navigateAndClearBackstack(Graph.Home)
+                ApplicationStatusContract.SideEffect.NavigateHome -> Unit // the shell re-roots at the new launch route
                 is ApplicationStatusContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }
@@ -66,7 +66,7 @@ class ApplicationNavigation(override val navController: NavHostController) : Nav
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is SetupChecklistContract.SideEffect.OpenStep -> navigateTo(effect.step.screen())
-                SetupChecklistContract.SideEffect.NavigateHome -> navigateAndClearBackstack(Graph.Home)
+                SetupChecklistContract.SideEffect.NavigateHome -> Unit // the shell re-roots at the new launch route
                 is SetupChecklistContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }

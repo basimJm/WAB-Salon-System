@@ -69,7 +69,8 @@ internal fun TimeColumn(window: TimeWindow, labels: List<String>, hourHeight: Dp
                 text = label,
                 style = AppTheme.typography.labelSmall,
                 color = AppTheme.colors.faint,
-                maxLines = 1,
+                // "10:00 ص" wraps onto two lines at large font scales instead of being cut.
+                maxLines = TIME_LABEL_LINES,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .offset(y = hourHeight * index)
@@ -187,3 +188,5 @@ private fun BlockText(block: CalendarBlockUi, color: Color) {
     AppText(text = block.servicesText, style = AppTheme.typography.labelSmall, color = color, maxLines = 1)
     AppText(text = block.timeText, style = AppTheme.typography.labelSmall, color = color, maxLines = 1)
 }
+
+private const val TIME_LABEL_LINES = 2

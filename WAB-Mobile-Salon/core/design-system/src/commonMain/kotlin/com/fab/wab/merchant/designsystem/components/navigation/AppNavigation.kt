@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.designsystem.components.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -173,7 +174,8 @@ fun AppNavScaffold(
         NavigationStyle.BottomBar -> FloatingBarLayout(source, body, modifier) { barModifier ->
             AppBottomBar(items, selectedId, onSelect, barModifier)
         }
-        NavigationStyle.Rail -> Row(modifier.fillMaxSize()) {
+        // The rail column shares the screens' themed background (no light window strip in the dark theme).
+        NavigationStyle.Rail -> Row(modifier.fillMaxSize().background(AppTheme.colors.background)) {
             CompositionLocalProvider(LocalGlassSource provides source) { AppNavigationRail(items, selectedId, onSelect) }
             Box(Modifier.weight(1f).glassSource(source)) { body() }
         }

@@ -64,7 +64,7 @@ class AuthNavigation(override val navController: NavHostController) : Navigator 
         val notifications = rememberNotificationManager()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
-                OtpContract.SideEffect.NavigateHome -> navigateAndClearBackstack(Graph.Home)
+                OtpContract.SideEffect.NavigateHome -> Unit // the shell re-roots at the new launch route
                 is OtpContract.SideEffect.NavigateToRegistration ->
                     navigateTo(Screen.Registration(effect.phone.countryCode, effect.phone.number))
                 OtpContract.SideEffect.NavigateBack -> navigateBack()

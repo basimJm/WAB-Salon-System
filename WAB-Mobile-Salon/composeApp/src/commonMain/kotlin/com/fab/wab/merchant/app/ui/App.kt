@@ -32,13 +32,12 @@ import com.fab.wab.merchant.core.analytics.di.analyticsModule
 import com.fab.wab.merchant.core.data.mock.di.mockDataModule
 import com.fab.wab.merchant.core.di.coreDiModule
 import com.fab.wab.merchant.core.domain.ThemeMode
+import com.fab.wab.merchant.core.domain.config.AppConfigRepository
 import com.fab.wab.merchant.core.domain.permission.permissionSet
 import com.fab.wab.merchant.core.domain.session.SessionState
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.core.domain.session.launchRouteOf
 import com.fab.wab.merchant.core.domain.session.showsOfflineBanner
-import com.fab.wab.merchant.core.domain.config.AppConfigRepository
-import com.fab.wab.merchant.core.ui.external.ExternalActions
 import com.fab.wab.merchant.core.firebase.di.platformFirebaseModule
 import com.fab.wab.merchant.core.mvi.CollectSideEffect
 import com.fab.wab.merchant.core.notification.composable.NotificationHost
@@ -47,30 +46,32 @@ import com.fab.wab.merchant.core.notification.di.notificationModule
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.core.realtime.RealtimeClient
 import com.fab.wab.merchant.core.realtime.di.realtimeModule
+import com.fab.wab.merchant.core.ui.external.ExternalActions
+import com.fab.wab.merchant.core.ui.theme.SystemBarsAppearance
 import com.fab.wab.merchant.core.ui.utils.LocalAppLocale
 import com.fab.wab.merchant.core.ui.utils.LocalDarkTheme
 import com.fab.wab.merchant.designsystem.components.image.LocalImageLoader
 import com.fab.wab.merchant.designsystem.components.image.rememberImageLoader
 import com.fab.wab.merchant.designsystem.components.permission.LocalPermissions
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.feature.auth.di.authModule
-import com.fab.wab.merchant.feature.auth.presentation.di.authPresentationModule
 import com.fab.wab.merchant.feature.application.di.applicationModule
 import com.fab.wab.merchant.feature.application.presentation.di.applicationPresentationModule
+import com.fab.wab.merchant.feature.auth.di.authModule
+import com.fab.wab.merchant.feature.auth.presentation.di.authPresentationModule
 import com.fab.wab.merchant.feature.bookings.di.bookingsModule
 import com.fab.wab.merchant.feature.bookings.presentation.di.bookingsPresentationModule
+import com.fab.wab.merchant.feature.content.di.contentModule
+import com.fab.wab.merchant.feature.content.presentation.di.contentPresentationModule
+import com.fab.wab.merchant.feature.finance.di.financeModule
+import com.fab.wab.merchant.feature.finance.presentation.di.financePresentationModule
+import com.fab.wab.merchant.feature.more.di.moreModule
+import com.fab.wab.merchant.feature.more.presentation.di.morePresentationModule
+import com.fab.wab.merchant.feature.notifications.di.notificationsModule
+import com.fab.wab.merchant.feature.notifications.presentation.di.notificationsPresentationModule
 import com.fab.wab.merchant.feature.salon.di.salonModule
 import com.fab.wab.merchant.feature.salon.presentation.di.salonPresentationModule
 import com.fab.wab.merchant.feature.team.di.teamModule
 import com.fab.wab.merchant.feature.team.presentation.di.teamPresentationModule
-import com.fab.wab.merchant.feature.finance.di.financeModule
-import com.fab.wab.merchant.feature.finance.presentation.di.financePresentationModule
-import com.fab.wab.merchant.feature.notifications.di.notificationsModule
-import com.fab.wab.merchant.feature.notifications.presentation.di.notificationsPresentationModule
-import com.fab.wab.merchant.feature.content.di.contentModule
-import com.fab.wab.merchant.feature.content.presentation.di.contentPresentationModule
-import com.fab.wab.merchant.feature.more.di.moreModule
-import com.fab.wab.merchant.feature.more.presentation.di.morePresentationModule
 import com.fab.wab.merchant.openStoreLink
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -136,6 +137,7 @@ fun App() {
             LocalAnalyticsTracker provides koinInject<AnalyticsTracker>(),
         ) {
             AppTheme {
+                SystemBarsAppearance(isDarkTheme)
                 TrackNavigationScreens(navController)
                 val sessionState by koinInject<SessionStore>().state.collectAsStateWithLifecycle(initialValue = null)
                 RealtimeConnectionEffect(koinInject<RealtimeClient>(), isSignedIn = sessionState?.isSignedIn == true)

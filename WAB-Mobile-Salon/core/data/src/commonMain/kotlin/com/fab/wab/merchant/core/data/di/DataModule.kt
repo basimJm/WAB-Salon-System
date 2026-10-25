@@ -1,20 +1,23 @@
 package com.fab.wab.merchant.core.data.di
 
+import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.data.booking.AffectedBookingsApi
 import com.fab.wab.merchant.core.data.booking.AffectedBookingsRepositoryImpl
-import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
-import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.data.config.AppConfigApi
 import com.fab.wab.merchant.core.data.config.AppConfigRepositoryImpl
 import com.fab.wab.merchant.core.data.locations.LocationsApi
 import com.fab.wab.merchant.core.data.locations.LocationsRepositoryImpl
+import com.fab.wab.merchant.core.data.mock.MockWorldControls
 import com.fab.wab.merchant.core.data.places.PlacesApiConfig
+import com.fab.wab.merchant.core.data.places.PlacesApiService
 import com.fab.wab.merchant.core.data.salon.SalonApi
 import com.fab.wab.merchant.core.data.salon.SalonRepositoryImpl
-import com.fab.wab.merchant.core.data.places.PlacesApiService
+import com.fab.wab.merchant.core.domain.AppSettings
+import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
 import com.fab.wab.merchant.core.domain.config.AppConfigRepository
 import com.fab.wab.merchant.core.domain.config.ClientPlatform
-import com.fab.wab.merchant.core.domain.AppSettings
+import com.fab.wab.merchant.core.domain.dev.MockControls
+import com.fab.wab.merchant.core.domain.dev.SwitchMockWorldUseCase
 import com.fab.wab.merchant.core.domain.locations.LocationsRepository
 import com.fab.wab.merchant.core.domain.permission.PermissionsSync
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
@@ -36,4 +39,6 @@ val dataModule = module {
     single { AffectedBookingsApi(get()) }
     single<AffectedBookingsRepository> { AffectedBookingsRepositoryImpl(get()) }
     single<SalonRepository> { SalonRepositoryImpl(api = get(), sessionStore = get()) }
+    single<MockControls> { MockWorldControls(get()) }
+    factory { SwitchMockWorldUseCase(controls = get(), salon = get(), permissions = get()) }
 }

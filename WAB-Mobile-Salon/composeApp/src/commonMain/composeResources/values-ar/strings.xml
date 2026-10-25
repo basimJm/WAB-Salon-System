@@ -13,4 +13,13 @@
     <string name="maintenance_title">التطبيق تحت الصيانة</string>
     <string name="maintenance_message">نعمل على تحسين WAB أعمال، سنعود قريباً.</string>
     <string name="maintenance_retry_button">إعادة المحاولة</string>
+    <!-- Mock data switcher (dev builds on mock data only) -->
+    <string name="mock_chip">تجريبي</string>
+    <string name="mock_title">بيانات تجريبية (للتطوير)</string>
+    <string name="mock_salon">حالة الصالون</string>
+    <string name="mock_member">العضو المسجّل</string>
+    <string name="mock_owner">المالك</string>
+    <string name="mock_manager">مدير</string>
+    <string name="mock_employee">موظف</string>
+    <string name="mock_none">بلا صلاحيات</string>
 </resources>

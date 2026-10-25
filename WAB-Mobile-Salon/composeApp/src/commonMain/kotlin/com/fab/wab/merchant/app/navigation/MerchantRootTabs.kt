@@ -24,12 +24,19 @@ private val MerchantTab.routeName: String get() = graph()::class.qualifiedName.o
 fun tabForRoutes(hierarchyRoutes: List<String?>): MerchantTab? =
     hierarchyRoutes.firstNotNullOfOrNull { route -> MerchantTab.entries.firstOrNull { it.routeName == route } }
 
+/**
+ * PRD §8.1: the bottom bar / rail only once the salon is live or offline (home route), and only on a tab's root
+ * screen; detail screens and the onboarding / setup routes are full screen.
+ */
+fun showsNavigation(route: LaunchRoute, onTabRoot: Boolean, currentTab: MerchantTab?, tabs: List<MerchantTab>): Boolean =
+    route == LaunchRoute.HOME && onTabRoot && currentTab != null && tabs.isNotEmpty()
+
 /** Graph the NavHost starts at for a launch route; home opens the first permitted, available tab. */
 fun LaunchRoute.startGraph(tabs: List<MerchantTab>): Graph = when (this) {
     LaunchRoute.LOGIN -> Graph.Auth
     LaunchRoute.APPLICATION_STATUS -> Graph.Onboarding
     LaunchRoute.SETUP_CHECKLIST -> Graph.Setup
-    LaunchRoute.HOME -> tabs.firstOrNull()?.graph() ?: Graph.Home
+    LaunchRoute.HOME -> tabs.firstOrNull()?.graph() ?: Graph.More
 }
 
 fun NavHostController.switchTab(tab: MerchantTab) {

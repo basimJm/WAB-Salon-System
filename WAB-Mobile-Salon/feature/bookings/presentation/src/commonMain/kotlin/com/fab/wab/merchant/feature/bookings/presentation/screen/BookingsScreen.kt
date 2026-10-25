@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
+import com.fab.wab.merchant.core.domain.booking.BookingStatus
+import com.fab.wab.merchant.core.domain.booking.BookingTimers
 import com.fab.wab.merchant.designsystem.components.booking.AppBookingCard
 import com.fab.wab.merchant.designsystem.components.booking.BookingCardUi
 import com.fab.wab.merchant.designsystem.components.chip.ActiveFilterChip
@@ -21,6 +23,7 @@ import com.fab.wab.merchant.designsystem.components.format.dateTimeText
 import com.fab.wab.merchant.designsystem.components.layout.AppPagedList
 import com.fab.wab.merchant.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.merchant.designsystem.components.layout.AppScreen
+import com.fab.wab.merchant.designsystem.components.layout.tabBarInset
 import com.fab.wab.merchant.designsystem.components.selector.AppSegmentedTabs
 import com.fab.wab.merchant.designsystem.components.shimmer.AppShimmerList
 import com.fab.wab.merchant.designsystem.components.text.AppText
@@ -37,8 +40,6 @@ import com.fab.wab.merchant.feature.bookings.presentation.resources.bookings_no_
 import com.fab.wab.merchant.feature.bookings.presentation.resources.bookings_no_results_body
 import com.fab.wab.merchant.feature.bookings.presentation.resources.bookings_search
 import com.fab.wab.merchant.feature.bookings.presentation.resources.bookings_title
-import com.fab.wab.merchant.core.domain.booking.BookingTimers
-import com.fab.wab.merchant.core.domain.booking.BookingStatus
 import org.jetbrains.compose.resources.stringResource
 
 /** PRD M08 (design 03 `on.list`): search, tabs, filter chips, paged booking cards. */
@@ -94,7 +95,12 @@ private fun ListBody(state: UiState, onAction: (UiAction) -> Unit) {
             hasMore = state.hasMore,
             loadingMore = state.loadingMore,
             onLoadMore = { onAction(UiAction.OnLoadMore) },
-            contentPadding = PaddingValues(horizontal = spacing.space16, vertical = spacing.space8),
+            contentPadding = PaddingValues(
+                start = spacing.space16,
+                top = spacing.space8,
+                end = spacing.space16,
+                bottom = spacing.space8 + tabBarInset(),
+            ),
         ) { booking ->
             AppBookingCard(
                 booking = booking.toCard(state.nowMs),

@@ -27,6 +27,7 @@ import com.fab.wab.merchant.designsystem.components.dashboard.AppSalonStateChip
 import com.fab.wab.merchant.designsystem.components.dashboard.salonStateLabel
 import com.fab.wab.merchant.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.merchant.designsystem.components.layout.AppScreen
+import com.fab.wab.merchant.designsystem.components.layout.tabBarInset
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.salon.domain.HubEntry
@@ -59,7 +60,12 @@ fun SalonHubScreen(state: UiState, available: Set<HubTile>, onAction: (UiAction)
             LazyVerticalGrid(
                 columns = GridCells.Fixed(AppTheme.adaptive.gridColumns),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(spacing.space16),
+                contentPadding = PaddingValues(
+                    start = spacing.space16,
+                    top = spacing.space16,
+                    end = spacing.space16,
+                    bottom = spacing.space16 + tabBarInset(),
+                ),
                 horizontalArrangement = Arrangement.spacedBy(spacing.space12),
                 verticalArrangement = Arrangement.spacedBy(spacing.space12),
             ) {

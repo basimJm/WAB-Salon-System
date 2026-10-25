@@ -81,8 +81,8 @@ data class SizeTokens(
     val mapRoadNarrow: Dp = 12.dp,
     // Calendar (MER-018, design 04: 56 px per hour)
     val calendarHour: Dp = 56.dp,
-    val calendarTimeColumn: Dp = 48.dp,
-    val calendarWeekTimeColumn: Dp = 40.dp,
+    val calendarTimeColumn: Dp = 56.dp,
+    val calendarWeekTimeColumn: Dp = 48.dp,
     val calendarHatch: Dp = 3.dp,
     val calendarNowDot: Dp = 9.dp,
     val calendarDayChip: Dp = 58.dp,
