@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "marked": 1,
+    "unread": 18
+  }
+}

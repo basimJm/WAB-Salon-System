@@ -1,0 +1,75 @@
+{
+  "success": true,
+  "message": "Created successfully.",
+  "data": {
+    "id": "6ade49a2c2cfb0cb993a17b9",
+    "name": {
+      "ar": "فرع تجريبي",
+      "en": "MER-054 contract capture (throwaway, please ignore)"
+    },
+    "isMain": false,
+    "status": "ACTIVE",
+    "location": {
+      "latitude": 31.9539,
+      "longitude": 35.8822
+    },
+    "locationText": "MER-054 contract capture (throwaway, please ignore)",
+    "cityId": "6ade371b97c38aeef84b9613",
+    "areaId": "6ade371b97c38aeef84b961f",
+    "phone": "+96265921001",
+    "whatsapp": null,
+    "weeklySchedule": [
+      {
+        "day": "SAT",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "SUN",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "MON",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "TUE",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "WED",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "THU",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "FRI",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      }
+    ],
+    "offline": null,
+    "completeness": {
+      "missing": [
+        "WORKING_HOURS",
+        "SERVICE",
+        "STAFF"
+      ],
+      "isComplete": false
+    }
+  }
+}

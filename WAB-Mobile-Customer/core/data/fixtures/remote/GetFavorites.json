@@ -1,0 +1,29 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "79ea2a78d15934408a10b09f",
+      "name": "Rose Bridal Studio",
+      "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/rose/profile.jpg",
+      "rating": 4.7,
+      "reviewsCount": 3,
+      "locationText": "Sweifieh, Wakalat Street, 2nd floor",
+      "shortDescription": "Bridal and occasion specialists in Sweifieh: bridal makeup, hair styling and henna for the whole party.",
+      "isOpenNow": false,
+      "todayHours": null,
+      "isFavorite": true,
+      "distanceKm": null,
+      "branchCount": 1,
+      "branch": {
+        "id": "6ade379d6cbc8f4cb1047d92",
+        "name": "Sweifieh"
+      }
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 1
+  }
+}

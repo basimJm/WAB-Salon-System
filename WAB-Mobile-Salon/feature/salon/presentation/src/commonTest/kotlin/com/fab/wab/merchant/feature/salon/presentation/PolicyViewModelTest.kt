@@ -3,10 +3,10 @@ package com.fab.wab.merchant.feature.salon.presentation
 import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
-import com.fab.wab.merchant.feature.salon.domain.FullPaymentRefund
-import com.fab.wab.merchant.feature.salon.domain.NoShowDeposit
-import com.fab.wab.merchant.feature.salon.domain.NoShowFullPayment
-import com.fab.wab.merchant.feature.salon.domain.PaymentOption
+import com.fab.wab.merchant.core.domain.policy.FullPaymentRefund
+import com.fab.wab.merchant.core.domain.policy.NoShowDeposit
+import com.fab.wab.merchant.core.domain.policy.NoShowFullPayment
+import com.fab.wab.merchant.core.domain.policy.PaymentOption
 import com.fab.wab.merchant.feature.salon.domain.PolicyDraft
 import com.fab.wab.merchant.feature.salon.domain.PolicyField
 import com.fab.wab.merchant.feature.salon.domain.PolicyRepository

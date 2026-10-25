@@ -1,0 +1,60 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "id": "6ade3fabc2cfb0cb993a174a",
+    "salon": {
+      "id": "79ea2a78d15934408a10b09f",
+      "name": "Rose Bridal Studio"
+    },
+    "branch": {
+      "id": "6ade379d6cbc8f4cb1047d92",
+      "name": "Sweifieh",
+      "locationText": "Sweifieh, Wakalat Street, 2nd floor"
+    },
+    "expiresAt": "2026-10-25T17:53:07.002Z",
+    "paymentMethod": "PAY_ON_ARRIVAL",
+    "persons": [
+      {
+        "name": "Capture",
+        "isMain": true,
+        "isBride": false,
+        "services": [
+          {
+            "salonServiceId": "387f8160a24b10c2d3b45546",
+            "name": "Makeup",
+            "price": "49.000",
+            "durationMinutes": 60
+          }
+        ],
+        "staff": {
+          "id": "b3bb803db1e7cc32fbc4ebbb",
+          "firstName": "Farah"
+        },
+        "staffSelection": "ANY",
+        "start": "2026-10-29T08:00:00.000Z",
+        "end": "2026-10-29T09:00:00.000Z",
+        "subtotal": "49.000"
+      }
+    ],
+    "money": {
+      "total": "49.000",
+      "deposit": "14.700",
+      "dueOnline": "0.000",
+      "remaining": "49.000"
+    },
+    "policy": {
+      "cancellationWindowHours": 12,
+      "paymentOptions": [
+        "PAY_ON_ARRIVAL",
+        "DEPOSIT",
+        "FULL_ONLINE"
+      ],
+      "depositPercentage": 30,
+      "depositRefundableOnCustomerCancel": true,
+      "fullPaymentRefundOnCustomerCancel": "MINUS_DEPOSIT",
+      "noShowDeposit": "KEEP",
+      "noShowFullPayment": "REFUND_MINUS_DEPOSIT"
+    }
+  }
+}

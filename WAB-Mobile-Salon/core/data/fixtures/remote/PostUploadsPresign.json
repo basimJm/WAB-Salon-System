@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "key": "gallery/7fe703cdf5e7eec204bb193d/3132d59c-6094-4395-8c66-025da5ef5d13.png",
+    "maxBytes": 70,
+    "upload": {
+      "url": "https://example.invalid/presigned-upload",
+      "method": "PUT",
+      "headers": {
+        "Content-Type": "image/png"
+      },
+      "expiresAt": "2026-10-25T18:29:51.166Z"
+    }
+  }
+}

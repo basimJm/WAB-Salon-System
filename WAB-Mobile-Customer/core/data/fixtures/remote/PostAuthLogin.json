@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "accessToken": "<redacted>",
+    "accessTokenExpiresAt": "2026-10-25T17:58:06.000Z",
+    "refreshToken": "<redacted>",
+    "refreshTokenExpiresAt": "2027-01-23T17:43:06.870Z",
+    "customer": {
+      "id": "6ade37a6c2cfb0cb993a1647",
+      "firstName": "Dana",
+      "lastName": "Khoury",
+      "email": "dana@wab.example",
+      "gender": "FEMALE",
+      "phone": {
+        "countryCode": "JO",
+        "dialCode": "+962",
+        "number": "790000001",
+        "e164": "+962790000001"
+      },
+      "cityId": "6ade371b97c38aeef84b9613",
+      "areaId": "6ade371b97c38aeef84b962c",
+      "language": "en",
+      "pushEnabled": true
+    }
+  }
+}

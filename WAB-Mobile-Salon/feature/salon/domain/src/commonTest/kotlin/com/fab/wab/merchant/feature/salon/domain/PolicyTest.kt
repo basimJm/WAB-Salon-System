@@ -1,5 +1,10 @@
 package com.fab.wab.merchant.feature.salon.domain
 
+import com.fab.wab.merchant.core.domain.policy.FullPaymentRefund
+import com.fab.wab.merchant.core.domain.policy.NoShowDeposit
+import com.fab.wab.merchant.core.domain.policy.NoShowFullPayment
+import com.fab.wab.merchant.core.domain.policy.PaymentOption
+import com.fab.wab.merchant.core.domain.policy.PolicyRule
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

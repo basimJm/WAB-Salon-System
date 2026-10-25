@@ -9,6 +9,7 @@ export const SEARCH_RATING_MAX = 5;
 /** Length of the short description on a salon card. */
 export const SHORT_DESCRIPTION_LENGTH = 120;
 /** Per-IP limit for the search routes (typing and filtering fire many requests). */
+/** Also the budget of every other browsing route (`browse` family, SRV-151). */
 export const SEARCH_ROUTE_RATE_LIMIT = { windowMs: 60_000, max: 300 } as const;
 export const SEARCH_SORTS = ['RATING', 'NEAREST'] as const;
 export type SearchSort = (typeof SEARCH_SORTS)[number];

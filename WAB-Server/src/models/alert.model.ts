@@ -1,21 +1,30 @@
 import { Schema, model, type Types } from 'mongoose';
 import {
+  ALERT_ENTITY_TYPES,
   ALERT_KINDS,
   ALERT_SEVERITIES,
   ALERT_STATUSES,
   ALERT_TITLE_MAX_LENGTH,
   ALERTS_COLLECTION,
+  type AlertEntityType,
   type AlertKind,
   type AlertSeverity,
   type AlertStatus,
 } from '../constants/alerts';
 
+/** An alert title in both languages (BUSINESS_DOMAIN.md §3.7, SRV-150). */
+export interface AlertTitle {
+  ar: string;
+  en: string;
+}
+
 /** One admin alert (BUSINESS_DOMAIN.md §3.7). */
 export interface AlertRaw {
   kind: AlertKind;
   severity: AlertSeverity;
-  title: string;
-  entityType?: string;
+  /** `{ ar, en }`; alerts stored before SRV-150 hold an English string (read through `alertTitles`). */
+  title: AlertTitle;
+  entityType?: AlertEntityType;
   entityId?: Types.ObjectId;
   data: Record<string, unknown>;
   status: AlertStatus;
@@ -31,8 +40,11 @@ const alertSchema = new Schema<AlertRaw>(
   {
     kind: { type: String, enum: ALERT_KINDS, required: true },
     severity: { type: String, enum: ALERT_SEVERITIES, required: true },
-    title: { type: String, required: true, maxlength: ALERT_TITLE_MAX_LENGTH },
-    entityType: { type: String },
+    title: {
+      ar: { type: String, required: true, maxlength: ALERT_TITLE_MAX_LENGTH },
+      en: { type: String, required: true, maxlength: ALERT_TITLE_MAX_LENGTH },
+    },
+    entityType: { type: String, enum: ALERT_ENTITY_TYPES },
     entityId: { type: Schema.Types.ObjectId },
     data: { type: Schema.Types.Mixed, default: {} },
     status: { type: String, enum: ALERT_STATUSES, default: 'NEW' },

@@ -33,7 +33,7 @@ internal fun UiState.withBranch(branchId: String): UiState {
     return copy(
         branchId = branch.id,
         salon = full.forBranch(branch),
-        persons = persons.map { it.copy(serviceIds = emptyList(), date = null, start = null, staff = null) },
+        persons = persons.map { it.copy(serviceIds = emptyList(), date = null, start = null, end = null, staff = null) },
         calendar = emptyList(),
         selectedDate = null,
         availability = null,

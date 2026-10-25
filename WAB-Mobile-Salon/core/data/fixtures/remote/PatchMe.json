@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "id": "6ade49a2c2cfb0cb993a17be",
+    "salonId": "7fe703cdf5e7eec204bb193d",
+    "firstName": "Capture",
+    "lastName": "Fixture",
+    "phone": "+962799852787",
+    "role": "EMPLOYEE",
+    "permissions": [
+      "BOOKINGS_VIEW_OWN"
+    ],
+    "providesServices": true,
+    "branchId": "6ade379d6cbc8f4cb1047d91",
+    "photoUrl": null,
+    "pushEnabled": true
+  }
+}
