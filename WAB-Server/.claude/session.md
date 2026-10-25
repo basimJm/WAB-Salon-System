@@ -10,10 +10,22 @@
 
 ## Current task
 
+### SRV-125 — Catalog request approval may map to an existing catalog service
+
+- Branch: `feat/srv-125-catalog-map`
+- Status: IN REVIEW
+- Acceptance criteria (Admin PRD A? catalog requests (ADM-039), BUSINESS_DOMAIN §3 catalogRequests `catalogServiceId`; operation `POST /admin/v1/catalog/requests/{id}/approve` — contract admin 1.2.0, client impact ADM-039):
+  - [x] Approve body is either a new catalog entry (names/descriptions, image, sort order) or `{catalogServiceId, reason}` mapping to an existing active catalog service of the salon's gender (wrong gender 422 `GENDER_MISMATCH`, unknown/inactive 404); a mapping creates nothing new; a body mixing both is 400
+  - [x] Same claim/audit/notice as before; the audit marks `mapped: true`
+  - [x] The saved-analytics-segment audience is split to SRV-125a (PENDING owner: no segment store exists, analytics excluded 2026-10-19)
+- Tests: `tests/salonServices.test.ts` (+1 mapping case); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (contract bumped through SRV-111), QA ✔) — DEVIATION: half of the row (segments) not built; it needs an owner decision.
+
 ### SRV-111 — Contract snapshot guard + per-namespace contract version
 
 - Branch: `feat/srv-111-contract-guard`
-- Status: IN REVIEW
+- Status: DONE (PR #408)
 - Acceptance criteria (INTEGRATION.md §3; API docs: `info.version` per namespace changes — common 1.0.0, customer/merchant/admin 1.1.0):
   - [x] `src/docs/contractVersions.ts` records per namespace the published version, the fingerprint (sha256 of the generated document without its version) and the client-impact note of the last change; `openapi.info.version` comes from it
   - [x] `tests/contractGuard.test.ts` fails when a generated contract no longer matches its fingerprint, or a namespace has no version/note
@@ -33,18 +45,6 @@
 - Tests: `tests/adminEvents.test.ts` (4); full gate 154 suites / 2776 tests (format fixed afterwards: whitespace only, format/lint/types re-checked)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (hooks injected, sockets stay in `sockets/`), QA ✔)
-
-### SRV-134 — Conflict preview endpoints
-
-- Branch: `feat/srv-134-conflict-preview`
-- Status: DONE (PR #406)
-- Acceptance criteria (BUSINESS_DOMAIN §5.12; operations `POST /merchant/v1/salon/hours/weekly/preview`, `.../closures/preview` (also under `/branches/{branchId}/hours`), `POST /merchant/v1/team/members/{id}/staff/preview`, `POST /merchant/v1/team/members/{id}/leaves/preview` — verifies MER-035/038/039 flows):
-  - [x] Verified: the saves already answer 409 `SCHEDULE_CONFLICT` with the booking ids and `cancel-affected` exists; what was missing is a dry run before saving
-  - [x] Each preview runs the same scope and validation as its save (week shape and slot grid, closure/leave dates not in the past, staff profile rules, branch scope) and returns the upcoming PENDING/APPROVED bookings it would break, saving nothing
-  - [x] Week validation extracted (`normalizeWeek`) and shared by the save and the preview; conflict doc schema shared by admin and merchant docs
-- Tests: `tests/hours.test.ts`, `tests/staff.test.ts`, `tests/leaves.test.ts` (+1 each); full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔)
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

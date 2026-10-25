@@ -25,8 +25,8 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'Baseline (SRV-111) after salon branches and M07/M20/M21/M25 endpoints: branches CRUD, branch-scoped hours/services/bookings/finance, reviews, statistics, dashboard, /me, change-phone, push switch, leave, deletion request, conflict previews (MER-042/043/049/050, MER-061…066).',
   },
   admin: {
-    version: '1.1.0',
-    sha256: '36ad3c2e0858e2c49585dcb0996a64d1205cc0266602fd5a07fb1fcc2f4bd2ea',
-    note: 'Baseline (SRV-111) after salon branches: branch CRUD, branch filters on bookings/reviews/members/finance/exports, salon edit per branch, staff move (ADM-088…091).',
+    version: '1.2.0',
+    sha256: 'fa6d34f82f5bab5f22eb28be8d5e87965e360726e646d85de05bb6f03e679666',
+    note: 'ADM-039: catalog request approval can map to an existing catalog service (body catalogServiceId instead of name/description)',
   },
 };
