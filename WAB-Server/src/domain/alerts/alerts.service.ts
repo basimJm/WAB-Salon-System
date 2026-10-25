@@ -1,6 +1,7 @@
 import {
   ALERT_BATCH_LIMIT,
   ALERT_NEW_ENTITY_LOOKBACK_MIN,
+  type AlertEntityType,
   type AlertKind,
   type AlertSeverity,
 } from '../../constants/alerts';
@@ -15,17 +16,17 @@ import type { SalonsRepository } from '../../repositories/salons.repository';
 import type { TransactionsRepository } from '../../repositories/transactions.repository';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
-import { translate } from '../../utils/i18n';
 import type { Logger } from '../../utils/logger';
 import type { SettingsService } from '../settings';
 import type { SubscriptionAlert } from '../subscriptions/subscriptions.service';
+import { titlesOf } from './alertText';
 
 export interface RaiseInput {
   readonly kind: AlertKind;
   readonly severity: AlertSeverity;
   /** One alert per occurrence: raising the same key again does nothing. */
   readonly dedupeKey: string;
-  readonly entityType?: string;
+  readonly entityType?: AlertEntityType;
   readonly entityId?: string;
   readonly data?: Record<string, unknown>;
 }
@@ -55,8 +56,6 @@ export interface AlertsDeps {
   readonly logger: Logger;
 }
 
-const title = (kind: AlertKind): string => translate('en', `alerts.${kind}.title`);
-
 export const createAlertsService = (deps: AlertsDeps): AlertsService => {
   const { alerts, transactions, refunds, salons, reviews, catalogRequests, settings, logger } =
     deps;
@@ -65,7 +64,8 @@ export const createAlertsService = (deps: AlertsDeps): AlertsService => {
     const created = await alerts.createOnce({
       kind: input.kind,
       severity: input.severity,
-      title: title(input.kind),
+      // Both languages: the admin reads alerts in Arabic or English (SRV-150).
+      title: titlesOf(input.kind),
       ...(input.entityType === undefined ? {} : { entityType: input.entityType }),
       ...(input.entityId === undefined ? {} : { entityId: toObjectId(input.entityId) }),
       data: input.data ?? {},

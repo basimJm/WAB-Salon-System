@@ -25,8 +25,8 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'MER-061: MemberProfile (login, refresh, application, /me) has branchId (SRV-149)',
   },
   admin: {
-    version: '1.3.0',
-    sha256: 'ec28ab65c006a6cb4a1f938c5976e24ba4187fbca75538a7588a94831cc1759f',
-    note: 'ADM-047: export kinds CUSTOMERS and SALONS (filters of their screens); PDF exports render Arabic',
+    version: '1.4.0',
+    sha256: 'ae6e2ec07c4ce2f921d4eca49e1f9bd0786b9a0a864e422db68f5ddd629b5dc8',
+    note: 'ADM-079 (alerts: title in the request language + titles{ar,en}; entityType uppercase enum)',
   },
 };

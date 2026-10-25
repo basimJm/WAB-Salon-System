@@ -10,6 +10,21 @@
 
 ## Current task
 
+### SRV-150 — Alerts: titles in the request language (+ both) and one uppercase subject type
+
+- Branch: `feat/srv-150-alert-i18n`
+- Status: IN REVIEW
+- Acceptance criteria (server issues S11/S12 from ADM-079, `WAB-Admin-Dashboard/docs/SERVER_ISSUES.md`; BUSINESS_DOMAIN §3.7 `alerts` (updated here), §7 admin room `alert.created`; CLAUDE.md §7 admin answers carry AR + EN; operations `GET /admin/v1/alerts`, `POST /admin/v1/alerts/{id}/acknowledge` — contract admin 1.4.0, client impact ADM-079):
+  - [x] S11: new alerts store `title{ar,en}` from the locale keys `alerts.<KIND>.title` (both already existed); list/acknowledge answer `title` in the `Accept-Language` language (default ar) plus `titles{ar,en}`; alerts stored before the fix (English string) read their titles from the kind, so no data migration
+  - [x] Socket `alert.created` carries `title` in the default language (ar; a socket has no request language) plus `titles{ar,en}` (was English)
+  - [x] S12: `ALERT_ENTITY_TYPES` (`SALON|REFUND|REVIEW|CATALOG_REQUEST`) types `RaiseInput.entityType` and the schema enum; salon deletion now raises `SALON`; demo seed wrote `salon`/`refund` and English titles, fixed; stored lowercase values are normalized on read (`normalizeAlertEntityType`; unknown → null), so no migration
+  - [x] BUSINESS_DOMAIN §3.7 records `title{ar,en}`, the entityType enum and the response/socket shape (domain was silent; chose the CLAUDE.md §7 bilingual convention while keeping `title` a string for compatibility)
+- Tests: `tests/alertI18n.test.ts` (9: titles per kind, stored on raise, list/ack in AR/EN/default, legacy string title, feed payload, legacy `salon`, normalizer, schema enum + both titles); `tests/accountRemoval.test.ts` asserts `entityType: 'SALON'`; full gate (Terminal panel, outside the sandbox): typecheck, build, jest 159 suites / 2803 tests green; lint + format re-run green after fixing the new test (deprecated `validateSync`) and the pre-existing prettier drift in this file
+- API docs: `openapi.admin.json` regenerated (`titles` added, `entityType` enum); contract admin 1.3.0 → 1.4.0 (`contract:bump`)
+- Loops: 1/1 — re-checked each criterion against BUSINESS_DOMAIN §3.7/§7, every `entityType` write in alerts (alerts.service, salonDeletion, demo seed) and every reader of `alert.title` (routes, socket; emails already used the kind's locale key)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (backward compatible: `title` stays a string, `titles` added, contract bumped, ADM-079 named), QA ✔) — audit-log `entityType: 'salon'` (a different collection) is untouched on purpose
+- Notes: client impact ADM-079: `alertLink` can drop the lowercase normalization; the panel may show `titles[lang]` for socket toasts. DEVIATION: docs/build ran `tsc` + `node dist/docs/*.js` directly (worktree shares the main checkout's `node_modules`, `prebuild` skipped).
+
 ### SRV-149 — Member profile carries `branchId` (gap found by MER-061)
 
 - Branch: `feat/srv-149-member-profile-branch`
@@ -202,6 +217,7 @@
 - Notes: none.
 
 ### SRV-011a — Hosted dev API recorded; client remote-switch tasks unblocked (owner request 2026-10-25)
+
 - Branch: `chore/srv-011a-dev-api`
 - Status: DONE
 - Acceptance criteria:
