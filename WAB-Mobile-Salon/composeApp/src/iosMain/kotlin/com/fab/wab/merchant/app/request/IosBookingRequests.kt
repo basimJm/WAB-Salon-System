@@ -98,25 +98,45 @@ class IosBookingRequests(private val koin: Koin) {
         center.addNotificationRequest(UNNotificationRequest.requestWithIdentifier(bookingId, content, null), null)
     }
 
+    /**
+     * Loads both titles before the first Objective-C call (MER-067): Kotlin/Native converts an Objective-C argument
+     * when it is evaluated and keeps only the raw pointer across a suspension inside the argument list, so
+     * `actionWithIdentifier(ID, getString(..), ..)` handed a freed NSString to UserNotifications once `getString`
+     * really suspended (SIGSEGV in objc_retain at launch).
+     */
     private suspend fun registerCategory() {
-        val accept = UNNotificationAction.actionWithIdentifier(
-            BookingRequestCategory.ACCEPT,
-            getString(Res.string.request_accept),
-            UNNotificationActionOptionNone,
+        val titles = BookingRequestTitles(
+            accept = getString(Res.string.request_accept),
+            reject = getString(Res.string.request_reject),
         )
-        val reject = UNNotificationAction.actionWithIdentifier(
-            BookingRequestCategory.REJECT,
-            getString(Res.string.request_reject),
-            UNNotificationActionOptionForeground,
-        )
-        val category = UNNotificationCategory.categoryWithIdentifier(
-            BookingRequestCategory.ID,
-            listOf(accept, reject),
-            emptyList<String>(),
-            UNNotificationCategoryOptionNone,
-        )
-        center.setNotificationCategories(setOf(category))
+        center.setNotificationCategories(setOf(bookingRequestCategory(titles)))
     }
+}
+
+/** The localized action titles of the booking request category, loaded before any Objective-C object is built. */
+internal data class BookingRequestTitles(val accept: String, val reject: String)
+
+/**
+ * The Accept / Reject category. Deliberately not `suspend`: every Objective-C argument is converted and used without a
+ * suspension in between (MER-067).
+ */
+internal fun bookingRequestCategory(titles: BookingRequestTitles): UNNotificationCategory {
+    val accept = UNNotificationAction.actionWithIdentifier(
+        BookingRequestCategory.ACCEPT,
+        titles.accept,
+        UNNotificationActionOptionNone,
+    )
+    val reject = UNNotificationAction.actionWithIdentifier(
+        BookingRequestCategory.REJECT,
+        titles.reject,
+        UNNotificationActionOptionForeground,
+    )
+    return UNNotificationCategory.categoryWithIdentifier(
+        BookingRequestCategory.ID,
+        listOf(accept, reject),
+        emptyList<String>(),
+        UNNotificationCategoryOptionNone,
+    )
 }
 
 /** Identifiers shared with the server payload (`aps.category`) and AppDelegate. */
