@@ -338,7 +338,7 @@ Index `{recipientType, recipientId, createdAt}`; `{recipientType, recipientId, r
 **settings** (key/value; cached in Redis; defaults below in §10).
 **auditLogs** `{ adminId, action, entityType, entityId, before?, after?, reason, ip, userAgent }` — append-only, never updated.
 **serverEvents** (time-series) `{ ts, name, actorType, actorId?, salonId?, bookingId?, params, platform?, appVersion? }`.
-**alerts** `{ kind, severity, title, entityType?, entityId?, data, status: NEW|ACKNOWLEDGED, emailedAt? }`.
+**alerts** `{ kind, severity, title{ar,en}, entityType?: SALON|REFUND|REVIEW|CATALOG_REQUEST, entityId?, data, status: NEW|ACKNOWLEDGED, emailedAt? }` — the title comes from the locale files of its `kind`; admin answers carry `title` in the request language plus `titles{ar,en}`; the live `alert.created` event uses the default language (ar) plus `titles`. `entityType` is always the uppercase value (SRV-150).
 **exports** `{ kind, params, status: QUEUED|RUNNING|DONE|FAILED, fileKey?, requestedBy, finishedAt? }`.
 **uploads** `{ key, purpose: UploadPurpose, ownerType, ownerId, contentType, maxBytes, status: PENDING|CONFIRMED|REJECTED, expiresAt }` — TTL for PENDING.
 

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.3.0"
+    "version": "1.4.0"
   },
   "servers": [
     {
@@ -21275,10 +21275,32 @@
                           "title": {
                             "type": "string"
                           },
+                          "titles": {
+                            "type": "object",
+                            "properties": {
+                              "ar": {
+                                "type": "string"
+                              },
+                              "en": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "ar",
+                              "en"
+                            ]
+                          },
                           "entityType": {
                             "type": [
                               "string",
                               "null"
+                            ],
+                            "enum": [
+                              "SALON",
+                              "REFUND",
+                              "REVIEW",
+                              "CATALOG_REQUEST",
+                              null
                             ]
                           },
                           "entityId": {
@@ -21319,6 +21341,7 @@
                           "kind",
                           "severity",
                           "title",
+                          "titles",
                           "entityType",
                           "entityId",
                           "data",
@@ -21590,10 +21613,32 @@
                         "title": {
                           "type": "string"
                         },
+                        "titles": {
+                          "type": "object",
+                          "properties": {
+                            "ar": {
+                              "type": "string"
+                            },
+                            "en": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "ar",
+                            "en"
+                          ]
+                        },
                         "entityType": {
                           "type": [
                             "string",
                             "null"
+                          ],
+                          "enum": [
+                            "SALON",
+                            "REFUND",
+                            "REVIEW",
+                            "CATALOG_REQUEST",
+                            null
                           ]
                         },
                         "entityId": {
@@ -21634,6 +21679,7 @@
                         "kind",
                         "severity",
                         "title",
+                        "titles",
                         "entityType",
                         "entityId",
                         "data",

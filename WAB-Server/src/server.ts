@@ -13,6 +13,7 @@ import { ReportsRepository } from './repositories/reports.repository';
 import { createAlertInbox } from './domain/alerts/alertInbox.service';
 import { SOCKET_ROOMS } from './constants/sockets';
 import { createAlertsService } from './domain/alerts/alerts.service';
+import { alertFeedPayload } from './domain/alerts/alertText';
 import { AlertsRepository } from './repositories/alerts.repository';
 import { ALERT_SOCKET_EVENT } from './constants/alerts';
 import { createAnalyticsService } from './domain/analytics/analytics.service';
@@ -654,12 +655,7 @@ const buildServices = (
     catalogRequests: new CatalogRequestsRepository(),
     settings,
     onRaised: (alert) => {
-      relay.current?.emit('admin', SOCKET_ROOMS.admin, ALERT_SOCKET_EVENT, {
-        id: alert.id,
-        kind: alert.kind,
-        severity: alert.severity,
-        title: alert.title,
-      });
+      relay.current?.emit('admin', SOCKET_ROOMS.admin, ALERT_SOCKET_EVENT, alertFeedPayload(alert));
     },
     logger,
   });
