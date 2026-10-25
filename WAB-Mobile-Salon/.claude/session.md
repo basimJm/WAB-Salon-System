@@ -9,6 +9,21 @@
 
 ## Current task
 
+### MER-058 — Performance pass (measurements)
+- Branch: `feat/mer-058-performance`
+- Branched: (from `origin/merchant` after PR #363 merged MER-002…057)
+- Status: IN REVIEW
+- Acceptance criteria (backlog MER-058; CLAUDE.md §6):
+  - [x] R8 + size budget: `assembleDevRelease` / `assembleProdRelease` green; release APKs 10,557,606 / 10,557,570 bytes (≈ 10.1 MB) vs 62,914,560 budget (`policy_checks.py budget` ok); debug APK 37.6 MB for comparison
+  - [x] Cold start (R8 dev release, debug-signed locally, Pixel 4 emulator, `am start -W -S`, 6 runs): 673 ms first after install, then 381 / 415 / 305 / 424 / 431 ms (median ≈ 415 ms); warm start 45 ms; the release build runs login → OTP → live bookings → details (no R8 serialization breakage)
+  - [x] Frames while scrolling bookings + calendar (`dumpsys gfxinfo`, 101 frames): p50 17 ms, p90 19 ms, p99 34 ms, 0 slow UI-thread frames, legacy jank 3 % (emulator GPU)
+  - [x] Image sizing: `AppImage` moved from `SubcomposeAsyncImage` (one subcomposition per image) to `AsyncImage` + state overlays (shimmer / fallback); decoding stays at the slot size from the constraints
+  - [x] Lists: every lazy list has `key` + `contentType` (finance rows were missing `contentType`); `collectAsStateWithLifecycle` everywhere (no plain `collectAsState`); the calendar draws only the visible hour window (≤ 24 h × staff columns, no virtualisation needed)
+- Tests: `ImagePhaseTest` (1); design-system + finance tests, design-system iOS compile, `assembleDevDebug` green; detekt 0; policy ok
+- Loops: 1/1 — re-measured size and start on the final release build; re-ran the touched modules' tests and detekt after the image change
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — small change (AppImage loader, finance contentType) plus measurements; no new dependency. DEVIATIONS: measured on the emulator only (no physical device); no Macrobenchmark / baseline profile module (would add a new module and dependency, not in the backlog row); iOS start time not measured.
+- Notes: the debug-signed release APK lives only in `/tmp` (no signing material committed).
+
 ### MER-057 — Accessibility and RTL QA pass (+ end-of-backlog gate)
 - Branch: `feat/mer-057-a11y-rtl-qa`
 - Branched: (from `feat/mer-053-deep-link-register`)

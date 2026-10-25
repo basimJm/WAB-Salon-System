@@ -93,9 +93,17 @@ fun FinanceScreen(state: UiState, bankReady: Boolean, onAction: (UiAction) -> Un
                     state.isEmpty -> item(key = EMPTY) {
                         AppEmptyState(title = stringResource(emptyTitle(state.tab)), message = stringResource(Res.string.empty_body))
                     }
-                    state.tab == FinanceTab.TRANSACTIONS -> items(state.transactions, key = { it.id }) { TransactionRow(it, onAction) }
-                    state.tab == FinanceTab.REFUNDS -> items(state.refunds, key = { it.id }) { RefundRow(it, onAction) }
-                    else -> items(state.payouts, key = { it.id }) { PayoutRow(it) }
+                    state.tab == FinanceTab.TRANSACTIONS -> items(
+                        state.transactions,
+                        key = { it.id },
+                        contentType = { ROW_TRANSACTION },
+                    ) { TransactionRow(it, onAction) }
+                    state.tab == FinanceTab.REFUNDS -> items(
+                        state.refunds,
+                        key = { it.id },
+                        contentType = { ROW_REFUND },
+                    ) { RefundRow(it, onAction) }
+                    else -> items(state.payouts, key = { it.id }, contentType = { ROW_PAYOUT }) { PayoutRow(it) }
                 }
                 if (state.hasMore && !state.loading) {
                     // The footer appearing at the end of the list asks for the next page (infinite scroll).
@@ -118,6 +126,9 @@ private const val LOADING = "loading"
 private const val ERROR = "error"
 private const val EMPTY = "empty"
 private const val MORE = "more"
+private const val ROW_TRANSACTION = "transaction"
+private const val ROW_REFUND = "refund"
+private const val ROW_PAYOUT = "payout"
 
 @Composable
 private fun Header(state: UiState, bankReady: Boolean, onAction: (UiAction) -> Unit) {
