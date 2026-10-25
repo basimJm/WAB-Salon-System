@@ -12,7 +12,7 @@
 ### MER-058 — Performance pass (measurements)
 - Branch: `feat/mer-058-performance`
 - Branched: (from `origin/merchant` after PR #363 merged MER-002…057)
-- Status: IN REVIEW
+- Status: DONE (PR #364)
 - Acceptance criteria (backlog MER-058; CLAUDE.md §6):
   - [x] R8 + size budget: `assembleDevRelease` / `assembleProdRelease` green; release APKs 10,557,606 / 10,557,570 bytes (≈ 10.1 MB) vs 62,914,560 budget (`policy_checks.py budget` ok); debug APK 37.6 MB for comparison
   - [x] Cold start (R8 dev release, debug-signed locally, Pixel 4 emulator, `am start -W -S`, 6 runs): 673 ms first after install, then 381 / 415 / 305 / 424 / 431 ms (median ≈ 415 ms); warm start 45 ms; the release build runs login → OTP → live bookings → details (no R8 serialization breakage)

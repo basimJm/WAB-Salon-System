@@ -102,7 +102,7 @@
 | MER-055 | Real OTP on devices (Firebase Phone Auth test numbers, `wab-otp` in the server) | `feat/mer-055-real-otp` | MER-054, SRV-034 | BLOCKED | Firebase registrations (MER-004) |
 | MER-056 | Booking request end to end on devices: customer books (dev API) → merchant receives socket + FCM, overlay / heads-up / time-sensitive paths, accept from notification | `feat/mer-056-request-e2e` | MER-029, MER-030, MER-054 | BLOCKED | Needs the dev API; SRV-100 is done |
 | MER-057 | Accessibility and RTL QA pass (TalkBack / VoiceOver, 48 dp, font 200 %, RTL, dark, landscape, alert sound + vibration + visual cue) | `feat/mer-057-a11y-rtl-qa` | MER-052 | DONE | PRD §13 |
-| MER-058 | Performance pass (cold start, R8, size budget, calendar rendering, image sizing) with measurements | `feat/mer-058-performance` | MER-057 | IN REVIEW | Customer `CLAUDE.md` §6 |
+| MER-058 | Performance pass (cold start, R8, size budget, calendar rendering, image sizing) with measurements | `feat/mer-058-performance` | MER-057 | DONE | Customer `CLAUDE.md` §6 |
 | MER-059 | Store readiness (icons, splash, privacy manifest, Data safety, screenshots AR/EN, listing texts, overlay-permission justification for Play) | `feat/mer-059-store-readiness` | MER-058 | PENDING | Store accounts and texts — **owner input** |
 | MER-060 | Release pipeline (signing, Play internal + TestFlight from a tag, changelog) | `feat/mer-060-release-pipeline` | MER-059 | PENDING | Signing material — **owner input** |
 
