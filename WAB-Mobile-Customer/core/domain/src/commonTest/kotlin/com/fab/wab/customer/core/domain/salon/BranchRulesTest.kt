@@ -60,6 +60,21 @@ class BranchRulesTest {
         assertEquals(listOf("s1", "s2", "s3"), details.servicesOf(null).map { it.id })
         assertEquals(listOf("m2"), details.staffOf("b").map { it.id })
     }
+
+    @Test
+    fun salonAtABranchTakesItsPlaceAndKeepsSalonWideFacts() {
+        val details = SalonDetailsFixture.details(services = listOf(service("s1", "a"), service("s2", "b")), staff = emptyList())
+        val khalda = branch("b").copy(locationText = "Khalda", phone = "+962790000002", isOpenNow = false, closedReason = "Holiday")
+        val view = details.forBranch(khalda)
+        assertEquals("Khalda", view.locationText)
+        assertEquals("+962790000002", view.phone)
+        assertFalse(view.isOpenNow)
+        assertEquals("Holiday", view.closedReason)
+        assertEquals(listOf("s2"), view.services.map { it.id })
+        assertEquals(details.name, view.name)
+        assertEquals(details.reviews, view.reviews)
+        assertEquals(details, details.forBranch(null))
+    }
 }
 
 private object SalonDetailsFixture {

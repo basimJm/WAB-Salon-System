@@ -11,6 +11,20 @@
 
 - Batch 7 = salon branches (CUS-082…086, then CUS-087), chained branches from `feat/cus-082-branches-contract`; per task policy checks + tests written, host unit tests after five (rules §3.13). The parent agent pushes and merges the chain.
 
+### CUS-085 — Salon details: clear, always-visible branch selector; branch address, map, phone, hours, open now; staff and services/prices per selected branch; reviews salon-wide with the branch label on each
+- Branch: `feat/cus-085-details-branches` (from `feat/cus-084-nearest-branches`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.11, §5.17; `GET /customer/v1/salons/{id}`):
+  - [x] Branch selector right under the header whenever the salon has more than one bookable branch: one chip per branch (main first, "· Main" mark), selected chip highlighted; single-branch salons show no selector
+  - [x] Initial branch = route `branchId` (Home nearest entry / deep link) when listed, else main, else first; the choice survives pull-to-refresh; unknown ids are ignored
+  - [x] `UiState.view = salon.forBranch(selected)`: header location link + maps (pin label "Salon - Branch"), open/closed badge, Call / WhatsApp, working hours, closures, staff and services/prices all follow the selected branch; name, gallery, description, rating and reviews stay salon-wide
+  - [x] Review cards (details preview, staff sheet, reviews list) show "‹branch› branch" / "فرع ‹branch›" when the review carries a branch
+  - [x] Book now passes the selected branch (`OpenBooking(salonId, branchId)` → `Screen.BookingStart(salonId, branchId)`, used by CUS-086); analytics `salon_branch_select` (catalog: by view model)
+- Tests: `SalonDetailsViewModelTest` (+3: main default + branch-driven place/contacts/staff/services/booking, requested + kept on refresh, fallback + single branch), `BranchRulesTest` (+1 `forBranch`), `SalonBranchTextsTest` (2); full `testAndroidHostTest --continue` green
+- Loops: 0/1
+- Review: PENDING
+- Notes: no feature-level `@Preview`s exist in this app (unchanged practice); the selector reuses `AppFilterChip` (portrait/landscape via `LazyRow`, RTL/LTR and light/dark from tokens). UI check deferred to the end-of-batch pass (rules §3.13).
+
 ### CUS-084 — Nearest section and map: one entry per branch titled "Salon - Branch" (e.g. Hifa Salon - Mecca Street); single-branch salons show the salon name
 - Branch: `feat/cus-084-nearest-branches` (from `feat/cus-083-search-branches`)
 - Status: IN REVIEW

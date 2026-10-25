@@ -54,6 +54,24 @@ object BranchRules {
 /** A card's `branchCount` (a JSON number) as a count; a visible salon always has at least one bookable branch. */
 fun cardBranchCount(serverValue: Double): Int = serverValue.toInt().coerceAtLeast(BranchRules.SINGLE_BRANCH)
 
+/**
+ * The salon as seen at [branch] (§5.17): place, contacts, hours and closures of that branch, its staff and services;
+ * name, media, description, rating and reviews stay salon-wide. Without a branch (older data) the salon is unchanged.
+ */
+fun SalonDetails.forBranch(branch: SalonBranch?): SalonDetails = if (branch == null) this else copy(
+    locationText = branch.locationText,
+    location = branch.location,
+    phone = branch.phone,
+    whatsapp = branch.whatsapp,
+    isOpenNow = branch.isOpenNow,
+    todayHours = branch.todayHours,
+    closedReason = branch.closedReason,
+    weeklySchedule = branch.weeklySchedule,
+    upcomingClosures = branch.upcomingClosures,
+    staff = staffOf(branch.id),
+    services = servicesOf(branch.id),
+)
+
 /** Services offered by [branchId] (§5.17: services and prices are per branch). */
 fun SalonDetails.servicesOf(branchId: String?): List<SalonService> = BranchRules.ofBranch(services, branchId) { it.branchId }
 

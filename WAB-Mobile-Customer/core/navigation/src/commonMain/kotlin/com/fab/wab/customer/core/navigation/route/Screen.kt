@@ -72,7 +72,7 @@ sealed interface Screen {
 
     /** S16 booking flow start for a salon (registered users). */
     @Serializable
-    data class BookingStart(val salonId: String) : Screen
+    data class BookingStart(val salonId: String, val branchId: String? = null) : Screen
 
     /** S22 edit personal information (registered). */
     @Serializable
