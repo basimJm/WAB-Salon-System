@@ -24,6 +24,8 @@ import { createLogger, type Logger } from '../utils/logger';
 import { addDays, localDateOf } from '../utils/time';
 import { migrateSalonsToBranches } from '../domain/branches/migration';
 import { createMongoBranchMigrationStore } from '../domain/branches/migrationStore';
+import { buildDemoBranches } from './demo/branches';
+import { loadDemoBranchSources, syncBranchCounts } from './demo/branchSources';
 import { loadDemoContext } from './demo/context';
 import { buildDemoDataset } from './demo/dataset';
 import { toDemoModel, writeDemoDataset } from './demo/writer';
@@ -85,8 +87,15 @@ const main = async (): Promise<void> => {
       store: createMongoBranchMigrationStore(),
       dryRun: false,
     });
+    // Then a few salons get more branches, each with its own staff, services and prices.
+    const sources = await loadDemoBranchSources();
+    const extraBranches = await writeDemoDataset(buildDemoBranches(context, sources), models);
+    await syncBranchCounts(sources);
     const reports = await storeDailyReports(context.timeZone, context.now, logger);
-    logger.info({ reference, catalog, written, branches, reports }, 'demo data seeded');
+    logger.info(
+      { reference, catalog, written, branches, extraBranches, reports },
+      'demo data seeded',
+    );
   } finally {
     await disconnectMongo();
   }
