@@ -9,10 +9,10 @@ actual object LocalAppLocale {
 
     private val defaultLocale = getDefaultLocale()
 
-    private val LocalAppLocale = staticCompositionLocalOf { defaultLocale }
+    private val LocalLocale = staticCompositionLocalOf { defaultLocale }
     actual val current: String
         @Composable
-        get() = LocalAppLocale.current
+        get() = LocalLocale.current
 
     @Composable
     actual infix fun provides(value: String?): ProvidedValue<*> {
@@ -26,6 +26,6 @@ actual object LocalAppLocale {
             )
         }
 
-        return LocalAppLocale provides newLocale
+        return LocalLocale provides newLocale
     }
 }

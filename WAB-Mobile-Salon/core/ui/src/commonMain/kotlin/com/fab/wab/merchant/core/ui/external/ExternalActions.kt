@@ -15,6 +15,8 @@ interface ExternalActions {
     fun email(address: String)
     /** Opens [appUrl] in the app identified by [appId] (package / URL scheme) when installed, else [fallbackUrl] (store page). */
     fun openApp(appUrl: String, appId: String, fallbackUrl: String)
+    /** Copies [text] to the system clipboard (booking reference). */
+    fun copyText(text: String)
 }
 
 /** Pure link builders shared by the platforms (unit-tested). */
@@ -64,6 +66,7 @@ class FakeExternalActions : ExternalActions {
     override fun openUrl(url: String) { calls += "url:$url" }
     override fun email(address: String) { calls += ExternalLinks.mailto(address) }
     override fun openApp(appUrl: String, appId: String, fallbackUrl: String) { calls += "app:$appUrl|$appId|$fallbackUrl" }
+    override fun copyText(text: String) { calls += "copy:$text" }
 }
 
 expect val platformExternalActionsModule: Module

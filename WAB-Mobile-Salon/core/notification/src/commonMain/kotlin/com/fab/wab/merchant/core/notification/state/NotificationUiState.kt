@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.merchant.core.notification.model.NotificationContent
+import com.fab.wab.merchant.core.notification.model.NotificationDefaults
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 
 data class NotificationUiState(
@@ -28,6 +29,6 @@ data class NotificationItemState(
     val customBackgroundColor: Color? = null,
     val customCornerRadius: Dp? = null,
     val showDismissButton: Boolean = true,
-    val autoDismissDelayMs: Long = 5000L,
+    val autoDismissDelayMs: Long = NotificationDefaults.AUTO_DISMISS_MS,
     val isVisible: Boolean = false,
 )

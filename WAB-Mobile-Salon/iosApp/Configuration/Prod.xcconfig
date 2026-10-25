@@ -2,7 +2,7 @@
 #include "Config.xcconfig"
 
 APP_ENV = prod
-APP_DISPLAY_NAME = WAB Merchant
+APP_DISPLAY_NAME = WAB Business
 // PLACEHOLDER host until the platform domain is decided. In xcconfig '//' starts a comment, so the
 // scheme separator is written as ':/$()/'.
 API_BASE_URL = https:/$()/api.template.app

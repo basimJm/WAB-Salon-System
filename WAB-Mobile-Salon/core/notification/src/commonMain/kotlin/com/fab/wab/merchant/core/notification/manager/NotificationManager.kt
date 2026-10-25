@@ -9,11 +9,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.merchant.core.notification.model.NotificationConfiguration
 import com.fab.wab.merchant.core.notification.model.NotificationContent
+import com.fab.wab.merchant.core.notification.model.NotificationDefaults
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.core.notification.state.NotificationEvent
 import com.fab.wab.merchant.core.notification.state.ShowNotification
-import org.jetbrains.compose.resources.StringResource
 import kotlin.random.Random
+import org.jetbrains.compose.resources.StringResource
 
 class NotificationManager internal constructor(
     private val handleEvent: (NotificationEvent) -> Unit,
@@ -60,7 +61,7 @@ class NotificationManager internal constructor(
         customBackgroundColor: Color? = null,
         customCornerRadius: Dp? = null,
         showDismissButton: Boolean = true,
-        autoDismissDelayMs: Long = 5000L,
+        autoDismissDelayMs: Long = NotificationDefaults.AUTO_DISMISS_MS,
     ) {
         handleEvent(
             ShowNotification(
@@ -84,7 +85,7 @@ class NotificationManager internal constructor(
 }
 
 internal object LocalNotificationManager {
-    private val LocalNotificationManager = staticCompositionLocalOf<NotificationManager> {
+    private val LocalManager = staticCompositionLocalOf<NotificationManager> {
         error("NotificationManager not provided. Wrap your content with NotificationHost.")
     }
 
@@ -92,12 +93,12 @@ internal object LocalNotificationManager {
         @Composable get() = if (LocalInspectionMode.current) {
             NotificationManager { }
         } else {
-            LocalNotificationManager.current
+            LocalManager.current
         }
 
     infix fun provides(
         notificationManager: NotificationManager,
     ): ProvidedValue<NotificationManager> {
-        return LocalNotificationManager provides notificationManager
+        return LocalManager provides notificationManager
     }
 }

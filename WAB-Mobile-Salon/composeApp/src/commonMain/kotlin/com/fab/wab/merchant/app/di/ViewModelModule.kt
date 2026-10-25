@@ -1,6 +1,9 @@
 package com.fab.wab.merchant.app.di
 
 import com.fab.wab.merchant.app.controller.vm.MainViewModel
+import com.fab.wab.merchant.app.realtime.RealtimeAccountEvents
+import com.fab.wab.merchant.core.domain.salon.SalonRepository
+import com.fab.wab.merchant.core.domain.session.SessionStore
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -8,11 +11,16 @@ import org.koin.dsl.module
 val viewModelModule = module {
     viewModel {
         MainViewModel(
+            appConfigRepository = get(),
             appSettings = get(),
             appearanceSettings = get(),
             sessionTimeOut = get(),
             environment = get(),
             sessionAnalyticsSync = get(),
+            permissionsSync = get(),
+            accountEvents = RealtimeAccountEvents(client = get(), permissionsSync = get(), sessionStore = get()),
+            session = get<SessionStore>().state,
+            refreshSalon = { get<SalonRepository>().refresh() },
         )
     }
 }

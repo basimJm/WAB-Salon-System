@@ -20,20 +20,23 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fab.wab.merchant.core.notification.model.NotificationConstants
 import com.fab.wab.merchant.core.notification.model.NotificationContent
+import com.fab.wab.merchant.core.notification.model.NotificationTheme
 import com.fab.wab.merchant.core.notification.state.NotificationEvent
 import com.fab.wab.merchant.core.notification.state.NotificationHidden
 import com.fab.wab.merchant.core.notification.state.NotificationItemState
@@ -42,12 +45,16 @@ import com.fab.wab.merchant.core.notification.state.NotificationShown
 import com.fab.wab.merchant.core.notification.state.NotificationViewModel
 import kotlinx.coroutines.delay
 
+private const val MESSAGE_MAX_LINES = 3
+private const val TITLED_MESSAGE_MAX_LINES = 2
+
 @Composable
 internal fun NotificationDisplay(
     viewModel: NotificationViewModel,
     bodyTextStyle: TextStyle,
+    theme: NotificationTheme,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LazyColumn(
         modifier = Modifier
@@ -63,6 +70,7 @@ internal fun NotificationDisplay(
             NotificationItemWrapper(
                 notificationState = notificationState,
                 defaultBodyTextStyle = bodyTextStyle,
+                theme = theme,
                 onEvent = viewModel::handleEvent,
             )
         }
@@ -73,16 +81,18 @@ internal fun NotificationDisplay(
 private fun NotificationItemWrapper(
     notificationState: NotificationItemState,
     defaultBodyTextStyle: TextStyle,
+    theme: NotificationTheme,
     onEvent: (NotificationEvent) -> Unit,
 ) {
+    val currentOnEvent by rememberUpdatedState(onEvent)
     LaunchedEffect(Unit) {
-        onEvent(NotificationShown(notificationState.id))
+        currentOnEvent(NotificationShown(notificationState.id))
     }
 
     LaunchedEffect(notificationState.isVisible) {
         if (notificationState.isVisible) {
             delay(notificationState.autoDismissDelayMs)
-            onEvent(NotificationHidden(notificationState.id))
+            currentOnEvent(NotificationHidden(notificationState.id))
         }
     }
 
@@ -98,32 +108,34 @@ private fun NotificationItemWrapper(
                 + fadeOut(animationSpec = tween(easing = EaseInOut)),
     ) {
         NotificationCard(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             notificationState = notificationState,
             defaultBodyTextStyle = defaultBodyTextStyle,
+            theme = theme,
             onEvent = onEvent,
-        ) {
-            onEvent(NotificationHidden(notificationState.id))
-        }
+            onDismiss = { onEvent(NotificationHidden(notificationState.id)) },
+            modifier = Modifier.padding(horizontal = NotificationConstants.GAP, vertical = NotificationConstants.GAP_SMALL),
+        )
     }
 }
 
 @Composable
 private fun NotificationCard(
-    modifier: Modifier = Modifier,
     notificationState: NotificationItemState,
     defaultBodyTextStyle: TextStyle,
+    theme: NotificationTheme,
     onEvent: (NotificationEvent) -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val currentOnEvent by rememberUpdatedState(onEvent)
     DisposableEffect(Unit) {
-        onDispose { onEvent(NotificationRemoved(notificationState.id)) }
+        onDispose { currentOnEvent(NotificationRemoved(notificationState.id)) }
     }
 
     val backgroundColor = notificationState.customBackgroundColor
-        ?: notificationState.style.backgroundColor
+        ?: theme.colorsOf(notificationState.style).background
     val contentColor = notificationState.customContentColor
-        ?: notificationState.style.contentColor
+        ?: theme.colorsOf(notificationState.style).content
     val cardShape = if (notificationState.customCornerRadius != null) {
         RoundedCornerShape(notificationState.customCornerRadius)
     } else {
@@ -136,22 +148,26 @@ private fun NotificationCard(
     ) {
         Box(
             modifier = Modifier
-                .widthIn(max = 600.dp)
+                .widthIn(max = NotificationConstants.MAX_WIDTH)
                 .background(color = backgroundColor, shape = cardShape),
             contentAlignment = Alignment.Center,
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(NotificationConstants.PADDING),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 NotificationContentDisplay(
                     modifier = Modifier
                         .weight(1f)
                         .padding(
-                            start = 8.dp,
-                            end = if (notificationState.showDismissButton) 32.dp else 8.dp,
+                            start = NotificationConstants.GAP,
+                            end = if (notificationState.showDismissButton) {
+                                NotificationConstants.DISMISS_SPACE
+                            } else {
+                                NotificationConstants.GAP
+                            },
                         ),
                     content = notificationState.content,
                     bodyTextStyle = notificationState.bodyTextStyle ?: defaultBodyTextStyle,
@@ -162,10 +178,7 @@ private fun NotificationCard(
 
                 if (notificationState.showDismissButton) {
                     IconButton(onClick = onDismiss) {
-                        Text(
-                            text = "\u2715",
-                            color = contentColor,
-                        )
+                        Icon(theme.closeIcon, contentDescription = theme.closeLabel, tint = contentColor)
                     }
                 }
             }
@@ -175,11 +188,11 @@ private fun NotificationCard(
 
 @Composable
 private fun NotificationContentDisplay(
-    modifier: Modifier = Modifier,
     content: NotificationContent,
     bodyTextStyle: TextStyle,
     titleTextStyle: TextStyle,
     contentColor: Color,
+    modifier: Modifier = Modifier,
 ) {
     when (content) {
         is NotificationContent.Message -> {
@@ -187,7 +200,7 @@ private fun NotificationContentDisplay(
                 modifier = modifier,
                 text = content.text.trim(),
                 style = bodyTextStyle.copy(color = contentColor),
-                maxLines = 3,
+                maxLines = MESSAGE_MAX_LINES,
             )
         }
         is NotificationContent.TitleAndMessage -> {
@@ -198,15 +211,15 @@ private fun NotificationContentDisplay(
                     maxLines = 1,
                 )
                 Text(
-                    modifier = Modifier.padding(top = 4.dp),
+                    modifier = Modifier.padding(top = NotificationConstants.GAP_SMALL),
                     text = content.message,
                     style = bodyTextStyle.copy(color = contentColor),
-                    maxLines = 2,
+                    maxLines = TITLED_MESSAGE_MAX_LINES,
                 )
             }
         }
         is NotificationContent.CustomComposable -> {
-            Box(modifier = modifier) { content.Display() }
+            content.Display(modifier)
         }
     }
 }

@@ -1,10 +1,14 @@
 package com.fab.wab.merchant.app.analytics
 
+import com.fab.wab.merchant.core.analytics.AnalyticsApps
+import com.fab.wab.merchant.core.analytics.AnalyticsKeys
 import com.fab.wab.merchant.core.analytics.AnalyticsUserType
+import com.fab.wab.merchant.core.analytics.AnalyticsValue
 import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.domain.AppLanguage
 import com.fab.wab.merchant.core.domain.session.SessionState
-import com.fab.wab.merchant.core.domain.session.UserProfile
+import com.fab.wab.merchant.core.domain.session.MemberProfile
+import com.fab.wab.merchant.core.domain.session.MemberRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -49,8 +53,20 @@ class AppAnalyticsContextProviderTest {
         session.value = SessionState.Guest
         val guest = provider().current()
         assertEquals(AnalyticsUserType.GUEST, guest.userType)
-        session.value = SessionState.SignedIn(UserProfile(id = "c1", firstName = "Omar"))
+        session.value = SessionState.SignedIn(MemberProfile(id = "c1", salonId = "s1", firstName = "Omar", role = MemberRole.OWNER))
         val registered = provider().current()
         assertEquals(AnalyticsUserType.REGISTERED, registered.userType)
+    }
+
+    @Test
+    fun merchantFieldsFollowTheSignedInMember() = runTest {
+        val guest = provider().current().toParams()
+        assertEquals(AnalyticsValue.Text(AnalyticsApps.MERCHANT), guest[AnalyticsKeys.APP])
+        assertNull(guest[AnalyticsKeys.MEMBER_ID])
+        session.value = SessionState.SignedIn(MemberProfile(id = "m7", salonId = "s3", firstName = "Lina", role = MemberRole.MANAGER))
+        val params = provider().current().toParams()
+        assertEquals(AnalyticsValue.Text("m7"), params[AnalyticsKeys.MEMBER_ID])
+        assertEquals(AnalyticsValue.Text("s3"), params[AnalyticsKeys.SALON_ID])
+        assertEquals(AnalyticsValue.Text("MANAGER"), params[AnalyticsKeys.ROLE])
     }
 }

@@ -6,6 +6,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
 
 /**
  * Service for calling Google Places API via HTTP.
@@ -16,7 +18,12 @@ class PlacesApiService(
     private val apiKey: String
 ) {
     companion object {
-        private const val BASE_URL = "https://maps.googleapis.com/maps/api/place"
+        /** Google Places web service (fixed for every environment; the key comes from `PlacesApiConfig`). */
+        private const val PLACES_HOST = "maps.googleapis.com"
+        private val PLACES_PATH = listOf("maps", "api", "place")
+        private const val AUTOCOMPLETE = "autocomplete"
+        private const val DETAILS = "details"
+        private const val JSON = "json"
     }
 
     /**
@@ -26,7 +33,7 @@ class PlacesApiService(
      * @return List of place predictions
      */
     suspend fun searchPlaces(query: String): PlacesAutocompleteResponse {
-        return client.get("$BASE_URL/autocomplete/json") {
+        return client.get(placesUrl(AUTOCOMPLETE)) {
             parameter("input", query)
             parameter("key", apiKey)
             // Optional: restrict to Jordan region
@@ -41,10 +48,16 @@ class PlacesApiService(
      * @return Place details with lat/lng
      */
     suspend fun getPlaceDetails(placeId: String): PlaceDetailsResponse {
-        return client.get("$BASE_URL/details/json") {
+        return client.get(placesUrl(DETAILS)) {
             parameter("place_id", placeId)
             parameter("key", apiKey)
             parameter("fields", "place_id,name,formatted_address,geometry")
         }.body()
     }
+
+    private fun placesUrl(endpoint: String): String = URLBuilder(
+        protocol = URLProtocol.HTTPS,
+        host = PLACES_HOST,
+        pathSegments = PLACES_PATH + listOf(endpoint, JSON),
+    ).buildString()
 }

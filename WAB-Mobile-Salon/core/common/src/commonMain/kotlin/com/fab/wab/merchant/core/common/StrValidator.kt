@@ -7,5 +7,6 @@ class StrValidator {
         str.isNotBlank() && Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$").matches(str.trim())
 
     fun isValidPassword(str: String): Boolean =
-        str.any { it.isLetter() } && str.any { it.isDigit() } && str.any { it.isLowerCase() } && str.any { it.isUpperCase() } && str.any { !it.isLetterOrDigit() && !it.isWhitespace() }
+        str.any { it.isLetter() } && str.any { it.isDigit() } && str.any { it.isLowerCase() } &&
+            str.any { it.isUpperCase() } && str.any { !it.isLetterOrDigit() && !it.isWhitespace() }
 }

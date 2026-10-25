@@ -4,5 +4,22 @@
     <!-- Update Dialogs -->
     <!-- Maintenance Dialog -->
     <!-- Session -->
+    <string name="access_removed_message">Your access was removed by the salon owner.</string>
     <string name="unauthorized_logout_message">You are unauthorized and will be logged out.</string>
+    <string name="splash_version">v%1$s</string>
+    <string name="force_update_title">Update required</string>
+    <string name="force_update_message">A new version of WAB Business is available. Please update to continue.</string>
+    <string name="force_update_button">Update now</string>
+    <string name="maintenance_title">Under maintenance</string>
+    <string name="maintenance_message">We're improving WAB Business. We'll be back soon.</string>
+    <string name="maintenance_retry_button">Retry</string>
+    <!-- Mock data switcher (dev builds on mock data only) -->
+    <string name="mock_chip">DEV</string>
+    <string name="mock_title">Mock data (development)</string>
+    <string name="mock_salon">Salon state</string>
+    <string name="mock_member">Signed-in member</string>
+    <string name="mock_owner">Owner</string>
+    <string name="mock_manager">Manager</string>
+    <string name="mock_employee">Employee</string>
+    <string name="mock_none">No permissions</string>
 </resources>

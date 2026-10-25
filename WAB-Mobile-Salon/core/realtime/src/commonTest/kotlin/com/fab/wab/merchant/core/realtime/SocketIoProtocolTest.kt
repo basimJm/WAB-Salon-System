@@ -39,9 +39,9 @@ class SocketIoProtocolTest {
     fun socketPacketsAreDecodedWithNamespaceAndPayload() {
         assertEquals(SocketIoPacket.Connected("/merchant"), socket("""40/merchant,{"sid":"s"}"""))
         assertEquals(SocketIoPacket.Disconnect("/merchant"), socket("41/merchant,"))
-        val event = socket("""42/merchant,7["entity.updated",{"id":"b1"}]""")
+        val event = socket("""42/merchant,7["booking.updated",{"id":"b1"}]""")
         assertIs<SocketIoPacket.Event>(event)
-        assertEquals("entity.updated", event.name)
+        assertEquals("booking.updated", event.name)
         assertEquals("b1", event.payload.jsonObject["id"]?.jsonPrimitive?.content)
         val error = socket("""44/merchant,{"message":"UNAUTHORIZED","data":{"code":"UNAUTHORIZED"}}""")
         assertEquals(SocketIoPacket.ConnectError("/merchant", "UNAUTHORIZED"), error)

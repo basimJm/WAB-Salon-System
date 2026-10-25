@@ -17,6 +17,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getCachedItemDao(): CachedItemDao
 }
 
+// Room KSP generates the actual constructor per platform, so the compiler sees no hand-written actual.
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
     override fun initialize(): AppDatabase

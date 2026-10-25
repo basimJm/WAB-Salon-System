@@ -23,33 +23,16 @@ class LocalCacheRepositoryImpl(private val dao: CachedItemDao) : LocalCacheRepos
             .onStart { emit(AppResult.Loading) }
     }
 
-    override suspend fun upsertItem(item: CachedItem): Flow<AppResult<Unit>> = flow {
-        emit(AppResult.Loading)
-        try {
-            dao.upsert(item.toEntity())
-            emit(AppResult.Success(Unit))
-        } catch (e: Exception) {
-            emit(AppResult.Error(AppError.ParseError(e.message)))
-        }
-    }
+    override suspend fun upsertItem(item: CachedItem): Flow<AppResult<Unit>> = write { dao.upsert(item.toEntity()) }
 
-    override suspend fun removeItem(itemId: Int): Flow<AppResult<Unit>> = flow {
-        emit(AppResult.Loading)
-        try {
-            dao.deleteById(itemId)
-            emit(AppResult.Success(Unit))
-        } catch (e: Exception) {
-            emit(AppResult.Error(AppError.ParseError(e.message)))
-        }
-    }
+    override suspend fun removeItem(itemId: Int): Flow<AppResult<Unit>> = write { dao.deleteById(itemId) }
 
-    override suspend fun clear(): Flow<AppResult<Unit>> = flow {
+    override suspend fun clear(): Flow<AppResult<Unit>> = write { dao.deleteAll() }
+
+    /** Loading, then success or the failure as an error result (the flow `catch` keeps cancellation intact). */
+    private fun write(block: suspend () -> Unit): Flow<AppResult<Unit>> = flow<AppResult<Unit>> {
         emit(AppResult.Loading)
-        try {
-            dao.deleteAll()
-            emit(AppResult.Success(Unit))
-        } catch (e: Exception) {
-            emit(AppResult.Error(AppError.ParseError(e.message)))
-        }
-    }
+        block()
+        emit(AppResult.Success(Unit))
+    }.catch { emit(AppResult.Error(AppError.ParseError(it.message))) }
 }

@@ -13,8 +13,10 @@ import kotlinx.coroutines.launch
 import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatform
 
+// Swift calls it as a view controller type (MainViewControllerKt.MainViewController()), so it keeps the UIKit name.
+@Suppress("FunctionNaming")
 fun MainViewController() = ComposeUIViewController {
-    App(null)
+    App()
 }
 
 // Called from AppDelegate.swift, so the compiler sees no Kotlin caller.

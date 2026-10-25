@@ -6,9 +6,8 @@ import com.fab.wab.merchant.core.navigation.route.Graph
 import com.fab.wab.merchant.core.navigation.route.Screen
 
 class NavigatorDelegation(override val navController: NavHostController) : Navigator {
-    override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
-
-    }
+    /** Features register their own graphs; the delegate only provides the shared navigation helpers. */
+    override fun registerGraph(navGraphBuilder: NavGraphBuilder) = Unit
 
     override fun navigateAndClearBackstack(graph: Graph) {
         navController.navigate(graph) {

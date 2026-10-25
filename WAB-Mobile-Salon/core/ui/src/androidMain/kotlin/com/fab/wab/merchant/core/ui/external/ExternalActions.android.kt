@@ -1,5 +1,7 @@
 package com.fab.wab.merchant.core.ui.external
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -33,6 +35,11 @@ class AndroidExternalActions(private val context: Context) : ExternalActions {
 
     override fun openUrl(url: String) {
         start(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    }
+
+    override fun copyText(text: String) {
+        val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, text))
     }
 
     override fun email(address: String) {

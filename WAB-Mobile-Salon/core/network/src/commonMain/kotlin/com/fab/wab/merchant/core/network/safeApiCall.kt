@@ -2,6 +2,7 @@ package com.fab.wab.merchant.core.network
 
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.permission.PermissionDeniedSignals
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.ResponseException
@@ -12,14 +13,15 @@ import kotlinx.serialization.SerializationException
 /**
  * Turns any API call into an [AppResult]: the backend envelope becomes [AppError.ServerError] (code-driven),
  * other HTTP failures [AppError.HttpError], transport problems [AppError.NetworkError]. Never throws except for
- * cancellation, never logs bodies (they can carry personal data).
+ * cancellation, never logs bodies (they can carry personal data). Permission refusals are reported to
+ * [PermissionDeniedSignals] so the shell refreshes the member's permissions.
  */
 suspend fun <T> safeApiCall(block: suspend () -> T): AppResult<T> = try {
     AppResult.Success(block())
 } catch (e: CancellationException) {
     throw e
 } catch (e: ResponseException) {
-    AppResult.Error(e.toAppError())
+    AppResult.Error(e.toAppError().also(PermissionDeniedSignals::report))
 } catch (e: SerializationException) {
     AppResult.Error(AppError.ParseError(e.message?.take(NetworkDefaults.MAX_ERROR_MESSAGE_LENGTH)))
 } catch (e: HttpRequestTimeoutException) {

@@ -49,6 +49,18 @@ class LocalizationTest(TempProject):
         ar = '<resources><plurals name="p"><item quantity="one">يوم</item></plurals></resources>'
         self.assertTrue(any("placeholders of plurals:p" in m for m in self.run_check(en, ar)))
 
+    def test_arabic_plural_quantities_may_spell_out_the_number(self):
+        en = ('<resources><plurals name="p"><item quantity="one">%1$d minute ago</item>'
+              '<item quantity="other">%1$d minutes ago</item></plurals></resources>')
+        ar = ('<resources><plurals name="p"><item quantity="one">منذ دقيقة</item><item quantity="two">منذ دقيقتين</item>'
+              '<item quantity="few">منذ %1$d دقائق</item><item quantity="other">منذ %1$d دقيقة</item></plurals></resources>')
+        self.assertEqual(self.run_check(en, ar), [])
+
+    def test_duplicate_keys_are_flagged(self):
+        en = res(("a", "One"), ("a", "Two"))
+        messages = self.run_check(en, res(("a", "واحد")))
+        self.assertTrue(any("string:a is declared more than once" in m for m in messages))
+
 
 if __name__ == "__main__":
     unittest.main()

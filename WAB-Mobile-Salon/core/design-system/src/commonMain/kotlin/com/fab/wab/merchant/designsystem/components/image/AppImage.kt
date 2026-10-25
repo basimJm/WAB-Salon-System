@@ -20,14 +20,30 @@ import com.fab.wab.merchant.designsystem.theme.AppTheme
  */
 @Composable
 fun AppImage(
-    modifier: Modifier = Modifier,
     url: String,
+    modifier: Modifier = Modifier,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
+    ModelImage(url, contentDescription, contentScale, modifier)
+}
+
+/** Local bytes (picked, not uploaded yet) through the same loader, shimmer and fallback. */
+@Composable
+fun AppImage(
+    bytes: ByteArray,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    contentScale: ContentScale = ContentScale.Crop,
+) {
+    ModelImage(bytes, contentDescription, contentScale, modifier)
+}
+
+@Composable
+private fun ModelImage(model: Any, contentDescription: String?, contentScale: ContentScale, modifier: Modifier = Modifier) {
     val imageLoader = LocalImageLoader.current
     SubcomposeAsyncImage(
-        model = url,
+        model = model,
         contentDescription = contentDescription,
         imageLoader = imageLoader,
         modifier = modifier,

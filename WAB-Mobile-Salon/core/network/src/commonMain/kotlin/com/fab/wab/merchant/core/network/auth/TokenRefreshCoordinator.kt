@@ -2,6 +2,7 @@ package com.fab.wab.merchant.core.network.auth
 
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.auth.AuthTokens
+import com.fab.wab.merchant.core.domain.auth.SessionRefresher
 import com.fab.wab.merchant.core.domain.auth.TokenRefreshApi
 import com.fab.wab.merchant.core.domain.auth.TokenRefreshResult
 import kotlinx.coroutines.flow.first
@@ -16,7 +17,7 @@ import kotlinx.coroutines.sync.withLock
 class TokenRefreshCoordinator(
     private val appSettings: AppSettings,
     private val api: TokenRefreshApi,
-) {
+) : SessionRefresher {
     private val lock = Mutex()
 
     suspend fun refreshAfterUnauthorized(rejectedAccessToken: String?): TokenRefreshResult = lock.withLock {
@@ -29,6 +30,12 @@ class TokenRefreshCoordinator(
             storedRefresh.isNullOrBlank() -> TokenRefreshResult.Rejected
             else -> rotate(storedRefresh)
         }
+    }
+
+    /** Explicit rotation (permission re-fetch); shares the lock, so it never races a 401 refresh. */
+    override suspend fun refreshNow(): TokenRefreshResult = lock.withLock {
+        val storedRefresh = appSettings.refreshToken.first()
+        if (storedRefresh.isNullOrBlank()) TokenRefreshResult.Rejected else rotate(storedRefresh)
     }
 
     private suspend fun rotate(refreshToken: String): TokenRefreshResult {

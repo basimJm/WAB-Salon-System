@@ -1,6 +1,8 @@
 package com.fab.wab.merchant.core.mvi
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -30,7 +32,8 @@ class MVIDelegate<UiState, UiEvent, SideEffect> internal constructor(
     private val _sideEffect by lazy { Channel<SideEffect>() }
     override val sideEffect: Flow<SideEffect> by lazy { _sideEffect.receiveAsFlow() }
 
-    override fun onEvent(event: UiEvent) {}
+    /** View models override the reducer; the delegate itself handles no events. */
+    override fun onEvent(event: UiEvent) = Unit
 
     override fun updateState(state: UiState.() -> UiState) {
         _uiState.update(state)
@@ -57,13 +60,14 @@ fun <SideEffect> CollectSideEffect(
     context: CoroutineContext = Dispatchers.Main.immediate,
     onSideEffect: suspend CoroutineScope.(effect: SideEffect) -> Unit,
 ) {
+    val currentOnSideEffect by rememberUpdatedState(onSideEffect)
     LaunchedEffect(sideEffect, lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(minActiveState) {
             if (context == EmptyCoroutineContext) {
-                sideEffect.collect { onSideEffect(it) }
+                sideEffect.collect { currentOnSideEffect(it) }
             } else {
                 withContext(context) {
-                    sideEffect.collect { onSideEffect(it) }
+                    sideEffect.collect { currentOnSideEffect(it) }
                 }
             }
         }

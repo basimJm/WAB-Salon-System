@@ -2,7 +2,7 @@
 #include "Config.xcconfig"
 
 APP_ENV = dev
-APP_DISPLAY_NAME = WAB Merchant Dev
+APP_DISPLAY_NAME = WAB Business Dev
 // PLACEHOLDER host until the platform domain is decided. In xcconfig '//' starts a comment, so the
 // scheme separator is written as ':/$()/'.
 API_BASE_URL = https:/$()/wab-server-dev.onrender.com

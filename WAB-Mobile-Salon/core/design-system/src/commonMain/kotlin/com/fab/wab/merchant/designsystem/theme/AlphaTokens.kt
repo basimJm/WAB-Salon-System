@@ -11,6 +11,8 @@ data class AlphaTokens(
     val border: Float = 1f,
     val overlayScrim: Float = 0.5f,
     val heroImageTint: Float = 0.65f,
+    /** Rule-of-thirds lines over the crop frame (design 05 Salon). */
+    val gridLine: Float = 0.6f,
 )
 
 val DefaultAlpha = AlphaTokens()

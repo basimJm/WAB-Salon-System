@@ -25,6 +25,11 @@ import kotlinx.serialization.json.Json
 expect fun provideHttpClientEngine(): HttpClientEngine
 
 /** Who creates the transport: the platform engine, or the fixture engine of `core/data` in mock builds. */
+private const val SCHEME_SEPARATOR = "://"
+private val HTTPS_PREFIX = URLProtocol.HTTPS.name + SCHEME_SEPARATOR
+private val HTTP_PREFIX = URLProtocol.HTTP.name + SCHEME_SEPARATOR
+private const val MAX_PORT = 65_535
+
 fun interface HttpEngineProvider {
     fun create(): HttpClientEngine
 }
@@ -69,7 +74,7 @@ class BaseHttpClient(
                     "API base URL is blank. Set DEV_API_BASE_URL / PROD_API_BASE_URL (Android) " +
                         "or API_BASE_URL in the environment xcconfig (iOS)."
                 }
-                val withoutScheme = base.removePrefix("https://").removePrefix("http://").trim()
+                val withoutScheme = base.removePrefix(HTTPS_PREFIX).removePrefix(HTTP_PREFIX).trim()
                 val hostPart = withoutScheme.split("/").firstOrNull()?.trim() ?: ""
                 require(hostPart.isNotBlank()) {
                     "API base URL has no host: $base"
@@ -80,11 +85,11 @@ class BaseHttpClient(
                     else -> hostAndPort.dropLast(1).joinToString(":")
                 }
                 val portPart = hostAndPort.lastOrNull()?.toIntOrNull()
-                if (portPart != null && portPart in 1..65535) {
+                if (portPart != null && portPart in 1..MAX_PORT) {
                     port = portPart
                 }
                 protocol = when {
-                    base.startsWith("https://") -> URLProtocol.HTTPS
+                    base.startsWith(HTTPS_PREFIX) -> URLProtocol.HTTPS
                     else -> URLProtocol.HTTP
                 }
             }
@@ -119,11 +124,11 @@ class BaseHttpClient(
         expectSuccess = false
     }
 
-    fun buildHttpClient(): HttpClient {
-        val coordinator = TokenRefreshCoordinator(appSettings, RemoteTokenRefreshApi(buildRefreshClient()))
-        return HttpClient(engineProvider.create()) {
-            installCommon(logRequests = true)
-            expectSuccess = true
-        }.also { it.installAuthRefresh(appSettings, coordinator, sessionTimeOut) }
-    }
+    /** The one refresh coordinator: the 401 interceptor and explicit re-fetches (permissions) share its lock. */
+    val refresher: TokenRefreshCoordinator by lazy { TokenRefreshCoordinator(appSettings, RemoteTokenRefreshApi(buildRefreshClient())) }
+
+    fun buildHttpClient(): HttpClient = HttpClient(engineProvider.create()) {
+        installCommon(logRequests = true)
+        expectSuccess = true
+    }.also { it.installAuthRefresh(appSettings, refresher, sessionTimeOut) }
 }

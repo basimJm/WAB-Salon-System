@@ -37,6 +37,17 @@ object AnalyticsKeys {
     const val PLATFORM = "platform"
     const val ENVIRONMENT = "environment"
     const val ITEM_ID = "item_id"
+
+    /** PRD §14 merchant fields: which app, member, salon and role produced the event. */
+    const val APP = "app"
+    const val MEMBER_ID = "member_id"
+    const val SALON_ID = "salon_id"
+    const val ROLE = "member_role"
+}
+
+/** Value of [AnalyticsKeys.APP] for this app (BigQuery separates the customer and merchant apps by it). */
+object AnalyticsApps {
+    const val MERCHANT = "MERCHANT"
 }
 
 /** Event names owned by the analytics module itself; feature modules declare their own next to their screens. */

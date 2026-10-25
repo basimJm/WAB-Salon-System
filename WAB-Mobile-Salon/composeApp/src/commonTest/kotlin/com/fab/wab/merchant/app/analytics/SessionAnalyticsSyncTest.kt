@@ -5,7 +5,8 @@ import com.fab.wab.merchant.core.analytics.AnalyticsKeys
 import com.fab.wab.merchant.core.analytics.AnalyticsScreen
 import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.domain.session.SessionState
-import com.fab.wab.merchant.core.domain.session.UserProfile
+import com.fab.wab.merchant.core.domain.session.MemberProfile
+import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.firebase.FakeCrashReporter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,14 +44,18 @@ class SessionAnalyticsSyncTest {
         assertNull(tracker.lastUserId)
         assertEquals("guest", tracker.properties[AnalyticsKeys.USER_TYPE])
 
-        session.value = SessionState.SignedIn(UserProfile(id = "c1", firstName = "Omar"))
+        session.value = SessionState.SignedIn(MemberProfile(id = "c1", salonId = "s1", firstName = "Omar", role = MemberRole.OWNER))
         assertEquals("c1", tracker.lastUserId)
         assertEquals("c1", crashReporter.userId)
         assertEquals("registered", tracker.properties[AnalyticsKeys.USER_TYPE])
+        assertEquals("s1", tracker.properties[AnalyticsKeys.SALON_ID])
+        assertEquals("OWNER", tracker.properties[AnalyticsKeys.ROLE])
 
         session.value = SessionState.Guest
         assertNull(tracker.lastUserId)
         assertNull(crashReporter.userId)
+        assertNull(tracker.properties[AnalyticsKeys.SALON_ID])
+        assertNull(tracker.properties[AnalyticsKeys.ROLE])
         job.cancel()
     }
 }

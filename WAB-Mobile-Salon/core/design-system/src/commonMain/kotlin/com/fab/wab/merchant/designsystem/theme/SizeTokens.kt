@@ -53,6 +53,41 @@ data class SizeTokens(
     val cardImageHeight: Dp = 140.dp,
     val cardCompactWidth: Dp = 220.dp,
     val listItemImage: Dp = 64.dp,
+    // Merchant components (MER-014, design 02 Home / 03 Bookings)
+    val brideBadgeHeight: Dp = 18.dp,
+    val brideIcon: Dp = 10.dp,
+    val metaIcon: Dp = 14.dp,
+    val timelineDot: Dp = 12.dp,
+    val timelineHalo: Dp = 4.dp,
+    val timelineLead: Dp = 14.dp,
+    val pendingCount: Dp = 30.dp,
+    val requestIcon: Dp = 48.dp,
+    val requestAvatar: Dp = 42.dp,
+    val requestDone: Dp = 80.dp,
+    val requestDoneIcon: Dp = 40.dp,
+    // Uploaders (MER-016, design 01 Onboarding documents / 05 Salon gallery)
+    val uploadTile: Dp = 112.dp,
+    val uploadCaption: Dp = 44.dp,
+    val pdfMarkWidth: Dp = 38.dp,
+    val pdfMarkHeight: Dp = 46.dp,
+    val removeBadge: Dp = 24.dp,
+    val cropZoomTrack: Dp = 4.dp,
+    // Map picker (MER-017)
+    val mapPin: Dp = 44.dp,
+    val mapPinShadowWidth: Dp = 14.dp,
+    val mapPinShadowHeight: Dp = 6.dp,
+    val mapGridCell: Dp = 44.dp,
+    val mapRoadWide: Dp = 18.dp,
+    val mapRoadNarrow: Dp = 12.dp,
+    // Calendar (MER-018, design 04: 56 px per hour)
+    val calendarHour: Dp = 56.dp,
+    val calendarTimeColumn: Dp = 56.dp,
+    val calendarWeekTimeColumn: Dp = 48.dp,
+    val calendarHatch: Dp = 3.dp,
+    val calendarNowDot: Dp = 9.dp,
+    val calendarDayChip: Dp = 58.dp,
+    val calendarStripDot: Dp = 5.dp,
+    val calendarNowLine: Dp = 2.dp,
 )
 
 val DefaultSizes = SizeTokens()

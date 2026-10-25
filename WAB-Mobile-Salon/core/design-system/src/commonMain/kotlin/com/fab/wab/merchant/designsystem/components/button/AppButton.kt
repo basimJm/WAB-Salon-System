@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.designsystem.components.button
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -30,7 +31,7 @@ import com.fab.wab.merchant.designsystem.utils.brandBrush
 import com.fab.wab.merchant.designsystem.utils.softShadow
 
 /** Visual weight of a button; the layout, height, shape and states are shared. */
-enum class ButtonKind { Primary, Secondary, Outlined, Text, Destructive }
+enum class ButtonKind { Primary, Secondary, Outlined, Text, Destructive, Success }
 
 /** Labels wrap to a second line instead of truncating (narrow cards, 200 % font scale). */
 private const val BUTTON_MAX_LINES = 2
@@ -108,7 +109,13 @@ fun AppButton(
                         .glassHighlight(glass, shape)
                 kind == ButtonKind.Primary -> base.clip(shape).background(colors.soft)
                 kind == ButtonKind.Secondary -> base.glassBackground(AppTheme.glass, shape)
-                kind == ButtonKind.Destructive -> base.clip(shape).background(colors.dangerContainer)
+                kind == ButtonKind.Success && active ->
+                    base.softShadow(AppTheme.elevation.raised, colors.success.copy(alpha = AppTheme.elevation.buttonShadowAlpha), shape)
+                        .background(colors.success, shape)
+                        .glassHighlight(glass, shape)
+                kind == ButtonKind.Success -> base.clip(shape).background(colors.successContainer)
+                kind == ButtonKind.Destructive ->
+                    base.clip(shape).background(colors.dangerContainer).border(sizes.borderWidth, colors.danger, shape)
                 kind == ButtonKind.Outlined -> base.glassBackground(AppTheme.glass, shape)
                 else -> base.clip(shape)
             }
@@ -152,6 +159,8 @@ private fun buttonContentColor(kind: ButtonKind, active: Boolean): Color {
     return when {
         kind == ButtonKind.Primary && active -> colors.onGradient
         kind == ButtonKind.Primary -> colors.faint
+        kind == ButtonKind.Success && active -> colors.onGradient
+        kind == ButtonKind.Success -> colors.onSuccessContainer
         kind == ButtonKind.Destructive -> colors.danger
         else -> colors.accent
     }

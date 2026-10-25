@@ -16,6 +16,9 @@
         tools:node="remove" />
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- PRD M10: booking request overlay; requested with an explanation, never assumed (More → Settings). -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:name=".app.AndroidApp"

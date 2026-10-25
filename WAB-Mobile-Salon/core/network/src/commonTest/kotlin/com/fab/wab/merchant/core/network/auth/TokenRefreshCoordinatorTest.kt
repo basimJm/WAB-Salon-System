@@ -44,6 +44,16 @@ class TokenRefreshCoordinatorTest {
     }
 
     @Test
+    fun refreshNowRotatesUnderTheSameLockAndRefusesWithoutAToken() = runTest {
+        val settings = FakeAppSettings(OLD_ACCESS, OLD_REFRESH)
+        val api = ScriptedApi(rotated)
+        assertEquals(rotated, TokenRefreshCoordinator(settings, api).refreshNow())
+        assertEquals(listOf(OLD_REFRESH), api.presentedTokens)
+        assertEquals(NEW_REFRESH, settings.refreshToken.first())
+        assertEquals(TokenRefreshResult.Rejected, TokenRefreshCoordinator(FakeAppSettings(null, null), ScriptedApi(rotated)).refreshNow())
+    }
+
+    @Test
     fun concurrentFailuresPresentTheRefreshTokenOnlyOnce() = runTest {
         val settings = FakeAppSettings(OLD_ACCESS, OLD_REFRESH)
         val api = ScriptedApi(rotated)

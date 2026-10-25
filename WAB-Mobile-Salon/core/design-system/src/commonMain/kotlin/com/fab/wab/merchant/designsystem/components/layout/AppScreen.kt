@@ -3,10 +3,13 @@ package com.fab.wab.merchant.designsystem.components.layout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -83,10 +86,16 @@ fun AppScreen(
         } else {
             Column(modifier = rootModifier) {
                 topBar?.invoke()
+                // Without a top bar the screen draws its own header: keep it below the status bar (minus the cutout
+                // padding the root already applied — on iPhones the Dynamic Island inset is the status bar).
+                val statusTop = WindowInsets.statusBars.exclude(WindowInsets.displayCutout).asPaddingValues().calculateTopPadding()
+                val top = if (topBar == null) statusTop else Dp.Hairline
+                val side = AppTheme.adaptive.horizontalPadding
                 Box(Modifier.weight(1f).fillMaxWidth()) {
-                    body(PaddingValues(horizontal = AppTheme.adaptive.horizontalPadding))
+                    body(PaddingValues(start = side, end = side, top = top))
                 }
-                bottomBar?.invoke()
+                // A sticky action bar stays above the gesture / navigation bar.
+                bottomBar?.let { bar -> Box(Modifier.windowInsetsPadding(WindowInsets.navigationBars)) { bar() } }
             }
         }
     }

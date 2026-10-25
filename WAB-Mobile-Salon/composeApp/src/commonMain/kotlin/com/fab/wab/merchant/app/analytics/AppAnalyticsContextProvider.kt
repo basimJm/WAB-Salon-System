@@ -11,7 +11,8 @@ import kotlinx.coroutines.flow.first
 
 /**
  * Builds the common analytics fields from the app's own sources: environment + version from [AppEnvironment],
- * the current language from the appearance settings flow, user type from the session state, platform from the host.
+ * the current language from the appearance settings flow, user type + member / salon / role from the session state,
+ * platform from the host; `app = MERCHANT` on every event (PRD §14).
  */
 class AppAnalyticsContextProvider(
     private val environment: AppEnvironment,
@@ -20,11 +21,17 @@ class AppAnalyticsContextProvider(
     private val platform: String,
 ) : AnalyticsContextProvider {
 
-    override suspend fun current(): AnalyticsContext = AnalyticsContext(
-        userType = if (session.first().isSignedIn) AnalyticsUserType.REGISTERED else AnalyticsUserType.GUEST,
-        language = language.first().code,
-        appVersion = environment.appVersion,
-        platform = platform,
-        environment = environment.name,
-    )
+    override suspend fun current(): AnalyticsContext {
+        val member = (session.first() as? SessionState.SignedIn)?.member
+        return AnalyticsContext(
+            userType = if (member != null) AnalyticsUserType.REGISTERED else AnalyticsUserType.GUEST,
+            language = language.first().code,
+            appVersion = environment.appVersion,
+            platform = platform,
+            environment = environment.name,
+            memberId = member?.id,
+            salonId = member?.salonId,
+            role = member?.role?.name,
+        )
+    }
 }

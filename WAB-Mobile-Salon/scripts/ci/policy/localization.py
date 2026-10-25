@@ -11,6 +11,18 @@ _ARABIC = re.compile(r"[؀-ۿ]")
 _WORD = re.compile(r"[A-Za-z]{4,}")
 
 
+def _duplicates(path: Path) -> list[str]:
+    """Resource names declared more than once (Compose resources refuse to build them)."""
+    seen: set[str] = set()
+    found: list[str] = []
+    for node in ET.parse(path).getroot():
+        key = f"{node.tag}:{node.get('name', '')}"
+        if key in seen:
+            found.append(key)
+        seen.add(key)
+    return found
+
+
 def _entries(path: Path) -> dict[str, str]:
     """Map `kind:name` to text; arrays/plurals are flattened to one joined value."""
     entries: dict[str, str] = {}
@@ -24,6 +36,13 @@ def _entries(path: Path) -> dict[str, str]:
             items = [("".join(child.itertext())) for child in node]
             entries[f"{node.tag}:{name}"] = "\n".join(items)
     return entries
+
+
+def _placeholders(key: str, text: str) -> list[str]:
+    """Placeholders of an entry; a plural compares the distinct set, since languages have different item counts
+    (Arabic has six quantities and may spell out "one"/"two" without the number)."""
+    found = _PLACEHOLDER.findall(text)
+    return sorted(set(found)) if key.startswith("plurals:") else sorted(found)
 
 
 def _find_default_files(config: Config) -> list[Path]:
@@ -43,6 +62,8 @@ def check(config: Config) -> list[Violation]:
     found: list[Violation] = []
     for default_file in _find_default_files(config):
         default = _entries(default_file)
+        for key in _duplicates(default_file):
+            found.append(Violation(rel(config, default_file), 1, RULE, f"{key} is declared more than once"))
         for language, folder in section["translations"].items():
             target = default_file.parent.parent / folder / section["stringFile"]
             where = rel(config, default_file)
@@ -51,12 +72,14 @@ def check(config: Config) -> list[Violation]:
                 continue
             translated = _entries(target)
             target_rel = rel(config, target)
+            for key in _duplicates(target):
+                found.append(Violation(target_rel, 1, RULE, f"{key} is declared more than once"))
             for key in sorted(default.keys() - translated.keys()):
                 found.append(Violation(target_rel, 1, RULE, f"missing {language} translation for {key}"))
             for key in sorted(translated.keys() - default.keys()):
                 found.append(Violation(target_rel, 1, RULE, f"{key} has no default (English) entry"))
             for key in sorted(default.keys() & translated.keys()):
-                if sorted(_PLACEHOLDER.findall(default[key])) != sorted(_PLACEHOLDER.findall(translated[key])):
+                if _placeholders(key, default[key]) != _placeholders(key, translated[key]):
                     found.append(Violation(target_rel, 1, RULE, f"placeholders of {key} differ between languages"))
                 if not translated[key].strip():
                     found.append(Violation(target_rel, 1, RULE, f"{key} is empty in {language}"))

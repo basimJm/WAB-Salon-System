@@ -2,6 +2,7 @@ package com.fab.wab.merchant.core.data.mock.di
 
 import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.data.mock.MockFixture
+import com.fab.wab.merchant.core.data.mock.contractFixtures
 import com.fab.wab.merchant.core.data.mock.createMockEngine
 import com.fab.wab.merchant.core.network.client.HttpEngineProvider
 import com.fab.wab.merchant.core.network.client.PlatformEngineProvider
@@ -16,7 +17,8 @@ val mockDataModule = module {
     single<HttpEngineProvider> {
         val environment = get<AppEnvironment>()
         if (environment.usesMock) {
-            val fixtures = getAll<MockFixture>()
+            // Feature fixtures first (hand-written), then one per contract operation (generated).
+            val fixtures = getAll<MockFixture>() + contractFixtures()
             val timeout = get<ApiConfig>().sendTimeout
             HttpEngineProvider { createMockEngine(requestTimeoutMs = timeout, fixtures = fixtures) }
         } else {
