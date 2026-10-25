@@ -10,13 +10,13 @@ import com.fab.wab.merchant.core.domain.branch.BranchLimits
 import com.fab.wab.merchant.core.domain.branch.BranchesRepository
 import com.fab.wab.merchant.core.domain.branch.blockingBookingIds
 import com.fab.wab.merchant.core.mvi.BaseViewModel
-import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.feature.branches.presentation.analytics.BranchesAnalytics
 import com.fab.wab.merchant.feature.branches.presentation.controller.contract.BlockingBookings
 import com.fab.wab.merchant.feature.branches.presentation.controller.contract.BranchOutcome
 import com.fab.wab.merchant.feature.branches.presentation.controller.contract.BranchesContract.SideEffect
 import com.fab.wab.merchant.feature.branches.presentation.controller.contract.BranchesContract.UiAction
 import com.fab.wab.merchant.feature.branches.presentation.controller.contract.BranchesContract.UiState
+import com.fab.wab.merchant.feature.branches.presentation.controller.error.branchErrorText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 class BranchesViewModel(
     private val repository: BranchesRepository,
     private val analytics: AnalyticsTracker,
-    private val errorText: suspend (AppError) -> String = ::appErrorText,
+    private val errorText: suspend (AppError) -> String = ::branchErrorText,
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 

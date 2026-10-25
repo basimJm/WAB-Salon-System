@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
 import * as dto from '@/data/contract/generated/dto';
@@ -6,9 +5,6 @@ import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { LocationsRepository } from '@/domain/locations/locations';
 import type { PageQuery } from '@/domain/shared/page';
 import { defined, resource } from '@/data/api/resource';
-
-/** The server's OpenAPI writes the id pattern as "^[a-f0-9]{24}$/i" (a slash-flag inside the string) that no id matches. */
-const OBJECT_ID = z.string().regex(/^[a-f0-9]{24}$/i);
 
 export class RemoteLocationsRepository implements LocationsRepository {
   readonly countries: LocationsRepository['countries'];
@@ -58,11 +54,11 @@ export class RemoteLocationsRepository implements LocationsRepository {
       {
         list: defineEndpoint(OPERATIONS.getLocationsAreas, {
           data: dto.getLocationsAreasDataSchema,
-          query: () => dto.getLocationsAreasQuerySchema().extend({ cityId: OBJECT_ID.optional() }),
+          query: dto.getLocationsAreasQuerySchema,
         }),
         create: defineEndpoint(OPERATIONS.postLocationsAreas, {
           data: dto.postLocationsAreasDataSchema,
-          body: () => dto.postLocationsAreasBodySchema().extend({ cityId: OBJECT_ID }),
+          body: dto.postLocationsAreasBodySchema,
         }),
         update: defineEndpoint(OPERATIONS.patchLocationsAreasById, {
           data: dto.patchLocationsAreasByIdDataSchema,

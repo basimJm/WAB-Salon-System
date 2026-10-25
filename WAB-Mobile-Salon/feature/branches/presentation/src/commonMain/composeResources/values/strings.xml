@@ -55,4 +55,5 @@
     <string name="branch_saved">Branch saved</string>
     <string name="branch_created">Branch added. Add its hours, services and staff to make it bookable.</string>
     <string name="branch_location_blocked">Allow location access in Settings</string>
+    <string name="branch_error_invalid_status">This action is not allowed for the branch\'s current status.</string>
 </resources>

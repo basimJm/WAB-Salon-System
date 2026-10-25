@@ -4,6 +4,7 @@ import com.fab.wab.merchant.core.data.contract.generated.MemberProfile
 import com.fab.wab.merchant.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpRequestData
 import com.fab.wab.merchant.core.domain.session.MemberRole
+import com.fab.wab.merchant.core.domain.session.MemberScope
 import com.fab.wab.merchant.feature.auth.data.repository.toDomain
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,5 +37,24 @@ class AuthMappersTest {
     @Test
     fun unknownRoleIsTheMostRestricted() {
         assertEquals(MemberRole.EMPLOYEE, member.copy(role = "SUPERVISOR").toDomain().role)
+    }
+
+    @Test
+    fun branchMemberSignsInScopedToTheirBranch() {
+        val session = PostAuthLoginData("a", "t1", "r", "t2", member.copy(branchId = "b-khalda")).toDomain()
+        assertEquals("b-khalda", session.member.branchId)
+        assertEquals(MemberScope.OneBranch("b-khalda"), session.member.scope)
+    }
+
+    @Test
+    fun ownerSignsInForAllBranches() {
+        val owner = member.copy(role = "OWNER", branchId = "b-main").toDomain()
+        assertNull(owner.branchId)
+        assertEquals(MemberScope.AllBranches, owner.scope)
+    }
+
+    @Test
+    fun blankBranchIdIsNoBranch() {
+        assertNull(member.copy(branchId = " ").toDomain().branchId)
     }
 }

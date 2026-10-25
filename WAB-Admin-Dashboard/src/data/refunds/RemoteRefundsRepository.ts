@@ -1,20 +1,13 @@
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
-import { OBJECT_ID } from '@/data/api/objectId';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { RefundsRepository } from '@/domain/refunds/refunds';
 
-/** The server's OpenAPI writes the id pattern as "^[a-f0-9]{24}$/i" that no id matches; see RemoteLocationsRepository. */
 const list = defineEndpoint(OPERATIONS.getRefunds, {
   data: dto.getRefundsDataSchema,
-  query: () =>
-    dto.getRefundsQuerySchema().extend({
-      bookingId: OBJECT_ID.optional(),
-      salonId: OBJECT_ID.optional(),
-      branchId: OBJECT_ID.optional(),
-    }),
+  query: dto.getRefundsQuerySchema,
 });
 const retry = defineEndpoint(OPERATIONS.postRefundsByIdRetry, {
   data: dto.postRefundsByIdRetryDataSchema,

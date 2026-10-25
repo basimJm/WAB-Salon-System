@@ -31,9 +31,21 @@ fun PostAuthOtpWrongAttemptData.toDomain(): WrongAttemptResult = WrongAttemptRes
     blockedUntil = parseInstantOrNull(blockedUntil),
 )
 
-/** Unknown roles read as the most restricted one (EMPLOYEE); access itself comes from the permission keys. */
-fun MemberDto.toDomain(): MemberProfile =
-    MemberProfile(id = id, salonId = salonId, firstName = firstName, role = MemberRole.fromCode(role) ?: MemberRole.EMPLOYEE)
+/**
+ * Unknown roles read as the most restricted one (EMPLOYEE); access itself comes from the permission keys. The
+ * branch (SRV-149, null for the owner) sets the member's scope from sign-in on (MER-069).
+ */
+fun MemberDto.toDomain(): MemberProfile {
+    val memberRole = MemberRole.fromCode(role) ?: MemberRole.EMPLOYEE
+    return MemberProfile(
+        id = id,
+        salonId = salonId,
+        firstName = firstName,
+        role = memberRole,
+        // Same rule as the token refresh (RemoteTokenRefreshApi): the owner has no branch, a blank id is none.
+        branchId = branchId?.takeIf { memberRole != MemberRole.OWNER && it.isNotBlank() },
+    )
+}
 
 fun PostAuthLoginData.toDomain(): AuthSession = AuthSession(
     tokens = AuthTokens(accessToken = accessToken, refreshToken = refreshToken),

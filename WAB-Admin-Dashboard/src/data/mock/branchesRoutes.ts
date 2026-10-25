@@ -99,7 +99,12 @@ export function branchesRoutes(store: BranchStore): readonly MockRoute[] {
         const open = store.list(salonId).filter((b) => b.status !== 'CLOSED');
         if (open.length <= 1) throw new MockBusinessError(HTTP_STATUS.unprocessable, 'LAST_BRANCH');
         if (branch.isMain)
-          throw new MockBusinessError(HTTP_STATUS.unprocessable, 'INVALID_TRANSITION');
+          throw new MockBusinessError(
+            HTTP_STATUS.unprocessable,
+            'INVALID_TRANSITION',
+            [],
+            'branchMainCannotClose',
+          );
         const blocking = upcomingOf(branch.id);
         if (blocking.length > 0)
           throw new MockBusinessError(

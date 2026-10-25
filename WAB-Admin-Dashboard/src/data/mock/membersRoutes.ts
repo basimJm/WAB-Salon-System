@@ -1,6 +1,5 @@
 import { HTTP_STATUS } from '@/constants/http';
-import { defineEndpoint } from '../api/endpoint';
-import { branchQuerySchema } from '../api/objectId';
+import { defineEndpoint, optionalQuery } from '../api/endpoint';
 import * as dto from '../contract/generated/dto';
 import { OPERATIONS } from '../contract/generated/operations';
 import { MOCK_BRANCH_IDS } from './branchesFixture';
@@ -39,7 +38,7 @@ export function membersRoutes(store: BranchStore): readonly MockRoute[] {
     mockRoute(
       defineEndpoint(O.getSalonsByIdMembers, {
         data: dto.getSalonsByIdMembersDataSchema,
-        query: branchQuerySchema,
+        query: optionalQuery(dto.getSalonsByIdMembersQuerySchema),
       }),
       ({ query }) => {
         const branchId = query.get('branchId');

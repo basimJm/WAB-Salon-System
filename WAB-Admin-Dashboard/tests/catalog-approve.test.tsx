@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import * as dto from '@/data/contract/generated/dto';
-import { approveBodySchema } from '@/data/catalog/RemoteCatalogRepository';
 import { AppError } from '@/infrastructure/errors/AppError';
 import { approveInputOf, approveProblems, type ApproveDraft } from '@/domain/catalog/catalog';
 import RequestsPage from '@/presentation/catalog/RequestsPage';
@@ -46,19 +45,18 @@ describe('approveProblems / approveInputOf', () => {
   });
 });
 
-describe('approve body schema (SRV-125)', () => {
-  it('accepts a real catalog service id that the generated pattern refuses (S6)', () => {
-    const body = { catalogServiceId: REAL_ID, reason: 'Same service' };
-    expect(dto.postCatalogRequestsByIdApproveBodySchema().safeParse(body).success).toBe(false);
-    expect(approveBodySchema().safeParse(body).success).toBe(true);
+describe('approve body schema (SRV-125, contract 1.5.0)', () => {
+  const approveBody = dto.postCatalogRequestsByIdApproveBodySchema;
+  it('the generated schema accepts a real catalog service id (S6 fixed by SRV-151)', () => {
+    expect(approveBody().safeParse({ catalogServiceId: REAL_ID, reason: 'Same' }).success).toBe(
+      true,
+    );
   });
 
   it('still refuses a malformed id and still accepts the create shape', () => {
-    expect(approveBodySchema().safeParse({ catalogServiceId: 'abc', reason: 'x' }).success).toBe(
-      false,
-    );
+    expect(approveBody().safeParse({ catalogServiceId: 'abc', reason: 'x' }).success).toBe(false);
     const create = approveInputOf(draft(), null);
-    expect(approveBodySchema().safeParse({ ...create, reason: 'Good' }).success).toBe(true);
+    expect(approveBody().safeParse({ ...create, reason: 'Good' }).success).toBe(true);
   });
 });
 

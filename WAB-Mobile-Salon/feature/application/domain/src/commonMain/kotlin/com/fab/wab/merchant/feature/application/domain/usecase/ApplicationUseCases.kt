@@ -1,9 +1,6 @@
 package com.fab.wab.merchant.feature.application.domain.usecase
 
 import com.fab.wab.merchant.core.domain.AppResult
-import com.fab.wab.merchant.core.domain.permission.Permission
-import com.fab.wab.merchant.core.domain.session.MemberProfile
-import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationForm
 import com.fab.wab.merchant.feature.application.domain.model.SalonApplication
@@ -14,7 +11,8 @@ import com.fab.wab.merchant.feature.auth.domain.repository.InstallationInfoProvi
 
 /**
  * PRD M04 submit: creates the salon (`APPLICATION_PENDING`) and its owner with the REGISTER proof, then signs the
- * owner in (the owner holds every permission) with the salon state, so the launch router opens M05.
+ * owner in with the member and permission keys the server answered (the owner holds every key) and the salon state,
+ * so the launch router opens M05.
  */
 class SubmitApplicationUseCase(
     private val repository: ApplicationRepository,
@@ -25,8 +23,7 @@ class SubmitApplicationUseCase(
         val result = repository.apply(form, proof.phone, proof.idToken, installation.current())
         if (result is AppResult.Success) {
             val session = result.data
-            val owner = MemberProfile(id = session.memberId, salonId = session.salonId, firstName = form.firstName, role = MemberRole.OWNER)
-            sessionStore.signIn(session.tokens, owner, Permission.entries.map { it.name }.toSet(), session.application.state)
+            sessionStore.signIn(session.tokens, session.member, session.permissions, session.application.state)
         }
         return result
     }
