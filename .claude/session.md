@@ -160,3 +160,17 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges only, no product code written.
+
+### T-138 — Backend blockers lifted; client remote-dev tasks; masters synced (owner request 2026-10-25)
+- Project: repo root
+- Branch: `chore/sync-masters-into-main-6` (PR into `main`), then `main` → each master
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Backend-side blockers of client tasks found: SRV-011 (deploy) → owner-hosted Render dev API recorded as SRV-011a DONE (PR #440); ADM-079, CUS-060, MER-054 unblocked
+  - [x] Masters → main (#441–#444) and main → masters (#445–#448) before implementation
+  - [x] Implemented and merged: ADM-079 (#449), ADM-093…095 (#453–#455), SRV-150 (#451), CUS-060 (#452), MER-054 (#456), SRV-151 (#457); statuses set DONE; follow-ups SRV-152 (owner hosting config), MER-067 (iOS crash), ADM-096/CUS-088/MER-068 (contract re-sync) added
+  - [x] End-of-backlog gates (rule §3.13): customer + merchant `run_local_checks.sh` green (policy, contract, detekt, unit tests, Android variants, iOS configurations, K/N tests); admin `gate.sh` green; customer guest journey on emulator (Pixel 8 Pro) + simulator (iPhone 17 Pro) against the hosted dev API
+  - [ ] Merchant iOS journey: app crashes at launch (MER-067, being fixed); Android merchant journey reaches the maintenance screen (dev config, SRV-152)
+- Tests: `tasks.py check` (only the known CUS-047 note); gates above
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — merges + backlog only in this branch. DEVIATIONS: signed-in client flows verified on a local stack (same server code), not on Render (no credentials sent there); device OTP/push (CUS-061/063, MER-055/056) need owner Firebase/APNs inputs.
