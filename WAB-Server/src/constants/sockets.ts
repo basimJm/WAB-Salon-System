@@ -27,6 +27,10 @@ export const SOCKET_ROOMS = {
   salonRespond: (salonId: string): string => `salon:${salonId}:respond`,
   /** Members who see every booking of the salon (BOOKINGS_VIEW_ALL). */
   salonAll: (salonId: string): string => `salon:${salonId}:all`,
+  /** Branch members who may answer that branch's requests (BOOKINGS_RESPOND, §7). */
+  branchRespond: (branchId: string): string => `branch:${branchId}:respond`,
+  /** Branch members who see every booking of that branch (BOOKINGS_VIEW_ALL). */
+  branchAll: (branchId: string): string => `branch:${branchId}:all`,
   admin: 'admin',
 } as const;
 /** Redis channel prefix of the Socket.IO adapter (keeps its pub/sub apart from other keys). */

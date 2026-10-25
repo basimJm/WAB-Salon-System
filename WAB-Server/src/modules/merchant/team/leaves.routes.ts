@@ -25,7 +25,13 @@ export const createMerchantLeavesRouter = (
     validate({ params: memberLeaveParams }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof memberLeaveParams>(req, 'params');
-      sendSuccess(req, res, { data: await service.list({ salonId: salonOf(req), memberId: id }) });
+      sendSuccess(req, res, {
+        data: await service.list({
+          salonId: salonOf(req),
+          memberId: id,
+          scope: req.member?.branchId,
+        }),
+      });
     }),
   );
   router.post(
@@ -34,7 +40,16 @@ export const createMerchantLeavesRouter = (
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof memberLeaveParams>(req, 'params');
       const input = part<typeof leaveSchema>(req, 'body');
-      sendCreated(req, res, await service.add({ salonId: salonOf(req), memberId: id, ...input }));
+      sendCreated(
+        req,
+        res,
+        await service.add({
+          salonId: salonOf(req),
+          memberId: id,
+          scope: req.member?.branchId,
+          ...input,
+        }),
+      );
     }),
   );
   router.patch(
@@ -44,7 +59,13 @@ export const createMerchantLeavesRouter = (
       const { id, leaveId } = part<typeof leaveParams>(req, 'params');
       const patch = part<typeof leavePatchSchema>(req, 'body');
       sendSuccess(req, res, {
-        data: await service.update({ salonId: salonOf(req), memberId: id, leaveId, ...patch }),
+        data: await service.update({
+          salonId: salonOf(req),
+          memberId: id,
+          leaveId,
+          scope: req.member?.branchId,
+          ...patch,
+        }),
       });
     }),
   );
@@ -53,7 +74,12 @@ export const createMerchantLeavesRouter = (
     validate({ params: leaveParams }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id, leaveId } = part<typeof leaveParams>(req, 'params');
-      await service.remove({ salonId: salonOf(req), memberId: id, leaveId });
+      await service.remove({
+        salonId: salonOf(req),
+        memberId: id,
+        leaveId,
+        scope: req.member?.branchId,
+      });
       sendSuccess(req, res);
     }),
   );

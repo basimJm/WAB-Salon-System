@@ -73,7 +73,8 @@ const guard: RequestHandler = (req, _res, next) => {
   req.member = {
     id: new Types.ObjectId().toHexString(),
     salonId: salon.toHexString(),
-    role: 'MANAGER',
+    // Finance and subscription are the owner's (§6 branch scope); `x-role` tries a manager.
+    role: req.header('x-role') ?? 'OWNER',
     permissions: (req.header('x-perms') ?? 'FINANCE_VIEW,SUBSCRIPTION_VIEW')
       .split(',')
       .filter(Boolean),
@@ -305,18 +306,23 @@ describe('refunds and payouts', () => {
 });
 
 describe('permissions', () => {
-  it('every finance route needs FINANCE_VIEW, the subscription needs SUBSCRIPTION_VIEW', async () => {
+  it('finance and the subscription are the owner’s: a manager is refused even with the keys', async () => {
+    const asManager = (path: string): Promise<{ status: number; body: unknown }> =>
+      request(app)
+        .get(`/merchant/v1${path}`)
+        .set({ 'x-role': 'MANAGER', 'x-perms': 'FINANCE_VIEW,SUBSCRIPTION_VIEW' })
+        .then((res) => res);
     for (const path of [
       '/finance/balance',
       '/finance/transactions',
       '/finance/refunds',
       '/finance/payouts',
+      '/subscription',
     ]) {
-      const res = await get(path, 'SUBSCRIPTION_VIEW');
+      const res = await asManager(path);
       expect(res.status).toBe(403);
       expect(bodyOf(res).error.code).toBe('PERMISSION_DENIED');
     }
-    expect((await get('/subscription', 'FINANCE_VIEW')).status).toBe(403);
     expect((await get('/finance/balance', 'FINANCE_VIEW')).status).toBe(200);
   });
 });

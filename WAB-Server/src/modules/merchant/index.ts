@@ -1,3 +1,4 @@
+import { scopeToBranch } from '../../middlewares/branchScope';
 import { Router } from 'express';
 import { MERCHANT_AUTH_ROUTES } from '../../constants/merchantAuth';
 import { OTP_ROUTES } from '../../constants/otp';
@@ -12,6 +13,7 @@ import {
   MERCHANT_SERVICES_ROUTES,
 } from '../../constants/salonServices';
 import { MERCHANT_HOURS_ROUTES } from '../../constants/hours';
+import { MERCHANT_BRANCH_ROUTES } from '../../constants/branches';
 import { MERCHANT_GALLERY_ROUTES } from '../../constants/gallery';
 import { createMerchantFinanceRouter } from './finance/finance.routes';
 import { MERCHANT_FINANCE_ROUTES, MERCHANT_SUBSCRIPTION_ROUTES } from '../../constants/finance';
@@ -35,6 +37,7 @@ import {
   unavailableBookingActions,
   unavailableMerchantFinance,
   unavailablePayoutDetails,
+  unavailableBranches,
   unavailableGallery,
   unavailableHours,
   unavailableSalonServices,
@@ -62,6 +65,7 @@ import { createMerchantServicesRouter } from './services/services.routes';
 import { createMerchantHoursRouter } from './hours/hours.routes';
 import { createMerchantBookingsRouter } from './bookings/bookings.routes';
 import { MERCHANT_BOOKING_ROUTES } from '../../constants/bookings';
+import { createMerchantBranchesRouter } from './branches/branches.routes';
 import { createMerchantGalleryRouter } from './gallery/gallery.routes';
 import { createMerchantProfileRouter } from './salon/profile.routes';
 import { createMerchantSalonRouter } from './salon/salon.routes';
@@ -132,6 +136,14 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
   );
   mount(
     router,
+    MERCHANT_BRANCH_ROUTES.base,
+    createMerchantBranchesRouter(
+      services.branches ?? unavailableBranches,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
     MERCHANT_GALLERY_ROUTES.base,
     createMerchantGalleryRouter(
       services.gallery ?? unavailableGallery,
@@ -152,6 +164,33 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     createMerchantServicesRouter(
       services.salonServices ?? unavailableSalonServices,
       services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  // The same routers addressed to one branch (§3.3a): owner any branch, manager their own.
+  const branchScoped = (child: Router): Router => {
+    const scoped = Router({ mergeParams: true });
+    scoped.use(scopeToBranch);
+    mount(scoped, '', child);
+    return scoped;
+  };
+  mount(
+    router,
+    MERCHANT_BRANCH_ROUTES.hours,
+    branchScoped(
+      createMerchantHoursRouter(
+        services.hours ?? unavailableHours,
+        services.salonProfile?.guard ?? [unavailableGuard],
+      ),
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_BRANCH_ROUTES.services,
+    branchScoped(
+      createMerchantServicesRouter(
+        services.salonServices ?? unavailableSalonServices,
+        services.salonProfile?.guard ?? [unavailableGuard],
+      ),
     ),
   );
   mount(

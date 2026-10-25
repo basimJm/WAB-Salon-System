@@ -4,22 +4,25 @@ import {
   DEPOSIT_PERCENT_MIN,
   type CompletenessItem,
 } from '../../constants/salon';
+import type { BranchCompletenessItem } from '../../constants/branches';
 import type { SalonRaw } from '../../models/salon.model';
 
-/** The salon fields the rules read, plus counts that live in other collections. */
+/** Branch facts the salon's completeness depends on (§5.2). */
+export interface BranchSummary {
+  /** At least one branch is ACTIVE and complete. */
+  readonly bookable: boolean;
+  /** The main branch's own gaps; `null` when the salon has no main branch yet. */
+  readonly mainMissing: readonly BranchCompletenessItem[] | null;
+}
+
+/** The salon-wide fields the rules read, plus what its branches allow. */
 export interface CompletenessInput {
   readonly name: string;
   readonly coverKey?: string | undefined;
   readonly profileKey?: string | undefined;
   readonly description?: string | undefined;
-  readonly phone?: string | undefined;
-  readonly location?: { readonly coordinates: readonly number[] } | undefined;
-  readonly weeklySchedule: readonly { readonly isOff: boolean }[];
   readonly policy?: SalonRaw['policy'] | undefined;
-  /** Active salon services. */
-  readonly activeServices: number;
-  /** Active members who provide services, with at least one service and one working day. */
-  readonly qualifiedStaff: number;
+  readonly branches: BranchSummary;
 }
 
 const filled = (value: string | undefined): boolean => value !== undefined && value.trim() !== '';
@@ -37,19 +40,24 @@ const policyIsValid = (policy: SalonRaw['policy'] | undefined): boolean => {
   );
 };
 
-/** What is still missing, in the order of the domain list (empty = complete). */
+/**
+ * What is still missing, in the order of the domain list (empty = complete). Without a bookable
+ * branch the main branch's gaps are listed (what the owner must fix), else BRANCH.
+ */
 export const computeMissing = (input: CompletenessInput): CompletenessItem[] => {
-  const present: Record<CompletenessItem, boolean> = {
+  const salonPresent: Partial<Record<CompletenessItem, boolean>> = {
     COVER: filled(input.coverKey),
     PROFILE_IMAGE: filled(input.profileKey),
     NAME: filled(input.name),
     DESCRIPTION: filled(input.description),
-    LOCATION: input.location !== undefined && input.location.coordinates.length === 2,
-    PHONE: filled(input.phone),
-    WORKING_HOURS: input.weeklySchedule.some((day) => !day.isOff),
-    SERVICE: input.activeServices >= 1,
-    STAFF: input.qualifiedStaff >= 1,
     POLICY: policyIsValid(input.policy),
   };
-  return COMPLETENESS_ITEMS.filter((item) => !present[item]);
+  const branchGaps: readonly CompletenessItem[] = input.branches.bookable
+    ? []
+    : input.branches.mainMissing !== null && input.branches.mainMissing.length > 0
+      ? input.branches.mainMissing
+      : ['BRANCH'];
+  return COMPLETENESS_ITEMS.filter(
+    (item) => salonPresent[item] === false || branchGaps.includes(item),
+  );
 };

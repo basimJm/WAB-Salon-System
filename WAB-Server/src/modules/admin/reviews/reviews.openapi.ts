@@ -27,6 +27,10 @@ const row = z.object({
   comment: z.string().nullable(),
   salon: z.object({ id: z.string(), name: z.string() }),
   staff: z.object({ id: z.string(), firstName: z.string() }).nullable(),
+  branch: z
+    .object({ id: z.string(), name: z.object({ ar: z.string(), en: z.string() }) })
+    .nullable()
+    .describe('The branch the review is about (label only)'),
   author: z.object({ id: z.string(), firstName: z.string(), lastName: z.string() }),
   authorOtherReviews: z.number(),
   createdAt: z.string(),

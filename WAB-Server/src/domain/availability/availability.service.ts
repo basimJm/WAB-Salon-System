@@ -1,3 +1,5 @@
+import type { BranchRaw } from '../../models/branch.model';
+import type { BranchesRepository } from '../../repositories/branches.repository';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import { MS_PER_MINUTE } from '../../constants/time';
 import type { MemberRaw } from '../../models/member.model';
@@ -36,6 +38,8 @@ export const noBookingBusy: BookingBusyLookup = { busy: () => Promise.resolve([]
 
 export interface AvailabilityRequest {
   readonly salonId: string;
+  /** The branch the customer picked (§5.18); optional when the salon has one bookable branch. */
+  readonly branchId?: string | undefined;
   readonly date: string;
   readonly person: {
     /** Salon service ids (`services[].id` of the salon details). */
@@ -64,6 +68,7 @@ export interface AvailabilityService {
    */
   plan(input: {
     salonId: string;
+    branchId?: string | undefined;
     persons: readonly PlanPersonInput[];
     draftId?: string | undefined;
     /** For a booking that already exists (reassignment): the booking lead time no longer applies. */
@@ -81,6 +86,8 @@ export interface AvailabilityDeps {
   readonly holds: Pick<HoldsStore, 'busy'>;
   readonly settings: Pick<SettingsService, 'get'>;
   readonly now?: () => Date;
+  /** Branch wiring (§5.18); without it the salon is one place (unit tests of the core rules). */
+  readonly branches?: Pick<BranchesRepository, 'forSalon'>;
 }
 
 const invalid = (
@@ -124,6 +131,8 @@ export interface PlannedPerson {
 
 export interface BookingPlan {
   readonly salon: Entity<SalonRaw>;
+  /** The branch the booking is for (`null` only without branch wiring). */
+  readonly branch: Entity<BranchRaw> | null;
   readonly persons: readonly PlannedPerson[];
 }
 
@@ -149,9 +158,37 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
     return salon?.state === 'LIVE' && salon.completeness.isComplete ? salon : null;
   };
 
+  /**
+   * The branch a request books (§5.18): the picked one, which must be bookable; without a pick
+   * the only bookable branch, `BRANCH_REQUIRED` when there are several.
+   */
+  const branchOf = async (
+    salonId: string,
+    branchId: string | undefined,
+  ): Promise<Entity<BranchRaw> | null> => {
+    if (deps.branches === undefined) return null;
+    const open = await deps.branches.forSalon(salonId);
+    const bookable = open.filter((b) => b.status === 'ACTIVE' && b.completeness.isComplete);
+    if (branchId !== undefined) {
+      const picked = bookable.find((b) => b.id === branchId);
+      if (picked !== undefined) return picked;
+      if (open.some((b) => b.id === branchId)) throw rule('BRANCH_NOT_BOOKABLE', 'branchId');
+      throw new NotFoundError({ code: ERROR_CODES.BRANCH_NOT_FOUND });
+    }
+    const [only, ...more] = bookable;
+    if (only === undefined) throw rule('SALON_NOT_BOOKABLE');
+    if (more.length > 0) throw rule('BRANCH_REQUIRED', 'branchId');
+    return only;
+  };
+
+  /** Rows of one branch (the whole salon without branch wiring). */
+  const inBranch = (branch: Entity<BranchRaw> | null): Record<string, string> =>
+    branch === null ? {} : { branchId: branch.id };
+
   /** Loads what a day needs and runs the pure core for one person. */
   const computeDay = async (input: {
     salon: Entity<SalonRaw>;
+    branch: Entity<BranchRaw> | null;
     team: readonly Entity<MemberRaw>[];
     date: string;
     person: AvailabilityPerson;
@@ -159,7 +196,7 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
     draftId: string | undefined;
     ignoreLeadTime?: boolean;
   }): Promise<{ result: AvailabilityResult; bookedCounts: Map<string, number> }> => {
-    const { salon, team, date, person, others, draftId, ignoreLeadTime } = input;
+    const { salon, branch, team, date, person, others, draftId, ignoreLeadTime } = input;
     const [timeZone, slotMinutes, maxDaysAhead, minLeadMinutes] = await Promise.all([
       settings.get('timezone'),
       settings.get('booking.slotMinutes'),
@@ -169,8 +206,18 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
     const at = now();
     const range = localDayRange(date, timeZone);
     const [ranges, onLeave, booked, held] = await Promise.all([
-      closures.findMany({ salonId: salon.id, from: { $lte: date }, to: { $gte: date } }),
-      leaves.findMany({ salonId: salon.id, from: { $lte: date }, to: { $gte: date } }),
+      closures.findMany({
+        salonId: salon.id,
+        ...inBranch(branch),
+        from: { $lte: date },
+        to: { $gte: date },
+      }),
+      leaves.findMany({
+        salonId: salon.id,
+        ...inBranch(branch),
+        from: { $lte: date },
+        to: { $gte: date },
+      }),
       bookings.busy({ salonId: salon.id, from: range.start, to: range.end }),
       holds.busy({
         staffIds: team.map((m) => m.id),
@@ -190,7 +237,7 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
       slotMinutes,
       maxDaysAhead,
       minLeadMinutes: ignoreLeadTime === true ? 0 : minLeadMinutes,
-      schedule: salon.weeklySchedule,
+      schedule: branch?.weeklySchedule ?? salon.weeklySchedule,
       closures: ranges,
       staff: team.map(toStaff),
       leaves: onLeave.map((l) => ({ staffId: l.memberId, from: l.from, to: l.to })),
@@ -201,22 +248,29 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
   };
 
   return {
-    async slots({ salonId, date, person, others = [], draftId }) {
+    async slots({ salonId, branchId, date, person, others = [], draftId }) {
       const salon = await visibleSalon(salonId);
       if (salon === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      const branch = await branchOf(salonId, branchId);
       if (person.isBride && salon.gender !== 'FEMALE') throw invalid('body.person.isBride');
 
       const wanted = [...new Set(person.serviceIds)];
       if (wanted.length !== person.serviceIds.length) throw invalid('body.person.serviceIds');
       const chosen = await salonServices.findMany({
         salonId,
+        ...inBranch(branch),
         active: true,
         _id: { $in: wanted },
       });
       if (chosen.length !== wanted.length) throw invalid('body.person.serviceIds');
       const durationMinutes = chosen.reduce((total, s) => total + s.durationMinutes, 0);
 
-      const team = await members.findMany({ salonId, active: true, providesServices: true });
+      const team = await members.findMany({
+        salonId,
+        ...inBranch(branch),
+        active: true,
+        providesServices: true,
+      });
       if (person.staffId !== undefined && !team.some((m) => m.id === person.staffId)) {
         throw invalid('body.person.staffId');
       }
@@ -228,6 +282,7 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
 
       const { result } = await computeDay({
         salon,
+        branch,
         team,
         date,
         others,
@@ -253,13 +308,19 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
       };
     },
 
-    async plan({ salonId, persons, draftId, ignoreLeadTime }) {
+    async plan({ salonId, branchId, persons, draftId, ignoreLeadTime }) {
       const salon = await visibleSalon(salonId);
       if (salon === null) throw rule('SALON_NOT_BOOKABLE');
+      const branch = await branchOf(salonId, branchId);
       const maxCompanions = await settings.get('booking.maxCompanions');
       if (persons.length > maxCompanions + 1) throw rule('TOO_MANY_COMPANIONS', 'persons');
       const timeZone = await settings.get('timezone');
-      const team = await members.findMany({ salonId, active: true, providesServices: true });
+      const team = await members.findMany({
+        salonId,
+        ...inBranch(branch),
+        active: true,
+        providesServices: true,
+      });
 
       const picks: BusyInterval[] = [];
       const planned: PlannedPerson[] = [];
@@ -271,7 +332,12 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
         const chosen =
           wanted.length === 0 || wanted.length !== input.serviceIds.length
             ? []
-            : await salonServices.findMany({ salonId, active: true, _id: { $in: wanted } });
+            : await salonServices.findMany({
+                salonId,
+                ...inBranch(branch),
+                active: true,
+                _id: { $in: wanted },
+              });
         if (chosen.length === 0 || chosen.length !== wanted.length) {
           throw rule('SERVICE_UNAVAILABLE', at('serviceIds'));
         }
@@ -285,6 +351,7 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
         const date = localDateOf(input.start, timeZone);
         const { result, bookedCounts } = await computeDay({
           salon,
+          branch,
           team,
           date,
           others: picks,
@@ -317,7 +384,7 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
           end,
         });
       }
-      return { salon, persons: planned };
+      return { salon, branch, persons: planned };
     },
   };
 };

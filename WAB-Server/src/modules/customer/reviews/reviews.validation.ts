@@ -15,4 +15,6 @@ export const reviewListQuerySchema = paginationQuery(APP_PAGE_SIZE);
 export const submitReviewBodySchema = z.object({
   rating: z.number().int().min(REVIEW_RATING_MIN).max(REVIEW_RATING_MAX),
   comment: z.string().trim().max(REVIEW_COMMENT_MAX_LENGTH).optional(),
+  /** The branch the review is about (label only); staff reviews take the staff member's branch. */
+  branchId: objectId.optional(),
 });

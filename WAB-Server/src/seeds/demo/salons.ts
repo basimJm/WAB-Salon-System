@@ -32,6 +32,7 @@ import type { LocalizedName } from '../../constants/referenceData';
 import { SCHEDULE_DAY_ORDER, type PAYMENT_OPTIONS } from '../../constants/salon';
 import { MS_PER_DAY, type DayOfWeek } from '../../constants/time';
 import { defaultPermissionsFor } from '../../domain/permissions/permissions';
+import { computeBranchMissing } from '../../domain/branches/completeness';
 import { computeMissing } from '../../domain/salons/completeness';
 import type { SalonPolicy, ScheduleDay } from '../../models/salon.model';
 import { mulDivRound } from '../../utils/money';
@@ -296,17 +297,20 @@ export const buildSalons = (
           coordinates: [spec.place.lng, spec.place.lat] as [number, number],
         }
       : undefined;
-    const missing = computeMissing({
-      ...(coverKey === undefined ? {} : { coverKey }),
-      ...(profileKey === undefined ? {} : { profileKey }),
-      name: spec.name,
-      ...(spec.description === '' ? {} : { description: spec.description }),
+    const mainMissing = computeBranchMissing({
       ...(location === undefined ? {} : { location }),
       phone: spec.phone,
       weeklySchedule: schedule,
       activeServices: services.length,
       qualifiedStaff: staff.length,
+    });
+    const missing = computeMissing({
+      ...(coverKey === undefined ? {} : { coverKey }),
+      ...(profileKey === undefined ? {} : { profileKey }),
+      name: spec.name,
+      ...(spec.description === '' ? {} : { description: spec.description }),
       ...(staffed ? { policy } : {}),
+      branches: { bookable: mainMissing.length === 0, mainMissing },
     });
     for (const key of [coverKey, profileKey]) {
       if (key !== undefined) {

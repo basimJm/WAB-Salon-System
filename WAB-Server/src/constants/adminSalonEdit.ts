@@ -14,6 +14,7 @@ export const ADMIN_SALON_EDIT_ROUTES = {
   services: '/:id/services',
   service: '/:id/services/:serviceId',
   staff: '/:id/members/:memberId/staff',
+  staffBranch: '/:id/members/:memberId/branch',
   policy: '/:id/policy',
 } as const;
 
@@ -31,6 +32,7 @@ export const ADMIN_SALON_EDIT_AUDIT = {
     serviceAdd: 'SALON_SERVICE_ADD',
     serviceUpdate: 'SALON_SERVICE_UPDATE',
     staff: 'SALON_STAFF_EDIT',
+    staffMove: 'SALON_STAFF_MOVE',
     policy: 'SALON_POLICY_EDIT',
   },
 } as const;
