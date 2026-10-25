@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.finance.presentation.controller.contract
 
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.feature.finance.domain.FinanceBalance
 import com.fab.wab.merchant.feature.finance.domain.FinanceRange
 import com.fab.wab.merchant.feature.finance.domain.FinanceTab
@@ -24,7 +25,11 @@ sealed interface FinanceContract {
         val loadingMore: Boolean = false,
         val hasMore: Boolean = false,
         val error: String? = null,
+        val branchScope: BranchScope = BranchScope(),
     ) {
+        /** Payouts are salon-wide; transactions and refunds can be narrowed to one branch (MER-064). */
+        val showsBranchSwitcher: Boolean get() = branchScope.showsSwitcher && tab != FinanceTab.PAYOUTS
+
         val isEmpty: Boolean
             get() = !loading && error == null && when (tab) {
                 FinanceTab.TRANSACTIONS -> transactions.isEmpty()
@@ -44,6 +49,7 @@ sealed interface FinanceContract {
         data object OnLoadMore : UiAction
         data object OnRefresh : UiAction
         data object OnRetry : UiAction
+        data class OnBranchSelect(val branchId: String?) : UiAction
         data object OnBank : UiAction
         data class OnBooking(val bookingId: String) : UiAction
     }

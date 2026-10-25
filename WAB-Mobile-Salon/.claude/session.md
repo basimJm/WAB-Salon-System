@@ -9,6 +9,19 @@
 
 ## Current task
 
+### MER-064 — Per-branch hours, closures, services / prices (+ finance by branch)
+- Branch: `feat/mer-064-branch-operations`
+- Branched: (from `feat/mer-063-branch-scope`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §6; operations `/branches/{branchId}/hours` (+ `/weekly`, `/closures[/{id}]`), `/branches/{branchId}/services[/{id}]`, `GET /finance/transactions|refunds?branchId=`):
+  - [x] Hours, closures and services address `/branches/{branchId}/…` for the owner's edited branch and the salon-level paths otherwise (`branchPath`, same bodies / answers); repositories take an optional `branchId`
+  - [x] Owner: switcher without "All branches" on Working hours and Services (the main branch until another is picked); changing branch reloads (services list cleared first); the service form and the catalog picker ("Added" marks) follow the same branch; branch members see no switcher and keep the salon-level calls (their own branch on the server)
+  - [x] Finance (owner only): switcher on Transactions / Refunds sends `?branchId=`; Payouts stay salon-wide (no switcher)
+- Tests: `HoursViewModelTest` (+2), `ServicesViewModelTest` (+1), `FinanceViewModelTest` (+1); salon data / presentation, finance, composeApp host tests green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: a manager addressing another branch would get 403 `BRANCH_SCOPE_DENIED` (localized, CONTACT action); the app never sends a branch id for branch members, so it cannot happen from the UI.
+
 ### MER-063 — Branch-scoped bookings, requests and calendar
 - Branch: `feat/mer-063-branch-scope`
 - Branched: (from `feat/mer-062-branches-manage`)

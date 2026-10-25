@@ -5,6 +5,7 @@ import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.core.domain.permission.OwnerCapability
 import com.fab.wab.merchant.core.domain.permission.permissionSet
 import com.fab.wab.merchant.core.domain.session.SessionState
@@ -22,6 +23,7 @@ import com.fab.wab.merchant.feature.finance.presentation.controller.contract.Fin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -39,6 +41,8 @@ class FinanceDependencies(
     val analytics: AnalyticsTracker,
     val today: () -> LocalDate,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    val branchScope: Flow<BranchScope> = flowOf(BranchScope()),
+    val selectBranch: (String?) -> Unit = {},
 )
 
 /** PRD M22: balance card, transactions / refunds / payouts tabs, date presets or custom range, pagination. */
@@ -55,6 +59,11 @@ class FinanceViewModel(
     override fun onStart() {
         deps.session.onEach { session ->
             updateState { copy(canManageBank = session.permissionSet().can(OwnerCapability.PAYOUT_DETAILS_MANAGE)) }
+        }.launchIn(scope)
+        deps.branchScope.onEach { branches ->
+            val changed = branches.filter != uiState.value.branchScope.filter
+            updateState { copy(branchScope = branches) }
+            if (changed) reload(refreshing = false)
         }.launchIn(scope)
         loadBalance()
         reload(refreshing = false)
@@ -104,6 +113,7 @@ class FinanceViewModel(
             UiAction.OnRetry -> reload(refreshing = false)
             UiAction.OnBank -> if (uiState.value.canManageBank) emitSideEffect(SideEffect.OpenBank)
             is UiAction.OnBooking -> emitSideEffect(SideEffect.OpenBooking(event.bookingId))
+            is UiAction.OnBranchSelect -> deps.selectBranch(event.branchId)
             else -> return false
         }
         return true
@@ -119,11 +129,12 @@ class FinanceViewModel(
     /** Loads [targetPage] of the current tab; returns the row count or null on error. */
     private suspend fun fetch(targetPage: Int, append: Boolean): Int? {
         val state = uiState.value
+        val branchId = state.branchScope.filter
         val result = when (state.tab) {
-            FinanceTab.TRANSACTIONS -> deps.finance.transactions(state.from, state.to, targetPage).onRows { rows ->
+            FinanceTab.TRANSACTIONS -> deps.finance.transactions(state.from, state.to, targetPage, branchId).onRows { rows ->
                 updateState { copy(transactions = mergePage(transactions, rows, append) { it.id }) }
             }
-            FinanceTab.REFUNDS -> deps.finance.refunds(state.from, state.to, targetPage).onRows { rows ->
+            FinanceTab.REFUNDS -> deps.finance.refunds(state.from, state.to, targetPage, branchId).onRows { rows ->
                 updateState { copy(refunds = mergePage(refunds, rows, append) { it.id }) }
             }
             FinanceTab.PAYOUTS -> deps.finance.payouts(state.from, state.to, targetPage).onRows { rows ->

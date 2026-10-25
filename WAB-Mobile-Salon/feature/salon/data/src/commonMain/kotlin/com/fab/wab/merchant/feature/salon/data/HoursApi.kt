@@ -9,7 +9,6 @@ import com.fab.wab.merchant.core.data.contract.generated.PostSalonHoursClosuresB
 import com.fab.wab.merchant.core.data.contract.generated.PostSalonHoursClosuresData
 import com.fab.wab.merchant.core.data.contract.generated.PutSalonHoursWeeklyBody
 import com.fab.wab.merchant.core.data.contract.generated.PutSalonHoursWeeklyData
-import com.fab.wab.merchant.core.data.contract.pathWith
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -22,20 +21,40 @@ import kotlinx.serialization.json.JsonElement
 
 private const val ID = "id"
 
+/** `/salon/hours…` or, for a chosen branch, `/branches/{branchId}/hours…` (same bodies, MER-064). */
 class HoursApi(private val client: HttpClient) {
-    suspend fun load(): BaseResponse<GetSalonHoursData> = client.get(MerchantOperations.getSalonHours.path).body()
+    suspend fun load(branchId: String?): BaseResponse<GetSalonHoursData> =
+        client.get(branchPath(MerchantOperations.getSalonHours, MerchantOperations.getBranchesByBranchIdHours, branchId)).body()
 
-    suspend fun saveWeek(body: PutSalonHoursWeeklyBody): BaseResponse<PutSalonHoursWeeklyData> =
-        client.put(MerchantOperations.putSalonHoursWeekly.path) { setBody(body) }.body()
+    suspend fun saveWeek(branchId: String?, body: PutSalonHoursWeeklyBody): BaseResponse<PutSalonHoursWeeklyData> =
+        client.put(branchPath(MerchantOperations.putSalonHoursWeekly, MerchantOperations.putBranchesByBranchIdHoursWeekly, branchId)) {
+            setBody(body)
+        }.body()
 
-    suspend fun addClosure(body: PostSalonHoursClosuresBody): BaseResponse<PostSalonHoursClosuresData> =
-        client.post(MerchantOperations.postSalonHoursClosures.path) { setBody(body) }.body()
+    suspend fun addClosure(branchId: String?, body: PostSalonHoursClosuresBody): BaseResponse<PostSalonHoursClosuresData> =
+        client.post(
+            branchPath(MerchantOperations.postSalonHoursClosures, MerchantOperations.postBranchesByBranchIdHoursClosures, branchId),
+        ) { setBody(body) }.body()
 
-    suspend fun updateClosure(id: String, body: PatchSalonHoursClosuresByIdBody): BaseResponse<PatchSalonHoursClosuresByIdData> =
-        client.patch(MerchantOperations.patchSalonHoursClosuresById.pathWith(ID to id)) { setBody(body) }.body()
+    suspend fun updateClosure(
+        branchId: String?,
+        id: String,
+        body: PatchSalonHoursClosuresByIdBody,
+    ): BaseResponse<PatchSalonHoursClosuresByIdData> = client.patch(
+        branchPath(
+            MerchantOperations.patchSalonHoursClosuresById,
+            MerchantOperations.patchBranchesByBranchIdHoursClosuresById,
+            branchId,
+            ID to id,
+        ),
+    ) { setBody(body) }.body()
 
-    suspend fun deleteClosure(id: String): BaseResponse<JsonElement?> = client.delete(
-        MerchantOperations.deleteSalonHoursClosuresById.pathWith(ID to id),
+    suspend fun deleteClosure(branchId: String?, id: String): BaseResponse<JsonElement?> = client.delete(
+        branchPath(
+            MerchantOperations.deleteSalonHoursClosuresById,
+            MerchantOperations.deleteBranchesByBranchIdHoursClosuresById,
+            branchId,
+            ID to id,
+        ),
     ).body()
-
 }

@@ -2,6 +2,7 @@ package com.fab.wab.merchant.feature.salon.presentation.controller.vm
 
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.core.domain.salon.SalonGenderType
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.mvi.BaseViewModel
@@ -12,6 +13,9 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.contract.Catal
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.CatalogPickerContract.UiAction
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.CatalogPickerContract.UiState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 private const val FIRST_PAGE = 1
@@ -22,6 +26,8 @@ class CatalogPickerViewModel(
     private val salon: SalonRepository,
     private val errorText: suspend (AppError) -> String = ::appErrorText,
     testScope: CoroutineScope? = null,
+    /** MER-064: the Added marks follow the branch being edited. */
+    private val branchScope: Flow<BranchScope> = flowOf(BranchScope()),
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
     private var page = FIRST_PAGE
@@ -49,7 +55,7 @@ class CatalogPickerViewModel(
             updateState { copy(loading = true, error = null) }
             val type = gender ?: salonGender() ?: return@launch
             gender = type
-            (services.services() as? AppResult.Success)?.let { mine ->
+            (services.services(branchScope.first().edited) as? AppResult.Success)?.let { mine ->
                 updateState { copy(added = mine.data.associate { it.catalogId to it.id }) }
             }
             page = FIRST_PAGE
