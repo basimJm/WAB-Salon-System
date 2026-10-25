@@ -106,7 +106,7 @@
 ## Phase 5 — Integration, quality and release
 | ID | Task | Branch | Needs | Status | Notes |
 |---|---|---|---|---|---|
-| CUS-060 | Switch dev builds to `DATA_SOURCE=remote` against the dev API: per-feature gap list (fields, enums, errors), socket events verified, fixtures updated to real shapes | `feat/cus-060-remote-dev` | CUS-059, SRV-011 | BLOCKED | Needs the dev API URL (deployment, owner) |
+| CUS-060 | Switch dev builds to `DATA_SOURCE=remote` against the dev API: per-feature gap list (fields, enums, errors), socket events verified, fixtures updated to real shapes | `feat/cus-060-remote-dev` | CUS-059, SRV-011a | TODO | Needs the dev API URL (deployment, owner) |
 | CUS-061 | Real OTP on devices: Firebase Phone Auth (test numbers in dev), backend `wab-otp` verification end to end | `feat/cus-061-real-otp` | CUS-060, SRV-034 | BLOCKED | Firebase app registrations + `wab-otp` in the server |
 | CUS-062 | Real payments on devices through the published KMP `wab-payments` launcher (sandbox), failure paths, booking never created on failure | `feat/cus-062-real-payments` | CUS-047, PAY-015, SRV-092 | BLOCKED | Gateway sandbox credentials (owner) |
 | CUS-063 | Push end to end on Android + iOS devices (token registration, foreground banner, tap → S19, badge), APNs key in Firebase (owner) | `feat/cus-063-push-e2e` | CUS-051, CUS-060 | BLOCKED | SRV-100 is done; needs the dev API and device builds |
