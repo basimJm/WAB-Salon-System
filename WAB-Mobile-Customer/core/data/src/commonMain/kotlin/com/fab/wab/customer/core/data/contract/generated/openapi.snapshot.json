@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Customer API",
-    "version": "1.2.0"
+    "version": "1.3.0"
   },
   "servers": [
     {
@@ -937,11 +937,11 @@
                   },
                   "cityId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "areaId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "phone": {
                     "type": "object",
@@ -3758,7 +3758,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -4413,7 +4413,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -4422,7 +4422,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "memberId",
@@ -5464,7 +5464,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -5597,7 +5597,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -5733,7 +5733,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -5955,7 +5955,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -5993,7 +5993,7 @@
                   },
                   "branchId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   }
                 },
                 "required": [
@@ -6122,7 +6122,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -6131,7 +6131,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "memberId",
@@ -6353,7 +6353,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -6362,7 +6362,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "memberId",
@@ -6400,7 +6400,7 @@
                   },
                   "branchId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   }
                 },
                 "required": [
@@ -6765,11 +6765,11 @@
                   },
                   "cityId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "areaId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "language": {
                     "type": "string",
@@ -7504,7 +7504,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "salonId",
@@ -7533,7 +7533,7 @@
                 "properties": {
                   "branchId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "date": {
                     "type": "string"
@@ -7545,7 +7545,7 @@
                         "type": "array",
                         "items": {
                           "type": "string",
-                          "pattern": "^[a-f0-9]{24}$/i"
+                          "pattern": "^[a-fA-F0-9]{24}$"
                         },
                         "minItems": 1,
                         "maxItems": 20
@@ -7556,7 +7556,7 @@
                       },
                       "staffId": {
                         "type": "string",
-                        "pattern": "^[a-f0-9]{24}$/i"
+                        "pattern": "^[a-fA-F0-9]{24}$"
                       }
                     },
                     "required": [
@@ -7570,20 +7570,14 @@
                       "properties": {
                         "staffId": {
                           "type": "string",
-                          "pattern": "^[a-f0-9]{24}$/i"
+                          "pattern": "^[a-fA-F0-9]{24}$"
                         },
                         "start": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
+                          "type": "string",
                           "format": "date-time"
                         },
                         "end": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
+                          "type": "string",
                           "format": "date-time"
                         }
                       },
@@ -7598,7 +7592,7 @@
                   },
                   "draftId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   }
                 },
                 "required": [
@@ -7791,11 +7785,11 @@
                 "properties": {
                   "salonId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "branchId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "paymentMethod": {
                     "type": "string",
@@ -7823,20 +7817,17 @@
                           "type": "array",
                           "items": {
                             "type": "string",
-                            "pattern": "^[a-f0-9]{24}$/i"
+                            "pattern": "^[a-fA-F0-9]{24}$"
                           },
                           "minItems": 1,
                           "maxItems": 20
                         },
                         "staffId": {
                           "type": "string",
-                          "pattern": "^[a-f0-9]{24}$/i"
+                          "pattern": "^[a-fA-F0-9]{24}$"
                         },
                         "start": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
+                          "type": "string",
                           "format": "date-time"
                         }
                       },
@@ -8190,7 +8181,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -8540,7 +8531,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -8677,7 +8668,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -8862,7 +8853,7 @@
                 "properties": {
                   "draftId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   }
                 },
                 "required": [
@@ -9366,7 +9357,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -9588,7 +9579,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -10084,7 +10075,7 @@
                 "properties": {
                   "draftId": {
                     "type": "string",
-                    "pattern": "^[a-f0-9]{24}$/i"
+                    "pattern": "^[a-fA-F0-9]{24}$"
                   },
                   "platform": {
                     "type": "string",
@@ -10347,7 +10338,7 @@
           {
             "schema": {
               "type": "string",
-              "pattern": "^[a-f0-9]{24}$/i"
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -10962,7 +10953,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "pattern": "^[a-f0-9]{24}$/i"
+                      "pattern": "^[a-fA-F0-9]{24}$"
                     },
                     "minItems": 1,
                     "maxItems": 50
