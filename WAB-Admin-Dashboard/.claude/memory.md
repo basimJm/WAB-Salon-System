@@ -69,7 +69,7 @@
 - ADM-063 done: analytics = repositories.analytics {overview,events}; useAnalyticsRange gives instants (and the previous period when comparing); EventsAnalyticsPage(prefix) is the shared event-family page
 - ADM-065 done: reports = repositories.reports {daily(date),weekly(from),monthly(YYYY-MM)}; ReportBody renders any of them
 - ADM-066 done: audit = repositories.audit.list(query); humanizeAction/hasDiff pure helpers
-- ADM-067 done: exports = repositories.exports {list,request,get}; useExportRunner()(kind, params) -> onExport(format) for ExportMenu; only REPORT_*, TRANSACTIONS and AUDIT_LOGS exist on the server
+- ADM-067 done: exports = repositories.exports {list,request,get}; useExportRunner()(kind, params) -> onExport(format) for ExportMenu; kinds REPORT_*, TRANSACTIONS, AUDIT_LOGS, BOOKINGS, CUSTOMERS, SALONS (list params via bookingExportParams / customerExportParams / salonExportParams, ADM-094)
 - ADM-078 done: fixtures coverage lives in tests/fixtures.test.ts (WITHOUT_FIXTURE has the 19 exempt operations: auth on MockAuthRepository and by-id reads no screen uses)
 - ADM-081 done: tests/pages-a11y.test.tsx renders every module screen in ar+en and runs axe; ChartFrame title is h2 styled as h3
 - ADM-068 done: profile = repositories.profile {get,saveAlertEmails,changePassword,requestEmailChange,verifyEmailChange}; page /profile from the topbar menu. LESSON: .gitignore had 'reports/' which hid src/{domain,data,presentation}/reports: the pattern is now '/reports/' and the files were rebuilt (ADM-064/065 sources had never been committed). tests/fixtures.test.ts NOT_BUILT_YET lists the new server operations; each ADM-069..073 task deletes its lines and has its Appendix A rows already

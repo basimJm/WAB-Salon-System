@@ -19,7 +19,7 @@ const list = defineEndpoint(O.getExports, {
  * The generated body union carries the server's broken id pattern (objectId.ts), so a salon or branch filter could
  * never be exported. Same shape with the id fields checked by OBJECT_ID; the server still validates per kind.
  */
-const ID_PARAMS = ['salonId', 'branchId', 'customerId', 'bookingId', 'adminId'] as const;
+const ID_PARAMS = ['salonId', 'branchId', 'customerId', 'bookingId', 'adminId', 'cityId'] as const;
 const exportBodySchema = () =>
   z.object({
     kind: z.enum(EXPORT_KINDS),
