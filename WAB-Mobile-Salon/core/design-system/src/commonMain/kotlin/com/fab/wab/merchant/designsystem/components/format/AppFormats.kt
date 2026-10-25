@@ -43,3 +43,14 @@ fun filsToDecimal(fils: Long): String =
 @Composable
 fun jodTextOfFils(fils: Long): String = jodText(filsToDecimal(fils))
 
+private const val ONE_DECIMAL_SCALE = 10L
+private const val MINUS = '-'
+
+/** One decimal for ratings and rates ("4.8", "5.0", "12.5"); negative values keep their sign. */
+fun oneDecimalText(value: Double): String {
+    val scaled = kotlin.math.round(value * ONE_DECIMAL_SCALE).toLong()
+    val absolute = kotlin.math.abs(scaled)
+    val text = (absolute / ONE_DECIMAL_SCALE).toString() + DECIMAL_POINT + (absolute % ONE_DECIMAL_SCALE).toString()
+    return if (scaled < 0) MINUS + text else text
+}
+
