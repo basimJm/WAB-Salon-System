@@ -87,7 +87,7 @@ fun DiscoverySalonCard(
                 SalonName(salon.name, Modifier.weight(1f))
                 DiscoveryRatingLine(salon.rating, salon.reviewsCount, DiscoveryDesign.TEXT_12_5)
             }
-            LocationLine(salon.locationText.orEmpty())
+            LocationLine(salon.placeText())
             DescriptionLine(salon.shortDescription.orEmpty())
             StatusLine(salon)
         }

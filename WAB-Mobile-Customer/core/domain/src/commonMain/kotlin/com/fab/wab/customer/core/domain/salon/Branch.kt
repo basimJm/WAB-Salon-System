@@ -51,6 +51,9 @@ object BranchRules {
         if (branchId == null) items else items.filter { branchOf(it).let { id -> id == null || id == branchId } }
 }
 
+/** A card's `branchCount` (a JSON number) as a count; a visible salon always has at least one bookable branch. */
+fun cardBranchCount(serverValue: Double): Int = serverValue.toInt().coerceAtLeast(BranchRules.SINGLE_BRANCH)
+
 /** Services offered by [branchId] (§5.17: services and prices are per branch). */
 fun SalonDetails.servicesOf(branchId: String?): List<SalonService> = BranchRules.ofBranch(services, branchId) { it.branchId }
 

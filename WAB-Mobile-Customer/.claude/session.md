@@ -11,6 +11,18 @@
 
 - Batch 7 = salon branches (CUS-082…086, then CUS-087), chained branches from `feat/cus-082-branches-contract`; per task policy checks + tests written, host unit tests after five (rules §3.13). The parent agent pushes and merges the chain.
 
+### CUS-083 — Search and filtered lists: one card per salon (never per branch) with the nearest branch's distance/area and "N branches"
+- Branch: `feat/cus-083-search-branches` (from `feat/cus-082-branches-contract`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.17; `GET /customer/v1/salons`, `GET /customer/v1/favorites`):
+  - [x] Search / filtered list cards keep one card per salon; place, hours and distance are the server's nearest bookable branch (`branch {id,name}` kept on `SalonSummary`); `branchCount` mapped (≥ 1)
+  - [x] Card place line = "area · N branches" only when the salon has several bookable branches (AR plural فرعان / N فروع / N فرعاً, EN N branches) on the All salons row, the Home recommended card and the Favorites card
+  - [x] Favorites cards map `branchCount` / `branch` the same way
+- Tests: `SalonCardMapperTest` (2), `BranchTextsTest` (3); policy `all: ok`; compile with `testAndroidHostTest --continue` green except the `feature:home:data` test (fixed in CUS-084)
+- Loops: 0/1
+- Review: PENDING
+- Notes: plurals carry an unused EN `many` item so the localization policy's placeholder count matches the AR plural (one/two carry no number in Arabic). Cards open the salon without a preselected branch (only the nearest entries carry a branch, CUS-084).
+
 ### CUS-082 — `./gradlew apiSync` with branches: `Branch` model, branch on salon details, drafts and bookings, branch error codes (AR/EN)
 - Branch: `feat/cus-082-branches-contract` (from `origin/customer`)
 - Status: IN REVIEW

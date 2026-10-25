@@ -69,7 +69,7 @@ fun DiscoverySalonRow(
                     )
                 }
             }
-            LocationLine(salon.locationText.orEmpty(), withPin = false)
+            LocationLine(salon.placeText(), withPin = false)
             DescriptionLine(salon.shortDescription.orEmpty())
             StatusLine(salon)
         }

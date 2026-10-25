@@ -17,4 +17,11 @@
     <string name="home_distance_km">%1$s كم</string>
     <string name="discovery_retry">إعادة المحاولة</string>
     <string name="discovery_error_server_body">نعتذر، حدثت مشكلة غير متوقعة.</string>
+    <plurals name="home_branch_count">
+        <item quantity="one">فرع واحد</item>
+        <item quantity="two">فرعان</item>
+        <item quantity="few">%1$d فروع</item>
+        <item quantity="many">%1$d فرعاً</item>
+        <item quantity="other">%1$d فرع</item>
+    </plurals>
 </resources>
