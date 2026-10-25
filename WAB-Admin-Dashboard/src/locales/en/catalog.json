@@ -23,8 +23,17 @@
       "descAr": "Required, up to {{max}} characters",
       "descEn": "Required, up to {{max}} characters",
       "image": "Upload an image",
-      "order": "Whole number from 0"
+      "order": "Whole number from 0",
+      "service": "Pick a catalog service"
     },
+    "approveMode": "How to approve",
+    "mode": {
+      "create": "Create a new service",
+      "map": "Use an existing service"
+    },
+    "mapService": "Catalog service",
+    "mapHint": "No new service is created. The request of \"{{name}}\" is linked to an active {{audience}} service already in the catalog.",
+    "noMatches": "There is no active service for this audience yet. Create a new one instead.",
     "requestsSubtitle": "Services salons asked to add to the catalog.",
     "noRequests": "No requests",
     "salon": "Salon",
@@ -32,7 +41,7 @@
     "requestedAt": "Requested",
     "approve": "Approve",
     "reject": "Reject",
-    "approveTitle": "Approve and add to the catalog",
+    "approveTitle": "Approve the request",
     "approveHint": "The service \"{{name}}\" will be created for everyone. Translate the texts first.",
     "rejectTitle": "Reject \"{{name}}\"",
     "rejectText": "The salon is told why. Write the reason.",
