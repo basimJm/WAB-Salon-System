@@ -15,8 +15,10 @@ import com.fab.wab.customer.core.domain.booking.FullPaymentRefundRule
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.core.domain.booking.PaymentStatus
 import com.fab.wab.customer.core.domain.booking.RefundStatus
+import com.fab.wab.customer.core.domain.salon.BranchRef
 import com.fab.wab.customer.core.domain.salon.RatingSummary
 import com.fab.wab.customer.core.domain.salon.ReviewsPreview
+import com.fab.wab.customer.core.domain.salon.SalonBranch
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.salon.StaffMember
 import com.fab.wab.customer.core.domain.session.Gender
@@ -84,9 +86,10 @@ private class DetailsBookingsFake(var details: AppResult<BookingDetails>) : Book
 
 private class SalonFake : SalonDetailsRepository {
     var calls = 0
+    var salon: SalonDetails = SALON
     override suspend fun details(salonId: String): AppResult<SalonDetails> {
         calls += 1
-        return AppResult.Success(SALON)
+        return AppResult.Success(salon)
     }
     override suspend fun staffMember(salonId: String, memberId: String): AppResult<StaffMember> = AppResult.Loading
 }
@@ -178,5 +181,20 @@ class BookingDetailsViewModelTest {
         vm.onEvent(UiAction.OnCancelConfirm)
         assertTrue(effects.last() is SideEffect.ShowError)
         assertEquals(false, vm.state.value.cancelling)
+    }
+
+    @Test
+    fun callAndWhatsAppUseTheBookedBranch() = runTest(UnconfinedTestDispatcher()) {
+        val khalda = SalonBranch(
+            id = "b2", name = "Khalda", isMain = false, locationText = "Khalda", location = null, phone = "+962790000002",
+            whatsapp = "+962790000003", isOpenNow = true, todayHours = null, closedReason = null, weeklySchedule = emptyList(),
+            upcomingClosures = emptyList(),
+        )
+        salons.salon = SALON.copy(branches = listOf(khalda))
+        val booked = detailsBooking(BookingStatus.APPROVED).copy(branch = BranchRef("b2", "Khalda", "Khalda"))
+        val vm = viewModel(DetailsBookingsFake(AppResult.Success(booked)))
+        assertEquals("+962790000002", vm.state.value.salonPhone)
+        assertEquals("+962790000003", vm.state.value.salonWhatsApp)
+        assertEquals("img", vm.state.value.salonImageUrl)
     }
 }
