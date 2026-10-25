@@ -59,7 +59,10 @@ fun MockWorldSwitcher(useCase: SwitchMockWorldUseCase, modifier: Modifier = Modi
         Column(Modifier.fillMaxWidth().padding(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
             AppText(text = stringResource(Res.string.mock_title), style = AppTheme.typography.titleMedium)
             AppText(text = stringResource(Res.string.mock_salon), style = AppTheme.typography.labelLarge)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.space8),
+                verticalArrangement = Arrangement.spacedBy(spacing.space8),
+            ) {
                 SalonState.entries.forEach { state ->
                     AppFilterChip(salonStateLabel(state), selected = false, onClick = {
                         open = false
@@ -68,7 +71,10 @@ fun MockWorldSwitcher(useCase: SwitchMockWorldUseCase, modifier: Modifier = Modi
                 }
             }
             AppText(text = stringResource(Res.string.mock_member), style = AppTheme.typography.labelLarge)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.space8), verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.space8),
+                verticalArrangement = Arrangement.spacedBy(spacing.space8),
+            ) {
                 MockMemberPreset.entries.forEach { preset ->
                     AppFilterChip(stringResource(presetLabel(preset)), selected = false, onClick = {
                         open = false

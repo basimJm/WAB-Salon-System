@@ -12,17 +12,18 @@
 ### MER-057 — Accessibility and RTL QA pass (+ end-of-backlog gate)
 - Branch: `feat/mer-057-a11y-rtl-qa`
 - Branched: (from `feat/mer-053-deep-link-register`)
-- Status: IN PROGRESS (final batch)
+- Status: IN REVIEW (final batch verified; PR blocked on the gh `workflow` scope)
 - Acceptance criteria (rules §3.13 end of backlog; backlog MER-057):
   - [x] Template `feature/sample` removed (module, Koin, navigation graph, `Screen.SampleDetails`, compose-app module list); CLAUDE.md reference = `feature/bookings`
   - [x] detekt clean with the empty baseline (was 435 findings across batches 2–9): long lines wrapped (string-aware script, then hand-fixed odd splits), every complex `handle` split into named sub-handlers (form / dialogs / …), shared mapper fields as private raw data classes, complex conditions extracted, Compose rules (modifier defaults and order, present-tense lambdas, single emitter, `rememberUpdatedState` in the load-more effect), `StaffSections.kt` split (< 300 lines)
   - [x] Full gate `scripts/ci/run_local_checks.sh` green on 106b09b8 (policy, detekt, unit tests, 4 Android variants + lint, 4 iOS configurations, K/N tests; SwiftLint not installed locally → skipped)
   - [x] Journey fixes (Pixel 4 emulator, AR/EN, light/dark, landscape, font 200 %): login crashed (navigation to the unregistered `Graph.Home`, now left to the launch router + new strict `navigation` policy); tab bar only on tab roots of the home route; headers below the status bar (`AppScreen` without top bar); bottom bars above the gesture bar; tab-bar inset on the four tab screens; Arabic hour labels cut (wider column); status-bar icons follow the app theme (`SystemBarsAppearance`); rail on the themed background; WhatsApp label / gallery add button wrapping; dev-only mock-world switcher (DEV chip: salon state + member preset, MER-007 UI entry)
-  - [ ] Emulator + simulator journey: AR + EN, light + dark, phone + tablet/landscape, font 200 %, TalkBack / VoiceOver labels, 48 dp targets
-- Tests: `PermissionCopyTest` (1); batch run: policy ok, 84 policy-script tests, 466 host tests 0 failures, `assembleDevDebug` green
-- Loops: 0/1
-- Review: PENDING
-- Notes: —
+  - [x] Emulator + simulator journey: Pixel 4 (AR + EN, light + dark, landscape rail, font 200 %) and iPhone 17 Pro (login → OTP → status → DEV switch → live bookings + tab bar); iOS double top inset fixed (status bar minus the cutout the root already pads); accessibility dump: no clickable target under 48 dp
+  - [ ] TalkBack / VoiceOver run itself (not done: labels checked from the accessibility tree only)
+- Tests: `PermissionCopyTest`, `SwitchMockWorldUseCaseTest`, `MerchantRootTabsTest` (+2), `test_navigation.py` (2); final run: policy ok, 86 policy-script tests, 468 host tests 0 failures, detekt 0, `assembleDevDebug` + iOS Debug-Dev build green; full gate green on 106b09b8
+- Loops: 1/1 — re-checked every criterion after the journey fixes: detekt (2 new long lines in the switcher wrapped), host tests, policy, both platforms rebuilt and re-run on device
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — read the batch diff (205 files, mostly mechanical wrapping / handler splits, checked for behaviour change: bare-if entries before `else ->` wrapped, `return` → `return true` in sub-handlers); one justified `@Suppress`; mock switcher is inert outside mock builds (`MockControls.enabled`); navigation policy blocks the crash class found on device. Non-blocking: dev switcher labels are dev-only strings; the full gate was not re-run after the journey fixes (tests + detekt + both builds were).
+- Notes: DEVIATIONS — TalkBack/VoiceOver not exercised (tree check only); no tablet AVD (landscape phone used for the rail); SwiftLint not installed locally; MER-058 (performance) not started.
 
 ### MER-053 — Deep link `/register` + App Links checklist
 - Branch: `feat/mer-053-deep-link-register`
