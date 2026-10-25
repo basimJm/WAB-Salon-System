@@ -135,4 +135,8 @@
         <item quantity="many">%1$d صلاحية مفعّلة</item>
         <item quantity="other">%1$d صلاحية مفعّلة</item>
     </plurals>
+    <string name="member_branch">الفرع</string>
+    <string name="member_branch_choose">اختر فرعاً</string>
+    <string name="member_branch_move_note">النقل إلى فرع آخر يزيل خدماته الحالية؛ اختر خدمات الفرع الجديد من ملف الموظف.</string>
+    <string name="member_move_conflict_body">لدى هذا العضو حجوزات قادمة في فرعه الحالي. اختر كيفية التعامل معها قبل النقل:</string>
 </resources>

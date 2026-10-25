@@ -2,6 +2,7 @@ package com.fab.wab.merchant.feature.team.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,9 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
+import com.fab.wab.merchant.core.ui.utils.LocalAppLocale
 import com.fab.wab.merchant.designsystem.components.avatar.AppAvatar
 import com.fab.wab.merchant.designsystem.components.badge.AppStatusBadge
 import com.fab.wab.merchant.designsystem.components.badge.StatusTone
+import com.fab.wab.merchant.designsystem.components.branch.AppBranchSwitcher
 import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.card.AppCard
 import com.fab.wab.merchant.designsystem.components.control.AppSwitch
@@ -68,30 +71,44 @@ fun TeamScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Unit,
             }
         },
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            when {
-                state.loading -> AppLoadingIndicator(Modifier.align(Alignment.Center))
-                state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
-                state.members.isEmpty() -> AppEmptyState(
-                    title = stringResource(Res.string.team_empty),
-                    modifier = Modifier.align(Alignment.Center),
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            if (state.branchScope.showsSwitcher) {
+                AppBranchSwitcher(
+                    branches = state.branchScope.branches,
+                    selectedId = state.branchScope.filter,
+                    onSelect = { onAction(UiAction.OnBranchSelect(it)) },
+                    modifier = Modifier.padding(vertical = spacing.space8),
                 )
-                else -> AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }) {
-                    LazyColumn(
-                        contentPadding = PaddingValues(spacing.space16),
-                        verticalArrangement = Arrangement.spacedBy(spacing.space10),
-                    ) {
-                        items(
-                            state.members,
-                            key = { it.id },
-                            contentType = { TeamMember::class },
-                        ) { member -> MemberRow(member, state, onAction) }
-                    }
-                }
             }
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) { TeamBody(state, onAction) }
         }
     }
     TeamDialogs(state, onAction)
+}
+
+@Composable
+private fun BoxScope.TeamBody(state: UiState, onAction: (UiAction) -> Unit) {
+    val spacing = AppTheme.spacing
+    when {
+        state.loading -> AppLoadingIndicator(Modifier.align(Alignment.Center))
+        state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
+        state.members.isEmpty() -> AppEmptyState(
+            title = stringResource(Res.string.team_empty),
+            modifier = Modifier.align(Alignment.Center),
+        )
+        else -> AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }) {
+            LazyColumn(
+                contentPadding = PaddingValues(spacing.space16),
+                verticalArrangement = Arrangement.spacedBy(spacing.space10),
+            ) {
+                items(
+                    state.members,
+                    key = { it.id },
+                    contentType = { TeamMember::class },
+                ) { member -> MemberRow(member, state, onAction) }
+            }
+        }
+    }
 }
 
 @Composable
@@ -107,6 +124,9 @@ private fun MemberRow(member: TeamMember, state: UiState, onAction: (UiAction) -
                     AppStatusBadge(text = stringResource(member.role.label()), tone = StatusTone.Accent)
                     if (member.providesServices) AppStatusBadge(text = stringResource(Res.string.team_provides), tone = StatusTone.Success)
                     if (!member.active) AppStatusBadge(text = stringResource(Res.string.team_inactive), tone = StatusTone.Neutral)
+                }
+                state.branchNameOf(member, LocalAppLocale.current)?.let {
+                    AppText(text = it, style = AppTheme.typography.labelSmall, color = AppTheme.colors.accent)
                 }
                 if (member.isOwner && state.access.manageTeam) {
                     AppText(

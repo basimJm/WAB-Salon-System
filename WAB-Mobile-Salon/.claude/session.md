@@ -9,6 +9,21 @@
 
 ## Current task
 
+### MER-065 — Team with branches
+- Branch: `feat/mer-065-team-branches`
+- Branched: (from `feat/mer-064-branch-operations`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.16 move rule, §6 branch scope; operations `GET /team/members?branchId=`, `POST /team/members` `branchId`, `PATCH /team/members/{id}` `branchId` (409 `SCHEDULE_CONFLICT`)):
+  - [x] Members carry `branchId`; the owner's team list has the branch switcher (`?branchId=`) and shows each member's branch while all branches are listed; managers get their branch's staff from the server (no switcher)
+  - [x] New member requires a branch (dropdown of open branches; default = the switcher's branch or the only open branch); `MemberField.BRANCH` validation; the branch goes in the create body
+  - [x] Owner moves a member: changing the branch sends `branchId` in the PATCH only when it changed; `409 SCHEDULE_CONFLICT` → affected-bookings sheet (reassign opens the first booking, cancel affected with `STAFF_UNAVAILABLE` then re-send the move, go back); a note says the services stay behind
+  - [x] Permission editor hides `FINANCE_VIEW`, `SUBSCRIPTION_VIEW`, `POLICIES_MANAGE` for branch members (`visiblePermissions`), refuses toggling them and drops stale ones on save
+  - [x] Staff profile reads the services and open days of the member's branch (`/branches/{branchId}/services|hours`)
+- Tests: `TeamBranchesTest` (2), `TeamBranchesViewModelTest` (3), `TeamMappersTest` (+1), `PermissionsViewModelTest` (updated: FINANCE_VIEW toggle ignored); team + composeApp host tests green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the move's "pick services of the new branch" happens in the staff profile (skills list now follows the member's branch); there is no separate post-move wizard.
+
 ### MER-064 — Per-branch hours, closures, services / prices (+ finance by branch)
 - Branch: `feat/mer-064-branch-operations`
 - Branched: (from `feat/mer-063-branch-scope`)

@@ -8,6 +8,7 @@ import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
 import com.fab.wab.merchant.core.domain.booking.AffectedReasons
 import com.fab.wab.merchant.core.domain.booking.conflictBookingIds
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.core.domain.permission.OwnerCapability
 import com.fab.wab.merchant.core.domain.permission.Permission
 import com.fab.wab.merchant.core.domain.permission.permissionSet
@@ -23,6 +24,7 @@ import com.fab.wab.merchant.feature.team.presentation.controller.contract.TeamCo
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.TeamContract.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -35,6 +37,9 @@ class TeamDependencies(
     /** Reason the customers see when their booking is cancelled because the staff member left. */
     val unavailableReason: suspend () -> String,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    /** Owner: "All branches" / one branch (`?branchId=`); managers get their branch's staff from the server. */
+    val branchScope: Flow<BranchScope> = flowOf(BranchScope()),
+    val selectBranch: (String?) -> Unit = {},
 )
 
 /** PRD M17 list: members, owner-only add / edit / (de)activate, staff profiles for STAFF_MANAGE, conflict flow. */
@@ -49,6 +54,11 @@ class TeamViewModel(
             updateState {
                 copy(access = TeamAccess(permissions.can(OwnerCapability.TEAM_MANAGE), permissions.has(Permission.STAFF_MANAGE)))
             }
+        }.launchIn(scope)
+        deps.branchScope.onEach { branches ->
+            val changed = branches.filter != uiState.value.branchScope.filter
+            updateState { copy(branchScope = branches) }
+            if (changed) load(refresh = false)
         }.launchIn(scope)
         load(refresh = false)
     }
@@ -85,6 +95,7 @@ class TeamViewModel(
             UiAction.OnDismiss -> updateState { copy(confirmDeactivate = null, conflict = null) }
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnRetry -> load(refresh = false)
+            is UiAction.OnBranchSelect -> deps.selectBranch(event.branchId)
             else -> return false
         }
         return true
@@ -102,7 +113,7 @@ class TeamViewModel(
     private fun load(refresh: Boolean) {
         scope.launch {
             updateState { if (refresh) copy(refreshing = true) else copy(loading = true, error = null) }
-            when (val result = deps.team.members()) {
+            when (val result = deps.team.members(uiState.value.branchScope.filter)) {
                 is AppResult.Success -> updateState { copy(loading = false, refreshing = false, error = null, members = result.data) }
                 is AppResult.Error -> {
                     val message = deps.errorText(result.appError)

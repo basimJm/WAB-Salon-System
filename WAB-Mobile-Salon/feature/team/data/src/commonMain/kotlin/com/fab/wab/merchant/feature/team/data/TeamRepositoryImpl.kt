@@ -32,6 +32,7 @@ internal object MemberKeys {
     const val PHOTO_KEY = "photoKey"
     const val ROLE = "role"
     const val PERMISSIONS = "permissions"
+    const val BRANCH_ID = "branchId"
 }
 
 private const val FIRST_PAGE = 1
@@ -39,7 +40,7 @@ private const val FIRST_PAGE = 1
 /** The fields every member DTO shares, before parsing. */
 private data class RawMember(
     val id: String, val firstName: String, val lastName: String, val phone: String, val photoUrl: String?, val role: String,
-    val permissions: List<String>, val active: Boolean, val providesServices: Boolean,
+    val permissions: List<String>, val active: Boolean, val providesServices: Boolean, val branchId: String?,
 )
 
 private fun RawMember.toDomain() = TeamMember(
@@ -52,39 +53,48 @@ private fun RawMember.toDomain() = TeamMember(
     permissions = permissions.mapNotNull(Permission::fromKey).toSet(),
     active = active,
     providesServices = providesServices,
+    branchId = branchId?.takeIf { it.isNotBlank() },
 )
 
 fun GetTeamMembersDataItem.toDomain() =
-    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices, branchId).toDomain()
 fun GetTeamMembersByIdData.toDomain() =
-    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices, branchId).toDomain()
 fun PostTeamMembersData.toDomain() =
-    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices, branchId).toDomain()
 fun PatchTeamMembersByIdData.toDomain() =
-    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices, branchId).toDomain()
 fun PostTeamMembersByIdDeactivateData.toDomain() =
-    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices, branchId).toDomain()
 fun PostTeamMembersByIdReactivateData.toDomain() =
-    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices).toDomain()
+    RawMember(id, firstName, lastName, phone, photoUrl, role, permissions, active, providesServices, branchId).toDomain()
 
-/** Name, role and permissions always; the photo only when it changed ([photoChanged]) — null removes it. */
-fun MemberDraft.toPatch(photoChanged: Boolean, permissions: Set<Permission>?): JsonObject = buildJsonObject {
+/**
+ * Name, role and permissions always; the photo only when it changed ([photoChanged]) — null removes it; the branch only
+ * when it changed ([branchChanged], a move).
+ */
+fun MemberDraft.toPatch(
+    photoChanged: Boolean,
+    permissions: Set<Permission>?,
+    branchChanged: Boolean = false,
+): JsonObject = buildJsonObject {
     put(MemberKeys.FIRST_NAME, firstName.trim())
     put(MemberKeys.LAST_NAME, lastName.trim())
     put(MemberKeys.ROLE, role.name)
     if (photoChanged) put(MemberKeys.PHOTO_KEY, photoKey?.let(::JsonPrimitive) ?: JsonNull)
     permissions?.let { keys -> put(MemberKeys.PERMISSIONS, JsonArray(keys.map { JsonPrimitive(it.name) })) }
+    if (branchChanged) branchId?.let { put(MemberKeys.BRANCH_ID, it) }
 }
 
 /** Member changes refresh the shared salon (completeness `STAFF`). */
 class TeamRepositoryImpl(private val api: TeamApi, private val salon: SalonRepository) : TeamRepository {
     private val cache = mutableMapOf<String, TeamMember>()
 
-    override suspend fun members(): AppResult<List<TeamMember>> {
+    override suspend fun members(branchId: String?): AppResult<List<TeamMember>> {
         val all = mutableListOf<TeamMember>()
         var page = FIRST_PAGE
         while (true) {
-            when (val result = safeApiCall { api.members(page, MemberLimits.PAGE_SIZE) }) {
+            when (val result = safeApiCall { api.members(page, MemberLimits.PAGE_SIZE, branchId) }) {
                 is AppResult.Success -> {
                     all += result.data.data.map { it.toDomain() }
                     if (result.data.data.size < MemberLimits.PAGE_SIZE) break
@@ -112,14 +122,16 @@ class TeamRepositoryImpl(private val api: TeamApi, private val salon: SalonRepos
             role = draft.role.name,
             permissions = permissions?.map { it.name },
             photoKey = draft.photoKey,
+            branchId = draft.branchId,
         )
         return safeApiCall { api.create(body) }.mapSuccess { it.data.toDomain() }.also { remember(it) }
     }
 
     override suspend fun update(id: String, draft: MemberDraft, permissions: Set<Permission>?): AppResult<TeamMember> {
         val photoChanged = draft.photoKey != null || (cache[id]?.photoUrl != null && draft.photoUrl == null)
+        val branchChanged = draft.branchId != null && draft.branchId != cache[id]?.branchId
         return safeApiCall {
-            api.update(id, draft.toPatch(photoChanged, permissions))
+            api.update(id, draft.toPatch(photoChanged, permissions, branchChanged))
         }.mapSuccess { it.data.toDomain() }.also { remember(it) }
     }
 
