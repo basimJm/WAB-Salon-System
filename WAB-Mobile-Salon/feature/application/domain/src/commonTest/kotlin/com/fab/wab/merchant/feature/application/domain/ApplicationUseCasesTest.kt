@@ -29,10 +29,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 internal val PENDING = SalonApplication("s1", SalonState.APPLICATION_PENDING, null, 0, null)
+internal val OWNER = MemberProfile("m1", "s1", "Lina", MemberRole.OWNER)
+internal val OWNER_KEYS = Permission.entries.map { it.name }.toSet()
 internal val FORM = RegistrationForm("Lina Beauty", SalonGender.WOMEN, "Lina", "Haddad", "c1", "a1", listOf("l/1.pdf"))
 
 internal class FakeApplications : ApplicationRepository {
-    var applyResult: AppResult<ApplicationSession> = AppResult.Success(ApplicationSession(AuthTokens("a", "r"), "m1", "s1", PENDING))
+    var applyResult: AppResult<ApplicationSession> = AppResult.Success(ApplicationSession(AuthTokens("a", "r"), OWNER, OWNER_KEYS, PENDING))
     var currentResult: AppResult<SalonApplication> = AppResult.Success(PENDING)
     var resubmitResult: AppResult<SalonApplication> = AppResult.Success(PENDING)
     val applied = mutableListOf<Pair<RegistrationForm, String>>()
@@ -77,13 +79,22 @@ class ApplicationUseCasesTest {
     private val proof = OtpVerified(AuthPurpose.REGISTER, PhoneNumber("JO", "791234567"), "proof")
 
     @Test
-    fun submitSignsTheOwnerInWithEveryPermissionAndThePendingState() = runTest {
+    fun submitSignsTheOwnerInWithTheServerMemberAndPermissionsAndThePendingState() = runTest {
         SubmitApplicationUseCase(repository, { null }, session)(FORM, proof)
         assertEquals(listOf(FORM to "proof"), repository.applied)
-        assertEquals(MemberRole.OWNER, session.member?.role)
-        assertEquals("Lina", session.member?.firstName)
-        assertEquals(Permission.entries.size, session.permissions.size)
+        assertEquals(OWNER, session.member)
+        assertEquals(OWNER_KEYS, session.permissions)
         assertEquals(SalonState.APPLICATION_PENDING, session.salonState)
+    }
+
+    @Test
+    fun submitUsesTheServerAnswerNotTheForm() = runTest {
+        // MER-068: the session follows what the server stored (contract 1.4.0 `member` = MemberProfile), not local guesses.
+        val stored = OWNER.copy(firstName = "Server Lina")
+        repository.applyResult = AppResult.Success(ApplicationSession(AuthTokens("a", "r"), stored, setOf("DASHBOARD_VIEW"), PENDING))
+        SubmitApplicationUseCase(repository, { null }, session)(FORM, proof)
+        assertEquals("Server Lina", session.member?.firstName)
+        assertEquals(setOf("DASHBOARD_VIEW"), session.permissions)
     }
 
     @Test
