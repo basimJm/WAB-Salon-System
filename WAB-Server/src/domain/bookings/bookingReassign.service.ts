@@ -87,6 +87,8 @@ export const createBookingReassignService = (deps: {
   ): Promise<void> => {
     await availability.plan({
       salonId: booking.salonId,
+      // Within the booking's own branch: its staff, hours and closures.
+      ...(booking.branchId === undefined ? {} : { branchId: booking.branchId }),
       ignoreLeadTime: true,
       persons: [
         {
@@ -168,6 +170,7 @@ export const createBookingReassignService = (deps: {
       const candidates =
         (await deps.members?.findMany({
           salonId: booking.salonId,
+          ...(booking.branchId === undefined ? {} : { branchId: booking.branchId }),
           active: true,
           providesServices: true,
         })) ?? [];

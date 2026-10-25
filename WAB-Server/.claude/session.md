@@ -10,6 +10,20 @@
 
 ## Current task
 
+### SRV-142 — Booking with branch (Stage P)
+
+- Branch: `feat/srv-142-booking-branch`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.4, §5.18, §3.5 `branchSnapshot`; API docs: availability + draft bodies gain optional `branchId`, booking rows/details gain `branch` — client impact CUS-082/086/087, MER-063, ADM-091):
+  - [x] Availability and plans resolve the branch: picked one must be bookable (422 `BRANCH_NOT_BOOKABLE`, unknown 404 `BRANCH_NOT_FOUND`); without a pick the only bookable branch, several → 422 `BRANCH_REQUIRED`; none → `SALON_NOT_BOOKABLE`
+  - [x] Slots/plans use the branch's hours, closures, leaves, services and staff only
+  - [x] Drafts take `branchId` (the planned branch is stored); booking creation re-plans in the draft's branch and keeps `branchId` + `branchSnapshot`
+  - [x] Reassign and eligible staff (merchant + admin) stay inside the booking's branch
+  - [x] Booking lists/details (customer, merchant, admin) show `branch {id, name (request language), locationText}` from the snapshot
+- Tests: `tests/bookingBranch.test.ts` (4); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔ (apps send `branchId` from step 1; older builds keep working for single-branch salons), Architect ✔, QA ✔)
+
 ### SRV-141 — Per-branch operations (Stage P)
 
 - Branch: `feat/srv-141-branch-operations`

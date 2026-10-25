@@ -15755,6 +15755,32 @@
                             ],
                             "description": "Customer and admin views only."
                           },
+                          "branch": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "locationText": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "locationText"
+                            ],
+                            "description": "The branch as booked, name in the request language; null for bookings made before branches."
+                          },
                           "customer": {
                             "type": [
                               "object",
@@ -15811,6 +15837,7 @@
                           "personsCount",
                           "total",
                           "salon",
+                          "branch",
                           "customer",
                           "staff"
                         ]
@@ -15985,6 +16012,32 @@
                             "name"
                           ],
                           "description": "Customer and admin views only."
+                        },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "locationText": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "locationText"
+                          ],
+                          "description": "The branch as booked, name in the request language; null for bookings made before branches."
                         },
                         "customer": {
                           "type": [
@@ -16246,6 +16299,7 @@
                         "personsCount",
                         "total",
                         "salon",
+                        "branch",
                         "customer",
                         "staff",
                         "refundStatus",

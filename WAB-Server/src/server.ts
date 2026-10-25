@@ -462,6 +462,7 @@ const buildServices = (
   const holdsStore = createHoldsStore(redis);
   const bookingDraftsRepository = new BookingDraftsRepository();
   const availability = createAvailabilityService({
+    branches: branchesRepository,
     salons: new SalonsRepository(),
     members: new MembersRepository(),
     salonServices,
