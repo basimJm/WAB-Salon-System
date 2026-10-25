@@ -1,6 +1,5 @@
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
-import { OBJECT_ID } from '@/data/api/objectId';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
@@ -8,12 +7,7 @@ import type { BookingsRepository } from '@/domain/bookings/bookings';
 
 const list = defineEndpoint(OPERATIONS.getBookings, {
   data: dto.getBookingsDataSchema,
-  query: () =>
-    dto.getBookingsQuerySchema().extend({
-      salonId: OBJECT_ID.optional(),
-      branchId: OBJECT_ID.optional(),
-      customerId: OBJECT_ID.optional(),
-    }),
+  query: dto.getBookingsQuerySchema,
 });
 const get = defineEndpoint(OPERATIONS.getBookingsById, { data: dto.getBookingsByIdDataSchema });
 const change = defineEndpoint(OPERATIONS.postBookingsByIdStatus, {
@@ -27,7 +21,7 @@ const eligible = defineEndpoint(OPERATIONS.getBookingsByIdEligibleStaff, {
 });
 const reassign = defineEndpoint(OPERATIONS.postBookingsByIdReassign, {
   data: dto.postBookingsByIdReassignDataSchema,
-  body: () => dto.postBookingsByIdReassignBodySchema().extend({ staffId: OBJECT_ID }),
+  body: dto.postBookingsByIdReassignBodySchema,
 });
 const cancel = defineEndpoint(OPERATIONS.postBookingsByIdCancel, {
   data: dto.postBookingsByIdCancelDataSchema,

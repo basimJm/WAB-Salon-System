@@ -1,7 +1,5 @@
-import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
-import { OBJECT_ID } from '@/data/api/objectId';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type {
@@ -15,19 +13,11 @@ const O = OPERATIONS;
 const list = defineEndpoint(O.getSalonsByIdBranches, { data: dto.getSalonsByIdBranchesDataSchema });
 const create = defineEndpoint(O.postSalonsByIdBranches, {
   data: dto.postSalonsByIdBranchesDataSchema,
-  // The server's OpenAPI id pattern matches no real id (see objectId.ts).
-  body: () => {
-    const s = dto.postSalonsByIdBranchesBodySchema();
-    return z.intersection(s.def.left.extend({ cityId: OBJECT_ID, areaId: OBJECT_ID }), s.def.right);
-  },
+  body: dto.postSalonsByIdBranchesBodySchema,
 });
 const update = defineEndpoint(O.patchSalonsByIdBranchesByBranchId, {
   data: dto.patchSalonsByIdBranchesByBranchIdDataSchema,
-  body: () => {
-    const s = dto.patchSalonsByIdBranchesByBranchIdBodySchema();
-    const ids = { cityId: OBJECT_ID.optional(), areaId: OBJECT_ID.optional() };
-    return z.intersection(s.def.left.extend(ids), s.def.right);
-  },
+  body: dto.patchSalonsByIdBranchesByBranchIdBodySchema,
 });
 const ACTIONS = {
   main: defineEndpoint(O.postSalonsByIdBranchesByBranchIdMain, {

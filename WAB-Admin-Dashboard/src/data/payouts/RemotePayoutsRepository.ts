@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
 import { defined } from '@/data/api/resource';
@@ -6,8 +5,6 @@ import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { PayoutsRepository } from '@/domain/payouts/payouts';
 
-/** The server's OpenAPI writes the id pattern as "^[a-f0-9]{24}$/i" that no id matches; see RemoteLocationsRepository. */
-const ID = z.string().regex(/^[a-f0-9]{24}$/i);
 const O = OPERATIONS;
 const balances = defineEndpoint(O.getPayoutsBalances, {
   data: dto.getPayoutsBalancesDataSchema,
@@ -15,15 +12,15 @@ const balances = defineEndpoint(O.getPayoutsBalances, {
 });
 const preview = defineEndpoint(O.getPayoutsPreview, {
   data: dto.getPayoutsPreviewDataSchema,
-  query: () => dto.getPayoutsPreviewQuerySchema().extend({ salonId: ID }),
+  query: dto.getPayoutsPreviewQuerySchema,
 });
 const list = defineEndpoint(O.getPayouts, {
   data: dto.getPayoutsDataSchema,
-  query: () => dto.getPayoutsQuerySchema().extend({ salonId: ID.optional() }),
+  query: dto.getPayoutsQuerySchema,
 });
 const create = defineEndpoint(O.postPayouts, {
   data: dto.postPayoutsDataSchema,
-  body: () => dto.postPayoutsBodySchema().extend({ salonId: ID }),
+  body: dto.postPayoutsBodySchema,
 });
 const transfer = defineEndpoint(O.postPayoutsByIdTransfer, {
   data: dto.postPayoutsByIdTransferDataSchema,
