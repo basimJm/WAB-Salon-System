@@ -1,10 +1,11 @@
+import type { AccountLifecycleService } from '../auth/accountLifecycle.service';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import type { MemberRaw } from '../../models/member.model';
 import type { StorageProvider } from '../../providers/storage';
 import type { MembersRepository } from '../../repositories/identity.repository';
 import { isDuplicateKeyError } from '../../utils/database/errors';
 import type { Entity } from '../../utils/database/plain';
-import { ConflictError, UnauthorizedError } from '../../utils/errors';
+import { ConflictError, ExternalServiceError, UnauthorizedError } from '../../utils/errors';
 import { toMemberProfile, type MemberProfile } from '../auth/merchantAuth.service';
 import type { PhoneInput, PhoneVerifier } from '../auth/phoneVerifier';
 import type { OtpGate } from '../otp/otpGate.service';
@@ -34,6 +35,11 @@ export interface MemberSelfService {
     phone: PhoneInput;
     idToken: string;
   }): Promise<MemberSelfView>;
+  /**
+   * A non-owner removes their own access (M25 "Delete my account"): deactivated, sessions ended.
+   * The owner gets 422 LAST_OWNER — their path is the salon deletion request.
+   */
+  leave(input: { memberId: string; salonId: string }): Promise<void>;
 }
 
 export interface MemberSelfDeps {
@@ -42,6 +48,7 @@ export interface MemberSelfDeps {
   readonly uploads: Pick<UploadVerifier, 'assertConfirmed'>;
   readonly phones: PhoneVerifier;
   readonly otpGate: Pick<OtpGate, 'reset'>;
+  readonly lifecycle?: Pick<AccountLifecycleService, 'deactivateMember'>;
 }
 
 const phoneTaken = (): ConflictError =>
@@ -110,6 +117,11 @@ export const createMemberSelfService = (deps: MemberSelfDeps): MemberSelfService
       }
       await otpGate.reset(phone.e164);
       return saved(updated);
+    },
+
+    async leave({ memberId, salonId }) {
+      if (deps.lifecycle === undefined) throw new ExternalServiceError({ unavailable: true });
+      await deps.lifecycle.deactivateMember({ memberId, salonId });
     },
   };
 };

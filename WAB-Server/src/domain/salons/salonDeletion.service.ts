@@ -1,3 +1,4 @@
+import type { AlertsService } from '../alerts/alerts.service';
 import {
   SALON_DELETION_AUDIT,
   type SalonDeletionDecision,
@@ -25,6 +26,15 @@ export interface SalonDeletionService {
     reason: string;
     actor: AdminActor;
   }): Promise<{ decision: SalonDeletionDecision }>;
+  /**
+   * The owner asks WAB to delete the salon (M25, store policy): stamps `deletionRequestedAt` once
+   * and raises an admin alert; asking again while a request is open changes nothing.
+   */
+  request(input: {
+    salonId: string;
+    memberId: string;
+    note?: string | undefined;
+  }): Promise<{ requestedAt: Date }>;
 }
 
 export interface SalonDeletionDeps {
@@ -35,6 +45,8 @@ export interface SalonDeletionDeps {
   readonly notifier: SalonStateNotifier;
   readonly logger: Logger;
   readonly now?: () => Date;
+  /** Admin alert for a new request; without it the request is only stamped. */
+  readonly alerts?: Pick<AlertsService, 'raise'>;
 }
 
 export const createSalonDeletionService = (deps: SalonDeletionDeps): SalonDeletionService => {
@@ -42,6 +54,24 @@ export const createSalonDeletionService = (deps: SalonDeletionDeps): SalonDeleti
   const now = deps.now ?? ((): Date => new Date());
 
   return {
+    async request({ salonId, memberId, note }) {
+      const salon = await salons.findById(salonId);
+      if (salon === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      if (salon.deletionRequestedAt !== undefined)
+        return { requestedAt: salon.deletionRequestedAt };
+      const requestedAt = now();
+      await salons.patch(salonId, { set: { deletionRequestedAt: requestedAt } });
+      await deps.alerts?.raise({
+        kind: 'SALON_DELETION_REQUEST',
+        severity: 'WARNING',
+        dedupeKey: `salon-deletion:${salonId}:${String(requestedAt.getTime())}`,
+        entityType: 'salon',
+        entityId: salonId,
+        data: { salonName: salon.name, memberId, ...(note === undefined ? {} : { note }) },
+      });
+      return { requestedAt };
+    },
+
     async decide({ salonId, decision, reason, actor }) {
       const salon: Entity<SalonRaw> | null = await salons.findById(salonId);
       if (salon === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });

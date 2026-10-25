@@ -10,10 +10,22 @@
 
 ## Current task
 
+### SRV-133 — Account removal from the merchant app (M25)
+
+- Branch: `feat/srv-133-account-removal`
+- Status: IN REVIEW
+- Acceptance criteria (Merchant PRD M25 "Delete my account", BUSINESS_DOMAIN §5.15; operations `POST /merchant/v1/me/leave`, `POST /merchant/v1/salon/deletion-request` — client impact MER-049; admin decision = existing SRV-121 endpoint):
+  - [x] `POST /merchant/v1/me/leave`: a non-owner removes their own access through the account lifecycle (deactivated, sessions and sockets ended); the owner gets 422 `LAST_OWNER`
+  - [x] `POST /merchant/v1/salon/deletion-request` (owner only, optional note): stamps `salon.deletionRequestedAt` once and raises an admin alert `SALON_DELETION_REQUEST` (AR/EN title); a repeat while open returns the same date and raises nothing
+  - [x] The admin decision endpoint (SRV-121) acts on that request (reject clears it)
+- Tests: `tests/accountRemoval.test.ts` (4); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔ (lifecycle and deletion services reused, no new rules), Mobile ✔, Architect ✔, QA ✔)
+
 ### SRV-129 — Merchant member self-service (M25)
 
 - Branch: `feat/srv-129-member-self-service`
-- Status: IN REVIEW
+- Status: DONE (PR #404)
 - Acceptance criteria (Merchant PRD M25, BUSINESS_DOMAIN §3.1 members (+`pushEnabled`), §8; operations `GET/PATCH /merchant/v1/me`, `POST /merchant/v1/auth/change-phone`, `PATCH /merchant/v1/installations/push-enabled` — client impact MER-049):
   - [x] `GET /merchant/v1/me`: session profile + photo URL, branch (null for the owner), push switch
   - [x] `PATCH /merchant/v1/me`: names and photo (only a confirmed MEMBER_PHOTO the member uploaded; `null` removes); role/permissions/branch stay owner-only
@@ -37,20 +49,6 @@
 - Tests: `tests/merchantDashboard.test.ts` (4); full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔ (cache helper extracted instead of copied), Mobile ✔, Architect ✔, QA ✔) — NOTE: a permission change can take up to the 15 s cache to show on the dashboard.
-
-### SRV-132 — Merchant statistics (M21), branch-scoped
-
-- Branch: `feat/srv-132-merchant-statistics`
-- Status: DONE (PR #402)
-- Acceptance criteria (Merchant PRD M21, BUSINESS_DOMAIN §6 branch scope; operation `GET /merchant/v1/statistics` — client impact MER-043, MER-063):
-  - [x] `GET /merchant/v1/statistics?from=&to=&branchId=` (`STATISTICS_VIEW`), civil days Asia/Amman both included, at most 92 days (400 otherwise)
-  - [x] Bookings by appointment day in the period: by status, approval rate (approved / answered), cancellation rate, no-show rate (no-show / finished), average response minutes (request → first member answer), bride bookings, revenue in JOD (online kept net of refunds + paid at the salon on completion)
-  - [x] Profile views = new `salon.viewed` server events written when a customer opens a salon page (salon-wide; index `{salonId, name, ts}`); new published reviews; average rating (salon rating, or the branch's labelled reviews for a branch)
-  - [x] Per-day series (bookings, revenue) for every day; top 5 services (booking snapshot names) and staff (first name, rating) among approved/completed bookings
-  - [x] Branch members get their branch only (another → 403 `BRANCH_SCOPE_DENIED`); the owner sees the salon or one branch
-- Tests: `tests/merchantStatistics.test.ts` (5), `tests/salonDetails.test.ts` (+1 view tracked), `tests/audit.test.ts` (read-only `countFor` allowed); full gate 150 suites / 2755 tests
-- Loops: 1/1
-- Review: PASSED (SE ✔ (pure calculator + thin service; bookings of the period are loaded once, bounded by the 92-day cap), Mobile ✔, Architect ✔, QA ✔) — profile views start counting from this release (no history before).
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

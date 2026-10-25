@@ -21178,7 +21178,8 @@
                 "SUBSCRIPTION_EXPIRED",
                 "SALON_APPLICATION",
                 "REVIEW_PENDING",
-                "CATALOG_REQUEST"
+                "CATALOG_REQUEST",
+                "SALON_DELETION_REQUEST"
               ]
             },
             "required": false,
@@ -21235,7 +21236,8 @@
                               "SUBSCRIPTION_EXPIRED",
                               "SALON_APPLICATION",
                               "REVIEW_PENDING",
-                              "CATALOG_REQUEST"
+                              "CATALOG_REQUEST",
+                              "SALON_DELETION_REQUEST"
                             ]
                           },
                           "severity": {
@@ -21549,7 +21551,8 @@
                             "SUBSCRIPTION_EXPIRED",
                             "SALON_APPLICATION",
                             "REVIEW_PENDING",
-                            "CATALOG_REQUEST"
+                            "CATALOG_REQUEST",
+                            "SALON_DELETION_REQUEST"
                           ]
                         },
                         "severity": {
