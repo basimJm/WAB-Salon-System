@@ -76,7 +76,13 @@ export function createBranchStore(): BranchStore {
     },
     makeMain(salonId, branchId) {
       const target = find(salonId, branchId);
-      if (target.status !== 'ACTIVE') throw refuse(HTTP_STATUS.unprocessable, 'INVALID_TRANSITION');
+      if (target.status !== 'ACTIVE')
+        throw new MockBusinessError(
+          HTTP_STATUS.unprocessable,
+          'INVALID_TRANSITION',
+          [],
+          'branchInvalidStatus',
+        );
       bySalon.set(
         salonId,
         list(salonId).map((b) => ({ ...b, isMain: b.id === target.id })),

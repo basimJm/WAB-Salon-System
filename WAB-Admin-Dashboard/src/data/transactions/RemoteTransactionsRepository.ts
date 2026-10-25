@@ -1,27 +1,13 @@
-import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
-import { defineEndpoint } from '@/data/api/endpoint';
-import { salonBranchQuerySchema } from '@/data/api/objectId';
+import { defineEndpoint, optionalQuery } from '@/data/api/endpoint';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { TransactionsRepository } from '@/domain/transactions/transactions';
 
-/** The server's OpenAPI writes the id pattern as "^[a-f0-9]{24}$/i" that no id matches; see RemoteLocationsRepository. */
-const OBJECT_ID = z
-  .string()
-  .regex(/^[a-f0-9]{24}$/i)
-  .optional();
-
 const list = defineEndpoint(OPERATIONS.getTransactions, {
   data: dto.getTransactionsDataSchema,
-  query: () =>
-    dto.getTransactionsQuerySchema().extend({
-      salonId: OBJECT_ID,
-      branchId: OBJECT_ID,
-      customerId: OBJECT_ID,
-      bookingId: OBJECT_ID,
-    }),
+  query: dto.getTransactionsQuerySchema,
 });
 const get = defineEndpoint(OPERATIONS.getTransactionsById, {
   data: dto.getTransactionsByIdDataSchema,
@@ -29,7 +15,7 @@ const get = defineEndpoint(OPERATIONS.getTransactionsById, {
 
 const reconcile = defineEndpoint(OPERATIONS.getFinanceReconciliation, {
   data: dto.getFinanceReconciliationDataSchema,
-  query: salonBranchQuerySchema,
+  query: optionalQuery(dto.getFinanceReconciliationQuerySchema),
 });
 
 export class RemoteTransactionsRepository implements TransactionsRepository {

@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
 import { defined } from '@/data/api/resource';
@@ -6,16 +5,14 @@ import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { PlacementsRepository } from '@/domain/placements/placements';
 
-/** The server's OpenAPI writes the id pattern as "^[a-f0-9]{24}$/i" that no id matches; see RemoteLocationsRepository. */
-const ID = z.string().regex(/^[a-f0-9]{24}$/i);
 const O = OPERATIONS;
 const list = defineEndpoint(O.getRecommended, {
   data: dto.getRecommendedDataSchema,
-  query: () => dto.getRecommendedQuerySchema().extend({ salonId: ID.optional() }),
+  query: dto.getRecommendedQuerySchema,
 });
 const create = defineEndpoint(O.postRecommended, {
   data: dto.postRecommendedDataSchema,
-  body: () => dto.postRecommendedBodySchema().extend({ salonId: ID }),
+  body: dto.postRecommendedBodySchema,
 });
 const update = defineEndpoint(O.patchRecommendedById, {
   data: dto.patchRecommendedByIdDataSchema,
@@ -27,7 +24,7 @@ const end = defineEndpoint(O.postRecommendedByIdEnd, {
 });
 const reorder = defineEndpoint(O.putRecommendedReorder, {
   data: dto.putRecommendedReorderDataSchema,
-  body: () => dto.putRecommendedReorderBodySchema().extend({ ids: z.array(ID).min(1).max(200) }),
+  body: dto.putRecommendedReorderBodySchema,
 });
 
 export class RemotePlacementsRepository implements PlacementsRepository {

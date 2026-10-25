@@ -2,7 +2,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link as RouterLink } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
-import { ALERT_KINDS, ALERT_STATUSES, alertLink, type Alert } from '@/domain/alerts/alerts';
+import {
+  ALERT_KINDS,
+  ALERT_STATUSES,
+  alertLink,
+  alertTitle,
+  type Alert,
+} from '@/domain/alerts/alerts';
 import { formatInstant } from '@/domain/shared/format';
 import { Button } from '../components/core/Button';
 import { StatusBadge } from '../components/core/StatusBadge';
@@ -55,7 +61,8 @@ export default function AlertsPage() {
       header: t('alerts.what'),
       render: (r) => {
         const to = alertLink(r);
-        return to ? <RouterLink to={to}>{r.title}</RouterLink> : r.title;
+        const text = alertTitle(r, language);
+        return to ? <RouterLink to={to}>{text}</RouterLink> : text;
       },
     },
     {

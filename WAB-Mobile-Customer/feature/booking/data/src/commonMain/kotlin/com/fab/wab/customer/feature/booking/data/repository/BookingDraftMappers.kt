@@ -17,25 +17,28 @@ import com.fab.wab.customer.feature.booking.domain.model.StaffChoice
 
 private const val STAFF_ANY = "ANY"
 
+/**
+ * Contract 1.3.0 (SRV-151): every `persons[].start` is a required ISO date-time. The flow only reaches the summary
+ * after each person picked a slot; a person without one yields `null` so nothing incomplete is ever sent (CUS-088).
+ */
 fun draftBodyOf(
     salonId: String,
     paymentMethod: PaymentMethod,
     persons: List<DraftPerson>,
     branchId: String? = null,
-): PostBookingsDraftsBody = PostBookingsDraftsBody(
-    salonId = salonId,
-    branchId = branchId,
-    paymentMethod = paymentMethod.code,
-    persons = persons.map {
+): PostBookingsDraftsBody? {
+    val items = persons.map { person ->
+        val start = person.start ?: return null
         PostBookingsDraftsBodyPersonsItem(
-            name = it.name.trim(),
-            isBride = it.isBride,
-            serviceIds = it.serviceIds,
-            staffId = (it.staff as? StaffChoice.Specific)?.staffId,
-            start = it.start,
+            name = person.name.trim(),
+            isBride = person.isBride,
+            serviceIds = person.serviceIds,
+            staffId = (person.staff as? StaffChoice.Specific)?.staffId,
+            start = start,
         )
-    },
-)
+    }
+    return PostBookingsDraftsBody(salonId = salonId, branchId = branchId, paymentMethod = paymentMethod.code, persons = items)
+}
 
 fun PostBookingsDraftsData.toDomain(): BookingDraft = BookingDraft(
     id = id,

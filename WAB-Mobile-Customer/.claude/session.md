@@ -9,9 +9,22 @@
 
 ## Current task
 
+### CUS-088 — Re-sync the customer contract 1.3.0 after SRV-151 (`./gradlew apiSync`)
+- Branch: `feat/cus-088-contract-sync` (from `origin/customer`)
+- Status: IN REVIEW
+- Acceptance criteria (CUS-088 row; `openapi.customer.json` 1.3.0: `POST /customer/v1/salons/{salonId}/availability`, `POST /customer/v1/bookings/drafts`, id `pattern`s):
+  - [x] `api_sync.py` re-run: snapshot 4fde7a6f (1.2.0 → 1.3.0); `api_sync --check` ok; DTO changes: availability `others[].start/end` and draft `persons[].start` are non-null `String`; ids `^[a-fA-F0-9]{24}$` (snapshot only; the app does not validate patterns)
+  - [x] Every request builder sends the times: `availabilityBodyOf` already sends only picks with staff + start + end (CUS-060); `draftBodyOf` returns `null` when a person has no slot and `BookingDraftRepositoryImpl.create` answers `AppError.UnknownError` without a request (the flow cannot reach the summary without a slot, so this is a guard, not a UI path); no other body carries a time
+  - [x] Fixtures: regenerated `MockFixtures`/`ContractDecoders` (only the sha header changed; response shapes unchanged, captured ids already ObjectIds); `contract_gaps.py` 0 gaps
+  - [x] `docs/REMOTE_DEV_GAPS.md`: rows 13, 14 Fixed (SRV-151 + this re-sync), 15 and 17 fixed on the server (not re-captured against the hosted dev API), row 1 notes the 1.3.0 snapshot
+- Tests: new `ContractV13RequestBodiesTest` (5: wire JSON of draft `persons[].start` and availability `others[].start/end`, no draft body without a slot, repository sends nothing for an incomplete draft, real fixture ids match the pattern); `BranchRequestBodiesTest` adapted (nullable body); `feature/booking/data` commonTest gets `kotlinx-coroutines-test` + `ktor-client-mock` (catalog entries already used by other data modules). `./gradlew testAndroidHostTest --continue` (Terminal panel) exit 0, 429 host tests, 0 failures; `policy_checks.py all` ok; `scripts/ci/tests` 89 OK; `api_sync.py --check` ok; `contract_gaps.py` 0
+- Loops: 1/1 — §3.13 batch form (host unit tests only) on the final tree; re-checked each criterion against the regenerated DTOs and every generated `*Body` (only availability + drafts carry times); found and fixed: one 142-char test line (detekt MaxLineLength 140), `BranchRequestBodiesTest` relying on a non-null draft body
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — code reading of the branch diff: generated files untouched by hand; the missing-slot guard lives in data (mapper + repository) and never sends an invalid body; error text stays the localized generic one; contract change is additive for the app (no new operation); no UI/strings changed
+- Notes: DEVIATIONS — no detekt, no Android/iOS variant builds, no emulator/simulator (rules §3.13; the lead runs the final gate); fixtures not re-captured (the hosted dev API may not run SRV-151 yet; seed and rate-limit fixes unverified from the client).
+
 ### CUS-060 — Dev builds on `DATA_SOURCE=remote` against the dev API: per-feature gap list, socket events verified, fixtures updated to real shapes
 - Branch: `feat/cus-060-remote-dev` (from `origin/customer`)
-- Status: IN PROGRESS
+- Status: DONE
 - Acceptance criteria (CUS-060 row; `openapi.customer.json` all operations the app calls; BUSINESS_DOMAIN §7 sockets, §11 error codes):
   - [x] Dev uses `remote` against the dev host on Android (`DEV_DATA_SOURCE`, `DEV_API_BASE_URL`) and iOS (`Dev.xcconfig` `DATA_SOURCE`, `API_BASE_URL`, same host); prod never `mock`; no URL in code
   - [x] Real responses captured for 46 of the 48 operations the app calls (`scripts/capture_remote_fixtures.py`: public ones from the hosted dev API, authenticated ones from the local real stack on a throwaway customer deleted afterwards; tokens / signed URLs redacted, local media → dev CDN) into `core/data/fixtures/remote/`; not captured: `POST /uploads/confirm`, `PUT /profile/avatar` (need a real image upload)
@@ -38,19 +51,3 @@
 - Loops: 1/1 — own unit-test run on the final tree (`./gradlew testAndroidHostTest`, 401 tests, 0 failures) + detekt + policy; found and fixed: MockEngine test without JSON content type / with an unparsable `data`, one detekt MaxLineLength in `ReviewsRepositoryImpl`
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — branch display is one shared composable; review branch flows domain → data body; contacts reuse `forBranch`; strings AR+EN. DEVIATIONS: notification rows cannot show the branch client-side (no contract field; server text); reviews written from salon details (not from a booking) stay salon-wide (no branch picker), as BUSINESS_DOMAIN §5.11 allows; UI not opened on a device.
 - Notes: `feature/salon/data` gets `kotlinx-coroutines-test` + `ktor-client-mock` for tests (catalog entries already used by other data modules; no new library).
-
-### CUS-086 — Booking step 1 = choose branch (skipped when one bookable branch); services, staff and slots of that branch; summary shows the branch; a deep link with `branchId` preselects it
-- Branch: `feat/cus-086-booking-branch` (from `feat/cus-085-details-branches`)
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §5.18; `POST /customer/v1/salons/{id}/availability`, `POST /customer/v1/bookings/drafts`):
-  - [x] New first step `BookingStep.BRANCH` (title, hint, one selection card per branch with address and today's open/closed line); Continue needs a branch; progress bars and "Step x of n" count only the steps this salon has
-  - [x] Skipped when the salon has one bookable branch (auto-selected) or when a branch arrives from salon details / deep link (`Screen.BookingStart(salonId, branchId)`); with several branches Back from the person step returns to the branch step, Back from the first step exits
-  - [x] After the choice the flow uses `salon.forBranch(branch)`: services/prices, staff, weekly hours and closures of that branch only; changing the branch clears every person's services, slot and staff (names stay)
-  - [x] Availability and draft requests send `branchId` (repositories, use cases, `availabilityBodyOf`, `draftBodyOf`); `BRANCH_REQUIRED` / `BRANCH_NOT_BOOKABLE` / `BRANCH_NOT_FOUND` surface through the localized error texts of CUS-082
-  - [x] Summary shows "Branch: ‹name›" and the branch address
-  - [x] Deep link `https://<web>/salon/{salonId}?branchId={branchId}` → `DeepLink.Salon(salonId, branchId)` → salon details with that branch preselected → Book now carries it
-- Tests: `BookingFlowBranchTest` (5), `BranchRequestBodiesTest` (2), `DeepLinksTest` (+1); fakes updated (`DraftFake`/`AvailabilityFake` record the branch, `VerifyRepoFake`); full `testAndroidHostTest --continue` green
-- Loops: 1/1 — batch run (CUS-082…086) on the final tree: `./gradlew testAndroidHostTest` exit 0, 397 host tests, 0 failures (Gradle reused up-to-date results of unchanged modules), plus `run_detekt.sh` exit 0 and `policy_checks.py all` ok; found and fixed during the batch: `HomeMappersTest` missing `branchCount`, `VerifyRepoFake` old `create` signature, one 168-char KDoc line (detekt MaxLineLength)
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading: branch rules are pure domain functions (`BranchRules`, `forBranch`, `withLoadedSalon`/`withBranch`) shared by details and booking; contract additive and nullable for older servers; route args through `SalonDetailsArgs`/`BookingFlowArgs` (no nullable Koin parameters); AR+EN strings incl. Arabic plurals; no hardcoded values (policy ok). DEVIATION: UI not opened on the emulator/simulator yet (rules §3.13 defers it to the end of the backlog)
-- Notes: ASSUMPTION — the deep-link query name `branchId` (BUSINESS_DOMAIN §5.17 says a link "may carry `branchId`" without a URL format); analytics `booking_branch_select` (catalog: by view model). The verify screen (draft response has no branch field) does not show the branch.
-
