@@ -11,6 +11,21 @@
 
 - Batch 7 = salon branches (CUS-082…086, then CUS-087), chained branches from `feat/cus-082-branches-contract`; per task policy checks + tests written, host unit tests after five (rules §3.13). The parent agent pushes and merges the chain.
 
+### CUS-086 — Booking step 1 = choose branch (skipped when one bookable branch); services, staff and slots of that branch; summary shows the branch; a deep link with `branchId` preselects it
+- Branch: `feat/cus-086-booking-branch` (from `feat/cus-085-details-branches`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.18; `POST /customer/v1/salons/{id}/availability`, `POST /customer/v1/bookings/drafts`):
+  - [x] New first step `BookingStep.BRANCH` (title, hint, one selection card per branch with address and today's open/closed line); Continue needs a branch; progress bars and "Step x of n" count only the steps this salon has
+  - [x] Skipped when the salon has one bookable branch (auto-selected) or when a branch arrives from salon details / deep link (`Screen.BookingStart(salonId, branchId)`); with several branches Back from the person step returns to the branch step, Back from the first step exits
+  - [x] After the choice the flow uses `salon.forBranch(branch)`: services/prices, staff, weekly hours and closures of that branch only; changing the branch clears every person's services, slot and staff (names stay)
+  - [x] Availability and draft requests send `branchId` (repositories, use cases, `availabilityBodyOf`, `draftBodyOf`); `BRANCH_REQUIRED` / `BRANCH_NOT_BOOKABLE` / `BRANCH_NOT_FOUND` surface through the localized error texts of CUS-082
+  - [x] Summary shows "Branch: ‹name›" and the branch address
+  - [x] Deep link `https://<web>/salon/{salonId}?branchId={branchId}` → `DeepLink.Salon(salonId, branchId)` → salon details with that branch preselected → Book now carries it
+- Tests: `BookingFlowBranchTest` (5), `BranchRequestBodiesTest` (2), `DeepLinksTest` (+1); fakes updated (`DraftFake`/`AvailabilityFake` record the branch, `VerifyRepoFake`); full `testAndroidHostTest --continue` green
+- Loops: 0/1
+- Review: PENDING
+- Notes: ASSUMPTION — the deep-link query name `branchId` (BUSINESS_DOMAIN §5.17 says a link "may carry `branchId`" without a URL format); analytics `booking_branch_select` (catalog: by view model). The verify screen (draft response has no branch field) does not show the branch.
+
 ### CUS-085 — Salon details: clear, always-visible branch selector; branch address, map, phone, hours, open now; staff and services/prices per selected branch; reviews salon-wide with the branch label on each
 - Branch: `feat/cus-085-details-branches` (from `feat/cus-084-nearest-branches`)
 - Status: IN REVIEW

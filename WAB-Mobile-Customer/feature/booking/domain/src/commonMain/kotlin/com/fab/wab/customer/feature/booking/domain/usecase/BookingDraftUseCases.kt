@@ -8,8 +8,12 @@ import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
 import com.fab.wab.customer.feature.booking.domain.repository.BookingDraftRepository
 
 class CreateBookingDraftUseCase(private val repository: BookingDraftRepository) {
-    suspend operator fun invoke(salonId: String, paymentMethod: PaymentMethod, persons: List<DraftPerson>): AppResult<BookingDraft> =
-        repository.create(salonId, paymentMethod, persons)
+    suspend operator fun invoke(
+        salonId: String,
+        branchId: String?,
+        paymentMethod: PaymentMethod,
+        persons: List<DraftPerson>,
+    ): AppResult<BookingDraft> = repository.create(salonId, branchId, paymentMethod, persons)
 }
 
 class GetBookingDraftUseCase(private val repository: BookingDraftRepository) {

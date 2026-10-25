@@ -49,6 +49,7 @@ class BookingFlowDependencies(
 class BookingFlowViewModel(
     private val salonId: String,
     private val deps: BookingFlowDependencies,
+    private val initialBranchId: String? = null,
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
@@ -69,6 +70,7 @@ class BookingFlowViewModel(
     private fun handlePersonAndServices(event: UiAction): Boolean {
         when (event) {
             UiAction.OnRetry -> load()
+            is UiAction.OnBranchSelect -> selectBranch(event.branchId)
             is UiAction.OnNameChange -> updatePerson { copy(name = event.value.take(BookingFlowDefaults.MAX_NAME_LENGTH)) }
                 .also { updateState { copy(nameError = false) } }
             is UiAction.OnBrideChange -> if (uiState.value.isWomenSalon) updatePerson { copy(isBride = event.isBride) }
@@ -111,7 +113,7 @@ class BookingFlowViewModel(
             when (val result = deps.salonDetails.details(salonId)) {
                 is AppResult.Success -> updateState {
                     val prefilled = persons.mapIndexed { index, p -> if (index == 0 && p.name.isBlank()) p.copy(name = accountName) else p }
-                    copy(loading = false, salon = result.data, persons = prefilled)
+                    copy(loading = false, persons = prefilled).withLoadedSalon(result.data, initialBranchId)
                 }
                 is AppResult.Error -> {
                     val message = deps.errorText(result.appError)
@@ -121,6 +123,12 @@ class BookingFlowViewModel(
                 AppResult.Loading -> Unit
             }
         }
+    }
+
+    private fun selectBranch(branchId: String) {
+        if (uiState.value.fullSalon?.branches.orEmpty().none { it.id == branchId }) return
+        track(BookingAnalytics.ACTION_BRANCH, BookingAnalytics.PARAM_ID to branchId)
+        updateState { withBranch(branchId) }
     }
 
     private fun updatePerson(transform: DraftPerson.() -> DraftPerson) = updateState {
@@ -139,6 +147,7 @@ class BookingFlowViewModel(
     private fun next() {
         val state = uiState.value
         when (state.step) {
+            BookingStep.BRANCH -> if (state.canContinueBranch) go(BookingStep.PERSON)
             BookingStep.PERSON -> if (state.canContinuePerson) go(BookingStep.SERVICES) else updateState { copy(nameError = true) }
             BookingStep.SERVICES -> if (state.canContinueServices) go(BookingStep.SLOT)
             BookingStep.SLOT -> if (state.canContinueSlot) go(BookingStep.STAFF)
@@ -147,7 +156,7 @@ class BookingFlowViewModel(
         }
     }
 
-    /** Back preserves selections (PRD S16); from the first step the flow exits; a companion's Back leads to the companions list. */
+    /** Back preserves selections (PRD S16); from the first step (branch, or person for one branch) the flow exits; a companion's Back leads to the companions list. */
     private fun back() {
         val state = uiState.value
         when {
@@ -161,7 +170,7 @@ class BookingFlowViewModel(
                 go(BookingStep.COMPANIONS)
             }
             else -> {
-                val previous = BookingStep.entries.getOrNull(state.step.ordinal - 1)
+                val previous = state.steps.getOrNull(state.stepIndex - 1)
                 if (previous == null) emitSideEffect(SideEffect.Exit) else go(previous)
             }
         }

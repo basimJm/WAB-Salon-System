@@ -26,7 +26,7 @@ internal class DraftCoordinator(
         val salon = current.salon ?: return
         scope().launch {
             update { copy(draftLoading = true, draftError = null) }
-            when (val result = deps.createDraft(salon.id, method, current.persons)) {
+            when (val result = deps.createDraft(salon.id, current.branchId, method, current.persons)) {
                 is AppResult.Success -> update { copy(draftLoading = false, draft = result.data) }
                 is AppResult.Error -> {
                     val notAllowed = (result.appError as? AppError.ServerError)?.code == ErrorCode.PAYMENT_OPTION_NOT_ALLOWED

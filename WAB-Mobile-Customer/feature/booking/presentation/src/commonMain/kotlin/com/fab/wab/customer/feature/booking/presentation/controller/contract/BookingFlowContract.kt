@@ -1,5 +1,7 @@
 package com.fab.wab.customer.feature.booking.presentation.controller.contract
 
+import com.fab.wab.customer.core.domain.salon.BranchRules
+import com.fab.wab.customer.core.domain.salon.SalonBranch
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
@@ -12,8 +14,11 @@ import com.fab.wab.customer.feature.booking.domain.model.SelectionTotals
 import com.fab.wab.customer.feature.booking.domain.model.selectionTotalsOf
 import kotlinx.datetime.LocalDate
 
-/** PRD S16 steps; the indicator shows 0–5 (verification is a separate screen). */
-enum class BookingStep { PERSON, SERVICES, SLOT, STAFF, COMPANIONS, SUMMARY }
+/** PRD S16 steps + the branch step (BUSINESS_DOMAIN §5.18, only for several bookable branches); verification is a separate screen. */
+enum class BookingStep { BRANCH, PERSON, SERVICES, SLOT, STAFF, COMPANIONS, SUMMARY }
+
+/** Route arguments of S16: the salon and the branch chosen on salon details or carried by a deep link. */
+data class BookingFlowArgs(val salonId: String, val branchId: String? = null)
 
 sealed interface BookingFlowContract {
 
@@ -21,7 +26,11 @@ sealed interface BookingFlowContract {
         val loading: Boolean = true,
         val offline: Boolean = false,
         val error: String? = null,
+        /** The salon at the chosen branch: services, staff, hours and closures of that branch only. */
         val salon: SalonDetails? = null,
+        /** The salon as loaded, with every bookable branch. */
+        val fullSalon: SalonDetails? = null,
+        val branchId: String? = null,
         val step: BookingStep = BookingStep.PERSON,
         val persons: List<DraftPerson> = listOf(DraftPerson()),
         val currentPerson: Int = 0,
@@ -38,6 +47,12 @@ sealed interface BookingFlowContract {
         val draftError: String? = null,
     ) {
         val canConfirm: Boolean get() = draft != null && !draftLoading
+        val hasBranchStep: Boolean get() = fullSalon?.branches.orEmpty().size > BranchRules.SINGLE_BRANCH
+        /** Steps of this salon: the branch step only when there is a branch to choose. */
+        val steps: List<BookingStep> get() = if (hasBranchStep) BookingStep.entries else BookingStep.entries - BookingStep.BRANCH
+        val stepIndex: Int get() = steps.indexOf(step).coerceAtLeast(0)
+        val selectedBranch: SalonBranch? get() = fullSalon?.branches?.firstOrNull { it.id == branchId }
+        val canContinueBranch: Boolean get() = selectedBranch != null
         val canContinueSlot: Boolean get() = person.start != null
         val canContinueStaff: Boolean get() = person.staff != null
         /** Staff eligible for the chosen slot (server-computed per person, bride rules included). */
@@ -55,6 +70,7 @@ sealed interface BookingFlowContract {
 
     sealed interface UiAction {
         data object OnRetry : UiAction
+        data class OnBranchSelect(val branchId: String) : UiAction
         data class OnNameChange(val value: String) : UiAction
         data class OnBrideChange(val isBride: Boolean) : UiAction
         data class OnServiceToggle(val serviceId: String) : UiAction

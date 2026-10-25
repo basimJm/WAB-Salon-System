@@ -62,8 +62,8 @@ fun salon(gender: Gender) = SalonDetails(
     reviews = ReviewsPreview(RatingSummary(4f, 1), emptyList()),
 )
 
-class SalonFake(val gender: Gender) : SalonDetailsRepository {
-    override suspend fun details(salonId: String): AppResult<SalonDetails> = AppResult.Success(salon(gender))
+class SalonFake(val gender: Gender, val details: SalonDetails = salon(gender)) : SalonDetailsRepository {
+    override suspend fun details(salonId: String): AppResult<SalonDetails> = AppResult.Success(details)
     override suspend fun staffMember(salonId: String, memberId: String): AppResult<StaffMember> = AppResult.Loading
 }
 
@@ -89,9 +89,16 @@ val DEFAULT_ALLOWED = setOf(PaymentMethod.PAY_ON_ARRIVAL, PaymentMethod.DEPOSIT,
 
 class DraftFake(val allowed: Set<PaymentMethod> = DEFAULT_ALLOWED) : BookingDraftRepository {
     val created = mutableListOf<PaymentMethod>()
+    val branches = mutableListOf<String?>()
     val deleted = mutableListOf<String>()
-    override suspend fun create(salonId: String, paymentMethod: PaymentMethod, persons: List<DraftPerson>): AppResult<BookingDraft> {
+    override suspend fun create(
+        salonId: String,
+        branchId: String?,
+        paymentMethod: PaymentMethod,
+        persons: List<DraftPerson>,
+    ): AppResult<BookingDraft> {
         created += paymentMethod
+        branches += branchId
         if (paymentMethod !in allowed) {
             return AppResult.Error(AppError.ServerError(ErrorCode.PAYMENT_OPTION_NOT_ALLOWED, 422, null))
         }
@@ -112,14 +119,17 @@ class DraftFake(val allowed: Set<PaymentMethod> = DEFAULT_ALLOWED) : BookingDraf
 
 class AvailabilityFake : AvailabilityRepository {
     val calls = mutableListOf<Pair<String, List<DraftPerson>>>()
+    val branches = mutableListOf<String?>()
     override suspend fun slots(
         salonId: String,
+        branchId: String?,
         date: String,
         person: DraftPerson,
         others: List<DraftPerson>,
         draftId: String?,
     ): AppResult<DayAvailability> {
         calls += date to others
+        branches += branchId
         val slots = listOf(
             AvailabilitySlot("${date}T07:00:00Z", "${date}T07:45:00Z", true, listOf("m1")),
             AvailabilitySlot("${date}T07:15:00Z", "${date}T08:00:00Z", false, emptyList()),
@@ -135,9 +145,13 @@ abstract class BookingFlowHarness {
     val availability = AvailabilityFake()
     var drafts = DraftFake()
 
-    fun TestScope.viewModel(gender: Gender = Gender.FEMALE): BookingFlowViewModel {
+    fun TestScope.viewModel(
+        gender: Gender = Gender.FEMALE,
+        details: SalonDetails = salon(gender),
+        branchId: String? = null,
+    ): BookingFlowViewModel {
         val deps = BookingFlowDependencies(
-            salonDetails = SalonFake(gender),
+            salonDetails = SalonFake(gender, details),
             sessionStore = SessionFake(USER),
             loadAvailability = LoadAvailabilityUseCase(availability),
             createDraft = CreateBookingDraftUseCase(drafts),
@@ -146,7 +160,7 @@ abstract class BookingFlowHarness {
             errorText = { "error" },
             today = { TODAY },
         )
-        val vm = BookingFlowViewModel("s1", deps, backgroundScope)
+        val vm = BookingFlowViewModel("s1", deps, initialBranchId = branchId, testScope = backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }
         return vm

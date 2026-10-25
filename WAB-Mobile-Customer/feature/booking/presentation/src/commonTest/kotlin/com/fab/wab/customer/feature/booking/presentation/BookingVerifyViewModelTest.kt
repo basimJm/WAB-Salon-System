@@ -47,7 +47,7 @@ private class VerifyRepoFake : BookingDraftRepository {
     var create: AppResult<CreatedBooking> = AppResult.Success(CreatedBooking("b1", "WAB-1001", "PENDING"))
     val tokens = mutableListOf<String>()
     var creates = 0
-    override suspend fun create(salonId: String, paymentMethod: PaymentMethod, persons: List<DraftPerson>) = draft
+    override suspend fun create(salonId: String, branchId: String?, paymentMethod: PaymentMethod, persons: List<DraftPerson>) = draft
     override suspend fun get(draftId: String) = draft
     override suspend fun delete(draftId: String): AppResult<Unit> = AppResult.Success(Unit)
     override suspend fun verifyOtp(draftId: String, idToken: String): AppResult<String> = verify.also { tokens += idToken }
