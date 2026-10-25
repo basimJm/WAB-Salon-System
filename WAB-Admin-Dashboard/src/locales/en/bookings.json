@@ -27,6 +27,7 @@
     "search": "Search reference, customer or salon",
     "empty": "No bookings match",
     "respondBy": "Salon must answer by",
+    "requestedAt": "Requested",
     "dueOnline": "Due online",
     "paidOnline": "Paid online",
     "remaining": "Remaining",
