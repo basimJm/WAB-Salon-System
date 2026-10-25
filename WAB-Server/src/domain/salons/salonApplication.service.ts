@@ -97,6 +97,8 @@ export interface SalonApplicationDeps {
   readonly uploads?: UploadVerifier;
   readonly accessSecret: string;
   readonly now?: () => Date;
+  /** A new or resubmitted application (the admin panel's live list, `application.created`). */
+  readonly onSubmitted?: (salon: Entity<SalonRaw>) => void;
 }
 
 const phoneTaken = (): ConflictError =>
@@ -196,6 +198,7 @@ export const createSalonApplicationService = (
       await installations.linkMember(owner.id, { ...input.device, language: input.language }, at);
       await otpGate.reset(phone.e164);
       const pair = await tokens.open('MEMBER', owner.id, input.device.installationId);
+      deps.onSubmitted?.(salon);
       return { ...pair, member: toMemberProfile(owner), application: toStatus(salon) };
     },
 
@@ -232,6 +235,7 @@ export const createSalonApplicationService = (
         },
       });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      deps.onSubmitted?.(updated);
       return toStatus(updated);
     },
   };

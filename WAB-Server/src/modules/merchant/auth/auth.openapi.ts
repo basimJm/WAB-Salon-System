@@ -13,7 +13,8 @@ import {
 import { z } from '../../../docs/zod';
 import { checkPhoneSchema, loginSchema, refreshSchema } from './auth.validation';
 
-const memberSchema = z
+/** The session profile; also the base of `GET /merchant/v1/me`. */
+export const memberSchema = z
   .object({
     id: z.string(),
     salonId: z.string(),
@@ -24,6 +25,10 @@ const memberSchema = z
     permissions: z.array(z.enum(PERMISSIONS)).describe('The OWNER always has all of them.'),
     providesServices: z.boolean(),
     photoKey: z.string().optional(),
+    branchId: z
+      .string()
+      .nullable()
+      .describe('The member’s branch; null for the owner (every branch)'),
   })
   .openapi('MemberProfile');
 

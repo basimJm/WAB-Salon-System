@@ -369,7 +369,7 @@ describe('installations: HTTP', () => {
       .send({ pushEnabled: false });
     expect(ok.status).toBe(200);
     expect(rig.customers.docs[0]?.['pushEnabled']).toBe(false);
-    // the merchant app has no such route
+    // The merchant app has its own switch (SRV-129): a customer token is refused there.
     expect(
       (
         await request(app)
@@ -377,7 +377,19 @@ describe('installations: HTTP', () => {
           .set(auth)
           .send({ pushEnabled: false })
       ).status,
-    ).toBe(404);
+    ).toBe(403);
+  });
+
+  it('a member switches their own push off on the merchant app (SRV-129)', async () => {
+    const rig = setup();
+    const member = addMember(rig);
+    const app = appFor(rig);
+    const res = await request(app)
+      .patch('/merchant/v1/installations/push-enabled')
+      .set('Authorization', `Bearer ${token('MEMBER', member)}`)
+      .send({ pushEnabled: false });
+    expect(res.status).toBe(200);
+    expect(rig.members.docs[0]?.['pushEnabled']).toBe(false);
   });
 
   it.each([

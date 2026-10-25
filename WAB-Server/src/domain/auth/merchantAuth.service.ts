@@ -33,6 +33,8 @@ export interface MemberProfile {
   readonly permissions: readonly Permission[];
   readonly providesServices: boolean;
   readonly photoKey?: string;
+  /** The member's branch scope (§6); `null` for the owner (every branch). */
+  readonly branchId: string | null;
 }
 
 export interface MerchantSession extends TokenPair {
@@ -74,6 +76,7 @@ export const toMemberProfile = (member: Entity<MemberRaw>): MemberProfile => ({
   permissions: member.role === 'OWNER' ? PERMISSIONS : member.permissions,
   providesServices: member.providesServices,
   ...(member.photoKey === undefined ? {} : { photoKey: member.photoKey }),
+  branchId: member.role === 'OWNER' ? null : (member.branchId ?? null),
 });
 
 const notLinked = (): NotFoundError =>

@@ -6,7 +6,13 @@ import { requirePermission } from '../../../middlewares/permission';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { sendCreated, sendSuccess } from '../../../utils/response/successResponse';
-import { leaveParams, leavePatchSchema, leaveSchema, memberLeaveParams } from './leaves.validation';
+import {
+  leaveParams,
+  leavePatchSchema,
+  leaveRangeSchema,
+  leaveSchema,
+  memberLeaveParams,
+} from './leaves.validation';
 
 const part = <S extends z.ZodType>(req: Request, key: 'body' | 'params'): z.infer<S> =>
   (req.validated as Record<string, z.infer<S>>)[key] as z.infer<S>;
@@ -30,6 +36,23 @@ export const createMerchantLeavesRouter = (
           salonId: salonOf(req),
           memberId: id,
           scope: req.member?.branchId,
+        }),
+      });
+    }),
+  );
+  router.post(
+    routes.preview,
+    validate({ params: memberLeaveParams, body: leaveRangeSchema }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { id } = part<typeof memberLeaveParams>(req, 'params');
+      const { from, to } = part<typeof leaveRangeSchema>(req, 'body');
+      sendSuccess(req, res, {
+        data: await service.preview({
+          salonId: salonOf(req),
+          memberId: id,
+          scope: req.member?.branchId,
+          from,
+          to,
         }),
       });
     }),
