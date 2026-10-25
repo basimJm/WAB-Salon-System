@@ -20,7 +20,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.json.Json
 
 expect fun provideHttpClientEngine(): HttpClientEngine
 
@@ -46,12 +45,7 @@ class BaseHttpClient(
             }
         }
         install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
-                explicitNulls = false
-            }, contentType = ContentType.Application.Json)
+            json(NetworkJson.json, contentType = ContentType.Application.Json)
         }
 
         install(HttpTimeout) {

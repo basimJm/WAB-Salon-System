@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "update": {
+      "status": "OK",
+      "latest": "1.0.0",
+      "minSupported": "1.0.0",
+      "storeUrl": "https://play.google.com/store/apps/details?id=com.example.wab"
+    },
+    "maintenance": {
+      "enabled": false,
+      "message": null
+    },
+    "nearbyRadiusKm": 10,
+    "otp": {
+      "length": 6,
+      "resendAfterSeconds": 60
+    },
+    "contact": {
+      "phone": "+96265000100",
+      "whatsapp": "+962790000100",
+      "email": "support@demo.wab.test"
+    }
+  }
+}

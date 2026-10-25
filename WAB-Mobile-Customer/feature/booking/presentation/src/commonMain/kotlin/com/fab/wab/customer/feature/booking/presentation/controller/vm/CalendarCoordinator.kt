@@ -37,14 +37,14 @@ internal class CalendarCoordinator(
     fun selectDate(date: LocalDate) {
         if (state().calendar.none { it.date == date && it.enabled }) return
         update { copy(selectedDate = date, availability = null) }
-        updatePerson { copy(date = date.toString(), start = null, staff = null) }
+        updatePerson { copy(date = date.toString(), start = null, end = null, staff = null) }
         loadSlots(date)
     }
 
     /** A "Full" slot cannot be picked; picking resets the staff choice (eligibility depends on the slot). */
     fun selectSlot(start: String) {
         val slot = state().availability?.slots?.firstOrNull { it.start == start && it.available } ?: return
-        updatePerson { copy(start = slot.start, staff = null) }
+        updatePerson { copy(start = slot.start, end = slot.end, staff = null) }
     }
 
     private fun loadSlots(date: LocalDate) {

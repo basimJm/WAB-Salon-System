@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "message": "Created successfully.",
+  "data": {
+    "id": "6ade3fabc2cfb0cb993a174b",
+    "referenceNumber": "WAB-4SGJP3",
+    "status": "PENDING",
+    "paymentMethod": "PAY_ON_ARRIVAL",
+    "paymentStatus": "PAY_ON_ARRIVAL",
+    "appointmentStart": "2026-10-29T08:00:00.000Z",
+    "appointmentEnd": "2026-10-29T09:00:00.000Z",
+    "respondBy": "2026-10-29T09:00:00.000Z",
+    "money": {
+      "total": "49.000",
+      "dueOnline": "0.000",
+      "paidOnline": "0.000",
+      "remaining": "49.000"
+    }
+  }
+}
