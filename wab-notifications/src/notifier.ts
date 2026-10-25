@@ -1,5 +1,6 @@
 import { FakeEmailChannel } from './adapters/email/fake';
 import { SmtpEmailChannel } from './adapters/email/smtp';
+import { BrevoEmailChannel } from './adapters/email/brevo';
 import { FakePushChannel } from './adapters/push/fake';
 import { FcmPushChannel } from './adapters/push/fcm';
 import { createFirebaseMessaging, createSmtpTransport } from './adapters/vendors';
@@ -34,6 +35,7 @@ interface Channels {
 
 type PushFcm = Extract<NotifierOptions['push'], { provider: 'fcm' }>;
 type EmailSmtp = Extract<NotifierOptions['email'], { provider: 'smtp' }>;
+type EmailBrevo = Extract<NotifierOptions['email'], { provider: 'brevo' }>;
 
 const buildFcm = (
   push: PushFcm,
@@ -78,6 +80,23 @@ const buildSmtp = (
     retryDeps: deps,
   });
 
+const buildBrevo = (
+  email: EmailBrevo,
+  config: ResolvedConfig,
+  logger: Logger,
+  deps: RetryDeps,
+): EmailChannel =>
+  new BrevoEmailChannel({
+    apiKey: email.brevo.apiKey,
+    from: email.from,
+    ...(email.brevo.baseUrl === undefined ? {} : { baseUrl: email.brevo.baseUrl }),
+    ...(email.brevo.timeoutMs === undefined ? {} : { timeoutMs: email.brevo.timeoutMs }),
+    ...(email.fetch === undefined ? {} : { fetch: email.fetch }),
+    logger,
+    retry: config.retry,
+    retryDeps: deps,
+  });
+
 const buildChannels = (config: ResolvedConfig, logger: Logger, deps: RetryDeps): Channels => {
   const { push: pushOptions, email: emailOptions } = config.options;
   const closers: (() => Promise<void>)[] = [];
@@ -92,7 +111,9 @@ const buildChannels = (config: ResolvedConfig, logger: Logger, deps: RetryDeps):
       ? emailOptions.channel
       : emailOptions.provider === 'fake'
         ? new FakeEmailChannel()
-        : buildSmtp(emailOptions, config, logger, deps);
+        : emailOptions.provider === 'brevo'
+          ? buildBrevo(emailOptions, config, logger, deps)
+          : buildSmtp(emailOptions, config, logger, deps);
   for (const channel of [push, email]) {
     if (channel.close) closers.push(channel.close.bind(channel));
   }

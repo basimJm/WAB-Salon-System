@@ -200,3 +200,14 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATION: docs/backlog only, no product code and no unit tests (nothing to test); the analytics work was stopped on the owner's order.
 - Notes: none.
+
+### SRV-011a — Hosted dev API recorded; client remote-switch tasks unblocked (owner request 2026-10-25)
+- Branch: `chore/srv-011a-dev-api`
+- Status: DONE
+- Acceptance criteria:
+  - [x] Server backlog row SRV-011a (DONE) for the owner-hosted Render dev API `https://wab-server-dev.onrender.com`; `/health` 200 and `/ready` mongodb + redis up (checked 2026-10-25)
+  - [x] ADM-079, CUS-060, MER-054 depend on SRV-011a instead of SRV-011 and are TODO; SRV-011 (DigitalOcean) stays PENDING for the owner
+  - [x] `tasks.py check` OK (only the known CUS-047 payments-paused note); board regenerated
+- Tests: `python3 scripts/tasks.py check`; `python3 -m unittest scripts/test_tasks.py`
+- Loops: 1/1 — re-checked that each client URL config (admin `.env.dev`, customer `gradle.properties`/`Dev.xcconfig`) already points at this host
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — backlog only, no code. API docs: no change.
