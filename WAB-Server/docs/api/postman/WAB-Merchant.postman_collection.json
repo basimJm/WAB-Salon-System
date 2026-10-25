@@ -952,6 +952,370 @@
       ]
     },
     {
+      "name": "Salon branches",
+      "item": [
+        {
+          "name": "Branches of the salon, main first (OWNER)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches"
+              ],
+              "query": [],
+              "variable": []
+            }
+          }
+        },
+        {
+          "name": "Add a branch; the first one is the main branch (OWNER; BRANCH_LIMIT_REACHED at salon.maxBranches)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"location\": {\n    \"latitude\": 0,\n    \"longitude\": 0\n  },\n  \"locationText\": \"string\",\n  \"cityId\": \"string\",\n  \"areaId\": \"string\",\n  \"phone\": \"string\",\n  \"whatsapp\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "One branch (OWNER)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Edit name, location, address, city/area or contacts (OWNER)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"location\": {\n    \"latitude\": 0,\n    \"longitude\": 0\n  },\n  \"locationText\": \"string\",\n  \"cityId\": \"string\",\n  \"areaId\": \"string\",\n  \"phone\": \"string\",\n  \"whatsapp\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Make this branch the main one (OWNER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/main",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "main"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Hide the branch from customers; the other branches stay bookable (OWNER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/offline",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "offline"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Bring an offline branch back (OWNER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/online",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "online"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Close for good (history kept); 409 BRANCH_HAS_UPCOMING_BOOKINGS lists the bookings, 422 LAST_BRANCH, 422 INVALID_TRANSITION for the main branch (OWNER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/branches/:branchId/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "branches",
+                ":branchId",
+                "close"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Salon gallery",
       "item": [
         {

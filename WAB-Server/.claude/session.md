@@ -10,6 +10,21 @@
 
 ## Current task
 
+### SRV-139 — Merchant branch management, owner only (Stage P)
+
+- Branch: `feat/srv-139-merchant-branches`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.16, §6 `BRANCHES_MANAGE` owner only, §8 branch events, §11; API docs: 8 merchant operations under `/merchant/v1/branches` — client impact MER-061/MER-062):
+  - [x] `GET/POST /branches`, `GET/PATCH /branches/{branchId}`, `POST …/main|offline|online|close`, all `requireOwner`; bodies validated (name AR+EN 1–60, pin, address, city/area that match, E.164 phone, optional whatsapp; reason for offline)
+  - [x] First branch = main (linked on the salon); `salon.maxBranches` → 422 `BRANCH_LIMIT_REACHED`; `branchCount` kept; another salon's branch → 404 `BRANCH_NOT_FOUND`
+  - [x] Set main: one main at a time (old flag cleared first, unique index); edits of the main branch keep the salon's legacy address/contacts in step (readers move to branches in SRV-144)
+  - [x] Offline (reason, actor) / online with `branch.offline` / `branch.online` owner notifications (AR/EN); wrong transitions → 422 `INVALID_TRANSITION`
+  - [x] Close: 422 `LAST_BRANCH`, 422 `INVALID_TRANSITION` (`isMain`) for the main branch, 409 `BRANCH_HAS_UPCOMING_BOOKINGS` listing booking ids (`BookingsRepository.upcomingForBranch`); closed = kept with `closedAt/closedBy`, out of lists; closed branches cannot be edited
+  - [x] Completeness recomputed after every change
+- Tests: `tests/merchantBranches.test.ts` (service 7 + routes 2); docs regenerated
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — service shared with the admin endpoints (SRV-147: actor ADMIN + audit). DEVIATION: closing the main branch reuses `INVALID_TRANSITION` with field `isMain` instead of a new error code (domain list unchanged).
+
 ### SRV-138 — Two-level completeness and visibility (Stage P)
 
 - Branch: `feat/srv-138-branch-completeness`

@@ -1,3 +1,4 @@
+import { createBranchesService } from './domain/branches/branches.service';
 import { createBranchFacts, createBranchStateService } from './domain/branches/branchState.service';
 import { createMainBranches } from './domain/branches/mainBranch';
 import { BranchesRepository } from './repositories/branches.repository';
@@ -766,6 +767,17 @@ const buildServices = (
     storage: providers.storage,
     logger,
   });
+  const branchesService = createBranchesService({
+    branches: branchesRepository,
+    salons: new SalonsRepository(),
+    cities: new CitiesRepository(),
+    areas: new AreasRepository(),
+    bookings: bookingsRepository,
+    settings,
+    state: salonState,
+    notifier: producers.salonStateNotifier,
+    logger,
+  });
   const galleryService = createGalleryService({
     gallery: new GalleryRepository(),
     storage: providers.storage,
@@ -969,6 +981,7 @@ const buildServices = (
     salonServices: salonServicesService,
     hours: hoursService,
     gallery: galleryService,
+    branches: branchesService,
     salonProfile: {
       service: salonProfileService,
       guard: [

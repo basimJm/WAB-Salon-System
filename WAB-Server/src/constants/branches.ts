@@ -33,3 +33,13 @@ export type BranchCompletenessItem = (typeof BRANCH_COMPLETENESS_ITEMS)[number];
 
 /** Name of the branch a salon gets on migration when it has no area name (§5.16). */
 export const MAIN_BRANCH_DEFAULT_NAME: LocalizedName = { ar: 'الفرع الرئيسي', en: 'Main branch' };
+
+/** Merchant branch routes (SRV-139), mounted at `/merchant/v1/branches`; OWNER only. */
+export const MERCHANT_BRANCH_ROUTES = {
+  base: '/branches',
+  byId: '/:branchId',
+  main: '/:branchId/main',
+  offline: '/:branchId/offline',
+  online: '/:branchId/online',
+  close: '/:branchId/close',
+} as const;

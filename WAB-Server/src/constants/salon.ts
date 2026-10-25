@@ -90,6 +90,8 @@ export const SALON_STATE_EVENTS = [
   'salon.deletion_rejected',
   'branch.live',
   'branch.not_bookable',
+  'branch.offline',
+  'branch.online',
 ] as const;
 export type SalonStateEvent = (typeof SALON_STATE_EVENTS)[number];
 
