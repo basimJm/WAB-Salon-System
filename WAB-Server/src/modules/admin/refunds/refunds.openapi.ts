@@ -19,6 +19,7 @@ const refund = z.object({
     .describe('Null when no booking was created (slot lost after payment).'),
   transactionId: z.string(),
   salonId: z.string(),
+  branchId: z.string().nullable(),
   customerId: z.string(),
   amount: z.string().describe('JOD decimal string'),
   source: z.enum([

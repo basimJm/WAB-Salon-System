@@ -366,6 +366,7 @@ booking 1─* transaction, refund ; booking.persons[*].staffId → member
 Two levels:
 - **Salon** `missing[]` (salon-wide items): `COVER`, `PROFILE_IMAGE`, `NAME`, `DESCRIPTION`, `POLICY` (present & valid), `BRANCH` (≥1 branch that is ACTIVE and complete).
 - **Branch** `missing[]`: `LOCATION`, `PHONE`, `WORKING_HOURS` (≥1 open day), `SERVICE` (≥1 active salonService of the branch), `STAFF` (≥1 active member of the branch with providesServices, ≥1 service, ≥1 working day).
+- The salon's `missing[]` names the **main branch's** gaps when no branch is bookable (so a single-branch salon's checklist reads as before: `LOCATION`, `SERVICE`…); `BRANCH` appears only when none applies (no main branch yet, or it is complete but offline).
 - On admin approval: state = `LIVE` if the salon is complete else `APPROVED_INCOMPLETE`.
 - On any write while `APPROVED_INCOMPLETE`: if complete → `LIVE` (notify owner "salon live").
 - New branches need **no admin approval**: a branch becomes bookable as soon as it is ACTIVE and complete (notify owner "branch live").

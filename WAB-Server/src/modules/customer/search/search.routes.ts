@@ -38,6 +38,7 @@ export const createSearchRouter = ({
         query: rest,
         params: { page, pageSize },
         customerId: req.auth?.subjectId,
+        language: req.language,
       });
       sendPaginated(req, res, result.items.map(cardData), { page, pageSize }, result.meta.total);
     }),

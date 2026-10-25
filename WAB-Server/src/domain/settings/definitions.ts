@@ -33,6 +33,7 @@ export const SETTING_DEFINITIONS = {
   ),
   currency: define(z.literal(CURRENCY_CODE), SETTING_DEFAULTS.currency),
   'discovery.nearbyRadiusKm': define(positiveNumber, SETTING_DEFAULTS['discovery.nearbyRadiusKm']),
+  'salon.maxBranches': define(positiveInt, SETTING_DEFAULTS['salon.maxBranches']),
   'booking.slotMinutes': define(positiveInt, SETTING_DEFAULTS['booking.slotMinutes']),
   'booking.maxDaysAhead': define(positiveInt, SETTING_DEFAULTS['booking.maxDaysAhead']),
   'booking.maxCompanions': define(nonNegativeInt, SETTING_DEFAULTS['booking.maxCompanions']),

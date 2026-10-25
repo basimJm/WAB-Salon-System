@@ -260,7 +260,7 @@ describe('recipients and delivery', () => {
       params: { amount: '7.300', reference: 'BANK-1' },
     });
     expect(stored(ids.owner)).toHaveLength(1);
-    expect(stored(ids.finance)).toHaveLength(1);
+    expect(stored(ids.finance)).toHaveLength(0);
     expect(stored(ids.staff)).toHaveLength(0);
     await service.notify('application.approved', {
       key: 'a:1',
@@ -268,7 +268,7 @@ describe('recipients and delivery', () => {
       params: { salon: 'Glow' },
     });
     expect(stored(ids.owner)).toHaveLength(2);
-    expect(stored(ids.finance)).toHaveLength(1);
+    expect(stored(ids.finance)).toHaveLength(0);
   });
   it('the same occurrence is delivered once; a different key is a new notification', async () => {
     const input = {
@@ -526,10 +526,13 @@ describe('producers', () => {
     await producers.refundHooks.refunded(refund);
     await producers.refundHooks.failed(refund);
     expect(stored(customer).map((n) => n['event'])).toEqual(['refund.pending', 'refund.refunded']);
-    expect(stored(ids.finance).map((n) => n['event'])).toEqual([
-      'refund.refunded',
-      'refund.failed',
-    ]);
+    // Finance is the owner's (§6 branch scope): a member holding FINANCE_VIEW gets nothing.
+    expect(stored(ids.finance)).toEqual([]);
+    expect(
+      stored(ids.owner)
+        .map((n) => n['event'])
+        .filter((event) => String(event).startsWith('refund.')),
+    ).toEqual(['refund.refunded', 'refund.failed']);
     expect(stored(customer)[1]?.['body']).toMatchObject({
       en: 'JOD'.length > 0 ? (expect.stringContaining('2.500') as unknown) : '',
     });

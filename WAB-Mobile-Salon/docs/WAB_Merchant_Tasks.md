@@ -111,7 +111,7 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 
 | ID | Task | Branch | Needs | Status | Notes |
 |---|---|---|---|---|---|
-| MER-061 | `./gradlew apiSync` with branches; session keeps the member's scope (owner = all branches, others = one branch); branch error codes (AR/EN) | `feat/mer-061-branches-contract` | MER-058, SRV-140, SRV-148 | BLOCKED | Waits for the server contract. |
+| MER-061 | `./gradlew apiSync` with branches; session keeps the member's scope (owner = all branches, others = one branch); branch error codes (AR/EN) | `feat/mer-061-branches-contract` | MER-058, SRV-140, SRV-148 | TODO | Waits for the server contract. unblocked by SRV-148 on 2026-10-25 |
 | MER-062 | Owner: branches management (list, create with map location/contacts/name AR+EN, edit, set main, offline/online, close showing the blocking bookings) and a branch switcher ("All branches" / one) across the app | `feat/mer-062-branches-manage` | MER-061, SRV-139 | BLOCKED | §5.16. |
 | MER-063 | Branch-scoped bookings, requests, calendar, dashboard, statistics and reviews (manager: own branch only; owner: switcher) | `feat/mer-063-branch-scope` | MER-062, SRV-140, SRV-142 | BLOCKED | §6 branch scope. |
 | MER-064 | Per-branch hours, closures and services/prices | `feat/mer-064-branch-operations` | MER-062, SRV-141 | BLOCKED | |

@@ -1,3 +1,5 @@
+import type { BranchRaw } from '../../models/branch.model';
+import type { BranchesRepository } from '../../repositories/branches.repository';
 import {
   REVIEW_DEFAULT_REASONS,
   RATING_DECIMAL_SCALE,
@@ -28,6 +30,8 @@ export interface AdminReviewRow {
   readonly comment: string | null;
   readonly salon: { id: string; name: string };
   readonly staff: { id: string; firstName: string } | null;
+  /** The branch label (§5.11), both languages for the admin. */
+  readonly branch: { id: string; name: { ar: string; en: string } } | null;
   readonly author: { id: string; firstName: string; lastName: string };
   /** The author's other reviews, so moderators spot spam. */
   readonly authorOtherReviews: number;
@@ -49,6 +53,7 @@ export interface AdminReviewsService {
     target?: ReviewTarget | undefined;
     salonId?: string | undefined;
     staffId?: string | undefined;
+    branchId?: string | undefined;
     rating?: number | undefined;
     /** The customer who wrote them; without a `status` every status is listed. */
     authorId?: string | undefined;
@@ -78,7 +83,14 @@ export interface AdminReviewsDeps {
   readonly audit: AuditWriter;
   readonly logger: Logger;
   readonly now?: () => Date;
+  /** Branch labels (§5.11); without it rows carry no branch. */
+  readonly branches?: Pick<BranchesRepository, 'findMany'>;
 }
+
+const branchOf = (
+  branch: Entity<BranchRaw> | undefined,
+): { id: string; name: { ar: string; en: string } } | null =>
+  branch === undefined ? null : { id: branch.id, name: { ar: branch.name.ar, en: branch.name.en } };
 
 const oneDecimal = (value: number): number =>
   Math.round(value * RATING_DECIMAL_SCALE) / RATING_DECIMAL_SCALE;
@@ -91,14 +103,19 @@ export const createAdminReviewsService = (deps: AdminReviewsDeps): AdminReviewsS
     if (items.length === 0) return [];
     const unique = (ids: string[]): string[] => [...new Set(ids)];
     const customerIds = unique(items.map((r) => r.customerId));
-    const [salonRows, staffRows, authors, others] = await Promise.all([
+    const branchIds = unique(items.flatMap((r) => (r.branchId === undefined ? [] : [r.branchId])));
+    const [salonRows, staffRows, authors, others, branchRows] = await Promise.all([
       salons.findMany({ _id: { $in: unique(items.map((r) => r.salonId)) } }),
       members.findMany({
         _id: { $in: unique(items.flatMap((r) => (r.staffId === undefined ? [] : [r.staffId]))) },
       }),
       customers.findMany({ _id: { $in: customerIds } }),
       Promise.all(customerIds.map((customerId) => reviews.count({ customerId }))),
+      branchIds.length === 0 || deps.branches === undefined
+        ? []
+        : deps.branches.findMany({ _id: { $in: branchIds } }),
     ]);
+    const branchById = new Map(branchRows.map((b) => [b.id, b]));
     const salonById = new Map(salonRows.map((s) => [s.id, s]));
     const staffById = new Map(staffRows.map((m) => [m.id, m]));
     const authorById = new Map(authors.map((c) => [c.id, c]));
@@ -114,6 +131,7 @@ export const createAdminReviewsService = (deps: AdminReviewsDeps): AdminReviewsS
         comment: r.comment ?? null,
         salon: { id: r.salonId, name: salonById.get(r.salonId)?.name ?? '' },
         staff: staff === undefined ? null : { id: staff.id, firstName: staff.firstName },
+        branch: branchOf(r.branchId === undefined ? undefined : branchById.get(r.branchId)),
         author: {
           id: r.customerId,
           firstName: author?.firstName ?? '',
@@ -200,7 +218,7 @@ export const createAdminReviewsService = (deps: AdminReviewsDeps): AdminReviewsS
         );
 
   return {
-    async list({ status, target, salonId, staffId, rating, authorId, params }) {
+    async list({ status, target, salonId, staffId, branchId, rating, authorId, params }) {
       // The moderation queue defaults to PENDING; one author's reviews are shown whatever their status.
       const shown = status ?? (authorId === undefined ? 'PENDING' : undefined);
       const page = await reviews.findPage(
@@ -209,6 +227,7 @@ export const createAdminReviewsService = (deps: AdminReviewsDeps): AdminReviewsS
           ...(target === undefined ? {} : { target }),
           ...(salonId === undefined ? {} : { salonId }),
           ...(staffId === undefined ? {} : { staffId }),
+          ...(branchId === undefined ? {} : { branchId }),
           ...(rating === undefined ? {} : { rating }),
           ...(authorId === undefined ? {} : { customerId: toObjectId(authorId) }),
         },

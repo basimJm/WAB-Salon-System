@@ -17,9 +17,17 @@ export class TransactionsRepository extends BaseRepository<TransactionRaw> {
   }
 
   /** Attempts that have waited for a result since before `cutoff`, oldest first (reconciliation). */
-  async pendingBefore(cutoff: Date, limit: number): Promise<Entity<TransactionRaw>[]> {
+  async pendingBefore(
+    cutoff: Date,
+    limit: number,
+    within: { salonId?: string; branchId?: string } = {},
+  ): Promise<Entity<TransactionRaw>[]> {
     const page = await this.findPage(
-      { status: 'PENDING', createdAt: { $lt: cutoff } },
+      {
+        ...within,
+        status: 'PENDING',
+        createdAt: { $lt: cutoff },
+      },
       { page: 1, pageSize: limit },
       { createdAt: 1 },
     );
@@ -88,9 +96,14 @@ export class TransactionsRepository extends BaseRepository<TransactionRaw> {
   }
 
   /** Successful payments no booking was ever created for, older than `cutoff` (abandoned checkouts). */
-  async orphansBefore(cutoff: Date, limit: number): Promise<Entity<TransactionRaw>[]> {
+  async orphansBefore(
+    cutoff: Date,
+    limit: number,
+    within: { salonId?: string; branchId?: string } = {},
+  ): Promise<Entity<TransactionRaw>[]> {
     const page = await this.findPage(
       {
+        ...within,
         status: 'SUCCEEDED',
         bookingId: { $exists: false },
         refundedAt: { $exists: false },
@@ -112,9 +125,14 @@ export class TransactionsRepository extends BaseRepository<TransactionRaw> {
   }
 
   /** Payments older than `cutoff` that back a booking but are not in the ledger (a missed write), oldest first. */
-  async unchargedWithBooking(cutoff: Date, limit: number): Promise<Entity<TransactionRaw>[]> {
+  async unchargedWithBooking(
+    cutoff: Date,
+    limit: number,
+    within: { salonId?: string; branchId?: string } = {},
+  ): Promise<Entity<TransactionRaw>[]> {
     const page = await this.findPage(
       {
+        ...within,
         status: 'SUCCEEDED',
         bookingId: { $exists: true },
         chargedAt: { $exists: false },

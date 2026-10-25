@@ -17,6 +17,8 @@ export interface BookingPerson {
 export interface UpcomingBooking {
   readonly id: string;
   readonly status: string;
+  /** The booking's branch: hours and closures of one branch only break its own bookings. */
+  readonly branchId?: string | undefined;
   readonly startsAt: Date;
   readonly persons: readonly BookingPerson[];
 }
@@ -152,6 +154,10 @@ export interface ConflictFinder {
 }
 
 /** The §5.12 checks over the salon's upcoming bookings, in the salon's time zone. */
+/** Bookings of one branch (every booking of the salon when no branch is given). */
+const inBranch = (list: readonly UpcomingBooking[], branchId?: string): UpcomingBooking[] =>
+  branchId === undefined ? [...list] : list.filter((b) => b.branchId === branchId);
+
 export const createConflictFinder = (deps: {
   readonly bookings: BookingLookup;
   readonly settings: Pick<SettingsService, 'get'>;
@@ -167,13 +173,13 @@ export const createConflictFinder = (deps: {
   };
   return {
     schedule: {
-      async weekly(salonId, days) {
+      async weekly(salonId, days, branchId) {
         const { list, timeZone } = await load(salonId);
-        return weeklyConflicts(list, days, timeZone);
+        return weeklyConflicts(inBranch(list, branchId), days, timeZone);
       },
-      async closure(salonId, range) {
+      async closure(salonId, range, branchId) {
         const { list, timeZone } = await load(salonId);
-        return closureConflicts(list, range, timeZone);
+        return closureConflicts(inBranch(list, branchId), range, timeZone);
       },
     },
     staff: {

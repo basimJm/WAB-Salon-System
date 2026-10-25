@@ -29,7 +29,9 @@ export const createMerchantProfileRouter = (
     validate({ body: profilePatchSchema }),
     asyncHandler(async (req: Request, res: Response) => {
       const patch = (req.validated as { body: z.infer<typeof profilePatchSchema> }).body;
-      sendSuccess(req, res, { data: await service.update(salonOf(req), patch) });
+      sendSuccess(req, res, {
+        data: await service.update(salonOf(req), patch, { scope: req.member?.branchId }),
+      });
     }),
   );
   return router;

@@ -38,6 +38,7 @@ export const exportRequestSchema = z.discriminatedUnion('kind', [
       status: z.enum(TRANSACTION_STATUSES).optional(),
       type: z.enum(TRANSACTION_TYPES).optional(),
       salonId: objectId.optional(),
+      branchId: objectId.optional(),
       customerId: objectId.optional(),
       bookingId: objectId.optional(),
       from: instant.optional(),
@@ -63,6 +64,7 @@ export const exportRequestSchema = z.discriminatedUnion('kind', [
       statuses: z.array(z.enum(BOOKING_STATUSES)).min(1).max(BOOKING_STATUSES.length).optional(),
       paymentStatus: z.enum(BOOKING_PAYMENT_STATUSES).optional(),
       salonId: objectId.optional(),
+      branchId: objectId.optional(),
       customerId: objectId.optional(),
       /** Appointment days (Asia/Amman), both inclusive. */
       from: day.optional(),

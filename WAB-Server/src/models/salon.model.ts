@@ -72,6 +72,10 @@ export interface SalonRaw {
   phone?: string;
   whatsapp?: string;
   weeklySchedule: ScheduleDay[];
+  /** The salon's main branch (§3.3a); set once its first branch exists. */
+  mainBranchId?: Types.ObjectId;
+  /** Non-closed branches, kept in step for cards and the branch limit. */
+  branchCount: number;
   policy?: SalonPolicy;
   application: SalonApplication;
   offline?: { reason: string; at: Date; by: Types.ObjectId };
@@ -87,7 +91,7 @@ export interface SalonRaw {
   updatedAt: Date;
 }
 
-const scheduleDaySchema = new Schema<ScheduleDay>(
+export const scheduleDaySchema = new Schema<ScheduleDay>(
   {
     day: { type: String, enum: DAYS_OF_WEEK, required: true },
     isOff: { type: Boolean, default: true },
@@ -130,7 +134,7 @@ const applicationSchema = new Schema<SalonApplication>(
   { _id: false },
 );
 
-const defaultSchedule = (): ScheduleDay[] =>
+export const defaultSchedule = (): ScheduleDay[] =>
   SCHEDULE_DAY_ORDER.map((day) => ({
     day,
     isOff: true,
@@ -169,6 +173,8 @@ const salonSchema = new Schema<SalonRaw>(
       default: defaultSchedule,
       validate: (value: ScheduleDay[]) => value.length === DAYS_OF_WEEK.length,
     },
+    mainBranchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
+    branchCount: { type: Number, default: 0, min: 0, validate: Number.isInteger },
     policy: { type: policySchema },
     application: { type: applicationSchema, required: true },
     offline: {
