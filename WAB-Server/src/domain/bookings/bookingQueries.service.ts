@@ -67,6 +67,8 @@ export interface BookingRow {
   readonly personsCount: number;
   readonly total: string;
   readonly salon: { id: string; name: string } | null;
+  /** The branch of the appointment, as booked (§3.5 `branchSnapshot`); `null` for older rows. */
+  readonly branch: { id: string; name: string; locationText: string | null } | null;
   readonly customer: { id: string; name: string; phone: string } | null;
   readonly staff: { id: string; name: string }[];
 }
@@ -294,7 +296,12 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
 
   type Lookups = Awaited<ReturnType<typeof lookups>>;
 
-  const toRow = (b: Entity<BookingRaw>, audience: BookingAudience, l: Lookups): BookingRow => ({
+  const toRow = (
+    b: Entity<BookingRaw>,
+    audience: BookingAudience,
+    l: Lookups,
+    language: Language,
+  ): BookingRow => ({
     id: b.id,
     referenceNumber: b.referenceNumber,
     status: b.status,
@@ -308,6 +315,14 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     total: formatJod(b.money.total),
     salon:
       audience.kind === 'MERCHANT' ? null : { id: b.salonId, name: l.salon.get(b.salonId) ?? '' },
+    branch:
+      b.branchId === undefined || b.branchSnapshot === undefined
+        ? null
+        : {
+            id: b.branchId,
+            name: b.branchSnapshot.name[language],
+            locationText: b.branchSnapshot.locationText ?? null,
+          },
     customer:
       audience.kind === 'CUSTOMER'
         ? null
@@ -339,14 +354,14 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
   };
 
   return {
-    async list({ audience, query, params }) {
+    async list({ audience, query, params, language }) {
       const { filter, ascending } = await buildFilter(audience, query);
       const page = await bookings.findPage(filter, params, {
         appointmentStart: ascending ? 1 : -1,
       });
       const l = await lookups(page.items, audience);
       return {
-        items: page.items.map((b) => toRow(b, audience, l)),
+        items: page.items.map((b) => toRow(b, audience, l, language)),
         total: page.meta.total,
       };
     },
@@ -365,7 +380,7 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
           ? null
           : { reasonCode: d.reasonCode, reasonText: d.reasonText ?? null, at: iso(d.at) };
       return {
-        ...toRow(found, audience, l),
+        ...toRow(found, audience, l, language),
         refundStatus: found.refundStatus,
         persons: found.persons.map((p) => ({
           name: p.name,

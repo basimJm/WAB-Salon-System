@@ -14,6 +14,8 @@ const MAX_PERSONS_SANITY = 20;
 export const draftParams = z.object({ id: objectId });
 export const createDraftBody = z.object({
   salonId: objectId,
+  /** The branch picked at step 1 (§5.18); omit only when the salon has one bookable branch. */
+  branchId: objectId.optional(),
   paymentMethod: z.enum(PAYMENT_OPTIONS),
   /** The first person is the account holder (or the bride they book for); the rest are companions. */
   persons: z

@@ -116,6 +116,7 @@ export const createBookingCreationService = (deps: BookingCreationDeps): Booking
     try {
       const plan = await availability.plan({
         salonId: draft.salonId,
+        ...(draft.branchId === undefined ? {} : { branchId: draft.branchId }),
         draftId: draft.id,
         persons: draft.persons.map((p) => ({
           name: p.name,
