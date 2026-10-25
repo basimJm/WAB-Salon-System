@@ -4,7 +4,7 @@
 
 | Project (`tasks.py` key) | Master | Current task | Next ready task | Blocked on | Session file |
 |---|---|---|---|---|---|
-| server | `server` | none (backlog Stage A–M done; Stage N/O added) | SRV-111 contract guard, then SRV-117… | SRV-011/059/115/116 owner deployment; SRV-034/092/110/112 SDK publish | `WAB-Server/.claude/session.md` |
+| server | `server` | none (Stage P branches SRV-136…148 DONE, PRs #380–#394) | SRV-131 merchant reviews, SRV-111… | SRV-011/059/115/116 owner deployment; SRV-034/092/110/112 SDK publish | `WAB-Server/.claude/session.md` |
 | admin | `admin` | none (ADM-001…081 done except owner-pending rows) | none ready (all remaining rows PENDING/BLOCKED) | SRV-117…127 (Stage N), SRV-011, owner hosting/CI | `WAB-Admin-Dashboard/.claude/session.md` |
 | customer | `customer` | none (CUS-069 design fidelity merged, PR #322) | none (remaining rows blocked/pending) | CUS-047 ← PAY-011; CUS-060 ← SRV-011 | `WAB-Mobile-Customer/.claude/session.md` |
 | merchant | `merchant` | none (MER-002…058 DONE, PRs #363/#364) | none ready | MER-004 owner Firebase → MER-012/029/030; SRV-129…133 → MER-042/043/049/050; SRV-011 → MER-054…056; MER-059/060 owner | `WAB-Mobile-Salon/.claude/session.md` |
