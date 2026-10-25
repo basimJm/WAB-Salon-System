@@ -68,6 +68,14 @@ export interface LeavesService {
     leaveId: string;
     scope?: string | undefined;
   }): Promise<void>;
+  /** Upcoming bookings a leave would break (SRV-134); nothing is saved. */
+  preview(input: {
+    salonId: string;
+    memberId: string;
+    scope?: string | undefined;
+    from: string;
+    to: string;
+  }): Promise<BookingConflict[]>;
 }
 
 export interface LeavesDeps {
@@ -146,6 +154,14 @@ export const createLeavesService = (deps: LeavesDeps): LeavesService => {
       return (await leaves.forMember(memberId))
         .filter((l) => l.to >= date)
         .map((l) => view(l, date));
+    },
+
+    async preview({ salonId, memberId, from, to, scope }) {
+      await requireMember(salonId, memberId, scope);
+      const date = await today();
+      if (to < from) throw invalid('body.to');
+      if (from < date) throw invalid('body.from');
+      return conflicts.check({ salonId, memberId, from, to });
     },
 
     async add({ salonId, memberId, from, to, note, scope }) {

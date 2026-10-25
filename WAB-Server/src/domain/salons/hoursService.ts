@@ -79,6 +79,19 @@ export interface WeeklyDayInput {
  */
 export interface HoursService {
   get(salonId: string, scope?: string): Promise<HoursView>;
+  /** Upcoming PENDING/APPROVED bookings a new weekly schedule would break; nothing is saved. */
+  previewWeekly(
+    salonId: string,
+    days: readonly WeeklyDayInput[],
+    scope?: string,
+  ): Promise<BookingConflict[]>;
+  /** Upcoming PENDING/APPROVED bookings a closure would break; nothing is saved. */
+  previewClosure(input: {
+    salonId: string;
+    from: string;
+    to: string;
+    scope?: string | undefined;
+  }): Promise<BookingConflict[]>;
   setWeekly(salonId: string, days: readonly WeeklyDayInput[], scope?: string): Promise<HoursView>;
   addClosure(input: {
     salonId: string;
@@ -211,35 +224,38 @@ export const createHoursService = (deps: HoursDeps): HoursService => {
     if (from < date) throw invalid('body.from');
   };
 
+  /** Checks a full week (every day once, open < close, on the slot grid) and orders it. */
+  const normalizeWeek = async (input: readonly WeeklyDayInput[]): Promise<ScheduleDay[]> => {
+    const step = await settings.get('booking.slotMinutes');
+    const present = new Set(input.map((d) => d.day));
+    if (input.length !== SCHEDULE_DAY_ORDER.length || present.size !== SCHEDULE_DAY_ORDER.length) {
+      throw invalid('body.days');
+    }
+    const bad: string[] = [];
+    input.forEach((entry, index) => {
+      const open = parseHHmm(entry.open);
+      const close = parseHHmm(entry.close);
+      if (entry.isOff) return;
+      if (close <= open) bad.push(`body.days.${String(index)}.close`);
+      if (open % step !== 0) bad.push(`body.days.${String(index)}.open`);
+      if (close % step !== 0) bad.push(`body.days.${String(index)}.close`);
+    });
+    if (bad.length > 0) throw invalid(...new Set(bad));
+
+    const week: ScheduleDay[] = SCHEDULE_DAY_ORDER.flatMap((day) => {
+      const entry = input.find((d) => d.day === day);
+      return entry === undefined
+        ? []
+        : [{ day, isOff: entry.isOff, open: entry.open, close: entry.close }];
+    });
+    return week;
+  };
+
   return {
     get: view,
 
     async setWeekly(salonId, input, scope) {
-      const step = await settings.get('booking.slotMinutes');
-      const present = new Set(input.map((d) => d.day));
-      if (
-        input.length !== SCHEDULE_DAY_ORDER.length ||
-        present.size !== SCHEDULE_DAY_ORDER.length
-      ) {
-        throw invalid('body.days');
-      }
-      const bad: string[] = [];
-      input.forEach((entry, index) => {
-        const open = parseHHmm(entry.open);
-        const close = parseHHmm(entry.close);
-        if (entry.isOff) return;
-        if (close <= open) bad.push(`body.days.${String(index)}.close`);
-        if (open % step !== 0) bad.push(`body.days.${String(index)}.open`);
-        if (close % step !== 0) bad.push(`body.days.${String(index)}.close`);
-      });
-      if (bad.length > 0) throw invalid(...new Set(bad));
-
-      const week: ScheduleDay[] = SCHEDULE_DAY_ORDER.flatMap((day) => {
-        const entry = input.find((d) => d.day === day);
-        return entry === undefined
-          ? []
-          : [{ day, isOff: entry.isOff, open: entry.open, close: entry.close }];
-      });
+      const week = await normalizeWeek(input);
       const branch = await branchFor(salonId, scope);
       rejectConflicts(await conflicts.weekly(salonId, week, branch?.id));
       if (branch !== null) await deps.branches?.patch(branch.id, { set: { weeklySchedule: week } });
@@ -250,6 +266,19 @@ export const createHoursService = (deps: HoursDeps): HoursService => {
       }
       await state.recompute(salonId);
       return view(salonId, scope);
+    },
+
+    async previewWeekly(salonId, input, scope) {
+      const week = await normalizeWeek(input);
+      const branch = await branchFor(salonId, scope);
+      return conflicts.weekly(salonId, week, branch?.id);
+    },
+
+    async previewClosure({ salonId, from, to, scope }) {
+      await loadSalon(salonId);
+      checkRange(from, to, await today());
+      const branch = await branchFor(salonId, scope);
+      return conflicts.closure(salonId, { from, to }, branch?.id);
     },
 
     async addClosure({ salonId, from, to, reason, scope }) {

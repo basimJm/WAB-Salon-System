@@ -22,6 +22,7 @@ import {
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
 import { teamMemberDoc } from '../../shared/team/teamMember.openapi';
+import { bookingConflictDoc } from '../../shared/salonEdit/conflict.openapi';
 import {
   addGalleryBody,
   addServiceBody,
@@ -99,11 +100,7 @@ const hoursView = z.object({
     isOpenNow: z.boolean(),
   }),
 });
-const conflict = z.object({
-  bookingId: z.string(),
-  startsAt: z.iso.datetime(),
-  status: z.string(),
-});
+const conflict = bookingConflictDoc;
 const serviceView = z.object({
   id: z.string(),
   catalogServiceId: z.string(),
