@@ -22,8 +22,8 @@
   - [x] Summary shows "Branch: ‹name›" and the branch address
   - [x] Deep link `https://<web>/salon/{salonId}?branchId={branchId}` → `DeepLink.Salon(salonId, branchId)` → salon details with that branch preselected → Book now carries it
 - Tests: `BookingFlowBranchTest` (5), `BranchRequestBodiesTest` (2), `DeepLinksTest` (+1); fakes updated (`DraftFake`/`AvailabilityFake` record the branch, `VerifyRepoFake`); full `testAndroidHostTest --continue` green
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch run (CUS-082…086) on the final tree: `./gradlew testAndroidHostTest` exit 0, 397 host tests, 0 failures (Gradle reused up-to-date results of unchanged modules), plus `run_detekt.sh` exit 0 and `policy_checks.py all` ok; found and fixed during the batch: `HomeMappersTest` missing `branchCount`, `VerifyRepoFake` old `create` signature, one 168-char KDoc line (detekt MaxLineLength)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading: branch rules are pure domain functions (`BranchRules`, `forBranch`, `withLoadedSalon`/`withBranch`) shared by details and booking; contract additive and nullable for older servers; route args through `SalonDetailsArgs`/`BookingFlowArgs` (no nullable Koin parameters); AR+EN strings incl. Arabic plurals; no hardcoded values (policy ok). DEVIATION: UI not opened on the emulator/simulator yet (rules §3.13 defers it to the end of the backlog)
 - Notes: ASSUMPTION — the deep-link query name `branchId` (BUSINESS_DOMAIN §5.17 says a link "may carry `branchId`" without a URL format); analytics `booking_branch_select` (catalog: by view model). The verify screen (draft response has no branch field) does not show the branch.
 
 ### CUS-085 — Salon details: clear, always-visible branch selector; branch address, map, phone, hours, open now; staff and services/prices per selected branch; reviews salon-wide with the branch label on each
@@ -36,8 +36,8 @@
   - [x] Review cards (details preview, staff sheet, reviews list) show "‹branch› branch" / "فرع ‹branch›" when the review carries a branch
   - [x] Book now passes the selected branch (`OpenBooking(salonId, branchId)` → `Screen.BookingStart(salonId, branchId)`, used by CUS-086); analytics `salon_branch_select` (catalog: by view model)
 - Tests: `SalonDetailsViewModelTest` (+3: main default + branch-driven place/contacts/staff/services/booking, requested + kept on refresh, fallback + single branch), `BranchRulesTest` (+1 `forBranch`), `SalonBranchTextsTest` (2); full `testAndroidHostTest --continue` green
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch run (CUS-082…086) on the final tree: `./gradlew testAndroidHostTest` exit 0, 397 host tests, 0 failures (Gradle reused up-to-date results of unchanged modules), plus `run_detekt.sh` exit 0 and `policy_checks.py all` ok; found and fixed during the batch: `HomeMappersTest` missing `branchCount`, `VerifyRepoFake` old `create` signature, one 168-char KDoc line (detekt MaxLineLength)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading: branch rules are pure domain functions (`BranchRules`, `forBranch`, `withLoadedSalon`/`withBranch`) shared by details and booking; contract additive and nullable for older servers; route args through `SalonDetailsArgs`/`BookingFlowArgs` (no nullable Koin parameters); AR+EN strings incl. Arabic plurals; no hardcoded values (policy ok). DEVIATION: UI not opened on the emulator/simulator yet (rules §3.13 defers it to the end of the backlog)
 - Notes: no feature-level `@Preview`s exist in this app (unchanged practice); the selector reuses `AppFilterChip` (portrait/landscape via `LazyRow`, RTL/LTR and light/dark from tokens). UI check deferred to the end-of-batch pass (rules §3.13).
 
 ### CUS-084 — Nearest section and map: one entry per branch titled "Salon - Branch" (e.g. Hifa Salon - Mecca Street); single-branch salons show the salon name
@@ -49,8 +49,8 @@
   - [x] Tapping a nearest entry opens the salon with that branch preselected (`OnSalonClick(salonId, branchId)` → `OpenSalon` → `Screen.SalonDetails(salonId, branchId)`); salon cards open without a branch
   - [x] "Map": the app has no in-app map; the maps hand-off of the selected branch is CUS-085
 - Tests: `SalonSummaryTest` (3), `HomeMappersTest` (+1, recommended count), `HomeViewModelTest` (+1); full `testAndroidHostTest --continue` green
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch run (CUS-082…086) on the final tree: `./gradlew testAndroidHostTest` exit 0, 397 host tests, 0 failures (Gradle reused up-to-date results of unchanged modules), plus `run_detekt.sh` exit 0 and `policy_checks.py all` ok; found and fixed during the batch: `HomeMappersTest` missing `branchCount`, `VerifyRepoFake` old `create` signature, one 168-char KDoc line (detekt MaxLineLength)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading: branch rules are pure domain functions (`BranchRules`, `forBranch`, `withLoadedSalon`/`withBranch`) shared by details and booking; contract additive and nullable for older servers; route args through `SalonDetailsArgs`/`BookingFlowArgs` (no nullable Koin parameters); AR+EN strings incl. Arabic plurals; no hardcoded values (policy ok). DEVIATION: UI not opened on the emulator/simulator yet (rules §3.13 defers it to the end of the backlog)
 - Notes: favorite toggles stay per salon (every entry of that salon follows).
 
 ### CUS-083 — Search and filtered lists: one card per salon (never per branch) with the nearest branch's distance/area and "N branches"
@@ -61,8 +61,8 @@
   - [x] Card place line = "area · N branches" only when the salon has several bookable branches (AR plural فرعان / N فروع / N فرعاً, EN N branches) on the All salons row, the Home recommended card and the Favorites card
   - [x] Favorites cards map `branchCount` / `branch` the same way
 - Tests: `SalonCardMapperTest` (2), `BranchTextsTest` (3); policy `all: ok`; compile with `testAndroidHostTest --continue` green except the `feature:home:data` test (fixed in CUS-084)
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch run (CUS-082…086) on the final tree: `./gradlew testAndroidHostTest` exit 0, 397 host tests, 0 failures (Gradle reused up-to-date results of unchanged modules), plus `run_detekt.sh` exit 0 and `policy_checks.py all` ok; found and fixed during the batch: `HomeMappersTest` missing `branchCount`, `VerifyRepoFake` old `create` signature, one 168-char KDoc line (detekt MaxLineLength)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading: branch rules are pure domain functions (`BranchRules`, `forBranch`, `withLoadedSalon`/`withBranch`) shared by details and booking; contract additive and nullable for older servers; route args through `SalonDetailsArgs`/`BookingFlowArgs` (no nullable Koin parameters); AR+EN strings incl. Arabic plurals; no hardcoded values (policy ok). DEVIATION: UI not opened on the emulator/simulator yet (rules §3.13 defers it to the end of the backlog)
 - Notes: plurals carry an unused EN `many` item so the localization policy's placeholder count matches the AR plural (one/two carry no number in Arabic). Cards open the salon without a preselected branch (only the nearest entries carry a branch, CUS-084).
 
 ### CUS-082 — `./gradlew apiSync` with branches: `Branch` model, branch on salon details, drafts and bookings, branch error codes (AR/EN)
@@ -75,8 +75,8 @@
   - [x] Error codes `BRANCH_NOT_FOUND`, `BRANCH_NOT_BOOKABLE`, `BRANCH_REQUIRED`, `BRANCH_LIMIT_REACHED`, `BRANCH_HAS_UPCOMING_BOOKINGS`, `LAST_BRANCH`, `BRANCH_SCOPE_DENIED`: `ErrorCode`, AR + EN text, handling path (not-found → retry, scope denied → contact, others → message)
   - [x] Mock: fixtures carry 3 branches (first is main), `branchCount` 3 (`SAMPLE_NUMBER_HINTS`, `SAMPLE_FIRST_ITEM_FLAGS`)
 - Tests: `BranchRulesTest` (4), `SalonDetailsMappersTest` (+2), `BookingsApiTest` (+1), `ErrorCodeTest` (codes list), `ErrorTextTest` (table covers every code), `test_api_sync.py` (+1); policy `all: ok`; early compile: `:core:domain`, `:core:design-system`, `:feature:salon:data`, `:feature:bookings:data` `testAndroidHostTest` green
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch run (CUS-082…086) on the final tree: `./gradlew testAndroidHostTest` exit 0, 397 host tests, 0 failures (Gradle reused up-to-date results of unchanged modules), plus `run_detekt.sh` exit 0 and `policy_checks.py all` ok; found and fixed during the batch: `HomeMappersTest` missing `branchCount`, `VerifyRepoFake` old `create` signature, one 168-char KDoc line (detekt MaxLineLength)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading: branch rules are pure domain functions (`BranchRules`, `forBranch`, `withLoadedSalon`/`withBranch`) shared by details and booking; contract additive and nullable for older servers; route args through `SalonDetailsArgs`/`BookingFlowArgs` (no nullable Koin parameters); AR+EN strings incl. Arabic plurals; no hardcoded values (policy ok). DEVIATION: UI not opened on the emulator/simulator yet (rules §3.13 defers it to the end of the backlog)
 - Notes: availability/draft `branchId` is wired in CUS-086 (needs the branch step); review submit `branchId` in CUS-087.
 
 ### CUS-080 — iOS dev API base URL cut at `//` (splash called `http://https/customer/v1/config`)

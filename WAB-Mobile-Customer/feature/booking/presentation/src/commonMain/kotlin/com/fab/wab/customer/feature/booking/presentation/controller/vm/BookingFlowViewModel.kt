@@ -156,7 +156,10 @@ class BookingFlowViewModel(
         }
     }
 
-    /** Back preserves selections (PRD S16); from the first step (branch, or person for one branch) the flow exits; a companion's Back leads to the companions list. */
+    /**
+     * Back preserves selections (PRD S16); from the first step (branch, or person for one branch) the flow exits;
+     * a companion's Back leads to the companions list.
+     */
     private fun back() {
         val state = uiState.value
         when {
