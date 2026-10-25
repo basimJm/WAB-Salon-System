@@ -62,22 +62,33 @@ export interface CatalogRequestsService {
     status?: CatalogRequestStatus | undefined;
     params: PaginationParams;
   }): Promise<{ items: CatalogRequestView[]; meta: PaginationMeta }>;
-  approve(input: {
-    id: string;
-    name: LocalizedText;
-    description: LocalizedText;
-    imageKey?: string | undefined;
-    sortOrder: number;
-    reason: string;
-    actor: AdminActor;
-  }): Promise<CatalogRequestView>;
+  /**
+   * Approve by creating a catalog service (`name` + `description`), or by mapping the request to
+   * an existing active catalog service of the salon's gender (`catalogServiceId`, SRV-125).
+   */
+  approve(
+    input: {
+      id: string;
+      reason: string;
+      actor: AdminActor;
+    } & (
+      | {
+          catalogServiceId?: undefined;
+          name: LocalizedText;
+          description: LocalizedText;
+          imageKey?: string | undefined;
+          sortOrder: number;
+        }
+      | { catalogServiceId: string }
+    ),
+  ): Promise<CatalogRequestView>;
   reject(input: { id: string; reason: string; actor: AdminActor }): Promise<CatalogRequestView>;
 }
 
 export interface CatalogRequestsDeps {
   readonly requests: CatalogRequestsRepository;
   readonly salons: Pick<SalonsRepository, 'findById' | 'findMany'>;
-  readonly catalog: Pick<CatalogServicesRepository, 'create'>;
+  readonly catalog: Pick<CatalogServicesRepository, 'create' | 'findById'>;
   readonly uploads: UploadVerifier;
   readonly audit: AuditWriter;
   readonly notifier: CatalogRequestNotifier;
@@ -201,19 +212,36 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
       };
     },
 
-    async approve({ id, name, description, imageKey, sortOrder, reason, actor }) {
+    async approve(input) {
+      const { id, reason, actor } = input;
       const request = await pending(id);
       const salon = await salons.findById(request.salonId);
       if (salon === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
-      const finalImage = imageKey ?? request.imageKey;
-      if (finalImage === undefined) throw invalid('body.imageKey');
-      if (imageKey !== undefined) {
-        await uploads.assertConfirmed({
-          keys: [imageKey],
-          purpose: 'CATALOG_IMAGE',
-          field: 'body.imageKey',
-          accept: (upload) => upload.ownerType === 'ADMIN',
-        });
+      // Mapping: the service already exists in the catalog; nothing new is created.
+      const existing =
+        input.catalogServiceId === undefined
+          ? null
+          : await catalog.findById(input.catalogServiceId);
+      if (input.catalogServiceId !== undefined) {
+        if (existing?.active !== true) {
+          throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+        }
+        if (existing.gender !== salon.gender) {
+          throw new BusinessRuleError({ code: ERROR_CODES.GENDER_MISMATCH });
+        }
+      }
+      const finalImage =
+        input.catalogServiceId === undefined ? (input.imageKey ?? request.imageKey) : undefined;
+      if (input.catalogServiceId === undefined) {
+        if (finalImage === undefined) throw invalid('body.imageKey');
+        if (input.imageKey !== undefined) {
+          await uploads.assertConfirmed({
+            keys: [input.imageKey],
+            purpose: 'CATALOG_IMAGE',
+            field: 'body.imageKey',
+            accept: (upload) => upload.ownerType === 'ADMIN',
+          });
+        }
       }
       // Claim first so two admins cannot both approve; undone if the catalog entry cannot be made.
       const claimed = await requests.decide(id, {
@@ -223,26 +251,33 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
         decidedAt: now(),
       });
       if (claimed === null) throw new BusinessRuleError({ code: ERROR_CODES.ALREADY_HANDLED });
-      let service;
-      try {
-        service = await catalog.create({
-          name,
-          description,
-          imageKey: finalImage,
-          gender: salon.gender,
-          active: true,
-          sortOrder,
-        });
-      } catch (error) {
-        await requests.updateById(id, { status: 'PENDING' });
-        throw error;
+      let serviceId: string;
+      if (existing !== null) {
+        serviceId = existing.id;
+      } else if (input.catalogServiceId === undefined && finalImage !== undefined) {
+        try {
+          const created = await catalog.create({
+            name: input.name,
+            description: input.description,
+            imageKey: finalImage,
+            gender: salon.gender,
+            active: true,
+            sortOrder: input.sortOrder,
+          });
+          serviceId = created.id;
+        } catch (error) {
+          await requests.updateById(id, { status: 'PENDING' });
+          throw error;
+        }
+      } else {
+        throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       }
       const done =
-        (await requests.updateById(id, { catalogServiceId: toObjectId(service.id) })) ?? claimed;
+        (await requests.updateById(id, { catalogServiceId: toObjectId(serviceId) })) ?? claimed;
       await record(
         'CATALOG_REQUEST_APPROVE',
         id,
-        { status: 'APPROVED', catalogServiceId: service.id },
+        { status: 'APPROVED', catalogServiceId: serviceId, mapped: existing !== null },
         reason,
         actor,
       );
