@@ -237,6 +237,44 @@ describe('createNotifier — FCM and SMTP wiring', () => {
     expect(transport.closed).toBe(1);
   });
 
+  it('delivers through the Brevo HTTP adapter with an injected fetch', async () => {
+    const posted: string[] = [];
+    const { deps } = instantDeps();
+    const notifier = createNotifier({
+      environment: 'dev',
+      push: { provider: 'fake' },
+      email: {
+        provider: 'brevo',
+        from: { name: 'WAB', address: 'no-reply@example.com' },
+        brevo: { apiKey: 'key', baseUrl: 'http://localhost:4010', timeoutMs: 1000 },
+        fetch: (url) => {
+          posted.push(url);
+          return Promise.resolve({ status: 201, text: () => Promise.resolve('{}') });
+        },
+      },
+      retry: FAST_RETRY,
+      retryDeps: deps,
+    });
+    await expect(notifier.sendEmail(emailRequest())).resolves.toMatchObject({
+      accepted: ['admin@example.com'],
+    });
+    expect(posted).toEqual(['http://localhost:4010/smtp/email']);
+    await notifier.close();
+  });
+
+  it('builds the Brevo adapter with its defaults', () => {
+    const notifier = createNotifier({
+      environment: 'dev',
+      push: { provider: 'fake' },
+      email: {
+        provider: 'brevo',
+        from: { name: 'WAB', address: 'no-reply@example.com' },
+        brevo: { apiKey: 'key' },
+      },
+    });
+    expect(notifier.channels.email).toBeDefined();
+  });
+
   it('builds real vendor clients lazily without any network access', async () => {
     const notifier = createNotifier({
       environment: 'dev',
