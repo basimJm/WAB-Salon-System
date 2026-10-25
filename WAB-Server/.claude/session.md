@@ -10,6 +10,20 @@
 
 ## Current task
 
+### SRV-131 — Merchant reviews read (M20), branch-scoped
+
+- Branch: `feat/srv-131-merchant-reviews`
+- Status: IN REVIEW
+- Acceptance criteria (Merchant PRD M20, BUSINESS_DOMAIN §5.11, §6 branch scope; operation `GET /merchant/v1/reviews` — client impact MER-042, MER-063):
+  - [x] `GET /merchant/v1/reviews?target=SALON|STAFF&memberId=&branchId=` (`REVIEWS_VIEW`): published reviews newest first, paginated; first name, stars, comment, date, branch label, staff for STAFF; review id = Report reference
+  - [x] Summary of the same scope: average (1 decimal), count, distribution per star
+  - [x] Branch members see their branch only (salon reviews by branch label, staff reviews of their branch's staff; another branch → 403 `BRANCH_SCOPE_DENIED`); the owner sees all with an optional `branchId`
+  - [x] `memberId` required for STAFF (400); unknown staff 404
+  - [x] Review view mapping shared with the customer list (`createReviewViews`), no duplication
+- Tests: `tests/merchantReviews.test.ts` (4) + reviews suites; full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔ (M20 fields), Architect ✔ (merchant namespace, permission + branch scope), QA ✔)
+
 ### SRV-148 — Branches end to end (Stage P)
 
 - Branch: `feat/srv-148-branches-e2e`
@@ -36,19 +50,6 @@
 - Tests: `tests/adminBranches.test.ts` (7); full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔ (no rule duplicated: admin wraps the owner's services), Mobile N/A, Architect ✔ (admin namespace only; adminGuard on every route), QA ✔)
-
-### SRV-146 — Finance by branch (Stage P)
-
-- Branch: `feat/srv-146-finance-branch`
-- Status: DONE (PR #392)
-- Acceptance criteria (BUSINESS_DOMAIN §5.14, §3 transactions/refunds/ledger `branchId`; operations merchant `GET /finance/transactions|refunds`, admin `GET /transactions`, `GET /finance/reconciliation`, `GET /refunds`, `POST /exports` TRANSACTIONS — client impact ADM-091, MER-064):
-  - [x] A payment attempt keeps the draft's `branchId`; refunds and ledger CHARGE/GATEWAY_FEE/REFUND entries take the payment's branch; payouts stay salon-wide (no branch)
-  - [x] Owner finance: payments and refunds accept `branchId` and show `branchId` per row; balance and payouts stay salon-wide
-  - [x] Admin: transactions list `branchId` filter, reconciliation `salonId`/`branchId` scope, refunds list `salonId`/`branchId` filters; rows show `branchId`
-  - [x] TRANSACTIONS export takes `branchId` and has a Branch column
-- Tests: `tests/financeBranch.test.ts` (5), `tests/paymentsService.test.ts` (+1), `tests/exports.test.ts` (column shift); full gate 146 suites / 2735 tests
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔ (additive fields), Architect ✔ (payouts per salon unchanged; Phase 2 split payments unaffected), QA ✔) — legacy rows without a branch are backfilled by SRV-137's migration.
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

@@ -18573,6 +18573,271 @@
         }
       }
     },
+    "/merchant/v1/reviews": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Published reviews of the salon or one staff member with average, count and star distribution (REVIEWS_VIEW; branch members: their branch only, else 403 BRANCH_SCOPE_DENIED)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "required": false,
+            "name": "pageSize",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SALON",
+                "STAFF"
+              ],
+              "default": "SALON"
+            },
+            "required": false,
+            "name": "target",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "memberId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Published reviews, newest first, with the summary of the same scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "Review reference (used by Report → Contact WAB)"
+                              },
+                              "customerName": {
+                                "type": "string",
+                                "description": "First name only"
+                              },
+                              "rating": {
+                                "type": "number"
+                              },
+                              "comment": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              },
+                              "branch": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ]
+                              },
+                              "staff": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "firstName": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "firstName"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "customerName",
+                              "rating",
+                              "comment",
+                              "createdAt",
+                              "branch",
+                              "staff"
+                            ]
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "avg": {
+                              "type": "number",
+                              "description": "One decimal"
+                            },
+                            "count": {
+                              "type": "number"
+                            },
+                            "distribution": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "number"
+                              },
+                              "description": "Published reviews per star, \"1\"…\"5\""
+                            }
+                          },
+                          "required": [
+                            "avg",
+                            "count",
+                            "distribution"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "items",
+                        "summary"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/merchant/v1/notifications": {
       "get": {
         "tags": [
