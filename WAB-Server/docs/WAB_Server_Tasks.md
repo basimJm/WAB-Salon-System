@@ -302,6 +302,7 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 | SRV-147 | Admin branches, full CRUD for any salon: list / get / create / update (location, contacts, hours, closures, services, staff) / set main / offline / online / close, each with reason + audit + owner notification; salon detail returns branches; bookings, reviews, members and staff filter by branch; admin moves staff between branches | `feat/srv-147-admin-branches` | SRV-139, SRV-141 | DONE | Root `CLAUDE.md` §4.12. Unblocks ADM-089…091. |
 | SRV-148 | Branches end to end: demo seed with multi-branch salons, OpenAPI/Postman regenerated and checked, client impact list (ADM-088…092, CUS-082…087, MER-061…066) | `feat/srv-148-branches-e2e` | SRV-143, SRV-144, SRV-145, SRV-146, SRV-147 | DONE | Closes Stage P. |
 | SRV-149 | Member profile (login, refresh, application, `/me`) carries `branchId` (null for the owner) so the merchant app knows the member's branch scope at sign-in — gap found by MER-061 | `feat/srv-149-member-profile-branch` | SRV-140 | DONE | Client impact MER-061 (parses it when present). |
+| SRV-150 | Alerts: titles localized to the request language (admin answers both AR and EN) and one subject-type spelling (uppercase enum) on every path | `feat/srv-150-alert-i18n` | SRV-117 | TODO | Server issues S11 (titles always English) and S12 (`salon` lowercase on one path) found by ADM-079 (`WAB-Admin-Dashboard/docs/SERVER_ISSUES.md`). |
 
 ---
 

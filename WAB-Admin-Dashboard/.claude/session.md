@@ -54,3 +54,13 @@
 - Browser check (dev-debug from this worktree): bookings, transactions, refunds, reconciliation and reviews with `?salon=Noor&branch=Khalda` and booking details, AR RTL dark 375 px and EN LTR light 1280 px (bookings, refunds, salon members); one row each with the Khalda column, labels Salon/Branch, no horizontal scroll, console clean
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — filters live in a shared presentation component + hooks (`useBranchOptions`, `useBranchNames`), no feature imports another. DEVIATIONS: no e2e (user decision); the salon picker lists the first 100 salons (no server-side typeahead endpoint for options); reviews have no separate detail page, so the branch is a column of the list (and of the customer's reviews tab); booking branch names come localized by the server (the mock answers in English); "ledger" = the reconciliation screen (the admin has no ledger list endpoint).
+
+### DOCS — ADM-079 DONE; gap rows ADM-093…095 + SRV-150
+- Branch: `docs/adm-079-done-gap-rows`
+- Status: DONE
+- Acceptance criteria:
+  - [x] ADM-079 DONE (PR #449); open gaps G13–G15 become ADM-093 (catalog map to existing), ADM-094 (customers/salons exports), ADM-095 (booking `requestedAt`); server issues S11/S12 become SRV-150
+  - [x] `tasks.py check` OK (only the known CUS-047 note); board regenerated
+- Tests: `python3 scripts/tasks.py check`
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — backlog only, no code.
