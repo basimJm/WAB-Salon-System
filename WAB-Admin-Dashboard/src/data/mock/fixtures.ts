@@ -8,6 +8,7 @@ import { contentRoutes } from './contentRoutes';
 import { locationsRoutes } from './locationsRoutes';
 import { salonsRoutes } from './salonsRoutes';
 import { branchesRoutes } from './branchesRoutes';
+import { membersRoutes } from './membersRoutes';
 import { createBranchStore } from './branchStore';
 import { reviewsRoutes } from './reviewsRoutes';
 import { transactionsRoutes } from './transactionsRoutes';
@@ -43,6 +44,7 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...catalogRoutes(),
     ...salonsRoutes(branches),
     ...branchesRoutes(branches),
+    ...membersRoutes(branches),
     ...applicationsRoutes(),
     ...customersRoutes(),
     ...bookingsRoutes(),

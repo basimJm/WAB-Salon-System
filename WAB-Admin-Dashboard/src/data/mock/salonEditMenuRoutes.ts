@@ -9,7 +9,7 @@ import { type Day, type SalonEditState, uid, withoutReason } from './salonEditSt
 
 const O = OPERATIONS;
 export function salonMenuRoutes(
-  of: (id: string | undefined) => SalonEditState,
+  of: (id: string | undefined, branchId?: string | null) => SalonEditState,
 ): readonly MockRoute[] {
   return [
     mockRoute(
@@ -18,8 +18,8 @@ export function salonMenuRoutes(
         query: () =>
           dto.getSalonsByIdServicesQuerySchema().extend({ branchId: OBJECT_ID.optional() }),
       }),
-      ({ params }) => {
-        const rows = of(params['id']).services;
+      ({ params, query }) => {
+        const rows = of(params['id'], query.get('branchId')).services;
         return {
           data: rows,
           meta: { page: 1, pageSize: 100, total: rows.length, totalPages: 1 },
@@ -33,8 +33,8 @@ export function salonMenuRoutes(
         data: dto.postSalonsByIdServicesDataSchema,
         body: dto.postSalonsByIdServicesBodySchema,
       }),
-      ({ params, body }) => {
-        const s = of(params['id']);
+      ({ params, query, body }) => {
+        const s = of(params['id'], query.get('branchId'));
         const b = body as {
           catalogServiceId: string;
           price: string;
@@ -66,8 +66,10 @@ export function salonMenuRoutes(
         data: dto.patchSalonsByIdServicesByServiceIdDataSchema,
         body: dto.patchSalonsByIdServicesByServiceIdBodySchema,
       }),
-      ({ params, body }) => {
-        const row = of(params['id']).services.find((x) => x.id === params['serviceId']);
+      ({ params, query, body }) => {
+        const row = of(params['id'], query.get('branchId')).services.find(
+          (x) => x.id === params['serviceId'],
+        );
         if (!row) throw new Error('no service');
         const patch = withoutReason(body);
         Object.assign(row, patch);
