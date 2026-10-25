@@ -106,6 +106,18 @@
 | MER-059 | Store readiness (icons, splash, privacy manifest, Data safety, screenshots AR/EN, listing texts, overlay-permission justification for Play) | `feat/mer-059-store-readiness` | MER-058 | PENDING | Store accounts and texts — **owner input** |
 | MER-060 | Release pipeline (signing, Play internal + TestFlight from a tag, changelog) | `feat/mer-060-release-pipeline` | MER-059 | PENDING | Signing material — **owner input** |
 
+## Phase 6 — Salon branches
+Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2, §5.16–§5.18, §6, §12.7). Owner manages all branches; managers (one or more per branch) manage their branch only; team members and permissions stay owner-only.
+
+| ID | Task | Branch | Needs | Status | Notes |
+|---|---|---|---|---|---|
+| MER-061 | `./gradlew apiSync` with branches; session keeps the member's scope (owner = all branches, others = one branch); branch error codes (AR/EN) | `feat/mer-061-branches-contract` | MER-058, SRV-140, SRV-148 | BLOCKED | Waits for the server contract. |
+| MER-062 | Owner: branches management (list, create with map location/contacts/name AR+EN, edit, set main, offline/online, close showing the blocking bookings) and a branch switcher ("All branches" / one) across the app | `feat/mer-062-branches-manage` | MER-061, SRV-139 | BLOCKED | §5.16. |
+| MER-063 | Branch-scoped bookings, requests, calendar, dashboard, statistics and reviews (manager: own branch only; owner: switcher) | `feat/mer-063-branch-scope` | MER-062, SRV-140, SRV-142 | BLOCKED | §6 branch scope. |
+| MER-064 | Per-branch hours, closures and services/prices | `feat/mer-064-branch-operations` | MER-062, SRV-141 | BLOCKED | |
+| MER-065 | Team with branches: new member requires a branch; owner moves staff between branches (conflict flow); managers see their branch's staff; permission editor hides FINANCE_VIEW / SUBSCRIPTION_VIEW / POLICIES_MANAGE for branch members | `feat/mer-065-team-branches` | MER-062, SRV-140, SRV-141 | BLOCKED | |
+| MER-066 | Real-time and push per branch: branch rooms, request alerts only for the member's branch (owner: all) | `feat/mer-066-branch-realtime` | MER-063, SRV-143 | BLOCKED | §7, §8. |
+
 ## 4. Traceability (PRD screen → task)
 M01 MER-019 · M02 MER-020 · M03 MER-021 · M04 MER-022 · M05 MER-023 · M06 MER-025 · M07 MER-050 · M08 MER-026 · M09 MER-027 · M10 MER-028/029/030 · M11 MER-031 · M12 MER-032 · M13 MER-033 · M14 MER-034 · M15 MER-035 · M16 MER-036/037 · M17 MER-038/039 · M18 MER-040 · M19 MER-041 · M20 MER-042 · M21 MER-043 · M22 MER-044/045 · M23 MER-046 · M24 MER-047 · M25 MER-048/049 · M26 MER-019 · §4 MER-024 · §6 MER-009/040 · §11 MER-012/047 · §14 MER-010/051.
 
