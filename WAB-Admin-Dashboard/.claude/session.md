@@ -10,6 +10,20 @@
 
 ## Current task
 
+### ADM-094 — Export menu on the customers and salons lists (export kinds `CUSTOMERS`, `SALONS`, SRV-126)
+
+- Branch: `feat/adm-094-list-exports` (from `origin/admin`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD §2 "export at any time" + A12 customers / A13 salons; gap G14; operation postExports kinds CUSTOMERS `{status?, gender?, cityId?, q?}` and SALONS `{state?, gender?, cityId?, subscription?, q?}`, getExportsById):
+  - [x] Customers list header has the shared `ExportMenu` (Excel / CSV / PDF, same toasts and polling as bookings/transactions through `useExportRunner`) exporting `CUSTOMERS` with the list's status, gender, city and search
+  - [x] Salons list header has the same menu exporting `SALONS` with state, gender, city, subscription and search; the recommended / deletion switches have no export parameter and are left out
+  - [x] Pure mappers: `customerQueryOf` + `customerExportParams` (new `presentation/customers/customerFilters.ts`, the page now uses it), `salonExportParams` next to `salonQueryOf`; paging never reaches the export
+  - [x] Export body: `cityId` re-checked with OBJECT_ID (the generated pattern refuses real ids, S6); G14 FIXED in `docs/REMOTE_DEV_GAPS.md`
+- Tests: tests/list-exports.test.tsx (5: both mappers incl. unknown values and dropped switches, real vs malformed city id, both menus send the right kind + params and open the link); `sh scripts/gate.sh` GATE OK
+- Browser check (dev-release against the local real stack, preview :4174, QA admin): AR RTL light 375 px customers `?status=ACTIVE`: "تصدير" menu with three formats, Excel → server job `CUSTOMERS {status: ACTIVE}` DONE, 25 rows, signed download link opened; EN LTR dark 1280 px salons `?state=LIVE&gender=FEMALE`: Export at the header end, Excel → `SALONS {state, gender}` DONE and opened; CSV → job FAILED `GENERATION_FAILED` on the server (known S5: CSV/PDF fail on the real S3 storage) and the menu shows its failure toast; no horizontal page scroll; console clean
+- Loops: 1/1 — re-checked every criterion against the contract params, the tests and the real job answers
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — reuses ExportMenu/useExportRunner, no contract hand edit, customers page query logic moved to a tested pure function. DEVIATIONS: salons export ignores the recommended / deletion-request switches (server has no such params); CSV/PDF fail on the real stack because of S5 (server); a city filter was not exercised against the real server (schema covered by unit test); no e2e (user decision).
+
 ### ADM-093 — Catalog request approval can map to an existing catalog service (SRV-125)
 
 - Branch: `feat/adm-093-catalog-map-existing` (from `origin/admin`)
