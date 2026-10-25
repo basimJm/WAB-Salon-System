@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-049 — More M25 part 2: my account, push switch, delete my account
+- Branch: `feat/mer-049-my-account`
+- Branched: (from `feat/mer-043-statistics`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD M25, §14 `delete_request`; operations `GET/PATCH /me`, `POST /auth/change-phone`, `PATCH /installations/push-enabled`, `POST /me/leave`, `POST /salon/deletion-request`):
+  - [x] `feature/more` gets its domain (`MyAccount`, `PhotoChange`, `AccountRepository`, name rules 1..50) and data (`AccountApi`, PATCH body built as JSON so `photoKey: null` removes the photo; hand fixtures for `/me` and change-phone because the generated one is `data: null`)
+  - [x] More header shows the member's photo and opens My account (`Screen.MyAccount`): photo (pick → 1:1 crop → MEMBER_PHOTO upload, remove), first / last name, phone (read-only) + "Change phone" sheet (country + number validated by the server regex) → OTP to the new number (purpose CHANGE_PHONE) → back on resume the proof is used once for `POST /auth/change-phone` (409 `PHONE_ALREADY_REGISTERED` shown localized), role badge; save only when changed; the session's first name follows the server
+  - [x] Push switch is now the server's (`PATCH /installations/push-enabled`, optimistic, rolled back with an error banner); More reads `/me` on open and aligns the local switch
+  - [x] Delete my account: members confirm "Remove my access" → `POST /me/leave` → everything cleared (`SessionStore.clearAll`) → login; the owner gets a sheet explaining WAB will contact them, optional note (≤ 500) → `POST /salon/deletion-request` → "Request sent on {date}"; `delete_request` (kind) tracked and added to the required PRD events
+- Tests: `AccountTest` (1), `AccountMapperTest` (2), `MyAccountViewModelTest` (2), `MoreViewModelTest` (+2 push rollback, deletion / leave); more + composeApp host tests green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the owner never calls `/me/leave` (the button sends the deletion request instead), so `LAST_OWNER` cannot come from the UI.
+
 ### MER-043 — Statistics M21
 - Branch: `feat/mer-043-statistics`
 - Branched: (from `feat/mer-042-reviews`)

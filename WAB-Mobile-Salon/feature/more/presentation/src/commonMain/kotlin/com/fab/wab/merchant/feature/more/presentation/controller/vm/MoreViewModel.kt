@@ -3,6 +3,8 @@ package com.fab.wab.merchant.feature.more.presentation.controller.vm
 import com.fab.wab.merchant.core.analytics.AnalyticsAction
 import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.analyticsParams
+import com.fab.wab.merchant.core.domain.AppError
+import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.AppearanceSettings
 import com.fab.wab.merchant.core.domain.ThemeMode
 import com.fab.wab.merchant.core.domain.config.AppConfigRepository
@@ -11,7 +13,10 @@ import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.core.ui.alert.RequestAlert
 import com.fab.wab.merchant.core.ui.permission.OverlayPermission
+import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.feature.auth.domain.usecase.LogoutUseCase
+import com.fab.wab.merchant.feature.more.domain.AccountLimits
+import com.fab.wab.merchant.feature.more.domain.AccountRepository
 import com.fab.wab.merchant.feature.more.presentation.analytics.MoreAnalytics
 import com.fab.wab.merchant.feature.more.presentation.controller.contract.MoreContract.SideEffect
 import com.fab.wab.merchant.feature.more.presentation.controller.contract.MoreContract.UiAction
@@ -31,6 +36,9 @@ class MoreDependencies(
     val analytics: AnalyticsTracker,
     val version: String,
     val versionCode: Int,
+    /** MER-049: `/me` (photo, push switch), `PATCH /installations/push-enabled`, leave / salon deletion request. */
+    val account: AccountRepository,
+    val errorText: suspend (AppError) -> String = ::appErrorText,
 )
 
 /**
@@ -58,10 +66,20 @@ class MoreViewModel(
         deps.session.pushEnabled.onEach { enabled -> updateState { copy(pushEnabled = enabled) } }.launchIn(scope)
         deps.config.current.onEach { value -> updateState { copy(contact = value?.contact) } }.launchIn(scope)
         refreshOverlay()
+        loadAccount()
+    }
+
+    /** Silent: the photo for the header and the server's push switch (kept locally for the app's own checks). */
+    private fun loadAccount() {
+        scope.launch {
+            val account = (deps.account.me() as? AppResult.Success)?.data ?: return@launch
+            updateState { copy(photoUrl = account.photoUrl) }
+            if (account.pushEnabled != uiState.value.pushEnabled) deps.session.setPushEnabled(account.pushEnabled)
+        }
     }
 
     override fun handle(event: UiAction) {
-        handleSettings(event) || handleSupport(event) || handleLogout(event)
+        handleSettings(event) || handleSupport(event) || handleLogout(event) || handleAccount(event)
     }
 
     private fun handleSettings(event: UiAction): Boolean {
@@ -74,10 +92,7 @@ class MoreViewModel(
                 deps.appearance.setThemeMode(if (event.enabled) ThemeMode.DARK else ThemeMode.LIGHT)
                 track(MoreAnalytics.ACTION_THEME, event.enabled.toString())
             }
-            is UiAction.OnPush -> scope.launch {
-                deps.session.setPushEnabled(event.enabled)
-                track(MoreAnalytics.ACTION_PUSH, event.enabled.toString())
-            }
+            is UiAction.OnPush -> setPush(event.enabled)
             UiAction.OnOverlay -> if (uiState.value.overlaySupported && !uiState.value.overlayGranted) {
                 deps.analytics.trackAction(AnalyticsAction(MoreAnalytics.ACTION_OVERLAY))
                 overlayAsked = true
@@ -120,6 +135,66 @@ class MoreViewModel(
             else -> return false
         }
         return true
+    }
+
+    private fun handleAccount(event: UiAction): Boolean {
+        when (event) {
+            UiAction.OnAccount -> emitSideEffect(SideEffect.OpenAccount)
+            UiAction.OnDeleteAccount -> updateState { copy(deleteSheet = true, deletionNote = "", deletionRequestedAt = null) }
+            is UiAction.OnDeletionNote -> updateState { copy(deletionNote = event.value.take(AccountLimits.DELETION_NOTE_MAX)) }
+            UiAction.OnDeleteConfirm -> deleteAccount()
+            UiAction.OnDeleteDismiss -> if (!uiState.value.deleting) updateState { copy(deleteSheet = false) }
+            else -> return false
+        }
+        return true
+    }
+
+    /** Optimistic switch; the server's answer wins (a failure puts the old value back). */
+    private fun setPush(enabled: Boolean) {
+        val before = uiState.value.pushEnabled
+        scope.launch {
+            deps.session.setPushEnabled(enabled)
+            track(MoreAnalytics.ACTION_PUSH, enabled.toString())
+            val result = deps.account.setPushEnabled(enabled)
+            if (result is AppResult.Error) {
+                deps.session.setPushEnabled(before)
+                emitSideEffect(SideEffect.ShowError(deps.errorText(result.appError)))
+            }
+        }
+    }
+
+    /** PRD M25 delete my account: the owner sends a salon deletion request; other members leave and are signed out. */
+    private fun deleteAccount() {
+        val state = uiState.value
+        if (state.deleting) return
+        scope.launch {
+            updateState { copy(deleting = true) }
+            val kind = if (state.isOwner) MoreAnalytics.KIND_SALON else MoreAnalytics.KIND_LEAVE
+            deps.analytics.trackAction(
+                AnalyticsAction(MoreAnalytics.ACTION_DELETE_REQUEST, analyticsParams { text(MoreAnalytics.PARAM_KIND, kind) }),
+            )
+            if (state.isOwner) {
+                when (val result = deps.account.requestSalonDeletion(state.deletionNote)) {
+                    is AppResult.Success -> updateState { copy(deleting = false, deletionRequestedAt = result.data) }
+                    is AppResult.Error -> failDeletion(result.appError)
+                    AppResult.Loading -> Unit
+                }
+            } else {
+                when (val result = deps.account.leave()) {
+                    is AppResult.Success -> {
+                        updateState { copy(deleting = false, deleteSheet = false) }
+                        deps.session.clearAll()
+                    }
+                    is AppResult.Error -> failDeletion(result.appError)
+                    AppResult.Loading -> Unit
+                }
+            }
+        }
+    }
+
+    private suspend fun failDeletion(error: AppError) {
+        updateState { copy(deleting = false) }
+        emitSideEffect(SideEffect.ShowError(deps.errorText(error)))
     }
 
     private fun track(

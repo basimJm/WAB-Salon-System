@@ -168,7 +168,8 @@
       "otp_request",
       "login_start",
       "review_report",
-      "statistics_view"
+      "statistics_view",
+      "delete_request"
     ]
   }
 }
