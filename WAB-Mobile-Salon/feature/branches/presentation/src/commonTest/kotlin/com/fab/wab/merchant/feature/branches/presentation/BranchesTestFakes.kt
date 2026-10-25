@@ -52,7 +52,8 @@ internal class FakeBranches(initial: List<Branch> = listOf(branch("a", main = tr
     }
 
     override suspend fun setMain(id: String) = record("main:$id") { branch(id, main = true) }
-    override suspend fun setOffline(id: String, reason: String) = record("offline:$id:$reason") { branch(id, status = BranchStatus.OFFLINE) }
+    override suspend fun setOffline(id: String, reason: String) =
+        record("offline:$id:$reason") { branch(id, status = BranchStatus.OFFLINE) }
     override suspend fun setOnline(id: String) = record("online:$id") { branch(id) }
     override suspend fun close(id: String) = record("close:$id") { branch(id, status = BranchStatus.CLOSED) }
 
@@ -66,7 +67,8 @@ internal class FakeLocations : LocationsRepository {
     override suspend fun countries(refresh: Boolean): AppResult<List<Country>> = AppResult.Success(emptyList())
     override suspend fun cities(countryCode: String, refresh: Boolean): AppResult<List<City>> =
         AppResult.Success(listOf(City("c1", "Amman"), City("c2", "Irbid")))
-    override suspend fun areas(cityId: String, refresh: Boolean): AppResult<List<Area>> = AppResult.Success(listOf(Area("a-$cityId", "Area")))
+    override suspend fun areas(cityId: String, refresh: Boolean): AppResult<List<Area>> =
+        AppResult.Success(listOf(Area("a-$cityId", "Area")))
 }
 
 private class GrantedPermissions : PermissionManager {

@@ -32,6 +32,13 @@ sealed interface BookingDetailsContract {
         val nowMs: Long = 0L,
     ) {
         val actions: Set<BookingAction> get() = details?.actions.orEmpty()
+
+        /** Reassignment stays inside the booking's branch (MER-063); members without a branch (older data) stay listed. */
+        val reassignStaff: List<StaffRef>
+            get() {
+                val branchId = details?.summary?.branch?.id ?: return staffOptions
+                return staffOptions.filter { it.branchId == null || it.branchId == branchId }
+            }
     }
 
     sealed interface UiAction {

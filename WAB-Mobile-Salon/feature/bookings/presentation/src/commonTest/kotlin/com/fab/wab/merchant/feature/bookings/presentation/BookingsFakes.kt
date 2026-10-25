@@ -84,7 +84,8 @@ internal class FakeBookingsRepository : BookingsRepository {
     override suspend fun complete(bookingId: String) = act("complete")
     override suspend fun noShow(bookingId: String) = act("noShow")
     override suspend fun reassign(bookingId: String, personIndex: Int, staffId: String) = act("reassign:$personIndex:$staffId")
-    override suspend fun staff(): AppResult<List<StaffRef>> = AppResult.Success(listOf(SARA, LINA))
+    var staffList = listOf(SARA, LINA)
+    override suspend fun staff(): AppResult<List<StaffRef>> = AppResult.Success(staffList)
 
     private fun act(call: String): AppResult<Unit> {
         actions += call

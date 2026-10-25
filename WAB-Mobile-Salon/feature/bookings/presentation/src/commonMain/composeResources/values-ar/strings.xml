@@ -44,6 +44,7 @@
     <string name="details_remaining">المتبقي للتحصيل</string>
     <string name="details_refunded">المسترد</string>
     <string name="details_policy">سياسة الحجز (وقت الحجز)</string>
+    <string name="details_branch">الفرع</string>
     <string name="details_history">سجل الحالة</string>
     <string name="details_reject_reason">سبب الرفض</string>
     <string name="details_cancel_reason">سبب الإلغاء</string>

@@ -54,7 +54,10 @@ class BranchesNavigation(override val navController: NavHostController) : Naviga
                 BranchesContract.SideEffect.AddBranch -> navigateTo(Screen.BranchEdit())
                 is BranchesContract.SideEffect.EditBranch -> navigateTo(Screen.BranchEdit(effect.id))
                 is BranchesContract.SideEffect.OpenBooking -> navigateTo(Screen.BookingDetails(effect.bookingId))
-                is BranchesContract.SideEffect.Done -> notifications.show(getString(outcomeText(effect.outcome)), style = NotificationStyle.Success)
+                is BranchesContract.SideEffect.Done -> notifications.show(
+                    getString(outcomeText(effect.outcome)),
+                    style = NotificationStyle.Success,
+                )
                 is BranchesContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }

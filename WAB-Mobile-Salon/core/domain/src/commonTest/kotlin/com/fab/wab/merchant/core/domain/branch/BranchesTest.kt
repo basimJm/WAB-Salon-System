@@ -86,7 +86,10 @@ class BranchesTest {
     @Test
     fun closeConflictCarriesTheBlockingBookings() {
         val conflict = AppError.ServerError(
-            ErrorCode.BRANCH_HAS_UPCOMING_BOOKINGS, 409, null, listOf(FieldError("b1", "", ""), FieldError("b2", "", ""), FieldError("b1", "", "")),
+            ErrorCode.BRANCH_HAS_UPCOMING_BOOKINGS,
+            409,
+            null,
+            listOf(FieldError("b1", "", ""), FieldError("b2", "", ""), FieldError("b1", "", "")),
         )
         assertEquals(listOf("b1", "b2"), conflict.blockingBookingIds())
         assertNull(AppError.ServerError(ErrorCode.LAST_BRANCH, 422, null).blockingBookingIds())

@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-063 — Branch-scoped bookings, requests and calendar
+- Branch: `feat/mer-063-branch-scope`
+- Branched: (from `feat/mer-062-branches-manage`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §6 branch scope; operations `GET /bookings?branchId=`, booking rows / details `branch {id,name,locationText}`, `GET /team/members` `branchId`):
+  - [x] Managers / employees: no switcher, no `branchId` sent — the server returns their branch only (bookings, calendar, requests)
+  - [x] Owner: branch switcher ("All branches" / one) on the bookings list and the calendar, shared through `BranchSelection`; the list sends `?branchId=`; the staff filter shows that branch's staff and a branch change clears it; cards show the branch name while all branches are listed
+  - [x] Calendar (the contract has no `branchId`): for a chosen branch the server call asks for that branch's staff and the columns / blocks are narrowed to them (team members carry `branchId`)
+  - [x] Booking details show a "Branch" section (name + address); reassignment lists only staff of the booking's branch; the in-app request card shows the branch name
+- Tests: `BookingsViewModelTest` (+2), `CalendarViewModelTest` (+1), `BookingMappersTest` (+1, branch + staff `branchId`); bookings / design-system / domain / branches / composeApp host tests green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: SERVER GAPS (stated, not built): Home dashboard (MER-050 ← SRV-130), merchant reviews read (SRV-131) and statistics (SRV-132) do not exist, so their branch scoping waits for those rows; the calendar endpoint has no `branchId` filter (client-side narrowing by staff branch). Long-line fixes of MER-062 files ride along in this commit.
+
 ### MER-062 — Owner branch management + branch switcher
 - Branch: `feat/mer-062-branches-manage`
 - Branched: (from `feat/mer-061-branches-contract`)

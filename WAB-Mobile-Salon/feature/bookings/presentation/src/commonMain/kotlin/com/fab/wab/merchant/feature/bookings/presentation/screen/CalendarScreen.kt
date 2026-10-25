@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
 import com.fab.wab.merchant.core.common.TimeFormat
 import com.fab.wab.merchant.core.domain.booking.BookingStatus
+import com.fab.wab.merchant.designsystem.components.branch.AppBranchSwitcher
 import com.fab.wab.merchant.designsystem.components.calendar.AppCalendarDayView
 import com.fab.wab.merchant.designsystem.components.calendar.AppCalendarHeader
 import com.fab.wab.merchant.designsystem.components.calendar.AppCalendarLegend
@@ -75,6 +76,14 @@ fun CalendarScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modif
                 modifier = Modifier.padding(horizontal = AppTheme.spacing.space16, vertical = AppTheme.spacing.space12),
                 filterCount = if (state.canFilter) state.staffFilter.size else null,
             )
+            if (state.branchScope.showsSwitcher) {
+                AppBranchSwitcher(
+                    branches = state.branchScope.branches,
+                    selectedId = state.branchScope.filter,
+                    onSelect = { onAction(UiAction.OnBranchSelect(it)) },
+                    modifier = Modifier.padding(bottom = AppTheme.spacing.space8),
+                )
+            }
             AppCalendarLegend(LEGEND)
             Box(modifier = Modifier.weight(1f)) { CalendarBody(state, onAction) }
         }
@@ -85,7 +94,7 @@ fun CalendarScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modif
 @Composable
 private fun CalendarBody(state: UiState, onAction: (UiAction) -> Unit) {
     when {
-        state.loading && state.entries.isEmpty() -> Box(
+        state.loading && state.visibleEntries.isEmpty() -> Box(
             Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) { AppLoadingIndicator() }
@@ -94,9 +103,9 @@ private fun CalendarBody(state: UiState, onAction: (UiAction) -> Unit) {
             val texts = CalendarTexts(timeRange = rangeText(), closed = stringResource(Res.string.calendar_closed_label))
             val days = state.days
             val columns = if (state.mode == CalendarMode.DAY) {
-                dayColumns(state.date, state.entries, state.staff, state.staffFilter, state.own, state.hours, texts)
+                dayColumns(state.date, state.visibleEntries, state.visibleStaff, state.staffFilter, state.own, state.hours, texts)
             } else {
-                weekColumns(days, days.map { weekDayTitle(it) }, state.entries, state.staffFilter, state.hours, texts)
+                weekColumns(days, days.map { weekDayTitle(it) }, state.visibleEntries, state.staffFilter, state.hours, texts)
             }
             val window = windowFor(days, state.hours, columns)
             val labels = hourLabels(window)
@@ -148,7 +157,7 @@ private fun nowMinute(state: UiState): Int? {
 
 @Composable
 private fun strip(state: UiState): List<WeekStripDayUi> {
-    val withBookings = state.entries.map { it.start.localDate() }.toSet()
+    val withBookings = state.visibleEntries.map { it.start.localDate() }.toSet()
     return weekOf(state.date).map { day ->
         WeekStripDayUi(
             date = day,

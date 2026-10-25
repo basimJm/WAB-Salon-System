@@ -76,7 +76,11 @@ private fun OfflineSheet(state: UiState, onAction: (UiAction) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(spacing.space12),
         ) {
             AppText(text = stringResource(Res.string.branch_offline_title), style = AppTheme.typography.titleMedium)
-            AppText(text = stringResource(Res.string.branch_offline_body), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(Res.string.branch_offline_body),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
             AppTextField(
                 value = state.offlineReason,
                 onValueChange = { onAction(UiAction.OnOfflineReason(it)) },
@@ -109,7 +113,11 @@ private fun BlockingSheet(blocking: BlockingBookings, onAction: (UiAction) -> Un
             verticalArrangement = Arrangement.spacedBy(spacing.space10),
         ) {
             AppText(text = stringResource(Res.string.branch_blocking_title), style = AppTheme.typography.titleMedium)
-            AppText(text = stringResource(Res.string.branch_blocking_body), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(Res.string.branch_blocking_body),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
             blocking.bookingIds.forEachIndexed { index, id ->
                 AppButton(
                     text = stringResource(Res.string.branch_blocking_booking, index + 1),
