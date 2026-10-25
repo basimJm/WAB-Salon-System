@@ -743,6 +743,7 @@ const buildServices = (
   });
   const favoritesRepository = new FavoritesRepository();
   const reviewsService = createReviewsService({
+    branches: branchesRepository,
     reviews: new ReviewsRepository(),
     salons: new SalonsRepository(),
     members: new MembersRepository(),
@@ -841,6 +842,7 @@ const buildServices = (
     logger,
   });
   const adminReviewsService = createAdminReviewsService({
+    branches: branchesRepository,
     reviews: new ReviewsRepository(),
     salons: new SalonsRepository(),
     members: new MembersRepository(),

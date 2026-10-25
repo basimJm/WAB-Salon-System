@@ -18,6 +18,10 @@ const reviewView = z.object({
   rating: z.number(),
   comment: z.string().nullable(),
   createdAt: z.string(),
+  branch: z
+    .object({ id: z.string(), name: z.string() })
+    .nullable()
+    .describe('The branch the review is about (label only)'),
 });
 const reviewsPreview = z.object({
   avg: z.number(),
