@@ -2084,7 +2084,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"role\": \"MANAGER\",\n  \"permissions\": [\n    \"string\"\n  ],\n  \"photoKey\": \"string\"\n}",
+              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"role\": \"MANAGER\",\n  \"permissions\": [\n    \"string\"\n  ],\n  \"photoKey\": \"string\",\n  \"branchId\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2181,7 +2181,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"photoKey\": \"string\",\n  \"role\": \"MANAGER\",\n  \"permissions\": [\n    \"string\"\n  ]\n}",
+              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"photoKey\": \"string\",\n  \"role\": \"MANAGER\",\n  \"permissions\": [\n    \"string\"\n  ],\n  \"branchId\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

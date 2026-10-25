@@ -19,6 +19,8 @@ export const DEFAULT_SORT = { createdAt: SORT_DESCENDING } as const;
 export const RETIRED_INDEXES: Readonly<Record<string, readonly string[]>> = {
   // Read each customer's `language` (ar/en) as a text-search language: inserting `ar` failed.
   Customer: ['firstName_text_lastName_text_phone.e164_text'],
+  // One service per catalog entry per salon: replaced by one per branch (salons have branches).
+  SalonService: ['salonId_1_catalogServiceId_1'],
 };
 /** Server codes for "nothing to drop": the index or the whole collection does not exist yet. */
 export const MONGO_INDEX_NOT_FOUND_CODES: readonly number[] = [26, 27];

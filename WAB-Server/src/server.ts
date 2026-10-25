@@ -785,6 +785,7 @@ const buildServices = (
     settings,
   });
   const salonProfileService = createSalonProfileService({
+    branchEditor: branchesService,
     mainBranches,
     salons: new SalonsRepository(),
     cities: new CitiesRepository(),
@@ -795,6 +796,7 @@ const buildServices = (
   });
   const policyService = createPolicyService({ salons: new SalonsRepository(), state: salonState });
   const staffService = createStaffService({
+    branches: branchesRepository,
     members: new MembersRepository(),
     salons: new SalonsRepository(),
     salonServices,
@@ -815,6 +817,7 @@ const buildServices = (
     state: salonState,
   });
   const hoursService = createHoursService({
+    branches: branchesRepository,
     mainBranches,
     salons: new SalonsRepository(),
     closures: new ClosuresRepository(),
@@ -960,6 +963,7 @@ const buildServices = (
     }),
     staff: staffService,
     team: createTeamService({
+      branches: branchesRepository,
       mainBranches,
       access: accessEvents,
       members: new MembersRepository(),

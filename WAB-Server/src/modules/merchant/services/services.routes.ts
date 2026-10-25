@@ -33,6 +33,7 @@ export const createMerchantServicesRouter = (
         salonId: salonOf(req),
         language: req.language,
         params: { page, pageSize },
+        scope: req.member?.branchId,
       });
       sendPaginated(req, res, result.items, { page, pageSize }, result.meta.total);
     }),
@@ -48,6 +49,7 @@ export const createMerchantServicesRouter = (
         await service.add({
           salonId: salonOf(req),
           language: req.language,
+          scope: req.member?.branchId,
           catalogServiceId,
           fields,
         }),
@@ -61,7 +63,13 @@ export const createMerchantServicesRouter = (
       const { id } = part<typeof serviceParams>(req, 'params');
       const fields = part<typeof updateServiceSchema>(req, 'body');
       sendSuccess(req, res, {
-        data: await service.update({ salonId: salonOf(req), language: req.language, id, fields }),
+        data: await service.update({
+          salonId: salonOf(req),
+          language: req.language,
+          scope: req.member?.branchId,
+          id,
+          fields,
+        }),
       });
     }),
   );

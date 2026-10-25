@@ -10090,6 +10090,10 @@
                     "type": "string",
                     "maxLength": 1024,
                     "pattern": "^[A-Za-z0-9_-]+(\\/[A-Za-z0-9._-]+)*$"
+                  },
+                  "branchId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
                   }
                 },
                 "required": [
@@ -10571,6 +10575,10 @@
                       "maxLength": 64
                     },
                     "maxItems": 23
+                  },
+                  "branchId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
                   }
                 }
               }

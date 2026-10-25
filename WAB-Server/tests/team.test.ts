@@ -210,7 +210,7 @@ describe('team: add member', () => {
       .post('/merchant/v1/team/members')
       .set(owner.headers)
       .send({ ...NEW, role: 'MANAGER', phone: { countryCode: 'JO', number: '781234567' } });
-    expect(bodyOf(manager).data['permissions']).toHaveLength(13);
+    expect(bodyOf(manager).data['permissions']).toHaveLength(12);
   });
 
   it('accepts an explicit grant but never owner-only or unknown keys', async () => {
@@ -219,7 +219,8 @@ describe('team: add member', () => {
       .post('/merchant/v1/team/members')
       .set(owner.headers)
       .send({ ...NEW, permissions: ['FINANCE_VIEW', 'DASHBOARD_VIEW', 'FINANCE_VIEW'] });
-    expect(bodyOf(ok).data['permissions']).toEqual(['DASHBOARD_VIEW', 'FINANCE_VIEW']);
+    // Finance cannot go to a branch member: dropped from the grant (§6 branch scope).
+    expect(bodyOf(ok).data['permissions']).toEqual(['DASHBOARD_VIEW']);
     const before = membersM.docs.length;
     const bad = await request(app)
       .post('/merchant/v1/team/members')
@@ -314,7 +315,7 @@ describe('team: change member', () => {
     const promoted = await request(app).patch(url).set(owner.headers).send({ role: 'MANAGER' });
     expect(promoted.status).toBe(200);
     expect(membersM.docs[1]?.['role']).toBe('MANAGER');
-    expect((membersM.docs[1]?.['permissions'] as string[]).length).toBe(13);
+    expect((membersM.docs[1]?.['permissions'] as string[]).length).toBe(12);
     const both = await request(app)
       .patch(url)
       .set(owner.headers)

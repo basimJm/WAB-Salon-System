@@ -15,6 +15,8 @@ const permissions = z.array(z.string().max(64)).max(PERMISSIONS.length + 8);
 
 export const teamQuery = paginationQuery(APP_PAGE_SIZE);
 export const memberParams = z.object({ id: z.string().regex(OBJECT_ID_PATTERN) });
+const branchIdSchema = z.string().regex(OBJECT_ID_PATTERN);
+
 export const createMemberSchema = z.object({
   firstName: name,
   lastName: name,
@@ -23,6 +25,8 @@ export const createMemberSchema = z.object({
   /** Omit to start from the role's template. */
   permissions: permissions.optional(),
   photoKey: photoKey.optional(),
+  /** The member's branch (§3.4); omit for the salon's main branch. */
+  branchId: branchIdSchema.optional(),
 });
 export const updateMemberSchema = z
   .object({
@@ -31,6 +35,8 @@ export const updateMemberSchema = z
     photoKey: photoKey.nullable(),
     role: z.enum(ASSIGNABLE_ROLES),
     permissions,
+    /** Moves the member to another branch of the salon (owner; their skills are cleared). */
+    branchId: branchIdSchema,
   })
   .partial()
   .refine((v) => Object.values(v).some((x) => x !== undefined), {

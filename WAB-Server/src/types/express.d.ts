@@ -27,6 +27,8 @@ declare global {
         salonId: string;
         role: MemberRole;
         permissions: readonly Permission[];
+        /** The member's branch; absent for the owner (every branch, §6 branch scope). */
+        branchId?: string | undefined;
       };
     }
   }
