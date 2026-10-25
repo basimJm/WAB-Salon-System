@@ -45,6 +45,8 @@ serverEventSchema.index({ ts: -1 });
 serverEventSchema.index({ name: 1, ts: -1 });
 serverEventSchema.index({ actorId: 1, ts: -1 });
 serverEventSchema.index({ bookingId: 1, ts: -1 });
+// Per-salon counts (salon page views for merchant statistics).
+serverEventSchema.index({ salonId: 1, name: 1, ts: -1 });
 makeAppendOnly(serverEventSchema);
 
 export const ServerEventModel = model<ServerEventRaw>('ServerEvent', serverEventSchema);

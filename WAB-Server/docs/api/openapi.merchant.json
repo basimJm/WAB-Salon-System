@@ -18838,6 +18838,364 @@
         }
       }
     },
+    "/merchant/v1/statistics": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "KPIs, per-day series and rankings for a period of appointment days (STATISTICS_VIEW; branch members: their branch only, else 403 BRANCH_SCOPE_DENIED)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "to",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "null = the whole salon"
+                        },
+                        "bookings": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "number"
+                            },
+                            "byStatus": {
+                              "type": "object",
+                              "properties": {
+                                "PENDING": {
+                                  "type": "number"
+                                },
+                                "APPROVED": {
+                                  "type": "number"
+                                },
+                                "REJECTED": {
+                                  "type": "number"
+                                },
+                                "CANCELLED_BY_CUSTOMER": {
+                                  "type": "number"
+                                },
+                                "CANCELLED_BY_SALON": {
+                                  "type": "number"
+                                },
+                                "AUTO_CANCELLED": {
+                                  "type": "number"
+                                },
+                                "COMPLETED": {
+                                  "type": "number"
+                                },
+                                "NO_SHOW": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "PENDING",
+                                "APPROVED",
+                                "REJECTED",
+                                "CANCELLED_BY_CUSTOMER",
+                                "CANCELLED_BY_SALON",
+                                "AUTO_CANCELLED",
+                                "COMPLETED",
+                                "NO_SHOW"
+                              ]
+                            },
+                            "approvalRate": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "description": "Percent, one decimal; null when nothing to measure"
+                            },
+                            "cancellationRate": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "description": "Percent, one decimal; null when nothing to measure"
+                            },
+                            "noShowRate": {
+                              "type": [
+                                "number",
+                                "null"
+                              ],
+                              "description": "Percent, one decimal; null when nothing to measure"
+                            },
+                            "averageResponseMinutes": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            },
+                            "brideBookings": {
+                              "type": "number"
+                            },
+                            "revenue": {
+                              "type": "object",
+                              "properties": {
+                                "online": {
+                                  "type": "string",
+                                  "description": "JOD, 3 decimals"
+                                },
+                                "atSalon": {
+                                  "type": "string",
+                                  "description": "JOD, 3 decimals"
+                                },
+                                "total": {
+                                  "type": "string",
+                                  "description": "JOD, 3 decimals"
+                                }
+                              },
+                              "required": [
+                                "online",
+                                "atSalon",
+                                "total"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "byStatus",
+                            "approvalRate",
+                            "cancellationRate",
+                            "noShowRate",
+                            "averageResponseMinutes",
+                            "brideBookings",
+                            "revenue"
+                          ]
+                        },
+                        "profileViews": {
+                          "type": "number",
+                          "description": "Salon page opens (shared by every branch)"
+                        },
+                        "reviews": {
+                          "type": "object",
+                          "properties": {
+                            "new": {
+                              "type": "number"
+                            },
+                            "averageRating": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "new",
+                            "averageRating"
+                          ]
+                        },
+                        "days": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "date": {
+                                "type": "string"
+                              },
+                              "bookings": {
+                                "type": "number"
+                              },
+                              "revenue": {
+                                "type": "string",
+                                "description": "JOD, 3 decimals"
+                              }
+                            },
+                            "required": [
+                              "date",
+                              "bookings",
+                              "revenue"
+                            ]
+                          }
+                        },
+                        "topServices": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "bookings": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "bookings"
+                            ]
+                          }
+                        },
+                        "topStaff": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "bookings": {
+                                "type": "number"
+                              },
+                              "rating": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "firstName",
+                              "bookings",
+                              "rating"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "from",
+                        "to",
+                        "branchId",
+                        "bookings",
+                        "profileViews",
+                        "reviews",
+                        "days",
+                        "topServices",
+                        "topStaff"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/merchant/v1/notifications": {
       "get": {
         "tags": [

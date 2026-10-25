@@ -10,10 +10,24 @@
 
 ## Current task
 
+### SRV-132 — Merchant statistics (M21), branch-scoped
+
+- Branch: `feat/srv-132-merchant-statistics`
+- Status: IN REVIEW
+- Acceptance criteria (Merchant PRD M21, BUSINESS_DOMAIN §6 branch scope; operation `GET /merchant/v1/statistics` — client impact MER-043, MER-063):
+  - [x] `GET /merchant/v1/statistics?from=&to=&branchId=` (`STATISTICS_VIEW`), civil days Asia/Amman both included, at most 92 days (400 otherwise)
+  - [x] Bookings by appointment day in the period: by status, approval rate (approved / answered), cancellation rate, no-show rate (no-show / finished), average response minutes (request → first member answer), bride bookings, revenue in JOD (online kept net of refunds + paid at the salon on completion)
+  - [x] Profile views = new `salon.viewed` server events written when a customer opens a salon page (salon-wide; index `{salonId, name, ts}`); new published reviews; average rating (salon rating, or the branch's labelled reviews for a branch)
+  - [x] Per-day series (bookings, revenue) for every day; top 5 services (booking snapshot names) and staff (first name, rating) among approved/completed bookings
+  - [x] Branch members get their branch only (another → 403 `BRANCH_SCOPE_DENIED`); the owner sees the salon or one branch
+- Tests: `tests/merchantStatistics.test.ts` (5), `tests/salonDetails.test.ts` (+1 view tracked), `tests/audit.test.ts` (read-only `countFor` allowed); full gate 150 suites / 2755 tests
+- Loops: 1/1
+- Review: PASSED (SE ✔ (pure calculator + thin service; bookings of the period are loaded once, bounded by the 92-day cap), Mobile ✔, Architect ✔, QA ✔) — profile views start counting from this release (no history before).
+
 ### SRV-131 — Merchant reviews read (M20), branch-scoped
 
 - Branch: `feat/srv-131-merchant-reviews`
-- Status: IN REVIEW
+- Status: DONE (PR #401)
 - Acceptance criteria (Merchant PRD M20, BUSINESS_DOMAIN §5.11, §6 branch scope; operation `GET /merchant/v1/reviews` — client impact MER-042, MER-063):
   - [x] `GET /merchant/v1/reviews?target=SALON|STAFF&memberId=&branchId=` (`REVIEWS_VIEW`): published reviews newest first, paginated; first name, stars, comment, date, branch label, staff for STAFF; review id = Report reference
   - [x] Summary of the same scope: average (1 decimal), count, distribution per star
@@ -35,21 +49,6 @@
 - Tests: `tests/demoBranches.test.ts` (3), `tests/demoSeed.test.ts` (Branch filled later); full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (salon legacy place/hours fields stay mirrored until every client reads branches — dropping them is a later contract change), QA ✔) — the demo seed itself was not run against the hosted dev database in this task (owner runs `npm run seed:demo`).
-
-### SRV-147 — Admin branches, full CRUD for any salon (Stage P)
-
-- Branch: `feat/srv-147-admin-branches`
-- Status: DONE (PR #393)
-- Acceptance criteria (BUSINESS_DOMAIN §5.16, §6 admin, root CLAUDE.md §4.12; operations admin `/salons/{id}/branches[/{branchId}[/main|offline|online|close]]`, `/salons/{id}` detail, `/salons/{id}/members`, salon edit hours/closures/services `?branchId=`, `POST /salons/{id}/members/{memberId}/branch`, `GET /bookings?branchId=` + BOOKINGS export — client impact ADM-089/090/091; merchant `GET /bookings?branchId=` for the owner, MER-063):
-  - [x] Admin list/get/create/update/set main/offline/online/close any salon's branch through the owner's branches service (limit, last branch, main, upcoming bookings unchanged); every write needs a reason, writes an audit record (`entityType: branch`) and tells the owner (`salon.edited_by_admin`, area `branches`; offline/online use the existing branch events, no second notice)
-  - [x] Salon detail returns `branches[]` (closed included); members show `branchId` and filter by `?branchId=`
-  - [x] Admin salon edit: hours, closures and services take `?branchId=` (default the main branch); previews check that branch; audit names the branch
-  - [x] Admin moves a member to another branch (`SALON_STAFF_MOVE`, skills cleared and upcoming bookings refuse it via the team service)
-  - [x] Booking lists (admin, and merchant for the owner) and the BOOKINGS export filter by `branchId`; reviews already filter by branch (SRV-145)
-  - [x] Merchant team member docs now show `branchId` (shared `teamMemberDoc`)
-- Tests: `tests/adminBranches.test.ts` (7); full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔ (no rule duplicated: admin wraps the owner's services), Mobile N/A, Architect ✔ (admin namespace only; adminGuard on every route), QA ✔)
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

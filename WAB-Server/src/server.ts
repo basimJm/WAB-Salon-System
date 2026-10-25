@@ -88,6 +88,7 @@ import { createPayoutDetailsService } from './domain/salons/payoutDetails.servic
 import { createFieldEncryption } from './utils/crypto/aesGcm';
 import { createMerchantFinanceService } from './domain/finance/merchantFinance.service';
 import { createMerchantReviewsService } from './domain/reviews/merchantReviews.service';
+import { createMerchantStatisticsService } from './domain/statistics/merchantStatistics.service';
 import { createSubscriptionsService } from './domain/subscriptions/subscriptions.service';
 import { createPayoutsService } from './domain/payouts/payouts.service';
 import { PayoutsRepository } from './repositories/payouts.repository';
@@ -299,8 +300,9 @@ const buildServices = (
   const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
   const serverEventsRepository = new ServerEventsRepository();
   // Server events live in the server's own MongoDB; installation links and admin queries share them.
+  const serverEvents = createServerEvents({ store: serverEventsRepository, logger });
   const serverAnalytics = createMongoAnalytics({
-    events: createServerEvents({ store: serverEventsRepository, logger }),
+    events: serverEvents,
     counter: serverEventsRepository,
   });
   const otpGate = createOtpGate({ redis, settings });
@@ -918,6 +920,14 @@ const buildServices = (
           }),
         }),
     adminSubscriptions: subscriptionsService,
+    merchantStatistics: createMerchantStatisticsService({
+      bookings: bookingsRepository,
+      reviews: new ReviewsRepository(),
+      salons: new SalonsRepository(),
+      members: new MembersRepository(),
+      events: serverEventsRepository,
+      settings,
+    }),
     merchantReviews: createMerchantReviewsService({
       reviews: new ReviewsRepository(),
       members: new MembersRepository(),
@@ -943,6 +953,7 @@ const buildServices = (
     bookingReassign,
     customerProfile,
     salonDetails: createSalonDetailsService({
+      events: serverEvents,
       branches: branchesRepository,
       favorites: favoritesRepository,
       reviews: reviewsService,
