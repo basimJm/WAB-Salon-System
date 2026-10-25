@@ -10,7 +10,7 @@
 ### NOT-012 — Brevo HTTP email adapter behind the same `EmailChannel`
 
 - Branch: `feat/not-012-email-http`
-- Status: IN REVIEW
+- Status: DONE (PR #438)
 - Acceptance criteria (BRD email channel; Rules.md §1–§4):
   - [x] `email.provider: 'brevo'` (`from`, `brevo {apiKey, baseUrl?, timeoutMs?}`, injectable `fetch`): POST `/smtp/email` with the `api-key` header, text + optional html; global `fetch`, no new dependency
   - [x] Every status mapped: 2xx sent (non-JSON body → `MALFORMED_RESPONSE`), 401/403 `AUTH_FAILED`, 402 `QUOTA_EXCEEDED`, 429 `RATE_LIMITED`, 400 `PAYLOAD_INVALID`, 5xx `VENDOR_ERROR`, fetch failure `NETWORK_ERROR`, timeout `TIMEOUT`, anything else `UNKNOWN` (logged); 429/5xx/network/timeout retried with the shared policy
