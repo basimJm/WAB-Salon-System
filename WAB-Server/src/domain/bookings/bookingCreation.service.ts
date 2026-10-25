@@ -1,3 +1,4 @@
+import type { BranchesRepository } from '../../repositories/branches.repository';
 import type { Redis } from 'ioredis';
 import { STAFF_LOCK_SEGMENT, STAFF_LOCK_TTL_MS } from '../../constants/bookings';
 import { ERROR_CODES } from '../../constants/errorCodes';
@@ -72,6 +73,8 @@ export interface BookingCreationDeps {
   readonly settings: Pick<SettingsService, 'get'>;
   readonly hook?: BookingCreatedHook;
   readonly now?: () => Date;
+  /** Reads the draft's branch for the booking's branch snapshot (§3.5). */
+  readonly branches?: Pick<BranchesRepository, 'findById'>;
 }
 
 export const toSummary = (booking: Entity<BookingRaw>): BookingSummary => ({
@@ -215,12 +218,28 @@ export const createBookingCreationService = (deps: BookingCreationDeps): Booking
           const appointmentStart = new Date(Math.min(...starts));
           const autoCancelMinutes = await settings.get('booking.autoCancelAfterStartMinutes');
           const paidOnline = payment === undefined ? 0 : amounts.dueOnline;
+          const branch =
+            draft.branchId === undefined
+              ? null
+              : ((await deps.branches?.findById(draft.branchId)) ?? null);
           return withUniqueReference((referenceNumber) =>
             bookings.create({
               _id: toObjectId(bookingId),
               referenceNumber,
               customerId: toObjectId(customerId),
               salonId: toObjectId(draft.salonId),
+              ...(branch === null
+                ? {}
+                : {
+                    branchId: toObjectId(branch.id),
+                    branchSnapshot: {
+                      name: branch.name,
+                      ...(branch.locationText === undefined
+                        ? {}
+                        : { locationText: branch.locationText }),
+                      ...(branch.phone === undefined ? {} : { phone: branch.phone }),
+                    },
+                  }),
               salonGender: plan.salon.gender,
               persons,
               appointmentStart,

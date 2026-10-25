@@ -93,10 +93,14 @@ export const createLeavesService = (deps: LeavesDeps): LeavesService => {
   });
 
   /** The member must belong to the caller's salon (others look missing). */
-  const requireMember = async (salonId: string, memberId: string): Promise<void> => {
-    if ((await members.findOne({ _id: memberId, salonId })) === null) {
-      throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
-    }
+  /** The member of that salon; a leave belongs to the member's branch (§3.4). */
+  const requireMember = async (
+    salonId: string,
+    memberId: string,
+  ): Promise<{ branchId?: string | undefined }> => {
+    const member = await members.findOne({ _id: memberId, salonId });
+    if (member === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+    return member;
   };
 
   const rejectConflicts = (found: readonly BookingConflict[]): void => {
@@ -128,7 +132,7 @@ export const createLeavesService = (deps: LeavesDeps): LeavesService => {
     },
 
     async add({ salonId, memberId, from, to, note }) {
-      await requireMember(salonId, memberId);
+      const member = await requireMember(salonId, memberId);
       const date = await today();
       if (to < from) throw invalid('body.to');
       if (from < date) throw invalid('body.from');
@@ -136,6 +140,7 @@ export const createLeavesService = (deps: LeavesDeps): LeavesService => {
       const created = await leaves.create({
         memberId: toObjectId(memberId),
         salonId: toObjectId(salonId),
+        ...(member.branchId === undefined ? {} : { branchId: toObjectId(member.branchId) }),
         from,
         to,
         ...(note === undefined ? {} : { note }),

@@ -1,3 +1,4 @@
+import type { MainBranches } from '../branches/mainBranch';
 import { noAccessEvents, type AccessEvents } from '../access/accessEvents';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { MemberRole, Permission } from '../../constants/enums';
@@ -74,6 +75,8 @@ export interface TeamDeps {
   readonly deactivationConflicts?: {
     check(input: { salonId: string; memberId: string }): Promise<BookingConflict[]>;
   };
+  /** Salon-level endpoint: new non-owner members join the salon's main branch (§5.16). */
+  readonly mainBranches?: Pick<MainBranches, 'idOf'>;
 }
 
 export const createTeamService = ({
@@ -84,6 +87,7 @@ export const createTeamService = ({
   uploads,
   deactivationConflicts,
   access = noAccessEvents,
+  mainBranches,
 }: TeamDeps): TeamService => {
   const view = (m: Entity<MemberRaw>): TeamMemberView => ({
     id: m.id,
@@ -131,9 +135,12 @@ export const createTeamService = ({
       const taken = (): ConflictError =>
         new ConflictError({ code: ERROR_CODES.PHONE_ALREADY_REGISTERED });
       if ((await members.findByPhone(resolved.e164)) !== null) throw taken();
+      // Members created here are never the owner (the owner comes with the salon).
+      const branchId = await mainBranches?.idOf(salonId);
       try {
         const created = await members.create({
           salonId: toObjectId(salonId),
+          ...(branchId === undefined ? {} : { branchId }),
           firstName,
           lastName,
           phone: resolved.e164,

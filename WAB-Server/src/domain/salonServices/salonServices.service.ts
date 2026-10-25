@@ -18,6 +18,7 @@ import {
   type ErrorDetail,
 } from '../../utils/errors';
 import type { PaginationMeta, PaginationParams } from '../../utils/pagination';
+import type { MainBranches } from '../branches/mainBranch';
 import type { SalonStateService } from '../salons/salonState.service';
 import type { UploadVerifier } from '../uploads/uploads.service';
 
@@ -85,6 +86,8 @@ export interface SalonServicesDeps {
   readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly uploads: UploadVerifier;
   readonly state: Pick<SalonStateService, 'recompute'>;
+  /** Salon-level endpoint: new services belong to the salon's main branch (§5.16). */
+  readonly mainBranches?: Pick<MainBranches, 'idOf'>;
 }
 
 const invalid = (
@@ -105,6 +108,7 @@ export const createSalonServicesService = ({
   storage,
   uploads,
   state,
+  mainBranches,
 }: SalonServicesDeps): SalonServicesService => {
   const toView = (
     s: Entity<SalonServiceRaw>,
@@ -167,8 +171,10 @@ export const createSalonServicesService = ({
       await verifyMedia(salonId, fields.mediaKeys ?? [], acceptUpload);
       let created: Entity<SalonServiceRaw>;
       try {
+        const branchId = await mainBranches?.idOf(salonId);
         created = await services.create({
           salonId: toObjectId(salonId),
+          ...(branchId === undefined ? {} : { branchId }),
           catalogServiceId: toObjectId(catalogServiceId),
           price: fields.price,
           durationMinutes: fields.durationMinutes,
