@@ -6,8 +6,8 @@
 |---|---|---|---|---|---|
 | server | `server` | none (Stage P branches SRV-136…148 DONE, PRs #380–#394) | SRV-131 merchant reviews, SRV-111… | SRV-011/059/115/116 owner deployment; SRV-034/092/110/112 SDK publish | `WAB-Server/.claude/session.md` |
 | admin | `admin` | none (ADM-001…081 done except owner-pending rows) | none ready (all remaining rows PENDING/BLOCKED) | SRV-117…127 (Stage N), SRV-011, owner hosting/CI | `WAB-Admin-Dashboard/.claude/session.md` |
-| customer | `customer` | CUS-060 remote dev API (`feat/cus-060-remote-dev`, IN PROGRESS) | CUS-061, CUS-063 after CUS-060 (devices, owner Firebase/APNs) | CUS-047 ← PAY-011 | `WAB-Mobile-Customer/.claude/session.md` |
-| merchant | `merchant` | none (MER-002…058 DONE, PRs #363/#364) | none ready | MER-004 owner Firebase → MER-012/029/030; SRV-129…133 → MER-042/043/049/050; SRV-011 → MER-054…056; MER-059/060 owner | `WAB-Mobile-Salon/.claude/session.md` |
+| customer | `customer` | none (CUS-060 remote dev merged, PR #452; full gate + emulator/simulator journey 2026-10-25) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
+| merchant | `merchant` | none (MER-054 remote dev merged, PR #456) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
 | otp | `server` | none | OTP-001 scaffold | — | `wab-otp/.claude/session.md` |
 | notifications | `server` | none (SDK built, wired in the server) | NOT-010 publish | NOT-011 owner App Password | `wab-notifications/.claude/session.md` |

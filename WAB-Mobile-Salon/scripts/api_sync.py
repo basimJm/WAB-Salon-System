@@ -16,9 +16,16 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from contract_fixtures import envelope_json, load_captured, render_captured_ids, render_decoders  # noqa: E402
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SPEC = PROJECT_ROOT.parent / "WAB-Server" / "docs" / "api" / "openapi.merchant.json"
 DEFAULT_OUT = PROJECT_ROOT / "core/data/src/commonMain/kotlin/com/fab/wab/merchant/core/data/contract/generated"
+DEFAULT_TEST_OUT = PROJECT_ROOT / "core/data/src/commonTest/kotlin/com/fab/wab/merchant/core/data/contract/generated"
+# Real responses (capture_remote_fixtures.py, MER-054) replace the schema-derived fixture of their operation.
+DEFAULT_CAPTURED = PROJECT_ROOT / "core/data/fixtures/remote"
+DECODERS_FILE = "ContractDecoders.kt"
 PACKAGE = "com.fab.wab.merchant.core.data.contract.generated"
 NAMESPACE_PREFIX = "/merchant/v1"
 METHODS = ("get", "post", "put", "patch", "delete")
@@ -54,6 +61,7 @@ class Renderer:
     def __init__(self, spec: dict):
         self.spec = spec
         self.classes: dict[str, list[str]] = {}  # file key -> rendered classes
+        self.data_types: dict[str, str | None] = {}  # operation id -> Kotlin type of `data`
 
     # ---- type resolution --------------------------------------------------
     def kotlin_type(self, schema: dict | None, name: str, file_key: str) -> str:
@@ -113,11 +121,15 @@ class Renderer:
                 body_schema = op.get("requestBody", {}).get("content", {}).get("application/json", {}).get("schema")
                 body_type = self.kotlin_type(body_schema, op_id + "Body", file_key) if body_schema else None
                 data_type = None
+                data_nullable = False
                 for code in SUCCESS_CODES:
                     response = op.get("responses", {}).get(code, {}).get("content", {}).get("application/json", {}).get("schema")
                     if response and "properties" in response and "data" in response["properties"]:
                         data_type = self.kotlin_type(response["properties"]["data"], op_id + "Data", file_key)
+                        data_nullable = self.nullable(response["properties"]["data"], True)
                         break
+                # `data: T | null` (e.g. a policy not set yet) decodes as `T?` in the contract tests (MER-054).
+                self.data_types[op_id] = data_type + "?" if data_type and data_nullable else data_type
                 query = [p["name"] for p in op.get("parameters", []) if p.get("in") == "query"]
                 path_params = [p["name"] for p in op.get("parameters", []) if p.get("in") == "path"]
                 operations.append(
@@ -196,9 +208,9 @@ def sample_value(schema: dict | None, field: str, components: dict, depth: int =
     return None
 
 
-def render_fixtures(spec: dict, head: str) -> str:
+def render_fixtures(spec: dict, head: str, captured: dict[str, dict] | None = None) -> str:
     components = spec.get("components", {}).get("schemas", {})
-    entries = []
+    entries, used = [], []
     for path, methods in spec.get("paths", {}).items():
         for method, op in methods.items():
             if method not in METHODS:
@@ -210,25 +222,30 @@ def render_fixtures(spec: dict, head: str) -> str:
                 if response and "properties" in response:
                     data = sample_value(response["properties"].get("data"), "data", components)
                     break
-            body = json.dumps({"success": True, "message": "", "data": data}, ensure_ascii=False)
+            real = (captured or {}).get(op_id)
+            used += [op_id] if real else []
+            body = envelope_json(real) if real else json.dumps({"success": True, "message": "", "data": data}, ensure_ascii=False)
             escaped = body.replace("\\", "\\\\").replace('"', '\\"').replace("$", "\\$")
             entries.append(f'    "{op_id}" to "{escaped}",')
     return (
         f"{head}package {PACKAGE}\n\n"
         "/** Success-envelope JSON per operation id, derived from the response schema; `MockTransport` serves and localizes it. */\n"
         "object MockFixtures {\n    const val TEXT_MARKER = \"" + TEXT_MARKER + "\"\n\n    val byOperationId: Map<String, String> = mapOf(\n"
-        + "\n".join(entries) + "\n    )\n}\n"
+        + "\n".join(entries) + "\n    )\n\n" + render_captured_ids(used) + "}\n"
     )
 
 
-def generate(spec_path: Path) -> tuple[dict[str, str], str]:
+def generate(spec_path: Path, captured_dir: Path | None = None) -> tuple[dict[str, str], str, dict[str, str]]:
+    """(main source files, spec sha, commonTest files)."""
     text = spec_path.read_text(encoding="utf-8")
     sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
     spec = json.loads(text)
-    files = Renderer(spec).render(spec_path.name, sha)
-    files["MockFixtures.kt"] = render_fixtures(spec, HEADER.format(name=spec_path.name, sha=sha))
+    renderer = Renderer(spec)
+    files = renderer.render(spec_path.name, sha)
+    head = HEADER.format(name=spec_path.name, sha=sha)
+    files["MockFixtures.kt"] = render_fixtures(spec, head, load_captured(captured_dir))
     files["openapi.snapshot.json"] = text
-    return files, sha
+    return files, sha, {DECODERS_FILE: render_decoders(head, PACKAGE, renderer.data_types)}
 
 
 def main(argv: list[str]) -> int:
@@ -236,25 +253,29 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--spec", default=str(DEFAULT_SPEC))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
+    parser.add_argument("--test-out", default=str(DEFAULT_TEST_OUT))
+    parser.add_argument("--captured", default=str(DEFAULT_CAPTURED))
     args = parser.parse_args(argv)
-    spec_path, out = Path(args.spec), Path(args.out)
+    spec_path = Path(args.spec)
     if not spec_path.is_file():
         print(f"api_sync: spec not found: {spec_path}")
         return 1
-    files, sha = generate(spec_path)
-    stale = [name for name, text in files.items() if not (out / name).is_file() or (out / name).read_text(encoding="utf-8") != text]
-    extra = [p.name for p in out.glob("*") if p.is_file() and p.name not in files] if out.is_dir() else []
+    files, sha, test_files = generate(spec_path, Path(args.captured))
+    targets = ((Path(args.out), files), (Path(args.test_out), test_files))
+    stale = [(out, n) for out, fs in targets for n, text in fs.items() if not (out / n).is_file() or (out / n).read_text(encoding="utf-8") != text]
+    extra = [(out, p.name) for out, fs in targets if out.is_dir() for p in out.glob("*") if p.is_file() and p.name not in fs]
     if args.check:
-        for name in stale + extra:
+        for _, name in stale + extra:
             print(f"api_sync --check: {name} is stale; run ./gradlew apiSync")
         print("api_sync: ok" if not stale and not extra else f"api_sync: FAILED, {len(stale) + len(extra)} file(s)")
         return 1 if stale or extra else 0
-    out.mkdir(parents=True, exist_ok=True)
-    for name in extra:
+    for out, name in extra:
         (out / name).unlink()
-    for name, text in files.items():
-        (out / name).write_text(text, encoding="utf-8")
-    print(f"api_sync: wrote {len(files)} files from {spec_path.name} ({sha[:12]})")
+    for out, fs in targets:
+        out.mkdir(parents=True, exist_ok=True)
+        for name, text in fs.items():
+            (out / name).write_text(text, encoding="utf-8")
+    print(f"api_sync: wrote {len(files) + len(test_files)} files from {spec_path.name} ({sha[:12]})")
     return 0
 
 

@@ -1,0 +1,60 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "memberId": "eaf41e0bf439c48d15ee4269",
+    "providesServices": true,
+    "bio": "Fast, friendly and always on time.",
+    "yearsOfExperience": 14,
+    "serviceIds": [
+      "1a5707237216a47218307067",
+      "5f048a9c125351eb49c4a499",
+      "4cbcba00cab6988a97e0e242",
+      "76393cc8569e0fe79b4e7f95",
+      "c31005cbe924c6bdb673fe2d",
+      "7be39931e2ea12cf18ca0dc2",
+      "178eff5d56cd322ee48edcb4",
+      "ae1b14d87e1f7f23c4885244",
+      "8c9fae3316b3b03b4bc1ef4b",
+      "dbb252f21829c9cf8fd2f8ca"
+    ],
+    "brideQualified": false,
+    "workingDays": [
+      {
+        "day": "SAT",
+        "start": null,
+        "end": null
+      },
+      {
+        "day": "SUN",
+        "start": null,
+        "end": null
+      },
+      {
+        "day": "MON",
+        "start": null,
+        "end": null
+      },
+      {
+        "day": "TUE",
+        "start": null,
+        "end": null
+      },
+      {
+        "day": "WED",
+        "start": null,
+        "end": null
+      },
+      {
+        "day": "THU",
+        "start": null,
+        "end": null
+      }
+    ],
+    "rating": {
+      "avg": 0,
+      "count": 0
+    },
+    "customersCount": 0
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "6ade379d6cbc8f4cb1047d91",
+      "name": {
+        "ar": "عبدون",
+        "en": "Abdoun"
+      },
+      "isMain": true,
+      "status": "ACTIVE",
+      "location": {
+        "latitude": 31.9539,
+        "longitude": 35.8822
+      },
+      "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون",
+      "cityId": "6ade371b97c38aeef84b9613",
+      "areaId": "6ade371b97c38aeef84b961f",
+      "phone": "+96265921001",
+      "whatsapp": "+962790921001",
+      "weeklySchedule": [
+        {
+          "day": "SAT",
+          "isOff": false,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": "SUN",
+          "isOff": false,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": "MON",
+          "isOff": false,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": "TUE",
+          "isOff": false,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": "WED",
+          "isOff": false,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": "THU",
+          "isOff": false,
+          "open": "10:00",
+          "close": "20:00"
+        },
+        {
+          "day": "FRI",
+          "isOff": true,
+          "open": "10:00",
+          "close": "20:00"
+        }
+      ],
+      "offline": null,
+      "completeness": {
+        "missing": [],
+        "isComplete": true
+      }
+    },
+    {
+      "id": "3acd84491492d014f9fc54a0",
+      "name": {
+        "ar": "دابوق",
+        "en": "Dabouq"
+      },
+      "isMain": false,
+      "status": "ACTIVE",
+      "location": {
+        "latitude": 31.9899,
+        "longitude": 35.8062
+      },
+      "locationText": "Dabouq, King Abdullah II Street, Plaza 7",
+      "cityId": "6ade371b97c38aeef84b9613",
+      "areaId": "6ade371b97c38aeef84b9625",
+      "phone": "+96265921012",
+      "whatsapp": null,
+      "weeklySchedule": [
+        {
+          "day": "SAT",
+          "isOff": true,
+          "open": "11:00",
+          "close": "20:00"
+        },
+        {
+          "day": "SUN",
+          "isOff": false,
+          "open": "11:00",
+          "close": "20:00"
+        },
+        {
+          "day": "MON",
+          "isOff": false,
+          "open": "11:00",
+          "close": "20:00"
+        },
+        {
+          "day": "TUE",
+          "isOff": false,
+          "open": "11:00",
+          "close": "20:00"
+        },
+        {
+          "day": "WED",
+          "isOff": false,
+          "open": "11:00",
+          "close": "20:00"
+        },
+        {
+          "day": "THU",
+          "isOff": false,
+          "open": "11:00",
+          "close": "20:00"
+        },
+        {
+          "day": "FRI",
+          "isOff": false,
+          "open": "11:00",
+          "close": "20:00"
+        }
+      ],
+      "offline": null,
+      "completeness": {
+        "missing": [],
+        "isComplete": true
+      }
+    },
+    {
+      "id": "71177b8871c36af7d19e512f",
+      "name": {
+        "ar": "خلدا",
+        "en": "Khalda"
+      },
+      "isMain": false,
+      "status": "ACTIVE",
+      "location": {
+        "latitude": 31.9946,
+        "longitude": 35.8366
+      },
+      "locationText": "خلدا، شارع وصفي التل، مقابل مجمع الحسيني",
+      "cityId": "6ade371b97c38aeef84b9613",
+      "areaId": "6ade371b97c38aeef84b9623",
+      "phone": "+96265921011",
+      "whatsapp": null,
+      "weeklySchedule": [
+        {
+          "day": "SAT",
+          "isOff": false,
+          "open": "10:00",
+          "close": "22:00"
+        },
+        {
+          "day": "SUN",
+          "isOff": false,
+          "open": "10:00",
+          "close": "22:00"
+        },
+        {
+          "day": "MON",
+          "isOff": false,
+          "open": "10:00",
+          "close": "22:00"
+        },
+        {
+          "day": "TUE",
+          "isOff": false,
+          "open": "10:00",
+          "close": "22:00"
+        },
+        {
+          "day": "WED",
+          "isOff": false,
+          "open": "10:00",
+          "close": "22:00"
+        },
+        {
+          "day": "THU",
+          "isOff": false,
+          "open": "10:00",
+          "close": "22:00"
+        },
+        {
+          "day": "FRI",
+          "isOff": true,
+          "open": "10:00",
+          "close": "22:00"
+        }
+      ],
+      "offline": null,
+      "completeness": {
+        "missing": [],
+        "isComplete": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "5d5a2009d2ef7b7693d075ed",
+      "firstName": "Rana",
+      "lastName": "Haddad",
+      "phone": "+962789000001",
+      "photoUrl": null,
+      "role": "OWNER",
+      "permissions": [
+        "DASHBOARD_VIEW",
+        "BOOKINGS_VIEW_ALL",
+        "BOOKINGS_VIEW_OWN",
+        "BOOKINGS_RESPOND",
+        "BOOKINGS_OPERATE",
+        "SALON_PROFILE_MANAGE",
+        "GALLERY_MANAGE",
+        "WORKING_HOURS_MANAGE",
+        "SERVICES_MANAGE",
+        "STAFF_MANAGE",
+        "POLICIES_MANAGE",
+        "REVIEWS_VIEW",
+        "STATISTICS_VIEW",
+        "FINANCE_VIEW",
+        "SUBSCRIPTION_VIEW"
+      ],
+      "active": true,
+      "providesServices": false,
+      "branchId": null
+    },
+    {
+      "id": "eaf41e0bf439c48d15ee4269",
+      "firstName": "Sara",
+      "lastName": "Shami",
+      "phone": "+962789000005",
+      "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/lamar-staff3.jpg",
+      "role": "EMPLOYEE",
+      "permissions": [
+        "BOOKINGS_VIEW_OWN",
+        "REVIEWS_VIEW"
+      ],
+      "active": true,
+      "providesServices": true,
+      "branchId": "6ade379d6cbc8f4cb1047d91"
+    },
+    {
+      "id": "f19e6e99f356e698383204b7",
+      "firstName": "Dana",
+      "lastName": "Majali",
+      "phone": "+962789000003",
+      "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/lamar-staff1.jpg",
+      "role": "EMPLOYEE",
+      "permissions": [
+        "BOOKINGS_VIEW_OWN",
+        "REVIEWS_VIEW"
+      ],
+      "active": true,
+      "providesServices": true,
+      "branchId": "6ade379d6cbc8f4cb1047d91"
+    },
+    {
+      "id": "f355da90c5d06e3c62149bab",
+      "firstName": "Hala",
+      "lastName": "Saleh",
+      "phone": "+962789000004",
+      "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/lamar-staff2.jpg",
+      "role": "EMPLOYEE",
+      "permissions": [
+        "BOOKINGS_VIEW_OWN",
+        "REVIEWS_VIEW"
+      ],
+      "active": true,
+      "providesServices": true,
+      "branchId": "6ade379d6cbc8f4cb1047d91"
+    },
+    {
+      "id": "fc827df71cbabf2b54c74373",
+      "firstName": "Lina",
+      "lastName": "Hijazi",
+      "phone": "+962789000002",
+      "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/lamar-staff0.jpg",
+      "role": "MANAGER",
+      "permissions": [
+        "DASHBOARD_VIEW",
+        "BOOKINGS_VIEW_ALL",
+        "BOOKINGS_VIEW_OWN",
+        "BOOKINGS_RESPOND",
+        "BOOKINGS_OPERATE",
+        "SALON_PROFILE_MANAGE",
+        "GALLERY_MANAGE",
+        "WORKING_HOURS_MANAGE",
+        "SERVICES_MANAGE",
+        "STAFF_MANAGE",
+        "REVIEWS_VIEW",
+        "STATISTICS_VIEW"
+      ],
+      "active": true,
+      "providesServices": true,
+      "branchId": "6ade379d6cbc8f4cb1047d91"
+    },
+    {
+      "id": "4c6c73c95671d89fe1a03a7e",
+      "firstName": "Noor",
+      "lastName": "Saleh",
+      "phone": "+962789010001",
+      "photoUrl": null,
+      "role": "MANAGER",
+      "permissions": [
+        "DASHBOARD_VIEW",
+        "BOOKINGS_VIEW_ALL",
+        "BOOKINGS_VIEW_OWN",
+        "BOOKINGS_RESPOND",
+        "BOOKINGS_OPERATE",
+        "SALON_PROFILE_MANAGE",
+        "GALLERY_MANAGE",
+        "WORKING_HOURS_MANAGE",
+        "SERVICES_MANAGE",
+        "STAFF_MANAGE",
+        "REVIEWS_VIEW",
+        "STATISTICS_VIEW"
+      ],
+      "active": true,
+      "providesServices": true,
+      "branchId": "71177b8871c36af7d19e512f"
+    },
+    {
+      "id": "559d041fa4a32c92155d781c",
+      "firstName": "Reem",
+      "lastName": "Odeh",
+      "phone": "+962789010002",
+      "photoUrl": null,
+      "role": "EMPLOYEE",
+      "permissions": [
+        "BOOKINGS_VIEW_OWN",
+        "REVIEWS_VIEW"
+      ],
+      "active": true,
+      "providesServices": true,
+      "branchId": "71177b8871c36af7d19e512f"
+    },
+    {
+      "id": "58261b8d40ccc13279b480c6",
+      "firstName": "Aya",
+      "lastName": "Abbadi",
+      "phone": "+962789010003",
+      "photoUrl": null,
+      "role": "MANAGER",
+      "permissions": [
+        "DASHBOARD_VIEW",
+        "BOOKINGS_VIEW_ALL",
+        "BOOKINGS_VIEW_OWN",
+        "BOOKINGS_RESPOND",
+        "BOOKINGS_OPERATE",
+        "SALON_PROFILE_MANAGE",
+        "GALLERY_MANAGE",
+        "WORKING_HOURS_MANAGE",
+        "SERVICES_MANAGE",
+        "STAFF_MANAGE",
+        "REVIEWS_VIEW",
+        "STATISTICS_VIEW"
+      ],
+      "active": true,
+      "providesServices": true,
+      "branchId": "3acd84491492d014f9fc54a0"
+    },
+    {
+      "id": "985bda877dc72ab5680a67c4",
+      "firstName": "Farah",
+      "lastName": "Smadi",
+      "phone": "+962789010004",
+      "photoUrl": null,
+      "role": "EMPLOYEE",
+      "permissions": [
+        "BOOKINGS_VIEW_OWN",
+        "REVIEWS_VIEW"
+      ],
+      "active": true,
+      "providesServices": true,
+      "branchId": "3acd84491492d014f9fc54a0"
+    },
+    {
+      "id": "6ade49a2c2cfb0cb993a17be",
+      "firstName": "Capture",
+      "lastName": "Fixture",
+      "phone": "+962799835837",
+      "photoUrl": null,
+      "role": "EMPLOYEE",
+      "permissions": [
+        "BOOKINGS_VIEW_OWN"
+      ],
+      "active": false,
+      "providesServices": true,
+      "branchId": "6ade379d6cbc8f4cb1047d91"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 50,
+    "total": 10
+  }
+}

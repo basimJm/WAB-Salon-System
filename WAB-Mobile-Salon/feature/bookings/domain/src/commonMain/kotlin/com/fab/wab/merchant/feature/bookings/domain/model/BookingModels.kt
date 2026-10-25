@@ -3,6 +3,7 @@ package com.fab.wab.merchant.feature.bookings.domain.model
 import com.fab.wab.merchant.core.domain.booking.BookingStatus
 import com.fab.wab.merchant.core.domain.booking.PaymentStatus
 import com.fab.wab.merchant.core.domain.booking.RefundStatus
+import com.fab.wab.merchant.core.domain.policy.PolicyTerms
 import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 
@@ -86,7 +87,8 @@ data class BookingDetails(
     val refundStatus: RefundStatus,
     val persons: List<BookingPerson>,
     val money: BookingMoney,
-    val policy: Map<String, String>,
+    /** The salon policy snapshotted at booking time; null for bookings without one. */
+    val policy: PolicyTerms?,
     val history: List<StatusChange>,
     val rejectionReason: String?,
     val cancellationReason: String?,

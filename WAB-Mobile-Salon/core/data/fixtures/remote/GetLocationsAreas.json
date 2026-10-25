@@ -1,0 +1,62 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "6ad867109e63b9a6a612d490",
+      "name": "Abdoun"
+    },
+    {
+      "id": "6ad867109e63b9a6a612d491",
+      "name": "Gardens"
+    },
+    {
+      "id": "6ad867119e63b9a6a612d492",
+      "name": "Um Uthaina"
+    },
+    {
+      "id": "6ad867119e63b9a6a612d493",
+      "name": "Sweifieh"
+    },
+    {
+      "id": "6ad867119e63b9a6a612d494",
+      "name": "Khalda"
+    },
+    {
+      "id": "6ad867129e63b9a6a612d495",
+      "name": "Shmeisani"
+    },
+    {
+      "id": "6ad867129e63b9a6a612d496",
+      "name": "Dabouq"
+    },
+    {
+      "id": "6ad867129e63b9a6a612d497",
+      "name": "Jubeiha"
+    },
+    {
+      "id": "6ad867139e63b9a6a612d498",
+      "name": "Tla' Al-Ali"
+    },
+    {
+      "id": "6ad867139e63b9a6a612d499",
+      "name": "Al-Rabyeh"
+    },
+    {
+      "id": "6ad867139e63b9a6a612d49a",
+      "name": "Jabal Amman"
+    },
+    {
+      "id": "6ad867149e63b9a6a612d49b",
+      "name": "Marj Al-Hamam"
+    },
+    {
+      "id": "6ad867149e63b9a6a612d49c",
+      "name": "Marka"
+    },
+    {
+      "id": "6ad867149e63b9a6a612d49d",
+      "name": "Tabarbour"
+    }
+  ]
+}

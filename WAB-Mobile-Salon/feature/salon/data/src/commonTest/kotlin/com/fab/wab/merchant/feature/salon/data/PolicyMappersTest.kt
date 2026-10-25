@@ -1,8 +1,8 @@
 package com.fab.wab.merchant.feature.salon.data
 
 import com.fab.wab.merchant.core.data.contract.generated.GetSalonPolicyData
-import com.fab.wab.merchant.feature.salon.domain.NoShowFullPayment
-import com.fab.wab.merchant.feature.salon.domain.PaymentOption
+import com.fab.wab.merchant.core.domain.policy.NoShowFullPayment
+import com.fab.wab.merchant.core.domain.policy.PaymentOption
 import com.fab.wab.merchant.feature.salon.domain.PolicyDraft
 import kotlin.test.Test
 import kotlin.test.assertEquals

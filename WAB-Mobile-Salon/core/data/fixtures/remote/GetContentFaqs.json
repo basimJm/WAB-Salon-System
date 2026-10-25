@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "d49764a2d528d7ff2372fd20",
+      "question": "When does my salon appear to customers?",
+      "answer": "After admin approval and once your profile is complete (photos, hours, services, staff and policy)."
+    },
+    {
+      "id": "1040d61ffc4f7e346fa3d4ef",
+      "question": "How long is the free period?",
+      "answer": "Three months from approval."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "id": "6ade49a2c2cfb0cb993a17bf",
+    "memberId": "6ade49a2c2cfb0cb993a17be",
+    "from": "2027-01-03",
+    "to": "2027-01-03",
+    "note": null,
+    "editable": true
+  }
+}

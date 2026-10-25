@@ -1,0 +1,90 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "id": "5c2e8cd3917ba37f01b1b97f",
+    "referenceNumber": "WAB-W41CVC",
+    "status": "PENDING",
+    "paymentMethod": "PAY_ON_ARRIVAL",
+    "paymentStatus": "PAY_ON_ARRIVAL",
+    "hasBride": false,
+    "appointmentStart": "2026-10-28T08:30:00.000Z",
+    "appointmentEnd": "2026-10-28T09:15:00.000Z",
+    "respondBy": "2026-10-28T09:30:00.000Z",
+    "requestedAt": "2026-10-25T17:03:44.887Z",
+    "personsCount": 1,
+    "total": "18.000",
+    "salon": null,
+    "branch": {
+      "id": "6ade379d6cbc8f4cb1047d91",
+      "name": "Abdoun",
+      "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون"
+    },
+    "customer": {
+      "id": "638e4440cfd0228b33fd0a08",
+      "name": "Zeina Khoury",
+      "phone": "+962799000014"
+    },
+    "staff": [
+      {
+        "id": "fc827df71cbabf2b54c74373",
+        "name": "Lina Hijazi"
+      }
+    ],
+    "refundStatus": "NONE",
+    "persons": [
+      {
+        "name": "Zeina",
+        "isBride": false,
+        "start": "2026-10-28T08:30:00.000Z",
+        "end": "2026-10-28T09:15:00.000Z",
+        "subtotal": "18.000",
+        "staff": {
+          "id": "fc827df71cbabf2b54c74373",
+          "name": "Lina Hijazi"
+        },
+        "services": [
+          {
+            "name": "Haircut",
+            "price": "18.000",
+            "durationMinutes": 45
+          }
+        ]
+      }
+    ],
+    "money": {
+      "total": "18.000",
+      "dueOnline": "0.000",
+      "paidOnline": "0.000",
+      "remaining": "18.000",
+      "refunded": "0.000"
+    },
+    "policy": {
+      "cancellationWindowHours": 12,
+      "paymentOptions": [
+        "PAY_ON_ARRIVAL",
+        "DEPOSIT"
+      ],
+      "depositPercentage": 30,
+      "depositRefundableOnCustomerCancel": true,
+      "fullPaymentRefundOnCustomerCancel": "MINUS_DEPOSIT",
+      "noShowDeposit": "KEEP",
+      "noShowFullPayment": "REFUND_MINUS_DEPOSIT"
+    },
+    "statusHistory": [
+      {
+        "status": "PENDING",
+        "actorType": "CUSTOMER",
+        "reason": null,
+        "at": "2026-10-25T17:03:44.887Z"
+      }
+    ],
+    "rejection": null,
+    "cancellation": null,
+    "createdAt": "2026-10-25T17:03:44.887Z",
+    "actions": [
+      "APPROVE",
+      "REJECT"
+    ]
+  }
+}

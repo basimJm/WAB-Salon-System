@@ -70,7 +70,7 @@ class BookingMappersTest {
         assertEquals(setOf(BookingAction.CANCEL, BookingAction.REASSIGN), details?.actions)
         assertEquals(45, details?.persons?.single()?.services?.single()?.durationMinutes)
         assertEquals("25.000", details?.money?.remaining)
-        assertEquals("24", details?.policy?.get("cancellationWindowHours"))
+        assertEquals(24, details?.policy?.windowHours)
         assertEquals(BookingStatus.APPROVED, details?.history?.single()?.status)
     }
 

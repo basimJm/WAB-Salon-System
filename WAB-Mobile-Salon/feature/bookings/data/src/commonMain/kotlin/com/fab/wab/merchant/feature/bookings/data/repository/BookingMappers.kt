@@ -15,7 +15,6 @@ import com.fab.wab.merchant.feature.bookings.domain.model.BookingSummary
 import com.fab.wab.merchant.feature.bookings.domain.model.BranchRef
 import com.fab.wab.merchant.feature.bookings.domain.model.StaffRef
 import com.fab.wab.merchant.feature.bookings.domain.model.StatusChange
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.time.Instant
 
 private const val NAME_SEPARATOR = " "
@@ -63,7 +62,7 @@ fun GetBookingsByIdData.toDomain(): BookingDetails? {
             )
         },
         money = BookingMoney(money.total, money.dueOnline, money.paidOnline, money.remaining, money.refunded),
-        policy = policy.mapNotNull { (key, value) -> (value as? JsonPrimitive)?.content?.let { key to it } }.toMap(),
+        policy = policy.toPolicyTerms(),
         history = statusHistory.map { StatusChange(BookingStatus.fromCode(it.status), it.actorType, it.reason, instantOf(it.at)) },
         rejectionReason = rejection?.let { it.reasonText ?: it.reasonCode },
         cancellationReason = cancellation?.let { it.reasonText ?: it.reasonCode },

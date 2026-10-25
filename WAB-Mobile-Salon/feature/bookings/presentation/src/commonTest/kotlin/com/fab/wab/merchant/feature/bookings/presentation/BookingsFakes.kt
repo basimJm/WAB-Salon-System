@@ -46,7 +46,7 @@ internal fun details(
     refundStatus = RefundStatus.NONE,
     persons = listOf(BookingPerson("Rana", false, START, START, "20", SARA, emptyList())),
     money = BookingMoney("20", "5", "5", "15", ""),
-    policy = emptyMap(),
+    policy = null,
     history = emptyList(),
     rejectionReason = null,
     cancellationReason = null,

@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "id": "6ade4972c2cfb0cb993a179c",
+    "referenceNumber": "WAB-RXM7NA",
+    "status": "APPROVED",
+    "paymentMethod": "PAY_ON_ARRIVAL",
+    "paymentStatus": "PAY_ON_ARRIVAL",
+    "appointmentStart": "2026-10-31T07:00:00.000Z",
+    "appointmentEnd": "2026-10-31T07:45:00.000Z",
+    "respondBy": "2026-10-31T08:00:00.000Z",
+    "money": {
+      "total": "18.000",
+      "dueOnline": "0.000",
+      "paidOnline": "0.000",
+      "remaining": "18.000"
+    }
+  }
+}
