@@ -21,6 +21,7 @@ import type { ReportsRepository } from '@/domain/reports/reports';
 import type { AuditRepository } from '@/domain/audit/audit';
 import type { ExportsRepository } from '@/domain/exports/exports';
 import type { SalonsRepository } from '@/domain/salons/salons';
+import type { BranchesRepository } from '@/domain/shared/branches';
 import type { CatalogRepository } from '@/domain/catalog/catalog';
 import type { ContentRepository } from '@/domain/content/content';
 import type { LocationsRepository } from '@/domain/locations/locations';
@@ -51,6 +52,7 @@ import { RemoteReportsRepository } from './reports/RemoteReportsRepository';
 import { RemoteAuditRepository } from './audit/RemoteAuditRepository';
 import { RemoteExportsRepository } from './exports/RemoteExportsRepository';
 import { RemoteSalonsRepository } from './salons/RemoteSalonsRepository';
+import { RemoteBranchesRepository } from './branches/RemoteBranchesRepository';
 import { RemoteCatalogRepository } from './catalog/RemoteCatalogRepository';
 import { RemoteContentRepository } from './content/RemoteContentRepository';
 import { RemoteLocationsRepository } from './locations/RemoteLocationsRepository';
@@ -65,6 +67,7 @@ export interface Repositories {
   readonly banners: BannersRepository;
   readonly catalog: CatalogRepository;
   readonly salons: SalonsRepository;
+  readonly branches: BranchesRepository;
   readonly exports: ExportsRepository;
   readonly audit: AuditRepository;
   readonly reports: ReportsRepository;
@@ -95,6 +98,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
   const banners = new RemoteBannersRepository(api);
   const catalog = new RemoteCatalogRepository(api);
   const salons = new RemoteSalonsRepository(api);
+  const branches = new RemoteBranchesRepository(api);
   const exportJobs = new RemoteExportsRepository(api);
   const audit = new RemoteAuditRepository(api);
   const reports = new RemoteReportsRepository(api);
@@ -126,6 +130,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
       banners,
       catalog,
       salons,
+      branches,
       exports: exportJobs,
       audit,
       reports,
@@ -156,6 +161,7 @@ export async function createRepositories(config: AppConfig, api: ApiClient): Pro
     banners,
     catalog,
     salons,
+    branches,
     exports: exportJobs,
     audit,
     reports,

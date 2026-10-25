@@ -8,8 +8,8 @@ const ROYAL = '64f000000000000000000002';
 const LAMA = '64f000000000000000000003';
 const AMMAN = '64a000000000000000000001';
 const IRBID = '64a000000000000000000002';
-const ABDOUN = '64a000000000000000000a01';
-const KHALDA = '64a000000000000000000a02';
+const ABDOUN = '64a000000000000000000021';
+const JUBEIHA = '64a000000000000000000022';
 
 const OPEN_DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'SAT'] as const;
 const week = (): MockBranch['weeklySchedule'] => [
@@ -62,7 +62,7 @@ export const MOCK_BRANCHES: Readonly<Record<string, readonly MockBranch[]>> = {
       isMain: false,
       status: 'ACTIVE',
       cityId: AMMAN,
-      areaId: KHALDA,
+      areaId: JUBEIHA,
     }),
     branch({
       n: 13,

@@ -19,6 +19,7 @@ import { DeletionDecision } from './DeletionDecision';
 import { SalonActions } from './SalonActions';
 import { SalonActivityTab } from './SalonActivityTab';
 import { SalonInsightsTab } from './SalonInsightsTab';
+import { BranchesTab } from './branches/BranchesTab';
 
 const TABS = ['overview', 'members', 'payout'] as const;
 
@@ -156,6 +157,7 @@ export default function SalonDetailsPage() {
       }
       tabs={[
         { id: 'overview', label: t('salons.overview'), content: s ? <Overview salon={s} /> : null },
+        { id: 'branches', label: t('branches.tab'), content: <BranchesTab salonId={id} /> },
         { id: 'insights', label: t('salons.insights'), content: <SalonInsightsTab id={id} /> },
         {
           id: 'activity',

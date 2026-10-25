@@ -86,6 +86,11 @@
       "RUNNING": "Running",
       "DONE": "Ready",
       "FAILED": "Failed"
+    },
+    "branch": {
+      "ACTIVE": "Active",
+      "OFFLINE": "Offline",
+      "CLOSED": "Closed"
     }
   }
 }

@@ -7,6 +7,8 @@ import { customersRoutes } from './customersRoutes';
 import { contentRoutes } from './contentRoutes';
 import { locationsRoutes } from './locationsRoutes';
 import { salonsRoutes } from './salonsRoutes';
+import { branchesRoutes } from './branchesRoutes';
+import { createBranchStore } from './branchStore';
 import { reviewsRoutes } from './reviewsRoutes';
 import { transactionsRoutes } from './transactionsRoutes';
 import { refundsRoutes } from './refundsRoutes';
@@ -31,6 +33,7 @@ import type { MockRoute } from './mockTransport';
  * (and every test) gets its own copy. Each feature task adds its routes file here.
  */
 export function createMockRoutes(): readonly MockRoute[] {
+  const branches = createBranchStore();
   return [
     ...settingsRoutes(),
     ...locationsRoutes(),
@@ -38,7 +41,8 @@ export function createMockRoutes(): readonly MockRoute[] {
     ...contentRoutes(),
     ...bannersRoutes(),
     ...catalogRoutes(),
-    ...salonsRoutes(),
+    ...salonsRoutes(branches),
+    ...branchesRoutes(branches),
     ...applicationsRoutes(),
     ...customersRoutes(),
     ...bookingsRoutes(),

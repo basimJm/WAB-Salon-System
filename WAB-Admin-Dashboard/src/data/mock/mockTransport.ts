@@ -96,6 +96,37 @@ function errorResponse(
   });
 }
 
+/**
+ * Thrown by a fixture to answer like the server refusing a business rule (409/422 with a domain code and, for
+ * example, the blocking record ids in `details[].field`).
+ */
+export class MockBusinessError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code: string,
+    readonly fields: readonly string[] = [],
+  ) {
+    super(code);
+  }
+}
+
+function businessErrorResponse(e: MockBusinessError, language: Language, traceSeed: number) {
+  return json(e.status, {
+    success: false,
+    message: mockMessage(
+      language,
+      e.status === HTTP_STATUS.conflict ? 'conflict' : 'unprocessable',
+    ),
+    error: {
+      code: e.code,
+      traceId: `${MOCK_TRACE_PREFIX}${String(traceSeed)}`,
+      ...(e.fields.length > 0
+        ? { details: e.fields.map((field) => ({ field, code: e.code, message: e.code })) }
+        : {}),
+    },
+  });
+}
+
 const isErrorScenario = (s: MockScenario): s is keyof typeof MOCK_ERROR_SCENARIOS =>
   s in MOCK_ERROR_SCENARIOS;
 
@@ -170,7 +201,8 @@ export function createMockTransport(options: MockTransportOptions): FetchFn {
     let answer: MockAnswer;
     try {
       answer = found.route.respond({ params: found.params, query: url.searchParams, body });
-    } catch {
+    } catch (error) {
+      if (error instanceof MockBusinessError) return businessErrorResponse(error, language, calls);
       // A fixture that cannot find the record answers like the server: not found.
       return errorResponse('notFound', language, calls);
     }
