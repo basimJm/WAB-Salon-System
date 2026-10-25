@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { DOC_NAMES, type DocName } from '../constants/docs';
-import { contractFingerprint, nextMinor } from './contract';
+import { contractFingerprint, nextMinor, replaceContractEntry } from './contract';
 import { CONTRACT_VERSIONS } from './contractVersions';
 import { buildOpenApiDocuments } from './index';
 
@@ -26,12 +26,11 @@ const main = (): void => {
   const version = nextMinor(current.version);
   const file = resolve(__dirname, '..', '..', 'src', 'docs', 'contractVersions.ts');
   const source = readFileSync(file, 'utf8');
-  const entry = new RegExp(`  ${doc}: \\{[^}]*\\},`);
-  const escaped = note.trim().replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-  const next = source.replace(
-    entry,
-    `  ${doc}: {\n    version: '${version}',\n    sha256: '${sha256}',\n    note: '${escaped}',\n  },`,
-  );
+  const next = replaceContractEntry(source, doc, { version, sha256, note });
+  if (next === source) {
+    process.stderr.write(`${doc}: entry not found in contractVersions.ts; nothing written\n`);
+    process.exit(1);
+  }
   writeFileSync(file, next);
   process.stdout.write(`${doc}: ${current.version} -> ${version}; now run npm run docs\n`);
 };

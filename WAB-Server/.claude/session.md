@@ -10,6 +10,17 @@
 
 ## Current task
 
+### SRV-149 — Member profile carries `branchId` (gap found by MER-061)
+
+- Branch: `feat/srv-149-member-profile-branch`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §6 branch scope; operations merchant login/refresh/application, `GET /merchant/v1/me` — contract merchant 1.3.0, client impact MER-061):
+  - [x] `MemberProfile` (login, refresh, salon application, `/me`) has `branchId`: the member's branch, `null` for the owner; `/me` no longer adds it separately
+  - [x] `contract:bump` fixed: it silently wrote nothing when the stored note contained braces (`{id}`); it now matches the whole entry, fails loudly when nothing matched, and the replacement is a tested helper (`replaceContractEntry`)
+- Tests: `tests/memberProfileBranch.test.ts` (1), `tests/contractGuard.test.ts` (+1); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — the bump bug was caught by the guard test itself (merchant fingerprint stayed old).
+
 ### SRV-128 — Customer/merchant contract review (+ SRV-128a, SRV-128b)
 
 - Branch: `feat/srv-128-contract-review`
@@ -31,18 +42,6 @@
 - Tests: `tests/exportsArabic.test.ts` (3), `tests/exports.test.ts` (builder deps); a rendered sample page was checked visually (pdftoppm)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (Dockerfile copies the fonts), QA ✔) — LIMITATION: no full Unicode bidi; punctuation between Arabic and Latin runs may sit on the wrong side. OFL licence: NOTICE names the licence and its URL; the owner may want the full OFL text added beside the fonts.
-
-### SRV-125 — Catalog request approval may map to an existing catalog service
-
-- Branch: `feat/srv-125-catalog-map`
-- Status: DONE (PR #409)
-- Acceptance criteria (Admin PRD A? catalog requests (ADM-039), BUSINESS_DOMAIN §3 catalogRequests `catalogServiceId`; operation `POST /admin/v1/catalog/requests/{id}/approve` — contract admin 1.2.0, client impact ADM-039):
-  - [x] Approve body is either a new catalog entry (names/descriptions, image, sort order) or `{catalogServiceId, reason}` mapping to an existing active catalog service of the salon's gender (wrong gender 422 `GENDER_MISMATCH`, unknown/inactive 404); a mapping creates nothing new; a body mixing both is 400
-  - [x] Same claim/audit/notice as before; the audit marks `mapped: true`
-  - [x] The saved-analytics-segment audience is split to SRV-125a (PENDING owner: no segment store exists, analytics excluded 2026-10-19)
-- Tests: `tests/salonServices.test.ts` (+1 mapping case); full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (contract bumped through SRV-111), QA ✔) — DEVIATION: half of the row (segments) not built; it needs an owner decision.
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 
