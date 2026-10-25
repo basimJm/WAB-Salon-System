@@ -149,3 +149,14 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.
+
+### T-137 — Salon branches delivered on every master; masters synced through main (2026-10-25)
+- Project: repo root
+- Branch: `chore/sync-masters-into-main-5` (PR into `main`), then `main` → each master
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Server Stage P (SRV-136…149) + merchant/admin server gaps (SRV-111, 124…134, 128a/b) merged into `server`; ADM-088…092 into `admin` (#416–#421); CUS-082…087 into `customer` (#411–#413); MER-061…066 into `merchant` (#423–#425)
+  - [x] `server`, `customer`, `admin`, `merchant` merged into one branch from `main`; the only conflicts were the generated board in `INTEGRATION.md` (regenerated with `tasks.py board`); SRV-149 set DONE
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges only, no product code written.
