@@ -13,7 +13,7 @@
 ### SRV-128 — Customer/merchant contract review (+ SRV-128a, SRV-128b)
 
 - Branch: `feat/srv-128-contract-review`
-- Status: IN REVIEW
+- Status: DONE (PR #414)
 - Acceptance criteria (Customer PRD §13, Merchant PRD §15, INTEGRATION.md §3; contracts merchant 1.2.0, customer 1.2.0):
   - [x] Every capability listed in both PRDs mapped to an operation (notes in `.claude/Integration.md`)
   - [x] Gaps added as rows and fixed here: SRV-128a `GET /merchant/v1/bookings/{id}/eligible-staff?personIndex=` (BOOKINGS_OPERATE, salon + branch scope, same rules as the admin list); SRV-128b customer draft response `branch {id, name, locationText}`
