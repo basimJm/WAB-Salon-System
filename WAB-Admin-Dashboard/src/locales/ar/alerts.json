@@ -14,7 +14,8 @@
       "SUBSCRIPTION_EXPIRED": "اشتراك منتهٍ",
       "SALON_APPLICATION": "طلب صالون جديد",
       "REVIEW_PENDING": "تقييم بانتظار المراجعة",
-      "CATALOG_REQUEST": "طلب خدمة للكتالوج"
+      "CATALOG_REQUEST": "طلب خدمة للكتالوج",
+      "SALON_DELETION_REQUEST": "طلب حذف صالون"
     }
   }
 }

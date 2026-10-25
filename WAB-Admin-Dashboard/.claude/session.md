@@ -5,10 +5,27 @@
 ## Integration status (one glance)
 
 - Consumes all 116 `/admin/v1` operations through the generated contract (`npm run api:sync`); mock transport on fixtures in dev; realtime `/admin` namespace client done.
-- Remote dev switch (ADM-079) waits for SRV-011; Phase 4C (ADM-068…077) BLOCKED on SRV-117…127 + SRV-110; ADM-002/005/006/082/083 PENDING owner hosting/CI; ADM-080 e2e waived by the owner.
+- Remote dev switch (ADM-079) checked against the real server (local stack + hosted dev wiring): gap list `docs/REMOTE_DEV_GAPS.md`; Phase 4C (ADM-068…077) BLOCKED on SRV-117…127 + SRV-110; ADM-002/005/006/082/083 PENDING owner hosting/CI; ADM-080 e2e waived by the owner.
 - Gate: `sh scripts/gate.sh` + browser UI check before every commit; no GitHub CI.
 
 ## Current task
+
+### ADM-079 — Switch to `remote` on dev (INT-05): per-module gap list and fixes, socket events verified against the real server
+
+- Branch: `feat/adm-079-remote-dev` (from `origin/admin`)
+- Status: IN REVIEW
+- Acceptance criteria (task row; operations: all 116 admin GETs via `qa/contract-check.mjs`, getAlerts/postAlertsByIdAcknowledge, getExports*, getBookings*, postCatalogRequestsByIdApprove; realtime `/admin` namespace, BUSINESS_DOMAIN §7):
+  - [x] Gap list per module in `docs/REMOTE_DEV_GAPS.md` (G1–G16: FIXED / SERVER / OPEN / OK) from the contract check, the socket check and a signed-in browser pass of `dev-release` on the local real stack (same server code as dev)
+  - [x] Client fixes: contract re-synced (SRV-125/126, `requestedAt`); alert kind `SALON_DELETION_REQUEST` and export kinds `CUSTOMERS`/`SALONS` (AR+EN); `alertLink` reads the server's UPPER_SNAKE/camelCase subjects and sends applications to their page; mocks use the real shapes
+  - [x] Realtime: event names match `WAB-Server/src/constants/{sockets,alerts}.ts`; received `booking.updated`, `application.created`, `overview.tick` live; handshake refusals measured (`active=false`): client now retries `UNAVAILABLE` with backoff and `UNAUTHORIZED` once the token changed, `FORBIDDEN` stops
+  - [x] Hosted dev wiring: `.env.dev`/`.env.prod` resolve to the Render host in the bundle; `write-hosting.ts` now reads the variant `.env` file (CSP `connect-src` had only `'self'`); hosted health/ready 200, 401/404 envelopes, `/admin` websocket refuses no/malformed token with UNAUTHORIZED; CORS preflight has no allow-origin (S10)
+  - [x] Server-side defects in `docs/SERVER_ISSUES.md` (S10 hosted CORS, S11 English alert titles, S12 entity type spelling); QA kit: `qa/socket-check.mjs`, `qa/hosted-check.mjs`, `QA_ADMIN_TOKEN`, fake providers in `qa/stack.sh`
+- Tests: tests/socket-client.test.ts (+5: FORBIDDEN, UNAUTHORIZED token wait, UNAVAILABLE backoff, transport errors, backoff cap), tests/alerts.test.tsx (+2 + updated link), tests/exports.test.tsx (+1), tests/hosting.test.ts (+2); `sh scripts/gate.sh` GATE OK (1226+ tests)
+- Browser check (dev-release built against the local stack, signed in as the QA admin): 36 screens in AR RTL light desktop, every request 200, no error alerts, console clean; alerts in EN LTR dark 375 px (links to /reviews and /salons/applications/:id, "Salon deletion request" filter, no horizontal overflow) and exports list
+- Loops: 1/1 — re-ran the contract check and socket check after the fixes (66 OK, 2 BAD = S3 handled), re-checked each gap row against the code and the measured answers; found the CSP/env gap (G7) and the stale contract (G1) in this pass
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — fixes stay in data/domain/scripts, no contract hand edits, retry timers cleared on disconnect. DEVIATIONS: hosted checks are unauthenticated only (by instruction, no credentials to Render), so module flows were run on the local stack, not on Render; `alert.created`/`review.created`/`refund.updated` not received live (raised by the evaluate job / need a completed or paid booking; checked in the server code); G13–G15 (catalog map-to-existing, customers/salons export buttons, `requestedAt`) left OPEN for new backlog rows; no e2e (user decision); root `session.md` index line left to the lead.
+
+## Last blocks
 
 ### ADM-092 — Branches QA (every branch screen, AR/EN, light/dark, phone/tablet/desktop)
 
@@ -22,23 +39,6 @@
 - Tests: tests/branches-qa.test.tsx (5); full suite; `sh scripts/gate.sh` GATE OK
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — CSS fix is global but only constrains single-column grids to the page width. DEVIATIONS: NOT run against the real server (no WAB-Server reachable from this sandbox: local ports are blocked and the dev server on Render was not used), so this is a mock QA; the owner should repeat the pass on a server with `seed:demo` (Lamar Beauty Lounge, 3 branches). No e2e (user decision). The browser pane was hidden, so checks are JS measurements, not screenshots. Earlier console 404s came from chunks replaced by rebuilds while the tab was open (lazyPage reload), not from the app.
-
-## Last blocks
-
-### ADM-090 — Branch-aware salon editing (hours, closures, services, staff; move staff)
-
-- Branch: `feat/adm-090-branch-editing` (from `feat/adm-089-salon-branches`)
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.16; operations getSalonsByIdHours/putSalonsByIdHours/…Preview/…Closures*/getSalonsByIdServices/postSalonsByIdServices/patchSalonsByIdServicesByServiceId with `?branchId=`, getSalonsByIdMembers `?branchId=`, postSalonsByIdMembersByMemberIdBranch):
-  - [x] Salon edit page: a Branch picker (open branches, main first, default main) above the Hours and closures, Services and Staff tabs only; profile, gallery and policy stay salon-wide
-  - [x] Every hours/closures/services call carries `?branchId=` of the picked branch (`BranchScope` in the salon-edit repository); no branch = the main branch
-  - [x] Staff tab lists the members of the picked branch, skills from that branch's services; empty branch says "This branch has no staff yet"
-  - [x] Move a member to another open branch (reason dialog; the hint says their services are cleared); member list and staff profile refresh
-  - [x] Mock: hours/closures/services state per branch (main branch = salon default), members store with `?branchId=` filter and the move route (refuses a closed branch)
-- Tests: tests/salonEdit-branches.test.tsx (4: query/params of every scoped call, picker visibility, services per branch, staff per branch + move) + existing salonEdit suite; `sh scripts/gate.sh` GATE OK
-- Browser check (dev-debug from this worktree): salon edit → Staff in EN light 1280 px (picker Abdoun/Dabouq/Khalda, move Sara to Khalda → Abdoun empty, Khalda lists Sara + Lina, toast) and AR RTL dark 375 px (Hours tab picker → Khalda, Staff → Dabouq empty message, hint shown); no horizontal scroll, no new console messages
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — repository signatures moved from `salonId` to `BranchScope` for the branch-scoped methods (max-params 4 kept). DEVIATIONS: no e2e (user decision); the mock seeds every branch with the same starting menu/hours (the real server keeps each branch's own data); the admin PRD has no branch section yet.
 
 ### ADM-091 — Branch filter and column across bookings, reviews, members, money and exports
 
