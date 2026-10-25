@@ -31,7 +31,13 @@ data class DaySchedule(val day: DayOfWeek?, val isOff: Boolean, val hours: Openi
 /** An exceptional closure (PRD S07 item 7), dates as the server sends them (ISO). */
 data class Closure(val from: String, val to: String, val reason: String)
 
-data class StaffPreview(val id: String, val firstName: String, val photoUrl: String?, val status: StaffStatus)
+data class StaffPreview(
+    val id: String,
+    val firstName: String,
+    val photoUrl: String?,
+    val status: StaffStatus,
+    val branchId: String? = null,
+)
 
 /** A salon's own service (PRD S07 item 10); price is JOD text, tax-inclusive. */
 data class SalonService(
@@ -43,15 +49,24 @@ data class SalonService(
     val price: String,
     val durationMinutes: Int,
     val mediaUrls: List<String>,
+    val branchId: String? = null,
 )
 
 data class GalleryItem(val id: String, val type: MediaType, val url: String, val thumbnailUrl: String?)
 
-data class Review(val id: String, val customerName: String, val rating: Float, val comment: String?, val createdAt: String)
+/** A review; [branch] is a label only (BUSINESS_DOMAIN §5.11: ratings are salon-wide). */
+data class Review(
+    val id: String,
+    val customerName: String,
+    val rating: Float,
+    val comment: String?,
+    val createdAt: String,
+    val branch: BranchRef? = null,
+)
 
 data class ReviewsPreview(val summary: RatingSummary, val latest: List<Review>)
 
-/** `GET /salons/{id}` (PRD S07). */
+/** `GET /salons/{id}` (PRD S07); the top-level place fields mirror the main branch, [branches] lists the bookable ones (main first). */
 data class SalonDetails(
     val id: String,
     val name: String,
@@ -74,4 +89,5 @@ data class SalonDetails(
     val gallery: List<GalleryItem>,
     val isFavorite: Boolean,
     val reviews: ReviewsPreview,
+    val branches: List<SalonBranch> = emptyList(),
 )

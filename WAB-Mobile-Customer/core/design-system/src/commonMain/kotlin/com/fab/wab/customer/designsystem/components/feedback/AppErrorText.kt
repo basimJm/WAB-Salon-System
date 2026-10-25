@@ -47,6 +47,13 @@ import com.fab.wab.customer.designsystem.resources.error_code_maintenance
 import com.fab.wab.customer.designsystem.resources.error_code_update_required
 import com.fab.wab.customer.designsystem.resources.error_code_current_password_invalid
 import com.fab.wab.customer.designsystem.resources.error_code_email_already_used
+import com.fab.wab.customer.designsystem.resources.error_code_branch_not_found
+import com.fab.wab.customer.designsystem.resources.error_code_branch_not_bookable
+import com.fab.wab.customer.designsystem.resources.error_code_branch_required
+import com.fab.wab.customer.designsystem.resources.error_code_branch_limit_reached
+import com.fab.wab.customer.designsystem.resources.error_code_branch_has_upcoming_bookings
+import com.fab.wab.customer.designsystem.resources.error_code_last_branch
+import com.fab.wab.customer.designsystem.resources.error_code_branch_scope_denied
 import com.fab.wab.customer.designsystem.resources.error_code_unknown
 import com.fab.wab.customer.designsystem.resources.state_error_message
 import com.fab.wab.customer.designsystem.resources.state_offline_message
@@ -99,6 +106,13 @@ internal val ERROR_CODE_STRINGS: Map<ErrorCode, StringResource> = mapOf(
     ErrorCode.UPDATE_REQUIRED to Res.string.error_code_update_required,
     ErrorCode.CURRENT_PASSWORD_INVALID to Res.string.error_code_current_password_invalid,
     ErrorCode.EMAIL_ALREADY_USED to Res.string.error_code_email_already_used,
+    ErrorCode.BRANCH_NOT_FOUND to Res.string.error_code_branch_not_found,
+    ErrorCode.BRANCH_NOT_BOOKABLE to Res.string.error_code_branch_not_bookable,
+    ErrorCode.BRANCH_REQUIRED to Res.string.error_code_branch_required,
+    ErrorCode.BRANCH_LIMIT_REACHED to Res.string.error_code_branch_limit_reached,
+    ErrorCode.BRANCH_HAS_UPCOMING_BOOKINGS to Res.string.error_code_branch_has_upcoming_bookings,
+    ErrorCode.LAST_BRANCH to Res.string.error_code_last_branch,
+    ErrorCode.BRANCH_SCOPE_DENIED to Res.string.error_code_branch_scope_denied,
     ErrorCode.UNKNOWN to Res.string.error_code_unknown,
 )
 

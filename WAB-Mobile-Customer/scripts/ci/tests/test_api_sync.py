@@ -90,6 +90,13 @@ class ApiSyncTest(unittest.TestCase):
         otp = api_sync.sample_value({"type": "object", "properties": {"allowed": {"type": "boolean"}, "otpLength": {"type": "integer"}, "enabled": {"type": "boolean"}}}, "o", {})
         self.assertEqual({"allowed": True, "otpLength": 6, "enabled": False}, otp)
 
+    def test_branch_samples_show_several_branches_with_one_main_first(self) -> None:
+        card = api_sync.sample_value({"type": "object", "properties": {"branchCount": {"type": "number"}}}, "card", {})
+        self.assertEqual(3, card["branchCount"])
+        branches = api_sync.sample_value(
+            {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "string"}, "isMain": {"type": "boolean"}}}}, "branches", {})
+        self.assertEqual([True, False, False], [b["isMain"] for b in branches])
+
     def test_check_mode_detects_stale_and_extra_files(self) -> None:
         self.assertEqual(1, api_sync.main(["--check", "--spec", str(self.spec), "--out", str(self.out)]))
         self.assertEqual(0, api_sync.main(["--spec", str(self.spec), "--out", str(self.out)]))

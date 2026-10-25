@@ -56,6 +56,7 @@ fun GetBookingsByIdData.toDomain(): BookingDetails = BookingDetails(
     appointmentEnd = appointmentEnd,
     salonId = salon?.id,
     salonName = salon?.name,
+    branch = branch?.let { bookedBranchOf(it.id, it.name, it.locationText) },
     persons = persons.map { it.toDomain() },
     money = BookingMoney(money.total, money.dueOnline, money.paidOnline, money.remaining, money.refunded),
     policy = policy.toPolicy(),

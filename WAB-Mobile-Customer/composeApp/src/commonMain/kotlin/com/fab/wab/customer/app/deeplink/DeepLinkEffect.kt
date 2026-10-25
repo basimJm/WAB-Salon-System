@@ -19,7 +19,7 @@ fun DeepLinkEffect(store: DeepLinkStore, navController: NavHostController) {
         store.consume(current)
         navController.switchRootTab(RootTab.Home)
         when (current) {
-            is DeepLink.Salon -> navController.navigate(Screen.SalonDetails(current.salonId))
+            is DeepLink.Salon -> navController.navigate(Screen.SalonDetails(current.salonId, current.branchId))
         }
     }
 }

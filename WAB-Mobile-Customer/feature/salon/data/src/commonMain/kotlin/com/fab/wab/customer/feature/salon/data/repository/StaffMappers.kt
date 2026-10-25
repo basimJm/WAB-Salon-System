@@ -5,6 +5,7 @@ package com.fab.wab.customer.feature.salon.data.repository
 import com.fab.wab.customer.core.data.contract.generated.GetSalonsBySalonIdStaffByMemberIdData
 import com.fab.wab.customer.core.data.contract.generated.GetSalonsBySalonIdStaffByMemberIdDataReviewsLatestItem
 import com.fab.wab.customer.core.data.contract.generated.GetSalonsBySalonIdStaffByMemberIdDataWorkingDaysItem
+import com.fab.wab.customer.core.domain.salon.BranchRef
 import com.fab.wab.customer.core.domain.salon.DayOfWeek
 import com.fab.wab.customer.core.domain.salon.MemberRole
 import com.fab.wab.customer.core.domain.salon.OpeningHours
@@ -38,4 +39,11 @@ fun GetSalonsBySalonIdStaffByMemberIdDataWorkingDaysItem.toDomain(): WorkingDay 
 }
 
 fun GetSalonsBySalonIdStaffByMemberIdDataReviewsLatestItem.toDomain(): Review =
-    Review(id = id, customerName = customerName, rating = rating.toFloat(), comment = comment, createdAt = createdAt)
+    Review(
+        id = id,
+        customerName = customerName,
+        rating = rating.toFloat(),
+        comment = comment,
+        createdAt = createdAt,
+        branch = branch?.let { BranchRef(it.id, it.name) },
+    )

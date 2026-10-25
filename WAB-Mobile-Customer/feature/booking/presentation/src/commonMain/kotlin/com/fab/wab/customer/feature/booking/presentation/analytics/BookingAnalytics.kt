@@ -8,6 +8,7 @@ object BookingAnalytics {
     const val ACTION_STEP = "booking_step"
     const val ACTION_SERVICE_TOGGLE = "booking_service_toggle"
     const val ACTION_PAYMENT_METHOD = "booking_payment_method"
+    const val ACTION_BRANCH = "booking_branch_select"
     const val PARAM_STEP = "step"
     const val PARAM_ID = "id"
     const val PARAM_VALUE = "value"
