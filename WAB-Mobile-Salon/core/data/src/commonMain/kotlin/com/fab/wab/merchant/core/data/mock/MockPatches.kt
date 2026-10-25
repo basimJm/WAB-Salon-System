@@ -41,3 +41,23 @@ private fun patchField(key: String, value: JsonElement, salonState: MockSalonSta
     key == PERMISSIONS_KEY && member != null && value is JsonArray -> JsonArray(member.permissions.sorted().map(::JsonPrimitive))
     else -> patch(value, salonState, member)
 }
+
+private const val BOOKINGS_SEGMENT = "bookings"
+private const val STATUS_KEY = "status"
+private const val DATA_KEY = "data"
+private const val PENDING = "PENDING"
+
+/** `GET …/bookings/{id}` for an id marked pending answers with `data.status = PENDING`; anything else is unchanged. */
+fun patchPendingBooking(json: String, path: String, pendingIds: Set<String>): String {
+    val segments = path.trim('/').split('/')
+    val id = segments.lastOrNull()
+    if (pendingIds.isEmpty() || segments.dropLast(1).lastOrNull() != BOOKINGS_SEGMENT || id !in pendingIds) return json
+    val root = try {
+        Json.parseToJsonElement(json) as? JsonObject
+    } catch (ignored: SerializationException) {
+        null
+    } ?: return json
+    val data = root[DATA_KEY] as? JsonObject ?: return json
+    return JsonObject(root + (DATA_KEY to JsonObject(data + (STATUS_KEY to JsonPrimitive(PENDING))))).toString()
+}
+
