@@ -8,6 +8,17 @@ export class ServerEventsRepository extends AppendOnlyRepository<ServerEventRaw>
     super(model);
   }
 
+  /** How many `name` events of one salon happened in `[from, to)` (merchant statistics). */
+  async countFor(query: { name: string; salonId: string; from: Date; to: Date }): Promise<number> {
+    return this.model
+      .countDocuments({
+        name: query.name,
+        salonId: query.salonId,
+        ts: { $gte: query.from, $lt: query.to },
+      })
+      .exec();
+  }
+
   /** Event counts in `[from, to)` grouped by name or by local day (`timeZone`). */
   async countGrouped(query: EventCountQuery): Promise<EventCountRow[]> {
     const match: Record<string, unknown> = { ts: { $gte: query.from, $lt: query.to } };

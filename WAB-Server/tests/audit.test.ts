@@ -174,7 +174,9 @@ describe('append-only repositories', () => {
       ]);
       // `countGrouped` is a read-only aggregate on the server events (dashboards).
       const allowed = ['append', 'findById', 'findPage'];
-      if (repository instanceof ServerEventsRepository) allowed.splice(1, 0, 'countGrouped');
+      // Server events also have read-only counts (analytics, merchant statistics).
+      if (repository instanceof ServerEventsRepository)
+        allowed.splice(1, 0, 'countFor', 'countGrouped');
       expect([...methods].filter((name) => name !== 'constructor').sort()).toEqual(allowed);
     }
   });
