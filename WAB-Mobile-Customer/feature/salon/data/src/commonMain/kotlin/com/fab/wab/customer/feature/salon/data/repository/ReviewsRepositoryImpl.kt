@@ -6,6 +6,7 @@ import com.fab.wab.customer.core.data.contract.generated.PostSalonsBySalonIdRevi
 import com.fab.wab.customer.core.data.contract.generated.PostSalonsBySalonIdStaffByMemberIdReviewsBody
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.mapSuccess
+import com.fab.wab.customer.core.domain.salon.BranchRef
 import com.fab.wab.customer.core.domain.salon.RatingSummary
 import com.fab.wab.customer.core.domain.salon.Review
 import com.fab.wab.customer.core.network.safeApiCall
@@ -35,11 +36,15 @@ class ReviewsRepositoryImpl(private val api: ReviewsApi) : ReviewsRepository {
 }
 
 fun GetSalonsBySalonIdReviewsData.toDomain(): ReviewsPage = ReviewsPage(
-    items = items.map { Review(it.id, it.customerName, it.rating.toFloat(), it.comment, it.createdAt) },
+    items = items.map {
+        Review(it.id, it.customerName, it.rating.toFloat(), it.comment, it.createdAt, it.branch?.let { b -> BranchRef(b.id, b.name) })
+    },
     summary = RatingSummary(summary.avg.toFloat(), summary.count.toInt()),
 )
 
 fun GetSalonsBySalonIdStaffByMemberIdReviewsData.toDomain(): ReviewsPage = ReviewsPage(
-    items = items.map { Review(it.id, it.customerName, it.rating.toFloat(), it.comment, it.createdAt) },
+    items = items.map {
+        Review(it.id, it.customerName, it.rating.toFloat(), it.comment, it.createdAt, it.branch?.let { b -> BranchRef(b.id, b.name) })
+    },
     summary = RatingSummary(summary.avg.toFloat(), summary.count.toInt()),
 )

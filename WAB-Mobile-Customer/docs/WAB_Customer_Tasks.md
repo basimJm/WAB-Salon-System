@@ -133,7 +133,7 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 
 | ID | Task | Branch | Needs | Status | Notes |
 |---|---|---|---|---|---|
-| CUS-082 | `./gradlew apiSync` with branches: `Branch` model, branch on salon details, drafts and bookings, branch error codes (AR/EN) | `feat/cus-082-branches-contract` | CUS-081, SRV-148 | TODO | Waits for the server contract. unblocked by SRV-148 on 2026-10-25 |
+| CUS-082 | `./gradlew apiSync` with branches: `Branch` model, branch on salon details, drafts and bookings, branch error codes (AR/EN) | `feat/cus-082-branches-contract` | CUS-081, SRV-148 | IN REVIEW | Waits for the server contract. unblocked by SRV-148 on 2026-10-25 |
 | CUS-083 | Search and filtered lists: one card per salon (never per branch) with the nearest branch's distance/area and "N branches" | `feat/cus-083-search-branches` | CUS-082, SRV-144 | BLOCKED | §5.17. |
 | CUS-084 | Nearest section and map: one entry per branch titled "Salon - Branch" (e.g. Hifa Salon - Mecca Street); single-branch salons show the salon name | `feat/cus-084-nearest-branches` | CUS-082, SRV-144 | BLOCKED | §5.17. |
 | CUS-085 | Salon details: clear, always-visible branch selector; branch address, map, phone, hours, open now; staff and services/prices per selected branch; reviews salon-wide with the branch label on each | `feat/cus-085-details-branches` | CUS-082, SRV-144, SRV-145 | BLOCKED | §5.17; RTL/LTR, light/dark, portrait/landscape. |
