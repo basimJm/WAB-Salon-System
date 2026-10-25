@@ -1,4 +1,8 @@
-import { OPEN_BRANCH_STATUSES, type BranchOfflineActorType } from '../../constants/branches';
+import {
+  BRANCH_MESSAGE_KEYS,
+  OPEN_BRANCH_STATUSES,
+  type BranchOfflineActorType,
+} from '../../constants/branches';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { LocalizedName } from '../../constants/referenceData';
 import type { BranchRaw } from '../../models/branch.model';
@@ -237,7 +241,10 @@ export const createBranchesService = (deps: BranchesDeps): BranchesService => {
     async update(salonId, branchId, patch) {
       const current = await find(salonId, branchId);
       if (current.status === 'CLOSED')
-        throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
+        throw new BusinessRuleError({
+          code: ERROR_CODES.INVALID_TRANSITION,
+          messageKey: BRANCH_MESSAGE_KEYS.invalidStatus,
+        });
       await assertPlace(places, 'body', patch.cityId, patch.areaId);
       const set: Record<string, unknown> = {};
       const unset: string[] = [];
@@ -257,7 +264,10 @@ export const createBranchesService = (deps: BranchesDeps): BranchesService => {
     async setMain(salonId, branchId) {
       const next = await find(salonId, branchId);
       if (next.status === 'CLOSED')
-        throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
+        throw new BusinessRuleError({
+          code: ERROR_CODES.INVALID_TRANSITION,
+          messageKey: BRANCH_MESSAGE_KEYS.invalidStatus,
+        });
       if (next.isMain) return toBranchView(next);
       const previous = await branches.main(salonId);
       // One main branch per salon (unique index): clear the old flag before setting the new one.
@@ -271,7 +281,10 @@ export const createBranchesService = (deps: BranchesDeps): BranchesService => {
     async setOffline({ salonId, branchId, reason, actor }) {
       const branch = await find(salonId, branchId);
       if (branch.status !== 'ACTIVE')
-        throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
+        throw new BusinessRuleError({
+          code: ERROR_CODES.INVALID_TRANSITION,
+          messageKey: BRANCH_MESSAGE_KEYS.invalidStatus,
+        });
       await branches.patch(branchId, {
         set: {
           status: 'OFFLINE',
@@ -285,7 +298,10 @@ export const createBranchesService = (deps: BranchesDeps): BranchesService => {
     async setOnline({ salonId, branchId }) {
       const branch = await find(salonId, branchId);
       if (branch.status !== 'OFFLINE')
-        throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
+        throw new BusinessRuleError({
+          code: ERROR_CODES.INVALID_TRANSITION,
+          messageKey: BRANCH_MESSAGE_KEYS.invalidStatus,
+        });
       await branches.patch(branchId, { set: { status: 'ACTIVE' }, unset: ['offline'] });
       await tell(branch, 'branch.online');
       return settle(salonId, branchId);
@@ -294,19 +310,24 @@ export const createBranchesService = (deps: BranchesDeps): BranchesService => {
     async close({ salonId, branchId, actor }) {
       const branch = await find(salonId, branchId);
       if (!(OPEN_BRANCH_STATUSES as readonly string[]).includes(branch.status)) {
-        throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
+        throw new BusinessRuleError({
+          code: ERROR_CODES.INVALID_TRANSITION,
+          messageKey: BRANCH_MESSAGE_KEYS.invalidStatus,
+        });
       }
       if ((await branches.countOpen(salonId)) <= 1) {
         throw new BusinessRuleError({ code: ERROR_CODES.LAST_BRANCH });
       }
       if (branch.isMain) {
+        // §5.16: choose another main branch first. No BRANCH_* code exists for this, so the code stays.
         throw new BusinessRuleError({
           code: ERROR_CODES.INVALID_TRANSITION,
+          messageKey: BRANCH_MESSAGE_KEYS.mainCannotClose,
           details: [
             {
               field: 'isMain',
               code: ERROR_CODES.INVALID_TRANSITION,
-              messageKey: errorMessageKey(ERROR_CODES.INVALID_TRANSITION),
+              messageKey: BRANCH_MESSAGE_KEYS.mainCannotClose,
             },
           ],
         });

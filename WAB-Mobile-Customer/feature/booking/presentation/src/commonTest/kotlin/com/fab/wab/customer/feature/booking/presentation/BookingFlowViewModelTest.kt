@@ -116,6 +116,7 @@ class BookingFlowViewModelTest : BookingFlowHarness() {
         vm.onEvent(UiAction.OnSlotSelect("2026-10-20T07:00:00Z"))
         assertTrue(vm.state.value.canContinueSlot)
         assertEquals("2026-10-20", vm.state.value.person.date)
+        assertEquals("2026-10-20T07:45:00Z", vm.state.value.person.end, "the slot end travels with the pick (others[].end, CUS-060)")
         vm.onEvent(UiAction.OnContinue)
         assertEquals(BookingStep.STAFF, vm.state.value.step)
         vm.onEvent(UiAction.OnBack)

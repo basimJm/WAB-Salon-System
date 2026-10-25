@@ -30,7 +30,8 @@ import {
 } from '../../constants/payoutDetails';
 import { MERCHANT_POLICY_ROUTES, MERCHANT_SALON_ROUTES } from '../../constants/salon';
 import { UPLOAD_ROUTES } from '../../constants/uploads';
-import { createRateLimiter } from '../../middlewares/rateLimit';
+import { ROUTE_LIMIT_FAMILIES } from '../../constants/security';
+import { createBrowseRouteLimiter, createRouteLimiter } from '../shared/rateLimits';
 import { mount } from '../../routes/mount';
 import { createMerchantUploadsRouter } from '../shared/uploads';
 import { createMerchantAppConfigRouter } from '../shared/appConfig';
@@ -94,7 +95,7 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     MERCHANT_AUTH_ROUTES.base,
     createMerchantAuthRouter({
       service: services.merchantAuth ?? unavailableMerchantAuth,
-      limiter: createOtpRouteLimiter(services),
+      limiter: createOtpRouteLimiter(services, 'merchant'),
     }),
   );
   mount(
@@ -103,7 +104,7 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     createMerchantChangePhoneRouter(
       services.memberSelf ?? unavailableMemberSelf,
       services.salonProfile?.guard ?? [unavailableGuard],
-      createOtpRouteLimiter(services),
+      createOtpRouteLimiter(services, 'merchant'),
     ),
   );
   mount(
@@ -124,14 +125,14 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
   );
   mount(router, INSTALLATION_ROUTES.base, createMerchantInstallationsRouter(services));
   mount(router, APP_CONFIG_ROUTES.base, createMerchantAppConfigRouter(services));
-  mount(router, LOCATION_ROUTES.base, createLocationsRouterFor(services));
+  mount(router, LOCATION_ROUTES.base, createLocationsRouterFor(services, 'merchant'));
   mount(router, CONTENT_ROUTES.base, createMerchantContentRouter(services));
   mount(
     router,
     CATALOG_ROUTES.base,
     createCatalogRouter(
       services.catalog ?? unavailableCatalogService,
-      createOtpRouteLimiter(services),
+      createBrowseRouteLimiter(services, 'merchant'),
     ),
   );
   mount(
@@ -139,7 +140,7 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     MERCHANT_SALON_ROUTES.base,
     createMerchantSalonRouter({
       service: services.salonApplication?.service ?? unavailableSalonApplication,
-      limiter: createOtpRouteLimiter(services),
+      limiter: createOtpRouteLimiter(services, 'merchant'),
       guard: services.salonApplication?.guard ?? unavailableGuard,
     }),
   );
@@ -158,7 +159,7 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       service: services.inbox ?? unavailableInbox,
       recipientType: 'MEMBER',
       guard: services.salonProfile?.guard ?? [unavailableGuard],
-      limiter: createOtpRouteLimiter(services),
+      limiter: createBrowseRouteLimiter(services, 'merchant'),
     }),
   );
   mount(router, UPLOAD_ROUTES.base, createMerchantUploadsRouter(services));
@@ -300,10 +301,12 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     createMerchantPayoutDetailsRouter(
       services.payoutDetails ?? unavailablePayoutDetails,
       services.salonProfile?.guard ?? [unavailableGuard],
-      createRateLimiter({
-        ...PAYOUT_DETAILS_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      createRouteLimiter(
+        services,
+        'merchant',
+        ROUTE_LIMIT_FAMILIES.payoutDetails,
+        PAYOUT_DETAILS_RATE_LIMIT,
+      ),
     ),
   );
   mount(

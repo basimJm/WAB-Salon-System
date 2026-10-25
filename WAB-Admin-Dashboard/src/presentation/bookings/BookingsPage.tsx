@@ -81,6 +81,12 @@ export default function BookingsPage() {
       ltr: true,
       render: (r) => `${formatJodAmount(r.total, language)} ${t('common.currency')}`,
     },
+    {
+      key: 'requested',
+      header: t('bookings.requestedAt'),
+      ltr: true,
+      render: (r) => formatInstant(r.requestedAt, language, 'dateTime'),
+    },
   ];
   const all = { value: '', label: t('appConfig.all') };
   const chip = (key: string, label: string, value: string) =>

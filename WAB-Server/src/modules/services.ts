@@ -180,8 +180,11 @@ export interface ApiServices {
     /** `requireAuth('customer', secret)`. */
     readonly authenticate: RequestHandler;
   };
-  /** Shared store for per-route rate limits; without it each instance counts on its own. */
-  readonly rateLimitStore?: Store;
+  /**
+   * Shared store per route-limit scope (`<namespace>:<family>`, SRV-151); without it each instance
+   * counts on its own in memory.
+   */
+  readonly rateLimitStoreFor?: (scope: string) => Store;
 }
 
 const unavailable = (): Promise<never> =>

@@ -5,6 +5,10 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 /** Why a screen refreshes its data (PRD §3.15): a socket event, an FCM message while open, or the app returning. */
 enum class RefreshReason { Realtime, Push, Foreground }
@@ -14,6 +18,7 @@ object RealtimePayloadKeys {
     const val ID = "id"
     const val BOOKING_ID = "bookingId"
     const val STATUS = "status"
+    const val PAYMENT_STATUS = "paymentStatus"
     const val UPDATED_AT = "updatedAt"
 }
 
@@ -23,30 +28,49 @@ fun RealtimeEvent.entityId(): String? = runCatching {
     (obj[RealtimePayloadKeys.ID] ?: obj[RealtimePayloadKeys.BOOKING_ID])?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
 }.getOrNull()
 
+/** How close in time a repeated [updateKey] counts as the same change delivered twice (CUS-060). */
+object RealtimeRefreshDefaults {
+    private const val DUPLICATE_WINDOW_SECONDS = 5
+    val DUPLICATE_WINDOW: Duration = DUPLICATE_WINDOW_SECONDS.seconds
+}
+
 /**
  * Identity of an update: the same booking in the same state delivered twice (socket + push, or a reconnect replay)
- * must trigger one refresh. Events without an id are never considered duplicates.
+ * must trigger one refresh. Events without an id are never considered duplicates. The server's booking summary has no
+ * `updatedAt` (BUSINESS_DOMAIN §7), so the key also carries the payment status.
  */
 fun RealtimeEvent.updateKey(): String? {
     val id = entityId() ?: return null
     val obj = runCatching { payload.jsonObject }.getOrNull()
-    val status = obj?.get(RealtimePayloadKeys.STATUS)?.jsonPrimitive?.content.orEmpty()
-    val updatedAt = obj?.get(RealtimePayloadKeys.UPDATED_AT)?.jsonPrimitive?.content.orEmpty()
-    return "$name:$id:$status:$updatedAt"
+    val parts = listOf(RealtimePayloadKeys.STATUS, RealtimePayloadKeys.PAYMENT_STATUS, RealtimePayloadKeys.UPDATED_AT)
+        .map { key -> runCatching { obj?.get(key)?.jsonPrimitive?.content }.getOrNull().orEmpty() }
+    return (listOf(name, id) + parts).joinToString(KEY_SEPARATOR)
 }
 
+private const val KEY_SEPARATOR = ":"
+
 /**
- * Realtime events of [name] that matter to [entityId] (any entity when null), with consecutive duplicates dropped by
- * [updateKey] so a socket replay or a push for the same change does not refresh twice.
+ * Realtime events of [name] that matter to [entityId] (any entity when null), with a consecutive duplicate (same
+ * [updateKey] within [duplicateWindow]) dropped so a socket replay or a push for the same change does not refresh twice.
+ * A later event with the same key is a new change (e.g. a staff reassignment keeps status and payment status) and refreshes.
  */
-fun Flow<RealtimeEvent>.refreshesFor(name: String, entityId: String? = null): Flow<RefreshReason> {
+fun Flow<RealtimeEvent>.refreshesFor(
+    name: String,
+    entityId: String? = null,
+    timeSource: TimeSource = TimeSource.Monotonic,
+    duplicateWindow: Duration = RealtimeRefreshDefaults.DUPLICATE_WINDOW,
+): Flow<RefreshReason> {
     var lastKey: String? = null
+    var lastAt: TimeMark? = null
     return filter { it.name == name }
         .filter { event -> entityId == null || event.entityId().let { it == null || it == entityId } }
         .filter { event ->
             val key = event.updateKey()
-            val duplicate = key != null && key == lastKey
-            if (key != null) lastKey = key
+            val duplicate = key != null && key == lastKey && lastAt?.let { it.elapsedNow() < duplicateWindow } == true
+            if (key != null) {
+                lastKey = key
+                lastAt = timeSource.markNow()
+            }
             !duplicate
         }
         .map { RefreshReason.Realtime }

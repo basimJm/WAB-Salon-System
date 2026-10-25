@@ -10,6 +10,38 @@
 
 ## Current task
 
+### SRV-151 — Remote-dev contract fixes (ADM-079 S6, CUS-060 #13/#14/#15/#17, MER-054 #9/#10/#11)
+
+- Branch: `feat/srv-151-remote-dev-fixes`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.4 step 4 (busy intervals), §3.3/§3.3a (single-language `description`/`locationText`), §5.16 + §11 error codes (no `BRANCH_*` code for "main branch"), BRD NFR-01 (stricter limits on OTP/login/payments only); contracts customer 1.3.0, merchant 1.4.0, admin 1.5.0):
+  - [x] Ids: `OBJECT_ID_PATTERN` = `/^[a-fA-F0-9]{24}$/` (no flag; zod-to-openapi copies `toString()`, so `/i` leaked into every `pattern`); same accepted ids; all three documents fixed at the source
+  - [x] Companion picks: domain says a busy interval, so the validator was right; `others[].start/end` and draft `persons[].start` use `instantInput` (ISO date-time with Z/offset → Date): documented required non-nullable `date-time`, and `null` (coerced to 1970 before) is refused
+  - [x] `POST /merchant/v1/salon/applications` `member` = the shared `MemberProfile` schema (firstName, lastName, phone, permissions, providesServices, branchId declared)
+  - [x] Closing the main branch: code stays `INVALID_TRANSITION` (no `BRANCH_*` code fits; none invented) with its own message `branches.mainCannotClose` (top-level + `details[isMain]`); the other branch-status refusals say `branches.invalidStatus` instead of the booking-status text; AR + EN
+  - [x] Demo seed: salon/branch `description` + `locationText` (single-language fields) in English for every demo salon
+  - [x] Rate limits: the real defect was ONE shared Redis store (`rate:http:otp`) for every per-route limiter, so any 20 requests/min from an IP (config, banners, catalog, search…) tripped the OTP-strict routes; `ApiServices.rateLimitStoreFor(scope)` gives each family its own counter (`rate:http:<ns>:<family>`: otp, browse, booking-draft, booking, payment, payout-details, upload); OTP family only on OTP/auth/change-phone/salon application/admin login; banners, catalog, profile, config, content, locations, installations, merchant inbox → browse (300/min); uploads keep 20/min in their own counter; global limiter unchanged
+- Tests: `tests/remoteDevFixes.test.ts` (patterns in every document, pick validation + spec, draft start, application member, branch messages AR/EN, seed text, limiter scopes + OTP budget isolation), `tests/merchantBranches.test.ts` (message keys); full gate (see Notes)
+- API docs: customer/merchant/admin regenerated; contract bumps with client impact: customer `./gradlew apiSync` (CUS-060), merchant `./gradlew apiSync` (MER-054), admin `npm run api:sync` (ADM-079, can drop its objectId re-validation)
+- Loops: 1/1 — re-checked each criterion against BUSINESS_DOMAIN §5.4, §3.3/§3.3a, §5.16, §11 and BRD NFR-01; grepped every `createOtpRouteLimiter`/`rateLimitStore` caller (found config/content/locations/installations/uploads/merchant catalog+inbox also on the OTP store) and every `z.coerce.date()` in customer pick fields
+- Review: PASSED (SE ✔, Mobile ✔ (apps: decoders already tolerate; DTOs re-sync), Architect ✔ (contract bumps, backward-compatible: stricter only for null/epoch inputs), QA ✔)
+- Notes: DEVIATIONS: docs/bump ran `tsc -p tsconfig.build.json` + `node dist/docs/*.js` directly (npm cache permission error; `prebuild` ensure-sdks skipped; `node_modules` symlinked from the main checkout, removed before commit). Seed is insert-only: the hosted dev DB keeps the old Arabic Lamar text until the owner re-seeds or edits it. Admin `z.coerce.date()` fields (placements, banners, campaigns, audit filters) still document `["string","null"]`: out of scope, not changed. Merchant `GET /config` maintenance on hosted dev (MER-054 #8) is a dev setting, not code.
+
+### SRV-150 — Alerts: titles in the request language (+ both) and one uppercase subject type
+
+- Branch: `feat/srv-150-alert-i18n`
+- Status: IN REVIEW
+- Acceptance criteria (server issues S11/S12 from ADM-079, `WAB-Admin-Dashboard/docs/SERVER_ISSUES.md`; BUSINESS_DOMAIN §3.7 `alerts` (updated here), §7 admin room `alert.created`; CLAUDE.md §7 admin answers carry AR + EN; operations `GET /admin/v1/alerts`, `POST /admin/v1/alerts/{id}/acknowledge` — contract admin 1.4.0, client impact ADM-079):
+  - [x] S11: new alerts store `title{ar,en}` from the locale keys `alerts.<KIND>.title` (both already existed); list/acknowledge answer `title` in the `Accept-Language` language (default ar) plus `titles{ar,en}`; alerts stored before the fix (English string) read their titles from the kind, so no data migration
+  - [x] Socket `alert.created` carries `title` in the default language (ar; a socket has no request language) plus `titles{ar,en}` (was English)
+  - [x] S12: `ALERT_ENTITY_TYPES` (`SALON|REFUND|REVIEW|CATALOG_REQUEST`) types `RaiseInput.entityType` and the schema enum; salon deletion now raises `SALON`; demo seed wrote `salon`/`refund` and English titles, fixed; stored lowercase values are normalized on read (`normalizeAlertEntityType`; unknown → null), so no migration
+  - [x] BUSINESS_DOMAIN §3.7 records `title{ar,en}`, the entityType enum and the response/socket shape (domain was silent; chose the CLAUDE.md §7 bilingual convention while keeping `title` a string for compatibility)
+- Tests: `tests/alertI18n.test.ts` (9: titles per kind, stored on raise, list/ack in AR/EN/default, legacy string title, feed payload, legacy `salon`, normalizer, schema enum + both titles); `tests/accountRemoval.test.ts` asserts `entityType: 'SALON'`; full gate (Terminal panel, outside the sandbox): typecheck, build, jest 159 suites / 2803 tests green; lint + format re-run green after fixing the new test (deprecated `validateSync`) and the pre-existing prettier drift in this file
+- API docs: `openapi.admin.json` regenerated (`titles` added, `entityType` enum); contract admin 1.3.0 → 1.4.0 (`contract:bump`)
+- Loops: 1/1 — re-checked each criterion against BUSINESS_DOMAIN §3.7/§7, every `entityType` write in alerts (alerts.service, salonDeletion, demo seed) and every reader of `alert.title` (routes, socket; emails already used the kind's locale key)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (backward compatible: `title` stays a string, `titles` added, contract bumped, ADM-079 named), QA ✔) — audit-log `entityType: 'salon'` (a different collection) is untouched on purpose
+- Notes: client impact ADM-079: `alertLink` can drop the lowercase normalization; the panel may show `titles[lang]` for socket toasts. DEVIATION: docs/build ran `tsc` + `node dist/docs/*.js` directly (worktree shares the main checkout's `node_modules`, `prebuild` skipped).
+
 ### SRV-149 — Member profile carries `branchId` (gap found by MER-061)
 
 - Branch: `feat/srv-149-member-profile-branch`
@@ -202,6 +234,7 @@
 - Notes: none.
 
 ### SRV-011a — Hosted dev API recorded; client remote-switch tasks unblocked (owner request 2026-10-25)
+
 - Branch: `chore/srv-011a-dev-api`
 - Status: DONE
 - Acceptance criteria:

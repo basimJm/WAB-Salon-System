@@ -1,0 +1,108 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "id": "500157bd497447d283767cbd",
+    "firstName": "Noor",
+    "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/rose-staff0.jpg",
+    "status": "DAY_OFF",
+    "branchId": "6addc42774ae573daadd06d6",
+    "role": "MANAGER",
+    "rating": {
+      "avg": 0,
+      "count": 0
+    },
+    "bio": "Fast, friendly and always on time.",
+    "yearsOfExperience": 13,
+    "customersCount": 9,
+    "workingDays": [
+      {
+        "day": "MON",
+        "start": null,
+        "end": null
+      },
+      {
+        "day": "TUE",
+        "start": null,
+        "end": null
+      },
+      {
+        "day": "WED",
+        "start": null,
+        "end": null
+      },
+      {
+        "day": "THU",
+        "start": null,
+        "end": null
+      },
+      {
+        "day": "FRI",
+        "start": null,
+        "end": null
+      }
+    ],
+    "services": [
+      {
+        "id": "387f8160a24b10c2d3b45546",
+        "catalogServiceId": "6ad867169e63b9a6a612d4a4",
+        "name": "Makeup"
+      },
+      {
+        "id": "549f6776cd9ce882c6fc96a4",
+        "catalogServiceId": "6ad867169e63b9a6a612d4a2",
+        "name": "Manicure"
+      },
+      {
+        "id": "605ee55e777f921da282b66b",
+        "catalogServiceId": "6ad867159e63b9a6a612d4a0",
+        "name": "Hair coloring"
+      },
+      {
+        "id": "6189fc909a33eec513e829a2",
+        "catalogServiceId": "6ad867149e63b9a6a612d49e",
+        "name": "Haircut"
+      },
+      {
+        "id": "909fddd9386396632153db0c",
+        "catalogServiceId": "6ad867159e63b9a6a612d4a1",
+        "name": "Keratin treatment"
+      },
+      {
+        "id": "93d46539a92b1f9031a798ec",
+        "catalogServiceId": "6ad867159e63b9a6a612d49f",
+        "name": "Blow dry"
+      },
+      {
+        "id": "96e1894af48d287aec173b7a",
+        "catalogServiceId": "6ad867179e63b9a6a612d4a5",
+        "name": "Bridal makeup"
+      },
+      {
+        "id": "b82b27d759d4ff4abe6c8a3d",
+        "catalogServiceId": "6ad867179e63b9a6a612d4a7",
+        "name": "Waxing"
+      },
+      {
+        "id": "d9975ca1a6311d5a893e4ada",
+        "catalogServiceId": "6ad867179e63b9a6a612d4a8",
+        "name": "Henna"
+      },
+      {
+        "id": "e83aa9dc20985f8a668b4ba2",
+        "catalogServiceId": "6ad867169e63b9a6a612d4a3",
+        "name": "Pedicure"
+      },
+      {
+        "id": "fb7fc2b5e3a58aa4f539e4e2",
+        "catalogServiceId": "6ad867179e63b9a6a612d4a6",
+        "name": "Facial"
+      }
+    ],
+    "reviews": {
+      "avg": 0,
+      "count": 0,
+      "latest": []
+    }
+  }
+}

@@ -3,13 +3,20 @@ export const REALTIME_NAMESPACE = '/admin';
 export const REALTIME_AUTH_FIELD = 'token';
 export const REALTIME_SOCKET_PATH = '/socket.io';
 
-/** Connect errors the server sends in the handshake. */
+/**
+ * Connect errors the server's namespace middleware sends in the handshake (`SOCKET_ERRORS`): no/expired token,
+ * a token of another scope, and a transient rooms lookup failure. Socket.IO does not retry a middleware refusal.
+ */
 export const REALTIME_CONNECT_ERRORS = {
   unauthorized: 'UNAUTHORIZED',
   forbidden: 'FORBIDDEN',
+  unavailable: 'UNAVAILABLE',
 } as const;
 
-/** Events of the admin room. Only the first two are emitted by the server today (Admin Tasks, Appendix D G10). */
+/**
+ * Events of the admin room, all emitted by the server (`SOCKET_EVENTS.bookingUpdated`, `ALERT_SOCKET_EVENT`,
+ * `ADMIN_SOCKET_EVENTS`; verified against a real server with `qa/socket-check.mjs`, ADM-079).
+ */
 export const REALTIME_EVENTS = [
   'booking.updated',
   'alert.created',

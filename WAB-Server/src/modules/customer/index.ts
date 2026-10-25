@@ -3,8 +3,9 @@ import { CUSTOMER_AUTH_ROUTES } from '../../constants/customerAuth';
 import { OTP_ROUTES } from '../../constants/otp';
 import { INSTALLATION_ROUTES } from '../../constants/installations';
 import { APP_CONFIG_ROUTES } from '../../constants/appConfig';
-import { SEARCH_ROUTES, SEARCH_ROUTE_RATE_LIMIT } from '../../constants/search';
-import { createRateLimiter } from '../../middlewares/rateLimit';
+import { SEARCH_ROUTES } from '../../constants/search';
+import { ROUTE_LIMIT_FAMILIES } from '../../constants/security';
+import { createBrowseRouteLimiter, createRouteLimiter } from '../shared/rateLimits';
 import { LOCATION_ROUTES } from '../../constants/locations';
 import { CONTENT_ROUTES } from '../../constants/content';
 import { BANNER_ROUTES } from '../../constants/banners';
@@ -68,7 +69,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     CUSTOMER_AUTH_ROUTES.base,
     createCustomerAuthRouter({
       service: services.customerAuth?.service ?? unavailableCustomerAuth,
-      limiter: createOtpRouteLimiter(services),
+      limiter: createOtpRouteLimiter(services, 'customer'),
       authenticate:
         services.customerAuth?.authenticate ??
         ((_req, _res, next): void => {
@@ -78,14 +79,14 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
   );
   mount(router, INSTALLATION_ROUTES.base, createCustomerInstallationsRouter(services));
   mount(router, APP_CONFIG_ROUTES.base, createCustomerAppConfigRouter(services));
-  mount(router, LOCATION_ROUTES.base, createLocationsRouterFor(services));
+  mount(router, LOCATION_ROUTES.base, createLocationsRouterFor(services, 'customer'));
   mount(router, CONTENT_ROUTES.base, createCustomerContentRouter(services));
   mount(
     router,
     BANNER_ROUTES.base,
     createCustomerBannersRouter(
       services.banners ?? unavailableBannersService,
-      createOtpRouteLimiter(services),
+      createBrowseRouteLimiter(services, 'customer'),
     ),
   );
   mount(
@@ -93,7 +94,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     CATALOG_ROUTES.base,
     createCatalogRouter(
       services.catalog ?? unavailableCatalogService,
-      createOtpRouteLimiter(services),
+      createBrowseRouteLimiter(services, 'customer'),
     ),
   );
   mount(router, UPLOAD_ROUTES.base, createCustomerUploadsRouter(services));
@@ -103,10 +104,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createSearchRouter({
       service: services.search ?? unavailableSearch,
       optionalAuth: services.installations?.customerOptional ?? unavailableGuard,
-      limiter: createRateLimiter({
-        ...SEARCH_ROUTE_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      limiter: createBrowseRouteLimiter(services, 'customer'),
     }),
   );
   mount(
@@ -115,10 +113,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createSalonDetailsRouter({
       service: services.salonDetails ?? unavailableSalonDetails,
       optionalAuth: services.installations?.customerOptional ?? unavailableGuard,
-      limiter: createRateLimiter({
-        ...SEARCH_ROUTE_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      limiter: createBrowseRouteLimiter(services, 'customer'),
     }),
   );
   mount(
@@ -127,10 +122,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createHomeRouter({
       service: services.home ?? unavailableHome,
       optionalAuth: services.installations?.customerOptional ?? unavailableGuard,
-      limiter: createRateLimiter({
-        ...SEARCH_ROUTE_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      limiter: createBrowseRouteLimiter(services, 'customer'),
     }),
   );
   mount(
@@ -139,10 +131,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createFavoritesRouter({
       service: services.favorites ?? unavailableFavorites,
       guard: services.installations?.customerRequired ?? unavailableGuard,
-      limiter: createRateLimiter({
-        ...SEARCH_ROUTE_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      limiter: createBrowseRouteLimiter(services, 'customer'),
     }),
   );
   mount(
@@ -152,10 +141,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
       service: services.inbox ?? unavailableInbox,
       recipientType: 'CUSTOMER',
       guard: services.installations?.customerRequired ?? unavailableGuard,
-      limiter: createRateLimiter({
-        ...SEARCH_ROUTE_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      limiter: createBrowseRouteLimiter(services, 'customer'),
     }),
   );
   mount(
@@ -164,10 +150,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createReviewsRouter({
       service: services.reviews ?? unavailableReviews,
       guard: services.installations?.customerRequired ?? unavailableGuard,
-      limiter: createRateLimiter({
-        ...SEARCH_ROUTE_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      limiter: createBrowseRouteLimiter(services, 'customer'),
     }),
   );
   mount(
@@ -176,7 +159,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createCustomerProfileRouter({
       service: services.customerProfile ?? unavailableCustomerProfile,
       guard: services.installations?.customerRequired ?? unavailableGuard,
-      limiter: createOtpRouteLimiter(services),
+      limiter: createBrowseRouteLimiter(services, 'customer'),
     }),
   );
   mount(
@@ -185,10 +168,7 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createAvailabilityRouter({
       service: services.availability ?? unavailableAvailability,
       guard: services.installations?.customerRequired ?? unavailableGuard,
-      limiter: createRateLimiter({
-        ...SEARCH_ROUTE_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      limiter: createBrowseRouteLimiter(services, 'customer'),
     }),
   );
   mount(
@@ -197,10 +177,12 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createBookingDraftsRouter({
       service: services.bookingDrafts ?? unavailableBookingDrafts,
       guard: services.installations?.customerRequired ?? unavailableGuard,
-      limiter: createRateLimiter({
-        ...BOOKING_DRAFT_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      limiter: createRouteLimiter(
+        services,
+        'customer',
+        ROUTE_LIMIT_FAMILIES.bookingDraft,
+        BOOKING_DRAFT_RATE_LIMIT,
+      ),
     }),
   );
   mount(
@@ -211,10 +193,12 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
       ...(services.bookingCancel === undefined ? {} : { cancel: services.bookingCancel }),
       ...(services.bookingQueries === undefined ? {} : { queries: services.bookingQueries }),
       guard: services.installations?.customerRequired ?? unavailableGuard,
-      limiter: createRateLimiter({
-        ...BOOKING_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      limiter: createRouteLimiter(
+        services,
+        'customer',
+        ROUTE_LIMIT_FAMILIES.booking,
+        BOOKING_RATE_LIMIT,
+      ),
     }),
   );
   mount(
@@ -223,10 +207,12 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     createPaymentsRouter({
       service: services.payments ?? unavailablePayments,
       guard: services.installations?.customerRequired ?? unavailableGuard,
-      limiter: createRateLimiter({
-        ...PAYMENT_RATE_LIMIT,
-        ...(services.rateLimitStore === undefined ? {} : { store: services.rateLimitStore }),
-      }),
+      limiter: createRouteLimiter(
+        services,
+        'customer',
+        ROUTE_LIMIT_FAMILIES.payment,
+        PAYMENT_RATE_LIMIT,
+      ),
     }),
   );
   return router;

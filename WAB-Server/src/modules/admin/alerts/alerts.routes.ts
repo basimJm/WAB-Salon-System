@@ -1,7 +1,9 @@
 import { Router, type Request, type RequestHandler, type Response } from 'express';
 import type { z } from 'zod';
 import { ADMIN_ALERT_ROUTES } from '../../../constants/alerts';
+import type { Language } from '../../../constants/i18n';
 import type { AlertInbox } from '../../../domain/alerts/alertInbox.service';
+import { alertTitles, normalizeAlertEntityType } from '../../../domain/alerts/alertText';
 import { validate } from '../../../middlewares/validate';
 import type { AlertRaw } from '../../../models/alert.model';
 import { asyncHandler } from '../../../utils/async';
@@ -9,19 +11,24 @@ import type { Entity } from '../../../utils/database/plain';
 import { sendPaginated, sendSuccess } from '../../../utils/response/successResponse';
 import { alertParams, alertsQuery } from './alerts.validation';
 
-export const presentAlert = (a: Entity<AlertRaw>): Record<string, unknown> => ({
-  id: a.id,
-  kind: a.kind,
-  severity: a.severity,
-  title: a.title,
-  entityType: a.entityType ?? null,
-  entityId: a.entityId ?? null,
-  data: a.data,
-  status: a.status,
-  emailedAt: a.emailedAt?.toISOString() ?? null,
-  acknowledgedAt: a.acknowledgedAt?.toISOString() ?? null,
-  createdAt: a.createdAt.toISOString(),
-});
+/** `title` in the request language, `titles` in both (admin answers carry AR and EN, SRV-150). */
+export const presentAlert = (a: Entity<AlertRaw>, language: Language): Record<string, unknown> => {
+  const titles = alertTitles(a);
+  return {
+    id: a.id,
+    kind: a.kind,
+    severity: a.severity,
+    title: titles[language],
+    titles,
+    entityType: normalizeAlertEntityType(a.entityType),
+    entityId: a.entityId ?? null,
+    data: a.data,
+    status: a.status,
+    emailedAt: a.emailedAt?.toISOString() ?? null,
+    acknowledgedAt: a.acknowledgedAt?.toISOString() ?? null,
+    createdAt: a.createdAt.toISOString(),
+  };
+};
 
 /** The alerts page and the bell (Admin PRD A27). */
 export const createAdminAlertsRouter = (
@@ -45,7 +52,13 @@ export const createAdminAlertsRouter = (
         req.validated as { query: z.infer<typeof alertsQuery> }
       ).query;
       const result = await service.list({ params: { page, pageSize }, ...filter });
-      sendPaginated(req, res, result.items.map(presentAlert), { page, pageSize }, result.total);
+      sendPaginated(
+        req,
+        res,
+        result.items.map((a) => presentAlert(a, req.language)),
+        { page, pageSize },
+        result.total,
+      );
     }),
   );
   router.post(
@@ -53,7 +66,9 @@ export const createAdminAlertsRouter = (
     validate({ params: alertParams }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = (req.validated as { params: { id: string } }).params;
-      sendSuccess(req, res, { data: presentAlert(await service.acknowledge(id, now())) });
+      sendSuccess(req, res, {
+        data: presentAlert(await service.acknowledge(id, now()), req.language),
+      });
     }),
   );
   return router;
