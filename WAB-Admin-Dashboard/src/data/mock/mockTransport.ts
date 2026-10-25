@@ -105,6 +105,8 @@ export class MockBusinessError extends Error {
     readonly status: number,
     readonly code: string,
     readonly fields: readonly string[] = [],
+    /** A message of `messages.ts` when the server words this refusal itself (e.g. the branch ones, SRV-151). */
+    readonly messageKey?: string,
   ) {
     super(code);
   }
@@ -115,7 +117,7 @@ function businessErrorResponse(e: MockBusinessError, language: Language, traceSe
     success: false,
     message: mockMessage(
       language,
-      e.status === HTTP_STATUS.conflict ? 'conflict' : 'unprocessable',
+      e.messageKey ?? (e.status === HTTP_STATUS.conflict ? 'conflict' : 'unprocessable'),
     ),
     error: {
       code: e.code,

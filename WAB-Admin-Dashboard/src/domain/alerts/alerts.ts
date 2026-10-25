@@ -1,3 +1,4 @@
+import type { Language } from '@/constants/i18n';
 import type { Page, PageQuery } from '@/domain/shared/page';
 
 export const ALERT_STATUSES = ['NEW', 'ACKNOWLEDGED'] as const;
@@ -19,7 +20,10 @@ export interface Alert {
   readonly id: string;
   readonly kind: AlertKind;
   readonly severity: 'INFO' | 'WARNING' | 'CRITICAL';
+  /** In the request language (contract 1.4.0+); English only on older servers. */
   readonly title: string;
+  /** Both languages (SRV-150, contract 1.4.0); absent on older servers. */
+  readonly titles?: { readonly ar: string; readonly en: string };
   readonly entityType: string | null;
   readonly entityId: string | null;
   readonly data: Record<string, unknown>;
@@ -28,6 +32,10 @@ export interface Alert {
   readonly acknowledgedAt: string | null;
   readonly createdAt: string;
 }
+
+/** The alert title in the panel language: `titles[language]` when the server sends both, else `title`. */
+export const alertTitle = (alert: Pick<Alert, 'title' | 'titles'>, language: Language): string =>
+  alert.titles?.[language] || alert.title;
 
 export interface AlertsRepository {
   list(query: PageQuery & { status?: AlertStatus; kind?: AlertKind }): Promise<Page<Alert>>;

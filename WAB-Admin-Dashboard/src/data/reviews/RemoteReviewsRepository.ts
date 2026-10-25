@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
 import { defined } from '@/data/api/resource';
@@ -6,17 +5,9 @@ import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { ReviewsRepository } from '@/domain/reviews/reviews';
 
-/** The server's OpenAPI writes the id pattern as "^[a-f0-9]{24}$/i" that no id matches; see RemoteLocationsRepository. */
-const OBJECT_ID = z.string().regex(/^[a-f0-9]{24}$/i);
-
 const list = defineEndpoint(OPERATIONS.getReviews, {
   data: dto.getReviewsDataSchema,
-  query: () =>
-    dto.getReviewsQuerySchema().extend({
-      salonId: OBJECT_ID.optional(),
-      branchId: OBJECT_ID.optional(),
-      staffId: OBJECT_ID.optional(),
-    }),
+  query: dto.getReviewsQuerySchema,
 });
 const approve = defineEndpoint(OPERATIONS.postReviewsByIdApprove, {
   data: dto.postReviewsByIdApproveDataSchema,
@@ -32,7 +23,7 @@ const remove = defineEndpoint(OPERATIONS.postReviewsByIdRemove, {
 });
 const bulk = defineEndpoint(OPERATIONS.postReviewsBulk, {
   data: dto.postReviewsBulkDataSchema,
-  body: () => dto.postReviewsBulkBodySchema().extend({ ids: z.array(OBJECT_ID).min(1).max(100) }),
+  body: dto.postReviewsBulkBodySchema,
 });
 
 export class RemoteReviewsRepository implements ReviewsRepository {

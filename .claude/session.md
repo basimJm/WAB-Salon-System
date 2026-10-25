@@ -4,10 +4,10 @@
 
 | Project (`tasks.py` key) | Master | Current task | Next ready task | Blocked on | Session file |
 |---|---|---|---|---|---|
-| server | `server` | none (Stage P branches SRV-136…148 DONE, PRs #380–#394) | SRV-131 merchant reviews, SRV-111… | SRV-011/059/115/116 owner deployment; SRV-034/092/110/112 SDK publish | `WAB-Server/.claude/session.md` |
-| admin | `admin` | none (ADM-001…081 done except owner-pending rows) | none ready (all remaining rows PENDING/BLOCKED) | SRV-117…127 (Stage N), SRV-011, owner hosting/CI | `WAB-Admin-Dashboard/.claude/session.md` |
-| customer | `customer` | none (CUS-060 remote dev merged, PR #452; full gate + emulator/simulator journey 2026-10-25) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
-| merchant | `merchant` | none (MER-054 remote dev merged, PR #456) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
+| server | `server` | none (SRV-011a #440, SRV-150 #451, SRV-151 #457) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
+| admin | `admin` | none (ADM-079 #449, ADM-093…096 #453–#455/#465) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking | `WAB-Admin-Dashboard/.claude/session.md` |
+| customer | `customer` | none (CUS-060 #452, CUS-088 #464; full gate + emulator/simulator journey 2026-10-25) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
+| merchant | `merchant` | none (MER-054 #456, MER-067…069 #463/#466/#467; full gate + journeys 2026-10-25) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
 | otp | `server` | none | OTP-001 scaffold | — | `wab-otp/.claude/session.md` |
 | notifications | `server` | none (SDK built, wired in the server) | NOT-010 publish | NOT-011 owner App Password | `wab-notifications/.claude/session.md` |
@@ -163,14 +163,15 @@
 
 ### T-138 — Backend blockers lifted; client remote-dev tasks; masters synced (owner request 2026-10-25)
 - Project: repo root
-- Branch: `chore/sync-masters-into-main-6` (PR into `main`), then `main` → each master
+- Branch: `chore/sync-masters-into-main-7` (PR into `main`), then `main` → each master
 - Status: IN REVIEW
 - Acceptance criteria:
   - [x] Backend-side blockers of client tasks found: SRV-011 (deploy) → owner-hosted Render dev API recorded as SRV-011a DONE (PR #440); ADM-079, CUS-060, MER-054 unblocked
   - [x] Masters → main (#441–#444) and main → masters (#445–#448) before implementation
   - [x] Implemented and merged: ADM-079 (#449), ADM-093…095 (#453–#455), SRV-150 (#451), CUS-060 (#452), MER-054 (#456), SRV-151 (#457); statuses set DONE; follow-ups SRV-152 (owner hosting config), MER-067 (iOS crash), ADM-096/CUS-088/MER-068 (contract re-sync) added
   - [x] End-of-backlog gates (rule §3.13): customer + merchant `run_local_checks.sh` green (policy, contract, detekt, unit tests, Android variants, iOS configurations, K/N tests); admin `gate.sh` green; customer guest journey on emulator (Pixel 8 Pro) + simulator (iPhone 17 Pro) against the hosted dev API
-  - [ ] Merchant iOS journey: app crashes at launch (MER-067, being fixed); Android merchant journey reaches the maintenance screen (dev config, SRV-152)
+  - [x] Merchant iOS journey: launch crash fixed (MER-067, #463); final merchant gate green after MER-067…069 (#463, #466–#468); app opens on iOS (after a cold-start timeout → error + Retry) and Android to the maintenance screen (hosted dev config, SRV-152)
+  - [x] Follow-ups done: SRV-151 (#457), ADM-096 (#465), CUS-088 (#464), MER-068 (#466), MER-069 sign-in `branchId` (#467); final customer gate green after CUS-088; every remaining row is owner-gated (`tasks.py blocked`)
 - Tests: `tasks.py check` (only the known CUS-047 note); gates above
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — merges + backlog only in this branch. DEVIATIONS: signed-in client flows verified on a local stack (same server code), not on Render (no credentials sent there); device OTP/push (CUS-061/063, MER-055/056) need owner Firebase/APNs inputs.

@@ -1,7 +1,6 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint, type Endpoint } from '@/data/api/endpoint';
-import { OBJECT_ID } from '@/data/api/objectId';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
@@ -9,7 +8,7 @@ import type { CustomerAction, CustomersRepository } from '@/domain/customers/cus
 
 const list = defineEndpoint(OPERATIONS.getCustomers, {
   data: dto.getCustomersDataSchema,
-  query: () => dto.getCustomersQuerySchema().extend({ cityId: OBJECT_ID.optional() }),
+  query: dto.getCustomersQuerySchema,
 });
 const get = defineEndpoint(OPERATIONS.getCustomersById, { data: dto.getCustomersByIdDataSchema });
 const reasonOnly = <D>(
@@ -41,29 +40,9 @@ const actions: Record<CustomerAction, Endpoint<unknown, { reason: string }, unde
   ),
 };
 
-const LANGUAGES = ['ar', 'en'] as const;
-const GENDERS = ['MALE', 'FEMALE'] as const;
-const NAME_MAX = 50;
-const EMAIL_MAX = 254;
-/** The generated patch body is an intersection that cannot be extended, so it is restated with the id override. */
-const patchBody = () =>
-  z.object({
-    firstName: z.string().min(1).max(NAME_MAX).optional(),
-    lastName: z.string().min(1).max(NAME_MAX).optional(),
-    email: z
-      .string()
-      .max(EMAIL_MAX)
-      .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
-      .optional(),
-    gender: z.enum(GENDERS).optional(),
-    cityId: OBJECT_ID.optional(),
-    areaId: OBJECT_ID.optional(),
-    language: z.enum(LANGUAGES).optional(),
-    reason: z.string().min(1).max(1000),
-  });
 const patch = defineEndpoint(OPERATIONS.patchCustomersById, {
   data: dto.patchCustomersByIdDataSchema,
-  body: patchBody,
+  body: dto.patchCustomersByIdBodySchema,
 });
 const reviews = defineEndpoint(OPERATIONS.getCustomersByIdReviews, {
   data: dto.getCustomersByIdReviewsDataSchema,
