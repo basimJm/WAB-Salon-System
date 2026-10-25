@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import { scheduleProblems } from '@/domain/salonEdit/rules';
-import type { ScheduleDay } from '@/domain/salonEdit/salonEdit';
+import type { BranchScope, ScheduleDay } from '@/domain/salonEdit/salonEdit';
 import { Button } from '../components/core/Button';
 import { Card } from '../components/core/Card';
 import { AsyncView } from '../components/feedback/AsyncView';
@@ -16,16 +16,16 @@ import { BrokenBookings } from './BrokenBookings';
 import { ClosuresPanel } from './ClosuresPanel';
 import { useSalonMutation } from './useSalonMutation';
 
-function WeeklyHours({ salonId, initial }: { salonId: string; initial: readonly ScheduleDay[] }) {
+function WeeklyHours({ scope, initial }: { scope: BranchScope; initial: readonly ScheduleDay[] }) {
   const { t } = useTranslation();
   const { repositories } = useContainer();
   const [days, setDays] = useState<readonly ScheduleDay[]>(initial);
   const [tried, setTried] = useState(false);
   const preview = useMutation({
-    mutationFn: () => repositories.salonEdit.previewHours(salonId, days),
+    mutationFn: () => repositories.salonEdit.previewHours(scope, days),
   });
   const save = useSalonMutation(
-    (reason: string) => repositories.salonEdit.saveHours(salonId, days, reason),
+    (reason: string) => repositories.salonEdit.saveHours(scope, days, reason),
     [['getSalonsByIdHours']],
   );
   const reason = useReasonAction(save.isPending);
@@ -91,11 +91,11 @@ function WeeklyHours({ salonId, initial }: { salonId: string; initial: readonly 
   );
 }
 
-export function HoursTab({ salonId }: { salonId: string }) {
+export function HoursTab({ scope }: { scope: BranchScope }) {
   const { repositories } = useContainer();
   const q = useQuery({
-    queryKey: ['getSalonsByIdHours', salonId],
-    queryFn: () => repositories.salonEdit.hours(salonId),
+    queryKey: ['getSalonsByIdHours', scope],
+    queryFn: () => repositories.salonEdit.hours(scope),
   });
   return (
     <AsyncView
@@ -106,8 +106,8 @@ export function HoursTab({ salonId }: { salonId: string }) {
     >
       {q.data ? (
         <div className="wab-stack">
-          <WeeklyHours key={q.dataUpdatedAt} salonId={salonId} initial={q.data.weeklySchedule} />
-          <ClosuresPanel salonId={salonId} closures={q.data.closures} />
+          <WeeklyHours key={q.dataUpdatedAt} scope={scope} initial={q.data.weeklySchedule} />
+          <ClosuresPanel scope={scope} closures={q.data.closures} />
         </div>
       ) : null}
     </AsyncView>

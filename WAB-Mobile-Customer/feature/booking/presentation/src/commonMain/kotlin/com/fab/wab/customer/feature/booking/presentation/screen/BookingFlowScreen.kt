@@ -27,6 +27,7 @@ import com.fab.wab.customer.feature.booking.presentation.resources.Res
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_bride_badge
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_confirm
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_continue
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_step_branch
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_step_companions
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_step_datetime
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_step_label
@@ -59,14 +60,15 @@ fun BookingFlowScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Mo
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             if (state.salon != null) {
                 BookingProgress(
-                    current = state.step.ordinal,
+                    current = state.stepIndex,
+                    count = state.steps.size,
                     stepLabel = stringResource(
                         Res.string.booking_step_label,
-                        state.step.ordinal + 1,
-                        BookingStep.entries.size,
+                        state.stepIndex + 1,
+                        state.steps.size,
                         stringResource(state.step.labelRes()),
                     ),
-                    personLabel = if (state.step < BookingStep.COMPANIONS) {
+                    personLabel = if (state.step in BookingStep.PERSON..BookingStep.STAFF) {
                         joinDots(state.person.name, if (state.person.isBride) stringResource(Res.string.booking_bride_badge) else null)
                     } else {
                         ""
@@ -90,6 +92,7 @@ fun BookingFlowScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Mo
                 loading = { ShimmerRows(BookingDesignConstants.serviceShimmerHeight, Modifier.padding(spacing.space20)) },
             ) {
                 when (state.step) {
+                    BookingStep.BRANCH -> BranchStep(state, onAction)
                     BookingStep.PERSON -> PersonStep(state, onAction)
                     BookingStep.SERVICES -> ServicesStep(state, onAction)
                     BookingStep.SLOT -> SlotStep(state, onAction)
@@ -103,6 +106,7 @@ fun BookingFlowScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Mo
 }
 
 private fun BookingStep.labelRes() = when (this) {
+    BookingStep.BRANCH -> Res.string.booking_step_branch
     BookingStep.PERSON -> Res.string.booking_step_person
     BookingStep.SERVICES -> Res.string.booking_step_services
     BookingStep.SLOT -> Res.string.booking_step_datetime
@@ -120,6 +124,7 @@ private fun StepBottomBar(state: UiState, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
     val summary = state.step == BookingStep.SUMMARY
     val enabled = when (state.step) {
+        BookingStep.BRANCH -> state.canContinueBranch
         BookingStep.PERSON -> state.canContinuePerson
         BookingStep.SERVICES -> state.canContinueServices
         BookingStep.SLOT -> state.canContinueSlot

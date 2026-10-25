@@ -12,6 +12,7 @@ export interface Transaction {
   readonly bookingId: string | null;
   readonly customerId: string;
   readonly salonId: string;
+  readonly branchId: string | null;
   readonly type: TransactionType;
   readonly amount: string;
   readonly currency: string;
@@ -39,6 +40,7 @@ export interface TransactionQuery extends PageQuery {
   status?: TransactionStatus;
   type?: TransactionType;
   salonId?: string;
+  branchId?: string;
   customerId?: string;
   bookingId?: string;
   from?: string;
@@ -62,7 +64,8 @@ export const RECONCILIATION_KINDS = [
 export type ReconciliationKind = (typeof RECONCILIATION_KINDS)[number];
 
 export interface TransactionsRepository {
-  reconciliation(): Promise<Reconciliation>;
+  /** Optionally narrowed to one salon or one of its branches. */
+  reconciliation(scope?: { salonId?: string; branchId?: string }): Promise<Reconciliation>;
   list(query: TransactionQuery): Promise<Page<Transaction>>;
   get(id: string): Promise<TransactionDetails>;
 }

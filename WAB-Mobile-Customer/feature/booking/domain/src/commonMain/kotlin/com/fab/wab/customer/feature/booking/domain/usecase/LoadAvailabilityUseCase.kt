@@ -6,6 +6,11 @@ import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
 import com.fab.wab.customer.feature.booking.domain.repository.AvailabilityRepository
 
 class LoadAvailabilityUseCase(private val repository: AvailabilityRepository) {
-    suspend operator fun invoke(salonId: String, date: String, person: DraftPerson, others: List<DraftPerson>): AppResult<DayAvailability> =
-        repository.slots(salonId, date, person, others.filter { it.hasSlot }, draftId = null)
+    suspend operator fun invoke(
+        salonId: String,
+        branchId: String?,
+        date: String,
+        person: DraftPerson,
+        others: List<DraftPerson>,
+    ): AppResult<DayAvailability> = repository.slots(salonId, branchId, date, person, others.filter { it.hasSlot }, draftId = null)
 }

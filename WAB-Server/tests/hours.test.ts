@@ -269,6 +269,36 @@ describe('weekly schedule', () => {
     expect((salons.docs[0]?.['weeklySchedule'] as { isOff: boolean }[])[0]?.isOff).toBe(true);
     expect(recomputes).toHaveLength(0);
   });
+
+  it('previews a schedule: lists the bookings it would break and saves nothing (SRV-134)', async () => {
+    conflict.list = [{ bookingId: 'b1', startsAt: NOW, status: 'APPROVED' }];
+    const before = JSON.stringify(salons.docs[0]?.['weeklySchedule']);
+    const res = await request(app)
+      .post('/merchant/v1/salon/hours/weekly/preview')
+      .set(owner())
+      .send(days({ MON: { isOff: true } }));
+    expect(res.status).toBe(200);
+    expect(
+      (bodyOf(res).data as unknown as { bookingId: string }[]).map((c) => c.bookingId),
+    ).toEqual(['b1']);
+    expect(JSON.stringify(salons.docs[0]?.['weeklySchedule'])).toBe(before);
+    expect(recomputes).toHaveLength(0);
+    // Same checks as the save.
+    expect(
+      (
+        await request(app)
+          .post('/merchant/v1/salon/hours/weekly/preview')
+          .set(owner())
+          .send(days({ MON: { close: '24:00' } }))
+      ).status,
+    ).toBe(400);
+    const closure = await request(app)
+      .post('/merchant/v1/salon/hours/closures/preview')
+      .set(owner())
+      .send({ from: '2026-10-13', to: '2026-10-14' });
+    expect(closure.status).toBe(200);
+    expect(closures.docs).toHaveLength(0);
+  });
 });
 
 describe('closures', () => {

@@ -6,4 +6,7 @@ export const MERCHANT_HOURS_ROUTES = {
   weekly: '/weekly',
   closures: '/closures',
   closureById: '/closures/:id',
+  /** SRV-134: the bookings a change would break, before it is saved (nothing changes). */
+  weeklyPreview: '/weekly/preview',
+  closuresPreview: '/closures/preview',
 } as const;

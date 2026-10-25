@@ -18,11 +18,12 @@ import com.fab.wab.customer.feature.booking.domain.repository.AvailabilityReposi
 class AvailabilityRepositoryImpl(private val api: AvailabilityApi) : AvailabilityRepository {
     override suspend fun slots(
         salonId: String,
+        branchId: String?,
         date: String,
         person: DraftPerson,
         others: List<DraftPerson>,
         draftId: String?,
-    ): AppResult<DayAvailability> = safeApiCall { api.slots(salonId, availabilityBodyOf(date, person, others, draftId)) }
+    ): AppResult<DayAvailability> = safeApiCall { api.slots(salonId, availabilityBodyOf(date, person, others, draftId, branchId)) }
         .mapSuccess { it.data.toDomain() }
 }
 
@@ -32,7 +33,9 @@ fun availabilityBodyOf(
     person: DraftPerson,
     others: List<DraftPerson>,
     draftId: String?,
+    branchId: String? = null,
 ): PostSalonsBySalonIdAvailabilityBody = PostSalonsBySalonIdAvailabilityBody(
+    branchId = branchId,
     date = date,
     person = PostSalonsBySalonIdAvailabilityBodyPerson(
         serviceIds = person.serviceIds,

@@ -32,6 +32,7 @@ import com.fab.wab.customer.feature.favorites.presentation.resources.favorites_m
 import com.fab.wab.customer.feature.favorites.presentation.resources.favorites_open
 import com.fab.wab.customer.feature.favorites.presentation.resources.favorites_remove
 import com.fab.wab.customer.feature.favorites.presentation.resources.favorites_reviews
+import com.fab.wab.customer.feature.home.presentation.screen.placeText
 import com.fab.wab.customer.feature.home.presentation.screen.toUi
 import org.jetbrains.compose.resources.stringResource
 
@@ -56,7 +57,7 @@ internal fun FavoriteSalonCard(salon: SalonSummary, onClick: () -> Unit, onRemov
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(FavoritesDesign.cardColumnGap)) {
             NameLine(salon.name, onRemove)
             RatingLine(salon.rating, salon.reviewsCount)
-            MetaText(salon.locationText.orEmpty())
+            MetaText(salon.placeText())
             DescriptionLine(salon.shortDescription.orEmpty())
             StatusLine(salon)
         }

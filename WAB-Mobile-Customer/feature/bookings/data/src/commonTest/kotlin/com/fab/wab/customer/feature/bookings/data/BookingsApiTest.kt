@@ -1,9 +1,11 @@
 package com.fab.wab.customer.feature.bookings.data
 
 import com.fab.wab.customer.core.data.contract.generated.GetBookingsDataItem
+import com.fab.wab.customer.core.data.contract.generated.GetBookingsDataItemBranch
 import com.fab.wab.customer.core.data.contract.generated.GetBookingsDataItemSalon
 import com.fab.wab.customer.core.domain.booking.BookingStatus
 import com.fab.wab.customer.core.domain.booking.PaymentStatus
+import com.fab.wab.customer.core.domain.salon.BranchRef
 import com.fab.wab.customer.feature.bookings.data.remote.BookingsApi
 import com.fab.wab.customer.feature.bookings.data.repository.toDomain
 import io.ktor.client.HttpClient
@@ -56,5 +58,19 @@ class BookingsApiTest {
         assertEquals(PaymentStatus.UNKNOWN, item.paymentStatus)
         assertEquals("Glow", item.salonName)
         assertEquals(2, item.personsCount)
+        assertNull(item.branch)
+    }
+
+    @Test
+    fun mapsTheBookedBranchWithItsAddress() {
+        fun row(branch: GetBookingsDataItemBranch) = GetBookingsDataItem(
+            id = "b1", referenceNumber = "WAB-1", status = "PENDING", paymentMethod = "PAY_ON_ARRIVAL", paymentStatus = "NONE",
+            hasBride = false, appointmentStart = "2026-10-18T10:00:00Z", appointmentEnd = "2026-10-18T11:00:00Z",
+            respondBy = "2026-10-18T09:00:00Z", personsCount = 1.0, total = "8", salon = GetBookingsDataItemSalon("s1", "Hifa"),
+            customer = null, staff = emptyList(), branch = branch,
+        ).toDomain()
+        val withAddress = row(GetBookingsDataItemBranch("br1", "Mecca Street", "Amman, Mecca St."))
+        assertEquals(BranchRef("br1", "Mecca Street", "Amman, Mecca St."), withAddress.branch)
+        assertEquals(BranchRef("br1", "Mecca Street", null), row(GetBookingsDataItemBranch("br1", "Mecca Street", " ")).branch)
     }
 }

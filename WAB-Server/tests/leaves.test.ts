@@ -146,6 +146,23 @@ describe('staff leaves', () => {
     expect(leavesM.docs).toHaveLength(0);
   });
 
+  it('previews a leave: lists affected bookings and saves nothing (SRV-134)', async () => {
+    const owner = add(salonId, 'OWNER');
+    const staff = add(salonId, 'EMPLOYEE');
+    conflict.list = [{ bookingId: 'b7', startsAt: NOW, status: 'APPROVED' }];
+    const res = await request(app)
+      .post(`${url(staff.id)}/preview`)
+      .set(owner.headers)
+      .send({ from: '2026-10-15', to: '2026-10-16' });
+    expect(res.status).toBe(200);
+    expect(leavesM.docs).toHaveLength(0);
+    const past = await request(app)
+      .post(`${url(staff.id)}/preview`)
+      .set(owner.headers)
+      .send({ from: '2026-10-01', to: '2026-10-02' });
+    expect(past.status).toBe(400);
+  });
+
   it('answers 409 SCHEDULE_CONFLICT with the bookings and saves nothing', async () => {
     const owner = add(salonId, 'OWNER');
     const staff = add(salonId, 'EMPLOYEE');

@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.booking.presentation.di
 
+import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowArgs
 import com.fab.wab.customer.feature.booking.presentation.controller.vm.BookingFlowDependencies
 import com.fab.wab.customer.feature.booking.presentation.controller.vm.BookingFlowViewModel
 import com.fab.wab.customer.feature.booking.presentation.controller.vm.BookingSuccessViewModel
@@ -22,7 +23,7 @@ val bookingPresentationModule = module {
             analytics = get(),
         )
     }
-    viewModel { (salonId: String) -> BookingFlowViewModel(salonId, deps = get()) }
+    viewModel { (args: BookingFlowArgs) -> BookingFlowViewModel(args.salonId, deps = get(), initialBranchId = args.branchId) }
     viewModel { (bookingId: String, referenceNumber: String) -> BookingSuccessViewModel(bookingId, referenceNumber, analytics = get()) }
     factory {
         val loadProfile: LoadProfileUseCase = get()

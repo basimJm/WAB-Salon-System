@@ -12,6 +12,7 @@ import com.fab.wab.customer.core.domain.booking.BookingTab
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.core.domain.booking.PaymentStatus
 import com.fab.wab.customer.core.domain.booking.RefundStatus
+import com.fab.wab.customer.core.domain.salon.BranchRef
 import com.fab.wab.customer.feature.bookings.domain.model.RatingStep
 import com.fab.wab.customer.feature.bookings.domain.repository.BookingsRepository
 import com.fab.wab.customer.feature.bookings.domain.usecase.GetBookingDetailsUseCase
@@ -101,6 +102,18 @@ class RatingViewModelTest {
         assertEquals(2, vm.state.value.submittedCount)
         vm.onEvent(UiAction.OnDone)
         assertEquals<SideEffect>(SideEffect.Exit, effects.single())
+    }
+
+    @Test
+    fun reviewsOfABookingCarryTheBookedBranch() = runTest(UnconfinedTestDispatcher()) {
+        val booked = ratingBooking(listOf(ratingPerson("m1", "Lina"))).copy(branch = BranchRef("b2", "Mecca Street", "Amman"))
+        val vm = viewModel(AppResult.Success(booked))
+        assertEquals(BranchRef("b2", "Mecca Street", "Amman"), vm.state.value.step?.branch)
+        vm.onEvent(UiAction.OnRatingChange(5))
+        vm.onEvent(UiAction.OnSubmit)
+        vm.onEvent(UiAction.OnRatingChange(4))
+        vm.onEvent(UiAction.OnSubmit)
+        assertEquals(listOf<String?>("b2", "b2"), reviews.submitted.map { it.second.branchId })
     }
 
     @Test

@@ -78,7 +78,7 @@ class RatingViewModel(
         track(BookingsAnalytics.ACTION_RATE_SUBMIT, step)
         scope.launch {
             updateState { copy(submitting = true) }
-            val draft = ReviewDraft(state.rating, state.comment.trim().ifEmpty { null })
+            val draft = ReviewDraft(state.rating, state.comment.trim().ifEmpty { null }, step.branch?.id)
             when (val result = deps.reviews.submit(step.target(), draft)) {
                 is AppResult.Success -> {
                     updateState { copy(submitting = false, submittedCount = submittedCount + 1) }

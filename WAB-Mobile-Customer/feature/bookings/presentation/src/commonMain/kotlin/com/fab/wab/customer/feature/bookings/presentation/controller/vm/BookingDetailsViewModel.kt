@@ -10,6 +10,7 @@ import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.booking.BookingDetails
 import com.fab.wab.customer.core.domain.booking.BookingStatus
+import com.fab.wab.customer.core.domain.salon.forBranch
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.core.realtime.RealtimeClient
 import com.fab.wab.customer.core.notification.push.PushKeys
@@ -124,11 +125,12 @@ class BookingDetailsViewModel(
         copy(loading = false, refreshing = false, booking = booking, cancellation = cancellationRuleOf(booking, deps.now()))
     }
 
-    /** The booking carries only the salon id + name; phone / WhatsApp / image come from the salon profile. */
+    /** The booking carries the salon and branch ids; phone / WhatsApp come from the booked branch, the image from the salon profile. */
     private suspend fun loadSalonContact(booking: BookingDetails) {
         val salonId = booking.salonId ?: return
         if (uiState.value.salonPhone != null || uiState.value.salonWhatsApp != null) return
-        val salon = (deps.salonDetails.details(salonId) as? AppResult.Success)?.data ?: return
+        val profile = (deps.salonDetails.details(salonId) as? AppResult.Success)?.data ?: return
+        val salon = profile.forBranch(profile.branches.firstOrNull { it.id == booking.branch?.id })
         updateState { copy(salonPhone = salon.phone, salonWhatsApp = salon.whatsapp, salonImageUrl = salon.profileImageUrl) }
     }
 

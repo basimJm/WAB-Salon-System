@@ -4,4 +4,5 @@ export const LEAVE_NOTE_MAX_LENGTH = 300;
 export const MERCHANT_LEAVES_ROUTES = {
   list: '/:id/leaves',
   byId: '/:id/leaves/:leaveId',
+  preview: '/:id/leaves/preview',
 } as const;

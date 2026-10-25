@@ -79,4 +79,5 @@
     <string name="rating_done_none">There is nothing to rate for this booking.</string>
     <string name="rating_done_button">Back to booking</string>
     <string name="rating_salon_unknown">the salon</string>
+    <string name="bookings_branch_label">Branch: %1$s</string>
 </resources>

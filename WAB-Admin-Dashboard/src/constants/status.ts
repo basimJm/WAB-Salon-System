@@ -6,6 +6,7 @@ import type { ToneName } from '@/design/tokens/colors';
  * (tests/status.test.ts fails otherwise); no page decides a tone itself.
  */
 export const STATUS_TONES = {
+  branch: { ACTIVE: 'green', OFFLINE: 'amber', CLOSED: 'grey' },
   booking: {
     PENDING: 'amber',
     APPROVED: 'green',

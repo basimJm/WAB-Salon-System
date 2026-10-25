@@ -2927,7 +2927,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"description\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"imageKey\": \"string\",\n  \"sortOrder\": 0,\n  \"reason\": \"string\"\n}",
+              "raw": "{\n  \"catalogServiceId\": \"string\",\n  \"reason\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

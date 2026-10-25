@@ -25,6 +25,7 @@ import {
   bookingParams,
   cancelAffectedBody,
   decisionBody,
+  eligibleStaffQuery,
   reassignBody,
 } from './bookings.validation';
 
@@ -190,6 +191,23 @@ export const createMerchantBookingsRouter = (
         staffId,
       });
       sendSuccess(req, res, { data: presentSummary(result) });
+    }),
+  );
+  router.get(
+    routes.eligibleStaff,
+    requirePermission(['BOOKINGS_OPERATE']),
+    validate({ params: bookingParams, query: eligibleStaffQuery }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { personIndex } = (req.validated as { query: z.infer<typeof eligibleStaffQuery> })
+        .query;
+      const { salonId, bookingId, member } = target(req);
+      const data = await (reassign ?? unavailableBookingReassign).eligibleStaff({
+        bookingId,
+        personIndex,
+        salonId,
+        member,
+      });
+      sendSuccess(req, res, { data });
     }),
   );
   return router;

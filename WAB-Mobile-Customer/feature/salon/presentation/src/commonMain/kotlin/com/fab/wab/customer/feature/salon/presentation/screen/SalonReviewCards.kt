@@ -25,6 +25,7 @@ import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.salon.presentation.resources.Res
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_review_add_button
+import com.fab.wab.customer.feature.salon.presentation.resources.salon_review_branch
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_reviews_all
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_reviews_count
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_reviews_count_short
@@ -75,6 +76,15 @@ internal fun SalonReviewCard(review: Review, style: ReviewCardStyle, modifier: M
             starSize = SalonDesign.ratingStarSmall,
             modifier = Modifier.padding(vertical = if (compact) spacing.space4 else spacing.space6),
         )
+        review.branch?.let { branch ->
+            AppText(
+                text = stringResource(Res.string.salon_review_branch, branch.name),
+                style = typography.labelSmall,
+                color = colors.accent,
+                maxLines = 1,
+                modifier = Modifier.padding(bottom = spacing.space4),
+            )
+        }
         AppText(
             text = review.comment.orEmpty(),
             style = typography.bodySmall,

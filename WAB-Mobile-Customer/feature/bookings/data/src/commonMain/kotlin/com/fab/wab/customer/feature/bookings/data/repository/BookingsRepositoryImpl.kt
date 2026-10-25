@@ -10,6 +10,7 @@ import com.fab.wab.customer.core.domain.booking.BookingTab
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.core.domain.booking.PaymentStatus
 import com.fab.wab.customer.core.domain.mapSuccess
+import com.fab.wab.customer.core.domain.salon.BranchRef
 import com.fab.wab.customer.core.network.safeApiCall
 import com.fab.wab.customer.feature.bookings.data.remote.BookingsApi
 import com.fab.wab.customer.feature.bookings.domain.repository.BookingsRepository
@@ -38,5 +39,10 @@ fun GetBookingsDataItem.toDomain(): BookingSummary = BookingSummary(
     total = total,
     salonId = salon?.id,
     salonName = salon?.name,
+    branch = branch?.let { bookedBranchOf(it.id, it.name, it.locationText) },
     staffNames = staff.map { it.name },
 )
+
+/** The branch as booked (`branch {id,name,locationText}`); null on bookings made before branches. */
+fun bookedBranchOf(id: String, name: String, locationText: String?): BranchRef =
+    BranchRef(id = id, name = name, locationText = locationText?.takeIf { it.isNotBlank() })

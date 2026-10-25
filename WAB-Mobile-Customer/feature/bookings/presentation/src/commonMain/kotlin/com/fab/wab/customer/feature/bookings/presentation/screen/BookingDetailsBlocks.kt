@@ -162,11 +162,13 @@ internal fun SalonBlock(booking: BookingDetails, state: UiState, onAction: (UiAc
     DesignCard {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(spacing.space12)) {
             SalonThumb(name = salonName, imageUrl = state.salonImageUrl)
-            AppText(
-                text = salonName,
-                style = AppTheme.typography.titleSmall.copy(fontSize = BookingsDesign.fontTitle, fontWeight = FontWeight.Bold),
-                modifier = Modifier.weight(1f),
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                AppText(
+                    text = salonName,
+                    style = AppTheme.typography.titleSmall.copy(fontSize = BookingsDesign.fontTitle, fontWeight = FontWeight.Bold),
+                )
+                BookedBranchLines(booking.branch)
+            }
             if (state.salonPhone != null) {
                 TintedIconButton(
                     icon = AppIcons.Call,

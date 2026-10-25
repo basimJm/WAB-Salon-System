@@ -7,6 +7,7 @@ import com.fab.wab.customer.core.domain.booking.BookingStatus
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.core.domain.booking.PaymentStatus
 import com.fab.wab.customer.core.domain.booking.RefundStatus
+import com.fab.wab.customer.core.domain.salon.BranchRef
 import com.fab.wab.customer.feature.bookings.domain.model.RatingStep
 import com.fab.wab.customer.feature.bookings.domain.model.ratingStepsOf
 import kotlin.test.Test
@@ -33,6 +34,13 @@ class RatingStepsTest {
             listOf(RatingStep.Salon("s1", "Glow"), RatingStep.Staff("s1", "m1", "Lina"), RatingStep.Staff("s1", "m2", "Dana")),
             steps,
         )
+    }
+
+    @Test
+    fun everyStepCarriesTheBookedBranch() {
+        val branch = BranchRef("b2", "Mecca Street")
+        val steps = ratingStepsOf(booking("s1", listOf(person("m1", "Lina"))).copy(branch = branch))
+        assertEquals(listOf(branch, branch), steps.map { it.branch })
     }
 
     @Test

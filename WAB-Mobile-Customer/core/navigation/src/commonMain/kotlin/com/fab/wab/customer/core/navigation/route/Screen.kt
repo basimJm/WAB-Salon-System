@@ -31,7 +31,7 @@ sealed interface Screen {
 
     /** S07 salon profile. */
     @Serializable
-    data class SalonDetails(val salonId: String) : Screen
+    data class SalonDetails(val salonId: String, val branchId: String? = null) : Screen
 
     /** S04 all salons of the Home tab's gender (a `Gender` code); no filters, a service pre-filter, or a `SalonListFilter` code. */
     @Serializable
@@ -72,7 +72,7 @@ sealed interface Screen {
 
     /** S16 booking flow start for a salon (registered users). */
     @Serializable
-    data class BookingStart(val salonId: String) : Screen
+    data class BookingStart(val salonId: String, val branchId: String? = null) : Screen
 
     /** S22 edit personal information (registered). */
     @Serializable

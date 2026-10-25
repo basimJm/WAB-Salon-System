@@ -1,4 +1,5 @@
 import type { Redis } from 'ioredis';
+import { createJsonCache } from '../../utils/redis/jsonCache';
 import {
   ANALYTICS_CACHE_PREFIX,
   ANALYTICS_CACHE_TTL_SEC,
@@ -52,22 +53,12 @@ export const createAnalyticsService = (deps: {
   };
 
   /** Cache failures never break a dashboard: the query just runs again. */
-  const cached = async <T>(key: string, load: () => Promise<T>): Promise<T> => {
-    const fullKey = `${ANALYTICS_CACHE_PREFIX}:${key}`;
-    try {
-      const hit = await deps.redis.get(fullKey);
-      if (hit !== null) return JSON.parse(hit) as T;
-    } catch (error) {
-      deps.logger.warn({ err: error }, 'analytics cache read failed');
-    }
-    const value = await load();
-    try {
-      await deps.redis.set(fullKey, JSON.stringify(value), 'EX', ANALYTICS_CACHE_TTL_SEC);
-    } catch (error) {
-      deps.logger.warn({ err: error }, 'analytics cache write failed');
-    }
-    return value;
-  };
+  const cached = createJsonCache({
+    redis: deps.redis,
+    logger: deps.logger,
+    prefix: ANALYTICS_CACHE_PREFIX,
+    ttlSec: ANALYTICS_CACHE_TTL_SEC,
+  });
 
   const count = async (
     from: Date,

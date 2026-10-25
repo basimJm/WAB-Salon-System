@@ -87,6 +87,12 @@ import { createBookingCancelService } from './domain/bookings/bookingCancel.serv
 import { createPayoutDetailsService } from './domain/salons/payoutDetails.service';
 import { createFieldEncryption } from './utils/crypto/aesGcm';
 import { createMerchantFinanceService } from './domain/finance/merchantFinance.service';
+import { createMerchantReviewsService } from './domain/reviews/merchantReviews.service';
+import { createMerchantStatisticsService } from './domain/statistics/merchantStatistics.service';
+import { createMerchantDashboardService } from './domain/dashboard/merchantDashboard.service';
+import { createMemberSelfService } from './domain/team/memberSelf.service';
+import { createJsonCache } from './utils/redis/jsonCache';
+import { DASHBOARD_CACHE_PREFIX, DASHBOARD_CACHE_TTL_SEC } from './constants/dashboard';
 import { createSubscriptionsService } from './domain/subscriptions/subscriptions.service';
 import { createPayoutsService } from './domain/payouts/payouts.service';
 import { PayoutsRepository } from './repositories/payouts.repository';
@@ -166,6 +172,7 @@ import { RedisRateLimitStore } from './utils/redis/rateLimitStore';
 import { connectRedis, createRedisReadinessCheck, disconnectRedis } from './utils/redis/client';
 import { createLogger, type Logger } from './utils/logger';
 import { createAccessEvents } from './sockets/accessEvents';
+import { createAdminEvents } from './sockets/adminEvents';
 import { createBookingEvents, type SocketRelay } from './sockets/bookingEvents';
 import { createRoomsFor } from './sockets/rooms';
 import {
@@ -298,8 +305,10 @@ const buildServices = (
   const settings = createSettingsService({ store: new SettingsRepository(), redis, logger });
   const serverEventsRepository = new ServerEventsRepository();
   // Server events live in the server's own MongoDB; installation links and admin queries share them.
+  const serverEvents = createServerEvents({ store: serverEventsRepository, logger });
+  const adminEvents = createAdminEvents({ relay, logger });
   const serverAnalytics = createMongoAnalytics({
-    events: createServerEvents({ store: serverEventsRepository, logger }),
+    events: serverEvents,
     counter: serverEventsRepository,
   });
   const otpGate = createOtpGate({ redis, settings });
@@ -474,6 +483,7 @@ const buildServices = (
     settings,
   });
   const bookingDrafts = createBookingDraftService({
+    branches: branchesRepository,
     mainBranches,
     redis,
     drafts: bookingDraftsRepository,
@@ -498,10 +508,17 @@ const buildServices = (
   });
   const fullRefunds = createRefundService({
     hooks: {
-      started: producers.refundHooks.started,
-      failed: producers.refundHooks.failed,
+      started: async (refund) => {
+        adminEvents.refundUpdated(refund);
+        await producers.refundHooks.started(refund);
+      },
+      failed: async (refund) => {
+        adminEvents.refundUpdated(refund);
+        await producers.refundHooks.failed(refund);
+      },
       // The money has left: book it. A missed write is repaired by `ledger.reconcile()` (job).
       refunded: async (refund) => {
+        adminEvents.refundUpdated(refund);
         try {
           await ledger.recordRefund(refund);
         } catch (error) {
@@ -687,6 +704,9 @@ const buildServices = (
       transactions: adminTransactionsService,
       adminSettings: adminSettingsService,
       bookings: bookingQueries,
+      // Built further down; only called when an export runs.
+      customers: { list: (input) => adminCustomersService.list(input) },
+      salons: { list: (input) => adminSalonsService.list(input) },
     }),
     storage: providers.storage,
     scheduler: jobs.scheduler,
@@ -718,6 +738,9 @@ const buildServices = (
     evaluateAlerts: (now) => adminAlerts.evaluate(now),
     emailAlerts: (now) => alertInbox.deliverEmails(now),
     aggregateReports: (now) => reportsService.aggregateYesterday(now),
+    overviewTick: () => {
+      adminEvents.overviewTick();
+    },
     onDelayedRefunds: (delayed) => adminAlerts.refundsDelayed(delayed),
     logger,
   });
@@ -744,6 +767,9 @@ const buildServices = (
   });
   const favoritesRepository = new FavoritesRepository();
   const reviewsService = createReviewsService({
+    onCreated: (review) => {
+      adminEvents.reviewCreated(review);
+    },
     branches: branchesRepository,
     reviews: new ReviewsRepository(),
     salons: new SalonsRepository(),
@@ -841,6 +867,74 @@ const buildServices = (
     uploads,
     deactivationConflicts: conflictFinder.deactivation,
   });
+  const salonDeletionService = createSalonDeletionService({
+    salons: new SalonsRepository(),
+    state: salonState,
+    bookings: conflictFinder.salon,
+    audit,
+    notifier: producers.salonStateNotifier,
+    logger,
+    alerts: adminAlerts,
+  });
+  const adminSalonsService = createAdminSalonsService({
+    salons: new SalonsRepository(),
+    members: new MembersRepository(),
+    subscriptions: new SubscriptionsRepository(),
+    salonServices,
+    state: salonState,
+    audit,
+    logger,
+    bookings: conflictFinder.salon,
+    notifier: producers.salonStateNotifier,
+    placements: new PlacementsRepository(),
+    bookingCounts: bookingsRepository,
+    branches: branchesRepository,
+  });
+  const adminCustomersService = createAdminCustomersService({
+    customers: new CustomersRepository(),
+    installations: new InstallationsRepository(),
+    bookings: bookingsRepository,
+    lifecycle: accountLifecycle,
+    audit,
+  });
+  const merchantStatisticsService = createMerchantStatisticsService({
+    bookings: bookingsRepository,
+    reviews: new ReviewsRepository(),
+    salons: new SalonsRepository(),
+    members: new MembersRepository(),
+    events: serverEventsRepository,
+    settings,
+  });
+  const merchantFinanceService = createMerchantFinanceService({
+    payoutsService: adminPayouts,
+    transactions: transactionsRepository,
+    refunds: refundsRepository,
+    payouts: payoutsRepository,
+    bookings: bookingsRepository,
+    subscriptions: subscriptionsService,
+    salons: new SalonsRepository(),
+    settings,
+  });
+  const inboxService = createInboxService({
+    notifications: notificationsRepository,
+    settings,
+    access: accessEvents,
+  });
+  const merchantDashboardService = createMerchantDashboardService({
+    salons: new SalonsRepository(),
+    storage: providers.storage,
+    bookings: bookingQueries,
+    finance: merchantFinanceService,
+    inbox: inboxService,
+    statistics: merchantStatisticsService,
+    settings,
+    cache: createJsonCache({
+      redis,
+      logger,
+      prefix: DASHBOARD_CACHE_PREFIX,
+      ttlSec: DASHBOARD_CACHE_TTL_SEC,
+    }),
+  });
   const adminSalonEditService = createAdminSalonEditService({
     profile: salonProfileService,
     gallery: galleryService,
@@ -881,11 +975,7 @@ const buildServices = (
       search,
     }),
     reviews: reviewsService,
-    inbox: createInboxService({
-      notifications: notificationsRepository,
-      settings,
-      access: accessEvents,
-    }),
+    inbox: inboxService,
     availability,
     bookingDrafts,
     bookings: bookingCreation,
@@ -917,16 +1007,24 @@ const buildServices = (
           }),
         }),
     adminSubscriptions: subscriptionsService,
-    merchantFinance: createMerchantFinanceService({
-      payoutsService: adminPayouts,
-      transactions: transactionsRepository,
-      refunds: refundsRepository,
-      payouts: payoutsRepository,
-      bookings: bookingsRepository,
-      subscriptions: subscriptionsService,
-      salons: new SalonsRepository(),
-      settings,
+    merchantStatistics: merchantStatisticsService,
+    merchantDashboard: merchantDashboardService,
+    salonDeletion: salonDeletionService,
+    memberSelf: createMemberSelfService({
+      members: new MembersRepository(),
+      storage: providers.storage,
+      uploads,
+      phones: createPhoneVerifier(phoneServices),
+      otpGate,
+      lifecycle: accountLifecycle,
     }),
+    merchantReviews: createMerchantReviewsService({
+      reviews: new ReviewsRepository(),
+      members: new MembersRepository(),
+      customers: new CustomersRepository(),
+      branches: branchesRepository,
+    }),
+    merchantFinance: merchantFinanceService,
     bookingAdmin,
     bookingBulk: createBookingBulkService({
       bookings: bookingsRepository,
@@ -936,6 +1034,7 @@ const buildServices = (
     bookingReassign,
     customerProfile,
     salonDetails: createSalonDetailsService({
+      events: serverEvents,
       branches: branchesRepository,
       favorites: favoritesRepository,
       reviews: reviewsService,
@@ -949,20 +1048,7 @@ const buildServices = (
       storage: providers.storage,
       settings,
     }),
-    adminSalons: createAdminSalonsService({
-      salons: new SalonsRepository(),
-      members: new MembersRepository(),
-      subscriptions: new SubscriptionsRepository(),
-      salonServices,
-      state: salonState,
-      audit,
-      logger,
-      bookings: conflictFinder.salon,
-      notifier: producers.salonStateNotifier,
-      placements: new PlacementsRepository(),
-      bookingCounts: bookingsRepository,
-      branches: branchesRepository,
-    }),
+    adminSalons: adminSalonsService,
     adminSalonInsights: {
       insights: createSalonInsightsService({
         salons: new SalonsRepository(),
@@ -972,14 +1058,7 @@ const buildServices = (
         auditLogs: new AuditLogsRepository(),
         settings,
       }),
-      deletion: createSalonDeletionService({
-        salons: new SalonsRepository(),
-        state: salonState,
-        bookings: conflictFinder.salon,
-        audit,
-        notifier: producers.salonStateNotifier,
-        logger,
-      }),
+      deletion: salonDeletionService,
     },
     policy: policyService,
     leaves: createLeavesService({
@@ -1023,13 +1102,7 @@ const buildServices = (
       members: new MembersRepository(),
       bookings: bookingsRepository,
     }),
-    adminCustomers: createAdminCustomersService({
-      customers: new CustomersRepository(),
-      installations: new InstallationsRepository(),
-      bookings: bookingsRepository,
-      lifecycle: accountLifecycle,
-      audit,
-    }),
+    adminCustomers: adminCustomersService,
     adminReviews: adminReviewsService,
     bookingAdminExtras,
     adminCustomerExtras: createAdminCustomerExtrasService({
@@ -1056,6 +1129,9 @@ const buildServices = (
     salonApplication: {
       service: createSalonApplicationService({
         ...phoneServices,
+        onSubmitted: (salon) => {
+          adminEvents.applicationCreated(salon);
+        },
         uploads,
         salons: new SalonsRepository(),
         members: new MembersRepository(),

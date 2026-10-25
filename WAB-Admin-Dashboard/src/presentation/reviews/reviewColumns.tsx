@@ -1,6 +1,7 @@
 import type { TFunction } from 'i18next';
 import type { Review } from '@/domain/reviews/reviews';
 import type { Language } from '@/constants/i18n';
+import { branchName } from '@/domain/shared/branches';
 import { formatInstant } from '@/domain/shared/format';
 import { StatusBadge } from '../components/core/StatusBadge';
 import type { Column } from '../components/data/tableTypes';
@@ -14,6 +15,11 @@ export function reviewColumns(t: TFunction, language: Language): Column<Review>[
       render: (r) => (r.staff ? `${t('reviews.staff')}: ${r.staff.firstName}` : t('reviews.salon')),
     },
     { key: 'salon', header: t('bookings.salon'), render: (r) => r.salon.name },
+    {
+      key: 'branch',
+      header: t('branches.name'),
+      render: (r) => (r.branch ? branchName(r.branch.name, language) : '—'),
+    },
     {
       key: 'rating',
       header: t('reviews.rating'),

@@ -418,6 +418,37 @@ describe('catalog requests', () => {
     expect(bodyOf(res).data['status']).toBe('APPROVED');
   });
 
+  it('approve can map the request to an existing catalog service of the same gender (SRV-125)', async () => {
+    const existing = new Types.ObjectId();
+    const menOnly = new Types.ObjectId();
+    catalogM.docs.push(
+      { _id: existing, gender: 'FEMALE', active: true, name: { ar: 'ك', en: 'Keratin care' } },
+      { _id: menOnly, gender: 'MALE', active: true, name: { ar: 'ح', en: 'Shave' } },
+    );
+    const before = catalogM.docs.length;
+    const id = pending(womenSalon);
+    const wrongGender = await request(app)
+      .post(`/admin/v1/catalog/requests/${id}/approve`)
+      .set(admin())
+      .send({ catalogServiceId: menOnly.toHexString(), reason: 'same service' });
+    expect(wrongGender.status).toBe(422);
+    const res = await request(app)
+      .post(`/admin/v1/catalog/requests/${id}/approve`)
+      .set(admin())
+      .send({ catalogServiceId: existing.toHexString(), reason: 'same service' });
+    expect(res.status).toBe(200);
+    expect(catalogM.docs).toHaveLength(before);
+    const stored = requestsM.docs.find((r) => String(r['_id']) === id);
+    expect(String(stored?.['catalogServiceId'])).toBe(existing.toHexString());
+    expect(audits.at(-1)).toMatchObject({ action: 'CATALOG_REQUEST_APPROVE' });
+    // A body mixing both ways is refused.
+    const mixed = await request(app)
+      .post(`/admin/v1/catalog/requests/${pending(womenSalon)}/approve`)
+      .set(admin())
+      .send({ ...APPROVE, catalogServiceId: existing.toHexString() });
+    expect(mixed.status).toBe(400);
+  });
+
   it('approve needs a picture when the request has none; the admin one must be a confirmed admin upload', async () => {
     const id = pending();
     const missing = await request(app)

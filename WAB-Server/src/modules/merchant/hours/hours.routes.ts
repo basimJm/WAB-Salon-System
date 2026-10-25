@@ -7,7 +7,13 @@ import { branchScopeOf } from '../../../middlewares/branchScope';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { sendCreated, sendSuccess } from '../../../utils/response/successResponse';
-import { closureParams, closurePatchSchema, closureSchema, weeklySchema } from './hours.validation';
+import {
+  closureParams,
+  closurePatchSchema,
+  closureRangeSchema,
+  closureSchema,
+  weeklySchema,
+} from './hours.validation';
 
 const part = <S extends z.ZodType>(req: Request, key: 'body' | 'params'): z.infer<S> =>
   (req.validated as Record<string, z.infer<S>>)[key] as z.infer<S>;
@@ -34,6 +40,31 @@ export const createMerchantHoursRouter = (
       const { days } = part<typeof weeklySchema>(req, 'body');
       sendSuccess(req, res, {
         data: await service.setWeekly(salonOf(req), days, branchScopeOf(req)),
+      });
+    }),
+  );
+  router.post(
+    routes.weeklyPreview,
+    validate({ body: weeklySchema }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { days } = part<typeof weeklySchema>(req, 'body');
+      sendSuccess(req, res, {
+        data: await service.previewWeekly(salonOf(req), days, branchScopeOf(req)),
+      });
+    }),
+  );
+  router.post(
+    routes.closuresPreview,
+    validate({ body: closureRangeSchema }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { from, to } = part<typeof closureRangeSchema>(req, 'body');
+      sendSuccess(req, res, {
+        data: await service.previewClosure({
+          salonId: salonOf(req),
+          from,
+          to,
+          scope: branchScopeOf(req),
+        }),
       });
     }),
   );

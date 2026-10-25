@@ -16,6 +16,8 @@ export const weeklySchema = z.object({
     .length(SCHEDULE_DAY_ORDER.length),
 });
 export const closureSchema = z.object({ from: date, to: date, reason });
+/** Just the days, for a preview of the bookings a closure would break. */
+export const closureRangeSchema = z.object({ from: date, to: date });
 export const closurePatchSchema = z
   .object({ from: date, to: date, reason })
   .partial()
