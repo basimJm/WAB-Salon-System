@@ -3,6 +3,7 @@ import { OPERATIONS } from '../contract/generated/operations';
 import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
+import { MOCK_BRANCH_IDS } from './branchesFixture';
 
 type Status = 'REFUND_PENDING' | 'REFUNDED' | 'REFUND_FAILED';
 const refund = (n: number, status: Status, nextAttemptAt: string | null) => ({
@@ -10,6 +11,7 @@ const refund = (n: number, status: Status, nextAttemptAt: string | null) => ({
   bookingId: '64a000000000000000000e01' as string | null,
   transactionId: '64d9000000000000000000a1',
   salonId: '64a000000000000000000501',
+  branchId: n === 2 ? MOCK_BRANCH_IDS.noorSecond : (MOCK_BRANCH_IDS.noorMain as string | null),
   customerId: '64a000000000000000000c01',
   amount: `${String(n * 10)}.000`,
   source: 'SALON_REJECT' as const,

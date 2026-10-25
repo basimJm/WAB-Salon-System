@@ -21,7 +21,8 @@
       "pagination": "Page sizes",
       "uploads": "Uploads",
       "alerts": "Alert thresholds",
-      "platform": "Platform"
+      "platform": "Platform",
+      "branches": "Salon branches"
     },
     "unit": {
       "km": "km",
@@ -81,7 +82,8 @@
       "alerts_paymentFailures_ratePct": "Payment failure rate that raises an alert",
       "alerts_paymentFailures_rateWindowMin": "Window for that rate",
       "alerts_api5xxRatePct": "Server error rate that raises an alert",
-      "alerts_crashesPerHour": "App crashes per hour that raise an alert"
+      "alerts_crashesPerHour": "App crashes per hour that raise an alert",
+      "salon_maxBranches": "Most branches per salon"
     },
     "notSet": "Not set",
     "tabsLabel": "Settings sections",

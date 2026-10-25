@@ -1,5 +1,6 @@
 import { MOCK_CDN_BASE } from '@/constants/mock';
 import { defineEndpoint } from '../api/endpoint';
+import { OBJECT_ID, branchQuerySchema } from '../api/objectId';
 import * as dto from '../contract/generated/dto';
 import { OPERATIONS } from '../contract/generated/operations';
 import { mockRoute } from './mockRoute';
@@ -14,7 +15,8 @@ export function salonMenuRoutes(
     mockRoute(
       defineEndpoint(O.getSalonsByIdServices, {
         data: dto.getSalonsByIdServicesDataSchema,
-        query: dto.getSalonsByIdServicesQuerySchema,
+        query: () =>
+          dto.getSalonsByIdServicesQuerySchema().extend({ branchId: OBJECT_ID.optional() }),
       }),
       ({ params }) => {
         const rows = of(params['id']).services;
@@ -27,6 +29,7 @@ export function salonMenuRoutes(
     ),
     mockRoute(
       defineEndpoint(O.postSalonsByIdServices, {
+        query: branchQuerySchema,
         data: dto.postSalonsByIdServicesDataSchema,
         body: dto.postSalonsByIdServicesBodySchema,
       }),
@@ -59,6 +62,7 @@ export function salonMenuRoutes(
     ),
     mockRoute(
       defineEndpoint(O.patchSalonsByIdServicesByServiceId, {
+        query: branchQuerySchema,
         data: dto.patchSalonsByIdServicesByServiceIdDataSchema,
         body: dto.patchSalonsByIdServicesByServiceIdBodySchema,
       }),

@@ -1,8 +1,10 @@
 import * as dto from '../contract/generated/dto';
 import { OPERATIONS } from '../contract/generated/operations';
 import { defineEndpoint } from '../api/endpoint';
+import { branchQuerySchema } from '../api/objectId';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
+import { MOCK_BRANCH_IDS, branchesOf } from './branchesFixture';
 
 const AMMAN = '64a000000000000000000001';
 const IRBID = '64a000000000000000000002';
@@ -80,6 +82,7 @@ const details = (s: (typeof MOCK_SALONS)[number]) => ({
         currentPeriodEnd: null,
       }
     : null,
+  branches: branchesOf(s.id),
 });
 
 type Mock = (typeof MOCK_SALONS)[number];
@@ -160,7 +163,10 @@ export function salonsRoutes(): readonly MockRoute[] {
     ),
 
     mockRoute(
-      defineEndpoint(OPERATIONS.getSalonsByIdMembers, { data: dto.getSalonsByIdMembersDataSchema }),
+      defineEndpoint(OPERATIONS.getSalonsByIdMembers, {
+        data: dto.getSalonsByIdMembersDataSchema,
+        query: branchQuerySchema,
+      }),
       () => ({
         data: [
           {
@@ -171,6 +177,7 @@ export function salonsRoutes(): readonly MockRoute[] {
             active: true,
             providesServices: false,
             permissions: ['BOOKINGS_VIEW_ALL', 'FINANCE_VIEW'],
+            branchId: null,
           },
           {
             id: '64f0000000000000000000a2',
@@ -180,6 +187,7 @@ export function salonsRoutes(): readonly MockRoute[] {
             active: true,
             providesServices: true,
             permissions: [],
+            branchId: MOCK_BRANCH_IDS.noorMain,
           },
         ],
       }),

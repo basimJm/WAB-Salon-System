@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
-import { OBJECT_ID } from '@/data/api/objectId';
+import { OBJECT_ID, branchQuerySchema } from '@/data/api/objectId';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { SalonEditRepository } from '@/domain/salonEdit/salonEdit';
@@ -56,40 +56,51 @@ const E = {
     body: () =>
       dto.putSalonsByIdGalleryOrderBodySchema().extend({ ids: z.array(OBJECT_ID).max(100) }),
   }),
-  hours: defineEndpoint(O.getSalonsByIdHours, { data: dto.getSalonsByIdHoursDataSchema }),
+  hours: defineEndpoint(O.getSalonsByIdHours, {
+    data: dto.getSalonsByIdHoursDataSchema,
+    query: branchQuerySchema,
+  }),
   putHours: defineEndpoint(O.putSalonsByIdHours, {
+    query: branchQuerySchema,
     data: dto.putSalonsByIdHoursDataSchema,
     body: dto.putSalonsByIdHoursBodySchema,
   }),
   previewHours: defineEndpoint(O.postSalonsByIdHoursPreview, {
+    query: branchQuerySchema,
     data: dto.postSalonsByIdHoursPreviewDataSchema,
     body: dto.postSalonsByIdHoursPreviewBodySchema,
   }),
   previewClosure: defineEndpoint(O.postSalonsByIdClosuresPreview, {
+    query: branchQuerySchema,
     data: dto.postSalonsByIdClosuresPreviewDataSchema,
     body: dto.postSalonsByIdClosuresPreviewBodySchema,
   }),
   addClosure: defineEndpoint(O.postSalonsByIdClosures, {
+    query: branchQuerySchema,
     data: dto.postSalonsByIdClosuresDataSchema,
     body: dto.postSalonsByIdClosuresBodySchema,
   }),
   patchClosure: defineEndpoint(O.patchSalonsByIdClosuresByClosureId, {
+    query: branchQuerySchema,
     data: dto.patchSalonsByIdClosuresByClosureIdDataSchema,
     body: dto.patchSalonsByIdClosuresByClosureIdBodySchema,
   }),
   removeClosure: defineEndpoint(O.postSalonsByIdClosuresByClosureIdRemove, {
+    query: branchQuerySchema,
     data: dto.postSalonsByIdClosuresByClosureIdRemoveDataSchema,
     body: dto.postSalonsByIdClosuresByClosureIdRemoveBodySchema,
   }),
   services: defineEndpoint(O.getSalonsByIdServices, {
     data: dto.getSalonsByIdServicesDataSchema,
-    query: dto.getSalonsByIdServicesQuerySchema,
+    query: () => dto.getSalonsByIdServicesQuerySchema().extend({ branchId: OBJECT_ID.optional() }),
   }),
   addService: defineEndpoint(O.postSalonsByIdServices, {
+    query: branchQuerySchema,
     data: dto.postSalonsByIdServicesDataSchema,
     body: () => dto.postSalonsByIdServicesBodySchema().extend({ catalogServiceId: OBJECT_ID }),
   }),
   patchService: defineEndpoint(O.patchSalonsByIdServicesByServiceId, {
+    query: branchQuerySchema,
     data: dto.patchSalonsByIdServicesByServiceIdDataSchema,
     body: dto.patchSalonsByIdServicesByServiceIdBodySchema,
   }),

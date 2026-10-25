@@ -60,6 +60,13 @@
                   "MEMBER_INACTIVE",
                   "SALON_NOT_FOUND",
                   "SALON_NOT_BOOKABLE",
+                  "BRANCH_NOT_FOUND",
+                  "BRANCH_NOT_BOOKABLE",
+                  "BRANCH_REQUIRED",
+                  "BRANCH_LIMIT_REACHED",
+                  "BRANCH_HAS_UPCOMING_BOOKINGS",
+                  "LAST_BRANCH",
+                  "BRANCH_SCOPE_DENIED",
                   "SALON_CLOSED",
                   "GENDER_MISMATCH",
                   "TOO_MANY_COMPANIONS",
@@ -1009,8 +1016,8 @@
                   },
                   "flagKey": {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
+                    "maxLength": 1024,
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                   },
                   "phoneRegex": {
                     "type": "string",
@@ -1442,8 +1449,8 @@
                   },
                   "flagKey": {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
+                    "maxLength": 1024,
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                   },
                   "phoneRegex": {
                     "type": "string",
@@ -7592,13 +7599,13 @@
                     "properties": {
                       "ar": {
                         "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200
+                        "maxLength": 1024,
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                       },
                       "en": {
                         "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200
+                        "maxLength": 1024,
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                       }
                     },
                     "required": [
@@ -8072,13 +8079,13 @@
                     "properties": {
                       "ar": {
                         "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200
+                        "maxLength": 1024,
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                       },
                       "en": {
                         "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200
+                        "maxLength": 1024,
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                       }
                     },
                     "required": [
@@ -8603,8 +8610,8 @@
                   },
                   "imageKey": {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
+                    "maxLength": 1024,
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                   },
                   "gender": {
                     "type": "string",
@@ -9077,8 +9084,8 @@
                   },
                   "imageKey": {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200
+                    "maxLength": 1024,
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                   },
                   "active": {
                     "type": "boolean"
@@ -11174,6 +11181,178 @@
                             "trialEndsAt",
                             "currentPeriodEnd"
                           ]
+                        },
+                        "branches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "object",
+                                "properties": {
+                                  "ar": {
+                                    "type": "string"
+                                  },
+                                  "en": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "ar",
+                                  "en"
+                                ]
+                              },
+                              "isMain": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "ACTIVE",
+                                  "OFFLINE",
+                                  "CLOSED"
+                                ]
+                              },
+                              "location": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "latitude": {
+                                    "type": "number"
+                                  },
+                                  "longitude": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "latitude",
+                                  "longitude"
+                                ]
+                              },
+                              "locationText": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "cityId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "areaId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "phone": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "whatsapp": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "weeklySchedule": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "day": {
+                                      "type": "string",
+                                      "enum": [
+                                        "SUN",
+                                        "MON",
+                                        "TUE",
+                                        "WED",
+                                        "THU",
+                                        "FRI",
+                                        "SAT"
+                                      ]
+                                    },
+                                    "isOff": {
+                                      "type": "boolean"
+                                    },
+                                    "open": {
+                                      "type": "string"
+                                    },
+                                    "close": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "day",
+                                    "isOff",
+                                    "open",
+                                    "close"
+                                  ]
+                                }
+                              },
+                              "offline": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "reason": {
+                                    "type": "string"
+                                  },
+                                  "at": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "reason",
+                                  "at"
+                                ]
+                              },
+                              "completeness": {
+                                "type": "object",
+                                "properties": {
+                                  "missing": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "isComplete": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "required": [
+                                  "missing",
+                                  "isComplete"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "isMain",
+                              "status",
+                              "location",
+                              "locationText",
+                              "cityId",
+                              "areaId",
+                              "phone",
+                              "whatsapp",
+                              "weeklySchedule",
+                              "offline",
+                              "completeness"
+                            ]
+                          },
+                          "description": "Every branch, closed ones too, main first"
                         }
                       },
                       "required": [
@@ -11195,7 +11374,8 @@
                         "offline",
                         "owner",
                         "deletionApprovedAt",
-                        "subscription"
+                        "subscription",
+                        "branches"
                       ]
                     },
                     "meta": {
@@ -11303,6 +11483,15 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -11360,6 +11549,13 @@
                             "items": {
                               "type": "string"
                             }
+                          },
+                          "branchId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "null for the owner (every branch)"
                           }
                         },
                         "required": [
@@ -11369,7 +11565,8 @@
                           "role",
                           "active",
                           "providesServices",
-                          "permissions"
+                          "permissions",
+                          "branchId"
                         ]
                       }
                     },
@@ -11727,6 +11924,178 @@
                             "trialEndsAt",
                             "currentPeriodEnd"
                           ]
+                        },
+                        "branches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "object",
+                                "properties": {
+                                  "ar": {
+                                    "type": "string"
+                                  },
+                                  "en": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "ar",
+                                  "en"
+                                ]
+                              },
+                              "isMain": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "ACTIVE",
+                                  "OFFLINE",
+                                  "CLOSED"
+                                ]
+                              },
+                              "location": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "latitude": {
+                                    "type": "number"
+                                  },
+                                  "longitude": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "latitude",
+                                  "longitude"
+                                ]
+                              },
+                              "locationText": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "cityId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "areaId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "phone": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "whatsapp": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "weeklySchedule": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "day": {
+                                      "type": "string",
+                                      "enum": [
+                                        "SUN",
+                                        "MON",
+                                        "TUE",
+                                        "WED",
+                                        "THU",
+                                        "FRI",
+                                        "SAT"
+                                      ]
+                                    },
+                                    "isOff": {
+                                      "type": "boolean"
+                                    },
+                                    "open": {
+                                      "type": "string"
+                                    },
+                                    "close": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "day",
+                                    "isOff",
+                                    "open",
+                                    "close"
+                                  ]
+                                }
+                              },
+                              "offline": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "reason": {
+                                    "type": "string"
+                                  },
+                                  "at": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "reason",
+                                  "at"
+                                ]
+                              },
+                              "completeness": {
+                                "type": "object",
+                                "properties": {
+                                  "missing": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "isComplete": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "required": [
+                                  "missing",
+                                  "isComplete"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "isMain",
+                              "status",
+                              "location",
+                              "locationText",
+                              "cityId",
+                              "areaId",
+                              "phone",
+                              "whatsapp",
+                              "weeklySchedule",
+                              "offline",
+                              "completeness"
+                            ]
+                          },
+                          "description": "Every branch, closed ones too, main first"
                         }
                       },
                       "required": [
@@ -11748,7 +12117,8 @@
                         "offline",
                         "owner",
                         "deletionApprovedAt",
-                        "subscription"
+                        "subscription",
+                        "branches"
                       ]
                     },
                     "meta": {
@@ -12984,6 +13354,15 @@
           },
           {
             "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
               "type": "integer",
               "minimum": 1,
               "maximum": 5
@@ -13090,6 +13469,37 @@
                               "firstName"
                             ]
                           },
+                          "branch": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "object",
+                                "properties": {
+                                  "ar": {
+                                    "type": "string"
+                                  },
+                                  "en": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "ar",
+                                  "en"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "The branch the review is about (label only)"
+                          },
                           "author": {
                             "type": "object",
                             "properties": {
@@ -13149,6 +13559,7 @@
                           "comment",
                           "salon",
                           "staff",
+                          "branch",
                           "author",
                           "authorOtherReviews",
                           "createdAt",
@@ -13372,6 +13783,37 @@
                             "firstName"
                           ]
                         },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "object",
+                              "properties": {
+                                "ar": {
+                                  "type": "string"
+                                },
+                                "en": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "ar",
+                                "en"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "description": "The branch the review is about (label only)"
+                        },
                         "author": {
                           "type": "object",
                           "properties": {
@@ -13431,6 +13873,7 @@
                         "comment",
                         "salon",
                         "staff",
+                        "branch",
                         "author",
                         "authorOtherReviews",
                         "createdAt",
@@ -13652,6 +14095,37 @@
                             "firstName"
                           ]
                         },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "object",
+                              "properties": {
+                                "ar": {
+                                  "type": "string"
+                                },
+                                "en": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "ar",
+                                "en"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "description": "The branch the review is about (label only)"
+                        },
                         "author": {
                           "type": "object",
                           "properties": {
@@ -13711,6 +14185,7 @@
                         "comment",
                         "salon",
                         "staff",
+                        "branch",
                         "author",
                         "authorOtherReviews",
                         "createdAt",
@@ -13935,6 +14410,37 @@
                             "firstName"
                           ]
                         },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "object",
+                              "properties": {
+                                "ar": {
+                                  "type": "string"
+                                },
+                                "en": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "ar",
+                                "en"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "description": "The branch the review is about (label only)"
+                        },
                         "author": {
                           "type": "object",
                           "properties": {
@@ -13994,6 +14500,7 @@
                         "comment",
                         "salon",
                         "staff",
+                        "branch",
                         "author",
                         "authorOtherReviews",
                         "createdAt",
@@ -15661,6 +16168,15 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -15748,6 +16264,32 @@
                             ],
                             "description": "Customer and admin views only."
                           },
+                          "branch": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "locationText": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "locationText"
+                            ],
+                            "description": "The branch as booked, name in the request language; null for bookings made before branches."
+                          },
                           "customer": {
                             "type": [
                               "object",
@@ -15804,6 +16346,7 @@
                           "personsCount",
                           "total",
                           "salon",
+                          "branch",
                           "customer",
                           "staff"
                         ]
@@ -15978,6 +16521,32 @@
                             "name"
                           ],
                           "description": "Customer and admin views only."
+                        },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "locationText": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "locationText"
+                          ],
+                          "description": "The branch as booked, name in the request language; null for bookings made before branches."
                         },
                         "customer": {
                           "type": [
@@ -16239,6 +16808,7 @@
                         "personsCount",
                         "total",
                         "salon",
+                        "branch",
                         "customer",
                         "staff",
                         "refundStatus",
@@ -16563,6 +17133,24 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "salonId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -16612,6 +17200,12 @@
                           },
                           "salonId": {
                             "type": "string"
+                          },
+                          "branchId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           },
                           "customerId": {
                             "type": "string"
@@ -16693,6 +17287,7 @@
                           "bookingId",
                           "transactionId",
                           "salonId",
+                          "branchId",
                           "customerId",
                           "amount",
                           "source",
@@ -16850,6 +17445,12 @@
                         "salonId": {
                           "type": "string"
                         },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "customerId": {
                           "type": "string"
                         },
@@ -16930,6 +17531,7 @@
                         "bookingId",
                         "transactionId",
                         "salonId",
+                        "branchId",
                         "customerId",
                         "amount",
                         "source",
@@ -17105,6 +17707,12 @@
                         "salonId": {
                           "type": "string"
                         },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "customerId": {
                           "type": "string"
                         },
@@ -17185,6 +17793,7 @@
                         "bookingId",
                         "transactionId",
                         "salonId",
+                        "branchId",
                         "customerId",
                         "amount",
                         "source",
@@ -17366,6 +17975,12 @@
                         "salonId": {
                           "type": "string"
                         },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "customerId": {
                           "type": "string"
                         },
@@ -17446,6 +18061,7 @@
                         "bookingId",
                         "transactionId",
                         "salonId",
+                        "branchId",
                         "customerId",
                         "amount",
                         "source",
@@ -18922,7 +19538,7 @@
         "tags": [
           "Finance"
         ],
-        "summary": "Payment attempts with gateway codes (filter by status, type, salon, customer, booking, dates)",
+        "summary": "Payment attempts with gateway codes (filter by status, type, salon, branch, customer, booking, dates)",
         "parameters": [
           {
             "schema": {
@@ -18979,6 +19595,15 @@
             },
             "required": false,
             "name": "salonId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
             "in": "query"
           },
           {
@@ -19075,6 +19700,13 @@
                           "salonId": {
                             "type": "string"
                           },
+                          "branchId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "The branch the booking was made at"
+                          },
                           "type": {
                             "type": "string",
                             "enum": [
@@ -19156,6 +19788,7 @@
                           "bookingId",
                           "customerId",
                           "salonId",
+                          "branchId",
                           "type",
                           "amount",
                           "currency",
@@ -19312,6 +19945,13 @@
                         "salonId": {
                           "type": "string"
                         },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The branch the booking was made at"
+                        },
                         "type": {
                           "type": "string",
                           "enum": [
@@ -19419,6 +20059,13 @@
                               "salonId": {
                                 "type": "string"
                               },
+                              "branchId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "The branch the booking was made at"
+                              },
                               "type": {
                                 "type": "string",
                                 "enum": [
@@ -19500,6 +20147,7 @@
                               "bookingId",
                               "customerId",
                               "salonId",
+                              "branchId",
                               "type",
                               "amount",
                               "currency",
@@ -19526,6 +20174,7 @@
                         "bookingId",
                         "customerId",
                         "salonId",
+                        "branchId",
                         "type",
                         "amount",
                         "currency",
@@ -19621,6 +20270,24 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "salonId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -19679,6 +20346,13 @@
                               "salonId": {
                                 "type": "string"
                               },
+                              "branchId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "The branch the booking was made at"
+                              },
                               "type": {
                                 "type": "string",
                                 "enum": [
@@ -19760,6 +20434,7 @@
                               "bookingId",
                               "customerId",
                               "salonId",
+                              "branchId",
                               "type",
                               "amount",
                               "currency",
@@ -19805,6 +20480,13 @@
                               "salonId": {
                                 "type": "string"
                               },
+                              "branchId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "The branch the booking was made at"
+                              },
                               "type": {
                                 "type": "string",
                                 "enum": [
@@ -19886,6 +20568,7 @@
                               "bookingId",
                               "customerId",
                               "salonId",
+                              "branchId",
                               "type",
                               "amount",
                               "currency",
@@ -19931,6 +20614,13 @@
                               "salonId": {
                                 "type": "string"
                               },
+                              "branchId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "The branch the booking was made at"
+                              },
                               "type": {
                                 "type": "string",
                                 "enum": [
@@ -20012,6 +20702,7 @@
                               "bookingId",
                               "customerId",
                               "salonId",
+                              "branchId",
                               "type",
                               "amount",
                               "currency",
@@ -22083,6 +22774,10 @@
                             "type": "string",
                             "pattern": "^[a-f0-9]{24}$/i"
                           },
+                          "branchId": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{24}$/i"
+                          },
                           "customerId": {
                             "type": "string",
                             "pattern": "^[a-f0-9]{24}$/i"
@@ -22212,6 +22907,10 @@
                             ]
                           },
                           "salonId": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{24}$/i"
+                          },
+                          "branchId": {
                             "type": "string",
                             "pattern": "^[a-f0-9]{24}$/i"
                           },
@@ -30365,6 +31064,15 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -30611,6 +31319,15 @@
             "required": true,
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
           },
           {
             "schema": {
@@ -30922,6 +31639,15 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -31129,6 +31855,15 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -31305,6 +32040,15 @@
             "required": true,
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
           },
           {
             "schema": {
@@ -31512,6 +32256,15 @@
             "required": true,
             "name": "closureId",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
           },
           {
             "schema": {
@@ -31729,6 +32482,15 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -31903,6 +32665,15 @@
             },
             "required": false,
             "name": "pageSize",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
             "in": "query"
           },
           {
@@ -32095,6 +32866,15 @@
             "required": true,
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
           },
           {
             "schema": {
@@ -32347,6 +33127,15 @@
             "required": true,
             "name": "serviceId",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
           },
           {
             "schema": {
@@ -33137,6 +33926,255 @@
         }
       }
     },
+    "/admin/v1/salons/{id}/members/{memberId}/branch": {
+      "post": {
+        "tags": [
+          "Admin salon editing"
+        ],
+        "summary": "Move a member to another open branch of the salon (skills are cleared)",
+        "description": "Every write needs a `reason`, is audited, and tells the salon owner what area was changed. Images must be files the admin uploaded with the admin presign (same purposes as the merchant app). When existing PENDING/APPROVED bookings would be broken the change is refused with 409 `SCHEDULE_CONFLICT` and the booking ids in `details`; use the matching preview first.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "memberId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "branchId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "branchId",
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Member",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "phone": {
+                          "type": "string"
+                        },
+                        "photoUrl": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "OWNER",
+                            "MANAGER",
+                            "EMPLOYEE"
+                          ]
+                        },
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "DASHBOARD_VIEW",
+                              "BOOKINGS_VIEW_ALL",
+                              "BOOKINGS_VIEW_OWN",
+                              "BOOKINGS_RESPOND",
+                              "BOOKINGS_OPERATE",
+                              "SALON_PROFILE_MANAGE",
+                              "GALLERY_MANAGE",
+                              "WORKING_HOURS_MANAGE",
+                              "SERVICES_MANAGE",
+                              "STAFF_MANAGE",
+                              "POLICIES_MANAGE",
+                              "REVIEWS_VIEW",
+                              "STATISTICS_VIEW",
+                              "FINANCE_VIEW",
+                              "SUBSCRIPTION_VIEW"
+                            ]
+                          },
+                          "description": "The OWNER always has all."
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "providesServices": {
+                          "type": "boolean"
+                        },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The member’s branch; null for the owner (all branches)"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "firstName",
+                        "lastName",
+                        "phone",
+                        "photoUrl",
+                        "role",
+                        "permissions",
+                        "active",
+                        "providesServices",
+                        "branchId"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/v1/salons/{id}/policy": {
       "get": {
         "tags": [
@@ -33586,6 +34624,2863 @@
           },
           "404": {
             "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/salons/{id}/branches": {
+      "get": {
+        "tags": [
+          "Salon branches"
+        ],
+        "summary": "Branches of the salon, main first (admin; reason + audit, the owner is notified)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Branches",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "object",
+                            "properties": {
+                              "ar": {
+                                "type": "string"
+                              },
+                              "en": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "ar",
+                              "en"
+                            ]
+                          },
+                          "isMain": {
+                            "type": "boolean"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "ACTIVE",
+                              "OFFLINE",
+                              "CLOSED"
+                            ]
+                          },
+                          "location": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "latitude": {
+                                "type": "number"
+                              },
+                              "longitude": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "latitude",
+                              "longitude"
+                            ]
+                          },
+                          "locationText": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "cityId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "areaId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "phone": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "whatsapp": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "weeklySchedule": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "day": {
+                                  "type": "string",
+                                  "enum": [
+                                    "SUN",
+                                    "MON",
+                                    "TUE",
+                                    "WED",
+                                    "THU",
+                                    "FRI",
+                                    "SAT"
+                                  ]
+                                },
+                                "isOff": {
+                                  "type": "boolean"
+                                },
+                                "open": {
+                                  "type": "string"
+                                },
+                                "close": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "day",
+                                "isOff",
+                                "open",
+                                "close"
+                              ]
+                            }
+                          },
+                          "offline": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "reason": {
+                                "type": "string"
+                              },
+                              "at": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "reason",
+                              "at"
+                            ]
+                          },
+                          "completeness": {
+                            "type": "object",
+                            "properties": {
+                              "missing": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "isComplete": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "missing",
+                              "isComplete"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "isMain",
+                          "status",
+                          "location",
+                          "locationText",
+                          "cityId",
+                          "areaId",
+                          "phone",
+                          "whatsapp",
+                          "weeklySchedule",
+                          "offline",
+                          "completeness"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Salon branches"
+        ],
+        "summary": "Add a branch; the first one is the main branch (admin; reason + audit, the owner is notified; BRANCH_LIMIT_REACHED at salon.maxBranches)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object",
+                        "properties": {
+                          "ar": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 60
+                          },
+                          "en": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 60
+                          }
+                        },
+                        "required": [
+                          "ar",
+                          "en"
+                        ]
+                      },
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "latitude": {
+                            "type": "number",
+                            "minimum": -90,
+                            "maximum": 90
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "minimum": -180,
+                            "maximum": 180
+                          }
+                        },
+                        "required": [
+                          "latitude",
+                          "longitude"
+                        ]
+                      },
+                      "locationText": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 300
+                      },
+                      "cityId": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{24}$/i"
+                      },
+                      "areaId": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{24}$/i"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "pattern": "^\\+[1-9][0-9]{6,14}$"
+                      },
+                      "whatsapp": {
+                        "type": "string",
+                        "pattern": "^\\+[1-9][0-9]{6,14}$"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "location",
+                      "locationText",
+                      "cityId",
+                      "areaId",
+                      "phone"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    },
+                    "required": [
+                      "reason"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Branch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "ar": {
+                              "type": "string"
+                            },
+                            "en": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "ar",
+                            "en"
+                          ]
+                        },
+                        "isMain": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ACTIVE",
+                            "OFFLINE",
+                            "CLOSED"
+                          ]
+                        },
+                        "location": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "latitude",
+                            "longitude"
+                          ]
+                        },
+                        "locationText": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "cityId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "areaId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "phone": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "whatsapp": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "weeklySchedule": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": {
+                                "type": "string",
+                                "enum": [
+                                  "SUN",
+                                  "MON",
+                                  "TUE",
+                                  "WED",
+                                  "THU",
+                                  "FRI",
+                                  "SAT"
+                                ]
+                              },
+                              "isOff": {
+                                "type": "boolean"
+                              },
+                              "open": {
+                                "type": "string"
+                              },
+                              "close": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "day",
+                              "isOff",
+                              "open",
+                              "close"
+                            ]
+                          }
+                        },
+                        "offline": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "reason": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reason",
+                            "at"
+                          ]
+                        },
+                        "completeness": {
+                          "type": "object",
+                          "properties": {
+                            "missing": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "isComplete": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "missing",
+                            "isComplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "isMain",
+                        "status",
+                        "location",
+                        "locationText",
+                        "cityId",
+                        "areaId",
+                        "phone",
+                        "whatsapp",
+                        "weeklySchedule",
+                        "offline",
+                        "completeness"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/salons/{id}/branches/{branchId}": {
+      "get": {
+        "tags": [
+          "Salon branches"
+        ],
+        "summary": "One branch (admin; reason + audit, the owner is notified)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "branchId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Branch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "ar": {
+                              "type": "string"
+                            },
+                            "en": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "ar",
+                            "en"
+                          ]
+                        },
+                        "isMain": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ACTIVE",
+                            "OFFLINE",
+                            "CLOSED"
+                          ]
+                        },
+                        "location": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "latitude",
+                            "longitude"
+                          ]
+                        },
+                        "locationText": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "cityId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "areaId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "phone": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "whatsapp": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "weeklySchedule": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": {
+                                "type": "string",
+                                "enum": [
+                                  "SUN",
+                                  "MON",
+                                  "TUE",
+                                  "WED",
+                                  "THU",
+                                  "FRI",
+                                  "SAT"
+                                ]
+                              },
+                              "isOff": {
+                                "type": "boolean"
+                              },
+                              "open": {
+                                "type": "string"
+                              },
+                              "close": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "day",
+                              "isOff",
+                              "open",
+                              "close"
+                            ]
+                          }
+                        },
+                        "offline": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "reason": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reason",
+                            "at"
+                          ]
+                        },
+                        "completeness": {
+                          "type": "object",
+                          "properties": {
+                            "missing": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "isComplete": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "missing",
+                            "isComplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "isMain",
+                        "status",
+                        "location",
+                        "locationText",
+                        "cityId",
+                        "areaId",
+                        "phone",
+                        "whatsapp",
+                        "weeklySchedule",
+                        "offline",
+                        "completeness"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Salon branches"
+        ],
+        "summary": "Edit name, location, address, city/area or contacts (admin; reason + audit, the owner is notified)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "branchId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "object",
+                        "properties": {
+                          "ar": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 60
+                          },
+                          "en": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 60
+                          }
+                        },
+                        "required": [
+                          "ar",
+                          "en"
+                        ]
+                      },
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "latitude": {
+                            "type": "number",
+                            "minimum": -90,
+                            "maximum": 90
+                          },
+                          "longitude": {
+                            "type": "number",
+                            "minimum": -180,
+                            "maximum": 180
+                          }
+                        },
+                        "required": [
+                          "latitude",
+                          "longitude"
+                        ]
+                      },
+                      "locationText": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 300
+                      },
+                      "cityId": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{24}$/i"
+                      },
+                      "areaId": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{24}$/i"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "pattern": "^\\+[1-9][0-9]{6,14}$"
+                      },
+                      "whatsapp": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "pattern": "^\\+[1-9][0-9]{6,14}$"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    },
+                    "required": [
+                      "reason"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Branch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "ar": {
+                              "type": "string"
+                            },
+                            "en": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "ar",
+                            "en"
+                          ]
+                        },
+                        "isMain": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ACTIVE",
+                            "OFFLINE",
+                            "CLOSED"
+                          ]
+                        },
+                        "location": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "latitude",
+                            "longitude"
+                          ]
+                        },
+                        "locationText": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "cityId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "areaId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "phone": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "whatsapp": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "weeklySchedule": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": {
+                                "type": "string",
+                                "enum": [
+                                  "SUN",
+                                  "MON",
+                                  "TUE",
+                                  "WED",
+                                  "THU",
+                                  "FRI",
+                                  "SAT"
+                                ]
+                              },
+                              "isOff": {
+                                "type": "boolean"
+                              },
+                              "open": {
+                                "type": "string"
+                              },
+                              "close": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "day",
+                              "isOff",
+                              "open",
+                              "close"
+                            ]
+                          }
+                        },
+                        "offline": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "reason": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reason",
+                            "at"
+                          ]
+                        },
+                        "completeness": {
+                          "type": "object",
+                          "properties": {
+                            "missing": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "isComplete": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "missing",
+                            "isComplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "isMain",
+                        "status",
+                        "location",
+                        "locationText",
+                        "cityId",
+                        "areaId",
+                        "phone",
+                        "whatsapp",
+                        "weeklySchedule",
+                        "offline",
+                        "completeness"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/salons/{id}/branches/{branchId}/main": {
+      "post": {
+        "tags": [
+          "Salon branches"
+        ],
+        "summary": "Make this branch the main one (admin; reason + audit, the owner is notified)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "branchId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    },
+                    "required": [
+                      "reason"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Branch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "ar": {
+                              "type": "string"
+                            },
+                            "en": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "ar",
+                            "en"
+                          ]
+                        },
+                        "isMain": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ACTIVE",
+                            "OFFLINE",
+                            "CLOSED"
+                          ]
+                        },
+                        "location": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "latitude",
+                            "longitude"
+                          ]
+                        },
+                        "locationText": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "cityId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "areaId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "phone": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "whatsapp": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "weeklySchedule": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": {
+                                "type": "string",
+                                "enum": [
+                                  "SUN",
+                                  "MON",
+                                  "TUE",
+                                  "WED",
+                                  "THU",
+                                  "FRI",
+                                  "SAT"
+                                ]
+                              },
+                              "isOff": {
+                                "type": "boolean"
+                              },
+                              "open": {
+                                "type": "string"
+                              },
+                              "close": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "day",
+                              "isOff",
+                              "open",
+                              "close"
+                            ]
+                          }
+                        },
+                        "offline": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "reason": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reason",
+                            "at"
+                          ]
+                        },
+                        "completeness": {
+                          "type": "object",
+                          "properties": {
+                            "missing": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "isComplete": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "missing",
+                            "isComplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "isMain",
+                        "status",
+                        "location",
+                        "locationText",
+                        "cityId",
+                        "areaId",
+                        "phone",
+                        "whatsapp",
+                        "weeklySchedule",
+                        "offline",
+                        "completeness"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/salons/{id}/branches/{branchId}/offline": {
+      "post": {
+        "tags": [
+          "Salon branches"
+        ],
+        "summary": "Hide the branch from customers; the other branches stay bookable (admin; reason + audit, the owner is notified)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "branchId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    },
+                    "required": [
+                      "reason"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    },
+                    "required": [
+                      "reason"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Branch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "ar": {
+                              "type": "string"
+                            },
+                            "en": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "ar",
+                            "en"
+                          ]
+                        },
+                        "isMain": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ACTIVE",
+                            "OFFLINE",
+                            "CLOSED"
+                          ]
+                        },
+                        "location": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "latitude",
+                            "longitude"
+                          ]
+                        },
+                        "locationText": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "cityId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "areaId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "phone": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "whatsapp": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "weeklySchedule": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": {
+                                "type": "string",
+                                "enum": [
+                                  "SUN",
+                                  "MON",
+                                  "TUE",
+                                  "WED",
+                                  "THU",
+                                  "FRI",
+                                  "SAT"
+                                ]
+                              },
+                              "isOff": {
+                                "type": "boolean"
+                              },
+                              "open": {
+                                "type": "string"
+                              },
+                              "close": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "day",
+                              "isOff",
+                              "open",
+                              "close"
+                            ]
+                          }
+                        },
+                        "offline": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "reason": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reason",
+                            "at"
+                          ]
+                        },
+                        "completeness": {
+                          "type": "object",
+                          "properties": {
+                            "missing": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "isComplete": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "missing",
+                            "isComplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "isMain",
+                        "status",
+                        "location",
+                        "locationText",
+                        "cityId",
+                        "areaId",
+                        "phone",
+                        "whatsapp",
+                        "weeklySchedule",
+                        "offline",
+                        "completeness"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/salons/{id}/branches/{branchId}/online": {
+      "post": {
+        "tags": [
+          "Salon branches"
+        ],
+        "summary": "Bring an offline branch back (admin; reason + audit, the owner is notified)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "branchId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    },
+                    "required": [
+                      "reason"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Branch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "ar": {
+                              "type": "string"
+                            },
+                            "en": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "ar",
+                            "en"
+                          ]
+                        },
+                        "isMain": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ACTIVE",
+                            "OFFLINE",
+                            "CLOSED"
+                          ]
+                        },
+                        "location": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "latitude",
+                            "longitude"
+                          ]
+                        },
+                        "locationText": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "cityId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "areaId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "phone": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "whatsapp": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "weeklySchedule": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": {
+                                "type": "string",
+                                "enum": [
+                                  "SUN",
+                                  "MON",
+                                  "TUE",
+                                  "WED",
+                                  "THU",
+                                  "FRI",
+                                  "SAT"
+                                ]
+                              },
+                              "isOff": {
+                                "type": "boolean"
+                              },
+                              "open": {
+                                "type": "string"
+                              },
+                              "close": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "day",
+                              "isOff",
+                              "open",
+                              "close"
+                            ]
+                          }
+                        },
+                        "offline": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "reason": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reason",
+                            "at"
+                          ]
+                        },
+                        "completeness": {
+                          "type": "object",
+                          "properties": {
+                            "missing": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "isComplete": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "missing",
+                            "isComplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "isMain",
+                        "status",
+                        "location",
+                        "locationText",
+                        "cityId",
+                        "areaId",
+                        "phone",
+                        "whatsapp",
+                        "weeklySchedule",
+                        "offline",
+                        "completeness"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/salons/{id}/branches/{branchId}/close": {
+      "post": {
+        "tags": [
+          "Salon branches"
+        ],
+        "summary": "Close for good (history kept); 409 BRANCH_HAS_UPCOMING_BOOKINGS lists the bookings, 422 LAST_BRANCH, 422 INVALID_TRANSITION for the main branch (admin; reason + audit, the owner is notified)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": true,
+            "name": "branchId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      }
+                    },
+                    "required": [
+                      "reason"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Branch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "ar": {
+                              "type": "string"
+                            },
+                            "en": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "ar",
+                            "en"
+                          ]
+                        },
+                        "isMain": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ACTIVE",
+                            "OFFLINE",
+                            "CLOSED"
+                          ]
+                        },
+                        "location": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "latitude",
+                            "longitude"
+                          ]
+                        },
+                        "locationText": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "cityId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "areaId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "phone": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "whatsapp": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "weeklySchedule": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": {
+                                "type": "string",
+                                "enum": [
+                                  "SUN",
+                                  "MON",
+                                  "TUE",
+                                  "WED",
+                                  "THU",
+                                  "FRI",
+                                  "SAT"
+                                ]
+                              },
+                              "isOff": {
+                                "type": "boolean"
+                              },
+                              "open": {
+                                "type": "string"
+                              },
+                              "close": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "day",
+                              "isOff",
+                              "open",
+                              "close"
+                            ]
+                          }
+                        },
+                        "offline": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "reason": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reason",
+                            "at"
+                          ]
+                        },
+                        "completeness": {
+                          "type": "object",
+                          "properties": {
+                            "missing": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "isComplete": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "missing",
+                            "isComplete"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "isMain",
+                        "status",
+                        "location",
+                        "locationText",
+                        "cityId",
+                        "areaId",
+                        "phone",
+                        "whatsapp",
+                        "weeklySchedule",
+                        "offline",
+                        "completeness"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
             "content": {
               "application/json": {
                 "schema": {
@@ -34660,6 +38555,37 @@
                               "firstName"
                             ]
                           },
+                          "branch": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "object",
+                                "properties": {
+                                  "ar": {
+                                    "type": "string"
+                                  },
+                                  "en": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "ar",
+                                  "en"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "The branch the review is about (label only)"
+                          },
                           "author": {
                             "type": "object",
                             "properties": {
@@ -34719,6 +38645,7 @@
                           "comment",
                           "salon",
                           "staff",
+                          "branch",
                           "author",
                           "authorOtherReviews",
                           "createdAt",
