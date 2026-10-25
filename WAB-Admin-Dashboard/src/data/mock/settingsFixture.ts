@@ -21,6 +21,7 @@ export const MOCK_SETTING_DEFAULTS: Readonly<Record<string, unknown>> = {
   'auth.accessTokenTtlSec': 900,
   'auth.refreshTokenTtlDays': 90,
   'account.deletionGraceDays': 30,
+  'salon.maxBranches': 20,
   'subscription.trialDays': 90,
   'subscription.warnDaysBefore': 7,
   'refund.maxRetries': 5,

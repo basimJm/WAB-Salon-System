@@ -1,8 +1,10 @@
 import * as dto from '../contract/generated/dto';
 import { OPERATIONS } from '../contract/generated/operations';
 import { defineEndpoint } from '../api/endpoint';
+import { salonBranchQuerySchema } from '../api/objectId';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
+import { MOCK_BRANCH_IDS } from './branchesFixture';
 
 const tx = (
   n: number,
@@ -15,6 +17,7 @@ const tx = (
   bookingId: status === 'SUCCEEDED' ? '64a000000000000000000e01' : null,
   customerId: '64a000000000000000000c01',
   salonId: '64a000000000000000000501',
+  branchId: n === 3 ? MOCK_BRANCH_IDS.noorSecond : (MOCK_BRANCH_IDS.noorMain as string | null),
   type,
   amount,
   currency: 'JOD',
@@ -41,7 +44,10 @@ export function transactionsRoutes(): readonly MockRoute[] {
   const O = OPERATIONS;
   return [
     mockRoute(
-      defineEndpoint(O.getFinanceReconciliation, { data: dto.getFinanceReconciliationDataSchema }),
+      defineEndpoint(O.getFinanceReconciliation, {
+        data: dto.getFinanceReconciliationDataSchema,
+        query: salonBranchQuerySchema,
+      }),
       () => ({
         data: {
           stuckPending: [MOCK_TRANSACTIONS[2]!],

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
+import { salonBranchQuerySchema } from '@/data/api/objectId';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
@@ -25,6 +26,7 @@ const get = defineEndpoint(OPERATIONS.getTransactionsById, {
 
 const reconcile = defineEndpoint(OPERATIONS.getFinanceReconciliation, {
   data: dto.getFinanceReconciliationDataSchema,
+  query: salonBranchQuerySchema,
 });
 
 export class RemoteTransactionsRepository implements TransactionsRepository {

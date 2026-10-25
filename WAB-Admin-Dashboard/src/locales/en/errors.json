@@ -57,7 +57,14 @@
       "UPLOAD_INVALID": "The uploaded file is not valid.",
       "UPLOAD_TOO_LARGE": "The uploaded file is too large.",
       "MAINTENANCE": "The service is under maintenance. Please try again later.",
-      "UPDATE_REQUIRED": "An update is required to continue."
+      "UPDATE_REQUIRED": "An update is required to continue.",
+      "BRANCH_NOT_FOUND": "This branch was not found.",
+      "BRANCH_NOT_BOOKABLE": "This branch is not taking bookings right now.",
+      "BRANCH_REQUIRED": "Choose a branch first.",
+      "BRANCH_LIMIT_REACHED": "This salon has reached the maximum number of branches.",
+      "BRANCH_HAS_UPCOMING_BOOKINGS": "This branch still has upcoming bookings. Cancel or complete them first.",
+      "LAST_BRANCH": "The last open branch of a salon cannot be closed.",
+      "BRANCH_SCOPE_DENIED": "This action is outside the branch you can manage."
     }
   }
 }

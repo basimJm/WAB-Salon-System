@@ -10,18 +10,22 @@
 
 ## Current task
 
-- (none) — run `python3 scripts/tasks.py next admin`; task branches start from `origin/admin`.
+### ADM-088 — Re-sync the contract with salon branches
+
+- Branch: `feat/adm-088-branches-contract`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.16, §10 `salon.maxBranches`, §11 branch codes; WAB-Server Integration "Salon branches contract"):
+  - [x] `npm run api:sync` (164 operations; 8 branch operations + member move; `branchId` fields/filters); Appendix A rows for the 9 new operations (ADM-089/090); `docs/API_CONSUMED.md` regenerated
+  - [x] Error codes BRANCH_NOT_FOUND, BRANCH_NOT_BOOKABLE, BRANCH_REQUIRED, BRANCH_LIMIT_REACHED, BRANCH_HAS_UPCOMING_BOOKINGS, LAST_BRANCH, BRANCH_SCOPE_DENIED in the catalog + AR/EN messages
+  - [x] Setting `salon.maxBranches` (default 20, 1–200) in a "Salon branches" group of the Settings security tab, AR/EN labels
+  - [x] Endpoints whose contract gained a query (`?branchId=` on hours/closures/services/members, `?salonId=&branchId=` on reconciliation) use `branchQuerySchema`/`salonBranchQuerySchema` (OBJECT_ID override of the server's broken id pattern; optional, so nothing changes for current callers)
+  - [x] Mock: shared `branchesFixture.ts` (Noor: Abdoun main, Khalda, Dabouq offline + incomplete; one main branch for the others); salon detail `branches[]`, members `branchId`, bookings/reviews `branch`, transactions/refunds `branchId`
+- Tests: tests/branchesContract.test.ts (6) + fixtures/settings/errorCatalog/i18n suites; `sh scripts/gate.sh` GATE OK (verify, 4 builds, check:size)
+- Browser check: built dev-debug served from this worktree (own terminal tab, port 4191), Settings → Accounts and security shows "Salon branches / Most branches per salon, default 20" in AR RTL dark + EN LTR light, 1280 px and 375 px, no horizontal scroll, console empty
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — contract re-sync + mock data, no screen logic yet. DEVIATION: no e2e (user decision); the 9 new operations sit in `tests/fixtures.test.ts` WITHOUT_FIXTURE until ADM-089/090 build them; the admin PRD has no branch section yet (T-133), so BUSINESS_DOMAIN is the source.
 
 ## Last blocks
-
-### ADM-085 — real-server QA and fixes
-
-- Branch: `feat/adm-085-real-server-fixes`
-- Status: DONE
-- Acceptance criteria: all 33 list screens, the detail pages and every write flow of ADM-068..073 (salon edit with real MinIO uploads, bookings, customers, reviews, recommended, subscriptions, settings, locations, versions, maintenance, catalog, banners, contact, FAQ, campaigns, profile, applications) driven in a browser against a real local WAB-Server with seeded data; fixed what it found: alerts and exports lists failed on real answers (empty data/params left out), send-now campaigns were stored as 1 Jan 1970, exports sent a header the server refuses, reassign offered for bookings the server refuses
-- Tests: tests/realServerShapes.test.ts (4), tests/bookingExtras.test.tsx (+2), full suite + gate PASS; qa/ tooling + docs/REAL_SERVER_QA.md + docs/SERVER_ISSUES.md; contract check of every real GET answer against the generated schemas: only getAlerts and getExports were BAD (fixed)
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — DEVIATION: no e2e (user decision); browser UI check deferred to the end of the batch. DEVIATION: browser check done in the built-in browser with JS-driven clicks (not e2e); payouts creation, refunds of paid bookings and the realtime socket were not exercised (no money settled).
 
 ### ADM-086 — a new deploy no longer breaks open tabs
 
