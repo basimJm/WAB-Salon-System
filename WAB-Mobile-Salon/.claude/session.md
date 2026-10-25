@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-061 — Branches contract, member scope, branch error codes
+- Branch: `feat/mer-061-branches-contract`
+- Branched: (batch 10 start, from `origin/merchant`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §6 branch scope, §11; `WAB-Server/.claude/Integration.md` "Salon branches contract" MER-061):
+  - [x] `./gradlew apiSync` (`scripts/api_sync.py`) re-run: `SalonBranchesDtos`, per-branch hours / services, `branch` on bookings, `branchId` on team members and finance rows, `?branchId=` filters; `apiSyncCheck` ok; two positional DTO uses in tests fixed
+  - [x] Session keeps the member's scope: `MemberProfile.branchId` (persisted `member_branch_id`, cleared on sign-out), `MemberProfile.scope` = `AllBranches` for the owner, `OneBranch(branchId)` for managers / employees; the refresh member reads an optional `branchId`
+  - [x] `PermissionSet.isBranchMember`; `FINANCE_VIEW`, `SUBSCRIPTION_VIEW`, `POLICIES_MANAGE` never count for a branch member (`BranchPermissions.OWNER_SCOPE_ONLY`); MANAGER template = every grantable branch permission (§6); owner-only `BRANCHES_MANAGE` capability (locked row "Branches" in the permission editor)
+  - [x] Error codes `BRANCH_NOT_FOUND`, `BRANCH_NOT_BOOKABLE`, `BRANCH_REQUIRED`, `BRANCH_LIMIT_REACHED`, `BRANCH_HAS_UPCOMING_BOOKINGS`, `LAST_BRANCH`, `BRANCH_SCOPE_DENIED` in `ErrorCode` + AR/EN text + handling action
+- Tests: `BranchScopeTest` (4), `RefreshMemberTest` (+1), `DataStoreSessionStoreTest` (+1), `ErrorCodeTest` (updated), `PermissionsTest` / `MerchantTabsTest` (updated for the branch rule); all host tests green (`testAndroidHostTest`), policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: SERVER GAP — the contract's `MemberProfile` (login / refresh member) has no `branchId` yet (Integration.md says it should); the app parses it when present and otherwise relies on the server scoping every call to the member's branch (role ≠ OWNER = branch member). Gradle runs through the terminal panel (the sandbox cannot write `~/.gradle`).
+
 ### MER-030 — Real-time request outside the app, iOS
 - Branch: `feat/mer-029-request-android`
 - Branched: (shared with MER-029, owner request 2026-10-25 "and on iOS")

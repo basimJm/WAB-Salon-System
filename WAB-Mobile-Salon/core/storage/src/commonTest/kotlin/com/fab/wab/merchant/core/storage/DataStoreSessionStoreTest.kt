@@ -45,6 +45,17 @@ class DataStoreSessionStoreTest {
     }
 
     @Test
+    fun branchOfABranchMemberIsKeptAndClearedWhenTheMemberBecomesOwnerScoped() = runTest {
+        store.signIn(tokens, member.copy(branchId = "b2"), permissions, SalonState.LIVE)
+        assertEquals("b2", (store.state.first() as SessionState.SignedIn).member.branchId)
+        store.updateMember(member)
+        assertNull((store.state.first() as SessionState.SignedIn).member.branchId)
+        store.updateMember(member.copy(branchId = "b3"))
+        store.signOut()
+        assertNull(dataStore.data.first()[SessionKeys.MEMBER_BRANCH_ID], "sign-out drops the branch")
+    }
+
+    @Test
     fun permissionsAndSalonStateRefreshInPlace() = runTest {
         store.signIn(tokens, member, permissions, SalonState.LIVE)
         store.updatePermissions(setOf("BOOKINGS_VIEW_OWN"))

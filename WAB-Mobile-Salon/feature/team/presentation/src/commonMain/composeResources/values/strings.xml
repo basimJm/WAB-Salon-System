@@ -126,6 +126,7 @@
     <string name="cap_team_manage">Team &amp; permissions</string>
     <string name="cap_payout_details_manage">Bank details</string>
     <string name="cap_salon_delete_request">Delete the salon</string>
+    <string name="cap_branches_manage">Branches</string>
     <plurals name="perm_count">
         <item quantity="one">%1$d permission on</item>
         <item quantity="other">%1$d permissions on</item>

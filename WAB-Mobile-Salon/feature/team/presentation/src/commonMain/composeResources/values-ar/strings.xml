@@ -126,6 +126,7 @@
     <string name="cap_team_manage">الفريق والصلاحيات</string>
     <string name="cap_payout_details_manage">البيانات البنكية</string>
     <string name="cap_salon_delete_request">حذف الصالون</string>
+    <string name="cap_branches_manage">الفروع</string>
     <plurals name="perm_count">
         <item quantity="zero">%1$d صلاحية مفعّلة</item>
         <item quantity="one">%1$d صلاحية مفعّلة</item>

@@ -15,6 +15,14 @@ class RefreshMemberTest {
     }
 
     @Test
+    fun branchIsKeptForBranchMembersOnly() {
+        val manager = RefreshMemberDto(id = "m2", salonId = "s1", firstName = "Rana", role = "MANAGER", branchId = "b2")
+        assertEquals("b2", manager.toProfile()?.branchId)
+        assertNull(manager.copy(role = "OWNER").toProfile()?.branchId, "the owner works across every branch")
+        assertNull(manager.copy(branchId = " ").toProfile()?.branchId)
+    }
+
+    @Test
     fun incompleteMemberIsIgnored() {
         assertNull(RefreshMemberDto(id = "m1", salonId = null, role = "OWNER").toProfile())
         assertNull(RefreshMemberDto(id = "m1", salonId = "s1", role = "ADMIN").toProfile())
