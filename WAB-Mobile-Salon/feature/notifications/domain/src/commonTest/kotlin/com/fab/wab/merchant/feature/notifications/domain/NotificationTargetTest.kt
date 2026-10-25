@@ -20,7 +20,7 @@ class NotificationTargetTest {
         assertEquals(NotificationTarget.Finance, notification("payout.transferred").target())
         assertEquals(NotificationTarget.Finance, notification("refund.failed").target())
         assertEquals(NotificationTarget.Subscription, notification("subscription.expired").target())
-        assertNull(notification("review.published").target())
+        assertEquals(NotificationTarget.Reviews, notification("review.published").target())
         assertNull(notification("booking.updated").target())
     }
 }

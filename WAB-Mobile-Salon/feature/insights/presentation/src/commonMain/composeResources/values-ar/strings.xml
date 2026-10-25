@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reviews_title">التقييمات</string>
+    <string name="reviews_tab_salon">الصالون</string>
+    <string name="reviews_tab_staff">الطاقم</string>
+    <string name="reviews_all_staff">كل الطاقم</string>
+    <plurals name="reviews_count">
+        <item quantity="zero">لا توجد تقييمات</item>
+        <item quantity="one">تقييم واحد</item>
+        <item quantity="two">تقييمان</item>
+        <item quantity="few">%1$d تقييمات</item>
+        <item quantity="many">%1$d تقييماً</item>
+        <item quantity="other">%1$d تقييم</item>
+    </plurals>
+    <string name="reviews_star_label">%1$d ★</string>
+    <string name="reviews_staff_for">لـ %1$s</string>
+    <string name="reviews_report">إبلاغ</string>
+    <string name="reviews_report_note">سنفتح التواصل مع WAB مع مرجع التقييم %1$s.</string>
+    <string name="reviews_report_subject">إبلاغ عن تقييم</string>
+    <string name="reviews_report_message">أود الإبلاغ عن التقييم ذي المرجع %1$s.</string>
+    <string name="reviews_empty_title">لا توجد تقييمات بعد</string>
+    <string name="reviews_empty_body">ستظهر هنا تقييمات الزبائن بعد اكتمال حجوزاتهم.</string>
+    <string name="insights_meta_pair">%1$s · %2$s</string>
+</resources>

@@ -91,4 +91,8 @@ include(
     ":feature:home:data",
     ":feature:home:presentation",
     ":feature:home:di",
+    ":feature:insights:domain",
+    ":feature:insights:data",
+    ":feature:insights:presentation",
+    ":feature:insights:di",
 )

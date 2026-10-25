@@ -63,6 +63,9 @@ sealed interface Screen {
 
     @Serializable data object Policies : Screen
 
+    // Insights (M20, M21)
+    @Serializable data object Reviews : Screen
+
     // Branches (MER-062, owner only)
     @Serializable data object Branches : Screen
 

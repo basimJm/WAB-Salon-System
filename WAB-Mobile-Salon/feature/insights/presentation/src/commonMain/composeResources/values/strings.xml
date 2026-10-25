@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reviews_title">Reviews</string>
+    <string name="reviews_tab_salon">Salon</string>
+    <string name="reviews_tab_staff">Staff</string>
+    <string name="reviews_all_staff">All staff</string>
+    <plurals name="reviews_count">
+        <item quantity="zero">No reviews</item>
+        <item quantity="one">%1$d review</item>
+        <item quantity="two">%1$d reviews</item>
+        <item quantity="few">%1$d reviews</item>
+        <item quantity="many">%1$d reviews</item>
+        <item quantity="other">%1$d reviews</item>
+    </plurals>
+    <string name="reviews_star_label">%1$d ★</string>
+    <string name="reviews_staff_for">For %1$s</string>
+    <string name="reviews_report">Report</string>
+    <string name="reviews_report_note">We will open Contact WAB with the review reference %1$s.</string>
+    <string name="reviews_report_subject">Review report</string>
+    <string name="reviews_report_message">I would like to report the review with reference %1$s.</string>
+    <string name="reviews_empty_title">No reviews yet</string>
+    <string name="reviews_empty_body">Customer reviews appear here after completed bookings.</string>
+    <string name="insights_meta_pair">%1$s · %2$s</string>
+</resources>

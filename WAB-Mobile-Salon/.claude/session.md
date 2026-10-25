@@ -9,6 +9,21 @@
 
 ## Current task
 
+### MER-042 — Reviews M20
+- Branch: `feat/mer-042-reviews`
+- Branched: (from `feat/mer-050-home-dashboard`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD M20, §14 `review_report`; operation `GET /reviews?target&memberId&branchId&page&pageSize` (REVIEWS_VIEW); design 07 `on.reviews`):
+  - [x] New `feature/insights` (domain / data / presentation / di) with `Screen.Reviews`; salon hub tile REVIEWS registered; `review.*` notifications now open M20
+  - [x] Tabs Salon | Staff; staff selector chips ("All staff" + the staff seen in the loaded reviews) send `memberId`; header card: average (one decimal), stars, count (AR plurals), distribution bars 5 → 1
+  - [x] Paginated published reviews (20 per page, `meta.hasMore`): customer, stars, date, staff (staff tab), branch, comment; shimmer / empty ("No reviews yet") / error + retry; pull-to-refresh
+  - [x] Owner branch switcher (`BranchScope`, `?branchId=`); branch members send no branch (the server scopes them; 403 `BRANCH_SCOPE_DENIED` otherwise)
+  - [x] Report per review → Contact WAB sheet (call / WhatsApp / email from the config) prefilled with the review reference (`ExternalLinks.whatsAppMessage` / `mailtoMessage`); `review_report` event with the channel (added to the required PRD events); no edit / delete
+- Tests: `ReviewsTest` (2), `ReviewsMapperTest` (2), `ReviewsViewModelTest` (3), `ExternalLinksTest` (+1), `NotificationTargetTest` (updated); insights + notifications + salon + core/ui + composeApp host tests green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATION — the staff selector lists the staff found in loaded reviews (`GET /team/members` needs STAFF_MANAGE, which a REVIEWS_VIEW member may not have), so a staff member without reviews is not offered (nothing to show anyway).
+
 ### MER-050 — Home M07
 - Branch: `feat/mer-050-home-dashboard`
 - Branched: (batch 12 start, from `origin/merchant`)
