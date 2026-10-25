@@ -16448,6 +16448,10 @@
                           "respondBy": {
                             "type": "string"
                           },
+                          "requestedAt": {
+                            "type": "string",
+                            "description": "When the customer sent the request"
+                          },
                           "personsCount": {
                             "type": "number"
                           },
@@ -16553,6 +16557,7 @@
                           "appointmentStart",
                           "appointmentEnd",
                           "respondBy",
+                          "requestedAt",
                           "personsCount",
                           "total",
                           "salon",
@@ -16885,6 +16890,10 @@
                         "respondBy": {
                           "type": "string"
                         },
+                        "requestedAt": {
+                          "type": "string",
+                          "description": "When the customer sent the request"
+                        },
                         "personsCount": {
                           "type": "number"
                         },
@@ -17194,6 +17203,7 @@
                         "appointmentStart",
                         "appointmentEnd",
                         "respondBy",
+                        "requestedAt",
                         "personsCount",
                         "total",
                         "salon",
@@ -19149,6 +19159,690 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/merchant/v1/dashboard": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Home screen in one call (DASHBOARD_VIEW): salon state, subscription warning, unread count, pending requests, today and quick stats, scoped to the member’s permissions and branch; cached a few seconds",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "salon": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "profileImageUrl": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "state": {
+                              "type": "string",
+                              "enum": [
+                                "APPLICATION_PENDING",
+                                "APPLICATION_REJECTED",
+                                "APPROVED_INCOMPLETE",
+                                "LIVE",
+                                "OFFLINE"
+                              ]
+                            },
+                            "missing": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "What the setup checklist still needs"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "profileImageUrl",
+                            "state",
+                            "missing"
+                          ]
+                        },
+                        "subscriptionWarning": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "endsAt": {
+                              "type": "string"
+                            },
+                            "daysRemaining": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "endsAt",
+                            "daysRemaining"
+                          ],
+                          "description": "Set while the trial or subscription ends within the warning window"
+                        },
+                        "unreadNotifications": {
+                          "type": "number"
+                        },
+                        "pending": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "count": {
+                              "type": "number"
+                            },
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "referenceNumber": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "type": "string"
+                                  },
+                                  "paymentMethod": {
+                                    "type": "string"
+                                  },
+                                  "paymentStatus": {
+                                    "type": "string"
+                                  },
+                                  "hasBride": {
+                                    "type": "boolean"
+                                  },
+                                  "appointmentStart": {
+                                    "type": "string"
+                                  },
+                                  "appointmentEnd": {
+                                    "type": "string"
+                                  },
+                                  "respondBy": {
+                                    "type": "string"
+                                  },
+                                  "requestedAt": {
+                                    "type": "string",
+                                    "description": "When the customer sent the request"
+                                  },
+                                  "personsCount": {
+                                    "type": "number"
+                                  },
+                                  "total": {
+                                    "type": "string",
+                                    "description": "JOD decimal string"
+                                  },
+                                  "salon": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "Customer and admin views only."
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "locationText": {
+                                        "type": [
+                                          "string",
+                                          "null"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name",
+                                      "locationText"
+                                    ],
+                                    "description": "The branch as booked, name in the request language; null for bookings made before branches."
+                                  },
+                                  "customer": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "phone": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name",
+                                      "phone"
+                                    ],
+                                    "description": "Merchant and admin views only."
+                                  },
+                                  "staff": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id",
+                                        "name"
+                                      ]
+                                    },
+                                    "description": "Merchant and admin views only."
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "referenceNumber",
+                                  "status",
+                                  "paymentMethod",
+                                  "paymentStatus",
+                                  "hasBride",
+                                  "appointmentStart",
+                                  "appointmentEnd",
+                                  "respondBy",
+                                  "requestedAt",
+                                  "personsCount",
+                                  "total",
+                                  "salon",
+                                  "branch",
+                                  "customer",
+                                  "staff"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "count",
+                            "items"
+                          ],
+                          "description": "BOOKINGS_RESPOND only"
+                        },
+                        "today": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "approved": {
+                              "type": "number"
+                            },
+                            "completed": {
+                              "type": "number"
+                            },
+                            "next": {
+                              "type": [
+                                "object",
+                                "null"
+                              ],
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "referenceNumber": {
+                                  "type": "string"
+                                },
+                                "status": {
+                                  "type": "string"
+                                },
+                                "paymentMethod": {
+                                  "type": "string"
+                                },
+                                "paymentStatus": {
+                                  "type": "string"
+                                },
+                                "hasBride": {
+                                  "type": "boolean"
+                                },
+                                "appointmentStart": {
+                                  "type": "string"
+                                },
+                                "appointmentEnd": {
+                                  "type": "string"
+                                },
+                                "respondBy": {
+                                  "type": "string"
+                                },
+                                "requestedAt": {
+                                  "type": "string",
+                                  "description": "When the customer sent the request"
+                                },
+                                "personsCount": {
+                                  "type": "number"
+                                },
+                                "total": {
+                                  "type": "string",
+                                  "description": "JOD decimal string"
+                                },
+                                "salon": {
+                                  "type": [
+                                    "object",
+                                    "null"
+                                  ],
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ],
+                                  "description": "Customer and admin views only."
+                                },
+                                "branch": {
+                                  "type": [
+                                    "object",
+                                    "null"
+                                  ],
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "locationText": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name",
+                                    "locationText"
+                                  ],
+                                  "description": "The branch as booked, name in the request language; null for bookings made before branches."
+                                },
+                                "customer": {
+                                  "type": [
+                                    "object",
+                                    "null"
+                                  ],
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "phone": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name",
+                                    "phone"
+                                  ],
+                                  "description": "Merchant and admin views only."
+                                },
+                                "staff": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ]
+                                  },
+                                  "description": "Merchant and admin views only."
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "referenceNumber",
+                                "status",
+                                "paymentMethod",
+                                "paymentStatus",
+                                "hasBride",
+                                "appointmentStart",
+                                "appointmentEnd",
+                                "respondBy",
+                                "requestedAt",
+                                "personsCount",
+                                "total",
+                                "salon",
+                                "branch",
+                                "customer",
+                                "staff"
+                              ]
+                            },
+                            "timeline": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "referenceNumber": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "type": "string"
+                                  },
+                                  "paymentMethod": {
+                                    "type": "string"
+                                  },
+                                  "paymentStatus": {
+                                    "type": "string"
+                                  },
+                                  "hasBride": {
+                                    "type": "boolean"
+                                  },
+                                  "appointmentStart": {
+                                    "type": "string"
+                                  },
+                                  "appointmentEnd": {
+                                    "type": "string"
+                                  },
+                                  "respondBy": {
+                                    "type": "string"
+                                  },
+                                  "requestedAt": {
+                                    "type": "string",
+                                    "description": "When the customer sent the request"
+                                  },
+                                  "personsCount": {
+                                    "type": "number"
+                                  },
+                                  "total": {
+                                    "type": "string",
+                                    "description": "JOD decimal string"
+                                  },
+                                  "salon": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "Customer and admin views only."
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "locationText": {
+                                        "type": [
+                                          "string",
+                                          "null"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name",
+                                      "locationText"
+                                    ],
+                                    "description": "The branch as booked, name in the request language; null for bookings made before branches."
+                                  },
+                                  "customer": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "phone": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name",
+                                      "phone"
+                                    ],
+                                    "description": "Merchant and admin views only."
+                                  },
+                                  "staff": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id",
+                                        "name"
+                                      ]
+                                    },
+                                    "description": "Merchant and admin views only."
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "referenceNumber",
+                                  "status",
+                                  "paymentMethod",
+                                  "paymentStatus",
+                                  "hasBride",
+                                  "appointmentStart",
+                                  "appointmentEnd",
+                                  "respondBy",
+                                  "requestedAt",
+                                  "personsCount",
+                                  "total",
+                                  "salon",
+                                  "branch",
+                                  "customer",
+                                  "staff"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "approved",
+                            "completed",
+                            "next",
+                            "timeline"
+                          ],
+                          "description": "BOOKINGS_VIEW_ALL / BOOKINGS_VIEW_OWN (own bookings only)"
+                        },
+                        "quickStats": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "bookings": {
+                              "type": "number"
+                            },
+                            "revenue": {
+                              "type": "string"
+                            },
+                            "rating": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "bookings",
+                            "revenue",
+                            "rating"
+                          ],
+                          "description": "STATISTICS_VIEW only: the last 7 days"
+                        }
+                      },
+                      "required": [
+                        "salon",
+                        "subscriptionWarning",
+                        "unreadNotifications",
+                        "pending",
+                        "today",
+                        "quickStats"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
                 }
               }
             }

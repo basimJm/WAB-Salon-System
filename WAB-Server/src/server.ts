@@ -89,6 +89,9 @@ import { createFieldEncryption } from './utils/crypto/aesGcm';
 import { createMerchantFinanceService } from './domain/finance/merchantFinance.service';
 import { createMerchantReviewsService } from './domain/reviews/merchantReviews.service';
 import { createMerchantStatisticsService } from './domain/statistics/merchantStatistics.service';
+import { createMerchantDashboardService } from './domain/dashboard/merchantDashboard.service';
+import { createJsonCache } from './utils/redis/jsonCache';
+import { DASHBOARD_CACHE_PREFIX, DASHBOARD_CACHE_TTL_SEC } from './constants/dashboard';
 import { createSubscriptionsService } from './domain/subscriptions/subscriptions.service';
 import { createPayoutsService } from './domain/payouts/payouts.service';
 import { PayoutsRepository } from './repositories/payouts.repository';
@@ -844,6 +847,44 @@ const buildServices = (
     uploads,
     deactivationConflicts: conflictFinder.deactivation,
   });
+  const merchantStatisticsService = createMerchantStatisticsService({
+    bookings: bookingsRepository,
+    reviews: new ReviewsRepository(),
+    salons: new SalonsRepository(),
+    members: new MembersRepository(),
+    events: serverEventsRepository,
+    settings,
+  });
+  const merchantFinanceService = createMerchantFinanceService({
+    payoutsService: adminPayouts,
+    transactions: transactionsRepository,
+    refunds: refundsRepository,
+    payouts: payoutsRepository,
+    bookings: bookingsRepository,
+    subscriptions: subscriptionsService,
+    salons: new SalonsRepository(),
+    settings,
+  });
+  const inboxService = createInboxService({
+    notifications: notificationsRepository,
+    settings,
+    access: accessEvents,
+  });
+  const merchantDashboardService = createMerchantDashboardService({
+    salons: new SalonsRepository(),
+    storage: providers.storage,
+    bookings: bookingQueries,
+    finance: merchantFinanceService,
+    inbox: inboxService,
+    statistics: merchantStatisticsService,
+    settings,
+    cache: createJsonCache({
+      redis,
+      logger,
+      prefix: DASHBOARD_CACHE_PREFIX,
+      ttlSec: DASHBOARD_CACHE_TTL_SEC,
+    }),
+  });
   const adminSalonEditService = createAdminSalonEditService({
     profile: salonProfileService,
     gallery: galleryService,
@@ -884,11 +925,7 @@ const buildServices = (
       search,
     }),
     reviews: reviewsService,
-    inbox: createInboxService({
-      notifications: notificationsRepository,
-      settings,
-      access: accessEvents,
-    }),
+    inbox: inboxService,
     availability,
     bookingDrafts,
     bookings: bookingCreation,
@@ -920,30 +957,15 @@ const buildServices = (
           }),
         }),
     adminSubscriptions: subscriptionsService,
-    merchantStatistics: createMerchantStatisticsService({
-      bookings: bookingsRepository,
-      reviews: new ReviewsRepository(),
-      salons: new SalonsRepository(),
-      members: new MembersRepository(),
-      events: serverEventsRepository,
-      settings,
-    }),
+    merchantStatistics: merchantStatisticsService,
+    merchantDashboard: merchantDashboardService,
     merchantReviews: createMerchantReviewsService({
       reviews: new ReviewsRepository(),
       members: new MembersRepository(),
       customers: new CustomersRepository(),
       branches: branchesRepository,
     }),
-    merchantFinance: createMerchantFinanceService({
-      payoutsService: adminPayouts,
-      transactions: transactionsRepository,
-      refunds: refundsRepository,
-      payouts: payoutsRepository,
-      bookings: bookingsRepository,
-      subscriptions: subscriptionsService,
-      salons: new SalonsRepository(),
-      settings,
-    }),
+    merchantFinance: merchantFinanceService,
     bookingAdmin,
     bookingBulk: createBookingBulkService({
       bookings: bookingsRepository,

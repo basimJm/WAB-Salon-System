@@ -36,6 +36,7 @@ import type { BookingActionsService } from '../domain/bookings/bookingActions.se
 import type { MerchantFinanceService } from '../domain/finance/merchantFinance.service';
 import type { MerchantReviewsService } from '../domain/reviews/merchantReviews.service';
 import type { MerchantStatisticsService } from '../domain/statistics/merchantStatistics.service';
+import type { MerchantDashboardService } from '../domain/dashboard/merchantDashboard.service';
 import type { PayoutDetailsService } from '../domain/salons/payoutDetails.service';
 import type { SubscriptionsService } from '../domain/subscriptions/subscriptions.service';
 import type { PayoutsService } from '../domain/payouts/payouts.service';
@@ -123,6 +124,7 @@ export interface ApiServices {
   readonly merchantFinance?: MerchantFinanceService;
   readonly merchantReviews?: MerchantReviewsService;
   readonly merchantStatistics?: MerchantStatisticsService;
+  readonly merchantDashboard?: MerchantDashboardService;
   readonly adminSubscriptions?: SubscriptionsService;
   readonly bookingBulk?: BookingBulkService;
   readonly bookingAdmin?: BookingAdminService;
@@ -651,3 +653,5 @@ export const unavailableAdminBranches: AdminBranchesService = {
 export const unavailableMerchantReviews: MerchantReviewsService = { list: unavailable };
 
 export const unavailableMerchantStatistics: MerchantStatisticsService = { get: unavailable };
+
+export const unavailableMerchantDashboard: MerchantDashboardService = { get: unavailable };

@@ -9116,6 +9116,10 @@
                           "respondBy": {
                             "type": "string"
                           },
+                          "requestedAt": {
+                            "type": "string",
+                            "description": "When the customer sent the request"
+                          },
                           "personsCount": {
                             "type": "number"
                           },
@@ -9221,6 +9225,7 @@
                           "appointmentStart",
                           "appointmentEnd",
                           "respondBy",
+                          "requestedAt",
                           "personsCount",
                           "total",
                           "salon",
@@ -9597,6 +9602,10 @@
                         "respondBy": {
                           "type": "string"
                         },
+                        "requestedAt": {
+                          "type": "string",
+                          "description": "When the customer sent the request"
+                        },
                         "personsCount": {
                           "type": "number"
                         },
@@ -9906,6 +9915,7 @@
                         "appointmentStart",
                         "appointmentEnd",
                         "respondBy",
+                        "requestedAt",
                         "personsCount",
                         "total",
                         "salon",
