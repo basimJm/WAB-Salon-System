@@ -10,10 +10,22 @@
 
 ## Current task
 
+### SRV-111 — Contract snapshot guard + per-namespace contract version
+
+- Branch: `feat/srv-111-contract-guard`
+- Status: IN REVIEW
+- Acceptance criteria (INTEGRATION.md §3; API docs: `info.version` per namespace changes — common 1.0.0, customer/merchant/admin 1.1.0):
+  - [x] `src/docs/contractVersions.ts` records per namespace the published version, the fingerprint (sha256 of the generated document without its version) and the client-impact note of the last change; `openapi.info.version` comes from it
+  - [x] `tests/contractGuard.test.ts` fails when a generated contract no longer matches its fingerprint, or a namespace has no version/note
+  - [x] `npm run contract:bump -- <name> "<client impact>"` records the new fingerprint, bumps the minor version and stores the note; then `npm run docs`
+- Tests: `tests/contractGuard.test.ts` (9); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (clients can compare `info.version` after api:sync / apiSync), QA ✔) — FLOW CHANGE for every later API task: `npm run docs` → guard fails → `npm run contract:bump -- <ns> "<CUS/MER/ADM tasks>"` → `npm run docs`.
+
 ### SRV-124 — Admin socket events
 
 - Branch: `feat/srv-124-admin-socket-events`
-- Status: IN REVIEW
+- Status: DONE (PR #407)
 - Acceptance criteria (BUSINESS_DOMAIN §7 admin row; API docs: no change (socket events) — client ADM-027 already maps these names):
   - [x] `application.created` on a new or resubmitted salon application, `review.created` on a new review, `refund.updated` when a refund starts, completes or fails, on the `/admin` namespace room `admin`, with small summaries
   - [x] `overview.tick` every minute (periodic job `periodic.overview-tick`)
@@ -33,18 +45,6 @@
 - Tests: `tests/hours.test.ts`, `tests/staff.test.ts`, `tests/leaves.test.ts` (+1 each); full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔)
-
-### SRV-133 — Account removal from the merchant app (M25)
-
-- Branch: `feat/srv-133-account-removal`
-- Status: DONE (PR #405)
-- Acceptance criteria (Merchant PRD M25 "Delete my account", BUSINESS_DOMAIN §5.15; operations `POST /merchant/v1/me/leave`, `POST /merchant/v1/salon/deletion-request` — client impact MER-049; admin decision = existing SRV-121 endpoint):
-  - [x] `POST /merchant/v1/me/leave`: a non-owner removes their own access through the account lifecycle (deactivated, sessions and sockets ended); the owner gets 422 `LAST_OWNER`
-  - [x] `POST /merchant/v1/salon/deletion-request` (owner only, optional note): stamps `salon.deletionRequestedAt` once and raises an admin alert `SALON_DELETION_REQUEST` (AR/EN title); a repeat while open returns the same date and raises nothing
-  - [x] The admin decision endpoint (SRV-121) acts on that request (reject clears it)
-- Tests: `tests/accountRemoval.test.ts` (4); full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔ (lifecycle and deletion services reused, no new rules), Mobile ✔, Architect ✔, QA ✔)
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 
