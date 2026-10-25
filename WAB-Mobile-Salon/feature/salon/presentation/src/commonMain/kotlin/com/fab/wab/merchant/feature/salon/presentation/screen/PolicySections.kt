@@ -20,13 +20,13 @@ import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
-import com.fab.wab.merchant.feature.salon.domain.FullPaymentRefund
-import com.fab.wab.merchant.feature.salon.domain.NoShowDeposit
-import com.fab.wab.merchant.feature.salon.domain.NoShowFullPayment
-import com.fab.wab.merchant.feature.salon.domain.PaymentOption
+import com.fab.wab.merchant.core.domain.policy.FullPaymentRefund
+import com.fab.wab.merchant.core.domain.policy.NoShowDeposit
+import com.fab.wab.merchant.core.domain.policy.NoShowFullPayment
+import com.fab.wab.merchant.core.domain.policy.PaymentOption
 import com.fab.wab.merchant.feature.salon.domain.PolicyDraft
-import com.fab.wab.merchant.feature.salon.domain.PolicyRule
 import com.fab.wab.merchant.feature.salon.domain.customerRules
+import com.fab.wab.merchant.designsystem.components.policy.policyRuleText
 import com.fab.wab.merchant.feature.salon.presentation.analytics.SalonAnalytics
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.PolicyContract.UiAction
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.PolicyContract.UiState
@@ -46,19 +46,6 @@ import com.fab.wab.merchant.feature.salon.presentation.resources.policy_refund_f
 import com.fab.wab.merchant.feature.salon.presentation.resources.policy_refund_minus
 import com.fab.wab.merchant.feature.salon.presentation.resources.policy_refundable
 import com.fab.wab.merchant.feature.salon.presentation.resources.policy_rules
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_arrival
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_dep_no
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_dep_yes
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_deposit
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_full
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_full_full
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_full_minus
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_ns_full_full
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_ns_full_keep
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_ns_full_minus
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_ns_keep
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_ns_ref
-import com.fab.wab.merchant.feature.salon.presentation.resources.rule_window
 import org.jetbrains.compose.resources.stringResource
 
 /** Cancellation and no-show outcomes; each block only for the options the salon offers. */
@@ -135,7 +122,7 @@ internal fun PolicyPreviewSheet(draft: PolicyDraft, onClose: () -> Unit) {
                     customerRules(draft).forEach { rule ->
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(spacing.space8)) {
                             Icon(AppIcons.Check, contentDescription = null, tint = AppTheme.colors.accent)
-                            AppText(text = ruleText(rule), style = AppTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                            AppText(text = policyRuleText(rule), style = AppTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                         }
                     }
                     if (draft.notes.isNotBlank()) AppText(
@@ -148,26 +135,4 @@ internal fun PolicyPreviewSheet(draft: PolicyDraft, onClose: () -> Unit) {
             AppButton(stringResource(Res.string.policy_close), onClose, Modifier.fillMaxWidth(), kind = ButtonKind.Outlined)
         }
     }
-}
-
-@Composable
-private fun ruleText(rule: PolicyRule): String = when (rule) {
-    is PolicyRule.Window -> stringResource(Res.string.rule_window, rule.hours)
-    PolicyRule.PayOnArrival -> stringResource(Res.string.rule_arrival)
-    is PolicyRule.Deposit -> stringResource(Res.string.rule_deposit, rule.percentage)
-    PolicyRule.FullOnline -> stringResource(Res.string.rule_full)
-    is PolicyRule.DepositOnCancel -> stringResource(if (rule.refundable) Res.string.rule_dep_yes else Res.string.rule_dep_no)
-    is PolicyRule.FullOnCancel -> stringResource(
-        if (rule.refund == FullPaymentRefund.FULL) Res.string.rule_full_full else Res.string.rule_full_minus,
-    )
-    is PolicyRule.DepositOnNoShow -> stringResource(
-        if (rule.outcome == NoShowDeposit.KEEP) Res.string.rule_ns_keep else Res.string.rule_ns_ref,
-    )
-    is PolicyRule.FullOnNoShow -> stringResource(
-        when (rule.outcome) {
-            NoShowFullPayment.KEEP -> Res.string.rule_ns_full_keep
-            NoShowFullPayment.REFUND_MINUS_DEPOSIT -> Res.string.rule_ns_full_minus
-            NoShowFullPayment.REFUND_FULL -> Res.string.rule_ns_full_full
-        },
-    )
 }

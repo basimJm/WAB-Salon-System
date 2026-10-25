@@ -13,7 +13,9 @@
       "REPORT_MONTHLY": "تقرير شهري",
       "TRANSACTIONS": "المعاملات",
       "AUDIT_LOGS": "سجل التدقيق",
-      "BOOKINGS": "الحجوزات"
+      "BOOKINGS": "الحجوزات",
+      "CUSTOMERS": "العملاء",
+      "SALONS": "الصالونات"
     },
     "failures": {
       "TOO_MANY_ROWS": "عدد الصفوف كبير: ضيّق عوامل التصفية",

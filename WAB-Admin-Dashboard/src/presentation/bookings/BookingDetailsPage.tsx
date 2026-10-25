@@ -76,6 +76,12 @@ function Facts({ b }: { b: BookingDetails }) {
             value: when(b.appointmentStart),
             ltr: true,
           },
+          {
+            key: 'requested',
+            label: t('bookings.requestedAt'),
+            value: when(b.requestedAt),
+            ltr: true,
+          },
           { key: 'respond', label: t('bookings.respondBy'), value: when(b.respondBy), ltr: true },
           { key: 'method', label: t('bookings.method'), value: b.paymentMethod },
           {

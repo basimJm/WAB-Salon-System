@@ -188,9 +188,13 @@ describe('branch management (§5.16)', () => {
       httpStatus: 422,
     });
     const second = await service.create(salonId.toHexString(), input('Zarqa Road'));
+    // SRV-151: the main branch answers its own message, not the booking-status one.
     await expect(service.close(scopeMain)).rejects.toMatchObject({
       code: 'INVALID_TRANSITION',
-      details: [expect.objectContaining({ field: 'isMain' })],
+      messageKey: 'branches.mainCannotClose',
+      details: [
+        expect.objectContaining({ field: 'isMain', messageKey: 'branches.mainCannotClose' }),
+      ],
     });
     upcoming.set(second.id, [{ id: 'booking-1', startsAt: NOW }]);
     const scopeSecond = { salonId: salonId.toHexString(), branchId: second.id, actor: owner };
@@ -207,7 +211,7 @@ describe('branch management (§5.16)', () => {
     expect((await service.list(salonId.toHexString())).map((b) => b.id)).toEqual([main.id]);
     await expect(
       service.update(salonId.toHexString(), second.id, { phone: '+96265000000' }),
-    ).rejects.toMatchObject({ code: 'INVALID_TRANSITION' });
+    ).rejects.toMatchObject({ code: 'INVALID_TRANSITION', messageKey: 'branches.invalidStatus' });
   });
 
   it('never reaches another salon’s branch (BRANCH_NOT_FOUND)', async () => {

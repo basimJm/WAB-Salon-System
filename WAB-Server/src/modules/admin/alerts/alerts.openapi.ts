@@ -1,6 +1,7 @@
 import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import {
   ADMIN_ALERT_ROUTES,
+  ALERT_ENTITY_TYPES,
   ALERT_KINDS,
   ALERT_SEVERITIES,
   ALERT_STATUSES,
@@ -20,8 +21,10 @@ const alert = z.object({
   id: z.string(),
   kind: z.enum(ALERT_KINDS),
   severity: z.enum(ALERT_SEVERITIES),
+  /** In the `Accept-Language` language; `titles` carries both (SRV-150). */
   title: z.string(),
-  entityType: z.string().nullable(),
+  titles: z.object({ ar: z.string(), en: z.string() }),
+  entityType: z.enum(ALERT_ENTITY_TYPES).nullable(),
   entityId: z.string().nullable(),
   data: z.record(z.string(), z.unknown()),
   status: z.enum(ALERT_STATUSES),

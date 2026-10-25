@@ -65,7 +65,7 @@ export const createSalonDeletionService = (deps: SalonDeletionDeps): SalonDeleti
         kind: 'SALON_DELETION_REQUEST',
         severity: 'WARNING',
         dedupeKey: `salon-deletion:${salonId}:${String(requestedAt.getTime())}`,
-        entityType: 'salon',
+        entityType: 'SALON',
         entityId: salonId,
         data: { salonName: salon.name, memberId, ...(note === undefined ? {} : { note }) },
       });

@@ -39,7 +39,8 @@
       "**/google-services.json",
       "config/policy-baseline.json",
       "config/detekt/baseline.xml",
-      "**/contract/generated/**"
+      "**/contract/generated/**",
+      "core/data/fixtures/remote/**"
     ]
   },
   "kotlin": {

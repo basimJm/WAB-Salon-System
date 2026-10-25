@@ -225,7 +225,7 @@ Integration and release tasks for the admin panel (`INTEGRATION.md` §6).
 | ID | Task | Branch | Needs | Server (SRV) | Status | Notes |
 |---|---|---|---|---|---|---|
 | ADM-078 | Fixture tests: every fixture of the mock transport is validated against the generated types in CI; adding an operation without a fixture fails the build | `feat/adm-078-fixture-tests` | ADM-026, ADM-004 | — | DONE | Works against the committed contract snapshot. |
-| ADM-079 | Switch to `remote` on dev (INT-05): per-module gap list and fixes, socket events verified against the real server | `feat/adm-079-remote-dev` | ADM-078, ADM-061, ADM-063, ADM-047, ADM-030 | SRV-011a | TODO | Dev API = SRV-011a (Render, `VITE_API_BASE_URL` in `.env.dev`, ADM-087). |
+| ADM-079 | Switch to `remote` on dev (INT-05): per-module gap list and fixes, socket events verified against the real server | `feat/adm-079-remote-dev` | ADM-078, ADM-061, ADM-063, ADM-047, ADM-030 | SRV-011a | DONE | Dev API = SRV-011a (Render, `VITE_API_BASE_URL` in `.env.dev`, ADM-087). |
 | ADM-080 | PRD §3 / Design Script §3 flows as Playwright e2e on the mock transport (login to overview, application approval, booking status change, refund retry, payout creation, subscription expiry to Offline, bulk review approval, campaign scheduling, monthly report export; flows needing blocked features join later) | `feat/adm-080-flows-e2e` | ADM-043, ADM-049, ADM-053, ADM-056, ADM-057, ADM-050, ADM-059, ADM-065, ADM-067 | — | PENDING | Chromium locally, Chromium + WebKit in CI. Owner decision 2026-10-14: no e2e runs for now; revisit before release (ADM-083). |
 | ADM-081 | RTL, accessibility and performance pass over all pages: keyboard paths, contrast in both themes, bundle budget per route chunk, 2-second load on a 30-day range with mock latency | `feat/adm-081-qa-pass` | ADM-080 | — | DONE | REL-01; budgets recorded in `scripts/budget.json`. |
 | ADM-082 | Error tracking and source-map upload for release builds | `feat/adm-082-error-tracking` | ADM-005 | SRV-115 | BLOCKED | Tool selection (open item #4) and DSN — **user input**. |
@@ -247,6 +247,10 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 | ADM-090 | Branch-aware salon editing: hours, closures, services/prices and staff per branch; move staff between branches | `feat/adm-090-branch-editing` | ADM-089 | SRV-141, SRV-147 | DONE |  |
 | ADM-091 | Branch filter and column across bookings, reviews, members/staff, transactions, refunds, ledger and exports; booking and review detail show the branch | `feat/adm-091-branch-filters` | ADM-088 | SRV-145, SRV-146, SRV-147 | DONE |  |
 | ADM-092 | Branches QA: every branch screen against the real server, AR/EN, light/dark, desktop/phone | `feat/adm-092-branches-qa` | ADM-089, ADM-090, ADM-091 | SRV-148 | DONE |  |
+| ADM-093 | Catalog request approval can map to an existing catalog service (SRV-125) instead of always creating a new one | `feat/adm-093-catalog-map-existing` | ADM-079 | SRV-125 | DONE | Gap G13 from ADM-079 (`docs/REMOTE_DEV_GAPS.md`). |
+| ADM-094 | Export menu on the customers and salons lists (export kinds `CUSTOMERS`, `SALONS`, SRV-126) | `feat/adm-094-list-exports` | ADM-079 | SRV-126 | DONE | Gap G14 from ADM-079. |
+| ADM-095 | Booking list/detail show the request time `requestedAt` (12-hour, Asia/Amman) | `feat/adm-095-booking-requested-at` | ADM-079 |  | DONE | Gap G15 from ADM-079. |
+| ADM-096 | Re-sync the admin contract 1.5.0 after SRV-151 (`npm run api:sync`): correct id patterns (drop `data/api/objectId.ts` re-checks), branch status messages, gate + browser check of affected screens | `feat/adm-096-contract-sync` | ADM-095 | SRV-151 | TODO |  |
 
 ---
 ## 5. Traceability matrix (nothing in the PRD or BRD is left without a task)

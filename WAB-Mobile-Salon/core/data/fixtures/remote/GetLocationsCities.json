@@ -1,0 +1,54 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "6ad8670c9e63b9a6a612d484",
+      "name": "Amman"
+    },
+    {
+      "id": "6ad8670d9e63b9a6a612d485",
+      "name": "Irbid"
+    },
+    {
+      "id": "6ad8670d9e63b9a6a612d486",
+      "name": "Zarqa"
+    },
+    {
+      "id": "6ad8670d9e63b9a6a612d487",
+      "name": "Aqaba"
+    },
+    {
+      "id": "6ad8670e9e63b9a6a612d488",
+      "name": "Salt"
+    },
+    {
+      "id": "6ad8670e9e63b9a6a612d489",
+      "name": "Madaba"
+    },
+    {
+      "id": "6ad8670e9e63b9a6a612d48a",
+      "name": "Jerash"
+    },
+    {
+      "id": "6ad8670e9e63b9a6a612d48b",
+      "name": "Ajloun"
+    },
+    {
+      "id": "6ad8670f9e63b9a6a612d48c",
+      "name": "Karak"
+    },
+    {
+      "id": "6ad8670f9e63b9a6a612d48d",
+      "name": "Tafilah"
+    },
+    {
+      "id": "6ad867109e63b9a6a612d48e",
+      "name": "Ma'an"
+    },
+    {
+      "id": "6ad867109e63b9a6a612d48f",
+      "name": "Mafraq"
+    }
+  ]
+}

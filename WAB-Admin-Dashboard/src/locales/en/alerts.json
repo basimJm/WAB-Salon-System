@@ -14,7 +14,8 @@
       "SUBSCRIPTION_EXPIRED": "Subscription expired",
       "SALON_APPLICATION": "New salon application",
       "REVIEW_PENDING": "Review waiting",
-      "CATALOG_REQUEST": "Catalog request"
+      "CATALOG_REQUEST": "Catalog request",
+      "SALON_DELETION_REQUEST": "Salon deletion request"
     }
   }
 }

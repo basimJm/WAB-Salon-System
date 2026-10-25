@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "35e81479b86d80013a67655b",
+      "periodFrom": "2026-09-26T09:30:00.000Z",
+      "periodTo": "2026-10-11T17:08:44.887Z",
+      "gross": "75.600",
+      "fees": "2.268",
+      "refunds": "0.000",
+      "adjustments": "0.000",
+      "net": "73.332",
+      "status": "TRANSFERRED",
+      "transferredAt": "2026-10-13T17:08:44.887Z",
+      "transferReference": "DEMO-TRF-67655B"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 1
+  }
+}

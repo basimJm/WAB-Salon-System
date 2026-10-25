@@ -1,0 +1,59 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "weeklySchedule": [
+      {
+        "day": "SAT",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "SUN",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "MON",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "TUE",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "WED",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "THU",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      },
+      {
+        "day": "FRI",
+        "isOff": true,
+        "open": "09:00",
+        "close": "18:00"
+      }
+    ],
+    "closures": [],
+    "today": {
+      "date": "2026-10-25",
+      "isClosed": true,
+      "closedReason": null,
+      "open": null,
+      "close": null,
+      "isOpenNow": false
+    }
+  }
+}

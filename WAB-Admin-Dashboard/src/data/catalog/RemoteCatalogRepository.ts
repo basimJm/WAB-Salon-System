@@ -1,5 +1,7 @@
+import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
+import { OBJECT_ID } from '@/data/api/objectId';
 import { defined, resource } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
@@ -16,9 +18,14 @@ const listRequests = defineEndpoint(OPERATIONS.getCatalogRequests, {
   data: dto.getCatalogRequestsDataSchema,
   query: dto.getCatalogRequestsQuerySchema,
 });
+/** The generated union's `catalogServiceId` pattern refuses every real id (S6): re-checked with OBJECT_ID. */
+export const approveBodySchema = () => {
+  const [map, create] = dto.postCatalogRequestsByIdApproveBodySchema().options;
+  return z.union([map.extend({ catalogServiceId: OBJECT_ID }), create]);
+};
 const approveRequest = defineEndpoint(OPERATIONS.postCatalogRequestsByIdApprove, {
   data: dto.postCatalogRequestsByIdApproveDataSchema,
-  body: dto.postCatalogRequestsByIdApproveBodySchema,
+  body: approveBodySchema,
 });
 const rejectRequest = defineEndpoint(OPERATIONS.postCatalogRequestsByIdReject, {
   data: dto.postCatalogRequestsByIdRejectDataSchema,

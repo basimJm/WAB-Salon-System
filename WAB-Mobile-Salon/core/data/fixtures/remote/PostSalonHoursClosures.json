@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "message": "Created successfully.",
+  "data": {
+    "id": "6ade4973c2cfb0cb993a17b6",
+    "from": "2027-01-13",
+    "to": "2027-01-13",
+    "reason": "MER-054 contract capture (throwaway, please ignore)",
+    "editable": true
+  }
+}

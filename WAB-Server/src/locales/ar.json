@@ -24,6 +24,8 @@
   "errors.BRANCH_LIMIT_REACHED": "وصلت إلى الحد الأقصى لعدد الفروع.",
   "errors.BRANCH_HAS_UPCOMING_BOOKINGS": "لا يمكن إغلاق الفرع لوجود حجوزات قادمة.",
   "errors.LAST_BRANCH": "لا يمكن إغلاق آخر فرع للصالون.",
+  "branches.invalidStatus": "هذا الإجراء غير مسموح لحالة الفرع الحالية.",
+  "branches.mainCannotClose": "لا يمكن إغلاق الفرع الرئيسي. اختر فرعاً رئيسياً آخر أولاً.",
   "errors.BRANCH_SCOPE_DENIED": "لا تملك صلاحية على هذا الفرع.",
   "errors.SALON_CLOSED": "الصالون مغلق في التاريخ المحدد.",
   "errors.GENDER_MISMATCH": "الحجز لا يتوافق مع نوع الصالون.",

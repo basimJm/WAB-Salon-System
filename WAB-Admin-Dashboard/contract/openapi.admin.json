@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.0.0"
+    "version": "1.3.0"
   },
   "servers": [
     {
@@ -12828,67 +12828,91 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
+                "anyOf": [
+                  {
                     "type": "object",
                     "properties": {
-                      "ar": {
+                      "catalogServiceId": {
                         "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200
+                        "pattern": "^[a-f0-9]{24}$/i"
                       },
-                      "en": {
+                      "reason": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 200
+                        "maxLength": 1000
                       }
                     },
                     "required": [
-                      "ar",
-                      "en"
-                    ]
+                      "catalogServiceId",
+                      "reason"
+                    ],
+                    "additionalProperties": false
                   },
-                  "description": {
+                  {
                     "type": "object",
                     "properties": {
-                      "ar": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 500
+                      "name": {
+                        "type": "object",
+                        "properties": {
+                          "ar": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "en": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          }
+                        },
+                        "required": [
+                          "ar",
+                          "en"
+                        ]
                       },
-                      "en": {
+                      "description": {
+                        "type": "object",
+                        "properties": {
+                          "ar": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500
+                          },
+                          "en": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500
+                          }
+                        },
+                        "required": [
+                          "ar",
+                          "en"
+                        ]
+                      },
+                      "imageKey": {
+                        "type": "string",
+                        "maxLength": 1024,
+                        "pattern": "^[A-Za-z0-9_-]+(\\/[A-Za-z0-9._-]+)*$"
+                      },
+                      "sortOrder": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000,
+                        "default": 0
+                      },
+                      "reason": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 500
+                        "maxLength": 1000
                       }
                     },
                     "required": [
-                      "ar",
-                      "en"
-                    ]
-                  },
-                  "imageKey": {
-                    "type": "string",
-                    "maxLength": 1024,
-                    "pattern": "^[A-Za-z0-9_-]+(\\/[A-Za-z0-9._-]+)*$"
-                  },
-                  "sortOrder": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 100000,
-                    "default": 0
-                  },
-                  "reason": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 1000
+                      "name",
+                      "description",
+                      "reason"
+                    ],
+                    "additionalProperties": false
                   }
-                },
-                "required": [
-                  "name",
-                  "description",
-                  "reason"
                 ]
               }
             }
@@ -16238,6 +16262,10 @@
                           "respondBy": {
                             "type": "string"
                           },
+                          "requestedAt": {
+                            "type": "string",
+                            "description": "When the customer sent the request"
+                          },
                           "personsCount": {
                             "type": "number"
                           },
@@ -16343,6 +16371,7 @@
                           "appointmentStart",
                           "appointmentEnd",
                           "respondBy",
+                          "requestedAt",
                           "personsCount",
                           "total",
                           "salon",
@@ -16495,6 +16524,10 @@
                         },
                         "respondBy": {
                           "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string",
+                          "description": "When the customer sent the request"
                         },
                         "personsCount": {
                           "type": "number"
@@ -16805,6 +16838,7 @@
                         "appointmentStart",
                         "appointmentEnd",
                         "respondBy",
+                        "requestedAt",
                         "personsCount",
                         "total",
                         "salon",
@@ -21168,7 +21202,8 @@
                 "SUBSCRIPTION_EXPIRED",
                 "SALON_APPLICATION",
                 "REVIEW_PENDING",
-                "CATALOG_REQUEST"
+                "CATALOG_REQUEST",
+                "SALON_DELETION_REQUEST"
               ]
             },
             "required": false,
@@ -21225,7 +21260,8 @@
                               "SUBSCRIPTION_EXPIRED",
                               "SALON_APPLICATION",
                               "REVIEW_PENDING",
-                              "CATALOG_REQUEST"
+                              "CATALOG_REQUEST",
+                              "SALON_DELETION_REQUEST"
                             ]
                           },
                           "severity": {
@@ -21539,7 +21575,8 @@
                             "SUBSCRIPTION_EXPIRED",
                             "SALON_APPLICATION",
                             "REVIEW_PENDING",
-                            "CATALOG_REQUEST"
+                            "CATALOG_REQUEST",
+                            "SALON_DELETION_REQUEST"
                           ]
                         },
                         "severity": {
@@ -22937,6 +22974,123 @@
                       "format",
                       "params"
                     ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "CUSTOMERS"
+                        ]
+                      },
+                      "format": {
+                        "type": "string",
+                        "enum": [
+                          "XLSX",
+                          "CSV",
+                          "PDF"
+                        ]
+                      },
+                      "params": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "ACTIVE",
+                              "BLOCKED",
+                              "DELETION_PENDING",
+                              "DELETED"
+                            ]
+                          },
+                          "gender": {
+                            "type": "string",
+                            "enum": [
+                              "MALE",
+                              "FEMALE"
+                            ]
+                          },
+                          "cityId": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{24}$/i"
+                          },
+                          "q": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "format",
+                      "params"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "SALONS"
+                        ]
+                      },
+                      "format": {
+                        "type": "string",
+                        "enum": [
+                          "XLSX",
+                          "CSV",
+                          "PDF"
+                        ]
+                      },
+                      "params": {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "APPLICATION_PENDING",
+                              "APPLICATION_REJECTED",
+                              "APPROVED_INCOMPLETE",
+                              "LIVE",
+                              "OFFLINE"
+                            ]
+                          },
+                          "gender": {
+                            "type": "string",
+                            "enum": [
+                              "MALE",
+                              "FEMALE"
+                            ]
+                          },
+                          "cityId": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{24}$/i"
+                          },
+                          "subscription": {
+                            "type": "string",
+                            "enum": [
+                              "TRIAL",
+                              "ACTIVE",
+                              "EXPIRED"
+                            ]
+                          },
+                          "q": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "format",
+                      "params"
+                    ]
                   }
                 ]
               }
@@ -22974,7 +23128,9 @@
                             "REPORT_MONTHLY",
                             "TRANSACTIONS",
                             "AUDIT_LOGS",
-                            "BOOKINGS"
+                            "BOOKINGS",
+                            "CUSTOMERS",
+                            "SALONS"
                           ]
                         },
                         "format": {
@@ -23186,7 +23342,9 @@
                               "REPORT_MONTHLY",
                               "TRANSACTIONS",
                               "AUDIT_LOGS",
-                              "BOOKINGS"
+                              "BOOKINGS",
+                              "CUSTOMERS",
+                              "SALONS"
                             ]
                           },
                           "format": {
@@ -23386,7 +23544,9 @@
                             "REPORT_MONTHLY",
                             "TRANSACTIONS",
                             "AUDIT_LOGS",
-                            "BOOKINGS"
+                            "BOOKINGS",
+                            "CUSTOMERS",
+                            "SALONS"
                           ]
                         },
                         "format": {

@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "message": "Created successfully.",
+  "data": {
+    "id": "6ade49a2c2cfb0cb993a17bb",
+    "catalogServiceId": "6ade371b5f4a5f519f5857d5",
+    "name": "Haircut",
+    "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/haircut.jpg",
+    "price": "10.000",
+    "durationMinutes": 30,
+    "brideOnly": false,
+    "extraDescription": null,
+    "mediaUrls": [],
+    "active": true
+  }
+}
