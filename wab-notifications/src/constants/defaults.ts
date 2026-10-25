@@ -4,7 +4,7 @@ export type Environment = (typeof ENVIRONMENTS)[number];
 
 export const PUSH_PROVIDERS = ['fake', 'fcm', 'custom'] as const;
 export type PushProviderName = (typeof PUSH_PROVIDERS)[number];
-export const EMAIL_PROVIDERS = ['fake', 'smtp', 'custom'] as const;
+export const EMAIL_PROVIDERS = ['fake', 'smtp', 'brevo', 'custom'] as const;
 export type EmailProviderName = (typeof EMAIL_PROVIDERS)[number];
 
 export const PUSH_APPS = ['CUSTOMER', 'MERCHANT'] as const;
@@ -50,7 +50,16 @@ export const DEFAULT_IDEMPOTENCY = {
   keyPrefix: 'wab:notifications:idem:',
 } as const;
 
-export const DEFAULT_TIMEOUTS = { fcmMs: 10_000, smtpMs: 15_000 } as const;
+export const DEFAULT_TIMEOUTS = { fcmMs: 10_000, smtpMs: 15_000, httpEmailMs: 15_000 } as const;
+
+/** Brevo transactional email HTTP API (NOT-012); `baseUrl` is overridable (local mock in dev). */
+export const DEFAULT_BREVO = {
+  baseUrl: 'https://api.brevo.com/v3',
+  sendPath: '/smtp/email',
+  apiKeyHeader: 'api-key',
+  jsonContentType: 'application/json',
+} as const;
+export const HTTPS_PROTOCOL = 'https:';
 export const DEFAULT_SMTP = { port: 587, secureOnPort: 465 } as const;
 export const DEFAULT_BRAND_NAME = 'WAB';
 export const DEFAULT_BRAND_COLOR = '#6D28D9';

@@ -150,6 +150,37 @@ describe('resolveConfig — prod rules', () => {
       ),
     ).toEqual(['email.smtp.user/pass (required in prod)']);
   });
+  it('Brevo: needs a sender and an API key; prod refuses a non-https base URL', () => {
+    const brevo = { apiKey: 'key' };
+    expect(() => resolveConfig(prod({ email: { provider: 'brevo', from, brevo } }))).not.toThrow();
+    expect(() =>
+      resolveConfig(
+        prod({
+          email: { provider: 'brevo', from, brevo: { ...brevo, baseUrl: 'https://x.test/v3' } },
+        }),
+      ),
+    ).not.toThrow();
+    expect(
+      fieldsOf(
+        prod({ email: { provider: 'brevo', from, brevo: { ...brevo, baseUrl: 'http://x.test' } } }),
+      ),
+    ).toEqual(['email.brevo.baseUrl (https is required in prod)']);
+    expect(fieldsOf(dev({ email: { provider: 'brevo', from, brevo: { apiKey: '' } } }))).toEqual([
+      'email.brevo',
+    ]);
+    expect(
+      fieldsOf(dev({ email: { provider: 'brevo', from: { name: 'W', address: 'x' }, brevo } })),
+    ).toEqual(['email.from']);
+    // Dev may point at a local mock over plain http.
+    expect(() =>
+      resolveConfig(
+        dev({
+          email: { provider: 'brevo', from, brevo: { ...brevo, baseUrl: 'http://localhost:4010' } },
+        }),
+      ),
+    ).not.toThrow();
+  });
+
   it('allows custom adapters (any third party) in prod', () => {
     const push = {
       provider: 'custom',
