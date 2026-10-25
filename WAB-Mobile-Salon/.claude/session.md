@@ -19,6 +19,7 @@
   - [x] The owner's request card names the branch (MER-063)
 - Tests: `BranchScopeTest` (+1, `accepts` / `memberScope`), `BookingRequestsViewModelTest` (+1), `RealtimeAccountEventsTest` (+1); domain / bookings / composeApp host tests + `assembleDevDebug` green; policy ok
 - Loops: 1/1 — batch 11 run (MER-066 alone, last row): policy ok, `testAndroidHostTest` all modules 151 suites / 514 tests / 0 failures, `:androidApp:assembleDevDebug` green; criteria re-checked against the diff
+- Final gate (2026-10-25): `scripts/ci/run_local_checks.sh` exit 0 — policy tests + checks, contract, detekt, unit tests, every Android variant + lint, iOS Debug/Release × Dev/Prod, Kotlin/Native tests. Two earlier runs failed on the machine, not the code: the disk filled up (R8 cache write), which left a half-built iOS release framework; outputs removed and rebuilt. Lint fixes from the gate committed (`BranchPicker` parameter order, `toUri`).
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — small, defensive change on top of the server routing; no new dependency; the socket renew is limited to live connections. DEVIATIONS: socket payloads and push data carry no `branchId` (server), so branch filtering happens after the details fetch; iOS alerts are shown by APNs before the app runs (no notification service extension), so an already-sent push for another branch cannot be suppressed there — the server routes them per branch; UI check deferred to the end-of-backlog journey.
 
 ### MER-065 — Team with branches
