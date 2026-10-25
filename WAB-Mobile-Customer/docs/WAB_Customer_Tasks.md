@@ -128,6 +128,18 @@
 | CUS-080 | iOS dev API base URL escaped in xcconfig (`//` = comment) + iOS dev on the real dev server | `fix/cus-080-ios-dev-api-url` | CUS-079 | IN REVIEW | Owner report 2026-10-22 |
 | CUS-081 | Liquid Glass (iOS 26 style) across the app: `AppGlassSurface` base primitive, glass tokens light/dark, cards, fields, buttons, tabs, floating tab bar + rail | `feat/cus-081-liquid-glass` | CUS-080 | DONE | Owner request 2026-10-22 |
 
+## Phase 6 — Salon branches
+Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2, §5.16–§5.18, §6, §12.7).
+
+| ID | Task | Branch | Needs | Status | Notes |
+|---|---|---|---|---|---|
+| CUS-082 | `./gradlew apiSync` with branches: `Branch` model, branch on salon details, drafts and bookings, branch error codes (AR/EN) | `feat/cus-082-branches-contract` | CUS-081, SRV-148 | BLOCKED | Waits for the server contract. |
+| CUS-083 | Search and filtered lists: one card per salon (never per branch) with the nearest branch's distance/area and "N branches" | `feat/cus-083-search-branches` | CUS-082, SRV-144 | BLOCKED | §5.17. |
+| CUS-084 | Nearest section and map: one entry per branch titled "Salon - Branch" (e.g. Hifa Salon - Mecca Street); single-branch salons show the salon name | `feat/cus-084-nearest-branches` | CUS-082, SRV-144 | BLOCKED | §5.17. |
+| CUS-085 | Salon details: clear, always-visible branch selector; branch address, map, phone, hours, open now; staff and services/prices per selected branch; reviews salon-wide with the branch label on each | `feat/cus-085-details-branches` | CUS-082, SRV-144, SRV-145 | BLOCKED | §5.17; RTL/LTR, light/dark, portrait/landscape. |
+| CUS-086 | Booking step 1 = choose branch (skipped when one bookable branch); services, staff and slots of that branch; summary shows the branch; a deep link with `branchId` preselects it | `feat/cus-086-booking-branch` | CUS-085, SRV-142 | BLOCKED | §5.18. |
+| CUS-087 | Bookings list/details, notifications and the review flow show the branch (name + address); review attaches the branch | `feat/cus-087-bookings-branch` | CUS-086, SRV-145 | BLOCKED | |
+
 ## 4. Traceability (PRD screen → task)
 S01 CUS-025 · S02 CUS-026 · S03 CUS-032 · S04 CUS-033 · S05 CUS-034 · S06 CUS-035 · S07 CUS-036/037 · S08/S09 CUS-038 · S10 CUS-039 · S11 CUS-028 · S12 CUS-030 · S13 CUS-029 · S14 CUS-041 · S15 CUS-042 · S16 CUS-043…047 · S17 CUS-048 · S18 CUS-049 · S19 CUS-050 · S20 CUS-040 · S21 CUS-053 · S22 CUS-054 · S23 CUS-055 · S24 CUS-024 · §3 global rules CUS-006/018/020/021/022 · §4 CUS-026/057 · §5 CUS-011 · §10 CUS-050/051 · §14 CUS-012/058 · §15 CUS-011.
 
