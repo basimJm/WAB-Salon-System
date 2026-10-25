@@ -9,6 +9,17 @@
 
 ## Current task
 
+### MER-069 — Sign-in keeps the member's `branchId`
+- Branch: `fix/mer-069-signin-branch`
+- Branched: (from `origin/merchant`)
+- Status: IN REVIEW
+- Acceptance criteria (backlog MER-069; SRV-149 member `branchId`; BUSINESS_DOMAIN §6 branch scope; found reviewing MER-068):
+  - [x] `MemberDto.toDomain()` (sign-in) maps `branchId` with the token-refresh rule: none for the owner, blank = none
+  - [x] A manager / employee is `MemberScope.OneBranch(branchId)` from sign-in (was `OneBranch(null)` = every branch passed the client filters until a refresh)
+- Tests: `AuthMappersTest` (+3: branch member scope, owner ignores a branch id, blank id); `./gradlew testAndroidHostTest` 178 suites / 581 tests / 0 failures; `policy_checks.py all: ok`
+- Loops: 1/1 — re-checked both criteria against the refresh mapper (`RemoteTokenRefreshApi.toProfile`), the session store (persists `branchId`) and the fresh test report (new cases present)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — data-layer mapper only, same rule as refresh, no new strings; the server already enforced branch scope, so this aligns the client filters. DEVIATIONS: not run on a device (needs a branch member sign-in: local stack only, real OTP is owner-gated); full gate follows in the end-of-backlog run.
+
 ### MER-068 — Re-sync the merchant contract 1.4.0 after SRV-151
 - Branch: `feat/mer-068-contract-sync`
 - Branched: (from `origin/merchant`)
@@ -38,19 +49,3 @@
 - Loops: 1/1 — re-checked each criterion against the rebuilt dylib (new `bookingRequestCategory` symbol present), three simulator launches (AR, EN, AR) and the crash-report folder (last report 22:25, before the fix)
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — minimal change in the iOS shell layer only; no new strings/constants in app code; Android untouched; no other iosMain call passes a suspend result inside an Objective-C argument list (only `getString` user in iosMain). DEVIATIONS: no detekt / full gate (batched rule, lead runs it); the language switch was done by writing the stored preference (the maintenance screen has no language toggle), so the live in-process re-registration on a language change was not exercised; the notification's Accept / Reject buttons were not opened (simulated long-press did not expand the alert); the unit test cannot reproduce the native use-after-free itself, the simulator launch is the proof.
 - Notes: K/N gotcha — never call a suspend function inside the argument list of an Objective-C call; load values first.
-
-### MER-054 — Dev builds on the remote dev API: gap list, socket events, permission filtering
-- Branch: `feat/mer-054-remote-dev`
-- Branched: (from `origin/merchant`)
-- Status: IN PROGRESS
-- Acceptance criteria (backlog MER-054; contract `openapi.merchant.json` 1.3.0; BUSINESS_DOMAIN §6 permissions / branch scope, §7 rooms + events, §11 codes; customer CUS-060 pattern):
-  - [x] Dev builds `remote` on Android (`DEV_DATA_SOURCE`) and iOS (`Dev.xcconfig` `DATA_SOURCE`), same host (`test_dev_remote_config.py`); prod stays remote
-  - [x] Real responses for 87 / 94 operations the app calls (+ 9 related) in `core/data/fixtures/remote` (`capture_remote_fixtures.py` + `capture_flows.py` + `capture_edits.py`: public GETs from the hosted dev API, the rest from the local stack on throwaway records; tokens / signed URLs redacted); the 7 not capturable are listed (gap #12)
-  - [x] `contract_gaps.py` (allOf merged): 0 breaking gaps, 6 undeclared fields; `api_sync.py` embeds captures in `MockFixtures` (+ `captured`) and generates `ContractDecoders` (nullable `data` → `T?`); `ContractFixturesTest` + per-feature `Real*Fixture(s)Test`
-  - [x] Socket events and permission filtering verified on the local stack (owner / Khalda manager / Khalda employee / other salon; 26 REST probes all as expected, `realtime_probe.mjs`)
-  - [x] Client gaps fixed: M09 policy snapshot shown as rules (`PolicyTerms` + `policyRuleText`, strings moved to the design system), duplicate socket deliveries (`withoutEchoes`), mock config fixture not in maintenance
-  - [x] `docs/REMOTE_DEV_GAPS.md` (15 rows: fixed / verified / server-side / open)
-- Tests: `ContractFixturesTest` (4), `RealCoreFixturesTest` (2), `Real{Bookings 4, Team, Salon, Finance, Insights, Notifications, Application, Auth, Dashboard, Account 2}`, `PolicyTermsTest` (3), `RealtimeEchoesTest` (3), `BookingSignalsTest` (+1), `test_contract_gaps.py` (7), `test_api_sync.py` (+3), `test_dev_remote_config.py` (3); `./gradlew testAndroidHostTest` all modules 177 suites / 574 tests / 0 failures; policy `all: ok`; policy-script tests 99 OK; `api_sync --check` ok
-- Loops: 1/1 — re-checked every criterion against the capture reports (full run: 177 calls; checks-only run: 113 calls, 26/26 probes), the socket log and the host-test run; found and fixed during the loop: wrong probe expectations (ALREADY_HANDLED is 422, a manager's other-branch list is an empty 200, a main-branch booking is 404 for the manager, the branch request was booked on the wrong branch), nullable `data` decoders, two lines over 140
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — four-role reading of the diff: capture tools refuse non-local hosts for proofs and never send tokens to the hosted API; no hardcoded URL in app code (config only); the policy refactor moves enums / rules to core/domain and the text to the design system without behaviour change for M19 (salon tests green); echo filter per collection with a 1 s window (reassignment later still refreshes); AR + EN for the moved strings. DEVIATIONS: only host unit tests + policy ran (no detekt, no Android / iOS builds, no emulator / simulator: the lead runs the full gate, disk is tight); the hosted dev API was only read unauthenticated (authenticated flows verified on the local stack with the same server code); 7 operations not captured (gap #12); throwaway records left on the local QA stack (gap #14).
-- Notes: server-side items for the owner: merchant `maintenance.enabled = true` on the hosted dev API (#8), spec of `POST /salon/applications` member (#9), branch-close message (#10), ObjectId patterns (#11).
