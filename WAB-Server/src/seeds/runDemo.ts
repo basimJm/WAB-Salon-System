@@ -22,6 +22,8 @@ import { connectMongo, disconnectMongo } from '../utils/database/connection';
 import { ensureIndexes } from '../utils/database/indexes';
 import { createLogger, type Logger } from '../utils/logger';
 import { addDays, localDateOf } from '../utils/time';
+import { migrateSalonsToBranches } from '../domain/branches/migration';
+import { createMongoBranchMigrationStore } from '../domain/branches/migrationStore';
 import { loadDemoContext } from './demo/context';
 import { buildDemoDataset } from './demo/dataset';
 import { toDemoModel, writeDemoDataset } from './demo/writer';
@@ -78,8 +80,13 @@ const main = async (): Promise<void> => {
     const dataset = buildDemoDataset(context);
     const models = new Map(ALL_MODELS.map((model) => [model.modelName, toDemoModel(model)]));
     const written = await writeDemoDataset(dataset, models);
+    // Demo salons get their main branch the same way existing salons do (§5.16).
+    const branches = await migrateSalonsToBranches({
+      store: createMongoBranchMigrationStore(),
+      dryRun: false,
+    });
     const reports = await storeDailyReports(context.timeZone, context.now, logger);
-    logger.info({ reference, catalog, written, reports }, 'demo data seeded');
+    logger.info({ reference, catalog, written, branches, reports }, 'demo data seeded');
   } finally {
     await disconnectMongo();
   }

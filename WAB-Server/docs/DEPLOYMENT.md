@@ -25,6 +25,10 @@ ADMIN_EMAIL=… ADMIN_PASSWORD=… npm run seed:admin   # first admin (≥ 12 ch
 npm start                    # http://localhost:<PORT>/health  and  /ready
 ```
 
+### Salon branches migration (every environment, once)
+
+`npm run migrate:branches` reports what it would change; `npm run migrate:branches -- --apply` gives each salon without branches one main branch built from its current address, contacts, hours, services and staff, and sets `branchId` on its services, closures, members (not the owner), leaves, drafts, bookings (+ branch snapshot), transactions, refunds, ledger and reviews (BUSINESS_DOMAIN.md §5.16). Idempotent: run it again after a stop; linked salons are skipped. Run it on each database before deploying a release that reads branches. `seed:demo` runs it for the demo salons.
+
 ### Demo data (development databases only)
 
 `npm run seed:demo` fills every collection of a **development** database with linked sample data (refused when `NODE_ENV=production`): 10 salons in Amman in every state (6 live, offline, incomplete, pending, rejected) with owners, staff, services, hours, gallery, closures, leaves, policies and subscriptions; 24 customers; bookings over the last 4 weeks and the next 10 days in every status, with payments, refunds, ledger and payouts; reviews, favorites, notifications, banners, content pages, FAQs, contact info, app versions, campaigns, alerts, audit logs, exports and 14 daily reports. It needs `npm run seed:admin` first, runs the reference seed itself, and is insert-only and deterministic: a second run adds nothing and never overwrites what an admin changed. Not seeded on purpose: settings (missing = default), refresh tokens and booking drafts (short-lived sessions).
