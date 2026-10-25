@@ -1,0 +1,13 @@
+{
+  "Simulator Target Bundle": "com.fab.wab.merchant.dev",
+  "aps": {
+    "alert": { "title": "طلب حجز جديد", "body": "سارة · السبت 10:00 ص · 3 خدمات · 45 د.أ" },
+    "sound": "default",
+    "category": "BOOKING_REQUEST",
+    "interruption-level": "time-sensitive",
+    "relevance-score": 1.0,
+    "thread-id": "booking-requests"
+  },
+  "event": "booking.requested",
+  "bookingId": "b1"
+}

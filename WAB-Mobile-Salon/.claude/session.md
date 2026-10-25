@@ -9,6 +9,33 @@
 
 ## Current task
 
+### MER-030 — Real-time request outside the app, iOS
+- Branch: `feat/mer-029-request-android`
+- Branched: (shared with MER-029, owner request 2026-10-25 "and on iOS")
+- Status: DONE (PR into `merchant`)
+- Acceptance criteria (PRD M10 iOS; backlog MER-030):
+  - [x] Notification category `BOOKING_REQUEST` registered from Kotlin in the app language (re-registered on language change): Accept (background, no app launch) and Reject (opens the app)
+  - [x] Accept calls `POST /bookings/{id}/approve`; the outcome replaces the alert ("Booking accepted" / "handled by another team member" / "could not accept"); Reject and a tap open the booking (`/bookings/<id>` link) with the request sheet (reason picker); foreground pushes go to the in-app sheet (MER-028)
+  - [x] Time-sensitive: `com.apple.developer.usernotifications.time-sensitive` entitlement (both entitlement files) + payload `interruption-level: time-sensitive`; sample payload `iosApp/PushSamples/booking_request.apns` + README (`xcrun simctl push booted com.fab.wab.merchant.dev …`)
+  - [x] Simulator (iPhone 17 Pro): banner over the home screen, long-press shows قبول / رفض, Accept answered in the background ("تم قبول الحجز"), Reject opened the booking with the request sheet
+- Tests: `BookingRequestPushTest` (2, shared payload helpers); iOS framework compile + Debug-Dev build green
+- Loops: 1/1 — re-ran the simulator journey after the final build (push → actions → accept / reject)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — Swift change limited to routing `didReceive` to Kotlin; payload keys shared with Android. DEVIATIONS: depends on MER-012 / MER-004 for real APNs delivery (tested with `simctl push` only); default sound (no custom request sound file yet); the Time Sensitive capability must be enabled on the App IDs (owner, store accounts); no notification service extension (not needed: the alert text comes from the server).
+
+### MER-029 — Real-time request outside the app, Android
+- Branch: `feat/mer-029-request-android`
+- Branched: (from `origin/merchant`)
+- Status: DONE (PR into `merchant`)
+- Acceptance criteria (PRD M10 Android; backlog MER-029):
+  - [x] One entry for every trigger (`OutsideBookingRequests.onPush` from FCM data messages, debug trigger): foreground → in-app sheet; background + still PENDING → overlay card over any app when "display over other apps" is granted, else heads-up notification
+  - [x] Overlay (`TYPE_APPLICATION_OVERLAY` ComposeView with its own lifecycle, app theme / language): the M10 request card (shared `BookingRequestOverlayCard`), alert sound + vibration while shown, queue ("1 of 2") for requests arriving while open, Accept in place, Reject / View details open the booking (reason picker needs the app window), close = keep pending; `request_shown` channel `overlay`
+  - [x] Heads-up: high-importance "booking requests" channel (ringtone, vibration), Accept (background broadcast → approve → outcome notification incl. "handled by another team member") and Reject / tap (booking link), full-screen intent for a locked phone (`USE_FULL_SCREEN_INTENT`); `request_shown` / `request_accept` channel `notification`
+  - [x] Debug-only trigger (debug manifest): `adb shell am broadcast -a com.fab.wab.merchant.dev.DEBUG_BOOKING_REQUEST --es bookingId b1 -p com.fab.wab.merchant.dev`; mock mode marks the booking PENDING (`MockControls.markBookingPending`, inert on remote data)
+  - [x] Emulator (Pixel 4): overlay over another app (AR RTL), Accept → "Booking accepted" card, Done closes; overlay permission denied → heads-up with قبول / رفض, Accept from the shade → "تم قبول الحجز"
+- Tests: `BookingRequestPushTest` (2), `MockWorldTest` (+1 pending patch), `SwitchMockWorldUseCaseTest` (updated); batch run: policy ok, 472 host tests 0 failures, detekt 0, `assembleDevDebug` green
+- Loops: 1/1 — re-checked each criterion on the emulator after the final build
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — platform code in `composeApp/androidMain` + `androidApp` wiring, card shared with the in-app sheet, no new dependency. DEVIATIONS: backlog dependency MER-012 (FCM token registration, ← MER-004 owner Firebase) not done — tested with the debug trigger, real FCM delivery is MER-056; Android 14+ may downgrade the full-screen intent to heads-up unless the user allows it; the overlay Reject opens the app instead of an in-overlay reason picker (a Compose bottom sheet cannot open in an overlay window).
+
 ### MER-058 — Performance pass (measurements)
 - Branch: `feat/mer-058-performance`
 - Branched: (from `origin/merchant` after PR #363 merged MER-002…057)

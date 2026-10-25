@@ -76,6 +76,7 @@ fun createMockEngine(
             } else {
                 val body = if (scenarios.current.value == MockScenario.Empty) emptyData(fixture) else fixture
                 val patched = patchFixture(body, scenarios.salonState.value, scenarios.member.value)
+                    .let { patchPendingBooking(it, request.url.encodedPath, scenarios.pendingBookings.value) }
                 respond(localizeFixture(patched, language), HttpStatusCode.OK, json)
             }
         }

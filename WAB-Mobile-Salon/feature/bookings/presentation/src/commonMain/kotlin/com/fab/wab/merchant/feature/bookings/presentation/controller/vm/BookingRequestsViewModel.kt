@@ -45,6 +45,8 @@ class BookingRequestsDependencies(
     /** Name shown when the server does not say who handled the request. */
     val anotherMember: suspend () -> String,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    /** `request_shown` channel (PRD §14): in-app sheet, Android overlay or notification. */
+    val channel: String = BookingsAnalytics.CHANNEL_IN_APP,
 )
 
 /** PRD M10: de-duplicated by booking id, queued ("1 of 3"), accept / reject in place, "handled by" then dismiss. */
@@ -226,7 +228,7 @@ class BookingRequestsViewModel(
             AnalyticsAction(
                 BookingsAnalytics.ACTION_SHOWN,
                 analyticsParams {
-                    text(BookingsAnalytics.PARAM_CHANNEL, BookingsAnalytics.CHANNEL_IN_APP)
+                    text(BookingsAnalytics.PARAM_CHANNEL, deps.channel)
                     flag(BookingsAnalytics.PARAM_BRIDE, current.summary.hasBride)
                 },
             ),

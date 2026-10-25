@@ -19,6 +19,8 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- PRD M10: booking request overlay; requested with an explanation, never assumed (More → Settings). -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- PRD M10: the booking request wakes a locked phone (heads-up when the system does not allow it). -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
         android:name=".app.AndroidApp"
@@ -59,6 +61,11 @@
                     android:pathPrefix="/" />
             </intent-filter>
         </activity>
+
+        <!-- "Accept" on the booking-request notification (MER-029). -->
+        <receiver
+            android:name="com.fab.wab.merchant.app.request.RequestActionReceiver"
+            android:exported="false" />
 
         <service
             android:name=".firebase.MyFirebaseMessagingService"

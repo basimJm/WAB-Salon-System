@@ -79,7 +79,7 @@ internal fun BookingRequestSheet(state: UiState, onAction: (UiAction) -> Unit) {
 }
 
 @Composable
-private fun UiState.toSheet(): RequestSheetUi? {
+internal fun UiState.toSheet(): RequestSheetUi? {
     val accepted = acceptedReference
     if (accepted != null) return RequestSheetUi.Accepted(reference = accepted, hasNext = queue.isNotEmpty())
     val details = current ?: return null
@@ -118,7 +118,7 @@ private fun BookingDetails.toRequest(nowMs: Long): BookingRequestUi {
     )
 }
 
-private fun RequestSheetAction.toUiAction(): UiAction = when (this) {
+internal fun RequestSheetAction.toUiAction(): UiAction = when (this) {
     RequestSheetAction.Accept -> UiAction.OnAccept
     RequestSheetAction.Reject -> UiAction.OnReject
     RequestSheetAction.ViewDetails -> UiAction.OnViewDetails

@@ -1,5 +1,6 @@
 package com.fab.wab.merchant
 
+import com.fab.wab.merchant.app.request.IosBookingRequests
 import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.common.DataSource
 import kotlin.experimental.ExperimentalNativeApi
@@ -20,6 +21,7 @@ internal object InfoPlistKeys {
 
 internal fun iosAppEnvironmentModule(): Module = module {
     single { readIosAppEnvironment() }
+    single { IosBookingRequests(getKoin()) }
 }
 
 /** Fails fast with the missing key, so a misconfigured xcconfig is found on first launch, not as a blank URL later. */
