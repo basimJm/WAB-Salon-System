@@ -131,7 +131,7 @@ describe('Cities and areas', () => {
     expect(screen.getByText('Inactive')).toBeInTheDocument();
   });
 
-  it('an area is created under a real city id (the contract id pattern is repaired)', async () => {
+  it('an area is created under a real city id (generated id pattern, contract 1.5.0)', async () => {
     renderWithApp(
       <MemoryRouter>
         <AreasPage />

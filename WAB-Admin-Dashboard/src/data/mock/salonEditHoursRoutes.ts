@@ -1,5 +1,4 @@
-import { defineEndpoint } from '../api/endpoint';
-import { branchQuerySchema } from '../api/objectId';
+import { defineEndpoint, optionalQuery } from '../api/endpoint';
 import * as dto from '../contract/generated/dto';
 import { OPERATIONS } from '../contract/generated/operations';
 import { mockRoute } from './mockRoute';
@@ -30,13 +29,13 @@ export function salonHoursRoutes(
     mockRoute(
       defineEndpoint(O.getSalonsByIdHours, {
         data: dto.getSalonsByIdHoursDataSchema,
-        query: branchQuerySchema,
+        query: optionalQuery(dto.getSalonsByIdHoursQuerySchema),
       }),
       ({ params, query }) => ({ data: hoursView(of(params['id'], query.get('branchId'))) }),
     ),
     mockRoute(
       defineEndpoint(O.putSalonsByIdHours, {
-        query: branchQuerySchema,
+        query: optionalQuery(dto.putSalonsByIdHoursQuerySchema),
         data: dto.putSalonsByIdHoursDataSchema,
         body: dto.putSalonsByIdHoursBodySchema,
       }),
@@ -48,7 +47,7 @@ export function salonHoursRoutes(
     ),
     mockRoute(
       defineEndpoint(O.postSalonsByIdHoursPreview, {
-        query: branchQuerySchema,
+        query: optionalQuery(dto.postSalonsByIdHoursPreviewQuerySchema),
         data: dto.postSalonsByIdHoursPreviewDataSchema,
         body: dto.postSalonsByIdHoursPreviewBodySchema,
       }),
@@ -62,7 +61,7 @@ export function salonHoursRoutes(
     ),
     mockRoute(
       defineEndpoint(O.postSalonsByIdClosuresPreview, {
-        query: branchQuerySchema,
+        query: optionalQuery(dto.postSalonsByIdClosuresPreviewQuerySchema),
         data: dto.postSalonsByIdClosuresPreviewDataSchema,
         body: dto.postSalonsByIdClosuresPreviewBodySchema,
       }),
@@ -70,7 +69,7 @@ export function salonHoursRoutes(
     ),
     mockRoute(
       defineEndpoint(O.postSalonsByIdClosures, {
-        query: branchQuerySchema,
+        query: optionalQuery(dto.postSalonsByIdClosuresQuerySchema),
         data: dto.postSalonsByIdClosuresDataSchema,
         body: dto.postSalonsByIdClosuresBodySchema,
       }),
@@ -91,7 +90,7 @@ export function salonHoursRoutes(
     ),
     mockRoute(
       defineEndpoint(O.patchSalonsByIdClosuresByClosureId, {
-        query: branchQuerySchema,
+        query: optionalQuery(dto.patchSalonsByIdClosuresByClosureIdQuerySchema),
         data: dto.patchSalonsByIdClosuresByClosureIdDataSchema,
         body: dto.patchSalonsByIdClosuresByClosureIdBodySchema,
       }),
@@ -110,7 +109,7 @@ export function salonHoursRoutes(
     ),
     mockRoute(
       defineEndpoint(O.postSalonsByIdClosuresByClosureIdRemove, {
-        query: branchQuerySchema,
+        query: optionalQuery(dto.postSalonsByIdClosuresByClosureIdRemoveQuerySchema),
         data: dto.postSalonsByIdClosuresByClosureIdRemoveDataSchema,
         body: dto.postSalonsByIdClosuresByClosureIdRemoveBodySchema,
       }),

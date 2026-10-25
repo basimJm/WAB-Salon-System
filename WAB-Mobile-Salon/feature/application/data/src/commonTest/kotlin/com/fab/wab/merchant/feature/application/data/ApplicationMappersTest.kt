@@ -1,6 +1,8 @@
 package com.fab.wab.merchant.feature.application.data
 
 import com.fab.wab.merchant.core.data.contract.generated.GetSalonApplicationData
+import com.fab.wab.merchant.core.data.contract.generated.MemberProfile as MemberDto
+import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.domain.session.SalonState
 import com.fab.wab.merchant.feature.application.data.repository.toApplyBody
 import com.fab.wab.merchant.feature.application.data.repository.toDomain
@@ -34,5 +36,17 @@ class ApplicationMappersTest {
         assertEquals(SalonState.APPLICATION_PENDING, odd.state)
         assertNull(odd.submittedAt)
         assertNull(odd.rejectionReason)
+    }
+
+    @Test
+    fun applicationMemberIsTheSharedProfileWithAConservativeRoleFallback() {
+        // MER-068: contract 1.4.0 declares the application `member` as MemberProfile (SRV-151).
+        val owner = MemberDto("m1", "s1", "Lina", "Haddad", "+962791234567", "OWNER", listOf("DASHBOARD_VIEW"), false).toDomain()
+        assertEquals(MemberRole.OWNER, owner.role)
+        assertEquals("Lina", owner.firstName)
+        assertNull(owner.branchId)
+        val odd = MemberDto("m2", "s1", "X", "Y", "+962791234568", "SUPERUSER", emptyList(), true, branchId = "b1").toDomain()
+        assertEquals(MemberRole.EMPLOYEE, odd.role)
+        assertEquals("b1", odd.branchId)
     }
 }

@@ -5,16 +5,19 @@ import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
 
 type Kind = 'PAYMENT_FAILURE_SPIKE' | 'REFUND_FAILED' | 'SALON_APPLICATION';
+type Subject = dto.getAlertsData[number]['entityType'];
 const alert = (
   n: number,
   kind: Kind,
   severity: 'INFO' | 'WARNING' | 'CRITICAL',
-  entityType: string | null,
+  entityType: Subject,
 ) => ({
   id: `64c3${String(n).padStart(20, '0')}`,
   kind,
   severity,
+  // Contract 1.4.0+: `title` in the request language, `titles` in both (SRV-150).
   title: `Alert ${String(n)}`,
+  titles: { ar: `تنبيه ${String(n)}`, en: `Alert ${String(n)}` },
   entityType,
   entityId: entityType ? '64f000000000000000000001' : null,
   data: {} as Record<string, unknown>,
@@ -25,7 +28,7 @@ const alert = (
 });
 export const MOCK_ALERTS = [
   alert(1, 'PAYMENT_FAILURE_SPIKE', 'CRITICAL', null),
-  // Subjects spelled like the real server (UPPER_SNAKE entity types, ADM-079).
+  // Subjects as the contract enum (UPPER_SNAKE, SRV-150).
   alert(2, 'REFUND_FAILED', 'WARNING', 'REFUND'),
   alert(3, 'SALON_APPLICATION', 'INFO', 'SALON'),
 ];
