@@ -4,10 +4,71 @@
 
 ## Integration status (one glance)
 - Scaffolded (MER-001) with `KMP_TEMPLATE` from the customer app: all modules, design system + Liquid Glass, sample feature; rules copied in MER-003 (until then `WAB-Mobile-Customer/CLAUDE.md` applies).
-- Will consume `/merchant/v1` (71 ops); 6 server gaps (SRV-129…134) block MER-042/043/049/050; MER-004 Firebase registrations = owner.
+- Consumes `/merchant/v1` (merchant contract 1.3.0: dashboard, reviews, statistics, my account consumed by MER-050/042/043/049); MER-004 Firebase registrations = owner.
 - Real-time booking requests: socket + FCM data message, Android overlay / iOS time-sensitive actions (MER-012, MER-028…030).
 
 ## Current task
+
+### MER-049 — More M25 part 2: my account, push switch, delete my account
+- Branch: `feat/mer-049-my-account`
+- Branched: (from `feat/mer-043-statistics`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD M25, §14 `delete_request`; operations `GET/PATCH /me`, `POST /auth/change-phone`, `PATCH /installations/push-enabled`, `POST /me/leave`, `POST /salon/deletion-request`):
+  - [x] `feature/more` gets its domain (`MyAccount`, `PhotoChange`, `AccountRepository`, name rules 1..50) and data (`AccountApi`, PATCH body built as JSON so `photoKey: null` removes the photo; hand fixtures for `/me` and change-phone because the generated one is `data: null`)
+  - [x] More header shows the member's photo and opens My account (`Screen.MyAccount`): photo (pick → 1:1 crop → MEMBER_PHOTO upload, remove), first / last name, phone (read-only) + "Change phone" sheet (country + number validated by the server regex) → OTP to the new number (purpose CHANGE_PHONE) → back on resume the proof is used once for `POST /auth/change-phone` (409 `PHONE_ALREADY_REGISTERED` shown localized), role badge; save only when changed; the session's first name follows the server
+  - [x] Push switch is now the server's (`PATCH /installations/push-enabled`, optimistic, rolled back with an error banner); More reads `/me` on open and aligns the local switch
+  - [x] Delete my account: members confirm "Remove my access" → `POST /me/leave` → everything cleared (`SessionStore.clearAll`) → login; the owner gets a sheet explaining WAB will contact them, optional note (≤ 500) → `POST /salon/deletion-request` → "Request sent on {date}"; `delete_request` (kind) tracked and added to the required PRD events
+- Tests: `AccountTest` (1), `AccountMapperTest` (2), `MyAccountViewModelTest` (2), `MoreViewModelTest` (+2 push rollback, deletion / leave); more + composeApp host tests green; policy ok
+- Loops: 1/1 — batch 12 run (MER-050, 042, 043, 049): policy ok, `testAndroidHostTest` all modules 163 suites / 547 tests / 0 failures (after fixing `BookingMappersTest` for the new required `requestedAt`); full gate `scripts/ci/run_local_checks.sh`: policy tests (86) + checks, contract, detekt (0 after wrapping 17 long lines and the `MoreDependencies` parameter count), unit tests + 4 Android variants + lint green, iOS Debug-Dev / Release-Dev green; the machine's disk filled during Debug-Prod, so Debug-Prod, Release-Prod and the Kotlin/Native tests were re-run one by one after removing this worktree's build outputs: all green; criteria re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 12 code reading of the four commits: one call per screen, permission-gated blocks hidden (not disabled), owner-only branch filters, AR + EN for every key, tokens only, files < 300 lines, mock fixtures for every new endpoint; fixed during review: contract regeneration broke a bookings mapper test, detekt findings. DEVIATION: UI not exercised on emulator / simulator (rules §3.13 end-of-backlog journey); no screen previews (feature modules have none).
+- Notes: the owner never calls `/me/leave` (the button sends the deletion request instead), so `LAST_OWNER` cannot come from the UI.
+
+### MER-043 — Statistics M21
+- Branch: `feat/mer-043-statistics`
+- Branched: (from `feat/mer-042-reviews`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD M21, §14 `statistics_view`; operation `GET /statistics?from&to&branchId` (STATISTICS_VIEW, civil days, max 92); design 07 `on.stats`):
+  - [x] `Screen.Statistics` in `feature/insights`; salon hub tile STATISTICS registered; Home quick stats "View all" opens it (STATISTICS_VIEW only)
+  - [x] Period selector Today / Week (Saturday-first) / Month / Custom (from / to pickers, ordered, at most 92 days, never after today, Asia/Amman dates); owner branch switcher (`?branchId=`)
+  - [x] KPIs: bookings, approval / cancellation / no-show rates (percent, one decimal, "—" when null), average response minutes, bride bookings, profile views, new reviews, average rating; revenue card (total, online, at salon, JOD); bookings by status
+  - [x] Charts: bookings per day / revenue per day (switch), one bar per day scaled to the busiest day, day numbers up to 14 days, a11y description per bar; rankings: top services (bookings), top staff (bookings, rating)
+  - [x] Shimmer, "No data for this period" empty state, error + retry, pull-to-refresh (a failed refresh keeps the figures); `statistics_view` (period, days) per load, `statistics_chart`; mock fixture with a full week
+- Tests: `StatisticsTest` (3), `StatisticsMapperTest` (2), `StatisticsViewModelTest` (2), `HomeViewModelTest` (updated: statistics link + permission); insights + home + salon + composeApp host tests green; policy ok
+- Loops: 1/1 — batch 12 run (MER-050, 042, 043, 049): policy ok, `testAndroidHostTest` all modules 163 suites / 547 tests / 0 failures (after fixing `BookingMappersTest` for the new required `requestedAt`); full gate `scripts/ci/run_local_checks.sh`: policy tests (86) + checks, contract, detekt (0 after wrapping 17 long lines and the `MoreDependencies` parameter count), unit tests + 4 Android variants + lint green, iOS Debug-Dev / Release-Dev green; the machine's disk filled during Debug-Prod, so Debug-Prod, Release-Prod and the Kotlin/Native tests were re-run one by one after removing this worktree's build outputs: all green; criteria re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 12 code reading of the four commits: one call per screen, permission-gated blocks hidden (not disabled), owner-only branch filters, AR + EN for every key, tokens only, files < 300 lines, mock fixtures for every new endpoint; fixed during review: contract regeneration broke a bookings mapper test, detekt findings. DEVIATION: UI not exercised on emulator / simulator (rules §3.13 end-of-backlog journey); no screen previews (feature modules have none).
+- Notes: the bars are drawn with plain boxes (no chart library added); in RTL the days run right to left like the rest of the layout.
+
+### MER-042 — Reviews M20
+- Branch: `feat/mer-042-reviews`
+- Branched: (from `feat/mer-050-home-dashboard`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD M20, §14 `review_report`; operation `GET /reviews?target&memberId&branchId&page&pageSize` (REVIEWS_VIEW); design 07 `on.reviews`):
+  - [x] New `feature/insights` (domain / data / presentation / di) with `Screen.Reviews`; salon hub tile REVIEWS registered; `review.*` notifications now open M20
+  - [x] Tabs Salon | Staff; staff selector chips ("All staff" + the staff seen in the loaded reviews) send `memberId`; header card: average (one decimal), stars, count (AR plurals), distribution bars 5 → 1
+  - [x] Paginated published reviews (20 per page, `meta.hasMore`): customer, stars, date, staff (staff tab), branch, comment; shimmer / empty ("No reviews yet") / error + retry; pull-to-refresh
+  - [x] Owner branch switcher (`BranchScope`, `?branchId=`); branch members send no branch (the server scopes them; 403 `BRANCH_SCOPE_DENIED` otherwise)
+  - [x] Report per review → Contact WAB sheet (call / WhatsApp / email from the config) prefilled with the review reference (`ExternalLinks.whatsAppMessage` / `mailtoMessage`); `review_report` event with the channel (added to the required PRD events); no edit / delete
+- Tests: `ReviewsTest` (2), `ReviewsMapperTest` (2), `ReviewsViewModelTest` (3), `ExternalLinksTest` (+1), `NotificationTargetTest` (updated); insights + notifications + salon + core/ui + composeApp host tests green; policy ok
+- Loops: 1/1 — batch 12 run (MER-050, 042, 043, 049): policy ok, `testAndroidHostTest` all modules 163 suites / 547 tests / 0 failures (after fixing `BookingMappersTest` for the new required `requestedAt`); full gate `scripts/ci/run_local_checks.sh`: policy tests (86) + checks, contract, detekt (0 after wrapping 17 long lines and the `MoreDependencies` parameter count), unit tests + 4 Android variants + lint green, iOS Debug-Dev / Release-Dev green; the machine's disk filled during Debug-Prod, so Debug-Prod, Release-Prod and the Kotlin/Native tests were re-run one by one after removing this worktree's build outputs: all green; criteria re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 12 code reading of the four commits: one call per screen, permission-gated blocks hidden (not disabled), owner-only branch filters, AR + EN for every key, tokens only, files < 300 lines, mock fixtures for every new endpoint; fixed during review: contract regeneration broke a bookings mapper test, detekt findings. DEVIATION: UI not exercised on emulator / simulator (rules §3.13 end-of-backlog journey); no screen previews (feature modules have none).
+- Notes: DEVIATION — the staff selector lists the staff found in loaded reviews (`GET /team/members` needs STAFF_MANAGE, which a REVIEWS_VIEW member may not have), so a staff member without reviews is not offered (nothing to show anyway).
+
+### MER-050 — Home M07
+- Branch: `feat/mer-050-home-dashboard`
+- Branched: (batch 12 start, from `origin/merchant`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD M07, §6, §8.1; operation `GET /dashboard` (DASHBOARD_VIEW, merchant contract 1.3.0); design 02 Home `on.home`):
+  - [x] `./gradlew apiSync` (`scripts/api_sync.py`) re-run for contract 1.3.0 (dashboard, reviews, statistics, my account, push switch, previews, eligible staff, `requestedAt` on booking rows); compiles unchanged elsewhere
+  - [x] New `feature/home` (domain / data / presentation / di); Home tab registered (`Graph.Home`, `REGISTERED_TABS` + HOME, first tab when DASHBOARD_VIEW)
+  - [x] One `GET /dashboard` for the whole screen: header (salon photo + name, "Hello, {member}", bell with unread badge 1–99 / "99+" → notifications), status strip (salon state chip; incomplete → "Complete your salon profile" → checklist), subscription warning (≤ 7 days from the server; only with SUBSCRIPTION_VIEW) → M23
+  - [x] Pending requests card (BOOKINGS_RESPOND): server count + newest rows (bride badge, time since `requestedAt`, appointment time, auto-cancel countdown from `respondBy`); row → M09, "View all" → Bookings tab (Pending is its first tab)
+  - [x] Today at a glance (approved, completed, next booking time + customer · staff) and today's timeline (time range, customer, staff, status, bride; "My schedule today" without BOOKINGS_VIEW_ALL — the server scopes it); empty → "No bookings today" + Open calendar
+  - [x] Quick stats (STATISTICS_VIEW): this week's bookings, revenue (JOD), rating
+  - [x] Unified shimmer, error + retry, pull-to-refresh also refreshes permissions (`PermissionsSync.refresh`); refresh failures keep the content (banner); booking socket events and app resume reload silently; mock fixture with every block (`mockDashboardFixture`)
+- Tests: `DashboardMapperTest` (2), `HomeViewModelTest` (5), `HomeUiMappersTest` (2), `FormatsTest` (+1 `oneDecimalText`), `MerchantRootTabsTest` (+1); home + design-system + composeApp host tests green; policy ok
+- Loops: 1/1 — batch 12 run (MER-050, 042, 043, 049): policy ok, `testAndroidHostTest` all modules 163 suites / 547 tests / 0 failures (after fixing `BookingMappersTest` for the new required `requestedAt`); full gate `scripts/ci/run_local_checks.sh`: policy tests (86) + checks, contract, detekt (0 after wrapping 17 long lines and the `MoreDependencies` parameter count), unit tests + 4 Android variants + lint green, iOS Debug-Dev / Release-Dev green; the machine's disk filled during Debug-Prod, so Debug-Prod, Release-Prod and the Kotlin/Native tests were re-run one by one after removing this worktree's build outputs: all green; criteria re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 12 code reading of the four commits: one call per screen, permission-gated blocks hidden (not disabled), owner-only branch filters, AR + EN for every key, tokens only, files < 300 lines, mock fixtures for every new endpoint; fixed during review: contract regeneration broke a bookings mapper test, detekt findings. DEVIATION: UI not exercised on emulator / simulator (rules §3.13 end-of-backlog journey); no screen previews (feature modules have none).
+- Notes: the dashboard repository is called by the view model directly (no use case), as in the finance / team features; no screen previews (feature modules have none).
 
 ### MER-066 — Real-time and push per branch
 - Branch: `feat/mer-066-branch-realtime`

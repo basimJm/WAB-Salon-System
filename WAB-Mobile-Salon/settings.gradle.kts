@@ -87,4 +87,12 @@ include(
     ":feature:more:presentation",
     ":feature:more:di",
     ":feature:branches:presentation",
+    ":feature:home:domain",
+    ":feature:home:data",
+    ":feature:home:presentation",
+    ":feature:home:di",
+    ":feature:insights:domain",
+    ":feature:insights:data",
+    ":feature:insights:presentation",
+    ":feature:insights:di",
 )
