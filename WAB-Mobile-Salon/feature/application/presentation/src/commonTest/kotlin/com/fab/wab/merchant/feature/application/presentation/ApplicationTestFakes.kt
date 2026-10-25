@@ -7,6 +7,7 @@ import com.fab.wab.merchant.core.domain.locations.City
 import com.fab.wab.merchant.core.domain.locations.Country
 import com.fab.wab.merchant.core.domain.locations.LocationsRepository
 import com.fab.wab.merchant.core.domain.session.MemberProfile
+import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.domain.session.SalonState
 import com.fab.wab.merchant.core.domain.session.SessionState
 import com.fab.wab.merchant.core.domain.session.SessionStore
@@ -27,7 +28,7 @@ internal val PENDING_APPLICATION = SalonApplication("s1", SalonState.APPLICATION
 
 internal class FakeApplications : ApplicationRepository {
     var applyResult: AppResult<ApplicationSession> =
-        AppResult.Success(ApplicationSession(AuthTokens("a", "r"), "m1", "s1", PENDING_APPLICATION))
+        AppResult.Success(ApplicationSession(AuthTokens("a", "r"), MemberProfile("m1", "s1", "Lina", MemberRole.OWNER), setOf("DASHBOARD_VIEW"), PENDING_APPLICATION))
     var current: AppResult<SalonApplication> = AppResult.Success(PENDING_APPLICATION)
     val applied = mutableListOf<RegistrationForm>()
     val resubmitted = mutableListOf<RegistrationForm>()
