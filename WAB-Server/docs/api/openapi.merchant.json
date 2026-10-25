@@ -11731,6 +11731,13 @@
                           },
                           "providesServices": {
                             "type": "boolean"
+                          },
+                          "branchId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "The member’s branch; null for the owner (all branches)"
                           }
                         },
                         "required": [
@@ -11742,7 +11749,8 @@
                           "role",
                           "permissions",
                           "active",
-                          "providesServices"
+                          "providesServices",
+                          "branchId"
                         ]
                       }
                     },
@@ -12007,6 +12015,13 @@
                         },
                         "providesServices": {
                           "type": "boolean"
+                        },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The member’s branch; null for the owner (all branches)"
                         }
                       },
                       "required": [
@@ -12018,7 +12033,8 @@
                         "role",
                         "permissions",
                         "active",
-                        "providesServices"
+                        "providesServices",
+                        "branchId"
                       ]
                     },
                     "meta": {
@@ -12223,6 +12239,13 @@
                         },
                         "providesServices": {
                           "type": "boolean"
+                        },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The member’s branch; null for the owner (all branches)"
                         }
                       },
                       "required": [
@@ -12234,7 +12257,8 @@
                         "role",
                         "permissions",
                         "active",
-                        "providesServices"
+                        "providesServices",
+                        "branchId"
                       ]
                     },
                     "meta": {
@@ -12486,6 +12510,13 @@
                         },
                         "providesServices": {
                           "type": "boolean"
+                        },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The member’s branch; null for the owner (all branches)"
                         }
                       },
                       "required": [
@@ -12497,7 +12528,8 @@
                         "role",
                         "permissions",
                         "active",
-                        "providesServices"
+                        "providesServices",
+                        "branchId"
                       ]
                     },
                     "meta": {
@@ -12702,6 +12734,13 @@
                         },
                         "providesServices": {
                           "type": "boolean"
+                        },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The member’s branch; null for the owner (all branches)"
                         }
                       },
                       "required": [
@@ -12713,7 +12752,8 @@
                         "role",
                         "permissions",
                         "active",
-                        "providesServices"
+                        "providesServices",
+                        "branchId"
                       ]
                     },
                     "meta": {
@@ -12918,6 +12958,13 @@
                         },
                         "providesServices": {
                           "type": "boolean"
+                        },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The member’s branch; null for the owner (all branches)"
                         }
                       },
                       "required": [
@@ -12929,7 +12976,8 @@
                         "role",
                         "permissions",
                         "active",
-                        "providesServices"
+                        "providesServices",
+                        "branchId"
                       ]
                     },
                     "meta": {
@@ -16325,6 +16373,15 @@
             },
             "required": false,
             "name": "paymentStatus",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
             "in": "query"
           },
           {

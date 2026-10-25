@@ -2649,7 +2649,13 @@
                 ":id",
                 "members"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -3644,6 +3650,11 @@
                 },
                 {
                   "key": "customerId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
                   "value": "",
                   "disabled": true
                 }
@@ -6954,7 +6965,13 @@
                 ":id",
                 "hours"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -7000,7 +7017,13 @@
                 ":id",
                 "hours"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -7057,7 +7080,13 @@
                 "hours",
                 "preview"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -7113,7 +7142,13 @@
                 "closures",
                 "preview"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -7168,7 +7203,13 @@
                 ":id",
                 "closures"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -7225,7 +7266,13 @@
                 "closures",
                 ":closureId"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -7287,7 +7334,13 @@
                 ":closureId",
                 "remove"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -7353,6 +7406,11 @@
                   "key": "pageSize",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": [
@@ -7400,7 +7458,13 @@
                 ":id",
                 "services"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -7457,7 +7521,13 @@
                 "services",
                 ":serviceId"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -7592,6 +7662,68 @@
           }
         },
         {
+          "name": "Move a member to another open branch of the salon (skills are cleared)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/members/:memberId/branch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "members",
+                ":memberId",
+                "branch"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "memberId",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Every write needs a `reason`, is audited, and tells the salon owner what area was changed. Images must be files the admin uploaded with the admin presign (same purposes as the merchant app). When existing PENDING/APPROVED bookings would be broken the change is refused with 409 `SCHEDULE_CONFLICT` and the booking ids in `details`; use the matching preview first.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"string\",\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
           "name": "A salon’s booking policy (null until one is set)",
           "request": {
             "method": "GET",
@@ -7681,6 +7813,459 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cancellationWindowHours\": 0,\n  \"paymentOptions\": [\n    \"PAY_ON_ARRIVAL\"\n  ],\n  \"depositPercentage\": 0,\n  \"depositRefundableOnCustomerCancel\": false,\n  \"fullPaymentRefundOnCustomerCancel\": \"FULL\",\n  \"noShowDeposit\": \"KEEP\",\n  \"noShowFullPayment\": \"KEEP\",\n  \"notes\": \"string\",\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Salon branches",
+      "item": [
+        {
+          "name": "Branches of the salon, main first (admin; reason + audit, the owner is notified)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "branches"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add a branch; the first one is the main branch (admin; reason + audit, the owner is notified; BRANCH_LIMIT_REACHED at salon.maxBranches)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "branches"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"location\": {\n    \"latitude\": 0,\n    \"longitude\": 0\n  },\n  \"locationText\": \"string\",\n  \"cityId\": \"string\",\n  \"areaId\": \"string\",\n  \"phone\": \"string\",\n  \"whatsapp\": \"string\",\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "One branch (admin; reason + audit, the owner is notified)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/branches/:branchId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "branches",
+                ":branchId"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Edit name, location, address, city/area or contacts (admin; reason + audit, the owner is notified)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/branches/:branchId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "branches",
+                ":branchId"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"location\": {\n    \"latitude\": 0,\n    \"longitude\": 0\n  },\n  \"locationText\": \"string\",\n  \"cityId\": \"string\",\n  \"areaId\": \"string\",\n  \"phone\": \"string\",\n  \"whatsapp\": \"string\",\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Make this branch the main one (admin; reason + audit, the owner is notified)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/branches/:branchId/main",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "branches",
+                ":branchId",
+                "main"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Hide the branch from customers; the other branches stay bookable (admin; reason + audit, the owner is notified)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/branches/:branchId/offline",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "branches",
+                ":branchId",
+                "offline"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Bring an offline branch back (admin; reason + audit, the owner is notified)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/branches/:branchId/online",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "branches",
+                ":branchId",
+                "online"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Close for good (history kept); 409 BRANCH_HAS_UPCOMING_BOOKINGS lists the bookings, 422 LAST_BRANCH, 422 INVALID_TRANSITION for the main branch (admin; reason + audit, the owner is notified)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/branches/:branchId/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "v1",
+                "salons",
+                ":id",
+                "branches",
+                ":branchId",
+                "close"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "branchId",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

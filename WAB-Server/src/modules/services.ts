@@ -22,6 +22,7 @@ import type { AdminSettingsService } from '../domain/adminSettings/adminSettings
 import type { AdminProfileService } from '../domain/adminProfile/adminProfile.service';
 import type { AdminSearchService } from '../domain/adminSearch/adminSearch.service';
 import type { AdminSalonEditService } from '../domain/adminSalonEdit/adminSalonEdit.service';
+import type { AdminBranchesService } from '../domain/branches/adminBranches.service';
 import type { BookingAdminExtrasService } from '../domain/bookings/bookingAdminExtras.service';
 import type { AdminCustomerExtrasService } from '../domain/customers/adminCustomerExtras.service';
 import type { SalonDeletionService } from '../domain/salons/salonDeletion.service';
@@ -92,6 +93,7 @@ export interface ApiServices {
   readonly adminProfile?: AdminProfileService;
   readonly adminSearch?: AdminSearchService;
   readonly adminSalonEdit?: AdminSalonEditService;
+  readonly adminBranches?: AdminBranchesService;
   readonly adminCustomerExtras?: AdminCustomerExtrasService;
   readonly bookingAdminExtras?: BookingAdminExtrasService;
   readonly adminSalonInsights?: {
@@ -438,6 +440,7 @@ export const unavailableAdminSalonEdit: AdminSalonEditService = {
   updateService: unavailable,
   staff: unavailable,
   setStaff: unavailable,
+  moveStaff: unavailable,
   policy: unavailable,
   setPolicy: unavailable,
 };
@@ -628,4 +631,15 @@ export const unavailableSearch: SearchService = {
   cards: unavailable,
   priceBounds: unavailable,
   nearestBranches: unavailable,
+};
+
+export const unavailableAdminBranches: AdminBranchesService = {
+  list: unavailable,
+  get: unavailable,
+  create: unavailable,
+  update: unavailable,
+  setMain: unavailable,
+  setOffline: unavailable,
+  setOnline: unavailable,
+  close: unavailable,
 };

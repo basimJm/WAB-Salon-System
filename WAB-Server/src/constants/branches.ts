@@ -49,3 +49,27 @@ export const MERCHANT_BRANCH_ROUTES = {
 
 /** Nearest list title of a salon with several branches: "Hifa Salon - Mecca Street" (§5.17). */
 export const BRANCH_TITLE_SEPARATOR = ' - ';
+
+/** Admin branch management of any salon (SRV-147), under `/admin/v1/salons`. */
+export const ADMIN_BRANCH_ROUTES = {
+  base: '/salons',
+  list: '/:id/branches',
+  byId: '/:id/branches/:branchId',
+  main: '/:id/branches/:branchId/main',
+  offline: '/:id/branches/:branchId/offline',
+  online: '/:id/branches/:branchId/online',
+  close: '/:id/branches/:branchId/close',
+} as const;
+
+/** Audit of admin branch writes (every write carries a reason, CLAUDE.md §4.12). */
+export const ADMIN_BRANCH_AUDIT = {
+  entityType: 'branch',
+  actions: {
+    create: 'BRANCH_CREATE',
+    update: 'BRANCH_UPDATE',
+    main: 'BRANCH_SET_MAIN',
+    offline: 'BRANCH_OFFLINE',
+    online: 'BRANCH_ONLINE',
+    close: 'BRANCH_CLOSE',
+  },
+} as const;

@@ -21,9 +21,12 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
+import { teamMemberDoc } from '../../shared/team/teamMember.openapi';
 import {
   addGalleryBody,
   addServiceBody,
+  branchQuery,
+  moveStaffBody,
   closureBody,
   closureParams,
   closurePatchBody,
@@ -245,7 +248,7 @@ export const registerAdminSalonEditDocs = (registry: OpenAPIRegistry): void => {
     path: path(ADMIN_SALON_EDIT_ROUTES.hours),
     tags,
     summary: 'Weekly hours, upcoming closures and today’s state',
-    request: { headers, params: salonParams },
+    request: { headers, query: branchQuery, params: salonParams },
     responses: { [HTTP_STATUS.ok]: ok('Hours', hoursView), ...failures },
   });
   registry.registerPath({
@@ -253,7 +256,7 @@ export const registerAdminSalonEditDocs = (registry: OpenAPIRegistry): void => {
     path: path(ADMIN_SALON_EDIT_ROUTES.hoursPreview),
     tags,
     summary: 'Preview: bookings a new weekly schedule would break (nothing is changed)',
-    request: { headers, params: salonParams, body: body(previewHoursBody) },
+    request: { headers, query: branchQuery, params: salonParams, body: body(previewHoursBody) },
     responses: { [HTTP_STATUS.ok]: ok('Affected bookings', z.array(conflict)), ...failures },
   });
   registry.registerPath({
@@ -262,7 +265,7 @@ export const registerAdminSalonEditDocs = (registry: OpenAPIRegistry): void => {
     tags,
     summary: 'Replace the weekly working hours',
     description: `All seven days, each once. ${note}${conflictNote}`,
-    request: { headers, params: salonParams, body: body(hoursBody) },
+    request: { headers, query: branchQuery, params: salonParams, body: body(hoursBody) },
     responses: { [HTTP_STATUS.ok]: ok('Hours', hoursView), ...failures },
   });
   registry.registerPath({
@@ -270,7 +273,7 @@ export const registerAdminSalonEditDocs = (registry: OpenAPIRegistry): void => {
     path: path(ADMIN_SALON_EDIT_ROUTES.closuresPreview),
     tags,
     summary: 'Preview: bookings a closure would break (nothing is changed)',
-    request: { headers, params: salonParams, body: body(previewClosureBody) },
+    request: { headers, query: branchQuery, params: salonParams, body: body(previewClosureBody) },
     responses: { [HTTP_STATUS.ok]: ok('Affected bookings', z.array(conflict)), ...failures },
   });
   registry.registerPath({
@@ -279,7 +282,7 @@ export const registerAdminSalonEditDocs = (registry: OpenAPIRegistry): void => {
     tags,
     summary: 'Add a closure',
     description: `\`closureReason\` is the text customers see, \`reason\` the admin’s audit reason. ${note}${conflictNote}`,
-    request: { headers, params: salonParams, body: body(closureBody) },
+    request: { headers, query: branchQuery, params: salonParams, body: body(closureBody) },
     responses: { [HTTP_STATUS.created]: ok('Added', closure), ...failures },
   });
   registry.registerPath({
@@ -288,7 +291,7 @@ export const registerAdminSalonEditDocs = (registry: OpenAPIRegistry): void => {
     tags,
     summary: 'Change a closure that has not started',
     description: `${note}${conflictNote} A closure that has started is history (422 \`INVALID_TRANSITION\`).`,
-    request: { headers, params: closureParams, body: body(closurePatchBody) },
+    request: { headers, query: branchQuery, params: closureParams, body: body(closurePatchBody) },
     responses: { [HTTP_STATUS.ok]: ok('Changed', closure), ...failures },
   });
   registry.registerPath({
@@ -297,7 +300,7 @@ export const registerAdminSalonEditDocs = (registry: OpenAPIRegistry): void => {
     tags,
     summary: 'Remove a closure that has not started',
     description: note,
-    request: { headers, params: closureParams, body: body(reasonBody) },
+    request: { headers, query: branchQuery, params: closureParams, body: body(reasonBody) },
     responses: { [HTTP_STATUS.ok]: ok('Removed', z.null()), ...failures },
   });
   registry.registerPath({
@@ -325,7 +328,7 @@ export const registerAdminSalonEditDocs = (registry: OpenAPIRegistry): void => {
     tags,
     summary: 'Add a catalog service to the salon',
     description: `Same rules as the merchant app (catalog audience must match the salon, one entry per catalog service, price above zero). ${note}`,
-    request: { headers, params: salonParams, body: body(addServiceBody) },
+    request: { headers, query: branchQuery, params: salonParams, body: body(addServiceBody) },
     responses: { [HTTP_STATUS.created]: ok('Added', serviceView), ...failures },
   });
   registry.registerPath({
@@ -334,7 +337,7 @@ export const registerAdminSalonEditDocs = (registry: OpenAPIRegistry): void => {
     tags,
     summary: 'Change a salon service (price, duration, bride-only, media, active)',
     description: note,
-    request: { headers, params: serviceParams, body: body(updateServiceBody) },
+    request: { headers, query: branchQuery, params: serviceParams, body: body(updateServiceBody) },
     responses: { [HTTP_STATUS.ok]: ok('Changed', serviceView), ...failures },
   });
   registry.registerPath({
@@ -353,6 +356,15 @@ export const registerAdminSalonEditDocs = (registry: OpenAPIRegistry): void => {
     description: `${note}${conflictNote}`,
     request: { headers, params: staffParams, body: body(staffBody) },
     responses: { [HTTP_STATUS.ok]: ok('Staff profile', staffView), ...failures },
+  });
+  registry.registerPath({
+    method: 'post',
+    path: path(ADMIN_SALON_EDIT_ROUTES.staffBranch),
+    tags,
+    summary: 'Move a member to another open branch of the salon (skills are cleared)',
+    description: `${note}${conflictNote}`,
+    request: { headers, params: staffParams, body: body(moveStaffBody) },
+    responses: { [HTTP_STATUS.ok]: ok('Member', teamMemberDoc), ...failures },
   });
   registry.registerPath({
     method: 'get',

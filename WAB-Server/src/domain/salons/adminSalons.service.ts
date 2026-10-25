@@ -1,3 +1,5 @@
+import type { BranchesRepository } from '../../repositories/branches.repository';
+import { toBranchView, type BranchView } from '../branches/branches.service';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { Gender } from '../../constants/enums';
 import type { SalonState } from '../../constants/salon';
@@ -52,6 +54,8 @@ export interface AdminSalonDetail extends AdminSalonRow {
     trialEndsAt: Date;
     currentPeriodEnd: Date | null;
   } | null;
+  /** Every branch, closed ones too, main first (§3.3a). */
+  readonly branches: BranchView[];
 }
 
 export interface SalonListFilter {
@@ -76,11 +80,13 @@ export interface AdminSalonMember {
   readonly providesServices: boolean;
   /** What the member can do (the owner has everything). */
   readonly permissions: readonly string[];
+  /** The member's branch; `null` for the owner (every branch). */
+  readonly branchId: string | null;
 }
 
 export interface AdminSalonsService {
   /** Every member of a salon, active or not, owner first. */
-  members(salonId: string): Promise<AdminSalonMember[]>;
+  members(salonId: string, branchId?: string): Promise<AdminSalonMember[]>;
   list(input: {
     filter: SalonListFilter;
     params: PaginationParams;
@@ -113,6 +119,8 @@ export interface AdminSalonsDeps {
   readonly placements?: Pick<PlacementsRepository, 'findMany'>;
   readonly bookingCounts?: Pick<BookingsRepository, 'countBy'>;
   readonly now?: () => Date;
+  /** The salon's branches for the detail page; without it the list is empty. */
+  readonly branches?: Pick<BranchesRepository, 'forSalon'>;
 }
 
 const escapeRegex = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -175,9 +183,10 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
 
   const detail = async (salonId: string): Promise<AdminSalonDetail> => {
     const salon = await find(salonId);
-    const [owner, subscription] = await Promise.all([
+    const [owner, subscription, branchRows] = await Promise.all([
       members.findOne({ salonId, role: 'OWNER' }),
       subscriptions.findOne({ salonId }),
+      deps.branches?.forSalon(salonId, { includeClosed: true }) ?? Promise.resolve([]),
     ]);
     return {
       ...row(salon, subscription?.status ?? null, await extrasFor([salonId])),
@@ -204,13 +213,17 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
               trialEndsAt: subscription.trialEndsAt,
               currentPeriodEnd: subscription.currentPeriodEnd ?? null,
             },
+      branches: branchRows.map(toBranchView),
     };
   };
 
   return {
-    async members(salonId) {
+    async members(salonId, branchId) {
       await find(salonId);
-      const team = await members.findMany({ salonId }, { createdAt: 1 });
+      const team = await members.findMany(
+        branchId === undefined ? { salonId } : { salonId, branchId },
+        { createdAt: 1 },
+      );
       return team
         .map((member) => ({
           id: member.id,
@@ -220,6 +233,7 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
           active: member.active,
           providesServices: member.providesServices,
           permissions: effectivePermissions(member),
+          branchId: member.role === 'OWNER' ? null : (member.branchId ?? null),
         }))
         .sort((a, b) => Number(b.role === 'OWNER') - Number(a.role === 'OWNER'));
     },

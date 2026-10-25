@@ -28,3 +28,5 @@ export const genderBody = z.object({
   gender: z.enum(GENDERS),
   reason: z.string().trim().min(1).max(AUDIT_REASON_MAX_LENGTH),
 });
+/** The members of one branch only (§3.3a). */
+export const membersQuery = z.object({ branchId: z.string().regex(OBJECT_ID_PATTERN).optional() });
