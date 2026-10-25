@@ -3,7 +3,6 @@ export const DOC_NAMES = ['common', 'customer', 'merchant', 'admin'] as const;
 export type DocName = (typeof DOC_NAMES)[number];
 
 export const OPENAPI_VERSION = '3.1.0';
-export const API_DOC_VERSION = '1.0.0';
 export const DOCS_ROUTE = '/docs';
 export const DOCS_OUTPUT_DIR = 'docs/api';
 export const POSTMAN_OUTPUT_DIR = 'docs/api/postman';

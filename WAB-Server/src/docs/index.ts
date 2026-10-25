@@ -1,6 +1,6 @@
+import { CONTRACT_VERSIONS } from './contractVersions';
 import { OpenAPIRegistry, OpenApiGeneratorV31 } from '@asteasolutions/zod-to-openapi';
 import {
-  API_DOC_VERSION,
   BEARER_SCHEME,
   DOC_NAMES,
   DOC_TITLES,
@@ -141,7 +141,7 @@ const buildDocument = (name: DocName): ReturnType<OpenApiGeneratorV31['generateD
   for (const register of REGISTRARS[name]) register(registry);
   const config: DocumentConfig = {
     openapi: OPENAPI_VERSION,
-    info: { title: DOC_TITLES[name], version: API_DOC_VERSION },
+    info: { title: DOC_TITLES[name], version: CONTRACT_VERSIONS[name].version },
     servers: [{ url: '/' }],
     ...(name === 'common' ? {} : { security: [{ [BEARER_SCHEME]: [] }] }),
   };
