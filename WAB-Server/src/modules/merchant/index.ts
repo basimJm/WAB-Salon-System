@@ -18,6 +18,8 @@ import { MERCHANT_GALLERY_ROUTES } from '../../constants/gallery';
 import { createMerchantFinanceRouter } from './finance/finance.routes';
 import { createMerchantReviewsRouter } from './reviews/reviews.routes';
 import { createMerchantStatisticsRouter } from './statistics/statistics.routes';
+import { createMerchantDashboardRouter } from './dashboard/dashboard.routes';
+import { MERCHANT_DASHBOARD_ROUTES } from '../../constants/dashboard';
 import { MERCHANT_STATISTICS_ROUTES } from '../../constants/statistics';
 import { MERCHANT_REVIEW_ROUTES } from '../../constants/reviews';
 import { MERCHANT_FINANCE_ROUTES, MERCHANT_SUBSCRIPTION_ROUTES } from '../../constants/finance';
@@ -42,6 +44,7 @@ import {
   unavailableMerchantFinance,
   unavailableMerchantReviews,
   unavailableMerchantStatistics,
+  unavailableMerchantDashboard,
   unavailablePayoutDetails,
   unavailableBranches,
   unavailableGallery,
@@ -249,6 +252,14 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     MERCHANT_STATISTICS_ROUTES.base,
     createMerchantStatisticsRouter(
       services.merchantStatistics ?? unavailableMerchantStatistics,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_DASHBOARD_ROUTES.base,
+    createMerchantDashboardRouter(
+      services.merchantDashboard ?? unavailableMerchantDashboard,
       services.salonProfile?.guard ?? [unavailableGuard],
     ),
   );

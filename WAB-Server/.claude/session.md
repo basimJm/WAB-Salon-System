@@ -10,10 +10,24 @@
 
 ## Current task
 
+### SRV-130 — Merchant dashboard aggregate (M07)
+
+- Branch: `feat/srv-130-merchant-dashboard`
+- Status: IN REVIEW
+- Acceptance criteria (Merchant PRD M07, BUSINESS_DOMAIN §6; operation `GET /merchant/v1/dashboard`, booking rows gain `requestedAt` — client impact MER-050, MER-063):
+  - [x] `GET /merchant/v1/dashboard` (`DASHBOARD_VIEW`): salon (name, profile image, state, missing checklist), subscription warning while ending soon (approved salons), unread notifications
+  - [x] Pending requests card (`BOOKINGS_RESPOND`): count + newest 5; today (`BOOKINGS_VIEW_ALL|OWN`, own bookings only for VIEW_OWN): approved and completed counts, next approved booking, timeline of upcoming pending/approved; quick stats (`STATISTICS_VIEW`): last 7 days bookings, revenue (JOD), rating — sections the member may not see are `null`
+  - [x] Branch scope comes from the reused services (bookings list, statistics) for branch members
+  - [x] One member's dashboard is cached 15 s in Redis (shared `createJsonCache`, also used by admin analytics now); a cache failure never fails the call
+  - [x] Booking rows (customer/merchant/admin lists) show `requestedAt` for "time since request"
+- Tests: `tests/merchantDashboard.test.ts` (4); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔ (cache helper extracted instead of copied), Mobile ✔, Architect ✔, QA ✔) — NOTE: a permission change can take up to the 15 s cache to show on the dashboard.
+
 ### SRV-132 — Merchant statistics (M21), branch-scoped
 
 - Branch: `feat/srv-132-merchant-statistics`
-- Status: IN REVIEW
+- Status: DONE (PR #402)
 - Acceptance criteria (Merchant PRD M21, BUSINESS_DOMAIN §6 branch scope; operation `GET /merchant/v1/statistics` — client impact MER-043, MER-063):
   - [x] `GET /merchant/v1/statistics?from=&to=&branchId=` (`STATISTICS_VIEW`), civil days Asia/Amman both included, at most 92 days (400 otherwise)
   - [x] Bookings by appointment day in the period: by status, approval rate (approved / answered), cancellation rate, no-show rate (no-show / finished), average response minutes (request → first member answer), bride bookings, revenue in JOD (online kept net of refunds + paid at the salon on completion)
@@ -37,18 +51,6 @@
 - Tests: `tests/merchantReviews.test.ts` (4) + reviews suites; full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔ (M20 fields), Architect ✔ (merchant namespace, permission + branch scope), QA ✔)
-
-### SRV-148 — Branches end to end (Stage P)
-
-- Branch: `feat/srv-148-branches-e2e`
-- Status: DONE (PR #394)
-- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.16; API docs: no change in this task — contract checked after SRV-136…147):
-  - [x] `seed:demo`: after the main-branch migration, Lamar gets Khalda + Dabouq and Al-Ostaz gets Shmeisani, each complete with own place, hours, prices (percent of the main branch), a branch manager (bride-qualified in women's salons) and an employee; deterministic ids, insert-only; `branchCount` synced
-  - [x] `Branch` is a demo collection; every demo branch row passes the real Mongoose schemas
-  - [x] Contract regenerated and compared (docs test green); client impact list per task (ADM-088…091, CUS-082…087, MER-061…066) in `.claude/Integration.md`; DEPLOYMENT.md demo section updated
-- Tests: `tests/demoBranches.test.ts` (3), `tests/demoSeed.test.ts` (Branch filled later); full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (salon legacy place/hours fields stay mirrored until every client reads branches — dropping them is a later contract change), QA ✔) — the demo seed itself was not run against the hosted dev database in this task (owner runs `npm run seed:demo`).
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 
