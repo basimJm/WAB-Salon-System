@@ -37,6 +37,9 @@ export const loadMember =
         salonId: member.salonId,
         role: member.role,
         permissions: effectivePermissions(member),
+        ...(member.role === 'OWNER' || member.branchId === undefined
+          ? {}
+          : { branchId: member.branchId }),
       };
       next();
     }, next);

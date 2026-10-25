@@ -11,7 +11,12 @@ import type { BookingsRepository } from '../../repositories/bookings.repository'
 import type { MembersRepository } from '../../repositories/identity.repository';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
-import { BusinessRuleError, ConflictError, NotFoundError } from '../../utils/errors';
+import {
+  BusinessRuleError,
+  ForbiddenError,
+  ConflictError,
+  NotFoundError,
+} from '../../utils/errors';
 import { lockKey } from '../../utils/redis/keys';
 import { withLocks } from '../../utils/redis/lock';
 import { localDateOf } from '../../utils/time';
@@ -23,7 +28,19 @@ import { applyTransition } from './stateMachine';
 export interface MemberActor {
   readonly id: string;
   readonly permissions: readonly string[];
+  /** The member's branch; absent for the owner, who covers every branch (§6 branch scope). */
+  readonly branchId?: string | undefined;
 }
+
+/** A branch member acts only on bookings of their own branch (`BRANCH_SCOPE_DENIED`). */
+export const assertBookingInScope = (
+  booking: { readonly branchId?: string | undefined },
+  member: { readonly branchId?: string | undefined },
+): void => {
+  if (member.branchId !== undefined && booking.branchId !== member.branchId) {
+    throw new ForbiddenError({ code: ERROR_CODES.BRANCH_SCOPE_DENIED });
+  }
+};
 
 export interface Decision {
   readonly reasonCode: string;
@@ -90,6 +107,7 @@ export const createBookingActionsService = (deps: BookingActionsDeps): BookingAc
     if (booking?.salonId !== target.salonId) {
       throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
     }
+    assertBookingInScope(booking, target.member);
     const at = now();
     const entry = applyTransition({
       facts: {
@@ -139,6 +157,7 @@ export const createBookingActionsService = (deps: BookingActionsDeps): BookingAc
       if (booking?.salonId !== target.salonId) {
         throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       }
+      assertBookingInScope(booking, target.member);
       const timeZone = await settings.get('timezone');
       const keys = booking.persons.map((p) =>
         lockKey(STAFF_LOCK_SEGMENT, p.staffId, localDateOf(p.start, timeZone)),

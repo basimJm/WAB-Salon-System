@@ -46,7 +46,8 @@ const salonServiceSchema = new Schema<SalonServiceRaw>(
   },
   { timestamps: true, collection: SALON_SERVICES_COLLECTION },
 );
-salonServiceSchema.index({ salonId: 1, catalogServiceId: 1 }, { unique: true });
+// A salon may offer the same catalog service in several branches (unique per branch below).
+salonServiceSchema.index({ salonId: 1, catalogServiceId: 1 }, { name: 'salon_catalog_service' });
 salonServiceSchema.index({ catalogServiceId: 1, active: 1 });
 salonServiceSchema.index({ branchId: 1, active: 1 });
 // One row per catalog service per branch; rows not migrated yet (no branch) are left out.

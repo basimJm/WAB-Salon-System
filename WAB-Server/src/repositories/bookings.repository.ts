@@ -142,6 +142,7 @@ export class BookingsRepository
     return found.map((booking) => ({
       id: booking.id,
       status: booking.status,
+      ...(booking.branchId === undefined ? {} : { branchId: booking.branchId }),
       startsAt: booking.appointmentStart,
       persons: booking.persons.map((p) => ({
         staffId: p.staffId,

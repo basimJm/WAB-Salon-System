@@ -20,6 +20,7 @@ import type { SettingsService } from '../settings';
 import {
   noBookingChangedHook,
   type BookingChangedHook,
+  assertBookingInScope,
   type MemberActor,
 } from './bookingActions.service';
 import { toSummary, type BookingSummary } from './bookingCreation.service';
@@ -105,6 +106,8 @@ export const createBookingReassignService = (deps: {
   /** Shared by the merchant and the admin path; `salonId` (merchant) hides other salons' bookings. */
   const perform = async (input: {
     salonId?: string;
+    /** The acting member (merchant path): a branch member stays inside their branch. */
+    member?: MemberActor;
     bookingId: string;
     personIndex: number;
     staffId: string;
@@ -114,6 +117,7 @@ export const createBookingReassignService = (deps: {
     if (booking === null || (input.salonId !== undefined && booking.salonId !== input.salonId)) {
       throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
     }
+    if (input.member !== undefined) assertBookingInScope(booking, input.member);
     const person = personOf(booking, personIndex);
     if (booking.status !== 'APPROVED' || person.start <= now()) {
       throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
@@ -148,7 +152,7 @@ export const createBookingReassignService = (deps: {
       if (!member.permissions.includes('BOOKINGS_OPERATE')) {
         throw new ForbiddenError({ code: ERROR_CODES.PERMISSION_DENIED });
       }
-      return (await perform({ salonId, bookingId, personIndex, staffId })).booking;
+      return (await perform({ salonId, member, bookingId, personIndex, staffId })).booking;
     },
 
     reassignAny: ({ bookingId, personIndex, staffId }) =>

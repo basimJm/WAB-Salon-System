@@ -1,3 +1,4 @@
+import type { BranchesRepository } from '../../repositories/branches.repository';
 import type { MainBranches } from '../branches/mainBranch';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import { SCHEDULE_DAY_ORDER } from '../../constants/salon';
@@ -9,6 +10,7 @@ import type { SalonsRepository } from '../../repositories/salons.repository';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
 import {
+  ForbiddenError,
   BusinessRuleError,
   ConflictError,
   NotFoundError,
@@ -31,8 +33,17 @@ export interface BookingConflict {
  * §5.12). Bookings do not exist yet (SRV-070+), so the default finds none.
  */
 export interface ScheduleConflicts {
-  weekly(salonId: string, days: readonly ScheduleDay[]): Promise<BookingConflict[]>;
-  closure(salonId: string, range: { from: string; to: string }): Promise<BookingConflict[]>;
+  /** `branchId` limits the check to that branch's bookings. */
+  weekly(
+    salonId: string,
+    days: readonly ScheduleDay[],
+    branchId?: string,
+  ): Promise<BookingConflict[]>;
+  closure(
+    salonId: string,
+    range: { from: string; to: string },
+    branchId?: string,
+  ): Promise<BookingConflict[]>;
 }
 
 export const noScheduleConflicts: ScheduleConflicts = {
@@ -62,23 +73,29 @@ export interface WeeklyDayInput {
   readonly close: string;
 }
 
+/**
+ * Hours and closures of one branch (§3.3a). `scope` = the caller's branch; without one the
+ * salon-level endpoints work on the main branch. Before branch wiring (unit tests) the salon's own.
+ */
 export interface HoursService {
-  get(salonId: string): Promise<HoursView>;
-  setWeekly(salonId: string, days: readonly WeeklyDayInput[]): Promise<HoursView>;
+  get(salonId: string, scope?: string): Promise<HoursView>;
+  setWeekly(salonId: string, days: readonly WeeklyDayInput[], scope?: string): Promise<HoursView>;
   addClosure(input: {
     salonId: string;
+    scope?: string | undefined;
     from: string;
     to: string;
     reason: string;
   }): Promise<ClosureView>;
   updateClosure(input: {
     salonId: string;
+    scope?: string | undefined;
     id: string;
     from?: string | undefined;
     to?: string | undefined;
     reason?: string | undefined;
   }): Promise<ClosureView>;
-  removeClosure(input: { salonId: string; id: string }): Promise<void>;
+  removeClosure(input: { salonId: string; id: string; scope?: string | undefined }): Promise<void>;
 }
 
 export interface HoursDeps {
@@ -90,6 +107,7 @@ export interface HoursDeps {
   readonly now?: () => Date;
   /** Salon-level endpoint: hours are copied to, and closures land on, the main branch (§5.16). */
   readonly mainBranches?: Pick<MainBranches, 'idOf' | 'mirror'>;
+  readonly branches?: Pick<BranchesRepository, 'findInSalon' | 'patch'>;
 }
 
 const invalid = (...fields: string[]): ValidationError =>
@@ -137,17 +155,54 @@ export const createHoursService = (deps: HoursDeps): HoursService => {
     }
   };
 
-  const view = async (salonId: string): Promise<HoursView> => {
-    const [salon, date, timeZone] = await Promise.all([
+  /** The branch the request works on, or `null` (salon-wide, before branch wiring). */
+  const branchFor = async (
+    salonId: string,
+    scope?: string,
+  ): Promise<{ id: string; isMain: boolean; weeklySchedule: ScheduleDay[] } | null> => {
+    const id = scope ?? (await deps.mainBranches?.idOf(salonId))?.toString();
+    if (id === undefined || deps.branches === undefined) return null;
+    const branch = await deps.branches.findInSalon(salonId, id);
+    if (branch === null) throw new NotFoundError({ code: ERROR_CODES.BRANCH_NOT_FOUND });
+    return branch;
+  };
+
+  /** Closures of the branch (all of the salon's before branch wiring). */
+  const closuresOf = async (
+    salonId: string,
+    branch: { id: string } | null,
+  ): Promise<Entity<SalonClosureRaw>[]> => {
+    const all = await closures.forSalon(salonId);
+    return branch === null ? all : all.filter((c) => c.branchId === branch.id);
+  };
+
+  /** A closure of the salon that the caller may change (`BRANCH_SCOPE_DENIED` for another branch). */
+  const findClosure = async (
+    salonId: string,
+    id: string,
+    scope?: string,
+  ): Promise<Entity<SalonClosureRaw>> => {
+    const current = (await closures.forSalon(salonId)).find((c) => c.id === id);
+    if (current === undefined) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+    if (scope !== undefined && current.branchId !== scope) {
+      throw new ForbiddenError({ code: ERROR_CODES.BRANCH_SCOPE_DENIED });
+    }
+    return current;
+  };
+
+  const view = async (salonId: string, scope?: string): Promise<HoursView> => {
+    const [salon, branch, date, timeZone] = await Promise.all([
       loadSalon(salonId),
+      branchFor(salonId, scope),
       today(),
       settings.get('timezone'),
     ]);
-    const all = await closures.forSalon(salonId);
+    const schedule = branch?.weeklySchedule ?? salon.weeklySchedule;
+    const all = await closuresOf(salonId, branch);
     return {
-      weeklySchedule: salon.weeklySchedule,
+      weeklySchedule: schedule,
       closures: all.filter((c) => c.to >= date).map((c) => toClosure(c, date)),
-      today: todaysHours(salon.weeklySchedule, all, now(), timeZone),
+      today: todaysHours(schedule, all, now(), timeZone),
     };
   };
 
@@ -159,7 +214,7 @@ export const createHoursService = (deps: HoursDeps): HoursService => {
   return {
     get: view,
 
-    async setWeekly(salonId, input) {
+    async setWeekly(salonId, input, scope) {
       const step = await settings.get('booking.slotMinutes');
       const present = new Set(input.map((d) => d.day));
       if (
@@ -185,23 +240,27 @@ export const createHoursService = (deps: HoursDeps): HoursService => {
           ? []
           : [{ day, isOff: entry.isOff, open: entry.open, close: entry.close }];
       });
-      rejectConflicts(await conflicts.weekly(salonId, week));
-      const updated = await salons.patch(salonId, { set: { weeklySchedule: week } });
-      if (updated === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
-      await deps.mainBranches?.mirror(salonId, { weeklySchedule: week });
+      const branch = await branchFor(salonId, scope);
+      rejectConflicts(await conflicts.weekly(salonId, week, branch?.id));
+      if (branch !== null) await deps.branches?.patch(branch.id, { set: { weeklySchedule: week } });
+      // The salon keeps the main branch's hours for the readers not on branches yet (SRV-144).
+      if (branch === null || branch.isMain) {
+        const updated = await salons.patch(salonId, { set: { weeklySchedule: week } });
+        if (updated === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      }
       await state.recompute(salonId);
-      return view(salonId);
+      return view(salonId, scope);
     },
 
-    async addClosure({ salonId, from, to, reason }) {
+    async addClosure({ salonId, from, to, reason, scope }) {
       await loadSalon(salonId);
       const date = await today();
       checkRange(from, to, date);
-      rejectConflicts(await conflicts.closure(salonId, { from, to }));
-      const branchId = await deps.mainBranches?.idOf(salonId);
+      const branch = await branchFor(salonId, scope);
+      rejectConflicts(await conflicts.closure(salonId, { from, to }, branch?.id));
       const created = await closures.create({
         salonId: toObjectId(salonId),
-        ...(branchId === undefined ? {} : { branchId }),
+        ...(branch === null ? {} : { branchId: toObjectId(branch.id) }),
         from,
         to,
         reason,
@@ -209,10 +268,9 @@ export const createHoursService = (deps: HoursDeps): HoursService => {
       return toClosure(created, date);
     },
 
-    async updateClosure({ salonId, id, ...patch }) {
+    async updateClosure({ salonId, id, scope, ...patch }) {
       const date = await today();
-      const current = (await closures.forSalon(salonId)).find((c) => c.id === id);
-      if (current === undefined) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+      const current = await findClosure(salonId, id, scope);
       // A closure that has started is history: customers and bookings already rely on it.
       if (current.from <= date)
         throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
@@ -222,16 +280,15 @@ export const createHoursService = (deps: HoursDeps): HoursService => {
         reason: patch.reason ?? current.reason,
       };
       checkRange(next.from, next.to, date);
-      rejectConflicts(await conflicts.closure(salonId, next));
+      rejectConflicts(await conflicts.closure(salonId, next, current.branchId));
       const updated = await closures.updateById(id, next);
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       return toClosure(updated, date);
     },
 
-    async removeClosure({ salonId, id }) {
+    async removeClosure({ salonId, id, scope }) {
       const date = await today();
-      const current = (await closures.forSalon(salonId)).find((c) => c.id === id);
-      if (current === undefined) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+      const current = await findClosure(salonId, id, scope);
       if (current.from <= date)
         throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
       await closures.remove(salonId, id);

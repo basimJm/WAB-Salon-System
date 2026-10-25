@@ -30,7 +30,12 @@ export type BookingAudience =
   | {
       readonly kind: 'MERCHANT';
       readonly salonId: string;
-      readonly member: { readonly id: string; readonly permissions: readonly string[] };
+      readonly member: {
+        readonly id: string;
+        readonly permissions: readonly string[];
+        /** Branch members see their branch only (§6); the owner sees every branch. */
+        readonly branchId?: string | undefined;
+      };
     }
   | { readonly kind: 'ADMIN' };
 
@@ -123,7 +128,7 @@ export interface BookingQueriesService {
   }): Promise<BookingDetail>;
   calendar(input: {
     salonId: string;
-    member: { id: string; permissions: readonly string[] };
+    member: { id: string; permissions: readonly string[]; branchId?: string | undefined };
     from: string;
     to: string;
     staffIds?: readonly string[] | undefined;
@@ -181,6 +186,9 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     if (audience.kind === 'CUSTOMER') and.push({ customerId: toObjectId(audience.customerId) });
     if (audience.kind === 'MERCHANT') {
       and.push({ salonId: toObjectId(audience.salonId) });
+      if (audience.member.branchId !== undefined) {
+        and.push({ branchId: toObjectId(audience.member.branchId) });
+      }
       if (viewScope(audience.member).own) {
         and.push({ persons: { $elemMatch: { staffId: toObjectId(audience.member.id) } } });
       }
@@ -414,6 +422,7 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
       const end = localDayRange(to, timeZone).end;
       const found = await bookings.findMany({
         salonId: toObjectId(salonId),
+        ...(member.branchId === undefined ? {} : { branchId: toObjectId(member.branchId) }),
         status: { $in: [...CALENDAR_STATUSES] },
         appointmentStart: { $lt: end },
         appointmentEnd: { $gt: start },

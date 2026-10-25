@@ -41,6 +41,10 @@ export const createBookingBulkService = (deps: {
           results.push({ bookingId, outcome: 'FAILED', code: ERROR_CODES.NOT_FOUND });
           continue;
         }
+        if (member.branchId !== undefined && booking.branchId !== member.branchId) {
+          results.push({ bookingId, outcome: 'FAILED', code: ERROR_CODES.BRANCH_SCOPE_DENIED });
+          continue;
+        }
         const target = { salonId, bookingId, member, reasonCode, reasonText };
         const done =
           booking.status === 'PENDING'

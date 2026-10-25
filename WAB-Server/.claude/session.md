@@ -10,6 +10,22 @@
 
 ## Current task
 
+### SRV-140 — Branch scope for merchant members (Stage P)
+
+- Branch: `feat/srv-140-branch-scope`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §6 branch scope, §5.12, §5.16; API docs: team member gains `branchId` (view, create, move) — client impact MER-061/MER-065):
+  - [x] `loadMember` puts the member's `branchId` on the request (never for the owner); `BRANCH_SCOPE_DENIED` (403) when a branch member reaches another branch's booking, member, service or closure
+  - [x] Bookings: list/detail/calendar filtered to the member's branch; approve/reject/complete/no-show/cancel/reassign/bulk refuse other branches
+  - [x] Permissions: `FINANCE_VIEW`, `SUBSCRIPTION_VIEW`, `POLICIES_MANAGE` never effective for non-owners (dropped from grants and from older members); MANAGER template = the 12 branch permissions; `BRANCHES_MANAGE` added to owner-only capabilities; finance notifications reach the owner only
+  - [x] Team: managers list/see their branch; owner picks the branch of a new member (default main, `BRANCH_NOT_FOUND` for another salon's or a closed branch); owner moves a member (`branchId` patch) — refused with SCHEDULE_CONFLICT while they have upcoming bookings, skills cleared, live app refreshed
+  - [x] Staff skills only from the member's branch services; working days inside the branch's hours; leaves follow the member's branch
+  - [x] Salon-level endpoints work on the caller's branch (owner: main branch): services list/add/edit, hours get/set (salon copy kept for the main branch), closures add/edit/remove; schedule conflict checks only see that branch's bookings; the old salon-wide unique service index is retired (`RETIRED_INDEXES`) so a catalog service can exist in several branches
+  - [x] Profile: a branch member's address/contact edit goes to their branch; salon-wide fields → 403 `OWNER_REQUIRED`
+- Tests: `tests/branchScope.test.ts` (new); permissions/team/policy/merchantFinance/notifications adapted to the new rule; `effectivePermissions` tolerates a member stored without a grant (found by `conflicts.test.ts`)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATIONS: grants of the three owner-only permissions are dropped (not refused) so older merchant builds keep working; dashboard/reviews/statistics endpoints (SRV-130…132) do not exist yet and get the scope when built; socket rooms move in SRV-143.
+
 ### SRV-139 — Merchant branch management, owner only (Stage P)
 
 - Branch: `feat/srv-139-merchant-branches`

@@ -29,7 +29,11 @@ export const createMerchantTeamRouter = (
     validate({ query: teamQuery }),
     asyncHandler(async (req: Request, res: Response) => {
       const { page, pageSize } = part<typeof teamQuery>(req, 'query');
-      const result = await service.list({ salonId: salonOf(req), params: { page, pageSize } });
+      const result = await service.list({
+        salonId: salonOf(req),
+        params: { page, pageSize },
+        branchId: req.member?.branchId,
+      });
       sendPaginated(req, res, result.items, { page, pageSize }, result.meta.total);
     }),
   );
@@ -39,7 +43,8 @@ export const createMerchantTeamRouter = (
     validate({ params: memberParams }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof memberParams>(req, 'params');
-      sendSuccess(req, res, { data: await service.get({ salonId: salonOf(req), id }) });
+      const data = await service.get({ salonId: salonOf(req), id, branchId: req.member?.branchId });
+      sendSuccess(req, res, { data });
     }),
   );
   router.post(
