@@ -49,5 +49,10 @@ const salonServiceSchema = new Schema<SalonServiceRaw>(
 salonServiceSchema.index({ salonId: 1, catalogServiceId: 1 }, { unique: true });
 salonServiceSchema.index({ catalogServiceId: 1, active: 1 });
 salonServiceSchema.index({ branchId: 1, active: 1 });
+// One row per catalog service per branch; rows not migrated yet (no branch) are left out.
+salonServiceSchema.index(
+  { branchId: 1, catalogServiceId: 1 },
+  { unique: true, partialFilterExpression: { branchId: { $exists: true } } },
+);
 
 export const SalonServiceModel = model<SalonServiceRaw>('SalonService', salonServiceSchema);

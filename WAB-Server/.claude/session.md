@@ -10,6 +10,18 @@
 
 ## Current task
 
+### SRV-137 — Branch migration (Stage P)
+
+- Branch: `feat/srv-137-branch-migration`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.16 migration, §5.2 branch completeness; API docs: no change):
+  - [x] `npm run migrate:branches` (dry run by default, `-- --apply` writes): one main branch per salon without `mainBranchId`, from its location, locationText, city/area, phone/whatsapp and weekly schedule; name = area `{ar,en}` else الفرع الرئيسي / Main branch; branch completeness computed (`computeBranchMissing`)
+  - [x] Backfill `branchId` (only rows without one) on salonServices, salonClosures, members (not the owner), staffLeaves, bookingDrafts, bookings (+ `branchSnapshot`), transactions, refunds, ledgerEntries (driver-level, the append-only guard only protects amounts/history), reviews; salon linked last (`mainBranchId`, `branchCount: 1`) so a stopped run resumes and reuses its branch
+  - [x] Partial unique `{branchId, catalogServiceId}` on salon services (rows without a branch ignored); `seed:demo` runs the migration for demo salons; runbook section in `docs/DEPLOYMENT.md`
+- Tests: `tests/branchMigration.test.ts` (8: completeness, branch from salon, area/default name, backfill + snapshot, idempotent, resume, dry run, index); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — DEVIATIONS: the salon location/hours fields are not dropped here (SRV-148, after discovery/booking read branches); the Mongo store has no unit test (driver updates; the fake model has no driver collection) — it is exercised by the dev-database run after merge.
+
 ### SRV-136 — Branch model (Stage P, salon branches)
 
 - Branch: `feat/srv-136-branch-model`
