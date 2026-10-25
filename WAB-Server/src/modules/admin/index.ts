@@ -113,7 +113,7 @@ export const createAdminRouter = (services: ApiServices = {}): Router => {
     createAdminAuthRouter({
       service: services.adminAuth?.service ?? unavailableAdminAuth,
       login: services.adminAuth?.login ?? unavailableAdminLogin,
-      limiter: createOtpRouteLimiter(services),
+      limiter: createOtpRouteLimiter(services, 'admin'),
     }),
   );
   mount(

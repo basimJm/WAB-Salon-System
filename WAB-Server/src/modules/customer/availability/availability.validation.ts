@@ -5,6 +5,7 @@ import {
 } from '../../../constants/availability';
 import { OBJECT_ID_PATTERN } from '../../../constants/database';
 import { isLocalDate } from '../../../utils/time';
+import { instantInput } from '../../../utils/time/instantInput';
 
 const objectId = z.string().regex(OBJECT_ID_PATTERN);
 
@@ -20,11 +21,11 @@ export const availabilityBody = z.object({
     /** Omit for "any available staff". */
     staffId: objectId.optional(),
   }),
-  /** What the other persons of the same draft already picked. */
+  /** What the other persons of the same draft already picked: a busy interval each, so `start` and `end` are required (BUSINESS_DOMAIN §5.4 step 4). */
   others: z
     .array(
       z
-        .object({ staffId: objectId, start: z.coerce.date(), end: z.coerce.date() })
+        .object({ staffId: objectId, start: instantInput, end: instantInput })
         .refine((v) => v.end > v.start),
     )
     .max(AVAILABILITY_MAX_OTHER_PICKS)

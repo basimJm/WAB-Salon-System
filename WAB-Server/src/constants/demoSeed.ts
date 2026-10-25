@@ -132,6 +132,10 @@ const PAY_ON_ARRIVAL = 'PAY_ON_ARRIVAL' as const;
 const DEPOSIT = 'DEPOSIT' as const;
 const FULL_ONLINE = 'FULL_ONLINE' as const;
 
+/**
+ * `description` and `locationText` are single-language salon text (BUSINESS_DOMAIN §3.3/§3.3a), so the demo
+ * writes them in English: every language then reads the same sample (SRV-151, CUS-060 #15).
+ */
 export const DEMO_SALONS: readonly DemoSalonSpec[] = [
   {
     key: 'lamar',
@@ -139,9 +143,9 @@ export const DEMO_SALONS: readonly DemoSalonSpec[] = [
     gender: 'FEMALE',
     state: 'LIVE',
     description:
-      'صالون نسائي متكامل في عبدون: شعر، أظافر، مكياج وعناية بالبشرة بأيدي فريق محترف وأجواء هادئة.',
+      'A full-service ladies salon in Abdoun: hair, nails, makeup and skin care by a professional team in a calm setting.',
     place: { area: 'Abdoun', lat: 31.9539, lng: 35.8822 },
-    locationText: 'عبدون، شارع القاهرة، بجانب دوار عبدون',
+    locationText: 'Abdoun, Cairo Street, next to Abdoun Circle',
     phone: '+96265921001',
     whatsapp: '+962790921001',
     open: '10:00',
@@ -174,9 +178,10 @@ export const DEMO_SALONS: readonly DemoSalonSpec[] = [
     name: 'Joury Ladies Salon',
     gender: 'FEMALE',
     state: 'LIVE',
-    description: 'صالون عائلي في خلدا بأسعار مناسبة: قص، سشوار، صبغة، أظافر ومكياج للمناسبات.',
+    description:
+      'A family salon in Khalda at fair prices: cuts, blow-dry, coloring, nails and occasion makeup.',
     place: { area: 'Khalda', lat: 31.993, lng: 35.838 },
-    locationText: 'خلدا، شارع وصفي التل، مجمع النخيل',
+    locationText: 'Khalda, Wasfi Al-Tal Street, Al-Nakheel Complex',
     phone: '+96265921003',
     whatsapp: '+962790921003',
     open: '09:00',
@@ -191,10 +196,9 @@ export const DEMO_SALONS: readonly DemoSalonSpec[] = [
     name: 'Al-Ostaz Barber Shop',
     gender: 'MALE',
     state: 'LIVE',
-    description:
-      'حلاقة رجالية كلاسيكية في الشميساني منذ سنوات: قص، ذقن، حلاقة بالموس وتجهيز العرسان.',
+    description: 'A classic barber shop in Shmeisani: cuts, beard, razor shave and groom packages.',
     place: { area: 'Shmeisani', lat: 31.97, lng: 35.902 },
-    locationText: 'الشميساني، شارع عبد الحميد شرف',
+    locationText: 'Shmeisani, Abdul Hamid Sharaf Street',
     phone: '+96265921004',
     whatsapp: '+962790921004',
     open: '10:00',
@@ -227,9 +231,9 @@ export const DEMO_SALONS: readonly DemoSalonSpec[] = [
     name: 'Classic Cuts Jubeiha',
     gender: 'MALE',
     state: 'LIVE',
-    description: 'صالون رجالي قريب من الجامعة الأردنية: قصات حديثة وأسعار طلابية.',
+    description: 'A men’s salon near the University of Jordan: modern cuts at student prices.',
     place: { area: 'Jubeiha', lat: 32.017, lng: 35.872 },
-    locationText: 'الجبيهة، شارع ياجوز، مقابل المجمع التجاري',
+    locationText: 'Jubeiha, Yajouz Street, opposite the shopping complex',
     phone: '+96265921006',
     whatsapp: '+962790921006',
     open: '10:00',
@@ -244,9 +248,9 @@ export const DEMO_SALONS: readonly DemoSalonSpec[] = [
     name: 'Nour Hair Studio',
     gender: 'FEMALE',
     state: 'OFFLINE',
-    description: 'استوديو شعر في الشميساني متخصص بالكيراتين والصبغات.',
+    description: 'A hair studio in Shmeisani specialised in keratin and coloring.',
     place: { area: 'Gardens', lat: 31.989, lng: 35.865 },
-    locationText: 'الجاردنز، شارع وصفي التل',
+    locationText: 'Gardens, Wasfi Al-Tal Street',
     phone: '+96265921007',
     whatsapp: '+962790921007',
     open: '10:00',
@@ -616,7 +620,7 @@ export const DEMO_BRANCHES: readonly DemoBranchSpec[] = [
     key: 'khalda',
     name: { ar: 'خلدا', en: 'Khalda' },
     place: { area: 'Khalda', lat: 31.9946, lng: 35.8366 },
-    locationText: 'خلدا، شارع وصفي التل، مقابل مجمع الحسيني',
+    locationText: 'Khalda, Wasfi Al-Tal Street, opposite Al-Husseini Complex',
     phone: '+96265921011',
     open: '10:00',
     close: '22:00',
@@ -642,7 +646,7 @@ export const DEMO_BRANCHES: readonly DemoBranchSpec[] = [
     key: 'shmeisani',
     name: { ar: 'الشميساني', en: 'Shmeisani' },
     place: { area: 'Shmeisani', lat: 31.9706, lng: 35.9006 },
-    locationText: 'الشميساني، شارع عبد الحميد شرف',
+    locationText: 'Shmeisani, Abdul Hamid Sharaf Street',
     phone: '+96265921014',
     open: '09:00',
     close: '23:00',

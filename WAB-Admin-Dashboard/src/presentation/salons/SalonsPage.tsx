@@ -4,14 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
 import { ROUTES } from '@/constants/routes';
 import { SALON_GENDERS, SALON_STATES, SUBSCRIPTION_STATUSES } from '@/domain/salons/salons';
+import { ExportMenu } from '../components/data/ExportMenu';
 import { SearchField } from '../components/form/SearchField';
 import { Select } from '../components/form/Select';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
+import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
 import { useLocationOptions } from '../hooks/useLocationOptions';
 import { salonColumns } from './SalonColumns';
-import { SALON_FILTER_KEYS, salonQueryOf } from './salonFilters';
+import { SALON_FILTER_KEYS, salonExportParams, salonQueryOf } from './salonFilters';
 
 const OPTIONS = { filterKeys: SALON_FILTER_KEYS };
 
@@ -24,6 +26,7 @@ export default function SalonsPage() {
   const list = useListController(OPTIONS);
   const { state } = list;
   const cities = useLocationOptions('cities');
+  const runner = useExportRunner();
   const f = (key: string) => state.filters[key]?.[0] ?? '';
   const query = useQuery({
     queryKey: ['getSalons', state],
@@ -81,6 +84,7 @@ export default function SalonsPage() {
     <ListPage
       title={title}
       subtitle={t('salons.subtitle')}
+      actions={<ExportMenu onExport={runner('SALONS', salonExportParams(salonQueryOf(state)))} />}
       filters={{
         active: chips,
         onClearAll: list.clearFilters,

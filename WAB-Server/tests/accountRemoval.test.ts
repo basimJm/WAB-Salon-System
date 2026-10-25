@@ -66,6 +66,7 @@ describe('salon deletion request (M25, SRV-133)', () => {
     expect(raised).toEqual([
       expect.objectContaining({
         kind: 'SALON_DELETION_REQUEST',
+        entityType: 'SALON',
         entityId: salonId.toHexString(),
         data: { salonName: 'Hifa', memberId: 'owner', note: 'Closing down' },
       }),

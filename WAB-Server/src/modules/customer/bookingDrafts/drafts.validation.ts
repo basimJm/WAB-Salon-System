@@ -6,6 +6,7 @@ import {
 import { OBJECT_ID_PATTERN } from '../../../constants/database';
 import { PAYMENT_OPTIONS } from '../../../constants/salon';
 import { AVAILABILITY_MAX_SERVICES } from '../../../constants/availability';
+import { instantInput } from '../../../utils/time/instantInput';
 
 const objectId = z.string().regex(OBJECT_ID_PATTERN);
 /** Main person + `booking.maxCompanions` is enforced by the service from settings; this is a sanity cap. */
@@ -32,7 +33,7 @@ export const createDraftBody = z.object({
         /** Omit for "any available staff". */
         staffId: objectId.optional(),
         /** Slot start (ISO instant); must be a slot returned by the availability endpoint. */
-        start: z.coerce.date(),
+        start: instantInput,
       }),
     )
     .min(1)

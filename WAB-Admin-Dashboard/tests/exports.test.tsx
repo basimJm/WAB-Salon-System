@@ -2,7 +2,13 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
-import { ExportTimeoutError, waitForExport, type ExportJob } from '@/domain/exports/exports';
+import { exportListSchema } from '@/data/exports/RemoteExportsRepository';
+import {
+  EXPORT_KINDS,
+  ExportTimeoutError,
+  waitForExport,
+  type ExportJob,
+} from '@/domain/exports/exports';
 import ExportsPage from '@/presentation/exports/ExportsPage';
 import TransactionsPage from '@/presentation/transactions/TransactionsPage';
 import { makeContainer, renderWithApp } from './helpers/render';
@@ -88,5 +94,27 @@ describe('export button', () => {
       ),
     );
     opened.mockRestore();
+  });
+});
+
+describe('real export jobs (ADM-079)', () => {
+  it('reads CUSTOMERS and SALONS jobs as the server sends them (no params key)', () => {
+    const real = (kind: string) => ({
+      id: '64c100000000000000000009',
+      kind,
+      format: 'XLSX',
+      status: 'DONE',
+      rowCount: 3,
+      failure: null,
+      createdAt: '2026-10-25T08:00:00.000Z',
+      finishedAt: '2026-10-25T08:00:02.000Z',
+      downloadUrl: null,
+    });
+    const parsed = exportListSchema().parse([real('CUSTOMERS'), real('SALONS')]);
+    expect(parsed.map((j) => [j.kind, j.params])).toEqual([
+      ['CUSTOMERS', {}],
+      ['SALONS', {}],
+    ]);
+    expect(EXPORT_KINDS).toEqual(expect.arrayContaining(['CUSTOMERS', 'SALONS']));
   });
 });

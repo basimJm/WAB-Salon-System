@@ -3,8 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import {
-  MAX_DESCRIPTION,
-  MAX_NAME,
   REQUEST_STATUSES,
   type ApproveInput,
   type CatalogRequest,
@@ -14,82 +12,18 @@ import { formatInstant } from '@/domain/shared/format';
 import { Badge } from '../components/core/Badge';
 import { Button } from '../components/core/Button';
 import type { Column } from '../components/data/tableTypes';
-import { TextField } from '../components/form/TextField';
 import { ReasonDialog } from '../components/overlay/ReasonDialog';
-import { reasonError, ResourceDrawer, Select } from '../components/overlay/ResourceDrawer';
+import { Select } from '../components/overlay/ResourceDrawer';
 import { useToast } from '../components/overlay/Toast';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useLanguage } from '../hooks/useLanguage';
 import { useResourcePanel } from '../hooks/useResourcePanel';
+import { ApproveDrawer } from './ApproveDrawer';
 
 const OPTIONS = { filterKeys: ['status'] };
 const DEFAULT_STATUS: RequestStatus = 'PENDING';
 const TONES = { PENDING: 'amber', APPROVED: 'green', REJECTED: 'rose' } as const;
-
-function ApproveDrawer({
-  item,
-  resource,
-}: {
-  item: CatalogRequest;
-  resource: ReturnType<typeof useApprove>;
-}) {
-  const { t } = useTranslation();
-  // The salon wrote the text in one language: start both fields from it and let the admin translate.
-  const [v, setV] = useState({
-    nameAr: item.name,
-    nameEn: item.name,
-    descAr: item.description,
-    descEn: item.description,
-    reason: '',
-  });
-  const [bad, setBad] = useState<ReadonlySet<string>>(new Set());
-  const submit = () => {
-    const found = new Set<string>();
-    if (!v.nameAr.trim() || v.nameAr.length > MAX_NAME) found.add('nameAr');
-    if (!v.nameEn.trim() || v.nameEn.length > MAX_NAME) found.add('nameEn');
-    if (!v.descAr.trim() || v.descAr.length > MAX_DESCRIPTION) found.add('descAr');
-    if (!v.descEn.trim() || v.descEn.length > MAX_DESCRIPTION) found.add('descEn');
-    if (reasonError(v.reason)) found.add('reason');
-    setBad(found);
-    if (found.size > 0) return;
-    resource.submit(
-      {
-        name: { ar: v.nameAr.trim(), en: v.nameEn.trim() },
-        description: { ar: v.descAr.trim(), en: v.descEn.trim() },
-        ...(item.imageKey ? { imageKey: item.imageKey } : {}),
-      },
-      v.reason.trim(),
-    );
-  };
-  const field = (k: 'nameAr' | 'nameEn' | 'descAr' | 'descEn', dir: 'rtl' | 'ltr', max: number) => (
-    <TextField
-      label={t(`catalog.${k}`)}
-      dir={dir}
-      value={v[k]}
-      error={bad.has(k) ? t(`catalog.error.${k}`, { max }) : undefined}
-      onChange={(e) => setV({ ...v, [k]: e.target.value })}
-    />
-  );
-  return (
-    <ResourceDrawer
-      title={t('catalog.approveTitle')}
-      reason={v.reason}
-      reasonErr={bad.has('reason') ? 'appConfig.error.reason' : undefined}
-      onReason={(reason) => setV({ ...v, reason })}
-      saving={resource.saving}
-      error={resource.saveError}
-      onSubmit={submit}
-      onClose={resource.close}
-    >
-      <p className="wab-field__hint">{t('catalog.approveHint', { name: item.name })}</p>
-      {field('nameAr', 'rtl', MAX_NAME)}
-      {field('nameEn', 'ltr', MAX_NAME)}
-      {field('descAr', 'rtl', MAX_DESCRIPTION)}
-      {field('descEn', 'ltr', MAX_DESCRIPTION)}
-    </ResourceDrawer>
-  );
-}
 
 function useApprove(state: ReturnType<typeof useListController>['state'], status: RequestStatus) {
   const { repositories } = useContainer();
@@ -102,7 +36,7 @@ function useApprove(state: ReturnType<typeof useListController>['state'], status
   });
 }
 
-/** Admin PRD A23 · Salon suggestions for new catalog services: approve (creates the service) or reject with a note. */
+/** Admin PRD A23 · Salon suggestions for new catalog services: approve (creates or maps to a service) or reject with a note. */
 export default function RequestsPage() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -199,7 +133,10 @@ export default function RequestsPage() {
         <ApproveDrawer
           key={resource.panel.editing.id}
           item={resource.panel.editing}
-          resource={resource}
+          saving={resource.saving}
+          error={resource.saveError}
+          onSubmit={resource.submit}
+          onClose={resource.close}
         />
       ) : null}
       <ReasonDialog
