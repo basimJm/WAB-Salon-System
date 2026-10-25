@@ -21,9 +21,11 @@ import { reasonError, ResourceDrawer } from '../components/overlay/ResourceDrawe
 import { useToast } from '../components/overlay/Toast';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
+import { useBranchNames } from '../hooks/useBranchOptions';
 import { useLanguage } from '../hooks/useLanguage';
+import { SalonBranchFilters } from '../shared/SalonBranchFilters';
 
-const OPTIONS = { filterKeys: ['status'] };
+const OPTIONS = { filterKeys: ['status', 'salon', 'branch'] };
 type Ask = { kind: 'retry' | 'manual'; refund: Refund } | null;
 
 function ManualDrawer({
@@ -86,11 +88,18 @@ export default function RefundsPage() {
   const list = useListController(OPTIONS);
   const { state } = list;
   const status = REFUND_STATUSES.find((s) => s === state.filters['status']?.[0]);
+  const f = (k: string) => state.filters[k]?.[0] ?? '';
   const [asking, setAsking] = useState<Ask>(null);
   const query = useQuery({
     queryKey: ['getRefunds', state],
     queryFn: () =>
-      repo.list({ page: state.page, pageSize: state.pageSize, ...(status ? { status } : {}) }),
+      repo.list({
+        page: state.page,
+        pageSize: state.pageSize,
+        ...(status ? { status } : {}),
+        ...(f('salon') ? { salonId: f('salon') } : {}),
+        ...(f('salon') && f('branch') ? { branchId: f('branch') } : {}),
+      }),
   });
   const act = useMutation({
     mutationFn: async (a: { reason: string; reference?: string }) => {
@@ -104,6 +113,7 @@ export default function RefundsPage() {
       await queryClient.invalidateQueries({ queryKey: ['getRefunds'] });
     },
   });
+  const branchNames = useBranchNames((query.data?.items ?? []).map((r) => r.salonId));
   const now = new Date();
   const title = t('nav.sub.refunds');
   const columns: Column<Refund>[] = [
@@ -123,6 +133,11 @@ export default function RefundsPage() {
       key: 'source',
       header: t('refunds.source'),
       render: (r) => t(`refunds.sources.${r.source}`, { defaultValue: r.source }),
+    },
+    {
+      key: 'branch',
+      header: t('branches.name'),
+      render: (r) => (r.branchId ? (branchNames.get(r.branchId) ?? '—') : '—'),
     },
     { key: 'attempts', header: t('transactions.attempt'), ltr: true, render: (r) => r.attempts },
     {
@@ -161,15 +176,27 @@ export default function RefundsPage() {
             : [],
           onClearAll: list.clearFilters,
           controls: (
-            <Select
-              label={t('salons.state')}
-              value={status ?? ''}
-              options={[
-                { value: '', label: t('appConfig.all') },
-                ...REFUND_STATUSES.map((s) => ({ value: s, label: t(`status.refund.${s}`) })),
-              ]}
-              onChange={(e) => list.setFilter('status', e.target.value ? [e.target.value] : [])}
-            />
+            <>
+              <SalonBranchFilters
+                salon={f('salon')}
+                branch={f('branch')}
+                onChange={(v) =>
+                  list.setFilters({
+                    salon: v.salon ? [v.salon] : [],
+                    branch: v.branch ? [v.branch] : [],
+                  })
+                }
+              />
+              <Select
+                label={t('salons.state')}
+                value={status ?? ''}
+                options={[
+                  { value: '', label: t('appConfig.all') },
+                  ...REFUND_STATUSES.map((s) => ({ value: s, label: t(`status.refund.${s}`) })),
+                ]}
+                onChange={(e) => list.setFilter('status', e.target.value ? [e.target.value] : [])}
+              />
+            </>
           ),
         }}
         table={{

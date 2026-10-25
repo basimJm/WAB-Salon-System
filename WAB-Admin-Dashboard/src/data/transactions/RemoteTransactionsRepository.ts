@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
+import { salonBranchQuerySchema } from '@/data/api/objectId';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
@@ -15,9 +16,12 @@ const OBJECT_ID = z
 const list = defineEndpoint(OPERATIONS.getTransactions, {
   data: dto.getTransactionsDataSchema,
   query: () =>
-    dto
-      .getTransactionsQuerySchema()
-      .extend({ salonId: OBJECT_ID, customerId: OBJECT_ID, bookingId: OBJECT_ID }),
+    dto.getTransactionsQuerySchema().extend({
+      salonId: OBJECT_ID,
+      branchId: OBJECT_ID,
+      customerId: OBJECT_ID,
+      bookingId: OBJECT_ID,
+    }),
 });
 const get = defineEndpoint(OPERATIONS.getTransactionsById, {
   data: dto.getTransactionsByIdDataSchema,
@@ -25,6 +29,7 @@ const get = defineEndpoint(OPERATIONS.getTransactionsById, {
 
 const reconcile = defineEndpoint(OPERATIONS.getFinanceReconciliation, {
   data: dto.getFinanceReconciliationDataSchema,
+  query: salonBranchQuerySchema,
 });
 
 export class RemoteTransactionsRepository implements TransactionsRepository {
@@ -38,6 +43,7 @@ export class RemoteTransactionsRepository implements TransactionsRepository {
         status: q.status,
         type: q.type,
         salonId: q.salonId,
+        branchId: q.branchId,
         customerId: q.customerId,
         bookingId: q.bookingId,
         from: q.from,
@@ -45,8 +51,8 @@ export class RemoteTransactionsRepository implements TransactionsRepository {
       }),
     });
 
-  reconciliation: TransactionsRepository['reconciliation'] = async () =>
-    (await this.api.execute(reconcile)).data;
+  reconciliation: TransactionsRepository['reconciliation'] = async (scope = {}) =>
+    (await this.api.execute(reconcile, { query: defined({ ...scope }) })).data;
 
   get: TransactionsRepository['get'] = async (id) =>
     (await this.api.execute(get, { params: { id } })).data;

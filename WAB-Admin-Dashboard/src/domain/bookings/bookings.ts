@@ -30,6 +30,12 @@ export interface BookingSummary {
   /** JOD amount as a 3-decimal string. */
   readonly total: string;
   readonly salon: { readonly id: string; readonly name: string } | null;
+  /** Branch of the booking (name localized by the server); null for very old records. */
+  readonly branch: {
+    readonly id: string;
+    readonly name: string;
+    readonly locationText: string | null;
+  } | null;
   readonly customer: { readonly id: string; readonly name: string; readonly phone: string } | null;
   readonly staff: readonly { readonly id: string; readonly name: string }[];
 }
@@ -84,6 +90,7 @@ export interface BookingQuery extends PageQuery {
   brideOnly?: boolean;
   paymentStatus?: PaymentStatus;
   salonId?: string;
+  branchId?: string;
   customerId?: string;
 }
 export interface StatusChangeResult {

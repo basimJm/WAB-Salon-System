@@ -34,6 +34,10 @@ import type { ReviewsService } from '../domain/reviews/reviews.service';
 import type { CustomerProfileService } from '../domain/customers/customerProfile.service';
 import type { BookingActionsService } from '../domain/bookings/bookingActions.service';
 import type { MerchantFinanceService } from '../domain/finance/merchantFinance.service';
+import type { MerchantReviewsService } from '../domain/reviews/merchantReviews.service';
+import type { MerchantStatisticsService } from '../domain/statistics/merchantStatistics.service';
+import type { MerchantDashboardService } from '../domain/dashboard/merchantDashboard.service';
+import type { MemberSelfService } from '../domain/team/memberSelf.service';
 import type { PayoutDetailsService } from '../domain/salons/payoutDetails.service';
 import type { SubscriptionsService } from '../domain/subscriptions/subscriptions.service';
 import type { PayoutsService } from '../domain/payouts/payouts.service';
@@ -119,6 +123,12 @@ export interface ApiServices {
   readonly adminExports?: ExportsService;
   readonly payoutDetails?: PayoutDetailsService;
   readonly merchantFinance?: MerchantFinanceService;
+  readonly merchantReviews?: MerchantReviewsService;
+  readonly merchantStatistics?: MerchantStatisticsService;
+  readonly merchantDashboard?: MerchantDashboardService;
+  readonly memberSelf?: MemberSelfService;
+  /** Owner deletion requests (merchant) and admin decisions share one service. */
+  readonly salonDeletion?: SalonDeletionService;
   readonly adminSubscriptions?: SubscriptionsService;
   readonly bookingBulk?: BookingBulkService;
   readonly bookingAdmin?: BookingAdminService;
@@ -221,6 +231,7 @@ export const unavailableAdminLogin: AdminLoginService = {
 export const unavailableInstallationService: InstallationService = {
   register: unavailableCustomerAuthError,
   setPushEnabled: unavailableCustomerAuthError,
+  setMemberPushEnabled: unavailableCustomerAuthError,
 };
 
 export const unavailableAppConfigService: AppConfigService = { get: unavailable };
@@ -319,6 +330,8 @@ export const unavailableHours: HoursService = {
   addClosure: unavailable,
   updateClosure: unavailable,
   removeClosure: unavailable,
+  previewWeekly: unavailable,
+  previewClosure: unavailable,
 };
 
 export const unavailableSalonServices: SalonServicesService = {
@@ -344,10 +357,15 @@ export const unavailableTeam: TeamService = {
   reactivate: unavailable,
 };
 
-export const unavailableStaff: StaffService = { get: unavailable, set: unavailable };
+export const unavailableStaff: StaffService = {
+  get: unavailable,
+  set: unavailable,
+  preview: unavailable,
+};
 
 export const unavailableLeaves: LeavesService = {
   list: unavailable,
+  preview: unavailable,
   add: unavailable,
   update: unavailable,
   remove: unavailable,
@@ -418,7 +436,7 @@ export const unavailableAdminSalonInsights = {
     analytics: unavailable,
     activity: unavailable,
   } satisfies SalonInsightsService,
-  deletion: { decide: unavailable } satisfies SalonDeletionService,
+  deletion: { decide: unavailable, request: unavailable } satisfies SalonDeletionService,
 };
 
 export const unavailableAdminSalonEdit: AdminSalonEditService = {
@@ -642,4 +660,17 @@ export const unavailableAdminBranches: AdminBranchesService = {
   setOffline: unavailable,
   setOnline: unavailable,
   close: unavailable,
+};
+
+export const unavailableMerchantReviews: MerchantReviewsService = { list: unavailable };
+
+export const unavailableMerchantStatistics: MerchantStatisticsService = { get: unavailable };
+
+export const unavailableMerchantDashboard: MerchantDashboardService = { get: unavailable };
+
+export const unavailableMemberSelf: MemberSelfService = {
+  get: unavailable,
+  update: unavailable,
+  changePhone: unavailable,
+  leave: unavailable,
 };

@@ -2,7 +2,12 @@ package com.fab.wab.merchant.feature.salon.presentation
 
 import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.branch.Branch
+import com.fab.wab.merchant.core.domain.branch.BranchName
+import com.fab.wab.merchant.core.domain.branch.BranchScope
+import com.fab.wab.merchant.core.domain.branch.BranchStatus
 import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.session.MemberScope
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
 import com.fab.wab.merchant.core.ui.media.FakeFilePicker
 import com.fab.wab.merchant.core.ui.media.PickedFile
@@ -15,17 +20,18 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.vm.CatalogPick
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.ServiceEditDependencies
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.ServiceEditViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.ServicesViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ServicesViewModelTest {
@@ -143,5 +149,28 @@ class ServicesViewModelTest {
     @Test
     fun unknownServiceShowsAnError() = runTest(UnconfinedTestDispatcher()) {
         assertEquals("failed", edit("missing", null).state.first { !it.loading }.error)
+    }
+
+    @Test
+    fun ownerServicesFollowTheEditedBranchForListToggleAndSave() = runTest(UnconfinedTestDispatcher()) {
+        val branches = listOf("b1", "b2").map {
+            Branch(it, BranchName(it, it), it == "b1", BranchStatus.ACTIVE, null, null, null, null, null, null, null, emptyList())
+        }
+        val scope = MutableStateFlow(BranchScope(MemberScope.AllBranches, branches, null))
+        scope.value = scope.value.copy(selected = "b2")
+        val viewModel = ServicesViewModel(services, NoOpAnalyticsTracker, { "failed" }, backgroundScope, scope, {})
+            .also { vm -> backgroundScope.launch { vm.state.collect { } } }
+        viewModel.state.first { !it.loading && it.branchScope.edited == "b2" }
+        viewModel.onEvent(ServicesContract.UiAction.OnToggle("s2", true))
+        assertEquals(listOf<String?>("b2", "b2"), services.branchIds.takeLast(2))
+        val form = ServiceEditViewModel(
+            "s1", null,
+            ServiceEditDependencies(services, salon, picker, UploadFileUseCase(uploads), NoOpAnalyticsTracker, { "failed" }, scope),
+            backgroundScope,
+        ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
+        form.state.first { !it.loading }
+        form.onEvent(ServiceEditContract.UiAction.OnPrice("30"))
+        form.onEvent(ServiceEditContract.UiAction.OnSave)
+        assertEquals("b2", services.branchIds.last())
     }
 }

@@ -54,6 +54,8 @@ data class BookingCardUi(
     val isBride: Boolean = false,
     val pendingAge: Duration? = null,
     val autoCancelIn: Duration? = null,
+    /** Branch name, shown when the owner sees several branches at once (MER-063). */
+    val branch: String? = null,
 ) {
     val isPending: Boolean get() = status == BookingStatus.PENDING
     val showsAutoCancel: Boolean get() = isPending && autoCancelIn != null
@@ -120,6 +122,7 @@ private fun BookingMeta(booking: BookingCardUi) {
         MetaItem(AppIcons.Calendar, stringResource(Res.string.meta_pair, booking.date, booking.time))
         MetaItem(AppIcons.Companions, pluralStringResource(Res.plurals.booking_persons, booking.persons, booking.persons))
         if (booking.staff.isNotBlank()) MetaItem(AppIcons.Person, booking.staff)
+        booking.branch?.let { MetaItem(AppIcons.Store, it) }
     }
 }
 

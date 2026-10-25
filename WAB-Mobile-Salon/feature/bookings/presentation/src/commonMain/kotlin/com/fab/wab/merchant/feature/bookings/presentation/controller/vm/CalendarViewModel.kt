@@ -5,6 +5,7 @@ import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.core.domain.permission.Permission
 import com.fab.wab.merchant.core.domain.permission.permissionSet
 import com.fab.wab.merchant.core.domain.session.SessionState
@@ -23,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -38,6 +40,8 @@ class CalendarDependencies(
     val today: () -> LocalDate,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    val branchScope: Flow<BranchScope> = flowOf(BranchScope()),
+    val selectBranch: (String?) -> Unit = {},
 )
 
 /** PRD M11: day / week pages, staff filter, own column for `BOOKINGS_VIEW_OWN`, tap → M09, live updates. */
@@ -51,6 +55,11 @@ class CalendarViewModel(
     override fun onStart() {
         deps.changes.onEach { load(silent = true) }.launchIn(scope)
         deps.clock.onEach { now -> updateState { copy(nowMs = now) } }.launchIn(scope)
+        deps.branchScope.onEach { branches ->
+            val changed = branches.filter != uiState.value.branchScope.filter
+            updateState { copy(branchScope = branches, staffFilter = if (changed) emptySet() else staffFilter) }
+            if (changed) load()
+        }.launchIn(scope)
         scope.launch {
             val own = ownColumn(deps.session.first())
             updateState { copy(own = own) }
@@ -94,6 +103,7 @@ class CalendarViewModel(
                 show(day, force = true)
             }
             UiAction.OnRetry -> load()
+            is UiAction.OnBranchSelect -> deps.selectBranch(event.branchId)
             else -> return false
         }
         return true
@@ -111,7 +121,11 @@ class CalendarViewModel(
             val state = uiState.value
             if (!silent) updateState { copy(loading = true, error = null) }
             val days = state.days
-            val filter = if (state.own == null) state.staffFilter else emptySet()
+            val filter = when {
+                state.own != null -> emptySet()
+                state.staffFilter.isNotEmpty() -> state.staffFilter
+                else -> state.visibleStaff.takeIf { state.branchScope.filter != null }?.map { it.id }?.toSet().orEmpty()
+            }
             when (val result = deps.calendar.entries(days.first(), days.last(), filter)) {
                 is AppResult.Success -> updateState { copy(entries = result.data, loading = false, error = null) }
                 is AppResult.Error -> {

@@ -57,6 +57,8 @@ export interface SalonMember {
   readonly active: boolean;
   readonly providesServices: boolean;
   readonly permissions: readonly string[];
+  /** The member's branch; null for the owner (all branches). */
+  readonly branchId: string | null;
 }
 
 export interface PayoutDetails {
@@ -127,7 +129,8 @@ export type DeletionDecision = 'APPROVE' | 'REJECT';
 export interface SalonsRepository {
   list(query: SalonQuery): Promise<Page<SalonSummary>>;
   get(id: string): Promise<SalonDetails>;
-  members(id: string): Promise<readonly SalonMember[]>;
+  /** Every member, or only the members of one branch. */
+  members(id: string, branchId?: string): Promise<readonly SalonMember[]>;
   kpis(id: string): Promise<SalonKpis>;
   /** Bookings per Amman day between two local days (inclusive). */
   analytics(id: string, range: { from: string; to: string }): Promise<SalonAnalytics>;

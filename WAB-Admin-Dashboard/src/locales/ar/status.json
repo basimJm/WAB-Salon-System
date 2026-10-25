@@ -86,6 +86,11 @@
       "RUNNING": "قيد التنفيذ",
       "DONE": "جاهز",
       "FAILED": "فشل"
+    },
+    "branch": {
+      "ACTIVE": "نشط",
+      "OFFLINE": "غير متاح",
+      "CLOSED": "مغلق"
     }
   }
 }

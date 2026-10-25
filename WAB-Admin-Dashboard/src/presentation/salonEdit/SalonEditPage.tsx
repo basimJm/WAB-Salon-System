@@ -8,6 +8,7 @@ import { PageHeader } from '../components/core/PageHeader';
 import { Tabs } from '../components/data/Tabs';
 import { AsyncView } from '../components/feedback/AsyncView';
 import { Skeleton } from '../components/feedback/Skeleton';
+import { BranchPicker, useBranchSelection } from './BranchPicker';
 import { GalleryTab } from './GalleryTab';
 import { HoursTab } from './HoursTab';
 import { PolicyTab } from './PolicyTab';
@@ -16,6 +17,8 @@ import { ServicesTab } from './ServicesTab';
 import { StaffTab } from './StaffTab';
 
 const TABS = ['profile', 'gallery', 'hours', 'services', 'staff', 'policy'] as const;
+/** Tabs whose data belongs to one branch (BUSINESS_DOMAIN §3.3a); the others are salon-wide. */
+const BRANCH_TABS: ReadonlySet<string> = new Set(['hours', 'services', 'staff']);
 type TabId = (typeof TABS)[number];
 
 /** Admin PRD A13 · edit a salon on its behalf: every change asks for a reason, is audited and told to the owner. */
@@ -28,13 +31,15 @@ export default function SalonEditPage() {
     queryKey: ['getSalonsById', id],
     queryFn: () => repositories.salons.get(id),
   });
+  const branch = useBranchSelection(id);
+  const { scope } = branch;
   const gender = salon.data?.gender ?? 'FEMALE';
   const content: Record<TabId, React.ReactNode> = {
     profile: <ProfileTab salonId={id} />,
     gallery: <GalleryTab salonId={id} />,
-    hours: <HoursTab salonId={id} />,
-    services: <ServicesTab salonId={id} gender={gender} />,
-    staff: <StaffTab salonId={id} gender={gender} />,
+    hours: <HoursTab scope={scope} />,
+    services: <ServicesTab scope={scope} gender={gender} />,
+    staff: <StaffTab scope={scope} gender={gender} branches={branch.open} />,
     policy: <PolicyTab salonId={id} />,
   };
   return (
@@ -50,6 +55,7 @@ export default function SalonEditPage() {
         onRetry={() => void salon.refetch()}
         skeleton={<Skeleton height="lg" />}
       >
+        {BRANCH_TABS.has(tab) ? <BranchPicker selection={branch} /> : null}
         <Tabs
           ariaLabel={t('salonEdit.title', { name: salon.data?.name ?? '' })}
           activeId={tab}

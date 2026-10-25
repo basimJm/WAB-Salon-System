@@ -33,6 +33,7 @@ import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.team.domain.PermissionGroup
+import com.fab.wab.merchant.feature.team.domain.visiblePermissions
 import com.fab.wab.merchant.feature.team.presentation.analytics.TeamAnalytics
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.PermissionsContract.UiAction
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.PermissionsContract.UiState
@@ -112,7 +113,7 @@ private fun GroupCard(group: PermissionGroup, state: UiState, onAction: (UiActio
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
             AppText(text = stringResource(group.title()), style = AppTheme.typography.labelLarge, color = AppTheme.colors.accent)
-            group.permissions.forEachIndexed { index, permission ->
+            group.visiblePermissions(state.member).forEachIndexed { index, permission ->
                 if (index > 0) AppDivider()
                 PermissionRow(
                     permission,

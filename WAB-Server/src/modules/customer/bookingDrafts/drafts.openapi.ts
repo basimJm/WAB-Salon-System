@@ -14,6 +14,10 @@ import { createDraftBody, draftParams, verifyOtpBody } from './drafts.validation
 const draft = z.object({
   id: z.string(),
   salon: z.object({ id: z.string(), name: z.string() }),
+  branch: z
+    .object({ id: z.string(), name: z.string(), locationText: z.string().nullable() })
+    .nullable()
+    .describe('The branch of the appointment'),
   expiresAt: z.string(),
   paymentMethod: z.enum(['PAY_ON_ARRIVAL', 'DEPOSIT', 'FULL_ONLINE']),
   persons: z.array(

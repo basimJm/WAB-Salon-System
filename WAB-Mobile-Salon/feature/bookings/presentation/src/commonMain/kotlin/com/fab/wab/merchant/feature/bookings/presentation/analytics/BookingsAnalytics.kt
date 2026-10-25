@@ -7,6 +7,7 @@ object BookingsAnalytics {
     val SCREEN_LIST = AnalyticsScreen("bookings")
     val SCREEN_DETAILS = AnalyticsScreen("booking_details")
     val SCREEN_REQUEST = AnalyticsScreen("booking_request_sheet")
+    val SCREEN_REQUEST_OVERLAY = AnalyticsScreen("booking_request_overlay")
     val SCREEN_CALENDAR = AnalyticsScreen("calendar")
     const val ACTION_SHOWN = "request_shown"
     const val ACTION_ACCEPT = "request_accept"
@@ -25,6 +26,8 @@ object BookingsAnalytics {
 
     /** Request channels of PRD §14 (`overlay` / `notification` are the outside-the-app paths, MER-029/030). */
     const val CHANNEL_IN_APP = "in_app"
+    const val CHANNEL_OVERLAY = "overlay"
+    const val CHANNEL_NOTIFICATION = "notification"
     const val PARAM_TAB = "tab"
     const val PARAM_COUNT = "count"
     const val PARAM_MODE = "mode"

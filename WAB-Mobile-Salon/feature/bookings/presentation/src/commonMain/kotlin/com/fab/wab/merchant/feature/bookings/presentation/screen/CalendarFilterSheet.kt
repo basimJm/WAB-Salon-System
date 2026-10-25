@@ -48,7 +48,7 @@ internal fun CalendarFilterSheet(state: UiState, onAction: (UiAction) -> Unit) {
                 color = AppTheme.colors.muted,
             )
             CheckRow(stringResource(Res.string.calendar_filter_all), selected.isEmpty()) { selected = emptySet() }
-            state.staff.forEach { staff ->
+            state.visibleStaff.forEach { staff ->
                 CheckRow(staff.name, staff.id in selected) {
                     selected = if (staff.id in selected) selected - staff.id else selected + staff.id
                 }

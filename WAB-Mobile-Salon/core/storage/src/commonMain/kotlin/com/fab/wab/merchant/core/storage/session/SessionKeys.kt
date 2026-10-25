@@ -11,6 +11,9 @@ object SessionKeys {
     val SALON_ID: Key<String> = stringPreferencesKey("salon_id")
     val MEMBER_FIRST_NAME: Key<String> = stringPreferencesKey("member_first_name")
     val MEMBER_ROLE: Key<String> = stringPreferencesKey("member_role")
+
+    /** Branch of a manager / employee (absent for the owner = every branch). */
+    val MEMBER_BRANCH_ID: Key<String> = stringPreferencesKey("member_branch_id")
     val PERMISSIONS: Key<Set<String>> = stringSetPreferencesKey("permissions")
     val SALON_STATE: Key<String> = stringPreferencesKey("salon_state")
     val PUSH_ENABLED: Key<Boolean> = booleanPreferencesKey("push_enabled")

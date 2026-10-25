@@ -15,6 +15,8 @@
     <string name="tile_services_sub">خدماتك وأسعارها</string>
     <string name="tile_team">الطاقم والفريق</string>
     <string name="tile_team_sub">الأعضاء ومقدمو الخدمات</string>
+    <string name="tile_branches">الفروع</string>
+    <string name="tile_branches_sub">المواقع والحالة والفرع الرئيسي</string>
     <string name="tile_policies">السياسات</string>
     <string name="tile_policies_sub">الإلغاء، الدفع، العربون</string>
     <string name="tile_reviews">التقييمات</string>

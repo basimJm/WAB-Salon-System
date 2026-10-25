@@ -18,9 +18,13 @@ import { Select } from '../components/form/Select';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useExportRunner } from '../hooks/useExportRunner';
+import { useBranchNames } from '../hooks/useBranchOptions';
 import { useLanguage } from '../hooks/useLanguage';
+import { SalonBranchFilters } from '../shared/SalonBranchFilters';
 
-const OPTIONS = { filterKeys: ['status', 'type', 'from', 'to', 'salon', 'customer', 'booking'] };
+const OPTIONS = {
+  filterKeys: ['status', 'type', 'from', 'to', 'salon', 'branch', 'customer', 'booking'],
+};
 const DETAILS = '/finance/transactions';
 
 /** The URL list state -> the API query (days are Amman days, `to` included). */
@@ -42,6 +46,7 @@ function queryOf(
     ...(from && isLocalDate(from) ? { from: localDayRange(from).start.toISOString() } : {}),
     ...(to && isLocalDate(to) ? { to: localDayRange(to).end.toISOString() } : {}),
     ...(first('salon') ? { salonId: first('salon') } : {}),
+    ...(first('salon') && first('branch') ? { branchId: first('branch') } : {}),
     ...(first('customer') ? { customerId: first('customer') } : {}),
     ...(first('booking') ? { bookingId: first('booking') } : {}),
   };
@@ -69,6 +74,7 @@ export default function TransactionsPage() {
     queryFn: () =>
       repositories.transactions.list(queryOf(state.filters, state.page, state.pageSize)),
   });
+  const branchNames = useBranchNames((query.data?.items ?? []).map((r) => r.salonId));
   const jod = (v: string | null) =>
     v ? `${formatJodAmount(v, language)} ${t('common.currency')}` : '—';
   const title = t('nav.sub.transactions');
@@ -87,6 +93,11 @@ export default function TransactionsPage() {
     { key: 'amount', header: t('transactions.amount'), ltr: true, render: (r) => jod(r.amount) },
     { key: 'fee', header: t('transactions.fee'), ltr: true, render: (r) => jod(r.gatewayFee) },
     { key: 'attempt', header: t('transactions.attempt'), ltr: true, render: (r) => r.attempt },
+    {
+      key: 'branch',
+      header: t('branches.name'),
+      render: (r) => (r.branchId ? (branchNames.get(r.branchId) ?? '—') : '—'),
+    },
     {
       key: 'code',
       header: t('transactions.gatewayCode'),
@@ -135,6 +146,16 @@ export default function TransactionsPage() {
         onClearAll: list.clearFilters,
         controls: (
           <>
+            <SalonBranchFilters
+              salon={f('salon')}
+              branch={f('branch')}
+              onChange={(v) =>
+                list.setFilters({
+                  salon: v.salon ? [v.salon] : [],
+                  branch: v.branch ? [v.branch] : [],
+                })
+              }
+            />
             <Select
               label={t('salons.state')}
               value={f('status')}

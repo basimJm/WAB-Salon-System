@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
-import { OBJECT_ID } from '@/data/api/objectId';
+import { OBJECT_ID, branchQuerySchema } from '@/data/api/objectId';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
-import type { SalonEditRepository } from '@/domain/salonEdit/salonEdit';
+import type { BranchScope, SalonEditRepository } from '@/domain/salonEdit/salonEdit';
 
 const O = OPERATIONS;
 const KEY = z
@@ -56,42 +56,58 @@ const E = {
     body: () =>
       dto.putSalonsByIdGalleryOrderBodySchema().extend({ ids: z.array(OBJECT_ID).max(100) }),
   }),
-  hours: defineEndpoint(O.getSalonsByIdHours, { data: dto.getSalonsByIdHoursDataSchema }),
+  hours: defineEndpoint(O.getSalonsByIdHours, {
+    data: dto.getSalonsByIdHoursDataSchema,
+    query: branchQuerySchema,
+  }),
   putHours: defineEndpoint(O.putSalonsByIdHours, {
+    query: branchQuerySchema,
     data: dto.putSalonsByIdHoursDataSchema,
     body: dto.putSalonsByIdHoursBodySchema,
   }),
   previewHours: defineEndpoint(O.postSalonsByIdHoursPreview, {
+    query: branchQuerySchema,
     data: dto.postSalonsByIdHoursPreviewDataSchema,
     body: dto.postSalonsByIdHoursPreviewBodySchema,
   }),
   previewClosure: defineEndpoint(O.postSalonsByIdClosuresPreview, {
+    query: branchQuerySchema,
     data: dto.postSalonsByIdClosuresPreviewDataSchema,
     body: dto.postSalonsByIdClosuresPreviewBodySchema,
   }),
   addClosure: defineEndpoint(O.postSalonsByIdClosures, {
+    query: branchQuerySchema,
     data: dto.postSalonsByIdClosuresDataSchema,
     body: dto.postSalonsByIdClosuresBodySchema,
   }),
   patchClosure: defineEndpoint(O.patchSalonsByIdClosuresByClosureId, {
+    query: branchQuerySchema,
     data: dto.patchSalonsByIdClosuresByClosureIdDataSchema,
     body: dto.patchSalonsByIdClosuresByClosureIdBodySchema,
   }),
   removeClosure: defineEndpoint(O.postSalonsByIdClosuresByClosureIdRemove, {
+    query: branchQuerySchema,
     data: dto.postSalonsByIdClosuresByClosureIdRemoveDataSchema,
     body: dto.postSalonsByIdClosuresByClosureIdRemoveBodySchema,
   }),
   services: defineEndpoint(O.getSalonsByIdServices, {
     data: dto.getSalonsByIdServicesDataSchema,
-    query: dto.getSalonsByIdServicesQuerySchema,
+    query: () => dto.getSalonsByIdServicesQuerySchema().extend({ branchId: OBJECT_ID.optional() }),
   }),
   addService: defineEndpoint(O.postSalonsByIdServices, {
+    query: branchQuerySchema,
     data: dto.postSalonsByIdServicesDataSchema,
     body: () => dto.postSalonsByIdServicesBodySchema().extend({ catalogServiceId: OBJECT_ID }),
   }),
   patchService: defineEndpoint(O.patchSalonsByIdServicesByServiceId, {
+    query: branchQuerySchema,
     data: dto.patchSalonsByIdServicesByServiceIdDataSchema,
     body: dto.patchSalonsByIdServicesByServiceIdBodySchema,
+  }),
+  moveMember: defineEndpoint(O.postSalonsByIdMembersByMemberIdBranch, {
+    data: dto.postSalonsByIdMembersByMemberIdBranchDataSchema,
+    body: () =>
+      dto.postSalonsByIdMembersByMemberIdBranchBodySchema().extend({ branchId: OBJECT_ID }),
   }),
   staff: defineEndpoint(O.getSalonsByIdMembersByMemberIdStaff, {
     data: dto.getSalonsByIdMembersByMemberIdStaffDataSchema,
@@ -109,6 +125,13 @@ const E = {
     body: dto.putSalonsByIdPolicyBodySchema,
   }),
 };
+
+const branchOf = (scope: BranchScope) => (scope.branchId ? { branchId: scope.branchId } : {});
+/** Path params and the optional `?branchId=` of a branch-scoped call (no branch = the main branch). */
+const at = (scope: BranchScope, extra: Record<string, string> = {}) => ({
+  params: { id: scope.salonId, ...extra },
+  query: branchOf(scope),
+});
 
 /** Largest page the services list accepts: a salon's whole menu in one request. */
 const SERVICES_PAGE_SIZE = 100;
@@ -136,52 +159,55 @@ export class RemoteSalonEditRepository implements SalonEditRepository {
     (await this.api.execute(E.orderGallery, { params: { id }, body: { ids: [...ids], reason } }))
       .data;
 
-  hours: SalonEditRepository['hours'] = async (id) =>
-    (await this.api.execute(E.hours, { params: { id } })).data;
+  hours: SalonEditRepository['hours'] = async (scope) =>
+    (await this.api.execute(E.hours, at(scope))).data;
 
-  previewHours: SalonEditRepository['previewHours'] = async (id, days) =>
-    (await this.api.execute(E.previewHours, { params: { id }, body: { days: [...days] } })).data;
+  previewHours: SalonEditRepository['previewHours'] = async (scope, days) =>
+    (await this.api.execute(E.previewHours, { ...at(scope), body: { days: [...days] } })).data;
 
-  saveHours: SalonEditRepository['saveHours'] = async (id, days, reason) =>
-    (await this.api.execute(E.putHours, { params: { id }, body: { days: [...days], reason } }))
-      .data;
+  saveHours: SalonEditRepository['saveHours'] = async (scope, days, reason) =>
+    (await this.api.execute(E.putHours, { ...at(scope), body: { days: [...days], reason } })).data;
 
-  previewClosure: SalonEditRepository['previewClosure'] = async (id, range) =>
-    (await this.api.execute(E.previewClosure, { params: { id }, body: range })).data;
+  previewClosure: SalonEditRepository['previewClosure'] = async (scope, range) =>
+    (await this.api.execute(E.previewClosure, { ...at(scope), body: range })).data;
 
-  addClosure: SalonEditRepository['addClosure'] = async (id, input, reason) =>
-    (await this.api.execute(E.addClosure, { params: { id }, body: { ...input, reason } })).data;
+  addClosure: SalonEditRepository['addClosure'] = async (scope, input, reason) =>
+    (await this.api.execute(E.addClosure, { ...at(scope), body: { ...input, reason } })).data;
 
-  updateClosure: SalonEditRepository['updateClosure'] = async (id, closureId, patch, reason) =>
+  updateClosure: SalonEditRepository['updateClosure'] = async (scope, closureId, patch, reason) =>
     (
       await this.api.execute(E.patchClosure, {
-        params: { id, closureId },
+        ...at(scope, { closureId }),
         body: { ...patch, reason },
       })
     ).data;
 
-  removeClosure: SalonEditRepository['removeClosure'] = async (id, closureId, reason) => {
-    await this.api.execute(E.removeClosure, { params: { id, closureId }, body: { reason } });
+  removeClosure: SalonEditRepository['removeClosure'] = async (scope, closureId, reason) => {
+    await this.api.execute(E.removeClosure, { ...at(scope, { closureId }), body: { reason } });
   };
 
-  services: SalonEditRepository['services'] = async (id) =>
+  services: SalonEditRepository['services'] = async (scope) =>
     (
       await this.api.execute(E.services, {
-        params: { id },
-        query: { pageSize: SERVICES_PAGE_SIZE },
+        params: { id: scope.salonId },
+        query: { pageSize: SERVICES_PAGE_SIZE, ...branchOf(scope) },
       })
     ).data;
 
-  addService: SalonEditRepository['addService'] = async (id, input, reason) =>
-    (await this.api.execute(E.addService, { params: { id }, body: { ...input, reason } })).data;
+  addService: SalonEditRepository['addService'] = async (scope, input, reason) =>
+    (await this.api.execute(E.addService, { ...at(scope), body: { ...input, reason } })).data;
 
-  updateService: SalonEditRepository['updateService'] = async (id, serviceId, patch, reason) =>
+  updateService: SalonEditRepository['updateService'] = async (scope, serviceId, patch, reason) =>
     (
       await this.api.execute(E.patchService, {
-        params: { id, serviceId },
+        ...at(scope, { serviceId }),
         body: { ...patch, reason },
       })
     ).data;
+
+  moveMember: SalonEditRepository['moveMember'] = async (id, memberId, branchId, reason) => {
+    await this.api.execute(E.moveMember, { params: { id, memberId }, body: { branchId, reason } });
+  };
 
   staff: SalonEditRepository['staff'] = async (id, memberId) =>
     (await this.api.execute(E.staff, { params: { id, memberId } })).data;

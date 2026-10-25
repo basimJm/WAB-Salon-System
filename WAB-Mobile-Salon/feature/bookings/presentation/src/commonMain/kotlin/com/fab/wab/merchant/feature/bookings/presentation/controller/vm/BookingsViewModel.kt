@@ -5,6 +5,7 @@ import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingFilter
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -34,6 +36,9 @@ class BookingsDependencies(
     val clock: Flow<Long>,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    /** BUSINESS_DOMAIN §6 branch scope (owner switcher); a fixed "own branch" scope when not provided. */
+    val branchScope: Flow<BranchScope> = flowOf(BranchScope()),
+    val selectBranch: (String?) -> Unit = {},
 )
 
 /** PRD M08 bookings list. */
@@ -51,6 +56,11 @@ class BookingsViewModel(
         typed.drop(1).debounce(BookingsDefaults.SEARCH_DEBOUNCE_MS).onEach { reload() }.launchIn(scope)
         deps.changes.onEach { reload(refreshing = true) }.launchIn(scope)
         deps.clock.onEach { now -> updateState { copy(nowMs = now) } }.launchIn(scope)
+        deps.branchScope.onEach { branches ->
+            val changed = branches.filter != uiState.value.branchScope.filter
+            updateState { copy(branchScope = branches, filter = if (changed) filter.copy(staffIds = emptySet()) else filter) }
+            if (changed) reload()
+        }.launchIn(scope)
         scope.launch { (deps.repository.staff() as? AppResult.Success)?.let { staff -> updateState { copy(staffOptions = staff.data) } } }
         reload()
     }
@@ -73,6 +83,7 @@ class BookingsViewModel(
             UiAction.OnLoadMore -> loadMore()
             UiAction.OnRefresh -> reload(refreshing = true)
             UiAction.OnRetry -> reload()
+            is UiAction.OnBranchSelect -> deps.selectBranch(event.branchId)
         }
     }
 
@@ -87,7 +98,7 @@ class BookingsViewModel(
         reload()
     }
 
-    private fun currentQuery(): BookingQuery = uiState.value.let { BookingQuery(it.tab, it.query, it.filter) }
+    private fun currentQuery(): BookingQuery = uiState.value.let { BookingQuery(it.tab, it.query, it.filter, it.branchScope.filter) }
 
     private fun reload(refreshing: Boolean = false) {
         loadJob?.cancel()

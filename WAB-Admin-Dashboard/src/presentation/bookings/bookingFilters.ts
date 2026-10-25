@@ -18,6 +18,7 @@ export const BOOKING_FILTER_KEYS = [
   'from',
   'to',
   'salon',
+  'branch',
   'customer',
 ];
 const first = (state: ListState, key: string): string | undefined => state.filters[key]?.[0];
@@ -32,6 +33,7 @@ export function bookingQueryOf(state: ListState): BookingQuery {
   const from = first(state, 'from');
   const to = first(state, 'to');
   const salon = first(state, 'salon');
+  const branch = first(state, 'branch');
   const customer = first(state, 'customer');
   return {
     page: state.page,
@@ -43,6 +45,7 @@ export function bookingQueryOf(state: ListState): BookingQuery {
     ...(from && isLocalDate(from) ? { from: localDayRange(from).start.toISOString() } : {}),
     ...(to && isLocalDate(to) ? { to: localDayRange(to).end.toISOString() } : {}),
     ...(salon ? { salonId: salon } : {}),
+    ...(salon && branch ? { branchId: branch } : {}),
     ...(customer ? { customerId: customer } : {}),
     ...(state.search ? { q: state.search } : {}),
   };
@@ -57,6 +60,7 @@ export function bookingExportParams(q: BookingQuery): Record<string, unknown> {
     statuses: q.status && q.status.length > 0 ? [...q.status] : [...BOOKING_STATUSES],
     ...(q.paymentStatus ? { paymentStatus: q.paymentStatus } : {}),
     ...(q.salonId ? { salonId: q.salonId } : {}),
+    ...(q.branchId ? { branchId: q.branchId } : {}),
     ...(q.customerId ? { customerId: q.customerId } : {}),
     ...(q.from ? { from: q.from } : {}),
     ...(q.to ? { to: q.to } : {}),

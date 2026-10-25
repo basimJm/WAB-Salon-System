@@ -1,5 +1,6 @@
 import { MOCK_CDN_BASE } from '@/constants/mock';
 import { defineEndpoint } from '../api/endpoint';
+import { OBJECT_ID, branchQuerySchema } from '../api/objectId';
 import * as dto from '../contract/generated/dto';
 import { OPERATIONS } from '../contract/generated/operations';
 import { mockRoute } from './mockRoute';
@@ -8,16 +9,17 @@ import { type Day, type SalonEditState, uid, withoutReason } from './salonEditSt
 
 const O = OPERATIONS;
 export function salonMenuRoutes(
-  of: (id: string | undefined) => SalonEditState,
+  of: (id: string | undefined, branchId?: string | null) => SalonEditState,
 ): readonly MockRoute[] {
   return [
     mockRoute(
       defineEndpoint(O.getSalonsByIdServices, {
         data: dto.getSalonsByIdServicesDataSchema,
-        query: dto.getSalonsByIdServicesQuerySchema,
+        query: () =>
+          dto.getSalonsByIdServicesQuerySchema().extend({ branchId: OBJECT_ID.optional() }),
       }),
-      ({ params }) => {
-        const rows = of(params['id']).services;
+      ({ params, query }) => {
+        const rows = of(params['id'], query.get('branchId')).services;
         return {
           data: rows,
           meta: { page: 1, pageSize: 100, total: rows.length, totalPages: 1 },
@@ -27,11 +29,12 @@ export function salonMenuRoutes(
     ),
     mockRoute(
       defineEndpoint(O.postSalonsByIdServices, {
+        query: branchQuerySchema,
         data: dto.postSalonsByIdServicesDataSchema,
         body: dto.postSalonsByIdServicesBodySchema,
       }),
-      ({ params, body }) => {
-        const s = of(params['id']);
+      ({ params, query, body }) => {
+        const s = of(params['id'], query.get('branchId'));
         const b = body as {
           catalogServiceId: string;
           price: string;
@@ -59,11 +62,14 @@ export function salonMenuRoutes(
     ),
     mockRoute(
       defineEndpoint(O.patchSalonsByIdServicesByServiceId, {
+        query: branchQuerySchema,
         data: dto.patchSalonsByIdServicesByServiceIdDataSchema,
         body: dto.patchSalonsByIdServicesByServiceIdBodySchema,
       }),
-      ({ params, body }) => {
-        const row = of(params['id']).services.find((x) => x.id === params['serviceId']);
+      ({ params, query, body }) => {
+        const row = of(params['id'], query.get('branchId')).services.find(
+          (x) => x.id === params['serviceId'],
+        );
         if (!row) throw new Error('no service');
         const patch = withoutReason(body);
         Object.assign(row, patch);

@@ -6,6 +6,7 @@ import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.booking.BookingStatus
+import com.fab.wab.merchant.core.domain.session.MemberScope
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.core.ui.alert.RequestAlert
 import com.fab.wab.merchant.designsystem.components.booking.HandledBy
@@ -45,6 +46,10 @@ class BookingRequestsDependencies(
     /** Name shown when the server does not say who handled the request. */
     val anotherMember: suspend () -> String,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    /** `request_shown` channel (PRD §14): in-app sheet, Android overlay or notification. */
+    val channel: String = BookingsAnalytics.CHANNEL_IN_APP,
+    /** MER-066: the member's branch scope; requests of another branch are never queued (the owner gets all). */
+    val memberScope: suspend () -> MemberScope = { MemberScope.AllBranches },
 )
 
 /** PRD M10: de-duplicated by booking id, queued ("1 of 3"), accept / reject in place, "handled by" then dismiss. */
@@ -114,6 +119,7 @@ class BookingRequestsViewModel(
         if (!seen.add(id)) return
         val details = (deps.repository.details(id) as? AppResult.Success)?.data
         if (details == null || details.summary.status != BookingStatus.PENDING) return
+        if (!deps.memberScope().accepts(details.summary.branch?.id)) return
         val wasEmpty = uiState.value.queue.isEmpty()
         updateState { copy(queue = queue + details) }
         if (wasEmpty) alertForCurrent()
@@ -226,7 +232,7 @@ class BookingRequestsViewModel(
             AnalyticsAction(
                 BookingsAnalytics.ACTION_SHOWN,
                 analyticsParams {
-                    text(BookingsAnalytics.PARAM_CHANNEL, BookingsAnalytics.CHANNEL_IN_APP)
+                    text(BookingsAnalytics.PARAM_CHANNEL, deps.channel)
                     flag(BookingsAnalytics.PARAM_BRIDE, current.summary.hasBride)
                 },
             ),

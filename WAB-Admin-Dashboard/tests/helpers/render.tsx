@@ -43,6 +43,7 @@ import { RemoteReportsRepository } from '@/data/reports/RemoteReportsRepository'
 import { RemoteAuditRepository } from '@/data/audit/RemoteAuditRepository';
 import { RemoteExportsRepository } from '@/data/exports/RemoteExportsRepository';
 import { RemoteSalonsRepository } from '@/data/salons/RemoteSalonsRepository';
+import { RemoteBranchesRepository } from '@/data/branches/RemoteBranchesRepository';
 import { RemoteLocationsRepository } from '@/data/locations/RemoteLocationsRepository';
 import { RemoteSettingsRepository } from '@/data/settings/RemoteSettingsRepository';
 import { FakeRealtimeClient } from '@/data/realtime/FakeRealtimeClient';
@@ -85,6 +86,7 @@ export function makeContainer(
       banners: new RemoteBannersRepository(api),
       catalog: new RemoteCatalogRepository(api),
       salons: new RemoteSalonsRepository(api),
+      branches: new RemoteBranchesRepository(api),
       exports: new RemoteExportsRepository(api),
       audit: new RemoteAuditRepository(api),
       reports: new RemoteReportsRepository(api),

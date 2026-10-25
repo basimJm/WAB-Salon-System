@@ -11,6 +11,8 @@ export const REVIEW_ROUTES = {
 } as const;
 /** Ratings are stored with one decimal place (BUSINESS_DOMAIN.md §3.3, §5.11). */
 export const RATING_DECIMAL_SCALE = 10;
+/** Merchant reviews read (SRV-131, Merchant PRD M20). */
+export const MERCHANT_REVIEW_ROUTES = { base: '/reviews' } as const;
 /** Admin moderation (A22). */
 export const ADMIN_REVIEW_ROUTES = {
   base: '/reviews',

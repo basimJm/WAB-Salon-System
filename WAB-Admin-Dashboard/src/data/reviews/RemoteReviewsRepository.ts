@@ -12,9 +12,11 @@ const OBJECT_ID = z.string().regex(/^[a-f0-9]{24}$/i);
 const list = defineEndpoint(OPERATIONS.getReviews, {
   data: dto.getReviewsDataSchema,
   query: () =>
-    dto
-      .getReviewsQuerySchema()
-      .extend({ salonId: OBJECT_ID.optional(), staffId: OBJECT_ID.optional() }),
+    dto.getReviewsQuerySchema().extend({
+      salonId: OBJECT_ID.optional(),
+      branchId: OBJECT_ID.optional(),
+      staffId: OBJECT_ID.optional(),
+    }),
 });
 const approve = defineEndpoint(OPERATIONS.postReviewsByIdApprove, {
   data: dto.postReviewsByIdApproveDataSchema,
@@ -44,6 +46,7 @@ export class RemoteReviewsRepository implements ReviewsRepository {
         status: q.status,
         target: q.target,
         salonId: q.salonId,
+        branchId: q.branchId,
         staffId: q.staffId,
         rating: q.rating,
       }),

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import { MAX_PAGE_SIZE } from '@/constants/ui';
-import type { SalonService } from '@/domain/salonEdit/salonEdit';
+import type { BranchScope, SalonService } from '@/domain/salonEdit/salonEdit';
 import { formatJodAmount, formatNumber } from '@/domain/shared/format';
 import { Button } from '../components/core/Button';
 import { DataTable } from '../components/data/DataTable';
@@ -14,15 +14,15 @@ import { useSalonMutation } from './useSalonMutation';
 
 const REFRESH = [['getSalonsByIdServices']] as const;
 
-export function ServicesTab({ salonId, gender }: { salonId: string; gender: 'MALE' | 'FEMALE' }) {
+export function ServicesTab({ scope, gender }: { scope: BranchScope; gender: 'MALE' | 'FEMALE' }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { repositories } = useContainer();
   const edit = repositories.salonEdit;
   const [open, setOpen] = useState<SalonService | 'new' | null>(null);
   const list = useQuery({
-    queryKey: ['getSalonsByIdServices', salonId],
-    queryFn: () => edit.services(salonId),
+    queryKey: ['getSalonsByIdServices', scope],
+    queryFn: () => edit.services(scope),
   });
   const catalog = useQuery({
     queryKey: ['getServices', 'options', gender],
@@ -31,13 +31,13 @@ export function ServicesTab({ salonId, gender }: { salonId: string; gender: 'MAL
   const close = () => setOpen(null);
   const create = useSalonMutation(
     (v: { input: Parameters<typeof edit.addService>[1]; reason: string }) =>
-      edit.addService(salonId, v.input, v.reason),
+      edit.addService(scope, v.input, v.reason),
     REFRESH,
     close,
   );
   const update = useSalonMutation(
     (v: { id: string; patch: Parameters<typeof edit.updateService>[2]; reason: string }) =>
-      edit.updateService(salonId, v.id, v.patch, v.reason),
+      edit.updateService(scope, v.id, v.patch, v.reason),
     REFRESH,
     close,
   );

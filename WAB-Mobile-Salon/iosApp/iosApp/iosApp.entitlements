@@ -10,5 +10,7 @@
 	<array>
 		<string>applinks:$(DEEP_LINK_HOST)</string>
 	</array>
+	<key>com.apple.developer.usernotifications.time-sensitive</key>
+	<true/>
 </dict>
 </plist>

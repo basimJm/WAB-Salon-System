@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.bookings.presentation.controller.contract
 
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.designsystem.components.calendar.CalendarMode
 import com.fab.wab.merchant.designsystem.components.calendar.weekOf
 import com.fab.wab.merchant.feature.bookings.domain.model.CalendarEntry
@@ -22,10 +23,24 @@ sealed interface CalendarContract {
         val error: String? = null,
         val filterOpen: Boolean = false,
         val nowMs: Long = 0L,
+        val branchScope: BranchScope = BranchScope(),
     ) {
         /** Days the current page shows (and loads). */
         val days: List<LocalDate> get() = if (mode == CalendarMode.DAY) listOf(date) else weekOf(date)
         val canFilter: Boolean get() = own == null
+
+        /**
+         * The calendar contract has no `branchId`: for the owner's branch choice the columns and blocks are narrowed to
+         * the staff of that branch (team members carry `branchId`). Branch members already get their branch only.
+         */
+        val visibleStaff: List<StaffRef>
+            get() = branchScope.filter?.let { id -> staff.filter { it.branchId == id } } ?: staff
+        val visibleEntries: List<CalendarEntry>
+            get() {
+                if (branchScope.filter == null) return entries
+                val ids = visibleStaff.map { it.id }.toSet()
+                return entries.filter { it.staffId in ids }
+            }
     }
 
     sealed interface UiAction {
@@ -39,6 +54,7 @@ sealed interface CalendarContract {
         data class OnBlockClick(val bookingId: String) : UiAction
         data class OnDayClick(val isoDate: String) : UiAction
         data object OnRetry : UiAction
+        data class OnBranchSelect(val branchId: String?) : UiAction
     }
 
     sealed interface SideEffect {

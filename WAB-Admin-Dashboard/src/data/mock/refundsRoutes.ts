@@ -3,13 +3,15 @@ import { OPERATIONS } from '../contract/generated/operations';
 import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
+import { MOCK_BRANCH_IDS } from './branchesFixture';
 
 type Status = 'REFUND_PENDING' | 'REFUNDED' | 'REFUND_FAILED';
 const refund = (n: number, status: Status, nextAttemptAt: string | null) => ({
   id: `64d8${String(n).padStart(20, '0')}`,
   bookingId: '64a000000000000000000e01' as string | null,
   transactionId: '64d9000000000000000000a1',
-  salonId: '64a000000000000000000501',
+  salonId: '64f000000000000000000001',
+  branchId: n === 2 ? MOCK_BRANCH_IDS.noorSecond : (MOCK_BRANCH_IDS.noorMain as string | null),
   customerId: '64a000000000000000000c01',
   amount: `${String(n * 10)}.000`,
   source: 'SALON_REJECT' as const,
@@ -43,7 +45,11 @@ export function refundsRoutes(): readonly MockRoute[] {
         query: dto.getRefundsQuerySchema,
       }),
       ({ query }) => {
-        const items = rows.filter((r) => !query.get('status') || r.status === query.get('status'));
+        const items = rows.filter(
+          (r) =>
+            (!query.get('status') || r.status === query.get('status')) &&
+            (!query.get('branchId') || r.branchId === query.get('branchId')),
+        );
         return {
           data: items,
           meta: { page: 1, pageSize: 25, total: items.length, totalPages: 1 },

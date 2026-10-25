@@ -6,6 +6,11 @@ import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.common.FormValidators
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
+import com.fab.wab.merchant.core.domain.booking.AffectedReasons
+import com.fab.wab.merchant.core.domain.booking.conflictBookingIds
+import com.fab.wab.merchant.core.domain.branch.BranchScope
+import com.fab.wab.merchant.core.domain.branch.BranchStatus
 import com.fab.wab.merchant.core.domain.locations.LocationsRepository
 import com.fab.wab.merchant.core.domain.locations.defaultCountry
 import com.fab.wab.merchant.core.domain.upload.LocalFile
@@ -31,6 +36,11 @@ import com.fab.wab.merchant.feature.team.presentation.controller.contract.Member
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.MemberEditContract.UiAction
 import com.fab.wab.merchant.feature.team.presentation.controller.contract.MemberEditContract.UiState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 private const val PHOTO_ID = "member-photo"
@@ -43,6 +53,11 @@ class MemberEditDependencies(
     val upload: UploadFileUseCase,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    /** MER-065: the salon's branches (the owner picks one per member) and the switcher's choice as the default. */
+    val branchScope: Flow<BranchScope> = flowOf(BranchScope()),
+    /** Cancels the bookings a move would break (full refunds), then the move is sent again. */
+    val affected: AffectedBookingsRepository? = null,
+    val unavailableReason: suspend () -> String = { "" },
 )
 
 /** PRD M17 member form (owner): names, phone (new members only), photo (1:1 crop), role; permissions / staff profile links. */
@@ -53,11 +68,14 @@ class MemberEditViewModel(
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(memberId = memberId), testScope) {
 
     override fun onStart() {
+        deps.branchScope.onEach { branches ->
+            updateState { copy(branches = branches.branches.filter { it.status != BranchStatus.CLOSED }) }
+        }.launchIn(scope)
         load()
     }
 
     override fun handle(event: UiAction) {
-        handleForm(event) || handlePhoto(event) || handleActions(event)
+        handleForm(event) || handlePhoto(event) || handleActions(event) || handleBranch(event)
     }
 
     private fun handleForm(event: UiAction): Boolean {
@@ -102,6 +120,20 @@ class MemberEditViewModel(
         return true
     }
 
+    private fun handleBranch(event: UiAction): Boolean {
+        when (event) {
+            is UiAction.OnBranch -> uiState.value.branches.getOrNull(event.index)?.let { branch -> edit { copy(branchId = branch.id) } }
+            UiAction.OnConflictCancelBookings -> cancelAffected()
+            UiAction.OnConflictReassign -> uiState.value.moveConflict?.firstOrNull()?.let { id ->
+                updateState { copy(moveConflict = null) }
+                emitSideEffect(SideEffect.OpenBooking(id))
+            }
+            UiAction.OnConflictDismiss -> updateState { copy(moveConflict = null) }
+            else -> return false
+        }
+        return true
+    }
+
     private fun edit(change: MemberDraft.() -> MemberDraft) = updateState { copy(draft = draft.change()) }
 
     private fun load() {
@@ -110,7 +142,7 @@ class MemberEditViewModel(
             val countries = (deps.locations.countries() as? AppResult.Success)?.data.orEmpty()
             val id = memberId
             if (id == null) {
-                val draft = MemberDraft(countryCode = countries.defaultCountry()?.code.orEmpty())
+                val draft = MemberDraft(countryCode = countries.defaultCountry()?.code.orEmpty(), branchId = defaultBranch())
                 updateState { copy(loading = false, countries = countries, original = draft, draft = draft) }
                 return@launch
             }
@@ -188,6 +220,33 @@ class MemberEditViewModel(
                     ))
                     emitSideEffect(SideEffect.Saved(added = id == null))
                 }
+                is AppResult.Error -> {
+                    val ids = result.appError.conflictBookingIds()
+                    if (id != null && !ids.isNullOrEmpty()) {
+                        updateState { copy(moveConflict = ids) }
+                    } else {
+                        emitSideEffect(SideEffect.ShowError(deps.errorText(result.appError)))
+                    }
+                }
+                AppResult.Loading -> Unit
+            }
+        }
+    }
+
+    /** The owner's switcher branch, else the only branch; several branches without a choice = the owner picks. */
+    private suspend fun defaultBranch(): String? {
+        val branches = deps.branchScope.first()
+        val open = branches.branches.filter { it.status != BranchStatus.CLOSED }
+        return branches.filter?.takeIf { id -> open.any { it.id == id } } ?: open.singleOrNull()?.id
+    }
+
+    private fun cancelAffected() {
+        val ids = uiState.value.moveConflict ?: return
+        val affected = deps.affected ?: return
+        updateState { copy(moveConflict = null) }
+        scope.launch {
+            when (val result = affected.cancel(ids, AffectedReasons.STAFF_UNAVAILABLE, deps.unavailableReason())) {
+                is AppResult.Success -> save()
                 is AppResult.Error -> emitSideEffect(SideEffect.ShowError(deps.errorText(result.appError)))
                 AppResult.Loading -> Unit
             }

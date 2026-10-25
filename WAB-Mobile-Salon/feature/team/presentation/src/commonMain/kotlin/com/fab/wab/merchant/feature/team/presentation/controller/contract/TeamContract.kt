@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.team.presentation.controller.contract
 
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.feature.team.domain.TeamAccess
 import com.fab.wab.merchant.feature.team.domain.TeamMember
 
@@ -16,7 +17,13 @@ sealed interface TeamContract {
         val confirmDeactivate: String? = null,
         val conflict: MemberConflict? = null,
         val busy: Set<String> = emptySet(),
-    )
+        val branchScope: BranchScope = BranchScope(),
+    ) {
+        /** The owner looking at every branch sees each member's branch (MER-065). */
+        fun branchNameOf(member: TeamMember, language: String): String? =
+            member.branchId?.takeIf { branchScope.showsSwitcher && branchScope.filter == null }
+                ?.let { id -> branchScope.branches.firstOrNull { it.id == id }?.name?.localized(language) }
+    }
 
     sealed interface UiAction {
         data class OnMemberClick(val id: String) : UiAction
@@ -28,6 +35,7 @@ sealed interface TeamContract {
         data object OnDismiss : UiAction
         data object OnRefresh : UiAction
         data object OnRetry : UiAction
+        data class OnBranchSelect(val branchId: String?) : UiAction
     }
 
     sealed interface SideEffect {

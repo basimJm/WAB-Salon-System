@@ -85,6 +85,7 @@ internal fun CustomerSummary(request: BookingRequestUi, modifier: Modifier = Mod
                 style = AppTheme.typography.bodySmall,
                 color = colors.muted,
             )
+            request.branch?.let { AppText(text = it, style = AppTheme.typography.labelSmall, color = colors.accent, maxLines = 1) }
         }
         Column(horizontalAlignment = Alignment.End) {
             AppText(text = request.time, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = colors.accent)

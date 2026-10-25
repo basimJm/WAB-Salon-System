@@ -180,7 +180,7 @@ private fun ReassignSheet(dialog: DetailsDialog.Reassign, state: UiState, onActi
                 color = AppTheme.colors.muted,
             )
         }
-        state.staffOptions.filter { it.id != person?.staff?.id }.forEach { staff ->
+        state.reassignStaff.filter { it.id != person?.staff?.id }.forEach { staff ->
             ChoiceRow(staff.name, staff.id == dialog.staffId) { onAction(UiAction.OnReassignStaff(staff.id)) }
         }
         AppText(text = stringResource(Res.string.reassign_note), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)

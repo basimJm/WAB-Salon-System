@@ -1,0 +1,78 @@
+{
+  "branches": {
+    "tab": "Branches",
+    "count": "{{count}} open of {{max}} allowed",
+    "add": "Add branch",
+    "edit": "Edit",
+    "actions": "Branch actions",
+    "main": "Main",
+    "name": "Branch",
+    "nameAr": "Name (Arabic)",
+    "nameEn": "Name (English)",
+    "status": "Status",
+    "completeness": "Ready to book",
+    "complete": "Complete",
+    "missing": "Missing: {{parts}}",
+    "area": "Area",
+    "city": "City",
+    "staff": "Staff",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp (optional)",
+    "address": "Address",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "mapLink": "Open on the map",
+    "locationHint": "Coordinates of the branch entrance (decimal degrees).",
+    "empty": "This salon has no branches yet",
+    "createTitle": "Add a branch",
+    "editTitle": "Edit {{name}}",
+    "done": "Branch updated",
+    "offlineSince": "Offline: {{reason}}",
+    "action": {
+      "main": "Make main branch",
+      "offline": "Take offline",
+      "online": "Bring online",
+      "close": "Close branch"
+    },
+    "confirm": {
+      "main": {
+        "title": "Make {{name}} the main branch",
+        "text": "The main branch is the default for single-branch views and the one older app versions show."
+      },
+      "offline": {
+        "title": "Take {{name}} offline",
+        "text": "Customers stop seeing this branch; the other branches stay bookable. Your reason is shown to the owner."
+      },
+      "online": {
+        "title": "Bring {{name}} online",
+        "text": "Customers can book this branch again once it is complete."
+      },
+      "close": {
+        "title": "Close {{name}} for good",
+        "text": "A closed branch keeps its history but can never take bookings again."
+      }
+    },
+    "blocked": {
+      "title": "{{name}} still has upcoming bookings",
+      "text": "Cancel or complete these bookings first, then close the branch.",
+      "open": "Open booking {{id}}",
+      "ok": "Got it"
+    },
+    "error": {
+      "nameAr": "Enter the Arabic name (up to {{max}} characters)",
+      "nameEn": "Enter the English name (up to {{max}} characters)",
+      "locationText": "Enter the address (up to {{max}} characters)",
+      "location": "Enter a valid latitude and longitude",
+      "cityId": "Choose a city",
+      "areaId": "Choose an area",
+      "phone": "Use the international format, e.g. +962790000000",
+      "whatsapp": "Use the international format, e.g. +962790000000",
+      "nothing": "Nothing changed"
+    },
+    "filter": {
+      "salon": "Salon",
+      "branch": "Branch",
+      "all": "All branches"
+    }
+  }
+}

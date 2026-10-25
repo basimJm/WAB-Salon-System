@@ -10,45 +10,38 @@
 
 ## Current task
 
-### SRV-148 — Branches end to end (Stage P)
+### SRV-149 — Member profile carries `branchId` (gap found by MER-061)
 
-- Branch: `feat/srv-148-branches-e2e`
-- Status: DONE (PR #394)
-- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.16; API docs: no change in this task — contract checked after SRV-136…147):
-  - [x] `seed:demo`: after the main-branch migration, Lamar gets Khalda + Dabouq and Al-Ostaz gets Shmeisani, each complete with own place, hours, prices (percent of the main branch), a branch manager (bride-qualified in women's salons) and an employee; deterministic ids, insert-only; `branchCount` synced
-  - [x] `Branch` is a demo collection; every demo branch row passes the real Mongoose schemas
-  - [x] Contract regenerated and compared (docs test green); client impact list per task (ADM-088…091, CUS-082…087, MER-061…066) in `.claude/Integration.md`; DEPLOYMENT.md demo section updated
-- Tests: `tests/demoBranches.test.ts` (3), `tests/demoSeed.test.ts` (Branch filled later); full gate
+- Branch: `feat/srv-149-member-profile-branch`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §6 branch scope; operations merchant login/refresh/application, `GET /merchant/v1/me` — contract merchant 1.3.0, client impact MER-061):
+  - [x] `MemberProfile` (login, refresh, salon application, `/me`) has `branchId`: the member's branch, `null` for the owner; `/me` no longer adds it separately
+  - [x] `contract:bump` fixed: it silently wrote nothing when the stored note contained braces (`{id}`); it now matches the whole entry, fails loudly when nothing matched, and the replacement is a tested helper (`replaceContractEntry`)
+- Tests: `tests/memberProfileBranch.test.ts` (1), `tests/contractGuard.test.ts` (+1); full gate
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (salon legacy place/hours fields stay mirrored until every client reads branches — dropping them is a later contract change), QA ✔) — the demo seed itself was not run against the hosted dev database in this task (owner runs `npm run seed:demo`).
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — the bump bug was caught by the guard test itself (merchant fingerprint stayed old).
 
-### SRV-147 — Admin branches, full CRUD for any salon (Stage P)
+### SRV-128 — Customer/merchant contract review (+ SRV-128a, SRV-128b)
 
-- Branch: `feat/srv-147-admin-branches`
-- Status: DONE (PR #393)
-- Acceptance criteria (BUSINESS_DOMAIN §5.16, §6 admin, root CLAUDE.md §4.12; operations admin `/salons/{id}/branches[/{branchId}[/main|offline|online|close]]`, `/salons/{id}` detail, `/salons/{id}/members`, salon edit hours/closures/services `?branchId=`, `POST /salons/{id}/members/{memberId}/branch`, `GET /bookings?branchId=` + BOOKINGS export — client impact ADM-089/090/091; merchant `GET /bookings?branchId=` for the owner, MER-063):
-  - [x] Admin list/get/create/update/set main/offline/online/close any salon's branch through the owner's branches service (limit, last branch, main, upcoming bookings unchanged); every write needs a reason, writes an audit record (`entityType: branch`) and tells the owner (`salon.edited_by_admin`, area `branches`; offline/online use the existing branch events, no second notice)
-  - [x] Salon detail returns `branches[]` (closed included); members show `branchId` and filter by `?branchId=`
-  - [x] Admin salon edit: hours, closures and services take `?branchId=` (default the main branch); previews check that branch; audit names the branch
-  - [x] Admin moves a member to another branch (`SALON_STAFF_MOVE`, skills cleared and upcoming bookings refuse it via the team service)
-  - [x] Booking lists (admin, and merchant for the owner) and the BOOKINGS export filter by `branchId`; reviews already filter by branch (SRV-145)
-  - [x] Merchant team member docs now show `branchId` (shared `teamMemberDoc`)
-- Tests: `tests/adminBranches.test.ts` (7); full gate
+- Branch: `feat/srv-128-contract-review`
+- Status: DONE (PR #414)
+- Acceptance criteria (Customer PRD §13, Merchant PRD §15, INTEGRATION.md §3; contracts merchant 1.2.0, customer 1.2.0):
+  - [x] Every capability listed in both PRDs mapped to an operation (notes in `.claude/Integration.md`)
+  - [x] Gaps added as rows and fixed here: SRV-128a `GET /merchant/v1/bookings/{id}/eligible-staff?personIndex=` (BOOKINGS_OPERATE, salon + branch scope, same rules as the admin list); SRV-128b customer draft response `branch {id, name, locationText}`
+- Tests: `tests/contractGaps.test.ts` (3); full gate
 - Loops: 1/1
-- Review: PASSED (SE ✔ (no rule duplicated: admin wraps the owner's services), Mobile N/A, Architect ✔ (admin namespace only; adminGuard on every route), QA ✔)
+- Review: PASSED (SE ✔ (the admin eligible list gained an optional merchant scope instead of a copy), Mobile ✔, Architect ✔ (both contracts bumped), QA ✔) — NOTE: SRV-128a/b were built in this PR rather than separate branches.
 
-### SRV-146 — Finance by branch (Stage P)
+### SRV-126 — Exports: customers and salons kinds; Arabic-capable PDF
 
-- Branch: `feat/srv-146-finance-branch`
-- Status: DONE (PR #392)
-- Acceptance criteria (BUSINESS_DOMAIN §5.14, §3 transactions/refunds/ledger `branchId`; operations merchant `GET /finance/transactions|refunds`, admin `GET /transactions`, `GET /finance/reconciliation`, `GET /refunds`, `POST /exports` TRANSACTIONS — client impact ADM-091, MER-064):
-  - [x] A payment attempt keeps the draft's `branchId`; refunds and ledger CHARGE/GATEWAY_FEE/REFUND entries take the payment's branch; payouts stay salon-wide (no branch)
-  - [x] Owner finance: payments and refunds accept `branchId` and show `branchId` per row; balance and payouts stay salon-wide
-  - [x] Admin: transactions list `branchId` filter, reconciliation `salonId`/`branchId` scope, refunds list `salonId`/`branchId` filters; rows show `branchId`
-  - [x] TRANSACTIONS export takes `branchId` and has a Branch column
-- Tests: `tests/financeBranch.test.ts` (5), `tests/paymentsService.test.ts` (+1), `tests/exports.test.ts` (column shift); full gate 146 suites / 2735 tests
+- Branch: `feat/srv-126-exports-arabic-pdf`
+- Status: DONE (PR #410)
+- Acceptance criteria (Admin PRD exports (G9), BUSINESS_DOMAIN exports; operation `POST /admin/v1/exports` — contract admin 1.3.0, client impact ADM-047):
+  - [x] BOOKINGS kind already existed (SRV-123); new kinds CUSTOMERS (status, gender, city, search) and SALONS (state, gender, city, subscription, search) with the columns of their admin lists
+  - [x] PDF exports embed IBM Plex Sans Arabic (OFL, the font the apps already ship; `assets/fonts` + NOTICE, copied into the Docker runtime image): Arabic letters are shaped and read right to left; Arabic cells are right-aligned
+- Tests: `tests/exportsArabic.test.ts` (3), `tests/exports.test.ts` (builder deps); a rendered sample page was checked visually (pdftoppm)
 - Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔ (additive fields), Architect ✔ (payouts per salon unchanged; Phase 2 split payments unaffected), QA ✔) — legacy rows without a branch are backfilled by SRV-137's migration.
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (Dockerfile copies the fonts), QA ✔) — LIMITATION: no full Unicode bidi; punctuation between Arabic and Latin runs may sit on the wrong side. OFL licence: NOTICE names the licence and its URL; the owner may want the full OFL text added beside the fonts.
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

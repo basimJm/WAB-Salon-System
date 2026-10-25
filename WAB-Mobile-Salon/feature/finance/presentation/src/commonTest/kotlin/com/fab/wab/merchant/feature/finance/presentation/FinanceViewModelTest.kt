@@ -4,8 +4,13 @@ import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.booking.RefundStatus
+import com.fab.wab.merchant.core.domain.branch.Branch
+import com.fab.wab.merchant.core.domain.branch.BranchName
+import com.fab.wab.merchant.core.domain.branch.BranchScope
+import com.fab.wab.merchant.core.domain.branch.BranchStatus
 import com.fab.wab.merchant.core.domain.session.MemberProfile
 import com.fab.wab.merchant.core.domain.session.MemberRole
+import com.fab.wab.merchant.core.domain.session.MemberScope
 import com.fab.wab.merchant.core.domain.session.SessionState
 import com.fab.wab.merchant.feature.finance.domain.FinanceBalance
 import com.fab.wab.merchant.feature.finance.domain.FinanceDefaults
@@ -21,7 +26,12 @@ import com.fab.wab.merchant.feature.finance.presentation.controller.contract.Fin
 import com.fab.wab.merchant.feature.finance.presentation.controller.contract.FinanceContract.UiAction
 import com.fab.wab.merchant.feature.finance.presentation.controller.vm.FinanceDependencies
 import com.fab.wab.merchant.feature.finance.presentation.controller.vm.FinanceViewModel
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -29,19 +39,17 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 private val TODAY = LocalDate(2026, 10, 24)
 
 private class FakeFinance : FinanceRepository {
     val calls = mutableListOf<String>()
+    val branchIds = mutableListOf<String?>()
     var fail = false
     override suspend fun balance(): AppResult<FinanceBalance> =
         AppResult.Success(FinanceBalance("10.000", "5.000", "20.000", "1.000", "2.000", "8.000", "8.000", "2026-10-01", null))
-    override suspend fun transactions(from: LocalDate, to: LocalDate, page: Int): AppResult<List<Transaction>> {
+    override suspend fun transactions(from: LocalDate, to: LocalDate, page: Int, branchId: String?): AppResult<List<Transaction>> {
+        branchIds += branchId
         calls += "tx:$from:$to:$page"
         if (fail) return AppResult.Error(AppError.NetworkError("x"))
         val size = if (page == 1) FinanceDefaults.PAGE_SIZE else 1
@@ -49,7 +57,8 @@ private class FakeFinance : FinanceRepository {
             List(size) { Transaction("t$page-$it", "b$it", "WAB-$it", PaymentType.DEPOSIT, "5.000", "0.100", "4.900", "2026-10-02") },
         )
     }
-    override suspend fun refunds(from: LocalDate, to: LocalDate, page: Int): AppResult<List<Refund>> {
+    override suspend fun refunds(from: LocalDate, to: LocalDate, page: Int, branchId: String?): AppResult<List<Refund>> {
+        branchIds += branchId
         calls += "rf:$from:$to:$page"
         return AppResult.Success(
             listOf(Refund("r1", null, null, "5.000", RefundSource.AUTO_CANCEL, null, RefundStatus.REFUNDED, "2026-10-02", null)),
@@ -110,5 +119,28 @@ class FinanceViewModelTest {
         viewModel.onEvent(UiAction.OnBank)
         viewModel.onEvent(UiAction.OnBooking("b1"))
         assertEquals(listOf<SideEffect>(SideEffect.OpenBooking("b1")), effects)
+    }
+
+    @Test
+    fun ownerNarrowsTransactionsAndRefundsToABranch() = runTest(UnconfinedTestDispatcher()) {
+        val branches = listOf("b1", "b2").map {
+            Branch(it, BranchName(it, it), it == "b1", BranchStatus.ACTIVE, null, null, null, null, null, null, null, emptyList())
+        }
+        val scope = MutableStateFlow(BranchScope(MemberScope.AllBranches, branches, null))
+        val viewModel = FinanceViewModel(
+            FinanceDependencies(
+                finance, flowOf(SessionState.SignedIn(MemberProfile("m", "s", "Huda", MemberRole.OWNER))), NoOpAnalyticsTracker,
+                { TODAY }, { "failed" }, scope, {},
+            ),
+            testScope = backgroundScope,
+        ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
+        val all = viewModel.state.first { !it.loading }
+        assertTrue(all.showsBranchSwitcher)
+        assertEquals(null, finance.branchIds.last())
+        scope.value = scope.value.copy(selected = "b2")
+        viewModel.state.first { it.branchScope.filter == "b2" && !it.loading }
+        assertEquals("b2", finance.branchIds.last())
+        viewModel.onEvent(UiAction.OnTab(FinanceTab.PAYOUTS))
+        assertFalse(viewModel.state.first().showsBranchSwitcher, "payouts are salon-wide")
     }
 }

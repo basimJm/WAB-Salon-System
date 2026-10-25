@@ -6,6 +6,7 @@ export type SettingGroup =
   | 'tokens'
   | 'accounts'
   | 'subscription'
+  | 'branches'
   | 'refunds'
   | 'reviews'
   | 'pagination'
@@ -77,6 +78,7 @@ export const SETTING_DEFINITIONS: readonly SettingDefinition[] = [
   row('auth.accessTokenTtlSec', 'tokens', [60, 86400], 'seconds'),
   row('auth.refreshTokenTtlDays', 'tokens', [1, 365], 'days'),
   row('account.deletionGraceDays', 'accounts', [0, 365], 'days'),
+  row('salon.maxBranches', 'branches', [1, 200]),
   row('subscription.trialDays', 'subscription', [0, 365], 'days'),
   row('subscription.warnDaysBefore', 'subscription', [0, 90], 'days'),
   row('refund.maxRetries', 'refunds', [0, 20]),

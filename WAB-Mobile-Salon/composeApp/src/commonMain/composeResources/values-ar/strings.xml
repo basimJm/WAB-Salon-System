@@ -22,4 +22,13 @@
     <string name="mock_manager">مدير</string>
     <string name="mock_employee">موظف</string>
     <string name="mock_none">بلا صلاحيات</string>
+    <!-- Booking requests outside the app (PRD M10, Android) -->
+    <string name="request_channel">طلبات الحجز</string>
+    <string name="request_title">طلب حجز جديد</string>
+    <string name="request_body">%1$s، %2$s %3$s، %4$s</string>
+    <string name="request_accept">قبول</string>
+    <string name="request_reject">رفض</string>
+    <string name="request_accepted">تم قبول الحجز</string>
+    <string name="request_handled">تمت معالجته من عضو آخر في الفريق</string>
+    <string name="request_failed">تعذّر قبول الحجز. افتح التطبيق وحاول مرة أخرى.</string>
 </resources>

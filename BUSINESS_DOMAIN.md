@@ -212,6 +212,7 @@ photoKey?: String
 role: MemberRole            // exactly one OWNER per salon
 permissions: Permission[]   // ignored for OWNER (has all)
 active: Boolean
+pushEnabled: Boolean (default true)   // M25 toggle (SRV-129); push respects it (§8), in-app is always stored
 providesServices: Boolean
 staff?: {                    // required when providesServices
   bio?: String   yearsOfExperience?: Int

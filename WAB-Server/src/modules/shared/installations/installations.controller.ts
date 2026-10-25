@@ -27,8 +27,11 @@ export const createInstallationsController = (
 
   async setPushEnabled(req, res) {
     const { pushEnabled } = bodyOf<typeof pushEnabledSchema>(req);
-    // `requireAuth` ran before this handler, so the caller is a known customer.
-    await service.setPushEnabled({ customerId: req.auth?.subjectId ?? '', enabled: pushEnabled });
+    // `requireAuth` ran before this handler, so the caller is a known customer or member.
+    const subjectId = req.auth?.subjectId ?? '';
+    await (app === 'MERCHANT'
+      ? service.setMemberPushEnabled({ memberId: subjectId, enabled: pushEnabled })
+      : service.setPushEnabled({ customerId: subjectId, enabled: pushEnabled }));
     sendSuccess(req, res);
   },
 });

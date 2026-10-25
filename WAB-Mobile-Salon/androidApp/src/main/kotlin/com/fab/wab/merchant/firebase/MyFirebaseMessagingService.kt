@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import com.fab.wab.merchant.R
+import com.fab.wab.merchant.app.request.OutsideBookingRequests
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.firebase.PushTokenRelay
 import com.fab.wab.merchant.core.notification.push.PushKeys
@@ -36,6 +37,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
+        // PRD M10: a booking request is a data message (no visible payload) — overlay / heads-up / in-app sheet.
+        if (KoinJavaComponent.getKoin().get<OutsideBookingRequests>().onPush(remoteMessage.data)) return
         val push = pushNotificationOf(remoteMessage.data, remoteMessage.notification?.title, remoteMessage.notification?.body) ?: return
         if (PushSignals.appForeground.value) PushSignals.publishReceived(push) else showSystemNotification(push)
     }

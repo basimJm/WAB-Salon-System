@@ -1,41 +1,39 @@
-package com.fab.wab.merchant.feature.salon.presentation.controller.profile
+package com.fab.wab.merchant.designsystem.components.map
 
 import com.fab.wab.merchant.core.domain.model.LocationData
-import com.fab.wab.merchant.designsystem.components.map.MapPickerAction
-import com.fab.wab.merchant.designsystem.components.map.MapPickerUi
-import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract.SideEffect
-import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** Search waits for a pause in typing before calling the places service. */
-internal const val PLACE_SEARCH_DEBOUNCE_MS = 400L
+const val PLACE_SEARCH_DEBOUNCE_MS = 400L
 
-/** The M13 map picker reducer: pin moves re-geocode, typed queries search places, "Use my location" asks first. */
-internal class ProfileMapHandler(
-    private val controller: ProfileMapController,
+/**
+ * The map picker reducer shared by the salon profile (M13) and the branch form (MER-062): pin moves re-geocode, typed
+ * queries search places, "Use my location" asks first. The owning view model keeps the [MapPickerUi] in its state.
+ */
+class MapPickerHandler(
+    private val controller: MapPickerController,
     private val scope: CoroutineScope,
-    private val state: () -> UiState,
-    private val update: (UiState.() -> UiState) -> Unit,
-    private val effect: (SideEffect) -> Unit,
+    private val readMap: () -> MapPickerUi?,
+    private val writeMap: (MapPickerUi?) -> Unit,
+    private val onLocationBlocked: () -> Unit,
 ) {
     private var geocodeJob: Job? = null
     private var searchJob: Job? = null
 
-    fun open() {
-        val form = state().form
-        val start = controller.startPoint(form.location)
-        update { copy(map = MapPickerUi(target = start, address = form.locationText.ifBlank { null })) }
-        if (form.location == null) resolve(start)
+    fun open(location: LocationData?, address: String) {
+        val start = controller.startPoint(location)
+        writeMap(MapPickerUi(target = start, address = address.ifBlank { null }))
+        if (location == null) resolve(start)
     }
 
     fun handle(action: MapPickerAction, onConfirm: (LocationData, String?) -> Unit) {
-        val map = state().map ?: return
+        val map = readMap() ?: return
         when (action) {
             is MapPickerAction.CenterChanged -> if (!controller.isSamePoint(map.target, action.point)) {
-                update { copy(map = map.copy(target = action.point)) }
+                writeMap(map.copy(target = action.point))
                 resolve(action.point)
             }
             is MapPickerAction.QueryChanged -> search(map, action.query)
@@ -47,12 +45,14 @@ internal class ProfileMapHandler(
             MapPickerAction.UseMyLocation -> locate()
             MapPickerAction.Confirm -> if (map.canConfirm) {
                 onConfirm(map.target, map.address)
-                update { copy(map = null) }
+                writeMap(null)
             }
         }
     }
 
-    private fun updateMap(change: MapPickerUi.() -> MapPickerUi) = update { copy(map = map?.change()) }
+    private fun updateMap(change: MapPickerUi.() -> MapPickerUi) {
+        readMap()?.let { writeMap(it.change()) }
+    }
 
     private fun resolve(point: LocationData) {
         geocodeJob?.cancel()
@@ -64,7 +64,7 @@ internal class ProfileMapHandler(
     }
 
     private fun search(map: MapPickerUi, query: String) {
-        update { copy(map = map.copy(query = query)) }
+        writeMap(map.copy(query = query))
         searchJob?.cancel()
         searchJob = scope.launch {
             delay(PLACE_SEARCH_DEBOUNCE_MS)
@@ -83,7 +83,7 @@ internal class ProfileMapHandler(
                     updateMap { copy(target = result.point) }
                     resolve(result.point)
                 }
-                LocateResult.Blocked -> effect(SideEffect.LocationBlocked)
+                LocateResult.Blocked -> onLocationBlocked()
                 LocateResult.Denied, LocateResult.Unavailable -> Unit
             }
         }

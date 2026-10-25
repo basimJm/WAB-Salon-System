@@ -168,6 +168,15 @@ export interface PolicyInput extends Omit<SalonPolicy, 'depositPercentage' | 'no
   readonly notes?: string;
 }
 
+/**
+ * Hours, closures and services belong to a branch (BUSINESS_DOMAIN §3.3a); without `branchId` the server uses the
+ * main branch.
+ */
+export interface BranchScope {
+  readonly salonId: string;
+  readonly branchId?: string;
+}
+
 /** Admin edits a salon on its behalf; every write carries the admin's reason (audited, owner notified). */
 export interface SalonEditRepository {
   profile(salonId: string): Promise<SalonProfile>;
@@ -180,25 +189,25 @@ export interface SalonEditRepository {
     ids: readonly string[],
     reason: string,
   ): Promise<readonly GalleryItem[]>;
-  hours(salonId: string): Promise<HoursView>;
-  previewHours(salonId: string, days: readonly ScheduleDay[]): Promise<readonly BrokenBooking[]>;
-  saveHours(salonId: string, days: readonly ScheduleDay[], reason: string): Promise<HoursView>;
+  hours(scope: BranchScope): Promise<HoursView>;
+  previewHours(scope: BranchScope, days: readonly ScheduleDay[]): Promise<readonly BrokenBooking[]>;
+  saveHours(scope: BranchScope, days: readonly ScheduleDay[], reason: string): Promise<HoursView>;
   previewClosure(
-    salonId: string,
+    scope: BranchScope,
     range: { from: string; to: string },
   ): Promise<readonly BrokenBooking[]>;
-  addClosure(salonId: string, input: ClosureInput, reason: string): Promise<Closure>;
+  addClosure(scope: BranchScope, input: ClosureInput, reason: string): Promise<Closure>;
   updateClosure(
-    salonId: string,
+    scope: BranchScope,
     closureId: string,
     patch: Partial<ClosureInput>,
     reason: string,
   ): Promise<Closure>;
-  removeClosure(salonId: string, closureId: string, reason: string): Promise<void>;
-  services(salonId: string): Promise<readonly SalonService[]>;
-  addService(salonId: string, input: NewService, reason: string): Promise<SalonService>;
+  removeClosure(scope: BranchScope, closureId: string, reason: string): Promise<void>;
+  services(scope: BranchScope): Promise<readonly SalonService[]>;
+  addService(scope: BranchScope, input: NewService, reason: string): Promise<SalonService>;
   updateService(
-    salonId: string,
+    scope: BranchScope,
     serviceId: string,
     patch: ServicePatch,
     reason: string,
@@ -210,6 +219,8 @@ export interface SalonEditRepository {
     input: StaffInput,
     reason: string,
   ): Promise<StaffProfile>;
+  /** Moves a member to another open branch; the server clears their services (they pick the new branch's). */
+  moveMember(salonId: string, memberId: string, branchId: string, reason: string): Promise<void>;
   policy(salonId: string): Promise<SalonPolicy | null>;
   savePolicy(salonId: string, input: PolicyInput, reason: string): Promise<SalonPolicy>;
 }

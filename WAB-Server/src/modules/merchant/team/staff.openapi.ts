@@ -10,6 +10,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
+import { bookingConflictDoc } from '../../shared/salonEdit/conflict.openapi';
 import { staffParams, staffProfileSchema } from './staff.validation';
 
 const profile = successResponseSchema(
@@ -64,5 +65,24 @@ export const registerMerchantStaffDocs = (registry: OpenAPIRegistry): void => {
       body: { required: true, content: { 'application/json': { schema: staffProfileSchema } } },
     },
     responses: { [HTTP_STATUS.ok]: jsonResponse('Saved', profile), ...failures },
+  });
+  registry.registerPath({
+    method: 'post',
+    path: `${path}/preview`,
+    tags: ['Staff'],
+    summary:
+      'Preview a staff profile change: the upcoming PENDING/APPROVED bookings it would break (same checks as the save, nothing changes)',
+    request: {
+      headers,
+      params: staffParams,
+      body: { required: true, content: { 'application/json': { schema: staffProfileSchema } } },
+    },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Affected bookings',
+        successResponseSchema(z.array(bookingConflictDoc)),
+      ),
+      ...failures,
+    },
   });
 };

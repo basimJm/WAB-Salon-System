@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { BRANCH_STATUSES } from '@/domain/shared/branches';
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import {
@@ -49,6 +50,7 @@ const EXPECTED: Record<StatusKind, string[]> = {
   alert: queryEnum('/alerts', 'status'),
   alertSeverity: ['INFO', 'WARNING', 'CRITICAL'],
   export: ['QUEUED', 'RUNNING', 'DONE', 'FAILED'],
+  branch: [...BRANCH_STATUSES],
 };
 
 const labels = (tree: unknown, kind: string): Record<string, string> =>
