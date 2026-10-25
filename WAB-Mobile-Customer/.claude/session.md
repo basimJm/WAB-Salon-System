@@ -10,6 +10,20 @@
 ## Current task
 
 - Batch 7 = salon branches (CUS-082…086, then CUS-087), chained branches from `feat/cus-082-branches-contract`; per task policy checks + tests written, host unit tests after five (rules §3.13). The parent agent pushes and merges the chain.
+- Final gate on `feat/cus-087-bookings-branch` (2026-10-25): `scripts/ci/run_local_checks.sh` exit 0 — policy tests, policy checks, contract check, detekt, `testAndroidHostTest` + the four Android variants + lint (BUILD SUCCESSFUL 7m58s), the four iOS configurations and the Kotlin/Native tests; SwiftLint not installed locally (CI runs it). Not done: emulator / simulator journey of the branch screens.
+
+### CUS-087 — Bookings list/details, notifications and the review flow show the branch (name + address); review attaches the branch
+- Branch: `feat/cus-087-bookings-branch` (from `feat/cus-086-booking-branch`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.11, §5.18; `GET /customer/v1/bookings`, `GET /customer/v1/bookings/{id}`, `POST /customer/v1/salons/{id}[/staff/{memberId}]/reviews`):
+  - [x] Bookings list card: "Branch: ‹name›" under the salon name; booking details salon block: branch name + address (`BookedBranchLines`); nothing for bookings made before branches
+  - [x] Booking details Call / WhatsApp use the booked branch's phone and WhatsApp (salon profile `forBranch(booking.branch)`), image stays salon-wide
+  - [x] Rating flow (S18): every step carries the booked branch, the salon step shows it, and both salon and staff reviews send `branchId`; `ReviewDraft.branchId` → review bodies
+  - [x] Notifications: tapping a booking notification opens booking details, which shows the branch; the notification list text itself is rendered by the server (`GET /notifications` has no branch field)
+- Tests: `RatingStepsTest` (+1), `RatingViewModelTest` (+1), `BookingDetailsViewModelTest` (+1), `ReviewsRepositoryTest` (1, request bodies); `testAndroidHostTest` exit 0 (401 host tests, 0 failures), `run_detekt.sh` exit 0, policy `all: ok`
+- Loops: 1/1 — own unit-test run on the final tree (`./gradlew testAndroidHostTest`, 401 tests, 0 failures) + detekt + policy; found and fixed: MockEngine test without JSON content type / with an unparsable `data`, one detekt MaxLineLength in `ReviewsRepositoryImpl`
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — branch display is one shared composable; review branch flows domain → data body; contacts reuse `forBranch`; strings AR+EN. DEVIATIONS: notification rows cannot show the branch client-side (no contract field; server text); reviews written from salon details (not from a booking) stay salon-wide (no branch picker), as BUSINESS_DOMAIN §5.11 allows; UI not opened on a device.
+- Notes: `feature/salon/data` gets `kotlinx-coroutines-test` + `ktor-client-mock` for tests (catalog entries already used by other data modules; no new library).
 
 ### CUS-086 — Booking step 1 = choose branch (skipped when one bookable branch); services, staff and slots of that branch; summary shows the branch; a deep link with `branchId` preselects it
 - Branch: `feat/cus-086-booking-branch` (from `feat/cus-085-details-branches`)

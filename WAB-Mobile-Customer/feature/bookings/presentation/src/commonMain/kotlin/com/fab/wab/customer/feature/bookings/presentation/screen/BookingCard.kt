@@ -80,6 +80,7 @@ fun BookingCard(booking: BookingSummary, onClick: () -> Unit, modifier: Modifier
                     style = AppTheme.typography.titleSmall.copy(fontSize = BookingsDesign.fontTitle, fontWeight = FontWeight.Bold),
                     maxLines = 1,
                 )
+                BookedBranchLines(booking.branch, withAddress = false)
                 AppText(
                     text = BookingsDesign.REFERENCE_PREFIX + booking.referenceNumber,
                     style = AppTheme.typography.bodySmall.copy(textDirection = TextDirection.Ltr),

@@ -25,11 +25,12 @@ class ReviewsRepositoryImpl(private val api: ReviewsApi) : ReviewsRepository {
     }
 
     override suspend fun submit(target: ReviewTarget, draft: ReviewDraft): AppResult<Unit> = when (target) {
-        is ReviewTarget.Salon ->
-            safeApiCall { api.submitSalonReview(target.salonId, PostSalonsBySalonIdReviewsBody(draft.rating, draft.comment)) }
-                .mapSuccess { }
+        is ReviewTarget.Salon -> {
+            val body = PostSalonsBySalonIdReviewsBody(draft.rating, draft.comment, draft.branchId)
+            safeApiCall { api.submitSalonReview(target.salonId, body) }.mapSuccess { }
+        }
         is ReviewTarget.Staff -> {
-            val body = PostSalonsBySalonIdStaffByMemberIdReviewsBody(draft.rating, draft.comment)
+            val body = PostSalonsBySalonIdStaffByMemberIdReviewsBody(draft.rating, draft.comment, draft.branchId)
             safeApiCall { api.submitStaffReview(target.salonId, target.memberId, body) }.mapSuccess { }
         }
     }
