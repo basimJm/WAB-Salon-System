@@ -10,10 +10,22 @@
 
 ## Current task
 
+### SRV-124 — Admin socket events
+
+- Branch: `feat/srv-124-admin-socket-events`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §7 admin row; API docs: no change (socket events) — client ADM-027 already maps these names):
+  - [x] `application.created` on a new or resubmitted salon application, `review.created` on a new review, `refund.updated` when a refund starts, completes or fails, on the `/admin` namespace room `admin`, with small summaries
+  - [x] `overview.tick` every minute (periodic job `periodic.overview-tick`)
+  - [x] An emit never throws and is silent before the socket server starts
+- Tests: `tests/adminEvents.test.ts` (4); full gate 154 suites / 2776 tests (format fixed afterwards: whitespace only, format/lint/types re-checked)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (hooks injected, sockets stay in `sockets/`), QA ✔)
+
 ### SRV-134 — Conflict preview endpoints
 
 - Branch: `feat/srv-134-conflict-preview`
-- Status: IN REVIEW
+- Status: DONE (PR #406)
 - Acceptance criteria (BUSINESS_DOMAIN §5.12; operations `POST /merchant/v1/salon/hours/weekly/preview`, `.../closures/preview` (also under `/branches/{branchId}/hours`), `POST /merchant/v1/team/members/{id}/staff/preview`, `POST /merchant/v1/team/members/{id}/leaves/preview` — verifies MER-035/038/039 flows):
   - [x] Verified: the saves already answer 409 `SCHEDULE_CONFLICT` with the booking ids and `cancel-affected` exists; what was missing is a dry run before saving
   - [x] Each preview runs the same scope and validation as its save (week shape and slot grid, closure/leave dates not in the past, staff profile rules, branch scope) and returns the upcoming PENDING/APPROVED bookings it would break, saving nothing
@@ -33,20 +45,6 @@
 - Tests: `tests/accountRemoval.test.ts` (4); full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔ (lifecycle and deletion services reused, no new rules), Mobile ✔, Architect ✔, QA ✔)
-
-### SRV-129 — Merchant member self-service (M25)
-
-- Branch: `feat/srv-129-member-self-service`
-- Status: DONE (PR #404)
-- Acceptance criteria (Merchant PRD M25, BUSINESS_DOMAIN §3.1 members (+`pushEnabled`), §8; operations `GET/PATCH /merchant/v1/me`, `POST /merchant/v1/auth/change-phone`, `PATCH /merchant/v1/installations/push-enabled` — client impact MER-049):
-  - [x] `GET /merchant/v1/me`: session profile + photo URL, branch (null for the owner), push switch
-  - [x] `PATCH /merchant/v1/me`: names and photo (only a confirmed MEMBER_PHOTO the member uploaded; `null` removes); role/permissions/branch stay owner-only
-  - [x] `POST /merchant/v1/auth/change-phone` (session + OTP limiter): OTP to the new number (purpose CHANGE_PHONE), 409 `PHONE_ALREADY_REGISTERED` when another member has it, OTP counters reset
-  - [x] `PATCH /merchant/v1/installations/push-enabled`: member switch; notifications to a member with push off are stored in-app but not pushed (requests too)
-  - [x] BUSINESS_DOMAIN members gain `pushEnabled: Boolean (default true)` (from PRD M25 and §8 "push respects pushEnabled")
-- Tests: `tests/memberSelf.test.ts` (5), `tests/installations.test.ts` (merchant switch now exists: customer token 403, member switch 200); full gate 152 suites green except that one stale assertion, fixed and its suites re-run (79 tests green)
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔ (merchant namespace; same OTP verifier as customers), QA ✔) — DOMAIN NOTE: `members.pushEnabled` added in this PR (derived from PRD M25 + §8, not a new business decision).
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 
