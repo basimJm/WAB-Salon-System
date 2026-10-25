@@ -49,14 +49,15 @@ fun closureValid(from: LocalDate?, to: LocalDate?, reason: String, today: LocalD
     from != null && to != null && from <= to && from >= today && reason.trim().length in 1..HoursLimits.REASON_MAX
 
 /** `/salon/hours*` (WORKING_HOURS_MANAGE). */
+/** [branchId] null = salon-level calls (the member's own branch / the main branch); else that branch (MER-064, owner). */
 interface HoursRepository {
-    suspend fun load(): AppResult<HoursData>
+    suspend fun load(branchId: String? = null): AppResult<HoursData>
 
-    suspend fun saveWeek(days: List<DaySchedule>): AppResult<HoursData>
+    suspend fun saveWeek(days: List<DaySchedule>, branchId: String? = null): AppResult<HoursData>
 
-    suspend fun addClosure(from: LocalDate, to: LocalDate, reason: String): AppResult<Closure>
+    suspend fun addClosure(from: LocalDate, to: LocalDate, reason: String, branchId: String? = null): AppResult<Closure>
 
-    suspend fun updateClosure(id: String, from: LocalDate, to: LocalDate, reason: String): AppResult<Closure>
+    suspend fun updateClosure(id: String, from: LocalDate, to: LocalDate, reason: String, branchId: String? = null): AppResult<Closure>
 
-    suspend fun deleteClosure(id: String): AppResult<Unit>
+    suspend fun deleteClosure(id: String, branchId: String? = null): AppResult<Unit>
 }

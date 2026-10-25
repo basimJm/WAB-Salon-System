@@ -86,4 +86,5 @@ include(
     ":feature:more:data",
     ":feature:more:presentation",
     ":feature:more:di",
+    ":feature:branches:presentation",
 )

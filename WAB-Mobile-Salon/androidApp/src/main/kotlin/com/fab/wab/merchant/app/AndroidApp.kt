@@ -2,16 +2,17 @@ package com.fab.wab.merchant.app
 
 import android.app.Application
 import android.util.Log
+import com.fab.wab.merchant.app.ui.appModules
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.firebase.PushTokenProvider
+import com.fab.wab.merchant.request.requestModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import org.koin.java.KoinJavaComponent.getKoin
-import com.fab.wab.merchant.app.ui.appModules
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
+import org.koin.java.KoinJavaComponent.getKoin
 
 class AndroidApp : Application() {
 
@@ -24,7 +25,7 @@ class AndroidApp : Application() {
         startKoin {
             androidContext(this@AndroidApp)
             properties(mapOf("androidContext" to this@AndroidApp))
-            modules(appModules + appEnvironmentModule)
+            modules(appModules + appEnvironmentModule + requestModule)
         }
 
         // FCM token: register (FCM 26) and store it; MyFirebaseMessagingService.onRegistered also stores later refreshes.

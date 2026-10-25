@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.bookings.presentation.controller.contract
 
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingFilter
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingSummary
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingsTab
@@ -20,8 +21,16 @@ sealed interface BookingsContract {
         val filterOpen: Boolean = false,
         val staffOptions: List<StaffRef> = emptyList(),
         val nowMs: Long = 0L,
+        val branchScope: BranchScope = BranchScope(),
     ) {
         val isEmpty: Boolean get() = !loading && error == null && items.isEmpty()
+
+        /** Staff of the chosen branch only (MER-063); every provider when all branches are shown. */
+        val visibleStaff: List<StaffRef>
+            get() = branchScope.filter?.let { id -> staffOptions.filter { it.branchId == null || it.branchId == id } } ?: staffOptions
+
+        /** The owner looking at several branches at once sees each booking's branch on its card. */
+        val showsBranchOnCards: Boolean get() = branchScope.showsSwitcher && branchScope.filter == null
     }
 
     sealed interface UiAction {
@@ -35,6 +44,7 @@ sealed interface BookingsContract {
         data object OnLoadMore : UiAction
         data object OnRefresh : UiAction
         data object OnRetry : UiAction
+        data class OnBranchSelect(val branchId: String?) : UiAction
     }
 
     sealed interface SideEffect {

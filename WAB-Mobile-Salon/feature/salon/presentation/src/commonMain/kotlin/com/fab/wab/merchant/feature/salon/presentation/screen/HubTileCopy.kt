@@ -4,6 +4,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.feature.salon.domain.HubTile
 import com.fab.wab.merchant.feature.salon.presentation.resources.Res
+import com.fab.wab.merchant.feature.salon.presentation.resources.tile_branches
+import com.fab.wab.merchant.feature.salon.presentation.resources.tile_branches_sub
 import com.fab.wab.merchant.feature.salon.presentation.resources.tile_finance
 import com.fab.wab.merchant.feature.salon.presentation.resources.tile_finance_sub
 import com.fab.wab.merchant.feature.salon.presentation.resources.tile_gallery
@@ -35,6 +37,7 @@ internal fun HubTile.copy(): TileCopy = when (this) {
     HubTile.HOURS -> TileCopy(AppIcons.Clock, Res.string.tile_hours, Res.string.tile_hours_sub)
     HubTile.SERVICES -> TileCopy(AppIcons.Tag, Res.string.tile_services, Res.string.tile_services_sub)
     HubTile.TEAM -> TileCopy(AppIcons.Companions, Res.string.tile_team, Res.string.tile_team_sub)
+    HubTile.BRANCHES -> TileCopy(AppIcons.Store, Res.string.tile_branches, Res.string.tile_branches_sub)
     HubTile.POLICIES -> TileCopy(AppIcons.Shield, Res.string.tile_policies, Res.string.tile_policies_sub)
     HubTile.REVIEWS -> TileCopy(AppIcons.Star, Res.string.tile_reviews, Res.string.tile_reviews_sub)
     HubTile.STATISTICS -> TileCopy(AppIcons.EventAvailable, Res.string.tile_statistics, Res.string.tile_statistics_sub)

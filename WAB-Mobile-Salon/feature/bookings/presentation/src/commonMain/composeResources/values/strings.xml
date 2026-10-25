@@ -44,6 +44,7 @@
     <string name="details_remaining">Remaining to collect</string>
     <string name="details_refunded">Refunded</string>
     <string name="details_policy">Policy (at booking time)</string>
+    <string name="details_branch">Branch</string>
     <string name="details_history">Status history</string>
     <string name="details_reject_reason">Rejection reason</string>
     <string name="details_cancel_reason">Cancellation reason</string>
@@ -99,6 +100,7 @@
     <string name="history_line">%1$s · %2$s</string>
     <string name="request_time_range">%1$s – %2$s</string>
     <string name="request_another_member">another team member</string>
+    <string name="request_later">Later (keep it pending)</string>
     <string name="actor_customer">Customer</string>
     <string name="actor_member">Salon</string>
     <string name="actor_admin">WAB admin</string>

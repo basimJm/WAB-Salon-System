@@ -62,10 +62,10 @@ private class FakeStaff : StaffRepository {
         memberId: String,
         leaveId: String,
     ): AppResult<Unit> = AppResult.Success(Unit).also { deleted += leaveId }
-    override suspend fun services(): AppResult<List<ServiceOption>> = AppResult.Success(
+    override suspend fun services(branchId: String?): AppResult<List<ServiceOption>> = AppResult.Success(
         listOf(ServiceOption("s1", "Cut", true), ServiceOption("s2", "Color", true)),
     )
-    override suspend fun salonDays(): AppResult<Map<DayOfWeek, OpenHours?>> =
+    override suspend fun salonDays(branchId: String?): AppResult<Map<DayOfWeek, OpenHours?>> =
         AppResult.Success(
             mapOf(DayOfWeek.SATURDAY to OpenHours(540, 1_260), DayOfWeek.SUNDAY to OpenHours(600, 1_200), DayOfWeek.FRIDAY to null),
         )

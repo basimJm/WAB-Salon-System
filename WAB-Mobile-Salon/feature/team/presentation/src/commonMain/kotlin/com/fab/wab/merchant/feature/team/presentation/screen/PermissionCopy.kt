@@ -4,6 +4,7 @@ import com.fab.wab.merchant.core.domain.permission.OwnerCapability
 import com.fab.wab.merchant.core.domain.permission.Permission
 import com.fab.wab.merchant.feature.team.domain.PermissionGroup
 import com.fab.wab.merchant.feature.team.presentation.resources.Res
+import com.fab.wab.merchant.feature.team.presentation.resources.cap_branches_manage
 import com.fab.wab.merchant.feature.team.presentation.resources.cap_payout_details_manage
 import com.fab.wab.merchant.feature.team.presentation.resources.cap_salon_delete_request
 import com.fab.wab.merchant.feature.team.presentation.resources.cap_team_manage
@@ -69,6 +70,7 @@ internal fun OwnerCapability.title(): StringResource = when (this) {
     OwnerCapability.TEAM_MANAGE -> Res.string.cap_team_manage
     OwnerCapability.PAYOUT_DETAILS_MANAGE -> Res.string.cap_payout_details_manage
     OwnerCapability.SALON_DELETE_REQUEST -> Res.string.cap_salon_delete_request
+    OwnerCapability.BRANCHES_MANAGE -> Res.string.cap_branches_manage
 }
 
 internal fun PermissionGroup.title(): StringResource = when (this) {

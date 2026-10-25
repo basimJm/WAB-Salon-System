@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.team.domain
 
+import com.fab.wab.merchant.core.domain.permission.BranchPermissions
 import com.fab.wab.merchant.core.domain.permission.OwnerCapability
 import com.fab.wab.merchant.core.domain.permission.Permission
 
@@ -11,11 +12,15 @@ enum class PermissionGroup(val permissions: List<Permission>, val ownerOnly: Lis
             Permission.SALON_PROFILE_MANAGE, Permission.GALLERY_MANAGE, Permission.WORKING_HOURS_MANAGE,
             Permission.SERVICES_MANAGE, Permission.POLICIES_MANAGE,
         ),
-        listOf(OwnerCapability.SALON_DELETE_REQUEST),
+        listOf(OwnerCapability.BRANCHES_MANAGE, OwnerCapability.SALON_DELETE_REQUEST),
     ),
     STAFF(listOf(Permission.STAFF_MANAGE), listOf(OwnerCapability.TEAM_MANAGE)),
     FINANCE(listOf(Permission.FINANCE_VIEW, Permission.SUBSCRIPTION_VIEW), listOf(OwnerCapability.PAYOUT_DETAILS_MANAGE)),
     INSIGHTS(listOf(Permission.DASHBOARD_VIEW, Permission.REVIEWS_VIEW, Permission.STATISTICS_VIEW)),
 }
+
+/** The keys the editor shows for [member]: branch members (every non-owner) never see the salon-wide ones. */
+fun PermissionGroup.visiblePermissions(member: TeamMember?): List<Permission> =
+    if (member == null || member.isOwner) permissions else permissions.filter { it in BranchPermissions.GRANTABLE }
 
 fun Set<Permission>.toggled(permission: Permission): Set<Permission> = if (permission in this) this - permission else this + permission

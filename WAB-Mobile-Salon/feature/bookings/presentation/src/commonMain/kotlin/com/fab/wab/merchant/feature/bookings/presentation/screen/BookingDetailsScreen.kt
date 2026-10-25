@@ -53,6 +53,7 @@ import com.fab.wab.merchant.feature.bookings.presentation.resources.details_call
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_cancel_reason
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_copy
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_customer
+import com.fab.wab.merchant.feature.bookings.presentation.resources.details_branch
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_history
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_policy
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_refund_done
@@ -98,6 +99,12 @@ private fun DetailsContent(details: BookingDetails, nowMs: Long, onAction: (UiAc
     ) {
         Header(details, nowMs, onAction)
         CustomerCard(details, onAction)
+        details.summary.branch?.let { branch ->
+            SectionCard(stringResource(Res.string.details_branch)) {
+                AppText(text = branch.name, style = AppTheme.typography.bodyMedium)
+                branch.locationText?.let { AppText(text = it, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted) }
+            }
+        }
         PersonsCard(details)
         PaymentCard(details)
         if (details.policy.isNotEmpty()) {

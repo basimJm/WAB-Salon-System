@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.salon.presentation.controller.contract
 
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.feature.salon.domain.Closure
 import com.fab.wab.merchant.feature.salon.domain.DaySchedule
 import kotlinx.datetime.DayOfWeek
@@ -31,6 +32,7 @@ sealed interface HoursContract {
         val closureSheet: ClosureForm? = null,
         val conflict: ScheduleConflict? = null,
         val deleteClosureId: String? = null,
+        val branchScope: BranchScope = BranchScope(),
     ) {
         val invalidDays: Set<DayOfWeek> get() = week.filterNot { it.isValid }.map { it.day }.toSet()
         val canSaveWeek: Boolean get() = week != savedWeek && invalidDays.isEmpty() && !saving
@@ -56,6 +58,7 @@ sealed interface HoursContract {
         data object OnConflictCancelBookings : UiAction
         data object OnDialogDismiss : UiAction
         data object OnRetry : UiAction
+        data class OnBranchSelect(val branchId: String?) : UiAction
     }
 
     sealed interface SideEffect {

@@ -28,7 +28,7 @@ enum class Permission {
 }
 
 /** Owner-only capabilities (PRD §6.2): never stored in `permissions[]`, never grantable. */
-enum class OwnerCapability { TEAM_MANAGE, PAYOUT_DETAILS_MANAGE, SALON_DELETE_REQUEST }
+enum class OwnerCapability { TEAM_MANAGE, PAYOUT_DETAILS_MANAGE, SALON_DELETE_REQUEST, BRANCHES_MANAGE }
 
 /**
  * What the current member may do. The owner holds every permission and every owner-only capability; managers and
@@ -37,7 +37,12 @@ enum class OwnerCapability { TEAM_MANAGE, PAYOUT_DETAILS_MANAGE, SALON_DELETE_RE
 data class PermissionSet(val role: MemberRole?, val granted: Set<Permission>) {
     val isOwner: Boolean get() = role == MemberRole.OWNER
 
-    fun has(permission: Permission): Boolean = isOwner || permission in granted
+    /** A manager / employee: every permission applies to their branch only (BUSINESS_DOMAIN §6 branch scope). */
+    val isBranchMember: Boolean get() = role != null && !isOwner
+
+    /** Salon-wide keys ([BranchPermissions.OWNER_SCOPE_ONLY]) never count for a branch member, even if sent. */
+    fun has(permission: Permission): Boolean =
+        isOwner || (permission in granted && !(isBranchMember && permission in BranchPermissions.OWNER_SCOPE_ONLY))
 
     fun anyOf(vararg permissions: Permission): Boolean = permissions.any(::has)
 
@@ -60,9 +65,17 @@ fun SessionState.permissionSet(): PermissionSet = when (this) {
     SessionState.Guest -> PermissionSet.NONE
 }
 
-/** PRD §6.3 suggested templates (editable by the owner): the starting grant for a new manager / employee. */
+/** Salon-wide permissions a branch member (manager / employee) can never hold (BUSINESS_DOMAIN §6 branch scope). */
+object BranchPermissions {
+    val OWNER_SCOPE_ONLY: Set<Permission> = setOf(Permission.FINANCE_VIEW, Permission.SUBSCRIPTION_VIEW, Permission.POLICIES_MANAGE)
+
+    /** What the owner may grant to a member of one branch. */
+    val GRANTABLE: Set<Permission> = Permission.entries.toSet() - OWNER_SCOPE_ONLY
+}
+
+/** PRD §6.3 / BUSINESS_DOMAIN §6 templates (editable by the owner): the starting grant for a new manager / employee. */
 object PermissionTemplates {
-    val MANAGER: Set<Permission> = Permission.entries.toSet() - setOf(Permission.FINANCE_VIEW, Permission.POLICIES_MANAGE)
+    val MANAGER: Set<Permission> = BranchPermissions.GRANTABLE
     val EMPLOYEE: Set<Permission> = setOf(Permission.BOOKINGS_VIEW_OWN, Permission.REVIEWS_VIEW)
 
     fun forRole(role: MemberRole): Set<Permission> = when (role) {

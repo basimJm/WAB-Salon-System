@@ -27,6 +27,8 @@ data class BookingRequestUi(
     val total: String,
     val payment: PaymentStatus?,
     val age: Duration,
+    /** Branch of the request (MER-063), so the owner knows where the customer is coming. */
+    val branch: String? = null,
 ) {
     val isBride: Boolean get() = persons.any { it.isBride }
     val personsCount: Int get() = persons.size.coerceAtLeast(1)

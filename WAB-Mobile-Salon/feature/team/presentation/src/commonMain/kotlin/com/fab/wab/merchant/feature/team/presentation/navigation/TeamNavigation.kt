@@ -89,6 +89,7 @@ class TeamNavigation(override val navController: NavHostController) : Navigator 
                 is MemberEditContract.SideEffect.OpenPermissions -> navigateTo(Screen.PermissionsEditor(effect.memberId))
                 is MemberEditContract.SideEffect.OpenStaff -> navigateTo(Screen.StaffProfile(effect.memberId))
                 is MemberEditContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+                is MemberEditContract.SideEffect.OpenBooking -> navigateTo(Screen.BookingDetails(effect.bookingId))
             }
         }
         MemberEditScreen(

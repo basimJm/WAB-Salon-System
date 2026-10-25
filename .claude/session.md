@@ -139,3 +139,13 @@
 - Tests: `python3 scripts/tasks.py check`
 - Loops: 1/1 — re-read every changed domain section against the owner's answers and the original requirements (branch per staff, branch first step, staff per branch in details, salon-wide reviews, "Salon - Branch" in nearest, salon-only search cards, owner/manager/admin scopes)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs and backlog only; no product code. DEVIATION: the customer/merchant/admin PRDs are not edited yet; tasks point at `BUSINESS_DOMAIN.md` §5.16–§5.18 until each PRD gets its branch section.
+
+### T-136 — Sync main into merchant after salon branches Stage P (2026-10-26)
+- Project: repo root
+- Branch: `chore/sync-main-into-merchant-4`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `main` (server Stage P, PR #396) merged into `merchant` so MER-061…066 build against the branches contract; the only conflict (`INTEGRATION.md`, the generated board) resolved by taking main's side and regenerating with `tasks.py board`
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.

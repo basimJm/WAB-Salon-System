@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.salon.presentation.controller.contract
 
+import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.feature.salon.domain.CatalogService
 import com.fab.wab.merchant.feature.salon.domain.SalonService
 import com.fab.wab.merchant.feature.salon.domain.matching
@@ -13,6 +14,7 @@ sealed interface ServicesContract {
         val query: String = "",
         val confirmDeactivate: String? = null,
         val toggling: Set<String> = emptySet(),
+        val branchScope: BranchScope = BranchScope(),
     ) {
         val shown: List<SalonService> get() = services.matching(query) { it.name }
         val isEmpty: Boolean get() = !loading && error == null && services.isEmpty()
@@ -27,6 +29,7 @@ sealed interface ServicesContract {
         data object OnAdd : UiAction
         data object OnRefresh : UiAction
         data object OnRetry : UiAction
+        data class OnBranchSelect(val branchId: String?) : UiAction
     }
 
     sealed interface SideEffect {

@@ -7,6 +7,7 @@ import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataPers
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataPersonsItemServicesItem
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataStatusHistoryItem
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItem
+import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItemBranch
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItemCustomer
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItemStaffItem
 import com.fab.wab.merchant.core.data.contract.generated.GetTeamMembersDataItem
@@ -75,5 +76,14 @@ class BookingMappersTest {
     fun teamMembersBecomeStaffWithFullNames() {
         val member = GetTeamMembersDataItem("m1", "Rana", "Odeh", "+962", null, "EMPLOYEE", emptyList(), true, true)
         assertEquals("Rana Odeh", member.toStaff().name)
+        assertEquals("b2", member.copy(branchId = "b2").toStaff().branchId)
+    }
+
+    @Test
+    fun bookingBranchIsMappedWithBlankAddressDropped() {
+        val summary = item.copy(branch = GetBookingsDataItemBranch("b1", "Abdoun", " ")).toDomain()
+        assertEquals("Abdoun", summary?.branch?.name)
+        assertNull(summary?.branch?.locationText)
+        assertNull(item.toDomain()?.branch)
     }
 }

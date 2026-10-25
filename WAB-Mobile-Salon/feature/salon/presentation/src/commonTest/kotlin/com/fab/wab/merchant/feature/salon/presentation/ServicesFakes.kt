@@ -20,6 +20,7 @@ internal class FakeServices : ServicesRepository {
     var list = mutableListOf(salonService("s1", "c1"), salonService("s2", active = false))
     val pages = mutableMapOf(1 to List(ServiceLimits.PAGE_SIZE) { catalogItem("c${it + 1}") }, 2 to listOf(catalogItem("x")))
     var fail = false
+    val branchIds = mutableListOf<String?>()
     val created = mutableListOf<Pair<String, ServiceDraft>>()
     val updated = mutableListOf<Pair<String, ServiceDraft>>()
     val toggled = mutableListOf<Pair<String, Boolean>>()
@@ -30,24 +31,30 @@ internal class FakeServices : ServicesRepository {
 
     private fun error() = AppResult.Error(AppError.NetworkError("offline"))
 
-    override suspend fun services(): AppResult<List<SalonService>> = if (fail) error() else AppResult.Success(list.toList())
+    override suspend fun services(branchId: String?): AppResult<List<SalonService>> {
+        branchIds += branchId
+        return if (fail) error() else AppResult.Success(list.toList())
+    }
     override suspend fun catalog(gender: SalonGenderType, page: Int): AppResult<List<CatalogService>> {
         catalogGenders += gender
         return AppResult.Success(pages[page].orEmpty().also { rows -> rows.forEach { catalogCache[it.id] = it } })
     }
     override fun cachedService(id: String): SalonService? = list.firstOrNull { it.id == id }
     override fun cachedCatalog(id: String): CatalogService? = catalogCache[id]
-    override suspend fun create(catalogId: String, draft: ServiceDraft): AppResult<SalonService> {
+    override suspend fun create(catalogId: String, draft: ServiceDraft, branchId: String?): AppResult<SalonService> {
+        branchIds += branchId
         if (fail) return error()
         created += catalogId to draft
         return AppResult.Success(salonService("new", catalogId)).also { emitted.emit(it.data) }
     }
-    override suspend fun update(id: String, draft: ServiceDraft): AppResult<SalonService> {
+    override suspend fun update(id: String, draft: ServiceDraft, branchId: String?): AppResult<SalonService> {
+        branchIds += branchId
         if (fail) return error()
         updated += id to draft
         return AppResult.Success(salonService(id, active = draft.active)).also { emitted.emit(it.data) }
     }
-    override suspend fun setActive(id: String, active: Boolean): AppResult<SalonService> {
+    override suspend fun setActive(id: String, active: Boolean, branchId: String?): AppResult<SalonService> {
+        branchIds += branchId
         if (fail) return error()
         toggled += id to active
         return AppResult.Success(salonService(id, active = active)).also { emitted.emit(it.data) }
