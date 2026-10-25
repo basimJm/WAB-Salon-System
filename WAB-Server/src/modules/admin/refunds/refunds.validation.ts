@@ -10,6 +10,8 @@ const reason = z.string().trim().min(1).max(AUDIT_REASON_MAX_LENGTH);
 export const refundsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
   status: z.enum(REFUND_STATUSES).optional(),
   bookingId: z.string().regex(OBJECT_ID_PATTERN).optional(),
+  salonId: z.string().regex(OBJECT_ID_PATTERN).optional(),
+  branchId: z.string().regex(OBJECT_ID_PATTERN).optional(),
 });
 export const refundParams = z.object({ id: z.string().regex(OBJECT_ID_PATTERN) });
 export const retryBody = z.object({ reason });

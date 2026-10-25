@@ -9,7 +9,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
-import { financeListQuery } from './finance.validation';
+import { branchFinanceListQuery, financeListQuery } from './finance.validation';
 
 const jod = z.string().describe('JOD decimal string');
 const balance = z.object({
@@ -35,6 +35,7 @@ const transaction = z.object({
   amount: jod,
   gatewayFee: jod,
   net: jod,
+  branchId: z.string().nullable().describe('The branch the booking was made at'),
   createdAt: z.string(),
 });
 const refund = z.object({
@@ -45,6 +46,7 @@ const refund = z.object({
   source: z.string(),
   reason: z.string().nullable(),
   status: z.enum(['REFUND_PENDING', 'REFUNDED', 'REFUND_FAILED']),
+  branchId: z.string().nullable(),
   createdAt: z.string(),
   completedAt: z.string().nullable(),
 });
@@ -86,7 +88,7 @@ export const registerMerchantFinanceDocs = (registry: OpenAPIRegistry): void => 
     path: string,
     summary: string,
     data: z.ZodType,
-    query?: typeof financeListQuery,
+    query?: typeof financeListQuery | typeof branchFinanceListQuery,
   ): void => {
     registry.registerPath({
       method: 'get',
@@ -106,13 +108,13 @@ export const registerMerchantFinanceDocs = (registry: OpenAPIRegistry): void => 
     `${base}${MERCHANT_FINANCE_ROUTES.transactions}`,
     'Online payments of the salon with gateway fee and net, newest first (FINANCE_VIEW)',
     z.array(transaction),
-    financeListQuery,
+    branchFinanceListQuery,
   );
   get(
     `${base}${MERCHANT_FINANCE_ROUTES.refunds}`,
     'Refunds of the salon with status (FINANCE_VIEW)',
     z.array(refund),
-    financeListQuery,
+    branchFinanceListQuery,
   );
   get(
     `${base}${MERCHANT_FINANCE_ROUTES.payouts}`,

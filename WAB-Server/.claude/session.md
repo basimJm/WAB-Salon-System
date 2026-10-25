@@ -10,10 +10,23 @@
 
 ## Current task
 
+### SRV-146 — Finance by branch (Stage P)
+
+- Branch: `feat/srv-146-finance-branch`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.14, §3 transactions/refunds/ledger `branchId`; operations merchant `GET /finance/transactions|refunds`, admin `GET /transactions`, `GET /finance/reconciliation`, `GET /refunds`, `POST /exports` TRANSACTIONS — client impact ADM-091, MER-064):
+  - [x] A payment attempt keeps the draft's `branchId`; refunds and ledger CHARGE/GATEWAY_FEE/REFUND entries take the payment's branch; payouts stay salon-wide (no branch)
+  - [x] Owner finance: payments and refunds accept `branchId` and show `branchId` per row; balance and payouts stay salon-wide
+  - [x] Admin: transactions list `branchId` filter, reconciliation `salonId`/`branchId` scope, refunds list `salonId`/`branchId` filters; rows show `branchId`
+  - [x] TRANSACTIONS export takes `branchId` and has a Branch column
+- Tests: `tests/financeBranch.test.ts` (5), `tests/paymentsService.test.ts` (+1), `tests/exports.test.ts` (column shift); full gate 146 suites / 2735 tests
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔ (additive fields), Architect ✔ (payouts per salon unchanged; Phase 2 split payments unaffected), QA ✔) — legacy rows without a branch are backfilled by SRV-137's migration.
+
 ### SRV-145 — Reviews with branch label (Stage P)
 
 - Branch: `feat/srv-145-review-branch`
-- Status: IN REVIEW
+- Status: DONE (PR #391)
 - Acceptance criteria (BUSINESS_DOMAIN §5.11, §3 reviews `branchId`; operations customer `POST/GET /salons/{salonId}[/staff/{memberId}]/reviews`, `GET /salons/{salonId}`, admin `GET /reviews` — client impact CUS-085/087, ADM-091):
   - [x] Submit takes an optional `branchId`: it must be an open branch of that salon (404 `BRANCH_NOT_FOUND`); a staff review takes the staff member's branch (a different pick → `BRANCH_NOT_FOUND`); no pick = no label
   - [x] Review views (list, salon/staff details previews) show `branch {id, name}` in the request language, `null` when unlabelled
@@ -37,19 +50,6 @@
 - Tests: `tests/discoveryBranches.test.ts` (10) + search/salonDetails/home/favorites suites; full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔ (fields are additive; older builds keep reading the main-branch fields), Architect ✔, QA ✔) — NOTE: the nearest list pages in memory over branches inside the radius (bounded by the radius; same approach as SRV-058).
-
-### SRV-143 — Real-time, notifications and jobs per branch (Stage P)
-
-- Branch: `feat/srv-143-branch-realtime`
-- Status: DONE (PR #389)
-- Acceptance criteria (BUSINESS_DOMAIN §7, §8, §9; API docs: no change — socket room names change for branch members, client impact MER-066):
-  - [x] Socket rooms: the owner joins `salon:{id}:respond|all` (every branch); a branch member `branch:{id}:respond|all` of their branch, by permission; refreshes leave the salon rooms too
-  - [x] Booking events emit to the salon rooms and to the booking's branch rooms (request card to `…:respond`, updates to `…:all`); assigned staff keep their `member:{id}` room
-  - [x] Notifications carry the booking's / branch's `branchId`: non-owner members of other branches are left out, the owner always included — so request, pending, reminder and auto-cancel recipients (jobs use the same producers) are the owner + members of that branch with the permission
-  - [x] Branch events (`branch.live|not_bookable|offline|online`) reach the owner and that branch's managers (`SALON_PROFILE_MANAGE`)
-- Tests: `tests/branchRealtime.test.ts` (4)
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔ (merchant app keeps one socket; rooms are server-side), Architect ✔, QA ✔) — NOTE: a member moved to another branch stays in the old branch room until their socket reconnects (the move already triggers a permissions refresh on the device).
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

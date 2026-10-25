@@ -17747,6 +17747,15 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -17815,6 +17824,13 @@
                             "type": "string",
                             "description": "JOD decimal string"
                           },
+                          "branchId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "The branch the booking was made at"
+                          },
                           "createdAt": {
                             "type": "string"
                           }
@@ -17827,6 +17843,7 @@
                           "amount",
                           "gatewayFee",
                           "net",
+                          "branchId",
                           "createdAt"
                         ]
                       }
@@ -17945,6 +17962,15 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -18015,6 +18041,12 @@
                               "REFUND_FAILED"
                             ]
                           },
+                          "branchId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "createdAt": {
                             "type": "string"
                           },
@@ -18033,6 +18065,7 @@
                           "source",
                           "reason",
                           "status",
+                          "branchId",
                           "createdAt",
                           "completedAt"
                         ]
