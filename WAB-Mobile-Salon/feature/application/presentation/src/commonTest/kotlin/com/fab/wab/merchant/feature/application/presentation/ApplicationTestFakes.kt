@@ -28,7 +28,14 @@ internal val PENDING_APPLICATION = SalonApplication("s1", SalonState.APPLICATION
 
 internal class FakeApplications : ApplicationRepository {
     var applyResult: AppResult<ApplicationSession> =
-        AppResult.Success(ApplicationSession(AuthTokens("a", "r"), MemberProfile("m1", "s1", "Lina", MemberRole.OWNER), setOf("DASHBOARD_VIEW"), PENDING_APPLICATION))
+        AppResult.Success(
+            ApplicationSession(
+                AuthTokens("a", "r"),
+                MemberProfile("m1", "s1", "Lina", MemberRole.OWNER),
+                setOf("DASHBOARD_VIEW"),
+                PENDING_APPLICATION,
+            ),
+        )
     var current: AppResult<SalonApplication> = AppResult.Success(PENDING_APPLICATION)
     val applied = mutableListOf<RegistrationForm>()
     val resubmitted = mutableListOf<RegistrationForm>()

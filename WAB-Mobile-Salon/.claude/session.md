@@ -9,6 +9,17 @@
 
 ## Current task
 
+### MER-068a — detekt: wrap the long test line left by MER-068
+- Branch: `fix/mer-068-detekt-line`
+- Branched: (from `origin/merchant`)
+- Status: DONE
+- Acceptance criteria (end-of-backlog gate, rule §3.13):
+  - [x] `ApplicationTestFakes.kt:31` (166 chars) wrapped; detekt clean with the empty baseline
+  - [x] Full `scripts/ci/run_local_checks.sh` green on the final merchant code (MER-067…069): policy tests + checks, contract, detekt, unit tests + 4 Android variants + lint, 4 iOS configurations, K/N tests
+- Tests: `run_local_checks.sh` exit 0
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — test formatting only.
+
 ### MER-069 — Sign-in keeps the member's `branchId`
 - Branch: `fix/mer-069-signin-branch`
 - Branched: (from `origin/merchant`)
@@ -35,17 +46,3 @@
 - Loops: 1/1 — re-checked every criterion against the regenerated snapshot (version, member `$ref`, pattern count), the captured fixture, `contract_gaps` (0) and the host-test reports (new suites present, 0 failures); nothing found to fix after the run
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — four-role reading of the diff: generated files only from the tool; mapper in the data layer, domain keeps no DTOs; no hardcoded text (AR + EN resources), branch text scoped to the branches feature; contract regression guarded by a script test; session now follows the server (single source of truth for permissions). DEVIATIONS: host unit tests + policy + script tests only (no detekt, Android/iOS builds, emulator/simulator: batched rule §3.13, lead runs the full gate); UI string not viewed on a device; auth sign-in mapper (`feature/auth`) still drops `branchId` (out of scope, not touched).
 - Notes: contract re-sync = `./gradlew apiSync` then `contract_gaps.py`; patterns are not used by the generator.
-
-### MER-067 — iOS launch crash in `IosBookingRequests.registerCategory`
-- Branch: `fix/mer-067-ios-category-crash`
-- Branched: (from `origin/merchant`)
-- Status: IN REVIEW
-- Acceptance criteria (backlog MER-067; PRD M10 iOS actionable request alert, MER-030):
-  - [x] Root cause from evidence: crash reports (x2 / x21 = the `identifier` argument with a garbage isa) + disassembly of `registerCategory`'s coroutine: K/N converted `BookingRequestCategory.ACCEPT` to an NSString (`Kotlin_Interop_refToObjC`) before the suspending `getString`, spilled the raw pointer into the continuation and passed it after resuming, when the autorelease pool of the earlier dispatch had freed it
-  - [x] Fix: titles loaded first (`BookingRequestTitles`), Objective-C objects built in the non-suspend `bookingRequestCategory(titles)`; AR/EN titles from resources; re-registration on language change unchanged
-  - [x] Regression test (iosTest, runs on the simulator): category identifiers / titles / options, titles produced across real suspensions and thread hops
-  - [x] Debug-Dev app launches on the iPhone 17 Pro simulator and stays up: maintenance screen in Arabic, relaunched with the stored language `en` → English maintenance screen, back to Arabic; no new crash report, process alive, booking request push delivered as time-sensitive
-- Tests: `:composeApp:iosSimulatorArm64Test` (32 tests, 0 failures, incl. `BookingRequestCategoryTest` 2) · `:composeApp:testAndroidHostTest` green · `:composeApp:linkDebugFrameworkIosSimulatorArm64` + `xcodebuild` iosApp-Dev Debug-Dev (simulator) OK · `policy_checks.py all: ok`
-- Loops: 1/1 — re-checked each criterion against the rebuilt dylib (new `bookingRequestCategory` symbol present), three simulator launches (AR, EN, AR) and the crash-report folder (last report 22:25, before the fix)
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — minimal change in the iOS shell layer only; no new strings/constants in app code; Android untouched; no other iosMain call passes a suspend result inside an Objective-C argument list (only `getString` user in iosMain). DEVIATIONS: no detekt / full gate (batched rule, lead runs it); the language switch was done by writing the stored preference (the maintenance screen has no language toggle), so the live in-process re-registration on a language change was not exercised; the notification's Accept / Reject buttons were not opened (simulated long-press did not expand the alert); the unit test cannot reproduce the native use-after-free itself, the simulator launch is the proof.
-- Notes: K/N gotcha — never call a suspend function inside the argument list of an Objective-C call; load values first.
