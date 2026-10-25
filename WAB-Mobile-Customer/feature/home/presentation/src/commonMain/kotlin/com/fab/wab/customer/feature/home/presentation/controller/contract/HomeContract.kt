@@ -47,7 +47,7 @@ sealed interface HomeContract {
         data object OnNotificationsClick : UiAction
         data class OnServiceClick(val serviceId: String) : UiAction
         data object OnServicesSeeMore : UiAction
-        data class OnSalonClick(val salonId: String) : UiAction
+        data class OnSalonClick(val salonId: String, val branchId: String? = null) : UiAction
         data class OnFavoriteClick(val salonId: String) : UiAction
         data class OnSeeAll(val section: SalonSection) : UiAction
         data object OnEnableLocationClick : UiAction
@@ -56,7 +56,7 @@ sealed interface HomeContract {
     }
 
     sealed interface SideEffect {
-        data class OpenSalon(val salonId: String) : SideEffect
+        data class OpenSalon(val salonId: String, val branchId: String? = null) : SideEffect
         data class OpenAllSalons(
             val gender: Gender,
             val serviceId: String? = null,

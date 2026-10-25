@@ -5,6 +5,7 @@ import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.permission.BranchPermissions
 import com.fab.wab.merchant.core.domain.permission.PermissionTemplates
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
@@ -33,8 +34,8 @@ class PermissionsViewModel(
 
     override fun handle(event: UiAction) {
         when (event) {
-            is UiAction.OnToggle -> if (uiState.value.member?.isOwner == false) updateState {
-                copy(selected = selected.toggled(event.permission))
+            is UiAction.OnToggle -> if (uiState.value.member?.isOwner == false && event.permission in BranchPermissions.GRANTABLE) {
+                updateState { copy(selected = selected.toggled(event.permission)) }
             }
             UiAction.OnApplyTemplate -> uiState.value.member?.takeIf { !it.isOwner }?.let { member ->
                 updateState { copy(selected = PermissionTemplates.forRole(member.role)) }
@@ -66,7 +67,8 @@ class PermissionsViewModel(
         if (!state.canSave || member.isOwner) return
         scope.launch {
             updateState { copy(saving = true) }
-            val result = team.update(memberId, member.toDraft(), state.selected)
+            // Branch members never hold the salon-wide keys (BUSINESS_DOMAIN §6); stale ones are dropped on save.
+            val result = team.update(memberId, member.toDraft(), state.selected intersect BranchPermissions.GRANTABLE)
             updateState { copy(saving = false) }
             when (result) {
                 is AppResult.Success -> {

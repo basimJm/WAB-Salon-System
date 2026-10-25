@@ -300,6 +300,20 @@ describe('staff profile', () => {
     ).toBe(404);
   });
 
+  it('previews a profile change: lists affected bookings and saves nothing (SRV-134)', async () => {
+    const owner = addMember(womenSalon, 'OWNER');
+    const member = addMember(womenSalon, 'EMPLOYEE');
+    conflict.list = [{ bookingId: 'b1', startsAt: new Date(), status: 'APPROVED' }];
+    const before = JSON.stringify(membersM.docs.find((d) => String(d['_id']) === member.id));
+    const res = await request(app)
+      .post(`/merchant/v1/team/members/${member.id}/staff/preview`)
+      .set(owner.headers)
+      .send(PROFILE);
+    expect(res.status).toBe(200);
+    expect(JSON.stringify(membersM.docs.find((d) => String(d['_id']) === member.id))).toBe(before);
+    expect(recomputes).toHaveLength(0);
+  });
+
   it('answers 409 SCHEDULE_CONFLICT with the bookings and saves nothing', async () => {
     const owner = addMember(womenSalon, 'OWNER');
     const member = addMember(womenSalon, 'EMPLOYEE');

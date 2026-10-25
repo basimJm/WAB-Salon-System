@@ -57,6 +57,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let content = response.notification.request.content
+        // PRD M10: booking requests — Accept answers in the background, Reject / tap open the booking (MER-030).
+        let handled = MainViewControllerKt.notificationResponse(
+            userInfo: content.userInfo,
+            action: response.actionIdentifier
+        ) { completionHandler() }
+        if handled { return }
         MainViewControllerKt.pushTapped(userInfo: content.userInfo, title: content.title, body: content.body)
         completionHandler()
     }

@@ -100,6 +100,13 @@
     <string name="state_action_update">تحديث التطبيق</string>
     <string name="error_code_current_password_invalid">كلمة المرور الحالية غير صحيحة.</string>
     <string name="error_code_email_already_used">هذا البريد الإلكتروني مستخدم بالفعل.</string>
+    <string name="error_code_branch_not_found">لم يتم العثور على هذا الفرع.</string>
+    <string name="error_code_branch_not_bookable">هذا الفرع لا يقبل الحجوزات حالياً. اختر فرعاً آخر.</string>
+    <string name="error_code_branch_required">اختر الفرع أولاً.</string>
+    <string name="error_code_branch_limit_reached">وصل الصالون إلى الحد الأقصى لعدد الفروع.</string>
+    <string name="error_code_branch_has_upcoming_bookings">لا تزال لدى هذا الفرع حجوزات قادمة.</string>
+    <string name="error_code_last_branch">يجب أن يبقى للصالون فرع واحد على الأقل.</string>
+    <string name="error_code_branch_scope_denied">هذا الإجراء غير مسموح لهذا الفرع.</string>
     <string name="date_picker_ok">تم</string>
     <string name="date_picker_cancel">إلغاء</string>
     <string name="date_picker_title">اختر التاريخ</string>

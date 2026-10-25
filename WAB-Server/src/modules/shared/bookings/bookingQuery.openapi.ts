@@ -35,6 +35,7 @@ const row = z.object({
   appointmentStart: z.string(),
   appointmentEnd: z.string(),
   respondBy: z.string(),
+  requestedAt: z.string().describe('When the customer sent the request'),
   personsCount: z.number(),
   total: z.string().describe('JOD decimal string'),
   salon: person.nullable().describe('Customer and admin views only.'),
@@ -50,6 +51,9 @@ const row = z.object({
     .describe('Merchant and admin views only.'),
   staff: z.array(person).describe('Merchant and admin views only.'),
 });
+/** A booking row as lists show it (also reused by the merchant dashboard). */
+export const bookingRowDoc = row;
+
 const detail = row.extend({
   refundStatus: z.string(),
   persons: z.array(

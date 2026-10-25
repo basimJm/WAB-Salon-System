@@ -39,6 +39,14 @@ export const SOCKET_PING_INTERVAL_MS = 25_000;
 export const SOCKET_PING_TIMEOUT_MS = 20_000;
 export const SOCKET_MAX_PAYLOAD_BYTES = 100_000;
 
+/** Admin room events (SRV-124, BUSINESS_DOMAIN.md §7); the panel refreshes the matching queries. */
+export const ADMIN_SOCKET_EVENTS = {
+  applicationCreated: 'application.created',
+  reviewCreated: 'review.created',
+  refundUpdated: 'refund.updated',
+  overviewTick: 'overview.tick',
+} as const;
+
 /** Account events (SRV-082, BUSINESS_DOMAIN.md §7). */
 export const ACCOUNT_SOCKET_EVENTS = {
   permissionsUpdated: 'permissions.updated',

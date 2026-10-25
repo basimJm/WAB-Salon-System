@@ -47,6 +47,8 @@ export const MERCHANT_SALON_ROUTES = {
   apply: '/applications',
   application: '/application',
   resubmit: '/application/resubmit',
+  /** Owner: ask WAB to delete the salon (M25, SRV-133). */
+  deletionRequest: '/deletion-request',
 } as const;
 
 /** Admin review of salon applications (SRV-042, Admin PRD A14). */

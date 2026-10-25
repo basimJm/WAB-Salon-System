@@ -52,7 +52,7 @@ internal class CalendarCoordinator(
             update { copy(slotsLoading = true, slotsError = null) }
             val current = state()
             val others = current.persons.filterIndexed { index, _ -> index != current.currentPerson }
-            when (val result = deps.loadAvailability(salonId, date.toString(), current.person, others)) {
+            when (val result = deps.loadAvailability(salonId, current.branchId, date.toString(), current.person, others)) {
                 is AppResult.Success -> update { copy(slotsLoading = false, availability = result.data) }
                 is AppResult.Error -> {
                     val message = deps.errorText(result.appError)

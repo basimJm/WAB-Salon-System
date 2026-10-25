@@ -78,7 +78,7 @@ interface Recipient {
   readonly tokens: readonly string[];
   /** Platform of each token: merchant booking requests are sent differently to Android and iOS. */
   readonly platforms: ReadonlyMap<string, Platform>;
-  /** A customer can switch push off in the app; members cannot. */
+  /** Customers and members can switch push off in the app (in-app copies are kept). */
   readonly pushAllowed: boolean;
 }
 
@@ -158,7 +158,8 @@ export const createNotificationService = (deps: NotificationDeps): NotificationS
           app: 'MERCHANT',
           tokens: devices.map((d) => d.token),
           platforms: new Map(devices.map((d) => [d.token, d.platform])),
-          pushAllowed: true,
+          // Members can switch push off in the app (M25); older rows have no flag = on.
+          pushAllowed: member.pushEnabled !== false,
         };
       }),
     );

@@ -1,3 +1,4 @@
+import type { BranchesRepository } from '../../repositories/branches.repository';
 import type { MainBranches } from '../branches/mainBranch';
 import type { Redis } from 'ioredis';
 import { DRAFT_LOCK_SEGMENT, DRAFT_LOCK_TTL_MS } from '../../constants/bookingDrafts';
@@ -34,6 +35,8 @@ type PaymentMethod = (typeof PAYMENT_OPTIONS)[number];
 export interface DraftView {
   readonly id: string;
   readonly salon: { id: string; name: string };
+  /** The branch of the appointment (SRV-128b), `null` before branches. */
+  readonly branch: { id: string; name: string; locationText: string | null } | null;
   readonly expiresAt: Date;
   readonly paymentMethod: PaymentMethod;
   readonly persons: {
@@ -79,6 +82,8 @@ export interface BookingDraftService {
 }
 
 export interface BookingDraftDeps {
+  /** The draft's branch for its view (SRV-128b); without it the view has no branch. */
+  readonly branches?: Pick<BranchesRepository, 'findById'>;
   readonly redis: Redis;
   readonly drafts: BookingDraftsRepository;
   readonly availability: Pick<AvailabilityService, 'plan'>;
@@ -127,6 +132,10 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
       _id: { $in: [...new Set(draft.persons.map((p) => p.staffId))] },
     });
     const names = new Map(staff.map((m) => [m.id, m.firstName]));
+    const branch =
+      draft.branchId === undefined || deps.branches === undefined
+        ? null
+        : await deps.branches.findById(draft.branchId);
     const amounts = calculateAmounts({
       persons: draft.persons.map((p) => ({ services: p.services })),
       paymentOption: draft.paymentMethod,
@@ -135,6 +144,14 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
     return {
       id: draft.id,
       salon: { id: draft.salonId, name: salonName },
+      branch:
+        branch === null
+          ? null
+          : {
+              id: branch.id,
+              name: branch.name[language],
+              locationText: branch.locationText ?? null,
+            },
       expiresAt: draft.expiresAt,
       paymentMethod: draft.paymentMethod,
       persons: draft.persons.map((p) => ({

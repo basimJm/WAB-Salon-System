@@ -2,6 +2,8 @@ import { EXPORT_MAX_ROWS, EXPORT_PAGE_SIZE, type ExportKind } from '../../consta
 import { formatJod } from '../../utils/money';
 import type { AdminSettingsService } from '../adminSettings/adminSettings.service';
 import type { AdminTransactionsService } from '../finance/adminTransactions.service';
+import type { AdminCustomersService } from '../customers/adminCustomers.service';
+import type { AdminSalonsService } from '../salons/adminSalons.service';
 import type { BookingQueriesService } from '../bookings/bookingQueries.service';
 import type { DailyFacts } from '../reports/reportSource';
 import type { ReportsService } from '../reports/reports.service';
@@ -62,6 +64,8 @@ export const createTableBuilders = (deps: {
   transactions: Pick<AdminTransactionsService, 'list'>;
   adminSettings: Pick<AdminSettingsService, 'auditLogs'>;
   bookings: Pick<BookingQueriesService, 'list'>;
+  customers: Pick<AdminCustomersService, 'list'>;
+  salons: Pick<AdminSalonsService, 'list'>;
 }): TableBuilders => ({
   async REPORT_DAILY(params) {
     const r = await deps.reports.daily(text(params['date']));
@@ -210,6 +214,83 @@ export const createTableBuilders = (deps: {
         b.paymentMethod,
         b.paymentStatus,
         b.total,
+      ]),
+    };
+  },
+  async CUSTOMERS(params) {
+    const filter = {
+      status: params['status'] as never,
+      gender: params['gender'] as never,
+      cityId: params['cityId'] as string | undefined,
+      q: params['q'] as string | undefined,
+    };
+    const items = await collect((page) =>
+      deps.customers.list({ ...filter, params: { page, pageSize: EXPORT_PAGE_SIZE } }),
+    );
+    return {
+      title: 'Customers',
+      columns: [
+        'Name',
+        'Phone',
+        'Gender',
+        'City',
+        'Status',
+        'Registered',
+        'Last active',
+        'Bookings',
+      ],
+      rows: items.map((c): Cell[] => [
+        c.name,
+        c.phone,
+        c.gender,
+        c.cityId,
+        c.status,
+        c.registeredAt.toISOString(),
+        c.lastActiveAt?.toISOString() ?? null,
+        c.bookingsCount,
+      ]),
+    };
+  },
+  async SALONS(params) {
+    const filter = {
+      state: params['state'] as never,
+      gender: params['gender'] as never,
+      cityId: params['cityId'] as string | undefined,
+      subscription: params['subscription'] as never,
+      q: params['q'] as string | undefined,
+    };
+    const items = await collect(async (page) => {
+      const result = await deps.salons.list({
+        filter,
+        params: { page, pageSize: EXPORT_PAGE_SIZE },
+      });
+      return { items: result.items, total: result.meta.total };
+    });
+    return {
+      title: 'Salons',
+      columns: [
+        'Name',
+        'Gender',
+        'State',
+        'City',
+        'Rating',
+        'Reviews',
+        'Subscription',
+        'Recommended',
+        'Bookings (30 days)',
+        'Created',
+      ],
+      rows: items.map((s): Cell[] => [
+        s.name,
+        s.gender,
+        s.state,
+        s.cityId,
+        s.rating.avg,
+        s.rating.count,
+        s.subscriptionStatus,
+        s.recommended ? 'yes' : 'no',
+        s.bookings30d,
+        s.createdAt.toISOString(),
       ]),
     };
   },

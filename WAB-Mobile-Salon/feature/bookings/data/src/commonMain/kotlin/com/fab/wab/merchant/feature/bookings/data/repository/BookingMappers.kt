@@ -12,6 +12,7 @@ import com.fab.wab.merchant.feature.bookings.domain.model.BookingDetails
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingMoney
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingPerson
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingSummary
+import com.fab.wab.merchant.feature.bookings.domain.model.BranchRef
 import com.fab.wab.merchant.feature.bookings.domain.model.StaffRef
 import com.fab.wab.merchant.feature.bookings.domain.model.StatusChange
 import kotlinx.serialization.json.JsonPrimitive
@@ -38,6 +39,7 @@ fun GetBookingsDataItem.toDomain(): BookingSummary? {
         customerName = customer?.name.orEmpty(),
         customerPhone = customer?.phone,
         staff = staff.map { StaffRef(it.id, it.name) },
+        branch = branch?.let { BranchRef(it.id, it.name, it.locationText?.takeIf(String::isNotBlank)) },
     )
 }
 
@@ -48,6 +50,7 @@ fun GetBookingsByIdData.toDomain(): BookingDetails? {
         paymentStatus = PaymentStatus.fromCode(paymentStatus), hasBride = hasBride, start = start, end = instantOf(appointmentEnd) ?: start,
         respondBy = instantOf(respondBy), personsCount = personsCount.toInt(), total = total, customerName = customer?.name.orEmpty(),
         customerPhone = customer?.phone, staff = staff.map { StaffRef(it.id, it.name) },
+        branch = branch?.let { BranchRef(it.id, it.name, it.locationText?.takeIf(String::isNotBlank)) },
     )
     return BookingDetails(
         summary = summary,
@@ -72,4 +75,5 @@ fun GetBookingsByIdData.toDomain(): BookingDetails? {
 fun GetTeamMembersDataItem.toStaff(): StaffRef = StaffRef(
     id,
     listOf(firstName, lastName).filter { it.isNotBlank() }.joinToString(NAME_SEPARATOR),
+    branchId = branchId,
 )

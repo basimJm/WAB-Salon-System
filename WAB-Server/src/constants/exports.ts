@@ -8,6 +8,8 @@ export const EXPORT_KINDS = [
   'TRANSACTIONS',
   'AUDIT_LOGS',
   'BOOKINGS',
+  'CUSTOMERS',
+  'SALONS',
 ] as const;
 export type ExportKind = (typeof EXPORT_KINDS)[number];
 export const EXPORT_FORMATS = ['XLSX', 'CSV', 'PDF'] as const;
@@ -47,4 +49,15 @@ export const CSV_BOM = '﻿';
 export const PDF_FONT_SIZE = 9;
 export const PDF_TITLE_SIZE = 14;
 export const PDF_MARGIN = 36;
+/** Space between a cell's text and the next column. */
+export const PDF_CELL_PADDING = 4;
 export const PDF_ROW_HEIGHT = 16;
+
+/** Fonts embedded in PDF exports (Arabic + Latin, SRV-126); files under `WAB-Server/assets/fonts`. */
+export const PDF_FONT_DIR = ['assets', 'fonts'] as const;
+export const PDF_FONTS = {
+  regular: { name: 'body', file: 'IBMPlexSansArabic-Regular.ttf' },
+  bold: { name: 'body-bold', file: 'IBMPlexSansArabic-Bold.ttf' },
+} as const;
+/** Any Arabic letter: such cells are right-aligned (the font shapes the joined letters). */
+export const ARABIC_TEXT_PATTERN = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/;

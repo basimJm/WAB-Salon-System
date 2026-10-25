@@ -9,14 +9,15 @@ import com.fab.wab.merchant.core.data.mock.contractFixtures
 import com.fab.wab.merchant.core.data.mock.createMockEngine
 import com.fab.wab.merchant.core.data.mock.fixtureKeyOf
 import com.fab.wab.merchant.core.data.mock.patchFixture
+import com.fab.wab.merchant.core.data.mock.patchPendingBooking
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
-import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 private const val SALON = """{"success":true,"data":{"state":"LIVE","booking":{"state":"PENDING"}}}"""
 private const val LOGIN = """{"success":true,"data":{"member":{"role":"OWNER","permissions":["DASHBOARD_VIEW"]}}}"""
@@ -63,5 +64,15 @@ class MockWorldTest {
         val body = client.get("https://mock" + MerchantOperations.getSalon.path).bodyAsText()
         assertTrue(body.contains("\"state\":\"OFFLINE\""))
         assertTrue(body.contains("\"booking\""), "the hand-written feature fixture wins over the generated one")
+    }
+
+    @Test
+    fun aBookingMarkedPendingAnswersAsPendingOthersStayAsTheFixtureSays() {
+        val fixture = """{"success":true,"data":{"id":"b1","status":"APPROVED"}}"""
+        assertEquals(fixture, patchPendingBooking(fixture, "/merchant/v1/bookings/b1", emptySet()))
+        val pending = patchPendingBooking(fixture, "/merchant/v1/bookings/b1", setOf("b1"))
+        assertTrue(pending.contains("\"status\":\"PENDING\""))
+        assertEquals(fixture, patchPendingBooking(fixture, "/merchant/v1/bookings/b2", setOf("b1")))
+        assertEquals(fixture, patchPendingBooking(fixture, "/merchant/v1/bookings/b1/approve", setOf("b1")))
     }
 }

@@ -1,3 +1,5 @@
+import { SALON_VIEWED_EVENT } from '../../constants/statistics';
+import type { ServerEvents } from '../events/events.service';
 import { pointOf } from '../search/branchPlaces';
 import type { BranchRaw } from '../../models/branch.model';
 import type { BranchesRepository } from '../../repositories/branches.repository';
@@ -126,6 +128,8 @@ export interface SalonDetailsDeps {
   readonly favorites?: FavoriteLookup;
   readonly reviews?: Pick<ReviewsService, 'latest'>;
   readonly now?: () => Date;
+  /** Server events (salon page views); without it views are not counted. */
+  readonly events?: Pick<ServerEvents, 'track'>;
   /** Branch wiring (§5.17); without it the salon is one place (its own fields). */
   readonly branches?: Pick<BranchesRepository, 'findMany'>;
 }
@@ -194,6 +198,13 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
   return {
     async get({ salonId, language, customerId }) {
       const salon = await visible(salonId);
+      // Profile views for merchant statistics (M21); tracking never fails the page.
+      void deps.events?.track({
+        name: SALON_VIEWED_EVENT,
+        actorType: 'CUSTOMER',
+        ...(customerId === undefined ? {} : { actorId: customerId }),
+        salonId,
+      });
       const timeZone = await settings.get('timezone');
       const today = localDateOf(now(), timeZone);
       const [ranges, team, onLeave, offered, items, saved, latest, branches] = await Promise.all([

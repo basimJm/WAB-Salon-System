@@ -10,7 +10,14 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
-import { closureParams, closurePatchSchema, closureSchema, weeklySchema } from './hours.validation';
+import { bookingConflictDoc } from '../../shared/salonEdit/conflict.openapi';
+import {
+  closureParams,
+  closurePatchSchema,
+  closureRangeSchema,
+  closureSchema,
+  weeklySchema,
+} from './hours.validation';
 
 const closure = z.object({
   id: z.string(),
@@ -92,6 +99,27 @@ export const registerMerchantHoursDocs = (
       'Replace the weekly schedule (7 days, slot-aligned, close after open). 409 SCHEDULE_CONFLICT lists bookings the change would break.',
     request: withScope({ headers, body: body(weeklySchema) }),
     responses: { [HTTP_STATUS.ok]: jsonResponse('Hours', hours), ...failures },
+  });
+  const affected = jsonResponse(
+    'Affected bookings (nothing is saved)',
+    successResponseSchema(z.array(bookingConflictDoc)),
+  );
+  registry.registerPath({
+    method: 'post',
+    path: `${base}${MERCHANT_HOURS_ROUTES.weeklyPreview}`,
+    tags,
+    summary:
+      'Preview a weekly schedule: the upcoming PENDING/APPROVED bookings it would break (same checks as the save, nothing changes)',
+    request: withScope({ headers, body: body(weeklySchema) }),
+    responses: { [HTTP_STATUS.ok]: affected, ...failures },
+  });
+  registry.registerPath({
+    method: 'post',
+    path: `${base}${MERCHANT_HOURS_ROUTES.closuresPreview}`,
+    tags,
+    summary: 'Preview a closure: the upcoming PENDING/APPROVED bookings it would break',
+    request: withScope({ headers, body: body(closureRangeSchema) }),
+    responses: { [HTTP_STATUS.ok]: affected, ...failures },
   });
   registry.registerPath({
     method: 'post',

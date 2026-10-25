@@ -22,12 +22,14 @@ import kotlinx.serialization.json.JsonObject
 internal const val ID = "id"
 private const val PAGE = "page"
 private const val PAGE_SIZE = "pageSize"
+private const val BRANCH_ID = "branchId"
 
 class TeamApi(private val client: HttpClient) {
-    suspend fun members(page: Int, pageSize: Int): BaseResponse<List<GetTeamMembersDataItem>> =
+    suspend fun members(page: Int, pageSize: Int, branchId: String?): BaseResponse<List<GetTeamMembersDataItem>> =
         client.get(MerchantOperations.getTeamMembers.path) {
             parameter(PAGE, page)
             parameter(PAGE_SIZE, pageSize)
+            branchId?.let { parameter(BRANCH_ID, it) }
         }.body()
 
     suspend fun member(id: String): BaseResponse<GetTeamMembersByIdData> = client.get(

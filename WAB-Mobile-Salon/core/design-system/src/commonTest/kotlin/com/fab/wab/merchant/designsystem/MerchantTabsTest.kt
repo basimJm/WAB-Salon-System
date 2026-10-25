@@ -40,7 +40,7 @@ class MerchantTabsTest {
 
     @Test
     fun managementPermissionsShowTheSalonTab() {
-        val manager = member(MemberRole.MANAGER, Permission.DASHBOARD_VIEW, Permission.FINANCE_VIEW)
+        val manager = member(MemberRole.MANAGER, Permission.DASHBOARD_VIEW, Permission.GALLERY_MANAGE)
         assertEquals(listOf(MerchantTab.HOME, MerchantTab.SALON, MerchantTab.MORE), visibleMerchantTabs(manager))
     }
 

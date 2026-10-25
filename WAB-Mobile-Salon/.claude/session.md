@@ -9,6 +9,116 @@
 
 ## Current task
 
+### MER-066 — Real-time and push per branch
+- Branch: `feat/mer-066-branch-realtime`
+- Branched: (from `feat/mer-065-team-branches`, after the batch 10 review commit)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §7 rooms `salon:{id}:*` / `branch:{id}:*`, §8 recipients, §5.18 requests to the owner + that branch's responders):
+  - [x] Rooms stay server-side (joined at connection from the member's role / branch); the app reconnects a live socket when the signed-in member's scope changes (moved to another branch, role change) so the server joins the new rooms; other profile changes and a disconnected socket are left alone
+  - [x] Request alerts only for the member's branch: the in-app / overlay request queue and the Android outside-the-app path drop a request whose booking `branch.id` is not the branch member's (`MemberScope.accepts`); the owner gets every branch; an unknown branch on either side trusts the server routing
+  - [x] The owner's request card names the branch (MER-063)
+- Tests: `BranchScopeTest` (+1, `accepts` / `memberScope`), `BookingRequestsViewModelTest` (+1), `RealtimeAccountEventsTest` (+1); domain / bookings / composeApp host tests + `assembleDevDebug` green; policy ok
+- Loops: 1/1 — batch 11 run (MER-066 alone, last row): policy ok, `testAndroidHostTest` all modules 151 suites / 514 tests / 0 failures, `:androidApp:assembleDevDebug` green; criteria re-checked against the diff
+- Final gate (2026-10-25): `scripts/ci/run_local_checks.sh` exit 0 — policy tests + checks, contract, detekt, unit tests, every Android variant + lint, iOS Debug/Release × Dev/Prod, Kotlin/Native tests. Two earlier runs failed on the machine, not the code: the disk filled up (R8 cache write), which left a half-built iOS release framework; outputs removed and rebuilt. Lint fixes from the gate committed (`BranchPicker` parameter order, `toUri`).
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — small, defensive change on top of the server routing; no new dependency; the socket renew is limited to live connections. DEVIATIONS: socket payloads and push data carry no `branchId` (server), so branch filtering happens after the details fetch; iOS alerts are shown by APNs before the app runs (no notification service extension), so an already-sent push for another branch cannot be suppressed there — the server routes them per branch; UI check deferred to the end-of-backlog journey.
+
+### MER-065 — Team with branches
+- Branch: `feat/mer-065-team-branches`
+- Branched: (from `feat/mer-064-branch-operations`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.16 move rule, §6 branch scope; operations `GET /team/members?branchId=`, `POST /team/members` `branchId`, `PATCH /team/members/{id}` `branchId` (409 `SCHEDULE_CONFLICT`)):
+  - [x] Members carry `branchId`; the owner's team list has the branch switcher (`?branchId=`) and shows each member's branch while all branches are listed; managers get their branch's staff from the server (no switcher)
+  - [x] New member requires a branch (dropdown of open branches; default = the switcher's branch or the only open branch); `MemberField.BRANCH` validation; the branch goes in the create body
+  - [x] Owner moves a member: changing the branch sends `branchId` in the PATCH only when it changed; `409 SCHEDULE_CONFLICT` → affected-bookings sheet (reassign opens the first booking, cancel affected with `STAFF_UNAVAILABLE` then re-send the move, go back); a note says the services stay behind
+  - [x] Permission editor hides `FINANCE_VIEW`, `SUBSCRIPTION_VIEW`, `POLICIES_MANAGE` for branch members (`visiblePermissions`), refuses toggling them and drops stale ones on save
+  - [x] Staff profile reads the services and open days of the member's branch (`/branches/{branchId}/services|hours`)
+- Tests: `TeamBranchesTest` (2), `TeamBranchesViewModelTest` (3), `TeamMappersTest` (+1), `PermissionsViewModelTest` (updated: FINANCE_VIEW toggle ignored); team + composeApp host tests green; policy ok
+- Loops: 1/1 — batch 10 run (MER-061…065): policy ok, `testAndroidHostTest` all modules 151 suites / 511 tests / 0 failures, `:androidApp:assembleDevDebug` green; every criterion re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 10 code reading of the five commits; fixed during review: Hours / Services / Team loads now cancel the previous load (a slow answer for the old branch could overwrite the newly chosen one), `branchScopeOf` reloads the branch list per owner account and trusts it only after a successful reload (no other account's branches after a re-login). DEVIATION: UI check on emulator / simulator deferred to the end-of-backlog journey (rules §3.13); no screen previews (none in the feature modules).
+- Notes: the move's "pick services of the new branch" happens in the staff profile (skills list now follows the member's branch); there is no separate post-move wizard.
+
+### MER-064 — Per-branch hours, closures, services / prices (+ finance by branch)
+- Branch: `feat/mer-064-branch-operations`
+- Branched: (from `feat/mer-063-branch-scope`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §6; operations `/branches/{branchId}/hours` (+ `/weekly`, `/closures[/{id}]`), `/branches/{branchId}/services[/{id}]`, `GET /finance/transactions|refunds?branchId=`):
+  - [x] Hours, closures and services address `/branches/{branchId}/…` for the owner's edited branch and the salon-level paths otherwise (`branchPath`, same bodies / answers); repositories take an optional `branchId`
+  - [x] Owner: switcher without "All branches" on Working hours and Services (the main branch until another is picked); changing branch reloads (services list cleared first); the service form and the catalog picker ("Added" marks) follow the same branch; branch members see no switcher and keep the salon-level calls (their own branch on the server)
+  - [x] Finance (owner only): switcher on Transactions / Refunds sends `?branchId=`; Payouts stay salon-wide (no switcher)
+- Tests: `HoursViewModelTest` (+2), `ServicesViewModelTest` (+1), `FinanceViewModelTest` (+1); salon data / presentation, finance, composeApp host tests green; policy ok
+- Loops: 1/1 — batch 10 run (MER-061…065): policy ok, `testAndroidHostTest` all modules 151 suites / 511 tests / 0 failures, `:androidApp:assembleDevDebug` green; every criterion re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 10 code reading of the five commits; fixed during review: Hours / Services / Team loads now cancel the previous load (a slow answer for the old branch could overwrite the newly chosen one), `branchScopeOf` reloads the branch list per owner account and trusts it only after a successful reload (no other account's branches after a re-login). DEVIATION: UI check on emulator / simulator deferred to the end-of-backlog journey (rules §3.13); no screen previews (none in the feature modules).
+- Notes: a manager addressing another branch would get 403 `BRANCH_SCOPE_DENIED` (localized, CONTACT action); the app never sends a branch id for branch members, so it cannot happen from the UI.
+
+### MER-063 — Branch-scoped bookings, requests and calendar
+- Branch: `feat/mer-063-branch-scope`
+- Branched: (from `feat/mer-062-branches-manage`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §6 branch scope; operations `GET /bookings?branchId=`, booking rows / details `branch {id,name,locationText}`, `GET /team/members` `branchId`):
+  - [x] Managers / employees: no switcher, no `branchId` sent — the server returns their branch only (bookings, calendar, requests)
+  - [x] Owner: branch switcher ("All branches" / one) on the bookings list and the calendar, shared through `BranchSelection`; the list sends `?branchId=`; the staff filter shows that branch's staff and a branch change clears it; cards show the branch name while all branches are listed
+  - [x] Calendar (the contract has no `branchId`): for a chosen branch the server call asks for that branch's staff and the columns / blocks are narrowed to them (team members carry `branchId`)
+  - [x] Booking details show a "Branch" section (name + address); reassignment lists only staff of the booking's branch; the in-app request card shows the branch name
+- Tests: `BookingsViewModelTest` (+2), `CalendarViewModelTest` (+1), `BookingMappersTest` (+1, branch + staff `branchId`); bookings / design-system / domain / branches / composeApp host tests green; policy ok
+- Loops: 1/1 — batch 10 run (MER-061…065): policy ok, `testAndroidHostTest` all modules 151 suites / 511 tests / 0 failures, `:androidApp:assembleDevDebug` green; every criterion re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 10 code reading of the five commits; fixed during review: Hours / Services / Team loads now cancel the previous load (a slow answer for the old branch could overwrite the newly chosen one), `branchScopeOf` reloads the branch list per owner account and trusts it only after a successful reload (no other account's branches after a re-login). DEVIATION: UI check on emulator / simulator deferred to the end-of-backlog journey (rules §3.13); no screen previews (none in the feature modules).
+- Notes: SERVER GAPS (stated, not built): Home dashboard (MER-050 ← SRV-130), merchant reviews read (SRV-131) and statistics (SRV-132) do not exist, so their branch scoping waits for those rows; the calendar endpoint has no `branchId` filter (client-side narrowing by staff branch). Long-line fixes of MER-062 files ride along in this commit.
+
+### MER-062 — Owner branch management + branch switcher
+- Branch: `feat/mer-062-branches-manage`
+- Branched: (from `feat/mer-061-branches-contract`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.16, §6 `BRANCHES_MANAGE`; operations `GET/POST /branches`, `GET/PATCH /branches/{branchId}`, `POST …/main|offline|online|close`):
+  - [x] Core: `Branch` / `BranchStatus` / `BranchName` (localized with fallback), `BranchForm` + contract validation (names 1..60, pin, address 1..300, city, area, E.164 phone, optional WhatsApp), lifecycle helpers (`canBecomeMain`, `canGoOffline`, `canGoOnline`, `canClose` — main must be replaced first), `BranchesRepository` (shared `StateFlow` list, main first) + `BranchesApi` / `BranchesRepositoryImpl` (PATCH as JSON so a cleared WhatsApp is `null`), mock list fixture (3 branches: main, active, offline)
+  - [x] Shared switcher state: `BranchSelection` singleton ("All branches" = null), `BranchScope` / `branchScopeOf` (owner = chosen filter + switcher when > 1 branch, branch members = server scope, list loaded once for the owner), `AppBranchSwitcher` chip row (closed branches labelled) in the design system
+  - [x] New `feature/branches/presentation` (data in core because every scoped feature reads it): list (main / status / incomplete badges, address, phone, offline reason, only the allowed actions), set main (confirm), offline (reason sheet, 1..1000), online, close (confirm; `409 BRANCH_HAS_UPCOMING_BOOKINGS` → sheet listing the blocking bookings, each opens M09), add / edit form (names AR + EN, map picker + address, city / area, phone, WhatsApp); salon hub tile "Branches" for the owner only (`OwnerCapability.BRANCHES_MANAGE`)
+  - [x] Map picker controller / handler moved from `feature/salon` to the design system (`MapPickerController`, `MapPickerHandler`) and shared by the profile and branch forms
+- Tests: `BranchesTest` (8), `BranchesMapperTest` (4), `BranchesViewModelTest` (4), `BranchEditViewModelTest` (3), `SalonHubTest` / `SalonProfileViewModelTest` unchanged and green; policy ok
+- Loops: 1/1 — batch 10 run (MER-061…065): policy ok, `testAndroidHostTest` all modules 151 suites / 511 tests / 0 failures, `:androidApp:assembleDevDebug` green; every criterion re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 10 code reading of the five commits; fixed during review: Hours / Services / Team loads now cancel the previous load (a slow answer for the old branch could overwrite the newly chosen one), `branchScopeOf` reloads the branch list per owner account and trusts it only after a successful reload (no other account's branches after a re-login). DEVIATION: UI check on emulator / simulator deferred to the end-of-backlog journey (rules §3.13); no screen previews (none in the feature modules).
+- Notes: no screen previews (no feature module has them; same as before). Reopening a closed branch has no merchant endpoint, so closed branches show no actions.
+
+### MER-061 — Branches contract, member scope, branch error codes
+- Branch: `feat/mer-061-branches-contract`
+- Branched: (batch 10 start, from `origin/merchant`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §6 branch scope, §11; `WAB-Server/.claude/Integration.md` "Salon branches contract" MER-061):
+  - [x] `./gradlew apiSync` (`scripts/api_sync.py`) re-run: `SalonBranchesDtos`, per-branch hours / services, `branch` on bookings, `branchId` on team members and finance rows, `?branchId=` filters; `apiSyncCheck` ok; two positional DTO uses in tests fixed
+  - [x] Session keeps the member's scope: `MemberProfile.branchId` (persisted `member_branch_id`, cleared on sign-out), `MemberProfile.scope` = `AllBranches` for the owner, `OneBranch(branchId)` for managers / employees; the refresh member reads an optional `branchId`
+  - [x] `PermissionSet.isBranchMember`; `FINANCE_VIEW`, `SUBSCRIPTION_VIEW`, `POLICIES_MANAGE` never count for a branch member (`BranchPermissions.OWNER_SCOPE_ONLY`); MANAGER template = every grantable branch permission (§6); owner-only `BRANCHES_MANAGE` capability (locked row "Branches" in the permission editor)
+  - [x] Error codes `BRANCH_NOT_FOUND`, `BRANCH_NOT_BOOKABLE`, `BRANCH_REQUIRED`, `BRANCH_LIMIT_REACHED`, `BRANCH_HAS_UPCOMING_BOOKINGS`, `LAST_BRANCH`, `BRANCH_SCOPE_DENIED` in `ErrorCode` + AR/EN text + handling action
+- Tests: `BranchScopeTest` (4), `RefreshMemberTest` (+1), `DataStoreSessionStoreTest` (+1), `ErrorCodeTest` (updated), `PermissionsTest` / `MerchantTabsTest` (updated for the branch rule); all host tests green (`testAndroidHostTest`), policy ok
+- Loops: 1/1 — batch 10 run (MER-061…065): policy ok, `testAndroidHostTest` all modules 151 suites / 511 tests / 0 failures, `:androidApp:assembleDevDebug` green; every criterion re-checked against the diff
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 10 code reading of the five commits; fixed during review: Hours / Services / Team loads now cancel the previous load (a slow answer for the old branch could overwrite the newly chosen one), `branchScopeOf` reloads the branch list per owner account and trusts it only after a successful reload (no other account's branches after a re-login). DEVIATION: UI check on emulator / simulator deferred to the end-of-backlog journey (rules §3.13); no screen previews (none in the feature modules).
+- Notes: SERVER GAP — the contract's `MemberProfile` (login / refresh member) has no `branchId` yet (Integration.md says it should); the app parses it when present and otherwise relies on the server scoping every call to the member's branch (role ≠ OWNER = branch member). Gradle runs through the terminal panel (the sandbox cannot write `~/.gradle`).
+
+### MER-030 — Real-time request outside the app, iOS
+- Branch: `feat/mer-029-request-android`
+- Branched: (shared with MER-029, owner request 2026-10-25 "and on iOS")
+- Status: DONE (PR into `merchant`)
+- Acceptance criteria (PRD M10 iOS; backlog MER-030):
+  - [x] Notification category `BOOKING_REQUEST` registered from Kotlin in the app language (re-registered on language change): Accept (background, no app launch) and Reject (opens the app)
+  - [x] Accept calls `POST /bookings/{id}/approve`; the outcome replaces the alert ("Booking accepted" / "handled by another team member" / "could not accept"); Reject and a tap open the booking (`/bookings/<id>` link) with the request sheet (reason picker); foreground pushes go to the in-app sheet (MER-028)
+  - [x] Time-sensitive: `com.apple.developer.usernotifications.time-sensitive` entitlement (both entitlement files) + payload `interruption-level: time-sensitive`; sample payload `iosApp/PushSamples/booking_request.apns` + README (`xcrun simctl push booted com.fab.wab.merchant.dev …`)
+  - [x] Simulator (iPhone 17 Pro): banner over the home screen, long-press shows قبول / رفض, Accept answered in the background ("تم قبول الحجز"), Reject opened the booking with the request sheet
+- Tests: `BookingRequestPushTest` (2, shared payload helpers); iOS framework compile + Debug-Dev build green
+- Loops: 1/1 — re-ran the simulator journey after the final build (push → actions → accept / reject)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — Swift change limited to routing `didReceive` to Kotlin; payload keys shared with Android. DEVIATIONS: depends on MER-012 / MER-004 for real APNs delivery (tested with `simctl push` only); default sound (no custom request sound file yet); the Time Sensitive capability must be enabled on the App IDs (owner, store accounts); no notification service extension (not needed: the alert text comes from the server).
+
+### MER-029 — Real-time request outside the app, Android
+- Branch: `feat/mer-029-request-android`
+- Branched: (from `origin/merchant`)
+- Status: DONE (PR into `merchant`)
+- Acceptance criteria (PRD M10 Android; backlog MER-029):
+  - [x] One entry for every trigger (`OutsideBookingRequests.onPush` from FCM data messages, debug trigger): foreground → in-app sheet; background + still PENDING → overlay card over any app when "display over other apps" is granted, else heads-up notification
+  - [x] Overlay (`TYPE_APPLICATION_OVERLAY` ComposeView with its own lifecycle, app theme / language): the M10 request card (shared `BookingRequestOverlayCard`), alert sound + vibration while shown, queue ("1 of 2") for requests arriving while open, Accept in place, Reject / View details open the booking (reason picker needs the app window), close = keep pending; `request_shown` channel `overlay`
+  - [x] Heads-up: high-importance "booking requests" channel (ringtone, vibration), Accept (background broadcast → approve → outcome notification incl. "handled by another team member") and Reject / tap (booking link), full-screen intent for a locked phone (`USE_FULL_SCREEN_INTENT`); `request_shown` / `request_accept` channel `notification`
+  - [x] Debug-only trigger (debug manifest): `adb shell am broadcast -a com.fab.wab.merchant.dev.DEBUG_BOOKING_REQUEST --es bookingId b1 -p com.fab.wab.merchant.dev`; mock mode marks the booking PENDING (`MockControls.markBookingPending`, inert on remote data)
+  - [x] Emulator (Pixel 4): overlay over another app (AR RTL), Accept → "Booking accepted" card, Done closes; overlay permission denied → heads-up with قبول / رفض, Accept from the shade → "تم قبول الحجز"
+- Tests: `BookingRequestPushTest` (2), `MockWorldTest` (+1 pending patch), `SwitchMockWorldUseCaseTest` (updated); batch run: policy ok, 472 host tests 0 failures, detekt 0, `assembleDevDebug` green
+- Loops: 1/1 — re-checked each criterion on the emulator after the final build
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — platform code in `composeApp/androidMain` + `androidApp` wiring, card shared with the in-app sheet, no new dependency. DEVIATIONS: backlog dependency MER-012 (FCM token registration, ← MER-004 owner Firebase) not done — tested with the debug trigger, real FCM delivery is MER-056; Android 14+ may downgrade the full-screen intent to heads-up unless the user allows it; the overlay Reject opens the app instead of an in-overlay reason picker (a Compose bottom sheet cannot open in an overlay window).
+
 ### MER-058 — Performance pass (measurements)
 - Branch: `feat/mer-058-performance`
 - Branched: (from `origin/merchant` after PR #363 merged MER-002…057)

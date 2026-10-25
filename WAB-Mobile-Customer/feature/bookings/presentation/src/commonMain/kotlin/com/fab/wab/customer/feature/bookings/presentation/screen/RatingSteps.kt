@@ -64,8 +64,9 @@ internal fun SalonStep(state: UiState, step: RatingStep.Salon, onAction: (UiActi
             style = AppTheme.typography.bodyMedium.copy(fontSize = BookingsDesign.fontBody),
             color = AppTheme.colors.muted,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = spacing.space20),
+            modifier = Modifier.padding(bottom = if (step.branch == null) spacing.space20 else spacing.space4),
         )
+        step.branch?.let { BookedBranchLines(it, Modifier.padding(bottom = spacing.space20), withAddress = false) }
         AppRatingInput(
             value = state.rating,
             onValueChange = { onAction(UiAction.OnRatingChange(it)) },

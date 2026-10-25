@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.feature.team.presentation.controller.contract
 
 import com.fab.wab.merchant.core.common.FormValidators
+import com.fab.wab.merchant.core.domain.branch.Branch
 import com.fab.wab.merchant.core.domain.locations.Country
 import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.ui.media.CropRegion
@@ -25,11 +26,15 @@ sealed interface MemberEditContract {
         val cropBytes: ByteArray? = null,
         val showErrors: Boolean = false,
         val saving: Boolean = false,
+        /** Branches a member can belong to (closed ones excluded); empty = the choice is not offered. */
+        val branches: List<Branch> = emptyList(),
+        /** Moving the member was refused with `409 SCHEDULE_CONFLICT`: the bookings that would break. */
+        val moveConflict: List<String>? = null,
     ) {
         val isNew: Boolean get() = memberId == null
         val country: Country? get() = countries.firstOrNull { it.code == draft.countryCode }
         val phoneValid: Boolean get() = country?.let { FormValidators.isValidPhone(draft.number, it.phoneRegex) } == true
-        val errors: Set<MemberField> get() = memberErrors(draft, isNew, phoneValid)
+        val errors: Set<MemberField> get() = memberErrors(draft, isNew, phoneValid, branchRequired = branches.isNotEmpty())
         val visibleErrors: Set<MemberField> get() = if (showErrors) errors else emptySet()
         val canSave: Boolean get() = (isNew || draft != original) && !saving && photo?.status !is UploadStatus.Uploading
     }
@@ -50,6 +55,10 @@ sealed interface MemberEditContract {
         data object OnPermissions : UiAction
         data object OnStaffProfile : UiAction
         data object OnRetry : UiAction
+        data class OnBranch(val index: Int) : UiAction
+        data object OnConflictCancelBookings : UiAction
+        data object OnConflictReassign : UiAction
+        data object OnConflictDismiss : UiAction
     }
 
     sealed interface SideEffect {
@@ -57,5 +66,6 @@ sealed interface MemberEditContract {
         data class OpenPermissions(val memberId: String) : SideEffect
         data class OpenStaff(val memberId: String) : SideEffect
         data class ShowError(val message: String) : SideEffect
+        data class OpenBooking(val bookingId: String) : SideEffect
     }
 }

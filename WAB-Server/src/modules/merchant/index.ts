@@ -16,6 +16,12 @@ import { MERCHANT_HOURS_ROUTES } from '../../constants/hours';
 import { MERCHANT_BRANCH_ROUTES } from '../../constants/branches';
 import { MERCHANT_GALLERY_ROUTES } from '../../constants/gallery';
 import { createMerchantFinanceRouter } from './finance/finance.routes';
+import { createMerchantReviewsRouter } from './reviews/reviews.routes';
+import { createMerchantStatisticsRouter } from './statistics/statistics.routes';
+import { createMerchantDashboardRouter } from './dashboard/dashboard.routes';
+import { MERCHANT_DASHBOARD_ROUTES } from '../../constants/dashboard';
+import { MERCHANT_STATISTICS_ROUTES } from '../../constants/statistics';
+import { MERCHANT_REVIEW_ROUTES } from '../../constants/reviews';
 import { MERCHANT_FINANCE_ROUTES, MERCHANT_SUBSCRIPTION_ROUTES } from '../../constants/finance';
 import { createMerchantPayoutDetailsRouter } from './payoutDetails/payoutDetails.routes';
 import {
@@ -36,6 +42,11 @@ import {
   unavailableCatalogService,
   unavailableBookingActions,
   unavailableMerchantFinance,
+  unavailableMerchantReviews,
+  unavailableMerchantStatistics,
+  unavailableMerchantDashboard,
+  unavailableMemberSelf,
+  unavailableAdminSalonInsights,
   unavailablePayoutDetails,
   unavailableBranches,
   unavailableGallery,
@@ -70,6 +81,9 @@ import { createMerchantGalleryRouter } from './gallery/gallery.routes';
 import { createMerchantProfileRouter } from './salon/profile.routes';
 import { createMerchantSalonRouter } from './salon/salon.routes';
 import { createMerchantAuthRouter } from './auth/auth.routes';
+import { createMerchantChangePhoneRouter, createMerchantMeRouter } from './me/me.routes';
+import { createSalonDeletionRequestRouter } from './salon/deletion.routes';
+import { MERCHANT_ME_ROUTES } from '../../constants/merchantAuth';
 
 /** Router for the /merchant/v1 namespace. Feature routers are mounted here as they are built. */
 export const createMerchantRouter = (services: ApiServices = {}): Router => {
@@ -82,6 +96,31 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
       service: services.merchantAuth ?? unavailableMerchantAuth,
       limiter: createOtpRouteLimiter(services),
     }),
+  );
+  mount(
+    router,
+    MERCHANT_AUTH_ROUTES.base,
+    createMerchantChangePhoneRouter(
+      services.memberSelf ?? unavailableMemberSelf,
+      services.salonProfile?.guard ?? [unavailableGuard],
+      createOtpRouteLimiter(services),
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_SALON_ROUTES.base,
+    createSalonDeletionRequestRouter(
+      services.salonDeletion ?? unavailableAdminSalonInsights.deletion,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_ME_ROUTES.base,
+    createMerchantMeRouter(
+      services.memberSelf ?? unavailableMemberSelf,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
   );
   mount(router, INSTALLATION_ROUTES.base, createMerchantInstallationsRouter(services));
   mount(router, APP_CONFIG_ROUTES.base, createMerchantAppConfigRouter(services));
@@ -230,6 +269,30 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     services.salonProfile?.guard ?? [unavailableGuard],
   );
   mount(router, MERCHANT_FINANCE_ROUTES.base, finance.finance);
+  mount(
+    router,
+    MERCHANT_REVIEW_ROUTES.base,
+    createMerchantReviewsRouter(
+      services.merchantReviews ?? unavailableMerchantReviews,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_STATISTICS_ROUTES.base,
+    createMerchantStatisticsRouter(
+      services.merchantStatistics ?? unavailableMerchantStatistics,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_DASHBOARD_ROUTES.base,
+    createMerchantDashboardRouter(
+      services.merchantDashboard ?? unavailableMerchantDashboard,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
   mount(router, MERCHANT_SUBSCRIPTION_ROUTES.base, finance.subscription);
   mount(
     router,

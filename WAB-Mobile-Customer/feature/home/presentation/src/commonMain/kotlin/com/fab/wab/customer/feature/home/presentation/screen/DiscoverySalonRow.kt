@@ -48,7 +48,7 @@ fun DiscoverySalonRow(
         SalonImage(salon.imageUrl, Modifier.size(DiscoveryDesign.ROW_IMAGE).clip(AppTheme.shapes.medium))
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.space4)) {
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.space6), verticalAlignment = Alignment.CenterVertically) {
-                SalonName(salon.name, Modifier.weight(1f))
+                SalonName(salon.displayName, Modifier.weight(1f))
                 FavoriteHeart(
                     isFavorite = salon.isFavorite,
                     onClick = onFavoriteClick,
@@ -69,7 +69,7 @@ fun DiscoverySalonRow(
                     )
                 }
             }
-            LocationLine(salon.locationText.orEmpty(), withPin = false)
+            LocationLine(salon.placeText(), withPin = false)
             DescriptionLine(salon.shortDescription.orEmpty())
             StatusLine(salon)
         }

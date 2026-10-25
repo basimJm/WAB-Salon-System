@@ -38,4 +38,6 @@ export const PERIODIC_JOBS = {
   alertsEmail: { name: 'periodic.alerts-email', cron: '*/5 * * * *' },
   alertsEvaluate: { name: 'periodic.alerts-evaluate', cron: '*/5 * * * *' },
   bookingJobsReconcile: { name: 'periodic.booking-jobs-reconcile', cron: '15 * * * *' },
+  /** Tells open admin panels to refresh the overview (`overview.tick`, §7). */
+  overviewTick: { name: 'periodic.overview-tick', cron: '* * * * *' },
 } as const;

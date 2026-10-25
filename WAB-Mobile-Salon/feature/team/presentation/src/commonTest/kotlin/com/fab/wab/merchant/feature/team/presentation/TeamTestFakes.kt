@@ -28,7 +28,12 @@ internal class FakeTeam : TeamRepository {
     val created = mutableListOf<MemberDraft>()
     val updated = mutableListOf<Pair<String, MemberDraft>>()
     val calls = mutableListOf<String>()
-    override suspend fun members(): AppResult<List<TeamMember>> = AppResult.Success(list)
+    val memberQueries = mutableListOf<String?>()
+    val updateResults = ArrayDeque<AppResult<TeamMember>>()
+    override suspend fun members(branchId: String?): AppResult<List<TeamMember>> {
+        memberQueries += branchId
+        return AppResult.Success(list)
+    }
     override fun cached(id: String): TeamMember? = list.firstOrNull { it.id == id }
     override suspend fun member(id: String): AppResult<TeamMember> = cached(id)?.let {
         AppResult.Success(it)
@@ -39,7 +44,7 @@ internal class FakeTeam : TeamRepository {
     }
     override suspend fun update(id: String, draft: MemberDraft, permissions: Set<Permission>?): AppResult<TeamMember> {
         updated += id to draft
-        return AppResult.Success(teamMember(id))
+        return updateResults.removeFirstOrNull() ?: AppResult.Success(teamMember(id))
     }
     override suspend fun deactivate(id: String): AppResult<TeamMember> {
         calls += "deactivate:$id"

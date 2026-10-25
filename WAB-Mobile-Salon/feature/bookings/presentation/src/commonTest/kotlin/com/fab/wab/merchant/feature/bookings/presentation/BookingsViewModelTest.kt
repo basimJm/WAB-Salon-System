@@ -4,25 +4,33 @@ import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.booking.BookingStatus
+import com.fab.wab.merchant.core.domain.branch.Branch
+import com.fab.wab.merchant.core.domain.branch.BranchName
+import com.fab.wab.merchant.core.domain.branch.BranchScope
+import com.fab.wab.merchant.core.domain.branch.BranchStatus
+import com.fab.wab.merchant.core.domain.session.MemberScope
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingFilter
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingsDefaults
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingsTab
+import com.fab.wab.merchant.feature.bookings.domain.model.BranchRef
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingsContract.SideEffect
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingsContract.UiAction
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingsDependencies
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingsViewModel
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BookingsViewModelTest {
@@ -104,6 +112,46 @@ class BookingsViewModelTest {
         assertEquals(1, viewModel.state.first().items.size)
         viewModel.onEvent(UiAction.OnBookingClick("x"))
         assertEquals(SideEffect.OpenDetails("x"), effects.last())
+    }
+
+    @Test
+    fun ownerSwitcherFiltersTheListAndTheStaffAndCardsShowTheBranch() = runTest(UnconfinedTestDispatcher()) {
+        val branches = listOf("b1", "b2").map {
+            Branch(it, BranchName(it, it), it == "b1", BranchStatus.ACTIVE, null, null, null, null, null, null, null, emptyList())
+        }
+        val scope = MutableStateFlow(BranchScope(MemberScope.AllBranches, branches, null))
+        repository.staffList = listOf(SARA.copy(branchId = "b1"), LINA.copy(branchId = "b2"))
+        repository.pages[1] = listOf(summary("a1").copy(branch = BranchRef("b1", "Abdoun", null)))
+        val selected = mutableListOf<String?>()
+        val viewModel = BookingsViewModel(
+            BookingsDependencies(
+                repository, changes, clock, NoOpAnalyticsTracker, errorText = { "failed" }, branchScope = scope,
+                selectBranch = { selected += it },
+            ),
+            testScope = backgroundScope,
+        )
+        val all = viewModel.state.first { !it.loading }
+        assertTrue(all.showsBranchOnCards)
+        assertNull(repository.queries.last().first.branchId)
+        assertEquals(2, all.visibleStaff.size)
+        viewModel.onEvent(UiAction.OnBranchSelect("b2"))
+        assertEquals(listOf<String?>("b2"), selected)
+        scope.value = scope.value.copy(selected = "b2")
+        val one = viewModel.state.first { it.branchScope.filter == "b2" }
+        assertEquals("b2", repository.queries.last().first.branchId)
+        assertEquals(listOf(LINA.copy(branchId = "b2")), one.visibleStaff)
+        assertFalse(one.showsBranchOnCards)
+    }
+
+    @Test
+    fun branchMembersNeverSendABranchFilter() = runTest(UnconfinedTestDispatcher()) {
+        val scope = MutableStateFlow(BranchScope(MemberScope.OneBranch("b2"), emptyList(), "b1"))
+        val viewModel = BookingsViewModel(
+            BookingsDependencies(repository, changes, clock, NoOpAnalyticsTracker, errorText = { "failed" }, branchScope = scope),
+            testScope = backgroundScope,
+        )
+        assertFalse(viewModel.state.first { !it.loading }.branchScope.showsSwitcher)
+        assertNull(repository.queries.last().first.branchId)
     }
 
     private companion object {

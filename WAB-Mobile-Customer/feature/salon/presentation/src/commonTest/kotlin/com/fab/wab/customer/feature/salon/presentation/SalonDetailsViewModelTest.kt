@@ -9,9 +9,13 @@ import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
 import com.fab.wab.customer.core.domain.model.LocationData
 import com.fab.wab.customer.core.domain.salon.RatingSummary
 import com.fab.wab.customer.core.domain.salon.ReviewsPreview
+import com.fab.wab.customer.core.domain.salon.SalonBranch
 import com.fab.wab.customer.core.domain.salon.SalonDetails
+import com.fab.wab.customer.core.domain.salon.SalonService
 import com.fab.wab.customer.core.domain.salon.SalonSummary
 import com.fab.wab.customer.core.domain.salon.StaffMember
+import com.fab.wab.customer.core.domain.salon.StaffPreview
+import com.fab.wab.customer.core.domain.salon.StaffStatus
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionState
@@ -88,7 +92,7 @@ class SalonDetailsViewModelTest {
     private val external = FakeExternalActions()
     private val effects = mutableListOf<SideEffect>()
 
-    private fun TestScope.viewModel(session: SessionState = GUEST): SalonDetailsViewModel {
+    private fun TestScope.viewModel(session: SessionState = GUEST, branchId: String? = null): SalonDetailsViewModel {
         val deps = SalonDetailsDependencies(
             getSalonDetails = GetSalonDetailsUseCase(details),
             favorites = favorites,
@@ -98,7 +102,7 @@ class SalonDetailsViewModelTest {
             webBaseUrl = WEB,
             errorText = { "error" },
         )
-        val vm = SalonDetailsViewModel("s1", deps, testScope = backgroundScope)
+        val vm = SalonDetailsViewModel("s1", deps, initialBranchId = branchId, testScope = backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }
         return vm
@@ -158,6 +162,68 @@ class SalonDetailsViewModelTest {
         assertNull(vm.state.value.error)
         assertEquals<SideEffect>(SideEffect.NotAvailable, effects.single())
     }
+
+    @Test
+    fun mainBranchIsSelectedFirstAndDrivesPlaceContactsStaffAndServices() = runTest(UnconfinedTestDispatcher()) {
+        details.result = AppResult.Success(BRANCHED)
+        val vm = viewModel(USER)
+        val state = vm.state.value
+        assertTrue(state.showBranchSelector)
+        assertEquals("main", state.selectedBranchId)
+        assertEquals("Abdoun", state.view?.locationText)
+        assertEquals(listOf("m1"), state.view?.staff?.map { it.id })
+        assertEquals(listOf("sv1"), state.view?.services?.map { it.id })
+
+        vm.onEvent(UiAction.OnBranchSelect("khalda"))
+        assertEquals("Khalda", vm.state.value.view?.locationText)
+        assertEquals(listOf("sv2"), vm.state.value.view?.services?.map { it.id })
+        vm.onEvent(UiAction.OnCallClick)
+        vm.onEvent(UiAction.OnLocationClick)
+        assertEquals(listOf("tel:+962790000002", "maps:32.0,35.8:Glow - Khalda"), external.calls)
+        vm.onEvent(UiAction.OnBookClick)
+        assertEquals(SideEffect.OpenBooking("s1", "khalda"), effects.last())
+    }
+
+    @Test
+    fun requestedBranchIsPreselectedAndKeptAcrossRefresh() = runTest(UnconfinedTestDispatcher()) {
+        details.result = AppResult.Success(BRANCHED)
+        val vm = viewModel(branchId = "khalda")
+        assertEquals("khalda", vm.state.value.selectedBranchId)
+        vm.onEvent(UiAction.OnBranchSelect("main"))
+        vm.onEvent(UiAction.OnRefresh)
+        assertEquals("main", vm.state.value.selectedBranchId)
+        vm.onEvent(UiAction.OnBranchSelect("gone"))
+        assertEquals("main", vm.state.value.selectedBranchId)
+    }
+
+    @Test
+    fun unknownRequestedBranchFallsBackToMainAndSingleBranchHidesTheSelector() = runTest(UnconfinedTestDispatcher()) {
+        details.result = AppResult.Success(BRANCHED)
+        assertEquals("main", viewModel(branchId = "closed").state.value.selectedBranchId)
+        details.result = AppResult.Success(BRANCHED.copy(branches = BRANCHED.branches.take(1)))
+        val single = viewModel().state.value
+        assertEquals(false, single.showBranchSelector)
+        assertEquals("main", single.selectedBranchId)
+        details.result = AppResult.Success(SALON)
+        assertNull(viewModel().state.value.selectedBranchId)
+    }
 }
+
+private fun branch(id: String, name: String, isMain: Boolean, phone: String, location: LocationData) = SalonBranch(
+    id = id, name = name, isMain = isMain, locationText = name, location = location, phone = phone, whatsapp = null,
+    isOpenNow = true, todayHours = null, closedReason = null, weeklySchedule = emptyList(), upcomingClosures = emptyList(),
+)
+
+private val BRANCHED = SALON.copy(
+    branches = listOf(
+        branch("main", "Abdoun", isMain = true, phone = "+962790000001", location = LocationData(31.9, 35.9)),
+        branch("khalda", "Khalda", isMain = false, phone = "+962790000002", location = LocationData(32.0, 35.8)),
+    ),
+    staff = listOf(StaffPreview("m1", "Omar", null, StaffStatus.ON_DUTY, branchId = "main")),
+    services = listOf(
+        SalonService("sv1", "c1", "Cut", null, null, "8", 30, emptyList(), branchId = "main"),
+        SalonService("sv2", "c1", "Cut", null, null, "9", 30, emptyList(), branchId = "khalda"),
+    ),
+)
 
 private const val HTTP_NOT_FOUND = 404

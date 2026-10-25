@@ -16,6 +16,7 @@ import com.fab.wab.customer.core.navigation.route.Graph
 import com.fab.wab.customer.core.navigation.route.Screen
 import com.fab.wab.customer.core.notification.composable.rememberNotificationManager
 import com.fab.wab.customer.core.notification.model.NotificationStyle
+import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowArgs
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract.SideEffect
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingSuccessContract
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingVerifyContract
@@ -36,7 +37,10 @@ import org.koin.core.parameter.parametersOf
 class BookingNavigation(override val navController: NavHostController) : Navigator by NavigatorDelegation(navController) {
 
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
-        navGraphBuilder.composable<Screen.BookingStart> { entry -> BookingFlowDestination(entry.toRoute<Screen.BookingStart>().salonId) }
+        navGraphBuilder.composable<Screen.BookingStart> { entry ->
+            val route = entry.toRoute<Screen.BookingStart>()
+            BookingFlowDestination(BookingFlowArgs(route.salonId, route.branchId))
+        }
         navGraphBuilder.composable<Screen.BookingVerify> { entry ->
             BookingVerifyDestination(entry.toRoute<Screen.BookingVerify>().draftId)
         }
@@ -91,8 +95,8 @@ class BookingNavigation(override val navController: NavHostController) : Navigat
     }
 
     @Composable
-    private fun BookingFlowDestination(salonId: String) {
-        val viewModel: BookingFlowViewModel = koinViewModel(key = salonId) { parametersOf(salonId) }
+    private fun BookingFlowDestination(args: BookingFlowArgs) {
+        val viewModel: BookingFlowViewModel = koinViewModel(key = args.salonId) { parametersOf(args) }
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
         CollectSideEffect(viewModel.sideEffect) { effect ->

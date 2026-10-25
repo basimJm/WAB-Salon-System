@@ -14,7 +14,8 @@ sealed interface ReviewTarget {
 data class ReviewsPage(val items: List<Review>, val summary: RatingSummary)
 
 /** A review to submit; the server keeps it PENDING until admin approval (PRD S08 rules). */
-data class ReviewDraft(val rating: Int, val comment: String?)
+/** [branchId] labels the review with a branch (from the booking being rated, BUSINESS_DOMAIN §5.11); null = salon-wide. */
+data class ReviewDraft(val rating: Int, val comment: String?, val branchId: String? = null)
 
 object ReviewDefaults {
     const val PAGE_SIZE = 10

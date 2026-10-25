@@ -48,6 +48,8 @@ class PermissionsViewModelTest {
         val effects = mutableListOf<SideEffect>().also { list -> backgroundScope.launch { viewModel.sideEffect.collect { list += it } } }
         assertFalse(viewModel.state.first { !it.loading }.canSave)
         viewModel.onEvent(UiAction.OnToggle(Permission.FINANCE_VIEW))
+        assertFalse(viewModel.state.first().canSave, "branch members can never hold FINANCE_VIEW (MER-065)")
+        viewModel.onEvent(UiAction.OnToggle(Permission.STATISTICS_VIEW))
         assertTrue(viewModel.state.first().canSave)
         viewModel.onEvent(UiAction.OnApplyTemplate)
         assertEquals(PermissionTemplates.MANAGER, viewModel.state.first().selected)

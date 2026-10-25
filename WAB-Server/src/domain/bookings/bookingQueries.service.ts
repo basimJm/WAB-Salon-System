@@ -66,6 +66,8 @@ export interface BookingRow {
   readonly appointmentStart: string;
   readonly appointmentEnd: string;
   readonly respondBy: string;
+  /** When the customer sent the request ("time since request" on M07/M10). */
+  readonly requestedAt: string;
   readonly personsCount: number;
   readonly total: string;
   readonly salon: { id: string; name: string } | null;
@@ -316,6 +318,7 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     appointmentStart: iso(b.appointmentStart),
     appointmentEnd: iso(b.appointmentEnd),
     respondBy: iso(b.respondBy),
+    requestedAt: iso(b.createdAt),
     personsCount: b.persons.length,
     total: formatJod(b.money.total),
     salon:

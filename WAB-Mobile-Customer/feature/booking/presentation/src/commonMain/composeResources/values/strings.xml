@@ -109,4 +109,8 @@
     <string name="verify_error_title">Couldn’t confirm the booking</string>
     <string name="verify_expired_title">Your booking hold expired</string>
     <string name="verify_back_to_booking">Back to booking</string>
+    <string name="booking_step_branch">Branch</string>
+    <string name="booking_branch_title">Choose a branch</string>
+    <string name="booking_branch_hint">Services, prices, staff and times depend on the branch.</string>
+    <string name="booking_summary_branch">Branch: %1$s</string>
 </resources>
