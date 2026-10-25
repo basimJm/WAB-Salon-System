@@ -12,4 +12,10 @@ object InsightsAnalytics {
     const val CHANNEL_CALL = "call"
     const val CHANNEL_WHATSAPP = "whatsapp"
     const val CHANNEL_EMAIL = "email"
+    val SCREEN_STATISTICS = AnalyticsScreen("statistics")
+    const val ACTION_STATISTICS_VIEW = "statistics_view"
+    const val ACTION_STATISTICS_CHART = "statistics_chart"
+    const val PARAM_PERIOD = "period"
+    const val PARAM_DAYS = "days"
+    const val PARAM_CHART = "chart"
 }

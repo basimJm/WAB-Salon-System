@@ -9,6 +9,21 @@
 
 ## Current task
 
+### MER-043 — Statistics M21
+- Branch: `feat/mer-043-statistics`
+- Branched: (from `feat/mer-042-reviews`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD M21, §14 `statistics_view`; operation `GET /statistics?from&to&branchId` (STATISTICS_VIEW, civil days, max 92); design 07 `on.stats`):
+  - [x] `Screen.Statistics` in `feature/insights`; salon hub tile STATISTICS registered; Home quick stats "View all" opens it (STATISTICS_VIEW only)
+  - [x] Period selector Today / Week (Saturday-first) / Month / Custom (from / to pickers, ordered, at most 92 days, never after today, Asia/Amman dates); owner branch switcher (`?branchId=`)
+  - [x] KPIs: bookings, approval / cancellation / no-show rates (percent, one decimal, "—" when null), average response minutes, bride bookings, profile views, new reviews, average rating; revenue card (total, online, at salon, JOD); bookings by status
+  - [x] Charts: bookings per day / revenue per day (switch), one bar per day scaled to the busiest day, day numbers up to 14 days, a11y description per bar; rankings: top services (bookings), top staff (bookings, rating)
+  - [x] Shimmer, "No data for this period" empty state, error + retry, pull-to-refresh (a failed refresh keeps the figures); `statistics_view` (period, days) per load, `statistics_chart`; mock fixture with a full week
+- Tests: `StatisticsTest` (3), `StatisticsMapperTest` (2), `StatisticsViewModelTest` (2), `HomeViewModelTest` (updated: statistics link + permission); insights + home + salon + composeApp host tests green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: the bars are drawn with plain boxes (no chart library added); in RTL the days run right to left like the rest of the layout.
+
 ### MER-042 — Reviews M20
 - Branch: `feat/mer-042-reviews`
 - Branched: (from `feat/mer-050-home-dashboard`)

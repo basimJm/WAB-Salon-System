@@ -15,11 +15,14 @@ import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.core.ui.external.ExternalActions
 import com.fab.wab.merchant.core.ui.external.ExternalLinks
 import com.fab.wab.merchant.feature.insights.presentation.controller.contract.ReviewsContract
+import com.fab.wab.merchant.feature.insights.presentation.controller.contract.StatisticsContract
 import com.fab.wab.merchant.feature.insights.presentation.controller.vm.ReviewsViewModel
+import com.fab.wab.merchant.feature.insights.presentation.controller.vm.StatisticsViewModel
 import com.fab.wab.merchant.feature.insights.presentation.resources.Res
 import com.fab.wab.merchant.feature.insights.presentation.resources.reviews_report_message
 import com.fab.wab.merchant.feature.insights.presentation.resources.reviews_report_subject
 import com.fab.wab.merchant.feature.insights.presentation.screen.ReviewsScreen
+import com.fab.wab.merchant.feature.insights.presentation.screen.StatisticsScreen
 import org.jetbrains.compose.resources.getString
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -29,6 +32,7 @@ class InsightsNavigation(override val navController: NavHostController) : Naviga
 
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
         navGraphBuilder.composable<Screen.Reviews> { ReviewsDestination() }
+        navGraphBuilder.composable<Screen.Statistics> { StatisticsDestination() }
     }
 
     @Composable
@@ -54,5 +58,18 @@ class InsightsNavigation(override val navController: NavHostController) : Naviga
             }
         }
         ReviewsScreen(state = state, onAction = viewModel::onEvent, onBack = { navigateBack() })
+    }
+
+    @Composable
+    private fun StatisticsDestination() {
+        val viewModel: StatisticsViewModel = koinViewModel()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val notifications = rememberNotificationManager()
+        CollectSideEffect(viewModel.sideEffect) { effect ->
+            when (effect) {
+                is StatisticsContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+            }
+        }
+        StatisticsScreen(state = state, onAction = viewModel::onEvent, onBack = { navigateBack() })
     }
 }

@@ -127,7 +127,7 @@ private fun LazyListScope.content(state: UiState, dashboard: Dashboard, onAction
     }
     val stats = dashboard.quickStats
     if (state.showsStatistics && stats != null) {
-        item(key = KEY_STATS) { QuickStatsSection(stats) }
+        item(key = KEY_STATS) { QuickStatsSection(stats, onAction) }
     }
 }
 

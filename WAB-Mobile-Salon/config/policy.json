@@ -167,7 +167,8 @@
       "logout",
       "otp_request",
       "login_start",
-      "review_report"
+      "review_report",
+      "statistics_view"
     ]
   }
 }

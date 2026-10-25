@@ -39,6 +39,7 @@ sealed interface HomeContract {
         data object OnSubscription : UiAction
         data object OnSetup : UiAction
         data object OnCalendar : UiAction
+        data object OnStatistics : UiAction
     }
 
     sealed interface SideEffect {
@@ -48,6 +49,7 @@ sealed interface HomeContract {
         data object OpenSubscription : SideEffect
         data object OpenSetup : SideEffect
         data object OpenCalendar : SideEffect
+        data object OpenStatistics : SideEffect
         data class ShowError(val message: String) : SideEffect
     }
 }

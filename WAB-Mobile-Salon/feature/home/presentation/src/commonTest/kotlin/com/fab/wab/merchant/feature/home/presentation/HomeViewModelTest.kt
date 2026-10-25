@@ -111,7 +111,8 @@ class HomeViewModelTest {
         assertFalse(state.showsPending || state.showsStatistics || state.showsSubscriptionWarning)
         assertTrue(state.ownBookingsOnly)
         viewModel.onEvent(UiAction.OnSubscription)
-        assertTrue(effects.isEmpty(), "no subscription screen without SUBSCRIPTION_VIEW")
+        viewModel.onEvent(UiAction.OnStatistics)
+        assertTrue(effects.isEmpty(), "no subscription / statistics screen without the permission")
     }
 
     @Test
@@ -155,6 +156,7 @@ class HomeViewModelTest {
         viewModel.onEvent(UiAction.OnCalendar)
         viewModel.onEvent(UiAction.OnSetup)
         viewModel.onEvent(UiAction.OnSubscription)
+        viewModel.onEvent(UiAction.OnStatistics)
         assertEquals(
             listOf(
                 SideEffect.OpenBooking("b1"),
@@ -163,6 +165,7 @@ class HomeViewModelTest {
                 SideEffect.OpenCalendar,
                 SideEffect.OpenSetup,
                 SideEffect.OpenSubscription,
+                SideEffect.OpenStatistics,
             ),
             effects,
         )

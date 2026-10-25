@@ -58,6 +58,7 @@ import com.fab.wab.merchant.feature.home.presentation.resources.home_time_range
 import com.fab.wab.merchant.feature.home.presentation.resources.home_timeline
 import com.fab.wab.merchant.feature.home.presentation.resources.home_today
 import com.fab.wab.merchant.feature.home.presentation.resources.home_today_count
+import com.fab.wab.merchant.feature.home.presentation.resources.home_view_all
 import com.fab.wab.merchant.feature.home.presentation.resources.home_week
 import org.jetbrains.compose.resources.stringResource
 
@@ -189,10 +190,14 @@ internal fun TimelineRow(booking: DashboardBooking, onAction: (UiAction) -> Unit
 }
 
 @Composable
-internal fun QuickStatsSection(stats: QuickStats) {
+internal fun QuickStatsSection(stats: QuickStats, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
     Column(verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
-        AppSectionHeader(title = stringResource(Res.string.home_week))
+        AppSectionHeader(
+            title = stringResource(Res.string.home_week),
+            actionText = stringResource(Res.string.home_view_all),
+            onAction = { onAction(UiAction.OnStatistics) },
+        )
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(spacing.space10)) {
             val tile = Modifier.weight(1f).fillMaxHeight()
             AppStatTile(stringResource(Res.string.home_stat_bookings), stats.bookings.toString(), tile)

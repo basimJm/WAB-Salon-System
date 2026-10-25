@@ -46,6 +46,7 @@ class HomeNavigation(override val navController: NavHostController) : Navigator 
                 is SideEffect.OpenBooking -> navigateTo(Screen.BookingDetails(effect.bookingId))
                 SideEffect.OpenPendingRequests -> switchTab(Graph.Bookings)
                 SideEffect.OpenCalendar -> switchTab(Graph.Calendar)
+                SideEffect.OpenStatistics -> navigateTo(Screen.Statistics)
                 SideEffect.OpenSubscription -> navigateTo(Screen.Subscription)
                 SideEffect.OpenSetup -> navigateTo(Screen.SetupChecklist)
                 is SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)

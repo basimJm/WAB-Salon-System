@@ -85,6 +85,9 @@ class HomeViewModel(
             }
             UiAction.OnSetup -> open(HomeAnalytics.TARGET_SETUP, SideEffect.OpenSetup)
             UiAction.OnCalendar -> open(HomeAnalytics.TARGET_CALENDAR, SideEffect.OpenCalendar)
+            UiAction.OnStatistics -> if (uiState.value.canSeeStatistics) {
+                open(HomeAnalytics.TARGET_STATISTICS, SideEffect.OpenStatistics)
+            }
         }
     }
 

@@ -14,4 +14,5 @@ object HomeAnalytics {
     const val TARGET_SUBSCRIPTION = "subscription"
     const val TARGET_SETUP = "setup"
     const val TARGET_CALENDAR = "calendar"
+    const val TARGET_STATISTICS = "statistics"
 }

@@ -58,6 +58,7 @@ private val TILE_SCREENS: Map<HubTile, Screen> = mapOf(
     HubTile.BRANCHES to Screen.Branches,
     HubTile.POLICIES to Screen.Policies,
     HubTile.REVIEWS to Screen.Reviews,
+    HubTile.STATISTICS to Screen.Statistics,
     HubTile.FINANCE to Screen.Finance,
     HubTile.SUBSCRIPTION to Screen.Subscription,
 )
