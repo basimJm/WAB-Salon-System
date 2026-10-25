@@ -1,11 +1,15 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { hostingFiles, originsFromEnv, type HostingTarget } from './lib/hosting.ts';
+import { loadEnv } from 'vite';
+import { PUBLIC_ENV_PREFIX } from '../src/constants/env.ts';
+import { resolveVariant } from '../src/infrastructure/config/variant.ts';
+import { buildEnv, hostingFiles, originsFromEnv, type HostingTarget } from './lib/hosting.ts';
 
 /**
  * node scripts/write-hosting.ts <variant> [--target netlify|vercel] [--out <dir>]
  * Writes the host's header and routing files from the same public env values the build used
- * (VITE_API_BASE_URL, VITE_SOCKET_URL; optional CSP_CONNECT_EXTRA = comma list of extra https origins).
+ * (VITE_API_BASE_URL, VITE_SOCKET_URL from the environment or the variant's `.env.<dev|prod>` file; optional
+ * CSP_CONNECT_EXTRA = comma list of extra https origins).
  */
 const args = process.argv.slice(2);
 const variant = args[0];
@@ -20,7 +24,8 @@ if (!variant) {
 const target: HostingTarget = option('--target') === 'vercel' ? 'vercel' : 'netlify';
 const out = option('--out') ?? join('dist', variant);
 const requireRemote = variant.startsWith('prod');
-const files = hostingFiles(target, originsFromEnv(process.env, requireRemote));
+const fileEnv = loadEnv(resolveVariant(variant).appEnv, process.cwd(), PUBLIC_ENV_PREFIX);
+const files = hostingFiles(target, originsFromEnv(buildEnv(process.env, fileEnv), requireRemote));
 mkdirSync(out, { recursive: true });
 for (const [name, content] of Object.entries(files)) writeFileSync(join(out, name), content);
 console.log(`hosting: wrote ${Object.keys(files).join(', ')} for ${target} into ${out}`);

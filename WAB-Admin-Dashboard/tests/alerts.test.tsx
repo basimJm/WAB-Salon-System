@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
-import { alertLink } from '@/domain/alerts/alerts';
+import { alertLink, normalizeEntityType } from '@/domain/alerts/alerts';
 import AlertsPage from '@/presentation/alerts/AlertsPage';
 import { useShellCounters } from '@/presentation/hooks/useShellCounters';
 import { makeContainer, renderWithApp } from './helpers/render';
@@ -24,6 +24,27 @@ describe('alertLink', () => {
     expect(alertLink({ entityType: 'weird', entityId: 'x' })).toBeNull();
     expect(alertLink({ entityType: null, entityId: null })).toBeNull();
   });
+
+  it('reads the real server spellings (UPPER_SNAKE and camelCase) and routes by kind', () => {
+    expect(alertLink({ entityType: 'SALON', entityId: 's1' })).toBe('/salons/s1');
+    expect(alertLink({ entityType: 'REFUND', entityId: 'r1' })).toBe('/finance/refunds');
+    expect(alertLink({ entityType: 'REVIEW', entityId: 'v1' })).toBe('/reviews');
+    expect(alertLink({ entityType: 'CATALOG_REQUEST', entityId: 'c1' })).toBe('/catalog/requests');
+    expect(alertLink({ entityType: 'catalogRequest', entityId: 'c1' })).toBe('/catalog/requests');
+    expect(alertLink({ kind: 'SALON_DELETION_REQUEST', entityType: 'salon', entityId: 's1' })).toBe(
+      '/salons/s1',
+    );
+    expect(alertLink({ kind: 'SALON_APPLICATION', entityType: 'SALON', entityId: 's2' })).toBe(
+      '/salons/applications/s2',
+    );
+    expect(alertLink({ kind: 'SALON_APPLICATION', entityType: null, entityId: null })).toBeNull();
+  });
+
+  it('normalizes entity types to UPPER_SNAKE', () => {
+    expect(normalizeEntityType('catalogRequest')).toBe('CATALOG_REQUEST');
+    expect(normalizeEntityType('salon')).toBe('SALON');
+    expect(normalizeEntityType('REFUND')).toBe('REFUND');
+  });
 });
 
 describe('AlertsPage', () => {
@@ -40,7 +61,11 @@ describe('AlertsPage', () => {
     await waitFor(() => expect(bodyRows()).toBe(3));
     expect(screen.getByRole('link', { name: 'Alert 3' })).toHaveAttribute(
       'href',
-      '/salons/64f000000000000000000001',
+      '/salons/applications/64f000000000000000000001',
+    );
+    expect(screen.getByRole('link', { name: 'Alert 2' })).toHaveAttribute(
+      'href',
+      '/finance/refunds',
     );
     expect(screen.queryByRole('link', { name: 'Alert 1' })).toBeNull();
   });

@@ -4,18 +4,16 @@ import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
 
-type Kind =
-  'REPORT_DAILY' | 'REPORT_WEEKLY' | 'REPORT_MONTHLY' | 'TRANSACTIONS' | 'AUDIT_LOGS' | 'BOOKINGS';
-type Format = 'XLSX' | 'CSV' | 'PDF';
-type Status = 'QUEUED' | 'RUNNING' | 'DONE' | 'FAILED';
-const job = (n: number, kind: Kind, format: Format, status: Status) => ({
+import type { ApiFormat, ExportJob, ExportKind, ExportStatus } from '@/domain/exports/exports';
+
+const job = (n: number, kind: ExportKind, format: ApiFormat, status: ExportStatus) => ({
   id: `64c1${String(n).padStart(20, '0')}`,
   kind,
   format,
   params: {} as Record<string, unknown>,
   status,
   rowCount: status === 'DONE' ? 120 : null,
-  failure: status === 'FAILED' ? 'TOO_MANY_ROWS' : null,
+  failure: (status === 'FAILED' ? 'TOO_MANY_ROWS' : null) as ExportJob['failure'],
   createdAt: '2026-10-17T08:00:00.000Z',
   finishedAt: status === 'DONE' || status === 'FAILED' ? '2026-10-17T08:00:05.000Z' : null,
   downloadUrl: status === 'DONE' ? 'https://files.example.test/export.xlsx?sig=1' : null, // hardcoded-ok: mock data
@@ -46,7 +44,7 @@ export function exportsRoutes(): readonly MockRoute[] {
         body: dto.postExportsBodySchema,
       }),
       ({ body }) => {
-        const b = body as { kind: Kind; format: Format };
+        const b = body as { kind: ExportKind; format: ApiFormat };
         // The mock finishes at once: the first read already says DONE.
         const row = job(rows.length + 1, b.kind, b.format, 'DONE');
         rows.unshift(row);
