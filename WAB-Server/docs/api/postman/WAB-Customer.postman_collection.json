@@ -1058,7 +1058,7 @@
               ],
               "variable": []
             },
-            "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent. Each section holds 10 items; `hasMore` shows See more / See all."
+            "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all."
           }
         }
       ]

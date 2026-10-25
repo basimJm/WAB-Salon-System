@@ -750,6 +750,7 @@ const buildServices = (
     settings,
   });
   const search = createSearchService({
+    branches: branchesRepository,
     favorites: favoritesRepository,
     recommended: placements,
     salons: new SalonsRepository(),
@@ -913,6 +914,7 @@ const buildServices = (
     bookingReassign,
     customerProfile,
     salonDetails: createSalonDetailsService({
+      branches: branchesRepository,
       favorites: favoritesRepository,
       reviews: reviewsService,
       salons: new SalonsRepository(),

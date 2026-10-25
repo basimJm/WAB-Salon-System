@@ -23,6 +23,13 @@ const card = z.object({
   todayHours: z.object({ open: z.string(), close: z.string() }).nullable(),
   isFavorite: z.boolean(),
   distanceKm: z.number().nullable(),
+  branchCount: z.number().describe('Bookable branches of the salon (§5.17).'),
+  branch: z
+    .object({ id: z.string(), name: z.string() })
+    .nullable()
+    .describe(
+      'The branch the place, hours and distance come from: the nearest, else the main one.',
+    ),
 });
 const section = (item: z.ZodType): z.ZodType =>
   z.object({ items: z.array(item), hasMore: z.boolean() });
@@ -34,7 +41,7 @@ export const registerCustomerHomeDocs = (registry: OpenAPIRegistry): void => {
     tags: ['Home'],
     summary: 'Home (S03): banners, services, recommended and nearest salons in one request',
     description:
-      'Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent. Each section holds 10 items; `hasMore` shows See more / See all.',
+      'Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all.',
     security: [],
     request: {
       headers: z.object({ 'Accept-Language': acceptLanguageHeader }),
@@ -65,7 +72,15 @@ export const registerCustomerHomeDocs = (registry: OpenAPIRegistry): void => {
               }),
             ),
             recommended: section(card),
-            nearest: section(card).nullable(),
+            nearest: section(
+              card.extend({
+                title: z
+                  .string()
+                  .describe(
+                    '"Salon - Branch" for a salon with several branches, else the salon name.',
+                  ),
+              }),
+            ).nullable(),
           }),
         ),
       ),

@@ -33,6 +33,7 @@ export const createFavoritesRouter = ({
       const result = await service.list({
         customerId: customerOf(req),
         params: { page, pageSize },
+        language: req.language,
       });
       sendPaginated(req, res, result.items, { page, pageSize }, result.meta.total);
     }),
