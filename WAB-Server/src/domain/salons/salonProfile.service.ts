@@ -1,3 +1,4 @@
+import { MAIN_BRANCH_MIRRORED_FIELDS, type MainBranches } from '../branches/mainBranch';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import type { SalonState } from '../../constants/salon';
 import type { SalonRaw } from '../../models/salon.model';
@@ -65,6 +66,8 @@ export interface SalonProfileDeps {
   readonly state: Pick<SalonStateService, 'recompute'>;
   /** When set, images must be files this salon uploaded and confirmed. */
   readonly uploads?: UploadVerifier;
+  /** Salon-level endpoint: address and contacts are copied to the main branch (§5.16). */
+  readonly mainBranches?: Pick<MainBranches, 'mirror'>;
 }
 
 export const createSalonProfileService = ({
@@ -74,6 +77,7 @@ export const createSalonProfileService = ({
   storage,
   state,
   uploads,
+  mainBranches,
 }: SalonProfileDeps): SalonProfileService => {
   const toProfile = (s: Entity<SalonRaw>): SalonProfile => ({
     id: s.id,
@@ -163,6 +167,15 @@ export const createSalonProfileService = ({
       }
       const updated = await salons.patch(salonId, { set, unset });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      const mirrored = (field: string): field is (typeof MAIN_BRANCH_MIRRORED_FIELDS)[number] =>
+        (MAIN_BRANCH_MIRRORED_FIELDS as readonly string[]).includes(field);
+      const branchSet = Object.fromEntries(
+        Object.entries(set).filter(([field]) => mirrored(field)),
+      );
+      const branchUnset = unset.filter(mirrored);
+      if (Object.keys(branchSet).length > 0 || branchUnset.length > 0) {
+        await mainBranches?.mirror(salonId, branchSet, branchUnset);
+      }
       const status = await state.recompute(salonId);
       return toProfile({
         ...updated,

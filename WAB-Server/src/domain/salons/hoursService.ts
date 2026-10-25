@@ -1,3 +1,4 @@
+import type { MainBranches } from '../branches/mainBranch';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import { SCHEDULE_DAY_ORDER } from '../../constants/salon';
 import type { DayOfWeek } from '../../constants/time';
@@ -87,6 +88,8 @@ export interface HoursDeps {
   readonly state: Pick<SalonStateService, 'recompute'>;
   readonly conflicts?: ScheduleConflicts;
   readonly now?: () => Date;
+  /** Salon-level endpoint: hours are copied to, and closures land on, the main branch (§5.16). */
+  readonly mainBranches?: Pick<MainBranches, 'idOf' | 'mirror'>;
 }
 
 const invalid = (...fields: string[]): ValidationError =>
@@ -185,6 +188,7 @@ export const createHoursService = (deps: HoursDeps): HoursService => {
       rejectConflicts(await conflicts.weekly(salonId, week));
       const updated = await salons.patch(salonId, { set: { weeklySchedule: week } });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      await deps.mainBranches?.mirror(salonId, { weeklySchedule: week });
       await state.recompute(salonId);
       return view(salonId);
     },
@@ -194,7 +198,14 @@ export const createHoursService = (deps: HoursDeps): HoursService => {
       const date = await today();
       checkRange(from, to, date);
       rejectConflicts(await conflicts.closure(salonId, { from, to }));
-      const created = await closures.create({ salonId: toObjectId(salonId), from, to, reason });
+      const branchId = await deps.mainBranches?.idOf(salonId);
+      const created = await closures.create({
+        salonId: toObjectId(salonId),
+        ...(branchId === undefined ? {} : { branchId }),
+        from,
+        to,
+        reason,
+      });
       return toClosure(created, date);
     },
 

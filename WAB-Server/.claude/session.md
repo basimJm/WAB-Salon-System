@@ -10,6 +10,19 @@
 
 ## Current task
 
+### SRV-138 — Two-level completeness and visibility (Stage P)
+
+- Branch: `feat/srv-138-branch-completeness`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.2, §5.16; API docs: no change — `completeness.missing` stays a string list, gains `BRANCH`):
+  - [x] Branch completeness per open branch (location, phone, hours, service, staff counted **by branch**) stored on the branch; salon completeness = cover, profile, name, description, policy + a bookable branch; without one the salon lists the main branch's gaps (else `BRANCH`), so single-branch checklists read as before; domain §5.2 updated
+  - [x] `isBranchBookable` / `assertBranchBookable` (`SALON_NOT_BOOKABLE` then `BRANCH_NOT_BOOKABLE`); salon visibility unchanged (`LIVE` + complete now implies a bookable branch)
+  - [x] `branch.live` / `branch.not_bookable` notifications to the owner for multi-branch salons (AR/EN); single-branch salons keep the salon events
+  - [x] Main branch for the salon-level endpoints (`createMainBranches`, created from the salon on first use, race-safe): new services, staff, closures, leaves, drafts and bookings (+ snapshot) get its `branchId`; hours and address/contact edits are mirrored onto it — today's merchant app and admin keep working
+- Tests: `tests/branchState.test.ts` (9), `tests/salonState.test.ts` adapted; full suite green before the new tests (137/2675)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — backward compatible: no route or schema change. NOTE: `branch.offline` notifications come with the offline action in SRV-139 (the backlog row lists them here).
+
 ### SRV-137 — Branch migration (Stage P)
 
 - Branch: `feat/srv-137-branch-migration`

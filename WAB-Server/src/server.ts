@@ -1,3 +1,6 @@
+import { createBranchFacts, createBranchStateService } from './domain/branches/branchState.service';
+import { createMainBranches } from './domain/branches/mainBranch';
+import { BranchesRepository } from './repositories/branches.repository';
 import { createExportsService } from './domain/exports/exports.service';
 import { createTableBuilders } from './domain/exports/tableBuilders';
 import { ExportsRepository } from './repositories/exports.repository';
@@ -405,11 +408,26 @@ const buildServices = (
     logger,
   });
   const conflictFinder = createConflictFinder({ bookings: bookingsRepository, settings });
+  const branchesRepository = new BranchesRepository();
+  // Salon-level endpoints act on the main branch until the per-branch ones replace them (§5.16).
+  const mainBranches = createMainBranches({
+    branches: branchesRepository,
+    salons: new SalonsRepository(),
+    areas: new AreasRepository(),
+  });
+  const branchState = createBranchStateService({
+    branches: branchesRepository,
+    facts: createBranchFacts(new MembersRepository(), salonServices),
+    notifier: producers.salonStateNotifier,
+    logger,
+  });
   const salonState = createSalonStateService({
     salons: new SalonsRepository(),
     facts: createStaffFacts(new MembersRepository(), (salonId) =>
       salonServices.countActive(salonId),
     ),
+    branchState,
+    mainBranches,
     audit: createAuditWriter(new AuditLogsRepository()),
     notifier: producers.salonStateNotifier,
     logger,
@@ -453,6 +471,7 @@ const buildServices = (
     settings,
   });
   const bookingDrafts = createBookingDraftService({
+    mainBranches,
     redis,
     drafts: bookingDraftsRepository,
     availability,
@@ -548,6 +567,7 @@ const buildServices = (
     },
   };
   const bookingCreation = createBookingCreationService({
+    branches: branchesRepository,
     transactions: transactionsRepository,
     refunds: fullRefunds,
     hook: bookingCreated,
@@ -753,6 +773,7 @@ const buildServices = (
     settings,
   });
   const salonProfileService = createSalonProfileService({
+    mainBranches,
     salons: new SalonsRepository(),
     cities: new CitiesRepository(),
     areas: new AreasRepository(),
@@ -773,6 +794,7 @@ const buildServices = (
     },
   });
   const salonServicesService = createSalonServicesService({
+    mainBranches,
     salons: new SalonsRepository(),
     catalog: new CatalogServicesRepository(),
     services: salonServices,
@@ -781,6 +803,7 @@ const buildServices = (
     state: salonState,
   });
   const hoursService = createHoursService({
+    mainBranches,
     salons: new SalonsRepository(),
     closures: new ClosuresRepository(),
     settings,
@@ -925,6 +948,7 @@ const buildServices = (
     }),
     staff: staffService,
     team: createTeamService({
+      mainBranches,
       access: accessEvents,
       members: new MembersRepository(),
       lifecycle: accountLifecycle,

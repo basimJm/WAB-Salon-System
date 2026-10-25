@@ -1,3 +1,4 @@
+import type { MainBranches } from '../branches/mainBranch';
 import type { Redis } from 'ioredis';
 import { DRAFT_LOCK_SEGMENT, DRAFT_LOCK_TTL_MS } from '../../constants/bookingDrafts';
 import type { Language } from '../../constants/enums';
@@ -88,6 +89,8 @@ export interface BookingDraftDeps {
   readonly otpGate: Pick<OtpGate, 'reset'>;
   readonly settings: Pick<SettingsService, 'get'>;
   readonly now?: () => Date;
+  /** Until the branch step exists (SRV-142) a draft is for the salon's main branch. */
+  readonly mainBranches?: Pick<MainBranches, 'idOf'>;
 }
 
 const toHold = (hold: {
@@ -226,9 +229,11 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
             start: p.start,
             end: p.end,
           }));
+          const branchId = await deps.mainBranches?.idOf(salonId);
           const created = await drafts.create({
             customerId: toObjectId(customerId),
             salonId: toObjectId(salonId),
+            ...(branchId === undefined ? {} : { branchId }),
             persons: bookingPersons,
             totals: { total: amounts.total, dueOnline: amounts.dueOnline },
             paymentMethod,
