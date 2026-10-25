@@ -10,10 +10,24 @@
 
 ## Current task
 
+### SRV-145 — Reviews with branch label (Stage P)
+
+- Branch: `feat/srv-145-review-branch`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.11, §3 reviews `branchId`; operations customer `POST/GET /salons/{salonId}[/staff/{memberId}]/reviews`, `GET /salons/{salonId}`, admin `GET /reviews` — client impact CUS-085/087, ADM-091):
+  - [x] Submit takes an optional `branchId`: it must be an open branch of that salon (404 `BRANCH_NOT_FOUND`); a staff review takes the staff member's branch (a different pick → `BRANCH_NOT_FOUND`); no pick = no label
+  - [x] Review views (list, salon/staff details previews) show `branch {id, name}` in the request language, `null` when unlabelled
+  - [x] Salon rating stays the average of APPROVED reviews of all branches together (no per-branch rating)
+  - [x] Admin list filter `branchId`; admin rows show `branch {id, name {ar, en}}`
+  - [x] Merchant reviews read does not exist yet: its branch scope is written into SRV-131's row
+- Tests: `tests/reviewBranch.test.ts` (5) + reviews/adminReviews/salonDetails suites; full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔ (additive fields; picking a branch is optional for older builds), Architect ✔, QA ✔) — reviews written before branches carry the migrated main-branch label (SRV-137 backfill).
+
 ### SRV-144 — Discovery with branches (Stage P)
 
 - Branch: `feat/srv-144-discovery-branches`
-- Status: IN REVIEW
+- Status: DONE (PR #390)
 - Acceptance criteria (BUSINESS_DOMAIN §5.17, §3.3a; operations customer `GET /salons`, `GET /salons/{salonId}`, `GET /home`, `GET /favorites` — client impact CUS-083/084/085):
   - [x] Search: one card per salon (never per branch), place/hours/distance from the nearest bookable branch (main branch without a position); cards gain `branchCount` and `branch {id, name}` in the request language
   - [x] Price filter/slider: a salon matches when ONE branch offers all selected services; the sum is that branch's cheapest
@@ -36,20 +50,6 @@
 - Tests: `tests/branchRealtime.test.ts` (4)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔ (merchant app keeps one socket; rooms are server-side), Architect ✔, QA ✔) — NOTE: a member moved to another branch stays in the old branch room until their socket reconnects (the move already triggers a permissions refresh on the device).
-
-### SRV-142 — Booking with branch (Stage P)
-
-- Branch: `feat/srv-142-booking-branch`
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §5.4, §5.18, §3.5 `branchSnapshot`; API docs: availability + draft bodies gain optional `branchId`, booking rows/details gain `branch` — client impact CUS-082/086/087, MER-063, ADM-091):
-  - [x] Availability and plans resolve the branch: picked one must be bookable (422 `BRANCH_NOT_BOOKABLE`, unknown 404 `BRANCH_NOT_FOUND`); without a pick the only bookable branch, several → 422 `BRANCH_REQUIRED`; none → `SALON_NOT_BOOKABLE`
-  - [x] Slots/plans use the branch's hours, closures, leaves, services and staff only
-  - [x] Drafts take `branchId` (the planned branch is stored); booking creation re-plans in the draft's branch and keeps `branchId` + `branchSnapshot`
-  - [x] Reassign and eligible staff (merchant + admin) stay inside the booking's branch
-  - [x] Booking lists/details (customer, merchant, admin) show `branch {id, name (request language), locationText}` from the snapshot
-- Tests: `tests/bookingBranch.test.ts` (4); full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔ (apps send `branchId` from step 1; older builds keep working for single-branch salons), Architect ✔, QA ✔)
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

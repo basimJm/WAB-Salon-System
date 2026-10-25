@@ -134,8 +134,13 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
   const { salons, members, salonServices, catalog, gallery, closures, leaves, storage, settings } =
     deps;
   const favorites = deps.favorites ?? noFavorites;
-  const latestReviews = (salonId: string, staffId?: string): Promise<ReviewView[]> =>
-    deps.reviews?.latest({ salonId, staffId, limit: REVIEW_PREVIEW_COUNT }) ?? Promise.resolve([]);
+  const latestReviews = (
+    language: Language,
+    salonId: string,
+    staffId?: string,
+  ): Promise<ReviewView[]> =>
+    deps.reviews?.latest({ salonId, staffId, limit: REVIEW_PREVIEW_COUNT, language }) ??
+    Promise.resolve([]);
   const now = deps.now ?? ((): Date => new Date());
   const url = (key: string | undefined): string | null =>
     key === undefined ? null : storage.getPublicUrl(key);
@@ -200,7 +205,7 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
         customerId === undefined
           ? Promise.resolve(new Set<string>())
           : favorites.among(customerId, [salonId]),
-        latestReviews(salonId),
+        latestReviews(language, salonId),
         bookableBranches(salonId),
       ]);
       // Only what customers can book: staff and services of bookable branches (§5.17).
@@ -306,7 +311,7 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
       const today = localDateOf(now(), await settings.get('timezone'));
       const [onLeave, latest] = await Promise.all([
         leavesToday(salonId, today),
-        latestReviews(salonId, memberId),
+        latestReviews(language, salonId, memberId),
       ]);
       const wanted = member.staff.serviceIds;
       const offered = await salonServices.findMany({

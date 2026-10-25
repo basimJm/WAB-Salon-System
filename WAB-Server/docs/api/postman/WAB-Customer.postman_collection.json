@@ -1289,7 +1289,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"rating\": 0,\n  \"comment\": \"string\"\n}",
+              "raw": "{\n  \"rating\": 0,\n  \"comment\": \"string\",\n  \"branchId\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1399,7 +1399,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"rating\": 0,\n  \"comment\": \"string\"\n}",
+              "raw": "{\n  \"rating\": 0,\n  \"comment\": \"string\",\n  \"branchId\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

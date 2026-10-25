@@ -12991,6 +12991,15 @@
           },
           {
             "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
               "type": "integer",
               "minimum": 1,
               "maximum": 5
@@ -13097,6 +13106,37 @@
                               "firstName"
                             ]
                           },
+                          "branch": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "object",
+                                "properties": {
+                                  "ar": {
+                                    "type": "string"
+                                  },
+                                  "en": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "ar",
+                                  "en"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "The branch the review is about (label only)"
+                          },
                           "author": {
                             "type": "object",
                             "properties": {
@@ -13156,6 +13196,7 @@
                           "comment",
                           "salon",
                           "staff",
+                          "branch",
                           "author",
                           "authorOtherReviews",
                           "createdAt",
@@ -13379,6 +13420,37 @@
                             "firstName"
                           ]
                         },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "object",
+                              "properties": {
+                                "ar": {
+                                  "type": "string"
+                                },
+                                "en": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "ar",
+                                "en"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "description": "The branch the review is about (label only)"
+                        },
                         "author": {
                           "type": "object",
                           "properties": {
@@ -13438,6 +13510,7 @@
                         "comment",
                         "salon",
                         "staff",
+                        "branch",
                         "author",
                         "authorOtherReviews",
                         "createdAt",
@@ -13659,6 +13732,37 @@
                             "firstName"
                           ]
                         },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "object",
+                              "properties": {
+                                "ar": {
+                                  "type": "string"
+                                },
+                                "en": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "ar",
+                                "en"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "description": "The branch the review is about (label only)"
+                        },
                         "author": {
                           "type": "object",
                           "properties": {
@@ -13718,6 +13822,7 @@
                         "comment",
                         "salon",
                         "staff",
+                        "branch",
                         "author",
                         "authorOtherReviews",
                         "createdAt",
@@ -13942,6 +14047,37 @@
                             "firstName"
                           ]
                         },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "object",
+                              "properties": {
+                                "ar": {
+                                  "type": "string"
+                                },
+                                "en": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "ar",
+                                "en"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "description": "The branch the review is about (label only)"
+                        },
                         "author": {
                           "type": "object",
                           "properties": {
@@ -14001,6 +14137,7 @@
                         "comment",
                         "salon",
                         "staff",
+                        "branch",
                         "author",
                         "authorOtherReviews",
                         "createdAt",
@@ -34721,6 +34858,37 @@
                               "firstName"
                             ]
                           },
+                          "branch": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "object",
+                                "properties": {
+                                  "ar": {
+                                    "type": "string"
+                                  },
+                                  "en": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "ar",
+                                  "en"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "The branch the review is about (label only)"
+                          },
                           "author": {
                             "type": "object",
                             "properties": {
@@ -34780,6 +34948,7 @@
                           "comment",
                           "salon",
                           "staff",
+                          "branch",
                           "author",
                           "authorOtherReviews",
                           "createdAt",

@@ -4272,6 +4272,25 @@
                                   },
                                   "createdAt": {
                                     "type": "string"
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The branch the review is about (label only)"
                                   }
                                 },
                                 "required": [
@@ -4279,7 +4298,8 @@
                                   "customerName",
                                   "rating",
                                   "comment",
-                                  "createdAt"
+                                  "createdAt",
+                                  "branch"
                                 ]
                               }
                             }
@@ -4590,6 +4610,25 @@
                                   },
                                   "createdAt": {
                                     "type": "string"
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The branch the review is about (label only)"
                                   }
                                 },
                                 "required": [
@@ -4597,7 +4636,8 @@
                                   "customerName",
                                   "rating",
                                   "comment",
-                                  "createdAt"
+                                  "createdAt",
+                                  "branch"
                                 ]
                               }
                             }
@@ -5778,6 +5818,25 @@
                               },
                               "createdAt": {
                                 "type": "string"
+                              },
+                              "branch": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ],
+                                "description": "The branch the review is about (label only)"
                               }
                             },
                             "required": [
@@ -5785,7 +5844,8 @@
                               "customerName",
                               "rating",
                               "comment",
-                              "createdAt"
+                              "createdAt",
+                              "branch"
                             ]
                           }
                         },
@@ -5930,6 +5990,10 @@
                   "comment": {
                     "type": "string",
                     "maxLength": 1000
+                  },
+                  "branchId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
                   }
                 },
                 "required": [
@@ -6152,6 +6216,25 @@
                               },
                               "createdAt": {
                                 "type": "string"
+                              },
+                              "branch": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ],
+                                "description": "The branch the review is about (label only)"
                               }
                             },
                             "required": [
@@ -6159,7 +6242,8 @@
                               "customerName",
                               "rating",
                               "comment",
-                              "createdAt"
+                              "createdAt",
+                              "branch"
                             ]
                           }
                         },
@@ -6313,6 +6397,10 @@
                   "comment": {
                     "type": "string",
                     "maxLength": 1000
+                  },
+                  "branchId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
                   }
                 },
                 "required": [
