@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.feature.application.data.repository
 
 import com.fab.wab.merchant.core.data.contract.generated.GetSalonApplicationData
+import com.fab.wab.merchant.core.data.contract.generated.MemberProfile as MemberDto
 import com.fab.wab.merchant.core.data.contract.generated.PostSalonApplicationResubmitBody
 import com.fab.wab.merchant.core.data.contract.generated.PostSalonApplicationResubmitData
 import com.fab.wab.merchant.core.data.contract.generated.PostSalonApplicationsBody
@@ -12,6 +13,8 @@ import com.fab.wab.merchant.core.data.contract.generated.PostSalonApplicationsDa
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.auth.AuthTokens
 import com.fab.wab.merchant.core.domain.mapSuccess
+import com.fab.wab.merchant.core.domain.session.MemberProfile
+import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.domain.session.SalonState
 import com.fab.wab.merchant.core.network.safeApiCall
 import com.fab.wab.merchant.feature.application.data.remote.ApplicationApi
@@ -73,9 +76,18 @@ fun RegistrationForm.toResubmitBody() =
 
 fun PostSalonApplicationsData.toDomain() = ApplicationSession(
     tokens = AuthTokens(accessToken = accessToken, refreshToken = refreshToken),
-    memberId = member.id,
-    salonId = member.salonId,
+    member = member.toDomain(),
+    permissions = member.permissions.toSet(),
     application = application.toDomain(),
+)
+
+/** The application answer's `MemberProfile` (contract 1.4.0); an unknown role reads as the most restricted one, like sign-in. */
+fun MemberDto.toDomain(): MemberProfile = MemberProfile(
+    id = id,
+    salonId = salonId,
+    firstName = firstName,
+    role = MemberRole.fromCode(role) ?: MemberRole.EMPLOYEE,
+    branchId = branchId,
 )
 
 fun PostSalonApplicationsDataApplication.toDomain() =

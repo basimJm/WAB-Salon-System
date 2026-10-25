@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -127,6 +128,39 @@ class ApiSyncTest(unittest.TestCase):
         renderer = api_sync.Renderer(spec)
         renderer.render("openapi.merchant.json", "sha")
         self.assertEqual("GetSalonPolicyData?", renderer.data_types["GetSalonPolicy"])
+
+
+SNAPSHOT = api_sync.DEFAULT_OUT / "openapi.snapshot.json"
+APPLICATIONS_PATH = api_sync.NAMESPACE_PREFIX + "/salon/applications"
+
+
+def _patterns(node: object) -> list[str]:
+    if isinstance(node, dict):
+        found = [node["pattern"]] if isinstance(node.get("pattern"), str) else []
+        return found + [p for value in node.values() for p in _patterns(value)]
+    if isinstance(node, list):
+        return [p for value in node for p in _patterns(value)]
+    return []
+
+
+class CommittedContractTest(unittest.TestCase):
+    """MER-068: the committed snapshot is the 1.4.0 contract fixed by SRV-151 (REMOTE_DEV_GAPS #9 and #11)."""
+
+    def setUp(self) -> None:
+        self.snapshot = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+
+    def test_id_patterns_are_plain_regexes_without_flags(self) -> None:
+        patterns = _patterns(self.snapshot)
+        self.assertTrue(patterns)
+        for pattern in patterns:
+            self.assertFalse(pattern.endswith("/i"), pattern)
+            self.assertIsNotNone(re.compile(pattern))
+            self.assertTrue(pattern.startswith("^") and pattern.endswith("$"), pattern)
+
+    def test_application_member_is_the_shared_member_profile(self) -> None:
+        schema = self.snapshot["paths"][APPLICATIONS_PATH]["post"]["responses"]["201"]["content"]["application/json"]["schema"]
+        data = schema["properties"]["data"]
+        self.assertEqual("#/components/schemas/MemberProfile", data["properties"]["member"]["$ref"])
 
 
 if __name__ == "__main__":

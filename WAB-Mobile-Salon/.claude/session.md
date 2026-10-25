@@ -4,10 +4,26 @@
 
 ## Integration status (one glance)
 - Scaffolded (MER-001) with `KMP_TEMPLATE` from the customer app: all modules, design system + Liquid Glass, sample feature; rules copied in MER-003 (until then `WAB-Mobile-Customer/CLAUDE.md` applies).
-- Consumes `/merchant/v1` (merchant contract 1.3.0: dashboard, reviews, statistics, my account consumed by MER-050/042/043/049); MER-004 Firebase registrations = owner.
+- Consumes `/merchant/v1` (merchant contract 1.4.0 since MER-068; 1.3.0 added dashboard, reviews, statistics, my account consumed by MER-050/042/043/049); MER-004 Firebase registrations = owner.
 - Real-time booking requests: socket + FCM data message, Android overlay / iOS time-sensitive actions (MER-012, MER-028…030).
 
 ## Current task
+
+### MER-068 — Re-sync the merchant contract 1.4.0 after SRV-151
+- Branch: `feat/mer-068-contract-sync`
+- Branched: (from `origin/merchant`)
+- Status: IN REVIEW
+- Acceptance criteria (backlog MER-068; contract `openapi.merchant.json` 1.4.0 (SRV-151); `POST /salon/applications`, branch status operations; BUSINESS_DOMAIN §11 `INVALID_TRANSITION`; REMOTE_DEV_GAPS #9–#11):
+  - [x] `./gradlew apiSync` regenerated the contract (31 files): version 1.4.0, 144 id patterns `^[a-fA-F0-9]{24}$`, `PostSalonApplicationsData.member` = shared `MemberProfile` (`PostSalonApplicationsDataMember` gone); `api_sync --check` ok; `contract_gaps.py` 0 gaps (was 6 undeclared fields)
+  - [x] Fallout fixed: `ApplicationSession` carries the domain `MemberProfile` + permission keys from the answer; `SubmitApplicationUseCase` signs the owner in with them (no local "every permission" / form first name); unknown role → EMPLOYEE like sign-in; `branchId` mapped
+  - [x] Branch status refusals (`INVALID_TRANSITION`, now with branch messages on the server): the app still branches on the code and never shows raw server text, so the branch screens get their own AR + EN text (`branchErrorText`, `branch_error_invalid_status`) instead of the shared booking wording; other codes unchanged
+  - [x] Captured `core/data/fixtures/remote/PostSalonApplications.json` already carries every declared `MemberProfile` field (no re-capture needed); contract / fixture tests assert it
+  - [x] `docs/REMOTE_DEV_GAPS.md` #9, #10, #11 → Fixed (SRV-151 + MER-068); summary line updated
+  - [x] Availability / draft person date-times: not in the merchant contract (customer-only operations), nothing to change here
+- Tests: `BranchErrorTextTest` (2), `ApplicationMappersTest` (+1), `RealApplicationFixturesTest` (member + permissions), `ApplicationUseCasesTest` (+1 server answer wins), `test_api_sync.CommittedContractTest` (2: plain anchored id patterns, application member `$ref`); `./gradlew testAndroidHostTest` all modules 178 suites / 578 tests / 0 failures; `policy_checks.py all: ok`; script tests 101 OK; `api_sync.py --check` ok
+- Loops: 1/1 — re-checked every criterion against the regenerated snapshot (version, member `$ref`, pattern count), the captured fixture, `contract_gaps` (0) and the host-test reports (new suites present, 0 failures); nothing found to fix after the run
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — four-role reading of the diff: generated files only from the tool; mapper in the data layer, domain keeps no DTOs; no hardcoded text (AR + EN resources), branch text scoped to the branches feature; contract regression guarded by a script test; session now follows the server (single source of truth for permissions). DEVIATIONS: host unit tests + policy + script tests only (no detekt, Android/iOS builds, emulator/simulator: batched rule §3.13, lead runs the full gate); UI string not viewed on a device; auth sign-in mapper (`feature/auth`) still drops `branchId` (out of scope, not touched).
+- Notes: contract re-sync = `./gradlew apiSync` then `contract_gaps.py`; patterns are not used by the generator.
 
 ### MER-067 — iOS launch crash in `IosBookingRequests.registerCategory`
 - Branch: `fix/mer-067-ios-category-crash`
@@ -38,17 +54,3 @@
 - Loops: 1/1 — re-checked every criterion against the capture reports (full run: 177 calls; checks-only run: 113 calls, 26/26 probes), the socket log and the host-test run; found and fixed during the loop: wrong probe expectations (ALREADY_HANDLED is 422, a manager's other-branch list is an empty 200, a main-branch booking is 404 for the manager, the branch request was booked on the wrong branch), nullable `data` decoders, two lines over 140
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — four-role reading of the diff: capture tools refuse non-local hosts for proofs and never send tokens to the hosted API; no hardcoded URL in app code (config only); the policy refactor moves enums / rules to core/domain and the text to the design system without behaviour change for M19 (salon tests green); echo filter per collection with a 1 s window (reassignment later still refreshes); AR + EN for the moved strings. DEVIATIONS: only host unit tests + policy ran (no detekt, no Android / iOS builds, no emulator / simulator: the lead runs the full gate, disk is tight); the hosted dev API was only read unauthenticated (authenticated flows verified on the local stack with the same server code); 7 operations not captured (gap #12); throwaway records left on the local QA stack (gap #14).
 - Notes: server-side items for the owner: merchant `maintenance.enabled = true` on the hosted dev API (#8), spec of `POST /salon/applications` member (#9), branch-close message (#10), ObjectId patterns (#11).
-
-### MER-049 — More M25 part 2: my account, push switch, delete my account
-- Branch: `feat/mer-049-my-account`
-- Branched: (from `feat/mer-043-statistics`)
-- Status: IN REVIEW
-- Acceptance criteria (PRD M25, §14 `delete_request`; operations `GET/PATCH /me`, `POST /auth/change-phone`, `PATCH /installations/push-enabled`, `POST /me/leave`, `POST /salon/deletion-request`):
-  - [x] `feature/more` gets its domain (`MyAccount`, `PhotoChange`, `AccountRepository`, name rules 1..50) and data (`AccountApi`, PATCH body built as JSON so `photoKey: null` removes the photo; hand fixtures for `/me` and change-phone because the generated one is `data: null`)
-  - [x] More header shows the member's photo and opens My account (`Screen.MyAccount`): photo (pick → 1:1 crop → MEMBER_PHOTO upload, remove), first / last name, phone (read-only) + "Change phone" sheet (country + number validated by the server regex) → OTP to the new number (purpose CHANGE_PHONE) → back on resume the proof is used once for `POST /auth/change-phone` (409 `PHONE_ALREADY_REGISTERED` shown localized), role badge; save only when changed; the session's first name follows the server
-  - [x] Push switch is now the server's (`PATCH /installations/push-enabled`, optimistic, rolled back with an error banner); More reads `/me` on open and aligns the local switch
-  - [x] Delete my account: members confirm "Remove my access" → `POST /me/leave` → everything cleared (`SessionStore.clearAll`) → login; the owner gets a sheet explaining WAB will contact them, optional note (≤ 500) → `POST /salon/deletion-request` → "Request sent on {date}"; `delete_request` (kind) tracked and added to the required PRD events
-- Tests: `AccountTest` (1), `AccountMapperTest` (2), `MyAccountViewModelTest` (2), `MoreViewModelTest` (+2 push rollback, deletion / leave); more + composeApp host tests green; policy ok
-- Loops: 1/1 — batch 12 run (MER-050, 042, 043, 049): policy ok, `testAndroidHostTest` all modules 163 suites / 547 tests / 0 failures (after fixing `BookingMappersTest` for the new required `requestedAt`); full gate `scripts/ci/run_local_checks.sh`: policy tests (86) + checks, contract, detekt (0 after wrapping 17 long lines and the `MoreDependencies` parameter count), unit tests + 4 Android variants + lint green, iOS Debug-Dev / Release-Dev green; the machine's disk filled during Debug-Prod, so Debug-Prod, Release-Prod and the Kotlin/Native tests were re-run one by one after removing this worktree's build outputs: all green; criteria re-checked against the diff
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch 12 code reading of the four commits: one call per screen, permission-gated blocks hidden (not disabled), owner-only branch filters, AR + EN for every key, tokens only, files < 300 lines, mock fixtures for every new endpoint; fixed during review: contract regeneration broke a bookings mapper test, detekt findings. DEVIATION: UI not exercised on emulator / simulator (rules §3.13 end-of-backlog journey); no screen previews (feature modules have none).
-- Notes: the owner never calls `/me/leave` (the button sends the deletion request instead), so `LAST_OWNER` cannot come from the UI.
