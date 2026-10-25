@@ -17,6 +17,8 @@ export interface DraftHold {
 export interface BookingDraftRaw {
   customerId: Types.ObjectId;
   salonId: Types.ObjectId;
+  /** Branch (§3.3a); set on every new row, backfilled by the branch migration. */
+  branchId?: Types.ObjectId;
   persons: BookingPersonRaw[];
   totals: { total: number; dueOnline: number };
   paymentMethod: (typeof PAYMENT_OPTIONS)[number];
@@ -43,6 +45,7 @@ const draftSchema = new Schema<BookingDraftRaw>(
   {
     customerId: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
     salonId: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
     persons: { type: [bookingPersonSchema], required: true },
     totals: {
       type: new Schema(

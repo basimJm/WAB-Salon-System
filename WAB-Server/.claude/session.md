@@ -10,6 +10,19 @@
 
 ## Current task
 
+### SRV-136 — Branch model (Stage P, salon branches)
+
+- Branch: `feat/srv-136-branch-model`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a branches, §3.3/§3.4/§3.5/§3.6 `branchId` fields, §10 `salon.maxBranches`, §11 `BRANCH_*`; API docs: the error-code enum gains the 7 `BRANCH_*` codes in all four contracts — clients pick them up at their branch contract task ADM-088, CUS-082, MER-061):
+  - [x] `branches` collection: `salonId`, name `{ar,en}` (1–60), `isMain` (partial unique per salon), `BranchStatus` ACTIVE/OFFLINE/CLOSED, location (2dsphere), locationText, city/area, phone/whatsapp (E.164), 7-day schedule, offline `{reason, at, actorType ADMIN|MEMBER, by}`, completeness, closedAt/By; registered in `ALL_MODELS`
+  - [x] Optional `branchId` (+ index) on salonServices, salonClosures, members, staffLeaves, bookingDrafts, bookings (+ `branchSnapshot {name, locationText, phone}`), transactions, refunds, ledgerEntries, reviews; salons get `mainBranchId` + `branchCount` (default 0)
+  - [x] `BranchesRepository` (forSalon main-first, countOpen, main, findInSalon scope, patch)
+  - [x] Setting `salon.maxBranches` = 20; error codes `BRANCH_NOT_FOUND`, `BRANCH_NOT_BOOKABLE`, `BRANCH_REQUIRED`, `BRANCH_LIMIT_REACHED`, `BRANCH_HAS_UPCOMING_BOOKINGS`, `LAST_BRANCH`, `BRANCH_SCOPE_DENIED` with AR/EN messages
+- Tests: `tests/branches.test.ts` (new), `tests/settings.test.ts`, `tests/errors.test.ts` adapted; full gate in the Terminal panel
+- Loops: 1/1 — fields re-checked against §3.3a/§3.5; branchId stays optional until SRV-137 backfills (no behaviour change in this task, as planned)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — schema/repository only. DEVIATION from the backlog row: the salon location/hours fields are kept until discovery and booking read branches (dropped in SRV-148), so nothing breaks mid-stage; the old unique `{salonId, catalogServiceId}` index is retired in SRV-137 after the backfill.
+
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 
 - Branch: `feat/srv-135-app-links`
