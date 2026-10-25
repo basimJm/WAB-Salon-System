@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-062 — Owner branch management + branch switcher
+- Branch: `feat/mer-062-branches-manage`
+- Branched: (from `feat/mer-061-branches-contract`)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.16, §6 `BRANCHES_MANAGE`; operations `GET/POST /branches`, `GET/PATCH /branches/{branchId}`, `POST …/main|offline|online|close`):
+  - [x] Core: `Branch` / `BranchStatus` / `BranchName` (localized with fallback), `BranchForm` + contract validation (names 1..60, pin, address 1..300, city, area, E.164 phone, optional WhatsApp), lifecycle helpers (`canBecomeMain`, `canGoOffline`, `canGoOnline`, `canClose` — main must be replaced first), `BranchesRepository` (shared `StateFlow` list, main first) + `BranchesApi` / `BranchesRepositoryImpl` (PATCH as JSON so a cleared WhatsApp is `null`), mock list fixture (3 branches: main, active, offline)
+  - [x] Shared switcher state: `BranchSelection` singleton ("All branches" = null), `BranchScope` / `branchScopeOf` (owner = chosen filter + switcher when > 1 branch, branch members = server scope, list loaded once for the owner), `AppBranchSwitcher` chip row (closed branches labelled) in the design system
+  - [x] New `feature/branches/presentation` (data in core because every scoped feature reads it): list (main / status / incomplete badges, address, phone, offline reason, only the allowed actions), set main (confirm), offline (reason sheet, 1..1000), online, close (confirm; `409 BRANCH_HAS_UPCOMING_BOOKINGS` → sheet listing the blocking bookings, each opens M09), add / edit form (names AR + EN, map picker + address, city / area, phone, WhatsApp); salon hub tile "Branches" for the owner only (`OwnerCapability.BRANCHES_MANAGE`)
+  - [x] Map picker controller / handler moved from `feature/salon` to the design system (`MapPickerController`, `MapPickerHandler`) and shared by the profile and branch forms
+- Tests: `BranchesTest` (8), `BranchesMapperTest` (4), `BranchesViewModelTest` (4), `BranchEditViewModelTest` (3), `SalonHubTest` / `SalonProfileViewModelTest` unchanged and green; policy ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: no screen previews (no feature module has them; same as before). Reopening a closed branch has no merchant endpoint, so closed branches show no actions.
+
 ### MER-061 — Branches contract, member scope, branch error codes
 - Branch: `feat/mer-061-branches-contract`
 - Branched: (batch 10 start, from `origin/merchant`)

@@ -3,8 +3,8 @@ package com.fab.wab.merchant.feature.salon.presentation.di
 import com.fab.wab.merchant.core.common.BusinessTime
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.session.SessionStore
-import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapController
-import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapDependencies
+import com.fab.wab.merchant.designsystem.components.map.MapPickerController
+import com.fab.wab.merchant.designsystem.components.map.MapPickerDependencies
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.CatalogPickerViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.CatalogRequestsViewModel
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.GalleryViewModel
@@ -32,8 +32,8 @@ val salonPresentationModule = module {
     viewModel { SalonHubViewModel(salon = get(), session = get<SessionStore>().state, analytics = get()) }
     factory {
         val settings = get<AppSettings>()
-        ProfileMapController(
-            ProfileMapDependencies(
+        MapPickerController(
+            MapPickerDependencies(
                 geocoder = get(),
                 places = get(),
                 location = get(),

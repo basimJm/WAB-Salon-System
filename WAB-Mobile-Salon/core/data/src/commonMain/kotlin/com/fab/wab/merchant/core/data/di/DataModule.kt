@@ -3,6 +3,10 @@ package com.fab.wab.merchant.core.data.di
 import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.data.booking.AffectedBookingsApi
 import com.fab.wab.merchant.core.data.booking.AffectedBookingsRepositoryImpl
+import com.fab.wab.merchant.core.data.branch.BranchesApi
+import com.fab.wab.merchant.core.data.branch.BranchesRepositoryImpl
+import com.fab.wab.merchant.core.data.branch.MOCK_BRANCHES_FIXTURE
+import com.fab.wab.merchant.core.data.branch.mockBranchesFixture
 import com.fab.wab.merchant.core.data.config.AppConfigApi
 import com.fab.wab.merchant.core.data.config.AppConfigRepositoryImpl
 import com.fab.wab.merchant.core.data.locations.LocationsApi
@@ -14,6 +18,8 @@ import com.fab.wab.merchant.core.data.salon.SalonApi
 import com.fab.wab.merchant.core.data.salon.SalonRepositoryImpl
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
+import com.fab.wab.merchant.core.domain.branch.BranchSelection
+import com.fab.wab.merchant.core.domain.branch.BranchesRepository
 import com.fab.wab.merchant.core.domain.config.AppConfigRepository
 import com.fab.wab.merchant.core.domain.config.ClientPlatform
 import com.fab.wab.merchant.core.domain.dev.MockControls
@@ -22,6 +28,7 @@ import com.fab.wab.merchant.core.domain.locations.LocationsRepository
 import com.fab.wab.merchant.core.domain.permission.PermissionsSync
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import io.ktor.client.HttpClient
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /**
@@ -39,6 +46,10 @@ val dataModule = module {
     single { AffectedBookingsApi(get()) }
     single<AffectedBookingsRepository> { AffectedBookingsRepositoryImpl(get()) }
     single<SalonRepository> { SalonRepositoryImpl(api = get(), sessionStore = get()) }
+    single { BranchesApi(get()) }
+    single<BranchesRepository> { BranchesRepositoryImpl(get()) }
+    single { BranchSelection() }
+    single(named(MOCK_BRANCHES_FIXTURE)) { mockBranchesFixture }
     single<MockControls> { MockWorldControls(get()) }
     factory { SwitchMockWorldUseCase(controls = get(), salon = get(), permissions = get()) }
 }

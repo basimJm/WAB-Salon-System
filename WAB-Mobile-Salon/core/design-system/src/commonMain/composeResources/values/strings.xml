@@ -222,4 +222,7 @@
     <string name="contact_call">Call</string>
     <string name="contact_whatsapp">WhatsApp</string>
     <string name="contact_email">Email</string>
+    <string name="branch_all">All branches</string>
+    <string name="branch_closed_name">%1$s (closed)</string>
+    <string name="branch_switcher_label">Branch</string>
 </resources>
