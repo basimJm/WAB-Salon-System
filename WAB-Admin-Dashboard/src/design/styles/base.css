@@ -61,7 +61,7 @@ button:disabled { cursor: not-allowed; }
 }
 
 .wab-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
-.wab-stack { display: grid; gap: var(--space-4); }
+.wab-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
 .wab-grid {
   display: grid;
   gap: var(--space-4);

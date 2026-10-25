@@ -246,7 +246,7 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 | ADM-089 | Salon detail → Branches tab: list (main, status, completeness, area, staff count), create / edit (location on map, contacts, name AR/EN), set main, offline / online, close (shows the blocking bookings), all with reason | `feat/adm-089-salon-branches` | ADM-088 | SRV-147 | IN REVIEW | Full CRUD. |
 | ADM-090 | Branch-aware salon editing: hours, closures, services/prices and staff per branch; move staff between branches | `feat/adm-090-branch-editing` | ADM-089 | SRV-141, SRV-147 | IN REVIEW |  |
 | ADM-091 | Branch filter and column across bookings, reviews, members/staff, transactions, refunds, ledger and exports; booking and review detail show the branch | `feat/adm-091-branch-filters` | ADM-088 | SRV-145, SRV-146, SRV-147 | IN REVIEW |  |
-| ADM-092 | Branches QA: every branch screen against the real server, AR/EN, light/dark, desktop/phone | `feat/adm-092-branches-qa` | ADM-089, ADM-090, ADM-091 | SRV-148 | BLOCKED | |
+| ADM-092 | Branches QA: every branch screen against the real server, AR/EN, light/dark, desktop/phone | `feat/adm-092-branches-qa` | ADM-089, ADM-090, ADM-091 | SRV-148 | IN REVIEW |  |
 
 ---
 ## 5. Traceability matrix (nothing in the PRD or BRD is left without a task)
