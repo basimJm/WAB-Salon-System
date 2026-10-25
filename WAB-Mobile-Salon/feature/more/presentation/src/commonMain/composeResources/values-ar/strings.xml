@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="more_title">المزيد</string>
+    <string name="more_account">الحساب</string>
+    <string name="more_settings">الإعدادات</string>
+    <string name="more_language">اللغة</string>
+    <string name="more_language_value">العربية</string>
+    <string name="more_dark_mode">الوضع الداكن</string>
+    <string name="more_push">الإشعارات</string>
+    <string name="more_push_sub">طلبات الحجز والتحديثات</string>
+    <string name="more_overlay">الظهور فوق التطبيقات</string>
+    <string name="more_overlay_on">مفعّل (Android)</string>
+    <string name="more_overlay_off">غير مفعّل — اضغط للتفعيل</string>
+    <string name="more_sound">تجربة صوت التنبيه</string>
+    <string name="more_sound_sub">نغمة طلب الحجز الجديد</string>
+    <string name="more_notifications">صندوق الإشعارات</string>
+    <string name="more_support">الدعم والقانوني</string>
+    <string name="more_contact">تواصل مع WAB</string>
+    <string name="more_faq">الأسئلة الشائعة</string>
+    <string name="more_terms">الشروط والأحكام</string>
+    <string name="more_privacy">سياسة الخصوصية</string>
+    <string name="more_about">عن WAB</string>
+    <string name="more_logout">تسجيل الخروج</string>
+    <string name="more_logout_title">تسجيل الخروج؟</string>
+    <string name="more_logout_body">ستحتاج إلى رقم هاتفك ورمز التحقق للدخول مجدداً.</string>
+    <string name="more_cancel">إلغاء</string>
+    <string name="more_version">الإصدار %1$s (%2$d)</string>
+    <string name="more_owner">المالك</string>
+    <string name="more_manager">مسؤول</string>
+    <string name="more_employee">موظف</string>
+</resources>
