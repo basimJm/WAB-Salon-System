@@ -68,6 +68,8 @@ export interface ReviewsDeps {
   readonly settings: Pick<SettingsService, 'get'>;
   /** Branch labels (§5.11); without it reviews carry no branch. */
   readonly branches?: Pick<BranchesRepository, 'findMany' | 'findInSalon'>;
+  /** A review waits for moderation (the admin panel's live queue, `review.created`). */
+  readonly onCreated?: (review: Entity<ReviewRaw>) => void;
 }
 
 /**
@@ -115,6 +117,7 @@ export const createReviewsService = ({
   customers,
   settings,
   branches,
+  onCreated,
 }: ReviewsDeps): ReviewsService => {
   const targetOf = (staffId: string | undefined): ReviewTarget =>
     staffId === undefined ? 'SALON' : 'STAFF';
@@ -210,6 +213,7 @@ export const createReviewsService = ({
         ...(comment === undefined || comment === '' ? {} : { comment }),
         status: 'PENDING',
       });
+      onCreated?.(created);
       return { id: created.id, status: 'PENDING' };
     },
 

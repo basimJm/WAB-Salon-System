@@ -172,6 +172,7 @@ import { RedisRateLimitStore } from './utils/redis/rateLimitStore';
 import { connectRedis, createRedisReadinessCheck, disconnectRedis } from './utils/redis/client';
 import { createLogger, type Logger } from './utils/logger';
 import { createAccessEvents } from './sockets/accessEvents';
+import { createAdminEvents } from './sockets/adminEvents';
 import { createBookingEvents, type SocketRelay } from './sockets/bookingEvents';
 import { createRoomsFor } from './sockets/rooms';
 import {
@@ -305,6 +306,7 @@ const buildServices = (
   const serverEventsRepository = new ServerEventsRepository();
   // Server events live in the server's own MongoDB; installation links and admin queries share them.
   const serverEvents = createServerEvents({ store: serverEventsRepository, logger });
+  const adminEvents = createAdminEvents({ relay, logger });
   const serverAnalytics = createMongoAnalytics({
     events: serverEvents,
     counter: serverEventsRepository,
@@ -505,10 +507,17 @@ const buildServices = (
   });
   const fullRefunds = createRefundService({
     hooks: {
-      started: producers.refundHooks.started,
-      failed: producers.refundHooks.failed,
+      started: async (refund) => {
+        adminEvents.refundUpdated(refund);
+        await producers.refundHooks.started(refund);
+      },
+      failed: async (refund) => {
+        adminEvents.refundUpdated(refund);
+        await producers.refundHooks.failed(refund);
+      },
       // The money has left: book it. A missed write is repaired by `ledger.reconcile()` (job).
       refunded: async (refund) => {
+        adminEvents.refundUpdated(refund);
         try {
           await ledger.recordRefund(refund);
         } catch (error) {
@@ -725,6 +734,9 @@ const buildServices = (
     evaluateAlerts: (now) => adminAlerts.evaluate(now),
     emailAlerts: (now) => alertInbox.deliverEmails(now),
     aggregateReports: (now) => reportsService.aggregateYesterday(now),
+    overviewTick: () => {
+      adminEvents.overviewTick();
+    },
     onDelayedRefunds: (delayed) => adminAlerts.refundsDelayed(delayed),
     logger,
   });
@@ -751,6 +763,9 @@ const buildServices = (
   });
   const favoritesRepository = new FavoritesRepository();
   const reviewsService = createReviewsService({
+    onCreated: (review) => {
+      adminEvents.reviewCreated(review);
+    },
     branches: branchesRepository,
     reviews: new ReviewsRepository(),
     salons: new SalonsRepository(),
@@ -1108,6 +1123,9 @@ const buildServices = (
     salonApplication: {
       service: createSalonApplicationService({
         ...phoneServices,
+        onSubmitted: (salon) => {
+          adminEvents.applicationCreated(salon);
+        },
         uploads,
         salons: new SalonsRepository(),
         members: new MembersRepository(),
