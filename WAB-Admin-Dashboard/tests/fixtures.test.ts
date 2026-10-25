@@ -32,14 +32,6 @@ const WITHOUT_FIXTURE: Readonly<Record<string, string>> = {
   getSubscriptionsBySalonId: 'no screen reads one record: the list carries every field',
   getCampaignsById: 'no screen reads one record: the list carries every field',
   getAuditLogsById: 'no screen reads one record: the list carries every field',
-  getSalonsByIdBranches: 'branches screen comes with ADM-089',
-  postSalonsByIdBranches: 'branches screen comes with ADM-089',
-  getSalonsByIdBranchesByBranchId: 'branches screen comes with ADM-089',
-  patchSalonsByIdBranchesByBranchId: 'branches screen comes with ADM-089',
-  postSalonsByIdBranchesByBranchIdMain: 'branches screen comes with ADM-089',
-  postSalonsByIdBranchesByBranchIdOffline: 'branches screen comes with ADM-089',
-  postSalonsByIdBranchesByBranchIdOnline: 'branches screen comes with ADM-089',
-  postSalonsByIdBranchesByBranchIdClose: 'branches screen comes with ADM-089',
   postSalonsByIdMembersByMemberIdBranch: 'moving staff comes with ADM-090',
 };
 

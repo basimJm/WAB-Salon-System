@@ -13,6 +13,7 @@ import content from './en/content.json';
 import banners from './en/banners.json';
 import catalog from './en/catalog.json';
 import salons from './en/salons.json';
+import branches from './en/branches.json';
 import applications from './en/applications.json';
 import customers from './en/customers.json';
 import bookings from './en/bookings.json';
@@ -69,6 +70,7 @@ const en = {
   ...customers,
   ...applications,
   ...salons,
+  ...branches,
   ...catalog,
   ...banners,
   ...content,

@@ -57,6 +57,8 @@ export interface SalonMember {
   readonly active: boolean;
   readonly providesServices: boolean;
   readonly permissions: readonly string[];
+  /** The member's branch; null for the owner (all branches). */
+  readonly branchId: string | null;
 }
 
 export interface PayoutDetails {
