@@ -34,6 +34,8 @@ export interface FinanceTransactionRow {
   readonly gatewayFee: number;
   /** amount − gateway fee: what the payment is worth to the salon before refunds. */
   readonly net: number;
+  /** The branch the booking was made at (§5.14). */
+  readonly branchId: string | null;
   readonly createdAt: Date;
 }
 export interface FinanceRefundRow {
@@ -44,6 +46,7 @@ export interface FinanceRefundRow {
   readonly source: RefundSource;
   readonly reason: string | null;
   readonly status: RefundStatus;
+  readonly branchId: string | null;
   readonly createdAt: Date;
   readonly completedAt: Date | null;
 }
@@ -75,15 +78,18 @@ export interface MerchantSubscriptionView {
 
 export interface MerchantFinanceService {
   balance(salonId: string): Promise<SalonBalance>;
+  /** Payments; `branchId` narrows to one branch (payouts stay salon-wide, §5.14). */
   transactions(input: {
     salonId: string;
     params: PaginationParams;
     range: DateRange;
+    branchId?: string | undefined;
   }): Promise<{ items: FinanceTransactionRow[]; total: number }>;
   refunds(input: {
     salonId: string;
     params: PaginationParams;
     range: DateRange;
+    branchId?: string | undefined;
   }): Promise<{ items: FinanceRefundRow[]; total: number }>;
   payouts(input: {
     salonId: string;
@@ -134,12 +140,13 @@ export const createMerchantFinanceService = (deps: {
   return {
     balance: (salonId) => deps.payoutsService.balanceOf(salonId),
 
-    async transactions({ salonId, params, range }) {
+    async transactions({ salonId, params, range, branchId }) {
       // Only payments that became bookings are the salon's money.
       const page = await transactions.findPage(
         scoped<TransactionRaw>(salonId, await window(range), {
           status: 'SUCCEEDED',
           bookingId: { $exists: true },
+          ...(branchId === undefined ? {} : { branchId }),
         }),
         params,
         { createdAt: -1 },
@@ -154,16 +161,19 @@ export const createMerchantFinanceService = (deps: {
           amount: t.amount,
           gatewayFee: t.gatewayFee ?? 0,
           net: t.amount - (t.gatewayFee ?? 0),
+          branchId: t.branchId ?? null,
           createdAt: t.createdAt,
         })),
         total: page.meta.total,
       };
     },
 
-    async refunds({ salonId, params, range }) {
-      const page = await refunds.findPage(scoped<RefundRaw>(salonId, await window(range)), params, {
-        createdAt: -1,
-      });
+    async refunds({ salonId, params, range, branchId }) {
+      const page = await refunds.findPage(
+        scoped<RefundRaw>(salonId, await window(range), branchId === undefined ? {} : { branchId }),
+        params,
+        { createdAt: -1 },
+      );
       const refs = await references(page.items);
       return {
         items: page.items.map((r) => ({
@@ -174,6 +184,7 @@ export const createMerchantFinanceService = (deps: {
           source: r.source,
           reason: r.reason ?? null,
           status: r.status,
+          branchId: r.branchId ?? null,
           createdAt: r.createdAt,
           completedAt: r.completedAt ?? null,
         })),

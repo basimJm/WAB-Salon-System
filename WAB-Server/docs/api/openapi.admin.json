@@ -16761,6 +16761,24 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "salonId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -16810,6 +16828,12 @@
                           },
                           "salonId": {
                             "type": "string"
+                          },
+                          "branchId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           },
                           "customerId": {
                             "type": "string"
@@ -16891,6 +16915,7 @@
                           "bookingId",
                           "transactionId",
                           "salonId",
+                          "branchId",
                           "customerId",
                           "amount",
                           "source",
@@ -17048,6 +17073,12 @@
                         "salonId": {
                           "type": "string"
                         },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "customerId": {
                           "type": "string"
                         },
@@ -17128,6 +17159,7 @@
                         "bookingId",
                         "transactionId",
                         "salonId",
+                        "branchId",
                         "customerId",
                         "amount",
                         "source",
@@ -17303,6 +17335,12 @@
                         "salonId": {
                           "type": "string"
                         },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "customerId": {
                           "type": "string"
                         },
@@ -17383,6 +17421,7 @@
                         "bookingId",
                         "transactionId",
                         "salonId",
+                        "branchId",
                         "customerId",
                         "amount",
                         "source",
@@ -17564,6 +17603,12 @@
                         "salonId": {
                           "type": "string"
                         },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "customerId": {
                           "type": "string"
                         },
@@ -17644,6 +17689,7 @@
                         "bookingId",
                         "transactionId",
                         "salonId",
+                        "branchId",
                         "customerId",
                         "amount",
                         "source",
@@ -19120,7 +19166,7 @@
         "tags": [
           "Finance"
         ],
-        "summary": "Payment attempts with gateway codes (filter by status, type, salon, customer, booking, dates)",
+        "summary": "Payment attempts with gateway codes (filter by status, type, salon, branch, customer, booking, dates)",
         "parameters": [
           {
             "schema": {
@@ -19177,6 +19223,15 @@
             },
             "required": false,
             "name": "salonId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
             "in": "query"
           },
           {
@@ -19273,6 +19328,13 @@
                           "salonId": {
                             "type": "string"
                           },
+                          "branchId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "The branch the booking was made at"
+                          },
                           "type": {
                             "type": "string",
                             "enum": [
@@ -19354,6 +19416,7 @@
                           "bookingId",
                           "customerId",
                           "salonId",
+                          "branchId",
                           "type",
                           "amount",
                           "currency",
@@ -19510,6 +19573,13 @@
                         "salonId": {
                           "type": "string"
                         },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The branch the booking was made at"
+                        },
                         "type": {
                           "type": "string",
                           "enum": [
@@ -19617,6 +19687,13 @@
                               "salonId": {
                                 "type": "string"
                               },
+                              "branchId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "The branch the booking was made at"
+                              },
                               "type": {
                                 "type": "string",
                                 "enum": [
@@ -19698,6 +19775,7 @@
                               "bookingId",
                               "customerId",
                               "salonId",
+                              "branchId",
                               "type",
                               "amount",
                               "currency",
@@ -19724,6 +19802,7 @@
                         "bookingId",
                         "customerId",
                         "salonId",
+                        "branchId",
                         "type",
                         "amount",
                         "currency",
@@ -19819,6 +19898,24 @@
           {
             "schema": {
               "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "salonId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$/i"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
               "enum": [
                 "ar",
                 "en"
@@ -19877,6 +19974,13 @@
                               "salonId": {
                                 "type": "string"
                               },
+                              "branchId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "The branch the booking was made at"
+                              },
                               "type": {
                                 "type": "string",
                                 "enum": [
@@ -19958,6 +20062,7 @@
                               "bookingId",
                               "customerId",
                               "salonId",
+                              "branchId",
                               "type",
                               "amount",
                               "currency",
@@ -20003,6 +20108,13 @@
                               "salonId": {
                                 "type": "string"
                               },
+                              "branchId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "The branch the booking was made at"
+                              },
                               "type": {
                                 "type": "string",
                                 "enum": [
@@ -20084,6 +20196,7 @@
                               "bookingId",
                               "customerId",
                               "salonId",
+                              "branchId",
                               "type",
                               "amount",
                               "currency",
@@ -20129,6 +20242,13 @@
                               "salonId": {
                                 "type": "string"
                               },
+                              "branchId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "The branch the booking was made at"
+                              },
                               "type": {
                                 "type": "string",
                                 "enum": [
@@ -20210,6 +20330,7 @@
                               "bookingId",
                               "customerId",
                               "salonId",
+                              "branchId",
                               "type",
                               "amount",
                               "currency",
@@ -22278,6 +22399,10 @@
                             ]
                           },
                           "salonId": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{24}$/i"
+                          },
+                          "branchId": {
                             "type": "string",
                             "pattern": "^[a-f0-9]{24}$/i"
                           },

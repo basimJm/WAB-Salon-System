@@ -12,7 +12,11 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
-import { transactionParams, transactionsQuery } from './transactions.validation';
+import {
+  reconciliationQuery,
+  transactionParams,
+  transactionsQuery,
+} from './transactions.validation';
 
 const transaction = z.object({
   id: z.string(),
@@ -20,6 +24,7 @@ const transaction = z.object({
   bookingId: z.string().nullable(),
   customerId: z.string(),
   salonId: z.string(),
+  branchId: z.string().nullable().describe('The branch the booking was made at'),
   type: z.enum(['DEPOSIT', 'FULL']),
   amount: z.string().describe('JOD decimal string'),
   currency: z.string(),
@@ -63,7 +68,7 @@ export const registerAdminFinanceDocs = (registry: OpenAPIRegistry): void => {
     path: base,
     tags: ['Finance'],
     summary:
-      'Payment attempts with gateway codes (filter by status, type, salon, customer, booking, dates)',
+      'Payment attempts with gateway codes (filter by status, type, salon, branch, customer, booking, dates)',
     request: { headers, query: transactionsQuery },
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Transactions', successResponseSchema(z.array(transaction))),
@@ -86,7 +91,7 @@ export const registerAdminFinanceDocs = (registry: OpenAPIRegistry): void => {
     path: `${API_PREFIXES.admin}${ADMIN_RECONCILIATION_ROUTES.base}`,
     tags: ['Finance'],
     summary: 'Payment problems: stuck pending, paid without booking, missing ledger charge',
-    request: { headers },
+    request: { headers, query: reconciliationQuery },
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Reconciliation', successResponseSchema(reconciliation)),
       ...failures,

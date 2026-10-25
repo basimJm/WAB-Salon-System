@@ -99,6 +99,7 @@ export const createTableBuilders = (deps: {
       status: params['status'] as never,
       type: params['type'] as never,
       salonId: params['salonId'] as string | undefined,
+      branchId: params['branchId'] as string | undefined,
       customerId: params['customerId'] as string | undefined,
       bookingId: params['bookingId'] as string | undefined,
       from: optionalDate(params['from']),
@@ -112,6 +113,7 @@ export const createTableBuilders = (deps: {
       columns: [
         'Time',
         'Salon',
+        'Branch',
         'Customer',
         'Booking',
         'Type',
@@ -124,6 +126,7 @@ export const createTableBuilders = (deps: {
       rows: items.map((t): Cell[] => [
         t.createdAt.toISOString(),
         t.salonId,
+        t.branchId ?? null,
         t.customerId,
         t.bookingId ?? null,
         t.type,

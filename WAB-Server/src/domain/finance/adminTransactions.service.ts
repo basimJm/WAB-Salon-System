@@ -13,6 +13,7 @@ export interface TransactionFilter {
   readonly status?: TransactionStatus | undefined;
   readonly type?: TransactionType | undefined;
   readonly salonId?: string | undefined;
+  readonly branchId?: string | undefined;
   readonly customerId?: string | undefined;
   readonly bookingId?: string | undefined;
   readonly from?: Date | undefined;
@@ -35,13 +36,19 @@ export interface Reconciliation {
   readonly missingLedger: Entity<TransactionRaw>[];
 }
 
+export interface ReconciliationScope {
+  readonly salonId?: string | undefined;
+  readonly branchId?: string | undefined;
+}
+
 export interface AdminTransactionsService {
   list(input: {
     params: PaginationParams;
     filter: TransactionFilter;
   }): Promise<{ items: Entity<TransactionRaw>[]; total: number }>;
   get(id: string): Promise<TransactionDetail>;
-  reconciliation(now: Date): Promise<Reconciliation>;
+  /** Optionally narrowed to one salon or branch (§5.14). */
+  reconciliation(now: Date, scope?: ReconciliationScope): Promise<Reconciliation>;
 }
 
 export const createAdminTransactionsService = (deps: {
@@ -49,7 +56,14 @@ export const createAdminTransactionsService = (deps: {
 }): AdminTransactionsService => ({
   async list({ params, filter }) {
     const query: Record<string, unknown> = {};
-    for (const key of ['status', 'type', 'salonId', 'customerId', 'bookingId'] as const) {
+    for (const key of [
+      'status',
+      'type',
+      'salonId',
+      'branchId',
+      'customerId',
+      'bookingId',
+    ] as const) {
       const value = filter[key];
       if (value !== undefined) query[key] = value;
     }
@@ -75,12 +89,16 @@ export const createAdminTransactionsService = (deps: {
     return { transaction, attempts };
   },
 
-  async reconciliation(now) {
+  async reconciliation(now, scope = {}) {
     const cutoff = new Date(now.getTime() - RECONCILE_MIN_AGE_MS);
+    const within = {
+      ...(scope.salonId === undefined ? {} : { salonId: scope.salonId }),
+      ...(scope.branchId === undefined ? {} : { branchId: scope.branchId }),
+    };
     const [stuckPending, paidWithoutBooking, missingLedger] = await Promise.all([
-      deps.transactions.pendingBefore(cutoff, RECONCILIATION_LIMIT),
-      deps.transactions.orphansBefore(cutoff, RECONCILIATION_LIMIT),
-      deps.transactions.unchargedWithBooking(cutoff, RECONCILIATION_LIMIT),
+      deps.transactions.pendingBefore(cutoff, RECONCILIATION_LIMIT, within),
+      deps.transactions.orphansBefore(cutoff, RECONCILIATION_LIMIT, within),
+      deps.transactions.unchargedWithBooking(cutoff, RECONCILIATION_LIMIT, within),
     ]);
     return { stuckPending, paidWithoutBooking, missingLedger };
   },

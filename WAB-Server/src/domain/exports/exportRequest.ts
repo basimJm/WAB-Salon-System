@@ -38,6 +38,7 @@ export const exportRequestSchema = z.discriminatedUnion('kind', [
       status: z.enum(TRANSACTION_STATUSES).optional(),
       type: z.enum(TRANSACTION_TYPES).optional(),
       salonId: objectId.optional(),
+      branchId: objectId.optional(),
       customerId: objectId.optional(),
       bookingId: objectId.optional(),
       from: instant.optional(),

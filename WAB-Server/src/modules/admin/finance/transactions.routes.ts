@@ -8,7 +8,11 @@ import { asyncHandler } from '../../../utils/async';
 import type { Entity } from '../../../utils/database/plain';
 import { formatJod } from '../../../utils/money';
 import { sendPaginated, sendSuccess } from '../../../utils/response/successResponse';
-import { transactionParams, transactionsQuery } from './transactions.validation';
+import {
+  reconciliationQuery,
+  transactionParams,
+  transactionsQuery,
+} from './transactions.validation';
 
 export const presentTransaction = (t: Entity<TransactionRaw>): Record<string, unknown> => ({
   id: t.id,
@@ -16,6 +20,7 @@ export const presentTransaction = (t: Entity<TransactionRaw>): Record<string, un
   bookingId: t.bookingId ?? null,
   customerId: t.customerId,
   salonId: t.salonId,
+  branchId: t.branchId ?? null,
   type: t.type,
   amount: formatJod(t.amount),
   currency: t.currency,
@@ -84,8 +89,10 @@ export const createAdminReconciliationRouter = (
   router.use(guard);
   router.get(
     '/',
+    validate({ query: reconciliationQuery }),
     asyncHandler(async (req: Request, res: Response) => {
-      const r = await service.reconciliation(now());
+      const scope = (req.validated as { query: z.infer<typeof reconciliationQuery> }).query;
+      const r = await service.reconciliation(now(), scope);
       sendSuccess(req, res, {
         data: {
           stuckPending: r.stuckPending.map(presentTransaction),
