@@ -9,9 +9,11 @@ import type { BookingsRepository } from '@/domain/bookings/bookings';
 const list = defineEndpoint(OPERATIONS.getBookings, {
   data: dto.getBookingsDataSchema,
   query: () =>
-    dto
-      .getBookingsQuerySchema()
-      .extend({ salonId: OBJECT_ID.optional(), customerId: OBJECT_ID.optional() }),
+    dto.getBookingsQuerySchema().extend({
+      salonId: OBJECT_ID.optional(),
+      branchId: OBJECT_ID.optional(),
+      customerId: OBJECT_ID.optional(),
+    }),
 });
 const get = defineEndpoint(OPERATIONS.getBookingsById, { data: dto.getBookingsByIdDataSchema });
 const change = defineEndpoint(OPERATIONS.postBookingsByIdStatus, {
@@ -53,6 +55,7 @@ export class RemoteBookingsRepository implements BookingsRepository {
           q.brideOnly === undefined ? undefined : (String(q.brideOnly) as 'true' | 'false'),
         paymentStatus: q.paymentStatus,
         salonId: q.salonId,
+        branchId: q.branchId,
         customerId: q.customerId,
       }),
     });

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import { DEFAULT_PAGE_SIZE } from '@/constants/ui';
 import type { CustomerNotification, CustomerReview } from '@/domain/customers/customers';
+import { branchName } from '@/domain/shared/branches';
 import { formatInstant, formatNumber } from '@/domain/shared/format';
 import { StatusBadge } from '../components/core/StatusBadge';
 import { DataTable } from '../components/data/DataTable';
@@ -24,6 +25,11 @@ export function CustomerReviewsTab({ id }: { id: string }) {
   });
   const columns: Column<CustomerReview>[] = [
     { key: 'salon', header: t('nav.sub.allSalons'), render: (r) => r.salon.name },
+    {
+      key: 'branch',
+      header: t('branches.name'),
+      render: (r) => (r.branch ? branchName(r.branch.name, language) : '—'),
+    },
     {
       key: 'target',
       header: t('reviews.target'),

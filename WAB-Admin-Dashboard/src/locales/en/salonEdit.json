@@ -123,6 +123,12 @@
       "REFUND_FULL": "Refund in full"
     },
     "policyNotes": "Notes for customers",
-    "isOpen": "Open"
+    "isOpen": "Open",
+    "branch": "Branch",
+    "branchHint": "Hours, closures, services and staff are kept per branch.",
+    "moveTo": "Move to branch",
+    "move": "Move",
+    "moveHint": "Moving a member clears their services: choose the new branch's services for them afterwards.",
+    "noBranchMembers": "This branch has no staff yet."
   }
 }

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import { CLOSURE_REASON_MAX, isClosureRange } from '@/domain/salonEdit/rules';
-import type { Closure } from '@/domain/salonEdit/salonEdit';
+import type { BranchScope, Closure } from '@/domain/salonEdit/salonEdit';
 import { Button } from '../components/core/Button';
 import { Card } from '../components/core/Card';
 import { InlineAlert } from '../components/feedback/InlineAlert';
@@ -56,10 +56,10 @@ function ClosureRows({
 
 /** Closure days (from-to, shown to customers): add, change (only future ones) and remove. */
 export function ClosuresPanel({
-  salonId,
+  scope,
   closures,
 }: {
-  salonId: string;
+  scope: BranchScope;
   closures: readonly Closure[];
 }) {
   const { t } = useTranslation();
@@ -74,19 +74,19 @@ export function ClosuresPanel({
     setTried(false);
   };
   const preview = useMutation({
-    mutationFn: () => edit.previewClosure(salonId, { from: form.from, to: form.to }),
+    mutationFn: () => edit.previewClosure(scope, { from: form.from, to: form.to }),
   });
   const save = useSalonMutation(
     (r: string) =>
       editing
         ? edit.updateClosure(
-            salonId,
+            scope,
             editing.id,
             { from: form.from, to: form.to, closureReason: form.text.trim() },
             r,
           )
         : edit.addClosure(
-            salonId,
+            scope,
             { from: form.from, to: form.to, closureReason: form.text.trim() },
             r,
           ),
@@ -94,7 +94,7 @@ export function ClosuresPanel({
     done,
   );
   const remove = useSalonMutation(
-    (v: { id: string; reason: string }) => edit.removeClosure(salonId, v.id, v.reason),
+    (v: { id: string; reason: string }) => edit.removeClosure(scope, v.id, v.reason),
     REFRESH,
   );
   const reason = useReasonAction(save.isPending || remove.isPending);

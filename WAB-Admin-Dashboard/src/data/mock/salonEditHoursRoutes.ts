@@ -1,4 +1,5 @@
 import { defineEndpoint } from '../api/endpoint';
+import { branchQuerySchema } from '../api/objectId';
 import * as dto from '../contract/generated/dto';
 import { OPERATIONS } from '../contract/generated/operations';
 import { mockRoute } from './mockRoute';
@@ -23,26 +24,31 @@ const hoursView = (s: SalonEditState) => ({
 });
 
 export function salonHoursRoutes(
-  of: (id: string | undefined) => SalonEditState,
+  of: (id: string | undefined, branchId?: string | null) => SalonEditState,
 ): readonly MockRoute[] {
   return [
     mockRoute(
-      defineEndpoint(O.getSalonsByIdHours, { data: dto.getSalonsByIdHoursDataSchema }),
-      ({ params }) => ({ data: hoursView(of(params['id'])) }),
+      defineEndpoint(O.getSalonsByIdHours, {
+        data: dto.getSalonsByIdHoursDataSchema,
+        query: branchQuerySchema,
+      }),
+      ({ params, query }) => ({ data: hoursView(of(params['id'], query.get('branchId'))) }),
     ),
     mockRoute(
       defineEndpoint(O.putSalonsByIdHours, {
+        query: branchQuerySchema,
         data: dto.putSalonsByIdHoursDataSchema,
         body: dto.putSalonsByIdHoursBodySchema,
       }),
-      ({ params, body }) => {
-        const s = of(params['id']);
+      ({ params, query, body }) => {
+        const s = of(params['id'], query.get('branchId'));
         s.schedule = (body as { days: typeof s.schedule }).days;
         return { data: hoursView(s) };
       },
     ),
     mockRoute(
       defineEndpoint(O.postSalonsByIdHoursPreview, {
+        query: branchQuerySchema,
         data: dto.postSalonsByIdHoursPreviewDataSchema,
         body: dto.postSalonsByIdHoursPreviewBodySchema,
       }),
@@ -56,6 +62,7 @@ export function salonHoursRoutes(
     ),
     mockRoute(
       defineEndpoint(O.postSalonsByIdClosuresPreview, {
+        query: branchQuerySchema,
         data: dto.postSalonsByIdClosuresPreviewDataSchema,
         body: dto.postSalonsByIdClosuresPreviewBodySchema,
       }),
@@ -63,11 +70,12 @@ export function salonHoursRoutes(
     ),
     mockRoute(
       defineEndpoint(O.postSalonsByIdClosures, {
+        query: branchQuerySchema,
         data: dto.postSalonsByIdClosuresDataSchema,
         body: dto.postSalonsByIdClosuresBodySchema,
       }),
-      ({ params, body }) => {
-        const s = of(params['id']);
+      ({ params, query, body }) => {
+        const s = of(params['id'], query.get('branchId'));
         const b = body as { from: string; to: string; closureReason: string };
         s.seq += 1;
         const item = {
@@ -83,11 +91,12 @@ export function salonHoursRoutes(
     ),
     mockRoute(
       defineEndpoint(O.patchSalonsByIdClosuresByClosureId, {
+        query: branchQuerySchema,
         data: dto.patchSalonsByIdClosuresByClosureIdDataSchema,
         body: dto.patchSalonsByIdClosuresByClosureIdBodySchema,
       }),
-      ({ params, body }) => {
-        const s = of(params['id']);
+      ({ params, query, body }) => {
+        const s = of(params['id'], query.get('branchId'));
         const row = s.closures.find((c) => c.id === params['closureId']);
         if (!row) throw new Error('no closure');
         const b = body as { from?: string; to?: string; closureReason?: string };
@@ -101,11 +110,12 @@ export function salonHoursRoutes(
     ),
     mockRoute(
       defineEndpoint(O.postSalonsByIdClosuresByClosureIdRemove, {
+        query: branchQuerySchema,
         data: dto.postSalonsByIdClosuresByClosureIdRemoveDataSchema,
         body: dto.postSalonsByIdClosuresByClosureIdRemoveBodySchema,
       }),
-      ({ params }) => {
-        const s = of(params['id']);
+      ({ params, query }) => {
+        const s = of(params['id'], query.get('branchId'));
         s.closures = s.closures.filter((c) => c.id !== params['closureId']);
         return { data: null };
       },

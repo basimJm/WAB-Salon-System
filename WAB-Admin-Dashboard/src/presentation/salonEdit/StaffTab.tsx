@@ -5,6 +5,7 @@ import { useContainer } from '@/app/ContainerContext';
 import { BIO_MAX, MAX_YEARS, staffDayProblems } from '@/domain/salonEdit/rules';
 import {
   WEEK_DAYS,
+  type BranchScope,
   type SalonService,
   type StaffInput,
   type StaffProfile,
@@ -21,6 +22,8 @@ import { TextArea } from '../components/form/TextArea';
 import { TextField } from '../components/form/TextField';
 import { Toggle } from '../components/form/Toggle';
 import { useReasonAction } from '../hooks/useReasonAction';
+import type { Branch } from '@/domain/shared/branches';
+import { MoveMemberPanel } from './MoveMemberPanel';
 import { useSalonMutation } from './useSalonMutation';
 
 interface Day {
@@ -173,19 +176,27 @@ function StaffForm({
   );
 }
 
-export function StaffTab({ salonId, gender }: { salonId: string; gender: 'MALE' | 'FEMALE' }) {
+export interface StaffTabProps {
+  scope: BranchScope;
+  gender: 'MALE' | 'FEMALE';
+  branches: readonly Branch[];
+}
+
+export function StaffTab({ scope, gender, branches }: StaffTabProps) {
+  const { salonId } = scope;
   const { t } = useTranslation();
   const { repositories } = useContainer();
   const members = useQuery({
-    queryKey: ['getSalonsByIdMembers', salonId],
-    queryFn: () => repositories.salons.members(salonId),
+    queryKey: ['getSalonsByIdMembers', scope],
+    queryFn: () => repositories.salons.members(salonId, scope.branchId),
   });
   const services = useQuery({
-    queryKey: ['getSalonsByIdServices', salonId],
-    queryFn: () => repositories.salonEdit.services(salonId),
+    queryKey: ['getSalonsByIdServices', scope],
+    queryFn: () => repositories.salonEdit.services(scope),
   });
   const [picked, setPicked] = useState('');
-  const memberId = picked || members.data?.[0]?.id || '';
+  const inBranch = members.data?.some((m) => m.id === picked) ? picked : '';
+  const memberId = inBranch || members.data?.[0]?.id || '';
   const staff = useQuery({
     queryKey: ['getSalonsByIdMembersByMemberIdStaff', salonId, memberId],
     queryFn: () => repositories.salonEdit.staff(salonId, memberId),
@@ -198,7 +209,9 @@ export function StaffTab({ salonId, gender }: { salonId: string; gender: 'MALE' 
       onRetry={() => void members.refetch()}
       skeleton={<Skeleton height="lg" />}
     >
-      {members.data && members.data.length === 0 ? <p>{t('salonEdit.noMembers')}</p> : null}
+      {members.data && members.data.length === 0 ? (
+        <p>{t(scope.branchId ? 'salonEdit.noBranchMembers' : 'salonEdit.noMembers')}</p>
+      ) : null}
       <div className="wab-stack">
         <Select
           label={t('salonEdit.member')}
@@ -206,6 +219,7 @@ export function StaffTab({ salonId, gender }: { salonId: string; gender: 'MALE' 
           options={(members.data ?? []).map((m) => ({ value: m.id, label: m.name }))}
           onChange={(e) => setPicked(e.target.value)}
         />
+        <MoveMemberPanel scope={scope} memberId={memberId} branches={branches} />
         <AsyncView
           loading={staff.isPending || services.isPending}
           error={staff.error}

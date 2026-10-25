@@ -1,6 +1,6 @@
-import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
+import { OBJECT_ID } from '@/data/api/objectId';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
@@ -11,10 +11,9 @@ const list = defineEndpoint(OPERATIONS.getRefunds, {
   data: dto.getRefundsDataSchema,
   query: () =>
     dto.getRefundsQuerySchema().extend({
-      bookingId: z
-        .string()
-        .regex(/^[a-f0-9]{24}$/i)
-        .optional(),
+      bookingId: OBJECT_ID.optional(),
+      salonId: OBJECT_ID.optional(),
+      branchId: OBJECT_ID.optional(),
     }),
 });
 const retry = defineEndpoint(OPERATIONS.postRefundsByIdRetry, {
@@ -36,6 +35,8 @@ export class RemoteRefundsRepository implements RefundsRepository {
         pageSize: q.pageSize,
         status: q.status,
         bookingId: q.bookingId,
+        salonId: q.salonId,
+        branchId: q.branchId,
       }),
     });
 
