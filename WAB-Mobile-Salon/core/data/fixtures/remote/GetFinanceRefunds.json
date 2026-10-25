@@ -1,0 +1,35 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "34d96c0ba3c820ebea96a6de",
+      "bookingId": "e09b4abb74d300edc5079757",
+      "referenceNumber": "WAB-GM8RGX",
+      "amount": "33.120",
+      "source": "AUTO_CANCEL",
+      "reason": null,
+      "status": "REFUND_PENDING",
+      "branchId": "6ade379d6cbc8f4cb1047d91",
+      "createdAt": "2026-10-24T13:15:00.000Z",
+      "completedAt": null
+    },
+    {
+      "id": "9b04eb8ce93f71c75cb27187",
+      "bookingId": "616458bdd6ce0604ed14723e",
+      "referenceNumber": "WAB-M4TE4B",
+      "amount": "12.600",
+      "source": "SALON_REJECT",
+      "reason": null,
+      "status": "REFUND_FAILED",
+      "branchId": "6ade379d6cbc8f4cb1047d91",
+      "createdAt": "2026-09-26T11:30:00.000Z",
+      "completedAt": null
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 2
+  }
+}

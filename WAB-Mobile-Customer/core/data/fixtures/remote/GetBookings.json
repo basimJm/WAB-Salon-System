@@ -1,0 +1,61 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "6ade37a7c2cfb0cb993a167c",
+      "referenceNumber": "WAB-1N2Z8R",
+      "status": "PENDING",
+      "paymentMethod": "PAY_ON_ARRIVAL",
+      "paymentStatus": "PAY_ON_ARRIVAL",
+      "hasBride": false,
+      "appointmentStart": "2026-10-27T06:00:00.000Z",
+      "appointmentEnd": "2026-10-27T06:45:00.000Z",
+      "respondBy": "2026-10-27T07:00:00.000Z",
+      "requestedAt": "2026-10-25T17:08:55.967Z",
+      "personsCount": 1,
+      "total": "15.000",
+      "salon": {
+        "id": "6ade37a6c2cfb0cb993a164e",
+        "name": "Noor Salon"
+      },
+      "branch": {
+        "id": "6ade37a7c2cfb0cb993a1658",
+        "name": "Tabarbour",
+        "locationText": "Abdoun, Amman"
+      },
+      "customer": null,
+      "staff": []
+    },
+    {
+      "id": "6ade37a8c2cfb0cb993a1682",
+      "referenceNumber": "WAB-RM7GX8",
+      "status": "PENDING",
+      "paymentMethod": "PAY_ON_ARRIVAL",
+      "paymentStatus": "PAY_ON_ARRIVAL",
+      "hasBride": false,
+      "appointmentStart": "2026-10-28T06:00:00.000Z",
+      "appointmentEnd": "2026-10-28T06:45:00.000Z",
+      "respondBy": "2026-10-28T07:00:00.000Z",
+      "requestedAt": "2026-10-25T17:08:56.060Z",
+      "personsCount": 1,
+      "total": "15.000",
+      "salon": {
+        "id": "6ade37a6c2cfb0cb993a164e",
+        "name": "Noor Salon"
+      },
+      "branch": {
+        "id": "6ade37a7c2cfb0cb993a1658",
+        "name": "Tabarbour",
+        "locationText": "Abdoun, Amman"
+      },
+      "customer": null,
+      "staff": []
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 2
+  }
+}

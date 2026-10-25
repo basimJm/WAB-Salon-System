@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "4e59542736157b91e7584669",
+      "question": "Is the app free to use?",
+      "answer": "Yes, booking is free for customers."
+    },
+    {
+      "id": "57781fa492ff5f88c2ce6ca3",
+      "question": "How do I cancel a booking?",
+      "answer": "Open the booking and tap Cancel. The salon's policy applies to any amount paid."
+    },
+    {
+      "id": "478d5edf1a719b9bbf28f044",
+      "question": "Can I book for other people?",
+      "answer": "Yes, up to five companions in the same booking."
+    }
+  ]
+}

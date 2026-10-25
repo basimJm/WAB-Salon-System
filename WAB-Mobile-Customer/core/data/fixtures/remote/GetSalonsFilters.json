@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "priceRange": {
+      "min": "13.500",
+      "max": "21.000"
+    }
+  }
+}

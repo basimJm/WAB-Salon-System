@@ -11,7 +11,7 @@ WEB_BASE_URL = https:/$()/wab-server-dev.onrender.com
 DEEP_LINK_HOST = wab-server-dev.onrender.com
 // Set a suffix (for example .dev) only when the Firebase project has a matching iOS app.
 // Dev builds run on fixtures until the dev API exists.
-DATA_SOURCE = mock
+DATA_SOURCE = remote
 BUNDLE_ID_SUFFIX = .dev
 PRODUCT_BUNDLE_IDENTIFIER = com.fab.wab.merchant$(BUNDLE_ID_SUFFIX)
 // App Check (App Attest) environment for the entitlement

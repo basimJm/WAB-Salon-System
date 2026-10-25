@@ -1,15 +1,13 @@
 package com.fab.wab.merchant.feature.salon.domain
 
 import com.fab.wab.merchant.core.domain.AppResult
-
-enum class PaymentOption { PAY_ON_ARRIVAL, DEPOSIT, FULL_ONLINE }
-
-/** Full online payment, customer cancels within the window. */
-enum class FullPaymentRefund { FULL, MINUS_DEPOSIT }
-
-enum class NoShowDeposit { KEEP, REFUND }
-
-enum class NoShowFullPayment { KEEP, REFUND_MINUS_DEPOSIT, REFUND_FULL }
+import com.fab.wab.merchant.core.domain.policy.FullPaymentRefund
+import com.fab.wab.merchant.core.domain.policy.NoShowDeposit
+import com.fab.wab.merchant.core.domain.policy.NoShowFullPayment
+import com.fab.wab.merchant.core.domain.policy.PaymentOption
+import com.fab.wab.merchant.core.domain.policy.PolicyRule
+import com.fab.wab.merchant.core.domain.policy.PolicyTerms
+import com.fab.wab.merchant.core.domain.policy.customerRules
 
 /** `GET /salon/policy` (null until the salon sets one). */
 data class SalonPolicy(
@@ -91,31 +89,16 @@ fun depositExampleFils(percentage: String): Long? {
     return PolicyLimits.EXAMPLE_BOOKING_FILS * pct / PolicyLimits.PERCENT
 }
 
-/** One line of the customer "Salon rules" block (design 07 `pr`). */
-sealed interface PolicyRule {
-    data class Window(val hours: Int) : PolicyRule
-    data object PayOnArrival : PolicyRule
-    data class Deposit(val percentage: Int) : PolicyRule
-    data object FullOnline : PolicyRule
-    data class DepositOnCancel(val refundable: Boolean) : PolicyRule
-    data class FullOnCancel(val refund: FullPaymentRefund) : PolicyRule
-    data class DepositOnNoShow(val outcome: NoShowDeposit) : PolicyRule
-    data class FullOnNoShow(val outcome: NoShowFullPayment) : PolicyRule
-}
-
-/** The rules a customer sees for [draft]; deposit / full-payment lines only when that option is offered. */
-fun customerRules(draft: PolicyDraft): List<PolicyRule> = buildList {
-    draft.windowHours.trim().toIntOrNull()?.let { add(PolicyRule.Window(it)) }
-    if (PaymentOption.PAY_ON_ARRIVAL in draft.options) add(PolicyRule.PayOnArrival)
-    val deposit = PaymentOption.DEPOSIT in draft.options
-    val full = PaymentOption.FULL_ONLINE in draft.options
-    if (deposit) draft.depositPercentage.trim().toIntOrNull()?.let { add(PolicyRule.Deposit(it)) }
-    if (full) add(PolicyRule.FullOnline)
-    if (deposit) add(PolicyRule.DepositOnCancel(draft.depositRefundable))
-    if (full) add(PolicyRule.FullOnCancel(draft.fullRefund))
-    if (deposit) add(PolicyRule.DepositOnNoShow(draft.noShowDeposit))
-    if (full) add(PolicyRule.FullOnNoShow(draft.noShowFull))
-}
+/** The rules a customer sees for [draft] (shared with the booking details, core `PolicyTerms`). */
+fun customerRules(draft: PolicyDraft): List<PolicyRule> = PolicyTerms(
+    windowHours = draft.windowHours.trim().toIntOrNull(),
+    options = draft.options,
+    depositPercentage = draft.depositPercentage.trim().toIntOrNull(),
+    depositRefundable = draft.depositRefundable,
+    fullRefund = draft.fullRefund,
+    noShowDeposit = draft.noShowDeposit,
+    noShowFull = draft.noShowFull,
+).customerRules()
 
 /** `GET/PUT /salon/policy` (POLICIES_MANAGE). */
 interface PolicyRepository {

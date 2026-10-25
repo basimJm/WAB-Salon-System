@@ -17,7 +17,8 @@ import { APP_KINDS, LANGUAGES } from '../../constants/enums';
 import { CONTENT_KINDS } from '../../constants/content';
 import { CLIENT_PLATFORMS } from '../../constants/appConfig';
 import { MS_PER_DAY } from '../../constants/time';
-import { translate } from '../../utils/i18n';
+import type { AlertEntityType, AlertKind } from '../../constants/alerts';
+import { titlesOf } from '../../domain/alerts/alertText';
 import { addDays, localDateOf } from '../../utils/time';
 import { demoId } from './random';
 import { addUpload } from './salons';
@@ -146,48 +147,48 @@ export const buildPlatform = (ctx: DemoContext, data: DemoDataset): void => {
   const failedRefund = data.Refund.find((refund) => refund['status'] === 'REFUND_FAILED');
   const pendingSalon = data.Salon.find((salon) => salon['state'] === 'APPLICATION_PENDING');
   const expired = data.Subscription.find((subscription) => subscription['status'] === 'EXPIRED');
-  const alerts = [
-    ...(failedRefund === undefined
-      ? []
-      : [
-          {
-            kind: 'REFUND_FAILED',
-            severity: 'CRITICAL',
-            entityType: 'refund',
-            entityId: failedRefund._id,
-            status: 'NEW',
-          },
-        ]),
-    ...(pendingSalon === undefined
-      ? []
-      : [
-          {
-            kind: 'SALON_APPLICATION',
-            severity: 'INFO',
-            entityType: 'salon',
-            entityId: pendingSalon._id,
-            status: 'NEW',
-          },
-        ]),
-    ...(expired === undefined
-      ? []
-      : [
-          {
-            kind: 'SUBSCRIPTION_EXPIRED',
-            severity: 'WARNING',
-            entityType: 'salon',
-            entityId: expired['salonId'],
-            status: 'ACKNOWLEDGED',
-          },
-        ]),
-  ];
+  interface DemoAlert {
+    kind: AlertKind;
+    severity: string;
+    entityType: AlertEntityType;
+    entityId: unknown;
+    status: string;
+  }
+  const alerts: DemoAlert[] = [];
+  if (failedRefund !== undefined) {
+    alerts.push({
+      kind: 'REFUND_FAILED',
+      severity: 'CRITICAL',
+      entityType: 'REFUND',
+      entityId: failedRefund._id,
+      status: 'NEW',
+    });
+  }
+  if (pendingSalon !== undefined) {
+    alerts.push({
+      kind: 'SALON_APPLICATION',
+      severity: 'INFO',
+      entityType: 'SALON',
+      entityId: pendingSalon._id,
+      status: 'NEW',
+    });
+  }
+  if (expired !== undefined) {
+    alerts.push({
+      kind: 'SUBSCRIPTION_EXPIRED',
+      severity: 'WARNING',
+      entityType: 'SALON',
+      entityId: expired['salonId'],
+      status: 'ACKNOWLEDGED',
+    });
+  }
   for (const alert of alerts) {
     const id = demoId(`alert:${alert.kind}`);
     data.Alert.push({
       _id: id,
       kind: alert.kind,
       severity: alert.severity,
-      title: translate('en', `alerts.${alert.kind}.title`),
+      title: titlesOf(alert.kind),
       entityType: alert.entityType,
       entityId: alert.entityId,
       data: {},

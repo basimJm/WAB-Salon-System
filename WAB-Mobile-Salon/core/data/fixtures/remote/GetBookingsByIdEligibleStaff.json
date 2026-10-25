@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "staffId": "f355da90c5d06e3c62149bab",
+      "name": "Hala Saleh"
+    },
+    {
+      "staffId": "fc827df71cbabf2b54c74373",
+      "name": "Lina Hijazi"
+    }
+  ]
+}

@@ -49,5 +49,23 @@ class SocketIoProtocolTest {
         assertIs<SocketIoPacket.Unknown>(socket("42/customer,not-json"))
     }
 
+    /** Frames observed on the local real stack (CUS-060): book → `booking.updated` summary + `notifications.unread`. */
+    @Test
+    fun realServerFramesDecodeToTheEventsTheScreensUse() {
+        val booking = socket(
+            """42/customer,["booking.updated",{"id":"6ade3cfcc2cfb0cb993a1726","referenceNumber":"WAB-Z4JSMB","status":"PENDING",""" +
+                """"paymentStatus":"PAY_ON_ARRIVAL","hasBride":false,"appointmentStart":"2026-10-30T08:00:00.000Z",""" +
+                """"appointmentEnd":"2026-10-30T09:00:00.000Z","respondBy":"2026-10-30T09:00:00.000Z",""" +
+                """"total":"49.000","personsCount":1}]""",
+        )
+        assertIs<SocketIoPacket.Event>(booking)
+        assertEquals(RealtimeEvents.BOOKING_UPDATED, booking.name)
+        assertEquals("6ade3cfcc2cfb0cb993a1726", RealtimeEvent(booking.name, booking.payload).entityId())
+        val unread = socket("""42/customer,["notifications.unread",{"count":2}]""")
+        assertIs<SocketIoPacket.Event>(unread)
+        assertEquals(RealtimeEvents.NOTIFICATIONS_UNREAD, unread.name)
+        assertEquals("2", unread.payload.jsonObject["count"]?.jsonPrimitive?.content)
+    }
+
     private fun socket(frame: String): SocketIoPacket = (protocol.decode(frame) as EngineIoPacket.Message).packet
 }

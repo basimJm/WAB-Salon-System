@@ -10,6 +10,7 @@ export const ALERT_KINDS = [
   'SALON_APPLICATION',
   'REVIEW_PENDING',
   'CATALOG_REQUEST',
+  'SALON_DELETION_REQUEST',
 ] as const;
 export type AlertStatus = (typeof ALERT_STATUSES)[number];
 export type AlertKind = (typeof ALERT_KINDS)[number];
@@ -36,20 +37,31 @@ export interface AlertsRepository {
   acknowledge(id: string): Promise<Alert>;
 }
 
+/**
+ * The server names alert subjects in UPPER_SNAKE (`SALON`, `REFUND`, `CATALOG_REQUEST`) but a few raise sites use
+ * camelCase (`salon`); both spellings mean the same subject.
+ */
+export const normalizeEntityType = (type: string): string =>
+  type.replace(/([a-z])([A-Z])/g, '$1_$2').toUpperCase();
+
 /** Where an alert's subject lives in the panel; unknown subjects have no link. */
-export function alertLink(alert: Pick<Alert, 'entityType' | 'entityId'>): string | null {
+export function alertLink(
+  alert: Pick<Alert, 'entityType' | 'entityId'> & { readonly kind?: AlertKind },
+): string | null {
   const { entityType: type, entityId: id } = alert;
   if (!type || !id) return null;
+  // A new application is a SALON subject, but it is reviewed on the application page.
+  if (alert.kind === 'SALON_APPLICATION') return `/salons/applications/${id}`;
   const routes: Readonly<Record<string, string>> = {
-    salon: `/salons/${id}`,
-    booking: `/bookings/${id}`,
-    customer: `/customers/${id}`,
-    transaction: `/finance/transactions/${id}`,
-    refund: '/finance/refunds',
-    subscription: '/finance/subscriptions',
-    review: '/reviews',
-    application: `/salons/applications/${id}`,
-    catalogRequest: '/catalog/requests',
+    SALON: `/salons/${id}`,
+    BOOKING: `/bookings/${id}`,
+    CUSTOMER: `/customers/${id}`,
+    TRANSACTION: `/finance/transactions/${id}`,
+    REFUND: '/finance/refunds',
+    SUBSCRIPTION: '/finance/subscriptions',
+    REVIEW: '/reviews',
+    APPLICATION: `/salons/applications/${id}`,
+    CATALOG_REQUEST: '/catalog/requests',
   };
-  return routes[type] ?? null;
+  return routes[normalizeEntityType(type)] ?? null;
 }

@@ -33,6 +33,8 @@ mc anonymous set download qa/wab-public >/dev/null
 
 cd "$SERVER_DIR"
 export NODE_ENV=development PORT="$API_PORT" LOG_LEVEL=info
+# Fake external providers: WAB-Server/.env.development may enable the real notifier, whose key is not set locally.
+export NOTIFIER_PROVIDER=fake OTP_PROVIDER=fake PAYMENT_PROVIDER=fake
 export MONGODB_URI='mongodb://127.0.0.1:27018/wab_qa?replicaSet=rs0' REDIS_URL='redis://127.0.0.1:6380'
 export JWT_ACCESS_SECRET="${JWT_ACCESS_SECRET:-qa-local-secret-qa-local-secret-qa-local-1234}"
 export CORS_ALLOWED_ORIGINS="$ADMIN_ORIGINS"

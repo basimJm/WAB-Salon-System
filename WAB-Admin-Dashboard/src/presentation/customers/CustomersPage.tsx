@@ -3,25 +3,22 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
 import { ROUTES } from '@/constants/routes';
-import {
-  CUSTOMER_STATUSES,
-  type CustomerStatus,
-  type CustomerSummary,
-} from '@/domain/customers/customers';
-import { SALON_GENDERS, type SalonGender } from '@/domain/salons/salons';
+import { CUSTOMER_STATUSES, type CustomerSummary } from '@/domain/customers/customers';
+import { SALON_GENDERS } from '@/domain/salons/salons';
 import { formatInstant, formatNumber } from '@/domain/shared/format';
 import { StatusBadge } from '../components/core/StatusBadge';
+import { ExportMenu } from '../components/data/ExportMenu';
 import type { Column } from '../components/data/tableTypes';
 import { SearchField } from '../components/form/SearchField';
 import { Select } from '../components/form/Select';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
+import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
 import { useLocationOptions } from '../hooks/useLocationOptions';
+import { CUSTOMER_FILTER_KEYS, customerExportParams, customerQueryOf } from './customerFilters';
 
-const OPTIONS = { filterKeys: ['status', 'gender', 'city'] };
-const pick = <T extends string>(all: readonly T[], v: string | undefined): T | undefined =>
-  all.find((a) => a === v);
+const OPTIONS = { filterKeys: CUSTOMER_FILTER_KEYS };
 
 /** Admin PRD A12 · Customers: search by name or phone, filters, status, bookings and last activity. */
 export default function CustomersPage() {
@@ -32,20 +29,12 @@ export default function CustomersPage() {
   const list = useListController(OPTIONS);
   const { state } = list;
   const cities = useLocationOptions('cities');
-  const status: CustomerStatus | undefined = pick(CUSTOMER_STATUSES, state.filters['status']?.[0]);
-  const gender: SalonGender | undefined = pick(SALON_GENDERS, state.filters['gender']?.[0]);
-  const city = state.filters['city']?.[0];
+  const runner = useExportRunner();
+  const apiQuery = customerQueryOf(state);
+  const { status, gender, cityId: city } = apiQuery;
   const query = useQuery({
     queryKey: ['getCustomers', state],
-    queryFn: () =>
-      repositories.customers.list({
-        page: state.page,
-        pageSize: state.pageSize,
-        ...(status ? { status } : {}),
-        ...(gender ? { gender } : {}),
-        ...(city ? { cityId: city } : {}),
-        ...(state.search ? { q: state.search } : {}),
-      }),
+    queryFn: () => repositories.customers.list(apiQuery),
   });
   const cityName = (id: string) => cities.find((c) => c.value === id)?.label ?? '—';
   const title = t('nav.customers');
@@ -113,6 +102,7 @@ export default function CustomersPage() {
     <ListPage
       title={title}
       subtitle={t('customers.subtitle')}
+      actions={<ExportMenu onExport={runner('CUSTOMERS', customerExportParams(apiQuery))} />}
       filters={{
         active: chips,
         onClearAll: list.clearFilters,

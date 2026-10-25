@@ -133,3 +133,18 @@ export function originsFromEnv(
     .filter((v) => v !== '');
   return { api, socket, extraConnect: extra };
 }
+
+/**
+ * The values the build used: real environment variables win over the variant's `.env.<dev|prod>` file (same rule as
+ * `vite.config.ts`). Without the file, a host that sets no variables got `connect-src 'self'` and blocked the API.
+ */
+export function buildEnv(
+  processEnv: Readonly<Record<string, string | undefined>>,
+  fileEnv: Readonly<Record<string, string>>,
+): Record<string, string | undefined> {
+  const merged: Record<string, string | undefined> = { ...fileEnv };
+  for (const [key, value] of Object.entries(processEnv)) {
+    if (value !== undefined) merged[key] = value;
+  }
+  return merged;
+}

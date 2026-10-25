@@ -7,6 +7,8 @@ export const EXPORT_KINDS = [
   'TRANSACTIONS',
   'AUDIT_LOGS',
   'BOOKINGS',
+  'CUSTOMERS',
+  'SALONS',
 ] as const;
 export const API_FORMATS = ['XLSX', 'CSV', 'PDF'] as const;
 export type ExportKind = (typeof EXPORT_KINDS)[number];

@@ -239,4 +239,17 @@
     <string name="branch_all">كل الفروع</string>
     <string name="branch_closed_name">%1$s (مغلق)</string>
     <string name="branch_switcher_label">الفرع</string>
+    <string name="policy_rule_window">يمكنك الإلغاء مجاناً حتى %1$d ساعات قبل الموعد</string>
+    <string name="policy_rule_arrival">الدفع عند الوصول متاح</string>
+    <string name="policy_rule_deposit">يتطلب الحجز عربوناً بنسبة %1$d%</string>
+    <string name="policy_rule_full">يمكن الدفع كاملاً أونلاين</string>
+    <string name="policy_rule_dep_yes">يُسترد العربون عند الإلغاء ضمن المهلة</string>
+    <string name="policy_rule_dep_no">لا يُسترد العربون عند الإلغاء</string>
+    <string name="policy_rule_full_full">يُسترد الدفع الكامل عند الإلغاء ضمن المهلة</string>
+    <string name="policy_rule_full_minus">يُسترد الدفع الكامل بعد خصم العربون</string>
+    <string name="policy_rule_ns_keep">عند عدم الحضور يحتفظ الصالون بالعربون</string>
+    <string name="policy_rule_ns_ref">عند عدم الحضور يُسترد العربون</string>
+    <string name="policy_rule_ns_full_keep">عند عدم الحضور لا يُسترد الدفع الكامل</string>
+    <string name="policy_rule_ns_full_minus">عند عدم الحضور يُسترد الدفع الكامل بعد خصم العربون</string>
+    <string name="policy_rule_ns_full_full">عند عدم الحضور يُسترد الدفع الكامل</string>
 </resources>

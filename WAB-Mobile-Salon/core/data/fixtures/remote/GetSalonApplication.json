@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "salonId": "7fe703cdf5e7eec204bb193d",
+    "state": "LIVE",
+    "submittedAt": "2026-04-08T17:08:44.887Z",
+    "resubmissionCount": 0,
+    "rejectionReason": null
+  }
+}

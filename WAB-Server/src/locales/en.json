@@ -24,6 +24,8 @@
   "errors.BRANCH_LIMIT_REACHED": "You have reached the maximum number of branches.",
   "errors.BRANCH_HAS_UPCOMING_BOOKINGS": "This branch has upcoming bookings and cannot be closed.",
   "errors.LAST_BRANCH": "The salon's last branch cannot be closed.",
+  "branches.invalidStatus": "This action is not allowed for the branch's current status.",
+  "branches.mainCannotClose": "The main branch cannot be closed. Choose another main branch first.",
   "errors.BRANCH_SCOPE_DENIED": "You do not have access to this branch.",
   "errors.SALON_CLOSED": "The salon is closed on the selected date.",
   "errors.GENDER_MISMATCH": "The booking does not match the salon's gender.",

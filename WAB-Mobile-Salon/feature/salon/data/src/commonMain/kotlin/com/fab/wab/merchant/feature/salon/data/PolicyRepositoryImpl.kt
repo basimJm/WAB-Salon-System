@@ -9,11 +9,11 @@ import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.mapSuccess
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.network.safeApiCall
-import com.fab.wab.merchant.feature.salon.domain.FullPaymentRefund
-import com.fab.wab.merchant.feature.salon.domain.NoShowDeposit
-import com.fab.wab.merchant.feature.salon.domain.NoShowFullPayment
-import com.fab.wab.merchant.feature.salon.domain.PaymentOption
-import com.fab.wab.merchant.feature.salon.domain.PaymentOption.DEPOSIT
+import com.fab.wab.merchant.core.domain.policy.FullPaymentRefund
+import com.fab.wab.merchant.core.domain.policy.NoShowDeposit
+import com.fab.wab.merchant.core.domain.policy.NoShowFullPayment
+import com.fab.wab.merchant.core.domain.policy.PaymentOption
+import com.fab.wab.merchant.core.domain.policy.PaymentOption.DEPOSIT
 import com.fab.wab.merchant.feature.salon.domain.PolicyDraft
 import com.fab.wab.merchant.feature.salon.domain.PolicyRepository
 import com.fab.wab.merchant.feature.salon.domain.SalonPolicy

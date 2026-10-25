@@ -28,6 +28,8 @@ data class DraftPerson(
     val date: String? = null,
     val start: String? = null,
     val staff: StaffChoice? = null,
+    /** End of the picked slot (server `slots[].end`); other persons' picks are sent with start AND end (CUS-060). */
+    val end: String? = null,
 ) {
     val hasSlot: Boolean get() = start != null
 }

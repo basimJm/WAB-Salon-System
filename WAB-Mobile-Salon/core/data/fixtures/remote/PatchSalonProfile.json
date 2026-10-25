@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "id": "7fe703cdf5e7eec204bb193d",
+    "name": "Lamar Beauty Lounge",
+    "gender": "FEMALE",
+    "state": "LIVE",
+    "description": "صالون نسائي متكامل في عبدون: شعر، أظافر، مكياج وعناية بالبشرة بأيدي فريق محترف وأجواء هادئة.",
+    "coverUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/cover.jpg",
+    "profileUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/profile.jpg",
+    "coverKey": "demo/salons/lamar/cover.jpg",
+    "profileKey": "demo/salons/lamar/profile.jpg",
+    "location": {
+      "latitude": 31.9539,
+      "longitude": 35.8822
+    },
+    "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون",
+    "cityId": "6ade371b97c38aeef84b9613",
+    "areaId": "6ade371b97c38aeef84b961f",
+    "phone": "+96265921001",
+    "whatsapp": "+962790921001",
+    "completeness": {
+      "missing": [],
+      "isComplete": true
+    },
+    "rating": {
+      "avg": 3.8,
+      "count": 5
+    }
+  }
+}
