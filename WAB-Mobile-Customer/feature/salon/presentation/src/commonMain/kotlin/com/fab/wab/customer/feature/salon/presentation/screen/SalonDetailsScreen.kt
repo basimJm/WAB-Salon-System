@@ -97,7 +97,7 @@ private fun SalonContent(state: UiState, onAction: (UiAction) -> Unit) {
             actionText = stringResource(Res.string.salon_retry),
             onAction = { onAction(UiAction.OnRetry) },
         )
-        else -> if (salon != null) SalonBody(salon, state.hoursExpanded, onAction)
+        else -> state.view?.let { SalonBody(it, state, onAction) }
     }
 }
 
@@ -130,12 +130,13 @@ private fun BookBar(onAction: (UiAction) -> Unit) {
 }
 
 @Composable
-private fun SalonBody(salon: SalonDetails, hoursExpanded: Boolean, onAction: (UiAction) -> Unit) {
+private fun SalonBody(salon: SalonDetails, state: UiState, onAction: (UiAction) -> Unit) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = AppTheme.spacing.space24)) {
         SalonHeader(salon, onAction)
+        if (state.showBranchSelector) BranchSelector(state.branches, state.selectedBranchId, onAction)
         ContactRow(salon, onAction)
         Description(salon)
-        WorkingHoursCard(salon, hoursExpanded, onAction)
+        WorkingHoursCard(salon, state.hoursExpanded, onAction)
         StaffSection(salon, onAction)
         ReviewsSection(salon, onAction)
         ServicesSection(salon, onAction)

@@ -15,8 +15,10 @@ object SalonAnalytics {
     const val ACTION_WHATSAPP = "salon_whatsapp"
     const val ACTION_MAPS = "salon_maps"
     const val ACTION_BOOK = "book_start"
+    const val ACTION_BRANCH = "salon_branch_select"
     const val PARAM_SALON = "salon_id"
     const val PARAM_VALUE = "value"
+    const val PARAM_BRANCH = "branch_id"
 
     val SCREEN = AnalyticsScreen(SCREEN_NAME)
     val STAFF_SCREEN = AnalyticsScreen(STAFF_SCREEN_NAME)

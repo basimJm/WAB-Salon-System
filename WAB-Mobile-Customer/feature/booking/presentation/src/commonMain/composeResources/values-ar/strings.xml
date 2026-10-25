@@ -109,4 +109,8 @@
     <string name="verify_error_title">تعذّر تأكيد الحجز</string>
     <string name="verify_expired_title">انتهت مهلة حجز الموعد</string>
     <string name="verify_back_to_booking">العودة إلى الحجز</string>
+    <string name="booking_step_branch">الفرع</string>
+    <string name="booking_branch_title">اختر الفرع</string>
+    <string name="booking_branch_hint">تختلف الخدمات والأسعار والموظفون والمواعيد حسب الفرع.</string>
+    <string name="booking_summary_branch">الفرع: %1$s</string>
 </resources>

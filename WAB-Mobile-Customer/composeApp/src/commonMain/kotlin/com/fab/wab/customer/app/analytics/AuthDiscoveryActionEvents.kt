@@ -74,6 +74,7 @@ internal object AuthDiscoveryActionEvents {
         SalonDetailsContract.UiAction.OnShareClick, SalonDetailsContract.UiAction.OnFavoriteClick,
         SalonDetailsContract.UiAction.OnLocationClick,
         SalonDetailsContract.UiAction.OnCallClick, SalonDetailsContract.UiAction.OnWhatsAppClick, SalonDetailsContract.UiAction.OnBookClick,
+        is SalonDetailsContract.UiAction.OnBranchSelect,
         -> ActionEvent.ByViewModel
         is SalonDetailsContract.UiAction.OnStaffClick -> ActionEvent.Named(Events.STAFF_OPEN)
         is SalonDetailsContract.UiAction.OnServiceClick -> ActionEvent.Named(Events.SERVICE_OPEN)

@@ -22,4 +22,13 @@ class DeepLinksTest {
         assertNull(DeepLinks.parse("https://example.invalid/salons/s1/extra", "https://example.invalid"))
         assertNull(DeepLinks.parse("not a url"))
     }
+
+    @Test
+    fun salonLinkMayPreselectABranch() {
+        val base = "https://example.invalid"
+        assertEquals(DeepLink.Salon("s1", "b2"), DeepLinks.parse("$base/salon/s1?utm=x&branchId=b2#top", base))
+        assertEquals(DeepLink.Salon("s1", "b2"), DeepLinks.parse("$base/salon/s1?branchId=b2", base))
+        assertEquals(DeepLink.Salon("s1", null), DeepLinks.parse("$base/salon/s1?branchId=", base))
+        assertEquals(DeepLink.Salon("s1", null), DeepLinks.parse("$base/salon/s1?branch=b2", base))
+    }
 }

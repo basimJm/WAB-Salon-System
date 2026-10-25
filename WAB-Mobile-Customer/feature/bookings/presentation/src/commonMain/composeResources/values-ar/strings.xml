@@ -79,4 +79,5 @@
     <string name="rating_done_none">لا يوجد ما يمكن تقييمه في هذا الحجز.</string>
     <string name="rating_done_button">العودة للحجز</string>
     <string name="rating_salon_unknown">الصالون</string>
+    <string name="bookings_branch_label">الفرع: %1$s</string>
 </resources>

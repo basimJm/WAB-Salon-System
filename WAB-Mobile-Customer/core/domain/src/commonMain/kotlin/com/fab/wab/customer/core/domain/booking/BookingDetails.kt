@@ -1,5 +1,7 @@
 package com.fab.wab.customer.core.domain.booking
 
+import com.fab.wab.customer.core.domain.salon.BranchRef
+
 /** BUSINESS_DOMAIN `RefundStatus`. */
 enum class RefundStatus(val code: String) {
     NONE("NONE"), REFUND_PENDING("REFUND_PENDING"), REFUNDED("REFUNDED"), REFUND_FAILED("REFUND_FAILED"), UNKNOWN(""),
@@ -61,6 +63,7 @@ data class BookingDetails(
     val appointmentEnd: String,
     val salonId: String?,
     val salonName: String?,
+    val branch: BranchRef? = null,
     val persons: List<BookingPerson>,
     val money: BookingMoney,
     val policy: BookingPolicy?,

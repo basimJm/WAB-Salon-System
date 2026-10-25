@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
+import com.fab.wab.customer.core.domain.salon.SalonBranch
 import com.fab.wab.customer.feature.booking.presentation.controller.vm.DraftCoordinator
 import com.fab.wab.customer.designsystem.components.feedback.AppErrorState
 import com.fab.wab.customer.designsystem.components.text.AppText
@@ -54,12 +55,12 @@ internal fun SummaryStep(state: UiState, onAction: (UiAction) -> Unit) {
         state.draftLoading && draft == null -> ShimmerRows(BookingDesignConstants.serviceShimmerHeight, Modifier.padding(spacing.space20))
         state.draftError != null && draft == null ->
             AppErrorState(onRetry = { onAction(UiAction.OnBack) }, message = state.draftError, modifier = Modifier.fillMaxSize())
-        draft != null -> SummaryBody(draft, onAction)
+        draft != null -> SummaryBody(draft, state.selectedBranch, onAction)
     }
 }
 
 @Composable
-private fun SummaryBody(draft: BookingDraft, onAction: (UiAction) -> Unit) {
+private fun SummaryBody(draft: BookingDraft, branch: SalonBranch?, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
     val colors = AppTheme.colors
     Column(
@@ -69,6 +70,7 @@ private fun SummaryBody(draft: BookingDraft, onAction: (UiAction) -> Unit) {
             .padding(start = spacing.space20, top = spacing.space4, end = spacing.space20, bottom = spacing.space20),
     ) {
         StepTitle(text = stringResource(Res.string.booking_summary_title), modifier = Modifier.padding(bottom = spacing.space14))
+        branch?.let { SummaryBranch(it, Modifier.padding(bottom = spacing.space10)) }
         Column(verticalArrangement = Arrangement.spacedBy(spacing.space10)) { draft.persons.forEach { PersonSummary(it) } }
         Row(
             modifier = Modifier

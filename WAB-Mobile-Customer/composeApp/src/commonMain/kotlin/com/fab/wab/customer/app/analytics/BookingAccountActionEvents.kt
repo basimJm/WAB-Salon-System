@@ -49,7 +49,7 @@ internal object BookingAccountActionEvents {
     }
     fun bookingFlow(a: BookingFlowContract.UiAction): ActionEvent = when (a) {
         BookingFlowContract.UiAction.OnContinue, BookingFlowContract.UiAction.OnJustMe, is BookingFlowContract.UiAction.OnServiceToggle,
-        is BookingFlowContract.UiAction.OnPaymentMethodSelect, -> ActionEvent.ByViewModel
+        is BookingFlowContract.UiAction.OnPaymentMethodSelect, is BookingFlowContract.UiAction.OnBranchSelect, -> ActionEvent.ByViewModel
         BookingFlowContract.UiAction.OnConfirm -> ActionEvent.Named(Events.BOOKING_SUBMIT)
         is BookingFlowContract.UiAction.OnDateSelect -> ActionEvent.Named(Events.BOOKING_DATE_SELECT)
         is BookingFlowContract.UiAction.OnSlotSelect -> ActionEvent.Named(Events.BOOKING_SLOT_SELECT)

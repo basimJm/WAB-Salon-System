@@ -22,6 +22,7 @@ import com.fab.wab.customer.core.notification.composable.rememberNotificationMan
 import com.fab.wab.customer.core.notification.model.NotificationStyle
 import com.fab.wab.customer.feature.salon.domain.model.ReviewTarget
 import com.fab.wab.customer.feature.salon.presentation.controller.contract.ReviewsContract
+import com.fab.wab.customer.feature.salon.presentation.controller.contract.SalonDetailsArgs
 import com.fab.wab.customer.feature.salon.presentation.controller.contract.SalonDetailsContract.SideEffect
 import com.fab.wab.customer.feature.salon.presentation.controller.contract.StaffSheetContract
 import com.fab.wab.customer.feature.salon.presentation.controller.vm.ReviewsViewModel
@@ -43,7 +44,10 @@ import org.koin.core.parameter.parametersOf
 class SalonNavigation(override val navController: NavHostController) : Navigator by NavigatorDelegation(navController) {
 
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
-        navGraphBuilder.composable<Screen.SalonDetails> { entry -> SalonDetailsDestination(entry.toRoute<Screen.SalonDetails>().salonId) }
+        navGraphBuilder.composable<Screen.SalonDetails> { entry ->
+            val route = entry.toRoute<Screen.SalonDetails>()
+            SalonDetailsDestination(SalonDetailsArgs(route.salonId, route.branchId))
+        }
         navGraphBuilder.composable<Screen.SalonReviews> { entry ->
             val route = entry.toRoute<Screen.SalonReviews>()
             ReviewsDestination(ReviewTarget.Salon(route.salonId), route.addReview)
@@ -70,8 +74,8 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
     }
 
     @Composable
-    private fun SalonDetailsDestination(salonId: String) {
-        val viewModel: SalonDetailsViewModel = koinViewModel(key = salonId) { parametersOf(salonId) }
+    private fun SalonDetailsDestination(args: SalonDetailsArgs) {
+        val viewModel: SalonDetailsViewModel = koinViewModel(key = args.salonId) { parametersOf(args) }
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
         var staffSheet by remember { mutableStateOf<StaffRequest?>(null) }
@@ -85,7 +89,7 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
                     notifications.show(notAvailable, style = NotificationStyle.Error)
                 }
                 is SideEffect.OpenReviews -> navigateTo(Screen.SalonReviews(effect.salonId))
-                is SideEffect.OpenBooking -> navigateTo(Screen.BookingStart(effect.salonId))
+                is SideEffect.OpenBooking -> navigateTo(Screen.BookingStart(effect.salonId, effect.branchId))
                 SideEffect.OpenLogin -> navigateTo(Graph.Auth)
                 is SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
                 is SideEffect.OpenStaff -> staffSheet = StaffRequest(effect.salonId, effect.memberId, (staffSheet?.key ?: 0) + 1)
