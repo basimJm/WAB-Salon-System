@@ -1,9 +1,14 @@
 import ExcelJS from 'exceljs';
+import { resolve } from 'node:path';
 import PDFDocument from 'pdfkit';
 import {
   CSV_BOM,
   EXPORT_FILES,
   PDF_FONT_SIZE,
+  PDF_FONTS,
+  PDF_FONT_DIR,
+  ARABIC_TEXT_PATTERN,
+  PDF_CELL_PADDING,
   PDF_MARGIN,
   PDF_ROW_HEIGHT,
   PDF_TITLE_SIZE,
@@ -53,6 +58,10 @@ const renderXlsx = async (table: ExportTable): Promise<Buffer> => {
   return Buffer.from(written);
 };
 
+/** `WAB-Server/assets/fonts/<file>` from `src/` and from `dist/` alike. */
+const fontPath = (file: string): string =>
+  resolve(__dirname, '..', '..', '..', ...PDF_FONT_DIR, file);
+
 const renderPdf = (table: ExportTable): Promise<Buffer> =>
   new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: PDF_MARGIN });
@@ -62,31 +71,34 @@ const renderPdf = (table: ExportTable): Promise<Buffer> =>
       resolve(Buffer.concat(chunks));
     });
     doc.on('error', reject);
+    for (const font of Object.values(PDF_FONTS)) doc.registerFont(font.name, fontPath(font.file));
     const width = doc.page.width - PDF_MARGIN * 2;
     const columnWidth = width / Math.max(table.columns.length, 1);
     const drawRow = (cells: readonly Cell[], bold: boolean): void => {
       if (doc.y + PDF_ROW_HEIGHT > doc.page.height - PDF_MARGIN) doc.addPage();
       const y = doc.y;
-      doc.font(bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(PDF_FONT_SIZE);
+      doc.font(bold ? PDF_FONTS.bold.name : PDF_FONTS.regular.name).fontSize(PDF_FONT_SIZE);
       cells.forEach((cell, i) => {
-        doc.text(safeText(cell), PDF_MARGIN + i * columnWidth, y, {
-          width: columnWidth - 4,
+        const text = safeText(cell);
+        doc.text(text, PDF_MARGIN + i * columnWidth, y, {
+          width: columnWidth - PDF_CELL_PADDING,
           height: PDF_ROW_HEIGHT,
           ellipsis: true,
           lineBreak: false,
+          align: ARABIC_TEXT_PATTERN.test(text) ? 'right' : 'left',
         });
       });
       doc.y = y + PDF_ROW_HEIGHT;
       doc.x = PDF_MARGIN;
     };
-    doc.font('Helvetica-Bold').fontSize(PDF_TITLE_SIZE).text(table.title);
+    doc.font(PDF_FONTS.bold.name).fontSize(PDF_TITLE_SIZE).text(table.title);
     doc.moveDown();
     drawRow(table.columns, true);
     for (const row of table.rows) drawRow(row, false);
     doc.end();
   });
 
-/** Writes the table as the requested file. PDF uses Latin text only (no Arabic shaping). */
+/** Writes the table as the requested file. PDF embeds a font with Arabic shaping (SRV-126). */
 export const renderTable = async (
   table: ExportTable,
   format: ExportFormat,

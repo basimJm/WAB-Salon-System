@@ -42,6 +42,8 @@ COPY --from=build /repo/wab-storage/dist ./wab-storage/dist
 COPY WAB-Server/package.json WAB-Server/package-lock.json ./WAB-Server/
 RUN cd WAB-Server && npm ci --omit=dev && npm cache clean --force
 COPY --from=build /repo/WAB-Server/dist ./WAB-Server/dist
+# Fonts for Arabic PDF exports (SRV-126).
+COPY WAB-Server/assets ./WAB-Server/assets
 WORKDIR /repo/WAB-Server
 # Run unprivileged; configuration comes from environment variables only (no .env files in the image).
 USER node

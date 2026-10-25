@@ -305,6 +305,8 @@ describe('table builders', () => {
   it('transactions: pages through every page and formats money', async () => {
     const pages: number[] = [];
     const b = createTableBuilders({
+      customers: {} as never,
+      salons: {} as never,
       reports: {} as never,
       adminSettings: {} as never,
       bookings: {} as never,
@@ -325,6 +327,8 @@ describe('table builders', () => {
 
   it('refuses a table bigger than one export', async () => {
     const b = createTableBuilders({
+      customers: {} as never,
+      salons: {} as never,
       reports: {} as never,
       adminSettings: {} as never,
       bookings: {} as never,
@@ -337,6 +341,8 @@ describe('table builders', () => {
 
   it('audit logs and reports build tables', async () => {
     const b = createTableBuilders({
+      customers: {} as never,
+      salons: {} as never,
       bookings: {} as never,
       reports: {
         daily: () =>
@@ -428,6 +434,8 @@ describe('BOOKINGS export', () => {
       language: string;
     }[] = [];
     const b = createTableBuilders({
+      customers: {} as never,
+      salons: {} as never,
       reports: {} as never,
       adminSettings: {} as never,
       transactions: {} as never,
@@ -481,6 +489,8 @@ describe('BOOKINGS export', () => {
 
   it('refuses a table bigger than one export', async () => {
     const b = createTableBuilders({
+      customers: {} as never,
+      salons: {} as never,
       reports: {} as never,
       adminSettings: {} as never,
       transactions: {} as never,
