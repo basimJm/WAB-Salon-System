@@ -1,0 +1,203 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "firstName": null,
+    "unreadCount": null,
+    "banners": [
+      {
+        "id": "6ad85dbe4476769dca9165ad",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/banners/6ad76618bf7000bf1221c7e3/f6edc544-bf98-4114-a7b9-94890ca17cee.png",
+        "actionType": "NONE",
+        "actionValue": null
+      },
+      {
+        "id": "7cf9c4c7e6f6ccc2efb90ec4",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/banners/welcome-en.jpg",
+        "actionType": "NONE",
+        "actionValue": null
+      },
+      {
+        "id": "c7948bdcef727ffbfe295263",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/banners/bridal-season-en.jpg",
+        "actionType": "SALON",
+        "actionValue": "79ea2a78d15934408a10b09f"
+      },
+      {
+        "id": "52faf176b9cfa9e56c7330b6",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/banners/tips-en.jpg",
+        "actionType": "EXTERNAL_URL",
+        "actionValue": "https://example.com/wab-tips"
+      }
+    ],
+    "services": {
+      "items": [
+        {
+          "id": "6ad867149e63b9a6a612d49e",
+          "name": "Haircut",
+          "description": "Cut and shape to your taste",
+          "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/haircut.jpg",
+          "gender": "FEMALE"
+        },
+        {
+          "id": "6ad867159e63b9a6a612d49f",
+          "name": "Blow dry",
+          "description": "Wash and blow-dry styling",
+          "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/blow-dry.jpg",
+          "gender": "FEMALE"
+        },
+        {
+          "id": "6ad867159e63b9a6a612d4a0",
+          "name": "Hair coloring",
+          "description": "Full color or highlights",
+          "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/hair-color.jpg",
+          "gender": "FEMALE"
+        },
+        {
+          "id": "6ad867159e63b9a6a612d4a1",
+          "name": "Keratin treatment",
+          "description": "Smoothing treatment for the hair",
+          "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/keratin.jpg",
+          "gender": "FEMALE"
+        },
+        {
+          "id": "6ad867169e63b9a6a612d4a2",
+          "name": "Manicure",
+          "description": "Nail care and polish",
+          "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/manicure.jpg",
+          "gender": "FEMALE"
+        },
+        {
+          "id": "6ad867169e63b9a6a612d4a3",
+          "name": "Pedicure",
+          "description": "Foot and toenail care",
+          "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/pedicure.jpg",
+          "gender": "FEMALE"
+        },
+        {
+          "id": "6ad867169e63b9a6a612d4a4",
+          "name": "Makeup",
+          "description": "Makeup for occasions",
+          "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/makeup.jpg",
+          "gender": "FEMALE"
+        },
+        {
+          "id": "6ad867179e63b9a6a612d4a5",
+          "name": "Bridal makeup",
+          "description": "Complete bridal makeup",
+          "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/bridal-makeup.jpg",
+          "gender": "FEMALE"
+        },
+        {
+          "id": "6ad867179e63b9a6a612d4a6",
+          "name": "Facial",
+          "description": "Deep cleansing and hydration",
+          "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/facial.jpg",
+          "gender": "FEMALE"
+        },
+        {
+          "id": "6ad867179e63b9a6a612d4a7",
+          "name": "Waxing",
+          "description": "Hair removal with wax",
+          "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/waxing.jpg",
+          "gender": "FEMALE"
+        }
+      ],
+      "hasMore": true
+    },
+    "recommended": {
+      "items": [
+        {
+          "id": "7fe703cdf5e7eec204bb193d",
+          "name": "Lamar Beauty Lounge",
+          "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/profile.jpg",
+          "rating": 3.8,
+          "reviewsCount": 5,
+          "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون",
+          "shortDescription": "صالون نسائي متكامل في عبدون: شعر، أظافر، مكياج وعناية بالبشرة بأيدي فريق محترف وأجواء هادئة.",
+          "isOpenNow": false,
+          "todayHours": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "isFavorite": false,
+          "distanceKm": null,
+          "branchCount": 1,
+          "branch": {
+            "id": "6addc42474ae573daadd06d5",
+            "name": "Abdoun"
+          }
+        }
+      ],
+      "hasMore": false
+    },
+    "nearest": {
+      "items": [
+        {
+          "id": "7fe703cdf5e7eec204bb193d",
+          "name": "Lamar Beauty Lounge",
+          "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/profile.jpg",
+          "rating": 3.8,
+          "reviewsCount": 5,
+          "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون",
+          "shortDescription": "صالون نسائي متكامل في عبدون: شعر، أظافر، مكياج وعناية بالبشرة بأيدي فريق محترف وأجواء هادئة.",
+          "isOpenNow": false,
+          "todayHours": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "isFavorite": false,
+          "distanceKm": 2.7,
+          "branchCount": 1,
+          "branch": {
+            "id": "6addc42474ae573daadd06d5",
+            "name": "Abdoun"
+          },
+          "title": "Lamar Beauty Lounge"
+        },
+        {
+          "id": "79ea2a78d15934408a10b09f",
+          "name": "Rose Bridal Studio",
+          "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/rose/profile.jpg",
+          "rating": 4.7,
+          "reviewsCount": 3,
+          "locationText": "Sweifieh, Wakalat Street, 2nd floor",
+          "shortDescription": "Bridal and occasion specialists in Sweifieh: bridal makeup, hair styling and henna for the whole party.",
+          "isOpenNow": false,
+          "todayHours": null,
+          "isFavorite": false,
+          "distanceKm": 4.9,
+          "branchCount": 1,
+          "branch": {
+            "id": "6addc42774ae573daadd06d6",
+            "name": "Sweifieh"
+          },
+          "title": "Rose Bridal Studio"
+        },
+        {
+          "id": "8dd71c4c0268487d2d240be2",
+          "name": "Joury Ladies Salon",
+          "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/joury/profile.jpg",
+          "rating": 3.8,
+          "reviewsCount": 5,
+          "locationText": "خلدا، شارع وصفي التل، مجمع النخيل",
+          "shortDescription": "صالون عائلي في خلدا بأسعار مناسبة: قص، سشوار، صبغة، أظافر ومكياج للمناسبات.",
+          "isOpenNow": false,
+          "todayHours": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "isFavorite": false,
+          "distanceKm": 8.3,
+          "branchCount": 1,
+          "branch": {
+            "id": "6addc42b74ae573daadd06d7",
+            "name": "Khalda"
+          },
+          "title": "Joury Ladies Salon"
+        }
+      ],
+      "hasMore": false
+    }
+  }
+}

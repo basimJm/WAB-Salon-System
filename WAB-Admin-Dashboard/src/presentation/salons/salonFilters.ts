@@ -37,3 +37,17 @@ export function salonQueryOf(state: ListState): SalonQuery {
     ...(state.search ? { q: state.search } : {}),
   };
 }
+
+/**
+ * What a SALONS export accepts (SRV-126): state, gender, city, subscription and search. The recommended and
+ * deletion-request switches have no export parameter, so the file holds every salon matching the other filters.
+ */
+export function salonExportParams(q: SalonQuery): Record<string, unknown> {
+  return {
+    ...(q.state ? { state: q.state } : {}),
+    ...(q.gender ? { gender: q.gender } : {}),
+    ...(q.cityId ? { cityId: q.cityId } : {}),
+    ...(q.subscription ? { subscription: q.subscription } : {}),
+    ...(q.q ? { q: q.q } : {}),
+  };
+}

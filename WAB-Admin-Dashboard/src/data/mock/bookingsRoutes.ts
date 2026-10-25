@@ -26,6 +26,8 @@ const make = ({ n, status, payment, bride, total }: Seed) => ({
   appointmentStart: inDays(n, 9),
   appointmentEnd: inDays(n, 10),
   respondBy: inDays(n, 8),
+  /** When the customer sent the request (the booking's creation): a day before the appointment day. */
+  requestedAt: inDays(n - 1, 8),
   personsCount: n,
   total,
   salon: { id: '64f000000000000000000001', name: 'Noor Salon' },

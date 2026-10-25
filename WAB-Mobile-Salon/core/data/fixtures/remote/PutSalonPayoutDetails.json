@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "bankName": "Capture Bank",
+    "accountHolderName": "Capture Owner",
+    "ibanLast4": "0302"
+  }
+}

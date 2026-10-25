@@ -1,0 +1,388 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "date": "2026-10-29",
+    "reason": null,
+    "durationMinutes": 60,
+    "slots": [
+      {
+        "start": "2026-10-29T08:00:00.000Z",
+        "end": "2026-10-29T09:00:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T08:15:00.000Z",
+        "end": "2026-10-29T09:15:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T08:30:00.000Z",
+        "end": "2026-10-29T09:30:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T08:45:00.000Z",
+        "end": "2026-10-29T09:45:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T09:00:00.000Z",
+        "end": "2026-10-29T10:00:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T09:15:00.000Z",
+        "end": "2026-10-29T10:15:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T09:30:00.000Z",
+        "end": "2026-10-29T10:30:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T09:45:00.000Z",
+        "end": "2026-10-29T10:45:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T10:00:00.000Z",
+        "end": "2026-10-29T11:00:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T10:15:00.000Z",
+        "end": "2026-10-29T11:15:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T10:30:00.000Z",
+        "end": "2026-10-29T11:30:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T10:45:00.000Z",
+        "end": "2026-10-29T11:45:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T11:00:00.000Z",
+        "end": "2026-10-29T12:00:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T11:15:00.000Z",
+        "end": "2026-10-29T12:15:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T11:30:00.000Z",
+        "end": "2026-10-29T12:30:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T11:45:00.000Z",
+        "end": "2026-10-29T12:45:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T12:00:00.000Z",
+        "end": "2026-10-29T13:00:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T12:15:00.000Z",
+        "end": "2026-10-29T13:15:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "68f31a814c14ec96a21aae43",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T12:30:00.000Z",
+        "end": "2026-10-29T13:30:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T12:45:00.000Z",
+        "end": "2026-10-29T13:45:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T13:00:00.000Z",
+        "end": "2026-10-29T14:00:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T13:15:00.000Z",
+        "end": "2026-10-29T14:15:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T13:30:00.000Z",
+        "end": "2026-10-29T14:30:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T13:45:00.000Z",
+        "end": "2026-10-29T14:45:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T14:00:00.000Z",
+        "end": "2026-10-29T15:00:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T14:15:00.000Z",
+        "end": "2026-10-29T15:15:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T14:30:00.000Z",
+        "end": "2026-10-29T15:30:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T14:45:00.000Z",
+        "end": "2026-10-29T15:45:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T15:00:00.000Z",
+        "end": "2026-10-29T16:00:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T15:15:00.000Z",
+        "end": "2026-10-29T16:15:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T15:30:00.000Z",
+        "end": "2026-10-29T16:30:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T15:45:00.000Z",
+        "end": "2026-10-29T16:45:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T16:00:00.000Z",
+        "end": "2026-10-29T17:00:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T16:15:00.000Z",
+        "end": "2026-10-29T17:15:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T16:30:00.000Z",
+        "end": "2026-10-29T17:30:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T16:45:00.000Z",
+        "end": "2026-10-29T17:45:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      },
+      {
+        "start": "2026-10-29T17:00:00.000Z",
+        "end": "2026-10-29T18:00:00.000Z",
+        "available": true,
+        "eligibleStaffIds": [
+          "500157bd497447d283767cbd",
+          "b3bb803db1e7cc32fbc4ebbb",
+          "f5a6256a47b58b591e790ecf"
+        ]
+      }
+    ]
+  }
+}

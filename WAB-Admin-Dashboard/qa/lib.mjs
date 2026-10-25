@@ -59,8 +59,12 @@ export function adminOtp() {
   }
   throw new Error('no otp');
 }
+/** Signs in (or reuses QA_ADMIN_TOKEN: admin logins are rate limited to a few per window). */
 export async function adminToken() {
+  if (process.env.QA_ADMIN_TOKEN) return process.env.QA_ADMIN_TOKEN;
   const l = await api('admin', 'POST', '/auth/login', ADMIN);
+  if (l.status === 429)
+    throw new Error('admin login rate limited: wait for the window or set QA_ADMIN_TOKEN');
   const v = await api('admin', 'POST', '/auth/verify-otp', {
     email: ADMIN.email,
     code: adminOtp(),

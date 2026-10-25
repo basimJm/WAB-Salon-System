@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Customer API",
-    "version": "1.0.0"
+    "version": "1.2.0"
   },
   "servers": [
     {
@@ -7897,6 +7897,32 @@
                             "name"
                           ]
                         },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "locationText": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "locationText"
+                          ],
+                          "description": "The branch of the appointment"
+                        },
                         "expiresAt": {
                           "type": "string"
                         },
@@ -8060,6 +8086,7 @@
                       "required": [
                         "id",
                         "salon",
+                        "branch",
                         "expiresAt",
                         "paymentMethod",
                         "persons",
@@ -8222,6 +8249,32 @@
                             "name"
                           ]
                         },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "locationText": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "locationText"
+                          ],
+                          "description": "The branch of the appointment"
+                        },
                         "expiresAt": {
                           "type": "string"
                         },
@@ -8385,6 +8438,7 @@
                       "required": [
                         "id",
                         "salon",
+                        "branch",
                         "expiresAt",
                         "paymentMethod",
                         "persons",
@@ -9116,6 +9170,10 @@
                           "respondBy": {
                             "type": "string"
                           },
+                          "requestedAt": {
+                            "type": "string",
+                            "description": "When the customer sent the request"
+                          },
                           "personsCount": {
                             "type": "number"
                           },
@@ -9221,6 +9279,7 @@
                           "appointmentStart",
                           "appointmentEnd",
                           "respondBy",
+                          "requestedAt",
                           "personsCount",
                           "total",
                           "salon",
@@ -9597,6 +9656,10 @@
                         "respondBy": {
                           "type": "string"
                         },
+                        "requestedAt": {
+                          "type": "string",
+                          "description": "When the customer sent the request"
+                        },
                         "personsCount": {
                           "type": "number"
                         },
@@ -9906,6 +9969,7 @@
                         "appointmentStart",
                         "appointmentEnd",
                         "respondBy",
+                        "requestedAt",
                         "personsCount",
                         "total",
                         "salon",

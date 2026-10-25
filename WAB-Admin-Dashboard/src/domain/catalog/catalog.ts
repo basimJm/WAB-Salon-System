@@ -40,12 +40,53 @@ export interface CatalogRequest {
   readonly catalogServiceId: string | null;
   readonly createdAt: string;
 }
-/** Approving creates the catalog service from these (edited) values. */
-export interface ApproveInput {
+/** Approving either creates a new catalog service from these (edited) values... */
+export interface CreateServiceApproval {
   name: LocalizedName;
   description: LocalizedName;
   imageKey?: string;
   sortOrder?: number;
+}
+/** ...or maps the request to an existing active catalog service of the salon's gender (SRV-125). */
+export interface MapServiceApproval {
+  catalogServiceId: string;
+}
+export type ApproveInput = CreateServiceApproval | MapServiceApproval;
+
+export const APPROVE_MODES = ['create', 'map'] as const;
+export type ApproveMode = (typeof APPROVE_MODES)[number];
+
+export interface ApproveDraft {
+  mode: ApproveMode;
+  nameAr: string;
+  nameEn: string;
+  descAr: string;
+  descEn: string;
+  catalogServiceId: string;
+}
+export type ApproveField = 'nameAr' | 'nameEn' | 'descAr' | 'descEn' | 'service';
+
+/** Create: both names and descriptions filled within their limits; map: an existing service picked. */
+export function approveProblems(d: ApproveDraft): ReadonlySet<ApproveField> {
+  if (d.mode === 'map') return new Set<ApproveField>(d.catalogServiceId ? [] : ['service']);
+  const bad = (text: string, max: number) => !text.trim() || text.length > max;
+  const checks: ReadonlyArray<readonly [ApproveField, boolean]> = [
+    ['nameAr', bad(d.nameAr, MAX_NAME)],
+    ['nameEn', bad(d.nameEn, MAX_NAME)],
+    ['descAr', bad(d.descAr, MAX_DESCRIPTION)],
+    ['descEn', bad(d.descEn, MAX_DESCRIPTION)],
+  ];
+  return new Set(checks.filter(([, failed]) => failed).map(([name]) => name));
+}
+
+/** The approval the server takes for the draft; a new service keeps the image the salon sent. */
+export function approveInputOf(d: ApproveDraft, imageKey: string | null): ApproveInput {
+  if (d.mode === 'map') return { catalogServiceId: d.catalogServiceId };
+  return {
+    name: { ar: d.nameAr.trim(), en: d.nameEn.trim() },
+    description: { ar: d.descAr.trim(), en: d.descEn.trim() },
+    ...(imageKey ? { imageKey } : {}),
+  };
 }
 
 export interface CatalogRequests {

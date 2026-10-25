@@ -1,0 +1,50 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "items": [
+      {
+        "id": "82ed475d8c96be989ce21736",
+        "customerName": "Dima",
+        "rating": 5,
+        "comment": "أفضل صالون جربته في عمّان، أنصح فيه.",
+        "createdAt": "2026-10-19T20:27:00.000Z",
+        "branch": {
+          "id": "6addc42774ae573daadd06d6",
+          "name": "Sweifieh"
+        }
+      },
+      {
+        "id": "c46b0f7892c58adfb14cfe10",
+        "customerName": "Shahd",
+        "rating": 5,
+        "comment": "Friendly staff, but I waited ten minutes past my time.",
+        "createdAt": "2026-10-17T19:36:00.000Z",
+        "branch": {
+          "id": "6addc42774ae573daadd06d6",
+          "name": "Sweifieh"
+        }
+      },
+      {
+        "id": "b27500de792bf10515877868",
+        "customerName": "Dima",
+        "rating": 4,
+        "comment": "تجربة ممتازة، الموظفين محترفين والمكان نظيف جدًا.",
+        "createdAt": "2026-10-17T19:25:00.000Z",
+        "branch": {
+          "id": "6addc42774ae573daadd06d6",
+          "name": "Sweifieh"
+        }
+      }
+    ],
+    "summary": {
+      "avg": 4.7,
+      "count": 3
+    }
+  },
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 3
+  }
+}

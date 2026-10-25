@@ -1,0 +1,39 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "6ade37a8c2cfb0cb993a1684",
+      "type": "BOOKING",
+      "event": "booking.created",
+      "title": "Booking request sent",
+      "body": "Your request WAB-RM7GX8 at Noor Salon for 28/10/2026, 9:00 am was sent and is waiting for the salon's reply.",
+      "data": {
+        "bookingId": "6ade37a8c2cfb0cb993a1682",
+        "salonId": "6ade37a6c2cfb0cb993a164e",
+        "deepLink": "/bookings/6ade37a8c2cfb0cb993a1682"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T17:08:56.073Z"
+    },
+    {
+      "id": "6ade37a7c2cfb0cb993a167e",
+      "type": "BOOKING",
+      "event": "booking.created",
+      "title": "Booking request sent",
+      "body": "Your request WAB-1N2Z8R at Noor Salon for 27/10/2026, 9:00 am was sent and is waiting for the salon's reply.",
+      "data": {
+        "bookingId": "6ade37a7c2cfb0cb993a167c",
+        "salonId": "6ade37a6c2cfb0cb993a164e",
+        "deepLink": "/bookings/6ade37a7c2cfb0cb993a167c"
+      },
+      "isRead": false,
+      "createdAt": "2026-10-25T17:08:55.987Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 2
+  }
+}

@@ -27,7 +27,10 @@ class AvailabilityRepositoryImpl(private val api: AvailabilityApi) : Availabilit
         .mapSuccess { it.data.toDomain() }
 }
 
-/** Other persons count only when they picked a specific staff member (an "any" pick is resolved by the server). */
+/**
+ * Other persons count only when they picked a specific staff member (an "any" pick is resolved by the server) and a
+ * slot: the server requires both `start` and `end` of each pick (WAB-Server availability.validation.ts, CUS-060).
+ */
 fun availabilityBodyOf(
     date: String,
     person: DraftPerson,
@@ -42,11 +45,16 @@ fun availabilityBodyOf(
         isBride = person.isBride,
         staffId = (person.staff as? StaffChoice.Specific)?.staffId,
     ),
-    others = others.mapNotNull { other ->
-        (other.staff as? StaffChoice.Specific)?.let { PostSalonsBySalonIdAvailabilityBodyOthersItem(it.staffId, other.start, null) }
-    }.takeIf { it.isNotEmpty() },
+    others = others.mapNotNull(::otherPickOf).takeIf { it.isNotEmpty() },
     draftId = draftId,
 )
+
+private fun otherPickOf(other: DraftPerson): PostSalonsBySalonIdAvailabilityBodyOthersItem? {
+    val staffId = (other.staff as? StaffChoice.Specific)?.staffId ?: return null
+    val start = other.start ?: return null
+    val end = other.end ?: return null
+    return PostSalonsBySalonIdAvailabilityBodyOthersItem(staffId, start, end)
+}
 
 fun PostSalonsBySalonIdAvailabilityData.toDomain(): DayAvailability = DayAvailability(
     date = date,

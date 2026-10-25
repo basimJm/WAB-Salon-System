@@ -13,3 +13,6 @@ Found with `qa/` (real WAB-Server, MongoDB, Redis, MinIO). The panel works aroun
 | S7 | booking `reassign` / `eligible-staff` | only an `APPROVED` booking that has not started is accepted (422 `INVALID_TRANSITION` otherwise); the OpenAPI does not say so | the button shows only then |
 | S8 | `GET /salons/{id}/payout-details` | 503 when `PAYOUT_ENCRYPTION_KEY` is not set (documented; `qa/stack.sh` sets one) | none |
 | S9 | fake storage provider | an upload cannot be simulated from outside, so licences cannot be confirmed in dev | run MinIO (`qa/stack.sh`) |
+| S10 | Hosted dev API (Render) `CORS_ALLOWED_ORIGINS` (2026-10-25) | the preflight answers 200 with no `Access-Control-Allow-Origin` for `http://localhost:4173` / `:5173`, so a browser cannot call the hosted API from the panel; the websocket handshake works (no CORS) | none: add the deployed panel origin (and local preview origins if wanted) on Render |
+| S11 | Alert titles (`alerts.service.ts` `title()`) | stored with `translate('en', …)`, so the Arabic panel shows English titles | none (the Type column is localized) |
+| S12 | Alert `entityType` | `UPPER_SNAKE` everywhere (`SALON`, `REFUND`, `REVIEW`, `CATALOG_REQUEST`) except `salonDeletion.service.ts` (`salon`) | `alertLink` normalizes both spellings |

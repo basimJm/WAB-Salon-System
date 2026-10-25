@@ -26,6 +26,8 @@ export interface BookingSummary {
   readonly appointmentStart: string;
   readonly appointmentEnd: string;
   readonly respondBy: string;
+  /** When the customer sent the request (UTC instant; shown in Amman time). */
+  readonly requestedAt: string;
   readonly personsCount: number;
   /** JOD amount as a 3-decimal string. */
   readonly total: string;

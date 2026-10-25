@@ -1,0 +1,38 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "5b0762b9c9d0fbed9c0bd2a0",
+      "type": "IMAGE",
+      "url": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/gallery-1.jpg",
+      "thumbnailUrl": null,
+      "durationSec": null,
+      "order": 0
+    },
+    {
+      "id": "23883acd15ad275002ab44a8",
+      "type": "IMAGE",
+      "url": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/gallery-2.jpg",
+      "thumbnailUrl": null,
+      "durationSec": null,
+      "order": 1
+    },
+    {
+      "id": "1250904b0238ac9dbb6aa250",
+      "type": "IMAGE",
+      "url": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/gallery-3.jpg",
+      "thumbnailUrl": null,
+      "durationSec": null,
+      "order": 2
+    },
+    {
+      "id": "a3e84313ffbde92c1bb98693",
+      "type": "IMAGE",
+      "url": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/gallery-4.jpg",
+      "thumbnailUrl": null,
+      "durationSec": null,
+      "order": 3
+    }
+  ]
+}

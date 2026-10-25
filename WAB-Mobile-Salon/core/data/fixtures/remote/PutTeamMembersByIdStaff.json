@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "memberId": "6ade49a2c2cfb0cb993a17be",
+    "providesServices": true,
+    "bio": "MER-054 contract capture (throwaway, please ignore)",
+    "yearsOfExperience": 1,
+    "serviceIds": [
+      "178eff5d56cd322ee48edcb4"
+    ],
+    "brideQualified": false,
+    "workingDays": [
+      {
+        "day": "SAT",
+        "start": null,
+        "end": null
+      }
+    ],
+    "rating": {
+      "avg": 0,
+      "count": 0
+    },
+    "customersCount": 0
+  }
+}

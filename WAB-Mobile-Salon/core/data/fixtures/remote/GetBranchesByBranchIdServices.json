@@ -1,0 +1,131 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": [
+    {
+      "id": "178eff5d56cd322ee48edcb4",
+      "catalogServiceId": "6ade371b5f4a5f519f5857d5",
+      "name": "Haircut",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/haircut.jpg",
+      "price": "18.000",
+      "durationMinutes": 45,
+      "brideOnly": false,
+      "extraDescription": null,
+      "mediaUrls": [],
+      "active": true
+    },
+    {
+      "id": "1a5707237216a47218307067",
+      "catalogServiceId": "6ade371b5f4a5f519f5857d7",
+      "name": "Hair coloring",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/hair-color.jpg",
+      "price": "54.000",
+      "durationMinutes": 120,
+      "brideOnly": false,
+      "extraDescription": null,
+      "mediaUrls": [],
+      "active": true
+    },
+    {
+      "id": "4cbcba00cab6988a97e0e242",
+      "catalogServiceId": "6ade371b5f4a5f519f5857d9",
+      "name": "Manicure",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/manicure.jpg",
+      "price": "9.600",
+      "durationMinutes": 30,
+      "brideOnly": false,
+      "extraDescription": null,
+      "mediaUrls": [],
+      "active": true
+    },
+    {
+      "id": "5f048a9c125351eb49c4a499",
+      "catalogServiceId": "6ade371b5f4a5f519f5857d8",
+      "name": "Keratin treatment",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/keratin.jpg",
+      "price": "96.000",
+      "durationMinutes": 150,
+      "brideOnly": false,
+      "extraDescription": null,
+      "mediaUrls": [],
+      "active": true
+    },
+    {
+      "id": "6cc6bdb4b4bd9787642aae25",
+      "catalogServiceId": "6ade371b5f4a5f519f5857dc",
+      "name": "Bridal makeup",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/bridal-makeup.jpg",
+      "price": "180.000",
+      "durationMinutes": 120,
+      "brideOnly": true,
+      "extraDescription": null,
+      "mediaUrls": [],
+      "active": true
+    },
+    {
+      "id": "76393cc8569e0fe79b4e7f95",
+      "catalogServiceId": "6ade371b5f4a5f519f5857d6",
+      "name": "Blow dry",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/blow-dry.jpg",
+      "price": "12.000",
+      "durationMinutes": 30,
+      "brideOnly": false,
+      "extraDescription": null,
+      "mediaUrls": [],
+      "active": true
+    },
+    {
+      "id": "7be39931e2ea12cf18ca0dc2",
+      "catalogServiceId": "6ade371b5f4a5f519f5857da",
+      "name": "Pedicure",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/pedicure.jpg",
+      "price": "14.400",
+      "durationMinutes": 45,
+      "brideOnly": false,
+      "extraDescription": null,
+      "mediaUrls": [],
+      "active": true
+    },
+    {
+      "id": "8c9fae3316b3b03b4bc1ef4b",
+      "catalogServiceId": "6ade371b5f4a5f519f5857de",
+      "name": "Waxing",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/waxing.jpg",
+      "price": "18.000",
+      "durationMinutes": 30,
+      "brideOnly": false,
+      "extraDescription": null,
+      "mediaUrls": [],
+      "active": true
+    },
+    {
+      "id": "ae1b14d87e1f7f23c4885244",
+      "catalogServiceId": "6ade371b5f4a5f519f5857db",
+      "name": "Makeup",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/makeup.jpg",
+      "price": "42.000",
+      "durationMinutes": 60,
+      "brideOnly": false,
+      "extraDescription": null,
+      "mediaUrls": [],
+      "active": true
+    },
+    {
+      "id": "c31005cbe924c6bdb673fe2d",
+      "catalogServiceId": "6ade371b5f4a5f519f5857dd",
+      "name": "Facial",
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/facial.jpg",
+      "price": "30.000",
+      "durationMinutes": 60,
+      "brideOnly": false,
+      "extraDescription": null,
+      "mediaUrls": [],
+      "active": true
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 10,
+    "total": 11
+  }
+}

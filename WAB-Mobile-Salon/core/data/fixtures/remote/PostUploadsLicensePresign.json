@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "key": "licenses/guest/6df9a7c6-5369-4bf6-95de-01c82a8dd1da.pdf",
+    "maxBytes": 45,
+    "upload": {
+      "url": "https://example.invalid/presigned-upload",
+      "method": "PUT",
+      "headers": {
+        "Content-Type": "application/pdf"
+      },
+      "expiresAt": "2026-10-25T18:30:38.933Z"
+    }
+  }
+}

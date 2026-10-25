@@ -1,0 +1,17 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "cancellationWindowHours": 12,
+    "paymentOptions": [
+      "PAY_ON_ARRIVAL",
+      "DEPOSIT"
+    ],
+    "depositPercentage": 30,
+    "depositRefundableOnCustomerCancel": true,
+    "fullPaymentRefundOnCustomerCancel": "MINUS_DEPOSIT",
+    "noShowDeposit": "KEEP",
+    "noShowFullPayment": "REFUND_MINUS_DEPOSIT",
+    "notes": null
+  }
+}

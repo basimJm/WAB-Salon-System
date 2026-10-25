@@ -37,7 +37,8 @@ export function catalogRoutes(): readonly MockRoute[] {
   const requests = [
     {
       id: '64e000000000000000000031',
-      salonId: '64e000000000000000000041',
+      // Noor Salon (women's) from the salon fixtures, so the approve drawer can read its gender.
+      salonId: '64f000000000000000000001',
       salonName: 'Noor Salon',
       name: 'Hair spa',
       description: 'Deep conditioning treatment',
@@ -48,13 +49,18 @@ export function catalogRoutes(): readonly MockRoute[] {
       createdAt: '2026-10-10T08:00:00.000Z',
     },
   ];
-  const decide = (id: string | undefined, status: 'APPROVED' | 'REJECTED', note: string) => {
+  const decide = (
+    id: string | undefined,
+    status: 'APPROVED' | 'REJECTED',
+    note: string,
+    mappedTo?: string,
+  ) => {
     const row = requests.find((r) => r.id === id) ?? requests[0];
     if (!row) throw new Error('no request');
     Object.assign(row, {
       status,
       adminNote: note,
-      catalogServiceId: status === 'APPROVED' ? nextId() : null,
+      catalogServiceId: status === 'APPROVED' ? (mappedTo ?? nextId()) : null,
     });
     return { data: { ...row } };
   };
@@ -79,7 +85,11 @@ export function catalogRoutes(): readonly MockRoute[] {
         data: dto.postCatalogRequestsByIdApproveDataSchema,
         body: dto.postCatalogRequestsByIdApproveBodySchema,
       }),
-      ({ params, body }) => decide(params['id'], 'APPROVED', (body as { reason: string }).reason),
+      ({ params, body }) => {
+        // Mapping keeps the chosen service; creating adds a new one (SRV-125).
+        const b = body as { reason: string; catalogServiceId?: string };
+        return decide(params['id'], 'APPROVED', b.reason, b.catalogServiceId);
+      },
     ),
     mockRoute(
       defineEndpoint(ops.postCatalogRequestsByIdReject, {
