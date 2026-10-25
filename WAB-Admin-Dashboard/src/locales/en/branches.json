@@ -68,6 +68,11 @@
       "phone": "Use the international format, e.g. +962790000000",
       "whatsapp": "Use the international format, e.g. +962790000000",
       "nothing": "Nothing changed"
+    },
+    "filter": {
+      "salon": "Salon",
+      "branch": "Branch",
+      "all": "All branches"
     }
   }
 }

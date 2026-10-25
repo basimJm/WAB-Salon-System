@@ -16,7 +16,7 @@ const tx = (
   bookingDraftId: '64d9000000000000000000f1',
   bookingId: status === 'SUCCEEDED' ? '64a000000000000000000e01' : null,
   customerId: '64a000000000000000000c01',
-  salonId: '64a000000000000000000501',
+  salonId: '64f000000000000000000001',
   branchId: n === 3 ? MOCK_BRANCH_IDS.noorSecond : (MOCK_BRANCH_IDS.noorMain as string | null),
   type,
   amount,
@@ -48,13 +48,18 @@ export function transactionsRoutes(): readonly MockRoute[] {
         data: dto.getFinanceReconciliationDataSchema,
         query: salonBranchQuerySchema,
       }),
-      () => ({
-        data: {
-          stuckPending: [MOCK_TRANSACTIONS[2]!],
-          paidWithoutBooking: [],
-          missingLedger: [MOCK_TRANSACTIONS[1]!],
-        },
-      }),
+      ({ query }) => {
+        const branchId = query.get('branchId');
+        const keep = (rows: typeof MOCK_TRANSACTIONS) =>
+          rows.filter((t) => !branchId || t.branchId === branchId);
+        return {
+          data: {
+            stuckPending: keep([MOCK_TRANSACTIONS[2]!]),
+            paidWithoutBooking: [],
+            missingLedger: keep([MOCK_TRANSACTIONS[1]!]),
+          },
+        };
+      },
     ),
     mockRoute(
       defineEndpoint(O.getTransactions, {
@@ -65,7 +70,8 @@ export function transactionsRoutes(): readonly MockRoute[] {
         const items = MOCK_TRANSACTIONS.filter(
           (t) =>
             (!query.get('status') || t.status === query.get('status')) &&
-            (!query.get('type') || t.type === query.get('type')),
+            (!query.get('type') || t.type === query.get('type')) &&
+            (!query.get('branchId') || t.branchId === query.get('branchId')),
         );
         return {
           data: items,

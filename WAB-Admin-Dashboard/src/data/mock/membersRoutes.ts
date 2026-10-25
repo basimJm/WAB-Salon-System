@@ -16,7 +16,7 @@ const member = (
 ) => ({
   id,
   name,
-  phone: `+9627900001${id.slice(-2)}`,
+  phone: `+9627900001${String(parseInt(id.slice(-2), 16)).padStart(2, '0')}`,
   role,
   active: true,
   providesServices: role !== 'OWNER',

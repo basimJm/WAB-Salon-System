@@ -13,6 +13,11 @@ export interface Review {
   readonly comment: string | null;
   readonly salon: { readonly id: string; readonly name: string };
   readonly staff: { readonly id: string; readonly firstName: string } | null;
+  /** Reviews are salon-wide but labelled with the branch of the visit. */
+  readonly branch: {
+    readonly id: string;
+    readonly name: { readonly ar: string; readonly en: string };
+  } | null;
   readonly author: { readonly id: string; readonly firstName: string; readonly lastName: string };
   /** How many other reviews this customer wrote (a hint for spotting abuse). */
   readonly authorOtherReviews: number;
@@ -28,6 +33,7 @@ export interface ReviewQuery extends PageQuery {
   status?: ReviewStatus;
   target?: ReviewTarget;
   salonId?: string;
+  branchId?: string;
   staffId?: string;
   rating?: number;
 }

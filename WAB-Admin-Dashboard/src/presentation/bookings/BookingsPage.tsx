@@ -22,6 +22,7 @@ import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
+import { SalonBranchFilters } from '../shared/SalonBranchFilters';
 import { BOOKING_FILTER_KEYS, bookingExportParams, bookingQueryOf } from './bookingFilters';
 
 const OPTIONS = { filterKeys: BOOKING_FILTER_KEYS };
@@ -46,6 +47,7 @@ export default function BookingsPage() {
     { key: 'ref', header: t('bookings.reference'), ltr: true, render: (r) => r.referenceNumber },
     { key: 'customer', header: t('bookings.customer'), render: (r) => r.customer?.name ?? '—' },
     { key: 'salon', header: t('bookings.salon'), render: (r) => r.salon?.name ?? '—' },
+    { key: 'branch', header: t('branches.name'), render: (r) => r.branch?.name ?? '—' },
     {
       key: 'when',
       header: t('bookings.appointment'),
@@ -98,6 +100,7 @@ export default function BookingsPage() {
     ...chip('from', t('bookings.from'), f('from')),
     ...chip('to', t('bookings.to'), f('to')),
     ...chip('salon', t('bookings.salon'), f('salon')),
+    ...chip('branch', t('branches.name'), f('branch')),
     ...chip('customer', t('bookings.customer'), f('customer')),
   ];
   const data = query.data;
@@ -129,6 +132,16 @@ export default function BookingsPage() {
               label={t('bookings.search')}
               initialValue={state.search}
               onSearch={list.setSearch}
+            />
+            <SalonBranchFilters
+              salon={f('salon')}
+              branch={f('branch')}
+              onChange={(v) =>
+                list.setFilters({
+                  salon: v.salon ? [v.salon] : [],
+                  branch: v.branch ? [v.branch] : [],
+                })
+              }
             />
             <Select
               label={t('salons.state')}

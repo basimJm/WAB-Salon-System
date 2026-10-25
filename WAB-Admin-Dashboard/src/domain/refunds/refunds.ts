@@ -10,6 +10,7 @@ export interface Refund {
   readonly bookingId: string | null;
   readonly transactionId: string;
   readonly salonId: string;
+  readonly branchId: string | null;
   readonly customerId: string;
   readonly amount: string;
   readonly source: RefundSource;
@@ -26,6 +27,8 @@ export interface Refund {
 export interface RefundQuery extends PageQuery {
   status?: RefundStatus;
   bookingId?: string;
+  salonId?: string;
+  branchId?: string;
 }
 
 export interface RefundsRepository {

@@ -59,6 +59,7 @@ export function bookingsRoutes(): readonly MockRoute[] {
             (!query.get('tab') || query.get('tab') !== 'PENDING' || r.status === 'PENDING') &&
             (query.get('brideOnly') !== 'true' || r.hasBride) &&
             (!query.get('paymentStatus') || r.paymentStatus === query.get('paymentStatus')) &&
+            (!query.get('branchId') || r.branch?.id === query.get('branchId')) &&
             `${r.referenceNumber} ${r.customer.name} ${r.salon.name}`.toLowerCase().includes(q),
         );
         return {

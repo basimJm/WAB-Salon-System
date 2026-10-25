@@ -20,6 +20,8 @@ export function reviewFilters(state: ListState): {
   const status = REVIEW_STATUSES.find((s) => s === state.filters['status']?.[0]) ?? DEFAULT_STATUS;
   const target = REVIEW_TARGETS.find((x) => x === state.filters['target']?.[0]);
   const rating = RATINGS.find((x) => String(x) === state.filters['rating']?.[0]);
+  const salon = state.filters['salon']?.[0];
+  const branch = state.filters['branch']?.[0];
   return {
     status,
     target,
@@ -30,6 +32,8 @@ export function reviewFilters(state: ListState): {
       status,
       ...(target ? { target } : {}),
       ...(rating ? { rating } : {}),
+      ...(salon ? { salonId: salon } : {}),
+      ...(salon && branch ? { branchId: branch } : {}),
     },
   };
 }
