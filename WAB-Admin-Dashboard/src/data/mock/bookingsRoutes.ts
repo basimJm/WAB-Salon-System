@@ -3,6 +3,7 @@ import { OPERATIONS } from '../contract/generated/operations';
 import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
+import { MOCK_BRANCH_IDS, bookingBranchRef } from './branchesFixture';
 
 interface Seed {
   n: number;
@@ -28,6 +29,7 @@ const make = ({ n, status, payment, bride, total }: Seed) => ({
   personsCount: n,
   total,
   salon: { id: '64f000000000000000000001', name: 'Noor Salon' },
+  branch: bookingBranchRef(n === 2 ? MOCK_BRANCH_IDS.noorSecond : MOCK_BRANCH_IDS.noorMain),
   customer: { id: '64g000000000000000000001', name: 'Dana Khoury', phone: '+962790000301' },
   staff: [{ id: '64f0000000000000000000a2', name: 'Sara Ali' }],
 });
@@ -57,6 +59,7 @@ export function bookingsRoutes(): readonly MockRoute[] {
             (!query.get('tab') || query.get('tab') !== 'PENDING' || r.status === 'PENDING') &&
             (query.get('brideOnly') !== 'true' || r.hasBride) &&
             (!query.get('paymentStatus') || r.paymentStatus === query.get('paymentStatus')) &&
+            (!query.get('branchId') || r.branch?.id === query.get('branchId')) &&
             `${r.referenceNumber} ${r.customer.name} ${r.salon.name}`.toLowerCase().includes(q),
         );
         return {

@@ -1,5 +1,7 @@
 package com.fab.wab.customer.core.domain.booking
 
+import com.fab.wab.customer.core.domain.salon.BranchRef
+
 /** One row of `GET /bookings` (PRD S14 card); instants are ISO UTC, money is JOD text. */
 data class BookingSummary(
     val id: String,
@@ -14,5 +16,6 @@ data class BookingSummary(
     val total: String,
     val salonId: String?,
     val salonName: String?,
+    val branch: BranchRef? = null,
     val staffNames: List<String>,
 )

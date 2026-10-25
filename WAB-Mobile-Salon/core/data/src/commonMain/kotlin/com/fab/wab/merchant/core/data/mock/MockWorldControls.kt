@@ -23,4 +23,8 @@ class MockWorldControls(environment: AppEnvironment) : MockControls {
             },
         )
     }
+
+    override fun markBookingPending(bookingId: String) {
+        if (enabled) MockScenarios.markBookingPending(bookingId)
+    }
 }

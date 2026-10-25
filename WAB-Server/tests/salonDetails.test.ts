@@ -31,6 +31,7 @@ const m = {
   leaves: createFakeModel(),
 };
 const saved = new Set<string>();
+const tracked: { name: string; salonId?: string }[] = [];
 const favorites: FavoriteLookup = {
   among: (_c, ids) => Promise.resolve(new Set(ids.filter((id) => saved.has(id)))),
 };
@@ -48,6 +49,12 @@ const app = createApp({
       storage: new FakeStorageProvider(),
       settings: { get: (key: string) => Promise.resolve(SETTING_DEFAULTS[key as never]) },
       favorites,
+      events: {
+        track: (event) => {
+          tracked.push(event as { name: string; salonId?: string });
+          return Promise.resolve(true);
+        },
+      },
       reviews: {
         latest: ({ staffId, limit }) =>
           Promise.resolve([
@@ -191,6 +198,15 @@ describe('GET /customer/v1/salons/:salonId', () => {
     expect(d.upcomingClosures.map((c) => c.reason)).toEqual(['Holiday']);
     expect(d.staff).toEqual([expect.objectContaining({ firstName: 'Lina', status: 'ON_DUTY' })]);
     expect(JSON.stringify(d)).not.toContain('Secret');
+  });
+
+  it('counts a profile view for merchant statistics (salon.viewed)', async () => {
+    addSalon();
+    tracked.length = 0;
+    await request(app).get(`/customer/v1/salons/${salonId.toHexString()}`);
+    expect(tracked).toEqual([
+      expect.objectContaining({ name: 'salon.viewed', salonId: salonId.toHexString() }),
+    ]);
   });
 
   it('answers in Arabic by default', async () => {

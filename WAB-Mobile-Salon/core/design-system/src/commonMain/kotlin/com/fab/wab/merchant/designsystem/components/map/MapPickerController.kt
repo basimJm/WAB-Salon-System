@@ -1,4 +1,4 @@
-package com.fab.wab.merchant.feature.salon.presentation.controller.profile
+package com.fab.wab.merchant.designsystem.components.map
 
 import com.fab.wab.merchant.core.domain.location.MapDefaults
 import com.fab.wab.merchant.core.domain.location.ReverseGeocoder
@@ -8,13 +8,12 @@ import com.fab.wab.merchant.core.domain.repository.PlacesRepository
 import com.fab.wab.merchant.core.ui.permission.AppPermission
 import com.fab.wab.merchant.core.ui.permission.PermissionFlow
 import com.fab.wab.merchant.core.ui.permission.PermissionOutcome
-import com.fab.wab.merchant.designsystem.components.map.PlaceSuggestionUi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.math.abs
 
-/** Platform services behind the M13 map picker. */
-class ProfileMapDependencies(
+/** Platform services behind the map picker (salon profile M13, branch form). */
+class MapPickerDependencies(
     val geocoder: ReverseGeocoder,
     val places: PlacesRepository,
     val location: DeviceLocationProvider,
@@ -31,7 +30,7 @@ sealed interface LocateResult {
 }
 
 /** Geocoding, place search and the device position for the map picker; the view model owns the state. */
-class ProfileMapController(private val deps: ProfileMapDependencies) {
+class MapPickerController(private val deps: MapPickerDependencies) {
 
     fun startPoint(current: LocationData?): LocationData = current ?: LocationData(
         MapDefaults.DEFAULT_LATITUDE,

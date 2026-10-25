@@ -35,10 +35,18 @@ object MockScenarios {
     private val state = MutableStateFlow(MockScenario.Success)
     private val salon = MutableStateFlow<MockSalonState?>(null)
     private val signedIn = MutableStateFlow<MockMember?>(null)
+    private val pending = MutableStateFlow<Set<String>>(emptySet())
 
     val current: StateFlow<MockScenario> = state.asStateFlow()
     val salonState: StateFlow<MockSalonState?> = salon.asStateFlow()
     val member: StateFlow<MockMember?> = signedIn.asStateFlow()
+
+    /** Booking ids `GET /bookings/{id}` answers as PENDING (dev booking-request triggers, PRD M10). */
+    val pendingBookings: StateFlow<Set<String>> = pending.asStateFlow()
+
+    fun markBookingPending(bookingId: String) {
+        pending.value = pending.value + bookingId
+    }
 
     fun set(scenario: MockScenario) {
         state.value = scenario
@@ -57,5 +65,6 @@ object MockScenarios {
         state.value = MockScenario.Success
         salon.value = null
         signedIn.value = null
+        pending.value = emptySet()
     }
 }

@@ -30,6 +30,8 @@ internal data class RefreshMemberDto(
     @SerialName("firstName") val firstName: String? = null,
     @SerialName("role") val role: String? = null,
     @SerialName("permissions") val permissions: List<String>? = null,
+    /** Branch of a manager / employee (BUSINESS_DOMAIN §6); absent for the owner and on older servers. */
+    @SerialName("branchId") val branchId: String? = null,
 )
 
 @Serializable
@@ -42,7 +44,13 @@ internal data class RefreshTokensDto(
 /** The member of a merchant refresh, when it is complete enough to identify the session. */
 internal fun RefreshMemberDto.toProfile(): MemberProfile? {
     val role = MemberRole.fromCode(role) ?: return null
-    return MemberProfile(id = id ?: return null, salonId = salonId ?: return null, firstName = firstName.orEmpty(), role = role)
+    return MemberProfile(
+        id = id ?: return null,
+        salonId = salonId ?: return null,
+        firstName = firstName.orEmpty(),
+        role = role,
+        branchId = branchId?.takeIf { role != MemberRole.OWNER && it.isNotBlank() },
+    )
 }
 
 /** Base success envelope of the backend (`WAB-Server/CLAUDE.md` §6): `{ success, message, data }`. */

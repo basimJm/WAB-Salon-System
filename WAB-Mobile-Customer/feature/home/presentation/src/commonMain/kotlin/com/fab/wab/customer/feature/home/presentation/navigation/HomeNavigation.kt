@@ -42,7 +42,7 @@ class HomeNavigation(
         LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.onEvent(UiAction.OnResume) }
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
-                is SideEffect.OpenSalon -> navigateTo(Screen.SalonDetails(effect.salonId))
+                is SideEffect.OpenSalon -> navigateTo(Screen.SalonDetails(effect.salonId, effect.branchId))
                 is SideEffect.OpenAllSalons ->
                     navigateTo(Screen.AllSalons(effect.gender.code, effect.serviceId, effect.serviceName, effect.filter?.code))
                 is SideEffect.OpenAllServices -> navigateTo(Screen.AllServices(effect.gender.code))

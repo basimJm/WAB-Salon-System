@@ -22,6 +22,8 @@ export interface ListController {
   setPageSize: (size: number) => void;
   setSort: (sort: ListSort | null) => void;
   setFilter: (key: string, values: readonly string[]) => void;
+  /** Several filters in one URL change (e.g. salon + branch), so one does not undo the other. */
+  setFilters: (changes: Readonly<Record<string, readonly string[]>>) => void;
   clearFilters: () => void;
 }
 
@@ -77,6 +79,10 @@ export function useListController(options: ListStateOptions): ListController {
     setSort: useCallback((sort) => commit({ sort }), [commit]),
     setFilter: useCallback(
       (key, values) => commit({ filters: { ...stateRef.current.filters, [key]: values } }),
+      [commit],
+    ),
+    setFilters: useCallback(
+      (changes) => commit({ filters: { ...stateRef.current.filters, ...changes } }),
       [commit],
     ),
     clearFilters: useCallback(() => commit({ filters: {}, search: '' }), [commit]),

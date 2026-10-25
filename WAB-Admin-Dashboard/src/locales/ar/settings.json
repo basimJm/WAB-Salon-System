@@ -21,7 +21,8 @@
       "pagination": "حجم الصفحة",
       "uploads": "الرفع",
       "alerts": "حدود التنبيهات",
-      "platform": "المنصة"
+      "platform": "المنصة",
+      "branches": "فروع الصالونات"
     },
     "unit": {
       "km": "كم",
@@ -81,7 +82,8 @@
       "alerts_paymentFailures_ratePct": "نسبة فشل الدفع التي تطلق تنبيهًا",
       "alerts_paymentFailures_rateWindowMin": "نافذة هذه النسبة",
       "alerts_api5xxRatePct": "نسبة أخطاء الخادم التي تطلق تنبيهًا",
-      "alerts_crashesPerHour": "انهيارات التطبيق في الساعة التي تطلق تنبيهًا"
+      "alerts_crashesPerHour": "انهيارات التطبيق في الساعة التي تطلق تنبيهًا",
+      "salon_maxBranches": "أقصى عدد للفروع لكل صالون"
     },
     "notSet": "غير محدد",
     "tabsLabel": "أقسام الإعدادات",

@@ -33,6 +33,7 @@ internal object BookingsParams {
     const val STATUS = "status"
     const val BRIDE_ONLY = "brideOnly"
     const val PAYMENT_STATUS = "paymentStatus"
+    const val BRANCH_ID = "branchId"
 }
 
 class BookingsApi(private val client: HttpClient) {
@@ -78,4 +79,5 @@ private fun HttpRequestBuilder.queryOf(query: BookingQuery, page: Int, pageSize:
     filter.statuses.forEach { parameter(BookingsParams.STATUS, it.name) }
     if (filter.brideOnly) parameter(BookingsParams.BRIDE_ONLY, true)
     filter.paymentStatus?.let { parameter(BookingsParams.PAYMENT_STATUS, it.name) }
+    query.branchId?.let { parameter(BookingsParams.BRANCH_ID, it) }
 }

@@ -3,9 +3,13 @@ import { OBJECT_ID_PATTERN } from '../../constants/database';
 import {
   BOOKING_PAYMENT_STATUSES,
   BOOKING_STATUSES,
+  CUSTOMER_STATUSES,
+  GENDERS,
   TRANSACTION_STATUSES,
   TRANSACTION_TYPES,
 } from '../../constants/enums';
+import { SALON_STATES } from '../../constants/salon';
+import { SUBSCRIPTION_STATUSES } from '../../constants/subscriptions';
 import { EXPORT_FORMATS } from '../../constants/exports';
 import { REPORT_MONTH_PATTERN } from '../../constants/reports';
 import { isLocalDate } from '../../utils/time';
@@ -69,6 +73,27 @@ export const exportRequestSchema = z.discriminatedUnion('kind', [
       /** Appointment days (Asia/Amman), both inclusive. */
       from: day.optional(),
       to: day.optional(),
+      q: z.string().trim().min(1).max(100).optional(),
+    }),
+  }),
+  z.object({
+    kind: z.literal('CUSTOMERS'),
+    format: z.enum(EXPORT_FORMATS),
+    params: z.object({
+      status: z.enum(CUSTOMER_STATUSES).optional(),
+      gender: z.enum(GENDERS).optional(),
+      cityId: objectId.optional(),
+      q: z.string().trim().min(1).max(100).optional(),
+    }),
+  }),
+  z.object({
+    kind: z.literal('SALONS'),
+    format: z.enum(EXPORT_FORMATS),
+    params: z.object({
+      state: z.enum(SALON_STATES).optional(),
+      gender: z.enum(GENDERS).optional(),
+      cityId: objectId.optional(),
+      subscription: z.enum(SUBSCRIPTION_STATUSES).optional(),
       q: z.string().trim().min(1).max(100).optional(),
     }),
   }),

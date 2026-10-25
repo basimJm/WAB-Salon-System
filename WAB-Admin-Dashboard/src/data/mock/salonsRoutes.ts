@@ -3,6 +3,7 @@ import { OPERATIONS } from '../contract/generated/operations';
 import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
+import { createBranchStore, type BranchStore } from './branchStore';
 
 const AMMAN = '64a000000000000000000001';
 const IRBID = '64a000000000000000000002';
@@ -56,7 +57,7 @@ export const MOCK_SALONS = [
   }),
 ];
 
-const details = (s: (typeof MOCK_SALONS)[number]) => ({
+const details = (s: (typeof MOCK_SALONS)[number], store: BranchStore) => ({
   ...s,
   deletionApprovedAt: null as string | null,
   description: 'Hair, nails and bridal packages',
@@ -80,11 +81,12 @@ const details = (s: (typeof MOCK_SALONS)[number]) => ({
         currentPeriodEnd: null,
       }
     : null,
+  branches: store.list(s.id),
 });
 
 type Mock = (typeof MOCK_SALONS)[number];
 
-export function salonsRoutes(): readonly MockRoute[] {
+export function salonsRoutes(store: BranchStore = createBranchStore()): readonly MockRoute[] {
   const changes = new Map<string, Partial<Mock>>();
   let payout: { bankName: string; accountHolderName: string; iban: string } | null = null;
   const find = (id: string | undefined): Mock => {
@@ -124,7 +126,7 @@ export function salonsRoutes(): readonly MockRoute[] {
           ...changes.get(salon.id),
           gender: (body as { gender: 'MALE' | 'FEMALE' }).gender,
         });
-        return { data: details(find(params['id'])) };
+        return { data: details(find(params['id']), store) };
       },
     ),
     mockRoute(
@@ -155,35 +157,10 @@ export function salonsRoutes(): readonly MockRoute[] {
     mockRoute(
       defineEndpoint(O.getSalonsById, { data: dto.getSalonsByIdDataSchema }),
       ({ params }) => ({
-        data: details(find(params['id'])),
+        data: details(find(params['id']), store),
       }),
     ),
 
-    mockRoute(
-      defineEndpoint(OPERATIONS.getSalonsByIdMembers, { data: dto.getSalonsByIdMembersDataSchema }),
-      () => ({
-        data: [
-          {
-            id: '64f0000000000000000000a1',
-            name: 'Maha Haddad',
-            phone: '+962790000101',
-            role: 'OWNER',
-            active: true,
-            providesServices: false,
-            permissions: ['BOOKINGS_VIEW_ALL', 'FINANCE_VIEW'],
-          },
-          {
-            id: '64f0000000000000000000a2',
-            name: 'Sara Ali',
-            phone: '+962790000102',
-            role: 'EMPLOYEE',
-            active: true,
-            providesServices: true,
-            permissions: [],
-          },
-        ],
-      }),
-    ),
     mockRoute(
       defineEndpoint(OPERATIONS.getSalons, {
         data: dto.getSalonsDataSchema,

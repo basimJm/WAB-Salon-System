@@ -20,9 +20,9 @@ import com.fab.wab.merchant.feature.salon.domain.ProfileField
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.ProfileImage
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract.SideEffect
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract.UiAction
-import com.fab.wab.merchant.feature.salon.presentation.controller.profile.PLACE_SEARCH_DEBOUNCE_MS
-import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapController
-import com.fab.wab.merchant.feature.salon.presentation.controller.profile.ProfileMapDependencies
+import com.fab.wab.merchant.designsystem.components.map.PLACE_SEARCH_DEBOUNCE_MS
+import com.fab.wab.merchant.designsystem.components.map.MapPickerController
+import com.fab.wab.merchant.designsystem.components.map.MapPickerDependencies
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonProfileDependencies
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonProfileViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,8 +57,8 @@ class SalonProfileViewModelTest {
             filePicker = picker,
             cropper = cropper,
             upload = UploadFileUseCase(uploads),
-            map = ProfileMapController(
-                ProfileMapDependencies(ReverseGeocoder { _, _ -> "Mecca St" }, FakePlaces(), device, PermissionFlow(permissions), { "ar" }),
+            map = MapPickerController(
+                MapPickerDependencies(ReverseGeocoder { _, _ -> "Mecca St" }, FakePlaces(), device, PermissionFlow(permissions), { "ar" }),
             ),
             analytics = NoOpAnalyticsTracker,
             errorText = { "failed" },

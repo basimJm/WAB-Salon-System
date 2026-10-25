@@ -25,6 +25,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 
 private const val LEAVE_ID = "leaveId"
+private const val BRANCH_ID = "branchId"
 private const val PAGE = "page"
 private const val PAGE_SIZE = "pageSize"
 
@@ -50,11 +51,17 @@ class StaffApi(private val client: HttpClient) {
     suspend fun deleteLeave(id: String, leaveId: String): BaseResponse<JsonElement?> =
         client.delete(MerchantOperations.deleteTeamMembersByIdLeavesByLeaveId.pathWith(ID to id, LEAVE_ID to leaveId)).body()
 
-    suspend fun services(page: Int, pageSize: Int): BaseResponse<List<GetSalonServicesDataItem>> =
-        client.get(MerchantOperations.getSalonServices.path) {
+    /** The member's branch services (`/branches/{branchId}/services`) or the salon-level list when [branchId] is null. */
+    suspend fun services(branchId: String?, page: Int, pageSize: Int): BaseResponse<List<GetSalonServicesDataItem>> =
+        client.get(
+            branchId?.let { MerchantOperations.getBranchesByBranchIdServices.pathWith(BRANCH_ID to it) }
+                ?: MerchantOperations.getSalonServices.path,
+        ) {
             parameter(PAGE, page)
             parameter(PAGE_SIZE, pageSize)
         }.body()
 
-    suspend fun hours(): BaseResponse<GetSalonHoursData> = client.get(MerchantOperations.getSalonHours.path).body()
+    suspend fun hours(branchId: String?): BaseResponse<GetSalonHoursData> = client.get(
+        branchId?.let { MerchantOperations.getBranchesByBranchIdHours.pathWith(BRANCH_ID to it) } ?: MerchantOperations.getSalonHours.path,
+    ).body()
 }

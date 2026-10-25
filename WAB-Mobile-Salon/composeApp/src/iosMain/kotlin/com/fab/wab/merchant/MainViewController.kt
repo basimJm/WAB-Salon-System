@@ -2,6 +2,7 @@ package com.fab.wab.merchant
 
 import androidx.compose.ui.window.ComposeUIViewController
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
+import com.fab.wab.merchant.app.request.IosBookingRequests
 import com.fab.wab.merchant.app.ui.App
 import com.fab.wab.merchant.app.ui.appModules
 import com.fab.wab.merchant.core.domain.AppSettings
@@ -25,6 +26,7 @@ fun initKoin() {
     startKoin {
         modules(appModules + iosAppEnvironmentModule())
     }
+    KoinPlatform.getKoin().get<IosBookingRequests>().start()
 }
 
 // Called from AppDelegate.swift, so the compiler sees no Kotlin caller.
@@ -55,3 +57,9 @@ fun pushReceivedInForeground(userInfo: Map<Any?, *>, title: String?, body: Strin
 fun pushTapped(userInfo: Map<Any?, *>, title: String?, body: String?) {
     pushNotificationOf(pushPayload(userInfo), title, body)?.let(PushSignals::tapped)
 }
+
+// Called from AppDelegate.swift (a tap or an action on a system notification), so the compiler sees no Kotlin caller.
+@Suppress("unused")
+fun notificationResponse(userInfo: Map<Any?, *>, action: String, completion: () -> Unit): Boolean =
+    KoinPlatform.getKoin().get<IosBookingRequests>().onResponse(pushPayload(userInfo), action, completion)
+

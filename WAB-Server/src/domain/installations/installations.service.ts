@@ -30,6 +30,8 @@ export interface InstallationService {
   }): Promise<RegisterResult>;
   /** Customer's account-wide push switch (Customer PRD §3, notifications toggle). */
   setPushEnabled(input: { customerId: string; enabled: boolean }): Promise<void>;
+  /** The merchant app's push switch (M25) for an active member. */
+  setMemberPushEnabled(input: { memberId: string; enabled: boolean }): Promise<void>;
 }
 
 export interface InstallationServiceDeps {
@@ -88,6 +90,12 @@ export const createInstallationService = (deps: InstallationServiceDeps): Instal
       const customer = await customers.findById(customerId);
       if (customer === null || customer.status !== 'ACTIVE') throw new UnauthorizedError();
       await customers.updateById(customer.id, { pushEnabled: enabled });
+    },
+
+    async setMemberPushEnabled({ memberId, enabled }) {
+      const member = await members.findById(memberId);
+      if (member?.active !== true) throw new UnauthorizedError();
+      await members.updateById(member.id, { pushEnabled: enabled });
     },
   };
 };

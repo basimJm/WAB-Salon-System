@@ -244,6 +244,15 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun nearestEntryOpensTheSalonWithItsBranchPreselected() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        vm.onEvent(UiAction.OnSalonClick("s1", "b2"))
+        assertEquals(SideEffect.OpenSalon("s1", "b2"), effects.last())
+        vm.onEvent(UiAction.OnSalonClick("s1"))
+        assertEquals(SideEffect.OpenSalon("s1", null), effects.last())
+    }
+
+    @Test
     fun firstLoadFailureShowsTheErrorState() = runTest(UnconfinedTestDispatcher()) {
         repository.result = AppResult.Error(AppError.UnknownError("boom"))
         val state = viewModel().state.value

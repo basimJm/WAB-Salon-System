@@ -56,6 +56,13 @@
     <string name="error_code_salon_not_found">Salon not available.</string>
     <string name="error_code_salon_not_bookable">This salon is not accepting bookings right now.</string>
     <string name="error_code_salon_closed">The salon is closed at that time.</string>
+    <string name="error_code_branch_not_found">This branch could not be found.</string>
+    <string name="error_code_branch_not_bookable">This branch is not accepting bookings right now.</string>
+    <string name="error_code_branch_required">Choose a branch first.</string>
+    <string name="error_code_branch_limit_reached">You have reached the maximum number of branches.</string>
+    <string name="error_code_branch_has_upcoming_bookings">This branch has upcoming bookings. Cancel or complete them before closing it.</string>
+    <string name="error_code_last_branch">The last open branch of the salon cannot be closed.</string>
+    <string name="error_code_branch_scope_denied">You can only manage your own branch.</string>
     <string name="error_code_gender_mismatch">This salon does not serve the selected gender.</string>
     <string name="error_code_too_many_companions">You can add up to 5 companions.</string>
     <string name="error_code_service_unavailable">One of the selected services is no longer available.</string>
@@ -215,4 +222,7 @@
     <string name="contact_call">Call</string>
     <string name="contact_whatsapp">WhatsApp</string>
     <string name="contact_email">Email</string>
+    <string name="branch_all">All branches</string>
+    <string name="branch_closed_name">%1$s (closed)</string>
+    <string name="branch_switcher_label">Branch</string>
 </resources>

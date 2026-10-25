@@ -8,6 +8,8 @@ import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.ErrorCode
 import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
+import com.fab.wab.customer.core.domain.salon.BranchRules
+import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.core.ui.external.ExternalActions
@@ -35,6 +37,7 @@ class SalonDetailsDependencies(
 class SalonDetailsViewModel(
     private val salonId: String,
     private val deps: SalonDetailsDependencies,
+    private val initialBranchId: String? = null,
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
@@ -57,6 +60,7 @@ class SalonDetailsViewModel(
             UiAction.OnCallClick -> call()
             UiAction.OnWhatsAppClick -> whatsApp()
             UiAction.OnHoursToggle -> updateState { copy(hoursExpanded = !hoursExpanded) }
+            is UiAction.OnBranchSelect -> selectBranch(event.branchId)
             UiAction.OnBookClick -> book()
             UiAction.OnDialogConfirm -> confirmDialog()
             UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
@@ -88,13 +92,26 @@ class SalonDetailsViewModel(
         }
     }
 
-    private fun salon() = uiState.value.salon
+    /** The salon at the selected branch: contacts, maps and hours follow the branch selector. */
+    private fun salon() = uiState.value.view
+
+    private fun selectBranch(branchId: String) {
+        if (uiState.value.branches.none { it.id == branchId } || uiState.value.selectedBranchId == branchId) return
+        track(SalonAnalytics.ACTION_BRANCH, SalonAnalytics.PARAM_BRANCH to branchId)
+        updateState { copy(selectedBranchId = branchId) }
+    }
+
+    /** Keep the customer's choice across refreshes while the branch is still listed, else the requested / main one. */
+    private fun branchAfterLoad(salon: SalonDetails): String? =
+        BranchRules.initialBranch(salon.branches, uiState.value.selectedBranchId ?: initialBranchId)?.id
 
     private fun load(refresh: Boolean = false) {
         scope.launch {
             updateState { copy(loading = !refresh, refreshing = refresh, error = null, offline = false) }
             when (val result = deps.getSalonDetails(salonId)) {
-                is AppResult.Success -> updateState { copy(loading = false, refreshing = false, salon = result.data) }
+                is AppResult.Success -> updateState {
+                    copy(loading = false, refreshing = false, salon = result.data, selectedBranchId = branchAfterLoad(result.data))
+                }
                 is AppResult.Error -> {
                     if (result.appError.isSalonMissing()) {
                         updateState { copy(loading = false, refreshing = false) }
@@ -123,13 +140,13 @@ class SalonDetailsViewModel(
         val salon = salon() ?: return
         val location = salon.location ?: return
         track(SalonAnalytics.ACTION_MAPS)
-        deps.external.openMaps(location.latitude, location.longitude, salon.name)
+        deps.external.openMaps(location.latitude, location.longitude, mapsLabel(salon.name, uiState.value.selectedBranch?.name))
     }
 
     /** Always enabled, even when closed (PRD S07 item 12); guests get the auth dialog. */
     private fun book() = authGated {
         track(SalonAnalytics.ACTION_BOOK)
-        emitSideEffect(SideEffect.OpenBooking(salonId))
+        emitSideEffect(SideEffect.OpenBooking(salonId, uiState.value.selectedBranchId))
     }
 
     private fun toggleFavorite() = authGated {
@@ -168,6 +185,12 @@ class SalonDetailsViewModel(
     }
 
 }
+
+/** Maps pin label: "Salon - Branch" when a branch is selected (§5.17), else the salon name. */
+fun mapsLabel(salonName: String, branchName: String?): String =
+    if (branchName.isNullOrBlank()) salonName else salonName + BRANCH_LABEL_SEPARATOR + branchName
+
+private const val BRANCH_LABEL_SEPARATOR = " - "
 
 /** Share payload: the salon name and its link (the platform's share sheet decides the rest). */
 fun shareText(name: String, link: String): String = "$name\n$link"

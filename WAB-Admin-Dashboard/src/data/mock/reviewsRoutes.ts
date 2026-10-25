@@ -3,6 +3,7 @@ import { OPERATIONS } from '../contract/generated/operations';
 import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
+import { MOCK_BRANCH_IDS, reviewBranchRef } from './branchesFixture';
 
 type Status = 'PENDING' | 'APPROVED' | 'REJECTED' | 'REMOVED';
 const review = (n: number, status: Status, rating: number, comment: string | null) => ({
@@ -13,6 +14,7 @@ const review = (n: number, status: Status, rating: number, comment: string | nul
   comment,
   salon: { id: '64f000000000000000000001', name: 'Noor Salon' },
   staff: n === 3 ? { id: '64f0000000000000000000a2', firstName: 'Sara' } : null,
+  branch: reviewBranchRef(n === 2 ? MOCK_BRANCH_IDS.noorSecond : MOCK_BRANCH_IDS.noorMain),
   author: { id: '64g000000000000000000001', firstName: 'Dana', lastName: 'Khoury' },
   authorOtherReviews: n,
   createdAt: `2026-10-0${String(n)}T08:00:00.000Z`,
@@ -47,7 +49,8 @@ export function reviewsRoutes(): readonly MockRoute[] {
           (r) =>
             (!query.get('status') || r.status === query.get('status')) &&
             (!query.get('target') || r.target === query.get('target')) &&
-            (!query.get('rating') || r.rating === Number(query.get('rating'))),
+            (!query.get('rating') || r.rating === Number(query.get('rating'))) &&
+            (!query.get('branchId') || r.branch?.id === query.get('branchId')),
         );
         return {
           data: items,

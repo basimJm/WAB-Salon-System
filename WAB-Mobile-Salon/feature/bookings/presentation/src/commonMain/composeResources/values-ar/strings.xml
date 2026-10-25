@@ -44,6 +44,7 @@
     <string name="details_remaining">المتبقي للتحصيل</string>
     <string name="details_refunded">المسترد</string>
     <string name="details_policy">سياسة الحجز (وقت الحجز)</string>
+    <string name="details_branch">الفرع</string>
     <string name="details_history">سجل الحالة</string>
     <string name="details_reject_reason">سبب الرفض</string>
     <string name="details_cancel_reason">سبب الإلغاء</string>
@@ -98,6 +99,7 @@
     <string name="service_line">%1$s · %2$d د · %3$s</string>
     <string name="history_line">%1$s · %2$s</string>
     <string name="request_time_range">%1$s – %2$s</string>
+    <string name="request_later">لاحقاً (يبقى معلّقاً)</string>
     <string name="request_another_member">عضو آخر في الفريق</string>
     <string name="actor_customer">العميل</string>
     <string name="actor_member">الصالون</string>

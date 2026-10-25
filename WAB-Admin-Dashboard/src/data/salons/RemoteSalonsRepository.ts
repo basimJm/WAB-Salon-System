@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ApiClient } from '@/data/api/ApiClient';
 import { defineEndpoint } from '@/data/api/endpoint';
+import { branchQuerySchema } from '@/data/api/objectId';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
@@ -41,6 +42,7 @@ const decision = defineEndpoint(OPERATIONS.postSalonsByIdDeletionRequestDecision
 const getSalon = defineEndpoint(OPERATIONS.getSalonsById, { data: dto.getSalonsByIdDataSchema });
 const getMembers = defineEndpoint(OPERATIONS.getSalonsByIdMembers, {
   data: dto.getSalonsByIdMembersDataSchema,
+  query: branchQuerySchema,
 });
 
 const offline = defineEndpoint(OPERATIONS.postSalonsByIdOffline, {
@@ -87,8 +89,9 @@ export class RemoteSalonsRepository implements SalonsRepository {
     return (await this.api.execute(getSalon, { params: { id } })).data;
   }
 
-  async members(id: string) {
-    return (await this.api.execute(getMembers, { params: { id } })).data;
+  async members(id: string, branchId?: string) {
+    const query = branchId ? { branchId } : undefined;
+    return (await this.api.execute(getMembers, { params: { id }, query })).data;
   }
 
   async setOffline(id: string, reason: string) {

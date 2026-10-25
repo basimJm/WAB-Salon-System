@@ -25,7 +25,6 @@ import com.fab.wab.customer.designsystem.resources.common_back
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.designsystem.utils.brandBackground
 import com.fab.wab.customer.designsystem.utils.brandBrush
-import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingStep
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -72,13 +71,13 @@ internal fun BookingHeader(title: String, subtitle: String, onBack: () -> Unit, 
  * `margin-bottom:8px`, then `font-size:12px`: step label `700 accent` at Start and the person label `muted` at End.
  */
 @Composable
-internal fun BookingProgress(current: Int, stepLabel: String, personLabel: String, modifier: Modifier = Modifier) {
+internal fun BookingProgress(current: Int, count: Int, stepLabel: String, personLabel: String, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val shape = roundedShape(BookingDesignConstants.stepBarRadius)
     val brush = brandBrush()
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(BookingDesignConstants.stepBarGap)) {
-            repeat(BookingStep.entries.size) { index ->
+            repeat(count) { index ->
                 val bar = Modifier.weight(1f).height(BookingDesignConstants.stepBarHeight)
                 Box(if (index <= current) bar.brandBackground(brush, shape) else bar.background(colors.line, shape))
             }

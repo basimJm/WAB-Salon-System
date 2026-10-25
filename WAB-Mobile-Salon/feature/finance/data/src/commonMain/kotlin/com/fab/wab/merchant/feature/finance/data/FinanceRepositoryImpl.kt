@@ -32,16 +32,27 @@ internal object FinanceParams {
     const val PAGE_SIZE = "pageSize"
     const val FROM = "from"
     const val TO = "to"
+    const val BRANCH_ID = "branchId"
 }
 
 class FinanceApi(private val client: HttpClient) {
     suspend fun balance(): BaseResponse<GetFinanceBalanceData> = client.get(MerchantOperations.getFinanceBalance.path).body()
 
-    suspend fun transactions(from: LocalDate, to: LocalDate, page: Int): BaseResponse<List<GetFinanceTransactionsDataItem>> =
-        client.get(MerchantOperations.getFinanceTransactions.path) { range(from, to, page) }.body()
+    suspend fun transactions(
+        from: LocalDate,
+        to: LocalDate,
+        page: Int,
+        branchId: String?,
+    ): BaseResponse<List<GetFinanceTransactionsDataItem>> = client.get(MerchantOperations.getFinanceTransactions.path) {
+        range(from, to, page)
+        branchId?.let { parameter(FinanceParams.BRANCH_ID, it) }
+    }.body()
 
-    suspend fun refunds(from: LocalDate, to: LocalDate, page: Int): BaseResponse<List<GetFinanceRefundsDataItem>> =
-        client.get(MerchantOperations.getFinanceRefunds.path) { range(from, to, page) }.body()
+    suspend fun refunds(from: LocalDate, to: LocalDate, page: Int, branchId: String?): BaseResponse<List<GetFinanceRefundsDataItem>> =
+        client.get(MerchantOperations.getFinanceRefunds.path) {
+            range(from, to, page)
+            branchId?.let { parameter(FinanceParams.BRANCH_ID, it) }
+        }.body()
 
     suspend fun payouts(from: LocalDate, to: LocalDate, page: Int): BaseResponse<List<GetFinancePayoutsDataItem>> =
         client.get(MerchantOperations.getFinancePayouts.path) { range(from, to, page) }.body()
@@ -104,11 +115,11 @@ fun GetFinancePayoutsDataItem.toDomain() =
 class FinanceRepositoryImpl(private val api: FinanceApi) : FinanceRepository {
     override suspend fun balance(): AppResult<FinanceBalance> = safeApiCall { api.balance() }.mapSuccess { it.data.toDomain() }
 
-    override suspend fun transactions(from: LocalDate, to: LocalDate, page: Int): AppResult<List<Transaction>> =
-        safeApiCall { api.transactions(from, to, page) }.mapSuccess { response -> response.data.map { it.toDomain() } }
+    override suspend fun transactions(from: LocalDate, to: LocalDate, page: Int, branchId: String?): AppResult<List<Transaction>> =
+        safeApiCall { api.transactions(from, to, page, branchId) }.mapSuccess { response -> response.data.map { it.toDomain() } }
 
-    override suspend fun refunds(from: LocalDate, to: LocalDate, page: Int): AppResult<List<Refund>> =
-        safeApiCall { api.refunds(from, to, page) }.mapSuccess { response -> response.data.map { it.toDomain() } }
+    override suspend fun refunds(from: LocalDate, to: LocalDate, page: Int, branchId: String?): AppResult<List<Refund>> =
+        safeApiCall { api.refunds(from, to, page, branchId) }.mapSuccess { response -> response.data.map { it.toDomain() } }
 
     override suspend fun payouts(from: LocalDate, to: LocalDate, page: Int): AppResult<List<Payout>> =
         safeApiCall { api.payouts(from, to, page) }.mapSuccess { response -> response.data.map { it.toDomain() } }

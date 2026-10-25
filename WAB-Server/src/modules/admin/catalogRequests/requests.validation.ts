@@ -19,7 +19,7 @@ export const requestsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
 });
 export const requestParams = z.object({ id: z.string().regex(OBJECT_ID_PATTERN) });
 /** The salon wrote one language; the admin supplies both for the catalog entry. */
-export const approveSchema = z.object({
+const createApproval = z.object({
   name: localized(LOCALIZED_TEXT_MAX_LENGTH),
   description: localized(CATALOG_TEXT_MAX_LENGTH),
   /** Needed when the request came without a picture. */
@@ -27,4 +27,8 @@ export const approveSchema = z.object({
   sortOrder: z.number().int().min(0).max(SORT_ORDER_MAX).default(0),
   reason,
 });
+/** SRV-125: the requested service already exists in the catalog under another name. */
+const mapApproval = z.object({ catalogServiceId: z.string().regex(OBJECT_ID_PATTERN), reason });
+/** Either a new catalog entry (names in both languages) or a mapping to an existing one. */
+export const approveSchema = z.union([mapApproval.strict(), createApproval.strict()]);
 export const rejectSchema = z.object({ reason });

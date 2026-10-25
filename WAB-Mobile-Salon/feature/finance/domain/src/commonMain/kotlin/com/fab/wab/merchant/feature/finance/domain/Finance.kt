@@ -91,9 +91,10 @@ object FinanceDefaults {
 interface FinanceRepository {
     suspend fun balance(): AppResult<FinanceBalance>
 
-    suspend fun transactions(from: LocalDate, to: LocalDate, page: Int): AppResult<List<Transaction>>
+    /** [branchId] = the owner's branch choice (MER-064); null = every branch. */
+    suspend fun transactions(from: LocalDate, to: LocalDate, page: Int, branchId: String? = null): AppResult<List<Transaction>>
 
-    suspend fun refunds(from: LocalDate, to: LocalDate, page: Int): AppResult<List<Refund>>
+    suspend fun refunds(from: LocalDate, to: LocalDate, page: Int, branchId: String? = null): AppResult<List<Refund>>
 
     suspend fun payouts(from: LocalDate, to: LocalDate, page: Int): AppResult<List<Payout>>
 }

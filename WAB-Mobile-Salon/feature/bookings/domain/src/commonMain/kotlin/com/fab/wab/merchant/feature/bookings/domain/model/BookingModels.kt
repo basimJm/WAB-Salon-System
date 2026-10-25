@@ -9,7 +9,11 @@ import kotlin.time.Instant
 /** PRD M08 tabs (`GET /bookings?tab`). */
 enum class BookingsTab { PENDING, UPCOMING, TODAY, PAST }
 
-data class StaffRef(val id: String, val name: String)
+/** A staff member; [branchId] = the member's branch (null for the owner or an older server). */
+data class StaffRef(val id: String, val name: String, val branchId: String? = null)
+
+/** The branch of a booking (`branch {id, name, locationText}`, MER-063). */
+data class BranchRef(val id: String, val name: String, val locationText: String?)
 
 /** One row of `GET /bookings` (merchant view); [total] is the contract's JOD decimal text. */
 data class BookingSummary(
@@ -26,6 +30,7 @@ data class BookingSummary(
     val customerName: String,
     val customerPhone: String?,
     val staff: List<StaffRef>,
+    val branch: BranchRef? = null,
 )
 
 /** PRD M08 filter sheet: date range, staff (multi), status (multi), bride only, payment status. */
@@ -48,7 +53,13 @@ data class BookingFilter(
         ).count { it }
 }
 
-data class BookingQuery(val tab: BookingsTab, val text: String = "", val filter: BookingFilter = BookingFilter())
+/** [branchId] = the owner's branch choice (`?branchId=`); null = every branch the member may see. */
+data class BookingQuery(
+    val tab: BookingsTab,
+    val text: String = "",
+    val filter: BookingFilter = BookingFilter(),
+    val branchId: String? = null,
+)
 
 data class BookedService(val name: String, val price: String, val durationMinutes: Int)
 

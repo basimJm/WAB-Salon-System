@@ -26,6 +26,9 @@ private class RecordingControls(override val enabled: Boolean) : MockControls {
     override fun setMember(preset: MockMemberPreset) {
         calls += "member:$preset"
     }
+    override fun markBookingPending(bookingId: String) {
+        calls += "pending:$bookingId"
+    }
 }
 
 private class CountingSalon : SalonRepository {

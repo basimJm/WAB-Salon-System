@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
+import { MEMBERS_QUERY } from '@/constants/branches';
 import { ROUTES } from '@/constants/routes';
 import type { SalonDetails, SalonMember } from '@/domain/salons/salons';
 import { formatInstant, formatNumber } from '@/domain/shared/format';
@@ -12,6 +13,8 @@ import { StatusBadge } from '../components/core/StatusBadge';
 import { DataTable } from '../components/data/DataTable';
 import type { Column } from '../components/data/tableTypes';
 import { DetailPage } from '../components/templates/DetailPage';
+import { Select } from '../components/form/Select';
+import { useBranchOptions } from '../hooks/useBranchOptions';
 import { useLanguage } from '../hooks/useLanguage';
 import { useLocationOptions } from '../hooks/useLocationOptions';
 import { PayoutDetailsPanel } from './PayoutDetailsPanel';
@@ -19,6 +22,7 @@ import { DeletionDecision } from './DeletionDecision';
 import { SalonActions } from './SalonActions';
 import { SalonActivityTab } from './SalonActivityTab';
 import { SalonInsightsTab } from './SalonInsightsTab';
+import { BranchesTab } from './branches/BranchesTab';
 
 const TABS = ['overview', 'members', 'payout'] as const;
 
@@ -75,20 +79,22 @@ function Overview({ salon }: { salon: SalonDetails }) {
   );
 }
 
-function Members({
-  members,
-  loading,
-  error,
-  onRetry,
-}: {
-  members: readonly SalonMember[];
-  loading: boolean;
-  error: unknown;
-  onRetry: () => void;
-}) {
+function Members({ salonId }: { salonId: string }) {
   const { t } = useTranslation();
+  const { repositories } = useContainer();
+  const branches = useBranchOptions(salonId);
+  const [branch, setBranch] = useState('');
+  const members = useQuery({
+    queryKey: [MEMBERS_QUERY, { id: salonId, branch }],
+    queryFn: () => repositories.salons.members(salonId, branch || undefined),
+  });
+  const branchOf = (m: SalonMember) =>
+    m.branchId
+      ? (branches.find((b) => b.value === m.branchId)?.label ?? '—')
+      : t('salons.allBranches');
   const columns: Column<SalonMember>[] = [
     { key: 'name', header: t('salons.name'), render: (m) => m.name },
+    { key: 'branch', header: t('branches.name'), render: branchOf },
     { key: 'phone', header: t('salons.phone'), ltr: true, render: (m) => m.phone },
     {
       key: 'role',
@@ -112,15 +118,25 @@ function Members({
     },
   ];
   return (
-    <DataTable
-      columns={columns}
-      rows={members}
-      rowKey={(m) => m.id}
-      caption={t('salons.members')}
-      loading={loading}
-      error={error}
-      onRetry={onRetry}
-    />
+    <div className="wab-stack">
+      {branches.length > 1 ? (
+        <Select
+          label={t('branches.filter.branch')}
+          value={branch}
+          options={[{ value: '', label: t('branches.filter.all') }, ...branches]}
+          onChange={(e) => setBranch(e.target.value)}
+        />
+      ) : null}
+      <DataTable
+        columns={columns}
+        rows={members.data ?? []}
+        rowKey={(m) => m.id}
+        caption={t('salons.members')}
+        loading={members.isPending}
+        error={members.error}
+        onRetry={() => void members.refetch()}
+      />
+    </div>
   );
 }
 
@@ -134,11 +150,6 @@ export default function SalonDetailsPage() {
   const salon = useQuery({
     queryKey: ['getSalonsById', { id }],
     queryFn: () => repositories.salons.get(id),
-  });
-  const members = useQuery({
-    queryKey: ['getSalonsByIdMembers', { id }],
-    queryFn: () => repositories.salons.members(id),
-    enabled: tab === 'members',
   });
   const s = salon.data;
   return (
@@ -156,6 +167,7 @@ export default function SalonDetailsPage() {
       }
       tabs={[
         { id: 'overview', label: t('salons.overview'), content: s ? <Overview salon={s} /> : null },
+        { id: 'branches', label: t('branches.tab'), content: <BranchesTab salonId={id} /> },
         { id: 'insights', label: t('salons.insights'), content: <SalonInsightsTab id={id} /> },
         {
           id: 'activity',
@@ -166,14 +178,7 @@ export default function SalonDetailsPage() {
         {
           id: 'members',
           label: t('salons.members'),
-          content: (
-            <Members
-              members={members.data ?? []}
-              loading={members.isPending}
-              error={members.error}
-              onRetry={() => void members.refetch()}
-            />
-          ),
+          content: <Members salonId={id} />,
         },
       ]}
       activeTab={tab}

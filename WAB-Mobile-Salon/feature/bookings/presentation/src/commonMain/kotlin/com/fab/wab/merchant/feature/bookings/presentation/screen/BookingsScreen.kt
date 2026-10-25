@@ -15,6 +15,7 @@ import com.fab.wab.merchant.core.domain.booking.BookingStatus
 import com.fab.wab.merchant.core.domain.booking.BookingTimers
 import com.fab.wab.merchant.designsystem.components.booking.AppBookingCard
 import com.fab.wab.merchant.designsystem.components.booking.BookingCardUi
+import com.fab.wab.merchant.designsystem.components.branch.AppBranchSwitcher
 import com.fab.wab.merchant.designsystem.components.chip.ActiveFilterChip
 import com.fab.wab.merchant.designsystem.components.chip.AppFilterChipRow
 import com.fab.wab.merchant.designsystem.components.feedback.AppEmptyState
@@ -54,6 +55,13 @@ fun BookingsScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modif
                 verticalArrangement = Arrangement.spacedBy(spacing.space10),
             ) {
                 AppText(text = stringResource(Res.string.bookings_title), style = AppTheme.typography.headlineMedium)
+                if (state.branchScope.showsSwitcher) {
+                    AppBranchSwitcher(
+                        branches = state.branchScope.branches,
+                        selectedId = state.branchScope.filter,
+                        onSelect = { onAction(UiAction.OnBranchSelect(it)) },
+                    )
+                }
                 AppSearchBar(
                     value = state.query,
                     onValueChange = { onAction(UiAction.OnQueryChange(it)) },
@@ -103,7 +111,7 @@ private fun ListBody(state: UiState, onAction: (UiAction) -> Unit) {
             ),
         ) { booking ->
             AppBookingCard(
-                booking = booking.toCard(state.nowMs),
+                booking = booking.toCard(state.nowMs, showBranch = state.showsBranchOnCards),
                 onClick = { onAction(UiAction.OnBookingClick(booking.id)) },
                 modifier = Modifier.fillMaxWidth().padding(bottom = spacing.space10),
             )
@@ -113,7 +121,7 @@ private fun ListBody(state: UiState, onAction: (UiAction) -> Unit) {
 
 /** List rows have no request time (`createdAt` is on the details only), so the card shows the countdown, not the age. */
 @Composable
-internal fun BookingSummary.toCard(nowMs: Long): BookingCardUi {
+internal fun BookingSummary.toCard(nowMs: Long, showBranch: Boolean = false): BookingCardUi {
     val text = dateTimeText(start)
     val pending = status == BookingStatus.PENDING
     return BookingCardUi(
@@ -130,6 +138,7 @@ internal fun BookingSummary.toCard(nowMs: Long): BookingCardUi {
         autoCancelIn = respondBy?.takeIf {
             pending && nowMs > 0
         }?.let { BookingTimers.autoCancelRemaining(it.toEpochMilliseconds(), nowMs) },
+        branch = branch?.name?.takeIf { showBranch },
     )
 }
 

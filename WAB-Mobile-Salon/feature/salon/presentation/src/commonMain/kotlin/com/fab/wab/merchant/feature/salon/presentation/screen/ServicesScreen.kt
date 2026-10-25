@@ -2,6 +2,7 @@ package com.fab.wab.merchant.feature.salon.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -75,46 +76,58 @@ fun ServicesScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> U
             }
         },
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            when {
-                state.loading -> AppLoadingIndicator(Modifier.align(Alignment.Center))
-                state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
-                state.isEmpty -> AppEmptyState(
-                    title = stringResource(Res.string.services_empty_title),
-                    message = stringResource(Res.string.services_empty_body),
-                    actionText = stringResource(Res.string.services_add),
-                    onAction = { onAction(UiAction.OnAdd) },
-                    modifier = Modifier.align(Alignment.Center).padding(spacing.space24),
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            BranchPicker(state.branchScope, onSelect = { onAction(UiAction.OnBranchSelect(it)) })
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) { ServicesBody(state, onAction) }
+        }
+    }
+    ServicesDialogs(state, onAction)
+}
+
+@Composable
+private fun BoxScope.ServicesBody(state: UiState, onAction: (UiAction) -> Unit) {
+    val spacing = AppTheme.spacing
+    when {
+        state.loading -> AppLoadingIndicator(Modifier.align(Alignment.Center))
+        state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
+        state.isEmpty -> AppEmptyState(
+            title = stringResource(Res.string.services_empty_title),
+            message = stringResource(Res.string.services_empty_body),
+            actionText = stringResource(Res.string.services_add),
+            onAction = { onAction(UiAction.OnAdd) },
+            modifier = Modifier.align(Alignment.Center).padding(spacing.space24),
+        )
+        else -> AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }) {
+            Column {
+                AppSearchBar(
+                    value = state.query,
+                    onValueChange = { onAction(UiAction.OnQuery(it)) },
+                    placeholder = stringResource(Res.string.services_search),
+                    modifier = Modifier.padding(horizontal = spacing.space16, vertical = spacing.space8),
                 )
-                else -> AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }) {
-                    Column {
-                        AppSearchBar(
-                            value = state.query,
-                            onValueChange = { onAction(UiAction.OnQuery(it)) },
-                            placeholder = stringResource(Res.string.services_search),
-                            modifier = Modifier.padding(horizontal = spacing.space16, vertical = spacing.space8),
-                        )
-                        if (state.shown.isEmpty()) {
-                            AppText(
-                                text = stringResource(Res.string.services_no_results),
-                                style = AppTheme.typography.bodyMedium,
-                                color = AppTheme.colors.muted,
-                                modifier = Modifier.padding(spacing.space16),
-                            )
-                        }
-                        LazyColumn(
-                            contentPadding = PaddingValues(spacing.space16),
-                            verticalArrangement = Arrangement.spacedBy(spacing.space10),
-                        ) {
-                            items(state.shown, key = { it.id }, contentType = { SalonService::class }) { service ->
-                                ServiceRow(service, toggling = service.id in state.toggling, onAction = onAction)
-                            }
-                        }
+                if (state.shown.isEmpty()) {
+                    AppText(
+                        text = stringResource(Res.string.services_no_results),
+                        style = AppTheme.typography.bodyMedium,
+                        color = AppTheme.colors.muted,
+                        modifier = Modifier.padding(spacing.space16),
+                    )
+                }
+                LazyColumn(
+                    contentPadding = PaddingValues(spacing.space16),
+                    verticalArrangement = Arrangement.spacedBy(spacing.space10),
+                ) {
+                    items(state.shown, key = { it.id }, contentType = { SalonService::class }) { service ->
+                        ServiceRow(service, toggling = service.id in state.toggling, onAction = onAction)
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ServicesDialogs(state: UiState, onAction: (UiAction) -> Unit) {
     if (state.confirmDeactivate != null) {
         AppDialog(
             title = stringResource(Res.string.service_deactivate_title),

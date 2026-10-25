@@ -101,6 +101,7 @@
       "rejectText": "The request is cleared and the owner is told.",
       "done": "Decision saved",
       "failed": "The decision could not be saved. If bookings are still open, handle them first."
-    }
+    },
+    "allBranches": "All branches (owner)"
   }
 }

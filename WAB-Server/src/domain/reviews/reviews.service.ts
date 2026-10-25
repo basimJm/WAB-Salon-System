@@ -68,7 +68,47 @@ export interface ReviewsDeps {
   readonly settings: Pick<SettingsService, 'get'>;
   /** Branch labels (§5.11); without it reviews carry no branch. */
   readonly branches?: Pick<BranchesRepository, 'findMany' | 'findInSalon'>;
+  /** A review waits for moderation (the admin panel's live queue, `review.created`). */
+  readonly onCreated?: (review: Entity<ReviewRaw>) => void;
 }
+
+/**
+ * Rows → what apps show: the author's first name and the branch label in the request language
+ * (§5.11). Shared by the customer and merchant review lists.
+ */
+export const createReviewViews =
+  (deps: {
+    readonly customers: Pick<CustomersRepository, 'findMany'>;
+    readonly branches?: Pick<BranchesRepository, 'findMany'> | undefined;
+  }) =>
+  async (rows: readonly Entity<ReviewRaw>[], language: Language): Promise<ReviewView[]> => {
+    const ids = [...new Set(rows.map((r) => r.customerId))];
+    const branchIds = [
+      ...new Set(rows.flatMap((r) => (r.branchId === undefined ? [] : [r.branchId]))),
+    ];
+    const [people, labels] = await Promise.all([
+      ids.length === 0 ? [] : deps.customers.findMany({ _id: { $in: ids } }),
+      branchIds.length === 0 || deps.branches === undefined
+        ? []
+        : deps.branches.findMany({ _id: { $in: branchIds } }),
+    ]);
+    const names = new Map(people.map((c) => [c.id, c.firstName]));
+    const branchNames = new Map(labels.map((b) => [b.id, b.name[language]]));
+    return rows.map((r) => {
+      const branchName = r.branchId === undefined ? undefined : branchNames.get(r.branchId);
+      return {
+        id: r.id,
+        customerName: names.get(r.customerId) ?? '',
+        rating: r.rating,
+        comment: r.comment ?? null,
+        createdAt: r.createdAt,
+        branch:
+          r.branchId === undefined || branchName === undefined
+            ? null
+            : { id: r.branchId, name: branchName },
+      };
+    });
+  };
 
 export const createReviewsService = ({
   reviews,
@@ -77,6 +117,7 @@ export const createReviewsService = ({
   customers,
   settings,
   branches,
+  onCreated,
 }: ReviewsDeps): ReviewsService => {
   const targetOf = (staffId: string | undefined): ReviewTarget =>
     staffId === undefined ? 'SALON' : 'STAFF';
@@ -133,37 +174,7 @@ export const createReviewsService = ({
     return branch.id;
   };
 
-  const views = async (
-    rows: readonly Entity<ReviewRaw>[],
-    language: Language,
-  ): Promise<ReviewView[]> => {
-    const ids = [...new Set(rows.map((r) => r.customerId))];
-    const branchIds = [
-      ...new Set(rows.flatMap((r) => (r.branchId === undefined ? [] : [r.branchId]))),
-    ];
-    const [people, labels] = await Promise.all([
-      ids.length === 0 ? [] : customers.findMany({ _id: { $in: ids } }),
-      branchIds.length === 0 || branches === undefined
-        ? []
-        : branches.findMany({ _id: { $in: branchIds } }),
-    ]);
-    const names = new Map(people.map((c) => [c.id, c.firstName]));
-    const branchNames = new Map(labels.map((b) => [b.id, b.name[language]]));
-    return rows.map((r) => {
-      const branchName = r.branchId === undefined ? undefined : branchNames.get(r.branchId);
-      return {
-        id: r.id,
-        customerName: names.get(r.customerId) ?? '',
-        rating: r.rating,
-        comment: r.comment ?? null,
-        createdAt: r.createdAt,
-        branch:
-          r.branchId === undefined || branchName === undefined
-            ? null
-            : { id: r.branchId, name: branchName },
-      };
-    });
-  };
+  const views = createReviewViews({ customers, branches });
 
   const filterOf = (
     salonId: string,
@@ -202,6 +213,7 @@ export const createReviewsService = ({
         ...(comment === undefined || comment === '' ? {} : { comment }),
         status: 'PENDING',
       });
+      onCreated?.(created);
       return { id: created.id, status: 'PENDING' };
     },
 

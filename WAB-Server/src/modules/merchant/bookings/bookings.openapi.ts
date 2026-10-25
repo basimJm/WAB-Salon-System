@@ -16,6 +16,7 @@ import {
   bookingParams,
   cancelAffectedBody,
   decisionBody,
+  eligibleStaffQuery,
   reassignBody,
 } from './bookings.validation';
 
@@ -125,6 +126,32 @@ export const registerMerchantBookingDocs = (registry: OpenAPIRegistry): void => 
         HTTP_STATUS.forbidden,
         HTTP_STATUS.notFound,
         HTTP_STATUS.conflict,
+        HTTP_STATUS.unprocessableEntity,
+        HTTP_STATUS.serviceUnavailable,
+      ),
+    },
+  });
+  registry.registerPath({
+    method: 'get',
+    path: `${API_PREFIXES.merchant}${MERCHANT_BOOKING_ROUTES.base}${MERCHANT_BOOKING_ROUTES.eligibleStaff.replace(':id', '{id}')}`,
+    tags: ['Bookings'],
+    summary:
+      'Staff who could take over one person of an approved booking right now (BOOKINGS_OPERATE; within the booking’s branch). Advisory: reassign re-checks under the lock.',
+    request: {
+      headers: z.object({ 'Accept-Language': acceptLanguageHeader }),
+      params: bookingParams,
+      query: eligibleStaffQuery,
+    },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Eligible staff',
+        successResponseSchema(z.array(z.object({ staffId: z.string(), name: z.string() }))),
+      ),
+      ...errorResponses(
+        HTTP_STATUS.badRequest,
+        HTTP_STATUS.unauthorized,
+        HTTP_STATUS.forbidden,
+        HTTP_STATUS.notFound,
         HTTP_STATUS.unprocessableEntity,
         HTTP_STATUS.serviceUnavailable,
       ),

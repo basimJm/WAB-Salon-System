@@ -9,7 +9,14 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
-import { leaveParams, leavePatchSchema, leaveSchema, memberLeaveParams } from './leaves.validation';
+import { bookingConflictDoc } from '../../shared/salonEdit/conflict.openapi';
+import {
+  leaveParams,
+  leavePatchSchema,
+  leaveRangeSchema,
+  leaveSchema,
+  memberLeaveParams,
+} from './leaves.validation';
 
 const leave = z.object({
   id: z.string(),
@@ -48,6 +55,21 @@ export const registerMerchantLeavesDocs = (registry: OpenAPIRegistry): void => {
     request: { headers, params: memberLeaveParams },
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Leaves', successResponseSchema(z.array(leave))),
+      ...failures,
+    },
+  });
+  registry.registerPath({
+    method: 'post',
+    path: `${base}/preview`,
+    tags,
+    summary:
+      'Preview a leave: the upcoming PENDING/APPROVED bookings it would break (nothing is saved)',
+    request: { headers, params: memberLeaveParams, body: body(leaveRangeSchema) },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Affected bookings',
+        successResponseSchema(z.array(bookingConflictDoc)),
+      ),
       ...failures,
     },
   });

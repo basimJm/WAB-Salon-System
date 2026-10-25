@@ -89,11 +89,11 @@ class ServicesRepositoryImpl(private val api: ServicesApi, private val salon: Sa
     override val changes: Flow<SalonService> = saved.asSharedFlow()
     private val catalog = mutableMapOf<String, CatalogService>()
 
-    override suspend fun services(): AppResult<List<SalonService>> {
+    override suspend fun services(branchId: String?): AppResult<List<SalonService>> {
         val all = mutableListOf<SalonService>()
         var page = FIRST_PAGE
         while (true) {
-            when (val result = safeApiCall { api.services(page, ServiceLimits.PAGE_SIZE) }) {
+            when (val result = safeApiCall { api.services(branchId, page, ServiceLimits.PAGE_SIZE) }) {
                 is AppResult.Success -> {
                     all += result.data.data.map { it.toDomain() }
                     if (result.data.data.size < ServiceLimits.PAGE_SIZE) break
@@ -117,7 +117,7 @@ class ServicesRepositoryImpl(private val api: ServicesApi, private val salon: Sa
 
     override fun cachedCatalog(id: String): CatalogService? = catalog[id]
 
-    override suspend fun create(catalogId: String, draft: ServiceDraft): AppResult<SalonService> {
+    override suspend fun create(catalogId: String, draft: ServiceDraft, branchId: String?): AppResult<SalonService> {
         val body = PostSalonServicesBody(
             catalogServiceId = catalogId,
             price = normalizeNumber(draft.price),
@@ -127,15 +127,15 @@ class ServicesRepositoryImpl(private val api: ServicesApi, private val salon: Sa
             mediaKeys = draft.mediaKeys?.takeIf { it.isNotEmpty() },
             active = draft.active,
         )
-        return safeApiCall { api.create(body) }.mapSuccess { it.data.toDomain() }.also { remember(it) }
+        return safeApiCall { api.create(branchId, body) }.mapSuccess { it.data.toDomain() }.also { remember(it) }
     }
 
-    override suspend fun update(id: String, draft: ServiceDraft): AppResult<SalonService> =
-        safeApiCall { api.update(id, draft.toPatch()) }.mapSuccess { it.data.toDomain() }.also { remember(it) }
+    override suspend fun update(id: String, draft: ServiceDraft, branchId: String?): AppResult<SalonService> =
+        safeApiCall { api.update(branchId, id, draft.toPatch()) }.mapSuccess { it.data.toDomain() }.also { remember(it) }
 
-    override suspend fun setActive(id: String, active: Boolean): AppResult<SalonService> =
+    override suspend fun setActive(id: String, active: Boolean, branchId: String?): AppResult<SalonService> =
         safeApiCall {
-            api.update(id, buildJsonObject { put(ServiceKeys.ACTIVE, active) })
+            api.update(branchId, id, buildJsonObject { put(ServiceKeys.ACTIVE, active) })
         }.mapSuccess { it.data.toDomain() }.also { remember(it) }
 
     private suspend fun remember(result: AppResult<SalonService>) {

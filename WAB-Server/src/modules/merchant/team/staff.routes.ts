@@ -48,5 +48,21 @@ export const createMerchantStaffRouter = (
       });
     }),
   );
+  router.post(
+    '/:id/staff/preview',
+    validate({ params: staffParams, body: staffProfileSchema }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { id } = part<typeof staffParams>(req, 'params');
+      const profile = part<typeof staffProfileSchema>(req, 'body');
+      sendSuccess(req, res, {
+        data: await service.preview({
+          salonId: salonOf(req),
+          memberId: id,
+          profile,
+          scope: req.member?.branchId,
+        }),
+      });
+    }),
+  );
   return router;
 };
