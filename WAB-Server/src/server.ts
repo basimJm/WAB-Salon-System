@@ -1185,7 +1185,8 @@ const buildServices = (
       service: customerAuthService,
       authenticate: requireAuth('customer', config.auth.accessSecret),
     },
-    rateLimitStore: new RedisRateLimitStore(redis, `${REDIS_KEY_PREFIX.httpRateLimit}:otp`),
+    rateLimitStoreFor: (scope) =>
+      new RedisRateLimitStore(redis, `${REDIS_KEY_PREFIX.httpRateLimit}:${scope}`),
     providersClose: providers.close,
   };
 };
