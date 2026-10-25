@@ -68,3 +68,15 @@ export const SMTP_CODES = {
   quotaEnhancedStatus: '5.4.5',
   quotaPhrase: 'sending limit',
 } as const;
+
+/** HTTP statuses of email APIs (Brevo) grouped by how the SDK reacts. */
+export const HTTP_EMAIL_STATUS = {
+  accepted: [200, 201, 202],
+  badRequest: 400,
+  auth: [401, 403],
+  quota: 402,
+  rateLimited: 429,
+  serverErrorFrom: 500,
+} as const;
+/** Fetch errors that mean "no answer in time". */
+export const HTTP_TIMEOUT_ERROR_NAMES = ['AbortError', 'TimeoutError'] as const;

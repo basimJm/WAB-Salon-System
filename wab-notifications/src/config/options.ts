@@ -7,11 +7,13 @@ import {
   DEFAULT_SMTP,
   DEFAULT_TIMEOUTS,
   ENVIRONMENTS,
+  HTTPS_PROTOCOL,
   type Environment,
 } from '../constants/defaults';
 import { configError } from '../errors';
 import type { MessagingLike } from '../adapters/push/fcm';
 import type { TransportLike } from '../adapters/email/smtp';
+import type { FetchLike } from '../adapters/email/brevo';
 import type { IdempotencyStore } from '../idempotency';
 import type { RetryDeps, RetryPolicy } from '../retry';
 import type { EmailChannel, Logger, NotifierEvent, PushChannel } from '../types';
@@ -51,6 +53,19 @@ export type EmailOptions =
         readonly timeoutMs?: number;
       };
       readonly transport?: () => TransportLike;
+    }
+  | {
+      /** Brevo transactional email over HTTPS (for hosts that block SMTP ports). */
+      readonly provider: 'brevo';
+      readonly from: { readonly name: string; readonly address: string };
+      readonly brevo: {
+        /** Secret, injected by the consumer from its environment. */
+        readonly apiKey: string;
+        /** Default Brevo's API; a local mock URL in dev. Must be HTTPS in prod. */
+        readonly baseUrl?: string;
+        readonly timeoutMs?: number;
+      };
+      readonly fetch?: FetchLike;
     };
 
 export interface NotifierOptions {
@@ -103,6 +118,11 @@ const smtpSchema = z.object({
   timeoutMs: positive.optional(),
 });
 const fromSchema = z.object({ name: z.string().min(1), address: z.email() });
+const brevoSchema = z.object({
+  apiKey: z.string().min(1),
+  baseUrl: z.url().optional(),
+  timeoutMs: positive.optional(),
+});
 
 export interface ResolvedConfig {
   readonly options: NotifierOptions;
@@ -150,6 +170,13 @@ const checkProd = (options: NotifierOptions): void => {
     const { user, pass } = options.email.smtp;
     if (user === undefined || pass === undefined) issue('email.smtp.user/pass (required in prod)');
   }
+  if (
+    options.email.provider === 'brevo' &&
+    options.email.brevo.baseUrl !== undefined &&
+    !options.email.brevo.baseUrl.startsWith(`${HTTPS_PROTOCOL}//`)
+  ) {
+    issue('email.brevo.baseUrl (https is required in prod)');
+  }
 };
 
 /** Validates every option once, at start-up, naming bad keys only (never their values). */
@@ -170,6 +197,10 @@ export const resolveConfig = (options: NotifierOptions): ResolvedConfig => {
   if (options.email.provider === 'smtp') {
     if (!fromSchema.safeParse(options.email.from).success) issue('email.from');
     if (!smtpSchema.safeParse(options.email.smtp).success) issue('email.smtp');
+  }
+  if (options.email.provider === 'brevo') {
+    if (!fromSchema.safeParse(options.email.from).success) issue('email.from');
+    if (!brevoSchema.safeParse(options.email.brevo).success) issue('email.brevo');
   }
 
   const base = {

@@ -7,6 +7,7 @@ import { createNotifier } from '../../src/notifier';
 import type { FcmBatchResponse, MessagingLike } from '../../src/adapters/push/fcm';
 import type { MailMessage, TransportLike } from '../../src/adapters/email/smtp';
 import { renderEmail } from '../../src/templates';
+import type { FetchLike } from '../../src/adapters/email/brevo';
 import { FAKE_ACCOUNT, FAST_RETRY, instantDeps } from '../helpers';
 
 const ITERATIONS = 500;
@@ -134,6 +135,55 @@ describe('notifications loop', () => {
     expect([...mails.values()].every((count) => count === 1)).toBe(true);
     expect(mails.size).toBe(ITERATIONS);
 
+    await notifier.close();
+    const growthMb = (process.memoryUsage().heapUsed - before) / 1024 / 1024;
+    expect(growthMb).toBeLessThan(100);
+  });
+
+  it(`delivers ${String(ITERATIONS)} emails exactly once over the Brevo HTTP adapter`, async () => {
+    const random = prng(20_261_026);
+    const sent = new Map<string, number>();
+    // ~10% 429, ~5% 503, ~5% network failures: all retried; the message is counted only on 201.
+    const fetch: FetchLike = (_url, init) => {
+      const roll = random();
+      if (roll < 0.05) return Promise.reject(new TypeError('fetch failed'));
+      if (roll < 0.15) return Promise.resolve({ status: 429, text: () => Promise.resolve('{}') });
+      if (roll < 0.2) return Promise.resolve({ status: 503, text: () => Promise.resolve('') });
+      const { subject } = JSON.parse(init.body) as { subject: string };
+      sent.set(subject, (sent.get(subject) ?? 0) + 1);
+      return Promise.resolve({ status: 201, text: () => Promise.resolve('{"messageId":"m"}') });
+    };
+    const { deps } = instantDeps();
+    const notifier = createNotifier({
+      environment: 'dev',
+      push: { provider: 'fake' },
+      email: {
+        provider: 'brevo',
+        from: { name: 'WAB', address: 'no-reply@example.com' },
+        brevo: { apiKey: 'local', baseUrl: 'http://localhost:4010' },
+        fetch,
+      },
+      retry: { ...FAST_RETRY, maxAttempts: 8 },
+      retryDeps: deps,
+    });
+    const before = process.memoryUsage().heapUsed;
+    for (let start = 0; start < ITERATIONS; start += CONCURRENCY) {
+      await Promise.all(
+        Array.from({ length: Math.min(CONCURRENCY, ITERATIONS - start) }, (_, n) => {
+          const i = start + n;
+          const request = {
+            to: ['admin@example.com'],
+            subject: `Brevo ${String(i)}`,
+            text: 'm',
+            idempotencyKey: `loop:brevo:${String(i)}`,
+          };
+          // Duplicate submissions must collapse into one delivery.
+          return Promise.all([notifier.sendEmail(request), notifier.sendEmail(request)]);
+        }),
+      );
+    }
+    expect(sent.size).toBe(ITERATIONS);
+    expect([...sent.values()].every((count) => count === 1)).toBe(true);
     await notifier.close();
     const growthMb = (process.memoryUsage().heapUsed - before) / 1024 / 1024;
     expect(growthMb).toBeLessThan(100);
