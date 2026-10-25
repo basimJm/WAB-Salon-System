@@ -44,7 +44,8 @@ private class FakeReviews : ReviewsRepository {
     override suspend fun reviews(target: ReviewTarget, memberId: String?, branchId: String?, page: Int): AppResult<ReviewsPage> {
         calls += "$target:$memberId:$branchId:$page"
         if (fail) return AppResult.Error(AppError.NetworkError("x"))
-        val items = listOf(Review("r$page", "Huda", 5.0, "Great", "2026-10-01T10:00:00Z", null, SARA.takeIf { target == ReviewTarget.STAFF }))
+        val staff = SARA.takeIf { target == ReviewTarget.STAFF }
+        val items = listOf(Review("r$page", "Huda", 5.0, "Great", "2026-10-01T10:00:00Z", null, staff))
         return AppResult.Success(ReviewsPage(items, ReviewSummary(4.5, 2, mapOf(5 to 1, 4 to 1)), hasMore = page == 1))
     }
 }

@@ -51,7 +51,8 @@ internal object AccountKeys {
 class AccountApi(private val client: HttpClient) {
     suspend fun me(): BaseResponse<MyAccountDto> = client.get(MerchantOperations.getMe.path).body()
 
-    suspend fun update(body: JsonObject): BaseResponse<MyAccountDto> = client.patch(MerchantOperations.patchMe.path) { setBody(body) }.body()
+    suspend fun update(body: JsonObject): BaseResponse<MyAccountDto> =
+        client.patch(MerchantOperations.patchMe.path) { setBody(body) }.body()
 
     suspend fun changePhone(body: PostAuthChangePhoneBody): BaseResponse<MyAccountDto> =
         client.post(MerchantOperations.postAuthChangePhone.path) { setBody(body) }.body()

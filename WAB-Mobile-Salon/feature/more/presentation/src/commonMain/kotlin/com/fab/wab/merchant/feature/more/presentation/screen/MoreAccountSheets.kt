@@ -79,7 +79,12 @@ internal fun DeleteAccountSheet(state: UiState, onAction: (UiAction) -> Unit) {
                     kind = ButtonKind.Destructive,
                     loading = state.deleting,
                 )
-                AppButton(stringResource(Res.string.more_cancel), { onAction(UiAction.OnDeleteDismiss) }, Modifier.fillMaxWidth(), kind = ButtonKind.Text)
+                AppButton(
+                    stringResource(Res.string.more_cancel),
+                    { onAction(UiAction.OnDeleteDismiss) },
+                    Modifier.fillMaxWidth(),
+                    kind = ButtonKind.Text,
+                )
             }
         }
     }

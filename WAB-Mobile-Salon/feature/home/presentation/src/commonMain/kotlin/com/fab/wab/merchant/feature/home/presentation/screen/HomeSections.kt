@@ -202,7 +202,8 @@ internal fun QuickStatsSection(stats: QuickStats, onAction: (UiAction) -> Unit) 
             val tile = Modifier.weight(1f).fillMaxHeight()
             AppStatTile(stringResource(Res.string.home_stat_bookings), stats.bookings.toString(), tile)
             AppStatTile(stringResource(Res.string.home_stat_revenue), jodText(stats.revenue), tile)
-            AppStatTile(stringResource(Res.string.home_stat_rating), stringResource(Res.string.home_rating_value, oneDecimalText(stats.rating)), tile)
+            val rating = stringResource(Res.string.home_rating_value, oneDecimalText(stats.rating))
+            AppStatTile(stringResource(Res.string.home_stat_rating), rating, tile)
         }
     }
 }

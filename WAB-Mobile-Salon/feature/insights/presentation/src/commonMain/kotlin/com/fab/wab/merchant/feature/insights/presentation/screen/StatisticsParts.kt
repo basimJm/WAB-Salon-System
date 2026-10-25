@@ -108,7 +108,11 @@ internal fun StatusCard(byStatus: Map<BookingStatus, Int>) {
     val spacing = AppTheme.spacing
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.space8)) {
-            AppText(text = stringResource(Res.string.stats_by_status), style = AppTheme.typography.labelLarge, color = AppTheme.colors.muted)
+            AppText(
+                text = stringResource(Res.string.stats_by_status),
+                style = AppTheme.typography.labelLarge,
+                color = AppTheme.colors.muted,
+            )
             rows.forEach { (status, count) ->
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     AppBookingStatusBadge(status)
@@ -146,7 +150,11 @@ private fun RankRow(rank: Int, name: String, detail: String, rating: String? = n
     val spacing = AppTheme.spacing
     AppCard(modifier = Modifier.fillMaxWidth(), contentPadding = spacing.space12) {
         Row(horizontalArrangement = Arrangement.spacedBy(spacing.space12), verticalAlignment = Alignment.CenterVertically) {
-            AppText(text = rank.toString(), style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = AppTheme.colors.accent)
+            AppText(
+                text = rank.toString(),
+                style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = AppTheme.colors.accent,
+            )
             Column(modifier = Modifier.weight(1f)) {
                 AppText(text = name, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), maxLines = 1)
                 AppText(text = detail, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
@@ -158,5 +166,9 @@ private fun RankRow(rank: Int, name: String, detail: String, rating: String? = n
 
 @Composable
 private fun RatingValue(rating: String) {
-    AppText(text = stringResource(Res.string.stats_rating_value, rating), style = AppTheme.typography.labelMedium, color = AppTheme.colors.muted)
+    AppText(
+        text = stringResource(Res.string.stats_rating_value, rating),
+        style = AppTheme.typography.labelMedium,
+        color = AppTheme.colors.muted,
+    )
 }

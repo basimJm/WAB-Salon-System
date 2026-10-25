@@ -78,7 +78,12 @@ private class OneCountry : LocationsRepository {
 private class Uploads : UploadsRepository {
     override suspend fun presign(purpose: UploadPurpose, contentType: String, size: Long): AppResult<PresignedUpload> =
         AppResult.Success(PresignedUpload("${purpose.name}-key", "u", "PUT", emptyMap(), size))
-    override suspend fun upload(target: PresignedUpload, bytes: ByteArray, contentType: String, onProgress: (Float) -> Unit): AppResult<Unit> =
+    override suspend fun upload(
+        target: PresignedUpload,
+        bytes: ByteArray,
+        contentType: String,
+        onProgress: (Float) -> Unit,
+    ): AppResult<Unit> =
         AppResult.Success(Unit)
     override suspend fun confirm(purpose: UploadPurpose, key: String): AppResult<ConfirmedUpload> =
         AppResult.Success(ConfirmedUpload(key, "https://cdn/$key"))

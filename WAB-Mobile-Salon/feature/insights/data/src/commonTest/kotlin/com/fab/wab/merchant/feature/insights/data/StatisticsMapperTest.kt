@@ -21,7 +21,8 @@ class StatisticsMapperTest {
 
     @Test
     fun mockStatisticsMapEveryKpiSeriesAndRanking() {
-        val stats = json.decodeFromString<BaseResponse<GetStatisticsData>>(localizeFixture(mockStatisticsFixture.json, "en")).data.toDomain()
+        val fixture = localizeFixture(mockStatisticsFixture.json, "en")
+        val stats = json.decodeFromString<BaseResponse<GetStatisticsData>>(fixture).data.toDomain()
         assertEquals(38, stats.bookings.total)
         assertEquals(22, stats.bookings.byStatus[BookingStatus.COMPLETED])
         assertEquals(94.7, stats.bookings.approvalRate)

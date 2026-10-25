@@ -59,7 +59,9 @@ class StatisticsViewModelTest {
     private val repo = FakeStatistics()
 
     private fun TestScope.viewModel(scope: MutableStateFlow<BranchScope> = MutableStateFlow(BranchScope())) = StatisticsViewModel(
-        StatisticsDependencies(repo, NoOpAnalyticsTracker, { TODAY }, { "failed" }, scope, { id -> scope.value = scope.value.copy(selected = id) }),
+        StatisticsDependencies(repo, NoOpAnalyticsTracker, { TODAY }, { "failed" }, scope) { id ->
+            scope.value = scope.value.copy(selected = id)
+        },
         testScope = backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 

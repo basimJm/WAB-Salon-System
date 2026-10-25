@@ -20,7 +20,8 @@ internal class FakeAccount(var account: MyAccount = ACCOUNT) : AccountRepository
     override suspend fun update(firstName: String, lastName: String, photo: PhotoChange): AppResult<MyAccount> {
         calls += "update:$firstName:$lastName:$photo"
         if (fail) return error
-        account = account.copy(firstName = firstName.trim(), lastName = lastName.trim(), photoUrl = if (photo == PhotoChange.Remove) null else account.photoUrl)
+        val photoUrl = if (photo == PhotoChange.Remove) null else account.photoUrl
+        account = account.copy(firstName = firstName.trim(), lastName = lastName.trim(), photoUrl = photoUrl)
         return AppResult.Success(account)
     }
 

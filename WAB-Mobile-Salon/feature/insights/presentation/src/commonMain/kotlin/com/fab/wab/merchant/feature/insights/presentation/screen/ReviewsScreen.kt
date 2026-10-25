@@ -59,7 +59,11 @@ fun ReviewsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Un
     val currentOnAction by rememberUpdatedState(onAction)
     val spacing = AppTheme.spacing
     AppScreen(modifier = modifier, topBar = { AppTopBar(title = stringResource(Res.string.reviews_title), onBack = onBack) }) { padding ->
-        AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }, modifier = Modifier.padding(padding)) {
+        AppPullToRefresh(
+            refreshing = state.refreshing,
+            onRefresh = { onAction(UiAction.OnRefresh) },
+            modifier = Modifier.padding(padding),
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(spacing.space16),

@@ -34,8 +34,9 @@ class MoreDependencies(
     val alert: RequestAlert,
     val logout: LogoutUseCase,
     val analytics: AnalyticsTracker,
-    val version: String,
-    val versionCode: Int,
+    /** Shown at the bottom of More (empty until the shell passes the build's version). */
+    val version: String = "",
+    val versionCode: Int = 0,
     /** MER-049: `/me` (photo, push switch), `PATCH /installations/push-enabled`, leave / salon deletion request. */
     val account: AccountRepository,
     val errorText: suspend (AppError) -> String = ::appErrorText,

@@ -46,7 +46,9 @@ internal fun DailyChart(days: List<DayStat>, chart: StatsChart, onAction: (UiAct
                 onSelect = { onAction(UiAction.OnChart(StatsChart.entries[it])) },
             )
             AppText(
-                text = stringResource(if (chart == StatsChart.BOOKINGS) Res.string.stats_chart_bookings else Res.string.stats_chart_revenue),
+                text = stringResource(
+                    if (chart == StatsChart.BOOKINGS) Res.string.stats_chart_bookings else Res.string.stats_chart_revenue,
+                ),
                 style = AppTheme.typography.labelLarge,
                 color = AppTheme.colors.muted,
             )

@@ -67,7 +67,11 @@ fun StatisticsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () ->
     TrackScreen(InsightsAnalytics.SCREEN_STATISTICS)
     val spacing = AppTheme.spacing
     AppScreen(modifier = modifier, topBar = { AppTopBar(title = stringResource(Res.string.stats_title), onBack = onBack) }) { padding ->
-        AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }, modifier = Modifier.padding(padding)) {
+        AppPullToRefresh(
+            refreshing = state.refreshing,
+            onRefresh = { onAction(UiAction.OnRefresh) },
+            modifier = Modifier.padding(padding),
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(spacing.space16),
@@ -81,7 +85,10 @@ fun StatisticsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () ->
                         AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
                     }
                     state.isEmpty || stats == null -> item(key = KEY_EMPTY) {
-                        AppEmptyState(title = stringResource(Res.string.stats_empty_title), message = stringResource(Res.string.stats_empty_body))
+                        AppEmptyState(
+                            title = stringResource(Res.string.stats_empty_title),
+                            message = stringResource(Res.string.stats_empty_body),
+                        )
                     }
                     else -> {
                         item(key = KEY_KPIS) { KpiGrid(stats) }

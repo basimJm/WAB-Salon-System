@@ -132,7 +132,11 @@ private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifie
         )
         roleLabel(account.role)?.let { role ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(spacing.space8)) {
-                AppText(text = stringResource(Res.string.account_role), style = AppTheme.typography.labelLarge, color = AppTheme.colors.muted)
+                AppText(
+                    text = stringResource(Res.string.account_role),
+                    style = AppTheme.typography.labelLarge,
+                    color = AppTheme.colors.muted,
+                )
                 AppStatusBadge(text = role, tone = StatusTone.Accent)
             }
         }
