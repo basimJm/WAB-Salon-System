@@ -24,7 +24,7 @@ const hoursView = (s: SalonEditState) => ({
 });
 
 export function salonHoursRoutes(
-  of: (id: string | undefined) => SalonEditState,
+  of: (id: string | undefined, branchId?: string | null) => SalonEditState,
 ): readonly MockRoute[] {
   return [
     mockRoute(
@@ -32,7 +32,7 @@ export function salonHoursRoutes(
         data: dto.getSalonsByIdHoursDataSchema,
         query: branchQuerySchema,
       }),
-      ({ params }) => ({ data: hoursView(of(params['id'])) }),
+      ({ params, query }) => ({ data: hoursView(of(params['id'], query.get('branchId'))) }),
     ),
     mockRoute(
       defineEndpoint(O.putSalonsByIdHours, {
@@ -40,8 +40,8 @@ export function salonHoursRoutes(
         data: dto.putSalonsByIdHoursDataSchema,
         body: dto.putSalonsByIdHoursBodySchema,
       }),
-      ({ params, body }) => {
-        const s = of(params['id']);
+      ({ params, query, body }) => {
+        const s = of(params['id'], query.get('branchId'));
         s.schedule = (body as { days: typeof s.schedule }).days;
         return { data: hoursView(s) };
       },
@@ -74,8 +74,8 @@ export function salonHoursRoutes(
         data: dto.postSalonsByIdClosuresDataSchema,
         body: dto.postSalonsByIdClosuresBodySchema,
       }),
-      ({ params, body }) => {
-        const s = of(params['id']);
+      ({ params, query, body }) => {
+        const s = of(params['id'], query.get('branchId'));
         const b = body as { from: string; to: string; closureReason: string };
         s.seq += 1;
         const item = {
@@ -95,8 +95,8 @@ export function salonHoursRoutes(
         data: dto.patchSalonsByIdClosuresByClosureIdDataSchema,
         body: dto.patchSalonsByIdClosuresByClosureIdBodySchema,
       }),
-      ({ params, body }) => {
-        const s = of(params['id']);
+      ({ params, query, body }) => {
+        const s = of(params['id'], query.get('branchId'));
         const row = s.closures.find((c) => c.id === params['closureId']);
         if (!row) throw new Error('no closure');
         const b = body as { from?: string; to?: string; closureReason?: string };
@@ -114,8 +114,8 @@ export function salonHoursRoutes(
         data: dto.postSalonsByIdClosuresByClosureIdRemoveDataSchema,
         body: dto.postSalonsByIdClosuresByClosureIdRemoveBodySchema,
       }),
-      ({ params }) => {
-        const s = of(params['id']);
+      ({ params, query }) => {
+        const s = of(params['id'], query.get('branchId'));
         s.closures = s.closures.filter((c) => c.id !== params['closureId']);
         return { data: null };
       },

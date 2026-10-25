@@ -32,7 +32,6 @@ const WITHOUT_FIXTURE: Readonly<Record<string, string>> = {
   getSubscriptionsBySalonId: 'no screen reads one record: the list carries every field',
   getCampaignsById: 'no screen reads one record: the list carries every field',
   getAuditLogsById: 'no screen reads one record: the list carries every field',
-  postSalonsByIdMembersByMemberIdBranch: 'moving staff comes with ADM-090',
 };
 
 const key = (o: { method: string; path: string }) => `${o.method} ${o.path}`;

@@ -89,8 +89,9 @@ export class RemoteSalonsRepository implements SalonsRepository {
     return (await this.api.execute(getSalon, { params: { id } })).data;
   }
 
-  async members(id: string) {
-    return (await this.api.execute(getMembers, { params: { id } })).data;
+  async members(id: string, branchId?: string) {
+    const query = branchId ? { branchId } : undefined;
+    return (await this.api.execute(getMembers, { params: { id }, query })).data;
   }
 
   async setOffline(id: string, reason: string) {

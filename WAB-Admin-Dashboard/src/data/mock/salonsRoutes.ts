@@ -1,10 +1,8 @@
 import * as dto from '../contract/generated/dto';
 import { OPERATIONS } from '../contract/generated/operations';
 import { defineEndpoint } from '../api/endpoint';
-import { branchQuerySchema } from '../api/objectId';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
-import { MOCK_BRANCH_IDS } from './branchesFixture';
 import { createBranchStore, type BranchStore } from './branchStore';
 
 const AMMAN = '64a000000000000000000001';
@@ -163,36 +161,6 @@ export function salonsRoutes(store: BranchStore = createBranchStore()): readonly
       }),
     ),
 
-    mockRoute(
-      defineEndpoint(OPERATIONS.getSalonsByIdMembers, {
-        data: dto.getSalonsByIdMembersDataSchema,
-        query: branchQuerySchema,
-      }),
-      () => ({
-        data: [
-          {
-            id: '64f0000000000000000000a1',
-            name: 'Maha Haddad',
-            phone: '+962790000101',
-            role: 'OWNER',
-            active: true,
-            providesServices: false,
-            permissions: ['BOOKINGS_VIEW_ALL', 'FINANCE_VIEW'],
-            branchId: null,
-          },
-          {
-            id: '64f0000000000000000000a2',
-            name: 'Sara Ali',
-            phone: '+962790000102',
-            role: 'EMPLOYEE',
-            active: true,
-            providesServices: true,
-            permissions: [],
-            branchId: MOCK_BRANCH_IDS.noorMain,
-          },
-        ],
-      }),
-    ),
     mockRoute(
       defineEndpoint(OPERATIONS.getSalons, {
         data: dto.getSalonsDataSchema,
