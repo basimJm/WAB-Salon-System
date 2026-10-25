@@ -12,6 +12,8 @@ import {
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
 import { salonParams } from './salonState.validation';
+import { membersQuery } from './adminSalons.validation';
+import { branchViewDoc } from '../../shared/branches/branch.openapi';
 import { genderBody, salonsQuery } from './adminSalons.validation';
 
 const row = z.object({
@@ -47,6 +49,7 @@ const detail = row.extend({
       currentPeriodEnd: z.string().nullable(),
     })
     .nullable(),
+  branches: z.array(branchViewDoc).describe('Every branch, closed ones too, main first'),
 });
 
 export const registerAdminSalonsDocs = (registry: OpenAPIRegistry): void => {
@@ -97,7 +100,7 @@ export const registerAdminSalonsDocs = (registry: OpenAPIRegistry): void => {
     path: `${base}/{id}/members`,
     tags,
     summary: 'All members of a salon (active or not), owner first, with role and permissions',
-    request: { headers, params: salonParams },
+    request: { headers, params: salonParams, query: membersQuery },
     responses: {
       [HTTP_STATUS.ok]: jsonResponse(
         'Members',
@@ -111,6 +114,7 @@ export const registerAdminSalonsDocs = (registry: OpenAPIRegistry): void => {
               active: z.boolean(),
               providesServices: z.boolean(),
               permissions: z.array(z.string()),
+              branchId: z.string().nullable().describe('null for the owner (every branch)'),
             }),
           ),
         ),

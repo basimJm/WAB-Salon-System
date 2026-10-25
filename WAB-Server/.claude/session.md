@@ -10,6 +10,46 @@
 
 ## Current task
 
+### SRV-148 — Branches end to end (Stage P)
+
+- Branch: `feat/srv-148-branches-e2e`
+- Status: DONE (PR #394)
+- Acceptance criteria (BUSINESS_DOMAIN §3.3a, §5.16; API docs: no change in this task — contract checked after SRV-136…147):
+  - [x] `seed:demo`: after the main-branch migration, Lamar gets Khalda + Dabouq and Al-Ostaz gets Shmeisani, each complete with own place, hours, prices (percent of the main branch), a branch manager (bride-qualified in women's salons) and an employee; deterministic ids, insert-only; `branchCount` synced
+  - [x] `Branch` is a demo collection; every demo branch row passes the real Mongoose schemas
+  - [x] Contract regenerated and compared (docs test green); client impact list per task (ADM-088…091, CUS-082…087, MER-061…066) in `.claude/Integration.md`; DEPLOYMENT.md demo section updated
+- Tests: `tests/demoBranches.test.ts` (3), `tests/demoSeed.test.ts` (Branch filled later); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (salon legacy place/hours fields stay mirrored until every client reads branches — dropping them is a later contract change), QA ✔) — the demo seed itself was not run against the hosted dev database in this task (owner runs `npm run seed:demo`).
+
+### SRV-147 — Admin branches, full CRUD for any salon (Stage P)
+
+- Branch: `feat/srv-147-admin-branches`
+- Status: DONE (PR #393)
+- Acceptance criteria (BUSINESS_DOMAIN §5.16, §6 admin, root CLAUDE.md §4.12; operations admin `/salons/{id}/branches[/{branchId}[/main|offline|online|close]]`, `/salons/{id}` detail, `/salons/{id}/members`, salon edit hours/closures/services `?branchId=`, `POST /salons/{id}/members/{memberId}/branch`, `GET /bookings?branchId=` + BOOKINGS export — client impact ADM-089/090/091; merchant `GET /bookings?branchId=` for the owner, MER-063):
+  - [x] Admin list/get/create/update/set main/offline/online/close any salon's branch through the owner's branches service (limit, last branch, main, upcoming bookings unchanged); every write needs a reason, writes an audit record (`entityType: branch`) and tells the owner (`salon.edited_by_admin`, area `branches`; offline/online use the existing branch events, no second notice)
+  - [x] Salon detail returns `branches[]` (closed included); members show `branchId` and filter by `?branchId=`
+  - [x] Admin salon edit: hours, closures and services take `?branchId=` (default the main branch); previews check that branch; audit names the branch
+  - [x] Admin moves a member to another branch (`SALON_STAFF_MOVE`, skills cleared and upcoming bookings refuse it via the team service)
+  - [x] Booking lists (admin, and merchant for the owner) and the BOOKINGS export filter by `branchId`; reviews already filter by branch (SRV-145)
+  - [x] Merchant team member docs now show `branchId` (shared `teamMemberDoc`)
+- Tests: `tests/adminBranches.test.ts` (7); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔ (no rule duplicated: admin wraps the owner's services), Mobile N/A, Architect ✔ (admin namespace only; adminGuard on every route), QA ✔)
+
+### SRV-146 — Finance by branch (Stage P)
+
+- Branch: `feat/srv-146-finance-branch`
+- Status: DONE (PR #392)
+- Acceptance criteria (BUSINESS_DOMAIN §5.14, §3 transactions/refunds/ledger `branchId`; operations merchant `GET /finance/transactions|refunds`, admin `GET /transactions`, `GET /finance/reconciliation`, `GET /refunds`, `POST /exports` TRANSACTIONS — client impact ADM-091, MER-064):
+  - [x] A payment attempt keeps the draft's `branchId`; refunds and ledger CHARGE/GATEWAY_FEE/REFUND entries take the payment's branch; payouts stay salon-wide (no branch)
+  - [x] Owner finance: payments and refunds accept `branchId` and show `branchId` per row; balance and payouts stay salon-wide
+  - [x] Admin: transactions list `branchId` filter, reconciliation `salonId`/`branchId` scope, refunds list `salonId`/`branchId` filters; rows show `branchId`
+  - [x] TRANSACTIONS export takes `branchId` and has a Branch column
+- Tests: `tests/financeBranch.test.ts` (5), `tests/paymentsService.test.ts` (+1), `tests/exports.test.ts` (column shift); full gate 146 suites / 2735 tests
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔ (additive fields), Architect ✔ (payouts per salon unchanged; Phase 2 split payments unaffected), QA ✔) — legacy rows without a branch are backfilled by SRV-137's migration.
+
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 
 - Branch: `feat/srv-135-app-links`

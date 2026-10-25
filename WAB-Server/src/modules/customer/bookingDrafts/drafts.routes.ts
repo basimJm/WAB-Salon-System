@@ -42,6 +42,7 @@ export const createBookingDraftsRouter = ({
       const draft = await service.create({
         customerId: me(req),
         salonId: body.salonId,
+        branchId: body.branchId,
         paymentMethod: body.paymentMethod,
         persons: body.persons,
         language: req.language,

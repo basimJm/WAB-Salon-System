@@ -26,6 +26,7 @@ export interface DemoCatalogEntry {
 /** Collections the demo seed writes, named as in `ALL_MODELS` (model name without `Model`). */
 export const DEMO_COLLECTIONS = [
   'Salon',
+  'Branch',
   'Member',
   'SalonService',
   'GalleryItem',

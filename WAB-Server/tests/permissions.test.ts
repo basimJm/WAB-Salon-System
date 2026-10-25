@@ -31,9 +31,10 @@ describe('role templates', () => {
     }
   });
 
-  it('MANAGER gets everything but FINANCE_VIEW and POLICIES_MANAGE; EMPLOYEE only the two basics', () => {
-    expect(ROLE_TEMPLATES.MANAGER).toHaveLength(13);
+  it('MANAGER gets every branch permission (not finance, subscription, policy); EMPLOYEE only the two basics', () => {
+    expect(ROLE_TEMPLATES.MANAGER).toHaveLength(12);
     expect(ROLE_TEMPLATES.MANAGER).not.toContain('FINANCE_VIEW');
+    expect(ROLE_TEMPLATES.MANAGER).not.toContain('SUBSCRIPTION_VIEW');
     expect(ROLE_TEMPLATES.MANAGER).not.toContain('POLICIES_MANAGE');
     expect(ROLE_TEMPLATES.EMPLOYEE).toEqual(['BOOKINGS_VIEW_OWN', 'REVIEWS_VIEW']);
     expect(defaultPermissionsFor('OWNER')).toEqual([]);
@@ -42,7 +43,7 @@ describe('role templates', () => {
 
   it('hands out copies, so callers cannot change the template', () => {
     defaultPermissionsFor('MANAGER').pop();
-    expect(ROLE_TEMPLATES.MANAGER).toHaveLength(13);
+    expect(ROLE_TEMPLATES.MANAGER).toHaveLength(12);
   });
 });
 
@@ -118,6 +119,9 @@ describe('enforcement middleware', () => {
     requireAuth('merchant', SECRET),
     loadMember(new MembersRepository(members.model as never)),
   ];
+  app.get('/stats', ...guard, requirePermission(['STATISTICS_VIEW']), (_req, res) => {
+    res.json({ ok: true });
+  });
   app.get('/finance', ...guard, requirePermission(['FINANCE_VIEW']), (req, res) => {
     res.json({ salonId: req.member?.salonId });
   });
@@ -156,12 +160,17 @@ describe('enforcement middleware', () => {
 
   it('checks the stored permissions on every request, so a change applies at once', async () => {
     const id = add('MANAGER', ['BOOKINGS_VIEW_OWN']);
-    const denied = await get('/finance', id);
+    const denied = await get('/stats', id);
     expect(denied.status).toBe(403);
     expect(code(denied)).toBe('PERMISSION_DENIED');
-    Object.assign(members.docs[0] ?? {}, { permissions: ['FINANCE_VIEW'] });
-    expect((await get('/finance', id)).status).toBe(200);
+    Object.assign(members.docs[0] ?? {}, { permissions: ['STATISTICS_VIEW'] });
+    expect((await get('/stats', id)).status).toBe(200);
     Object.assign(members.docs[0] ?? {}, { permissions: [] });
+    expect((await get('/stats', id)).status).toBe(403);
+  });
+
+  it('a branch member never gets finance, even when it is stored (§6 branch scope)', async () => {
+    const id = add('MANAGER', ['FINANCE_VIEW']);
     expect((await get('/finance', id)).status).toBe(403);
   });
 

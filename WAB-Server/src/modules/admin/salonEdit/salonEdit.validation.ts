@@ -41,12 +41,15 @@ export const closurePatchBody = z
   .and(z.object({ reason }));
 export const closureParams = z.object({ id: objectId, closureId: objectId });
 
-export const servicesQuery = paginationQuery(ADMIN_PAGE_SIZE);
+/** Hours, closures and services address one branch (default the main branch, §3.3a). */
+export const branchQuery = z.object({ branchId: objectId.optional() });
+export const servicesQuery = paginationQuery(ADMIN_PAGE_SIZE).extend(branchQuery.shape);
 export const addServiceBody = addServiceSchema.extend({ reason });
 export const updateServiceBody = updateServiceSchema.and(z.object({ reason }));
 export const serviceParams = z.object({ id: objectId, serviceId: objectId });
 
 export const staffParams = z.object({ id: objectId, memberId: objectId });
 export const staffBody = staffProfileSchema.extend({ reason });
+export const moveStaffBody = z.object({ branchId: objectId, reason });
 
 export const policyBody = policySchema.and(z.object({ reason }));

@@ -18,6 +18,10 @@ const reviewView = z.object({
   rating: z.number(),
   comment: z.string().nullable(),
   createdAt: z.string(),
+  branch: z
+    .object({ id: z.string(), name: z.string() })
+    .nullable()
+    .describe('The branch the review is about (label only)'),
 });
 const reviewsPreview = z.object({
   avg: z.number(),
@@ -29,6 +33,28 @@ const staffSummary = z.object({
   firstName: z.string(),
   photoUrl: z.string().nullable(),
   status: z.enum(['ON_DUTY', 'ON_LEAVE', 'DAY_OFF']),
+  branchId: z.string().nullable().describe('The branch the staff member works at'),
+});
+const scheduleDay = z.object({
+  day: z.string(),
+  isOff: z.boolean(),
+  open: z.string(),
+  close: z.string(),
+});
+const closure = z.object({ from: z.string(), to: z.string(), reason: z.string() });
+const branchSummary = z.object({
+  id: z.string(),
+  name: z.string(),
+  isMain: z.boolean(),
+  locationText: z.string().nullable(),
+  location: z.object({ lat: z.number(), lng: z.number() }).nullable(),
+  phone: z.string().nullable(),
+  whatsapp: z.string().nullable(),
+  isOpenNow: z.boolean(),
+  todayHours: z.object({ open: z.string(), close: z.string() }).nullable(),
+  closedReason: z.string().nullable(),
+  weeklySchedule: z.array(scheduleDay),
+  upcomingClosures: z.array(closure),
 });
 const details = z.object({
   id: z.string(),
@@ -45,14 +71,16 @@ const details = z.object({
   isOpenNow: z.boolean(),
   todayHours: z.object({ open: z.string(), close: z.string() }).nullable(),
   closedReason: z.string().nullable(),
-  weeklySchedule: z.array(
-    z.object({ day: z.string(), isOff: z.boolean(), open: z.string(), close: z.string() }),
-  ),
-  upcomingClosures: z.array(z.object({ from: z.string(), to: z.string(), reason: z.string() })),
+  weeklySchedule: z.array(scheduleDay),
+  upcomingClosures: z.array(closure),
   staff: z.array(staffSummary),
+  branches: z
+    .array(branchSummary)
+    .describe('Bookable branches, main first; the place fields above are the main branch'),
   services: z.array(
     z.object({
       id: z.string(),
+      branchId: z.string().nullable().describe('The branch offering the service at this price'),
       catalogServiceId: z.string(),
       name: z.string(),
       imageUrl: z.string(),

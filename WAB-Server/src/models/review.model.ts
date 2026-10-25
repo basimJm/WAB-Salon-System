@@ -16,6 +16,8 @@ import {
 export interface ReviewRaw {
   target: ReviewTarget;
   salonId: Types.ObjectId;
+  /** Branch of the visit (from the booking, or picked by the customer): a label only; the salon rating spans every branch. */
+  branchId?: Types.ObjectId;
   /** The staff member (a `members` row) when the target is STAFF. */
   staffId?: Types.ObjectId;
   customerId: Types.ObjectId;
@@ -32,6 +34,7 @@ const reviewSchema = new Schema<ReviewRaw>(
   {
     target: { type: String, enum: REVIEW_TARGETS, required: true },
     salonId: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
     staffId: {
       type: Schema.Types.ObjectId,
       ref: 'Member',
@@ -67,5 +70,6 @@ reviewSchema.index({ salonId: 1, target: 1, status: 1, createdAt: -1 });
 reviewSchema.index({ staffId: 1, status: 1, createdAt: -1 });
 reviewSchema.index({ status: 1, createdAt: -1 });
 reviewSchema.index({ customerId: 1, target: 1, salonId: 1, staffId: 1, status: 1 });
+reviewSchema.index({ branchId: 1, status: 1, createdAt: -1 });
 
 export const ReviewModel = model<ReviewRaw>('Review', reviewSchema);

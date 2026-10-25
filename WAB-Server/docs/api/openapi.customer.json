@@ -60,6 +60,13 @@
                   "MEMBER_INACTIVE",
                   "SALON_NOT_FOUND",
                   "SALON_NOT_BOOKABLE",
+                  "BRANCH_NOT_FOUND",
+                  "BRANCH_NOT_BOOKABLE",
+                  "BRANCH_REQUIRED",
+                  "BRANCH_LIMIT_REACHED",
+                  "BRANCH_HAS_UPCOMING_BOOKINGS",
+                  "LAST_BRANCH",
+                  "BRANCH_SCOPE_DENIED",
                   "SALON_CLOSED",
                   "GENDER_MISMATCH",
                   "TOO_MANY_COMPANIONS",
@@ -3488,6 +3495,29 @@
                               "number",
                               "null"
                             ]
+                          },
+                          "branchCount": {
+                            "type": "number",
+                            "description": "Bookable branches of the salon (§5.17)."
+                          },
+                          "branch": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "The branch the place, hours and distance come from: the nearest, else the main one."
                           }
                         },
                         "required": [
@@ -3501,7 +3531,9 @@
                           "isOpenNow",
                           "todayHours",
                           "isFavorite",
-                          "distanceKm"
+                          "distanceKm",
+                          "branchCount",
+                          "branch"
                         ]
                       }
                     },
@@ -3948,15 +3980,166 @@
                                   "ON_LEAVE",
                                   "DAY_OFF"
                                 ]
+                              },
+                              "branchId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "The branch the staff member works at"
                               }
                             },
                             "required": [
                               "id",
                               "firstName",
                               "photoUrl",
-                              "status"
+                              "status",
+                              "branchId"
                             ]
                           }
+                        },
+                        "branches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "isMain": {
+                                "type": "boolean"
+                              },
+                              "locationText": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "location": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "lat": {
+                                    "type": "number"
+                                  },
+                                  "lng": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "lat",
+                                  "lng"
+                                ]
+                              },
+                              "phone": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "whatsapp": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "isOpenNow": {
+                                "type": "boolean"
+                              },
+                              "todayHours": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "open": {
+                                    "type": "string"
+                                  },
+                                  "close": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "open",
+                                  "close"
+                                ]
+                              },
+                              "closedReason": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "weeklySchedule": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "day": {
+                                      "type": "string"
+                                    },
+                                    "isOff": {
+                                      "type": "boolean"
+                                    },
+                                    "open": {
+                                      "type": "string"
+                                    },
+                                    "close": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "day",
+                                    "isOff",
+                                    "open",
+                                    "close"
+                                  ]
+                                }
+                              },
+                              "upcomingClosures": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "from": {
+                                      "type": "string"
+                                    },
+                                    "to": {
+                                      "type": "string"
+                                    },
+                                    "reason": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "from",
+                                    "to",
+                                    "reason"
+                                  ]
+                                }
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "isMain",
+                              "locationText",
+                              "location",
+                              "phone",
+                              "whatsapp",
+                              "isOpenNow",
+                              "todayHours",
+                              "closedReason",
+                              "weeklySchedule",
+                              "upcomingClosures"
+                            ]
+                          },
+                          "description": "Bookable branches, main first; the place fields above are the main branch"
                         },
                         "services": {
                           "type": "array",
@@ -3965,6 +4148,13 @@
                             "properties": {
                               "id": {
                                 "type": "string"
+                              },
+                              "branchId": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "The branch offering the service at this price"
                               },
                               "catalogServiceId": {
                                 "type": "string"
@@ -3997,6 +4187,7 @@
                             },
                             "required": [
                               "id",
+                              "branchId",
                               "catalogServiceId",
                               "name",
                               "imageUrl",
@@ -4081,6 +4272,25 @@
                                   },
                                   "createdAt": {
                                     "type": "string"
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The branch the review is about (label only)"
                                   }
                                 },
                                 "required": [
@@ -4088,7 +4298,8 @@
                                   "customerName",
                                   "rating",
                                   "comment",
-                                  "createdAt"
+                                  "createdAt",
+                                  "branch"
                                 ]
                               }
                             }
@@ -4118,6 +4329,7 @@
                         "weeklySchedule",
                         "upcomingClosures",
                         "staff",
+                        "branches",
                         "services",
                         "gallery",
                         "isFavorite",
@@ -4271,6 +4483,13 @@
                             "DAY_OFF"
                           ]
                         },
+                        "branchId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The branch the staff member works at"
+                        },
                         "role": {
                           "type": "string",
                           "enum": [
@@ -4391,6 +4610,25 @@
                                   },
                                   "createdAt": {
                                     "type": "string"
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The branch the review is about (label only)"
                                   }
                                 },
                                 "required": [
@@ -4398,7 +4636,8 @@
                                   "customerName",
                                   "rating",
                                   "comment",
-                                  "createdAt"
+                                  "createdAt",
+                                  "branch"
                                 ]
                               }
                             }
@@ -4415,6 +4654,7 @@
                         "firstName",
                         "photoUrl",
                         "status",
+                        "branchId",
                         "role",
                         "rating",
                         "bio",
@@ -4497,7 +4737,7 @@
           "Home"
         ],
         "summary": "Home (S03): banners, services, recommended and nearest salons in one request",
-        "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent. Each section holds 10 items; `hasMore` shows See more / See all.",
+        "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all.",
         "security": [],
         "parameters": [
           {
@@ -4726,6 +4966,29 @@
                                       "number",
                                       "null"
                                     ]
+                                  },
+                                  "branchCount": {
+                                    "type": "number",
+                                    "description": "Bookable branches of the salon (§5.17)."
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The branch the place, hours and distance come from: the nearest, else the main one."
                                   }
                                 },
                                 "required": [
@@ -4739,7 +5002,9 @@
                                   "isOpenNow",
                                   "todayHours",
                                   "isFavorite",
-                                  "distanceKm"
+                                  "distanceKm",
+                                  "branchCount",
+                                  "branch"
                                 ]
                               }
                             },
@@ -4822,6 +5087,33 @@
                                       "number",
                                       "null"
                                     ]
+                                  },
+                                  "branchCount": {
+                                    "type": "number",
+                                    "description": "Bookable branches of the salon (§5.17)."
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The branch the place, hours and distance come from: the nearest, else the main one."
+                                  },
+                                  "title": {
+                                    "type": "string",
+                                    "description": "\"Salon - Branch\" for a salon with several branches, else the salon name."
                                   }
                                 },
                                 "required": [
@@ -4835,7 +5127,10 @@
                                   "isOpenNow",
                                   "todayHours",
                                   "isFavorite",
-                                  "distanceKm"
+                                  "distanceKm",
+                                  "branchCount",
+                                  "branch",
+                                  "title"
                                 ]
                               }
                             },
@@ -5040,6 +5335,29 @@
                               "number",
                               "null"
                             ]
+                          },
+                          "branchCount": {
+                            "type": "number",
+                            "description": "Bookable branches of the salon (§5.17)."
+                          },
+                          "branch": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "The branch the place, hours and distance come from: the nearest, else the main one."
                           }
                         },
                         "required": [
@@ -5053,7 +5371,9 @@
                           "isOpenNow",
                           "todayHours",
                           "isFavorite",
-                          "distanceKm"
+                          "distanceKm",
+                          "branchCount",
+                          "branch"
                         ]
                       }
                     },
@@ -5498,6 +5818,25 @@
                               },
                               "createdAt": {
                                 "type": "string"
+                              },
+                              "branch": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ],
+                                "description": "The branch the review is about (label only)"
                               }
                             },
                             "required": [
@@ -5505,7 +5844,8 @@
                               "customerName",
                               "rating",
                               "comment",
-                              "createdAt"
+                              "createdAt",
+                              "branch"
                             ]
                           }
                         },
@@ -5650,6 +5990,10 @@
                   "comment": {
                     "type": "string",
                     "maxLength": 1000
+                  },
+                  "branchId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
                   }
                 },
                 "required": [
@@ -5872,6 +6216,25 @@
                               },
                               "createdAt": {
                                 "type": "string"
+                              },
+                              "branch": {
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ],
+                                "description": "The branch the review is about (label only)"
                               }
                             },
                             "required": [
@@ -5879,7 +6242,8 @@
                               "customerName",
                               "rating",
                               "comment",
-                              "createdAt"
+                              "createdAt",
+                              "branch"
                             ]
                           }
                         },
@@ -6033,6 +6397,10 @@
                   "comment": {
                     "type": "string",
                     "maxLength": 1000
+                  },
+                  "branchId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
                   }
                 },
                 "required": [
@@ -7163,6 +7531,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "branchId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
+                  },
                   "date": {
                     "type": "string"
                   },
@@ -7418,6 +7790,10 @@
                 "type": "object",
                 "properties": {
                   "salonId": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{24}$/i"
+                  },
+                  "branchId": {
                     "type": "string",
                     "pattern": "^[a-f0-9]{24}$/i"
                   },
@@ -8766,6 +9142,32 @@
                             ],
                             "description": "Customer and admin views only."
                           },
+                          "branch": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "locationText": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "locationText"
+                            ],
+                            "description": "The branch as booked, name in the request language; null for bookings made before branches."
+                          },
                           "customer": {
                             "type": [
                               "object",
@@ -8822,6 +9224,7 @@
                           "personsCount",
                           "total",
                           "salon",
+                          "branch",
                           "customer",
                           "staff"
                         ]
@@ -9220,6 +9623,32 @@
                           ],
                           "description": "Customer and admin views only."
                         },
+                        "branch": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "locationText": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "locationText"
+                          ],
+                          "description": "The branch as booked, name in the request language; null for bookings made before branches."
+                        },
                         "customer": {
                           "type": [
                             "object",
@@ -9480,6 +9909,7 @@
                         "personsCount",
                         "total",
                         "salon",
+                        "branch",
                         "customer",
                         "staff",
                         "refundStatus",

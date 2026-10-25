@@ -49,7 +49,10 @@ type Person = {
 
 describe('demo seed data set', () => {
   it('fills every collection the seed owns, with a realistic volume', () => {
-    for (const collection of DEMO_COLLECTIONS) expect(data[collection].length).toBeGreaterThan(0);
+    // Branches come after the main-branch migration (`buildDemoBranches`, tests/demoBranches).
+    for (const collection of DEMO_COLLECTIONS.filter((name) => name !== 'Branch')) {
+      expect(data[collection].length).toBeGreaterThan(0);
+    }
     expect(data.Salon).toHaveLength(DEMO_SALONS.length);
     expect(data.Booking.length).toBeGreaterThan(80);
     expect(data.Review.length).toBeGreaterThan(20);

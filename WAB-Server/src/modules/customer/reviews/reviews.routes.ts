@@ -40,6 +40,7 @@ export const createReviewsRouter = ({ service, guard, limiter }: ReviewsRouterOp
           salonId: params.salonId,
           staffId: params.memberId,
           params: query,
+          language: req.language,
         });
         sendSuccess(req, res, {
           data: { items: result.items, summary: result.summary },
@@ -58,6 +59,7 @@ export const createReviewsRouter = ({ service, guard, limiter }: ReviewsRouterOp
           customerId: req.auth?.subjectId ?? '',
           salonId: params.salonId,
           staffId: params.memberId,
+          branchId: body.branchId,
           rating: body.rating,
           comment: body.comment,
         });

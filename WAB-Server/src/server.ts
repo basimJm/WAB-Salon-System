@@ -1,3 +1,8 @@
+import { createAdminBranchesService } from './domain/branches/adminBranches.service';
+import { createBranchesService } from './domain/branches/branches.service';
+import { createBranchFacts, createBranchStateService } from './domain/branches/branchState.service';
+import { createMainBranches } from './domain/branches/mainBranch';
+import { BranchesRepository } from './repositories/branches.repository';
 import { createExportsService } from './domain/exports/exports.service';
 import { createTableBuilders } from './domain/exports/tableBuilders';
 import { ExportsRepository } from './repositories/exports.repository';
@@ -405,11 +410,26 @@ const buildServices = (
     logger,
   });
   const conflictFinder = createConflictFinder({ bookings: bookingsRepository, settings });
+  const branchesRepository = new BranchesRepository();
+  // Salon-level endpoints act on the main branch until the per-branch ones replace them (§5.16).
+  const mainBranches = createMainBranches({
+    branches: branchesRepository,
+    salons: new SalonsRepository(),
+    areas: new AreasRepository(),
+  });
+  const branchState = createBranchStateService({
+    branches: branchesRepository,
+    facts: createBranchFacts(new MembersRepository(), salonServices),
+    notifier: producers.salonStateNotifier,
+    logger,
+  });
   const salonState = createSalonStateService({
     salons: new SalonsRepository(),
     facts: createStaffFacts(new MembersRepository(), (salonId) =>
       salonServices.countActive(salonId),
     ),
+    branchState,
+    mainBranches,
     audit: createAuditWriter(new AuditLogsRepository()),
     notifier: producers.salonStateNotifier,
     logger,
@@ -443,6 +463,7 @@ const buildServices = (
   const holdsStore = createHoldsStore(redis);
   const bookingDraftsRepository = new BookingDraftsRepository();
   const availability = createAvailabilityService({
+    branches: branchesRepository,
     salons: new SalonsRepository(),
     members: new MembersRepository(),
     salonServices,
@@ -453,6 +474,7 @@ const buildServices = (
     settings,
   });
   const bookingDrafts = createBookingDraftService({
+    mainBranches,
     redis,
     drafts: bookingDraftsRepository,
     availability,
@@ -548,6 +570,7 @@ const buildServices = (
     },
   };
   const bookingCreation = createBookingCreationService({
+    branches: branchesRepository,
     transactions: transactionsRepository,
     refunds: fullRefunds,
     hook: bookingCreated,
@@ -721,6 +744,7 @@ const buildServices = (
   });
   const favoritesRepository = new FavoritesRepository();
   const reviewsService = createReviewsService({
+    branches: branchesRepository,
     reviews: new ReviewsRepository(),
     salons: new SalonsRepository(),
     members: new MembersRepository(),
@@ -728,6 +752,7 @@ const buildServices = (
     settings,
   });
   const search = createSearchService({
+    branches: branchesRepository,
     favorites: favoritesRepository,
     recommended: placements,
     salons: new SalonsRepository(),
@@ -746,6 +771,17 @@ const buildServices = (
     storage: providers.storage,
     logger,
   });
+  const branchesService = createBranchesService({
+    branches: branchesRepository,
+    salons: new SalonsRepository(),
+    cities: new CitiesRepository(),
+    areas: new AreasRepository(),
+    bookings: bookingsRepository,
+    settings,
+    state: salonState,
+    notifier: producers.salonStateNotifier,
+    logger,
+  });
   const galleryService = createGalleryService({
     gallery: new GalleryRepository(),
     storage: providers.storage,
@@ -753,6 +789,8 @@ const buildServices = (
     settings,
   });
   const salonProfileService = createSalonProfileService({
+    branchEditor: branchesService,
+    mainBranches,
     salons: new SalonsRepository(),
     cities: new CitiesRepository(),
     areas: new AreasRepository(),
@@ -762,6 +800,7 @@ const buildServices = (
   });
   const policyService = createPolicyService({ salons: new SalonsRepository(), state: salonState });
   const staffService = createStaffService({
+    branches: branchesRepository,
     members: new MembersRepository(),
     salons: new SalonsRepository(),
     salonServices,
@@ -773,6 +812,8 @@ const buildServices = (
     },
   });
   const salonServicesService = createSalonServicesService({
+    branches: branchesRepository,
+    mainBranches,
     salons: new SalonsRepository(),
     catalog: new CatalogServicesRepository(),
     services: salonServices,
@@ -781,11 +822,24 @@ const buildServices = (
     state: salonState,
   });
   const hoursService = createHoursService({
+    branches: branchesRepository,
+    mainBranches,
     salons: new SalonsRepository(),
     closures: new ClosuresRepository(),
     settings,
     state: salonState,
     conflicts: conflictFinder.schedule,
+  });
+  const teamService = createTeamService({
+    branches: branchesRepository,
+    mainBranches,
+    access: accessEvents,
+    members: new MembersRepository(),
+    lifecycle: accountLifecycle,
+    phones: createPhoneVerifier(phoneServices),
+    storage: providers.storage,
+    uploads,
+    deactivationConflicts: conflictFinder.deactivation,
   });
   const adminSalonEditService = createAdminSalonEditService({
     profile: salonProfileService,
@@ -798,8 +852,17 @@ const buildServices = (
     audit,
     notifier: producers.salonStateNotifier,
     logger,
+    branches: branchesRepository,
+    team: teamService,
+  });
+  const adminBranchesService = createAdminBranchesService({
+    branches: branchesService,
+    audit,
+    notifier: producers.salonStateNotifier,
+    logger,
   });
   const adminReviewsService = createAdminReviewsService({
+    branches: branchesRepository,
     reviews: new ReviewsRepository(),
     salons: new SalonsRepository(),
     members: new MembersRepository(),
@@ -873,6 +936,7 @@ const buildServices = (
     bookingReassign,
     customerProfile,
     salonDetails: createSalonDetailsService({
+      branches: branchesRepository,
       favorites: favoritesRepository,
       reviews: reviewsService,
       salons: new SalonsRepository(),
@@ -897,6 +961,7 @@ const buildServices = (
       notifier: producers.salonStateNotifier,
       placements: new PlacementsRepository(),
       bookingCounts: bookingsRepository,
+      branches: branchesRepository,
     }),
     adminSalonInsights: {
       insights: createSalonInsightsService({
@@ -924,15 +989,7 @@ const buildServices = (
       conflicts: conflictFinder.leave,
     }),
     staff: staffService,
-    team: createTeamService({
-      access: accessEvents,
-      members: new MembersRepository(),
-      lifecycle: accountLifecycle,
-      phones: createPhoneVerifier(phoneServices),
-      storage: providers.storage,
-      uploads,
-      deactivationConflicts: conflictFinder.deactivation,
-    }),
+    team: teamService,
     catalogRequests: createCatalogRequestsService({
       requests: new CatalogRequestsRepository(),
       salons: new SalonsRepository(),
@@ -945,6 +1002,7 @@ const buildServices = (
     salonServices: salonServicesService,
     hours: hoursService,
     gallery: galleryService,
+    branches: branchesService,
     salonProfile: {
       service: salonProfileService,
       guard: [
@@ -958,6 +1016,7 @@ const buildServices = (
     adminSettings: adminSettingsService,
     adminProfile: adminProfileService,
     adminSalonEdit: adminSalonEditService,
+    adminBranches: adminBranchesService,
     adminSearch: createAdminSearchService({
       customers: new CustomersRepository(),
       salons: new SalonsRepository(),

@@ -11,7 +11,7 @@ import { asyncHandler } from '../../../utils/async';
 import { sendPaginated, sendSuccess } from '../../../utils/response/successResponse';
 import { toActor } from '../crud/actor';
 import { salonParams } from './salonState.validation';
-import { genderBody, salonsQuery } from './adminSalons.validation';
+import { genderBody, membersQuery, salonsQuery } from './adminSalons.validation';
 
 const iso = (date: Date | null): string | null => (date === null ? null : date.toISOString());
 const rowData = (r: AdminSalonRow): Record<string, unknown> => ({
@@ -27,6 +27,10 @@ const detailData = (d: AdminSalonDetail): Record<string, unknown> => ({
   completeness: d.completeness,
   offline: d.offline === null ? null : { reason: d.offline.reason, at: d.offline.at.toISOString() },
   owner: d.owner,
+  branches: d.branches.map((b) => ({
+    ...b,
+    offline: b.offline === null ? null : { reason: b.offline.reason, at: iso(b.offline.at) },
+  })),
   subscription:
     d.subscription === null
       ? null
@@ -67,10 +71,11 @@ export const createAdminSalonsRouter = (
   );
   router.get(
     routes.members,
-    validate({ params: salonParams }),
+    validate({ params: salonParams, query: membersQuery }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof salonParams>(req, 'params');
-      sendSuccess(req, res, { data: await service.members(id) });
+      const { branchId } = part<typeof membersQuery>(req, 'query');
+      sendSuccess(req, res, { data: await service.members(id, branchId) });
     }),
   );
   router.patch(

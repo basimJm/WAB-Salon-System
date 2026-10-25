@@ -10,6 +10,8 @@ import {
 /** A catalog service a salon offers, with its own price and duration (BUSINESS_DOMAIN.md §3.3). */
 export interface SalonServiceRaw {
   salonId: Types.ObjectId;
+  /** Branch (§3.3a); set on every new row, backfilled by the branch migration. */
+  branchId?: Types.ObjectId;
   catalogServiceId: Types.ObjectId;
   /** Integer fils, > 0. */
   price: number;
@@ -26,6 +28,7 @@ export interface SalonServiceRaw {
 const salonServiceSchema = new Schema<SalonServiceRaw>(
   {
     salonId: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
     catalogServiceId: { type: Schema.Types.ObjectId, ref: 'CatalogService', required: true },
     price: { type: Number, required: true, min: 1, validate: Number.isInteger },
     durationMinutes: {
@@ -43,7 +46,14 @@ const salonServiceSchema = new Schema<SalonServiceRaw>(
   },
   { timestamps: true, collection: SALON_SERVICES_COLLECTION },
 );
-salonServiceSchema.index({ salonId: 1, catalogServiceId: 1 }, { unique: true });
+// A salon may offer the same catalog service in several branches (unique per branch below).
+salonServiceSchema.index({ salonId: 1, catalogServiceId: 1 }, { name: 'salon_catalog_service' });
 salonServiceSchema.index({ catalogServiceId: 1, active: 1 });
+salonServiceSchema.index({ branchId: 1, active: 1 });
+// One row per catalog service per branch; rows not migrated yet (no branch) are left out.
+salonServiceSchema.index(
+  { branchId: 1, catalogServiceId: 1 },
+  { unique: true, partialFilterExpression: { branchId: { $exists: true } } },
+);
 
 export const SalonServiceModel = model<SalonServiceRaw>('SalonService', salonServiceSchema);

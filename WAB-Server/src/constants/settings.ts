@@ -10,6 +10,7 @@ export const SETTING_DEFAULTS = {
   timezone: DEFAULT_TIMEZONE,
   currency: CURRENCY_CODE,
   'discovery.nearbyRadiusKm': 10,
+  'salon.maxBranches': 20,
   'booking.slotMinutes': 15,
   'booking.maxDaysAhead': 90,
   'booking.maxCompanions': 5,

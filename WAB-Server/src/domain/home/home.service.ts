@@ -25,8 +25,8 @@ export interface Home {
   readonly banners: PublicBanner[];
   readonly services: HomeSection<PublicCatalogService>;
   readonly recommended: HomeSection<SalonCard>;
-  /** `null` when the customer sent no position (the app asks for location permission). */
-  readonly nearest: HomeSection<SalonCard> | null;
+  /** `null` when the customer sent no position; one entry per bookable branch (§5.17). */
+  readonly nearest: HomeSection<SalonCard & { title?: string }> | null;
 }
 
 export interface HomeService {
@@ -41,7 +41,7 @@ export interface HomeService {
 export interface HomeDeps {
   readonly banners: Pick<BannersService, 'live'>;
   readonly catalog: CatalogService;
-  readonly search: Pick<SearchService, 'search'>;
+  readonly search: Pick<SearchService, 'search'> & Partial<Pick<SearchService, 'nearestBranches'>>;
   readonly customers: Pick<CustomersRepository, 'findById'>;
   readonly unread?: UnreadLookup;
 }
@@ -66,14 +66,24 @@ export const createHomeService = ({
       customerId === undefined ? Promise.resolve(null) : unread.count(customerId),
       banners.live(gender, language),
       catalog.list({ gender, language, params }),
-      search.search({ query: { gender, general: 'RECOMMENDED' }, params, customerId }),
+      search.search({ query: { gender, general: 'RECOMMENDED' }, params, customerId, language }),
       position === undefined
         ? Promise.resolve(null)
-        : search.search({
-            query: { gender, lat: position.lat, lng: position.lng, sort: 'NEAREST' },
-            params,
-            customerId,
-          }),
+        : search.nearestBranches === undefined
+          ? search.search({
+              query: { gender, lat: position.lat, lng: position.lng, sort: 'NEAREST' },
+              params,
+              customerId,
+              language,
+            })
+          : search.nearestBranches({
+              gender,
+              lat: position.lat,
+              lng: position.lng,
+              params,
+              customerId,
+              language,
+            }),
     ]);
     return {
       firstName: customer?.firstName ?? null,

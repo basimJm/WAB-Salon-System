@@ -20,6 +20,7 @@ const DOMAIN_SETTINGS: Readonly<Record<string, unknown>> = {
   timezone: 'Asia/Amman',
   currency: 'JOD',
   'discovery.nearbyRadiusKm': 10,
+  'salon.maxBranches': 20,
   'booking.slotMinutes': 15,
   'booking.maxDaysAhead': 90,
   'booking.maxCompanions': 5,
@@ -61,9 +62,9 @@ const valid = (key: keyof typeof SETTING_DEFINITIONS, value: unknown): boolean =
   SETTING_DEFINITIONS[key].schema.safeParse(value).success;
 
 describe('settings registry', () => {
-  it('has exactly the 38 keys of BUSINESS_DOMAIN.md §10', () => {
+  it('has exactly the 39 keys of BUSINESS_DOMAIN.md §10', () => {
     expect([...SETTING_KEYS].sort()).toEqual(Object.keys(DOMAIN_SETTINGS).sort());
-    expect(SETTING_KEYS).toHaveLength(38);
+    expect(SETTING_KEYS).toHaveLength(39);
     expect(Object.keys(SETTING_DEFAULTS).sort()).toEqual([...SETTING_KEYS].sort());
   });
 
@@ -108,6 +109,8 @@ describe('settings registry', () => {
     ['booking.minLeadMinutes', 0, true],
     ['booking.minLeadMinutes', -1, false],
     ['booking.maxCompanions', 0, true],
+    ['salon.maxBranches', 1, true],
+    ['salon.maxBranches', 0, false],
     ['subscription.trialDays', 0, true],
     ['refund.maxRetries', 0, true],
     ['account.deletionGraceDays', 0, false],
@@ -170,6 +173,7 @@ describe('settings registry', () => {
     'uploads.docMaxMb',
     'uploads.docMaxFiles',
     'alerts.crashesPerHour',
+    'salon.maxBranches',
   ] as const;
   const NON_NEGATIVE_INT_KEYS = [
     'booking.maxCompanions',

@@ -9,6 +9,8 @@ import { LOCAL_DATE_PATTERN } from '../constants/time';
 export interface StaffLeaveRaw {
   memberId: Types.ObjectId;
   salonId: Types.ObjectId;
+  /** Branch (§3.3a); set on every new row, backfilled by the branch migration. */
+  branchId?: Types.ObjectId;
   from: string;
   to: string;
   note?: string;
@@ -20,6 +22,7 @@ const staffLeaveSchema = new Schema<StaffLeaveRaw>(
   {
     memberId: { type: Schema.Types.ObjectId, ref: 'Member', required: true },
     salonId: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
     from: { type: String, required: true, match: LOCAL_DATE_PATTERN },
     to: { type: String, required: true, match: LOCAL_DATE_PATTERN },
     note: { type: String, trim: true, maxlength: LEAVE_NOTE_MAX_LENGTH },
@@ -28,5 +31,6 @@ const staffLeaveSchema = new Schema<StaffLeaveRaw>(
 );
 staffLeaveSchema.index({ memberId: 1, to: 1 });
 staffLeaveSchema.index({ salonId: 1, from: 1 });
+staffLeaveSchema.index({ branchId: 1, from: 1 });
 
 export const StaffLeaveModel = model<StaffLeaveRaw>('StaffLeave', staffLeaveSchema);

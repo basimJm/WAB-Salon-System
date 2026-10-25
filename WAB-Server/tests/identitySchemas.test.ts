@@ -247,6 +247,7 @@ describe('member model', () => {
         { salonId: 1 },
         expect.objectContaining({ unique: true, partialFilterExpression: { role: 'OWNER' } }),
       ],
+      [{ branchId: 1, active: 1 }, expect.anything()],
     ]);
   });
 });

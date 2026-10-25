@@ -23,7 +23,13 @@ export const createMerchantStaffRouter = (
     validate({ params: staffParams }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof staffParams>(req, 'params');
-      sendSuccess(req, res, { data: await service.get({ salonId: salonOf(req), memberId: id }) });
+      sendSuccess(req, res, {
+        data: await service.get({
+          salonId: salonOf(req),
+          memberId: id,
+          scope: req.member?.branchId,
+        }),
+      });
     }),
   );
   router.put(
@@ -33,7 +39,12 @@ export const createMerchantStaffRouter = (
       const { id } = part<typeof staffParams>(req, 'params');
       const profile = part<typeof staffProfileSchema>(req, 'body');
       sendSuccess(req, res, {
-        data: await service.set({ salonId: salonOf(req), memberId: id, profile }),
+        data: await service.set({
+          salonId: salonOf(req),
+          memberId: id,
+          profile,
+          scope: req.member?.branchId,
+        }),
       });
     }),
   );

@@ -1,3 +1,4 @@
+import type { BranchesRepository } from '../../repositories/branches.repository';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { Language } from '../../constants/enums';
 import type { CatalogServiceRaw } from '../../models/catalogService.model';
@@ -12,12 +13,14 @@ import type { UploadRaw } from '../../models/upload.model';
 import type { Entity } from '../../utils/database/plain';
 import { formatJod } from '../../utils/money';
 import {
+  ForbiddenError,
   ConflictError,
   NotFoundError,
   ValidationError,
   type ErrorDetail,
 } from '../../utils/errors';
 import type { PaginationMeta, PaginationParams } from '../../utils/pagination';
+import type { MainBranches } from '../branches/mainBranch';
 import type { SalonStateService } from '../salons/salonState.service';
 import type { UploadVerifier } from '../uploads/uploads.service';
 
@@ -56,14 +59,20 @@ export interface UpdateFields {
 }
 
 export interface SalonServicesService {
+  /**
+   * `scope` = the caller's branch; without one the salon-level endpoints work on the main branch
+   * (§5.16); per-branch endpoints pass the branch they address.
+   */
   list(input: {
     salonId: string;
     language: Language;
     params: PaginationParams;
+    scope?: string | undefined;
   }): Promise<{ items: SalonServiceView[]; meta: PaginationMeta }>;
   add(input: {
     salonId: string;
     language: Language;
+    scope?: string | undefined;
     catalogServiceId: string;
     fields: AddFields;
     /** Replaces the default "uploaded by this salon" check (an admin edits for the salon). */
@@ -72,6 +81,7 @@ export interface SalonServicesService {
   update(input: {
     salonId: string;
     language: Language;
+    scope?: string | undefined;
     id: string;
     fields: UpdateFields;
     acceptUpload?: ((upload: Entity<UploadRaw>) => boolean) | undefined;
@@ -85,6 +95,10 @@ export interface SalonServicesDeps {
   readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly uploads: UploadVerifier;
   readonly state: Pick<SalonStateService, 'recompute'>;
+  /** Salon-level endpoint: new services belong to the salon's main branch (§5.16). */
+  readonly mainBranches?: Pick<MainBranches, 'idOf'>;
+  /** An addressed branch must be one of this salon's (`BRANCH_NOT_FOUND`). */
+  readonly branches?: Pick<BranchesRepository, 'findInSalon'>;
 }
 
 const invalid = (
@@ -105,7 +119,18 @@ export const createSalonServicesService = ({
   storage,
   uploads,
   state,
+  mainBranches,
+  branches,
 }: SalonServicesDeps): SalonServicesService => {
+  /** The caller's branch, else the salon's main branch (none before branch wiring: salon-wide). */
+  const branchFor = async (salonId: string, scope?: string): Promise<string | undefined> => {
+    if (scope === undefined) return (await mainBranches?.idOf(salonId))?.toString();
+    if (branches !== undefined && (await branches.findInSalon(salonId, scope)) === null) {
+      throw new NotFoundError({ code: ERROR_CODES.BRANCH_NOT_FOUND });
+    }
+    return scope;
+  };
+
   const toView = (
     s: Entity<SalonServiceRaw>,
     c: Entity<CatalogServiceRaw> | undefined,
@@ -143,8 +168,10 @@ export const createSalonServicesService = ({
   };
 
   return {
-    async list({ salonId, language, params }) {
-      const page = await services.findPage({ salonId }, params, { createdAt: 1 });
+    async list({ salonId, language, params, scope }) {
+      const branchId = await branchFor(salonId, scope);
+      const filter = branchId === undefined ? { salonId } : { salonId, branchId };
+      const page = await services.findPage(filter, params, { createdAt: 1 });
       const ids = page.items.map((s) => s.catalogServiceId);
       const entries = ids.length === 0 ? [] : await catalog.findMany({ _id: { $in: ids } });
       const byId = new Map(entries.map((c) => [c.id, c]));
@@ -154,14 +181,16 @@ export const createSalonServicesService = ({
       };
     },
 
-    async add({ salonId, language, catalogServiceId, fields, acceptUpload }) {
+    async add({ salonId, language, catalogServiceId, fields, acceptUpload, scope }) {
+      const branchId = await branchFor(salonId, scope);
       const salon = await loadSalon(salonId);
       const entry = await catalog.findById(catalogServiceId);
       if (entry === null || !entry.active) throw invalid('body.catalogServiceId');
       if (entry.gender !== salon.gender)
         throw invalid('body.catalogServiceId', ERROR_CODES.GENDER_MISMATCH);
       if (fields.brideOnly === true && salon.gender !== 'FEMALE') throw invalid('body.brideOnly');
-      if (await services.exists({ salonId, catalogServiceId })) {
+      const same = branchId === undefined ? { salonId } : { branchId };
+      if (await services.exists({ ...same, catalogServiceId })) {
         throw new ConflictError({ code: ERROR_CODES.CONFLICT });
       }
       await verifyMedia(salonId, fields.mediaKeys ?? [], acceptUpload);
@@ -169,6 +198,7 @@ export const createSalonServicesService = ({
       try {
         created = await services.create({
           salonId: toObjectId(salonId),
+          ...(branchId === undefined ? {} : { branchId: toObjectId(branchId) }),
           catalogServiceId: toObjectId(catalogServiceId),
           price: fields.price,
           durationMinutes: fields.durationMinutes,
@@ -187,10 +217,13 @@ export const createSalonServicesService = ({
       return toView(created, entry, language);
     },
 
-    async update({ salonId, language, id, fields, acceptUpload }) {
+    async update({ salonId, language, id, fields, acceptUpload, scope }) {
       const salon = await loadSalon(salonId);
       const current = await services.findOne({ _id: id, salonId });
       if (current === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+      if (scope !== undefined && current.branchId !== scope) {
+        throw new ForbiddenError({ code: ERROR_CODES.BRANCH_SCOPE_DENIED });
+      }
       if (fields.brideOnly === true && salon.gender !== 'FEMALE') throw invalid('body.brideOnly');
       if (fields.mediaKeys !== undefined) {
         await verifyMedia(

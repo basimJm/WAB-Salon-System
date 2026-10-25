@@ -44,13 +44,17 @@ export const createMerchantBookingsRouter = (
   ): {
     salonId: string;
     bookingId: string;
-    member: { id: string; permissions: readonly string[] };
+    member: { id: string; permissions: readonly string[]; branchId?: string | undefined };
   } => {
     const { id } = (req.validated as { params: z.infer<typeof bookingParams> }).params;
     return {
       salonId: req.member?.salonId ?? '',
       bookingId: id,
-      member: { id: req.member?.id ?? '', permissions: req.member?.permissions ?? [] },
+      member: {
+        id: req.member?.id ?? '',
+        permissions: req.member?.permissions ?? [],
+        branchId: req.member?.branchId,
+      },
     };
   };
   const body = (req: Request): z.infer<typeof decisionBody> =>
@@ -58,9 +62,12 @@ export const createMerchantBookingsRouter = (
 
   const reads = queries ?? unavailableBookingQueries;
   const viewer = requirePermission(['BOOKINGS_VIEW_ALL', 'BOOKINGS_VIEW_OWN'], 'any');
-  const memberOf = (req: Request): { id: string; permissions: readonly string[] } => ({
+  const memberOf = (
+    req: Request,
+  ): { id: string; permissions: readonly string[]; branchId?: string | undefined } => ({
     id: req.member?.id ?? '',
     permissions: req.member?.permissions ?? [],
+    branchId: req.member?.branchId,
   });
   router.get(
     '/',

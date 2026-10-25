@@ -1058,7 +1058,7 @@
               ],
               "variable": []
             },
-            "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent. Each section holds 10 items; `hasMore` shows See more / See all."
+            "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all."
           }
         }
       ]
@@ -1289,7 +1289,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"rating\": 0,\n  \"comment\": \"string\"\n}",
+              "raw": "{\n  \"rating\": 0,\n  \"comment\": \"string\",\n  \"branchId\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1399,7 +1399,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"rating\": 0,\n  \"comment\": \"string\"\n}",
+              "raw": "{\n  \"rating\": 0,\n  \"comment\": \"string\",\n  \"branchId\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1668,7 +1668,7 @@
             "description": "Ask once per person; send the times the earlier persons picked in `others` so the same staff member is not offered twice. `reason` explains a day without slots: PAST, TOO_FAR or CLOSED. A slot is available when at least one eligible staff member is free for the whole duration (existing PENDING/APPROVED bookings and live payment holds count as busy).",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"date\": \"string\",\n  \"person\": {\n    \"serviceIds\": [\n      \"string\"\n    ],\n    \"isBride\": false,\n    \"staffId\": \"string\"\n  },\n  \"others\": [\n    {\n      \"staffId\": \"string\",\n      \"start\": \"string\",\n      \"end\": \"string\"\n    }\n  ],\n  \"draftId\": \"string\"\n}",
+              "raw": "{\n  \"branchId\": \"string\",\n  \"date\": \"string\",\n  \"person\": {\n    \"serviceIds\": [\n      \"string\"\n    ],\n    \"isBride\": false,\n    \"staffId\": \"string\"\n  },\n  \"others\": [\n    {\n      \"staffId\": \"string\",\n      \"start\": \"string\",\n      \"end\": \"string\"\n    }\n  ],\n  \"draftId\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1723,7 +1723,7 @@
             "description": "Persons are checked in order and each pick blocks the next. Errors (422): SALON_NOT_BOOKABLE, TOO_MANY_COMPANIONS, GENDER_MISMATCH, SERVICE_UNAVAILABLE, BRIDE_ONLY_SERVICE, STAFF_NOT_ELIGIBLE, SALON_CLOSED, DATE_OUT_OF_RANGE, SLOT_UNAVAILABLE, PAYMENT_OPTION_NOT_ALLOWED.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"salonId\": \"string\",\n  \"paymentMethod\": \"PAY_ON_ARRIVAL\",\n  \"persons\": [\n    {\n      \"name\": \"string\",\n      \"isBride\": false,\n      \"serviceIds\": [\n        \"string\"\n      ],\n      \"staffId\": \"string\",\n      \"start\": \"string\"\n    }\n  ]\n}",
+              "raw": "{\n  \"salonId\": \"string\",\n  \"branchId\": \"string\",\n  \"paymentMethod\": \"PAY_ON_ARRIVAL\",\n  \"persons\": [\n    {\n      \"name\": \"string\",\n      \"isBride\": false,\n      \"serviceIds\": [\n        \"string\"\n      ],\n      \"staffId\": \"string\",\n      \"start\": \"string\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"

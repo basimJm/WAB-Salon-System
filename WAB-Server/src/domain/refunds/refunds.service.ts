@@ -65,6 +65,8 @@ export interface RefundService extends FullRefundPort {
     params: PaginationParams;
     status?: RefundRaw['status'] | undefined;
     bookingId?: string | undefined;
+    salonId?: string | undefined;
+    branchId?: string | undefined;
   }): Promise<{ items: Entity<RefundRaw>[]; total: number }>;
   get(id: string): Promise<Entity<RefundRaw>>;
   /** Admin: a failed refund gets a fresh set of attempts. */
@@ -232,6 +234,7 @@ export const createRefundService = (deps: RefundServiceDeps): RefundService => {
         ...(input.bookingId === undefined ? {} : { bookingId: toObjectId(input.bookingId) }),
         transactionId: toObjectId(payment.id),
         salonId: toObjectId(payment.salonId),
+        ...(payment.branchId === undefined ? {} : { branchId: toObjectId(payment.branchId) }),
         customerId: toObjectId(payment.customerId),
         amount,
         source: input.source,
@@ -371,11 +374,13 @@ export const createRefundService = (deps: RefundServiceDeps): RefundService => {
       );
     },
 
-    async list({ params, status, bookingId }) {
+    async list({ params, status, bookingId, salonId, branchId }) {
       const page = await refunds.findPage(
         {
           ...(status === undefined ? {} : { status }),
           ...(bookingId === undefined ? {} : { bookingId }),
+          ...(salonId === undefined ? {} : { salonId }),
+          ...(branchId === undefined ? {} : { branchId }),
         },
         params,
         { createdAt: -1 },

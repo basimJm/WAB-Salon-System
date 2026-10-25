@@ -24,6 +24,13 @@ const card = z.object({
   todayHours: z.object({ open: z.string(), close: z.string() }).nullable(),
   isFavorite: z.boolean(),
   distanceKm: z.number().nullable(),
+  branchCount: z.number().describe('Bookable branches of the salon (§5.17).'),
+  branch: z
+    .object({ id: z.string(), name: z.string() })
+    .nullable()
+    .describe(
+      'The branch the place, hours and distance come from: the nearest, else the main one.',
+    ),
 });
 
 export const registerCustomerSearchDocs = (registry: OpenAPIRegistry): void => {

@@ -34,12 +34,8 @@ const COMPLETE: CompletenessInput = {
   coverKey: 'c.jpg',
   profileKey: 'p.jpg',
   description: 'nice',
-  phone: '+962791234567',
-  location: { coordinates: [35.9, 31.9] },
-  weeklySchedule: [{ isOff: true }, { isOff: false }],
   policy: POLICY,
-  activeServices: 1,
-  qualifiedStaff: 1,
+  branches: { bookable: true, mainMissing: [] },
 };
 
 describe('computeMissing', () => {
@@ -53,12 +49,9 @@ describe('computeMissing', () => {
     ['PROFILE_IMAGE', { profileKey: undefined }],
     ['NAME', { name: ' ' }],
     ['DESCRIPTION', { description: undefined }],
-    ['LOCATION', { location: undefined }],
-    ['LOCATION', { location: { coordinates: [35.9] } }],
-    ['PHONE', { phone: undefined }],
-    ['WORKING_HOURS', { weeklySchedule: [{ isOff: true }, { isOff: true }] }],
-    ['SERVICE', { activeServices: 0 }],
-    ['STAFF', { qualifiedStaff: 0 }],
+    ['BRANCH', { branches: { bookable: false, mainMissing: [] } }],
+    ['BRANCH', { branches: { bookable: false, mainMissing: null } }],
+    ['STAFF', { branches: { bookable: false, mainMissing: ['STAFF'] } }],
     ['POLICY', { policy: undefined }],
     ['POLICY', { policy: { ...POLICY, paymentOptions: [] } }],
     ['POLICY', { policy: { ...POLICY, cancellationWindowHours: -1 } }],
@@ -79,8 +72,19 @@ describe('computeMissing', () => {
       }),
     ).toEqual([]);
     expect(
-      computeMissing({ ...COMPLETE, qualifiedStaff: 0, coverKey: undefined, policy: undefined }),
-    ).toEqual(['COVER', 'STAFF', 'POLICY']);
+      computeMissing({
+        ...COMPLETE,
+        coverKey: undefined,
+        policy: undefined,
+        branches: { bookable: false, mainMissing: ['LOCATION', 'STAFF'] },
+      }),
+    ).toEqual(['COVER', 'LOCATION', 'STAFF', 'POLICY']);
+  });
+
+  it('is complete when another branch is bookable, whatever the main branch lacks', () => {
+    expect(
+      computeMissing({ ...COMPLETE, branches: { bookable: true, mainMissing: ['PHONE'] } }),
+    ).toEqual([]);
   });
 });
 

@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { MERCHANT_HOURS_ROUTES } from '../../../constants/hours';
 import type { HoursService } from '../../../domain/salons/hoursService';
 import { requirePermission } from '../../../middlewares/permission';
+import { branchScopeOf } from '../../../middlewares/branchScope';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { sendCreated, sendSuccess } from '../../../utils/response/successResponse';
@@ -23,7 +24,7 @@ export const createMerchantHoursRouter = (
   router.get(
     '/',
     asyncHandler(async (req: Request, res: Response) => {
-      sendSuccess(req, res, { data: await service.get(salonOf(req)) });
+      sendSuccess(req, res, { data: await service.get(salonOf(req), branchScopeOf(req)) });
     }),
   );
   router.put(
@@ -31,7 +32,9 @@ export const createMerchantHoursRouter = (
     validate({ body: weeklySchema }),
     asyncHandler(async (req: Request, res: Response) => {
       const { days } = part<typeof weeklySchema>(req, 'body');
-      sendSuccess(req, res, { data: await service.setWeekly(salonOf(req), days) });
+      sendSuccess(req, res, {
+        data: await service.setWeekly(salonOf(req), days, branchScopeOf(req)),
+      });
     }),
   );
   router.post(
@@ -39,7 +42,15 @@ export const createMerchantHoursRouter = (
     validate({ body: closureSchema }),
     asyncHandler(async (req: Request, res: Response) => {
       const input = part<typeof closureSchema>(req, 'body');
-      sendCreated(req, res, await service.addClosure({ salonId: salonOf(req), ...input }));
+      sendCreated(
+        req,
+        res,
+        await service.addClosure({
+          salonId: salonOf(req),
+          scope: branchScopeOf(req),
+          ...input,
+        }),
+      );
     }),
   );
   router.patch(
@@ -49,7 +60,12 @@ export const createMerchantHoursRouter = (
       const { id } = part<typeof closureParams>(req, 'params');
       const patch = part<typeof closurePatchSchema>(req, 'body');
       sendSuccess(req, res, {
-        data: await service.updateClosure({ salonId: salonOf(req), id, ...patch }),
+        data: await service.updateClosure({
+          salonId: salonOf(req),
+          scope: branchScopeOf(req),
+          id,
+          ...patch,
+        }),
       });
     }),
   );
@@ -58,7 +74,7 @@ export const createMerchantHoursRouter = (
     validate({ params: closureParams }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof closureParams>(req, 'params');
-      await service.removeClosure({ salonId: salonOf(req), id });
+      await service.removeClosure({ salonId: salonOf(req), id, scope: branchScopeOf(req) });
       sendSuccess(req, res);
     }),
   );

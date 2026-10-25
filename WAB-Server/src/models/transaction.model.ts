@@ -15,6 +15,8 @@ export interface TransactionRaw {
   bookingId?: Types.ObjectId;
   customerId: Types.ObjectId;
   salonId: Types.ObjectId;
+  /** Branch (§3.3a); set on every new row, backfilled by the branch migration. */
+  branchId?: Types.ObjectId;
   type: TransactionType;
   /** Integer fils. */
   amount: number;
@@ -47,6 +49,7 @@ const transactionSchema = new Schema<TransactionRaw>(
     bookingId: { type: Schema.Types.ObjectId, ref: 'Booking' },
     customerId: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
     salonId: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
     type: { type: String, enum: TRANSACTION_TYPES, required: true },
     amount: { type: Number, required: true, min: 1, validate: Number.isInteger },
     currency: { type: String, enum: [PAYMENT_CURRENCY], required: true, default: PAYMENT_CURRENCY },
@@ -72,5 +75,6 @@ transactionSchema.index({ bookingDraftId: 1, attempt: -1 });
 transactionSchema.index({ providerRef: 1 }, { sparse: true });
 transactionSchema.index({ status: 1, createdAt: -1 });
 transactionSchema.index({ salonId: 1, createdAt: -1 });
+transactionSchema.index({ branchId: 1, createdAt: -1 });
 
 export const TransactionModel = model<TransactionRaw>('Transaction', transactionSchema);

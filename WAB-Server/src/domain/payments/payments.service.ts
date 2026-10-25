@@ -195,6 +195,7 @@ export const createPaymentsService = (deps: PaymentsDeps): PaymentsService => {
           bookingDraftId: toObjectId(draft.id),
           customerId: toObjectId(customerId),
           salonId: toObjectId(draft.salonId),
+          ...(draft.branchId === undefined ? {} : { branchId: toObjectId(draft.branchId) }),
           type: draft.paymentMethod === 'DEPOSIT' ? 'DEPOSIT' : 'FULL',
           amount: draft.totals.dueOnline,
           currency: PAYMENT_CURRENCY,

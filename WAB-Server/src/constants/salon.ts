@@ -59,7 +59,11 @@ export const ADMIN_APPLICATION_ROUTES = {
 /** Lifetime of the signed URLs an admin gets to read the private license documents. */
 export const LICENSE_URL_TTL_SEC = 300;
 
-/** Things a salon profile can still lack before customers may see it (BUSINESS_DOMAIN.md §5.2). */
+/**
+ * Things a salon can still lack before customers may see it (BUSINESS_DOMAIN.md §5.2). Salon-wide:
+ * COVER, PROFILE_IMAGE, NAME, DESCRIPTION, POLICY. When no branch is bookable, the main branch's own
+ * gaps (LOCATION, PHONE, WORKING_HOURS, SERVICE, STAFF) are listed, or BRANCH when none applies.
+ */
 export const COMPLETENESS_ITEMS = [
   'COVER',
   'PROFILE_IMAGE',
@@ -71,6 +75,7 @@ export const COMPLETENESS_ITEMS = [
   'SERVICE',
   'STAFF',
   'POLICY',
+  'BRANCH',
 ] as const;
 export type CompletenessItem = (typeof COMPLETENESS_ITEMS)[number];
 
@@ -83,6 +88,10 @@ export const SALON_STATE_EVENTS = [
   'salon.gender_changed',
   'salon.edited_by_admin',
   'salon.deletion_rejected',
+  'branch.live',
+  'branch.not_bookable',
+  'branch.offline',
+  'branch.online',
 ] as const;
 export type SalonStateEvent = (typeof SALON_STATE_EVENTS)[number];
 
@@ -94,6 +103,7 @@ export const SALON_EDIT_AREAS = [
   'services',
   'staff',
   'policy',
+  'branches',
 ] as const;
 export type SalonEditArea = (typeof SALON_EDIT_AREAS)[number];
 export const ADMIN_SALON_STATE_ROUTES = {

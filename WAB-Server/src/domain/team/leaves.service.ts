@@ -5,6 +5,7 @@ import type { LeavesRepository } from '../../repositories/leaves.repository';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
 import {
+  ForbiddenError,
   BusinessRuleError,
   ConflictError,
   NotFoundError,
@@ -37,10 +38,16 @@ export interface LeaveConflicts {
 export const noLeaveConflicts: LeaveConflicts = { check: () => Promise.resolve([]) };
 
 export interface LeavesService {
-  list(input: { salonId: string; memberId: string }): Promise<LeaveView[]>;
+  /** `scope` = the caller's branch (managers reach members of their branch only, §6). */
+  list(input: {
+    salonId: string;
+    memberId: string;
+    scope?: string | undefined;
+  }): Promise<LeaveView[]>;
   add(input: {
     salonId: string;
     memberId: string;
+    scope?: string | undefined;
     from: string;
     to: string;
     note?: string | undefined;
@@ -48,13 +55,19 @@ export interface LeavesService {
   update(input: {
     salonId: string;
     memberId: string;
+    scope?: string | undefined;
     leaveId: string;
     from?: string | undefined;
     to?: string | undefined;
     /** `null` clears the note. */
     note?: string | null | undefined;
   }): Promise<LeaveView>;
-  remove(input: { salonId: string; memberId: string; leaveId: string }): Promise<void>;
+  remove(input: {
+    salonId: string;
+    memberId: string;
+    leaveId: string;
+    scope?: string | undefined;
+  }): Promise<void>;
 }
 
 export interface LeavesDeps {
@@ -93,10 +106,18 @@ export const createLeavesService = (deps: LeavesDeps): LeavesService => {
   });
 
   /** The member must belong to the caller's salon (others look missing). */
-  const requireMember = async (salonId: string, memberId: string): Promise<void> => {
-    if ((await members.findOne({ _id: memberId, salonId })) === null) {
-      throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+  /** The member of that salon; a leave belongs to the member's branch (§3.4). */
+  const requireMember = async (
+    salonId: string,
+    memberId: string,
+    scope?: string,
+  ): Promise<{ branchId?: string | undefined }> => {
+    const member = await members.findOne({ _id: memberId, salonId });
+    if (member === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+    if (scope !== undefined && member.branchId !== scope) {
+      throw new ForbiddenError({ code: ERROR_CODES.BRANCH_SCOPE_DENIED });
     }
+    return member;
   };
 
   const rejectConflicts = (found: readonly BookingConflict[]): void => {
@@ -119,16 +140,16 @@ export const createLeavesService = (deps: LeavesDeps): LeavesService => {
   };
 
   return {
-    async list({ salonId, memberId }) {
-      await requireMember(salonId, memberId);
+    async list({ salonId, memberId, scope }) {
+      await requireMember(salonId, memberId, scope);
       const date = await today();
       return (await leaves.forMember(memberId))
         .filter((l) => l.to >= date)
         .map((l) => view(l, date));
     },
 
-    async add({ salonId, memberId, from, to, note }) {
-      await requireMember(salonId, memberId);
+    async add({ salonId, memberId, from, to, note, scope }) {
+      const member = await requireMember(salonId, memberId, scope);
       const date = await today();
       if (to < from) throw invalid('body.to');
       if (from < date) throw invalid('body.from');
@@ -136,6 +157,7 @@ export const createLeavesService = (deps: LeavesDeps): LeavesService => {
       const created = await leaves.create({
         memberId: toObjectId(memberId),
         salonId: toObjectId(salonId),
+        ...(member.branchId === undefined ? {} : { branchId: toObjectId(member.branchId) }),
         from,
         to,
         ...(note === undefined ? {} : { note }),
@@ -143,8 +165,8 @@ export const createLeavesService = (deps: LeavesDeps): LeavesService => {
       return view(created, date);
     },
 
-    async update({ salonId, memberId, leaveId, ...patch }) {
-      await requireMember(salonId, memberId);
+    async update({ salonId, memberId, leaveId, scope, ...patch }) {
+      await requireMember(salonId, memberId, scope);
       const date = await today();
       const current = await findLeave(memberId, leaveId);
       if (current.from <= date)
@@ -163,8 +185,8 @@ export const createLeavesService = (deps: LeavesDeps): LeavesService => {
       return view(updated, date);
     },
 
-    async remove({ salonId, memberId, leaveId }) {
-      await requireMember(salonId, memberId);
+    async remove({ salonId, memberId, leaveId, scope }) {
+      await requireMember(salonId, memberId, scope);
       const date = await today();
       const current = await findLeave(memberId, leaveId);
       if (current.from <= date)

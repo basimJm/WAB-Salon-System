@@ -1,3 +1,4 @@
+import type { Types } from 'mongoose';
 import { LEDGER_RECONCILE_BATCH_SIZE } from '../../constants/ledger';
 import { PAYOUT_LEDGER_NOTE } from '../../constants/payouts';
 import { RECONCILE_MIN_AGE_MS } from '../../constants/payments';
@@ -39,6 +40,10 @@ export interface LedgerService {
   reconcile(): Promise<number>;
 }
 
+/** Ledger rows of a payment carry its branch so finance can be filtered by branch (§5.14). */
+const branchOf = (payment: { branchId?: string | undefined }): { branchId?: Types.ObjectId } =>
+  payment.branchId === undefined ? {} : { branchId: toObjectId(payment.branchId) };
+
 export const createLedgerService = (deps: {
   readonly entries: LedgerRepository;
   readonly transactions: TransactionsRepository;
@@ -67,6 +72,7 @@ export const createLedgerService = (deps: {
     if (payment === null || payment.chargedAt !== undefined) return false;
     const base = {
       salonId: toObjectId(payment.salonId),
+      ...branchOf(payment),
       bookingId: toObjectId(bookingId),
       transactionId: toObjectId(payment.id),
     };
@@ -95,6 +101,7 @@ export const createLedgerService = (deps: {
     await appendOnce(
       {
         salonId: toObjectId(refund.salonId),
+        ...branchOf(payment),
         type: 'REFUND',
         amount: -refund.amount,
         ...(refund.bookingId === undefined ? {} : { bookingId: toObjectId(refund.bookingId) }),
