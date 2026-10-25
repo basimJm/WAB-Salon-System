@@ -49,7 +49,7 @@
 - ADM-036 done: content.faqs / content.contactInfo (AdminResource, filter app); shared ResourceDrawer (reason + errors + buttons) lives in components/overlay
 - ADM-037 done: uploads kit: repositories.uploads.upload(purpose, file, onProgress) = presign -> PUT (fakePutFile in mock) -> confirm; banners = repositories.banners.banners; date helpers dateToInstant/endDateToInstant (Amman days, end day included)
 - ADM-038 done: catalog services = repositories.catalog.services (AdminResource, filter gender); pages with a required audience use SegmentedControl in the header actions
-- ADM-039 done: catalog requests = repositories.catalog.requests {list, approve(id,input,reason), reject(id,reason)}; approve always creates a service (no map-to-existing option on the server)
+- ADM-039/093 done: catalog requests = repositories.catalog.requests {list, approve(id,input,reason), reject(id,reason)}; ApproveInput = create {name,description,imageKey?} | map {catalogServiceId} (ApproveDrawer, approveBodySchema with OBJECT_ID)
 - ADM-040 done: salons list = repositories.salons.list(query); shared hook useLocationOptions('cities'|'countries'); SearchField pages use list.setSearch(value) (immediate URL write)
 - ADM-041 done: record pages with a path param go in DETAIL_PAGES (app/routes.tsx); salons = repositories.salons.{list,get,members}
 - ADM-042 done: salon actions in SalonActions.tsx; payout details read = explicit click, gcTime 0; IBAN helpers isIban/normalizeIban in domain/salons. LESSON: after prettier, string replace anchors break silently - assert that a replacement happened.

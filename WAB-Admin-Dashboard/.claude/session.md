@@ -24,6 +24,20 @@
 - Loops: 1/1 — re-checked every criterion against the contract params, the tests and the real job answers
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — reuses ExportMenu/useExportRunner, no contract hand edit, customers page query logic moved to a tested pure function. DEVIATIONS: salons export ignores the recommended / deletion-request switches (server has no such params); CSV/PDF fail on the real stack because of S5 (server); a city filter was not exercised against the real server (schema covered by unit test); no e2e (user decision).
 
+### ADM-093 — Catalog request approval can map to an existing catalog service (SRV-125)
+
+- Branch: `feat/adm-093-catalog-map-existing` (from `origin/admin`)
+- Status: IN REVIEW
+- Acceptance criteria (PRD A23 Requests "creates or maps to a catalog service"; gap G13; operation postCatalogRequestsByIdApprove body = `{catalogServiceId, reason}` | `{name, description, imageKey?, sortOrder?, reason}`; getSalonsById, getCatalogServices):
+  - [x] Approve drawer has a "Create a new service" / "Use an existing service" switch (SegmentedControl, AR+EN); create keeps the old translate-and-create form
+  - [x] Map lists only ACTIVE catalog services of the salon's gender (the server answers 404 / GENDER_MISMATCH otherwise) and sends only `{catalogServiceId, reason}`; loading, empty ("no active service for this audience") and error states; a service and a reason are required
+  - [x] Domain: `ApproveInput` = `CreateServiceApproval | MapServiceApproval`, pure `approveProblems` / `approveInputOf`; data: `approveBodySchema` re-checks the id with OBJECT_ID (the generated pattern refuses every real id, S6)
+  - [x] Mock: the request belongs to Noor Salon (women's) of the salon fixtures; approve keeps the mapped id; G13 FIXED in `docs/REMOTE_DEV_GAPS.md`
+- Tests: tests/catalog-approve.test.tsx (8: draft rules, body mapping, schema vs S6, gender-filtered options + sent id, empty + field error, salon read error); tests/catalog-requests.test.tsx unchanged green; `sh scripts/gate.sh` GATE OK
+- Browser check (dev-release built against the local real stack on 127.0.0.1:4000, preview :4174, signed in as the QA admin; two QA requests created for Noor Salon through the merchant API): EN LTR dark 1280 px: map mode lists the 11 women's services, empty reason refused, mapped "Hair spa QA" to "Blow dry" → server 200 `status APPROVED, catalogServiceId` = the picked id, row left the pending list; AR RTL light 375 px: Arabic labels and service names, drawer 392 px of 405, no horizontal page scroll, create mode shows the four AR/EN fields; console clean
+- Loops: 1/1 — re-checked each criterion against the code, the tests and the real server answer; found the missing salon-error test and added it
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — no contract hand edit, uses already-consumed operations, salon/catalog queries only run in map mode. DEVIATIONS: options = first page of 100 services of that gender (same limit as the salon menu picker; no typeahead endpoint); no e2e (user decision); the "Blow dry QA" request was left pending on the shared stack.
+
 ## Last blocks
 
 ### ADM-079 — Switch to `remote` on dev (INT-05): per-module gap list and fixes, socket events verified against the real server
