@@ -123,6 +123,11 @@ describe('POST /customer/v1/payments', () => {
     const d = draft({ paymentMethod: 'FULL_ONLINE', totals: { total: 12_345, dueOnline: 12_345 } });
     expect(bodyOf(await start(d)).data).toMatchObject({ type: 'FULL', amount: '12.345' });
   });
+  it('the attempt keeps the draft’s branch (finance by branch, §5.14)', async () => {
+    const branchId = new Types.ObjectId();
+    await start(draft({ branchId }));
+    expect(String(stored()[0]?.['branchId'])).toBe(branchId.toHexString());
+  });
   it('a running attempt is returned again, not duplicated', async () => {
     const d = draft();
     const first = bodyOf(await start(d)).data;

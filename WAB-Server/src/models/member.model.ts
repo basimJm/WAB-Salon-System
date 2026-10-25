@@ -32,6 +32,8 @@ export interface StaffProfile {
 /** A salon team member and, when `providesServices`, a staff profile (BUSINESS_DOMAIN.md §3.4). */
 export interface MemberRaw {
   salonId: Types.ObjectId;
+  /** The one branch of a MANAGER/EMPLOYEE (§3.4); absent for the OWNER, who covers every branch. */
+  branchId?: Types.ObjectId;
   firstName: string;
   lastName: string;
   phone: string;
@@ -104,6 +106,7 @@ const staffSchema = new Schema<StaffProfile>(
 const memberSchema = new Schema<MemberRaw>(
   {
     salonId: { type: Schema.Types.ObjectId, required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
     firstName: name,
     lastName: name,
     phone: { type: String, required: true, match: E164_PATTERN },
@@ -127,5 +130,6 @@ memberSchema.index({ salonId: 1, active: 1 });
 memberSchema.index({ salonId: 1, providesServices: 1, 'staff.serviceIds': 1 });
 // Exactly one OWNER per salon, enforced by the database.
 memberSchema.index({ salonId: 1 }, { unique: true, partialFilterExpression: { role: 'OWNER' } });
+memberSchema.index({ branchId: 1, active: 1 });
 
 export const MemberModel = model<MemberRaw>('Member', memberSchema);

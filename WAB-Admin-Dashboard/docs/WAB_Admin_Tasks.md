@@ -242,7 +242,7 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 
 | ID | Task | Branch | Needs | Server (SRV) | Status | Notes |
 |---|---|---|---|---|---|---|
-| ADM-088 | Re-sync the contract (`npm run api:sync`) with branches: types, branch error codes in AR/EN messages, setting `salon.maxBranches` on the Settings page | `feat/adm-088-branches-contract` | ADM-087 | SRV-136, SRV-148 | BLOCKED | Waits for the server contract. |
+| ADM-088 | Re-sync the contract (`npm run api:sync`) with branches: types, branch error codes in AR/EN messages, setting `salon.maxBranches` on the Settings page | `feat/adm-088-branches-contract` | ADM-087 | SRV-136, SRV-148 | TODO | Waits for the server contract. unblocked by SRV-148 on 2026-10-25 |
 | ADM-089 | Salon detail → Branches tab: list (main, status, completeness, area, staff count), create / edit (location on map, contacts, name AR/EN), set main, offline / online, close (shows the blocking bookings), all with reason | `feat/adm-089-salon-branches` | ADM-088 | SRV-147 | BLOCKED | Full CRUD. |
 | ADM-090 | Branch-aware salon editing: hours, closures, services/prices and staff per branch; move staff between branches | `feat/adm-090-branch-editing` | ADM-089 | SRV-141, SRV-147 | BLOCKED | |
 | ADM-091 | Branch filter and column across bookings, reviews, members/staff, transactions, refunds, ledger and exports; booking and review detail show the branch | `feat/adm-091-branch-filters` | ADM-088 | SRV-145, SRV-146, SRV-147 | BLOCKED | |

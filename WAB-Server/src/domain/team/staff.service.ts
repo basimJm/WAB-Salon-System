@@ -1,3 +1,4 @@
+import type { BranchesRepository } from '../../repositories/branches.repository';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { DayOfWeek } from '../../constants/time';
 import type { MemberRaw } from '../../models/member.model';
@@ -8,6 +9,7 @@ import type { SalonsRepository } from '../../repositories/salons.repository';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
 import {
+  ForbiddenError,
   ConflictError,
   NotFoundError,
   ValidationError,
@@ -61,11 +63,17 @@ export interface StaffConflicts {
 export const noStaffConflicts: StaffConflicts = { check: () => Promise.resolve([]) };
 
 export interface StaffService {
-  get(input: { salonId: string; memberId: string }): Promise<StaffProfileView>;
+  /** `scope` = the caller's branch (managers reach members of their branch only, §6). */
+  get(input: {
+    salonId: string;
+    memberId: string;
+    scope?: string | undefined;
+  }): Promise<StaffProfileView>;
   set(input: {
     salonId: string;
     memberId: string;
     profile: StaffProfileInput;
+    scope?: string | undefined;
   }): Promise<StaffProfileView>;
 }
 
@@ -76,6 +84,8 @@ export interface StaffDeps {
   readonly settings: Pick<SettingsService, 'get'>;
   readonly state: Pick<SalonStateService, 'recompute'>;
   readonly conflicts?: StaffConflicts;
+  /** The member's branch: its services are the only skills, its hours bound the working days. */
+  readonly branches?: Pick<BranchesRepository, 'findById'>;
 }
 
 const invalid = (fields: readonly string[]): ValidationError =>
@@ -110,27 +120,48 @@ export const createStaffService = (deps: StaffDeps): StaffService => {
     customersCount: m.staff?.customersCount ?? 0,
   });
 
-  const findMember = async (salonId: string, memberId: string): Promise<Entity<MemberRaw>> => {
+  const findMember = async (
+    salonId: string,
+    memberId: string,
+    scope?: string,
+  ): Promise<Entity<MemberRaw>> => {
     const member = await members.findOne({ _id: memberId, salonId });
     if (member === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+    if (scope !== undefined && member.branchId !== scope) {
+      throw new ForbiddenError({ code: ERROR_CODES.BRANCH_SCOPE_DENIED });
+    }
     return member;
   };
 
-  /** Skills must be services of this salon; days must be open days; custom hours stay inside the salon's. */
-  const validate = async (salon: Entity<SalonRaw>, profile: StaffProfileInput): Promise<void> => {
+  /**
+   * Skills must be services of the member's branch (of the salon before branches); days must be
+   * open days and custom hours stay inside the branch's hours.
+   */
+  const validate = async (
+    salon: Entity<SalonRaw>,
+    member: Entity<MemberRaw>,
+    profile: StaffProfileInput,
+  ): Promise<void> => {
+    const branch =
+      member.branchId === undefined ? null : await deps.branches?.findById(member.branchId);
+    const schedule = branch?.weeklySchedule ?? salon.weeklySchedule;
     const bad: string[] = [];
     if (profile.brideQualified && salon.gender !== 'FEMALE') bad.push('body.brideQualified');
     const wanted = [...new Set(profile.serviceIds)];
     if (wanted.length !== profile.serviceIds.length) bad.push('body.serviceIds');
     if (wanted.length > 0) {
-      const own = await salonServices.findMany({ salonId: salon.id, _id: { $in: wanted } });
+      const own = await salonServices.findMany({
+        salonId: salon.id,
+        ...(member.branchId === undefined ? {} : { branchId: member.branchId }),
+        _id: { $in: wanted },
+      });
       if (own.length !== wanted.length) bad.push('body.serviceIds');
     }
     const step = await settings.get('booking.slotMinutes');
     const seen = new Set<DayOfWeek>();
     profile.workingDays.forEach((entry, index) => {
       const at = `body.workingDays.${String(index)}`;
-      const open = salon.weeklySchedule.find((d) => d.day === entry.day && !d.isOff);
+      const open = schedule.find((d) => d.day === entry.day && !d.isOff);
       if (seen.has(entry.day)) bad.push(`${at}.day`);
       seen.add(entry.day);
       if (open === undefined) {
@@ -154,15 +185,15 @@ export const createStaffService = (deps: StaffDeps): StaffService => {
   };
 
   return {
-    async get({ salonId, memberId }) {
-      return view(await findMember(salonId, memberId));
+    async get({ salonId, memberId, scope }) {
+      return view(await findMember(salonId, memberId, scope));
     },
 
-    async set({ salonId, memberId, profile }) {
-      const member = await findMember(salonId, memberId);
+    async set({ salonId, memberId, profile, scope }) {
+      const member = await findMember(salonId, memberId, scope);
       const salon = await salons.findById(salonId);
       if (salon === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
-      await validate(salon, profile);
+      await validate(salon, member, profile);
 
       const found = await conflicts.check({ salonId, memberId, before: member, after: profile });
       if (found.length > 0) {

@@ -1,3 +1,5 @@
+import type { BranchesService } from '../branches/branches.service';
+import { MAIN_BRANCH_MIRRORED_FIELDS, type MainBranches } from '../branches/mainBranch';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import type { SalonState } from '../../constants/salon';
 import type { SalonRaw } from '../../models/salon.model';
@@ -7,7 +9,7 @@ import type { SalonsRepository } from '../../repositories/salons.repository';
 import { toObjectId } from '../../utils/database/ids';
 import type { UploadRaw } from '../../models/upload.model';
 import type { Entity } from '../../utils/database/plain';
-import { NotFoundError } from '../../utils/errors';
+import { ForbiddenError, NotFoundError } from '../../utils/errors';
 import { assertPlace } from '../locations/place';
 import type { UploadVerifier } from '../uploads/uploads.service';
 import type { SalonStateService } from './salonState.service';
@@ -49,10 +51,17 @@ export interface ProfilePatch {
 export interface SalonProfileService {
   get(salonId: string): Promise<SalonProfile>;
   /** `acceptUpload` replaces the default "uploaded by this salon" check (an admin edits for the salon). */
+  /**
+   * `options.scope` = the caller's branch: a branch member edits only that branch's address and
+   * contacts (`SALON_PROFILE_MANAGE`, §6); salon-wide fields stay with the owner.
+   */
   update(
     salonId: string,
     patch: ProfilePatch,
-    options?: { acceptUpload?: (upload: Entity<UploadRaw>) => boolean },
+    options?: {
+      acceptUpload?: (upload: Entity<UploadRaw>) => boolean;
+      scope?: string | undefined;
+    },
   ): Promise<SalonProfile>;
 }
 
@@ -65,6 +74,10 @@ export interface SalonProfileDeps {
   readonly state: Pick<SalonStateService, 'recompute'>;
   /** When set, images must be files this salon uploaded and confirmed. */
   readonly uploads?: UploadVerifier;
+  /** Salon-level endpoint: address and contacts are copied to the main branch (§5.16). */
+  readonly mainBranches?: Pick<MainBranches, 'mirror'>;
+  /** Edits a branch member's own branch (address/contacts). */
+  readonly branchEditor?: Pick<BranchesService, 'update'>;
 }
 
 export const createSalonProfileService = ({
@@ -74,7 +87,31 @@ export const createSalonProfileService = ({
   storage,
   state,
   uploads,
+  mainBranches,
+  branchEditor,
 }: SalonProfileDeps): SalonProfileService => {
+  /** A branch member's edit: only the branch's address and contacts, applied to their branch. */
+  const updateBranch = async (
+    salonId: string,
+    branchId: string,
+    patch: ProfilePatch,
+  ): Promise<SalonProfile> => {
+    const salonWide = [patch.name, patch.description, patch.coverKey, patch.profileKey];
+    if (salonWide.some((value) => value !== undefined) || branchEditor === undefined) {
+      throw new ForbiddenError({ code: ERROR_CODES.OWNER_REQUIRED });
+    }
+    // Clearing the pin or the address is not allowed on a branch: both are required there.
+    await branchEditor.update(salonId, branchId, {
+      ...(patch.location == null ? {} : { location: patch.location }),
+      ...(patch.locationText == null ? {} : { locationText: patch.locationText }),
+      ...(patch.cityId === undefined ? {} : { cityId: patch.cityId }),
+      ...(patch.areaId === undefined ? {} : { areaId: patch.areaId }),
+      ...(patch.phone === undefined ? {} : { phone: patch.phone }),
+      ...(patch.whatsapp === undefined ? {} : { whatsapp: patch.whatsapp }),
+    });
+    return toProfile(await load(salonId));
+  };
+
   const toProfile = (s: Entity<SalonRaw>): SalonProfile => ({
     id: s.id,
     name: s.name,
@@ -110,6 +147,7 @@ export const createSalonProfileService = ({
     },
 
     async update(salonId, patch, options) {
+      if (options?.scope !== undefined) return updateBranch(salonId, options.scope, patch);
       const current = await load(salonId);
       // A new area must belong to the (new or current) city.
       const cityId = patch.cityId ?? (patch.areaId === undefined ? undefined : current.cityId);
@@ -163,6 +201,15 @@ export const createSalonProfileService = ({
       }
       const updated = await salons.patch(salonId, { set, unset });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      const mirrored = (field: string): field is (typeof MAIN_BRANCH_MIRRORED_FIELDS)[number] =>
+        (MAIN_BRANCH_MIRRORED_FIELDS as readonly string[]).includes(field);
+      const branchSet = Object.fromEntries(
+        Object.entries(set).filter(([field]) => mirrored(field)),
+      );
+      const branchUnset = unset.filter(mirrored);
+      if (Object.keys(branchSet).length > 0 || branchUnset.length > 0) {
+        await mainBranches?.mirror(salonId, branchSet, branchUnset);
+      }
       const status = await state.recompute(salonId);
       return toProfile({
         ...updated,

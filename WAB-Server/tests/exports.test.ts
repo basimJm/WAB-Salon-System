@@ -320,7 +320,7 @@ describe('table builders', () => {
     const t = await b.TRANSACTIONS({});
     expect(t.rows).toHaveLength(250);
     expect(pages).toEqual([1, 2, 3]);
-    expect(t.rows[0]?.[5]).toBe('5.000');
+    expect(t.rows[0]?.[6]).toBe('5.000');
   });
 
   it('refuses a table bigger than one export', async () => {

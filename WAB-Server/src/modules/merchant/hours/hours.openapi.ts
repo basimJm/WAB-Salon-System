@@ -1,4 +1,4 @@
-import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import type { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi';
 import { HTTP_STATUS } from '../../../constants/http';
 import { MERCHANT_HOURS_ROUTES } from '../../../constants/hours';
 import { API_PREFIXES } from '../../../constants/server';
@@ -41,8 +41,23 @@ const hours = successResponseSchema(
   }),
 );
 
-export const registerMerchantHoursDocs = (registry: OpenAPIRegistry): void => {
-  const base = `${API_PREFIXES.merchant}${MERCHANT_HOURS_ROUTES.base}`;
+/**
+ * `options` registers the same paths under another base (the per-branch routes
+ * `/merchant/v1/branches/{branchId}/…`) with extra path params.
+ */
+export const registerMerchantHoursDocs = (
+  registry: OpenAPIRegistry,
+  options: { base?: string; params?: z.ZodObject; tagSuffix?: string } = {},
+): void => {
+  const base = options.base ?? `${API_PREFIXES.merchant}${MERCHANT_HOURS_ROUTES.base}`;
+  const scope = options.params;
+  /** Adds the extra path params to a request (or the only params when it had none). */
+  type Request = NonNullable<RouteConfig['request']>;
+  const withScope = (request: Request): Request => {
+    if (scope === undefined) return request;
+    const params = request.params as z.ZodObject | undefined;
+    return { ...request, params: params === undefined ? scope : params.extend(scope.shape) };
+  };
   const headers = z.object({ 'Accept-Language': acceptLanguageHeader });
   const tags = ['Working hours'];
   const failures = errorResponses(
@@ -66,7 +81,7 @@ export const registerMerchantHoursDocs = (registry: OpenAPIRegistry): void => {
     path: base,
     tags,
     summary: 'Weekly schedule, upcoming closures and today’s hours (WORKING_HOURS_MANAGE)',
-    request: { headers },
+    request: withScope({ headers }),
     responses: { [HTTP_STATUS.ok]: jsonResponse('Hours', hours), ...failures },
   });
   registry.registerPath({
@@ -75,7 +90,7 @@ export const registerMerchantHoursDocs = (registry: OpenAPIRegistry): void => {
     tags,
     summary:
       'Replace the weekly schedule (7 days, slot-aligned, close after open). 409 SCHEDULE_CONFLICT lists bookings the change would break.',
-    request: { headers, body: body(weeklySchema) },
+    request: withScope({ headers, body: body(weeklySchema) }),
     responses: { [HTTP_STATUS.ok]: jsonResponse('Hours', hours), ...failures },
   });
   registry.registerPath({
@@ -84,7 +99,7 @@ export const registerMerchantHoursDocs = (registry: OpenAPIRegistry): void => {
     tags,
     summary:
       'Add an exceptional closure (dates in the salon calendar, `to` inclusive, not in the past)',
-    request: { headers, body: body(closureSchema) },
+    request: withScope({ headers, body: body(closureSchema) }),
     responses: {
       [HTTP_STATUS.created]: jsonResponse('Added', successResponseSchema(closure)),
       ...failures,
@@ -95,7 +110,7 @@ export const registerMerchantHoursDocs = (registry: OpenAPIRegistry): void => {
     path: `${base}/closures/{id}`,
     tags,
     summary: 'Change a closure that has not started',
-    request: { headers, params: closureParams, body: body(closurePatchSchema) },
+    request: withScope({ headers, params: closureParams, body: body(closurePatchSchema) }),
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Saved', successResponseSchema(closure)),
       ...failures,
@@ -106,7 +121,7 @@ export const registerMerchantHoursDocs = (registry: OpenAPIRegistry): void => {
     path: `${base}/closures/{id}`,
     tags,
     summary: 'Remove a closure that has not started',
-    request: { headers, params: closureParams },
+    request: withScope({ headers, params: closureParams }),
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Removed', successResponseSchema(z.null())),
       ...failures,

@@ -9,6 +9,8 @@ export interface RefundRaw {
   bookingId?: Types.ObjectId;
   transactionId: Types.ObjectId;
   salonId: Types.ObjectId;
+  /** Branch (§3.3a); set on every new row, backfilled by the branch migration. */
+  branchId?: Types.ObjectId;
   customerId: Types.ObjectId;
   /** Integer fils. */
   amount: number;
@@ -40,6 +42,7 @@ const refundSchema = new Schema<RefundRaw>(
     bookingId: { type: Schema.Types.ObjectId, ref: 'Booking' },
     transactionId: { type: Schema.Types.ObjectId, ref: 'Transaction', required: true },
     salonId: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
     customerId: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
     amount: { type: Number, required: true, min: 1, validate: Number.isInteger },
     source: { type: String, enum: REFUND_SOURCES, required: true },
@@ -70,5 +73,6 @@ refundSchema.index({ bookingId: 1 });
 refundSchema.index({ transactionId: 1 });
 refundSchema.index({ status: 1, nextAttemptAt: 1 });
 refundSchema.index({ status: 1, createdAt: -1 });
+refundSchema.index({ branchId: 1, createdAt: -1 });
 
 export const RefundModel = model<RefundRaw>('Refund', refundSchema);

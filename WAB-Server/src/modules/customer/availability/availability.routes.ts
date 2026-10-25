@@ -33,6 +33,7 @@ export const createAvailabilityRouter = ({
       };
       const result = await service.slots({
         salonId: params.salonId,
+        branchId: body.branchId,
         date: body.date,
         person: body.person,
         others: body.others,

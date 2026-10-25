@@ -75,14 +75,15 @@ beforeEach(() => {
 });
 
 describe('salon policy', () => {
-  it('needs POLICIES_MANAGE: the owner has it, a default manager does not, a granted one does', async () => {
+  it('needs POLICIES_MANAGE: only the owner has it (a branch member never does, even granted)', async () => {
     expect((await request(app).get('/merchant/v1/salon/policy')).status).toBe(401);
     const denied = await request(app)
       .get('/merchant/v1/salon/policy')
       .set(member('MANAGER', ['SALON_PROFILE_MANAGE']));
     expect(denied.status).toBe(403);
     expect((await put(member('MANAGER', ['FINANCE_VIEW']), POLICY)).status).toBe(403);
-    expect((await put(member('MANAGER', ['POLICIES_MANAGE']), POLICY)).status).toBe(200);
+    expect((await put(member('MANAGER', ['POLICIES_MANAGE']), POLICY)).status).toBe(403);
+    expect((await put(member('OWNER'), POLICY)).status).toBe(200);
     expect((await request(app).get('/merchant/v1/salon/policy').set(member('OWNER'))).status).toBe(
       200,
     );

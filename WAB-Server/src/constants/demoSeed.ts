@@ -591,3 +591,65 @@ export const DEMO_IMAGE_SOURCE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '
 /** Uploaded demo photos are re-encoded as JPEG no wider than this, like a phone upload. */
 export const DEMO_IMAGE_MAX_WIDTH = 1_600;
 export const DEMO_IMAGE_QUALITY = 82;
+
+/** Extra branches of demo salons (§3.3a), added after every salon got its main branch. */
+export interface DemoBranchSpec {
+  /** The demo salon (`DemoSalonSpec.key`). */
+  readonly salon: string;
+  readonly key: string;
+  readonly name: { readonly ar: string; readonly en: string };
+  readonly place: DemoAreaPoint;
+  readonly locationText: string;
+  readonly phone: string;
+  readonly open: string;
+  readonly close: string;
+  readonly offDays: readonly string[];
+  /** Prices of the main branch's services in percent (each branch has its own prices). */
+  readonly pricePercent: number;
+  /** A branch manager plus employees, all serving every regular service of the branch. */
+  readonly staff: number;
+}
+
+export const DEMO_BRANCHES: readonly DemoBranchSpec[] = [
+  {
+    salon: 'lamar',
+    key: 'khalda',
+    name: { ar: 'خلدا', en: 'Khalda' },
+    place: { area: 'Khalda', lat: 31.9946, lng: 35.8366 },
+    locationText: 'خلدا، شارع وصفي التل، مقابل مجمع الحسيني',
+    phone: '+96265921011',
+    open: '10:00',
+    close: '22:00',
+    offDays: ['FRI'],
+    pricePercent: 90,
+    staff: 2,
+  },
+  {
+    salon: 'lamar',
+    key: 'dabouq',
+    name: { ar: 'دابوق', en: 'Dabouq' },
+    place: { area: 'Dabouq', lat: 31.9899, lng: 35.8062 },
+    locationText: 'Dabouq, King Abdullah II Street, Plaza 7',
+    phone: '+96265921012',
+    open: '11:00',
+    close: '20:00',
+    offDays: ['SAT'],
+    pricePercent: 110,
+    staff: 2,
+  },
+  {
+    salon: 'ostaz',
+    key: 'shmeisani',
+    name: { ar: 'الشميساني', en: 'Shmeisani' },
+    place: { area: 'Shmeisani', lat: 31.9706, lng: 35.9006 },
+    locationText: 'الشميساني، شارع عبد الحميد شرف',
+    phone: '+96265921014',
+    open: '09:00',
+    close: '23:00',
+    offDays: [],
+    pricePercent: 100,
+    staff: 2,
+  },
+];
+/** Branch staff phones: national part = prefix + a 4-digit index (apart from the salon staff). */
+export const DEMO_BRANCH_MEMBER_PHONE_PREFIX = '78901';

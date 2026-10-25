@@ -14,6 +14,7 @@ export const adminReviewsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
   target: z.enum(REVIEW_TARGETS).optional(),
   salonId: objectId.optional(),
   staffId: objectId.optional(),
+  branchId: objectId.optional(),
   rating: z.coerce.number().int().min(REVIEW_RATING_MIN).max(REVIEW_RATING_MAX).optional(),
 });
 export const reviewIdParams = z.object({ id: objectId });

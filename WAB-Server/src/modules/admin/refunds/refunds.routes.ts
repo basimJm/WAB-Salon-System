@@ -16,6 +16,7 @@ const present = (r: Entity<RefundRaw>): Record<string, unknown> => ({
   bookingId: r.bookingId ?? null,
   transactionId: r.transactionId,
   salonId: r.salonId,
+  branchId: r.branchId ?? null,
   customerId: r.customerId,
   amount: formatJod(r.amount),
   source: r.source,

@@ -1,5 +1,4 @@
 import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
-import { PERMISSIONS } from '../../../constants/enums';
 import { HTTP_STATUS } from '../../../constants/http';
 import { API_PREFIXES } from '../../../constants/server';
 import { MERCHANT_TEAM_ROUTES } from '../../../constants/team';
@@ -11,19 +10,10 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
+import { teamMemberDoc } from '../../shared/team/teamMember.openapi';
 import { createMemberSchema, memberParams, teamQuery, updateMemberSchema } from './team.validation';
 
-const member = z.object({
-  id: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
-  phone: z.string(),
-  photoUrl: z.string().nullable(),
-  role: z.enum(['OWNER', 'MANAGER', 'EMPLOYEE']),
-  permissions: z.array(z.enum(PERMISSIONS)).describe('The OWNER always has all.'),
-  active: z.boolean(),
-  providesServices: z.boolean(),
-});
+const member = teamMemberDoc;
 
 export const registerMerchantTeamDocs = (registry: OpenAPIRegistry): void => {
   const base = `${API_PREFIXES.merchant}${MERCHANT_TEAM_ROUTES.base}`;

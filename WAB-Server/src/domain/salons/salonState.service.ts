@@ -9,7 +9,11 @@ import { BusinessRuleError, NotFoundError } from '../../utils/errors';
 import type { Logger } from '../../utils/logger';
 import type { AuditWriter } from '../audit/audit.service';
 import type { AdminActor } from '../auth/accountLifecycle.service';
-import { computeMissing } from './completeness';
+import type { LocalizedName } from '../../constants/referenceData';
+import type { BranchStateService } from '../branches/branchState.service';
+import { computeBranchMissing } from '../branches/completeness';
+import type { MainBranches } from '../branches/mainBranch';
+import { computeMissing, type BranchSummary } from './completeness';
 
 /** Counts that live outside the salon document. */
 export interface CompletenessFacts {
@@ -25,6 +29,8 @@ export interface SalonStateNotifier {
     reason?: string;
     /** `salon.edited_by_admin` only: what the admin changed (a `SALON_EDIT_AREAS` value). */
     area?: SalonEditArea;
+    /** `branch.*` events: the branch concerned. */
+    branch?: { id: string; name: LocalizedName };
   }): Promise<void>;
 }
 
@@ -48,7 +54,11 @@ export interface SalonStateService {
 
 export interface SalonStateDeps {
   readonly salons: SalonsRepository;
+  /** Salon-wide counts: used only without `branchState` (a salon read as its single branch). */
   readonly facts: CompletenessFacts;
+  /** Branch-aware completeness (§5.2); production wires it, unit tests may leave it out. */
+  readonly branchState?: BranchStateService;
+  readonly mainBranches?: MainBranches;
   readonly audit: AuditWriter;
   readonly notifier: SalonStateNotifier;
   readonly logger: Logger;
@@ -86,12 +96,24 @@ export const createSalonStateService = (deps: SalonStateDeps): SalonStateService
     return salon;
   };
 
-  const evaluate: SalonStateService['evaluate'] = async (salon) => {
+  /** Without branch wiring the salon is read as one branch built from its own fields. */
+  const singleBranchSummary = async (salon: Entity<SalonRaw>): Promise<BranchSummary> => {
     const [activeServices, qualifiedStaff] = await Promise.all([
       facts.activeServiceCount(salon.id),
       facts.qualifiedStaffCount(salon.id),
     ]);
-    const missing = computeMissing({ ...salon, activeServices, qualifiedStaff });
+    const mainMissing = computeBranchMissing({ ...salon, activeServices, qualifiedStaff });
+    return { bookable: mainMissing.length === 0, mainMissing };
+  };
+
+  const evaluate: SalonStateService['evaluate'] = async (salon) => {
+    let branches: BranchSummary;
+    if (deps.branchState === undefined) branches = await singleBranchSummary(salon);
+    else {
+      await deps.mainBranches?.ensure(salon.id);
+      branches = await deps.branchState.recompute(salon.id);
+    }
+    const missing = computeMissing({ ...salon, branches });
     return { missing, isComplete: missing.length === 0 };
   };
 

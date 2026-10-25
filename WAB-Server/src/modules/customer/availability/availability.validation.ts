@@ -10,6 +10,8 @@ const objectId = z.string().regex(OBJECT_ID_PATTERN);
 
 export const availabilityParams = z.object({ salonId: objectId });
 export const availabilityBody = z.object({
+  /** The branch picked at step 1 (§5.18); omit only when the salon has one bookable branch. */
+  branchId: objectId.optional(),
   /** Salon-local calendar date, `YYYY-MM-DD`. */
   date: z.string().refine((v) => isLocalDate(v)),
   person: z.object({

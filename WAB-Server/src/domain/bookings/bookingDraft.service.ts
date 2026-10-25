@@ -1,3 +1,4 @@
+import type { MainBranches } from '../branches/mainBranch';
 import type { Redis } from 'ioredis';
 import { DRAFT_LOCK_SEGMENT, DRAFT_LOCK_TTL_MS } from '../../constants/bookingDrafts';
 import type { Language } from '../../constants/enums';
@@ -57,6 +58,8 @@ export interface BookingDraftService {
   create(input: {
     customerId: string;
     salonId: string;
+    /** The picked branch (§5.18): required when the salon has several bookable branches. */
+    branchId?: string | undefined;
     paymentMethod: PaymentMethod;
     persons: readonly PlanPersonInput[];
     language: Language;
@@ -88,6 +91,8 @@ export interface BookingDraftDeps {
   readonly otpGate: Pick<OtpGate, 'reset'>;
   readonly settings: Pick<SettingsService, 'get'>;
   readonly now?: () => Date;
+  /** Until the branch step exists (SRV-142) a draft is for the salon's main branch. */
+  readonly mainBranches?: Pick<MainBranches, 'idOf'>;
 }
 
 const toHold = (hold: {
@@ -170,7 +175,7 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
   };
 
   return {
-    async create({ customerId, salonId, paymentMethod, persons, language }) {
+    async create({ customerId, salonId, branchId, paymentMethod, persons, language }) {
       const customer = await customers.findById(customerId);
       if (customer?.status !== 'ACTIVE')
         throw new ForbiddenError({ code: ERROR_CODES.ACCOUNT_BLOCKED });
@@ -183,7 +188,12 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
         keys,
         async () => {
           const earlier = await drafts.latestOf(customerId);
-          const plan = await availability.plan({ salonId, persons, draftId: earlier?.id });
+          const plan = await availability.plan({
+            salonId,
+            branchId,
+            persons,
+            draftId: earlier?.id,
+          });
           const policy = plan.salon.policy;
           if (policy === undefined)
             throw new BusinessRuleError({ code: ERROR_CODES.SALON_NOT_BOOKABLE });
@@ -226,9 +236,15 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
             start: p.start,
             end: p.end,
           }));
+          // The planned branch; without branch wiring the salon's main branch, when it has one.
+          const draftBranch =
+            plan.branch === null
+              ? await deps.mainBranches?.idOf(salonId)
+              : toObjectId(plan.branch.id);
           const created = await drafts.create({
             customerId: toObjectId(customerId),
             salonId: toObjectId(salonId),
+            ...(draftBranch === undefined ? {} : { branchId: draftBranch }),
             persons: bookingPersons,
             totals: { total: amounts.total, dueOnline: amounts.dueOnline },
             paymentMethod,

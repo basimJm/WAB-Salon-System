@@ -38,6 +38,12 @@ const row = z.object({
   personsCount: z.number(),
   total: z.string().describe('JOD decimal string'),
   salon: person.nullable().describe('Customer and admin views only.'),
+  branch: z
+    .object({ id: z.string(), name: z.string(), locationText: z.string().nullable() })
+    .nullable()
+    .describe(
+      'The branch as booked, name in the request language; null for bookings made before branches.',
+    ),
   customer: person
     .extend({ phone: z.string() })
     .nullable()

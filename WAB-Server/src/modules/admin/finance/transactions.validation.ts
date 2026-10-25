@@ -12,8 +12,14 @@ export const transactionsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
   status: z.enum(TRANSACTION_STATUSES).optional(),
   type: z.enum(TRANSACTION_TYPES).optional(),
   salonId: objectId.optional(),
+  branchId: objectId.optional(),
   customerId: objectId.optional(),
   bookingId: objectId.optional(),
   from: instant.optional(),
   to: instant.optional(),
+});
+/** Reconciliation narrowed to one salon or branch (§5.14). */
+export const reconciliationQuery = z.object({
+  salonId: objectId.optional(),
+  branchId: objectId.optional(),
 });
