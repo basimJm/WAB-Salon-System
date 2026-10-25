@@ -330,6 +330,8 @@ export const unavailableHours: HoursService = {
   addClosure: unavailable,
   updateClosure: unavailable,
   removeClosure: unavailable,
+  previewWeekly: unavailable,
+  previewClosure: unavailable,
 };
 
 export const unavailableSalonServices: SalonServicesService = {
@@ -355,10 +357,15 @@ export const unavailableTeam: TeamService = {
   reactivate: unavailable,
 };
 
-export const unavailableStaff: StaffService = { get: unavailable, set: unavailable };
+export const unavailableStaff: StaffService = {
+  get: unavailable,
+  set: unavailable,
+  preview: unavailable,
+};
 
 export const unavailableLeaves: LeavesService = {
   list: unavailable,
+  preview: unavailable,
   add: unavailable,
   update: unavailable,
   remove: unavailable,

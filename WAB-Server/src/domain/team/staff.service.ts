@@ -75,6 +75,13 @@ export interface StaffService {
     profile: StaffProfileInput;
     scope?: string | undefined;
   }): Promise<StaffProfileView>;
+  /** Upcoming bookings this profile change would break (SRV-134); nothing is saved. */
+  preview(input: {
+    salonId: string;
+    memberId: string;
+    profile: StaffProfileInput;
+    scope?: string | undefined;
+  }): Promise<BookingConflict[]>;
 }
 
 export interface StaffDeps {
@@ -187,6 +194,14 @@ export const createStaffService = (deps: StaffDeps): StaffService => {
   return {
     async get({ salonId, memberId, scope }) {
       return view(await findMember(salonId, memberId, scope));
+    },
+
+    async preview({ salonId, memberId, profile, scope }) {
+      const member = await findMember(salonId, memberId, scope);
+      const salon = await salons.findById(salonId);
+      if (salon === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      await validate(salon, member, profile);
+      return conflicts.check({ salonId, memberId, before: member, after: profile });
     },
 
     async set({ salonId, memberId, profile, scope }) {

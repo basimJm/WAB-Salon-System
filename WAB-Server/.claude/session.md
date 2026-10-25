@@ -10,10 +10,22 @@
 
 ## Current task
 
+### SRV-134 — Conflict preview endpoints
+
+- Branch: `feat/srv-134-conflict-preview`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.12; operations `POST /merchant/v1/salon/hours/weekly/preview`, `.../closures/preview` (also under `/branches/{branchId}/hours`), `POST /merchant/v1/team/members/{id}/staff/preview`, `POST /merchant/v1/team/members/{id}/leaves/preview` — verifies MER-035/038/039 flows):
+  - [x] Verified: the saves already answer 409 `SCHEDULE_CONFLICT` with the booking ids and `cancel-affected` exists; what was missing is a dry run before saving
+  - [x] Each preview runs the same scope and validation as its save (week shape and slot grid, closure/leave dates not in the past, staff profile rules, branch scope) and returns the upcoming PENDING/APPROVED bookings it would break, saving nothing
+  - [x] Week validation extracted (`normalizeWeek`) and shared by the save and the preview; conflict doc schema shared by admin and merchant docs
+- Tests: `tests/hours.test.ts`, `tests/staff.test.ts`, `tests/leaves.test.ts` (+1 each); full gate
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔)
+
 ### SRV-133 — Account removal from the merchant app (M25)
 
 - Branch: `feat/srv-133-account-removal`
-- Status: IN REVIEW
+- Status: DONE (PR #405)
 - Acceptance criteria (Merchant PRD M25 "Delete my account", BUSINESS_DOMAIN §5.15; operations `POST /merchant/v1/me/leave`, `POST /merchant/v1/salon/deletion-request` — client impact MER-049; admin decision = existing SRV-121 endpoint):
   - [x] `POST /merchant/v1/me/leave`: a non-owner removes their own access through the account lifecycle (deactivated, sessions and sockets ended); the owner gets 422 `LAST_OWNER`
   - [x] `POST /merchant/v1/salon/deletion-request` (owner only, optional note): stamps `salon.deletionRequestedAt` once and raises an admin alert `SALON_DELETION_REQUEST` (AR/EN title); a repeat while open returns the same date and raises nothing
@@ -35,20 +47,6 @@
 - Tests: `tests/memberSelf.test.ts` (5), `tests/installations.test.ts` (merchant switch now exists: customer token 403, member switch 200); full gate 152 suites green except that one stale assertion, fixed and its suites re-run (79 tests green)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔ (merchant namespace; same OTP verifier as customers), QA ✔) — DOMAIN NOTE: `members.pushEnabled` added in this PR (derived from PRD M25 + §8, not a new business decision).
-
-### SRV-130 — Merchant dashboard aggregate (M07)
-
-- Branch: `feat/srv-130-merchant-dashboard`
-- Status: DONE (PR #403)
-- Acceptance criteria (Merchant PRD M07, BUSINESS_DOMAIN §6; operation `GET /merchant/v1/dashboard`, booking rows gain `requestedAt` — client impact MER-050, MER-063):
-  - [x] `GET /merchant/v1/dashboard` (`DASHBOARD_VIEW`): salon (name, profile image, state, missing checklist), subscription warning while ending soon (approved salons), unread notifications
-  - [x] Pending requests card (`BOOKINGS_RESPOND`): count + newest 5; today (`BOOKINGS_VIEW_ALL|OWN`, own bookings only for VIEW_OWN): approved and completed counts, next approved booking, timeline of upcoming pending/approved; quick stats (`STATISTICS_VIEW`): last 7 days bookings, revenue (JOD), rating — sections the member may not see are `null`
-  - [x] Branch scope comes from the reused services (bookings list, statistics) for branch members
-  - [x] One member's dashboard is cached 15 s in Redis (shared `createJsonCache`, also used by admin analytics now); a cache failure never fails the call
-  - [x] Booking rows (customer/merchant/admin lists) show `requestedAt` for "time since request"
-- Tests: `tests/merchantDashboard.test.ts` (4); full gate
-- Loops: 1/1
-- Review: PASSED (SE ✔ (cache helper extracted instead of copied), Mobile ✔, Architect ✔, QA ✔) — NOTE: a permission change can take up to the 15 s cache to show on the dashboard.
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 
