@@ -10,6 +10,23 @@
 
 ## Current task
 
+### SRV-151 — Remote-dev contract fixes (ADM-079 S6, CUS-060 #13/#14/#15/#17, MER-054 #9/#10/#11)
+
+- Branch: `feat/srv-151-remote-dev-fixes`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.4 step 4 (busy intervals), §3.3/§3.3a (single-language `description`/`locationText`), §5.16 + §11 error codes (no `BRANCH_*` code for "main branch"), BRD NFR-01 (stricter limits on OTP/login/payments only); contracts customer 1.3.0, merchant 1.4.0, admin 1.5.0):
+  - [x] Ids: `OBJECT_ID_PATTERN` = `/^[a-fA-F0-9]{24}$/` (no flag; zod-to-openapi copies `toString()`, so `/i` leaked into every `pattern`); same accepted ids; all three documents fixed at the source
+  - [x] Companion picks: domain says a busy interval, so the validator was right; `others[].start/end` and draft `persons[].start` use `instantInput` (ISO date-time with Z/offset → Date): documented required non-nullable `date-time`, and `null` (coerced to 1970 before) is refused
+  - [x] `POST /merchant/v1/salon/applications` `member` = the shared `MemberProfile` schema (firstName, lastName, phone, permissions, providesServices, branchId declared)
+  - [x] Closing the main branch: code stays `INVALID_TRANSITION` (no `BRANCH_*` code fits; none invented) with its own message `branches.mainCannotClose` (top-level + `details[isMain]`); the other branch-status refusals say `branches.invalidStatus` instead of the booking-status text; AR + EN
+  - [x] Demo seed: salon/branch `description` + `locationText` (single-language fields) in English for every demo salon
+  - [x] Rate limits: the real defect was ONE shared Redis store (`rate:http:otp`) for every per-route limiter, so any 20 requests/min from an IP (config, banners, catalog, search…) tripped the OTP-strict routes; `ApiServices.rateLimitStoreFor(scope)` gives each family its own counter (`rate:http:<ns>:<family>`: otp, browse, booking-draft, booking, payment, payout-details, upload); OTP family only on OTP/auth/change-phone/salon application/admin login; banners, catalog, profile, config, content, locations, installations, merchant inbox → browse (300/min); uploads keep 20/min in their own counter; global limiter unchanged
+- Tests: `tests/remoteDevFixes.test.ts` (patterns in every document, pick validation + spec, draft start, application member, branch messages AR/EN, seed text, limiter scopes + OTP budget isolation), `tests/merchantBranches.test.ts` (message keys); full gate (see Notes)
+- API docs: customer/merchant/admin regenerated; contract bumps with client impact: customer `./gradlew apiSync` (CUS-060), merchant `./gradlew apiSync` (MER-054), admin `npm run api:sync` (ADM-079, can drop its objectId re-validation)
+- Loops: 1/1 — re-checked each criterion against BUSINESS_DOMAIN §5.4, §3.3/§3.3a, §5.16, §11 and BRD NFR-01; grepped every `createOtpRouteLimiter`/`rateLimitStore` caller (found config/content/locations/installations/uploads/merchant catalog+inbox also on the OTP store) and every `z.coerce.date()` in customer pick fields
+- Review: PASSED (SE ✔, Mobile ✔ (apps: decoders already tolerate; DTOs re-sync), Architect ✔ (contract bumps, backward-compatible: stricter only for null/epoch inputs), QA ✔)
+- Notes: DEVIATIONS: docs/bump ran `tsc -p tsconfig.build.json` + `node dist/docs/*.js` directly (npm cache permission error; `prebuild` ensure-sdks skipped; `node_modules` symlinked from the main checkout, removed before commit). Seed is insert-only: the hosted dev DB keeps the old Arabic Lamar text until the owner re-seeds or edits it. Admin `z.coerce.date()` fields (placements, banners, campaigns, audit filters) still document `["string","null"]`: out of scope, not changed. Merchant `GET /config` maintenance on hosted dev (MER-054 #8) is a dev setting, not code.
+
 ### SRV-150 — Alerts: titles in the request language (+ both) and one uppercase subject type
 
 - Branch: `feat/srv-150-alert-i18n`

@@ -14,6 +14,23 @@ export const CORS_MAX_AGE_SEC = 600;
 export const GLOBAL_RATE_LIMIT = { windowMs: 60_000, max: 300 } as const;
 export const RATE_LIMIT_HEADER_DRAFT = 'draft-7';
 
+/**
+ * Per-route limit families (SRV-151). Each family counts in its own store (`rate:http:<ns>:<family>`),
+ * so browsing never spends the strict OTP budget; routes of one family in one namespace share it.
+ */
+export const ROUTE_LIMIT_FAMILIES = {
+  otp: 'otp',
+  browse: 'browse',
+  bookingDraft: 'booking-draft',
+  booking: 'booking',
+  payment: 'payment',
+  payoutDetails: 'payout-details',
+  upload: 'upload',
+} as const;
+export type RouteLimitFamily = (typeof ROUTE_LIMIT_FAMILIES)[keyof typeof ROUTE_LIMIT_FAMILIES];
+export const ROUTE_LIMIT_NAMESPACES = ['customer', 'merchant', 'admin'] as const;
+export type RouteLimitNamespace = (typeof ROUTE_LIMIT_NAMESPACES)[number];
+
 /** Keys that could be used for NoSQL operator injection or prototype pollution are dropped. */
 export const FORBIDDEN_KEY_PREFIX = '$';
 export const FORBIDDEN_KEY_CHARACTER = '.';

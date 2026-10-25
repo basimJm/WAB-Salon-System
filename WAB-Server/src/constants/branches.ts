@@ -17,6 +17,15 @@ export const BRANCH_NAME_MAX_LENGTH = 60;
 export const BRANCH_LOCATION_TEXT_MAX_LENGTH = 300;
 export const BRANCH_OFFLINE_REASON_MAX_LENGTH = 1_000;
 
+/**
+ * Branch-specific messages for `INVALID_TRANSITION` (SRV-151): the code stays (BUSINESS_DOMAIN §11 has
+ * no `BRANCH_*` code for these), but the default text speaks of a booking status.
+ */
+export const BRANCH_MESSAGE_KEYS = {
+  invalidStatus: 'branches.invalidStatus',
+  mainCannotClose: 'branches.mainCannotClose',
+} as const;
+
 /** Who took a branch offline: the admin or the salon owner. */
 export const BRANCH_OFFLINE_ACTOR_TYPES = ['ADMIN', 'MEMBER'] as const;
 export type BranchOfflineActorType = (typeof BRANCH_OFFLINE_ACTOR_TYPES)[number];
