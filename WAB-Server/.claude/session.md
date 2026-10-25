@@ -10,10 +10,21 @@
 
 ## Current task
 
+### SRV-126 — Exports: customers and salons kinds; Arabic-capable PDF
+
+- Branch: `feat/srv-126-exports-arabic-pdf`
+- Status: IN REVIEW
+- Acceptance criteria (Admin PRD exports (G9), BUSINESS_DOMAIN exports; operation `POST /admin/v1/exports` — contract admin 1.3.0, client impact ADM-047):
+  - [x] BOOKINGS kind already existed (SRV-123); new kinds CUSTOMERS (status, gender, city, search) and SALONS (state, gender, city, subscription, search) with the columns of their admin lists
+  - [x] PDF exports embed IBM Plex Sans Arabic (OFL, the font the apps already ship; `assets/fonts` + NOTICE, copied into the Docker runtime image): Arabic letters are shaped and read right to left; Arabic cells are right-aligned
+- Tests: `tests/exportsArabic.test.ts` (3), `tests/exports.test.ts` (builder deps); a rendered sample page was checked visually (pdftoppm)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (Dockerfile copies the fonts), QA ✔) — LIMITATION: no full Unicode bidi; punctuation between Arabic and Latin runs may sit on the wrong side. OFL licence: NOTICE names the licence and its URL; the owner may want the full OFL text added beside the fonts.
+
 ### SRV-125 — Catalog request approval may map to an existing catalog service
 
 - Branch: `feat/srv-125-catalog-map`
-- Status: IN REVIEW
+- Status: DONE (PR #409)
 - Acceptance criteria (Admin PRD A? catalog requests (ADM-039), BUSINESS_DOMAIN §3 catalogRequests `catalogServiceId`; operation `POST /admin/v1/catalog/requests/{id}/approve` — contract admin 1.2.0, client impact ADM-039):
   - [x] Approve body is either a new catalog entry (names/descriptions, image, sort order) or `{catalogServiceId, reason}` mapping to an existing active catalog service of the salon's gender (wrong gender 422 `GENDER_MISMATCH`, unknown/inactive 404); a mapping creates nothing new; a body mixing both is 400
   - [x] Same claim/audit/notice as before; the audit marks `mapped: true`
@@ -33,18 +44,6 @@
 - Tests: `tests/contractGuard.test.ts` (9); full gate
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (clients can compare `info.version` after api:sync / apiSync), QA ✔) — FLOW CHANGE for every later API task: `npm run docs` → guard fails → `npm run contract:bump -- <ns> "<CUS/MER/ADM tasks>"` → `npm run docs`.
-
-### SRV-124 — Admin socket events
-
-- Branch: `feat/srv-124-admin-socket-events`
-- Status: DONE (PR #407)
-- Acceptance criteria (BUSINESS_DOMAIN §7 admin row; API docs: no change (socket events) — client ADM-027 already maps these names):
-  - [x] `application.created` on a new or resubmitted salon application, `review.created` on a new review, `refund.updated` when a refund starts, completes or fails, on the `/admin` namespace room `admin`, with small summaries
-  - [x] `overview.tick` every minute (periodic job `periodic.overview-tick`)
-  - [x] An emit never throws and is silent before the socket server starts
-- Tests: `tests/adminEvents.test.ts` (4); full gate 154 suites / 2776 tests (format fixed afterwards: whitespace only, format/lint/types re-checked)
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔ (hooks injected, sockets stay in `sockets/`), QA ✔)
 
 ### SRV-135 — App Links / Universal Links for shared salon links (owner request 2026-10-21)
 

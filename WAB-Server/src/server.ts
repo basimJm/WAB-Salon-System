@@ -703,6 +703,9 @@ const buildServices = (
       transactions: adminTransactionsService,
       adminSettings: adminSettingsService,
       bookings: bookingQueries,
+      // Built further down; only called when an export runs.
+      customers: { list: (input) => adminCustomersService.list(input) },
+      salons: { list: (input) => adminSalonsService.list(input) },
     }),
     storage: providers.storage,
     scheduler: jobs.scheduler,
@@ -872,6 +875,27 @@ const buildServices = (
     logger,
     alerts: adminAlerts,
   });
+  const adminSalonsService = createAdminSalonsService({
+    salons: new SalonsRepository(),
+    members: new MembersRepository(),
+    subscriptions: new SubscriptionsRepository(),
+    salonServices,
+    state: salonState,
+    audit,
+    logger,
+    bookings: conflictFinder.salon,
+    notifier: producers.salonStateNotifier,
+    placements: new PlacementsRepository(),
+    bookingCounts: bookingsRepository,
+    branches: branchesRepository,
+  });
+  const adminCustomersService = createAdminCustomersService({
+    customers: new CustomersRepository(),
+    installations: new InstallationsRepository(),
+    bookings: bookingsRepository,
+    lifecycle: accountLifecycle,
+    audit,
+  });
   const merchantStatisticsService = createMerchantStatisticsService({
     bookings: bookingsRepository,
     reviews: new ReviewsRepository(),
@@ -1023,20 +1047,7 @@ const buildServices = (
       storage: providers.storage,
       settings,
     }),
-    adminSalons: createAdminSalonsService({
-      salons: new SalonsRepository(),
-      members: new MembersRepository(),
-      subscriptions: new SubscriptionsRepository(),
-      salonServices,
-      state: salonState,
-      audit,
-      logger,
-      bookings: conflictFinder.salon,
-      notifier: producers.salonStateNotifier,
-      placements: new PlacementsRepository(),
-      bookingCounts: bookingsRepository,
-      branches: branchesRepository,
-    }),
+    adminSalons: adminSalonsService,
     adminSalonInsights: {
       insights: createSalonInsightsService({
         salons: new SalonsRepository(),
@@ -1090,13 +1101,7 @@ const buildServices = (
       members: new MembersRepository(),
       bookings: bookingsRepository,
     }),
-    adminCustomers: createAdminCustomersService({
-      customers: new CustomersRepository(),
-      installations: new InstallationsRepository(),
-      bookings: bookingsRepository,
-      lifecycle: accountLifecycle,
-      audit,
-    }),
+    adminCustomers: adminCustomersService,
     adminReviews: adminReviewsService,
     bookingAdminExtras,
     adminCustomerExtras: createAdminCustomerExtrasService({
