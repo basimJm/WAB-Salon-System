@@ -370,4 +370,23 @@ describe('admin branch routes', () => {
       .send({});
     expect(noReason.status).toBe(400);
   });
+
+  it('SRV-171 S3: the list is paged with `meta`, main first, closed branches left out', async () => {
+    const base = `/admin/v1/salons/${salonId.toHexString()}/branches`;
+    await create('Abdoun');
+    await create('Sweifieh');
+    const third = await create('Khalda');
+    await service.close({ salonId: salonId.toHexString(), branchId: third.id, reason: 'r', actor });
+    const all = await request(app).get(base);
+    expect(all.status).toBe(200);
+    const page = all.body as { data: { name: { en: string } }[]; meta: unknown };
+    expect(page.meta).toEqual({ page: 1, pageSize: 25, total: 2 });
+    expect(page.data.map((b) => b.name.en)).toEqual(['Abdoun', 'Sweifieh']);
+    const second = await request(app).get(`${base}?page=2&pageSize=1`);
+    expect(second.body).toMatchObject({
+      data: [{ name: { en: 'Sweifieh' } }],
+      meta: { page: 2, pageSize: 1, total: 2 },
+    });
+    expect((await request(app).get(`${base}?pageSize=0`)).status).toBe(400);
+  });
 });

@@ -114,6 +114,13 @@ export const FAKE_PAYMENT_CLIENT = {
 export const PAYMENT_REFERENCE_PATTERN = /^[A-Za-z0-9_.:-]{1,64}$/;
 /** The fake gateway's webhook signature: anything else is rejected as unverifiable. */
 export const FAKE_WEBHOOK_SIGNATURE = 'fake-webhook-signature';
+/**
+ * Gateway session ids the demo seed writes on its paid transactions (`<prefix><booking reference>`).
+ * The fake gateway (in memory) adopts such a session as paid when it is asked to refund it, so
+ * refunds work on seeded data in dev; the server already caps every refund at what is refundable.
+ */
+export const FAKE_SEEDED_SESSION_PREFIX = 'demo_';
+export const FAKE_SEEDED_REFUND_PREFIX = 'demo_refund_';
 export const FAKE_GATEWAY_CODES = {
   success: '000.100.110',
   pending: '000.200.000',

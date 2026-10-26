@@ -20,6 +20,7 @@ import {
   type ErrorDetail,
 } from '../../utils/errors';
 import type { Logger } from '../../utils/logger';
+import type { PaginationParams } from '../../utils/pagination';
 import { assertPlace } from '../locations/place';
 import type { SalonStateNotifier, SalonStateService } from '../salons/salonState.service';
 import type { SettingsService } from '../settings/settings.service';
@@ -71,6 +72,8 @@ export interface BranchActor {
 
 export interface BranchesService {
   list(salonId: string): Promise<BranchView[]>;
+  /** One page of `list` (admin, SRV-171 S3). */
+  page(salonId: string, params: PaginationParams): Promise<{ items: BranchView[]; total: number }>;
   get(salonId: string, branchId: string): Promise<BranchView>;
   create(salonId: string, input: BranchInput): Promise<BranchView>;
   update(salonId: string, branchId: string, patch: BranchPatch): Promise<BranchView>;
@@ -205,6 +208,11 @@ export const createBranchesService = (deps: BranchesDeps): BranchesService => {
   return {
     async list(salonId) {
       return (await branches.forSalon(salonId)).map(toBranchView);
+    },
+
+    async page(salonId, params) {
+      const { items, total } = await branches.pageForSalon(salonId, params);
+      return { items: items.map(toBranchView), total };
     },
 
     async get(salonId, branchId) {
