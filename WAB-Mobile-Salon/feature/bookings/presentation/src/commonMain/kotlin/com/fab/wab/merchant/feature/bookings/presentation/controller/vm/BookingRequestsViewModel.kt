@@ -218,8 +218,10 @@ class BookingRequestsViewModel(
         }
     }
 
+    /** "View details" opens the booking and closes the sheet; the rest of the queue waits (same as "View booking"). */
     private fun open(id: String) {
-        drop(id)
+        updateState { copy(queue = queue.filterNot { it.summary.id == id }, snoozed = queue.any { it.summary.id != id }) }
+        alertForCurrent()
         emitSideEffect(SideEffect.OpenDetails(id))
     }
 

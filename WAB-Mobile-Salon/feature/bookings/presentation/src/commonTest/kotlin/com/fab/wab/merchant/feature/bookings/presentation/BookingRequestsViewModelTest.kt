@@ -232,6 +232,8 @@ class BookingRequestsViewModelTest {
         requests.emit("r2")
         viewModel.onEvent(UiAction.OnViewDetails)
         assertEquals(SideEffect.OpenDetails("r1"), effects.last())
+        assertTrue(!viewModel.state.first().visible, "e2e: the next request covered the details the member opened")
+        assertEquals("r2", viewModel.state.first().current?.summary?.id)
         viewModel.onEvent(UiAction.OnDismiss)
         assertTrue(viewModel.state.first().queue.isEmpty())
         requests.emit("r1")
