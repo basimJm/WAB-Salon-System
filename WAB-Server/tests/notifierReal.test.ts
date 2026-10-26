@@ -213,13 +213,13 @@ describe('createProviders with a real notifier', () => {
     payments: 'fake',
     analytics: 'fake',
   } as const;
-  const config = { notifier: SETTINGS } as never;
+  const config = { otp: {}, notifier: SETTINGS } as never;
 
   it('fails clearly without credentials or runtime dependencies', () => {
     expect(() => createProviders(modes, false)).toThrow(ProviderUnavailableError);
-    expect(() => createProviders(modes, false, { redis, logger, config: {} as never })).toThrow(
-      ProviderUnavailableError,
-    );
+    expect(() =>
+      createProviders(modes, false, { redis, logger, config: { otp: {} } as never }),
+    ).toThrow(ProviderUnavailableError);
   });
 
   it('fails fast at start-up when the service account is invalid', () => {
@@ -242,6 +242,7 @@ describe('createProviders with a real notifier', () => {
       private_key: privateKey,
     });
     const valid = {
+      otp: {},
       notifier: { ...SETTINGS, fcm: { ...SETTINGS.fcm, serviceAccountJson: account } },
     } as never;
     const providers = createProviders(modes, false, { redis, logger, config: valid });

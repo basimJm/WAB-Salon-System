@@ -38,7 +38,7 @@ export interface PayoutDetailsService {
    * A malformed IBAN is 400; a wrong or expired proof is 401.
    */
   setByOwner(
-    input: PayoutDetailsInput & { salonId: string; memberId: string; idToken: string },
+    input: PayoutDetailsInput & { salonId: string; memberId: string; otpToken: string },
   ): Promise<PayoutDetailsView>;
   /** Admin: the full details, for a transfer. Audited on every call. */
   revealForAdmin(input: { salonId: string; actor: AdminActor }): Promise<PayoutDetailsFull | null>;
@@ -98,7 +98,7 @@ export const createPayoutDetailsService = (deps: {
       return salon.payoutDetails === undefined ? null : masked(salon.payoutDetails);
     },
 
-    async setByOwner({ salonId, memberId, idToken, ...input }) {
+    async setByOwner({ salonId, memberId, otpToken, ...input }) {
       const owner = await members.findById(memberId);
       if (owner?.salonId !== salonId || owner.role !== 'OWNER' || !owner.active) {
         throw new ForbiddenError({ code: ERROR_CODES.OWNER_REQUIRED });
@@ -107,7 +107,7 @@ export const createPayoutDetailsService = (deps: {
       const { stored } = checked(input);
       await phones.verify(
         { countryCode: '', dialCode: '', number: '', e164: owner.phone },
-        idToken,
+        otpToken,
         'BANK_DETAILS',
       );
       await otpGate.reset(owner.phone);

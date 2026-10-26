@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CURRENCY_CODE } from '../../constants/money';
+import { OTP_CHANNELS } from '../../constants/otp';
 import { MAX_PAGE_SIZE } from '../../constants/pagination';
 import { SETTING_DEFAULTS, SETTING_LIMITS } from '../../constants/settings';
 import { isValidTimeZone } from '../../utils/time';
@@ -67,6 +68,9 @@ export const SETTING_DEFINITIONS = {
   'otp.requestWindowSec': define(positiveInt, SETTING_DEFAULTS['otp.requestWindowSec']),
   'otp.maxWrong': define(positiveInt, SETTING_DEFAULTS['otp.maxWrong']),
   'otp.blockSec': define(positiveInt, SETTING_DEFAULTS['otp.blockSec']),
+  'otp.codeTtlSec': define(positiveInt, SETTING_DEFAULTS['otp.codeTtlSec']),
+  'otp.proofTtlSec': define(positiveInt, SETTING_DEFAULTS['otp.proofTtlSec']),
+  'otp.channel': define(z.enum(OTP_CHANNELS), SETTING_DEFAULTS['otp.channel']),
   'auth.accessTokenTtlSec': define(positiveInt, SETTING_DEFAULTS['auth.accessTokenTtlSec']),
   'auth.refreshTokenTtlDays': define(positiveInt, SETTING_DEFAULTS['auth.refreshTokenTtlDays']),
   'admin.maxFailedLogins': define(positiveInt, SETTING_DEFAULTS['admin.maxFailedLogins']),

@@ -16,8 +16,6 @@ PRODUCT_BUNDLE_IDENTIFIER = com.fab.wab.customer$(BUNDLE_ID_SUFFIX)
 MERCHANT_REGISTER_URL = https:/$()/merchant.template.app/register
 MERCHANT_STORE_URL = https:/$()/apps.apple.com/app/id0000000000
 MERCHANT_APP_SCHEME = wabmerchant
-// App Check (App Attest) environment for the entitlement
-APP_ATTEST_ENVIRONMENT = production
 
 // Per-developer overrides (team, free-account entitlements); optional and git-ignored.
 #include? "Local.xcconfig"

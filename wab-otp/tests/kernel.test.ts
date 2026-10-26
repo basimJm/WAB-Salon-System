@@ -2,14 +2,7 @@ import { ERROR_CODES } from '../src/constants/codes';
 import { configError, isOtpError, OtpError, providerError, validationError } from '../src/errors';
 import { maskPhone, redactFields, redactingLogger, silentLogger } from '../src/logging';
 import type { Logger } from '../src/ports';
-import {
-  delayFor,
-  isRetryable,
-  realRetryDeps,
-  withRetry,
-  withTimeout,
-  type RetryDeps,
-} from '../src/retry';
+import { delayFor, isRetryable, realRetryDeps, withRetry, type RetryDeps } from '../src/retry';
 
 const policy = { maxAttempts: 3, baseDelayMs: 100, maxDelayMs: 250, jitterRatio: 0.5 };
 
@@ -195,17 +188,5 @@ describe('retry', () => {
       ),
     ).rejects.toThrow('x');
     expect(calls).toBe(1);
-  });
-
-  it('times out slow work and clears the timer', async () => {
-    const slow = new Promise<string>((resolve) => {
-      setTimeout(() => {
-        resolve('late');
-      }, 200);
-    });
-    await expect(withTimeout(slow, 5, () => new Error('timeout'))).rejects.toThrow('timeout');
-    await expect(withTimeout(Promise.resolve('fast'), 50, () => new Error('t'))).resolves.toBe(
-      'fast',
-    );
   });
 });

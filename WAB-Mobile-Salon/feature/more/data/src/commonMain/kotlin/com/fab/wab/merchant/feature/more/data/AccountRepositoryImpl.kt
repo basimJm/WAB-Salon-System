@@ -96,8 +96,8 @@ class AccountRepositoryImpl(private val api: AccountApi) : AccountRepository {
     override suspend fun update(firstName: String, lastName: String, photo: PhotoChange): AppResult<MyAccount> =
         safeApiCall { api.update(updateBody(firstName, lastName, photo)) }.mapSuccess { it.data.toDomain() }
 
-    override suspend fun changePhone(countryCode: String, number: String, idToken: String): AppResult<MyAccount> =
-        safeApiCall { api.changePhone(PostAuthChangePhoneBody(PostAuthChangePhoneBodyPhone(countryCode, number), idToken)) }
+    override suspend fun changePhone(countryCode: String, number: String, otpToken: String): AppResult<MyAccount> =
+        safeApiCall { api.changePhone(PostAuthChangePhoneBody(PostAuthChangePhoneBodyPhone(countryCode, number), otpToken)) }
             .mapSuccess { it.data.toDomain() }
 
     override suspend fun setPushEnabled(enabled: Boolean): AppResult<Unit> = safeApiCall { api.setPushEnabled(enabled) }.mapSuccess { }

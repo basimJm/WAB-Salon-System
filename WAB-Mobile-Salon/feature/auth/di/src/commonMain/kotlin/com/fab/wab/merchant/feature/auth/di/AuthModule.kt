@@ -4,12 +4,12 @@ import com.fab.wab.merchant.feature.auth.data.di.authDataModule
 import com.fab.wab.merchant.feature.auth.domain.repository.PendingOtpVerification
 import com.fab.wab.merchant.feature.auth.domain.usecase.CheckPhoneUseCase
 import com.fab.wab.merchant.core.domain.AppSettings
-import com.fab.wab.merchant.feature.auth.domain.usecase.LoginWithIdTokenUseCase
+import com.fab.wab.merchant.feature.auth.domain.usecase.LoginWithOtpTokenUseCase
 import com.fab.wab.merchant.feature.auth.domain.usecase.LogoutUseCase
 import com.fab.wab.merchant.feature.auth.domain.usecase.SyncInstallationUseCase
-import com.fab.wab.merchant.feature.auth.domain.usecase.ReportWrongOtpAttemptUseCase
 import com.fab.wab.merchant.feature.auth.domain.usecase.RequestOtpUseCase
 import com.fab.wab.merchant.feature.auth.domain.usecase.ResolveDialCodeUseCase
+import com.fab.wab.merchant.feature.auth.domain.usecase.VerifyOtpUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -18,8 +18,8 @@ val authModule = module {
     includes(authDataModule)
     singleOf(::CheckPhoneUseCase)
     singleOf(::RequestOtpUseCase)
-    singleOf(::ReportWrongOtpAttemptUseCase)
-    singleOf(::LoginWithIdTokenUseCase)
+    singleOf(::VerifyOtpUseCase)
+    singleOf(::LoginWithOtpTokenUseCase)
     singleOf(::ResolveDialCodeUseCase)
     singleOf(::PendingOtpVerification)
     singleOf(::LogoutUseCase)

@@ -14,10 +14,17 @@ export type OtpEvent =
   | { readonly type: 'precheck'; readonly allowed: boolean; readonly purpose: OtpPurpose }
   | { readonly type: 'verify'; readonly outcome: VerifyOutcome; readonly purpose: OtpPurpose }
   | { readonly type: 'failure'; readonly reason: FailureReason; readonly blocked: boolean }
-  | { readonly type: 'provider_error'; readonly code: string };
+  | { readonly type: 'provider_error'; readonly code: string }
+  | {
+      readonly type: 'send';
+      readonly channel: string;
+      readonly purpose: OtpPurpose;
+      readonly delivered: boolean;
+      readonly errorCode?: string;
+    };
 
 export interface VerifyInput {
-  /** What the app got from the provider after the user typed the code (Firebase ID token). */
+  /** The `otpToken` issued after a correct code (or a fake / custom adapter's proof). */
   readonly proof: string;
   /** The phone the user claims to own, E.164. */
   readonly expectedPhone: string;
@@ -28,7 +35,7 @@ export type VerifyResult =
   | { readonly outcome: 'VERIFIED'; readonly phone: string }
   | { readonly outcome: Exclude<VerifyOutcome, 'VERIFIED'> };
 
-/** Checks one proof. Adapters (Firebase, fake, SMS vendors) implement this; outages throw `OtpError`. */
+/** Checks one proof. Adapters (signed proof, fake, custom) implement this; outages throw `OtpError`. */
 export interface ProofVerifier {
   verify(input: VerifyInput): Promise<VerifyResult>;
   close?(): Promise<void>;
@@ -101,4 +108,35 @@ export interface LimitStore {
   startCooldown(key: string, ms: number): Promise<{ started: boolean; retryAfterMs: number }>;
   reset(keys: readonly string[]): Promise<void>;
   close?(): Promise<void>;
+}
+
+/** One code to deliver. `language` is the app language (`ar`, `en`); the channel maps it. */
+export interface OtpMessage {
+  /** E.164 recipient. */
+  readonly to: string;
+  /** Never log it. */
+  readonly code: string;
+  readonly language: string;
+  readonly purpose: OtpPurpose;
+  readonly ttlSec: number;
+}
+
+/** A way to deliver a code (WhatsApp, SMS…). Failures throw `OtpError`. */
+export interface OtpChannel {
+  /** Short channel name for logs and events (`whatsapp`, `sms`, `fake`). */
+  readonly name: string;
+  /** A fake channel must say so: production refuses it. */
+  readonly isFake?: boolean;
+  send(message: OtpMessage): Promise<{ readonly id: string }>;
+}
+
+/** Code hashes and used-proof flags with TTL. Production needs a shared implementation. */
+export interface CodeStore {
+  readonly scope: 'local' | 'shared';
+  set(key: string, value: string, ttlMs: number): Promise<void>;
+  get(key: string): Promise<string | null>;
+  /** Returns true when the key existed, so exactly one concurrent caller wins. */
+  delete(key: string): Promise<boolean>;
+  /** Sets only when absent; returns true when this call set it. */
+  setIfAbsent(key: string, value: string, ttlMs: number): Promise<boolean>;
 }

@@ -74,14 +74,15 @@ import type { BannerRaw } from '../models/banner.model';
 import type { BannersService } from '../domain/banners';
 import type { AdminContentServices } from '../domain/adminCrud/content';
 import type { AdminCrudService } from '../domain/adminCrud/adminCrud.service';
-import type { OtpGate } from '../domain/otp/otpGate.service';
+import type { PhoneOtpService } from '../domain/otp/phoneOtp.service';
 import { ExternalServiceError } from '../utils/errors';
 
 /** Long-lived services the feature routers need. `server.ts` builds them once Redis is connected. */
 export interface ApiServices {
   /** Closes provider connections (SMTP pool, push client) on shutdown. */
   readonly providersClose?: () => Promise<void>;
-  readonly otpGate?: OtpGate;
+  /** WhatsApp OTP: send a code, exchange the typed code for `otpToken` (BUSINESS_DOMAIN §3.1a). */
+  readonly phoneOtp?: PhoneOtpService;
   readonly appConfig?: AppConfigService;
   readonly locations?: LocationsService;
   /** `requireAuth('admin', secret)`: every admin resource route sits behind it. */
@@ -190,12 +191,10 @@ export interface ApiServices {
 const unavailable = (): Promise<never> =>
   Promise.reject(new ExternalServiceError({ unavailable: true }));
 
-/** Stands in when no Redis-backed gate exists (tests without Redis): the route answers 503, not 404. */
-export const unavailableOtpGate: OtpGate = {
+/** Stands in when no Redis-backed OTP service exists (tests without Redis): 503, not 404. */
+export const unavailablePhoneOtp: PhoneOtpService = {
   request: unavailable,
-  reportWrongAttempt: unavailable,
-  assertNotBlocked: unavailable,
-  reset: unavailable,
+  verify: unavailable,
 };
 
 const unavailableCustomerAuthError = (): Promise<never> =>

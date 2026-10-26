@@ -1,5 +1,6 @@
+import { MemoryCodeStore } from '../src/adapters/code-store/memory';
 import { resolveOptions, type OtpOptions } from '../src/config/options';
-import type { LimitStore, ProofVerifier } from '../src/ports';
+import type { CodeStore, LimitStore, ProofVerifier } from '../src/ports';
 
 const verifier: ProofVerifier = { verify: () => Promise.resolve({ outcome: 'INVALID_PROOF' }) };
 const store = (scope: 'local' | 'shared'): LimitStore => ({
@@ -10,10 +11,13 @@ const store = (scope: 'local' | 'shared'): LimitStore => ({
   startCooldown: () => Promise.resolve({ started: true, retryAfterMs: 0 }),
   reset: () => Promise.resolve(),
 });
+const sharedCodes = (): CodeStore =>
+  Object.assign(new MemoryCodeStore(), { scope: 'shared' as const });
+const SECRET = 'p'.repeat(32);
 const prod: OtpOptions = {
   environment: 'prod',
-  provider: 'firebase',
-  firebase: { projectId: 'wab-prod' },
+  provider: 'signed',
+  proof: { secret: SECRET, store: sharedCodes() },
 };
 
 const codeOf = (options: OtpOptions): string | undefined => {
@@ -30,8 +34,7 @@ describe('resolveOptions', () => {
     const r = resolveOptions({ environment: 'dev', provider: 'fake' });
     expect(r.limits).toEqual({ requestMax: 5, requestWindowSec: 300, wrongMax: 5, blockSec: 900 });
     expect(r).toMatchObject({ otpLength: 6, resendAfterSec: 60, keyPrefix: '' });
-    expect(r.retry.maxAttempts).toBe(3);
-    expect(r.firebase.jwksUrl).toContain('https://');
+    expect(r.proof).toBeUndefined();
     expect(r.now()).toBeInstanceOf(Date);
     r.onEvent({ type: 'provider_error', code: 'x' });
     expect(r.onEvent).toBeInstanceOf(Function);
@@ -39,18 +42,11 @@ describe('resolveOptions', () => {
 
   it('keeps consumer values', () => {
     const now = (): Date => new Date(0);
+    const proof = { secret: SECRET, store: new MemoryCodeStore(), keyPrefix: 'k:' };
     const r = resolveOptions({
       environment: 'dev',
-      provider: 'firebase',
-      firebase: {
-        projectId: 'p',
-        authEmulatorHost: 'localhost:9099',
-        jwksUrl: 'http://localhost:1/jwk',
-        timeoutMs: 10,
-        clockSkewSec: 1,
-        maxAuthAgeSec: 2,
-        fetch: () => Promise.reject(new Error('x')),
-      },
+      provider: 'signed',
+      proof,
       limits: { requestMax: 2 },
       otpLength: 4,
       resendAfterSec: 0,
@@ -59,85 +55,54 @@ describe('resolveOptions', () => {
     });
     expect(r.limits.requestMax).toBe(2);
     expect(r.limits.wrongMax).toBe(5);
-    expect(r.firebase).toMatchObject({
-      authEmulatorHost: 'localhost:9099',
-      timeoutMs: 10,
-      projectId: 'p',
-    });
-    expect(r.firebase.fetch).toBeDefined();
+    expect(r.proof).toBe(proof);
     expect(r.now).toBe(now);
     expect(r.otpLength).toBe(4);
   });
 
   it('rejects malformed values naming the fields only', () => {
     expect(codeOf({ environment: 'qa' as 'dev', provider: 'fake' })).toBe('OTP_CONFIG_INVALID');
+    expect(codeOf({ environment: 'dev', provider: 'firebase' as 'fake' })).toBe(
+      'OTP_CONFIG_INVALID',
+    );
     expect(codeOf({ environment: 'dev', provider: 'fake', otpLength: 2 })).toBe(
       'OTP_CONFIG_INVALID',
     );
     expect(codeOf({ environment: 'dev', provider: 'fake', limits: { requestMax: 0 } })).toBe(
       'OTP_CONFIG_INVALID',
     );
-    expect(
-      codeOf({
-        environment: 'dev',
-        provider: 'firebase',
-        firebase: { projectId: 'p', authEmulatorHost: 'no port' },
-      }),
-    ).toBe('OTP_CONFIG_INVALID');
-    expect(codeOf({ environment: 'dev', provider: 'fake', retry: { jitterRatio: 2 } })).toBe(
-      'OTP_CONFIG_INVALID',
-    );
   });
 
-  it('requires a verifier for custom and a project for firebase', () => {
+  it('requires a verifier for custom and a strong secret for signed', () => {
     expect(codeOf({ environment: 'dev', provider: 'custom' })).toBe('OTP_CONFIG_INVALID');
     expect(resolveOptions({ environment: 'dev', provider: 'custom', verifier }).verifier).toBe(
       verifier,
     );
-    expect(codeOf({ environment: 'dev', provider: 'firebase' })).toBe('OTP_CONFIG_INVALID');
-    expect(codeOf({ environment: 'dev', provider: 'firebase', firebase: { projectId: ' ' } })).toBe(
-      'OTP_CONFIG_INVALID',
-    );
-  });
-
-  it('refuses an emulator host without the firebase provider', () => {
+    expect(codeOf({ environment: 'dev', provider: 'signed' })).toBe('OTP_CONFIG_INVALID');
     expect(
       codeOf({
         environment: 'dev',
-        provider: 'fake',
-        firebase: { projectId: 'p', authEmulatorHost: 'localhost:9099' },
+        provider: 'signed',
+        proof: { secret: 'short', store: new MemoryCodeStore() },
       }),
     ).toBe('OTP_CONFIG_INVALID');
   });
 
   describe('production rules', () => {
-    it('accepts a strict firebase setup with a shared store', () => {
+    it('accepts a signed setup with shared stores', () => {
       expect(resolveOptions({ ...prod, store: store('shared') }).environment).toBe('prod');
     });
-    it('refuses fake, missing project, emulator, http keys and local stores', () => {
+    it('refuses fake, local limit stores and local proof stores', () => {
       expect(codeOf({ environment: 'prod', provider: 'fake' })).toBe('OTP_CONFIG_INVALID');
-      expect(codeOf({ environment: 'prod', provider: 'firebase' })).toBe('OTP_CONFIG_INVALID');
-      expect(
-        codeOf({ environment: 'prod', provider: 'firebase', firebase: { projectId: '  ' } }),
-      ).toBe('OTP_CONFIG_INVALID');
-      expect(
-        codeOf({ ...prod, firebase: { projectId: 'p', authEmulatorHost: 'localhost:9099' } }),
-      ).toBe('OTP_CONFIG_INVALID');
-      expect(codeOf({ ...prod, firebase: { projectId: 'p', jwksUrl: 'http://x.test/jwk' } })).toBe(
+      expect(codeOf({ ...prod, store: store('local') })).toBe('OTP_CONFIG_INVALID');
+      expect(codeOf({ ...prod, proof: { secret: SECRET, store: new MemoryCodeStore() } })).toBe(
         'OTP_CONFIG_INVALID',
       );
-      expect(codeOf({ ...prod, store: store('local') })).toBe('OTP_CONFIG_INVALID');
     });
     it('allows a custom verifier', () => {
       expect(resolveOptions({ environment: 'prod', provider: 'custom', verifier }).provider).toBe(
         'custom',
       );
-    });
-    it('allows an https key endpoint', () => {
-      expect(
-        resolveOptions({ ...prod, firebase: { projectId: 'p', jwksUrl: 'https://k.test/jwk' } })
-          .firebase.jwksUrl,
-      ).toBe('https://k.test/jwk');
     });
   });
 });

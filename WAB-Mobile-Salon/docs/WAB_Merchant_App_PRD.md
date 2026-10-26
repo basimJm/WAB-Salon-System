@@ -2,7 +2,7 @@
 
 > **Document type:** Product Requirements Document — Merchant app (mobile)
 > **Audience:** AI coding agents and engineers implementing the merchant app.
-> **Version:** 1.1 — updated with backend decisions: Firebase phone OTP with dynamic length (currently 6), Socket.IO real-time, Firebase Analytics + BigQuery, presigned uploads + CDN.
+> **Version:** 1.1 — updated with backend decisions: phone OTP with dynamic length (currently 6; WhatsApp since 2026-10-26), Socket.IO real-time, Firebase Analytics + BigQuery, presigned uploads + CDN.
 > **Related documents:** Customer App PRD, Customer BRD, Merchant BRD, Admin BRD, Admin PRD, Backend PRD (upcoming).
 
 ---
@@ -36,7 +36,7 @@ Every piece of salon data shown in the customer app originates here (see Custome
 ### 2.1 Confirmed
 - **Kotlin Multiplatform + Compose Multiplatform**, shared UI and business logic for Android and iOS. Platform code only via `expect/actual` (push, overlays, location/map picker, image/video/document pickers, payments are NOT needed here).
 - **Local persistence:** DataStore.
-- **OTP:** Firebase Authentication (Phone / SMS); backend verifies the Firebase ID token. Code length is dynamic (`otpLength` from backend, currently 6).
+- **OTP (owner decision 2026-10-26, BUSINESS_DOMAIN §3.1a):** the backend sends the code over **WhatsApp** (`POST /auth/otp/request`), the app verifies it with the backend (`POST /auth/otp/verify`) and receives a short-lived single-use `otpToken` for login / registration / change phone / bank details. Firebase Phone Auth is removed (Firebase stays for push, analytics, crash reporting). Code length is dynamic (`otpLength` from backend, currently 6).
 - **Push:** Firebase Cloud Messaging (Android + iOS), high-priority data messages for booking requests.
 - **Real-time:** Socket.IO client while the app is in the foreground; FCM in background.
 - **Crashlytics + Analytics:** Firebase; raw events exported to **BigQuery** (permanent) and read by the backend for the Admin panel.
@@ -116,7 +116,7 @@ App start
 - Phone found as an **active member** → OTP → app.
 - Phone **not found** → dialog: "This number is not linked to any salon." with actions **Register a new salon** (→ M04 after OTP) and **Cancel**. (Team members must ask their owner to add their number.)
 - Member deactivated → message as above.
-- OTP rules identical to the customer app (Customer PRD S13): Firebase SMS, dynamic code length (currently 6), backend pre-check of limits, resend after 60 s, 5 requests / 5 min → 15 min block, 5 wrong codes → 15 min block, backend verifies the Firebase ID token.
+- OTP rules identical to the customer app (Customer PRD S13): WhatsApp code from the backend, dynamic code length (currently 6), backend pre-check of limits, resend after 60 s, 5 requests / 5 min → 15 min block, 5 wrong codes → 15 min block, backend verifies the code and answers a single-use `otpToken`.
 
 ### 4.5 Entry From the Customer App
 "Register your salon with us" in the customer app opens the merchant app via deep link (`<merchant-domain>/register`) if installed, otherwise the corresponding app store page.
@@ -264,7 +264,7 @@ Checks version policy and maintenance (same as customer app), then follows the l
 **States:** invalid phone, loading, blocked/deactivated messages.
 
 ### M03 — OTP Verification
-Same component, flow and rules as the customer app (Firebase SMS, `otpLength` boxes, 60 s resend, limits, expiry popup). Modes: LOGIN, REGISTER, CHANGE_PHONE, BANK_DETAILS.
+Same component, flow and rules as the customer app (WhatsApp code, `otpLength` boxes, 60 s resend, limits, code lifetime + expiry popup; `OTP_DELIVERY_FAILED` when the number is not on WhatsApp). Modes: LOGIN, REGISTER, CHANGE_PHONE, BANK_DETAILS.
 
 ### M04 — Salon Registration (owner)
 **Fields (all required unless stated):**

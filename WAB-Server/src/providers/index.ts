@@ -1,12 +1,16 @@
 import type { AppConfig } from '../config';
-import { DISABLED_PAYMENT_MODE, REAL_PROVIDER_MODE } from '../constants/providers';
+import {
+  DISABLED_PAYMENT_MODE,
+  REAL_PROVIDER_MODE,
+  WHATSAPP_OTP_MODE,
+} from '../constants/providers';
 import { InternalError } from '../utils/errors';
 import { FakeNotifier, type Notifier } from './notifier';
 import { createRealNotifier, type ClosableNotifier } from './notifier/real';
 import type { Redis } from 'ioredis';
 import type { Logger } from '../utils/logger';
-import { FakeOtpProvider, type OtpProvider } from './otp';
-import { createRealOtp } from './otp/real';
+import { RedisCodeStore } from '@wab/otp';
+import { FakeOtpProvider, createWhatsAppOtpProvider, type OtpProvider } from './otp';
 import { DisabledPaymentProvider, FakePaymentProvider, type PaymentProvider } from './payments';
 import { FakeStorageProvider, type StorageProvider } from './storage';
 import { createRealStorage } from './storage/real';
@@ -38,7 +42,7 @@ export class ProviderUnavailableError extends InternalError {
   }
 }
 
-type Mode = AppConfig['providers']['otp'];
+type Mode = AppConfig['providers']['storage'];
 
 /**
  * Builds the providers named by the config. Fakes are for development and tests only: they are
@@ -67,24 +71,32 @@ export const createProviders = (
       throw new ProviderUnavailableError('payments', 'fakes are not allowed in production');
     return new FakePaymentProvider();
   };
+  // Phone OTP (BUSINESS_DOMAIN §3.1a): WhatsApp in production; the fake records codes (dev/test).
+  const pickOtp = (mode: AppConfig['providers']['otp']): OtpProvider => {
+    if (mode === WHATSAPP_OTP_MODE) {
+      if (deps === undefined)
+        throw new ProviderUnavailableError('otp', 'runtime dependencies missing');
+      return createWhatsAppOtpProvider({
+        settings: deps.config.otp,
+        redis: deps.redis,
+        logger: deps.logger,
+        isProduction,
+      });
+    }
+    if (isProduction)
+      throw new ProviderUnavailableError('otp', 'fakes are not allowed in production');
+    if (deps === undefined) return new FakeOtpProvider();
+    const { codeSecret, proofSecret, fixedCode } = deps.config.otp;
+    return new FakeOtpProvider({
+      store: new RedisCodeStore(deps.redis),
+      logger: deps.logger,
+      ...(codeSecret === undefined ? {} : { codeSecret }),
+      ...(proofSecret === undefined ? {} : { proofSecret }),
+      ...(fixedCode === undefined ? {} : { fixedCode }),
+    });
+  };
   const built = {
-    otp: pick(
-      'otp',
-      providers.otp,
-      (): OtpProvider => new FakeOtpProvider(),
-      () => {
-        const settings = deps?.config.otp;
-        if (deps === undefined || settings === undefined) {
-          throw new ProviderUnavailableError(
-            'otp',
-            'Firebase project or runtime dependencies missing',
-          );
-        }
-        const real = createRealOtp({ settings, logger: deps.logger, isProduction });
-        closers.push(() => real.close());
-        return real;
-      },
-    ),
+    otp: pickOtp(providers.otp),
     storage: pick(
       'storage',
       providers.storage,

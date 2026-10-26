@@ -20,11 +20,11 @@ import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.customer.feature.auth.domain.model.AuthSession
 import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
+import com.fab.wab.customer.feature.auth.domain.model.OtpProof
 import com.fab.wab.customer.feature.auth.domain.model.OtpVerified
 import com.fab.wab.customer.feature.auth.domain.model.PhoneCheck
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
 import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
-import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
 import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
 import com.fab.wab.customer.feature.auth.domain.repository.PendingOtpVerification
 import com.fab.wab.customer.feature.auth.domain.usecase.CheckPhoneUseCase
@@ -66,15 +66,16 @@ private class RegisterFakeAuth : AuthRepository {
     var registered: RegisterRequest? = null
     override suspend fun checkPhone(phone: PhoneNumber, purpose: AuthPurpose): AppResult<PhoneCheck> = check
     override suspend fun requestOtp(phoneE164: String, purpose: AuthPurpose): AppResult<OtpPolicy> = AppResult.Loading
-    override suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult> = AppResult.Loading
-    override suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession> =
+    override suspend fun verifyOtp(phoneE164: String, purpose: AuthPurpose, code: String): AppResult<OtpProof> =
+        AppResult.Loading
+    override suspend fun login(phone: PhoneNumber, otpToken: String, installation: InstallationInfo?): AppResult<AuthSession> =
         AppResult.Loading
     override suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession> {
         registered = request
         return AppResult.Success(AuthSession(AuthTokens("a", "r"), UserProfile("c1", request.firstName, request.gender)))
     }
     override suspend fun logout(refreshToken: String): AppResult<Unit> = AppResult.Success(Unit)
-    override suspend fun changePhone(phone: PhoneNumber, idToken: String): AppResult<UserProfile> =
+    override suspend fun changePhone(phone: PhoneNumber, otpToken: String): AppResult<UserProfile> =
         AppResult.Success(UserProfile("c1", "Sara", null))
 }
 
@@ -200,7 +201,7 @@ class RegisterViewModelTest {
         assertEquals("Sara", request?.firstName)
         assertEquals(Gender.FEMALE, request?.gender)
         assertEquals("a1", request?.areaId)
-        assertEquals("proof", request?.idToken)
+        assertEquals("proof", request?.otpToken)
         assertEquals("Sara", session.signedIn?.firstName)
         assertNull(pending.consume())
     }

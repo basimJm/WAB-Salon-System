@@ -11,8 +11,12 @@ import {
   DEFAULT_SMTP_PORT,
   DEFAULT_EMAIL_FROM_NAME,
   NOTIFIER_REAL_REQUIRED_KEYS,
-  OTP_REAL_REQUIRED_KEYS,
-  FIREBASE_EMULATOR_HOST_PATTERN,
+  OTP_WHATSAPP_REQUIRED_KEYS,
+  OTP_FIXED_CODE_PATTERN,
+  OTP_SECRET_MIN_LENGTH,
+  WHATSAPP_API_VERSION_PATTERN,
+  WHATSAPP_PHONE_NUMBER_ID_PATTERN,
+  WHATSAPP_TEMPLATE_NAME_PATTERN,
   STORAGE_REAL_REQUIRED_KEYS,
   CLOUDFRONT_KEYS,
   MONGO_URI_PATTERN,
@@ -24,7 +28,9 @@ import { JWT_SECRET_MIN_LENGTH } from '../constants/auth';
 import { isEncryptionKey } from '../utils/crypto/aesGcm';
 import {
   DISABLED_PAYMENT_MODE,
+  OTP_PROVIDER_MODES,
   PAYMENT_PROVIDER_MODES,
+  WHATSAPP_OTP_MODE,
   PROVIDER_MODES,
   REAL_PROVIDER_MODE,
 } from '../constants/providers';
@@ -50,6 +56,8 @@ const optionalUrlOrEmpty = z
 const booleanText = z.enum(['true', 'false']).transform((value) => value === 'true');
 const providerMode = z.enum(PROVIDER_MODES).optional();
 const paymentProviderMode = z.enum(PAYMENT_PROVIDER_MODES).optional();
+const otpProviderMode = z.enum(OTP_PROVIDER_MODES).optional();
+const otpSecret = z.string().min(OTP_SECRET_MIN_LENGTH).optional();
 
 export const envSchema = z
   .object({
@@ -74,17 +82,19 @@ export const envSchema = z
     [ENV_KEYS.jwtAccessSecret]: z.string().min(JWT_SECRET_MIN_LENGTH),
     // Optional outside production (bank-details endpoints answer 503 without it); never has a default.
     [ENV_KEYS.payoutEncryptionKey]: z.string().refine(isEncryptionKey).optional(),
-    [ENV_KEYS.otpProvider]: providerMode,
+    [ENV_KEYS.otpProvider]: otpProviderMode,
     [ENV_KEYS.storageProvider]: providerMode,
     [ENV_KEYS.notifierProvider]: providerMode,
     [ENV_KEYS.paymentProvider]: paymentProviderMode,
     [ENV_KEYS.fcmServiceAccountJson]: z.string().min(1).optional(),
     [ENV_KEYS.fcmProjectId]: z.string().min(1).optional(),
-    [ENV_KEYS.firebaseProjectId]: z.string().min(1).optional(),
-    [ENV_KEYS.firebaseAuthEmulatorHost]: z
-      .string()
-      .regex(FIREBASE_EMULATOR_HOST_PATTERN)
-      .optional(),
+    [ENV_KEYS.whatsappPhoneNumberId]: z.string().regex(WHATSAPP_PHONE_NUMBER_ID_PATTERN).optional(),
+    [ENV_KEYS.whatsappAccessToken]: z.string().trim().min(1).optional(),
+    [ENV_KEYS.whatsappTemplateName]: z.string().regex(WHATSAPP_TEMPLATE_NAME_PATTERN).optional(),
+    [ENV_KEYS.whatsappApiVersion]: z.string().regex(WHATSAPP_API_VERSION_PATTERN).optional(),
+    [ENV_KEYS.otpCodeSecret]: otpSecret,
+    [ENV_KEYS.otpProofSecret]: otpSecret,
+    [ENV_KEYS.otpFixedCode]: z.string().regex(OTP_FIXED_CODE_PATTERN).optional(),
     [ENV_KEYS.fcmDryRun]: booleanText.default(false),
     [ENV_KEYS.smtpHost]: z.string().min(1).optional(),
     [ENV_KEYS.smtpPort]: z.coerce
@@ -112,20 +122,19 @@ export const envSchema = z
   })
   // Production never runs on fakes, and never guesses: every provider must be named `real`.
   .superRefine((env, context) => {
-    // A real OTP provider needs the Firebase project; the emulator is for development only.
-    if (env[ENV_KEYS.otpProvider] === REAL_PROVIDER_MODE) {
-      for (const key of OTP_REAL_REQUIRED_KEYS) {
+    // WhatsApp OTP needs the Meta number, token, template and both secrets (BUSINESS_DOMAIN §3.1a).
+    if (env[ENV_KEYS.otpProvider] === WHATSAPP_OTP_MODE) {
+      for (const key of OTP_WHATSAPP_REQUIRED_KEYS) {
         if (env[key] === undefined) context.addIssue({ code: 'custom', path: [key], message: key });
       }
     }
-    if (
-      env[ENV_KEYS.nodeEnv] === 'production' &&
-      env[ENV_KEYS.firebaseAuthEmulatorHost] !== undefined
-    ) {
+    // One secret for codes at rest, another for `otpToken`: a leak of one never forges the other.
+    const codeSecret = env[ENV_KEYS.otpCodeSecret];
+    if (codeSecret !== undefined && codeSecret === env[ENV_KEYS.otpProofSecret]) {
       context.addIssue({
         code: 'custom',
-        path: [ENV_KEYS.firebaseAuthEmulatorHost],
-        message: ENV_KEYS.firebaseAuthEmulatorHost,
+        path: [ENV_KEYS.otpProofSecret],
+        message: ENV_KEYS.otpProofSecret,
       });
     }
     // A real notifier needs its credentials; the error names keys only, never values.
@@ -172,6 +181,21 @@ export const envSchema = z
     for (const key of PROVIDER_ENV_KEYS) {
       if (env[key] !== REAL_PROVIDER_MODE)
         context.addIssue({ code: 'custom', path: [key], message: key });
+    }
+    // Phone OTP in production is WhatsApp only; the fake channel and its fixed code are refused.
+    if (env[ENV_KEYS.otpProvider] !== WHATSAPP_OTP_MODE) {
+      context.addIssue({
+        code: 'custom',
+        path: [ENV_KEYS.otpProvider],
+        message: ENV_KEYS.otpProvider,
+      });
+    }
+    if (env[ENV_KEYS.otpFixedCode] !== undefined) {
+      context.addIssue({
+        code: 'custom',
+        path: [ENV_KEYS.otpFixedCode],
+        message: ENV_KEYS.otpFixedCode,
+      });
     }
     // Payments are paused: production names `disabled` explicitly and never runs a fake gateway.
     if (env[ENV_KEYS.paymentProvider] !== DISABLED_PAYMENT_MODE) {

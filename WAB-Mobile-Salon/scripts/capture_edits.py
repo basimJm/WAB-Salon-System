@@ -132,15 +132,14 @@ def capture_team(rec: Recorder, base: str, token: str, salon: dict) -> None:
     rec.call(base, "POST", "/team/members/{id}/deactivate", params=ids, token=token)
     rec.call(base, "POST", "/team/members/{id}/reactivate", params=ids, token=token)
     session = rec.call(base, "POST", "/auth/login", save=False, label="login(member)", body={
-        "phone": phone(number), "idToken": proof(number), "installation": installation(number)}) or {}
+        "phone": phone(number), "otpToken": proof(rec, base, number, "LOGIN"), "installation": installation(number)}) or {}
     own = session.get("accessToken")
     rec.call(base, "PUT", "/installations", body={**installation(number), "language": CONFIG["language"]}, token=own)
     rec.call(base, "PATCH", "/installations/push-enabled", body={"pushEnabled": True}, token=own)
     rec.call(base, "PATCH", "/me", body={"firstName": "Capture"}, token=own)
     moved = throwaway_number()
-    rec.call(base, "POST", "/auth/otp/request", body={"phone": CONFIG["dialCode"] + moved, "purpose": "CHANGE_PHONE"}, token=own)
-    rec.call(base, "POST", "/auth/otp/wrong-attempt", body={"phone": CONFIG["dialCode"] + moved})
-    rec.call(base, "POST", "/auth/change-phone", body={"phone": phone(moved), "idToken": proof(moved)}, token=own)
+    moved_token = proof(rec, base, moved, "CHANGE_PHONE", wrong_first=True)
+    rec.call(base, "POST", "/auth/change-phone", body={"phone": phone(moved), "otpToken": moved_token}, token=own)
     rec.call(base, "POST", "/me/leave", token=own)
     rec.call(base, "POST", "/me/leave", token=own, save=False, label="PostMeLeave(again)")
 
@@ -149,21 +148,21 @@ def capture_application(rec: Recorder, base: str, ctx: dict, gender: str) -> Non
     """A salon application of a throwaway phone (license upload → apply → status → deletion request)."""
     number = throwaway_number()
     rec.call(base, "POST", "/auth/check-phone", body={"phone": phone(number)}, save=False, label="PostAuthCheckPhone(new)")
-    rec.call(base, "POST", "/auth/otp/request", body={"phone": CONFIG["dialCode"] + number, "purpose": "REGISTER"})
+    register_token = proof(rec, base, number, "REGISTER")
     presigned = rec.call(base, "POST", "/uploads/license/presign",
                          body={"contentType": CONFIG["uploadDocument"]["contentType"], "size": len(DOCUMENT)})
     if not rec.upload(presigned, DOCUMENT):
         return
     rec.call(base, "POST", "/uploads/license/confirm", body={"key": presigned["key"]})
     applied = rec.call(base, "POST", "/salon/applications", body={
-        "phone": phone(number), "idToken": proof(number), "firstName": "Capture", "lastName": "Owner",
+        "phone": phone(number), "otpToken": register_token, "firstName": "Capture", "lastName": "Owner",
         "salon": {"name": CONFIG["captureLabel"], "gender": gender, "cityId": ctx["cities"][0]["id"], "areaId": ctx["areas"][0]["id"]},
         "documentKeys": [presigned["key"]], "installation": installation(number)}) or {}
     token = applied.get("accessToken")
     rec.call(base, "GET", "/salon/application", token=token, save=False, label="GetSalonApplication(pending)")
     rec.call(base, "PUT", "/salon/payout-details", token=token, body={
         "bankName": "Capture Bank", "accountHolderName": "Capture Owner", "iban": CONFIG["testIban"],
-        "idToken": proof(number)})
+        "otpToken": proof(rec, base, number, "BANK_DETAILS")})
     rec.call(base, "POST", "/salon/deletion-request", body={"note": CONFIG["captureLabel"]}, token=token)
     rec.call(base, "POST", "/auth/logout", body={"refreshToken": applied.get("refreshToken")}, token=token,
              save=False, label="PostAuthLogout(applicant)")

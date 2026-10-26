@@ -10,6 +10,8 @@
   "errors.OTP_BLOCKED": "Too many attempts. Verification is temporarily blocked.",
   "errors.OTP_INVALID": "The verification code is incorrect.",
   "errors.OTP_EXPIRED": "The verification code has expired.",
+  "errors.OTP_DELIVERY_FAILED": "We could not send the code on WhatsApp. Make sure this number uses WhatsApp, then try again.",
+  "otp.attemptsRemaining": "The verification code is incorrect. Attempts left: {attemptsRemaining}.",
   "errors.CURRENT_PASSWORD_INVALID": "The current password is incorrect.",
   "errors.EMAIL_ALREADY_USED": "This email address is already used by another account.",
   "errors.PHONE_NOT_REGISTERED": "This phone number is not registered.",

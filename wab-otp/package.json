@@ -1,7 +1,7 @@
 {
   "name": "@wab/otp",
-  "version": "0.1.0",
-  "description": "Provider-independent phone OTP proof verification and abuse limits for WAB projects.",
+  "version": "0.2.0",
+  "description": "Provider-independent phone OTP for WAB projects: server-generated codes over WhatsApp (or SMS), signed single-use proofs and abuse limits.",
   "license": "UNLICENSED",
   "engines": {
     "node": ">=22"
@@ -38,7 +38,6 @@
     "pack:check": "npm pack --dry-run"
   },
   "dependencies": {
-    "jose": "^5.10.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {

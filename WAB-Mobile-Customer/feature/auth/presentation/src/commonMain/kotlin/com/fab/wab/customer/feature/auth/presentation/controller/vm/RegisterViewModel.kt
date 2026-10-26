@@ -199,7 +199,7 @@ class RegisterViewModel(
             cityId = current.cityId ?: return,
             areaId = current.areaId ?: return,
             phone = proof.phone,
-            idToken = proof.idToken,
+            otpToken = proof.otpToken,
         )
         updateState { copy(submitting = true) }
         val result = deps.register(request)

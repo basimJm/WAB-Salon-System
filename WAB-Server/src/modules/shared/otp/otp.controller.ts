@@ -1,40 +1,44 @@
 import type { Request, Response } from 'express';
-import type { OtpGate } from '../../../domain/otp/otpGate.service';
+import type { OtpPurpose } from '../../../constants/providers';
+import type { PhoneOtpService } from '../../../domain/otp/phoneOtp.service';
 import { sendSuccess } from '../../../utils/response/successResponse';
 
-const phoneOf = (req: Request): string => (req.validated as { body: { phone: string } }).body.phone;
+interface OtpBody {
+  readonly phone: string;
+  readonly purpose: OtpPurpose;
+  readonly code?: string;
+}
 
-const iso = (date: Date | undefined): string | undefined => date?.toISOString();
+const bodyOf = (req: Request): OtpBody => (req.validated as { body: OtpBody }).body;
 
-/** Thin handlers: validated body in, one gate call, base success envelope out. */
+/** Thin handlers: validated body in, one service call, base success envelope out. */
 export const createOtpController = (
-  gate: OtpGate,
+  service: PhoneOtpService,
 ): {
   request: (req: Request, res: Response) => Promise<void>;
-  wrongAttempt: (req: Request, res: Response) => Promise<void>;
+  verify: (req: Request, res: Response) => Promise<void>;
 } => ({
   async request(req: Request, res: Response): Promise<void> {
-    const decision = await gate.request(phoneOf(req));
+    const { phone, purpose } = bodyOf(req);
+    const answer = await service.request({ phone, purpose, language: req.language });
     sendSuccess(req, res, {
       data: {
-        allowed: decision.allowed,
-        otpLength: decision.otpLength,
-        resendAfterSeconds: decision.resendAfterSeconds,
-        ...(decision.blockedUntil === undefined
+        allowed: answer.allowed,
+        otpLength: answer.otpLength,
+        resendAfterSeconds: answer.resendAfterSeconds,
+        expiresInSeconds: answer.expiresInSeconds,
+        ...(answer.blockedUntil === undefined
           ? {}
-          : { blockedUntil: iso(decision.blockedUntil) }),
+          : { blockedUntil: answer.blockedUntil.toISOString() }),
       },
     });
   },
 
-  async wrongAttempt(req: Request, res: Response): Promise<void> {
-    const result = await gate.reportWrongAttempt(phoneOf(req));
+  async verify(req: Request, res: Response): Promise<void> {
+    const { phone, purpose, code = '' } = bodyOf(req);
+    const verified = await service.verify({ phone, purpose, code });
     sendSuccess(req, res, {
-      data: {
-        blocked: result.blocked,
-        attemptsRemaining: result.attemptsRemaining,
-        ...(result.blockedUntil === undefined ? {} : { blockedUntil: iso(result.blockedUntil) }),
-      },
+      data: { otpToken: verified.otpToken, expiresInSeconds: verified.expiresInSeconds },
     });
   },
 });

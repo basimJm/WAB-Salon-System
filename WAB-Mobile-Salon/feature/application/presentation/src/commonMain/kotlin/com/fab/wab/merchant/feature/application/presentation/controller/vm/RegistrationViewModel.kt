@@ -5,6 +5,7 @@ import com.fab.wab.merchant.core.analytics.AnalyticsTracker
 import com.fab.wab.merchant.core.analytics.analyticsParams
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.ErrorCode
 import com.fab.wab.merchant.core.domain.locations.LocationDefaults
 import com.fab.wab.merchant.core.domain.locations.LocationsRepository
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
@@ -161,7 +162,11 @@ class RegistrationViewModel(
             track(if (current.isResubmission) ApplicationAnalytics.ACTION_RESUBMIT else ApplicationAnalytics.ACTION_SUBMIT, result)
             when (result) {
                 is AppResult.Success -> emitSideEffect(SideEffect.NavigateToStatus)
-                is AppResult.Error -> emitSideEffect(SideEffect.ShowError(deps.errorText(result.appError)))
+                is AppResult.Error -> {
+                    emitSideEffect(SideEffect.ShowError(deps.errorText(result.appError)))
+                    // The single-use `otpToken` expired or was spent: only a new REGISTER code can submit.
+                    if (!current.isResubmission && result.appError.isRejectedProof()) emitSideEffect(SideEffect.NavigateToLogin)
+                }
                 AppResult.Loading -> Unit
             }
         }
@@ -172,3 +177,6 @@ class RegistrationViewModel(
         deps.analytics.trackAction(AnalyticsAction(name, analyticsParams { text(ApplicationAnalytics.PARAM_RESULT, outcome) }))
     }
 }
+
+private fun AppError.isRejectedProof(): Boolean =
+    (this as? AppError.ServerError)?.code.let { it == ErrorCode.OTP_INVALID || it == ErrorCode.OTP_EXPIRED }

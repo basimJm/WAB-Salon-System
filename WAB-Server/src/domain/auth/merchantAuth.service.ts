@@ -46,7 +46,7 @@ export interface MerchantAuthService {
   checkPhone(input: { phone: PhoneInput }): Promise<void>;
   login(input: {
     phone: PhoneInput;
-    idToken: string;
+    otpToken: string;
     device: DeviceInput;
     language: Language;
   }): Promise<MerchantSession>;
@@ -114,9 +114,9 @@ export const createMerchantAuthService = (deps: MerchantAuthDeps): MerchantAuthS
       await activeMember((await phones.resolve(phone)).e164);
     },
 
-    async login({ phone: input, idToken, device, language }) {
+    async login({ phone: input, otpToken, device, language }) {
       const phone = await phones.resolve(input);
-      await phones.verify(phone, idToken, 'LOGIN');
+      await phones.verify(phone, otpToken, 'LOGIN');
       const member = await activeMember(phone.e164);
       await installations.linkMember(member.id, { ...device, language }, now());
       await otpGate.reset(phone.e164);

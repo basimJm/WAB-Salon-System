@@ -73,6 +73,13 @@ class SafeApiCallTest {
     }
 
     @Test
+    fun successBodyMissingARequiredFieldIsAParseErrorNotACrash() = runTest {
+        // A 200 from a server older than the app (field absent) — Ktor throws JsonConvertException here.
+        val result = safeApiCall { client(HttpStatusCode.OK, """{"other":1}""").get("/x").body<Pong>() }
+        assertIs<AppError.ParseError>(assertIs<AppResult.Error>(result).appError)
+    }
+
+    @Test
     fun nonEnvelopeFailureIsAPlainHttpError() = runTest {
         val result = safeApiCall { client(HttpStatusCode.BadGateway, "<html>502</html>", json = false).get("/x").body<Pong>() }
         val http = assertIs<AppError.HttpError>(assertIs<AppResult.Error>(result).appError)

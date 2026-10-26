@@ -14,8 +14,6 @@ DEEP_LINK_HOST = wab-server-dev.onrender.com
 DATA_SOURCE = remote
 BUNDLE_ID_SUFFIX = .dev
 PRODUCT_BUNDLE_IDENTIFIER = com.fab.wab.merchant$(BUNDLE_ID_SUFFIX)
-// App Check (App Attest) environment for the entitlement
-APP_ATTEST_ENVIRONMENT = development
 
 // Per-developer overrides (team, free-account entitlements); optional and git-ignored.
 #include? "Local.xcconfig"

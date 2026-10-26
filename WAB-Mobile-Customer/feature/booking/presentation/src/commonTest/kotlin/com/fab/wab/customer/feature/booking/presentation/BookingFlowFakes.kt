@@ -109,7 +109,7 @@ class DraftFake(val allowed: Set<PaymentMethod> = DEFAULT_ALLOWED) : BookingDraf
         return AppResult.Success(draft)
     }
     override suspend fun get(draftId: String): AppResult<BookingDraft> = AppResult.Loading
-    override suspend fun verifyOtp(draftId: String, idToken: String): AppResult<String> = AppResult.Loading
+    override suspend fun verifyOtp(draftId: String, otpToken: String): AppResult<String> = AppResult.Loading
     override suspend fun createBooking(draftId: String): AppResult<CreatedBooking> = AppResult.Loading
     override suspend fun delete(draftId: String): AppResult<Unit> {
         deleted += draftId

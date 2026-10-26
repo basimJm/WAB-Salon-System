@@ -18,8 +18,9 @@ OK = 200
 
 
 def login(rec: Recorder, base: str, number: str, save: bool = False, label: str | None = None) -> dict:
+    token = proof(rec, base, number, "LOGIN", save=save)
     data = rec.call(base, "POST", "/auth/login", save=save, label=label or ("PostAuthLogin" if save else f"login({number[-4:]})"),
-                    body={"phone": phone(number), "idToken": proof(number), "installation": installation(number)})
+                    body={"phone": phone(number), "otpToken": token, "installation": installation(number)})
     return data or {}
 
 
@@ -126,11 +127,12 @@ class Customer:
     def __init__(self, rec: Recorder, base: str, ctx: dict, gender: str):
         self.rec, self.base = rec, base
         number = throwaway_number()
-        self.e164 = CONFIG["dialCode"] + number
+        self.number = number
+        otp_token = proof(rec, base, number, "REGISTER", namespace=CUSTOMER)
         data = rec.call(base, "POST", "/auth/register", namespace=CUSTOMER, body={
             "firstName": "Capture", "lastName": "Customer", "email": f"mer054.{number}@wab.example", "gender": gender,
             "cityId": ctx["cities"][0]["id"], "areaId": ctx["areas"][0]["id"], "phone": phone(number),
-            "idToken": proof(number), "installation": installation("customer-" + number)}) or {}
+            "otpToken": otp_token, "installation": installation("customer-" + number)}) or {}
         self.token = data.get("accessToken")
 
     def book(self, salon_id: str, branch_id: str, service_ids: list[str], days_from: int = 0) -> str | None:
@@ -151,7 +153,8 @@ class Customer:
             "persons": [{"name": "Capture", "serviceIds": person["serviceIds"], "start": slot["start"]}]})
         if not draft:
             return None
-        self.call("POST", "/bookings/drafts/{id}/verify-otp", {"id": draft["id"]}, {"idToken": CONFIG["fakeProofFormat"].format(self.e164)})
+        otp_token = proof(self.rec, self.base, self.number, "BOOKING_CONFIRMATION", namespace=CUSTOMER)
+        self.call("POST", "/bookings/drafts/{id}/verify-otp", {"id": draft["id"]}, {"otpToken": otp_token})
         booking = self.call("POST", "/bookings", None, {"draftId": draft["id"]})
         return (booking or {}).get("id")
 

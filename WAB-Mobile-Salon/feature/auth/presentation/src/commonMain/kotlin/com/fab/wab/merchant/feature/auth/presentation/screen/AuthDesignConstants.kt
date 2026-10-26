@@ -97,6 +97,7 @@ internal object AuthDesign {
     val otpHeaderSize = 15.sp
     val otpSentSize = 13.5.sp
     val otpSentLineHeight = 22.sp
+    val otpExpiresSize = 12.5.sp
     val otpBoxHeight = 64.dp
     val otpBoxRadius = 16.dp
     val otpBoxGap = 12.dp

@@ -9,7 +9,7 @@ import {
 } from '../../../constants/identity';
 import { EMAIL_PATTERN } from '../../../constants/providers';
 import {
-  idTokenSchema as idToken,
+  otpTokenSchema as otpToken,
   installationSchema as installation,
   phoneSchema as phone,
   refreshTokenSchema as refreshToken,
@@ -19,7 +19,7 @@ const name = z.string().trim().min(PERSON_NAME_MIN_LENGTH).max(PERSON_NAME_MAX_L
 const objectId = z.string().regex(OBJECT_ID_PATTERN);
 
 export const checkPhoneSchema = z.object({ phone, purpose: z.enum(PHONE_CHECK_PURPOSES) });
-export const loginSchema = z.object({ phone, idToken, installation });
+export const loginSchema = z.object({ phone, otpToken, installation });
 export const registerSchema = z.object({
   firstName: name,
   lastName: name,
@@ -28,8 +28,8 @@ export const registerSchema = z.object({
   cityId: objectId,
   areaId: objectId,
   phone,
-  idToken,
+  otpToken,
   installation,
 });
 export const refreshSchema = z.object({ refreshToken });
-export const changePhoneSchema = z.object({ phone, idToken });
+export const changePhoneSchema = z.object({ phone, otpToken });

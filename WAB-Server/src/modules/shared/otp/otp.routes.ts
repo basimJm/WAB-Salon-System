@@ -1,35 +1,34 @@
 import { Router, type RequestHandler } from 'express';
-import type { ZodType } from 'zod';
 import { OTP_ROUTES } from '../../../constants/otp';
-import type { OtpGate } from '../../../domain/otp/otpGate.service';
+import type { PhoneOtpService } from '../../../domain/otp/phoneOtp.service';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { createOtpController } from './otp.controller';
-import { wrongAttemptSchema } from './otp.validation';
+import type { OtpSchemas } from './otp.validation';
 
 export interface OtpRouterOptions {
-  readonly gate: OtpGate;
+  readonly service: PhoneOtpService;
   /** Customer and merchant accept different purposes. */
-  readonly requestSchema: ZodType;
+  readonly schemas: OtpSchemas;
   /** Per-IP guard (fails closed: a Redis outage answers 503, not "allowed"). */
   readonly limiter: RequestHandler;
 }
 
-/** Public routes (no token yet): the OTP pre-check and the wrong-code report. */
-export const createOtpRouter = ({ gate, requestSchema, limiter }: OtpRouterOptions): Router => {
+/** Public routes (no token yet): send a WhatsApp code, then exchange the typed code for `otpToken`. */
+export const createOtpRouter = ({ service, schemas, limiter }: OtpRouterOptions): Router => {
   const router = Router();
-  const controller = createOtpController(gate);
+  const controller = createOtpController(service);
   router.post(
     OTP_ROUTES.request,
     limiter,
-    validate({ body: requestSchema }),
+    validate({ body: schemas.request }),
     asyncHandler(controller.request),
   );
   router.post(
-    OTP_ROUTES.wrongAttempt,
+    OTP_ROUTES.verify,
     limiter,
-    validate({ body: wrongAttemptSchema }),
-    asyncHandler(controller.wrongAttempt),
+    validate({ body: schemas.verify }),
+    asyncHandler(controller.verify),
   );
   return router;
 };

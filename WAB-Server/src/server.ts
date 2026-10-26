@@ -156,6 +156,7 @@ import {
   CountriesRepository,
 } from './repositories/locations.repository';
 import { createOtpGate } from './domain/otp/otpGate.service';
+import { createPhoneOtpService } from './domain/otp/phoneOtp.service';
 import { createSettingsService } from './domain/settings';
 import type { ApiServices } from './modules/services';
 import { SettingsRepository } from './repositories/settings.repository';
@@ -961,7 +962,7 @@ const buildServices = (
     logger,
   });
   return {
-    otpGate,
+    phoneOtp: createPhoneOtpService({ gate: otpGate, otp: providers.otp, settings }),
     adminGuard,
     uploads,
     search,

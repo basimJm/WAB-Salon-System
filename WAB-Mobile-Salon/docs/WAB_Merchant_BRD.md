@@ -5,7 +5,7 @@
 |---|---|
 | Document | Business Requirements Document — Merchant |
 | Product | WAB Wedding & Beauty — Merchant App |
-| Version | 1.1 (OTP via Firebase SMS, real-time booking screens, analytics via Firebase + BigQuery) |
+| Version | 1.1 (OTP via WhatsApp since 2026-10-26, was Firebase SMS; real-time booking screens, analytics via Firebase + BigQuery) |
 | Date | October 2026 |
 | Related documents | Customer App PRD & BRD, Merchant App PRD, Admin PRD & BRD, Backend BRD |
 
@@ -256,7 +256,7 @@ Priority: **M** = Must, **S** = Should, **C** = Could.
 | MBR-132 | Merchants MUST have access to support (call/WhatsApp/email), FAQ and legal terms. | M |
 | MBR-133 | Admin MUST be able to force/suggest app updates and enable maintenance mode. | M |
 | MBR-134 | Booking screens (dashboard, bookings list, calendar, details) MUST update in real time. | M |
-| MBR-135 | Login MUST use mobile number + SMS OTP (Firebase); OTP length configurable (currently 6). | M |
+| MBR-135 | Login MUST use mobile number + WhatsApp OTP sent by the backend (BUSINESS_DOMAIN §3.1a); OTP length configurable (currently 6). | M |
 
 ---
 
@@ -313,7 +313,7 @@ Priority: **M** = Must, **S** = Should, **C** = Could.
 **Dependencies**
 - Admin panel (approvals, catalog, suspensions, payouts, moderation).
 - Payment gateway selection supporting platform collection, refunds and payouts.
-- Firebase (phone OTP via SMS, push, analytics, crashlytics) and BigQuery export.
+- Firebase (push, analytics, crashlytics) and BigQuery export; phone OTP over the WhatsApp Cloud API through the backend.
 
 ---
 
