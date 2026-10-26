@@ -2,8 +2,10 @@ package com.fab.wab.customer.feature.salons.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
@@ -79,10 +81,15 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
         val notifications = rememberNotificationManager()
         val nearestDropped = stringResource(Res.string.salons_nearest_dropped)
         var sheet by remember { mutableStateOf<FilterSheetRequest?>(null) }
+        var sheetOpenings by rememberSaveable { mutableIntStateOf(0) }
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is SideEffect.OpenSalon -> navigateTo(Screen.SalonDetails(effect.salonId))
-                is SideEffect.OpenFilters -> sheet = FilterSheetRequest(effect.filters, (sheet?.key ?: 0) + 1)
+                is SideEffect.OpenFilters -> {
+                    val request = FilterSheetRequest.next(sheetOpenings, effect.filters)
+                    sheetOpenings = request.key
+                    sheet = request
+                }
                 SideEffect.OpenLogin -> navigateTo(Graph.Auth)
                 is SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
                 SideEffect.NearestDropped -> notifications.show(nearestDropped, style = NotificationStyle.Info)
@@ -123,4 +130,12 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
     }
 }
 
-private data class FilterSheetRequest(val filters: SalonFilters, val key: Int)
+/**
+ * One opening of S05. The key must grow on every opening, also after the sheet closed: the sheet view model is
+ * cached per key in the destination's store, so a reused key reopens the sheet with stale selections (CUS-092).
+ */
+internal data class FilterSheetRequest(val filters: SalonFilters, val key: Int) {
+    companion object {
+        fun next(lastKey: Int, filters: SalonFilters) = FilterSheetRequest(filters, lastKey + 1)
+    }
+}

@@ -28,6 +28,7 @@ import com.fab.wab.customer.feature.notifications.presentation.resources.time_ho
 import com.fab.wab.customer.feature.notifications.presentation.resources.time_minutes_ago
 import com.fab.wab.customer.feature.notifications.presentation.resources.time_now
 import com.fab.wab.customer.feature.notifications.presentation.resources.time_yesterday
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -96,10 +97,10 @@ internal fun NotificationRow(item: Notification, onClick: () -> Unit, modifier: 
 internal fun relativeText(createdAt: String): String =
     when (val rel = relativeTimeOf(createdAt, BusinessTime.nowInstant(), BusinessTime.ZONE_ID)) {
         RelativeTime.Now -> stringResource(Res.string.time_now)
-        is RelativeTime.Minutes -> stringResource(Res.string.time_minutes_ago, rel.value)
-        is RelativeTime.Hours -> stringResource(Res.string.time_hours_ago, rel.value)
+        is RelativeTime.Minutes -> pluralStringResource(Res.plurals.time_minutes_ago, rel.value, rel.value)
+        is RelativeTime.Hours -> pluralStringResource(Res.plurals.time_hours_ago, rel.value, rel.value)
         RelativeTime.Yesterday -> stringResource(Res.string.time_yesterday)
-        is RelativeTime.Days -> stringResource(Res.string.time_days_ago, rel.value)
+        is RelativeTime.Days -> pluralStringResource(Res.plurals.time_days_ago, rel.value, rel.value)
         is RelativeTime.Date -> TimeFormat.isoDateText(rel.iso) ?: rel.iso
         null -> ""
     }

@@ -3,17 +3,24 @@ package com.fab.wab.customer.app.di
 import com.fab.wab.customer.PlatformNames
 import com.fab.wab.customer.app.auth.AppInstallationInfoProvider
 import com.fab.wab.customer.app.auth.InstallationSyncer
+import com.fab.wab.customer.app.auth.LocalInstallationId
+import com.fab.wab.customer.core.common.randomUUID
 import com.fab.wab.customer.core.domain.AppSettings
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.firebase.PushTokenProvider
 import com.fab.wab.customer.core.domain.config.ClientPlatform
 import com.fab.wab.customer.feature.auth.domain.repository.InstallationInfoProvider
 import com.fab.wab.customer.getPlatform
+import kotlinx.coroutines.flow.first
 import org.koin.dsl.module
 
 /** Host facts: the store platform the config call reports and the installation record login / register send. */
 val appPlatformModule = module {
     single<ClientPlatform> { clientPlatformOf(getPlatform().analyticsName) }
+    single {
+        val settings = get<AppSettings>()
+        LocalInstallationId(read = { settings.deviceId.first() }, write = settings::setDeviceId, newId = ::randomUUID)
+    }
     single<InstallationInfoProvider> {
         val platform = getPlatform()
         AppInstallationInfoProvider(
@@ -23,6 +30,7 @@ val appPlatformModule = module {
             pushToken = get(),
             osVersion = platform.osVersion,
             deviceModel = platform.deviceModel,
+            localInstallationId = get<LocalInstallationId>()::invoke,
         )
     }
 }

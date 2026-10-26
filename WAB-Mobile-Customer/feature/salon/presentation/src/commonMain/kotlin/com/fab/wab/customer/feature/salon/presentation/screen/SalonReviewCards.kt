@@ -21,6 +21,7 @@ import com.fab.wab.customer.core.domain.salon.RatingSummary
 import com.fab.wab.customer.core.domain.salon.Review
 import com.fab.wab.customer.designsystem.components.domain.ratingValueText
 import com.fab.wab.customer.designsystem.components.rating.AppRatingStars
+import com.fab.wab.customer.designsystem.components.text.AppExpandableText
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.salon.presentation.resources.Res
@@ -31,10 +32,15 @@ import com.fab.wab.customer.feature.salon.presentation.resources.salon_reviews_c
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_reviews_count_short
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_reviews_of_five
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_reviews_see_more
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** The three review cards of the design: S07 (surface, 2 lines + See more), S07a (surface, compact), S08 (outlined, full text). */
-internal enum class ReviewCardStyle { SalonPreview, StaffPreview, List }
+internal enum class ReviewCardStyle(val collapsedLines: Int, val expandsInPlace: Boolean) {
+    SalonPreview(SalonDesign.REVIEW_PREVIEW_LINES, expandsInPlace = true),
+    StaffPreview(SalonDesign.REVIEW_PREVIEW_LINES, expandsInPlace = false),
+    List(Int.MAX_VALUE, expandsInPlace = false),
+}
 
 @Composable
 internal fun SalonReviewCard(review: Review, style: ReviewCardStyle, modifier: Modifier = Modifier) {
@@ -85,19 +91,17 @@ internal fun SalonReviewCard(review: Review, style: ReviewCardStyle, modifier: M
                 modifier = Modifier.padding(bottom = spacing.space4),
             )
         }
-        AppText(
-            text = review.comment.orEmpty(),
-            style = typography.bodySmall,
-            color = colors.muted,
-            maxLines = if (style == ReviewCardStyle.List) Int.MAX_VALUE else SalonDesign.REVIEW_PREVIEW_LINES,
-        )
-        if (style == ReviewCardStyle.SalonPreview) {
-            AppText(
-                text = stringResource(Res.string.salon_reviews_see_more),
-                style = typography.labelMedium,
-                color = colors.accent,
-                modifier = Modifier.padding(top = spacing.space4),
+        val comment = review.comment.orEmpty()
+        when {
+            comment.isBlank() -> Unit
+            // "See more" only when the comment really overflows, and it expands in place (CUS-092; PRD S07 item 9).
+            style.expandsInPlace -> AppExpandableText(
+                text = comment,
+                style = typography.bodySmall,
+                collapsedLines = style.collapsedLines,
+                moreLabel = stringResource(Res.string.salon_reviews_see_more),
             )
+            else -> AppText(text = comment, style = typography.bodySmall, color = colors.muted, maxLines = style.collapsedLines)
         }
     }
 }
@@ -109,8 +113,12 @@ internal fun reviewSummaryText(summary: RatingSummary, withReviewsWord: Boolean 
     withStyle(SpanStyle(color = colors.ink, fontWeight = FontWeight.Bold)) {
         append(stringResource(Res.string.salon_reviews_of_five, ratingValueText(summary.average)))
     }
-    val count = if (withReviewsWord) Res.string.salon_reviews_count else Res.string.salon_reviews_count_short
-    append(stringResource(count, summary.count))
+    val count = if (withReviewsWord) {
+        pluralStringResource(Res.plurals.salon_reviews_count, summary.count, summary.count)
+    } else {
+        stringResource(Res.string.salon_reviews_count_short, summary.count)
+    }
+    append(count)
 }
 
 /** The muted "no reviews" box of S07 / S07a. */

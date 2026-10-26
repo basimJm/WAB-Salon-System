@@ -2,6 +2,8 @@ package com.fab.wab.customer.core.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptions
+import androidx.navigation.navOptions
 import com.fab.wab.customer.core.navigation.route.Graph
 import com.fab.wab.customer.core.navigation.route.Screen
 
@@ -23,7 +25,7 @@ class NavigatorDelegation(override val navController: NavHostController) : Navig
     }
 
     override fun navigateTo(screen: Screen) {
-        navController.navigate(screen)
+        navController.navigate(screen, ScreenNavigation.options)
     }
 
     override fun navigateBack() {
@@ -40,4 +42,12 @@ class NavigatorDelegation(override val navController: NavHostController) : Navig
     override fun navigateUp() {
         navController.navigateUp()
     }
+}
+
+/**
+ * Options of every screen navigation. Single top: a double tap (e.g. "Book now", a salon card) must not push the same
+ * screen twice; Back then reopened a stale copy of the booking flow (CUS-092).
+ */
+object ScreenNavigation {
+    val options: NavOptions = navOptions { launchSingleTop = true }
 }
