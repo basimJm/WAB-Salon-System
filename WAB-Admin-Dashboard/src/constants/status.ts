@@ -79,12 +79,13 @@ export const STATUS_TONES = {
     ACTIVE: 'green',
     ENDED: 'grey',
   },
+  // Design kit `W.S.alert` / `W.S.sev`: new = rose, info = purple.
   alert: {
-    NEW: 'amber',
+    NEW: 'rose',
     ACKNOWLEDGED: 'grey',
   },
   alertSeverity: {
-    INFO: 'grey',
+    INFO: 'purple',
     WARNING: 'amber',
     CRITICAL: 'rose',
   },

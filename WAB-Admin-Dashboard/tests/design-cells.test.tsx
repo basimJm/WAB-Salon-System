@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { KpiCard } from '@/presentation/components/core/KpiCard';
 import { PageHeader } from '@/presentation/components/core/PageHeader';
+import { DataTable } from '@/presentation/components/data/DataTable';
 import { EntityCell, initialOf, RatingCell } from '@/presentation/components/data/TableCells';
 import { renderWithApp } from './helpers/render';
 
@@ -52,5 +53,32 @@ describe('design header and KPI blocks', () => {
     unmount();
     renderWithApp(<KpiCard label="Payments" value="64" loading parts={parts} />);
     expect(screen.queryByText('payment.succeeded')).toBeNull();
+  });
+});
+
+describe('design row tint', () => {
+  it('rows that need attention get the alert class, others do not', () => {
+    renderWithApp(
+      <DataTable
+        caption="Transactions"
+        columns={[
+          { key: 'id', header: 'Ref', render: (r: { id: string; failed: boolean }) => r.id },
+        ]}
+        rows={[
+          { id: 'TX-1', failed: true },
+          { id: 'TX-2', failed: false },
+        ]}
+        rowKey={(r) => r.id}
+        rowAlert={(r) => r.failed}
+      />,
+    );
+    expect(screen.getByText('TX-1').closest('tr')).toHaveClass('wab-table__row--alert');
+    expect(screen.getByText('TX-2').closest('tr')).not.toHaveClass('wab-table__row--alert');
+  });
+
+  it('a single rating shows no count', () => {
+    renderWithApp(<RatingCell avg={5} language="en" />);
+    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.queryByText(/\(/)).toBeNull();
   });
 });

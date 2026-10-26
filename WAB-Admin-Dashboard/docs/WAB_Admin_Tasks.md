@@ -252,7 +252,7 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 | ADM-095 | Booking list/detail show the request time `requestedAt` (12-hour, Asia/Amman) | `feat/adm-095-booking-requested-at` | ADM-079 |  | DONE | Gap G15 from ADM-079. |
 | ADM-096 | Re-sync the admin contract 1.5.0 after SRV-151 (`npm run api:sync`): correct id patterns (drop `data/api/objectId.ts` re-checks), branch status messages, gate + browser check of affected screens | `feat/adm-096-contract-sync` | ADM-095 | SRV-151 | DONE |  |
 | ADM-097 | Session lasts 2 days: client idle sign-out 2 days (= server `admin.sessionIdleSec` 172800), proactive token refresh, session survives a reload (tab sessionStorage), settings bound raised | `feat/adm-097-session-two-days` | ADM-096 |  | IN REVIEW | Owner 2026-10-26 "make session time out after 2 days"; server default changes in parallel. |
-| ADM-098 | Design fidelity: make every panel screen match `design/` (login, overview, customers, salons, bookings, finance, content, system, shell) | `feat/adm-098-design-fidelity` | ADM-097 |  | TODO | Owner 2026-10-26 "implement design as is from its design folder". Design items without server data are listed, not faked. |
+| ADM-098 | Design fidelity: make every panel screen match `design/` (login, overview, customers, salons, bookings, finance, content, system, shell) | `feat/adm-098-design-fidelity` | ADM-097 |  | IN REVIEW | Owner 2026-10-26 "implement design as is from its design folder". Design items without server data are listed, not faked. |
 
 ---
 ## 5. Traceability matrix (nothing in the PRD or BRD is left without a task)

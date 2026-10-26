@@ -38,14 +38,17 @@ export function RatingCell({
   language,
 }: {
   avg: number;
-  count: number;
+  /** Number of reviews; left out for a single review's own rating. */
+  count?: number;
   language: Language;
 }) {
   return (
     <span className="wab-rating">
       <Icon name="star" size="sm" />
       <span className="wab-rating__avg">{formatNumber(avg, language)}</span>
-      <span className="wab-rating__count">({formatNumber(count, language)})</span>
+      {count !== undefined ? (
+        <span className="wab-rating__count">({formatNumber(count, language)})</span>
+      ) : null}
     </span>
   );
 }

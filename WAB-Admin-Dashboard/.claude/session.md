@@ -10,6 +10,24 @@
 
 ## Current task
 
+### ADM-098 — Design fidelity: the panel matches `design/` (shell, login, kit, overview, lists, finance, content, system)
+
+- Branch: `feat/adm-098-design-fidelity`
+- Status: IN REVIEW
+- Acceptance criteria (owner 2026-10-26 "implement design as is from its design folder"; design files `WAB Admin 01…09`, `Blocks`, `Sidebar`, `Topbar`, `Overlay`, `wab-admin-kit.js`, `assets/`; PRD wins on behaviour):
+  - [x] Shell = `Sidebar` + `Topbar` designs (brand icon/wordmark/chip, gradient active row, group rows, dotted sub-pages, rose counters, admin card + Collapse; page-coloured top bar, search + Cmd/Ctrl+K, EN/ع button, bordered theme/bell, admin menu with avatar + email header)
+  - [x] Login = `01 Login` (brand split + rings + app icon, borderless form, field icons, back link, six OTP boxes over one input)
+  - [x] Kit = Blocks basics, tokens only: design icon set (stroke 1.8), buttons, badges, KPI card + breakdown, tabs strip, list card (title + total + tools + pager), filter pills, popovers, chart cards, entity/rating cells, alert row tint, two-line code cells, table links
+  - [x] Modules: overview (live pill, Amman date, report/alerts buttons, range filter, KPI breakdown), customers/salons/bookings (entity + rating cells, live pill on bookings), finance (failed transactions / failed or overdue refunds tinted), content (reviews: star rating + author with previous reviews), system (alerts: design tones + critical rows tinted; audit: read-only badge, action code, device column)
+  - [x] AR + EN, light + dark, 1440 / 768 drawer / 375; no horizontal page scroll; console clean
+- Tests: tests/design-shell.test.tsx (10), tests/design-cells.test.tsx (10), audit + overview tests extended; shell/app/about/i18n/gallery tests updated for the new shell; `vitest run` 1330+ green; `sh scripts/gate.sh` GATE OK before each commit
+- Browser check: Chrome (Playwright, terminal panel) against dev-debug mock :4192 and the design files served on :4193, side by side: login (AR/EN, light/dark, 1440/375, credentials + OTP), shell (expanded, collapsed rail, 768 + 375 drawer, admin menu AR dark / EN light), overview (AR light/dark, 375 full page), customers EN dark, salons, bookings (1440 + 375), transactions, refunds, payouts, subscriptions, reconciliation, reviews EN, catalog, banners, push, reports, alerts dark, settings, audit 375, journey, traffic; measured at 1440: sidebar 262 px, top bar 66 px, nav row 41 px (design 256/64/40 at a 16 px root; our root font is fluid, 16.4 px at 1440); every page `scrollWidth <= clientWidth`
+- Loops: 1/1 — re-compared every module screenshot with its design frame after the changes; found and fixed the reversed Cmd+K hint in RTL, the menu header layout, duplicated phone in the customer cell, the dev scenario switcher covering the sidebar Collapse button, and the RTL alert-row border side
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — tokens only (new sizes/radii/shadows/tracking/brand colours), shared components extended (no page-specific CSS hacks), data unchanged (no faked numbers). DEVIATIONS: not every frame is pixel-identical (see "not built" list in the final report); Playfair Display is not bundled (no new dependency; the serif stack falls back to Georgia for Latin and IBM Plex Sans Arabic for Arabic); the 375 px layout keeps the drawer sidebar instead of the design's 76 px rail (the design overflows horizontally at 375); digits stay in the language (Arabic-Indic in Arabic) as the app rule; the design's page codes (A01…A29 chips) and demo hints are not shown; branched on top of ADM-097 (not fresh `origin/admin`) because ADM-097 carries the contract/error-catalog fix the gate needs; no e2e (user decision).
+- Design items with no server data (listed, not faked): overview active users now + iOS/Android split, installs today, new registrations + conversion, bookings today by status, salon requests waiting + oldest wait, bride bookings, payment success rate + top decline reason, collected JOD, refunds pending/overdue counts, error rate last hour, offline salons + trials ending, sparklines per KPI; transactions KPI row (count/success rate/collected/fees for the range); customer code (C-1042) and registration-date filter; salon code + owner line; banner titles and artwork previews (only storage keys, no CDN base URL); top-bar bell dropdown (latest alerts); alerts "email preview" tab and "limits & recipients" shortcut (no recipients setting on the server); audit device brand parsing (raw user agent shown)
+
+## Last blocks
+
 ### ADM-097 — Session lasts 2 days (client idle sign-out, proactive refresh, reload keeps the session)
 
 - Branch: `feat/adm-097-session-two-days`
@@ -26,8 +44,6 @@
 - Loops: 1/1 — re-checked every criterion against the diff, the tests and both browser runs; found the settings bound (86400) that would have refused the owner's 172800 and the stale "30 minutes" notice text
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — session stays in the app layer (store + persistence adapter), pure rule in domain, hook in presentation; no new dependency. DEVIATIONS: idle length is a 2-day client constant, not read from the server setting (the server enforces its own value through refresh-token expiry; a shorter server value ends the session at the next refresh); persistence is per tab (sessionStorage), so closing the tab or opening a new tab needs a new sign-in, and a duplicated tab shares one refresh token (the first refresh in either tab can revoke the family on the server); the local stack still runs `admin.sessionIdleSec` = 1800 (refresh TTL 30 min seen), so the 2-day server lifetime was not observed end to end; contract/error-catalog fix is outside the task row; no e2e (user decision).
 
-## Last blocks
-
 ### ADM-096 — Re-sync the admin contract 1.5.0 after SRV-150/151; drop the S6 id workarounds; alert titles; branch status messages
 
 - Branch: `feat/adm-096-contract-sync` (from `origin/admin`)
@@ -42,17 +58,3 @@
 - Browser check (dev-release built against the local real stack, preview :4174, QA admin, AR RTL; the stack still runs the OLD server build, before SRV-150/151): with real ids `bookings?salon=`, `transactions?salon=`, `reviews?salon=`, `refunds?salon=`, reconciliation, salon details, salon edit hours (no branch query = main) + "check affected bookings" preview (POST with optional query) + services, catalog requests, payouts, recommended, audit: every screen loads with no error alert; a malformed id (`undefined`) is refused client-side with the validation alert; alerts list 20 rows, links to /catalog/requests, /salons/applications/:id, /salons/:id (old-server titles are English: fallback works), 1280 px dark and 375 px light, no horizontal page scroll; console: only the 400s of my own `/salons/undefined` probes and one 401 from an unauthenticated manual fetch
 - Loops: 1/1 — re-checked every criterion against the diff, the tests and the old real stack; the new "no `{24}` in data" test found four sites the task row did not name (audit, recommended, payouts, campaigns) and they were moved too
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — generated schemas only (one guarded cast for the export body: the screens build `params` as a record, the generated union validates them before the request); tolerances for pre-1.4.0 alert answers are documented in the repository. DEVIATIONS: the new Arabic alert titles and the branch status messages could not be seen on a real server (local stack runs the pre-SRV-150 build; covered by mock + unit tests); branch-filtered real calls not exercised (Noor has one branch on the stack); EN language not switched in the real-stack pass (EN covered by tests); domain-level form checks in `banners.ts` / `campaigns.ts` keep their own case-insensitive id regex (user input validation, not an S6 workaround); no e2e (user decision).
-
-### ADM-095 — Booking list/detail show the request time `requestedAt` (12-hour, Asia/Amman)
-
-- Branch: `feat/adm-095-booking-requested-at` (from `origin/admin`)
-- Status: IN REVIEW
-- Acceptance criteria (PRD A15 list "created at" + details; design `06 Bookings` has a 100 px "Created" column; gap G15; operations getBookings / getBookingsById `requestedAt`):
-  - [x] `BookingSummary.requestedAt` (domain) read from the contract (list and details DTOs both carry it; the mock already sends it)
-  - [x] Bookings list: "Requested" / "وقت الطلب" column after Total (the PRD and the design both list the creation time, so the list has room), `formatInstant(…, 'dateTime')` = Asia/Amman, 12-hour, language digits
-  - [x] Booking details: "Requested" row between the appointment and the salon's answer deadline
-  - [x] G15 FIXED in `docs/REMOTE_DEV_GAPS.md`
-- Tests: tests/booking-requested-at.test.tsx (3: 21:30 UTC → "25 Oct 2026, 12:30 am" Amman day change, list column in EN, details row in AR); bookings tests unchanged green; `sh scripts/gate.sh` GATE OK (the first gate run had one test failing under machine load while other agents ran builds; a full `vitest run` then showed timeouts in the a11y/app/layers files, each passed alone, and the second gate run was green)
-- Browser check (dev-release against the local real stack, preview :4174, QA admin): EN LTR dark 1280 px bookings list: "Requested" is the last column (e.g. WAB-BW1JEZ appointment 27 Sept 9:30 am, requested 25 Sept 6:30 pm); AR RTL light 375 px list + details: "وقت الطلب = ٢٥ أيلول ٢٠٢٦، ٦:٣٠ م" for server `requestedAt` 2026-09-25T15:30:00Z (= 18:30 Amman), no horizontal page scroll, console clean
-- Loops: 1/1 — re-checked the shown values against the raw server answer (UTC → Amman) and each criterion against the tests
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — one domain field, one column, one detail row, existing date utility. DEVIATIONS: the bookings table already scrolled inside its wrapper at 1280 px (128 px minimum per column, 1008 px wrapper); the new column adds 128 px to that inner scroll (page itself does not scroll); no e2e (user decision).
