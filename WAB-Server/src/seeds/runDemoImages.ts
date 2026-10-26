@@ -30,7 +30,6 @@ const main = async (): Promise<void> => {
   if (folder === undefined) throw new Error('usage: npm run seed:demo-images -- <photo folder>');
   const root = resolve(folder);
   const config = loadConfig();
-  assertDemoAllowed(config);
   const logger = createLogger({ level: config.logLevel });
   if (config.storage === undefined)
     throw new Error('set STORAGE_PROVIDER=real and the S3/CDN settings first');
@@ -40,8 +39,9 @@ const main = async (): Promise<void> => {
     logger,
   });
   const variants = createImageVariants({ storage, logger });
-  await connectMongo(config, logger);
+  const connection = await connectMongo(config, logger);
   try {
+    assertDemoAllowed(config, connection.name);
     const uploads = await UploadModel.find(
       { status: 'CONFIRMED', key: { $regex: `^${escapeRegex(DEMO_FILE_PREFIX)}/` } },
       { key: 1, purpose: 1 },

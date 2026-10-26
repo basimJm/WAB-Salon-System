@@ -120,6 +120,8 @@ export interface AppConfig {
     /** Payments are paused: `fake` in dev/test, `disabled` in production. */
     readonly payments: PaymentProviderMode;
   };
+  /** Demo data (SRV-160): seed at startup, and the only database production rules let it touch. */
+  readonly demoSeed: { readonly onStart: boolean; readonly allowedDatabase?: string };
 }
 
 /** One invalid environment key and why. Never carries the value. */
@@ -282,6 +284,7 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   const notifier = buildNotifierSettings(values);
   const storage = buildStorageSettings(values);
   const otp = buildOtpSettings(values);
+  const demoDatabase = values[ENV_KEYS.seedDemoDatabase];
   return Object.freeze({
     ...(notifier === undefined ? {} : { notifier }),
     ...(storage === undefined ? {} : { storage }),
@@ -302,6 +305,10 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
       storage: values[ENV_KEYS.storageProvider] ?? DEFAULT_PROVIDER_MODE,
       notifier: values[ENV_KEYS.notifierProvider] ?? DEFAULT_PROVIDER_MODE,
       payments: values[ENV_KEYS.paymentProvider] ?? DEFAULT_PAYMENT_PROVIDER_MODE,
+    }),
+    demoSeed: Object.freeze({
+      onStart: values[ENV_KEYS.seedDemoOnStart],
+      ...(demoDatabase === undefined ? {} : { allowedDatabase: demoDatabase }),
     }),
   });
 };
