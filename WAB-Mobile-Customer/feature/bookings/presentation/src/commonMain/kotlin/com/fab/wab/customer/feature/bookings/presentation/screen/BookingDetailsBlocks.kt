@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import com.fab.wab.customer.core.common.TimeFormat
 import com.fab.wab.customer.core.domain.booking.BookingDetails
+import com.fab.wab.customer.core.domain.booking.BookingReason
 import com.fab.wab.customer.core.domain.booking.BookingPerson
 import com.fab.wab.customer.core.domain.booking.BookingStatus
 import com.fab.wab.customer.core.domain.booking.RefundStatus
@@ -53,8 +54,9 @@ import com.fab.wab.customer.feature.bookings.presentation.resources.details_refu
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_refund_pending
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_refunded
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_rejection_reason
+import com.fab.wab.customer.feature.bookings.presentation.resources.details_reason_customer_request
+import com.fab.wab.customer.feature.bookings.presentation.resources.details_reason_not_given
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_staff
-import com.fab.wab.customer.feature.bookings.presentation.resources.details_staff_any
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_whatsapp
 import org.jetbrains.compose.resources.stringResource
 
@@ -121,11 +123,18 @@ internal fun StatusBlock(booking: BookingDetails) {
     }
 }
 
+@Composable
+private fun reasonText(reason: BookingReason): String = when (val display = reasonDisplayOf(reason)) {
+    is ReasonDisplay.Written -> display.text
+    ReasonDisplay.CustomerRequest -> stringResource(Res.string.details_reason_customer_request)
+    ReasonDisplay.NotGiven -> stringResource(Res.string.details_reason_not_given)
+}
+
 /** Design `b.hasReason`: rose-tinted 14 px card, 18 px rose info icon, bold rose title then the reason text (12.5 px). */
 @Composable
 internal fun ReasonBlock(booking: BookingDetails) {
-    val reason = booking.rejection?.let { Res.string.details_rejection_reason to (it.text ?: it.code) }
-        ?: booking.cancellation?.let { Res.string.details_cancellation_reason to (it.text ?: it.code) }
+    val reason = booking.rejection?.let { Res.string.details_rejection_reason to reasonText(it) }
+        ?: booking.cancellation?.let { Res.string.details_cancellation_reason to reasonText(it) }
         ?: booking.status.takeIf { it == BookingStatus.AUTO_CANCELLED }?.let {
             Res.string.details_cancellation_reason to stringResource(Res.string.details_auto_cancel_reason)
         }
@@ -230,11 +239,13 @@ internal fun PersonCard(person: BookingPerson) {
                     .padding(top = spacing.space8),
                 horizontalArrangement = Arrangement.spacedBy(spacing.space14),
             ) {
-                AppText(
-                    text = stringResource(Res.string.details_staff, person.staffName ?: stringResource(Res.string.details_staff_any)),
-                    style = AppTheme.typography.bodySmall,
-                    color = colors.muted,
-                )
+                staffLineName(person.staffName)?.let { name ->
+                    AppText(
+                        text = stringResource(Res.string.details_staff, name),
+                        style = AppTheme.typography.bodySmall,
+                        color = colors.muted,
+                    )
+                }
                 AppText(
                     text = listOfNotNull(start?.date, start?.time).joinToString(BookingsDesign.WHEN_SEPARATOR),
                     style = AppTheme.typography.bodySmall,
@@ -265,3 +276,9 @@ private fun RefundStatus.badge() = when (this) {
     RefundStatus.REFUND_FAILED -> Res.string.details_refund_failed to StatusTone.Danger
     RefundStatus.NONE, RefundStatus.UNKNOWN -> null
 }
+
+/**
+ * The staff line of a person: only a real name. The customer API sends `staff: null` for every person (the server hides
+ * staff from customers), so "Any available" was shown even when the customer had picked someone (CUS-092).
+ */
+internal fun staffLineName(staffName: String?): String? = staffName?.takeIf { it.isNotBlank() }

@@ -11,10 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
@@ -26,10 +22,8 @@ import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.layout.AppPagedList
 import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
+import com.fab.wab.customer.designsystem.components.text.AppExpandableText
 import com.fab.wab.customer.designsystem.components.text.AppText
-import com.fab.wab.customer.designsystem.resources.Res as DsRes
-import com.fab.wab.customer.designsystem.resources.card_more
-import com.fab.wab.customer.designsystem.resources.card_see_less
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.home.presentation.screen.DiscoveryDesign
 import com.fab.wab.customer.feature.home.presentation.screen.DiscoveryPlaceholder
@@ -94,7 +88,6 @@ private fun ServiceCard(service: CatalogService, onClick: () -> Unit) {
     val colors = AppTheme.colors
     val spacing = AppTheme.spacing
     val shape = RoundedCornerShape(SalonsDesign.LIST_RADIUS)
-    var expanded by remember(service.id) { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,19 +105,11 @@ private fun ServiceCard(service: CatalogService, onClick: () -> Unit) {
                 maxLines = 1,
                 modifier = Modifier.padding(bottom = spacing.space4),
             )
-            AppText(
+            // CUS-092: "more" showed under every one-line description; it now appears only on real overflow.
+            AppExpandableText(
                 text = service.description,
                 style = discoveryBody(DiscoveryDesign.TEXT_12_5, lineHeight = DiscoveryDesign.LINE_HEIGHT_1_6),
-                color = colors.muted,
-                maxLines = if (expanded) Int.MAX_VALUE else SalonsDesign.SERVICE_DESC_LINES,
-            )
-            AppText(
-                text = stringResource(if (expanded) DsRes.string.card_see_less else DsRes.string.card_more),
-                style = discoveryBody(DiscoveryDesign.TEXT_12, FontWeight.SemiBold),
-                color = colors.accent,
-                modifier = Modifier
-                    .clickable(role = Role.Button, onClick = { expanded = !expanded })
-                    .padding(top = spacing.space4),
+                collapsedLines = SalonsDesign.SERVICE_DESC_LINES,
             )
         }
     }

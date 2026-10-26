@@ -35,12 +35,13 @@
     <string name="details_rejection_reason">سبب الرفض</string>
     <string name="details_cancellation_reason">سبب الإلغاء</string>
     <string name="details_auto_cancel_reason">لم يوافق الصالون على الحجز خلال ساعة من موعده، فتم إلغاؤه تلقائياً.</string>
+    <string name="details_reason_customer_request">ألغيتَ هذا الحجز بنفسك.</string>
+    <string name="details_reason_not_given">لم يُذكر سبب.</string>
     <string name="details_call">اتصال</string>
     <string name="details_whatsapp">واتساب</string>
     <string name="details_persons">الأشخاص</string>
     <string name="details_bride">عروس</string>
     <string name="details_staff">الموظف: %1$s</string>
-    <string name="details_staff_any">أي موظف متاح</string>
     <string name="details_payment">تفاصيل الدفع</string>
     <string name="details_total">الإجمالي</string>
     <string name="details_paid">المدفوع</string>
@@ -49,15 +50,27 @@
     <string name="details_refund_pending">قيد الاسترجاع</string>
     <string name="details_refund_failed">فشل الاسترجاع</string>
     <string name="details_policy">سياسة الصالون</string>
-    <string name="details_policy_window">يمكن الإلغاء حتى %1$d ساعات قبل الموعد</string>
-    <string name="details_policy_deposit">العربون %1$d%% من الإجمالي</string>
+    <plurals name="details_policy_window">
+        <item quantity="one">يمكن الإلغاء حتى ساعة واحدة قبل الموعد</item>
+        <item quantity="two">يمكن الإلغاء حتى ساعتين قبل الموعد</item>
+        <item quantity="few">يمكن الإلغاء حتى %1$d ساعات قبل الموعد</item>
+        <item quantity="many">يمكن الإلغاء حتى %1$d ساعة قبل الموعد</item>
+        <item quantity="other">يمكن الإلغاء حتى %1$d ساعة قبل الموعد</item>
+    </plurals>
+    <string name="details_policy_deposit">العربون %1$d% من الإجمالي</string>
     <string name="details_policy_deposit_refundable">يُسترد العربون عند الإلغاء في الوقت المسموح</string>
     <string name="details_policy_deposit_non_refundable">لا يُسترد العربون عند الإلغاء من قبلك</string>
     <string name="details_rate">قيّم تجربتك</string>
     <string name="details_cancel">إلغاء الحجز</string>
     <string name="details_cancel_any_time">يمكنك إلغاء الحجز في أي وقت</string>
     <string name="details_cancel_until">يمكنك الإلغاء حتى %1$s</string>
-    <string name="details_cancel_window_passed">لا يمكن الإلغاء قبل الموعد بأقل من %1$d ساعات</string>
+    <plurals name="details_cancel_window_passed">
+        <item quantity="one">لا يمكن الإلغاء قبل الموعد بأقل من ساعة واحدة</item>
+        <item quantity="two">لا يمكن الإلغاء قبل الموعد بأقل من ساعتين</item>
+        <item quantity="few">لا يمكن الإلغاء قبل الموعد بأقل من %1$d ساعات</item>
+        <item quantity="many">لا يمكن الإلغاء قبل الموعد بأقل من %1$d ساعة</item>
+        <item quantity="other">لا يمكن الإلغاء قبل الموعد بأقل من %1$d ساعة</item>
+    </plurals>
     <string name="details_cancel_title">هل تريد إلغاء الحجز؟</string>
     <string name="details_cancel_body">سيتم إلغاء الحجز بالكامل لجميع الأشخاص. لا يمكن التراجع عن هذا الإجراء.</string>
     <string name="details_cancel_confirm">نعم، إلغاء الحجز</string>
