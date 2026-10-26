@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
@@ -90,6 +90,15 @@ describe('primitives', () => {
     rerender(<Avatar name="Layth Al-Hasan" src="x.png" size="lg" />);
     expect(document.querySelector('img')).toHaveAttribute('src', 'x.png');
     expect(screen.getByRole('img', { name: 'Layth Al-Hasan' })).toHaveClass('wab-avatar--lg');
+  });
+
+  it('Avatar falls back to initials when the picture fails, and retries a new picture', () => {
+    const { rerender } = render(<Avatar name="Sara Ali" src="broken.png" />);
+    fireEvent.error(document.querySelector('img') as HTMLImageElement);
+    expect(document.querySelector('img')).toBeNull();
+    expect(screen.getByRole('img', { name: 'Sara Ali' })).toHaveTextContent('SA');
+    rerender(<Avatar name="Sara Ali" src="fixed.png" />);
+    expect(document.querySelector('img')).toHaveAttribute('src', 'fixed.png');
   });
 
   it('Chip is static, or removable with an accessible button', async () => {

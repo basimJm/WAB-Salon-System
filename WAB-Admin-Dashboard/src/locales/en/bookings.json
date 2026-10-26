@@ -80,6 +80,11 @@
       "EXCEPTIONAL_CLOSURE": "Exceptional closure",
       "OTHER": "Other",
       "ADMIN_ACTION": "Admin action"
+    },
+    "paymentMethod": {
+      "PAY_ON_ARRIVAL": "Pay on arrival",
+      "DEPOSIT": "Deposit online",
+      "FULL_ONLINE": "Full payment online"
     }
   }
 }

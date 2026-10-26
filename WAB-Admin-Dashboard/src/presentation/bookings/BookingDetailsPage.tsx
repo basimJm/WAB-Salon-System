@@ -95,7 +95,13 @@ function Facts({ b }: { b: BookingDetails }) {
           { key: 'respond', label: t('bookings.respondBy'), value: when(b.respondBy), ltr: true },
           { key: 'staff', label: t('bookings.staff'), value: <StaffList staff={b.staff} /> },
           ...outcome,
-          { key: 'method', label: t('bookings.method'), value: b.paymentMethod },
+          {
+            key: 'method',
+            label: t('bookings.method'),
+            value: t(`bookings.paymentMethod.${b.paymentMethod}`, {
+              defaultValue: b.paymentMethod,
+            }),
+          },
           {
             key: 'payment',
             label: t('bookings.payment'),
@@ -103,7 +109,11 @@ function Facts({ b }: { b: BookingDetails }) {
               defaultValue: b.paymentStatus,
             }),
           },
-          { key: 'refund', label: t('bookings.refund'), value: b.refundStatus },
+          {
+            key: 'refund',
+            label: t('bookings.refund'),
+            value: t(`status.refund.${b.refundStatus}`, { defaultValue: b.refundStatus }),
+          },
           { key: 'created', label: t('salons.created'), value: when(b.createdAt), ltr: true },
         ]}
       />

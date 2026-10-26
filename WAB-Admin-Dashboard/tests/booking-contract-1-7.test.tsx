@@ -126,4 +126,15 @@ describe('admin contract 1.7.0 (SRV-170, ADM-107)', () => {
     expect((await fact('Cancellation reason')).textContent).toContain('Salon emergency · Flood');
     expect(screen.queryByText('Rejection reason', { selector: 'dt' })).toBeNull();
   });
+
+  it('payment method and refund status are worded, not raw codes (e2e finding)', async () => {
+    render(`/bookings/${String(PENDING)}`, 'en', (b) => ({ ...b, refundStatus: 'NONE' }));
+    expect((await fact('Payment method')).textContent).toBe('Pay on arrival');
+    expect((await fact('Refund')).textContent).toBe('No refund');
+  });
+
+  it('an unknown payment method shows as sent', async () => {
+    render(`/bookings/${String(PENDING)}`, 'en', (b) => ({ ...b, paymentMethod: 'WALLET' }));
+    expect((await fact('Payment method')).textContent).toBe('WALLET');
+  });
 });

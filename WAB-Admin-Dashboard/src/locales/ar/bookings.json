@@ -80,6 +80,11 @@
       "EXCEPTIONAL_CLOSURE": "إغلاق استثنائي",
       "OTHER": "سبب آخر",
       "ADMIN_ACTION": "إجراء من الإدارة"
+    },
+    "paymentMethod": {
+      "PAY_ON_ARRIVAL": "الدفع عند الوصول",
+      "DEPOSIT": "عربون إلكتروني",
+      "FULL_ONLINE": "دفع كامل إلكترونياً"
     }
   }
 }
