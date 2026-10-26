@@ -40,11 +40,13 @@ fun AppAvatar(
             modifier = Modifier.size(size).clip(AppTheme.shapes.circle).background(colors.soft),
             contentAlignment = Alignment.Center,
         ) {
-            if (imageUrl != null) {
-                AppImage(url = imageUrl, modifier = Modifier.size(size))
-            } else {
-                AppText(text = initialsOf(name, maxLetters), style = initialsStyle, color = colors.accent, maxLines = 1)
+            val letters: @Composable () -> Unit = {
+                Box(modifier = Modifier.size(size).background(colors.soft), contentAlignment = Alignment.Center) {
+                    AppText(text = initialsOf(name, maxLetters), style = initialsStyle, color = colors.accent, maxLines = 1)
+                }
             }
+            // A photo that fails to load falls back to the letters too (e2e: a broken-image icon in the staff circle).
+            if (imageUrl != null) AppImage(url = imageUrl, modifier = Modifier.size(size), fallback = letters) else letters()
         }
         if (available != null) {
             Box(
