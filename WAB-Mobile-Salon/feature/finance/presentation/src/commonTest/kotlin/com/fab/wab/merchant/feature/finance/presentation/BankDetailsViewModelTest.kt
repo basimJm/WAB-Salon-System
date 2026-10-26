@@ -42,8 +42,8 @@ private const val IBAN = "JO94CBJO0010000000000131000302"
 private class FakeBank : BankRepository {
     val saved = mutableListOf<Pair<BankDraft, String>>()
     override suspend fun details(): AppResult<BankDetails?> = AppResult.Success(BankDetails("Arab Bank", "Lina", "0302"))
-    override suspend fun save(draft: BankDraft, idToken: String): AppResult<BankDetails> {
-        saved += draft to idToken
+    override suspend fun save(draft: BankDraft, otpToken: String): AppResult<BankDetails> {
+        saved += draft to otpToken
         return AppResult.Success(BankDetails(draft.bankName, draft.accountHolder, "0302"))
     }
     override suspend fun phoneOf(memberId: String): AppResult<String> = AppResult.Success("+962791234567")
@@ -91,9 +91,9 @@ class BankDetailsViewModelTest {
         viewModel.onEvent(UiAction.OnContinue)
         assertEquals(SideEffect.VerifyPhone("JO", "791234567"), effects.last())
         assertTrue(viewModel.state.first().awaitingOtp)
-        pending.publish(OtpVerified(AuthPurpose.BANK_DETAILS, PhoneNumber("JO", "791234567"), "id-token"))
+        pending.publish(OtpVerified(AuthPurpose.BANK_DETAILS, PhoneNumber("JO", "791234567"), "otp-token"))
         viewModel.onEvent(UiAction.OnResume)
-        assertEquals("id-token", bank.saved.single().second)
+        assertEquals("otp-token", bank.saved.single().second)
         assertEquals(SideEffect.Saved, effects.last())
         assertFalse(viewModel.state.first().awaitingOtp)
     }

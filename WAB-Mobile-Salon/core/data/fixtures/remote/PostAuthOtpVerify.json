@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "message": "Done successfully.",
+  "data": {
+    "otpToken": "<redacted>",
+    "expiresInSeconds": 600
+  }
+}

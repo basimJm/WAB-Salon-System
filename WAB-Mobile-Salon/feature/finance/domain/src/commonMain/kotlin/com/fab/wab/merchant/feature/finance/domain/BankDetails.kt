@@ -53,8 +53,8 @@ fun bankErrors(draft: BankDraft): Set<BankField> = buildSet {
 interface BankRepository {
     suspend fun details(): AppResult<BankDetails?>
 
-    /** [idToken] = Firebase proof of a fresh BANK_DETAILS OTP to the owner's phone. */
-    suspend fun save(draft: BankDraft, idToken: String): AppResult<BankDetails>
+    /** [otpToken] = single-use proof of a fresh BANK_DETAILS WhatsApp OTP to the owner's phone. */
+    suspend fun save(draft: BankDraft, otpToken: String): AppResult<BankDetails>
 
     /** E.164 phone of [memberId] (`GET /team/members/{id}`; the contract has no self profile). */
     suspend fun phoneOf(memberId: String): AppResult<String>

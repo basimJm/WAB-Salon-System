@@ -1,7 +1,8 @@
 export const ENVIRONMENTS = ['dev', 'prod'] as const;
 export type Environment = (typeof ENVIRONMENTS)[number];
 
-export const PROVIDERS = ['fake', 'firebase', 'custom'] as const;
+/** `signed`: the SDK's own single-use OTP proof (`otpToken`) issued after a correct code. */
+export const PROVIDERS = ['fake', 'signed', 'custom'] as const;
 export type ProviderName = (typeof PROVIDERS)[number];
 
 /** Extensible by consumers through the `string` brand; these are the platform's own purposes. */
@@ -41,11 +42,33 @@ export const DEFAULT_LIMITS = {
 
 export const DEFAULT_OTP = { otpLength: 6, resendAfterSec: 60 } as const;
 
-/** Server-verified (SMS) model. */
-export const DEFAULT_SMS = {
+/** Server-generated codes (WhatsApp / SMS channels). */
+export const DEFAULT_CODE = {
   ttlSec: 300,
   minSecretLength: 32,
   secondsPerMinute: 60,
+  radix: 10,
+  /** Longest code a channel may carry (WhatsApp authentication templates accept 15 characters). */
+  maxLength: 15,
+  hmacAlgorithm: 'sha256',
+  hashEncoding: 'hex',
+} as const;
+
+/** Signed single-use OTP proof (`otpToken`). */
+export const DEFAULT_PROOF = {
+  ttlSec: 600,
+  version: 1,
+  separator: '.',
+  hmacAlgorithm: 'sha256',
+  encoding: 'base64url',
+  usedFlag: '1',
+} as const;
+
+/** Key prefixes of the code store (the consumer may add its own namespace in front). */
+export const CODE_KEY_PREFIX = {
+  code: 'otp:code',
+  used: 'otp:used',
+  separator: ':',
 } as const;
 
 export const DEFAULT_RETRY = {
@@ -53,33 +76,6 @@ export const DEFAULT_RETRY = {
   baseDelayMs: 200,
   maxDelayMs: 2000,
   jitterRatio: 0.2,
-} as const;
-
-export const DEFAULT_FIREBASE = {
-  /** Public keys of Firebase ID tokens, in JWK form (Google's documented endpoint). */
-  jwksUrl:
-    'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com',
-  issuerPrefix: 'https://securetoken.google.com/',
-  signInProviderPhone: 'phone',
-  algorithm: 'RS256',
-  timeoutMs: 5000,
-  clockSkewSec: 30,
-  /** Older sign-ins are refused: a proof must belong to the code the user just typed. */
-  maxAuthAgeSec: 600,
-  /** Used when the key endpoint sends no usable Cache-Control. */
-  fallbackKeyTtlSec: 3600,
-  minKeyTtlSec: 60,
-  /** Cached keys may serve this long past their expiry when the key endpoint is down. */
-  maxStaleKeySec: 86_400,
-  /** Largest `sub` accepted (Firebase uids are at most 128 characters). */
-  maxSubjectLength: 128,
-  /** Claim names of a Firebase ID token. */
-  claims: {
-    phone: 'phone_number',
-    authTime: 'auth_time',
-    firebase: 'firebase',
-    provider: 'sign_in_provider',
-  },
 } as const;
 
 /** Key prefixes of the limiter store (the consumer may add its own namespace in front). */

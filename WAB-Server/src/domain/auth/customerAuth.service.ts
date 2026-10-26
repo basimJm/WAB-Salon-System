@@ -47,15 +47,15 @@ export interface RegisterInput {
   readonly cityId: string;
   readonly areaId: string;
   readonly phone: PhoneInput;
-  /** Firebase ID token obtained after the user typed the SMS code. */
-  readonly idToken: string;
+  /** `otpToken` from `POST /auth/otp/verify` (purpose REGISTER). */
+  readonly otpToken: string;
   readonly device: DeviceInput;
   readonly language: Language;
 }
 
 export interface LoginInput {
   readonly phone: PhoneInput;
-  readonly idToken: string;
+  readonly otpToken: string;
   readonly device: DeviceInput;
   readonly language: Language;
 }
@@ -88,7 +88,7 @@ export interface CustomerAuthService {
   changePhone(input: {
     customerId: string;
     phone: PhoneInput;
-    idToken: string;
+    otpToken: string;
   }): Promise<CustomerProfile>;
 }
 
@@ -129,7 +129,7 @@ const phoneUnknown = (): NotFoundError =>
 
 /**
  * Customer register, login, refresh, logout and phone change (Customer PRD S11, S12, S13, S22).
- * The phone is only trusted after the OTP provider confirms the Firebase ID token for that exact
+ * The phone is only trusted after the OTP provider confirms the `otpToken` for that exact
  * number; the platform limits (SRV-027) gate every verification attempt.
  */
 export const createCustomerAuthService = (deps: CustomerAuthDeps): CustomerAuthService => {
@@ -180,7 +180,7 @@ export const createCustomerAuthService = (deps: CustomerAuthDeps): CustomerAuthS
       ];
       if (details.length > 0) throw new ValidationError({ details });
 
-      await verifyOwnership(phone, input.idToken, 'REGISTER');
+      await verifyOwnership(phone, input.otpToken, 'REGISTER');
       if ((await customers.findByPhone(phone.e164)) !== null) throw phoneTaken();
       let created: Entity<CustomerRaw>;
       try {
@@ -208,7 +208,7 @@ export const createCustomerAuthService = (deps: CustomerAuthDeps): CustomerAuthS
 
     async login(input) {
       const phone = await resolvePhone(input.phone);
-      await verifyOwnership(phone, input.idToken, 'LOGIN');
+      await verifyOwnership(phone, input.otpToken, 'LOGIN');
       const found = await customers.findByPhone(phone.e164);
       if (found === null || found.status === 'DELETED') throw phoneUnknown();
       if (found.status === 'BLOCKED') throw accountBlocked();
@@ -240,11 +240,11 @@ export const createCustomerAuthService = (deps: CustomerAuthDeps): CustomerAuthS
       }
     },
 
-    async changePhone({ customerId, phone: input, idToken }) {
+    async changePhone({ customerId, phone: input, otpToken }) {
       const customer = await customers.findById(customerId);
       if (customer === null || customer.status !== 'ACTIVE') throw new UnauthorizedError();
       const phone = await resolvePhone(input);
-      await verifyOwnership(phone, idToken, 'CHANGE_PHONE');
+      await verifyOwnership(phone, otpToken, 'CHANGE_PHONE');
       const owner = await customers.findByPhone(phone.e164);
       if (owner !== null && owner.id !== customer.id) throw phoneTaken();
       let updated: Entity<CustomerRaw> | null;

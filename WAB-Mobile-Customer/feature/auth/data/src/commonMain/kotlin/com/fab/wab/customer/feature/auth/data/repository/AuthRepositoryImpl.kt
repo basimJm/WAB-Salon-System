@@ -8,7 +8,7 @@ import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBodyPhone
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLogoutBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestBody
-import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptBody
+import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpVerifyBody
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.session.UserProfile
@@ -20,7 +20,7 @@ import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.customer.feature.auth.domain.model.AuthSession
 import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
-import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
+import com.fab.wab.customer.feature.auth.domain.model.OtpProof
 import com.fab.wab.customer.feature.auth.domain.model.PhoneCheck
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
 import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
@@ -40,13 +40,14 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
         safeApiCall { api.requestOtp(PostAuthOtpRequestBody(phone = phoneE164, purpose = purpose.code)) }
             .mapSuccess { it.data.toDomain() }
 
-    override suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult> =
-        safeApiCall { api.wrongAttempt(PostAuthOtpWrongAttemptBody(phone = phoneE164)) }.mapSuccess { it.data.toDomain() }
+    override suspend fun verifyOtp(phoneE164: String, purpose: AuthPurpose, code: String): AppResult<OtpProof> =
+        safeApiCall { api.verifyOtp(PostAuthOtpVerifyBody(phone = phoneE164, purpose = purpose.code, code = code)) }
+            .mapSuccess { it.data.toDomain() }
 
-    override suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession> {
+    override suspend fun login(phone: PhoneNumber, otpToken: String, installation: InstallationInfo?): AppResult<AuthSession> {
         val body = PostAuthLoginBody(
             phone = PostAuthLoginBodyPhone(countryCode = phone.countryCode, number = phone.number),
-            idToken = idToken,
+            otpToken = otpToken,
             installation = (installation ?: InstallationInfo.UNKNOWN_INSTALLATION).toLoginBody(),
         )
         return safeApiCall { api.login(body) }.mapSuccess { it.data.toDomain() }
@@ -57,8 +58,8 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
         return safeApiCall { api.register(body) }.mapSuccess { it.data.toDomain() }
     }
 
-    override suspend fun changePhone(phone: PhoneNumber, idToken: String): AppResult<UserProfile> {
-        val body = PostAuthChangePhoneBody(PostAuthChangePhoneBodyPhone(countryCode = phone.countryCode, number = phone.number), idToken)
+    override suspend fun changePhone(phone: PhoneNumber, otpToken: String): AppResult<UserProfile> {
+        val body = PostAuthChangePhoneBody(PostAuthChangePhoneBodyPhone(countryCode = phone.countryCode, number = phone.number), otpToken)
         return safeApiCall { api.changePhone(body) }.mapSuccess { it.data.customer.toUserProfile() }
     }
 

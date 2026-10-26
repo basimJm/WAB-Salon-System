@@ -12,8 +12,11 @@ import {
   type LogLevel,
 } from '../constants/env';
 import {
+  DEFAULT_OTP_PROVIDER_MODE,
   DEFAULT_PAYMENT_PROVIDER_MODE,
   DEFAULT_PROVIDER_MODE,
+  WHATSAPP_OTP_MODE,
+  type OtpProviderMode,
   type PaymentProviderMode,
   type ProviderMode,
 } from '../constants/providers';
@@ -35,12 +38,24 @@ export interface NotifierSettings {
   readonly from: { readonly address: string; readonly name: string };
 }
 
-/** Firebase settings of the real OTP provider (wab-otp). */
+/** WhatsApp Cloud API account of the `whatsapp` OTP provider (BUSINESS_DOMAIN §3.1a). */
+export interface WhatsAppSettings {
+  readonly phoneNumberId: string;
+  readonly accessToken: string;
+  readonly templateName: string;
+  readonly apiVersion?: string;
+}
+
+/**
+ * Phone OTP secrets and channel (wab-otp). `whatsapp` is present only for OTP_PROVIDER=whatsapp,
+ * which also requires both secrets; the fake provider makes per-process secrets when they are unset.
+ */
 export interface OtpSettings {
-  readonly firebase: {
-    readonly projectId: string;
-    readonly authEmulatorHost?: string;
-  };
+  readonly codeSecret?: string;
+  readonly proofSecret?: string;
+  /** Development only: every code is this value (refused in production). */
+  readonly fixedCode?: string;
+  readonly whatsapp?: WhatsAppSettings;
 }
 
 export interface StorageSettings {
@@ -90,11 +105,12 @@ export interface AppConfig {
   readonly notifier?: NotifierSettings;
   /** S3 + CDN settings of the real storage; present only when the storage is `real`. */
   readonly storage?: StorageSettings;
-  /** Firebase project of the real OTP provider; present only when the OTP provider is `real`. */
-  readonly otp?: OtpSettings;
+  /** Phone OTP secrets and WhatsApp account. */
+  readonly otp: OtpSettings;
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
   readonly providers: {
-    readonly otp: ProviderMode;
+    /** `whatsapp` in production; `fake` records codes instead of sending them. */
+    readonly otp: OtpProviderMode;
     readonly storage: ProviderMode;
     readonly notifier: ProviderMode;
     /** Payments are paused: `fake` in dev/test, `disabled` in production. */
@@ -184,16 +200,32 @@ const buildNotifierSettings = (values: RawEnv): NotifierSettings | undefined => 
   });
 };
 
-const buildOtpSettings = (values: RawEnv): OtpSettings | undefined => {
-  if (values[ENV_KEYS.otpProvider] !== 'real') return undefined;
-  const projectId = values[ENV_KEYS.firebaseProjectId];
-  if (projectId === undefined) return undefined;
-  const emulatorHost = values[ENV_KEYS.firebaseAuthEmulatorHost];
+const buildWhatsAppSettings = (values: RawEnv): WhatsAppSettings | undefined => {
+  if (values[ENV_KEYS.otpProvider] !== WHATSAPP_OTP_MODE) return undefined;
+  const phoneNumberId = values[ENV_KEYS.whatsappPhoneNumberId];
+  const accessToken = values[ENV_KEYS.whatsappAccessToken];
+  const templateName = values[ENV_KEYS.whatsappTemplateName];
+  if (phoneNumberId === undefined || accessToken === undefined || templateName === undefined)
+    return undefined;
+  const apiVersion = values[ENV_KEYS.whatsappApiVersion];
   return Object.freeze({
-    firebase: Object.freeze({
-      projectId,
-      ...(emulatorHost === undefined ? {} : { authEmulatorHost: emulatorHost }),
-    }),
+    phoneNumberId,
+    accessToken,
+    templateName,
+    ...(apiVersion === undefined ? {} : { apiVersion }),
+  });
+};
+
+const buildOtpSettings = (values: RawEnv): OtpSettings => {
+  const codeSecret = values[ENV_KEYS.otpCodeSecret];
+  const proofSecret = values[ENV_KEYS.otpProofSecret];
+  const fixedCode = values[ENV_KEYS.otpFixedCode];
+  const whatsapp = buildWhatsAppSettings(values);
+  return Object.freeze({
+    ...(codeSecret === undefined ? {} : { codeSecret }),
+    ...(proofSecret === undefined ? {} : { proofSecret }),
+    ...(fixedCode === undefined ? {} : { fixedCode }),
+    ...(whatsapp === undefined ? {} : { whatsapp }),
   });
 };
 
@@ -248,7 +280,7 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
   return Object.freeze({
     ...(notifier === undefined ? {} : { notifier }),
     ...(storage === undefined ? {} : { storage }),
-    ...(otp === undefined ? {} : { otp }),
+    otp,
     env,
     isProduction: env === 'production',
     port: values[ENV_KEYS.port],
@@ -261,7 +293,7 @@ export const loadConfig = (source: NodeJS.ProcessEnv = readEnvSources()): AppCon
     auth: Object.freeze({ accessSecret: values[ENV_KEYS.jwtAccessSecret] }),
     secrets: Object.freeze(payoutKey === undefined ? {} : { payoutEncryptionKey: payoutKey }),
     providers: Object.freeze({
-      otp: values[ENV_KEYS.otpProvider] ?? DEFAULT_PROVIDER_MODE,
+      otp: values[ENV_KEYS.otpProvider] ?? DEFAULT_OTP_PROVIDER_MODE,
       storage: values[ENV_KEYS.storageProvider] ?? DEFAULT_PROVIDER_MODE,
       notifier: values[ENV_KEYS.notifierProvider] ?? DEFAULT_PROVIDER_MODE,
       payments: values[ENV_KEYS.paymentProvider] ?? DEFAULT_PAYMENT_PROVIDER_MODE,

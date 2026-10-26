@@ -7,6 +7,7 @@ object OtpAnalytics {
     private const val SCREEN_NAME = "otp"
     const val ACTION_REQUEST = "otp_request"
     const val ACTION_RESEND = "otp_resend"
+    const val ACTION_REQUEST_FAIL = "otp_request_fail"
     const val ACTION_VERIFY_SUCCESS = "otp_verify_success"
     const val ACTION_VERIFY_FAIL = "otp_verify_fail"
     const val PARAM_PURPOSE = "purpose"

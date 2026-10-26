@@ -10,8 +10,8 @@ import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLogoutBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestData
-import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptBody
-import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptData
+import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpVerifyBody
+import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpVerifyData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterData
 import io.ktor.client.HttpClient
@@ -28,8 +28,8 @@ class AuthApi(private val client: HttpClient) {
     suspend fun requestOtp(body: PostAuthOtpRequestBody): BaseResponse<PostAuthOtpRequestData> =
         client.post(CustomerOperations.postAuthOtpRequest.path) { setBody(body) }.body()
 
-    suspend fun wrongAttempt(body: PostAuthOtpWrongAttemptBody): BaseResponse<PostAuthOtpWrongAttemptData> =
-        client.post(CustomerOperations.postAuthOtpWrongAttempt.path) { setBody(body) }.body()
+    suspend fun verifyOtp(body: PostAuthOtpVerifyBody): BaseResponse<PostAuthOtpVerifyData> =
+        client.post(CustomerOperations.postAuthOtpVerify.path) { setBody(body) }.body()
 
     suspend fun login(body: PostAuthLoginBody): BaseResponse<PostAuthLoginData> =
         client.post(CustomerOperations.postAuthLogin.path) { setBody(body) }.body()

@@ -9,7 +9,7 @@ import { createLimiter, toRetryAfterSec, type Limiter } from '../../utils/redis/
 import type { SettingsService } from '../settings';
 
 export interface OtpRequestDecision {
-  /** The app may now ask Firebase to send the SMS. */
+  /** The limits allow a new code now (the server then sends it). */
   readonly allowed: boolean;
   readonly otpLength: number;
   /** Seconds until the next request is allowed (the resend countdown). */
@@ -25,9 +25,9 @@ export interface WrongAttemptResult {
 }
 
 export interface OtpGate {
-  /** Pre-check before the app triggers Firebase: platform limits, `otpLength`, resend timing. */
+  /** Limits before a code is sent: platform limits, `otpLength`, resend timing. */
   request(e164: string): Promise<OtpRequestDecision>;
-  /** The app reports a wrong code from Firebase; counts toward the wrong-attempts block. */
+  /** A wrong code typed at `POST …/auth/otp/verify`; counts toward the wrong-attempts block. */
   reportWrongAttempt(e164: string): Promise<WrongAttemptResult>;
   /** Throws `OTP_BLOCKED` (429) while the phone is blocked; verification endpoints call it first. */
   assertNotBlocked(e164: string): Promise<void>;
@@ -42,7 +42,7 @@ export interface OtpGateDeps {
 }
 
 /**
- * OTP rules the platform enforces on top of Firebase (Customer PRD S13). All numbers come from
+ * OTP abuse limits (Customer PRD S13, BUSINESS_DOMAIN §3.1a step 2). All numbers come from
  * settings and are read per call, so an admin change applies at once. State lives in Redis and is
  * shared by every API instance. The request that reaches the limit is allowed and starts the block.
  */

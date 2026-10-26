@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { PERSON_NAME_MAX_LENGTH, PERSON_NAME_MIN_LENGTH } from '../../../constants/identity';
 import { STORAGE_KEY_MAX_LENGTH, STORAGE_KEY_PATTERN } from '../../../constants/salon';
-import { phoneSchema } from '../../shared/auth/auth.schemas';
+import { otpTokenSchema, phoneSchema } from '../../shared/auth/auth.schemas';
 
 const name = z.string().trim().min(PERSON_NAME_MIN_LENGTH).max(PERSON_NAME_MAX_LENGTH);
 
@@ -20,5 +20,5 @@ export const updateMeSchema = z
 /** The new number and the Firebase ID token proving it (OTP sent to the new number). */
 export const changePhoneSchema = z.object({
   phone: phoneSchema,
-  idToken: z.string().min(1),
+  otpToken: otpTokenSchema,
 });

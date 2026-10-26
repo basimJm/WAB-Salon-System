@@ -80,8 +80,8 @@ export const registerMerchantAuthDocs = (registry: OpenAPIRegistry): void => {
   );
   route(
     MERCHANT_AUTH_ROUTES.login,
-    'Log in with a Firebase ID token',
-    'The token must prove the phone. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `MEMBER_INACTIVE` (403), `PHONE_NOT_REGISTERED` (404). The profile carries role, salon and permissions for the app to cache.',
+    'Log in with an otpToken',
+    '`otpToken` = the single-use proof from `POST /auth/otp/verify` (purpose LOGIN) for this phone. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `MEMBER_INACTIVE` (403), `PHONE_NOT_REGISTERED` (404). The profile carries role, salon and permissions for the app to cache.',
     loginSchema,
     sessionSchema,
     'Session',

@@ -7,6 +7,7 @@ import { OBJECT_ID_PATTERN } from '../../../constants/database';
 import { PAYMENT_OPTIONS } from '../../../constants/salon';
 import { AVAILABILITY_MAX_SERVICES } from '../../../constants/availability';
 import { instantInput } from '../../../utils/time/instantInput';
+import { otpTokenSchema } from '../../shared/auth/auth.schemas';
 
 const objectId = z.string().regex(OBJECT_ID_PATTERN);
 /** Main person + `booking.maxCompanions` is enforced by the service from settings; this is a sanity cap. */
@@ -40,5 +41,5 @@ export const createDraftBody = z.object({
     .max(MAX_PERSONS_SANITY),
 });
 
-/** Firebase ID token proving the customer controls their phone (purpose BOOKING_CONFIRMATION). */
-export const verifyOtpBody = z.object({ idToken: z.string().trim().min(1).max(8192) });
+/** `otpToken` proving the customer controls their phone (purpose BOOKING_CONFIRMATION). */
+export const verifyOtpBody = z.object({ otpToken: otpTokenSchema });

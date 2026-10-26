@@ -25,7 +25,7 @@ class DeleteBookingDraftUseCase(private val repository: BookingDraftRepository) 
 }
 
 class VerifyBookingOtpUseCase(private val repository: BookingDraftRepository) {
-    suspend operator fun invoke(draftId: String, idToken: String): AppResult<String> = repository.verifyOtp(draftId, idToken)
+    suspend operator fun invoke(draftId: String, otpToken: String): AppResult<String> = repository.verifyOtp(draftId, otpToken)
 }
 
 class CreateBookingUseCase(private val repository: BookingDraftRepository) {

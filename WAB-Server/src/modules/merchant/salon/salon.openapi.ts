@@ -48,7 +48,7 @@ export const registerMerchantSalonDocs = (registry: OpenAPIRegistry): void => {
     tags,
     summary: 'Apply with a new salon (creates the owner, signs them in)',
     description:
-      'Public. The phone is proven by a Firebase ID token. The salon waits for admin approval; license documents are private storage keys.',
+      'Public. The phone is proven by an `otpToken` (purpose REGISTER, from `POST /auth/otp/verify`). The salon waits for admin approval; license documents are private storage keys.',
     security: [],
     request: {
       headers,

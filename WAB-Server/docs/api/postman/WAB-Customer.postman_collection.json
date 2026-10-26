@@ -9,7 +9,7 @@
       "name": "Auth",
       "item": [
         {
-          "name": "OTP pre-check",
+          "name": "Send an OTP code on WhatsApp",
           "request": {
             "method": "POST",
             "header": [
@@ -37,7 +37,7 @@
               "query": [],
               "variable": []
             },
-            "description": "Public. Checks the platform limits before the app asks Firebase to send the SMS. A blocked phone or a running resend countdown answers 200 with `allowed: false`.",
+            "description": "Public. The platform limits run first (5 requests / 5 min, resend after 60 s, 15 min block); then the server sends a new code on WhatsApp in the `Accept-Language` language (ar default). A blocked phone or a running resend countdown answers 200 with `allowed: false` and sends nothing. A number WhatsApp cannot reach (not on WhatsApp) answers 422 `OTP_DELIVERY_FAILED` (the request still counts). A WhatsApp outage answers 503 `INTERNAL`.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"phone\": \"string\",\n  \"purpose\": \"LOGIN\"\n}",
@@ -50,7 +50,7 @@
           }
         },
         {
-          "name": "Report a wrong OTP code",
+          "name": "Check the typed code and get an otpToken",
           "request": {
             "method": "POST",
             "header": [
@@ -64,7 +64,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/customer/v1/auth/otp/wrong-attempt",
+              "raw": "{{baseUrl}}/customer/v1/auth/otp/verify",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -73,15 +73,15 @@
                 "v1",
                 "auth",
                 "otp",
-                "wrong-attempt"
+                "verify"
               ],
               "query": [],
               "variable": []
             },
-            "description": "Public. The app reports a wrong code from Firebase; it counts toward the wrong-attempts block.",
+            "description": "Public. The right code (for this phone and purpose) is used up and answers `otpToken`. Errors: 401 `OTP_INVALID` (wrong code; `details[0].message` says how many attempts are left; the 5th wrong code blocks), 401 `OTP_EXPIRED` (no code, expired or already used: request a new one), 429 `OTP_BLOCKED` (blocked for 15 min).",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"string\"\n}",
+              "raw": "{\n  \"phone\": \"string\",\n  \"purpose\": \"LOGIN\",\n  \"code\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -131,7 +131,7 @@
           }
         },
         {
-          "name": "Log in with a Firebase ID token",
+          "name": "Log in with an otpToken",
           "request": {
             "method": "POST",
             "header": [
@@ -158,10 +158,10 @@
               "query": [],
               "variable": []
             },
-            "description": "The token must prove the phone. An account in its deletion grace period is restored. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `ACCOUNT_BLOCKED` (403), `PHONE_NOT_REGISTERED` (404).",
+            "description": "`otpToken` = the single-use proof from `POST /auth/otp/verify` (purpose LOGIN) for this phone. An account in its deletion grace period is restored. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `ACCOUNT_BLOCKED` (403), `PHONE_NOT_REGISTERED` (404).",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"idToken\": \"string\",\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"otpToken\": \"string\",\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -171,7 +171,7 @@
           }
         },
         {
-          "name": "Register with a Firebase ID token",
+          "name": "Register with an otpToken",
           "request": {
             "method": "POST",
             "header": [
@@ -198,10 +198,10 @@
               "query": [],
               "variable": []
             },
-            "description": "Creates the account and signs it in. Errors: `OTP_INVALID`, `OTP_EXPIRED`, `OTP_BLOCKED`, `PHONE_ALREADY_REGISTERED` (409).",
+            "description": "Creates the account and signs it in. `otpToken` from `POST /auth/otp/verify` (purpose REGISTER), single use. Errors: `OTP_INVALID`, `OTP_EXPIRED`, `OTP_BLOCKED`, `PHONE_ALREADY_REGISTERED` (409).",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"email\": \"string\",\n  \"gender\": \"MALE\",\n  \"cityId\": \"string\",\n  \"areaId\": \"string\",\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"idToken\": \"string\",\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
+              "raw": "{\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"email\": \"string\",\n  \"gender\": \"MALE\",\n  \"cityId\": \"string\",\n  \"areaId\": \"string\",\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"otpToken\": \"string\",\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -328,10 +328,10 @@
               "query": [],
               "variable": []
             },
-            "description": "Needs the Firebase ID token of the NEW number. Errors: `OTP_INVALID`, `OTP_EXPIRED`, `OTP_BLOCKED`, `PHONE_ALREADY_REGISTERED`.",
+            "description": "Needs an `otpToken` (purpose CHANGE_PHONE) of the NEW number. Errors: `OTP_INVALID`, `OTP_EXPIRED`, `OTP_BLOCKED`, `PHONE_ALREADY_REGISTERED`.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"idToken\": \"string\"\n}",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"otpToken\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1817,7 +1817,7 @@
           }
         },
         {
-          "name": "Confirm the booking with the OTP (purpose BOOKING_CONFIRMATION): the Firebase ID token must belong to the customer’s own phone. Required before the booking is created.",
+          "name": "Confirm the booking with the OTP (purpose BOOKING_CONFIRMATION): the `otpToken` (from `POST /auth/otp/verify`) must belong to the customer’s own phone; it works once. Required before the booking is created.",
           "request": {
             "method": "POST",
             "header": [
@@ -1863,7 +1863,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"idToken\": \"string\"\n}",
+              "raw": "{\n  \"otpToken\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

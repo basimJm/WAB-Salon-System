@@ -7,7 +7,7 @@ import { createSalonApplicationService } from '../src/domain/salons/salonApplica
 import type { UploadVerifier } from '../src/domain/uploads/uploads.service';
 import { requireAuth } from '../src/middlewares/auth';
 import { SalonModel } from '../src/models/salon.model';
-import { FakeOtpProvider, fakeOtpProof } from '../src/providers/otp';
+import { proofFor, testOtp } from './helpers/otp';
 import {
   InstallationsRepository,
   MembersRepository,
@@ -33,7 +33,8 @@ const cityId = new Types.ObjectId();
 const areaId = new Types.ObjectId();
 const BODY = {
   phone: { countryCode: 'JO', number: '791234567' },
-  idToken: fakeOtpProof(E164),
+  /** Replaced by a fresh single-use token on every send. */
+  otpToken: '',
   firstName: 'Sami',
   lastName: 'Nasser',
   salon: {
@@ -86,7 +87,7 @@ const setup = (uploads?: UploadVerifier): Rig => {
     countries: new CountriesRepository(countries.model as never),
     cities: new CitiesRepository(cities.model as never),
     areas: new AreasRepository(areas.model as never),
-    otp: new FakeOtpProvider(),
+    otp: testOtp,
     otpGate: gate,
     refreshTokens: createRefreshTokenService({
       repository: new RefreshTokensRepository(tokens.model as never),
@@ -121,7 +122,7 @@ const apply = async (
 ): Promise<{ status: number; body: unknown }> =>
   await request(rig.app)
     .post('/merchant/v1/salon/applications')
-    .send({ ...BODY, ...over });
+    .send({ ...BODY, otpToken: proofFor(E164, 'REGISTER'), ...over });
 
 describe('salon model', () => {
   it('starts with seven days off and default completeness', async () => {
@@ -198,8 +199,8 @@ describe('POST /merchant/v1/salon/applications', () => {
   });
 
   it.each([
-    ['proof for another number', { idToken: fakeOtpProof('+962781234567') }, 401],
-    ['expired proof', { idToken: fakeOtpProof(E164, 'expired') }, 401],
+    ['proof for another number', { otpToken: proofFor('+962781234567', 'REGISTER') }, 401],
+    ['expired proof', { otpToken: proofFor(E164, 'REGISTER', 'expired') }, 401],
     ['unknown country', { phone: { countryCode: 'XX', number: '791234567' } }, 400],
     ['bad number', { phone: { countryCode: 'JO', number: '123' } }, 400],
     ['no documents', { documentKeys: [] }, 400],
@@ -246,7 +247,7 @@ describe('POST /merchant/v1/salon/applications', () => {
   it('answers 503 when unconfigured', async () => {
     const res = await request(createApp({ logger }))
       .post('/merchant/v1/salon/applications')
-      .send(BODY);
+      .send({ ...BODY, otpToken: proofFor(E164, 'REGISTER') });
     expect(res.status).toBe(503);
   });
 });

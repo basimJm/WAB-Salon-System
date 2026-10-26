@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { REFRESH_TOKEN_PATTERN } from '../../../constants/auth';
-import { ID_TOKEN_MAX_LENGTH } from '../../../constants/customerAuth';
 import {
   APP_VERSION_MAX_LENGTH,
   DEVICE_TEXT_MAX_LENGTH,
@@ -8,6 +7,7 @@ import {
   PHONE_NUMBER_PATTERN,
 } from '../../../constants/identity';
 import { PLATFORMS } from '../../../constants/enums';
+import { OTP_TOKEN_MAX_LENGTH } from '../../../constants/otp';
 import { INSTALLATION_ID_PATTERN } from '../../../constants/providers';
 import { COUNTRY_CODE_PATTERN } from '../../../constants/referenceData';
 
@@ -16,7 +16,8 @@ export const phoneSchema = z.object({
   countryCode: z.string().regex(COUNTRY_CODE_PATTERN),
   number: z.string().regex(PHONE_NUMBER_PATTERN),
 });
-export const idTokenSchema = z.string().min(1).max(ID_TOKEN_MAX_LENGTH);
+/** The signed single-use proof from `POST …/auth/otp/verify` (BUSINESS_DOMAIN §3.1a step 4). */
+export const otpTokenSchema = z.string().min(1).max(OTP_TOKEN_MAX_LENGTH);
 export const refreshTokenSchema = z.string().regex(REFRESH_TOKEN_PATTERN);
 
 /** The app instance behind the request: push token holder and analytics identity link. */

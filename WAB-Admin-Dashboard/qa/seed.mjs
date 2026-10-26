@@ -28,7 +28,7 @@ for (const [first, last, n, gender] of customers) {
     cityId,
     areaId,
     phone: { countryCode: 'JO', number: n },
-    idToken: proof(`+962${n}`),
+    otpToken: await proof('customer', `+962${n}`, 'REGISTER'),
     installation: installation(`qa-install-${n}-device`),
   });
 }
@@ -46,7 +46,7 @@ for (const [n, first, last, salonName, gender] of merchants) {
   await api('merchant', 'POST', '/uploads/license/confirm', { key: pres.data.key });
   await api('merchant', 'POST', '/salon/applications', {
     phone: { countryCode: 'JO', number: n },
-    idToken: proof(`+962${n}`),
+    otpToken: await proof('merchant', `+962${n}`, 'REGISTER'),
     firstName: first,
     lastName: last,
     salon: { name: salonName, gender, cityId, areaId },
@@ -77,7 +77,7 @@ const salonIds = {};
 for (const [n, , , salonName, gender, extra] of merchants) {
   const login = await api('merchant', 'POST', '/auth/login', {
     phone: { countryCode: 'JO', number: n },
-    idToken: proof(`+962${n}`),
+    otpToken: await proof('merchant', `+962${n}`, 'LOGIN'),
     installation: installation(`qa-merchant-${n}-dev`),
   });
   const token = login.data.accessToken;
@@ -197,7 +197,7 @@ const customerToken = async (n) =>
   (
     await api('customer', 'POST', '/auth/login', {
       phone: { countryCode: 'JO', number: n },
-      idToken: proof(`+962${n}`),
+      otpToken: await proof('customer', `+962${n}`, 'LOGIN'),
       installation: installation(`qa-install-${n}-device`),
     })
   ).data.accessToken;
@@ -231,7 +231,7 @@ const book = async (token, n, salonId, plusDays, serviceIdx, name) => {
     'customer',
     'POST',
     `/bookings/drafts/${draft.data.id}/verify-otp`,
-    { idToken: proof(`+962${n}`) },
+    { otpToken: await proof('customer', `+962${n}`, 'BOOKING_CONFIRMATION') },
     token,
   );
   const booking = await api('customer', 'POST', '/bookings', { draftId: draft.data.id }, token);
