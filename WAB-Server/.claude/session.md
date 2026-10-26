@@ -244,3 +244,14 @@
 - Tests: `python3 scripts/tasks.py check`; `python3 -m unittest scripts/test_tasks.py`
 - Loops: 1/1 — re-checked that each client URL config (admin `.env.dev`, customer `gradle.properties`/`Dev.xcconfig`) already points at this host
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — backlog only, no code. API docs: no change.
+
+### DOCS-OTP — WhatsApp phone OTP decision recorded; tasks for SDK, server, apps (owner request 2026-10-26)
+- Branch: `docs/whatsapp-otp-domain`
+- Status: DONE
+- Acceptance criteria:
+  - [x] Owner answers: end to end, Firebase Phone Auth removed (no SMS fallback)
+  - [x] `BUSINESS_DOMAIN.md`: actors table, §3.1a WhatsApp OTP flow (server code, HMAC store, request/verify, single-use `otpToken`), Redis keys, settings `otp.codeTtlSec` / `otp.proofTtlSec` / `otp.channel`, error `OTP_DELIVERY_FAILED`, open point 8
+  - [x] Backlog: OTP-011, SRV-153, SRV-154 (owner Meta setup), CUS-089, MER-070; CUS-061 / MER-055 rewritten for WhatsApp
+- Tests: `python3 scripts/tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs + backlog only. API docs: no change.
