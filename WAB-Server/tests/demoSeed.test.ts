@@ -317,10 +317,10 @@ describe('writeDemoDataset', () => {
 
   it('never runs in production', () => {
     expect(() => {
-      assertDemoAllowed({ isProduction: true });
+      assertDemoAllowed({ isProduction: true, demoSeed: { onStart: false } }, 'wab');
     }).toThrow();
     expect(() => {
-      assertDemoAllowed({ isProduction: false });
+      assertDemoAllowed({ isProduction: false, demoSeed: { onStart: false } }, 'wab');
     }).not.toThrow();
   });
 });

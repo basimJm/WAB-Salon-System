@@ -28,6 +28,7 @@ export function CredentialsStep({
         label={t('login.email')}
         type="email"
         autoComplete="username"
+        startIcon="mail"
         dir="ltr"
         value={email}
         onChange={(e) => onEmail(e.target.value)}
@@ -37,6 +38,7 @@ export function CredentialsStep({
         label={t('login.password')}
         type={visible ? 'text' : 'password'}
         autoComplete="current-password"
+        startIcon="lock"
         dir="ltr"
         value={password}
         onChange={(e) => onPassword(e.target.value)}

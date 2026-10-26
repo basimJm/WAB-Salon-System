@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { formatNumber } from '@/domain/shared/format';
+import { formatNumber } from '@/domain/shared/numbers';
 import { useLanguage } from '../../hooks/useLanguage';
 import { Button } from '../core/Button';
 import { Modal } from '../overlay/Modal';

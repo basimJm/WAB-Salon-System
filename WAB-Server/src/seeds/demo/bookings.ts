@@ -87,13 +87,22 @@ export interface BookingsResult {
   readonly bookings: number;
 }
 
+/** Volume knobs: extra branches book at least one appointment a day and skip failed payments. */
+export interface BookingsOptions {
+  readonly perDay?: { readonly min: number; readonly max: number };
+  readonly failedPayments?: number;
+}
+
 export const buildBookings = (
   ctx: DemoContext,
   random: DemoRandom,
   data: DemoDataset,
   salons: readonly DemoSalon[],
   customers: readonly DemoCustomer[],
+  options: BookingsOptions = {},
 ): BookingsResult => {
+  const perDay = options.perDay ?? { min: 0, max: DEMO_BOOKINGS_PER_SALON_DAY };
+  const failedPayments = options.failedPayments ?? DEMO_FAILED_PAYMENTS;
   const busy = new Map<string, [number, number][]>();
   const isFree = (staff: DemoStaff, start: Date, end: Date): boolean =>
     (busy.get(staff.id.toString()) ?? []).every(
@@ -176,7 +185,7 @@ export const buildBookings = (
       if (day === undefined || day.isOff) continue;
       const openMin = parseHHmm(day.open);
       const closeMin = parseHHmm(day.close);
-      const wanted = random.int(0, DEMO_BOOKINGS_PER_SALON_DAY);
+      const wanted = random.int(perDay.min, perDay.max);
       for (let n = 0; n < wanted; n += 1) {
         const customer = random.pick(pool);
         const bride =
@@ -402,6 +411,9 @@ export const buildBookings = (
       referenceNumber: reference,
       customerId: customer.id,
       salonId: salon.id,
+      ...(salon.branch === undefined
+        ? {}
+        : { branchId: salon.branch.id, branchSnapshot: salon.branch.snapshot }),
       salonGender: salon.gender,
       persons: persons.map((p, index) => ({
         name: p.name,
@@ -446,7 +458,10 @@ export const buildBookings = (
     });
 
     // Online money: the payment, its ledger lines and any refund.
-    const salonRef = { salonId: salon.id };
+    const salonRef = {
+      salonId: salon.id,
+      ...(salon.branch === undefined ? {} : { branchId: salon.branch.id }),
+    };
     if (paidOnline > 0) {
       const transactionId = demoId(`transaction:${label}`);
       const gatewayFee = percentOf(paidOnline, DEMO_GATEWAY_FEE_PERCENT);
@@ -644,6 +659,7 @@ export const buildBookings = (
       _id: demoId(`review:salon:${label}`),
       target: 'SALON',
       salonId: salon.id,
+      ...(salon.branch === undefined ? {} : { branchId: salon.branch.id }),
       customerId: customer.id,
       bookingId,
       rating,
@@ -664,6 +680,7 @@ export const buildBookings = (
         _id: demoId(`review:staff:${label}`),
         target: 'STAFF',
         salonId: salon.id,
+        ...(salon.branch === undefined ? {} : { branchId: salon.branch.id }),
         staffId: staff.id,
         customerId: customer.id,
         bookingId,
@@ -685,7 +702,7 @@ export const buildBookings = (
   const paying = salons.filter(
     (s) => s.takesBookings && s.policy.paymentOptions.some((o) => o !== 'PAY_ON_ARRIVAL'),
   );
-  for (let n = 0; n < DEMO_FAILED_PAYMENTS && paying.length > 0; n += 1) {
+  for (let n = 0; n < failedPayments && paying.length > 0; n += 1) {
     const salon = paying[n % paying.length];
     const customer = customers.find((c) => salon !== undefined && c.gender === salon.gender);
     if (salon === undefined || customer === undefined) continue;

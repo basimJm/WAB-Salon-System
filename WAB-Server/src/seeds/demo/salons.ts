@@ -67,6 +67,15 @@ export interface DemoSalon {
   /** Members told about booking requests (owner + manager). */
   readonly responders: readonly Types.ObjectId[];
   readonly takesBookings: boolean;
+  /** Set for an extra branch: its bookings, money and reviews carry the branch (§3.5, §5.16). */
+  readonly branch?: {
+    readonly id: Types.ObjectId;
+    readonly snapshot: {
+      readonly name: LocalizedName;
+      readonly locationText: string;
+      readonly phone: string;
+    };
+  };
 }
 
 const APPROVED_STATES = new Set(['APPROVED_INCOMPLETE', 'LIVE', 'OFFLINE']);
@@ -84,7 +93,7 @@ const daysAgo = (now: Date, days: number): Date => new Date(now.getTime() - days
 const phoneOf = (dialCode: string, prefix: string, index: number): string =>
   `${dialCode}${prefix}${String(index).padStart(DEMO_PHONE_INDEX_DIGITS, '0')}`;
 
-const policyOf = (spec: DemoSalonSpec): SalonPolicy => ({
+export const policyOf = (spec: DemoSalonSpec): SalonPolicy => ({
   cancellationWindowHours: DEMO_CANCELLATION_WINDOW_HOURS,
   paymentOptions: [...spec.paymentOptions] as (typeof PAYMENT_OPTIONS)[number][],
   ...(spec.paymentOptions.includes('DEPOSIT') ? { depositPercentage: DEMO_DEPOSIT_PERCENT } : {}),

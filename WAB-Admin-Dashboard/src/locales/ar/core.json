@@ -63,7 +63,9 @@
     },
     "breadcrumbs": "مسار التنقل",
     "expand": "توسيع {{name}}",
-    "collapse": "طيّ {{name}}"
+    "collapse": "طيّ {{name}}",
+    "collapseSidebar": "طي القائمة",
+    "expandSidebar": "توسيع القائمة"
   },
   "topbar": {
     "alerts": "التنبيهات",
@@ -86,7 +88,12 @@
       "bookings": "الحجوزات",
       "members": "الأعضاء"
     },
-    "profile": "ملفي الشخصي"
+    "profile": "ملفي الشخصي",
+    "otherLanguageShort": "EN",
+    "viewAll": "عرض الكل",
+    "markRead": "تمييز كمقروء",
+    "noAlerts": "لا توجد تنبيهات جديدة",
+    "alertsFailed": "تعذّر تحميل التنبيهات."
   },
   "module": {
     "comingSoon": "هذا القسم قادم قريبًا",

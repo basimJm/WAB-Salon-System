@@ -26,6 +26,7 @@
       "OTP_BLOCKED": "Too many code attempts. Verification is blocked for a while.",
       "OTP_INVALID": "The verification code is incorrect.",
       "OTP_EXPIRED": "The verification code has expired. Request a new one.",
+      "OTP_DELIVERY_FAILED": "The verification code could not be delivered on WhatsApp. Check the number and try again.",
       "PHONE_NOT_REGISTERED": "This phone number is not registered.",
       "PHONE_ALREADY_REGISTERED": "This phone number is already registered.",
       "ACCOUNT_BLOCKED": "This account is blocked.",

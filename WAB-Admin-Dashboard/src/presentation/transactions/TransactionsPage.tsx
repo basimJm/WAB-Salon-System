@@ -133,7 +133,7 @@ export default function TransactionsPage() {
     <ListPage
       title={title}
       subtitle={t('transactions.subtitle')}
-      actions={
+      exportMenu={
         <ExportMenu
           onExport={runner(
             'TRANSACTIONS',
@@ -197,6 +197,7 @@ export default function TransactionsPage() {
         columns,
         rows: data?.items ?? [],
         rowKey: (r) => r.id,
+        rowAlert: (r) => r.status === 'FAILED',
         caption: title,
         loading: query.isPending,
         error: query.error,

@@ -9,6 +9,21 @@ export const canRefresh = (session: Session, now: number): boolean =>
   session.refreshToken !== undefined &&
   (session.refreshExpiresAt === undefined || session.refreshExpiresAt > now);
 
+/**
+ * How long to wait before refreshing the access token proactively: until `skewMs` before it expires (0 when
+ * that moment has passed). Null when nothing can be scheduled (unknown expiry or no usable refresh token).
+ * Capped at `maxMs` (the largest delay a browser timer accepts).
+ */
+export function refreshDelay(
+  session: Session,
+  now: number,
+  skewMs: number,
+  maxMs: number,
+): number | null {
+  if (session.accessExpiresAt === undefined || !canRefresh(session, now)) return null;
+  return Math.min(maxMs, Math.max(0, session.accessExpiresAt - skewMs - now));
+}
+
 export type IdleState = 'active' | 'warning' | 'expired';
 
 export interface IdleStatus {
