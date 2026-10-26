@@ -156,4 +156,14 @@ describe('image build scripts', () => {
       expect(read('Dockerfile.dockerignore')).toContain(`!WAB-Server/${folder}\n`);
     }
   });
+
+  it('lets every WAB-Server folder the Dockerfile copies into the context (fonts, flags: SRV-172)', () => {
+    const copied = [...read('Dockerfile').matchAll(/^COPY WAB-Server\/(\w+) /gm)].map(
+      (m) => m[1] ?? '',
+    );
+    expect(copied).toContain('assets');
+    for (const folder of copied) {
+      expect(read('Dockerfile.dockerignore')).toContain(`!WAB-Server/${folder}\n`);
+    }
+  });
 });

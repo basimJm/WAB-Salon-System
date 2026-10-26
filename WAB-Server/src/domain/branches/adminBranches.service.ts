@@ -1,5 +1,6 @@
 import { ADMIN_BRANCH_AUDIT } from '../../constants/branches';
 import type { Logger } from '../../utils/logger';
+import type { PaginationParams } from '../../utils/pagination';
 import type { OnBehalf } from '../adminSalonEdit/adminSalonEdit.service';
 import type { AuditWriter } from '../audit/audit.service';
 import type { SalonStateNotifier } from '../salons/salonState.service';
@@ -9,7 +10,8 @@ type OnBranch = OnBehalf & { readonly branchId: string };
 
 /** Admin management of any salon's branches (§5.16): the owner's rules plus reason + audit + notice. */
 export interface AdminBranchesService {
-  list(salonId: string): Promise<BranchView[]>;
+  /** One page of the salon's open branches, main first (`meta` like every admin list). */
+  list(salonId: string, params: PaginationParams): Promise<{ items: BranchView[]; total: number }>;
   get(salonId: string, branchId: string): Promise<BranchView>;
   create(input: OnBehalf & { branch: BranchInput }): Promise<BranchView>;
   update(input: OnBranch & { patch: BranchPatch }): Promise<BranchView>;
@@ -73,7 +75,7 @@ export const createAdminBranchesService = ({
   });
 
   return {
-    list: (salonId) => branches.list(salonId),
+    list: (salonId, params) => branches.page(salonId, params),
     get: (salonId, branchId) => branches.get(salonId, branchId),
 
     async create({ branch, ...on }) {

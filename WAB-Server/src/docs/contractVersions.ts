@@ -15,9 +15,9 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-153: error code OTP_DELIVERY_FAILED added to the error enum only. Clients: none',
   },
   customer: {
-    version: '1.5.0',
-    sha256: '3af28abc1d51b48cce4112db9c932a5da1c5f42c7bd97d6b4f331968f3d2cf53',
-    note: 'SRV-170 (additive + semantic): CUS-093 uses services[].brideOnly on GET /customer/v1/salons/{salonId} (+ staff sheet services), bookings list/detail staff[] and persons[].staff {id,name,firstName,photoUrl} (first name only), list-row rejection, money.remaining = 0 once final + new money.paidAtSalon; ./gradlew apiSync',
+    version: '1.6.0',
+    sha256: '72384a511ae44eccbd9c6d4eb0a589315ce48ffcf856d467e3a32b009de82eda',
+    note: 'SRV-172: optional branchId query on salon details (that branch\'s staff/services/place; 404 BRANCH_NOT_FOUND); staff sheet = member branch services. Additive; customer app needs no change (it filters by branchId client-side), apiSync at the next customer task.',
   },
   merchant: {
     version: '1.6.0',
@@ -25,8 +25,8 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-170 (additive + semantic): booking rows/details add rejection, staff {firstName, photoUrl}, money.paidAtSalon; money.remaining is 0 once the booking is final (was the stored at-salon part). No merchant row needed: decoders tolerate new fields; ./gradlew apiSync at the next merchant task',
   },
   admin: {
-    version: '1.7.0',
-    sha256: '24e6e85ef138fd2b219584f04e833db4ae116e549c4e87d4d4251adcd3f767e4',
-    note: 'SRV-170 (additive + semantic): booking rows/details add rejection, staff {firstName, photoUrl}, money.paidAtSalon; money.remaining is 0 once the booking is final. No admin row needed; npm run api:sync at the next admin task',
+    version: '1.8.0',
+    sha256: '182e94e9ba7796693505c5617f02fab203ce66ba7d7a92ac0b60be2a33930c9b',
+    note: 'SRV-171 (additive): GET /admin/v1/salons/{id}/branches takes page/pageSize (default 25) and answers meta {page, pageSize, total}; booking q also matches partial references. Admin panel already tolerates both; npm run api:sync at the next admin task',
   },
 };

@@ -7827,7 +7827,7 @@
       "name": "Salon branches",
       "item": [
         {
-          "name": "Branches of the salon, main first (admin; reason + audit, the owner is notified)",
+          "name": "Branches of the salon, main first (admin; reason + audit, the owner is notified); paged, `meta` = {page, pageSize, total}",
           "request": {
             "method": "GET",
             "header": [
@@ -7858,7 +7858,18 @@
                 ":id",
                 "branches"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
