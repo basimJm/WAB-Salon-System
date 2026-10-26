@@ -14,10 +14,15 @@
     <string name="salon_day_today">%1$s · Today</string>
     <string name="salon_closure_title">Upcoming closure</string>
     <string name="salon_closure">Closed %1$s – %2$s · %3$s</string>
+    <string name="salon_closure_day">Closed %1$s · %2$s</string>
     <string name="salon_staff">Staff</string>
     <string name="salon_reviews">Reviews</string>
     <string name="salon_reviews_of_five">%1$s / 5</string>
-    <string name="salon_reviews_count"> · %1$d reviews</string>
+    <plurals name="salon_reviews_count">
+        <item quantity="one"> · %1$d review</item>
+        <item quantity="many"> · %1$d reviews</item>
+        <item quantity="other"> · %1$d reviews</item>
+    </plurals>
     <string name="salon_reviews_count_short"> · %1$d</string>
     <string name="salon_reviews_see_more">See more</string>
     <string name="salon_reviews_empty">There are no reviews for this salon yet.</string>
@@ -52,7 +57,11 @@
     <string name="reviews_title">Salon reviews</string>
     <string name="reviews_staff_title">Staff reviews</string>
     <string name="reviews_empty">No reviews yet</string>
-    <string name="reviews_based_on">Based on %1$d reviews</string>
+    <plurals name="reviews_based_on">
+        <item quantity="one">Based on %1$d review</item>
+        <item quantity="many">Based on %1$d reviews</item>
+        <item quantity="other">Based on %1$d reviews</item>
+    </plurals>
     <string name="review_comment_hint">Write a comment (optional)</string>
     <string name="review_submit">Submit review</string>
     <string name="review_submitted">Thank you! Your review will appear after approval.</string>

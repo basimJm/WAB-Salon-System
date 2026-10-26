@@ -43,7 +43,7 @@ fun AppExpandableText(
             overflow = TextOverflow.Ellipsis,
             onTextLayout = { result -> if (!expanded) overflows = result.hasVisualOverflow },
         )
-        if (overflows || expanded) {
+        if (expandToggleVisible(overflows = overflows, expanded = expanded)) {
             val toggle = onExpandRequest ?: { expanded = !expanded }
             AppText(
                 text = if (expanded) lessLabel else moreLabel,
@@ -56,3 +56,6 @@ fun AppExpandableText(
 }
 
 private const val DEFAULT_COLLAPSED_LINES = 2
+
+/** "more" only when the collapsed text really overflows; "less" while expanded (PRD §3.9). */
+fun expandToggleVisible(overflows: Boolean, expanded: Boolean): Boolean = overflows || expanded

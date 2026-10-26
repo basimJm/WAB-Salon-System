@@ -35,12 +35,13 @@
     <string name="details_rejection_reason">Rejection reason</string>
     <string name="details_cancellation_reason">Cancellation reason</string>
     <string name="details_auto_cancel_reason">The salon did not approve the booking within 1 hour of its start, so it was cancelled automatically.</string>
+    <string name="details_reason_customer_request">You cancelled this booking.</string>
+    <string name="details_reason_not_given">No reason was given.</string>
     <string name="details_call">Call</string>
     <string name="details_whatsapp">WhatsApp</string>
     <string name="details_persons">People</string>
     <string name="details_bride">Bride</string>
     <string name="details_staff">Staff: %1$s</string>
-    <string name="details_staff_any">Any available</string>
     <string name="details_payment">Payment</string>
     <string name="details_total">Total</string>
     <string name="details_paid">Paid</string>
@@ -49,15 +50,23 @@
     <string name="details_refund_pending">Refund pending</string>
     <string name="details_refund_failed">Refund failed</string>
     <string name="details_policy">Salon policy</string>
-    <string name="details_policy_window">Cancel up to %1$d hours before the appointment</string>
-    <string name="details_policy_deposit">Deposit is %1$d%% of the total</string>
+    <plurals name="details_policy_window">
+        <item quantity="one">Cancel up to %1$d hour before the appointment</item>
+        <item quantity="many">Cancel up to %1$d hours before the appointment</item>
+        <item quantity="other">Cancel up to %1$d hours before the appointment</item>
+    </plurals>
+    <string name="details_policy_deposit">Deposit is %1$d% of the total</string>
     <string name="details_policy_deposit_refundable">The deposit is refunded if you cancel in time</string>
     <string name="details_policy_deposit_non_refundable">The deposit is not refunded if you cancel</string>
     <string name="details_rate">Rate your experience</string>
     <string name="details_cancel">Cancel booking</string>
     <string name="details_cancel_any_time">You can cancel this booking at any time.</string>
     <string name="details_cancel_until">You can cancel this booking until %1$s</string>
-    <string name="details_cancel_window_passed">Cancellation is not allowed less than %1$d hours before the appointment.</string>
+    <plurals name="details_cancel_window_passed">
+        <item quantity="one">Cancellation is not allowed less than %1$d hour before the appointment.</item>
+        <item quantity="many">Cancellation is not allowed less than %1$d hours before the appointment.</item>
+        <item quantity="other">Cancellation is not allowed less than %1$d hours before the appointment.</item>
+    </plurals>
     <string name="details_cancel_title">Cancel this booking?</string>
     <string name="details_cancel_body">The whole booking will be cancelled for everyone. This can’t be undone.</string>
     <string name="details_cancel_confirm">Yes, cancel booking</string>

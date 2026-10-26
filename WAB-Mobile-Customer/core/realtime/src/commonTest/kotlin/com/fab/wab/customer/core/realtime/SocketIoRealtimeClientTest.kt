@@ -60,7 +60,7 @@ class SocketIoRealtimeClientTest {
     }
 
     @Test
-    fun unauthorizedStopsWithoutRetry() = runTest {
+    fun unauthorizedWaitsWhileTheTokenIsUnchangedAndStopsOnSignOut() = runTest {
         val client = client()
         client.connect()
         testScheduler.runCurrent()
@@ -75,6 +75,31 @@ class SocketIoRealtimeClientTest {
         testScheduler.runCurrent()
         assertEquals(RealtimeStatus.Unauthorized, client.status.value)
         assertEquals(1, transport.connections.size)
+    }
+
+    @Test
+    fun unauthorizedReconnectsOnceTheHttpLayerStoredARefreshedToken() = runTest {
+        // CUS-092: the 15-minute access token expired, the socket got UNAUTHORIZED and stayed dead until the next resume.
+        val client = client()
+        client.connect()
+        testScheduler.runCurrent()
+        transport.connections.single().push(OPEN_FRAME)
+        transport.connections.single().push(UNAUTHORIZED_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(RealtimeStatus.Unauthorized, client.status.value)
+
+        token = "access-2"
+        testScheduler.advanceTimeBy(RealtimeDefaults.RECONNECT_BASE_DELAY_MS + 1)
+        testScheduler.runCurrent()
+        val second = transport.connections.last()
+        assertEquals(2, transport.connections.size)
+        second.push(OPEN_FRAME)
+        testScheduler.runCurrent()
+        assertEquals("""40/customer,{"token":"access-2"}""", second.sent.single())
+        second.push(CONNECTED_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(RealtimeStatus.Connected, client.status.value)
+        client.disconnect()
     }
 
     @Test

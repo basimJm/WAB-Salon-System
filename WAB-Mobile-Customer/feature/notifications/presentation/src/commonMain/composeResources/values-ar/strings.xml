@@ -20,8 +20,26 @@
     <string name="notifications_reset">إعادة تعيين</string>
     <string name="notifications_view_booking">عرض الحجز</string>
     <string name="time_now">الآن</string>
-    <string name="time_minutes_ago">قبل %1$d دقيقة</string>
-    <string name="time_hours_ago">قبل %1$d ساعة</string>
+    <plurals name="time_minutes_ago">
+        <item quantity="one">قبل دقيقة</item>
+        <item quantity="two">قبل دقيقتين</item>
+        <item quantity="few">قبل %1$d دقائق</item>
+        <item quantity="many">قبل %1$d دقيقة</item>
+        <item quantity="other">قبل %1$d دقيقة</item>
+    </plurals>
+    <plurals name="time_hours_ago">
+        <item quantity="one">قبل ساعة</item>
+        <item quantity="two">قبل ساعتين</item>
+        <item quantity="few">قبل %1$d ساعات</item>
+        <item quantity="many">قبل %1$d ساعة</item>
+        <item quantity="other">قبل %1$d ساعة</item>
+    </plurals>
     <string name="time_yesterday">أمس</string>
-    <string name="time_days_ago">قبل %1$d يوم</string>
+    <plurals name="time_days_ago">
+        <item quantity="one">قبل يوم</item>
+        <item quantity="two">قبل يومين</item>
+        <item quantity="few">قبل %1$d أيام</item>
+        <item quantity="many">قبل %1$d يوماً</item>
+        <item quantity="other">قبل %1$d يوم</item>
+    </plurals>
 </resources>

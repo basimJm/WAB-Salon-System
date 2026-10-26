@@ -30,6 +30,7 @@ import com.fab.wab.customer.designsystem.resources.price_jod
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.bookings.domain.model.RefundOutcome
 import com.fab.wab.customer.feature.bookings.presentation.resources.Res
+import com.fab.wab.customer.feature.bookings.presentation.resources.details_policy_window
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancel_body
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancel_confirm
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancel_dismiss
@@ -40,7 +41,6 @@ import com.fab.wab.customer.feature.bookings.presentation.resources.details_poli
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_policy_deposit
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_policy_deposit_non_refundable
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_policy_deposit_refundable
-import com.fab.wab.customer.feature.bookings.presentation.resources.details_policy_window
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_refund_deposit_deducted
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_refund_deposit_kept
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_refund_full
@@ -49,6 +49,7 @@ import com.fab.wab.customer.feature.bookings.presentation.resources.details_refu
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_remaining
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_total
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -101,7 +102,7 @@ internal fun PolicyBlock(booking: BookingDetails) {
         Res.string.details_policy_deposit_non_refundable
     }
     val rules = listOfNotNull(
-        stringResource(Res.string.details_policy_window, policy.cancellationWindowHours.toInt()),
+        policy.cancellationWindowHours.toInt().let { hours -> pluralStringResource(Res.plurals.details_policy_window, hours, hours) },
         policy.depositPercentage?.let { stringResource(Res.string.details_policy_deposit, it.toInt()) },
         stringResource(refundRes),
         policy.notes,
