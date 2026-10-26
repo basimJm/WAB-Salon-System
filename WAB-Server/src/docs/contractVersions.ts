@@ -15,18 +15,18 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-153: error code OTP_DELIVERY_FAILED added to the error enum only. Clients: none',
   },
   customer: {
-    version: '1.4.0',
-    sha256: '4abb4f99c0dce22ed67f35b77c3b63b66b7f67042741e9b8cd2d128644e5bb6a',
-    note: 'SRV-153 BREAKING (WhatsApp OTP): POST /auth/otp/request now sends the code (answer adds expiresInSeconds; 422 OTP_DELIVERY_FAILED); NEW POST /auth/otp/verify {phone,purpose,code} -> {otpToken,expiresInSeconds}; POST /auth/otp/wrong-attempt REMOVED; idToken -> otpToken in POST /auth/login, /auth/register, /auth/change-phone, /bookings/drafts/{id}/verify-otp; error code OTP_DELIVERY_FAILED. Client: CUS-089 (./gradlew apiSync)',
+    version: '1.5.0',
+    sha256: '3af28abc1d51b48cce4112db9c932a5da1c5f42c7bd97d6b4f331968f3d2cf53',
+    note: 'SRV-170 (additive + semantic): CUS-093 uses services[].brideOnly on GET /customer/v1/salons/{salonId} (+ staff sheet services), bookings list/detail staff[] and persons[].staff {id,name,firstName,photoUrl} (first name only), list-row rejection, money.remaining = 0 once final + new money.paidAtSalon; ./gradlew apiSync',
   },
   merchant: {
-    version: '1.5.0',
-    sha256: '75d06730cc35c53a631eaea8627bf6f4617517df5695fd7c770274ddfedd1b4f',
-    note: 'SRV-153 BREAKING (WhatsApp OTP): POST /auth/otp/request now sends the code (answer adds expiresInSeconds; 422 OTP_DELIVERY_FAILED); NEW POST /auth/otp/verify {phone,purpose,code} -> {otpToken,expiresInSeconds}; POST /auth/otp/wrong-attempt REMOVED; idToken -> otpToken in POST /auth/login, /auth/change-phone, /salon/applications, PUT /salon/payout-details; error code OTP_DELIVERY_FAILED. Client: MER-070 (./gradlew apiSync)',
+    version: '1.6.0',
+    sha256: '6c69d083bfdf698c9ce611460ec428e514ece5bacee98c420e42e30513e2d359',
+    note: 'SRV-170 (additive + semantic): booking rows/details add rejection, staff {firstName, photoUrl}, money.paidAtSalon; money.remaining is 0 once the booking is final (was the stored at-salon part). No merchant row needed: decoders tolerate new fields; ./gradlew apiSync at the next merchant task',
   },
   admin: {
-    version: '1.6.0',
-    sha256: '2da64228c42baab53c5dcdb70564c1f1661bff6e30ee82a55d00c976f2c36d07',
-    note: 'SRV-153: error code OTP_DELIVERY_FAILED added to the error enum only (no admin operation changed). Client: ADM none required (npm run api:sync optional)',
+    version: '1.7.0',
+    sha256: '24e6e85ef138fd2b219584f04e833db4ae116e549c4e87d4d4251adcd3f767e4',
+    note: 'SRV-170 (additive + semantic): booking rows/details add rejection, staff {firstName, photoUrl}, money.paidAtSalon; money.remaining is 0 once the booking is final. No admin row needed; npm run api:sync at the next admin task',
   },
 };

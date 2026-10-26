@@ -625,6 +625,7 @@ const buildServices = (
     members: new MembersRepository(),
     salons: new SalonsRepository(),
     settings,
+    storage: providers.storage,
   });
   const bookingAdmin = createBookingAdminService({
     hook: bookingChanges,
