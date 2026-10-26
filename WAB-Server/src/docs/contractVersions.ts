@@ -25,8 +25,8 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-170 (additive + semantic): booking rows/details add rejection, staff {firstName, photoUrl}, money.paidAtSalon; money.remaining is 0 once the booking is final (was the stored at-salon part). No merchant row needed: decoders tolerate new fields; ./gradlew apiSync at the next merchant task',
   },
   admin: {
-    version: '1.7.0',
-    sha256: '24e6e85ef138fd2b219584f04e833db4ae116e549c4e87d4d4251adcd3f767e4',
-    note: 'SRV-170 (additive + semantic): booking rows/details add rejection, staff {firstName, photoUrl}, money.paidAtSalon; money.remaining is 0 once the booking is final. No admin row needed; npm run api:sync at the next admin task',
+    version: '1.8.0',
+    sha256: '182e94e9ba7796693505c5617f02fab203ce66ba7d7a92ac0b60be2a33930c9b',
+    note: 'SRV-171 (additive): GET /admin/v1/salons/{id}/branches takes page/pageSize (default 25) and answers meta {page, pageSize, total}; booking q also matches partial references. Admin panel already tolerates both; npm run api:sync at the next admin task',
   },
 };
