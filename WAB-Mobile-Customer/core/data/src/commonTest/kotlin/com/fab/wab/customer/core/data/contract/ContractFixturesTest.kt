@@ -62,12 +62,10 @@ class ContractFixturesTest {
     fun everyOperationTheAppCallsHasARealCapturedResponse() {
         val notCaptured = appOperations.filterNot { it in MockFixtures.captured }.toSet()
         // A profile picture needs a real image upload to the storage before confirm/avatar; their schema samples stay.
-        // CUS-089: the WhatsApp OTP request / verify (contract 1.4.0) wait for the next local-stack capture.
+        // The WhatsApp OTP request / verify were captured with contract 1.5.0 (CUS-093).
         val expected = setOf(
             CustomerOperations.postUploadsConfirm,
             CustomerOperations.putProfileAvatar,
-            CustomerOperations.postAuthOtpRequest,
-            CustomerOperations.postAuthOtpVerify,
         ).map(::fixtureKeyOf).toSet()
         assertEquals(expected, notCaptured)
     }

@@ -6,17 +6,20 @@
       "id": "79ea2a78d15934408a10b09f",
       "name": "Rose Bridal Studio",
       "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/rose/profile.jpg",
-      "rating": 4.7,
-      "reviewsCount": 3,
+      "rating": 4.2,
+      "reviewsCount": 23,
       "locationText": "Sweifieh, Wakalat Street, 2nd floor",
       "shortDescription": "Bridal and occasion specialists in Sweifieh: bridal makeup, hair styling and henna for the whole party.",
-      "isOpenNow": false,
-      "todayHours": null,
+      "isOpenNow": true,
+      "todayHours": {
+        "open": "11:00",
+        "close": "21:00"
+      },
       "isFavorite": false,
       "distanceKm": null,
-      "branchCount": 1,
+      "branchCount": 3,
       "branch": {
-        "id": "6addc42774ae573daadd06d6",
+        "id": "6adf513d4bd7099438793e83",
         "name": "Sweifieh"
       }
     },
@@ -24,10 +27,10 @@
       "id": "7fe703cdf5e7eec204bb193d",
       "name": "Lamar Beauty Lounge",
       "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/profile.jpg",
-      "rating": 3.8,
-      "reviewsCount": 5,
-      "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون",
-      "shortDescription": "صالون نسائي متكامل في عبدون: شعر، أظافر، مكياج وعناية بالبشرة بأيدي فريق محترف وأجواء هادئة.",
+      "rating": 3.9,
+      "reviewsCount": 28,
+      "locationText": "Abdoun, Cairo Street, next to Abdoun Circle",
+      "shortDescription": "A full-service ladies salon in Abdoun: hair, nails, makeup and skin care by a professional team in a calm setting.",
       "isOpenNow": false,
       "todayHours": {
         "open": "10:00",
@@ -35,9 +38,9 @@
       },
       "isFavorite": false,
       "distanceKm": null,
-      "branchCount": 1,
+      "branchCount": 4,
       "branch": {
-        "id": "6addc42474ae573daadd06d5",
+        "id": "6adf513c4bd7099438793e82",
         "name": "Abdoun"
       }
     },
@@ -45,10 +48,10 @@
       "id": "8dd71c4c0268487d2d240be2",
       "name": "Joury Ladies Salon",
       "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/joury/profile.jpg",
-      "rating": 3.8,
-      "reviewsCount": 5,
-      "locationText": "خلدا، شارع وصفي التل، مجمع النخيل",
-      "shortDescription": "صالون عائلي في خلدا بأسعار مناسبة: قص، سشوار، صبغة، أظافر ومكياج للمناسبات.",
+      "rating": 3.9,
+      "reviewsCount": 8,
+      "locationText": "Khalda, Wasfi Al-Tal Street, Al-Nakheel Complex",
+      "shortDescription": "A family salon in Khalda at fair prices: cuts, blow-dry, coloring, nails and occasion makeup.",
       "isOpenNow": false,
       "todayHours": {
         "open": "09:00",
@@ -58,14 +61,35 @@
       "distanceKm": null,
       "branchCount": 1,
       "branch": {
-        "id": "6addc42b74ae573daadd06d7",
+        "id": "6adf513d4bd7099438793e84",
         "name": "Khalda"
+      }
+    },
+    {
+      "id": "6adf0da8a2ab115e76fee5c6",
+      "name": "Noor Salon",
+      "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/salons/profile/6adf0da8a2ab115e76fee5c6/c7c57ed7-d836-4f0b-b7bf-4a5efb3be529.png",
+      "rating": 0,
+      "reviewsCount": 0,
+      "locationText": "Abdoun, Amman",
+      "shortDescription": "Hair, nails and bridal packages in Amman",
+      "isOpenNow": true,
+      "todayHours": {
+        "open": "09:00",
+        "close": "21:00"
+      },
+      "isFavorite": false,
+      "distanceKm": null,
+      "branchCount": 1,
+      "branch": {
+        "id": "6adf0da8a2ab115e76fee5cd",
+        "name": "Tabarbour"
       }
     }
   ],
   "meta": {
     "page": 1,
     "pageSize": 10,
-    "total": 3
+    "total": 4
   }
 }

@@ -50,6 +50,8 @@ data class SalonService(
     val durationMinutes: Int,
     val mediaUrls: List<String>,
     val branchId: String? = null,
+    /** VIP service: bookable only for a person marked as bride (PRD S16 step 1, SRV-170). */
+    val brideOnly: Boolean = false,
 )
 
 data class GalleryItem(val id: String, val type: MediaType, val url: String, val thumbnailUrl: String?)

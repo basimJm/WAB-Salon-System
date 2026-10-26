@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Customer API",
-    "version": "1.4.0"
+    "version": "1.5.0"
   },
   "servers": [
     {
@@ -4217,6 +4217,10 @@
                               "durationMinutes": {
                                 "type": "number"
                               },
+                              "brideOnly": {
+                                "type": "boolean",
+                                "description": "Bookable only for a bride person; otherwise 422 BRIDE_ONLY_SERVICE"
+                              },
                               "mediaUrls": {
                                 "type": "array",
                                 "items": {
@@ -4233,6 +4237,7 @@
                               "description",
                               "price",
                               "durationMinutes",
+                              "brideOnly",
                               "mediaUrls"
                             ]
                           }
@@ -4609,12 +4614,17 @@
                               },
                               "name": {
                                 "type": "string"
+                              },
+                              "brideOnly": {
+                                "type": "boolean",
+                                "description": "Bookable only for a bride person; otherwise 422 BRIDE_ONLY_SERVICE"
                               }
                             },
                             "required": [
                               "id",
                               "catalogServiceId",
-                              "name"
+                              "name",
+                              "brideOnly"
                             ]
                           }
                         },
@@ -8967,7 +8977,8 @@
                               "type": "string"
                             },
                             "remaining": {
-                              "type": "string"
+                              "type": "string",
+                              "description": "Still to pay at the salon now (JOD); 0 once the booking is final."
                             }
                           },
                           "required": [
@@ -9289,14 +9300,52 @@
                                 },
                                 "name": {
                                   "type": "string"
+                                },
+                                "firstName": {
+                                  "type": "string"
+                                },
+                                "photoUrl": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
                                 }
                               },
                               "required": [
                                 "id",
-                                "name"
-                              ]
+                                "name",
+                                "firstName",
+                                "photoUrl"
+                              ],
+                              "description": "Assigned staff member. Customer view: first name only (`name` = `firstName`); merchant/admin: `name` is the full name."
                             },
-                            "description": "Merchant and admin views only."
+                            "description": "The distinct staff of the booking (every view)."
+                          },
+                          "rejection": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "reasonCode": {
+                                "type": "string"
+                              },
+                              "reasonText": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "at": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "reasonCode",
+                              "reasonText",
+                              "at"
+                            ],
+                            "description": "The salon’s rejection reason; null unless REJECTED."
                           }
                         },
                         "required": [
@@ -9315,7 +9364,8 @@
                           "salon",
                           "branch",
                           "customer",
-                          "staff"
+                          "staff",
+                          "rejection"
                         ]
                       }
                     },
@@ -9495,7 +9545,8 @@
                               "type": "string"
                             },
                             "remaining": {
-                              "type": "string"
+                              "type": "string",
+                              "description": "Still to pay at the salon now (JOD); 0 once the booking is final."
                             }
                           },
                           "required": [
@@ -9775,14 +9826,52 @@
                               },
                               "name": {
                                 "type": "string"
+                              },
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "photoUrl": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
                               }
                             },
                             "required": [
                               "id",
-                              "name"
-                            ]
+                              "name",
+                              "firstName",
+                              "photoUrl"
+                            ],
+                            "description": "Assigned staff member. Customer view: first name only (`name` = `firstName`); merchant/admin: `name` is the full name."
                           },
-                          "description": "Merchant and admin views only."
+                          "description": "The distinct staff of the booking (every view)."
+                        },
+                        "rejection": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "reasonCode": {
+                              "type": "string"
+                            },
+                            "reasonText": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "at": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reasonCode",
+                            "reasonText",
+                            "at"
+                          ],
+                          "description": "The salon’s rejection reason; null unless REJECTED."
                         },
                         "refundStatus": {
                           "type": "string"
@@ -9818,12 +9907,24 @@
                                   },
                                   "name": {
                                     "type": "string"
+                                  },
+                                  "firstName": {
+                                    "type": "string"
+                                  },
+                                  "photoUrl": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "id",
-                                  "name"
-                                ]
+                                  "name",
+                                  "firstName",
+                                  "photoUrl"
+                                ],
+                                "description": "Assigned staff member. Customer view: first name only (`name` = `firstName`); merchant/admin: `name` is the full name."
                               },
                               "services": {
                                 "type": "array",
@@ -9872,7 +9973,12 @@
                               "type": "string"
                             },
                             "remaining": {
-                              "type": "string"
+                              "type": "string",
+                              "description": "Still to pay at the salon now (JOD): total − paidOnline while PENDING/APPROVED, 0 once the booking is final."
+                            },
+                            "paidAtSalon": {
+                              "type": "string",
+                              "description": "Collected in person (JOD): the at-salon part once COMPLETED, else 0."
                             },
                             "refunded": {
                               "type": "string"
@@ -9883,6 +9989,7 @@
                             "dueOnline",
                             "paidOnline",
                             "remaining",
+                            "paidAtSalon",
                             "refunded"
                           ]
                         },
@@ -9919,31 +10026,6 @@
                               "at"
                             ]
                           }
-                        },
-                        "rejection": {
-                          "type": [
-                            "object",
-                            "null"
-                          ],
-                          "properties": {
-                            "reasonCode": {
-                              "type": "string"
-                            },
-                            "reasonText": {
-                              "type": [
-                                "string",
-                                "null"
-                              ]
-                            },
-                            "at": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "reasonCode",
-                            "reasonText",
-                            "at"
-                          ]
                         },
                         "cancellation": {
                           "type": [
@@ -10006,12 +10088,12 @@
                         "branch",
                         "customer",
                         "staff",
+                        "rejection",
                         "refundStatus",
                         "persons",
                         "money",
                         "policy",
                         "statusHistory",
-                        "rejection",
                         "cancellation",
                         "createdAt",
                         "actions"

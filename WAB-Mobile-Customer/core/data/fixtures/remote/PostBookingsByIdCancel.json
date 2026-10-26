@@ -2,19 +2,19 @@
   "success": true,
   "message": "Done successfully.",
   "data": {
-    "id": "6ade3fabc2cfb0cb993a174b",
-    "referenceNumber": "WAB-4SGJP3",
+    "id": "6adf88e16a85c06ca3b8015b",
+    "referenceNumber": "WAB-RP9WRZ",
     "status": "CANCELLED_BY_CUSTOMER",
     "paymentMethod": "PAY_ON_ARRIVAL",
     "paymentStatus": "PAY_ON_ARRIVAL",
-    "appointmentStart": "2026-10-29T08:00:00.000Z",
-    "appointmentEnd": "2026-10-29T09:00:00.000Z",
-    "respondBy": "2026-10-29T09:00:00.000Z",
+    "appointmentStart": "2026-10-30T08:00:00.000Z",
+    "appointmentEnd": "2026-10-30T09:00:00.000Z",
+    "respondBy": "2026-10-30T09:00:00.000Z",
     "money": {
       "total": "49.000",
       "dueOnline": "0.000",
       "paidOnline": "0.000",
-      "remaining": "49.000"
+      "remaining": "0.000"
     },
     "refundDue": "0.000"
   }

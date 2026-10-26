@@ -6,12 +6,6 @@
     "unreadCount": null,
     "banners": [
       {
-        "id": "6ad85dbe4476769dca9165ad",
-        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/banners/6ad76618bf7000bf1221c7e3/f6edc544-bf98-4114-a7b9-94890ca17cee.png",
-        "actionType": "NONE",
-        "actionValue": null
-      },
-      {
         "id": "7cf9c4c7e6f6ccc2efb90ec4",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/banners/welcome-en.jpg",
         "actionType": "NONE",
@@ -33,70 +27,70 @@
     "services": {
       "items": [
         {
-          "id": "6ad867149e63b9a6a612d49e",
+          "id": "6adf0d5d1399cd74c64483d8",
           "name": "Haircut",
           "description": "Cut and shape to your taste",
           "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/haircut.jpg",
           "gender": "FEMALE"
         },
         {
-          "id": "6ad867159e63b9a6a612d49f",
+          "id": "6adf0d5d1399cd74c64483d9",
           "name": "Blow dry",
           "description": "Wash and blow-dry styling",
           "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/blow-dry.jpg",
           "gender": "FEMALE"
         },
         {
-          "id": "6ad867159e63b9a6a612d4a0",
+          "id": "6adf0d5d1399cd74c64483da",
           "name": "Hair coloring",
           "description": "Full color or highlights",
           "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/hair-color.jpg",
           "gender": "FEMALE"
         },
         {
-          "id": "6ad867159e63b9a6a612d4a1",
+          "id": "6adf0d5d1399cd74c64483db",
           "name": "Keratin treatment",
           "description": "Smoothing treatment for the hair",
           "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/keratin.jpg",
           "gender": "FEMALE"
         },
         {
-          "id": "6ad867169e63b9a6a612d4a2",
+          "id": "6adf0d5d1399cd74c64483dc",
           "name": "Manicure",
           "description": "Nail care and polish",
           "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/manicure.jpg",
           "gender": "FEMALE"
         },
         {
-          "id": "6ad867169e63b9a6a612d4a3",
+          "id": "6adf0d5d1399cd74c64483dd",
           "name": "Pedicure",
           "description": "Foot and toenail care",
           "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/pedicure.jpg",
           "gender": "FEMALE"
         },
         {
-          "id": "6ad867169e63b9a6a612d4a4",
+          "id": "6adf0d5d1399cd74c64483de",
           "name": "Makeup",
           "description": "Makeup for occasions",
           "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/makeup.jpg",
           "gender": "FEMALE"
         },
         {
-          "id": "6ad867179e63b9a6a612d4a5",
+          "id": "6adf0d5d1399cd74c64483df",
           "name": "Bridal makeup",
           "description": "Complete bridal makeup",
           "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/bridal-makeup.jpg",
           "gender": "FEMALE"
         },
         {
-          "id": "6ad867179e63b9a6a612d4a6",
+          "id": "6adf0d5d1399cd74c64483e0",
           "name": "Facial",
           "description": "Deep cleansing and hydration",
           "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/facial.jpg",
           "gender": "FEMALE"
         },
         {
-          "id": "6ad867179e63b9a6a612d4a7",
+          "id": "6adf0d5d1399cd74c64483e1",
           "name": "Waxing",
           "description": "Hair removal with wax",
           "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/waxing.jpg",
@@ -111,10 +105,10 @@
           "id": "7fe703cdf5e7eec204bb193d",
           "name": "Lamar Beauty Lounge",
           "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/profile.jpg",
-          "rating": 3.8,
-          "reviewsCount": 5,
-          "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون",
-          "shortDescription": "صالون نسائي متكامل في عبدون: شعر، أظافر، مكياج وعناية بالبشرة بأيدي فريق محترف وأجواء هادئة.",
+          "rating": 3.9,
+          "reviewsCount": 28,
+          "locationText": "Abdoun, Cairo Street, next to Abdoun Circle",
+          "shortDescription": "A full-service ladies salon in Abdoun: hair, nails, makeup and skin care by a professional team in a calm setting.",
           "isOpenNow": false,
           "todayHours": {
             "open": "10:00",
@@ -122,9 +116,9 @@
           },
           "isFavorite": false,
           "distanceKm": null,
-          "branchCount": 1,
+          "branchCount": 4,
           "branch": {
-            "id": "6addc42474ae573daadd06d5",
+            "id": "6adf513c4bd7099438793e82",
             "name": "Abdoun"
           }
         }
@@ -134,13 +128,57 @@
     "nearest": {
       "items": [
         {
+          "id": "6adf0da8a2ab115e76fee5c6",
+          "name": "Noor Salon",
+          "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/salons/profile/6adf0da8a2ab115e76fee5c6/c7c57ed7-d836-4f0b-b7bf-4a5efb3be529.png",
+          "rating": 0,
+          "reviewsCount": 0,
+          "locationText": "Abdoun, Amman",
+          "shortDescription": "Hair, nails and bridal packages in Amman",
+          "isOpenNow": true,
+          "todayHours": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "isFavorite": false,
+          "distanceKm": 0,
+          "branchCount": 1,
+          "branch": {
+            "id": "6adf0da8a2ab115e76fee5cd",
+            "name": "Tabarbour"
+          },
+          "title": "Noor Salon"
+        },
+        {
+          "id": "79ea2a78d15934408a10b09f",
+          "name": "Rose Bridal Studio",
+          "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/rose/profile.jpg",
+          "rating": 4.2,
+          "reviewsCount": 23,
+          "locationText": "Jabal Amman, Rainbow Street, near the First Circle",
+          "shortDescription": "Bridal and occasion specialists in Sweifieh: bridal makeup, hair styling and henna for the whole party.",
+          "isOpenNow": true,
+          "todayHours": {
+            "open": "12:00",
+            "close": "22:00"
+          },
+          "isFavorite": false,
+          "distanceKm": 1.3,
+          "branchCount": 3,
+          "branch": {
+            "id": "ce1bd4752df7edefcac0f090",
+            "name": "Jabal Amman"
+          },
+          "title": "Rose Bridal Studio - Jabal Amman"
+        },
+        {
           "id": "7fe703cdf5e7eec204bb193d",
           "name": "Lamar Beauty Lounge",
           "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/profile.jpg",
-          "rating": 3.8,
-          "reviewsCount": 5,
-          "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون",
-          "shortDescription": "صالون نسائي متكامل في عبدون: شعر، أظافر، مكياج وعناية بالبشرة بأيدي فريق محترف وأجواء هادئة.",
+          "rating": 3.9,
+          "reviewsCount": 28,
+          "locationText": "Abdoun, Cairo Street, next to Abdoun Circle",
+          "shortDescription": "A full-service ladies salon in Abdoun: hair, nails, makeup and skin care by a professional team in a calm setting.",
           "isOpenNow": false,
           "todayHours": {
             "open": "10:00",
@@ -148,40 +186,87 @@
           },
           "isFavorite": false,
           "distanceKm": 2.7,
-          "branchCount": 1,
+          "branchCount": 4,
           "branch": {
-            "id": "6addc42474ae573daadd06d5",
+            "id": "6adf513c4bd7099438793e82",
             "name": "Abdoun"
           },
-          "title": "Lamar Beauty Lounge"
+          "title": "Lamar Beauty Lounge - Abdoun"
         },
         {
           "id": "79ea2a78d15934408a10b09f",
           "name": "Rose Bridal Studio",
           "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/rose/profile.jpg",
-          "rating": 4.7,
-          "reviewsCount": 3,
+          "rating": 4.2,
+          "reviewsCount": 23,
+          "locationText": "Al-Rabyeh, Abdul Rahim Al-Waked Street",
+          "shortDescription": "Bridal and occasion specialists in Sweifieh: bridal makeup, hair styling and henna for the whole party.",
+          "isOpenNow": true,
+          "todayHours": {
+            "open": "11:00",
+            "close": "21:00"
+          },
+          "isFavorite": false,
+          "distanceKm": 4.2,
+          "branchCount": 3,
+          "branch": {
+            "id": "444ece388341b640276cd4f0",
+            "name": "Al-Rabyeh"
+          },
+          "title": "Rose Bridal Studio - Al-Rabyeh"
+        },
+        {
+          "id": "79ea2a78d15934408a10b09f",
+          "name": "Rose Bridal Studio",
+          "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/rose/profile.jpg",
+          "rating": 4.2,
+          "reviewsCount": 23,
           "locationText": "Sweifieh, Wakalat Street, 2nd floor",
           "shortDescription": "Bridal and occasion specialists in Sweifieh: bridal makeup, hair styling and henna for the whole party.",
-          "isOpenNow": false,
-          "todayHours": null,
+          "isOpenNow": true,
+          "todayHours": {
+            "open": "11:00",
+            "close": "21:00"
+          },
           "isFavorite": false,
           "distanceKm": 4.9,
-          "branchCount": 1,
+          "branchCount": 3,
           "branch": {
-            "id": "6addc42774ae573daadd06d6",
+            "id": "6adf513d4bd7099438793e83",
             "name": "Sweifieh"
           },
-          "title": "Rose Bridal Studio"
+          "title": "Rose Bridal Studio - Sweifieh"
+        },
+        {
+          "id": "7fe703cdf5e7eec204bb193d",
+          "name": "Lamar Beauty Lounge",
+          "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/profile.jpg",
+          "rating": 3.9,
+          "reviewsCount": 28,
+          "locationText": "Gardens, Wasfi Al-Tal Street, Al-Sharq Complex",
+          "shortDescription": "A full-service ladies salon in Abdoun: hair, nails, makeup and skin care by a professional team in a calm setting.",
+          "isOpenNow": true,
+          "todayHours": {
+            "open": "10:00",
+            "close": "21:00"
+          },
+          "isFavorite": false,
+          "distanceKm": 5.6,
+          "branchCount": 4,
+          "branch": {
+            "id": "23157ce015ef9f32be49b52d",
+            "name": "Gardens"
+          },
+          "title": "Lamar Beauty Lounge - Gardens"
         },
         {
           "id": "8dd71c4c0268487d2d240be2",
           "name": "Joury Ladies Salon",
           "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/joury/profile.jpg",
-          "rating": 3.8,
-          "reviewsCount": 5,
-          "locationText": "خلدا، شارع وصفي التل، مجمع النخيل",
-          "shortDescription": "صالون عائلي في خلدا بأسعار مناسبة: قص، سشوار، صبغة، أظافر ومكياج للمناسبات.",
+          "rating": 3.9,
+          "reviewsCount": 8,
+          "locationText": "Khalda, Wasfi Al-Tal Street, Al-Nakheel Complex",
+          "shortDescription": "A family salon in Khalda at fair prices: cuts, blow-dry, coloring, nails and occasion makeup.",
           "isOpenNow": false,
           "todayHours": {
             "open": "09:00",
@@ -191,10 +276,32 @@
           "distanceKm": 8.3,
           "branchCount": 1,
           "branch": {
-            "id": "6addc42b74ae573daadd06d7",
+            "id": "6adf513d4bd7099438793e84",
             "name": "Khalda"
           },
           "title": "Joury Ladies Salon"
+        },
+        {
+          "id": "7fe703cdf5e7eec204bb193d",
+          "name": "Lamar Beauty Lounge",
+          "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/profile.jpg",
+          "rating": 3.9,
+          "reviewsCount": 28,
+          "locationText": "Khalda, Wasfi Al-Tal Street, opposite Al-Husseini Complex",
+          "shortDescription": "A full-service ladies salon in Abdoun: hair, nails, makeup and skin care by a professional team in a calm setting.",
+          "isOpenNow": true,
+          "todayHours": {
+            "open": "10:00",
+            "close": "22:00"
+          },
+          "isFavorite": false,
+          "distanceKm": 8.5,
+          "branchCount": 4,
+          "branch": {
+            "id": "71177b8871c36af7d19e512f",
+            "name": "Khalda"
+          },
+          "title": "Lamar Beauty Lounge - Khalda"
         }
       ],
       "hasMore": false

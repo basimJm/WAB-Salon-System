@@ -41,12 +41,28 @@ data class BookingPerson(
     val end: String,
     val subtotal: String,
     val staffId: String?,
+    /** First name of the member who serves this person (SRV-170); null = any available, not yet assigned. */
     val staffName: String?,
     val services: List<BookingService>,
+    val staffPhotoUrl: String? = null,
 )
 
-/** JOD text amounts as the server computes them. */
-data class BookingMoney(val total: String, val dueOnline: String, val paidOnline: String, val remaining: String, val refunded: String)
+/**
+ * JOD text amounts as the server computes them; [remaining] is what is still due at the salon (0 once the booking is final)
+ * and [paidAtSalon] what was collected in person (non-zero only for COMPLETED) (SRV-170).
+ */
+data class BookingMoney(
+    val total: String,
+    val dueOnline: String,
+    val paidOnline: String,
+    val remaining: String,
+    val refunded: String,
+    val paidAtSalon: String = ZERO_AMOUNT,
+) {
+    companion object {
+        const val ZERO_AMOUNT = "0"
+    }
+}
 
 data class BookingReason(val code: String, val text: String?, val at: String)
 

@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.window.Dialog
 import com.fab.wab.customer.core.domain.booking.BookingDetails
-import com.fab.wab.customer.core.domain.booking.RefundStatus
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.resources.Res as CoreRes
 import com.fab.wab.customer.designsystem.resources.price_jod
@@ -36,6 +35,7 @@ import com.fab.wab.customer.feature.bookings.presentation.resources.details_canc
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancel_dismiss
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancel_title
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_paid
+import com.fab.wab.customer.feature.bookings.presentation.resources.details_paid_at_salon
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_payment
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_policy
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_policy_deposit
@@ -63,9 +63,7 @@ internal fun PaymentBlock(booking: BookingDetails) {
     DesignCard(filled = true, contentPadding = spacing.space0) {
         Column(modifier = Modifier.padding(horizontal = spacing.space16, vertical = spacing.space14)) {
             BlockTitle(stringResource(Res.string.details_payment), bottom = spacing.space8)
-            MoneyRow(Res.string.details_total, booking.money.total)
-            MoneyRow(Res.string.details_paid, booking.money.paidOnline)
-            if (booking.refundStatus == RefundStatus.REFUNDED) MoneyRow(Res.string.details_refunded, booking.money.refunded)
+            moneyRowsOf(booking).forEach { row -> MoneyLine(row.kind.labelRes(), row.amount) }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -82,8 +80,15 @@ internal fun PaymentBlock(booking: BookingDetails) {
     }
 }
 
+private fun MoneyRowKind.labelRes(): StringResource = when (this) {
+    MoneyRowKind.TOTAL -> Res.string.details_total
+    MoneyRowKind.PAID_ONLINE -> Res.string.details_paid
+    MoneyRowKind.REFUNDED -> Res.string.details_refunded
+    MoneyRowKind.PAID_AT_SALON -> Res.string.details_paid_at_salon
+}
+
 @Composable
-private fun MoneyRow(labelRes: StringResource, amount: String) {
+private fun MoneyLine(labelRes: StringResource, amount: String) {
     val style = AppTheme.typography.bodyMedium.copy(fontSize = BookingsDesign.fontBody)
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = AppTheme.spacing.space4), horizontalArrangement = Arrangement.SpaceBetween) {
         AppText(text = stringResource(labelRes), style = style, color = AppTheme.colors.muted, modifier = Modifier.weight(1f))

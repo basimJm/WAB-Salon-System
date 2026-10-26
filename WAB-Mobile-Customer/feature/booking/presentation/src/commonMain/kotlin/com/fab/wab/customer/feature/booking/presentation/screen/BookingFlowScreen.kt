@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
+import com.fab.wab.customer.designsystem.components.navigation.AppBackHandler
 import com.fab.wab.customer.designsystem.components.button.AppPrimaryButton
 import com.fab.wab.customer.designsystem.components.feedback.AppStateContent
 import com.fab.wab.customer.designsystem.components.feedback.contentStateOf
@@ -45,6 +46,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun BookingFlowScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(BookingAnalytics.SCREEN)
+    // System Back = the header back (PRD S16: previous step, selections kept; exit only from the first step). E2E CUS-093.
+    AppBackHandler { onAction(UiAction.OnBack) }
     val spacing = AppTheme.spacing
     AppScreen(
         modifier = modifier,

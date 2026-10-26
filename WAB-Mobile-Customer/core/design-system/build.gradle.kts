@@ -25,6 +25,7 @@ kotlin {
         implementation(projects.core.domain)
         implementation(libs.kotlinx.datetime)
         implementation(libs.haze)
+        implementation(libs.jetbrains.navigationevent.compose)
         api(libs.material.icons.extended)
     }
     sourceSets.androidMain.dependencies {

@@ -2,19 +2,19 @@
   "success": true,
   "message": "Done successfully.",
   "data": {
-    "id": "6ade3faac2cfb0cb993a1744",
+    "id": "6adf88e16a85c06ca3b80154",
     "firstName": "Capture",
     "lastName": "Fixture",
-    "email": "capture.799926782@wab.example",
+    "email": "capture.799966247@wab.example",
     "gender": "FEMALE",
     "phone": {
       "countryCode": "JO",
       "dialCode": "+962",
-      "number": "799926782",
-      "e164": "+962799926782"
+      "number": "799966247",
+      "e164": "+962799966247"
     },
-    "cityId": "6ade371b97c38aeef84b9613",
-    "areaId": "6ade371b97c38aeef84b961f",
+    "cityId": "6adf0d5d78e65ddea68fc94d",
+    "areaId": "6adf0d5d78e65ddea68fc959",
     "language": "en",
     "pushEnabled": true,
     "avatarUrl": null
