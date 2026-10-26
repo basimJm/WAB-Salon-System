@@ -310,6 +310,15 @@ describe('merchant', () => {
     expect(refsOf(await merchant('?q=792222'))).toEqual([refs.b4]);
     expect(refsOf(await merchant('?q=WAB-KMN012'))).toEqual([refs.b4]);
   });
+  it('SRV-172: q finds a partial reference (merchant E2E #3), never another salon', async () => {
+    // The code without the prefix, as the merchant tester typed it (`46512N` for `WAB-46512N`).
+    expect(refsOf(await merchant('?q=KMN012'))).toEqual([refs.b4]);
+    expect(refsOf(await merchant('?q=kmn0'))).toEqual([refs.b4]);
+    expect(refsOf(await merchant('?q=wab-def'))).toEqual([refs.b2]);
+    // b5 belongs to another salon: its full or partial reference finds nothing here.
+    expect(refsOf(await merchant('?q=PQR345'))).toEqual([]);
+    expect(refsOf(await merchant('?q=pqr'))).toEqual([]);
+  });
   it('filters by staff, status, bride, payment and dates', async () => {
     expect(refsOf(await merchant(`?staffId=${staffB.toHexString()}`))).toEqual([refs.b2]);
     expect(refsOf(await merchant('?status=COMPLETED,PENDING'))).toEqual([refs.b3, refs.b1]);
@@ -411,6 +420,16 @@ describe('admin', () => {
     expect(refsOf(await admin(`?salonId=${salon2.toHexString()}`))).toEqual([refs.b5]);
     expect(refsOf(await admin(`?customerId=${c2.toHexString()}`))).toEqual([refs.b4]);
     expect(refsOf(await admin('?status=COMPLETED'))).toEqual([refs.b3]);
+  });
+  it('SRV-171 S5: q finds full and partial references, with or without the prefix', async () => {
+    expect(refsOf(await admin('?q=PQR345'))).toEqual([refs.b5]);
+    expect(refsOf(await admin('?q=pqr'))).toEqual([refs.b5]);
+    expect(refsOf(await admin('?q=wab-kmn0'))).toEqual([refs.b4]);
+    expect(refsOf(await admin('?q=WAB-PQR345'))).toEqual([refs.b5]);
+    // Too short for a reference and no customer with that name: nothing, not everything.
+    expect(refsOf(await admin('?q=PQ'))).toEqual([]);
+    // Regex characters are taken literally.
+    expect(refsOf(await admin('?q=.*'))).toEqual([]);
   });
   it('returns details and 404 for an unknown booking', async () => {
     expect((await admin(`/${ids['b5']?.toHexString() ?? ''}`)).status).toBe(200);

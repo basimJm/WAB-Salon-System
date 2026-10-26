@@ -310,6 +310,7 @@ export const unavailableUploads: UploadsService = { presign: unavailable, confir
 
 export const unavailableBranches: BranchesService = {
   list: unavailable,
+  page: unavailable,
   get: unavailable,
   create: unavailable,
   update: unavailable,

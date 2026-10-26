@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Customer API",
-    "version": "1.5.0"
+    "version": "1.6.0"
   },
   "servers": [
     {
@@ -3791,7 +3791,7 @@
           "Salon details"
         ],
         "summary": "Salon details (S07): hours, closures, staff, services, gallery",
-        "description": "Public; a valid customer token only adds `isFavorite`. A salon that is not LIVE and complete is 404 `SALON_NOT_FOUND`.",
+        "description": "Public; a valid customer token only adds `isFavorite`. A salon that is not LIVE and complete is 404 `SALON_NOT_FOUND`. With `branchId` (a bookable branch, else 404 `BRANCH_NOT_FOUND`) `staff` and `services` are that branch's only and the place fields are the branch's; without it they cover every bookable branch, each tagged with its `branchId`.",
         "security": [],
         "parameters": [
           {
@@ -3802,6 +3802,15 @@
             "required": true,
             "name": "salonId",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{24}$"
+            },
+            "required": false,
+            "name": "branchId",
+            "in": "query"
           },
           {
             "schema": {
@@ -4178,7 +4187,7 @@
                               "upcomingClosures"
                             ]
                           },
-                          "description": "Bookable branches, main first; the place fields above are the main branch"
+                          "description": "Bookable branches, main first; the place fields above are the selected branch (`branchId`), else the main branch"
                         },
                         "services": {
                           "type": "array",
@@ -4452,6 +4461,7 @@
           "Salon details"
         ],
         "summary": "Staff sheet of a salon member who provides services",
+        "description": "Services are the member's own branch services; a member of an unbookable branch is 404 `NOT_FOUND`.",
         "security": [],
         "parameters": [
           {

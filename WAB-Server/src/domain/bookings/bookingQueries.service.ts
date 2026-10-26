@@ -21,7 +21,7 @@ import type { Entity } from '../../utils/database/plain';
 import { ForbiddenError, NotFoundError, ValidationError } from '../../utils/errors';
 import { formatJod } from '../../utils/money';
 import type { PaginationParams } from '../../utils/pagination';
-import { normalizeReferenceNumber } from '../../utils/reference';
+import { isReferenceNumber, referenceSearchPrefixes } from '../../utils/reference';
 import { diffDays, localDateOf, localDayRange } from '../../utils/time';
 import type { SettingsService } from '../settings';
 import { outstandingAtSalon, paidAtSalon } from './bookingMoney';
@@ -273,9 +273,13 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
 
     const text = query.q?.trim();
     if (text !== undefined && text !== '') {
-      const reference = normalizeReferenceNumber(text);
-      const or: Record<string, unknown>[] =
-        reference === null ? [] : [{ referenceNumber: reference }];
+      // Full or partial reference (`WAB-BW1JEZ`, `BW1JEZ`, `bw1`): an exact or anchored prefix
+      // match on the unique `referenceNumber` index, never an unanchored scan (SRV-171 S5).
+      const or: Record<string, unknown>[] = referenceSearchPrefixes(text).map((prefix) =>
+        isReferenceNumber(prefix)
+          ? { referenceNumber: prefix }
+          : { referenceNumber: { $regex: `^${escapeRegex(prefix)}` } },
+      );
       if (audience.kind === 'CUSTOMER') {
         const salonIds = await salonIdsMatching(text);
         if (salonIds.length > 0) or.push({ salonId: { $in: salonIds.map(toObjectId) } });
