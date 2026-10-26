@@ -9,6 +9,16 @@
 
 ## Current task
 
+### MER-071 — Crash fix: decoding failures become `AppError.ParseError`
+- Branch: `fix/mer-071-decode-crash`
+- Status: IN REVIEW
+- Acceptance criteria (customer crash report 2026-10-26, same transport code; rules "failures are AppResult/AppError, never thrown"):
+  - [x] `safeApiCall` catches Ktor's `ContentConvertException` (`JsonConvertException` is not a kotlinx `SerializationException`) → `AppError.ParseError`
+  - [x] Regression test: 200 body missing a required field → `ParseError` (the customer twin was proven red without the fix)
+- Tests: `SafeApiCallTest` (+1, 8 total); `./gradlew :core:network:testAndroidHostTest` green
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one catch in the transport layer, valid responses unchanged.
+
 ### MER-070 — WhatsApp phone OTP (Firebase Phone Auth removed)
 - Branch: `feat/mer-070-whatsapp-otp`
 - Branched: (from local `feat/srv-153-whatsapp-otp` + `origin/merchant` merged; server branch not merged yet, lead ships SDK + server + apps together)
@@ -36,14 +46,3 @@
 - Tests: `run_local_checks.sh` exit 0
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — test formatting only.
-
-### MER-069 — Sign-in keeps the member's `branchId`
-- Branch: `fix/mer-069-signin-branch`
-- Branched: (from `origin/merchant`)
-- Status: IN REVIEW
-- Acceptance criteria (backlog MER-069; SRV-149 member `branchId`; BUSINESS_DOMAIN §6 branch scope; found reviewing MER-068):
-  - [x] `MemberDto.toDomain()` (sign-in) maps `branchId` with the token-refresh rule: none for the owner, blank = none
-  - [x] A manager / employee is `MemberScope.OneBranch(branchId)` from sign-in (was `OneBranch(null)` = every branch passed the client filters until a refresh)
-- Tests: `AuthMappersTest` (+3: branch member scope, owner ignores a branch id, blank id); `./gradlew testAndroidHostTest` 178 suites / 581 tests / 0 failures; `policy_checks.py all: ok`
-- Loops: 1/1 — re-checked both criteria against the refresh mapper (`RemoteTokenRefreshApi.toProfile`), the session store (persists `branchId`) and the fresh test report (new cases present)
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — data-layer mapper only, same rule as refresh, no new strings; the server already enforced branch scope, so this aligns the client filters. DEVIATIONS: not run on a device (needs a branch member sign-in: local stack only, real OTP is owner-gated); full gate follows in the end-of-backlog run.
