@@ -11,7 +11,7 @@ export interface SeedCountry {
   readonly code: string;
   readonly name: LocalizedName;
   readonly dialCode: string;
-  /** Storage key of the flag image (the file itself comes with the storage task). */
+  /** Storage key of the flag image; `npm run seed` writes `assets/flags/<file name>` there. */
   readonly flagKey: string;
   /** Tested against the national number, digits only, without the leading 0. */
   readonly phoneRegex: string;
@@ -32,6 +32,10 @@ export interface SeedArea {
 }
 
 export const JORDAN_CODE = 'JO';
+
+/** Flag images shipped with the server (`WAB-Server/assets/flags/<file name of flagKey>`, SRV-172). */
+export const FLAG_ASSET_DIR = ['assets', 'flags'] as const;
+export const FLAG_CONTENT_TYPE = 'image/svg+xml';
 
 export const SEED_COUNTRIES: readonly SeedCountry[] = [
   {

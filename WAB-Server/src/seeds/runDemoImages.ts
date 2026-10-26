@@ -9,6 +9,7 @@ import { connectMongo, disconnectMongo } from '../utils/database/connection';
 import { escapeRegex } from '../utils/format/regex';
 import { createLogger } from '../utils/logger';
 import { uploadDemoImages } from './demoImageUpload';
+import { uploadSeedFlags } from './flagImages';
 import { isDemoImagePurpose, type DemoImageTarget } from './demoImages';
 import { assertDemoAllowed } from './runDemo';
 
@@ -17,7 +18,8 @@ import { assertDemoAllowed } from './runDemo';
  * demo data points at (salon covers, gallery, staff, customers, banners, catalog, licenses): the
  * owner's photo re-encoded as JPEG when the folder has one, else a plain placeholder, so no seeded
  * URL answers 404 (SRV-171 S4); public images also get their list thumbnails. Run it after
- * `seed:demo` (and again after a seed added rows); it rewrites the same keys.
+ * `seed:demo` (and again after a seed added rows); it rewrites the same keys. It also writes the
+ * shipped country flags (SRV-172).
  */
 const main = async (): Promise<void> => {
   const folder = process.argv[2];
@@ -53,6 +55,8 @@ const main = async (): Promise<void> => {
       read: (path) => readFileSync(join(root ?? '', path)),
     });
     logger.info({ ...report }, 'demo images uploaded');
+    // The seeded countries' flags too, so the phone pickers draw them (SRV-172).
+    logger.info({ ...(await uploadSeedFlags(storage)) }, 'country flags written');
   } finally {
     await disconnectMongo();
   }
