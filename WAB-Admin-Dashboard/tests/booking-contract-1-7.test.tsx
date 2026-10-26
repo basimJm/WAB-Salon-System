@@ -1,5 +1,7 @@
 import { screen, within } from '@testing-library/react';
+import { I18N_DEFAULT_NAMESPACE } from '@/constants/i18n';
 import { createI18n } from '@/infrastructure/i18n/i18n';
+import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { getBookingsByIdDataSchema, getBookingsDataSchema } from '@/data/contract/generated/dto';
@@ -60,7 +62,9 @@ describe('admin contract 1.7.0 (SRV-170, ADM-107)', () => {
   });
 
   it('words a reason from its code, keeps unknown codes and adds the free text', () => {
-    const t = createI18n('en').t;
+    const i18n = createI18n('en');
+    i18n.addResourceBundle('en', I18N_DEFAULT_NAMESPACE, BOOKINGS_STRINGS.en, true, false);
+    const t = i18n.t;
     const at = '2026-10-20T10:00:00.000Z';
     expect(reasonLabel(t, { reasonCode: 'FULLY_BOOKED', reasonText: null, at })).toBe(
       'Fully booked',
