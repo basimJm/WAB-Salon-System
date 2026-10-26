@@ -16,4 +16,9 @@ export const REFERENCE_LOOKALIKES: Readonly<Record<string, string>> = {
 export const REFERENCE_FIELD = 'referenceNumber';
 /** 32^6 ≈ 1.07 billion numbers, so a retry is rare; a handful of attempts is plenty. */
 export const REFERENCE_MAX_ATTEMPTS = 5;
+/**
+ * Booking search: the fewest code symbols that count as a partial reference (`BW1` finds
+ * `WAB-BW1JEZ`). Shorter text would match too many bookings to be useful (SRV-171 S5).
+ */
+export const REFERENCE_SEARCH_MIN_SYMBOLS = 3;
 export const BASE32_SYMBOL_MASK = 0b11111;

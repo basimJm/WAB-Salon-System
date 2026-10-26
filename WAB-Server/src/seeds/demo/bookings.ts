@@ -28,6 +28,7 @@ import {
 import type { ActorType, BookingStatus, Language } from '../../constants/enums';
 import { EVENT_BY_BOOKING_STATUS } from '../../constants/notifications';
 import { PAYMENT_CURRENCY } from '../../constants/payments';
+import { FAKE_SEEDED_REFUND_PREFIX, FAKE_SEEDED_SESSION_PREFIX } from '../../constants/providers';
 import type { PAYMENT_OPTIONS } from '../../constants/salon';
 import { MINUTES_PER_HOUR, MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from '../../constants/time';
 import { customerCancelRefund, fullRefund, noShowRefund } from '../../domain/bookings/refunds';
@@ -476,7 +477,7 @@ export const buildBookings = (
         idempotencyKey: `${label}:1`,
         attempt: 1,
         provider: DEMO_PAYMENT_PROVIDER,
-        providerRef: `demo_${reference}`,
+        providerRef: `${FAKE_SEEDED_SESSION_PREFIX}${reference}`,
         status: 'SUCCEEDED',
         gatewayFee,
         chargedAt: createdAt,
@@ -536,7 +537,7 @@ export const buildBookings = (
           idempotencyKey: `refund:${id.toString()}:${source}`,
           ...(done
             ? {
-                providerRef: `demo_refund_${reference}`,
+                providerRef: `${FAKE_SEEDED_REFUND_PREFIX}${reference}`,
                 completedAt: completedRefundAt,
                 ledgeredAt: completedRefundAt,
               }

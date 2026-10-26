@@ -3,6 +3,7 @@ import { OPEN_BRANCH_STATUSES, type BranchStatus } from '../constants/branches';
 import { BranchModel, type BranchRaw } from '../models/branch.model';
 import { isObjectIdString } from '../utils/database/ids';
 import { toEntity, type Entity } from '../utils/database/plain';
+import type { PaginationParams } from '../utils/pagination';
 import { BaseRepository } from './base.repository';
 
 /** Data access for salon branches (§3.3a). Branches are closed, never deleted. */
@@ -24,6 +25,20 @@ export class BranchesRepository extends BaseRepository<BranchRaw> {
       isMain: -1,
       'name.en': 1,
     } as never);
+  }
+
+  /** One page of the salon's open branches in the `forSalon` order (admin list, SRV-171 S3). */
+  async pageForSalon(
+    salonId: string,
+    params: PaginationParams,
+  ): Promise<{ items: Entity<BranchRaw>[]; total: number }> {
+    if (!isObjectIdString(salonId)) return { items: [], total: 0 };
+    const page = await this.findPage(
+      { salonId, status: { $in: [...OPEN_BRANCH_STATUSES] } },
+      params,
+      { isMain: -1, 'name.en': 1 } as never,
+    );
+    return { items: page.items, total: page.meta.total };
   }
 
   /** Non-closed branches of a salon (the branch limit and the last-branch rule count these). */

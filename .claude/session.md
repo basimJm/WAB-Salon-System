@@ -4,7 +4,7 @@
 
 | Project (`tasks.py` key) | Master | Current task | Next ready task | Blocked on | Session file |
 |---|---|---|---|---|---|
-| server | `server` | SRV-158 ARQAM OTP (IN REVIEW, `feat/srv-158-arqam-otp`, ships with OTP-012) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-159 owner ARQAM setup; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
+| server | `server` | SRV-171 e2e defects (IN REVIEW, `feat/srv-171-e2e-defects`) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-159 owner ARQAM setup; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
 | admin | `admin` | none (ADM-097…099 #497/#498/#505) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking; ADM-100…106 server gaps SRV-162…168 | `WAB-Admin-Dashboard/.claude/session.md` |
 | customer | `customer` | none (CUS-092 e2e #499) | CUS-093 SRV-170 contract adoption | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
 | merchant | `merchant` | MER-070 WhatsApp OTP (IN REVIEW, branch `feat/mer-070-whatsapp-otp` on top of SRV-153) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |

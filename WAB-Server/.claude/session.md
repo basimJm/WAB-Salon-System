@@ -10,6 +10,25 @@
 
 ## Current task
 
+### SRV-171 — Server defects from the client e2e passes
+
+- Branch: `feat/srv-171-e2e-defects`
+- Branched: from `origin/server`
+- Status: IN REVIEW (committed, not pushed; no PR — the lead ships it)
+- Acceptance criteria (admin `WAB-Admin-Dashboard/docs/E2E_RESULTS.md` S1–S6 on `origin/admin`; BUSINESS_DOMAIN §5.8 refunds (`REFUND_PENDING` → retry with backoff → `REFUND_FAILED` + alert), §11 codes; Admin PRD A13 branches, A15 bookings; operations `POST /admin/v1/bookings/{id}/refund`, `POST /admin/v1/exports`, `GET /admin/v1/salons/{id}/branches`, `GET /admin/v1/bookings`):
+  - [x] S1: any gateway error in a refund attempt (unknown session, outage) is a failed attempt (retry, then `REFUND_FAILED` + alert per §5.8) — never a 500; DB errors after the gateway call still surface. Demo seed writes gateway sessions as `FAKE_SEEDED_SESSION_PREFIX` + reference; the in-memory fake gateway adopts such a session as paid when refunding (server keeps capping at what is refundable); other unknown sessions still throw
+  - [x] S2: CSV export content type `text/csv` (the storage SDK accepts `type/subtype` only; `; charset=utf-8` was refused); UTF-8 stays announced by the BOM
+  - [x] S3: `GET /admin/v1/salons/{id}/branches` takes `page`/`pageSize` (default `ADMIN_PAGE_SIZE`) and answers `meta {page, pageSize, total}` via `BranchesRepository.pageForSalon` (indexed `salonId,status`, main first); merchant list unchanged
+  - [x] S4: `seed:demo-images [-- <folder>]` writes the owner's photo or, for every key without one (all keys when no folder), a generated placeholder JPEG through the storage port (+ thumbnails for public images)
+  - [x] S5: Admin PRD A15 lists salon as a filter (served by `salonId`), not a text-search field: no salon-name search added for admin. `q` now also matches full/partial references with or without `WAB-` (≥ 3 code symbols, exact or anchored-prefix regex on the unique `referenceNumber` index, escaped), for every audience
+  - [x] S6: global limit is the named constant `GLOBAL_RATE_LIMIT` (300/min/IP, `constants/security.ts`, overridable through `createApp({security:{rateLimit}})`), not an env key — not inline-hardcoded, so no change (owner may ask for an env key)
+- Tests: `tests/refundService.test.ts` (+3: unknown session = pending + lastError, demo session refunds + cap, fake gateway adopts only seeded sessions), `tests/exports.test.ts` (+1: every format stored by the real `@wab/storage` memory adapter), `tests/adminBranches.test.ts` (+1: meta, paging, closed left out, 400 on bad pageSize), `tests/demoImageUpload.test.ts` (new, 3), `tests/reference.test.ts` (+2), `tests/bookingQueries.test.ts` (+1 admin partial references, too short, regex chars)
+- API docs: admin regenerated; `contract:bump admin` 1.7.0 → 1.8.0 (additive: branches list paging + meta). Client impact: admin `npm run api:sync` at the next admin task (panel already tolerates both, F4)
+- Gate (Terminal panel): prettier --check ., eslint ., `tsc --noEmit`, `tsc -p tsconfig.build.json` + `node dist/docs/generate.js` (no diff after the bump), full jest 165 suites / 2926 tests green
+- Loops: 1/1 — re-read §5.8 (refund retry/alert) and Admin PRD A13/A15 against the code; grepped every `provider.refund`/`getRefund` caller (only `refunds.service`), every `EXPORT_FILES` content type, every `BranchesService` implementer (`unavailableBranches` got `page`) and every booking `q` audience (customer/merchant also gain partial references: additive); found and fixed: a code that itself starts with `WAB` was read twice (now prefix letters = the prefix), and `Rana`-style names are valid code symbols (harmless: anchored prefix with no match)
+- Review: PASSED (SE ✔ (gateway errors confined to the attempt; repository paging; prefix regex anchored + escaped on the unique index), Mobile N/A (no app contract change; customer/merchant `q` only matches more), Architect ✔ (admin contract 1.8.0 additive, client impact named; fake-gateway adoption is dev-only — production runs `PAYMENT_PROVIDER=disabled`), QA ✔ (each defect has a test that fails without its fix; full suite green))
+- Notes: DEVIATIONS: (1) S1 answers 200 with the refund `REFUND_PENDING` + `lastError` when the gateway does not know the session (BUSINESS_DOMAIN §5.8 retry/alert path) instead of an immediate 4xx — the E2E expectation "refund created, or a business error" is met; (2) S4 needs `npm run seed:demo-images` to be run (again) against the QA stack — not run here (the shared QA stack must not be reseeded); the startup seed (`SEED_DEMO_ON_START`) still writes keys only; (3) S5: no salon-name text search for admin (PRD A15 = salon filter); (4) S6 unchanged; (5) tools run from a symlinked `node_modules` (not committed), `ensure-sdks` skipped.
+
 ### SRV-170 — Customer booking/salon contract gaps found by CUS-092
 
 - Branch: `feat/srv-170-customer-contract-gaps`

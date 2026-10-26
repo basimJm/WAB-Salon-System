@@ -35,7 +35,9 @@ export const EXPORT_FILES: Readonly<
     extension: 'xlsx',
     contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   },
-  CSV: { extension: 'csv', contentType: 'text/csv; charset=utf-8' },
+  // No media-type parameters (`; charset=…`): the storage SDK accepts `type/subtype` only and
+  // refused the CSV file (SRV-171 S2). UTF-8 is announced by the byte order mark (`CSV_BOM`).
+  CSV: { extension: 'csv', contentType: 'text/csv' },
   PDF: { extension: 'pdf', contentType: 'application/pdf' },
 };
 /** Audit reason of an export request (the request body has no reason field). */
