@@ -1,7 +1,9 @@
 package com.fab.wab.merchant.feature.auth.presentation
 
+import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.ErrorCode
 import com.fab.wab.merchant.core.domain.FieldError
+import com.fab.wab.merchant.feature.auth.domain.model.OtpPolicy
 import com.fab.wab.merchant.feature.auth.presentation.controller.contract.OtpContract.OtpDialog
 import com.fab.wab.merchant.feature.auth.presentation.controller.contract.OtpContract.SideEffect
 import com.fab.wab.merchant.feature.auth.presentation.controller.contract.OtpContract.UiAction
@@ -18,6 +20,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private const val WRONG_CODE = "000000"
 private const val ATTEMPTS_LEFT_LINE = "The verification code is incorrect. Attempts left: 4."
+private const val BLOCK_SECONDS = 900
 
 /** MER-070: `OTP_INVALID` / `OTP_EXPIRED` / `OTP_BLOCKED` on verify, the code lifetime, and a failed sign-in after verify. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -50,10 +53,37 @@ class OtpVerifyErrorsTest {
     }
 
     @Test
-    fun blockedOnVerifyEndsTheCodeAndShowsTheMessage() = runTest(UnconfinedTestDispatcher()) {
+    fun blockedOnVerifyEndsTheCodeAndShowsTheBlockedBannerWithTheRemainingTime() = runTest(UnconfinedTestDispatcher()) {
         val harness = OtpHarness(this)
         harness.repository.verifyResult = serverError(ErrorCode.OTP_BLOCKED, HTTP_TOO_MANY)
         val viewModel = harness.viewModel()
+        viewModel.state.first { !it.requesting }
+        // The fifth wrong code starts the block: the follow-up request answers `allowed: false` + `blockedUntil`.
+        harness.repository.policy = OtpPolicy(
+            allowed = false,
+            otpLength = TEST_OTP_LENGTH,
+            resendAfterSeconds = 0,
+            blockedUntil = OTP_NOW + BLOCK_SECONDS.seconds,
+        )
+        viewModel.enterAndVerify(this, WRONG_CODE)
+        val state = viewModel.state.first()
+        assertTrue(harness.effects.isEmpty(), "the banner replaces the toast")
+        assertEquals(2, harness.repository.requested.size, "one status request after the block")
+        assertTrue(state.isBlocked)
+        assertEquals(BLOCK_SECONDS, state.blockedRemainingSeconds)
+        assertFalse(state.codeSent)
+        assertEquals("", state.code)
+        assertFalse(state.canVerify)
+        assertFalse(state.canResend)
+    }
+
+    @Test
+    fun blockedOnVerifyWithoutAStatusShowsTheBlockMessage() = runTest(UnconfinedTestDispatcher()) {
+        val harness = OtpHarness(this)
+        harness.repository.verifyResult = serverError(ErrorCode.OTP_BLOCKED, HTTP_TOO_MANY)
+        val viewModel = harness.viewModel()
+        viewModel.state.first { !it.requesting }
+        harness.repository.requestError = AppError.NetworkError(ERROR_TEXT)
         viewModel.enterAndVerify(this, WRONG_CODE)
         val state = viewModel.state.first()
         assertEquals(listOf<SideEffect>(SideEffect.ShowError(ERROR_TEXT)), harness.effects)

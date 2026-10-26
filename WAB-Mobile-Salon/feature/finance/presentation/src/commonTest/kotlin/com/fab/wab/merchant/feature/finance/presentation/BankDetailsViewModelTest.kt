@@ -38,6 +38,7 @@ import kotlin.test.assertTrue
 private val JORDAN = Country("JO", "Jordan", "+962", null, "^7[789]\\d{7}$")
 private val US = Country("US", "USA", "+1", null, "^\\d{10}$")
 private const val IBAN = "JO94CBJO0010000000000131000302"
+private const val AWAY_FROM_SCREEN_MS = 30_000L
 
 private class FakeBank : BankRepository {
     val saved = mutableListOf<Pair<BankDraft, String>>()
@@ -61,7 +62,7 @@ class BankDetailsViewModelTest {
     private val bank = FakeBank()
     private val pending = PendingOtpVerification()
 
-    private fun TestScope.viewModel() = BankDetailsViewModel(
+    private fun TestScope.viewModel(collect: Boolean = true) = BankDetailsViewModel(
         BankDetailsDependencies(
             bank,
             FakeCountries(),
@@ -71,7 +72,7 @@ class BankDetailsViewModelTest {
             { "failed" },
         ),
         testScope = backgroundScope,
-    ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
+    ).also { vm -> if (collect) backgroundScope.launch { vm.state.collect { } } }
 
     @Test
     fun phoneSplitsOnTheLongestDialCode() {
@@ -108,5 +109,22 @@ class BankDetailsViewModelTest {
         viewModel.onEvent(UiAction.OnResume)
         assertTrue(bank.saved.isEmpty())
         assertFalse(viewModel.state.first().awaitingOtp)
+    }
+
+    @Test
+    fun backFromTheOtpScreenKeepsTheTypedDetailsAndSavesThem() = runTest(UnconfinedTestDispatcher()) {
+        // No permanent collector: the screen stops collecting while the OTP screen is on top (> the state timeout).
+        val viewModel = viewModel(collect = false)
+        viewModel.state.first { !it.loading }
+        viewModel.onEvent(UiAction.OnBankName("Housing Bank"))
+        viewModel.onEvent(UiAction.OnHolder("Rana Haddad"))
+        viewModel.onEvent(UiAction.OnIban(IBAN))
+        viewModel.onEvent(UiAction.OnContinue)
+        testScheduler.advanceTimeBy(AWAY_FROM_SCREEN_MS)
+        pending.publish(OtpVerified(AuthPurpose.BANK_DETAILS, PhoneNumber("JO", "791234567"), "otp-token"))
+        val back = viewModel.state.first()
+        assertEquals("Housing Bank", back.draft.bankName, "the saved details must not overwrite the typed ones")
+        viewModel.onEvent(UiAction.OnResume)
+        assertEquals(BankDraft("Housing Bank", "Rana Haddad", IBAN), bank.saved.single().first)
     }
 }

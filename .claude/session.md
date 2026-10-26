@@ -208,3 +208,21 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.
+
+### T-140b — Sync main into merchant (part of T-140)
+- Branch: `chore/sync-main-into-merchant-9`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `main` merged into `merchant`; only conflict = generated board (regenerated); MER-073 + MER-074 DONE
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.
+
+### T-140c — Sync main into merchant again (part of T-140)
+- Branch: `chore/sync-main-into-merchant-10`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `main` (customer sync) merged into `merchant`; conflicts = generated board + both root session blocks kept
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.

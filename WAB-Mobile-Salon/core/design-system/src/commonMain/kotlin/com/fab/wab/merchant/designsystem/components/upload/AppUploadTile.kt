@@ -20,10 +20,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.merchant.core.domain.upload.UploadKind
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
 import com.fab.wab.merchant.designsystem.components.image.AppImage
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.resources.Res
@@ -35,7 +34,7 @@ import com.fab.wab.merchant.designsystem.resources.upload_percent
 import com.fab.wab.merchant.designsystem.resources.upload_remove
 import com.fab.wab.merchant.designsystem.resources.upload_retry
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.designsystem.theme.GlassStyle
+import com.fab.wab.merchant.designsystem.theme.SurfaceTone
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -56,7 +55,7 @@ fun AppUploadTile(
         modifier = modifier
             .height(AppTheme.sizes.uploadTile)
             .clip(shape)
-            .glassBackground(AppTheme.glass, shape, GlassStyle.Subtle, stateBorder = if (failed) colors.danger else colors.line),
+            .cardBackground(AppTheme.surfaces, shape, SurfaceTone.Surface, stateBorder = if (failed) colors.danger else colors.line),
     ) {
         TilePreview(item)
         TileOverlay(item)
@@ -129,7 +128,6 @@ private fun BoxScope.TileOverlay(item: UploadItemUi) {
 @Composable
 private fun TileCaption(item: UploadItemUi, onRetry: () -> Unit, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
-    val press = rememberGlassPress()
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -148,7 +146,7 @@ private fun TileCaption(item: UploadItemUi, onRetry: () -> Unit, modifier: Modif
                 text = stringResource(Res.string.upload_retry),
                 style = AppTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 color = colors.danger,
-                modifier = Modifier.glassClickable(press, role = Role.Button, onClick = onRetry),
+                modifier = Modifier.appClickable(role = Role.Button, onClick = onRetry),
             )
             UploadStatus.Uploaded -> item.sizeText?.let {
                 AppText(text = it, style = AppTheme.typography.labelSmall, color = colors.faint, maxLines = 1)
@@ -161,11 +159,10 @@ private fun TileCaption(item: UploadItemUi, onRetry: () -> Unit, modifier: Modif
 @Composable
 internal fun RemoveButton(onRemove: () -> Unit, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
-    val press = rememberGlassPress()
     Box(
         modifier = modifier
             .size(AppTheme.sizes.touchTarget)
-            .glassClickable(press, role = Role.Button, onClick = onRemove),
+            .appClickable(role = Role.Button, onClick = onRemove),
         contentAlignment = Alignment.Center,
     ) {
         Box(
@@ -191,13 +188,12 @@ fun AppUploadAddTile(
 ) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.medium
-    val press = rememberGlassPress()
     Column(
         modifier = modifier
             .height(AppTheme.sizes.uploadTile)
             .clip(shape)
             .border(AppTheme.sizes.borderWidth, colors.line, shape)
-            .glassClickable(press, role = Role.Button, onClick = onClick),
+            .appClickable(role = Role.Button, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4, Alignment.CenterVertically),
     ) {

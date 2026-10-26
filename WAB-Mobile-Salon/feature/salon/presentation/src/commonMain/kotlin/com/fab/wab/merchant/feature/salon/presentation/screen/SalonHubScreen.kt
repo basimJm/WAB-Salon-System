@@ -1,12 +1,15 @@
 package com.fab.wab.merchant.feature.salon.presentation.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
 import com.fab.wab.merchant.core.domain.salon.SalonGenderType
@@ -22,12 +26,13 @@ import com.fab.wab.merchant.core.domain.salon.SalonProfile
 import com.fab.wab.merchant.designsystem.components.avatar.AppAvatar
 import com.fab.wab.merchant.designsystem.components.badge.AppStatusBadge
 import com.fab.wab.merchant.designsystem.components.badge.StatusTone
-import com.fab.wab.merchant.designsystem.components.card.AppCard
 import com.fab.wab.merchant.designsystem.components.dashboard.AppSalonStateChip
 import com.fab.wab.merchant.designsystem.components.dashboard.salonStateLabel
 import com.fab.wab.merchant.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.merchant.designsystem.components.layout.AppScreen
 import com.fab.wab.merchant.designsystem.components.layout.tabBarInset
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.salon.domain.HubEntry
@@ -58,16 +63,17 @@ fun SalonHubScreen(state: UiState, available: Set<HubTile>, onAction: (UiAction)
             modifier = Modifier.padding(padding),
         ) {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(AppTheme.adaptive.gridColumns),
+                columns = GridCells.Fixed(AppTheme.adaptive.gridColumns * HubDesign.COLUMNS_PER_GRID_COLUMN),
                 modifier = Modifier.fillMaxSize(),
+                // Design: `padding:8px 20px 20px`, grid `gap:10px`.
                 contentPadding = PaddingValues(
-                    start = spacing.space16,
-                    top = spacing.space16,
-                    end = spacing.space16,
-                    bottom = spacing.space16 + tabBarInset(),
+                    start = spacing.space20,
+                    top = spacing.space8,
+                    end = spacing.space20,
+                    bottom = spacing.space20 + tabBarInset(),
                 ),
-                horizontalArrangement = Arrangement.spacedBy(spacing.space12),
-                verticalArrangement = Arrangement.spacedBy(spacing.space12),
+                horizontalArrangement = Arrangement.spacedBy(spacing.space10),
+                verticalArrangement = Arrangement.spacedBy(spacing.space10),
             ) {
                 item(key = HEADER_KEY, span = { GridItemSpan(maxLineSpan) }) { Header(state) }
                 items(tiles, key = { it.tile.name }, contentType = { HubEntry::class }) { entry ->
@@ -94,10 +100,21 @@ private fun Header(state: UiState) {
 
 @Composable
 private fun SalonRow(salon: SalonProfile) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12)) {
+    // Design: the salon sits in a card (`padding:12px;border-radius:20px;border:1px solid var(--line)`).
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .cardBackground(AppTheme.surfaces, HubDesign.headerShape)
+            .padding(HubDesign.headerPadding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12),
+    ) {
         AppAvatar(name = salon.name, imageUrl = salon.profileUrl)
         Column(modifier = Modifier.weight(1f)) {
-            AppText(text = salon.name, style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+            AppText(
+                text = salon.name,
+                style = AppTheme.typography.titleMedium.copy(fontSize = HubDesign.salonNameSize, fontWeight = FontWeight.Bold),
+            )
             val type = if (salon.gender == SalonGenderType.FEMALE) Res.string.hub_women else Res.string.hub_men
             AppText(text = stringResource(type), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
         }
@@ -109,16 +126,37 @@ private fun SalonRow(salon: SalonProfile) {
 private fun HubTileCard(entry: HubEntry, onClick: () -> Unit) {
     val copy = entry.tile.copy()
     val spacing = AppTheme.spacing
-    AppCard(modifier = Modifier.fillMaxWidth(), onClick = onClick) {
-        Column(verticalArrangement = Arrangement.spacedBy(spacing.space6)) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Icon(copy.icon, contentDescription = null, tint = AppTheme.colors.accent, modifier = Modifier.weight(1f, fill = false))
-                Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
-                    if (entry.missing) AppStatusBadge(text = stringResource(Res.string.hub_missing), tone = StatusTone.Warning)
-                }
+    val colors = AppTheme.colors
+    // Design tile: `padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--card)`.
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(HubDesign.tileShape)
+            .cardBackground(AppTheme.surfaces, HubDesign.tileShape)
+            .appClickable(onClick = onClick)
+            .padding(HubDesign.tilePadding),
+        verticalArrangement = Arrangement.spacedBy(spacing.space2),
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+            Box(
+                modifier = Modifier.size(HubDesign.iconBox).background(colors.soft, HubDesign.iconBoxShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(copy.icon, contentDescription = null, tint = colors.accent, modifier = Modifier.size(HubDesign.icon))
             }
-            AppText(text = stringResource(copy.title), style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
-            AppText(text = stringResource(copy.subtitle), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
+                if (entry.missing) AppStatusBadge(text = stringResource(Res.string.hub_missing), tone = StatusTone.Warning)
+            }
         }
+        AppText(
+            text = stringResource(copy.title),
+            modifier = Modifier.padding(top = HubDesign.titleTop),
+            style = AppTheme.typography.titleSmall.copy(fontSize = HubDesign.titleSize, fontWeight = FontWeight.Bold),
+        )
+        AppText(
+            text = stringResource(copy.subtitle),
+            style = AppTheme.typography.bodySmall.copy(fontSize = HubDesign.subtitleSize),
+            color = colors.muted,
+        )
     }
 }

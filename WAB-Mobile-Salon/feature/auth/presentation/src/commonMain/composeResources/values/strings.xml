@@ -20,7 +20,12 @@
     <string name="login_blocked_title">This number is blocked</string>
     <string name="login_blocked_body">This number is temporarily blocked. Please contact WAB for more information.</string>
     <string name="login_blocked_contact">Contact WAB</string>
-    <string name="otp_title">Verify your number</string>
+    <string name="otp_title">Enter verification code</string>
+    <string name="otp_mode_login">Log in</string>
+    <string name="otp_mode_register">Register salon</string>
+    <string name="otp_mode_change_phone">Change number</string>
+    <string name="otp_mode_bank_details">Confirm bank details</string>
+    <string name="otp_bank_note">To protect your money, confirm the bank details change with the code sent to the owner’s phone.</string>
     <string name="otp_sent_to">We sent a WhatsApp code to</string>
     <string name="otp_expires_in">The code expires in %1$s</string>
     <string name="otp_verify">Verify</string>

@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -16,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceAtLeast
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 
 /** Design `--authbg`: a top-to-bottom hero gradient behind every auth screen (`heroStart → heroMiddle → heroEnd`). */
@@ -25,9 +29,17 @@ internal fun authHeroBrush(): Brush {
     return Brush.verticalGradient(listOf(colors.heroStart, colors.heroMiddle, colors.heroEnd))
 }
 
-/** `padding:54px 22px 26px` (login/register) or `54px 24px 30px` (OTP); `AppScreen` already handles the insets. */
-internal fun authScreenPadding(horizontal: Dp = AuthDesign.screenHorizontal, bottom: Dp = AuthDesign.screenBottom): PaddingValues =
-    PaddingValues(start = horizontal, end = horizontal, top = AuthDesign.screenTop, bottom = bottom)
+/**
+ * `padding:54px 22px 26px` (login/register) or `54px 22px 30px` (OTP). The design's 54 px top is measured from the
+ * top of the phone, under its absolute status bar; `AppScreen` already pads the status bar, so only the rest of the
+ * 54 dp is added here (at least [AuthDesign.screenTopMin]) — the header sits where the design draws it.
+ */
+@Composable
+internal fun authScreenPadding(horizontal: Dp = AuthDesign.screenHorizontal, bottom: Dp = AuthDesign.screenBottom): PaddingValues {
+    val statusBar = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val top = (AuthDesign.screenTop - statusBar).coerceAtLeast(AuthDesign.screenTopMin)
+    return PaddingValues(start = horizontal, end = horizontal, top = top, bottom = bottom)
+}
 
 /**
  * Scrollable screen column on the hero gradient whose minimum height is the viewport, so `Modifier.weight(1f)`

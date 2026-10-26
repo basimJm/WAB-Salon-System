@@ -20,7 +20,12 @@
     <string name="login_blocked_title">تم إيقاف هذا الرقم</string>
     <string name="login_blocked_body">تم إيقاف هذا الرقم مؤقتاً. يرجى التواصل مع WAB لمزيد من المعلومات.</string>
     <string name="login_blocked_contact">تواصل مع WAB</string>
-    <string name="otp_title">تحقق من رقمك</string>
+    <string name="otp_title">أدخل رمز التحقق</string>
+    <string name="otp_mode_login">تسجيل الدخول</string>
+    <string name="otp_mode_register">تسجيل صالون</string>
+    <string name="otp_mode_change_phone">تغيير الرقم</string>
+    <string name="otp_mode_bank_details">تأكيد بيانات البنك</string>
+    <string name="otp_bank_note">لحماية أموالك، أكّد تغيير بيانات البنك بالرمز المرسل إلى هاتف المالك.</string>
     <string name="otp_sent_to">أرسلنا رمزاً عبر واتساب إلى</string>
     <string name="otp_expires_in">تنتهي صلاحية الرمز خلال %1$s</string>
     <string name="otp_verify">تحقق</string>

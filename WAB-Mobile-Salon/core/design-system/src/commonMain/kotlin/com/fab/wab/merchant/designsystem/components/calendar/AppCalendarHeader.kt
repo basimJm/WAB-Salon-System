@@ -28,9 +28,8 @@ import com.fab.wab.merchant.designsystem.components.badge.AppCountBadge
 import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.button.AppIconButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
 import com.fab.wab.merchant.designsystem.components.selector.AppSegmentedTabs
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppDatePickerDialog
 import com.fab.wab.merchant.designsystem.icons.AppIcons
@@ -117,9 +116,8 @@ private fun TitleRow(
     onPickDate: () -> Unit,
     onAction: (CalendarHeaderAction) -> Unit,
 ) {
-    val press = rememberGlassPress()
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
-        Column(modifier = Modifier.weight(1f).glassClickable(press, role = Role.Button, onClick = onPickDate)) {
+        Column(modifier = Modifier.weight(1f).appClickable(role = Role.Button, onClick = onPickDate)) {
             AppText(text = title, style = AppTheme.typography.headlineMedium)
             AppText(text = monthLabel, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
         }
@@ -145,7 +143,6 @@ private fun TitleRow(
 private fun StripDay(day: WeekStripDayUi, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.large
-    val press = rememberGlassPress()
     val content = when {
         day.selected -> colors.onGradient
         day.isDayOff -> colors.faint
@@ -163,7 +160,7 @@ private fun StripDay(day: WeekStripDayUi, onClick: () -> Unit, modifier: Modifie
             .then(fill)
             .then(if (day.isToday && !day.selected) Modifier.border(AppTheme.sizes.borderWidth, colors.gradientEnd, shape) else Modifier)
             .semantics { selected = day.selected }
-            .glassClickable(press, role = Role.Tab, onClick = onClick),
+            .appClickable(role = Role.Tab, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space2, Alignment.CenterVertically),
     ) {

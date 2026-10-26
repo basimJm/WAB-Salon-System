@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import com.fab.wab.merchant.designsystem.components.button.AppIconButton
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
@@ -65,7 +65,7 @@ fun AppSearchBarStatic(
         modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = AppTheme.sizes.fieldHeight)
-            .glassBackground(AppTheme.glass, AppTheme.shapes.medium)
+            .cardBackground(AppTheme.surfaces, AppTheme.shapes.medium)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = AppTheme.spacing.space14),
         verticalAlignment = Alignment.CenterVertically,
