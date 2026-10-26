@@ -1,4 +1,4 @@
-import { useEffect, useRef, type KeyboardEvent } from 'react';
+import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { cx } from '../../utils/cx';
 import type { ButtonVariant } from '../core/Button';
 import { Popover } from './Popover';
@@ -18,11 +18,24 @@ export interface MenuProps {
   items: readonly MenuItem[];
   variant?: ButtonVariant;
   disabled?: boolean;
+  /** Custom trigger content and class (see Popover). */
+  trigger?: ReactNode;
+  triggerClassName?: string;
+  /** Non-interactive content above the items (e.g. who is signed in). */
+  header?: ReactNode;
 }
 
 const ITEM = '[role="menuitem"]:not([disabled])';
 
-function MenuItems({ items, close }: { items: readonly MenuItem[]; close: () => void }) {
+function MenuItems({
+  items,
+  close,
+  header,
+}: {
+  items: readonly MenuItem[];
+  close: () => void;
+  header?: ReactNode;
+}) {
   const list = useRef<HTMLDivElement>(null);
   useEffect(() => {
     list.current?.querySelector<HTMLElement>(ITEM)?.focus();
@@ -47,6 +60,7 @@ function MenuItems({ items, close }: { items: readonly MenuItem[]; close: () => 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- arrow-key navigation of the menu items inside
     <div ref={list} className="wab-menu" onKeyDown={onKeyDown}>
+      {header ? <div className="wab-menu__header">{header}</div> : null}
       {items.map((item) => (
         <button
           key={item.key}
@@ -67,10 +81,25 @@ function MenuItems({ items, close }: { items: readonly MenuItem[]; close: () => 
 }
 
 /** Actions menu (row actions, "more"). Arrow keys, Home/End move; Enter selects; Escape closes. */
-export function Menu({ label, items, variant, disabled }: MenuProps) {
+export function Menu({
+  label,
+  items,
+  variant,
+  disabled,
+  trigger,
+  triggerClassName,
+  header,
+}: MenuProps) {
   return (
-    <Popover label={label} panelRole="menu" {...(variant ? { variant } : {})} disabled={disabled}>
-      {(close) => <MenuItems items={items} close={close} />}
+    <Popover
+      label={label}
+      panelRole="menu"
+      {...(variant ? { variant } : {})}
+      {...(trigger ? { trigger } : {})}
+      {...(triggerClassName ? { triggerClassName } : {})}
+      disabled={disabled}
+    >
+      {(close) => <MenuItems items={items} close={close} header={header} />}
     </Popover>
   );
 }

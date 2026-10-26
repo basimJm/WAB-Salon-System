@@ -1,3 +1,5 @@
+import { Badge } from '../components/core/Badge';
+import { Icon } from '../components/core/Icon';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -107,7 +109,16 @@ export default function AuditPage() {
       ltr: true,
       render: (r) => formatInstant(r.createdAt, language, 'dateTime'),
     },
-    { key: 'action', header: t('audit.action'), render: (r) => humanizeAction(r.action) },
+    {
+      key: 'action',
+      header: t('audit.action'),
+      render: (r) => (
+        <span className="wab-cell2">
+          <span className="wab-cell2__main">{humanizeAction(r.action)}</span>
+          <bdi className="wab-cell2__code">{r.action}</bdi>
+        </span>
+      ),
+    },
     {
       key: 'entity',
       header: t('audit.entity'),
@@ -116,6 +127,16 @@ export default function AuditPage() {
     },
     { key: 'reason', header: t('appConfig.reason'), render: (r) => r.reason },
     { key: 'ip', header: t('audit.ip'), ltr: true, render: (r) => r.ip },
+    {
+      key: 'device',
+      header: t('audit.device'),
+      ltr: true,
+      render: (r) => (
+        <span className="wab-cell-clip" title={r.userAgent}>
+          {r.userAgent}
+        </span>
+      ),
+    },
   ];
   const chip = (key: string, label: string) =>
     f(key) ? [{ key, label: `${label}: ${f(key)}`, onRemove: () => list.setFilter(key, []) }] : [];
@@ -132,13 +153,26 @@ export default function AuditPage() {
     <>
       <ListPage
         title={title}
+        badges={
+          <Badge tone="grey">
+            <Icon name="lock" size="sm" />
+            {t('audit.readOnly')}
+          </Badge>
+        }
         subtitle={t('audit.subtitle')}
-        actions={
+        exportMenu={
           <ExportMenu
             onExport={runner(
               'AUDIT_LOGS',
               exportParams(queryOf(state.filters, state.page, state.pageSize)),
             )}
+          />
+        }
+        search={
+          <SearchField
+            label={t('audit.searchAction')}
+            initialValue={f('action')}
+            onSearch={(v) => list.setFilter('action', v ? [v] : [])}
           />
         }
         filters={{
@@ -153,11 +187,6 @@ export default function AuditPage() {
           onClearAll: list.clearFilters,
           controls: (
             <>
-              <SearchField
-                label={t('audit.searchAction')}
-                initialValue={f('action')}
-                onSearch={(v) => list.setFilter('action', v ? [v] : [])}
-              />
               {text('entityType', t('audit.entityType'))}
               {text('entityId', t('audit.entityId'))}
               {text('admin', t('audit.admin'))}

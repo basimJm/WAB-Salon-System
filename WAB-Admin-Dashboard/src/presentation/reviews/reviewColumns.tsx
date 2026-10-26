@@ -2,7 +2,8 @@ import type { TFunction } from 'i18next';
 import type { Review } from '@/domain/reviews/reviews';
 import type { Language } from '@/constants/i18n';
 import { branchName } from '@/domain/shared/branches';
-import { formatInstant } from '@/domain/shared/format';
+import { formatInstant, formatNumber } from '@/domain/shared/format';
+import { EntityCell, RatingCell } from '../components/data/TableCells';
 import { StatusBadge } from '../components/core/StatusBadge';
 import type { Column } from '../components/data/tableTypes';
 
@@ -24,13 +25,18 @@ export function reviewColumns(t: TFunction, language: Language): Column<Review>[
       key: 'rating',
       header: t('reviews.rating'),
       ltr: true,
-      render: (r) => `${String(r.rating)} / 5`,
+      render: (r) => <RatingCell avg={r.rating} language={language} />,
     },
     { key: 'comment', header: t('reviews.comment'), render: (r) => r.comment ?? '—' },
     {
       key: 'author',
       header: t('reviews.author'),
-      render: (r) => `${r.author.firstName} ${r.author.lastName} (${String(r.authorOtherReviews)})`,
+      render: (r) => (
+        <EntityCell
+          name={`${r.author.firstName} ${r.author.lastName}`}
+          sub={t('reviews.previous', { count: formatNumber(r.authorOtherReviews, language) })}
+        />
+      ),
     },
     {
       key: 'at',

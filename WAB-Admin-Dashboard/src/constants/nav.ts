@@ -72,7 +72,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     id: 'catalog',
     labelKey: 'nav.catalog',
     path: ROUTES.catalog,
-    icon: 'list',
+    icon: 'grid',
     children: [
       { id: 'services', labelKey: 'nav.sub.services', path: '/catalog' },
       { id: 'requests', labelKey: 'nav.sub.requests', path: '/catalog/requests' },

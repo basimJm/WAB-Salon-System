@@ -32,7 +32,3 @@ export function deltaPercent(current: number, previous: number): number | undefi
   if (previous === 0) return undefined;
   return Math.round(((current - previous) / previous) * 1000) / 10;
 }
-
-/** Keeps the counts whose event name starts with the prefix (`booking.` -> `booking.created`). */
-export const withPrefix = (rows: readonly EventCount[], prefix: string): EventCount[] =>
-  rows.filter((r) => r.key.startsWith(prefix));

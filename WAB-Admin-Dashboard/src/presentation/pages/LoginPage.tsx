@@ -2,12 +2,16 @@ import { useState, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OTP_LENGTH } from '@/constants/auth';
+import { SESSION_IDLE_DAYS } from '@/constants/session';
+import { formatNumber } from '@/domain/shared/numbers';
 import { LOGIN_REDIRECT_PARAM, ROUTES } from '@/constants/routes';
 import { useContainer } from '@/app/ContainerContext';
 import { Button } from '../components/core/Button';
+import { Icon } from '../components/core/Icon';
 import { InlineAlert } from '../components/feedback/InlineAlert';
 import { safeRedirect } from '../controllers/loginValidation';
 import { useLoginController } from '../controllers/useLoginController';
+import { useLanguage } from '../hooks/useLanguage';
 import { PreferenceSwitches } from '../layout/PreferenceSwitches';
 import { BrandPanel } from './login/BrandPanel';
 import { CredentialsStep } from './login/CredentialsStep';
@@ -20,6 +24,7 @@ export default function LoginPage() {
   const [params] = useSearchParams();
   const ctrl = useLoginController();
   const ended = useContainer().session.endReason();
+  const { language } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -46,15 +51,23 @@ export default function LoginPage() {
           <PreferenceSwitches />
         </div>
         <section className="wab-login__card" aria-labelledby="login-title">
-          <h1 id="login-title" className="wab-login__title">
-            {t(first ? 'login.title' : 'login.codeTitle')}
-          </h1>
+          {first ? null : (
+            <button type="button" className="wab-login__back" onClick={ctrl.back}>
+              <Icon name="chevronEnd" size="sm" directional />
+              {t('common.back')}
+            </button>
+          )}
+          <div className="wab-login__heading">
+            <h1 id="login-title" className="wab-login__title">
+              {t(first ? 'login.title' : 'login.codeTitle')}
+            </h1>
+            {first ? <p className="wab-login__lead">{t('login.subtitle')}</p> : null}
+          </div>
           {first && ended ? (
             <p className="wab-login__notice" role="status">
-              {t(`login.ended.${ended}`)}
+              {t(`login.ended.${ended}`, { days: formatNumber(SESSION_IDLE_DAYS, language) })}
             </p>
           ) : null}
-          {first ? <p className="wab-login__lead">{t('login.subtitle')}</p> : null}
           <form className="wab-login__form" onSubmit={(e) => void onSubmit(e)} noValidate>
             {first ? (
               <CredentialsStep
@@ -80,11 +93,6 @@ export default function LoginPage() {
             <Button type="submit" block loading={ctrl.busy}>
               {t(first ? 'login.continue' : 'login.verify')}
             </Button>
-            {first ? null : (
-              <Button variant="ghost" block onClick={ctrl.back}>
-                {t('common.back')}
-              </Button>
-            )}
           </form>
         </section>
       </main>

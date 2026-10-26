@@ -31,6 +31,11 @@
       "XLSX": "Excel (.xlsx)",
       "CSV": "CSV",
       "PDF": "PDF"
+    },
+    "chip": {
+      "XLSX": "XLS",
+      "CSV": "CSV",
+      "PDF": "PDF"
     }
   },
   "chart": {

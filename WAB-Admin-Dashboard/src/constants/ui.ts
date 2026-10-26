@@ -1,10 +1,19 @@
+import brandIcon from '@/assets/wab-app-icon.png';
+
 export const BRAND_MARK = 'WAB';
+/** The WAB app icon (design/assets/wab-app-icon.png): sidebar and login brand. */
+export const BRAND_ICON_URL: string = brandIcon;
+/** Keyboard hint of the global search (Cmd+K on macOS, Ctrl+K elsewhere). */
+export const SEARCH_SHORTCUT_KEY = 'k';
+export const SEARCH_SHORTCUT_HINT = '⌘K';
 export const BRAND_TAGLINE = 'WEDDING & BEAUTY';
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 export const DEFAULT_PAGE_SIZE = 25;
 /** The largest page the admin API serves (lookups load one full page). */
 export const MAX_PAGE_SIZE = 100;
 export const SKELETON_ROWS = 6;
+/** Placeholder cards while a card grid (banners) loads. */
+export const SKELETON_CARDS = 4;
 export const MIN_REASON_LENGTH = 3;
 export const TOAST_DURATION_MS = 4_000;
 export const SIDEBAR_DRAWER_ID = 'wab-sidebar';
@@ -45,3 +54,5 @@ export const LIST_SEARCH_MAX_LENGTH = 100;
 export const EXPORT_POLL_INTERVAL_MS = 2_000;
 export const EXPORT_POLL_TIMEOUT_MS = 120_000;
 export const SEARCH_GROUP_SIZE = 5;
+/** Latest NEW alerts shown in the top-bar bell dropdown (design `WAB Admin Topbar`). */
+export const BELL_LATEST_ALERTS = 5;
