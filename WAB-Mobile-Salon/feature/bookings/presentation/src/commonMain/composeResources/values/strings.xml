@@ -41,6 +41,7 @@
     <string name="details_payment">Payment</string>
     <string name="details_total">Total</string>
     <string name="details_paid_online">Paid online</string>
+    <string name="details_paid_at_salon">Paid at the salon</string>
     <string name="details_remaining">Remaining to collect</string>
     <string name="details_refunded">Refunded</string>
     <string name="details_policy">Policy (at booking time)</string>
@@ -95,7 +96,6 @@
     <string name="done_no_show">Booking marked as no-show</string>
     <string name="done_reassigned">Staff reassigned — customer notified</string>
     <string name="person_services">%1$s · %2$s</string>
-    <string name="person_staff_time">%1$s · %2$s – %3$s</string>
     <string name="service_line">%1$s · %2$d min · %3$s</string>
     <string name="history_line">%1$s · %2$s</string>
     <string name="request_time_range">%1$s – %2$s</string>

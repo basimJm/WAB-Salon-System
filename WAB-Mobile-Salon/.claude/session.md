@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-075 — Merchant contract 1.6.0 (SRV-170) + end-to-end pass on the local stack
+- Branch: `feat/mer-075-contract-1-6`
+- Status: IN PROGRESS
+- Acceptance criteria (SRV-170, BUSINESS_DOMAIN §5.5; `GET /bookings`, `GET /bookings/{id}`, `GET /dashboard`; PRD M07–M09; design 03 `on.details`):
+  - [x] `apiSync` to merchant contract 1.6.0; `api_sync --check` ok; `contract_gaps.py` 0 gaps after re-capturing `GetBookings`, `GetBookingsById` (a COMPLETED booking) and `GetDashboard` from the local stack (read-only owner capture, no full capture: it would cancel leftover bookings of the shared stack)
+  - [x] Staff per person `{id, name, firstName, photoUrl}`: `StaffRef.photoUrl` mapped on list rows, details staff and persons; details person footer = design 03 26 dp staff circle (photo, else first letter) + name + start – end
+  - [x] `money.remaining` = still owed (0 once final), `money.paidAtSalon` new: "Paid at the salon" row (AR + EN) when non-zero; "Refunded" only when non-zero (was shown as 0 on every booking)
+  - [x] `rejection` on list rows decoded (contract tests); NOT drawn on list cards: PRD M08 card and design 03 list card have no reason (details already shows it, design `hasReason`)
+  - [x] Hand dashboard mock fixture carries the new required `firstName`
+  - [ ] End-to-end pass (owner, branch manager, employee; Android + iOS) → `docs/E2E_RESULTS.md`
+- Tests: `BookingMappersTest` (+2), `RealBookingsFixturesTest` (+1 completed booking), `BookingMoneyTest` (2, new); contract decoders on the new captures
+- Loops: 0/1
+- Review: PENDING
+
 ### MER-074 — Design as drawn, no Liquid Glass
 - Branch: `feat/mer-074-flat-design`
 - Branched: (from `fix/mer-073-otp-screen`)

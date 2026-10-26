@@ -37,7 +37,7 @@ fun GetBookingsDataItem.toDomain(): BookingSummary? {
         total = total,
         customerName = customer?.name.orEmpty(),
         customerPhone = customer?.phone,
-        staff = staff.map { StaffRef(it.id, it.name) },
+        staff = staff.map { StaffRef(it.id, it.name, photoUrl = it.photoUrl) },
         branch = branch?.let { BranchRef(it.id, it.name, it.locationText?.takeIf(String::isNotBlank)) },
     )
 }
@@ -48,7 +48,7 @@ fun GetBookingsByIdData.toDomain(): BookingDetails? {
         id = id, reference = referenceNumber, status = BookingStatus.fromCode(status) ?: BookingStatus.PENDING,
         paymentStatus = PaymentStatus.fromCode(paymentStatus), hasBride = hasBride, start = start, end = instantOf(appointmentEnd) ?: start,
         respondBy = instantOf(respondBy), personsCount = personsCount.toInt(), total = total, customerName = customer?.name.orEmpty(),
-        customerPhone = customer?.phone, staff = staff.map { StaffRef(it.id, it.name) },
+        customerPhone = customer?.phone, staff = staff.map { StaffRef(it.id, it.name, photoUrl = it.photoUrl) },
         branch = branch?.let { BranchRef(it.id, it.name, it.locationText?.takeIf(String::isNotBlank)) },
     )
     return BookingDetails(
@@ -57,11 +57,11 @@ fun GetBookingsByIdData.toDomain(): BookingDetails? {
         persons = persons.map { person ->
             BookingPerson(
                 name = person.name, isBride = person.isBride, start = instantOf(person.start), end = instantOf(person.end),
-                subtotal = person.subtotal, staff = person.staff?.let { StaffRef(it.id, it.name) },
+                subtotal = person.subtotal, staff = person.staff?.let { StaffRef(it.id, it.name, photoUrl = it.photoUrl) },
                 services = person.services.map { BookedService(it.name, it.price, it.durationMinutes.toInt()) },
             )
         },
-        money = BookingMoney(money.total, money.dueOnline, money.paidOnline, money.remaining, money.refunded),
+        money = with(money) { BookingMoney(total, dueOnline, paidOnline, remaining, refunded, paidAtSalon) },
         policy = policy.toPolicyTerms(),
         history = statusHistory.map { StatusChange(BookingStatus.fromCode(it.status), it.actorType, it.reason, instantOf(it.at)) },
         rejectionReason = rejection?.let { it.reasonText ?: it.reasonCode },
