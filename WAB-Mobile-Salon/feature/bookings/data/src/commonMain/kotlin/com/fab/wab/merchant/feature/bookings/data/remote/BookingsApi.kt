@@ -73,7 +73,11 @@ class BookingsApi(private val client: HttpClient) {
             parameter(BookingsParams.PERSON_INDEX, personIndex)
         }.body()
 
-    suspend fun team(): BaseResponse<List<GetTeamMembersDataItem>> = client.get(MerchantOperations.getTeamMembers.path).body()
+    suspend fun team(page: Int, pageSize: Int): BaseResponse<List<GetTeamMembersDataItem>> =
+        client.get(MerchantOperations.getTeamMembers.path) {
+            parameter(BookingsParams.PAGE, page)
+            parameter(BookingsParams.PAGE_SIZE, pageSize)
+        }.body()
 }
 
 private fun HttpRequestBuilder.queryOf(query: BookingQuery, page: Int, pageSize: Int) {
