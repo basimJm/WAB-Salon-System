@@ -14,10 +14,17 @@
     <string name="salon_day_today">%1$s · اليوم</string>
     <string name="salon_closure_title">إغلاق استثنائي قادم</string>
     <string name="salon_closure">مغلق %1$s – %2$s · %3$s</string>
+    <string name="salon_closure_day">مغلق %1$s · %2$s</string>
     <string name="salon_staff">الطاقم</string>
     <string name="salon_reviews">التقييمات</string>
     <string name="salon_reviews_of_five">%1$s من 5</string>
-    <string name="salon_reviews_count"> · %1$d تقييم</string>
+    <plurals name="salon_reviews_count">
+        <item quantity="one"> · تقييم واحد</item>
+        <item quantity="two"> · تقييمان</item>
+        <item quantity="few"> · %1$d تقييمات</item>
+        <item quantity="many"> · %1$d تقييماً</item>
+        <item quantity="other"> · %1$d تقييم</item>
+    </plurals>
     <string name="salon_reviews_count_short"> · %1$d</string>
     <string name="salon_reviews_see_more">عرض المزيد</string>
     <string name="salon_reviews_empty">لا يوجد تقييمات حالية لهذا الصالون</string>
@@ -52,7 +59,13 @@
     <string name="reviews_title">تقييمات الصالون</string>
     <string name="reviews_staff_title">تقييمات الموظف</string>
     <string name="reviews_empty">لا توجد تقييمات بعد</string>
-    <string name="reviews_based_on">بناءً على %1$d تقييم</string>
+    <plurals name="reviews_based_on">
+        <item quantity="one">بناءً على تقييم واحد</item>
+        <item quantity="two">بناءً على تقييمين</item>
+        <item quantity="few">بناءً على %1$d تقييمات</item>
+        <item quantity="many">بناءً على %1$d تقييماً</item>
+        <item quantity="other">بناءً على %1$d تقييم</item>
+    </plurals>
     <string name="review_comment_hint">اكتب تعليقك (اختياري)</string>
     <string name="review_submit">إرسال التقييم</string>
     <string name="review_submitted">شكراً لك! سيظهر تقييمك بعد الموافقة</string>

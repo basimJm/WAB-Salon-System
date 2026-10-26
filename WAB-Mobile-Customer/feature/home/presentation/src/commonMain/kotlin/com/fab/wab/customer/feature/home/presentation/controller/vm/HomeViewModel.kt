@@ -4,6 +4,7 @@ import com.fab.wab.customer.core.analytics.AnalyticsAction
 import com.fab.wab.customer.core.analytics.AnalyticsTracker
 import com.fab.wab.customer.core.analytics.analyticsParams
 import com.fab.wab.customer.core.domain.AppError
+import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
 import com.fab.wab.customer.core.domain.model.LocationData
@@ -34,6 +35,10 @@ import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeCo
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.intOrNull
@@ -49,6 +54,8 @@ class HomeDependencies(
     val realtime: RealtimeClient,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    /** The app language: server content is localized by `Accept-Language`, so a switch reloads Home (CUS-092). */
+    val languageChanges: Flow<AppLanguage> = emptyFlow(),
 )
 
 /** S03: one request per gender tab, nearest by permission state, live unread badge, auth-gated favorites. */
@@ -70,6 +77,7 @@ class HomeViewModel(
                 if (count != null) updateState { copy(unreadCount = count) }
             }
         }
+        scope.launch { deps.languageChanges.distinctUntilChanged().drop(1).collect { if (uiState.value.hasContent) load(refresh = true) } }
         scope.launch {
             // PRD §10.2: a push shown while the app is open refreshes the badge (the Home payload carries the unread count).
             PushSignals.messages.collect { if (uiState.value.signedIn && uiState.value.hasContent) load(refresh = true) }

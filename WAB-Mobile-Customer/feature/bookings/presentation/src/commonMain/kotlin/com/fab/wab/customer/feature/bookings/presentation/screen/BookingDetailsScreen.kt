@@ -42,15 +42,16 @@ import com.fab.wab.customer.feature.bookings.presentation.analytics.BookingsAnal
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiAction
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiState
 import com.fab.wab.customer.feature.bookings.presentation.resources.Res
+import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancel_window_passed
 import com.fab.wab.customer.feature.bookings.presentation.resources.bookings_error_network
 import com.fab.wab.customer.feature.bookings.presentation.resources.bookings_error_server
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancel
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancel_any_time
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancel_until
-import com.fab.wab.customer.feature.bookings.presentation.resources.details_cancel_window_passed
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_persons
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_rate
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_title
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** S15 (design `on.details`): top bar, shimmer / error placeholder, scrolling blocks, sticky cancel bar, cancel dialog. */
@@ -205,7 +206,9 @@ private fun CancellationRule.message(): String = when (this) {
         val text = TimeFormat.instantText(deadline.toString(), am, pm)
         stringResource(Res.string.details_cancel_until, listOfNotNull(text?.date, text?.time).joinToString(DATE_TIME_SEPARATOR))
     }
-    is CancellationRule.WindowPassed -> stringResource(Res.string.details_cancel_window_passed, windowHours.toInt())
+    is CancellationRule.WindowPassed -> windowHours.toInt().let { hours ->
+        pluralStringResource(Res.plurals.details_cancel_window_passed, hours, hours)
+    }
     CancellationRule.NotApplicable -> ""
 }
 

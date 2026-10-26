@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.home.presentation.di
 
+import com.fab.wab.customer.core.domain.AppearanceSettings
 import com.fab.wab.customer.feature.home.presentation.controller.vm.HomeDependencies
 import com.fab.wab.customer.feature.home.presentation.controller.vm.HomeViewModel
 import org.koin.core.module.dsl.viewModel
@@ -15,6 +16,7 @@ val homePresentationModule = module {
             favorites = get(),
             realtime = get(),
             analytics = get(),
+            languageChanges = get<AppearanceSettings>().language,
         )
     }
     viewModel { HomeViewModel(deps = get()) }

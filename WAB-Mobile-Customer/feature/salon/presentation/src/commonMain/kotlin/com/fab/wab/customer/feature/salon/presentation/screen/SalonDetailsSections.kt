@@ -32,6 +32,7 @@ import com.fab.wab.customer.feature.salon.presentation.resources.Res
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_call
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_closed
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_closure
+import com.fab.wab.customer.feature.salon.presentation.resources.salon_closure_day
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_closure_title
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_day_off
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_day_today
@@ -190,8 +191,10 @@ private fun ClosureBox(closure: Closure) {
                 style = AppTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                 color = colors.danger,
             )
+            val dates = closureDatesOf(closure)
             AppText(
-                text = stringResource(Res.string.salon_closure, closure.from, closure.to, closure.reason),
+                text = dates.to?.let { to -> stringResource(Res.string.salon_closure, dates.from, to, closure.reason) }
+                    ?: stringResource(Res.string.salon_closure_day, dates.from, closure.reason),
                 style = AppTheme.typography.bodySmall,
             )
         }
