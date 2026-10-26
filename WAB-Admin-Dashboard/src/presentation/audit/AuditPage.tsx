@@ -19,6 +19,8 @@ import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
+import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
+import { useLazyStrings } from '../hooks/useLazyStrings';
 
 const OPTIONS = { filterKeys: ['action', 'entityType', 'entityId', 'admin', 'from', 'to'] };
 
@@ -89,6 +91,7 @@ function Details({ log }: { log: AuditLog }) {
 
 /** Admin PRD A29 · Audit log: every admin action with who, what, why and from where; open one for the before/after diff. */
 export default function AuditPage() {
+  useLazyStrings(BOOKINGS_STRINGS);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { repositories } = useContainer();

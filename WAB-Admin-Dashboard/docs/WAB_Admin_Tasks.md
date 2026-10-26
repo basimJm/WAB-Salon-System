@@ -261,6 +261,7 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 | ADM-104 | Alerts "email preview" tab (design 09 A27) | `feat/adm-104-alert-email-preview` | ADM-099 | SRV-166 | BLOCKED |  |
 | ADM-105 | Audit device column shows browser / OS / device type (design 09 A29) | `feat/adm-105-audit-device` | ADM-099 | SRV-167 | BLOCKED |  |
 | ADM-106 | Analytics A07–A10: fill the "no data yet" KPIs and cards from the breakdown endpoints (design 03) | `feat/adm-106-analytics-breakdowns` | ADM-099 | SRV-168 | BLOCKED |  |
+| ADM-107 | Adopt admin contract 1.7.0 (SRV-170): `api:sync`; staff per person `{id, name, firstName, photoUrl}` on booking rows/details, `rejection {reasonCode, reasonText, at}` on list rows, `money.remaining` = still owed (0 once final) + `money.paidAtSalon` (COMPLETED) shown in the bookings list and details (PRD A12/A13) | `feat/adm-107-contract-1-7` | ADM-047 | SRV-170 | IN REVIEW |  |
 
 ---
 ## 5. Traceability matrix (nothing in the PRD or BRD is left without a task)

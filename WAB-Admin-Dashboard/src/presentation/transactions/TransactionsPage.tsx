@@ -21,6 +21,8 @@ import { useExportRunner } from '../hooks/useExportRunner';
 import { useBranchNames } from '../hooks/useBranchOptions';
 import { useLanguage } from '../hooks/useLanguage';
 import { SalonBranchFilters } from '../shared/SalonBranchFilters';
+import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
+import { useLazyStrings } from '../hooks/useLazyStrings';
 
 const OPTIONS = {
   filterKeys: ['status', 'type', 'from', 'to', 'salon', 'branch', 'customer', 'booking'],
@@ -61,6 +63,7 @@ const exportParams = ({
 
 /** Admin PRD A16 · Payment attempts with the gateway code and fee; open one for the raw answer and all attempts. */
 export default function TransactionsPage() {
+  useLazyStrings(BOOKINGS_STRINGS);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const navigate = useNavigate();
