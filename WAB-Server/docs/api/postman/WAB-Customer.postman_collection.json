@@ -967,7 +967,13 @@
                 "salons",
                 ":salonId"
               ],
-              "query": [],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
                   "key": "salonId",
@@ -975,7 +981,7 @@
                 }
               ]
             },
-            "description": "Public; a valid customer token only adds `isFavorite`. A salon that is not LIVE and complete is 404 `SALON_NOT_FOUND`."
+            "description": "Public; a valid customer token only adds `isFavorite`. A salon that is not LIVE and complete is 404 `SALON_NOT_FOUND`. With `branchId` (a bookable branch, else 404 `BRANCH_NOT_FOUND`) `staff` and `services` are that branch's only and the place fields are the branch's; without it they cover every bookable branch, each tagged with its `branchId`."
           }
         },
         {
@@ -1012,7 +1018,8 @@
                   "value": ""
                 }
               ]
-            }
+            },
+            "description": "Services are the member's own branch services; a member of an unbookable branch is 404 `NOT_FOUND`."
           }
         }
       ]
