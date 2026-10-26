@@ -65,11 +65,21 @@ class BookingRequestsViewModel(
     private var shownId: String? = null
     private var shownAtMs = 0L
 
+    /** `onStart` re-runs on every re-subscription (app back from the background): the streams are collected once. */
+    private var collecting = false
+
     override fun onStart() {
-        deps.requests.onEach { enqueue(it) }.launchIn(scope)
-        deps.updates.onEach { recheck(it) }.launchIn(scope)
-        deps.clock.onEach { now -> updateState { copy(nowMs = now) } }.launchIn(scope)
-        // Opening the app shows the unanswered requests (PRD M10, iOS).
+        if (!collecting) {
+            collecting = true
+            deps.requests.onEach { enqueue(it) }.launchIn(scope)
+            deps.updates.onEach { recheck(it) }.launchIn(scope)
+            deps.clock.onEach { now -> updateState { copy(nowMs = now) } }.launchIn(scope)
+        }
+        // Opening the app shows the unanswered requests (PRD M10, iOS), also the ones closed with "Done".
+        if (uiState.value.snoozed) {
+            updateState { copy(snoozed = false) }
+            alertForCurrent()
+        }
         scope.launch {
             val pending = deps.repository.list(BookingQuery(BookingsTab.PENDING), BookingsDefaults.FIRST_PAGE, BookingsDefaults.PAGE_SIZE)
             (pending as? AppResult.Success)?.data?.forEach { enqueue(it.id) }
@@ -85,13 +95,14 @@ class BookingRequestsViewModel(
             UiAction.OnAccept -> accept()
             UiAction.OnReject -> if (canAct()) updateState { copy(reject = DetailsDialog.Reason(BookingAction.REJECT)) }
             UiAction.OnViewDetails -> uiState.value.current?.let { open(it.summary.id) }
-            UiAction.OnNext, UiAction.OnDone -> {
-                updateState { copy(acceptedReference = null, acceptedId = null) }
+            UiAction.OnNext -> {
+                updateState { copy(acceptedReference = null, acceptedId = null, snoozed = false) }
                 alertForCurrent()
             }
+            // Close the sheet: the next queued request must not cover the screen the member chose (found in the e2e pass).
+            UiAction.OnDone -> closeAccepted()
             UiAction.OnViewBooking -> uiState.value.acceptedId?.let { id ->
-                updateState { copy(acceptedReference = null, acceptedId = null) }
-                alertForCurrent()
+                closeAccepted()
                 emitSideEffect(SideEffect.OpenDetails(id))
             }
             UiAction.OnDismiss -> uiState.value.current?.let { drop(it.summary.id) }
@@ -113,6 +124,11 @@ class BookingRequestsViewModel(
         return true
     }
 
+    private fun closeAccepted() {
+        updateState { copy(acceptedReference = null, acceptedId = null, snoozed = queue.isNotEmpty()) }
+        alertForCurrent()
+    }
+
     private fun canAct(): Boolean = uiState.value.let { it.current != null && !it.accepting && !it.rejecting && it.handledBy == null }
 
     private suspend fun enqueue(id: String) {
@@ -120,9 +136,10 @@ class BookingRequestsViewModel(
         val details = (deps.repository.details(id) as? AppResult.Success)?.data
         if (details == null || details.summary.status != BookingStatus.PENDING) return
         if (!deps.memberScope().accepts(details.summary.branch?.id)) return
-        val wasEmpty = uiState.value.queue.isEmpty()
-        updateState { copy(queue = queue + details) }
-        if (wasEmpty) alertForCurrent()
+        val wasHidden = uiState.value.queue.isEmpty() || uiState.value.snoozed
+        // A new request brings a closed queue back on screen (real time, PRD M10).
+        updateState { copy(queue = queue + details, snoozed = false) }
+        if (wasHidden) alertForCurrent()
     }
 
     private suspend fun recheck(id: String) {
@@ -216,7 +233,7 @@ class BookingRequestsViewModel(
     private fun alertForCurrent() {
         val state = uiState.value
         val current = state.current
-        if (current != null && state.acceptedReference == null) {
+        if (current != null && state.acceptedReference == null && !state.snoozed) {
             deps.alert.play()
             trackShown(current)
         } else {
