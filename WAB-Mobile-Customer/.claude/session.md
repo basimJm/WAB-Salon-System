@@ -11,19 +11,20 @@
 
 ### CUS-093 — Bride-only services, staff per person, list rejection, completed money (SRV-170, contract 1.5.0)
 - Branch: `feat/cus-093-srv-170-contract`
-- Status: IN PROGRESS
+- Status: IN PROGRESS (ready for the lead: not pushed, no PR)
 - Acceptance criteria (PRD S07/S10 staff sheet, S14, S15, S16 step 1, S18; `openapi.customer.json` 1.5.0: `GET /salons/{salonId}` + `/staff/{memberId}` `services[].brideOnly`, `GET /bookings` `rejection`, `GET /bookings/{id}` `persons[].staff {firstName, photoUrl}` + `money.paidAtSalon` + `remaining` 0 once final, `POST /salons/{salonId}/staff/{memberId}/reviews`; closes E2E gaps #26 #28 #30 #33 #35):
-  - [ ] Contract re-synced (`api_sync.py`, snapshot 052913e6) + real fixtures re-captured from the local stack (incl. OTP request/verify); `api_sync --check` ok; `contract_gaps.py` 0
-  - [ ] S16 step 1 offers bride-only services only to a bride person; unmarking the bride drops the VIP picks; VIP rows labelled "Brides only"
-  - [ ] S07 services list + service sheet and the S07a staff sheet show the bride-only label
-  - [ ] S15 person card: staff first name + photo (no line when unassigned); S18 staff step shows the photo and posts the staff review
-  - [ ] S14 card shows the rejection reason on REJECTED bookings
-  - [ ] S15 money: "Remaining" = server `remaining` (0 once final), "Paid at the salon" row for COMPLETED
-  - [ ] AR + EN strings; no hardcoded values; tests for every mapper / VM / helper change
-- Tests: (pending)
-- Loops: 0/1
-- Review: PENDING
-- Notes: (pending)
+  - [x] Contract re-synced (`api_sync.py`, snapshot 052913e6) + real fixtures re-captured from the local stack (incl. OTP request/verify, now captured); `api_sync --check` ok; `contract_gaps.py` 0; capture script picks a main-branch, non-VIP service (was a 400 on availability)
+  - [x] S16 step 1 offers bride-only services only to a bride person (`UiState.offeredServices`, toggle guard); unmarking the bride drops the VIP picks (`DraftPerson.withBride`); VIP rows labelled "Brides only"
+  - [x] S07 services list + service sheet and the S07a staff sheet show the bride-only label
+  - [x] S15 person card: staff first name + photo (initial fallback; no line when unassigned); S18 staff step shows the photo and posts the staff review (verified live)
+  - [x] S14 card shows the rejection reason on REJECTED bookings
+  - [x] S15 money: "Remaining" = server `remaining` (0 once final), "Paid at the salon" row for COMPLETED, "Paid" → "Paid online"
+  - [x] AR + EN strings; no hardcoded values; tests for every mapper / VM / helper change
+  - [x] E2E re-run (owner request): fixed "Closed today" shown outside today's hours (cards, favorites, branch step) and system Back leaving the booking flow (`AppBackHandler`); results + Render gap in `docs/E2E_RESULTS.md`
+- Tests: new `BookingFlowBrideOnlyTest` (3), `Srv170MappersTest` (3), `BookingMoneyRowsTest` (4), `FavoriteStatusTest` (1); +1 `SalonDetailsMappersTest`, +1 `StaffMappersTest`, +1 `RatingStepsTest`, `DomainCardsTest` hours rule rewritten, `ContractFixturesTest` (OTP captured). Terminal panel: `run_detekt.sh` ok; `./gradlew testAndroidHostTest --continue` 474 tests, 0 failures; `:androidApp:assembleDevDebug` ok; `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok; `policy_checks.py all` ok; `scripts/ci/tests` 93 OK; `api_sync --check` ok; `contract_gaps` 0
+- Loops: 1/1 — every criterion re-checked on the device (Pixel 4 AVD, local stack): VIP hidden for non-bride + companion, shown + labelled for the bride, Back returns to the person step, booking WAB-SKFH82 with staff per person, cancel → remaining 0, REJECTED reason on the card (AR + EN, dark), COMPLETED paid at salon 8.000 / remaining 0, staff rating step submitted; found and fixed in the loop: wrong duration in the new VM test, capture script over 300 lines, two detekt MaxLineLength
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — branch diff read once per role: filtering in domain helpers + VM state (no logic in composables), money/rejection decisions in pure tested helpers, mappers fall back safely (blank first name / photo), generated contract untouched by hand; AR + EN for every new text; `AppBackHandler` in the design system over `navigationevent-compose` (already in the graph, now declared, same version) instead of the deprecated `BackHandler`; Render must get SRV-170 before a dev build points at it (`brideOnly` required)
+- Notes: DEVIATIONS — not pushed / no PR / not merged (lead ships); emulator = Pixel 4 AVD (2 GB, swapping; the larger AVDs were used by other agents): tapping "Dark" in the theme sheet raised a system ANR twice while the app main thread was idle (trace) — environment, dark checked via system night mode, re-check on a healthy device; iOS: only the K/N framework link, no simulator run and no Xcode scheme build; `AppBackHandler` wiring is checked on the device, not by a Compose UI test; customer-app paid/deposit flows not exercised (payments paused). I created an AVD `WAB_Customer_E2E` that never came online (deleted again) and, by mistake, closed three idle Terminal tabs from other sessions (the local stack kept running). Local overrides only (untracked `local.properties`, `androidApp/src/devDebug/AndroidManifest.xml`), never committed.
 
 ### CUS-092 — End-to-end pass against a real server: fix every defect found
 - Branch: `feat/cus-092-e2e-fixes`
