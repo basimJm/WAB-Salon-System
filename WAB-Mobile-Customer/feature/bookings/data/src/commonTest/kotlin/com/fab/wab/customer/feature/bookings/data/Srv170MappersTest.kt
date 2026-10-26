@@ -47,7 +47,8 @@ class Srv170MappersTest {
 
     @Test
     fun theListRowCarriesTheRejectionReason() {
-        val rejected = row.copy(status = "REJECTED", rejection = GetBookingsDataItemRejection("FULL", "Fully booked", "2026-10-26T10:00:00Z"))
+        val reason = GetBookingsDataItemRejection("FULL", "Fully booked", "2026-10-26T10:00:00Z")
+        val rejected = row.copy(status = "REJECTED", rejection = reason)
         assertEquals(BookingReason("FULL", "Fully booked", "2026-10-26T10:00:00Z"), rejected.toDomain().rejection)
         assertNull(row.copy(rejection = null).toDomain().rejection)
     }

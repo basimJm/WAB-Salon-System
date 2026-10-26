@@ -24,7 +24,9 @@ sealed interface RatingStep {
 fun ratingStepsOf(booking: BookingDetails): List<RatingStep> {
     val salonId = booking.salonId ?: return emptyList()
     val staff = booking.persons
-        .mapNotNull { person -> person.staffId?.let { id -> RatingStep.Staff(salonId, id, person.staffName.orEmpty(), booking.branch, person.staffPhotoUrl) } }
+        .mapNotNull { person ->
+            person.staffId?.let { id -> RatingStep.Staff(salonId, id, person.staffName.orEmpty(), booking.branch, person.staffPhotoUrl) }
+        }
         .distinctBy { it.memberId }
     return listOf(RatingStep.Salon(salonId, booking.salonName, booking.branch)) + staff
 }
