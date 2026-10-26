@@ -84,17 +84,21 @@ export default function SalonsPage() {
     <ListPage
       title={title}
       subtitle={t('salons.subtitle')}
-      actions={<ExportMenu onExport={runner('SALONS', salonExportParams(salonQueryOf(state)))} />}
+      exportMenu={
+        <ExportMenu onExport={runner('SALONS', salonExportParams(salonQueryOf(state)))} />
+      }
+      search={
+        <SearchField
+          label={t('salons.search')}
+          initialValue={state.search}
+          onSearch={list.setSearch}
+        />
+      }
       filters={{
         active: chips,
         onClearAll: list.clearFilters,
         controls: (
           <>
-            <SearchField
-              label={t('salons.search')}
-              initialValue={state.search}
-              onSearch={list.setSearch}
-            />
             {select('state', t('salons.state'), [
               all,
               ...SALON_STATES.map((s) => ({ value: s, label: t(`status.salon.${s}`) })),

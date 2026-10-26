@@ -1,11 +1,8 @@
 import { MemoryRouter } from 'react-router-dom';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { deltaPercent, sumCounts, withPrefix } from '@/domain/analytics/analytics';
-import {
-  BookingsAnalyticsPage,
-  ErrorsAnalyticsPage,
-} from '@/presentation/analytics/EventsAnalyticsPage';
+import { deltaPercent, sumCounts } from '@/domain/analytics/analytics';
+import { alignDays, countOf, ratioOf } from '@/presentation/analytics/useBoardData';
 import LiveOverviewPage from '@/presentation/analytics/LiveOverviewPage';
 import { makeContainer, renderWithApp } from './helpers/render';
 
@@ -18,18 +15,39 @@ describe('analytics rules', () => {
     expect(deltaPercent(5, 0)).toBeUndefined();
   });
 
-  it('keeps events by name prefix', () => {
-    const rows = [
-      { key: 'booking.created', count: 1 },
-      { key: 'payment.failed', count: 2 },
-    ];
-    expect(withPrefix(rows, 'booking.')).toEqual([rows[0]]);
-    expect(withPrefix(rows, 'x.')).toEqual([]);
+  it('reads one event count of a section, 0 when missing or not loaded', () => {
+    const overview = { payments: { 'payment.failed': 4 }, refunds: {}, bookings: {}, errors: {} };
+    expect(countOf(overview, 'payments', 'payment.failed')).toBe(4);
+    expect(countOf(overview, 'payments', 'payment.started')).toBe(0);
+    expect(countOf(undefined, 'errors', 'api.error')).toBe(0);
+  });
+
+  it('gives a ratio only when there is something to divide by', () => {
+    expect(ratioOf(72, 80)).toBe(0.9);
+    expect(ratioOf(0, 0)).toBeUndefined();
+    expect(ratioOf(3, 0)).toBeUndefined();
+  });
+
+  it('aligns per-name day counts on one day axis with zeros for missing days', () => {
+    const aligned = alignDays([
+      [
+        { key: '2026-10-02', count: 3 },
+        { key: '2026-10-01', count: 1 },
+      ],
+      [{ key: '2026-10-03', count: 5 }],
+      [],
+    ]);
+    expect(aligned.labels).toEqual(['2026-10-01', '2026-10-02', '2026-10-03']);
+    expect(aligned.values).toEqual([
+      [1, 3, 0],
+      [0, 0, 5],
+      [0, 0, 0],
+    ]);
   });
 });
 
-describe('analytics pages', () => {
-  it('overview shows the four totals with their event breakdown (design 02)', async () => {
+describe('live overview', () => {
+  it('shows the four totals with their event breakdown (design 02)', async () => {
     renderWithApp(
       <MemoryRouter>
         <LiveOverviewPage />
@@ -37,23 +55,13 @@ describe('analytics pages', () => {
       makeContainer(),
     );
     expect(await screen.findByText('Payment events')).toBeInTheDocument();
-    expect(screen.getByText('64')).toBeInTheDocument();
-    expect(screen.getByText('110')).toBeInTheDocument();
+    // payments 70 + 60 + 4 + 2, bookings 100 + 72 + 8 + 10 + 55 + 3 + 2 (mock overview).
+    expect(screen.getByText('136')).toBeInTheDocument();
+    expect(screen.getByText('250')).toBeInTheDocument();
     expect(screen.getByText('payment.succeeded')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: "Today's report" })).toBeInTheDocument();
     expect(await screen.findByRole('button', { name: /^Alerts \(\d+\)$/ })).toBeInTheDocument();
     expect(screen.getByText(/· Amman time$/)).toBeInTheDocument();
-  });
-
-  it('a family page charts only its events', async () => {
-    renderWithApp(<BookingsAnalyticsPage />, makeContainer());
-    expect(await screen.findByText('Events by name')).toBeInTheDocument();
-    await waitFor(() => expect(screen.getAllByText('Events per day').length).toBeGreaterThan(0));
-  });
-
-  it('shows an empty message when the family has no events', async () => {
-    renderWithApp(<ErrorsAnalyticsPage />, makeContainer());
-    expect(await screen.findByText('Events by name')).toBeInTheDocument();
   });
 
   it('shows the error state with retry', async () => {

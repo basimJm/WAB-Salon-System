@@ -34,3 +34,11 @@
 .wab-heat--2 { background: color-mix(in srgb, var(--chart-1) 34%, var(--c-card)); }
 .wab-heat--3 { background: color-mix(in srgb, var(--chart-1) 46%, var(--c-card)); }
 .wab-heat--4 { background: color-mix(in srgb, var(--chart-1) 58%, var(--c-card)); }
+
+/* Design analytics boards (03 Analytics): KPI row (tiles >= 150 px) and a 12-column card grid; each cell sets its
+   design span (--span) and its tablet span (--span-md). */
+.wab-kpi-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--size-kpi-tile)), 1fr)); gap: var(--space-3); }
+.wab-board { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-4); }
+.wab-board__cell { display: grid; grid-column: span 12; min-width: 0; }
+[data-bp='medium'] .wab-board__cell { grid-column: span var(--span-md); }
+[data-bp='expanded'] .wab-board__cell { grid-column: span var(--span); }

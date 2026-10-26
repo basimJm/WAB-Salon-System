@@ -14,7 +14,37 @@
   padding: var(--space-3) var(--space-4);
   border-block-end: var(--size-hairline) solid var(--c-line);
 }
+.wab-listcard__titles { display: flex; flex: 1 1 var(--size-listcard-title); flex-wrap: wrap; align-items: center; gap: var(--space-2); min-width: 0; }
 .wab-listcard__title { font-size: var(--fs-md); font-weight: var(--fw-bold); }
+/* Design table card header: 220 px search box (34 px, surface fill) and 32 px tool buttons. */
+.wab-listcard__search { flex: 0 1 var(--size-listcard-search); min-width: 0; }
+.wab-listcard__search .wab-search .wab-field__control { min-height: var(--size-listcard-tool-lg); border-color: var(--c-line2); border-radius: var(--radius-control); background: var(--c-surface); font-size: var(--fs-sm); }
+[data-bp='compact'] .wab-listcard__search { flex: 1 1 100%; }
+.wab-listcard__tools { display: flex; align-items: center; gap: var(--space-2); }
+.wab-cardbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: var(--size-button-sm);
+  min-height: var(--size-button-sm);
+  padding-inline: var(--space-2);
+  border: var(--size-hairline) solid var(--c-line2);
+  border-radius: var(--radius-control);
+  background: var(--c-card);
+  color: var(--c-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.wab-cardbtn:hover:not(:disabled) { color: var(--c-ink); background: var(--c-hover); }
+.wab-cardbtn:disabled { opacity: var(--opacity-disabled); cursor: default; }
+.wab-export__item { display: flex; align-items: center; gap: var(--space-3); }
+.wab-export__chip { padding: var(--space-0) var(--space-1); border-radius: var(--radius-xs); color: var(--c-on-primary); font-family: var(--font-numeric); font-size: var(--fs-xxs); font-weight: var(--fw-bold); }
+.wab-export__chip--xlsx { background: var(--c-file-xlsx); }
+.wab-export__chip--csv { background: var(--c-file-csv); }
+.wab-export__chip--pdf { background: var(--c-file-pdf); }
 .wab-listcard__count {
   padding: 0 var(--space-2);
   border-radius: var(--radius-xs);
@@ -24,7 +54,7 @@
   font-size: var(--fs-xs);
   font-weight: var(--fw-semibold);
 }
-.wab-listcard__head .wab-table-toolbar { flex: 1; }
+.wab-listcard__head .wab-table-toolbar { flex: 0 1 auto; }
 .wab-listcard .wab-table-wrap { border: 0; border-radius: 0; box-shadow: none; background: transparent; }
 .wab-listcard > .wab-state { border-radius: 0; }
 .wab-listcard .wab-pagination {
@@ -82,3 +112,16 @@
 .wab-cell2__main { font-weight: var(--fw-semibold); }
 .wab-cell2__code { color: var(--c-muted); font-family: var(--font-numeric); font-size: var(--fs-xs); direction: ltr; }
 .wab-cell-clip { display: inline-block; max-width: var(--size-card-min); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+
+/* Design `Blocks` "cards" body (banners): auto-fill grid of 260 px cards with a 130 px artwork area. */
+.wab-cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--size-grid-card)), 1fr)); gap: var(--space-3); margin: 0; padding: var(--space-4); list-style: none; }
+.wab-cardgrid__cell { display: flex; min-width: 0; }
+.wab-gridcard { display: flex; flex: 1; flex-direction: column; min-width: 0; overflow: hidden; border: var(--size-hairline) solid var(--c-line); border-radius: var(--radius-popup); background: var(--c-card); }
+.wab-gridcard--skeleton { gap: var(--space-3); padding: var(--space-3); }
+.wab-gridcard__media { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-1); height: var(--size-grid-card-media); padding: var(--space-3); border-block-end: var(--size-hairline) solid var(--c-line); background: var(--c-surface); color: var(--c-faint); font-size: var(--fs-xs); text-align: center; }
+.wab-gridcard__key { max-width: 100%; overflow: hidden; font-family: var(--font-numeric); text-overflow: ellipsis; white-space: nowrap; }
+.wab-gridcard__body { display: flex; flex: 1; flex-direction: column; gap: var(--space-2); padding: var(--space-3); }
+.wab-gridcard__top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-2); }
+.wab-gridcard__title { font-size: var(--fs-base); font-weight: var(--fw-bold); line-height: var(--lh-tight); }
+.wab-gridcard__sub { color: var(--c-muted); font-size: var(--fs-sm); line-height: var(--lh); overflow-wrap: anywhere; }
+.wab-gridcard__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-block-start: auto; padding-block-start: var(--space-1); }

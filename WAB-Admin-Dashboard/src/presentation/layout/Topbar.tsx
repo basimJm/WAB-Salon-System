@@ -8,6 +8,7 @@ import { IconButton } from '../components/core/IconButton';
 import { useTheme } from '@/design/theme/useTheme';
 import { useLanguage } from '../hooks/useLanguage';
 import { AdminAvatar } from './AdminAvatar';
+import { AlertsBell } from './AlertsBell';
 
 export interface TopbarProps {
   adminName: string;
@@ -20,7 +21,7 @@ export interface TopbarProps {
   onLogout: () => void;
   /** Global search; the box is shown only when the data source for it exists (global-search task). */
   search?: GlobalSearchProps['search'];
-  /** Alerts still NEW: shown on the bell, which opens the alerts page. */
+  /** Alerts still NEW: the bell counter; the bell opens the latest ones (design dropdown). */
   alertCount?: number;
 }
 
@@ -68,13 +69,7 @@ export function Topbar({
         label={t(theme === 'dark' ? 'topbar.lightTheme' : 'topbar.darkTheme')}
         onClick={toggleTheme}
       />
-      <IconButton
-        className="wab-topbtn"
-        icon="bell"
-        label={t('topbar.alerts')}
-        {...(alertCount !== undefined ? { badge: alertCount } : {})}
-        onClick={() => void navigate(ROUTES.alerts)}
-      />
+      <AlertsBell count={alertCount ?? 0} />
       <Menu
         label={name}
         triggerClassName="wab-topbar__admin"

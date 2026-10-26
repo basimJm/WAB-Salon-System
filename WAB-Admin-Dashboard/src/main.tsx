@@ -8,6 +8,9 @@ import '@fontsource/ibm-plex-sans-arabic/400.css';
 import '@fontsource/ibm-plex-sans-arabic/500.css';
 import '@fontsource/ibm-plex-sans-arabic/600.css';
 import '@fontsource/ibm-plex-sans-arabic/700.css';
+// Playfair Display (OFL-1.1, self-hosted): Latin subset only, the serif headings fall back to IBM Plex Sans Arabic in Arabic.
+import '@fontsource/playfair-display/latin-600.css';
+import '@fontsource/playfair-display/latin-700.css';
 import './design/styles/index.css';
 import { applyThemeToDocument } from './design/theme/applyTheme';
 import { readStoredMode, resolveTheme, systemIsDark } from './design/theme/themeMode';

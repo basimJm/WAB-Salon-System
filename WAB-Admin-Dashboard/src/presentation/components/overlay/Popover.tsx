@@ -1,5 +1,6 @@
 import { useId, useState, type ReactNode } from 'react';
 import { usePopoverAlign } from '../../hooks/usePopoverAlign';
+import { cx } from '../../utils/cx';
 import { Button, type ButtonVariant } from '../core/Button';
 
 export interface PopoverProps {
@@ -17,6 +18,8 @@ export interface PopoverProps {
   trigger?: ReactNode;
   /** Class of a custom trigger (replaces the button look). */
   triggerClassName?: string;
+  /** Extra class of the floating panel (e.g. a wider panel with its own padding). */
+  panelClassName?: string;
 }
 
 /** Button + floating panel. Closes on Escape and when focus leaves; stays inside the viewport. */
@@ -29,6 +32,7 @@ export function Popover({
   panelRole = 'group',
   trigger,
   triggerClassName,
+  panelClassName,
 }: PopoverProps) {
   const panelId = useId();
   const [open, setOpen] = useState(false);
@@ -87,7 +91,7 @@ export function Popover({
           id={panelId}
           role={panelRole}
           aria-label={label}
-          className="wab-popover__panel"
+          className={cx('wab-popover__panel', panelClassName)}
         >
           {children(close)}
         </div>

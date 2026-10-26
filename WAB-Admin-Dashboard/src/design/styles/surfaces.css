@@ -11,6 +11,8 @@
 .wab-kpi.wab-card { display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-2); min-height: var(--size-kpi-min); padding: var(--space-4); }
 .wab-kpi__label { color: var(--c-muted); font-size: var(--fs-sm); font-weight: var(--fw-medium); }
 .wab-kpi__value { font-family: var(--font-numeric); font-size: var(--fs-xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); line-height: var(--lh-tight); white-space: nowrap; }
+.wab-kpi__value--rose { color: var(--tone-rose-fg); }
+.wab-kpi__note { color: var(--c-muted); font-size: var(--fs-xs); }
 .wab-kpi__delta { display: inline-flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; font-size: var(--fs-xs); font-weight: var(--fw-bold); }
 .wab-kpi__chip { display: inline-flex; gap: var(--space-1); align-items: center; padding: 0 var(--space-2); border-radius: var(--radius-xs); font-family: var(--font-numeric); }
 .wab-kpi__delta--up .wab-kpi__chip { background: var(--tone-green-bg); color: var(--tone-green-fg); }
@@ -157,3 +159,14 @@
   box-shadow: var(--shadow-overlay);
 }
 .wab-phone__screen { min-height: var(--size-phone-height); overflow: hidden; border-radius: var(--radius-md); background: var(--c-card); }
+
+/* Design card header bar (form / chart / settings cards): title row ruled off from the body. */
+.wab-card.wab-section-card { display: flex; flex-direction: column; min-width: 0; padding: 0; }
+.wab-section-card__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-block-end: var(--size-hairline) solid var(--c-line); }
+.wab-section-card__titles { display: flex; flex: 1 1 var(--size-listcard-title); flex-direction: column; gap: var(--space-0); min-width: 0; }
+.wab-section-card__title { margin: 0; font-size: var(--fs-md); font-weight: var(--fw-bold); }
+.wab-section-card__sub { margin: 0; color: var(--c-muted); font-size: var(--fs-sm); }
+.wab-section-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.wab-section-card__body { flex: 1; min-width: 0; padding: var(--space-4); }
+.wab-section-card__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-block-start: var(--size-hairline) solid var(--c-line); color: var(--c-muted); font-size: var(--fs-sm); }
+.wab-section-card__note { flex: 1; }

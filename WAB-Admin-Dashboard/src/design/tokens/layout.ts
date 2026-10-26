@@ -47,6 +47,8 @@ export const SIZES = {
   adminAvatar: '2.125rem',
   adminAvatarSm: '1.75rem',
   kpiMin: '6.125rem',
+  /** Smallest KPI tile on the analytics boards (design `min:150`). */
+  kpiTile: '9.375rem',
   otpBox: '3.25rem',
   otpBoxH: '3.625rem',
   stateIcon: '3.25rem',
@@ -70,13 +72,22 @@ export const SIZES = {
   phoneHeight: '40rem',
   toast: '22rem',
   popupMax: '16rem',
+  /** Top-bar bell dropdown (design 360 px). */
+  bellPanel: '22.5rem',
   popupMin: '12rem',
   searchMax: '32.5rem',
+  /** Design table card header: title block basis, search box width, search height. */
+  listcardTitle: '12.5rem',
+  listcardSearch: '13.75rem',
+  listcardToolLg: '2.125rem',
   tableMin: '40rem',
   skeletonLine: '1rem',
   spinner: '1.5rem',
   touchTarget: '2.75rem',
   cardMin: '15rem',
+  /** Design card grid (banners): card min width and artwork height. */
+  gridCard: '16.25rem',
+  gridCardMedia: '8.125rem',
   authCard: '25rem',
   brandPanel: '34rem',
   segmentedItem: '2.25rem',
@@ -91,7 +102,7 @@ export const SIZES = {
 } as const;
 
 export const FONT_FAMILIES = {
-  /** Headings and the wordmark (design: Playfair Display; falls back to a system serif when not installed). */
+  /** Headings and the wordmark: Playfair Display (bundled, OFL, Latin only); Arabic text falls through to IBM Plex Sans Arabic. */
   display: "'Playfair Display', Georgia, 'IBM Plex Sans Arabic', serif",
   numeric: "'Poppins', sans-serif",
   latin: "'Poppins', 'IBM Plex Sans Arabic', sans-serif",

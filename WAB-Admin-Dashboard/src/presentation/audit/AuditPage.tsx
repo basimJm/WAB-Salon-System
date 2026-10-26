@@ -160,12 +160,19 @@ export default function AuditPage() {
           </Badge>
         }
         subtitle={t('audit.subtitle')}
-        actions={
+        exportMenu={
           <ExportMenu
             onExport={runner(
               'AUDIT_LOGS',
               exportParams(queryOf(state.filters, state.page, state.pageSize)),
             )}
+          />
+        }
+        search={
+          <SearchField
+            label={t('audit.searchAction')}
+            initialValue={f('action')}
+            onSearch={(v) => list.setFilter('action', v ? [v] : [])}
           />
         }
         filters={{
@@ -180,11 +187,6 @@ export default function AuditPage() {
           onClearAll: list.clearFilters,
           controls: (
             <>
-              <SearchField
-                label={t('audit.searchAction')}
-                initialValue={f('action')}
-                onSearch={(v) => list.setFilter('action', v ? [v] : [])}
-              />
               {text('entityType', t('audit.entityType'))}
               {text('entityId', t('audit.entityId'))}
               {text('admin', t('audit.admin'))}
