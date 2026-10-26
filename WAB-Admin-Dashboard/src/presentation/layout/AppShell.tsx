@@ -9,6 +9,7 @@ import { useSession } from '../controllers/useSession';
 import { useViewport } from '../hooks/useViewport';
 import { IdleWarningDialog } from '../components/feedback/IdleWarningDialog';
 import { useIdleTimeout } from '../hooks/useIdleTimeout';
+import { useProactiveRefresh } from '../hooks/useProactiveRefresh';
 import { useRealtimeConnection } from '../hooks/useRealtime';
 import { useShellCounters } from '../hooks/useShellCounters';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
@@ -62,6 +63,7 @@ export function AppShell() {
   }, [sessionManager]);
 
   useRealtimeConnection(current !== null);
+  useProactiveRefresh(current);
   const counters = useShellCounters(current !== null);
   const { status: idle, stay } = useIdleTimeout({
     onExpire: () => void sessionManager.signOut('idle'),
