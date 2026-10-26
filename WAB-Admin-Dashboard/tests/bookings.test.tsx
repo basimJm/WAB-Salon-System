@@ -54,14 +54,14 @@ describe('bookingQueryOf', () => {
 describe('BookingsPage', () => {
   it('lists bookings with status, payment and JOD totals', async () => {
     app();
-    await waitFor(() => expect(bodyRows()).toBe(3));
+    await waitFor(() => expect(bodyRows()).toBe(4));
     expect(screen.getByText('WAB-000002')).toBeInTheDocument();
     expect(screen.getByText('120.500 JOD')).toBeInTheDocument();
   });
 
   it('filters by status and by bride, and opens a booking', async () => {
     app();
-    await waitFor(() => expect(bodyRows()).toBe(3));
+    await waitFor(() => expect(bodyRows()).toBe(4));
     await userEvent.selectOptions(screen.getByLabelText('State'), 'COMPLETED');
     await waitFor(() => expect(bodyRows()).toBe(1));
     await userEvent.selectOptions(screen.getByLabelText('State'), '');

@@ -4,10 +4,10 @@
 
 | Project (`tasks.py` key) | Master | Current task | Next ready task | Blocked on | Session file |
 |---|---|---|---|---|---|
-| server | `server` | SRV-172 merchant/customer e2e defects (IN REVIEW, `feat/srv-172-e2e-defects-2`; SRV-171 merged) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-159 owner ARQAM setup; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
-| admin | `admin` | none (ADM-097…099 #497/#498/#505) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking; ADM-100…106 server gaps SRV-162…168 | `WAB-Admin-Dashboard/.claude/session.md` |
-| customer | `customer` | none (CUS-092 e2e #499) | CUS-093 SRV-170 contract adoption | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
-| merchant | `merchant` | MER-070 WhatsApp OTP (IN REVIEW, branch `feat/mer-070-whatsapp-otp` on top of SRV-153) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
+| server | `server` | none (SRV-170 #500, SRV-171 #517, SRV-172 #520) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-159 owner ARQAM setup; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
+| admin | `admin` | none (ADM-107 #516) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking; ADM-100…106 server gaps SRV-162…168 | `WAB-Admin-Dashboard/.claude/session.md` |
+| customer | `customer` | none (CUS-093 #519) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
+| merchant | `merchant` | none (MER-073/074 #501, MER-075 #518) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
 | otp | `server` | OTP-012 ARQAM channel (IN REVIEW, 0.3.0, branch `feat/srv-158-arqam-otp`) | none | SRV-158 server adoption (same branch) | `wab-otp/.claude/session.md` |
 | notifications | `server` | none (SDK built, wired in the server) | NOT-010 publish | NOT-011 owner App Password | `wab-notifications/.claude/session.md` |
@@ -226,3 +226,15 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.
+
+### T-141 — E2E round merged; masters synced through main (2026-10-27)
+- Project: repo root
+- Branch: `chore/sync-main-into-admin-11`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Merged: ADM-107 (#516), SRV-171 (#517), MER-075 (#518), CUS-093 (#519), SRV-172 (#520); statuses DONE
+  - [x] `main` merged into each master that conflicted; conflicts = generated board (regenerated) + root index lines (rewritten to the current state)
+  - [ ] every master → `main`, then `main` → every master; all 0 behind `main`
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges + backlog only, no product code written.

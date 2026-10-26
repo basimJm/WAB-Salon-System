@@ -25,13 +25,17 @@ import { useListController } from '../controllers/useListController';
 import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
 import { SalonBranchFilters } from '../shared/SalonBranchFilters';
+import { reasonLabel } from './bookingReason';
 import { BOOKING_FILTER_KEYS, bookingExportParams, bookingQueryOf } from './bookingFilters';
+import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
+import { useLazyStrings } from '../hooks/useLazyStrings';
 
 const OPTIONS = { filterKeys: BOOKING_FILTER_KEYS };
 const ALL_TABS = 'ALL';
 
 /** Admin PRD A15 · All bookings: tabs, filters, search; refreshes itself when the server pushes `booking.updated`. */
 export default function BookingsPage() {
+  useLazyStrings(BOOKINGS_STRINGS);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -70,7 +74,15 @@ export default function BookingsPage() {
     {
       key: 'status',
       header: t('salons.state'),
-      render: (r) => <StatusBadge kind="booking" value={r.status} />,
+      render: (r) =>
+        r.rejection ? (
+          <span className="wab-entity__text">
+            <StatusBadge kind="booking" value={r.status} />
+            <span className="wab-entity__sub">{reasonLabel(t, r.rejection)}</span>
+          </span>
+        ) : (
+          <StatusBadge kind="booking" value={r.status} />
+        ),
     },
     {
       key: 'payment',

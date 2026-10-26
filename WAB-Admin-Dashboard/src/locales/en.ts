@@ -16,7 +16,6 @@ import salons from './en/salons.json';
 import branches from './en/branches.json';
 import applications from './en/applications.json';
 import customers from './en/customers.json';
-import bookings from './en/bookings.json';
 import reviews from './en/reviews.json';
 import transactions from './en/transactions.json';
 import refunds from './en/refunds.json';
@@ -66,7 +65,6 @@ const en = {
   ...refunds,
   ...transactions,
   ...reviews,
-  ...bookings,
   ...customers,
   ...applications,
   ...salons,

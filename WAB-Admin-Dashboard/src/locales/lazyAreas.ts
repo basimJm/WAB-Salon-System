@@ -1,22 +1,19 @@
-import type { Language } from '@/constants/i18n';
-import arAnalytics from './ar/analytics.json';
-import arAnalyticsOps from './ar/analyticsOps.json';
-import enAnalytics from './en/analytics.json';
-import enAnalyticsOps from './en/analyticsOps.json';
+import { ANALYTICS_STRINGS } from './lazy/analytics';
+import { BOOKINGS_STRINGS } from './lazy/bookings';
 
 /**
- * Locale areas kept OUT of the entry bundle: they are loaded with the screens that use them (the analytics boards'
- * labels are ~4 KB gzip and would break the entry budget). A page registers them with `useLazyStrings(area)`.
+ * Registry of the locale areas kept OUT of the entry bundle (tests read it: key parity, every file merged once).
+ * Pages never import this file: each imports its own bundle from `locales/lazy/<area>` and registers it with
+ * `useLazyStrings(bundle)`, so a screen loads only the strings it uses.
  */
 export const LAZY_AREAS = {
-  analytics: {
-    ar: { ...arAnalytics, ...arAnalyticsOps },
-    en: { ...enAnalytics, ...enAnalyticsOps },
-  },
-} as const satisfies Record<string, Record<Language, object>>;
+  analytics: ANALYTICS_STRINGS,
+  bookings: BOOKINGS_STRINGS,
+} as const;
 
 export type LazyArea = keyof typeof LAZY_AREAS;
 /** Area files on disk that belong to a lazy area (tests check every other file is merged into the entry). */
 export const LAZY_AREA_FILES: Readonly<Record<LazyArea, readonly string[]>> = {
   analytics: ['analytics.json', 'analyticsOps.json'],
+  bookings: ['bookings.json'],
 };

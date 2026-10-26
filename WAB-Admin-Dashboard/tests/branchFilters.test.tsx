@@ -30,7 +30,7 @@ const scoped = `salon=${SALON}&branch=${KHALDA}`;
 describe('branch filter and column (ADM-091)', () => {
   it('bookings: picking a salon shows its branches; a branch narrows the list; the column names it', async () => {
     at('/bookings', '/bookings', <BookingsPage />);
-    await waitFor(() => expect(bodyRows()).toBe(3));
+    await waitFor(() => expect(bodyRows()).toBe(4));
     expect(screen.queryByLabelText('Branch')).toBeNull();
     await userEvent.click(screen.getByRole('combobox', { name: 'Salon' }));
     await userEvent.click(await screen.findByRole('option', { name: 'Noor Salon' }));
