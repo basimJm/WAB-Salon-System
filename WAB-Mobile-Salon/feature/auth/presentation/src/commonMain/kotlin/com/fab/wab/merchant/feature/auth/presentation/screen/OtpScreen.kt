@@ -37,6 +37,7 @@ import com.fab.wab.merchant.feature.auth.presentation.resources.auth_dialog_glyp
 import com.fab.wab.merchant.feature.auth.presentation.resources.login_dialog_cancel
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_expired_body
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_expired_title
+import com.fab.wab.merchant.feature.auth.presentation.resources.otp_expires_in
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_resend
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_resend_in
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_sent_to
@@ -46,7 +47,8 @@ import com.fab.wab.merchant.feature.auth.presentation.resources.otp_wrong
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * S13 as in `design/WAB 01 Auth.dc.html` (`on.otp`): hero gradient, `padding:54px 24px 30px`, back pill with the
+ * S13 as in `design/WAB 01 Auth.dc.html` (`on.otp`), code sent on WhatsApp (MER-070): hero gradient,
+ * `padding:54px 24px 30px`, back pill with the
  * centered "Confirm booking" header (booking variant only), 76 dp soft icon box, title 23, "we sent a code to
  * <phone>", N boxes from the backend, wrong-code line / blocked banner, Verify, then resend link or countdown.
  */
@@ -86,6 +88,7 @@ fun OtpScreen(
             )
             AuthGap(AuthDesign.otpTitleBottom)
             SentToLine(state.phoneDisplay)
+            if (state.codeSent && state.expiresRemainingSeconds > 0) ExpiresLine(state.expiresRemainingSeconds)
             if (state.requestError != null) {
                 AppErrorState(onRetry = { onAction(UiAction.OnRetryRequest) }, message = state.requestError)
                 return@AuthScrollColumn
@@ -103,7 +106,7 @@ fun OtpScreen(
             }
             if (state.codeError) {
                 AppText(
-                    text = stringResource(Res.string.otp_wrong),
+                    text = state.codeErrorMessage ?: stringResource(Res.string.otp_wrong),
                     style = AppTheme.typography.bodySmall.copy(fontSize = AuthDesign.otpWrongSize),
                     color = colors.danger,
                 )
@@ -159,6 +162,17 @@ private fun SentToLine(phone: String, modifier: Modifier = Modifier) {
         modifier = modifier,
         style = AppTheme.typography.bodyMedium.copy(fontSize = AuthDesign.otpSentSize, lineHeight = AuthDesign.otpSentLineHeight),
         color = colors.muted,
+    )
+}
+
+/** "The code expires in 4:59" under the number: the WhatsApp code lives `expiresInSeconds` (BUSINESS_DOMAIN §3.1a). */
+@Composable
+private fun ExpiresLine(remainingSeconds: Int, modifier: Modifier = Modifier) {
+    AppText(
+        text = stringResource(Res.string.otp_expires_in, isolateLtr(formatCountdown(remainingSeconds))),
+        modifier = modifier,
+        style = AppTheme.typography.bodySmall.copy(fontSize = AuthDesign.otpExpiresSize),
+        color = AppTheme.colors.muted,
     )
 }
 

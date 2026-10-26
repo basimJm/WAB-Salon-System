@@ -1,7 +1,5 @@
 package com.fab.wab.merchant.feature.auth.presentation.di
 
-import com.fab.wab.merchant.core.common.AppEnvironment
-import com.fab.wab.merchant.core.firebase.FakePhoneAuthGateway
 import com.fab.wab.merchant.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.merchant.feature.auth.domain.model.PhoneNumber
 import com.fab.wab.merchant.feature.auth.presentation.controller.vm.LoginViewModel
@@ -15,11 +13,10 @@ val authPresentationModule = module {
     factory {
         OtpDependencies(
             requestOtp = get(),
-            reportWrongAttempt = get(),
-            loginWithIdToken = get(),
+            // Mock data source: the contract fixtures answer request + verify, so any code signs in.
+            verifyOtp = get(),
+            loginWithOtpToken = get(),
             resolveDialCode = get(),
-            // No SMS can be sent against fixtures: the mock data source verifies any code (unit-test fake).
-            phoneAuth = if (get<AppEnvironment>().usesMock) FakePhoneAuthGateway() else get(),
             appConfig = get(),
             pending = get(),
             analytics = get(),

@@ -50,6 +50,7 @@
     <string name="error_code_otp_blocked">طلبات رمز كثيرة. يرجى المحاولة لاحقاً.</string>
     <string name="error_code_otp_invalid">الرمز الذي أدخلته غير صحيح.</string>
     <string name="error_code_otp_expired">انتهت صلاحية هذا الرمز، يرجى طلب رمز جديد.</string>
+    <string name="error_code_otp_delivery_failed">تعذّر إرسال الرمز عبر واتساب. تأكد أن هذا الرقم يستخدم واتساب ثم حاول مجدداً.</string>
     <string name="error_code_phone_not_registered">هذا الرقم غير مسجل.</string>
     <string name="error_code_phone_already_registered">هذا الرقم مسجل مسبقاً.</string>
     <string name="error_code_account_blocked">حسابك موقوف. يرجى التواصل معنا.</string>

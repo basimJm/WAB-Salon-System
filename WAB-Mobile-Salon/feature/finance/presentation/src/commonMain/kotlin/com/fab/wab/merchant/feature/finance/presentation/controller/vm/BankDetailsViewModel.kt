@@ -110,7 +110,7 @@ class BankDetailsViewModel(
         proof ?: return
         scope.launch {
             updateState { copy(working = true) }
-            val result = deps.bank.save(uiState.value.draft, proof.idToken)
+            val result = deps.bank.save(uiState.value.draft, proof.otpToken)
             updateState { copy(working = false) }
             when (result) {
                 is AppResult.Success -> {

@@ -39,9 +39,9 @@ class BankRepositoryImpl(private val api: BankApi) : BankRepository {
             api.details()
         }.mapSuccess { response -> response.data?.let { BankDetails(it.bankName, it.accountHolderName, it.ibanLast4) } }
 
-    override suspend fun save(draft: BankDraft, idToken: String): AppResult<BankDetails> =
+    override suspend fun save(draft: BankDraft, otpToken: String): AppResult<BankDetails> =
         safeApiCall {
-            api.save(PutSalonPayoutDetailsBody(draft.bankName.trim(), draft.accountHolder.trim(), normalizeIban(draft.iban), idToken))
+            api.save(PutSalonPayoutDetailsBody(draft.bankName.trim(), draft.accountHolder.trim(), normalizeIban(draft.iban), otpToken))
         }
             .mapSuccess { BankDetails(it.data.bankName, it.data.accountHolderName, it.data.ibanLast4) }
 

@@ -25,9 +25,9 @@ import com.fab.wab.merchant.core.ui.permission.FakeOverlayPermission
 import com.fab.wab.merchant.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.merchant.feature.auth.domain.model.AuthSession
 import com.fab.wab.merchant.feature.auth.domain.model.OtpPolicy
+import com.fab.wab.merchant.feature.auth.domain.model.OtpProof
 import com.fab.wab.merchant.feature.auth.domain.model.PhoneCheck
 import com.fab.wab.merchant.feature.auth.domain.model.PhoneNumber
-import com.fab.wab.merchant.feature.auth.domain.model.WrongAttemptResult
 import com.fab.wab.merchant.feature.auth.domain.repository.AuthRepository
 import com.fab.wab.merchant.feature.auth.domain.usecase.LogoutUseCase
 import com.fab.wab.merchant.feature.auth.domain.model.InstallationInfo
@@ -116,8 +116,8 @@ private class FakeAuth : AuthRepository {
     private val error = AppResult.Error(AppError.NetworkError("x"))
     override suspend fun checkPhone(phone: PhoneNumber): AppResult<PhoneCheck> = error
     override suspend fun requestOtp(phoneE164: String, purpose: AuthPurpose): AppResult<OtpPolicy> = error
-    override suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult> = error
-    override suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession> = error
+    override suspend fun verifyOtp(phoneE164: String, purpose: AuthPurpose, code: String): AppResult<OtpProof> = error
+    override suspend fun login(phone: PhoneNumber, otpToken: String, installation: InstallationInfo?): AppResult<AuthSession> = error
     override suspend fun logout(refreshToken: String): AppResult<Unit> {
         loggedOut += refreshToken
         return error

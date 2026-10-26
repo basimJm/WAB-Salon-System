@@ -5,6 +5,7 @@ import com.fab.wab.merchant.core.domain.auth.TokenRefreshApi
 import com.fab.wab.merchant.core.domain.auth.TokenRefreshResult
 import com.fab.wab.merchant.core.domain.repository.SessionTimeOut
 import com.fab.wab.merchant.core.network.client.installAuthRefresh
+import com.fab.wab.merchant.core.network.client.publicRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -160,5 +161,23 @@ class AuthRefreshInterceptorTest {
 
         assertEquals(listOf<String?>(BEARER + NEW_ACCESS), backend.seen)
         assertEquals(0, refresh.calls)
+    }
+
+    /** MER-070: `POST /auth/otp/verify` answers a wrong code with 401; a refresh + retry would count it twice. */
+    @Test
+    fun publicRequestIsSentOnceWithoutTokenAndNeverRefreshed() = runTest {
+        val backend = Backend()
+        val refresh = ScriptedRefresh(rotated)
+        val session = RecordingSession()
+        val settings = FakeAppSettings(OLD_ACCESS, OLD_REFRESH)
+        val client = httpClient(backend, settings, refresh, session)
+
+        val error = assertFailsWith<ClientRequestException> { client.get(PATH) { publicRequest() } }
+
+        assertEquals(HttpStatusCode.Unauthorized, error.response.status)
+        assertEquals(listOf<String?>(null), backend.seen)
+        assertEquals(0, refresh.calls)
+        assertTrue(session.events.isEmpty())
+        assertEquals(OLD_ACCESS, settings.token.first())
     }
 }

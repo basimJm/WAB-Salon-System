@@ -4,14 +4,14 @@ import com.fab.wab.merchant.core.data.contract.generated.MemberProfile as Member
 import com.fab.wab.merchant.core.data.contract.generated.PostAuthLoginBodyInstallation
 import com.fab.wab.merchant.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpRequestData
-import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpWrongAttemptData
+import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpVerifyData
 import com.fab.wab.merchant.core.domain.auth.AuthTokens
 import com.fab.wab.merchant.core.domain.session.MemberProfile
 import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.feature.auth.domain.model.AuthSession
 import com.fab.wab.merchant.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.merchant.feature.auth.domain.model.OtpPolicy
-import com.fab.wab.merchant.feature.auth.domain.model.WrongAttemptResult
+import com.fab.wab.merchant.feature.auth.domain.model.OtpProof
 import kotlin.time.Instant
 
 /** A malformed timestamp from the server must not crash the flow: it reads as "not blocked". */
@@ -22,14 +22,11 @@ fun PostAuthOtpRequestData.toDomain(): OtpPolicy = OtpPolicy(
     allowed = allowed,
     otpLength = otpLength,
     resendAfterSeconds = resendAfterSeconds,
+    expiresInSeconds = expiresInSeconds,
     blockedUntil = parseInstantOrNull(blockedUntil),
 )
 
-fun PostAuthOtpWrongAttemptData.toDomain(): WrongAttemptResult = WrongAttemptResult(
-    blocked = blocked,
-    attemptsRemaining = attemptsRemaining,
-    blockedUntil = parseInstantOrNull(blockedUntil),
-)
+fun PostAuthOtpVerifyData.toDomain(): OtpProof = OtpProof(otpToken = otpToken, expiresInSeconds = expiresInSeconds)
 
 /**
  * Unknown roles read as the most restricted one (EMPLOYEE); access itself comes from the permission keys. The

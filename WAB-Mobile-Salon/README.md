@@ -18,11 +18,12 @@ in an xcconfig write `https:/$()/host`, because `//` starts a comment).
 - iosApp/Firebase/dev/GoogleService-Info.plist: PLACEHOLDER for com.fab.wab.merchant.dev (app runs without Firebase until you add the real file)
 - iosApp/Firebase/prod/GoogleService-Info.plist: PLACEHOLDER for com.fab.wab.merchant (app runs without Firebase until you add the real file)
 
-Placeholders build and run; Firebase (push, analytics, Crashlytics, phone auth, App Check) stays off until the
+Placeholders build and run; Firebase (push, analytics, Crashlytics) stays off until the
 real files are in place:
 - Android: `androidApp/src/dev/google-services.json`, `androidApp/src/prod/google-services.json`
 - iOS: `iosApp/Firebase/dev/GoogleService-Info.plist`, `iosApp/Firebase/prod/GoogleService-Info.plist` (copied into the app by the "Copy Firebase Config" build phase)
-Register the dev and prod ids above in your Firebase projects (debug SHA-1/SHA-256 for phone auth; APNs key for push).
+Register the dev and prod ids above in your Firebase projects (APNs key for push). Phone OTP is not Firebase: the
+backend sends WhatsApp codes (`POST /merchant/v1/auth/otp/request` → `/auth/otp/verify` → `otpToken`, MER-070).
 
 ## Run
 ```bash

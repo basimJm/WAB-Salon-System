@@ -20,7 +20,7 @@ class SubmitApplicationUseCase(
     private val sessionStore: SessionStore,
 ) {
     suspend operator fun invoke(form: RegistrationForm, proof: OtpVerified): AppResult<ApplicationSession> {
-        val result = repository.apply(form, proof.phone, proof.idToken, installation.current())
+        val result = repository.apply(form, proof.phone, proof.otpToken, installation.current())
         if (result is AppResult.Success) {
             val session = result.data
             sessionStore.signIn(session.tokens, session.member, session.permissions, session.application.state)

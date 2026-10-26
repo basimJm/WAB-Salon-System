@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/** Hands a verified phone back to the flow that asked for the OTP (register, change phone, booking confirmation). */
+/** Hands a verified phone back to the flow that asked for the OTP (register, change phone, bank details). */
 class PendingOtpVerification {
     private val state = MutableStateFlow<OtpVerified?>(null)
     val current: StateFlow<OtpVerified?> = state.asStateFlow()
