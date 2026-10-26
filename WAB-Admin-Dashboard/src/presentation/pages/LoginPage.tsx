@@ -2,12 +2,15 @@ import { useState, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OTP_LENGTH } from '@/constants/auth';
+import { SESSION_IDLE_DAYS } from '@/constants/session';
+import { formatNumber } from '@/domain/shared/format';
 import { LOGIN_REDIRECT_PARAM, ROUTES } from '@/constants/routes';
 import { useContainer } from '@/app/ContainerContext';
 import { Button } from '../components/core/Button';
 import { InlineAlert } from '../components/feedback/InlineAlert';
 import { safeRedirect } from '../controllers/loginValidation';
 import { useLoginController } from '../controllers/useLoginController';
+import { useLanguage } from '../hooks/useLanguage';
 import { PreferenceSwitches } from '../layout/PreferenceSwitches';
 import { BrandPanel } from './login/BrandPanel';
 import { CredentialsStep } from './login/CredentialsStep';
@@ -20,6 +23,7 @@ export default function LoginPage() {
   const [params] = useSearchParams();
   const ctrl = useLoginController();
   const ended = useContainer().session.endReason();
+  const { language } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -51,7 +55,7 @@ export default function LoginPage() {
           </h1>
           {first && ended ? (
             <p className="wab-login__notice" role="status">
-              {t(`login.ended.${ended}`)}
+              {t(`login.ended.${ended}`, { days: formatNumber(SESSION_IDLE_DAYS, language) })}
             </p>
           ) : null}
           {first ? <p className="wab-login__lead">{t('login.subtitle')}</p> : null}

@@ -23,11 +23,11 @@
     "brand": {
       "headline": "Full visibility of the platform, full control of every detail.",
       "text": "Every screen, booking, payment attempt and user journey — in one place, with a full log of every action.",
-      "security": "Secure connection · Two-step verification · Session ends after {{minutes}} minutes of inactivity"
+      "security": "Secure connection · Two-step verification · Session ends after {{days}} days of inactivity"
     },
     "ended": {
       "expired": "Your session expired. Please sign in again.",
-      "idle": "You were signed out after 30 minutes of inactivity."
+      "idle": "You were signed out after {{days}} days of inactivity."
     }
   }
 }

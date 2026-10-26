@@ -54,7 +54,7 @@ A **React web application** for a **single administrator** with full permissions
 
 ## 4. Authentication & Security
 - Login: email + password, then **second factor** (OTP code sent to the admin email or authenticator app — assumption: email OTP).
-- Session timeout after 30 minutes of inactivity; refresh token for active sessions.
+- Session timeout after 2 days of inactivity (owner 2026-10-26; server `admin.sessionIdleSec` = 172800); refresh token for active sessions; a page reload keeps the session.
 - Lockout after 5 failed logins for 15 minutes; alert email on new-device login.
 - Admin profile: change password, change email (with verification), alert email recipients.
 

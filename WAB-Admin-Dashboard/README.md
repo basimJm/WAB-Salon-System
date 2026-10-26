@@ -21,4 +21,4 @@ npm run verify         # typecheck + lint (0 warnings) + format + unit tests + h
 
 ## Security notes for hosting (REL-02)
 
-Serve over HTTPS with a strict CSP (`default-src 'self'`; `connect-src` = API + socket origins), `X-Content-Type-Options: nosniff` and `frame-ancestors 'none'`. The panel keeps its access token in memory only.
+Serve over HTTPS with a strict CSP (`default-src 'self'`; `connect-src` = API + socket origins), `X-Content-Type-Options: nosniff` and `frame-ancestors 'none'`. The panel keeps its tokens in memory and in the tab's `sessionStorage` (survives a reload, cleared when the tab closes), never in `localStorage`.

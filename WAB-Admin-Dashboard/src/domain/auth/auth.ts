@@ -17,7 +17,7 @@ export interface Session {
   readonly admin: AdminProfile;
   /** Epoch ms when the access token stops working; missing = unknown (the lifecycle then relies on 401). */
   readonly accessExpiresAt?: number;
-  /** Rotates on every refresh and is revoked on logout. Kept in memory only. */
+  /** Rotates on every refresh and is revoked on logout. In memory + this tab's sessionStorage (never localStorage). */
   readonly refreshToken?: string;
   readonly refreshExpiresAt?: number;
 }

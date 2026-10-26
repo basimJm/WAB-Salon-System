@@ -74,7 +74,8 @@ export const SETTING_DEFINITIONS: readonly SettingDefinition[] = [
   row('otp.blockSec', 'otp', [30, 86400], 'seconds'),
   row('admin.maxFailedLogins', 'adminAuth', [1, 20]),
   row('admin.lockSec', 'adminAuth', [30, 86400], 'seconds'),
-  row('admin.sessionIdleSec', 'adminAuth', [60, 86400], 'seconds'),
+  // Up to 30 days: the owner default is 2 days (172800 s, 2026-10-26).
+  row('admin.sessionIdleSec', 'adminAuth', [60, 2_592_000], 'seconds'),
   row('auth.accessTokenTtlSec', 'tokens', [60, 86400], 'seconds'),
   row('auth.refreshTokenTtlDays', 'tokens', [1, 365], 'days'),
   row('account.deletionGraceDays', 'accounts', [0, 365], 'days'),
