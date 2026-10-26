@@ -119,6 +119,12 @@ export interface SalonDetailsService {
     salonId: string;
     language: Language;
     customerId?: string | undefined;
+    /**
+     * The branch the customer selected (§5.17/§5.18): staff, services and the place fields are
+     * that branch's only; `BRANCH_NOT_FOUND` when it is not a bookable branch of the salon.
+     * Omitted: every bookable branch's staff and services, each tagged with its `branchId`.
+     */
+    branchId?: string | undefined;
   }): Promise<SalonDetails>;
   staff(input: { salonId: string; memberId: string; language: Language }): Promise<StaffDetails>;
 }
@@ -205,8 +211,19 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
 
   const placeOf = pointOf;
 
+  /** The selected branch among the bookable ones; without branch wiring the salon is the place. */
+  const selectedBranch = (
+    branches: Entity<BranchRaw>[],
+    branchId: string,
+  ): Entity<BranchRaw> | undefined => {
+    if (deps.branches === undefined) return undefined;
+    const picked = branches.find((b) => b.id === branchId);
+    if (picked === undefined) throw new NotFoundError({ code: ERROR_CODES.BRANCH_NOT_FOUND });
+    return picked;
+  };
+
   return {
-    async get({ salonId, language, customerId }) {
+    async get({ salonId, language, customerId, branchId }) {
       const salon = await visible(salonId);
       // Profile views for merchant statistics (M21); tracking never fails the page.
       void deps.events?.track({
@@ -229,11 +246,15 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
         latestReviews(language, salonId),
         bookableBranches(salonId),
       ]);
-      // Only what customers can book: staff and services of bookable branches (§5.17).
-      const bookableIds = new Set(branches.map((b) => b.id));
-      const inBookable = (branchId: string | undefined): boolean =>
-        branches.length === 0 || (branchId !== undefined && bookableIds.has(branchId));
-      const main = branches.find((b) => b.isMain) ?? branches[0];
+      const selected = branchId === undefined ? undefined : selectedBranch(branches, branchId);
+      // Only what customers can book: staff and services of bookable branches (§5.17), of the
+      // selected branch alone when the customer picked one (§5.18: every step uses that branch).
+      const bookableIds = new Set(
+        selected === undefined ? branches.map((b) => b.id) : [selected.id],
+      );
+      const inBookable = (rowBranchId: string | undefined): boolean =>
+        branches.length === 0 || (rowBranchId !== undefined && bookableIds.has(rowBranchId));
+      const main = selected ?? branches.find((b) => b.isMain) ?? branches[0];
       const closuresOf = (branchId?: string): typeof ranges =>
         branchId === undefined ? ranges : ranges.filter((r) => r.branchId === branchId);
       const entries =
@@ -330,16 +351,27 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
         providesServices: true,
       });
       if (member?.staff === undefined) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+      // Staff of an unbookable branch are hidden on the salon page; their sheet is too (§5.17).
+      const branches = await bookableBranches(salonId);
+      if (
+        deps.branches !== undefined &&
+        branches.length > 0 &&
+        !branches.some((b) => b.id === member.branchId)
+      ) {
+        throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+      }
       const today = localDateOf(now(), await settings.get('timezone'));
       const [onLeave, latest] = await Promise.all([
         leavesToday(salonId, today),
         latestReviews(language, salonId, memberId),
       ]);
       const wanted = member.staff.serviceIds;
+      // Only services of the member's own branch: those are the ones bookable with them (§5.18).
       const offered = await salonServices.findMany({
         salonId,
         active: true,
         _id: { $in: wanted },
+        ...(member.branchId === undefined ? {} : { branchId: member.branchId }),
       });
       const entries =
         offered.length === 0
