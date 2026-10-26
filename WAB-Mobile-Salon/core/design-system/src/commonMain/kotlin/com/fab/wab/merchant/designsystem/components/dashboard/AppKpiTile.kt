@@ -7,10 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.designsystem.theme.GlassStyle
+import com.fab.wab.merchant.designsystem.theme.SurfaceTone
 
 private const val LABEL_MAX_LINES = 2
 
@@ -35,7 +35,7 @@ fun AppKpiTile(
     val shape = AppTheme.shapes.large
     Column(
         modifier = modifier
-            .glassBackground(AppTheme.glass, shape, GlassStyle.Subtle)
+            .cardBackground(AppTheme.surfaces, shape, SurfaceTone.Surface)
             .padding(AppTheme.spacing.space12),
     ) {
         AppText(text = value, style = AppTheme.typography.headlineMedium, color = kpiColor(tone), maxLines = 1)
@@ -54,7 +54,7 @@ fun AppStatTile(
     val shape = AppTheme.shapes.large
     Column(
         modifier = modifier
-            .glassBackground(AppTheme.glass, shape)
+            .cardBackground(AppTheme.surfaces, shape)
             .padding(AppTheme.spacing.space12),
     ) {
         AppText(text = label, style = AppTheme.typography.labelSmall, color = AppTheme.colors.muted, maxLines = LABEL_MAX_LINES)

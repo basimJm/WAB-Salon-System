@@ -20,10 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
@@ -56,7 +55,7 @@ internal fun AuthDropdownField(
                 .height(AppTheme.sizes.fieldHeight)
                 .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
                 .clip(shape)
-                .glassBackground(AppTheme.glass, shape, stateBorder = if (error) colors.danger else Color.Unspecified)
+                .cardBackground(AppTheme.surfaces, shape, stateBorder = if (error) colors.danger else colors.line)
                 .clickable(enabled = enabled, role = Role.DropdownList) { expanded = !expanded }
                 .padding(horizontal = AppTheme.spacing.space14),
             verticalAlignment = Alignment.CenterVertically,
@@ -98,7 +97,7 @@ private fun OptionList(options: List<String>, selectedIndex: Int?, onSelect: (In
             .fillMaxWidth()
             .padding(top = AppTheme.spacing.space6)
             .clip(shape)
-            .glassBackground(AppTheme.glass, shape),
+            .cardBackground(AppTheme.surfaces, shape),
     ) {
         options.forEachIndexed { index, option ->
             val isSelected = index == selectedIndex

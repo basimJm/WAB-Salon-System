@@ -21,20 +21,20 @@ import com.fab.wab.merchant.designsystem.components.booking.AppBrideBadge
 import com.fab.wab.merchant.designsystem.components.booking.autoCancelText
 import com.fab.wab.merchant.designsystem.components.booking.pendingAgeText
 import com.fab.wab.merchant.designsystem.components.divider.AppDivider
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.resources.Res
-import com.fab.wab.merchant.designsystem.resources.booking_persons
 import com.fab.wab.merchant.designsystem.resources.action_view_all
+import com.fab.wab.merchant.designsystem.resources.booking_persons
 import com.fab.wab.merchant.designsystem.resources.meta_pair
 import com.fab.wab.merchant.designsystem.resources.pending_requests_title
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.designsystem.theme.GlassStyle
+import com.fab.wab.merchant.designsystem.theme.SurfaceTone
+import com.fab.wab.merchant.designsystem.utils.softShadow
+import kotlin.time.Duration
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.time.Duration
 
 /** One pending request on Home (PRD M07): who, how many, when, how long it has waited, auto-cancel countdown. */
 @Immutable
@@ -62,7 +62,18 @@ fun AppPendingRequestsCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .glassBackground(AppTheme.glass, AppTheme.shapes.extraLarge, GlassStyle.Prominent, stateBorder = colors.accentContainer)
+            // Design: `border:1.5px solid #D8B4FE;box-shadow:0 10px 26px rgba(109,40,217,.08)` on the card fill.
+            .softShadow(
+                AppTheme.elevation.raised,
+                colors.accent.copy(alpha = AppTheme.elevation.cardShadowAlpha),
+                AppTheme.shapes.extraLarge,
+            )
+            .cardBackground(
+                AppTheme.surfaces,
+                AppTheme.shapes.extraLarge,
+                SurfaceTone.Card,
+                stateBorder = colors.gradientEnd.copy(alpha = AppTheme.alpha.disabled),
+            )
             .padding(start = spacing.space14, end = spacing.space14, top = spacing.space14, bottom = spacing.space8),
     ) {
         PendingHeader(count, onViewAll)
@@ -77,7 +88,6 @@ fun AppPendingRequestsCard(
 private fun PendingHeader(count: Int, onViewAll: () -> Unit) {
     val spacing = AppTheme.spacing
     val colors = AppTheme.colors
-    val press = rememberGlassPress()
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = spacing.space8),
         horizontalArrangement = Arrangement.spacedBy(spacing.space8),
@@ -107,7 +117,7 @@ private fun PendingHeader(count: Int, onViewAll: () -> Unit) {
             color = colors.accent,
             modifier = Modifier
                 .defaultMinSize(minHeight = AppTheme.sizes.touchTarget)
-                .glassClickable(press, role = Role.Button, onClick = onViewAll)
+                .appClickable(role = Role.Button, onClick = onViewAll)
                 .padding(horizontal = spacing.space4, vertical = spacing.space14),
         )
     }
@@ -117,13 +127,12 @@ private fun PendingHeader(count: Int, onViewAll: () -> Unit) {
 private fun PendingRow(request: PendingRequestUi, onClick: () -> Unit) {
     val spacing = AppTheme.spacing
     val colors = AppTheme.colors
-    val press = rememberGlassPress()
     val persons = pluralStringResource(Res.plurals.booking_persons, request.persons, request.persons)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = AppTheme.sizes.touchTarget)
-            .glassClickable(press, role = Role.Button, onClick = onClick)
+            .appClickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = spacing.space8, vertical = spacing.space10),
         horizontalArrangement = Arrangement.spacedBy(spacing.space10),
     ) {

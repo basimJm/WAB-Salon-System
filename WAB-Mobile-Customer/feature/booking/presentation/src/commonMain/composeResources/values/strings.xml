@@ -74,15 +74,19 @@
     <string name="booking_summary_title">Booking summary</string>
     <string name="booking_grand_total">Total</string>
     <string name="booking_rules_title">Salon rules</string>
-    <string name="booking_rules_window">Cancel up to %1$d hours before the appointment</string>
-    <string name="booking_rules_deposit">Deposit is %1$d%% of the total</string>
+    <plurals name="booking_rules_window">
+        <item quantity="one">Cancel up to %1$d hour before the appointment</item>
+        <item quantity="many">Cancel up to %1$d hours before the appointment</item>
+        <item quantity="other">Cancel up to %1$d hours before the appointment</item>
+    </plurals>
+    <string name="booking_rules_deposit">Deposit is %1$d% of the total</string>
     <string name="booking_rules_deposit_refundable">Deposit is refunded if you cancel in time</string>
     <string name="booking_rules_deposit_non_refundable">Deposit is not refunded if you cancel</string>
     <string name="booking_rules_approval">The booking needs salon approval</string>
     <string name="booking_payment_title">Payment method</string>
     <string name="booking_pay_on_arrival">Pay on arrival</string>
     <string name="booking_pay_on_arrival_sub">Pay the full amount at the salon</string>
-    <string name="booking_pay_deposit">%1$d%% deposit = %2$s JOD</string>
+    <string name="booking_pay_deposit">%1$d% deposit = %2$s JOD</string>
     <string name="booking_pay_deposit_sub">Pay now, the rest on arrival</string>
     <string name="booking_pay_full">Pay in full</string>
     <string name="booking_pay_full_sub">Pay the full amount online</string>

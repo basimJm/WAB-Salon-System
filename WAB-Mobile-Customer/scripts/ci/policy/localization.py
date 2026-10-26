@@ -9,6 +9,17 @@ RULE = "I001"
 _PLACEHOLDER = re.compile(r"%(?:\d+\$)?[sdfx%]|\{\w+\}")
 _ARABIC = re.compile(r"[؀-ۿ]")
 _WORD = re.compile(r"[A-Za-z]{4,}")
+# Compose resources format only `%N$s`/`%N$d`; an Android-style `%%` escape is printed literally ("30%%", CUS-092).
+_COMPOSE_DIR = "composeResources"
+_ESCAPED_PERCENT = "%%"
+
+
+def _escaped_percent(config: Config, path: Path, entries: dict[str, str]) -> list[Violation]:
+    if _COMPOSE_DIR not in path.parts:
+        return []
+    where = rel(config, path)
+    return [Violation(where, 1, RULE, f"{key} uses %% (Compose resources print it literally; write a single %)")
+            for key, text in sorted(entries.items()) if _ESCAPED_PERCENT in text]
 
 
 def _entries(path: Path) -> dict[str, str]:
@@ -43,6 +54,7 @@ def check(config: Config) -> list[Violation]:
     found: list[Violation] = []
     for default_file in _find_default_files(config):
         default = _entries(default_file)
+        found += _escaped_percent(config, default_file, default)
         for language, folder in section["translations"].items():
             target = default_file.parent.parent / folder / section["stringFile"]
             where = rel(config, default_file)
@@ -51,6 +63,7 @@ def check(config: Config) -> list[Violation]:
                 continue
             translated = _entries(target)
             target_rel = rel(config, target)
+            found += _escaped_percent(config, target, translated)
             for key in sorted(default.keys() - translated.keys()):
                 found.append(Violation(target_rel, 1, RULE, f"missing {language} translation for {key}"))
             for key in sorted(translated.keys() - default.keys()):

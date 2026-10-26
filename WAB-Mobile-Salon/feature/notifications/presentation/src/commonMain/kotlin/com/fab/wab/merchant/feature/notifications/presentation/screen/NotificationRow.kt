@@ -10,15 +10,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.fab.wab.merchant.core.common.BusinessTime
 import com.fab.wab.merchant.core.common.TimeFormat
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.designsystem.theme.GlassStyle
+import com.fab.wab.merchant.designsystem.theme.SurfaceTone
 import com.fab.wab.merchant.feature.notifications.domain.model.Notification
 import com.fab.wab.merchant.feature.notifications.domain.model.RelativeTime
 import com.fab.wab.merchant.feature.notifications.domain.model.relativeTimeOf
@@ -40,16 +41,16 @@ internal fun NotificationRow(item: Notification, onClick: () -> Unit, modifier: 
     val spacing = AppTheme.spacing
     val shape = AppTheme.shapes.large
     val unread = !item.isRead
-    val borderColor = if (unread) colors.gradientEnd.copy(alpha = NotificationsDesign.unreadBorderAlpha) else colors.line
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .glassBackground(
-                AppTheme.glass,
+            // Design: unread `background:var(--soft);border:1px solid transparent`, read `var(--card)` + `var(--line)`.
+            .cardBackground(
+                AppTheme.surfaces,
                 shape,
-                style = if (unread) GlassStyle.Prominent else GlassStyle.Regular,
-                stateBorder = borderColor,
+                tone = if (unread) SurfaceTone.Soft else SurfaceTone.Card,
+                stateBorder = if (unread) Color.Transparent else Color.Unspecified,
             )
             .clickable(role = Role.Button, onClick = onClick)
             .padding(NotificationsDesign.itemPadding),

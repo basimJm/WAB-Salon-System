@@ -49,6 +49,11 @@ class LocalizationTest(TempProject):
         ar = '<resources><plurals name="p"><item quantity="one">يوم</item></plurals></resources>'
         self.assertTrue(any("placeholders of plurals:p" in m for m in self.run_check(en, ar)))
 
+    def test_escaped_percent_in_compose_resources_is_flagged(self):
+        messages = self.run_check(res(("a", "Deposit %1$d%% of total")), res(("a", "العربون %1$d%% من الإجمالي")))
+        self.assertEqual(2, sum("string:a uses %%" in m for m in messages))
+        self.assertEqual(self.run_check(res(("a", "Deposit %1$d% of total")), res(("a", "العربون %1$d% من الإجمالي"))), [])
+
 
 if __name__ == "__main__":
     unittest.main()

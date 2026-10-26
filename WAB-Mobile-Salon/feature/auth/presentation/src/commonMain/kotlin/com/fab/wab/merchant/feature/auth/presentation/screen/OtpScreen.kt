@@ -1,56 +1,50 @@
 package com.fab.wab.merchant.feature.auth.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
 import com.fab.wab.merchant.designsystem.components.button.AppPrimaryButton
 import com.fab.wab.merchant.designsystem.components.feedback.AppErrorState
 import com.fab.wab.merchant.designsystem.components.layout.AppScreen
 import com.fab.wab.merchant.designsystem.components.text.AppText
-import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
+import com.fab.wab.merchant.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.merchant.feature.auth.presentation.analytics.OtpAnalytics
 import com.fab.wab.merchant.feature.auth.presentation.controller.contract.OtpContract.OtpDialog
 import com.fab.wab.merchant.feature.auth.presentation.controller.contract.OtpContract.UiAction
 import com.fab.wab.merchant.feature.auth.presentation.controller.contract.OtpContract.UiState
-import com.fab.wab.merchant.feature.auth.presentation.controller.contract.formatCountdown
 import com.fab.wab.merchant.feature.auth.presentation.resources.Res
 import com.fab.wab.merchant.feature.auth.presentation.resources.auth_dialog_glyph_expired
 import com.fab.wab.merchant.feature.auth.presentation.resources.login_dialog_cancel
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_expired_body
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_expired_title
-import com.fab.wab.merchant.feature.auth.presentation.resources.otp_expires_in
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_resend
-import com.fab.wab.merchant.feature.auth.presentation.resources.otp_resend_in
-import com.fab.wab.merchant.feature.auth.presentation.resources.otp_sent_to
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_title
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_verify
 import com.fab.wab.merchant.feature.auth.presentation.resources.otp_wrong
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * S13 as in `design/WAB 01 Auth.dc.html` (`on.otp`), code sent on WhatsApp (MER-070): hero gradient,
- * `padding:54px 24px 30px`, back pill with the
- * centered "Confirm booking" header (booking variant only), 76 dp soft icon box, title 23, "we sent a code to
- * <phone>", N boxes from the backend, wrong-code line / blocked banner, Verify, then resend link or countdown.
+ * M03 as in `design/WAB Merchant 01 Onboarding.dc.html` (`on.otp`), code sent on WhatsApp (MER-070, MER-073):
+ * `padding:54px 22px 30px` on the auth background, back pill + centered mode title, 76 dp soft icon box (per mode),
+ * title 23, "we sent a code to <phone>", the bank note (bank details), N boxes from the backend, wrong-code line /
+ * blocked banner, Verify, then resend link or countdown. The code field takes focus (keyboard up) whenever a live
+ * code is waiting; the content keeps the phone width in landscape and on tablets.
  */
 @Composable
 fun OtpScreen(
@@ -60,67 +54,25 @@ fun OtpScreen(
     onBack: (() -> Unit)? = null,
 ) {
     TrackScreen(OtpAnalytics.SCREEN)
-    val colors = AppTheme.colors
+    val keyboard = LocalSoftwareKeyboardController.current
+    val verify = {
+        keyboard?.hide()
+        onAction(UiAction.OnVerifyClick)
+    }
     AppScreen(modifier = modifier) {
-        AuthScrollColumn(contentPadding = authScreenPadding(AuthDesign.otpHorizontal, AuthDesign.otpBottom)) {
-            OtpHeader(onBack)
-            Box(
-                modifier = Modifier
-                    .padding(top = AuthDesign.otpIconTop, bottom = AuthDesign.otpIconBottom)
-                    .size(AuthDesign.otpIconBox)
-                    .background(colors.soft, RoundedCornerShape(AuthDesign.otpIconBoxRadius)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    AppIcons.Device,
-                    contentDescription = null,
-                    tint = colors.accent,
-                    modifier = Modifier.size(AuthDesign.otpIcon),
-                )
+        AuthScrollColumn(
+            contentPadding = authScreenPadding(AuthDesign.otpHorizontal, AuthDesign.otpBottom),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Column(modifier = Modifier.widthIn(max = AppTheme.sizes.sheetMaxWidth).fillMaxWidth()) {
+                OtpHeader(title = stringResource(state.purpose.otpTitle()), onBack = onBack)
+                OtpIntro(state)
+                if (state.requestError != null) {
+                    AppErrorState(onRetry = { onAction(UiAction.OnRetryRequest) }, message = state.requestError)
+                } else {
+                    OtpCodeSection(state, onAction, verify)
+                }
             }
-            AppText(
-                text = stringResource(Res.string.otp_title),
-                style = AppTheme.typography.headlineMedium.copy(
-                    fontSize = AuthDesign.otpTitleSize,
-                    lineHeight = AuthDesign.otpTitleLineHeight,
-                    fontWeight = FontWeight.Bold,
-                ),
-            )
-            AuthGap(AuthDesign.otpTitleBottom)
-            SentToLine(state.phoneDisplay)
-            if (state.codeSent && state.expiresRemainingSeconds > 0) ExpiresLine(state.expiresRemainingSeconds)
-            if (state.requestError != null) {
-                AppErrorState(onRetry = { onAction(UiAction.OnRetryRequest) }, message = state.requestError)
-                return@AuthScrollColumn
-            }
-            if (state.otpLength > 0) {
-                OtpBoxes(
-                    value = state.code,
-                    onValueChange = { onAction(UiAction.OnCodeChange(it)) },
-                    length = state.otpLength,
-                    modifier = Modifier.padding(top = AuthDesign.otpBoxTop, bottom = AuthDesign.otpBoxBottom),
-                    error = state.codeError,
-                    blocked = state.isBlocked,
-                    enabled = !state.isBlocked && !state.verifying,
-                )
-            }
-            if (state.codeError) {
-                AppText(
-                    text = state.codeErrorMessage ?: stringResource(Res.string.otp_wrong),
-                    style = AppTheme.typography.bodySmall.copy(fontSize = AuthDesign.otpWrongSize),
-                    color = colors.danger,
-                )
-            }
-            if (state.isBlocked) OtpBlockedBanner(state.blockedRemainingSeconds)
-            AuthGap(AuthDesign.otpButtonTop)
-            AppPrimaryButton(
-                text = stringResource(Res.string.otp_verify),
-                onClick = { onAction(UiAction.OnVerifyClick) },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = state.canVerify,
-                loading = state.verifying || state.requesting,
-            )
-            ResendRow(state, onAction, Modifier.padding(top = AuthDesign.otpResendTop))
         }
     }
     if (state.dialog == OtpDialog.Expired) {
@@ -139,83 +91,82 @@ fun OtpScreen(
     }
 }
 
-/** Back pill at the start of the header row. */
+/** Icon box, title, "sent to", the code lifetime and the bank note. */
 @Composable
-private fun OtpHeader(onBack: (() -> Unit)?, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = AuthDesign.topRowMinHeight)) {
-        if (onBack != null) AuthBackPill(onBack, Modifier.align(Alignment.CenterStart))
+private fun OtpIntro(state: UiState) {
+    val colors = AppTheme.colors
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .padding(top = AuthDesign.otpIconTop, bottom = AuthDesign.otpIconBottom)
+                .size(AuthDesign.otpIconBox)
+                .background(colors.soft, RoundedCornerShape(AuthDesign.otpIconBoxRadius)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(state.purpose.otpIcon(), contentDescription = null, tint = colors.accent, modifier = Modifier.size(AuthDesign.otpIcon))
+        }
+        AppText(
+            text = stringResource(Res.string.otp_title),
+            style = AppTheme.typography.headlineMedium.copy(
+                fontSize = AuthDesign.otpTitleSize,
+                lineHeight = AuthDesign.otpTitleLineHeight,
+                fontWeight = FontWeight.Bold,
+            ),
+        )
+        AuthGap(AuthDesign.otpTitleBottom)
+        SentToLine(state.phoneDisplay)
+        if (state.codeSent && state.expiresRemainingSeconds > 0) ExpiresLine(state.expiresRemainingSeconds)
+        if (state.purpose == AuthPurpose.BANK_DETAILS) OtpBankNote()
     }
 }
 
-/** "We sent a code to" in muted 13.5 + the number in ink/600, isolated LTR (`unicode-bidi:isolate`). */
+/** Boxes (focused while a live code waits), wrong-code line, blocked banner, Verify and the resend row. */
 @Composable
-private fun SentToLine(phone: String, modifier: Modifier = Modifier) {
+private fun OtpCodeSection(state: UiState, onAction: (UiAction) -> Unit, onVerify: () -> Unit) {
     val colors = AppTheme.colors
-    val prefix = stringResource(Res.string.otp_sent_to)
-    val text = buildAnnotatedString {
-        append(prefix)
-        append(' ')
-        withStyle(SpanStyle(color = colors.ink, fontWeight = FontWeight.SemiBold)) { append(isolateLtr(phone)) }
-    }
-    AppText(
-        text = text,
-        modifier = modifier,
-        style = AppTheme.typography.bodyMedium.copy(fontSize = AuthDesign.otpSentSize, lineHeight = AuthDesign.otpSentLineHeight),
-        color = colors.muted,
-    )
-}
-
-/** "The code expires in 4:59" under the number: the WhatsApp code lives `expiresInSeconds` (BUSINESS_DOMAIN §3.1a). */
-@Composable
-private fun ExpiresLine(remainingSeconds: Int, modifier: Modifier = Modifier) {
-    AppText(
-        text = stringResource(Res.string.otp_expires_in, isolateLtr(formatCountdown(remainingSeconds))),
-        modifier = modifier,
-        style = AppTheme.typography.bodySmall.copy(fontSize = AuthDesign.otpExpiresSize),
-        color = AppTheme.colors.muted,
-    )
-}
-
-/** Wraps a phone number in LTR isolates so it never reorders inside Arabic text. */
-private fun isolateLtr(value: String): String = "$LTR_ISOLATE$value$POP_ISOLATE"
-
-private const val LTR_ISOLATE = '⁦'
-private const val POP_ISOLATE = '⁩'
-
-@Composable
-private fun ResendRow(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
-    val colors = AppTheme.colors
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-        when {
-            state.isBlocked -> Unit
-            state.resendRemainingSeconds > 0 -> {
-                // The string carries the time as %1$s; the time part is bolded where it lands in either language.
-                val time = isolateLtr(formatCountdown(state.resendRemainingSeconds))
-                val sentence = stringResource(Res.string.otp_resend_in, time)
-                val start = sentence.indexOf(time)
-                val countdown = buildAnnotatedString {
-                    append(sentence)
-                    if (start >= 0) {
-                        addStyle(SpanStyle(color = colors.ink, fontWeight = FontWeight.Bold), start, start + time.length)
-                    }
-                }
-                AppText(
-                    text = countdown,
-                    modifier = Modifier.padding(AuthDesign.otpResendPadding),
-                    style = AppTheme.typography.bodyMedium.copy(fontSize = AuthDesign.otpCountingSize),
-                    color = colors.muted,
-                )
-            }
-            else -> AppText(
-                text = stringResource(Res.string.otp_resend),
-                modifier = Modifier
-                    .defaultMinSize(minHeight = AppTheme.sizes.touchTarget)
-                    .clip(AppTheme.shapes.small)
-                    .clickable(enabled = state.canResend, role = Role.Button) { onAction(UiAction.OnResendClick) }
-                    .padding(AuthDesign.otpResendPadding),
-                style = AppTheme.typography.labelLarge.copy(fontSize = AuthDesign.otpResendSize, fontWeight = FontWeight.Bold),
-                color = colors.accent,
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (state.otpLength > 0) OtpCodeField(state, onAction, onVerify)
+        if (state.codeError) {
+            AppText(
+                text = state.codeErrorMessage ?: stringResource(Res.string.otp_wrong),
+                style = AppTheme.typography.bodySmall.copy(fontSize = AuthDesign.otpWrongSize),
+                color = colors.danger,
             )
         }
+        if (state.isBlocked) OtpBlockedBanner(state.blockedRemainingSeconds)
+        AuthGap(AuthDesign.otpButtonTop)
+        AppPrimaryButton(
+            text = stringResource(Res.string.otp_verify),
+            onClick = onVerify,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = state.canVerify,
+            loading = state.verifying || state.requesting,
+        )
+        ResendRow(state, onAction, Modifier.padding(top = AuthDesign.otpResendTop))
     }
+}
+
+/** The code boxes; a new code, or a refused one (the keyboard was hidden on Verify), gives them the keyboard again. */
+@Composable
+private fun OtpCodeField(state: UiState, onAction: (UiAction) -> Unit, onVerify: () -> Unit) {
+    val focusRequester = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val awaitingCode = state.codeSent && !state.isBlocked
+    LaunchedEffect(awaitingCode, state.codeError, state.codesSent) {
+        if (awaitingCode) {
+            focusRequester.requestFocus()
+            keyboard?.show()
+        }
+    }
+    OtpBoxes(
+        value = state.code,
+        onValueChange = { onAction(UiAction.OnCodeChange(it)) },
+        length = state.otpLength,
+        focusRequester = focusRequester,
+        onSubmit = { if (state.canVerify) onVerify() },
+        modifier = Modifier.padding(top = AuthDesign.otpBoxTop, bottom = AuthDesign.otpBoxBottom),
+        error = state.codeError,
+        blocked = state.isBlocked,
+        enabled = !state.isBlocked && !state.verifying,
+    )
 }
