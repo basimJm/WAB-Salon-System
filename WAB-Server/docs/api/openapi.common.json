@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Common",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "servers": [
     {
@@ -40,6 +40,7 @@
                   "OTP_BLOCKED",
                   "OTP_INVALID",
                   "OTP_EXPIRED",
+                  "OTP_DELIVERY_FAILED",
                   "PHONE_NOT_REGISTERED",
                   "PHONE_ALREADY_REGISTERED",
                   "ACCOUNT_BLOCKED",

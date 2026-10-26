@@ -1,7 +1,5 @@
 import type { Redis } from 'ioredis';
-import request from 'supertest';
-import { createApp } from '../src/app';
-import { OTP_KEY_PREFIX, OTP_ROUTE_RATE_LIMIT } from '../src/constants/otp';
+import { OTP_KEY_PREFIX } from '../src/constants/otp';
 import { SETTING_DEFAULTS } from '../src/constants/settings';
 import { createOtpGate, type OtpGate } from '../src/domain/otp/otpGate.service';
 import { RateLimitError } from '../src/utils/errors';
@@ -9,14 +7,6 @@ import { createLogger } from '../src/utils/logger';
 import { connectRedis, disconnectRedis } from '../src/utils/redis/client';
 import { redisKey } from '../src/utils/redis/keys';
 import { startTestRedis, type TestRedis } from './helpers/redis';
-
-interface Body {
-  success: boolean;
-  data: { blockedUntil?: string; allowed?: boolean };
-  error: { code: string; details: { field: string }[] };
-}
-/** supertest types the body as `any`; this gives it the envelope shape. */
-const bodyOf = (res: { body: unknown }): Body => res.body as Body;
 
 const logger = createLogger({ level: 'silent' });
 const PHONE = '+962791234567';
@@ -158,98 +148,5 @@ describe('otp gate: assertNotBlocked and reset', () => {
     await gate.reset(PHONE);
     expect((await gate.request(PHONE)).allowed).toBe(true);
     expect((await gate.reportWrongAttempt(PHONE)).attemptsRemaining).toBe(4);
-  });
-});
-
-describe('otp endpoints', () => {
-  const makeApp = (): ReturnType<typeof createApp> =>
-    createApp({ logger, services: { otpGate: makeGate() } });
-
-  it('answers the customer pre-check with the base envelope, no token needed', async () => {
-    const res = await request(makeApp())
-      .post('/customer/v1/auth/otp/request')
-      .send({ phone: PHONE, purpose: 'LOGIN' });
-    expect(res.status).toBe(200);
-    expect(bodyOf(res)).toMatchObject({
-      success: true,
-      data: { allowed: true, otpLength: 6, resendAfterSeconds: 60 },
-    });
-    expect(bodyOf(res).data.blockedUntil).toBeUndefined();
-  });
-
-  it('shows the block as ISO time and allowed false', async () => {
-    const app = makeApp();
-    for (let i = 0; i < 5; i += 1) {
-      await request(app).post('/customer/v1/auth/otp/wrong-attempt').send({ phone: PHONE });
-    }
-    const res = await request(app)
-      .post('/customer/v1/auth/otp/request')
-      .send({ phone: PHONE, purpose: 'LOGIN' });
-    expect(res.status).toBe(200);
-    expect(bodyOf(res).data.allowed).toBe(false);
-    const until = Date.parse(bodyOf(res).data.blockedUntil as string);
-    expect(until).toBeGreaterThan(NOW.getTime() + 899_000);
-    expect(until).toBeLessThanOrEqual(NOW.getTime() + 900_000);
-  });
-
-  it('reports a wrong attempt', async () => {
-    const res = await request(makeApp())
-      .post('/merchant/v1/auth/otp/wrong-attempt')
-      .send({ phone: PHONE });
-    expect(res.status).toBe(200);
-    expect(bodyOf(res).data).toEqual({ blocked: false, attemptsRemaining: 4 });
-  });
-
-  it.each([
-    ['customer', 'BANK_DETAILS', 400],
-    ['customer', 'BOOKING_CONFIRMATION', 200],
-    ['merchant', 'BOOKING_CONFIRMATION', 400],
-    ['merchant', 'BANK_DETAILS', 200],
-    ['merchant', 'REGISTER', 200],
-  ])('%s purpose %s answers %i', async (namespace, purpose, status) => {
-    const res = await request(makeApp())
-      .post(`/${namespace}/v1/auth/otp/request`)
-      .send({ phone: PHONE, purpose });
-    expect(res.status).toBe(status);
-  });
-
-  it.each([
-    [{ phone: '0791234567', purpose: 'LOGIN' }, 'body.phone'],
-    [{ phone: '+962791234567' }, 'body.purpose'],
-    [{ phone: 'phone:key', purpose: 'LOGIN' }, 'body.phone'],
-    [{ phone: PHONE, purpose: 'LOGIN', extra: 1 }, null],
-  ])('validates %j', async (body, field) => {
-    const res = await request(makeApp()).post('/customer/v1/auth/otp/request').send(body);
-    if (field === null) {
-      expect(res.status).toBe(200);
-      return;
-    }
-    expect(res.status).toBe(400);
-    expect(bodyOf(res).error.code).toBe('VALIDATION_ERROR');
-    expect(bodyOf(res).error.details.map((d) => d.field)).toContain(field);
-  });
-
-  it('limits each IP and answers RATE_LIMITED in the requested language', async () => {
-    const app = makeApp();
-    for (let i = 0; i < OTP_ROUTE_RATE_LIMIT.max; i += 1) {
-      const res = await request(app)
-        .post('/customer/v1/auth/otp/wrong-attempt')
-        .send({ phone: `+9627912${String(10000 + i)}` });
-      expect(res.status).toBe(200);
-    }
-    const limited = await request(app)
-      .post('/customer/v1/auth/otp/wrong-attempt')
-      .set('Accept-Language', 'en')
-      .send({ phone: PHONE });
-    expect(limited.status).toBe(429);
-    expect(bodyOf(limited).error.code).toBe('RATE_LIMITED');
-  });
-
-  it('answers 503, not 404, when no Redis-backed gate is configured', async () => {
-    const res = await request(createApp({ logger }))
-      .post('/customer/v1/auth/otp/request')
-      .send({ phone: PHONE, purpose: 'LOGIN' });
-    expect(res.status).toBe(503);
-    expect(bodyOf(res).success).toBe(false);
   });
 });

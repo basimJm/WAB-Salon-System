@@ -57,8 +57,8 @@ export const createMerchantChangePhoneRouter = (
     ...guard,
     validate({ body: changePhoneSchema }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { phone, idToken } = bodyOf<typeof changePhoneSchema>(req);
-      const data = await service.changePhone({ memberId: req.member?.id ?? '', phone, idToken });
+      const { phone, otpToken } = bodyOf<typeof changePhoneSchema>(req);
+      const data = await service.changePhone({ memberId: req.member?.id ?? '', phone, otpToken });
       sendSuccess(req, res, { data });
     }),
   );

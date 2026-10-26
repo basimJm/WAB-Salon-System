@@ -4,12 +4,12 @@
 
 | Project (`tasks.py` key) | Master | Current task | Next ready task | Blocked on | Session file |
 |---|---|---|---|---|---|
-| server | `server` | none (SRV-011a #440, SRV-150 #451, SRV-151 #457) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
+| server | `server` | SRV-153 WhatsApp OTP (IN REVIEW, `feat/srv-153-whatsapp-otp`, ships with OTP-011) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
 | admin | `admin` | none (ADM-079 #449, ADM-093…096 #453–#455/#465) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking | `WAB-Admin-Dashboard/.claude/session.md` |
 | customer | `customer` | none (CUS-060 #452, CUS-088 #464; full gate + emulator/simulator journey 2026-10-25) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
 | merchant | `merchant` | none (MER-054 #456, MER-067…069 #463/#466/#467; full gate + journeys 2026-10-25) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
-| otp | `server` | none | OTP-001 scaffold | — | `wab-otp/.claude/session.md` |
+| otp | `server` | OTP-011 WhatsApp + otpToken (IN REVIEW, 0.2.0, branch `feat/otp-011-whatsapp`) | none | SRV-153 server adoption | `wab-otp/.claude/session.md` |
 | notifications | `server` | none (SDK built, wired in the server) | NOT-010 publish | NOT-011 owner App Password | `wab-notifications/.claude/session.md` |
 | analytics | `server` | none | ANA-001 scaffold | — | `wab-analytics/.claude/session.md` |
 | storage | `server` | none | STO-001 scaffold | — | `wab-storage/.claude/session.md` |

@@ -25,7 +25,7 @@ export interface PhoneVerifier {
   /** Country lookup and the country's phone regex; the full number is dial code + national number. */
   resolve(phone: PhoneInput, field?: string): Promise<ResolvedPhone>;
   /** Blocked numbers cannot try again; then the provider must confirm this very number. */
-  verify(phone: ResolvedPhone, idToken: string, purpose: OtpPurpose): Promise<void>;
+  verify(phone: ResolvedPhone, otpToken: string, purpose: OtpPurpose): Promise<void>;
 }
 
 export interface PhoneVerifierDeps {
@@ -62,9 +62,9 @@ export const createPhoneVerifier = ({
     };
   },
 
-  async verify(phone, idToken, purpose) {
+  async verify(phone, otpToken, purpose) {
     await otpGate.assertNotBlocked(phone.e164);
-    const result = await otp.verify({ proof: idToken, expectedPhone: phone.e164, purpose });
+    const result = await otp.verify({ proof: otpToken, expectedPhone: phone.e164, purpose });
     if (result.outcome === 'VERIFIED') return;
     throw new UnauthorizedError({
       code: result.outcome === 'EXPIRED' ? ERROR_CODES.OTP_EXPIRED : ERROR_CODES.OTP_INVALID,

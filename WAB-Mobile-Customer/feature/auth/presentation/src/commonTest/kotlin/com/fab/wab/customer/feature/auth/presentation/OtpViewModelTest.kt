@@ -5,37 +5,14 @@ import com.fab.wab.customer.core.common.Clock
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.ErrorCode
-import com.fab.wab.customer.core.domain.auth.AuthTokens
-import com.fab.wab.customer.core.domain.config.AppConfig
-import com.fab.wab.customer.core.domain.config.AppConfigRepository
-import com.fab.wab.customer.core.domain.locations.Area
-import com.fab.wab.customer.core.domain.locations.City
-import com.fab.wab.customer.core.domain.locations.Country
-import com.fab.wab.customer.core.domain.locations.LocationsRepository
-import com.fab.wab.customer.core.domain.session.Gender
-import com.fab.wab.customer.core.domain.session.GuestProfile
-import com.fab.wab.customer.core.domain.session.SessionState
-import com.fab.wab.customer.core.domain.session.SessionStore
-import com.fab.wab.customer.core.domain.session.UserProfile
-import com.fab.wab.customer.core.firebase.FakePhoneAuthGateway
-import com.fab.wab.customer.core.firebase.FirebaseFailure
-import com.fab.wab.customer.core.firebase.FirebaseResult
-import com.fab.wab.customer.core.firebase.PhoneVerification
 import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
-import com.fab.wab.customer.feature.auth.domain.model.AuthSession
-import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
-import com.fab.wab.customer.feature.auth.domain.model.PhoneCheck
-import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
-import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
-import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
-import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
-import com.fab.wab.customer.feature.auth.domain.repository.InstallationInfoProvider
+import com.fab.wab.customer.feature.auth.domain.model.OtpProof
 import com.fab.wab.customer.feature.auth.domain.repository.PendingOtpVerification
-import com.fab.wab.customer.feature.auth.domain.usecase.LoginWithIdTokenUseCase
-import com.fab.wab.customer.feature.auth.domain.usecase.ReportWrongOtpAttemptUseCase
+import com.fab.wab.customer.feature.auth.domain.usecase.LoginWithOtpTokenUseCase
 import com.fab.wab.customer.feature.auth.domain.usecase.RequestOtpUseCase
 import com.fab.wab.customer.feature.auth.domain.usecase.ResolveDialCodeUseCase
+import com.fab.wab.customer.feature.auth.domain.usecase.VerifyOtpUseCase
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.OtpContract.OtpDialog
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.OtpContract.SideEffect
 import com.fab.wab.customer.feature.auth.presentation.controller.contract.OtpContract.UiAction
@@ -43,9 +20,6 @@ import com.fab.wab.customer.feature.auth.presentation.controller.contract.format
 import com.fab.wab.customer.feature.auth.presentation.controller.vm.OtpDependencies
 import com.fab.wab.customer.feature.auth.presentation.controller.vm.OtpViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -60,72 +34,17 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
-private val PHONE = PhoneNumber("JO", "791234567")
-private val JORDAN = Country("JO", "الأردن", "+962", null, "^7")
 private val NOW = Instant.parse("2026-10-18T10:00:00Z")
-private const val RESEND_SECONDS = 60
-private const val LENGTH = 6
-
-private class FakeAuthRepository : AuthRepository {
-    var policy = OtpPolicy(allowed = true, otpLength = LENGTH, resendAfterSeconds = RESEND_SECONDS)
-    var wrong = WrongAttemptResult(blocked = false, attemptsRemaining = 4)
-    var loginResult: AppResult<AuthSession> = AppResult.Success(
-        AuthSession(AuthTokens("a1", "r1"), UserProfile("c1", "Omar", Gender.MALE)),
-    )
-    val requested = mutableListOf<String>()
-    var wrongReports = 0
-    override suspend fun checkPhone(phone: PhoneNumber, purpose: AuthPurpose): AppResult<PhoneCheck> =
-        AppResult.Success(PhoneCheck.REGISTERED)
-    override suspend fun requestOtp(phoneE164: String, purpose: AuthPurpose): AppResult<OtpPolicy> {
-        requested += phoneE164
-        return AppResult.Success(policy)
-    }
-    override suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult> {
-        wrongReports += 1
-        return AppResult.Success(wrong)
-    }
-    override suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession> = loginResult
-    override suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession> = loginResult
-    override suspend fun logout(refreshToken: String): AppResult<Unit> = AppResult.Success(Unit)
-    override suspend fun changePhone(phone: PhoneNumber, idToken: String): AppResult<UserProfile> =
-        AppResult.Success(UserProfile("c1", "Sara", null))
-}
-
-private class FakeSessionStore : SessionStore {
-    var signedIn: UserProfile? = null
-    override val state: Flow<SessionState> = MutableStateFlow(SessionState.Guest())
-    override val onboardingSeen: Flow<Boolean> = MutableStateFlow(true)
-    override val pushEnabled: Flow<Boolean> = MutableStateFlow(true)
-    override suspend fun tokens(): AuthTokens? = null
-    override suspend fun signIn(tokens: AuthTokens, user: UserProfile) {
-        signedIn = user
-    }
-    override suspend fun updateTokens(tokens: AuthTokens) = Unit
-    override suspend fun updateUser(user: UserProfile) = Unit
-    override suspend fun setOnboardingSeen(seen: Boolean) = Unit
-    override suspend fun setGuestProfile(profile: GuestProfile) = Unit
-    override suspend fun setPushEnabled(enabled: Boolean) = Unit
-    override suspend fun signOut() = Unit
-    override suspend fun clearAll() = Unit
-}
-
-private class OtpFakeLocations : LocationsRepository {
-    override suspend fun countries(refresh: Boolean): AppResult<List<Country>> = AppResult.Success(listOf(JORDAN))
-    override suspend fun cities(countryCode: String, refresh: Boolean): AppResult<List<City>> = AppResult.Success(emptyList())
-    override suspend fun areas(cityId: String, refresh: Boolean): AppResult<List<Area>> = AppResult.Success(emptyList())
-}
-
-private object NoConfig : AppConfigRepository {
-    override val current: StateFlow<AppConfig?> = MutableStateFlow(null)
-    override suspend fun refresh(): AppResult<AppConfig> = AppResult.Error(AppError.UnknownError(""))
-}
+private const val SERVER_ATTEMPTS_TEXT = "Wrong code. 3 attempts left."
+private const val SERVICE_UNAVAILABLE_STATUS = 503
+private const val DELIVERY_FAILED_STATUS = 422
+private const val TOO_MANY_STATUS = 429
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class OtpViewModelTest {
 
-    private val repository = FakeAuthRepository()
-    private val gateway = FakePhoneAuthGateway()
-    private val session = FakeSessionStore()
+    private val repository = OtpFakeAuthRepository()
+    private val session = OtpFakeSessionStore()
     private val pending = PendingOtpVerification()
     private val clock = object : Clock {
         override fun now(): Instant = NOW
@@ -133,46 +52,68 @@ class OtpViewModelTest {
 
     private fun TestScope.viewModel(purpose: AuthPurpose = AuthPurpose.LOGIN) = OtpViewModel(
         purpose = purpose,
-        phone = PHONE,
+        phone = OTP_PHONE,
         deps = OtpDependencies(
             requestOtp = RequestOtpUseCase(repository),
-            reportWrongAttempt = ReportWrongOtpAttemptUseCase(repository),
-            loginWithIdToken = LoginWithIdTokenUseCase(repository, { null }, session),
+            verifyOtp = VerifyOtpUseCase(repository),
+            loginWithOtpToken = LoginWithOtpTokenUseCase(repository, { null }, session),
             resolveDialCode = ResolveDialCodeUseCase(OtpFakeLocations()),
-            phoneAuth = gateway,
-            appConfig = NoConfig,
+            appConfig = OtpNoConfig,
             pending = pending,
             analytics = NoOpAnalyticsTracker,
             clock = clock,
-            errorText = { "failed" },
+            errorText = { error -> (error as? AppError.ServerError)?.code?.name ?: "failed" },
         ),
         testScope = backgroundScope,
     ).also { viewModel -> backgroundScope.launch { viewModel.state.collect {} } }
 
+    private fun TestScope.effectsOf(viewModel: OtpViewModel): MutableList<SideEffect> =
+        mutableListOf<SideEffect>().also { list -> backgroundScope.launch { viewModel.sideEffect.collect { list += it } } }
+
+    private suspend fun OtpViewModel.typeAndVerify(code: String = "123456") {
+        state.first { !it.requesting }
+        onEvent(UiAction.OnCodeChange(code))
+        onEvent(UiAction.OnVerifyClick)
+    }
+
     @Test
-    fun requestsTheCodeForTheE164NumberAndCountsDownToResend() = runTest(UnconfinedTestDispatcher()) {
+    fun requestsTheWhatsAppCodeAndCountsDownResendAndExpiry() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = viewModel()
         val ready = viewModel.state.first { !it.requesting }
-        assertEquals("+962791234567", ready.phoneDisplay)
-        assertEquals(listOf("+962791234567"), repository.requested)
-        assertEquals(listOf("+962791234567"), gateway.startedPhones)
-        assertEquals(LENGTH, ready.otpLength)
-        assertEquals(RESEND_SECONDS, ready.resendRemainingSeconds)
+        assertEquals(OTP_E164, ready.phoneDisplay)
+        assertEquals(listOf(OTP_E164 to AuthPurpose.LOGIN), repository.requested)
+        assertTrue(ready.codeSent)
+        assertEquals(OTP_LENGTH, ready.otpLength)
+        assertEquals(OTP_RESEND_SECONDS, ready.resendRemainingSeconds)
+        assertEquals(OTP_EXPIRES_SECONDS, ready.expiresRemainingSeconds)
         assertFalse(ready.canResend)
-        testScheduler.advanceTimeBy((RESEND_SECONDS + 1).seconds)
+        testScheduler.advanceTimeBy((OTP_RESEND_SECONDS + 1).seconds)
         testScheduler.runCurrent()
-        val expired = viewModel.state.first { it.resendRemainingSeconds == 0 }
-        assertTrue(expired.canResend)
+        val resendable = viewModel.state.first { it.resendRemainingSeconds == 0 }
+        assertTrue(resendable.canResend)
+        assertEquals(OTP_EXPIRES_SECONDS - OTP_RESEND_SECONDS - 1, resendable.expiresRemainingSeconds)
         viewModel.onEvent(UiAction.OnResendClick)
         testScheduler.runCurrent()
         assertEquals(2, repository.requested.size)
     }
 
     @Test
-    fun correctCodeLogsInStoresTheSessionAndGoesHome() = runTest(UnconfinedTestDispatcher()) {
+    fun codeExpiryShowsThePopupAndTurnsVerifyOff() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = viewModel()
-        val effects = mutableListOf<SideEffect>()
-        backgroundScope.launch { viewModel.sideEffect.collect { effects += it } }
+        viewModel.state.first { !it.requesting }
+        viewModel.onEvent(UiAction.OnCodeChange("123456"))
+        testScheduler.advanceTimeBy((OTP_EXPIRES_SECONDS + 1).seconds)
+        testScheduler.runCurrent()
+        val expired = viewModel.state.first { it.dialog != null }
+        assertEquals(OtpDialog.Expired, expired.dialog)
+        assertFalse(expired.canVerify)
+        assertTrue(expired.canResend)
+    }
+
+    @Test
+    fun correctCodeIsVerifiedThenTheTokenLogsIn() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        val effects = effectsOf(viewModel)
         viewModel.state.first { !it.requesting }
         viewModel.onEvent(UiAction.OnCodeChange("12a456"))
         assertEquals("12456", viewModel.state.first().code)
@@ -181,91 +122,134 @@ class OtpViewModelTest {
         viewModel.onEvent(UiAction.OnVerifyClick)
         testScheduler.runCurrent()
         assertEquals(listOf<SideEffect>(SideEffect.NavigateHome), effects)
+        assertEquals(listOf(VerifyCall(OTP_E164, AuthPurpose.LOGIN, "123456")), repository.verified)
+        assertEquals(listOf(OTP_TOKEN), repository.loginTokens)
         assertEquals("Omar", session.signedIn?.firstName)
-        assertEquals(listOf("123456"), gateway.confirmedCodes)
     }
 
     @Test
-    fun wrongCodeIsReportedAndABlockStartsTheRemainingTime() = runTest(UnconfinedTestDispatcher()) {
-        gateway.confirmResult = FirebaseResult.Failure(FirebaseFailure.InvalidCode)
-        repository.wrong = WrongAttemptResult(blocked = true, attemptsRemaining = 0, blockedUntil = NOW + 15.minutes)
+    fun wrongCodeShowsTheServerAttemptsTextOrTheOwnText() = runTest(UnconfinedTestDispatcher()) {
+        repository.verifyResult = AppResult.Error(invalidCode(SERVER_ATTEMPTS_TEXT))
         val viewModel = viewModel()
-        viewModel.state.first { !it.requesting }
-        viewModel.onEvent(UiAction.OnCodeChange("000000"))
+        viewModel.typeAndVerify("000000")
+        testScheduler.runCurrent()
+        val wrong = viewModel.state.first { it.codeError }
+        assertEquals(SERVER_ATTEMPTS_TEXT, wrong.codeErrorMessage)
+        assertFalse(wrong.verifying)
+        assertTrue(repository.loginTokens.isEmpty())
+        viewModel.onEvent(UiAction.OnCodeChange("00000"))
+        assertFalse(viewModel.state.first().codeError)
+        repository.verifyResult = AppResult.Error(serverError(ErrorCode.OTP_INVALID, UNAUTHORIZED_STATUS))
+        viewModel.onEvent(UiAction.OnCodeChange("000001"))
         viewModel.onEvent(UiAction.OnVerifyClick)
         testScheduler.runCurrent()
-        val state = viewModel.state.first { it.codeError }
-        assertEquals(1, repository.wrongReports)
-        assertTrue(state.isBlocked)
-        assertEquals(15 * 60, state.blockedRemainingSeconds)
-        assertFalse(state.canVerify)
-        assertEquals("15:00", formatCountdown(state.blockedRemainingSeconds))
+        val own = viewModel.state.first { it.codeError }
+        assertNull(own.codeErrorMessage)
     }
 
     @Test
-    fun expiredCodeShowsThePopupAndServerOtpErrorsMapBack() = runTest(UnconfinedTestDispatcher()) {
-        gateway.confirmResult = FirebaseResult.Failure(FirebaseFailure.CodeExpired)
+    fun blockedOnVerifyClearsTheCodeAndTheNextRequestShowsTheRemainingTime() = runTest(UnconfinedTestDispatcher()) {
+        repository.verifyResult = AppResult.Error(serverError(ErrorCode.OTP_BLOCKED, TOO_MANY_STATUS))
         val viewModel = viewModel()
-        viewModel.state.first { !it.requesting }
-        viewModel.onEvent(UiAction.OnCodeChange("123456"))
-        viewModel.onEvent(UiAction.OnVerifyClick)
+        val effects = effectsOf(viewModel)
+        viewModel.typeAndVerify("000000")
+        testScheduler.runCurrent()
+        val state = viewModel.state.first()
+        assertFalse(state.codeSent)
+        assertEquals("", state.code)
+        assertEquals(listOf<SideEffect>(SideEffect.ShowError(ErrorCode.OTP_BLOCKED.name)), effects)
+        repository.policy = AppResult.Success(OtpPolicy(false, OTP_LENGTH, OTP_RESEND_SECONDS, blockedUntil = NOW + 15.minutes))
+        viewModel.onEvent(UiAction.OnResendClick)
+        testScheduler.runCurrent()
+        val blocked = viewModel.state.first { it.isBlocked }
+        assertEquals("15:00", formatCountdown(blocked.blockedRemainingSeconds))
+        assertFalse(blocked.canVerify)
+        assertFalse(blocked.canResend)
+    }
+
+    @Test
+    fun expiredCodeAndARefusedTokenBothAskForANewCode() = runTest(UnconfinedTestDispatcher()) {
+        repository.verifyResult = AppResult.Error(serverError(ErrorCode.OTP_EXPIRED, UNAUTHORIZED_STATUS))
+        val viewModel = viewModel()
+        viewModel.typeAndVerify()
         testScheduler.runCurrent()
         assertEquals(OtpDialog.Expired, viewModel.state.first().dialog)
         viewModel.onEvent(UiAction.OnDialogDismiss)
         assertNull(viewModel.state.first().dialog)
-        gateway.confirmResult = FirebaseResult.Success("proof")
-        repository.loginResult = AppResult.Error(AppError.ServerError(ErrorCode.OTP_INVALID, 401, null))
-        viewModel.onEvent(UiAction.OnVerifyClick)
+
+        repository.verifyResult = AppResult.Success(OtpProof(OTP_TOKEN, 1))
+        repository.loginResult = AppResult.Error(serverError(ErrorCode.OTP_INVALID, UNAUTHORIZED_STATUS))
+        testScheduler.advanceTimeBy((OTP_RESEND_SECONDS + 1).seconds)
         testScheduler.runCurrent()
-        assertTrue(viewModel.state.first().codeError)
+        viewModel.onEvent(UiAction.OnResendClick)
+        testScheduler.runCurrent()
+        assertEquals(2, repository.requested.size)
+        viewModel.typeAndVerify()
+        testScheduler.runCurrent()
+        val refused = viewModel.state.first { it.dialog != null }
+        assertEquals(OtpDialog.Expired, refused.dialog)
+        assertFalse(refused.codeSent)
+        assertTrue(refused.canResend)
     }
 
     @Test
-    fun otherPurposesPublishTheProofAndGoBack() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = viewModel(AuthPurpose.REGISTER)
-        val effects = mutableListOf<SideEffect>()
-        backgroundScope.launch { viewModel.sideEffect.collect { effects += it } }
-        viewModel.state.first { !it.requesting }
+    fun failedSignInAfterVerifyNeedsANewCode() = runTest(UnconfinedTestDispatcher()) {
+        repository.loginResult = AppResult.Error(serverError(ErrorCode.INTERNAL, SERVICE_UNAVAILABLE_STATUS))
+        val viewModel = viewModel()
+        val effects = effectsOf(viewModel)
+        viewModel.typeAndVerify()
+        testScheduler.runCurrent()
+        assertEquals(listOf<SideEffect>(SideEffect.ShowError(ErrorCode.INTERNAL.name)), effects)
+        val state = viewModel.state.first()
+        assertFalse(state.codeSent)
+        assertTrue(state.canResend)
         viewModel.onEvent(UiAction.OnCodeChange("123456"))
-        viewModel.onEvent(UiAction.OnVerifyClick)
+        assertFalse(viewModel.state.first().canVerify)
+    }
+
+    @Test
+    fun otherPurposesPublishTheTokenAndGoBack() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel(AuthPurpose.BOOKING_CONFIRMATION)
+        val effects = effectsOf(viewModel)
+        viewModel.typeAndVerify()
         testScheduler.runCurrent()
         assertEquals(listOf<SideEffect>(SideEffect.NavigateBack), effects)
+        assertEquals(listOf(OTP_E164 to AuthPurpose.BOOKING_CONFIRMATION), repository.requested)
+        assertEquals(AuthPurpose.BOOKING_CONFIRMATION, repository.verified.single().purpose)
         val proof = pending.consume()
-        assertEquals(FakePhoneAuthGateway.DEFAULT_PROOF, proof?.idToken)
-        assertEquals(AuthPurpose.REGISTER, proof?.purpose)
+        assertEquals(OTP_TOKEN, proof?.otpToken)
+        assertEquals(AuthPurpose.BOOKING_CONFIRMATION, proof?.purpose)
         assertNull(pending.consume())
+        assertTrue(repository.loginTokens.isEmpty())
         assertNull(session.signedIn)
     }
 
     @Test
-    fun notAllowedWithBlockShowsRemainingTimeAndAutoVerificationSkipsTheCode() = runTest(UnconfinedTestDispatcher()) {
-        repository.policy = OtpPolicy(false, LENGTH, RESEND_SECONDS, blockedUntil = NOW + 90.seconds)
-        val blocked = viewModel()
-        val state = blocked.state.first { !it.requesting }
-        assertEquals(90, state.blockedRemainingSeconds)
-        assertTrue(gateway.startedPhones.isEmpty())
-
-        repository.policy = OtpPolicy(allowed = true, otpLength = LENGTH, resendAfterSeconds = RESEND_SECONDS)
-        gateway.startResult = FirebaseResult.Success(PhoneVerification("v", autoVerifiedIdToken = "auto"))
-        val auto = viewModel()
-        val effects = mutableListOf<SideEffect>()
-        backgroundScope.launch { auto.sideEffect.collect { effects += it } }
-        auto.state.first { !it.requesting }
-        testScheduler.runCurrent()
-        assertEquals(listOf<SideEffect>(SideEffect.NavigateHome), effects)
+    fun notAllowedWithoutBlockKeepsTheEarlierCodeUsable() = runTest(UnconfinedTestDispatcher()) {
+        repository.policy = AppResult.Success(OtpPolicy(false, OTP_LENGTH, OTP_RESEND_SECONDS))
+        val viewModel = viewModel()
+        val state = viewModel.state.first { !it.requesting }
+        assertTrue(state.codeSent)
+        assertFalse(state.isBlocked)
+        assertEquals(OTP_RESEND_SECONDS, state.resendRemainingSeconds)
+        assertEquals(0, state.expiresRemainingSeconds)
     }
 
     @Test
-    fun firebaseSendFailureKeepsVerifyOffAndShowsTheError() = runTest(UnconfinedTestDispatcher()) {
-        gateway.startResult = FirebaseResult.Failure(FirebaseFailure.Unknown("17006"))
+    fun numberWithoutWhatsAppShowsTheDeliveryErrorAndKeepsVerifyOff() = runTest(UnconfinedTestDispatcher()) {
+        repository.policy = AppResult.Error(serverError(ErrorCode.OTP_DELIVERY_FAILED, DELIVERY_FAILED_STATUS))
         val viewModel = viewModel()
         val failed = viewModel.state.first { !it.requesting }
         assertFalse(failed.codeSent)
-        assertTrue(failed.requestError != null)
+        assertEquals(ErrorCode.OTP_DELIVERY_FAILED.name, failed.requestError)
         viewModel.onEvent(UiAction.OnCodeChange("123456"))
-        assertFalse(viewModel.state.first().canVerify)
         viewModel.onEvent(UiAction.OnVerifyClick)
         testScheduler.runCurrent()
-        assertTrue(gateway.confirmedCodes.isEmpty())
+        assertTrue(repository.verified.isEmpty())
+        repository.policy = AppResult.Success(OtpPolicy(true, OTP_LENGTH, OTP_RESEND_SECONDS, OTP_EXPIRES_SECONDS))
+        viewModel.onEvent(UiAction.OnRetryRequest)
+        testScheduler.runCurrent()
+        val retried = viewModel.state.first { it.codeSent }
+        assertNull(retried.requestError)
     }
 }

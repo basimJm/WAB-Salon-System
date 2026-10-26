@@ -44,21 +44,3 @@ export const withRetry = async <T>(
     }
   }
 };
-
-export const withTimeout = async <T>(
-  work: Promise<T>,
-  timeoutMs: number,
-  onTimeout: () => Error,
-): Promise<T> => {
-  let timer: NodeJS.Timeout | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => {
-      reject(onTimeout());
-    }, timeoutMs);
-  });
-  try {
-    return await Promise.race([work, timeout]);
-  } finally {
-    if (timer !== undefined) clearTimeout(timer);
-  }
-};

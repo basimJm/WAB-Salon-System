@@ -11,7 +11,7 @@
 | `customer` | `WAB-Mobile-Customer/` | Customers discover salons and book (self + 5 companions, brides) | `customer` | `WAB-Mobile-Customer/docs/WAB_Customer_Tasks.md` (CUS-) | `WAB-Mobile-Customer/.claude/…` |
 | `merchant` | `WAB-Mobile-Salon/` | Salons register, get approved, manage the salon, answer booking requests in real time | `merchant` | `WAB-Mobile-Salon/docs/WAB_Merchant_Tasks.md` (MER-) | `WAB-Mobile-Salon/.claude/…` |
 | `payments` | `wab-payments/` | Gateway-independent payments (Node for the server, KMP launcher for the customer app) | `server` | `wab-payments/docs/WAB_Package_Payments_Tasks.md` (PAY-) | `wab-payments/.claude/…` |
-| `otp` | `wab-otp/` | Phone-ownership proof (Firebase ID token verification) + OTP abuse limits | `server` | `wab-otp/docs/WAB_Package_OTP_Tasks.md` (OTP-) | `wab-otp/.claude/…` |
+| `otp` | `wab-otp/` | Phone-ownership proof: WhatsApp OTP codes (server-generated) + signed single-use `otpToken` + OTP abuse limits | `server` | `wab-otp/docs/WAB_Package_OTP_Tasks.md` (OTP-) | `wab-otp/.claude/…` |
 | `notifications` | `wab-notifications/` | Push (FCM) + email (SMTP) behind one interface — **built** | `server` | `wab-notifications/docs/WAB_Package_Notifications_Tasks.md` (NOT-) | `wab-notifications/.claude/…` |
 | `analytics` | `wab-analytics/` | Server events + analytics queries (Mongo now, BigQuery later) | `server` | `wab-analytics/docs/WAB_Package_Analytics_Tasks.md` (ANA-) | `wab-analytics/.claude/…` |
 | `storage` | `wab-storage/` | Presigned uploads, confirmation, CDN and signed URLs, image variants | `server` | `wab-storage/docs/WAB_Package_Storage_Tasks.md` (STO-) | `wab-storage/.claude/…` |
@@ -21,9 +21,9 @@ Branch flow: task branch `feat/<prefix>-NNN-<key>` from the freshly fetched mast
 ## 2. System map
 ```
                  ┌──────────────────────────────── Firebase ────────────────────────────────┐
-                 │ Phone Auth (OTP SMS)  ·  FCM  ·  Analytics + Crashlytics → BigQuery      │
+                 │ FCM  ·  Analytics + Crashlytics → BigQuery  (phone OTP: WhatsApp)        │
                  └──────▲───────────────────────────▲──────────────────────────▲─────────────┘
-   ID token / SMS code  │          push tokens      │        events (apps only)│
+                        │          push tokens      │        events (apps only)│
  ┌──────────────────────┴────┐  ┌───────────────────┴──────┐  ┌────────────────┴──────────────┐
  │ Customer app (KMP)        │  │ Merchant app (KMP)        │  │ Admin panel (React)            │
  │ /customer/v1 + Socket.IO  │  │ /merchant/v1 + Socket.IO  │  │ /admin/v1 + Socket.IO /admin   │
@@ -46,7 +46,7 @@ Branch flow: task branch `feat/<prefix>-NNN-<key>` from the freshly fetched mast
 - **Envelope:** `{success, message, data, meta?}` / `{success:false, message, error:{code, details?, traceId}}`; clients branch on `code` (BUSINESS_DOMAIN §11), never on text. Every client keeps an AR + EN message per code (ADM-009, CUS-059, MER-052).
 - **Socket.IO events and FCM payloads:** names and payloads in `BUSINESS_DOMAIN.md` §7; mirrored in `WAB-Server/src/constants`, admin `constants/realtime.ts`, customer/merchant realtime constants (CUS-013, MER-011). Admin today receives `booking.updated`, `alert.created`; SRV-124 adds the rest.
 - **SDK ports:** the `WAB-Server/src/providers/<name>/types.ts` interfaces are the contract between the server and each SDK; an SDK adapter must satisfy them (`wab-notifications` does). Business rules never live in an SDK.
-- **Auth:** phone + OTP (Firebase) for customers/members, email + password + email OTP for admins; server JWT access (short) + rotating refresh per scope; a token of one scope never works on another namespace (root `CLAUDE.md` §4.2).
+- **Auth:** phone + WhatsApp OTP for customers/members (server sends the code via the WhatsApp Cloud API, `POST …/auth/otp/request` → `…/auth/otp/verify` → single-use `otpToken` for login/register/change phone/booking/bank details; BUSINESS_DOMAIN §3.1a), email + password + email OTP for admins; server JWT access (short) + rotating refresh per scope; a token of one scope never works on another namespace (root `CLAUDE.md` §4.2).
 
 ## 4. Working without the other side (mandatory)
 1. **Never wait.** Build against the contract: fixtures per operation behind a repository interface, switched only by config (`VITE_DATA_SOURCE` admin, `DATA_SOURCE` apps, `*_PROVIDER=fake|real` server). Prod builds compile the mock out.
@@ -63,7 +63,7 @@ Branch flow: task branch `feat/<prefix>-NNN-<key>` from the freshly fetched mast
 | Customer → `wab-payments` KMP | `PaymentLauncher` port | Not started | PAY-010/011 → CUS-047; PAY-015 → CUS-062 |
 | Merchant → Server `/merchant/v1` | `openapi.merchant.json` (71 ops) | No client code; 6 gaps found | SRV-129…SRV-134 → MER-042/043/049/050 |
 | Server → `wab-notifications` | `providers/notifier` | **Live** (`NOTIFIER_PROVIDER=real`, T-123) | NOT-010 publish → SRV-112 |
-| Server → `wab-otp` | `providers/otp` | Fake; Firebase verification stub | OTP-001…010 → SRV-034 |
+| Server → `wab-otp` | `providers/otp` | `whatsapp` (Meta Cloud API) or `fake` (recorded codes, dev fixed code) | OTP-011 → SRV-153 |
 | Server → `wab-storage` | `providers/storage` | Server has its own S3 code; SDK not started | STO-001…010 → SRV-112 |
 | Server → `wab-payments` Node | `providers/payments` | Fake | PAY-001…012 → SRV-092 |
 | Server → `wab-analytics` | `providers/analytics` | Mongo events in server; BigQuery not started | ANA-001…010 → SRV-110 |
@@ -76,16 +76,16 @@ Branch flow: task branch `feat/<prefix>-NNN-<key>` from the freshly fetched mast
 
 ## 7. Live board
 <!-- BOARD:START -->
-_Generated by `scripts/tasks.py board` on 2026-10-25. Do not edit by hand._
+_Generated by `scripts/tasks.py board` on 2026-10-26. Do not edit by hand._
 
 | Project | Master branch | TODO | IN PROGRESS | IN REVIEW | DONE | PENDING | BLOCKED | Next ready task |
 |---|---|---|---|---|---|---|---|---|
-| WAB-Server (backend API) | `server` | 0 | 0 | 1 | 149 | 9 | 1 | none ready |
+| WAB-Server (backend API) | `server` | 0 | 0 | 2 | 149 | 10 | 1 | none ready |
 | WAB-Admin-Dashboard (web panel) | `admin` | 0 | 0 | 0 | 87 | 8 | 1 | none ready |
-| WAB-Mobile-Customer (KMP app) | `customer` | 0 | 0 | 1 | 83 | 4 | 2 | none ready |
-| WAB-Mobile-Salon (merchant KMP app) | `merchant` | 1 | 0 | 0 | 63 | 5 | 0 | none ready |
+| WAB-Mobile-Customer (KMP app) | `customer` | 0 | 0 | 2 | 83 | 4 | 2 | none ready |
+| WAB-Mobile-Salon (merchant KMP app) | `merchant` | 1 | 0 | 0 | 63 | 5 | 1 | none ready |
 | wab-payments (SDK: Node + KMP) | `server` | 0 | 0 | 0 | 15 | 0 | 0 | none ready |
-| wab-otp (SDK) | `server` | 0 | 0 | 1 | 9 | 0 | 0 | none ready |
+| wab-otp (SDK) | `server` | 0 | 0 | 2 | 9 | 0 | 0 | none ready |
 | wab-notifications (SDK) | `server` | 0 | 0 | 0 | 10 | 2 | 0 | none ready |
 | wab-analytics (SDK) | `server` | 0 | 0 | 0 | 9 | 1 | 0 | none ready |
 | wab-storage (SDK) | `server` | 0 | 0 | 0 | 9 | 1 | 0 | none ready |
@@ -102,10 +102,12 @@ _Generated by `scripts/tasks.py board` on 2026-10-25. Do not edit by hand._
 | ADM-077 | admin | PENDING | SRV-122 (server) | DONE |
 | ADM-082 | admin | BLOCKED | SRV-115 (server) | PENDING |
 | CUS-047 | customer | BLOCKED | PAY-011 (payments) | DONE |
-| CUS-061 | customer | PENDING | SRV-034 (server) | DONE |
+| CUS-061 | customer | PENDING | SRV-154 (server) | PENDING |
 | CUS-062 | customer | BLOCKED | PAY-015 (payments) | DONE |
 | CUS-062 | customer | BLOCKED | SRV-092 (server) | PENDING |
-| MER-055 | merchant | PENDING | SRV-034 (server) | DONE |
+| CUS-089 | customer | IN REVIEW | SRV-153 (server) | IN REVIEW |
+| MER-055 | merchant | PENDING | SRV-154 (server) | PENDING |
+| MER-070 | merchant | BLOCKED | SRV-153 (server) | IN REVIEW |
 | SRV-092 | server | PENDING | PAY-012 (payments) | DONE |
 | SRV-110 | server | PENDING | ANA-010 (analytics) | PENDING |
 | SRV-112 | server | BLOCKED | ANA-010 (analytics) | PENDING |
@@ -113,6 +115,7 @@ _Generated by `scripts/tasks.py board` on 2026-10-25. Do not edit by hand._
 | SRV-112 | server | BLOCKED | OTP-010 (otp) | IN REVIEW |
 | SRV-112 | server | BLOCKED | PAY-012 (payments) | DONE |
 | SRV-112 | server | BLOCKED | STO-010 (storage) | PENDING |
+| SRV-153 | server | IN REVIEW | OTP-011 (otp) | IN REVIEW |
 
 ### Waiting on the owner (PENDING)
 
@@ -125,12 +128,12 @@ _Generated by `scripts/tasks.py board` on 2026-10-25. Do not edit by hand._
 - **ADM-080** (admin) PRD §3 / Design Script §3 flows as Playwright e2e on the mock transpor — Chromium locally, Chromium + WebKit in CI. Owner decision 2026-10-14: no e2e runs for now; revisit before release (ADM-0
 - **ADM-083** (admin) Prod go-live checklist for the admin panel (env values, domain, CSP, r — Hosting, domain and the pending tasks above (REL-03).
 - **ANA-010** (analytics) Publish `@wab/analytics`; `WAB-Server` switches `ANALYTICS_PROVIDER=re — Owner runs the publish; unblocks SRV-110 and SRV-112
-- **CUS-061** (customer) Real OTP on devices: Firebase Phone Auth (test numbers in dev), backen — Firebase app registrations + `wab-otp` in the server unblocked by CUS-060 on 2026-10-25 **Owner**: dev debug SHA-1/SHA-2
+- **CUS-061** (customer) Real OTP on devices over WhatsApp: a Meta test number receives the cod — Replaced Firebase Phone Auth (owner decision 2026-10-26). **Owner**: Meta setup SRV-154.
 - **CUS-063** (customer) Push end to end on Android + iOS devices (token registration, foregrou — SRV-100 is done; needs the dev API and device builds unblocked by CUS-060 on 2026-10-25 **Owner**: APNs .p8 key in Fireb
 - **CUS-066** (customer) Store readiness: icons, splash, privacy manifest (iOS), Data safety (P — Store accounts, domain and listing texts — **owner input**
 - **CUS-067** (customer) Release pipeline: signing (keystore / certificates in CI secrets), Pla — Signing material and store API keys — **owner input**
 - **MER-004** (merchant) Firebase registrations for the merchant app (Android + iOS, dev + prod — Owner registers the 2 merchant apps in `wab-dev-397ab` / `wab-prod-9c58f` and provides the config files — **owner input*
-- **MER-055** (merchant) Real OTP on devices (Firebase Phone Auth test numbers, `wab-otp` in th — Firebase registrations (MER-004) unblocked by MER-054 on 2026-10-25 **Owner**: merchant Firebase registrations (MER-004)
+- **MER-055** (merchant) Real OTP on devices over WhatsApp: a Meta test number receives the cod — Replaced Firebase Phone Auth (owner decision 2026-10-26). **Owner**: Meta setup SRV-154.
 - **MER-056** (merchant) Booking request end to end on devices: customer books (dev API) → merc — Needs the dev API; SRV-100 is done unblocked by MER-054 on 2026-10-25 **Owner**: MER-004 Firebase files, FCM token regis
 - **MER-059** (merchant) Store readiness (icons, splash, privacy manifest, Data safety, screens — Store accounts and texts — **owner input**
 - **MER-060** (merchant) Release pipeline (signing, Play internal + TestFlight from a tag, chan — Signing material — **owner input**
@@ -145,6 +148,7 @@ _Generated by `scripts/tasks.py board` on 2026-10-25. Do not edit by hand._
 - **SRV-125a** (server) Push campaign audience from a saved analytics segment — Owner decision needed: no saved-segment store exists and analytics (BigQuery) was excluded on 2026-10-19; define what a 
 - **SRV-127** (server) Live analytics without BigQuery: active users now (socket presence), l — G7 part that needs no BigQuery; ADM-074 also waits for SRV-110. dropped by owner 2026-10-19: analytics excluded; admin h
 - **SRV-152** (server) Hosted dev (Render) configuration: `CORS_ALLOWED_ORIGINS` with the dep — **Owner** (hosting dashboard + secrets). Found by ADM-079 (CORS S10), MER-054 (maintenance), the 2026-10-25 device journ
+- **SRV-154** (server) Meta WhatsApp setup for dev + prod: Meta Business account, WhatsApp Bu — **Owner** (Meta Business Manager). Guide: `wab-otp/docs/WHATSAPP_SETUP.md`.
 - **STO-010** (storage) Publish `@wab/storage`; `WAB-Server` switches `STORAGE_PROVIDER=real`  — Owner runs the publish; unblocks SRV-112. AWS bucket/CDN values are env only
 <!-- BOARD:END -->
 

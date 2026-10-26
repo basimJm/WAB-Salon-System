@@ -2,7 +2,7 @@
 
 > **Document type:** Product Requirements Document (PRD) — Customer app (frontend / mobile)
 > **Audience:** AI coding agents and engineers who will implement the customer app.
-> **Version:** 1.1 — updated with backend decisions: Firebase phone OTP with dynamic code length (currently 6), Socket.IO real-time, Firebase Analytics + BigQuery, `wab-payments` KMP library, presigned uploads + CDN.
+> **Version:** 1.1 — updated with backend decisions: phone OTP with dynamic code length (currently 6; WhatsApp since 2026-10-26), Socket.IO real-time, Firebase Analytics + BigQuery, `wab-payments` KMP library, presigned uploads + CDN.
 > **Related documents (separate PRDs, not covered here):** Merchant (Salon) App PRD, Admin Panel PRD, Backend PRD.
 
 ---
@@ -42,11 +42,11 @@
 ### 2.1 Confirmed
 - **Kotlin Multiplatform (KMP) + Compose Multiplatform.** Shared UI **and** shared business logic for **Android and iOS**. Platform-specific code only via `expect/actual` where unavoidable (location, payments SDK, video player, image picker, push, deep links).
 - **Local persistence:** DataStore (key-value). See Section 5.
-- **OTP:** Firebase Authentication (Phone / SMS) via the Firebase SDK. The backend verifies the resulting Firebase ID token (see S13).
+- **OTP:** phone code sent **on WhatsApp by the backend** (owner decision 2026-10-26, BUSINESS_DOMAIN §3.1a; Firebase Phone Auth removed). The backend generates, sends and verifies the code and answers a single-use `otpToken` (see S13).
 - **Push notifications:** Firebase Cloud Messaging (Android + iOS).
 - **Real-time:** Socket.IO client connected to the backend while the app is in the foreground (registered users); FCM covers background/closed app.
 - **Crash reporting & analytics:** Firebase Crashlytics + Firebase Analytics. Firebase exports raw events to **BigQuery** (retained permanently); the backend reads BigQuery for the Admin panel (see Section 14).
-- **Internal abstraction (mandatory):** all Firebase usages (OTP, push, analytics, crash reporting) MUST sit behind interfaces in the app's own code (e.g., `OtpProvider`, `PushProvider`, `AnalyticsTracker`, `CrashReporter`) so a provider change touches one place only. No separate repositories for these on mobile.
+- **Internal abstraction (mandatory):** all Firebase usages (push, analytics, crash reporting) MUST sit behind interfaces in the app's own code (e.g., `OtpProvider`, `PushProvider`, `AnalyticsTracker`, `CrashReporter`) so a provider change touches one place only. No separate repositories for these on mobile.
 - **Payments:** the **`wab-payments` KMP library** (separate repository, published package). The app depends only on its interface; the first implementation wraps the chosen gateway's native SDKs (HyperPay candidate; gateway not final). Changing the gateway MUST NOT require app code changes beyond the library version.
 - **Files:** uploads use **presigned upload URLs** issued by the backend (upload goes directly to AWS S3); media is served through a **CDN**. Images and videos MUST be **compressed on the device** before upload.
 - **Backend (context only):** Node.js + TypeScript + Express + Mongoose, MongoDB, Redis. REST JSON APIs, versioned (`/v1`), customer endpoints under a dedicated customer namespace (e.g., `/customer/v1`). Swagger and a Postman collection are maintained in the backend repository.
@@ -529,20 +529,17 @@ App start
 **Used by modes:** LOGIN, REGISTER, CHANGE_PHONE, BOOKING_CONFIRMATION.
 **Layout:** Title, message "We sent a code to {phone}", **code input with N boxes** where **N = `otpLength` returned by the backend (currently 6)** — never hardcoded, **Verify** button, resend control with countdown.
 
-**Flow (Firebase Phone Auth):**
-1. App calls backend **OTP request** (phone, purpose). Backend checks platform limits and returns `{ allowed, otpLength, resendAfterSeconds, blockedUntil? }`.
-2. If allowed → app triggers Firebase phone verification (SMS sent by Firebase).
-3. User enters the code → app confirms it with Firebase → obtains a **Firebase ID token**.
-4. App sends the ID token to the backend (login / register / change phone / booking confirmation). Backend verifies the token and the phone number match, then proceeds (e.g., issues the app's own access + refresh tokens).
-5. Wrong-code results from Firebase are reported to the backend (counted toward the wrong-attempts limit).
+**Flow (WhatsApp OTP, BUSINESS_DOMAIN §3.1a):**
+1. App calls backend **OTP request** (phone, purpose). Backend checks platform limits, sends the code **on WhatsApp** in the app language and returns `{ allowed, otpLength, resendAfterSeconds, expiresInSeconds, blockedUntil? }`. Message: "We sent a code on WhatsApp to {phone}".
+2. User enters the code → app calls backend **OTP verify** (phone, purpose, code) → single-use **`otpToken`**.
+3. App sends the `otpToken` to the action of that purpose (login / register / change phone / booking confirmation). A failed action needs a new code.
 
 **Rules:**
-- Channel: **SMS via Firebase**.
-- Resend becomes available after `resendAfterSeconds` (**60 s**), countdown shown.
-- Expired/invalid session from Firebase → popup "This code has expired, please request a new one."
-- **Send limit (platform, on top of Firebase limits):** 5 requests within 5 minutes → blocked for **15 minutes** (show remaining time).
-- **Wrong attempts:** 5 wrong codes → blocked for **15 minutes**.
-- Firebase's own throttling errors are shown as "Too many attempts, please try again later."
+- Channel: **WhatsApp** (authentication template), sent by the backend. A number without WhatsApp → "We couldn't send the code: this number has no WhatsApp account" (`OTP_DELIVERY_FAILED`), retry available.
+- Resend becomes available after `resendAfterSeconds` (**60 s**), countdown shown; the code expiry (`expiresInSeconds`) is shown too.
+- Expired code (`OTP_EXPIRED`, or the expiry countdown ends) → popup "This code has expired, please request a new one."
+- **Send limit:** 5 requests within 5 minutes → blocked for **15 minutes** (show remaining time from `blockedUntil`).
+- **Wrong attempts:** counted by the backend on verify; the wrong-code message shows the attempts left (server text); 5 wrong codes → blocked for **15 minutes** (`OTP_BLOCKED`).
 **On success:**
 - LOGIN / REGISTER → save tokens + user first name + gender → Home (no Nickname screen).
 - CHANGE_PHONE → save profile changes → back to Profile.
@@ -796,7 +793,7 @@ No pull-to-refresh. Show a step indicator. Back returns to the previous step pre
 - Salon details, salon reviews (paginated), staff reviews (paginated), submit review.
 - Available slots (salon, services, date, bride flag) and eligible staff per slot.
 - Create booking (with OTP verification), payment session initiation/confirmation, cancel booking, bookings list (upcoming/past, search, paginated), booking details.
-- Auth: OTP request (limits + `otpLength`), verify Firebase ID token for login/register/phone change/booking confirmation, report wrong attempts, refresh token, logout, delete account.
+- Auth: OTP request (limits + `otpLength`, WhatsApp send), OTP verify (→ `otpToken`) for login/register/phone change/booking confirmation, refresh token, logout, delete account.
 - Profile: get/update, upload/delete profile photo, cities, areas.
 - Favorites: list/add/remove.
 - Notifications: list (filters, paginated), mark as read, register FCM token, push toggle.

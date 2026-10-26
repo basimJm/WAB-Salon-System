@@ -7,6 +7,8 @@ export const ERROR_CODES = {
   RATE_LIMITED: 'OTP_RATE_LIMITED',
   VENDOR_ERROR: 'OTP_PROVIDER_UNAVAILABLE',
   MALFORMED_RESPONSE: 'OTP_MALFORMED_RESPONSE',
+  /** The channel refused the recipient (not on WhatsApp, not deliverable); retrying will not help. */
+  DELIVERY_FAILED: 'OTP_DELIVERY_FAILED',
   STORE_UNAVAILABLE: 'OTP_STORE_UNAVAILABLE',
   UNKNOWN: 'OTP_UNKNOWN',
 } as const;

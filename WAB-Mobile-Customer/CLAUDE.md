@@ -40,7 +40,7 @@ core/navigation        Typed routes (Graph/Screen), Navigator
 core/notification      In-app toast host + push handling
 core/security          Security helpers (keep secrets out of logs, secure storage seam)
 core/mvi               MVI base (MVI, MVIDelegate, BaseViewModel, CollectSideEffect) — standalone, depends only on Compose runtime + lifecycle
-core/firebase          Firebase behind ports: PhoneAuthGateway, PushTokenProvider, CrashReporter, AnalyticsBackend; Android = Firebase Android SDK, iOS = Swift bridges (FirebaseBridges.swift); fakes for tests
+core/firebase          Firebase behind ports (no phone auth: OTP is WhatsApp via the server): PushTokenProvider, CrashReporter, AppInstanceIdProvider, AnalyticsBackend; Android = Firebase Android SDK, iOS = Swift bridges (FirebaseBridges.swift); fakes for tests
 core/analytics         AnalyticsTracker port (screens + actions, user id/properties), common-field context, validation, TrackScreen, no-op/recording/composite backends — vendor backend is wired by the app
 core/ui                Locale/dark-mode locals, permission flow
 core/design-system     Theme, tokens, adaptive layout, base components, icons, string resources

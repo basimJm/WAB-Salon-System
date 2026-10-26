@@ -29,7 +29,23 @@ npm run build && npm start            # API on the PORT from .env.development
 
 ## External providers
 
-OTP, file storage, push/email, payments and analytics sit behind interfaces in `src/providers`. `OTP_PROVIDER`, `STORAGE_PROVIDER` and `NOTIFIER_PROVIDER` choose `fake` (in-repo stand-in, the default outside production) or `real` (the `wab-*` SDKs); production must set them to `real`. Payments are paused: `PAYMENT_PROVIDER` is `fake` (dev/test) or `disabled` (production; every gateway call answers 503). Server analytics run on the server's own MongoDB events; there is no analytics provider.
+OTP, file storage, push/email, payments and analytics sit behind interfaces in `src/providers`. `STORAGE_PROVIDER` and `NOTIFIER_PROVIDER` choose `fake` (in-repo stand-in, the default outside production) or `real` (the `wab-*` SDKs); production must set them to `real`. `OTP_PROVIDER` is `whatsapp` (production) or `fake`. Payments are paused: `PAYMENT_PROVIDER` is `fake` (dev/test) or `disabled` (production; every gateway call answers 503). Server analytics run on the server's own MongoDB events; there is no analytics provider.
+
+### Phone OTP (WhatsApp, BUSINESS_DOMAIN §3.1a)
+
+The server generates the code, sends it as a WhatsApp authentication template (`@wab/otp`), checks it at `POST /{customer,merchant}/v1/auth/otp/verify` and answers a signed single-use `otpToken`; login, register, change phone, booking confirmation and bank details take that `otpToken`.
+
+| Variable                              | Meaning                                                                                                     |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `OTP_PROVIDER`                        | `whatsapp` (required in production) or `fake` (dev/test: codes are recorded, not sent)                      |
+| `WHATSAPP_PHONE_NUMBER_ID`            | Meta app → WhatsApp → API Setup → Phone number ID (whatsapp only)                                           |
+| `WHATSAPP_ACCESS_TOKEN`               | System-user access token (secret; whatsapp only)                                                            |
+| `WHATSAPP_TEMPLATE_NAME`              | Approved authentication template, same name in `ar` and `en_US` (whatsapp only)                             |
+| `WHATSAPP_API_VERSION`                | Optional Graph API version pin, e.g. `v26.0`                                                                |
+| `OTP_CODE_SECRET`, `OTP_PROOF_SECRET` | HMAC secrets (≥ 32 characters, different); required for whatsapp, generated per process for fake when unset |
+| `OTP_FIXED_CODE`                      | Development only (refused in production): every code is this value                                          |
+
+Local QA sign-in: run with `OTP_PROVIDER=fake OTP_FIXED_CODE=123456`, call `POST …/auth/otp/request {phone, purpose}`, then `POST …/auth/otp/verify {phone, purpose, code: "123456"}` and send the returned `otpToken` (`WAB-Admin-Dashboard/qa/lib.mjs` `proof()` does this).
 
 ## Authentication
 

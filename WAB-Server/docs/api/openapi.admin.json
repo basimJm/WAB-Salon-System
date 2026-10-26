@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.5.0"
+    "version": "1.6.0"
   },
   "servers": [
     {
@@ -52,6 +52,7 @@
                   "OTP_BLOCKED",
                   "OTP_INVALID",
                   "OTP_EXPIRED",
+                  "OTP_DELIVERY_FAILED",
                   "PHONE_NOT_REGISTERED",
                   "PHONE_ALREADY_REGISTERED",
                   "ACCOUNT_BLOCKED",

@@ -5,10 +5,29 @@
 ## Integration status (one glance)
 
 - Serves `/customer/v1` (51 ops), `/merchant/v1` (71), `/admin/v1` (155) + Socket.IO; contract = `docs/api/openapi.*.json` regenerated with `npm run docs` every task.
-- Providers: notifier **real** (`wab-notifications`); otp **real** (`wab-otp`, SRV-034, needs `FIREBASE_PROJECT_ID`); analytics = the server's own MongoDB events (no analytics provider; BigQuery/`@wab/analytics` dropped, owner 2026-10-19); payments **paused** (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev/test; HyperPay/`@wab/payments` not used by the server); storage on the in-repo S3 code until SRV-112.
+- Providers: notifier **real** (`wab-notifications`); otp **whatsapp** (`wab-otp` 0.2.0, SRV-153: `WHATSAPP_*` + `OTP_CODE_SECRET`/`OTP_PROOF_SECRET`; `fake` + `OTP_FIXED_CODE` for local QA); analytics = the server's own MongoDB events (no analytics provider; BigQuery/`@wab/analytics` dropped, owner 2026-10-19); payments **paused** (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev/test; HyperPay/`@wab/payments` not used by the server); storage on the in-repo S3 code until SRV-112.
 - Open work: SRV-111 contract guard, Stage N (SRV-117…128, admin gaps), Stage O (SRV-129…134, merchant gaps). Deployment SRV-011/116 and SRV-059/115: owner (PENDING).
 
 ## Current task
+
+### SRV-153 — WhatsApp phone OTP: server codes, `otp/verify`, single-use `otpToken` (owner decision 2026-10-26)
+
+- Branch: `feat/srv-153-whatsapp-otp` (on top of `feat/otp-011-whatsapp`, `@wab/otp` 0.2.0; both ship in one PR)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §3.1 OTP Redis keys, §3.1a steps 1–6, §10 `otp.*` (+ `otp.codeTtlSec`, `otp.proofTtlSec`, `otp.channel`), §11 `OTP_DELIVERY_FAILED`, §12 point 8; BRD NFR-01 OTP limits; contracts customer 1.4.0, merchant 1.5.0, admin 1.6.0, common 1.1.0):
+  - [x] `POST /{customer,merchant}/v1/auth/otp/request {phone, purpose}`: OtpGate limits first, then `sendCode` in the `Accept-Language` language (ar default, `en` → template `en_US`); answer `{allowed, otpLength, resendAfterSeconds, expiresInSeconds, blockedUntil?}` (`expiresInSeconds` 0 when nothing was sent); WhatsApp refusal → 422 `OTP_DELIVERY_FAILED` (AR + EN, request still counts, no code stored); outage / auth / config / throttling / store → 503 `ExternalServiceError` logged with the SDK code, masked phone, Meta code + fbtrace id (never code, token or access token)
+  - [x] NEW `POST /{customer,merchant}/v1/auth/otp/verify {phone, purpose, code}`: `assertNotBlocked` first (429 `OTP_BLOCKED`); wrong code → 401 `OTP_INVALID` + `reportWrongAttempt` (detail `body.code` says the attempts left; the 5th → 429 `OTP_BLOCKED`); no / expired / used / other-purpose code → 401 `OTP_EXPIRED` (not counted); right code → `{otpToken, expiresInSeconds}`, code deleted, gate reset
+  - [x] `POST /auth/otp/wrong-attempt` removed in both namespaces (the server counts wrong codes itself)
+  - [x] `idToken` → `otpToken` (max 2048) in customer login / register / change-phone / booking draft verify-otp and merchant login / change-phone / salon application / PUT payout-details; checked by `ProofVerifier` through `PhoneVerifier` (signature, expiry, phone, purpose, single use `otp:used:{jti}`); mismatch / replay / tampered → `OTP_INVALID`, expired → `OTP_EXPIRED`
+  - [x] Providers: `OTP_PROVIDER=whatsapp|fake` (`real` retired); whatsapp = `createWhatsAppChannel` + Redis code store; fake = `FakeOtpChannel` + Redis (memory in tests) + dev-only `OTP_FIXED_CODE`; production refuses fake and a fixed code (config + SDK); env `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_TEMPLATE_NAME`, `WHATSAPP_API_VERSION` (opt), `OTP_CODE_SECRET`, `OTP_PROOF_SECRET` (≥ 32, distinct) fail fast; `FIREBASE_PROJECT_ID` / `FIREBASE_AUTH_EMULATOR_HOST` removed (FCM keys untouched)
+  - [x] Settings `otp.codeTtlSec` 300, `otp.proofTtlSec` 600, `otp.channel` WHATSAPP (defaults in constants, read per call); error code + locales; Redis keys = the SDK's `otp:code:{purpose}:{e164}` and `otp:used:{jti}`
+  - [x] Local QA: `WAB-Admin-Dashboard/qa/lib.mjs` `proof(ns, phone, purpose)` = request + verify with `QA_OTP_CODE` (default 123456; `qa/stack.sh` sets `OTP_FIXED_CODE`); `seed.mjs` / `socket-check.mjs` send `otpToken`
+  - [x] OpenAPI + Postman regenerated; contracts bumped with client impact CUS-089 / MER-070; docs: README OTP env table, `docs/DEPLOYMENT.md`, `docs/SECURITY_CHECKLIST.md`, `.claude/Integration.md`, root `INTEGRATION.md` §1/§2/§4, root `CLAUDE.md` §3 Auth, root memory OTP line; `.env.example` + `docker/env.*.example` templates
+- Tests: `tests/phoneOtp.test.ts` (request: language, settings, countdown, block, 422 AR/EN, 503 per SDK code, purposes, validation; verify: token single use, settings TTL, phone/purpose binding, foreign/tampered, wrong-code countdown + block, expired/other purpose/other phone, validation, route removed, IP limit, 503), `tests/otpProviders.test.ts` (WhatsApp provider with a stubbed Meta API: template body, language, URL/version, HMAC only, no secrets in logs, 131026 → 422, 401 → 503, missing account, fixed code refused in prod, settings rebuild; fake provider; SDK error mapping; `PhoneVerifier` × every purpose: valid once, replay, cross-purpose, other phone, expired, tampered, foreign, blocked; `createProviders`), `tests/config.test.ts` (missing keys, malformed values, distinct secrets, retired `real`, production refuses fake / fixed code), `tests/customerAuth|merchantAuth|salonApplication.test.ts` (real signed tokens via `tests/helpers/otp.ts`; replay + wrong purpose on login), booking stubs assert `BOOKING_CONFIRMATION`, `tests/settings|errors|checkEnv|providers.test.ts` updated; full gate (see Notes)
+- API docs: customer + merchant (+ error enum in admin/common) regenerated; `contract:bump` customer 1.4.0, merchant 1.5.0, admin 1.6.0, common 1.1.0
+- Loops: 1/1 — re-read BUSINESS_DOMAIN §3.1 (Redis keys), §3.1a steps 1–6, §10 `otp.*`, §11 and §12.8 against the code, tests and the regenerated customer/merchant contracts; grepped every `idToken` / `wrong-attempt` / `fake-otp` / `FIREBASE_PROJECT_ID` use in WAB-Server and the admin QA scripts; found and fixed: single-use tokens reused across tests (salon application BODY), config tests building providers without `otp` settings, booking stubs not checking the purpose
+- Review: PASSED (SE ✔ (layers: route → controller → `PhoneOtpService` → `OtpProvider` port over `@wab/otp`; constants/locales; no secrets or codes logged), Mobile ✔ (breaking contract named for CUS-089 / MER-070 with every field and route; AR + EN messages), Architect ✔ (contracts bumped; production = whatsapp only, fake + fixed code refused; Firebase stays for push), QA ✔ (every consumer purpose: valid once / replay / wrong phone / wrong purpose / expired / tampered; full gate green))
+- Notes: full gate run in the Terminal panel (local ports): prettier --check, eslint, `tsc --noEmit`, `tsc -p tsconfig.build.json`, jest 161 suites / 2859 tests green. DEVIATIONS: tools run directly from a symlinked `node_modules` (npm cache is root-owned; `ensure-sdks` skipped; `@wab/otp` built from this branch with `tsup`); `npm audit --omit=dev` not run (npm cache); no real call to graph.facebook.com (Meta account is SRV-154, owner); `contract:bump` only bumps minor versions, so the breaking change is a minor bump with BREAKING in the note; mobile capture scripts not changed (client tasks). Client impact CUS-089 / MER-070 (BREAKING: new verify step, `idToken` → `otpToken`, wrong-attempt route gone; the mobile `scripts/capture_remote_fixtures.py` + `config/remote-capture.json` still send `fake-otp:` proofs and must move to request + verify with the fixed code there). Single-use tokens: a sign-in that fails after the proof was checked (e.g. `PHONE_NOT_REGISTERED`) needs a new code.
 
 ### SRV-151 — Remote-dev contract fixes (ADM-079 S6, CUS-060 #13/#14/#15/#17, MER-054 #9/#10/#11)
 
@@ -244,3 +263,15 @@
 - Tests: `python3 scripts/tasks.py check`; `python3 -m unittest scripts/test_tasks.py`
 - Loops: 1/1 — re-checked that each client URL config (admin `.env.dev`, customer `gradle.properties`/`Dev.xcconfig`) already points at this host
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — backlog only, no code. API docs: no change.
+
+### DOCS-OTP — WhatsApp phone OTP decision recorded; tasks for SDK, server, apps (owner request 2026-10-26)
+
+- Branch: `docs/whatsapp-otp-domain`
+- Status: DONE
+- Acceptance criteria:
+  - [x] Owner answers: end to end, Firebase Phone Auth removed (no SMS fallback)
+  - [x] `BUSINESS_DOMAIN.md`: actors table, §3.1a WhatsApp OTP flow (server code, HMAC store, request/verify, single-use `otpToken`), Redis keys, settings `otp.codeTtlSec` / `otp.proofTtlSec` / `otp.channel`, error `OTP_DELIVERY_FAILED`, open point 8
+  - [x] Backlog: OTP-011, SRV-153, SRV-154 (owner Meta setup), CUS-089, MER-070; CUS-061 / MER-055 rewritten for WhatsApp
+- Tests: `python3 scripts/tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs + backlog only. API docs: no change.

@@ -71,7 +71,7 @@ export const createBookingDraftsRouter = ({
       const { otpVerifiedAt } = await service.verifyOtp({
         customerId: me(req),
         id: params.id,
-        idToken: body.idToken,
+        otpToken: body.otpToken,
       });
       sendSuccess(req, res, { data: { otpVerifiedAt: otpVerifiedAt.toISOString() } });
     }),

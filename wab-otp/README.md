@@ -1,44 +1,68 @@
 # wab-otp
 
-Provider-independent phone OTP verification and abuse limits for WAB projects (Node >= 22, TypeScript, ESM + CJS).
+Provider-independent phone OTP for WAB projects (Node >= 22, TypeScript, ESM + CJS): server-generated codes delivered over **WhatsApp** (Meta Cloud API authentication template) or any other channel, a **signed single-use proof** (`otpToken`) after a correct code, and request / wrong-code limits.
 
-Phase 1 provider: **Firebase Phone Auth**. The app sends and confirms the SMS code with Firebase; the server verifies the resulting **ID token** (RS256 signature, issuer, audience, expiry, freshness, `phone` provider, phone match). Another provider (Twilio Verify, a local SMS vendor) is one more adapter behind the same interface.
+Owner setup of the Meta side (app, number, token, template): [`docs/WHATSAPP_SETUP.md`](docs/WHATSAPP_SETUP.md).
 
 ## Quick start
 
 ```ts
-import { createOtpService } from 'wab-otp';
+import { createWhatsAppOtp, createOtpService, RedisCodeStore, RedisLimitStore } from '@wab/otp';
 
-const otp = createOtpService({
+const codeStore = new RedisCodeStore(redis); // shared store, required in prod
+const whatsapp = createWhatsAppOtp({
   environment: 'prod', // 'dev' | 'prod'
-  provider: 'firebase', // 'fake' | 'firebase' | 'custom'
-  firebase: { projectId: process.env.FIREBASE_PROJECT_ID! },
-  store: new RedisLimitStore(redis), // shared store, required in prod
-  limits: { requestMax: 5, requestWindowSec: 300, wrongMax: 5, blockSec: 900 }, // from your settings
+  store: codeStore,
+  codeSecret: process.env.OTP_CODE_SECRET!, // >= 32 chars
+  proofSecret: process.env.OTP_PROOF_SECRET!, // >= 32 chars, different
+  codeLength: 6, // otp.length
+  codeTtlSec: 300, // otp.codeTtlSec
+  proofTtlSec: 600, // otp.proofTtlSec
+  whatsapp: {
+    phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID!,
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    templateName: process.env.WHATSAPP_TEMPLATE_NAME!,
+    languageCodes: { ar: 'ar', en: 'en_US' },
+    fallbackLanguage: 'ar',
+  },
+});
+const limits = createOtpService({
+  environment: 'prod',
+  provider: 'signed', // verifies otpToken
+  proof: { secret: process.env.OTP_PROOF_SECRET!, store: codeStore },
+  store: new RedisLimitStore(redis),
 });
 
-await otp.precheck({ phone, purpose: 'LOGIN' }); // { allowed, otpLength, resendAfterSeconds, blockedUntil? }
-const result = await otp.verify({ proof: firebaseIdToken, expectedPhone: phone, purpose: 'LOGIN' });
-// { outcome: 'VERIFIED', phone } | { outcome: 'INVALID_PROOF' | 'PHONE_MISMATCH' | 'EXPIRED' | 'BLOCKED' }
-await otp.reportFailure({ phone, purpose: 'LOGIN', reason: 'WRONG_CODE' }); // { blocked, attemptsRemaining, blockedUntil? }
+// 1. request: limits first, then send
+const pre = await limits.precheck({ phone, purpose: 'LOGIN' }); // { allowed, otpLength, resendAfterSeconds, blockedUntil? }
+if (pre.allowed) await whatsapp.sendCode({ phone, purpose: 'LOGIN', language: 'ar' }); // { expiresInSec, messageId }
+
+// 2. verify the typed code
+const r = await whatsapp.verifyCode({ phone, purpose: 'LOGIN', code });
+// { outcome: 'VERIFIED', phone, otpToken, expiresInSec } | { outcome: 'INVALID_PROOF' | 'EXPIRED' }
+if (r.outcome === 'INVALID_PROOF')
+  await limits.reportFailure({ phone, purpose: 'LOGIN', reason: 'WRONG_CODE' });
+
+// 3. any action that needs a verified phone
+await limits.verify({ proof: otpToken, expectedPhone: phone, purpose: 'LOGIN' });
+// { outcome: 'VERIFIED', phone } | INVALID_PROOF (bad / replayed) | EXPIRED | PHONE_MISMATCH | PURPOSE_MISMATCH | BLOCKED
 ```
 
-Only verification, no limits (when your backend owns the limits): `createOtpVerifier(options).verify(...)`.
+Only proof verification (when your backend owns the limits): `createOtpVerifier({ environment, provider: 'signed', proof })`, or `whatsapp.proofs.verify(...)`.
 
-A provider outage (Firebase keys unreachable, store down) **throws** an `OtpError` (`code`, `retryable`, `cause`); it is never an outcome.
+Failures **throw** `OtpError` (`code`, `retryable`, `details` without secrets). Not on WhatsApp / not deliverable → `OTP_DELIVERY_FAILED` (not retried; the stored code is removed). 429 / 5xx / Meta throughput limits / timeouts are retried with capped backoff + jitter.
 
 ## Environments
 
-|                  | dev                                                              | prod                                                          |
-| ---------------- | ---------------------------------------------------------------- | ------------------------------------------------------------- |
-| provider         | `fake` (deterministic proofs) or `firebase` + `authEmulatorHost` | `firebase` (or `custom`); `fake` and the emulator are refused |
-| limit store      | `MemoryLimitStore` by default                                    | injected shared store (`RedisLimitStore`)                     |
-| Firebase project | dev project id (a different project from prod)                   | prod project id                                               |
-| key endpoint     | any URL                                                          | https only                                                    |
+|              | dev                                                                               | prod                                                               |
+| ------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| channel      | `FakeOtpChannel` (records codes, `lastCode(phone)`) or WhatsApp with test numbers | WhatsApp (fake channel refused)                                    |
+| fixed code   | `fixedCode: '123456'` allowed                                                     | refused                                                            |
+| stores       | `MemoryCodeStore`, `MemoryLimitStore`                                             | shared stores (`RedisCodeStore`, `RedisLimitStore`); local refused |
+| Graph URL    | any (`baseUrl` for a local mock)                                                  | https only                                                         |
+| proof verify | `provider: 'fake'` (`fakeProof(phone)`) or `'signed'`                             | `'signed'` or `'custom'`                                           |
 
-Local development without credentials: `fakeProof(phone)` for the fake provider, or run the Firebase Auth emulator and set `firebase.authEmulatorHost` (`createEmulatorToken` builds emulator-shaped tokens for tests).
-
-Behind a proxy: pass `firebase.fetch` (any `fetch`-compatible function with an agent).
+Other channels: `createSmsOtp({ ..., sms: { vendor, templates } })`, or any `OtpChannel` with `createCodeOtp({ ..., channel })`. Behind a proxy: pass `whatsapp.fetch`.
 
 ## Develop
 

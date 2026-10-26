@@ -104,7 +104,7 @@ export const registerCustomerBookingDraftDocs = (registry: OpenAPIRegistry): voi
     path: `${base}/{id}/verify-otp`,
     tags,
     summary:
-      'Confirm the booking with the OTP (purpose BOOKING_CONFIRMATION): the Firebase ID token must belong to the customer’s own phone. Required before the booking is created.',
+      'Confirm the booking with the OTP (purpose BOOKING_CONFIRMATION): the `otpToken` (from `POST /auth/otp/verify`) must belong to the customer’s own phone; it works once. Required before the booking is created.',
     request: {
       headers,
       params: draftParams,

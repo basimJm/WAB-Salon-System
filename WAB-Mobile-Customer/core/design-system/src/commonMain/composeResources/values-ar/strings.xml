@@ -57,9 +57,10 @@
     <string name="error_code_conflict">يتعارض هذا الإجراء مع تغيير حديث. يرجى التحديث والمحاولة مرة أخرى.</string>
     <string name="error_code_rate_limited">محاولات كثيرة. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.</string>
     <string name="error_code_internal">حدث خطأ من جهتنا. يرجى المحاولة لاحقاً.</string>
-    <string name="error_code_otp_blocked">طلبات رمز كثيرة. يرجى المحاولة لاحقاً.</string>
+    <string name="error_code_otp_blocked">محاولات كثيرة. يرجى المحاولة لاحقاً.</string>
     <string name="error_code_otp_invalid">الرمز الذي أدخلته غير صحيح.</string>
     <string name="error_code_otp_expired">انتهت صلاحية هذا الرمز، يرجى طلب رمز جديد.</string>
+    <string name="error_code_otp_delivery_failed">تعذّر إرسال الرمز: هذا الرقم ليس لديه حساب واتساب. استخدم رقماً عليه واتساب.</string>
     <string name="error_code_phone_not_registered">هذا الرقم غير مسجل.</string>
     <string name="error_code_phone_already_registered">هذا الرقم مسجل مسبقاً.</string>
     <string name="error_code_account_blocked">حسابك موقوف. يرجى التواصل معنا.</string>
