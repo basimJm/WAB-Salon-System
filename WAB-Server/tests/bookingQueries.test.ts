@@ -310,6 +310,15 @@ describe('merchant', () => {
     expect(refsOf(await merchant('?q=792222'))).toEqual([refs.b4]);
     expect(refsOf(await merchant('?q=WAB-KMN012'))).toEqual([refs.b4]);
   });
+  it('SRV-172: q finds a partial reference (merchant E2E #3), never another salon', async () => {
+    // The code without the prefix, as the merchant tester typed it (`46512N` for `WAB-46512N`).
+    expect(refsOf(await merchant('?q=KMN012'))).toEqual([refs.b4]);
+    expect(refsOf(await merchant('?q=kmn0'))).toEqual([refs.b4]);
+    expect(refsOf(await merchant('?q=wab-def'))).toEqual([refs.b2]);
+    // b5 belongs to another salon: its full or partial reference finds nothing here.
+    expect(refsOf(await merchant('?q=PQR345'))).toEqual([]);
+    expect(refsOf(await merchant('?q=pqr'))).toEqual([]);
+  });
   it('filters by staff, status, bride, payment and dates', async () => {
     expect(refsOf(await merchant(`?staffId=${staffB.toHexString()}`))).toEqual([refs.b2]);
     expect(refsOf(await merchant('?status=COMPLETED,PENDING'))).toEqual([refs.b3, refs.b1]);
