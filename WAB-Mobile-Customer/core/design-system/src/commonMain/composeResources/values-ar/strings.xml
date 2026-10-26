@@ -15,6 +15,7 @@
     <string name="card_see_more">عرض المزيد</string>
     <string name="card_see_less">عرض أقل</string>
     <string name="salon_open">مفتوح</string>
+    <string name="salon_closed_now">مغلق الآن</string>
     <string name="salon_closed_today">مغلق اليوم</string>
     <string name="salon_hours_separator"> · </string>
     <string name="favorite_add">إضافة إلى المفضلة</string>
