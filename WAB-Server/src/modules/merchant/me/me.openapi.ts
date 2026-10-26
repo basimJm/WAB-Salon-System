@@ -89,7 +89,7 @@ export const registerMerchantMeDocs = (registry: OpenAPIRegistry): void => {
     path: `${API_PREFIXES.merchant}${MERCHANT_AUTH_ROUTES.base}${MERCHANT_AUTH_ROUTES.changePhone}`,
     tags: ['My account'],
     summary:
-      'Change my phone: OTP to the new number (purpose CHANGE_PHONE), then this call with its ID token; 409 PHONE_ALREADY_REGISTERED when another member has it',
+      'Change my phone: OTP to the new number (purpose CHANGE_PHONE), then this call with the `otpToken` from `POST /auth/otp/verify` (single use); 409 PHONE_ALREADY_REGISTERED when another member has it',
     request: {
       headers,
       body: { required: true, content: { [JSON_CONTENT_TYPE]: { schema: changePhoneSchema } } },

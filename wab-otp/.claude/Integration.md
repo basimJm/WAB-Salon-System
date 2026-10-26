@@ -4,151 +4,159 @@
 
 | Field | Value |
 |---|---|
-| Package | `wab-otp` |
+| Package | `@wab/otp` |
 | Type | Node.js package (TypeScript, npm), server only |
-| BRD | `docs/WAB_Package_OTP_BRD.md` |
-| Version | 0.1.0 (implemented; publish prepared, owner runs `npm publish`) |
+| BRD | `docs/WAB_Package_OTP_BRD.md`; behaviour: `BUSINESS_DOMAIN.md` §3.1a, §10 `otp.*`, §11 |
+| Version | **0.2.0** (OTP-011; BREAKING for WAB-Server, adopted in SRV-153). Not published (owner runs `npm publish`). |
 | Node | >= 22, TypeScript strict, ESM + CJS builds |
-| Server counterpart in WAB | `WAB-Server/src/providers/otp` (interface already in WAB-Server, fake only today) |
+| Server counterpart in WAB | `WAB-Server/src/providers/otp` (still on 0.1.0 Firebase API until SRV-153) |
+| Owner setup guide | `docs/WHATSAPP_SETUP.md` (Meta app, number, system-user token, template, env names) |
 
 ## 1. Purpose and boundaries
-Confirms that a user controls a phone number before sensitive actions (login, register, change phone, booking confirmation, bank details) and enforces platform OTP abuse limits. Phase 1 provider: Firebase ID-token verification (signature, expiry, project, phone). A future server-verified provider (send code + check code) plugs in as another adapter.
+Confirms that a user controls a phone number before sensitive actions and enforces OTP abuse limits. Phase 1 (owner decision 2026-10-26): the **server** generates the code, stores only its HMAC, delivers it through the **WhatsApp Cloud API** authentication template, checks the typed code and issues a **signed single-use proof** (`otpToken`) that every phone-verified action checks. Firebase Phone Auth is removed; no SMS fallback (an SMS channel exists for a future vendor).
 
-**Not in this package:** Issuing JWT/refresh tokens (backend auth), admin e-mail 2FA (wab-notifications), UI.
+**Not in this package:** JWT/refresh tokens (backend auth), admin e-mail 2FA (wab-notifications), UI, Meta webhooks.
 
 ## 2. Architecture
-Ports and adapters:
 ```
-consumer ──> createOtpService(options) ──> OtpProvider (port, stable interface)
-                                       ├── adapters/fake   (dev: local/fake)
-                                       ├── adapters/firebase
-                                       ├── adapters/memory-store
-                                       ├── adapters/redis-store
-                                       ├── adapters/sms-server-verified
+createWhatsAppOtp / createSmsOtp ──> createCodeOtp ──> OtpChannel (port)
+                                         │              ├── adapters/whatsapp (Meta Graph API, fetch)
+                                         │              ├── adapters/sms (SmsVendor + templates)
+                                         │              └── adapters/fake/channel (FakeOtpChannel)
+                                         ├── CodeStore (port): code-store/memory | code-store/redis
+                                         └── proof/ (createProofs: issue + ProofVerifier)
+createOtpService / createOtpVerifier ──> ProofVerifier: signed (proof/) | fake | custom
+                                     └── limits/ over LimitStore: memory-store | redis-store
 ```
-- The factory picks the adapter from `options.provider` (+ `options.environment`). Unknown provider → `ConfigError`.
-- Adapters never leak vendor types through the port; vendor responses are normalized (§5).
-- Shared kernel: `errors/`, `config/` (zod-validated options), `http/` (timeouts, retry with backoff + jitter), `logger` (injected, redacting), `events` (optional hook for analytics).
+Kernel: `errors/`, `config/` (zod options), `retry/` (capped backoff + jitter), `logging/` (injected, redacting), events hook.
 
-## 3. Public API (port)
+## 3. Public API
 ```ts
-interface OtpProvider {
-  precheck(i:{phone; purpose; deviceId?; ip?}): Promise<{allowed; otpLength; resendAfterSeconds; blockedUntil?: Date}>;
-  verify(i:{proof; expectedPhone; purpose}): Promise<{outcome:"VERIFIED"; phone} | {outcome:"INVALID_PROOF"|"PHONE_MISMATCH"|"EXPIRED"|"PURPOSE_MISMATCH"|"BLOCKED"}>;
-  reportFailure(i:{phone; purpose; reason:"WRONG_CODE"|"EXPIRED"|"PROVIDER_ERROR"}): Promise<{blocked; attemptsRemaining; blockedUntil?: Date}>;
-  resetLimits(phone): Promise<void>;           // admin unblock; a VERIFIED outcome resets by itself
-  getConfig(): {otpLength; resendAfterSeconds};  // no I/O
-  close(): Promise<void>;
+// code flow (BUSINESS_DOMAIN §3.1a steps 1–3)
+createWhatsAppOtp(o: CodeOtpOptions-without-channel & { whatsapp: WhatsAppChannelOptions-without-environment }): CodeOtp
+createSmsOtp(o: … & { sms: { vendor: SmsVendor; templates: Record<lang,string>; fallbackLanguage? } }): CodeOtp
+createCodeOtp(o: CodeOtpOptions): CodeOtp
+interface CodeOtp {
+  sendCode({phone, purpose, language}): Promise<{expiresInSec, messageId}>;      // stores HMAC, then sends; failure deletes the code
+  verifyCode({phone, purpose, code}): Promise<{outcome:'VERIFIED'; phone; otpToken; expiresInSec} | {outcome:'INVALID_PROOF'|'EXPIRED'}>;
+  proofs: ProofVerifier;   // checks otpToken
+  channelName: string;
 }
-createOtpService(options): OtpProvider      // verification + limits
-createOtpVerifier(options): ProofVerifier   // verification only (WAB-Server uses this one: it owns the limits, SRV-027)
+CodeOtpOptions = { environment; channel: OtpChannel; store: CodeStore; codeSecret; proofSecret;
+  codeLength?=6; codeTtlSec?=300; proofTtlSec?=600; fixedCode? (dev only); keyPrefix?; logger?; onEvent?; now?; randomInt?; newId? }
+WhatsAppChannelOptions = { environment; phoneNumberId; accessToken; templateName; languageCodes: Record<appLang, metaLang>;
+  fallbackLanguage?; apiVersion?='v26.0'; baseUrl?='https://graph.facebook.com'; timeoutMs?=5000; fetch?: FetchLike; retry?; retryDeps?; logger? }
+createWhatsAppChannel(o): OtpChannel     createSmsChannel(o): OtpChannel     new FakeOtpChannel()  (.sent, .lastCode(phone), .failWith)
+
+// proof (step 3/4)
+createProofs({secret, store, ttlSec?=600, keyPrefix?, now?, newId?}): { issue({phone, purpose}): {otpToken, expiresInSec}; verifier: ProofVerifier }
+
+// limits + verification (unchanged port)
+createOtpService({environment, provider:'signed'|'fake'|'custom', proof?: {secret, store, keyPrefix?}, verifier?, limits?, otpLength?, resendAfterSec?, store?, keyPrefix?, logger?, onEvent?, now?}): OtpProvider
+createOtpVerifier(same): ProofVerifier & { resolved }
+OtpProvider { precheck; verify; reportFailure; resetLimits; getConfig; close }   // as in 0.1.0
 ```
-Ports: `ProofVerifier` (any vendor), `LimitStore` (`MemoryLimitStore`, `RedisLimitStore`). `purpose` is any UPPER_SNAKE name (the six platform purposes are in `OTP_PURPOSES`).
+Stores: `MemoryLimitStore`, `RedisLimitStore`, `MemoryCodeStore`, `RedisCodeStore` (both Redis stores take the same `RedisClientLike`: `eval`, `pttl`, `get`, `del`).
+
+`otpToken` = `base64url(JSON{v:1, phone, purpose, jti, iat, exp}).base64url(HMAC-SHA256(proofSecret, payloadPart))`. Single use: `setIfAbsent(otp:used:{jti}, ttl = exp - now)`.
 
 ## 4. Configuration
-| Option / env key | Dev | Prod | Notes |
+| Option | Dev | Prod | Server env (SRV-153 decides final names) |
 |---|---|---|---|
-| `provider` | `fake` or `firebase` | `firebase` | adapter selector |
-| `environment` | `dev` | `prod` | prod refuses `fake` |
-| `firebase.projectId` | optional | required | no hardcoding |
-| `firebase.credentials` (service account, injected) | emulator host instead | required (secret) | never logged |
-| `firebase.authEmulatorHost` | `localhost:9099` (consumer-supplied) | forbidden | dev only |
-| `limits.requestMax/requestWindowSec/blockSec` | 5/300/900 | same (admin-settable) | |
-| `limits.wrongMax/blockSec` | 5/900 | same | |
-| `resendAfterSec`, `otpLength` | 60 / 6 | same | otpLength must match provider |
-| `store` | memory | redis (injected client) | atomic ops |
+| `environment` | `dev` | `prod` | `NODE_ENV` |
+| channel | fake or WhatsApp test number | WhatsApp; fake refused | `OTP_CHANNEL` / `OTP_PROVIDER` |
+| `whatsapp.phoneNumberId` | test number id | business number id | `WHATSAPP_PHONE_NUMBER_ID` |
+| `whatsapp.accessToken` (secret) | system-user token | system-user token | `WHATSAPP_ACCESS_TOKEN` |
+| `whatsapp.templateName` | approved template | same | `WHATSAPP_TEMPLATE_NAME` |
+| `whatsapp.apiVersion` | default `v26.0` | same | `WHATSAPP_API_VERSION` |
+| `whatsapp.baseUrl` | any (local mock) | https only | — |
+| `whatsapp.languageCodes` | `{ar:'ar', en:'en_US'}` | same | — (code) |
+| `codeSecret` / `proofSecret` (secrets, ≥ 32, different) | any strong value | required | `OTP_CODE_SECRET` / `OTP_PROOF_SECRET` |
+| `codeLength` / `codeTtlSec` / `proofTtlSec` | 6 / 300 / 600 | settings | `otp.length`, `otp.codeTtlSec`, `otp.proofTtlSec` |
+| `fixedCode` | allowed | refused | dev only |
+| stores | memory | Redis (local refused) | existing Redis client |
+| `limits`, `resendAfterSec` | 5/300/5/900, 60 | settings | `otp.*` |
 
-Also: `firebase.jwksUrl` (https in prod), `firebase.timeoutMs` (5000), `firebase.clockSkewSec` (30), `firebase.maxAuthAgeSec` (600), `firebase.fetch` (proxy / tests), `retry` (3 attempts, capped backoff + jitter), `keyPrefix`, `logger` (always wrapped by the redactor), `onEvent`, `now`.
-
-Rules: values come from the consumer (options/env), defaults live in `constants/`, prod refuses the fake adapter and missing secrets (`ConfigError` naming the key only).
-
-## 5. Status and result mapping (every vendor status handled)
-| Vendor result | Normalized |
+## 5. Status and result mapping
+| Situation | Result |
 |---|---|
-| valid token, phone == expected | `VERIFIED` |
-| bad signature, unknown `kid`, alg != RS256 (incl. `none`), wrong issuer/audience, missing `sub`/`iat`/`exp`/`auth_time`, provider != `phone`, non-E.164 phone, malformed token | `INVALID_PROOF` |
-| token expired (beyond clock skew) or sign-in older than `maxAuthAgeSec` | `EXPIRED` |
-| phone differs | `PHONE_MISMATCH` |
-| blocked by limiter (service only) | `BLOCKED` |
-| key endpoint 5xx / 408 / network / timeout / 429 | throws `OtpError` (retryable, retried with backoff first; stale keys served up to 24 h) |
-| key endpoint 401/403 | throws `OTP_AUTH_FAILED` (not retried) |
-| key endpoint other 4xx / bad JSON / bad key shape | throws `OTP_PROVIDER_UNAVAILABLE` (not retried) / `OTP_MALFORMED_RESPONSE` |
-| custom adapter returns an unknown outcome, or VERIFIED without a phone | throws `OTP_MALFORMED_RESPONSE` (never success) |
-| custom adapter says VERIFIED for a different phone | downgraded to `PHONE_MISMATCH` |
-| custom adapter throws a non-`OtpError` | `OTP_UNKNOWN` with the cause |
-`PURPOSE_MISMATCH` is reserved for adapters that can bind a purpose (Firebase tokens cannot).
+| right code, first use | `VERIFIED` + `otpToken`; code deleted |
+| wrong code (any string) | `INVALID_PROOF` (consumer calls `reportFailure(WRONG_CODE)`) |
+| no code / expired / already used / other phone or purpose | `EXPIRED` |
+| concurrent verifications of the same code | exactly one `VERIFIED`, others `EXPIRED` |
+| `otpToken` valid, first use | `VERIFIED` |
+| bad signature / malformed / other secret / replayed | `INVALID_PROOF` |
+| past `exp` | `EXPIRED` |
+| phone / purpose differs | `PHONE_MISMATCH` / `PURPOSE_MISMATCH` (proof not consumed) |
+| blocked by limiter (service) | `BLOCKED` |
+| WhatsApp 2xx with `messages[0].id` | sent (`messageId` = wamid) |
+| WhatsApp 2xx without a message id / non-JSON | `OTP_MALFORMED_RESPONSE`, not retried (could duplicate) |
+| WhatsApp error | by Meta `error.code` first, then HTTP status (§6) |
 
 ## 6. Error model
-All failures extend `OtpError` with `code`, `retryable`, `cause`, `details` (no secrets).
 | Code | When | Retryable |
 |---|---|---|
-| `OTP_PROVIDER_UNAVAILABLE` | Firebase down/timeout/quota | yes |
-| `OTP_CONFIG_INVALID` | missing project/credentials in prod | no |
-| `OTP_STORE_UNAVAILABLE` | limiter store down | yes |
-| `OTP_INPUT_INVALID` | phone not E.164 / empty or oversize proof / bad purpose | no |
-| `OTP_AUTH_FAILED` | key endpoint 401/403 | no |
-| `OTP_NETWORK_ERROR` / `OTP_TIMEOUT` / `OTP_RATE_LIMITED` | key endpoint unreachable / slow / 429 | yes |
-| `OTP_MALFORMED_RESPONSE` | key endpoint or adapter answered nonsense | no |
-| `OTP_UNKNOWN` | unexpected adapter failure | no |
-Common codes for every package: `CONFIG_INVALID`, `VALIDATION_FAILED`, `AUTH_FAILED`, `NETWORK_ERROR`, `TIMEOUT`, `RATE_LIMITED`, `VENDOR_ERROR`, `MALFORMED_RESPONSE`, `UNKNOWN`.
+| `OTP_DELIVERY_FAILED` | Meta 131026 (not on WhatsApp / undeliverable), 131021 (same number), 131030 (not in test allowed list) | no |
+| `OTP_AUTH_FAILED` | Meta 0, 3, 10, 190, 200–299, 131005; HTTP 401/403 | no |
+| `OTP_CONFIG_INVALID` | bad options; Meta 100, 131008, 131009, 132000, 132001, 132005, 132007, 132012, 132015, 132016, 135000 | no |
+| `OTP_PROVIDER_UNAVAILABLE` | Meta account 368, 130497, 131031, 131037, 131042, 131045, 133010 (no); temporary 1, 2, 131000, 131016, 131057, 133004 and HTTP 5xx (yes); non-OtpError channel failure (yes) | see left |
+| `OTP_RATE_LIMITED` | Meta 4, 80007, 130429, 131056, HTTP 429 (yes); 131048 spam limit (no) | see left |
+| `OTP_TIMEOUT` / `OTP_NETWORK_ERROR` | no HTTP answer | yes |
+| `OTP_MALFORMED_RESPONSE` | 2xx without message id; unexpected store reply | no |
+| `OTP_STORE_UNAVAILABLE` | Redis down | yes |
+| `OTP_INPUT_INVALID` | bad phone/purpose/language/code type, code > 15 chars, no template language | no |
+| `OTP_UNKNOWN` | any other WhatsApp status/code (logged with status, Meta code, fbtrace_id) | no |
+Details carry `status`, `metaCode`, `metaSubcode`, `fbtraceId` only. Logs never contain the token or the code; phones are masked. Log keys avoid the word `code` (the redactor hides such keys).
 
 ## 7. Environments
-- **dev (localhost):** `provider: fake` (deterministic proofs) or Firebase Auth emulator on localhost; `memory-store` limiter; no credentials.
-- **prod:** `provider: firebase` with injected service account; `redis-store` limiter; fake refused.
+- **dev (localhost):** `FakeOtpChannel` (+ optional `fixedCode`) or the Meta test number with up to 5 verified recipients; memory stores; `provider: 'fake'` (`fakeProof`) still available for proof-less tests.
+- **prod:** WhatsApp channel over https, Redis stores, strong different secrets; fake channel, fixed code and local stores refused.
 
 ## 8. Performance notes
-Initialize the Firebase app once and reuse; cache Google public keys (library default); limiter uses one atomic Redis script per call; no I/O in `getConfig`.
+One HTTPS call per code (bounded `timeoutMs`, `AbortSignal.timeout`); one Redis SET per send, GET + DEL per verify, one SET NX per proof check; no I/O in `getConfig`; `fetch` is the platform's (keep-alive by undici).
 
 ## 9. Testing
-- Unit tests: one test file per source file, every exported function: success, each error code, each status mapping, boundaries, idempotent replay. Vendor SDK/HTTP mocked. Coverage gate: 100 % functions, >= 95 % lines/branches.
-- Loop test (`npm run test:loop`): 1 000 flows (50 phones x 20 rounds, 20 in flight) of precheck / wrong codes / verify with real RS256 tokens, on the memory store and on a real Redis; asserts the block starts after exactly the configured count, success resets, no key is left behind and the heap stays flat.
-- Firebase tests use locally generated RSA keys and a stubbed key endpoint; the real Firebase endpoint has NOT been called from CI or this repo yet.
-- Consumer smoke test: install the built tarball into a temp project and call the factory.
+- Unit tests per file (`tests/*.test.ts`): request body (both parameters, language mapping, `+` stripped), every Meta code group and HTTP status, retry only on retryable (5xx/429/throughput/timeouts), timeout abort, https in prod, code HMAC/TTL/single use/concurrency, proof signature/expiry/phone/purpose/replay/concurrency, limits interplay, code stores (memory + real Redis). Coverage gate 100 % functions, ≥ 95 % lines/branches (0.2.0: 99.5 % statements, 98.4 % branches).
+- Loop test (`npm run test:loop`): 1 000 flows (50 phones × 20 rounds, 20 in flight) of precheck / send / wrong code / verify / otpToken use + replay, on memory stores and a real Redis; asserts block counts, resets, no code/limit key left (only used-proof flags with TTL), flat heap.
+- Smoke: packed tarball, CJS + ESM: fake channel → code → otpToken → signed verify; WhatsApp channel with a stubbed fetch.
+- NOT verified: a real call to graph.facebook.com (no Meta app/token here).
 
-## 10. Adoption guide (any project)
-```ts
-const otp = createOtpService({ environment: "dev", provider: "fake", limits: { /* from settings */ } });
-const r = await otp.verify({ proof, expectedPhone: "+9627XXXXXXXX", purpose: "LOGIN" });
-```
-How WAB-Server adopts it (done, SRV-034): `"@wab/otp": "file:../wab-otp"`, `src/providers/otp/real.ts` calls `createOtpVerifier({environment, provider: 'firebase', firebase: {projectId, authEmulatorHost?}, logger})` and maps outcomes / `OtpError`s to the server's `OtpProvider` + `ExternalServiceError`; env `OTP_PROVIDER=real`, `FIREBASE_PROJECT_ID` (dev `wab-dev-397ab`, prod `wab-prod-9c58f`), dev-only `FIREBASE_AUTH_EMULATOR_HOST`. No service account is needed: ID tokens are verified with Google's public keys.
-
-Publishing (OTP-010, owner runs it): package `@wab/otp`, registry GitHub Packages (`publishConfig`), `npm publish` runs `prepublishOnly` = `npm run verify`; `npm run pack:check` lists the tarball (dist + README + CHANGELOG). Consumers then replace the `file:` dependency by the registry version (SRV-112).
+## 10. Adoption guide (WAB-Server, SRV-153)
+1. `providers/otp`: build `createWhatsAppOtp({environment, store: new RedisCodeStore(redis), codeSecret, proofSecret, codeLength: settings.otp.length, codeTtlSec, proofTtlSec, whatsapp: {phoneNumberId, accessToken, templateName, apiVersion?, languageCodes: {ar:'ar', en:'en_US'}, fallbackLanguage:'ar'}, logger})`; `OTP_PROVIDER=fake` → `FakeOtpChannel` + `MemoryCodeStore`/Redis, optional fixed code (dev only).
+2. `POST …/auth/otp/request`: server limits first, then `sendCode({phone, purpose, language from Accept-Language})`; map `OTP_DELIVERY_FAILED` → 422 `OTP_DELIVERY_FAILED` (request still counts), retryable errors → 503 `ExternalServiceError`.
+3. `POST …/auth/otp/verify`: `verifyCode` → `INVALID_PROOF` = `OTP_INVALID` (+ wrong-attempt limit), `EXPIRED` = `OTP_EXPIRED`, `VERIFIED` → return `otpToken`.
+4. Login/register/change phone/booking/bank: replace the Firebase ID token by `otpToken`; verify with `createOtpVerifier({environment, provider:'signed', proof:{secret: proofSecret, store}})` (same store as step 1).
+5. Remove `FIREBASE_PROJECT_ID`/`FIREBASE_AUTH_EMULATOR_HOST` from OTP config (Firebase stays for push). Apps: remove Firebase Phone Auth (customer/merchant tasks).
 
 ## 11. Open questions / assumed-missing requirements
-- Per device/IP limit key design (OTP-04 SHOULD): `deviceId`/`ip` are accepted by `precheck` but not limited yet; needs a device id source from the apps.
-- `maxAuthAgeSec` default 600 s (freshness of the sign-in behind a proof) is an assumption; token single-use per purpose window (BRD risk "token replay") needs the backend to store used `jti`/`sub+auth_time` — not built.
-- Server-verified provider (code storage, hashing, SMS vendor) — vendor not chosen (OTP-009 skeleton only).
-- Purpose binding cannot be enforced by Firebase tokens; enforced by backend session/state.
-- Event schema for analytics (`precheck`, `verify`, `failure`, `provider_error`) must match `wab-analytics`.
-- Firebase emulator availability in CI; the emulator token shape comes from Firebase behaviour/docs, not a captured token.
-- Real Firebase check is unverified: needs the dev project (`wab-dev-397ab`) and a real phone sign-in token.
-- Redis Cluster: counter and block keys of a phone are not hash-tagged (single primary / managed Redis assumed).
-- Phone numbers appear inside store keys (`otp:*:+9627…`), not in logs; confirm that is acceptable for Redis.
+- **Async delivery failures:** Meta often accepts (200 + wamid) and reports 131026 later via webhook. Without a webhook the user sees "code sent" and never gets it. Needs a server webhook task (owner).
+- Template name/languages, display name, business verification and pricing are owner actions (`docs/WHATSAPP_SETUP.md`).
+- Retrying after a timeout may deliver the same code twice (same code, harmless); 2xx-without-id is not retried.
+- Rate-limit `Retry-After`/Meta backoff hints are not read; capped exponential backoff is used.
+- `fallbackLanguage` default left to the consumer (WAB: `ar`).
+- Per device/IP limit key (OTP-04 SHOULD) still not built.
+- Redis Cluster: code/limit keys of a phone are not hash-tagged (single primary assumed). Phones appear inside store keys (not logs).
+- Event schema (`precheck`, `verify`, `failure`, `provider_error`, `send`) must match `wab-analytics`.
+- API version default `v26.0` comes from Meta's documentation example on 2026-10-26; pin it per environment via `WHATSAPP_API_VERSION`.
 
 ## 12. Implementation status
 | Item | Status |
 |---|---|
-| Project scaffold (tsconfig strict, eslint, prettier, jest, build, scripts) | ✅ |
-| Shared kernel (errors, config, http/retry, logger) | ✅ |
-| Adapter: fake — in-memory, deterministic proofs for dev/tests | ✅ |
-| Adapter: firebase — Firebase Admin `verifyIdToken` → verified phone | ✅ |
-| Adapter: memory-store — LimitStore for dev/tests | ✅ |
-| Adapter: redis-store — LimitStore for prod (atomic Lua counters, TTL) | ✅ |
-| Adapter: sms-server-verified — FUTURE: server sends + checks code | 🚧 |
-| Unit tests + coverage gate | ✅ |
-| Loop test | ✅ |
-| README + consumer smoke test | ✅ |
+| Scaffold, kernel, limits, memory/redis limit stores, fake proof | ✅ |
+| Code flow (`createCodeOtp`), `OtpChannel` port, fake channel, fixed code (dev) | ✅ |
+| WhatsApp channel (Meta authentication template, error mapping, retry, timeout) | ✅ |
+| Signed single-use proof + `provider: 'signed'` | ✅ |
+| Code stores memory + Redis | ✅ |
+| SMS channel (no vendor chosen) | ✅ |
+| Firebase verifier | removed in 0.2.0 |
+| Meta delivery-status webhook | ⬜ (server side, not planned yet) |
+| Unit tests + coverage gate, loop test, smoke | ✅ |
 
 ## 13. Changelog
 | Date | Version | Change |
 |---|---|---|
 | 2026-10-14 | 0.0.0 | Design document created from the BRD; no code yet. |
-| 2026-10-18 | 0.1.0 | OTP-001 scaffold (tooling, build, smoke, loop config). |
-| 2026-10-18 | 0.1.0 | OTP-002 kernel: errors, zod options with prod rules, redacting logger, retry/timeout, ports. |
-| 2026-10-18 | 0.1.0 | OTP-003 verifier: createOtpVerifier, fake adapter, memory store, input validation. |
-| 2026-10-18 | 0.1.0 | OTP-004 limits engine + createOtpService (precheck/verify/reportFailure/getConfig). |
-| 2026-10-18 | 0.1.0 | OTP-005 Redis LimitStore (Lua scripts, ioredis-shaped client). |
-| 2026-10-18 | 0.1.0 | OTP-006 Firebase ID-token adapter on jose (JWK cache, rotation, stale keys, claim checks). |
-| 2026-10-18 | 0.1.0 | OTP-007 Firebase Auth emulator mode (dev only) + createEmulatorToken. |
-| 2026-10-18 | 0.1.0 | OTP-008 quality: loop test (memory + real Redis), richer package smoke, README, docs. |
+| 2026-10-18 | 0.1.0 | OTP-001…008: scaffold, kernel, verifier, limits, Redis store, Firebase ID-token adapter + emulator, loop/smoke. |
 | 2026-10-18 | 0.1.0 | OTP-009 server-verified SMS skeleton (fake vendor, HMAC code store). |
+| 2026-10-19 | 0.1.0 | OTP-010 publish preparation; WAB-Server SRV-034 on the Firebase verifier. |
+| 2026-10-26 | 0.2.0 | OTP-011 WhatsApp channel, generic code flow, signed single-use `otpToken`, Redis code store, `OTP_DELIVERY_FAILED`; Firebase verifier and `jose` removed (BREAKING; server adopts in SRV-153). |

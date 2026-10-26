@@ -266,7 +266,7 @@ describe('createProviders with the real storage', () => {
   const depsWith = (storage?: StorageSettings): Parameters<typeof createProviders>[2] => ({
     redis: {} as never,
     logger,
-    config: { ...(storage === undefined ? {} : { storage }) } as AppConfig,
+    config: { otp: {}, ...(storage === undefined ? {} : { storage }) } as AppConfig,
   });
 
   it('builds the SDK-backed provider from the config', async () => {

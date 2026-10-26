@@ -12,7 +12,7 @@ import {
   STORAGE_KEY_PATTERN,
 } from '../../../constants/salon';
 import {
-  idTokenSchema as idToken,
+  otpTokenSchema as otpToken,
   installationSchema as installation,
   phoneSchema as phone,
 } from '../../shared/auth/auth.schemas';
@@ -29,7 +29,7 @@ const documentKeys = z
 
 export const applySchema = z.object({
   phone,
-  idToken,
+  otpToken,
   firstName: person,
   lastName: person,
   salon: z.object({

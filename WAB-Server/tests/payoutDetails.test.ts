@@ -84,11 +84,15 @@ describe('configuration', () => {
   const production = {
     ...base,
     NODE_ENV: 'production',
-    OTP_PROVIDER: 'real',
+    OTP_PROVIDER: 'whatsapp',
     STORAGE_PROVIDER: 'real',
     NOTIFIER_PROVIDER: 'real',
     PAYMENT_PROVIDER: 'disabled',
-    FIREBASE_PROJECT_ID: 'wab-prod-test',
+    WHATSAPP_PHONE_NUMBER_ID: '106540352242922',
+    WHATSAPP_ACCESS_TOKEN: 'not-a-real-access-token',
+    WHATSAPP_TEMPLATE_NAME: 'wab_login_code',
+    OTP_CODE_SECRET: 'c'.repeat(40),
+    OTP_PROOF_SECRET: 'f'.repeat(40),
     FCM_SERVICE_ACCOUNT_JSON: '{}',
     SMTP_HOST: 'smtp.example.test',
     EMAIL_FROM_ADDRESS: 'noreply@example.test',
@@ -197,7 +201,7 @@ describe('bank details', () => {
         bankName: 'Capital Bank',
         accountHolderName: 'Glow Salon',
         iban: JO_IBAN,
-        idToken: 'proof',
+        otpToken: 'proof',
         ...body,
       });
   const stored = (): Record<string, unknown> | undefined =>
@@ -250,7 +254,7 @@ describe('bank details', () => {
     expect(verified).toEqual([]);
     expect(stored()).toBeUndefined();
     expect((await put({ bankName: '' })).status).toBe(400);
-    expect((await put({ idToken: '' })).status).toBe(400);
+    expect((await put({ otpToken: '' })).status).toBe(400);
   });
   it('only the owner: a manager cannot read or change them', async () => {
     expect((await put({}, 'MANAGER')).status).toBe(403);

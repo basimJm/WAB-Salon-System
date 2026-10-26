@@ -43,7 +43,7 @@ export interface SalonDraft {
 
 export interface ApplyInput {
   readonly phone: PhoneInput;
-  readonly idToken: string;
+  readonly otpToken: string;
   readonly firstName: string;
   readonly lastName: string;
   readonly salon: SalonDraft;
@@ -159,7 +159,7 @@ export const createSalonApplicationService = (
         field: 'body.documentKeys',
         accept: (upload) => upload.ownerType === 'GUEST',
       });
-      await phones.verify(phone, input.idToken, 'REGISTER');
+      await phones.verify(phone, input.otpToken, 'REGISTER');
       if ((await members.findByPhone(phone.e164)) !== null) throw phoneTaken();
 
       const at = now();

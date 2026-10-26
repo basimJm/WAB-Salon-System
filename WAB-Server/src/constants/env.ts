@@ -12,8 +12,14 @@ export const DEFAULT_LOG_LEVEL: LogLevel = 'info';
 export const PORT_MIN = 1;
 export const PORT_MAX = 65535;
 
-/** `host:port` of the Firebase Auth emulator. */
-export const FIREBASE_EMULATOR_HOST_PATTERN = /^[A-Za-z0-9.-]+:\d{1,5}$/;
+/** WhatsApp Cloud API identifiers (same rules as `@wab/otp`; checked at startup, not at first send). */
+export const WHATSAPP_PHONE_NUMBER_ID_PATTERN = /^\d{1,32}$/;
+export const WHATSAPP_TEMPLATE_NAME_PATTERN = /^[a-z0-9_]{1,512}$/;
+export const WHATSAPP_API_VERSION_PATTERN = /^v\d{1,3}\.\d{1,3}$/;
+/** HMAC secrets of OTP codes at rest and of `otpToken` (the SDK refuses shorter ones). */
+export const OTP_SECRET_MIN_LENGTH = 32;
+/** Dev-only fixed code of the fake OTP channel (digits; its length must equal `otp.length`). */
+export const OTP_FIXED_CODE_PATTERN = /^\d{4,10}$/;
 export const MONGO_URI_PATTERN = /^mongodb(\+srv)?:\/\/\S+$/;
 export const REDIS_URL_PATTERN = /^rediss?:\/\/\S+$/;
 
@@ -45,10 +51,20 @@ export const ENV_KEYS = {
   paymentProvider: 'PAYMENT_PROVIDER',
   /** Firebase service-account key as JSON text (secret). Needed when NOTIFIER_PROVIDER=real. */
   fcmServiceAccountJson: 'FCM_SERVICE_ACCOUNT_JSON',
-  /** Firebase project whose Phone Auth ID tokens are accepted (dev and prod use different projects). Needed when OTP_PROVIDER=real. */
-  firebaseProjectId: 'FIREBASE_PROJECT_ID',
-  /** Dev only: Firebase Auth emulator `host:port`; refused in production. */
-  firebaseAuthEmulatorHost: 'FIREBASE_AUTH_EMULATOR_HOST',
+  /** WhatsApp Cloud API (Meta) phone OTP; needed when OTP_PROVIDER=whatsapp (BUSINESS_DOMAIN §3.1a). */
+  whatsappPhoneNumberId: 'WHATSAPP_PHONE_NUMBER_ID',
+  /** System-user access token (secret). */
+  whatsappAccessToken: 'WHATSAPP_ACCESS_TOKEN',
+  /** Approved authentication template (same name in Arabic and English). */
+  whatsappTemplateName: 'WHATSAPP_TEMPLATE_NAME',
+  /** Optional Graph API version pin, e.g. `v26.0` (default: the SDK's). */
+  whatsappApiVersion: 'WHATSAPP_API_VERSION',
+  /** HMAC secret of codes at rest (secret, >= 32 chars). Required for whatsapp. */
+  otpCodeSecret: 'OTP_CODE_SECRET',
+  /** HMAC secret of `otpToken` (secret, >= 32 chars, different from OTP_CODE_SECRET). Required for whatsapp. */
+  otpProofSecret: 'OTP_PROOF_SECRET',
+  /** Development only: every OTP code is this value (local QA sign-in); refused in production. */
+  otpFixedCode: 'OTP_FIXED_CODE',
   /** Optional: must equal the key's project (catches dev/prod key mix-ups). */
   fcmProjectId: 'FCM_PROJECT_ID',
   /** `true` validates pushes without delivering them (dev only). */
@@ -79,15 +95,20 @@ export const ENV_KEYS = {
   cloudfrontPrivateKey: 'CLOUDFRONT_PRIVATE_KEY',
 } as const;
 
-/** Keys that pick `fake` or `real` for an external provider; production must set them to `real`. Payments are paused: PAYMENT_PROVIDER is `fake` or `disabled` and has its own production rule. */
-export const PROVIDER_ENV_KEYS = [
-  ENV_KEYS.otpProvider,
-  ENV_KEYS.storageProvider,
-  ENV_KEYS.notifierProvider,
-] as const;
+/**
+ * Keys that pick `fake` or `real` for an external provider; production must set them to `real`.
+ * Payments (`fake` | `disabled`) and OTP (`fake` | `whatsapp`) have their own production rules.
+ */
+export const PROVIDER_ENV_KEYS = [ENV_KEYS.storageProvider, ENV_KEYS.notifierProvider] as const;
 
-/** Keys that must be present when the OTP provider is `real`. */
-export const OTP_REAL_REQUIRED_KEYS = [ENV_KEYS.firebaseProjectId] as const;
+/** Keys that must be present when the OTP provider is `whatsapp`. */
+export const OTP_WHATSAPP_REQUIRED_KEYS = [
+  ENV_KEYS.whatsappPhoneNumberId,
+  ENV_KEYS.whatsappAccessToken,
+  ENV_KEYS.whatsappTemplateName,
+  ENV_KEYS.otpCodeSecret,
+  ENV_KEYS.otpProofSecret,
+] as const;
 
 /** Keys that must be present when the notifier provider is `real`. */
 export const NOTIFIER_REAL_REQUIRED_KEYS = [

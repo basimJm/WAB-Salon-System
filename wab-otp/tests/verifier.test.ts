@@ -216,8 +216,8 @@ describe('createOtpVerifier', () => {
   });
 
   it('refuses unconfigured providers at creation', () => {
-    expect(() => createOtpVerifier({ environment: 'dev', provider: 'firebase' })).toThrow(
-      'projectId',
+    expect(() => createOtpVerifier({ environment: 'dev', provider: 'signed' })).toThrow(
+      'proof options',
     );
     expect(() => createOtpVerifier({ environment: 'prod', provider: 'fake' })).toThrow('refused');
   });

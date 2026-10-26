@@ -5,7 +5,7 @@ import { createCustomerAuthService } from '../src/domain/auth/customerAuth.servi
 import { createRefreshTokenService } from '../src/domain/auth/refreshTokens.service';
 import type { OtpGate } from '../src/domain/otp/otpGate.service';
 import { requireAuth } from '../src/middlewares/auth';
-import { FakeOtpProvider, fakeOtpProof } from '../src/providers/otp';
+import { proofFor, testOtp } from './helpers/otp';
 import {
   CustomersRepository,
   InstallationsRepository,
@@ -88,7 +88,7 @@ const setup = (clock: () => Date = () => NOW): Rig => {
     countries: new CountriesRepository(countries.model as never),
     cities: new CitiesRepository(cities.model as never),
     areas: new AreasRepository(areas.model as never),
-    otp: new FakeOtpProvider(),
+    otp: testOtp,
     otpGate: gate,
     refreshTokens: createRefreshTokenService({
       repository: new RefreshTokensRepository(tokens.model as never),
@@ -120,7 +120,7 @@ const registration = (rig: Rig, override: Record<string, unknown> = {}): never =
     cityId: rig.cityId,
     areaId: rig.areaId,
     phone: PHONE,
-    idToken: fakeOtpProof(E164),
+    otpToken: proofFor(E164, 'REGISTER'),
     device: DEVICE,
     language: 'ar',
     ...override,
@@ -252,7 +252,7 @@ describe('customer auth: register', () => {
   ] as const)('%s creates nothing', async (_label, kind, code, status) => {
     const rig = setup();
     const error = await failure(
-      rig.service.register(registration(rig, { idToken: fakeOtpProof(E164, kind) })),
+      rig.service.register(registration(rig, { otpToken: proofFor(E164, 'REGISTER', kind) })),
     );
     expect(error).toMatchObject({ code, httpStatus: status });
     expect(rig.customers.docs).toHaveLength(0);
@@ -262,7 +262,7 @@ describe('customer auth: register', () => {
   it('refuses a proof for a different number', async () => {
     const rig = setup();
     const error = await failure(
-      rig.service.register(registration(rig, { idToken: fakeOtpProof(OTHER_E164) })),
+      rig.service.register(registration(rig, { otpToken: proofFor(OTHER_E164, 'REGISTER') })),
     );
     expect(error).toMatchObject({ code: 'OTP_INVALID' });
     expect(rig.customers.docs).toHaveLength(0);
@@ -272,7 +272,7 @@ describe('customer auth: register', () => {
     const rig = setup();
     rig.gate.blocked = true;
     const error = await failure(
-      rig.service.register(registration(rig, { idToken: 'not even checked' })),
+      rig.service.register(registration(rig, { otpToken: 'not even checked' })),
     );
     expect(error).toMatchObject({ code: 'OTP_BLOCKED', httpStatus: 429 });
   });
@@ -337,7 +337,7 @@ describe('customer auth: register', () => {
           },
         ]).model as never,
       ),
-      otp: new FakeOtpProvider(),
+      otp: testOtp,
       otpGate: rig.gate,
       refreshTokens: createRefreshTokenService({
         repository: new RefreshTokensRepository(rig.tokens.model as never),
@@ -362,8 +362,11 @@ describe('customer auth: login', () => {
     );
     return String(rig.customers.docs.at(-1)?.['_id']);
   };
-  const login = (rig: Rig, idToken = fakeOtpProof(E164)): Promise<{ customer: { id: string } }> =>
-    rig.service.login({ phone: PHONE, idToken, device: DEVICE, language: 'en' });
+  const login = (
+    rig: Rig,
+    otpToken = proofFor(E164, 'LOGIN'),
+  ): Promise<{ customer: { id: string } }> =>
+    rig.service.login({ phone: PHONE, otpToken, device: DEVICE, language: 'en' });
 
   it('signs an active customer in and links the device with the app language', async () => {
     const rig = setup();
@@ -380,7 +383,7 @@ describe('customer auth: login', () => {
     await login(rig);
     await rig.service.login({
       phone: PHONE,
-      idToken: fakeOtpProof(E164),
+      otpToken: proofFor(E164, 'LOGIN'),
       device: { ...DEVICE, appVersion: '1.1.0', fcmToken: 'fcm-token-1' },
       language: 'ar',
     });
@@ -418,16 +421,27 @@ describe('customer auth: login', () => {
     expect(await failure(login(setup()))).toMatchObject({ code: 'PHONE_NOT_REGISTERED' });
   });
 
+  it('takes a LOGIN otpToken only once; a token of another purpose is refused', async () => {
+    const rig = setup();
+    existing(rig);
+    const token = proofFor(E164, 'LOGIN');
+    await login(rig, token);
+    expect(await failure(login(rig, token))).toMatchObject({ code: 'OTP_INVALID' });
+    expect(await failure(login(rig, proofFor(E164, 'REGISTER')))).toMatchObject({
+      code: 'OTP_INVALID',
+    });
+  });
+
   it('checks the proof first: wrong, expired, other number, blocked', async () => {
     const rig = setup();
     existing(rig);
-    expect(await failure(login(rig, fakeOtpProof(E164, 'invalid')))).toMatchObject({
+    expect(await failure(login(rig, proofFor(E164, 'LOGIN', 'invalid')))).toMatchObject({
       code: 'OTP_INVALID',
     });
-    expect(await failure(login(rig, fakeOtpProof(E164, 'expired')))).toMatchObject({
+    expect(await failure(login(rig, proofFor(E164, 'LOGIN', 'expired')))).toMatchObject({
       code: 'OTP_EXPIRED',
     });
-    expect(await failure(login(rig, fakeOtpProof(OTHER_E164)))).toMatchObject({
+    expect(await failure(login(rig, proofFor(OTHER_E164, 'LOGIN')))).toMatchObject({
       code: 'OTP_INVALID',
     });
     rig.gate.blocked = true;
@@ -496,7 +510,7 @@ describe('customer auth: change phone', () => {
     const profile = await rig.service.changePhone({
       customerId: id,
       phone: OTHER,
-      idToken: fakeOtpProof(OTHER_E164),
+      otpToken: proofFor(OTHER_E164, 'CHANGE_PHONE'),
     });
     expect(profile.phone).toMatchObject({ e164: OTHER_E164, number: '781234567' });
     expect(rig.customers.docs[0]?.['phone']).toMatchObject({ e164: OTHER_E164 });
@@ -507,7 +521,11 @@ describe('customer auth: change phone', () => {
     const { rig, id } = await account();
     expect(
       await failure(
-        rig.service.changePhone({ customerId: id, phone: OTHER, idToken: fakeOtpProof(E164) }),
+        rig.service.changePhone({
+          customerId: id,
+          phone: OTHER,
+          otpToken: proofFor(E164, 'CHANGE_PHONE'),
+        }),
       ),
     ).toMatchObject({ code: 'OTP_INVALID' });
     expect(rig.customers.docs[0]?.['phone']).toMatchObject({ e164: E164 });
@@ -521,18 +539,22 @@ describe('customer auth: change phone', () => {
         rig.service.changePhone({
           customerId: id,
           phone: OTHER,
-          idToken: fakeOtpProof(OTHER_E164),
+          otpToken: proofFor(OTHER_E164, 'CHANGE_PHONE'),
         }),
       ),
     ).toMatchObject({ code: 'PHONE_ALREADY_REGISTERED' });
     await expect(
-      rig.service.changePhone({ customerId: id, phone: PHONE, idToken: fakeOtpProof(E164) }),
+      rig.service.changePhone({
+        customerId: id,
+        phone: PHONE,
+        otpToken: proofFor(E164, 'CHANGE_PHONE'),
+      }),
     ).resolves.toMatchObject({ phone: { e164: E164 } });
   });
 
   it('refuses unknown and non-active customers and a blocked number', async () => {
     const { rig, id } = await account();
-    const args = { phone: OTHER, idToken: fakeOtpProof(OTHER_E164) };
+    const args = { phone: OTHER, otpToken: proofFor(OTHER_E164, 'CHANGE_PHONE') };
     expect(
       await failure(
         rig.service.changePhone({ customerId: new Types.ObjectId().toHexString(), ...args }),
@@ -573,7 +595,7 @@ describe('customer auth: HTTP', () => {
     cityId: rig.cityId,
     areaId: rig.areaId,
     phone: PHONE,
-    idToken: fakeOtpProof(E164),
+    otpToken: proofFor(E164, 'REGISTER'),
     installation: DEVICE,
   });
 
@@ -588,7 +610,7 @@ describe('customer auth: HTTP', () => {
     const login = await request(app)
       .post('/customer/v1/auth/login')
       .set('Accept-Language', 'en')
-      .send({ phone: PHONE, idToken: fakeOtpProof(E164), installation: DEVICE });
+      .send({ phone: PHONE, otpToken: proofFor(E164, 'LOGIN'), installation: DEVICE });
     expect(login.status).toBe(200);
     expect(rig.installations.docs[0]).toMatchObject({ language: 'en' });
     const refreshToken = bodyOf(login).data?.refreshToken ?? '';
@@ -609,14 +631,14 @@ describe('customer auth: HTTP', () => {
   });
 
   it.each([
-    [{ phone: PHONE, idToken: 'x' }, 'body.installation'],
+    [{ phone: PHONE, otpToken: 'x' }, 'body.installation'],
     [
-      { phone: { countryCode: 'jo', number: '791234567' }, idToken: 'x', installation: DEVICE },
+      { phone: { countryCode: 'jo', number: '791234567' }, otpToken: 'x', installation: DEVICE },
       'body.phone.countryCode',
     ],
-    [{ phone: PHONE, idToken: '', installation: DEVICE }, 'body.idToken'],
+    [{ phone: PHONE, otpToken: '', installation: DEVICE }, 'body.otpToken'],
     [
-      { phone: PHONE, idToken: 'x', installation: { ...DEVICE, platform: 'PALM' } },
+      { phone: PHONE, otpToken: 'x', installation: { ...DEVICE, platform: 'PALM' } },
       'body.installation.platform',
     ],
   ])('validates the login body %#', async (body, field) => {
@@ -643,7 +665,7 @@ describe('customer auth: HTTP', () => {
     const app = appFor(rig);
     const session = await request(app).post('/customer/v1/auth/register').send(registerBody(rig));
     const customer = bodyOf(session).data;
-    const body = { phone: OTHER, idToken: fakeOtpProof(OTHER_E164) };
+    const body = { phone: OTHER, otpToken: proofFor(OTHER_E164, 'CHANGE_PHONE') };
     expect((await request(app).post('/customer/v1/auth/change-phone').send(body)).status).toBe(401);
     const merchantToken = signAccessToken({
       secret: SECRET,
@@ -669,7 +691,7 @@ describe('customer auth: HTTP', () => {
   it('answers 503, not 404, when auth is not configured', async () => {
     const res = await request(createApp({ logger }))
       .post('/customer/v1/auth/login')
-      .send({ phone: PHONE, idToken: 'x', installation: DEVICE });
+      .send({ phone: PHONE, otpToken: 'x', installation: DEVICE });
     expect(res.status).toBe(503);
   });
 });

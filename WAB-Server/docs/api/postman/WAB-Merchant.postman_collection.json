@@ -9,7 +9,7 @@
       "name": "Auth",
       "item": [
         {
-          "name": "OTP pre-check",
+          "name": "Send an OTP code on WhatsApp",
           "request": {
             "method": "POST",
             "header": [
@@ -37,7 +37,7 @@
               "query": [],
               "variable": []
             },
-            "description": "Public. Checks the platform limits before the app asks Firebase to send the SMS. A blocked phone or a running resend countdown answers 200 with `allowed: false`.",
+            "description": "Public. The platform limits run first (5 requests / 5 min, resend after 60 s, 15 min block); then the server sends a new code on WhatsApp in the `Accept-Language` language (ar default). A blocked phone or a running resend countdown answers 200 with `allowed: false` and sends nothing. A number WhatsApp cannot reach (not on WhatsApp) answers 422 `OTP_DELIVERY_FAILED` (the request still counts). A WhatsApp outage answers 503 `INTERNAL`.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"phone\": \"string\",\n  \"purpose\": \"LOGIN\"\n}",
@@ -50,7 +50,7 @@
           }
         },
         {
-          "name": "Report a wrong OTP code",
+          "name": "Check the typed code and get an otpToken",
           "request": {
             "method": "POST",
             "header": [
@@ -64,7 +64,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/merchant/v1/auth/otp/wrong-attempt",
+              "raw": "{{baseUrl}}/merchant/v1/auth/otp/verify",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -73,15 +73,15 @@
                 "v1",
                 "auth",
                 "otp",
-                "wrong-attempt"
+                "verify"
               ],
               "query": [],
               "variable": []
             },
-            "description": "Public. The app reports a wrong code from Firebase; it counts toward the wrong-attempts block.",
+            "description": "Public. The right code (for this phone and purpose) is used up and answers `otpToken`. Errors: 401 `OTP_INVALID` (wrong code; `details[0].message` says how many attempts are left; the 5th wrong code blocks), 401 `OTP_EXPIRED` (no code, expired or already used: request a new one), 429 `OTP_BLOCKED` (blocked for 15 min).",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"string\"\n}",
+              "raw": "{\n  \"phone\": \"string\",\n  \"purpose\": \"LOGIN\",\n  \"code\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -131,7 +131,7 @@
           }
         },
         {
-          "name": "Log in with a Firebase ID token",
+          "name": "Log in with an otpToken",
           "request": {
             "method": "POST",
             "header": [
@@ -158,10 +158,10 @@
               "query": [],
               "variable": []
             },
-            "description": "The token must prove the phone. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `MEMBER_INACTIVE` (403), `PHONE_NOT_REGISTERED` (404). The profile carries role, salon and permissions for the app to cache.",
+            "description": "`otpToken` = the single-use proof from `POST /auth/otp/verify` (purpose LOGIN) for this phone. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `MEMBER_INACTIVE` (403), `PHONE_NOT_REGISTERED` (404). The profile carries role, salon and permissions for the app to cache.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"idToken\": \"string\",\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"otpToken\": \"string\",\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -629,10 +629,10 @@
               "query": [],
               "variable": []
             },
-            "description": "Public. The phone is proven by a Firebase ID token. The salon waits for admin approval; license documents are private storage keys.",
+            "description": "Public. The phone is proven by an `otpToken` (purpose REGISTER, from `POST /auth/otp/verify`). The salon waits for admin approval; license documents are private storage keys.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"idToken\": \"string\",\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"salon\": {\n    \"name\": \"string\",\n    \"gender\": \"MALE\",\n    \"description\": \"string\",\n    \"cityId\": \"string\",\n    \"areaId\": \"string\"\n  },\n  \"documentKeys\": [\n    \"string\"\n  ],\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"otpToken\": \"string\",\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"salon\": {\n    \"name\": \"string\",\n    \"gender\": \"MALE\",\n    \"description\": \"string\",\n    \"cityId\": \"string\",\n    \"areaId\": \"string\"\n  },\n  \"documentKeys\": [\n    \"string\"\n  ],\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4160,10 +4160,10 @@
               "query": [],
               "variable": []
             },
-            "description": "The IBAN is validated (ISO 13616 checksum; Jordan = 30 characters) and stored encrypted (AES-256-GCM). A wrong or expired proof is 401 `OTP_INVALID` / `OTP_EXPIRED`; a blocked number 429 `OTP_BLOCKED`; a manager is 403 `OWNER_REQUIRED`.",
+            "description": "The IBAN is validated (ISO 13616 checksum; Jordan = 30 characters) and stored encrypted (AES-256-GCM). `otpToken` = the single-use proof from `POST /auth/otp/verify` (purpose BANK_DETAILS, the owner’s own phone). A wrong, reused or expired proof is 401 `OTP_INVALID` / `OTP_EXPIRED`; a blocked number 429 `OTP_BLOCKED`; a manager is 403 `OWNER_REQUIRED`.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"bankName\": \"string\",\n  \"accountHolderName\": \"string\",\n  \"iban\": \"string\",\n  \"idToken\": \"string\"\n}",
+              "raw": "{\n  \"bankName\": \"string\",\n  \"accountHolderName\": \"string\",\n  \"iban\": \"string\",\n  \"otpToken\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4763,7 +4763,7 @@
           }
         },
         {
-          "name": "Change my phone: OTP to the new number (purpose CHANGE_PHONE), then this call with its ID token; 409 PHONE_ALREADY_REGISTERED when another member has it",
+          "name": "Change my phone: OTP to the new number (purpose CHANGE_PHONE), then this call with the `otpToken` from `POST /auth/otp/verify` (single use); 409 PHONE_ALREADY_REGISTERED when another member has it",
           "request": {
             "method": "POST",
             "header": [
@@ -4802,7 +4802,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"idToken\": \"string\"\n}",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"otpToken\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

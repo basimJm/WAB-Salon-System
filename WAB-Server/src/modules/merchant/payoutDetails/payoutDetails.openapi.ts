@@ -49,7 +49,7 @@ export const registerMerchantPayoutDetailsDocs = (registry: OpenAPIRegistry): vo
     tags: ['Payout details'],
     summary: 'Save the bank details (owner only; needs a fresh OTP, purpose BANK_DETAILS)',
     description:
-      'The IBAN is validated (ISO 13616 checksum; Jordan = 30 characters) and stored encrypted (AES-256-GCM). A wrong or expired proof is 401 `OTP_INVALID` / `OTP_EXPIRED`; a blocked number 429 `OTP_BLOCKED`; a manager is 403 `OWNER_REQUIRED`.',
+      'The IBAN is validated (ISO 13616 checksum; Jordan = 30 characters) and stored encrypted (AES-256-GCM). `otpToken` = the single-use proof from `POST /auth/otp/verify` (purpose BANK_DETAILS, the owner’s own phone). A wrong, reused or expired proof is 401 `OTP_INVALID` / `OTP_EXPIRED`; a blocked number 429 `OTP_BLOCKED`; a manager is 403 `OWNER_REQUIRED`.',
     request: {
       headers,
       body: { content: { 'application/json': { schema: ownerPayoutDetailsBody } } },

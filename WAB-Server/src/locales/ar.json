@@ -10,6 +10,8 @@
   "errors.OTP_BLOCKED": "محاولات كثيرة. تم إيقاف التحقق مؤقتًا.",
   "errors.OTP_INVALID": "رمز التحقق غير صحيح.",
   "errors.OTP_EXPIRED": "انتهت صلاحية رمز التحقق.",
+  "errors.OTP_DELIVERY_FAILED": "تعذّر إرسال رمز التحقق عبر واتساب. تأكد أن هذا الرقم يستخدم واتساب ثم حاول مرة أخرى.",
+  "otp.attemptsRemaining": "رمز التحقق غير صحيح. المحاولات المتبقية: {attemptsRemaining}.",
   "errors.CURRENT_PASSWORD_INVALID": "كلمة المرور الحالية غير صحيحة.",
   "errors.EMAIL_ALREADY_USED": "عنوان البريد الإلكتروني مستخدم بالفعل في حساب آخر.",
   "errors.PHONE_NOT_REGISTERED": "رقم الهاتف غير مسجل.",

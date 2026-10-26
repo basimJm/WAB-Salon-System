@@ -13,12 +13,21 @@ export const ENV_KEY_HINTS: Readonly<Record<string, string>> = {
   JWT_ACCESS_SECRET: 'must be at least 32 characters; generate one with: openssl rand -base64 48',
   PAYOUT_ENCRYPTION_KEY:
     'must be 32 random bytes in base64; generate one with: openssl rand -base64 32',
-  OTP_PROVIDER: 'must be real in production (fake is for development only)',
+  OTP_PROVIDER: 'must be whatsapp in production (fake is for development only)',
   STORAGE_PROVIDER: 'must be real in production (fake is for development only)',
   NOTIFIER_PROVIDER: 'must be real in production (fake is for development only)',
   PAYMENT_PROVIDER: 'must be exactly: disabled (payments are paused)',
-  FIREBASE_PROJECT_ID: 'required when OTP_PROVIDER=real (Firebase > Project settings > Project ID)',
-  FIREBASE_AUTH_EMULATOR_HOST: 'development only: remove it in production',
+  WHATSAPP_PHONE_NUMBER_ID:
+    'required when OTP_PROVIDER=whatsapp: digits only (Meta app > WhatsApp > API Setup > Phone number ID)',
+  WHATSAPP_ACCESS_TOKEN: 'required when OTP_PROVIDER=whatsapp: the system-user access token',
+  WHATSAPP_TEMPLATE_NAME:
+    'required when OTP_PROVIDER=whatsapp: the approved authentication template name (lowercase, digits, _)',
+  WHATSAPP_API_VERSION: 'optional Graph API version such as v26.0',
+  OTP_CODE_SECRET:
+    'required when OTP_PROVIDER=whatsapp: at least 32 characters; generate one with: openssl rand -base64 48',
+  OTP_PROOF_SECRET:
+    'required when OTP_PROVIDER=whatsapp: at least 32 characters and different from OTP_CODE_SECRET',
+  OTP_FIXED_CODE: 'development only (digits, otp.length long): remove it in production',
   FCM_SERVICE_ACCOUNT_JSON:
     'required when NOTIFIER_PROVIDER=real: the whole Firebase key file as one line',
   SMTP_HOST: 'required when NOTIFIER_PROVIDER=real, e.g. smtp.gmail.com',

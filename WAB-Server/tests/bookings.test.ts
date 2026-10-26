@@ -86,8 +86,10 @@ beforeAll(async () => {
         customers,
         salons: new SalonsRepository(m.salons.model as never),
         phones: {
-          verify: (phone, idToken) =>
-            idToken === 'valid-proof' && phone.e164 === PHONE.e164
+          verify: (phone, otpToken, purpose) =>
+            otpToken === 'valid-proof' &&
+            phone.e164 === PHONE.e164 &&
+            purpose === 'BOOKING_CONFIRMATION'
               ? Promise.resolve()
               : Promise.reject(new UnauthorizedError({ code: 'OTP_INVALID' })),
         },
@@ -209,7 +211,11 @@ const makeDraft = async (
   return bodyOf(res).data.id;
 };
 const confirm = async (draftId: string, who = me): Promise<void> => {
-  const res = await post(`/bookings/drafts/${draftId}/verify-otp`, { idToken: 'valid-proof' }, who);
+  const res = await post(
+    `/bookings/drafts/${draftId}/verify-otp`,
+    { otpToken: 'valid-proof' },
+    who,
+  );
   expect(res.status).toBe(200);
 };
 const book = (draftId: string, who = me): request.Test => post('/bookings', { draftId }, who);
@@ -269,7 +275,7 @@ beforeEach(async () => {
 describe('OTP confirmation of a draft', () => {
   it('accepts the customer’s own proof and records the time', async () => {
     const draftId = await makeDraft();
-    const res = await post(`/bookings/drafts/${draftId}/verify-otp`, { idToken: 'valid-proof' });
+    const res = await post(`/bookings/drafts/${draftId}/verify-otp`, { otpToken: 'valid-proof' });
     expect(res.status).toBe(200);
     expect(bodyOf(res).data.otpVerifiedAt).toBe(clock.toISOString());
     expect(m.drafts.docs[0]?.['otpVerifiedAt']).toEqual(clock);
@@ -277,15 +283,15 @@ describe('OTP confirmation of a draft', () => {
 
   it('refuses a wrong proof, another customer’s draft and an expired draft', async () => {
     const draftId = await makeDraft();
-    const bad = await post(`/bookings/drafts/${draftId}/verify-otp`, { idToken: 'nope' });
+    const bad = await post(`/bookings/drafts/${draftId}/verify-otp`, { otpToken: 'nope' });
     expect(bad.status).toBe(401);
     expect(bodyOf(bad).error.code).toBe('OTP_INVALID');
     expect(
-      (await post(`/bookings/drafts/${draftId}/verify-otp`, { idToken: 'valid-proof' }, other))
+      (await post(`/bookings/drafts/${draftId}/verify-otp`, { otpToken: 'valid-proof' }, other))
         .status,
     ).toBe(404);
     clock = new Date(clock.getTime() + 11 * 60_000);
-    const late = await post(`/bookings/drafts/${draftId}/verify-otp`, { idToken: 'valid-proof' });
+    const late = await post(`/bookings/drafts/${draftId}/verify-otp`, { otpToken: 'valid-proof' });
     expect(bodyOf(late).error.code).toBe('DRAFT_EXPIRED');
     expect((await post(`/bookings/drafts/${draftId}/verify-otp`, {})).status).toBe(400);
   });

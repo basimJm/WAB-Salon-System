@@ -29,7 +29,24 @@ export async function api(ns, method, path, body, token, query = '') {
   if (!res.ok) log('FAIL', method, ns + path, res.status, JSON.stringify(json).slice(0, 400));
   return { status: res.status, ok: res.ok, json, data: json?.data };
 }
-export const proof = (phone) => `fake-otp:valid:${phone}`;
+/**
+ * Local QA sign-in with the server's fake OTP provider (SRV-153): ask for a WhatsApp code, then
+ * verify the dev-only fixed code (`OTP_FIXED_CODE` on the server, `QA_OTP_CODE` here) and return the
+ * single-use `otpToken`. Waits out the per-IP OTP limit once if a long seed hits it.
+ */
+const QA_OTP_CODE = process.env.QA_OTP_CODE ?? '123456';
+const OTP_LIMIT_WAIT_MS = Number(process.env.QA_OTP_LIMIT_WAIT_MS ?? 61_000);
+const otpCall = async (ns, path, body) => {
+  const first = await api(ns, 'POST', path, body);
+  if (first.status !== 429 || first.json?.error?.code !== 'RATE_LIMITED') return first;
+  await new Promise((resolve) => setTimeout(resolve, OTP_LIMIT_WAIT_MS));
+  return api(ns, 'POST', path, body);
+};
+export async function proof(ns, phone, purpose) {
+  await otpCall(ns, '/auth/otp/request', { phone, purpose });
+  const verified = await otpCall(ns, '/auth/otp/verify', { phone, purpose, code: QA_OTP_CODE });
+  return verified.data?.otpToken ?? '';
+}
 export const installation = (id) => ({
   installationId: id,
   platform: 'ANDROID',
