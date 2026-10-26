@@ -25,7 +25,6 @@ kotlin {
         implementation(projects.core.domain)
         implementation(projects.core.common)
         implementation(libs.kotlinx.datetime)
-        implementation(libs.haze)
         api(libs.material.icons.extended)
     }
     sourceSets.androidMain.dependencies {

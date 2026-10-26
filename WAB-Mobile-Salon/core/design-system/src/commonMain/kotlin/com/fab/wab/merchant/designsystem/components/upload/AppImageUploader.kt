@@ -17,10 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
 import com.fab.wab.merchant.designsystem.components.image.AppImage
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.resources.Res
@@ -30,7 +29,7 @@ import com.fab.wab.merchant.designsystem.resources.upload_failed
 import com.fab.wab.merchant.designsystem.resources.upload_percent
 import com.fab.wab.merchant.designsystem.resources.upload_retry
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.designsystem.theme.GlassStyle
+import com.fab.wab.merchant.designsystem.theme.SurfaceTone
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -49,15 +48,14 @@ fun AppImageUploader(
 ) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.large
-    val press = rememberGlassPress()
     val failed = item?.status == UploadStatus.Failed
     Box(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(aspect.ratio)
             .clip(shape)
-            .glassBackground(AppTheme.glass, shape, GlassStyle.Subtle, stateBorder = if (failed) colors.danger else colors.line)
-            .glassClickable(press, role = Role.Button, onClick = if (failed) onRetry else onPick),
+            .cardBackground(AppTheme.surfaces, shape, SurfaceTone.Surface, stateBorder = if (failed) colors.danger else colors.line)
+            .appClickable(role = Role.Button, onClick = if (failed) onRetry else onPick),
         contentAlignment = Alignment.Center,
     ) {
         val preview = item?.preview

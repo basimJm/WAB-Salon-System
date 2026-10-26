@@ -12,23 +12,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.glassHighlight
-import com.fab.wab.merchant.designsystem.components.glass.glassPressScale
-import com.fab.wab.merchant.designsystem.components.glass.rememberContentGlass
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
+import androidx.compose.ui.text.font.FontWeight
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.designsystem.theme.GlassStyle
+import com.fab.wab.merchant.designsystem.theme.SurfaceTone
 import com.fab.wab.merchant.designsystem.utils.brandBackground
 import com.fab.wab.merchant.designsystem.utils.brandBrush
 
-/** Selectable filter chip. With [onRemove] it becomes an active-filter chip with a remove (x) action. */
+/**
+ * Selectable filter chip (design `chipS`): 36 dp, radius 11, `padding:0 13px`, 12.5/600; selected = `var(--soft)`
+ * fill, 1.5 dp `#A855F7` border and accent text, otherwise `var(--card)` with the line border and ink text.
+ * With [onRemove] it becomes an active-filter chip with a remove (x) action.
+ */
 @Composable
 fun AppFilterChip(
     text: String,
@@ -40,27 +42,30 @@ fun AppFilterChip(
 ) {
     val colors = AppTheme.colors
     val spacing = AppTheme.spacing
-    val shape = AppTheme.shapes.small
-    val glass = rememberContentGlass()
-    val press = rememberGlassPress()
+    val shape = AppTheme.shapes.chip
     val background = if (selected) {
-        Modifier.brandBackground(brandBrush(), shape).glassHighlight(glass, shape)
+        Modifier.cardBackground(AppTheme.surfaces, shape, SurfaceTone.Soft, stateBorder = colors.gradientEnd)
     } else {
-        Modifier.glassBackground(AppTheme.glass, shape, GlassStyle.Subtle)
+        Modifier.cardBackground(AppTheme.surfaces, shape, stateBorder = colors.line)
     }
-    val content = if (selected) colors.onGradient else colors.accent
+    val content = if (selected) colors.accent else colors.ink
     Row(
         modifier = modifier
-            .glassPressScale(press)
             .defaultMinSize(minHeight = AppTheme.sizes.chipHeight)
             .then(background)
             .semantics { this.selected = selected }
-            .glassClickable(press, onClick = onClick)
-            .padding(horizontal = spacing.space12, vertical = spacing.space6),
+            .clip(shape)
+            .appClickable(onClick = onClick)
+            .padding(horizontal = AppChipDesign.horizontalPadding, vertical = spacing.space6),
         horizontalArrangement = Arrangement.spacedBy(spacing.space6),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AppText(text = text, style = AppTheme.typography.labelMedium, color = content, maxLines = 1)
+        AppText(
+            text = text,
+            style = AppTheme.typography.labelMedium.copy(fontSize = AppChipDesign.labelSize, fontWeight = FontWeight.SemiBold),
+            color = content,
+            maxLines = 1,
+        )
         if (onRemove != null) {
             Icon(
                 imageVector = AppIcons.Close,
@@ -89,12 +94,10 @@ fun AppTimeSlotChip(
     val shape = AppTheme.shapes.small
     val selected = state == SlotState.Selected
     val full = state == SlotState.Full
-    val glass = rememberContentGlass()
-    val press = rememberGlassPress()
     val background = if (selected) {
-        Modifier.brandBackground(brandBrush(), shape).glassHighlight(glass, shape)
+        Modifier.brandBackground(brandBrush(), shape)
     } else {
-        Modifier.glassBackground(AppTheme.glass, shape, GlassStyle.Subtle)
+        Modifier.cardBackground(AppTheme.surfaces, shape, SurfaceTone.Surface)
     }
     val content = when {
         selected -> colors.onGradient
@@ -103,12 +106,11 @@ fun AppTimeSlotChip(
     }
     Row(
         modifier = modifier
-            .glassPressScale(press)
             .defaultMinSize(minWidth = AppTheme.sizes.timeSlotWidth, minHeight = AppTheme.sizes.touchTarget)
             .then(background)
             .alpha(if (full) AppTheme.alpha.disabled else 1f)
             .semantics { this.selected = selected }
-            .glassClickable(press, enabled = !full, onClick = onClick)
+            .appClickable(enabled = !full, onClick = onClick)
             .padding(horizontal = AppTheme.spacing.space12, vertical = AppTheme.spacing.space8),
         horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,

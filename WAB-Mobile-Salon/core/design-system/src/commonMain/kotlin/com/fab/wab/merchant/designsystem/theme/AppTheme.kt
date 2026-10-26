@@ -69,13 +69,13 @@ fun AppTheme(
     val typography = remember(fonts) { appTypography(fonts.headline, fonts.body) }
     val scheme = remember(colors) { colors.toMaterialScheme() }
     val adaptive = remember(windowSize) { adaptiveFor(windowSize) }
-    val glass = remember(colors) { glassTokensFor(colors) }
+    val surfaces = remember(colors) { surfaceTokensFor(colors) }
     CompositionLocalProvider(
         LocalDarkTheme provides darkTheme,
         LocalAppColors provides colors,
         LocalTypography provides typography,
         LocalAdaptive provides adaptive,
-        LocalGlass provides glass,
+        LocalSurfaces provides surfaces,
     ) {
         MaterialTheme(colorScheme = scheme, typography = typography.toMaterialTypography(), content = content)
     }
@@ -92,5 +92,5 @@ object AppTheme {
     val motion: MotionTokens @Composable get() = LocalMotion.current
     val typography: TypographyTokens @Composable get() = LocalTypography.current
     val adaptive: AdaptiveTokens @Composable get() = LocalAdaptive.current
-    val glass: GlassTokens @Composable get() = LocalGlass.current
+    val surfaces: SurfaceTokens @Composable get() = LocalSurfaces.current
 }

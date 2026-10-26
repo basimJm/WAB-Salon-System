@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.finance.presentation.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,7 +29,6 @@ import com.fab.wab.merchant.core.common.TimeFormat
 import com.fab.wab.merchant.designsystem.components.branch.AppBranchSwitcher
 import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
-import com.fab.wab.merchant.designsystem.components.card.AppCard
 import com.fab.wab.merchant.designsystem.components.chip.AppFilterChip
 import com.fab.wab.merchant.designsystem.components.feedback.AppEmptyState
 import com.fab.wab.merchant.designsystem.components.feedback.AppErrorState
@@ -41,6 +42,9 @@ import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppDatePickerDialog
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
+import com.fab.wab.merchant.designsystem.utils.brandBackground
+import com.fab.wab.merchant.designsystem.utils.brandBrush
+import com.fab.wab.merchant.designsystem.utils.softShadow
 import com.fab.wab.merchant.feature.finance.domain.FinanceRange
 import com.fab.wab.merchant.feature.finance.domain.FinanceTab
 import com.fab.wab.merchant.feature.finance.presentation.analytics.FinanceAnalytics
@@ -136,7 +140,15 @@ private fun Header(state: UiState, bankReady: Boolean, onAction: (UiAction) -> U
     val spacing = AppTheme.spacing
     Column(verticalArrangement = Arrangement.spacedBy(spacing.space12)) {
         BalanceCard(state)
-        AppText(text = stringResource(Res.string.finance_info), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+        AppText(
+            text = stringResource(Res.string.finance_info),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(AppTheme.colors.surface, FinanceDesign.infoShape)
+                .padding(vertical = FinanceDesign.infoPaddingV, horizontal = FinanceDesign.infoPaddingH),
+            style = AppTheme.typography.bodySmall.copy(fontSize = FinanceDesign.infoSize),
+            color = AppTheme.colors.muted,
+        )
         if (bankReady && state.canManageBank) {
             AppButton(
                 stringResource(Res.string.finance_bank),
@@ -166,29 +178,45 @@ private fun Header(state: UiState, bankReady: Boolean, onAction: (UiAction) -> U
     }
 }
 
+/** Design 08 payout card: brand gradient, white text, amount 30/700, a soft divider above the last payout. */
 @Composable
 private fun BalanceCard(state: UiState) {
     val balance = state.balance
-    AppCard(modifier = Modifier.fillMaxWidth()) {
-        Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
-            AppText(
-                text = stringResource(Res.string.finance_pending),
-                style = AppTheme.typography.labelLarge,
-                color = AppTheme.colors.muted,
-            )
-            AppText(
-                text = balance?.let { jodText(it.dueNow) }.orEmpty(),
-                style = AppTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            )
-            val last = balance?.lastPayoutNet
-            val date = balance?.lastPayoutDate?.let { TimeFormat.isoDateText(it) }
-            val text = when {
-                last == null -> stringResource(Res.string.finance_no_payout)
-                date == null -> stringResource(Res.string.finance_last_payout_amount, jodText(last))
-                else -> stringResource(Res.string.finance_last_payout, jodText(last), date)
-            }
-            AppText(text = text, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+    val colors = AppTheme.colors
+    val shape = AppTheme.shapes.extraLarge
+    val soft = colors.onGradient.copy(alpha = FinanceDesign.SOFT_TEXT_ALPHA)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .softShadow(AppTheme.elevation.raised, colors.accent.copy(alpha = AppTheme.elevation.buttonShadowAlpha), shape)
+            .brandBackground(brandBrush(), shape)
+            .padding(FinanceDesign.cardPadding),
+    ) {
+        AppText(
+            text = stringResource(Res.string.finance_pending),
+            style = AppTheme.typography.bodySmall.copy(fontSize = FinanceDesign.captionSize),
+            color = soft,
+        )
+        AppText(
+            text = balance?.let { jodText(it.dueNow) }.orEmpty(),
+            modifier = Modifier.padding(top = AppTheme.spacing.space2, bottom = FinanceDesign.amountBottom),
+            style = AppTheme.typography.headlineMedium.copy(fontSize = FinanceDesign.amountSize, fontWeight = FontWeight.Bold),
+            color = colors.onGradient,
+        )
+        HorizontalDivider(color = colors.onGradient.copy(alpha = FinanceDesign.DIVIDER_ALPHA))
+        val last = balance?.lastPayoutNet
+        val date = balance?.lastPayoutDate?.let { TimeFormat.isoDateText(it) }
+        val text = when {
+            last == null -> stringResource(Res.string.finance_no_payout)
+            date == null -> stringResource(Res.string.finance_last_payout_amount, jodText(last))
+            else -> stringResource(Res.string.finance_last_payout, jodText(last), date)
         }
+        AppText(
+            text = text,
+            modifier = Modifier.padding(top = FinanceDesign.amountBottom),
+            style = AppTheme.typography.bodySmall.copy(fontSize = FinanceDesign.captionSize),
+            color = soft,
+        )
     }
 }
 

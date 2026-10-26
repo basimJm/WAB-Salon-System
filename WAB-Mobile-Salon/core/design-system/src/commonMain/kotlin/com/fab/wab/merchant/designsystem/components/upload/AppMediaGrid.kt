@@ -28,10 +28,9 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.merchant.core.domain.upload.UploadKind
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
 import com.fab.wab.merchant.designsystem.components.image.AppImage
 import com.fab.wab.merchant.designsystem.components.image.AppImageFallback
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.resources.Res
@@ -105,7 +104,6 @@ private fun MediaCell(
 ) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.medium
-    val press = rememberGlassPress()
     val selectedLabel = stringResource(Res.string.media_selected)
     val positionLabel = stringResource(Res.string.media_order_position, index + 1)
     Box(
@@ -120,7 +118,7 @@ private fun MediaCell(
                 if (mode == MediaGridMode.Reorder) contentDescription = positionLabel
                 if (isSelected) contentDescription = selectedLabel
             }
-            .glassClickable(press, role = Role.Button, onClick = onTap),
+            .appClickable(role = Role.Button, onClick = onTap),
     ) {
         val preview = item.preview
         val url = item.url

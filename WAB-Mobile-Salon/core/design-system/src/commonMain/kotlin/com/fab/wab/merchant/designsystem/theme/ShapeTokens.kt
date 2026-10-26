@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 data class ShapeTokens(
     val extraSmall: Shape = RoundedCornerShape(6.dp),
     val small: Shape = RoundedCornerShape(9.dp),
+    val chip: Shape = RoundedCornerShape(11.dp),
     val medium: Shape = RoundedCornerShape(14.dp),
     val large: Shape = RoundedCornerShape(16.dp),
     val extraLarge: Shape = RoundedCornerShape(22.dp),

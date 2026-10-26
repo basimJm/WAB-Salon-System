@@ -36,7 +36,7 @@ scripts/ci/run_local_checks.sh  # policy, detekt, unit tests, every Android vari
 ## Structure
 - `build-logic/` convention plugins (KMP library, core library/compose, feature domain/data/presentation/di, Android app, compose app)
 - `core/*` common, domain, data (Ktor + mock engine), network, storage (DataStore), security, realtime (Socket.IO), navigation,
-  mvi, analytics, firebase, notification, ui, design-system (tokens, Liquid Glass components), di
+  mvi, analytics, firebase, notification, ui, design-system (tokens, flat design-file components), di
 - `feature/sample/{domain,data,presentation,di}` the reference feature; copy it for each new feature, then add the modules to
   `settings.gradle.kts`, `ComposeAppPlugin.FEATURE_MODULES` and `appModules` in `composeApp/.../app/ui/App.kt`
 - `composeApp/` app shell (theme, language/RTL, dark mode, navigation host, push, deep links); `androidApp/`, `iosApp/` hosts

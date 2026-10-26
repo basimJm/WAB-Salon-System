@@ -32,12 +32,11 @@ import com.fab.wab.merchant.core.domain.booking.BookingStatus
 import com.fab.wab.merchant.designsystem.components.avatar.AppAvatar
 import com.fab.wab.merchant.designsystem.components.booking.bookingStatusLabel
 import com.fab.wab.merchant.designsystem.components.feedback.AppEmptyState
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.designsystem.theme.GlassStyle
+import com.fab.wab.merchant.designsystem.theme.SurfaceTone
 import kotlin.math.abs
 
 private const val HALF = 0.5f
@@ -83,7 +82,7 @@ fun AppCalendarDayView(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(AppTheme.spacing.space24)
-                    .glassBackground(AppTheme.glass, AppTheme.shapes.extraLarge, GlassStyle.Prominent),
+                    .cardBackground(AppTheme.surfaces, AppTheme.shapes.extraLarge, SurfaceTone.Card),
             )
         }
     }
@@ -119,7 +118,6 @@ private fun RowScope.GridColumn(
 ) {
     val colors = AppTheme.colors
     val hour = AppTheme.sizes.calendarHour
-    val press = rememberGlassPress()
     Box(
         modifier = Modifier
             .weight(1f)
@@ -128,7 +126,7 @@ private fun RowScope.GridColumn(
             .padding(start = AppTheme.sizes.hairline)
             .background(colors.background)
             .hourGrid(window, hour, colors.line)
-            .then(if (onColumnClick != null) Modifier.glassClickable(press, role = Role.Button, onClick = onColumnClick) else Modifier),
+            .then(if (onColumnClick != null) Modifier.appClickable(role = Role.Button, onClick = onColumnClick) else Modifier),
     ) {
         column.shades.forEach { ShadeBox(it, window, hour) }
         column.blocks.forEach { block ->

@@ -12,8 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.fab.wab.merchant.designsystem.components.badge.StatusTone
 import com.fab.wab.merchant.designsystem.components.badge.statusColors
-import com.fab.wab.merchant.designsystem.components.glass.liquidGlass
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlass
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
@@ -34,8 +33,8 @@ fun AppToast(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .liquidGlass(rememberGlass(), AppTheme.shapes.medium)
-            .background(container.copy(alpha = container.alpha * AppTheme.glass.tintAlpha), AppTheme.shapes.medium)
+            .cardBackground(AppTheme.surfaces, AppTheme.shapes.medium)
+            .background(container, AppTheme.shapes.medium)
             .padding(AppTheme.spacing.space12),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8),

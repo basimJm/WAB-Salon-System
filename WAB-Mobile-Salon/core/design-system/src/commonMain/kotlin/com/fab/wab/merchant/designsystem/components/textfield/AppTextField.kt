@@ -1,6 +1,5 @@
 package com.fab.wab.merchant.designsystem.components.textfield
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -20,13 +19,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.LayoutDirection
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 
@@ -65,7 +63,7 @@ fun AppTextField(
     val borderColor = when {
         error != null -> colors.danger
         focused -> colors.accent
-        else -> Color.Transparent
+        else -> colors.line
     }
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.space6)) {
         if (label != null) {
@@ -92,8 +90,7 @@ fun AppTextField(
                             .fillMaxWidth()
                             .defaultMinSize(minHeight = AppTheme.sizes.fieldHeight)
                             .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
-                            .glassBackground(AppTheme.glass, AppTheme.shapes.medium)
-                            .border(AppTheme.sizes.borderWidth, borderColor, AppTheme.shapes.medium)
+                            .cardBackground(AppTheme.surfaces, AppTheme.shapes.medium, stateBorder = borderColor)
                             .padding(horizontal = spacing.space14),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(spacing.space8),

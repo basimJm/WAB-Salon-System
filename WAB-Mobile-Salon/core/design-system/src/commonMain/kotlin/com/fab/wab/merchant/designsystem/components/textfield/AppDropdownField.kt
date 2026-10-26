@@ -1,6 +1,5 @@
 package com.fab.wab.merchant.designsystem.components.textfield
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,9 +20,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
@@ -44,7 +42,7 @@ fun AppDropdownField(
     val colors = AppTheme.colors
     val spacing = AppTheme.spacing
     val selected = selectedIndex?.let { options.getOrNull(it) }
-    val borderColor = if (error != null) colors.danger else Color.Transparent
+    val borderColor = if (error != null) colors.danger else colors.line
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.space6)) {
         if (label != null) {
             AppText(text = label, style = AppTheme.typography.labelMedium, color = colors.muted)
@@ -55,8 +53,7 @@ fun AppDropdownField(
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = AppTheme.sizes.fieldHeight)
                     .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
-                    .glassBackground(AppTheme.glass, AppTheme.shapes.medium)
-                    .border(AppTheme.sizes.borderWidth, borderColor, AppTheme.shapes.medium)
+                    .cardBackground(AppTheme.surfaces, AppTheme.shapes.medium, stateBorder = borderColor)
                     .clickable(enabled = enabled, role = Role.DropdownList) { expanded = true }
                     .padding(horizontal = spacing.space14),
                 verticalAlignment = Alignment.CenterVertically,
