@@ -42,7 +42,7 @@ core/mvi               MVI base (BaseViewModel, MVIDelegate, CollectSideEffect)
 core/analytics         AnalyticsTracker port, TrackScreen
 core/firebase          Push token, crash reporting, analytics behind ports (Swift bridges on iOS); phone OTP = WhatsApp via the backend
 core/ui                Locale/dark-mode locals, permissions, external actions, image picker
-core/design-system     Tokens, Liquid Glass (AppGlassSurface, glassBackground, liquidGlass), App* components, icons, strings
+core/design-system     Tokens, flat surfaces (AppSurface, cardBackground, barBackground), App* components, icons, strings
 core/di                Koin aggregation
 feature/<name>/{domain,data,presentation,di}   One folder per feature (reference: feature/bookings)
 build-logic/convention Convention plugins
@@ -58,7 +58,7 @@ Dependency direction: `presentation → domain ← data`; `di` wires them; `core
 - Unit tests in `commonTest` for every view model, use case and mapper (fakes, not mocks).
 
 ## 4. Design System
-Tokens via `AppTheme.colors|spacing|shapes|typography|sizes|elevation|alpha|motion|adaptive|glass`. Screens follow `design/WAB Merchant 0x *.dc.html` as drawn, with the customer's Liquid Glass: `AppScreen` (glass backdrop), `AppCard`/`AppGlassSurface`, `glassBackground` for custom cards/fields/rows, glass top bars only where the design floats them, the floating glass tab bar / rail. Start/End, never Left/Right.
+Tokens via `AppTheme.colors|spacing|shapes|typography|sizes|elevation|alpha|motion|adaptive|surfaces`. **The merchant app follows `design/WAB Merchant 0x *.dc.html` as drawn, without Liquid Glass (owner decision 2026-10-26):** flat `var(--bg)` screens, `var(--card)` / `var(--surface)` / `var(--soft)` fills with the `1px var(--line)` edge (`cardBackground`, `AppSurface`, `AppCard`), 1.5 dp state borders for error / focus / selection, flat top bars (plain back chevron, centered title), the attached card tab bar with a top line (`AppBottomBar`, rail in landscape), gradient primary buttons and design chips (`chipS`). No blur, sheen, rim or press-scale; taps use the platform ripple (`appClickable`). Take values from the design file (comment the CSS next to feature-only constants in `*DesignConstants.kt`). Start/End, never Left/Right. The customer app keeps its own (glass) design system.
 
 ## 5. Environments
 Android `gradle.properties` (`DEV_/PROD_API_BASE_URL`, `*_WEB_BASE_URL`, `*_DATA_SOURCE` = `mock|remote`, `DEV_APPLICATION_ID_SUFFIX=.dev`) → `BuildConfig`; iOS `iosApp/Configuration/{Dev,Prod}.xcconfig` (write URLs as `https:/$()/host`) → `Info.plist`; shared code reads `AppEnvironment`. Dev builds use `DATA_SOURCE=mock` until MER-054 switches them to the dev API.

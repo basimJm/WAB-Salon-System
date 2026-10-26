@@ -62,18 +62,16 @@ import com.fab.wab.merchant.feature.home.presentation.resources.home_view_all
 import com.fab.wab.merchant.feature.home.presentation.resources.home_week
 import org.jetbrains.compose.resources.stringResource
 
-/** Salon photo + name, "Hello, {member}" (Start); bell with the unread badge 1–99 / "99+" (End). */
+/**
+ * Design 02 Home header: salon photo, "Hello, {member}" (12 muted) over the salon name (Playfair 19/700) at Start;
+ * bell with the unread badge 1–99 / "99+" at End.
+ */
 @Composable
 internal fun HomeHeader(salon: DashboardSalon?, memberName: String, unread: Int, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(spacing.space12)) {
         AppAvatar(name = salon?.name.orEmpty(), imageUrl = salon?.imageUrl)
         Column(modifier = Modifier.weight(1f)) {
-            AppText(
-                text = salon?.name.orEmpty(),
-                style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                maxLines = 1,
-            )
             if (memberName.isNotBlank()) {
                 AppText(
                     text = stringResource(Res.string.home_hello, memberName),
@@ -82,6 +80,11 @@ internal fun HomeHeader(salon: DashboardSalon?, memberName: String, unread: Int,
                     maxLines = 1,
                 )
             }
+            AppText(
+                text = salon?.name.orEmpty(),
+                style = AppTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                maxLines = 1,
+            )
         }
         Box {
             AppIconButton(AppIcons.Notifications, stringResource(Res.string.home_notifications), { onAction(UiAction.OnNotifications) })

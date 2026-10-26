@@ -65,6 +65,8 @@ internal object DesignIcons {
     val Store: ImageVector by lazy { icon("Store", STROKE, false, DesignIconPaths.STORE) }
     val Menu: ImageVector by lazy { icon("Menu", STROKE, false, DesignIconPaths.MENU) }
     val Crown: ImageVector by lazy { icon("Crown", null, false, DesignIconPaths.CROWN) }
+    val House: ImageVector by lazy { icon("House", STROKE_LIGHT, false, DesignIconPaths.HOUSE) }
+    val Bank: ImageVector by lazy { icon("Bank", STROKE_LIGHT, false, DesignIconPaths.BANK) }
 
     private fun icon(name: String, strokeWidth: Float?, mirrored: Boolean, paths: List<String>): ImageVector {
         val builder = ImageVector.Builder(

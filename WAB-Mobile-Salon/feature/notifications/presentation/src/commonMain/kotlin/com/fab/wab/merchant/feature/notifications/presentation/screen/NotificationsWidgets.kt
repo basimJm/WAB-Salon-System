@@ -23,8 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
 import com.fab.wab.merchant.designsystem.components.shimmer.AppShimmerBox
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
@@ -71,7 +71,7 @@ internal fun OutlineButton(text: String, onClick: () -> Unit, modifier: Modifier
         modifier = modifier
             .height(NotificationsDesign.sheetButtonHeight)
             .clip(shape)
-            .glassBackground(AppTheme.glass, shape)
+            .cardBackground(AppTheme.surfaces, shape)
             .clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

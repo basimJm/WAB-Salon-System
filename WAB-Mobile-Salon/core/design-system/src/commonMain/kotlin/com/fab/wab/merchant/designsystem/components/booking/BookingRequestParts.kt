@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.merchant.core.domain.booking.BookingStatus
 import com.fab.wab.merchant.designsystem.components.avatar.AppAvatar
 import com.fab.wab.merchant.designsystem.components.divider.AppDivider
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.resources.Res
@@ -31,7 +31,7 @@ import com.fab.wab.merchant.designsystem.resources.request_handled_closing
 import com.fab.wab.merchant.designsystem.resources.request_handled_rejected
 import com.fab.wab.merchant.designsystem.resources.request_total
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.designsystem.theme.GlassStyle
+import com.fab.wab.merchant.designsystem.theme.SurfaceTone
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -72,7 +72,7 @@ internal fun CustomerSummary(request: BookingRequestUi, modifier: Modifier = Mod
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .glassBackground(AppTheme.glass, AppTheme.shapes.large, GlassStyle.Subtle)
+            .cardBackground(AppTheme.surfaces, AppTheme.shapes.large, SurfaceTone.Surface)
             .padding(horizontal = spacing.space14, vertical = spacing.space12),
         horizontalArrangement = Arrangement.spacedBy(spacing.space12),
         verticalAlignment = Alignment.CenterVertically,
@@ -102,7 +102,7 @@ internal fun RequestPersonCard(person: RequestPersonUi, modifier: Modifier = Mod
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .glassBackground(AppTheme.glass, AppTheme.shapes.medium)
+            .cardBackground(AppTheme.surfaces, AppTheme.shapes.medium)
             .padding(horizontal = spacing.space12, vertical = spacing.space10),
         verticalArrangement = Arrangement.spacedBy(spacing.space2),
     ) {

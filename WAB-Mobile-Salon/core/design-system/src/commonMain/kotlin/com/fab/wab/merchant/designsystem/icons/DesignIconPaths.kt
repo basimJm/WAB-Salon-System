@@ -174,4 +174,8 @@ internal object DesignIconPaths {
     )
     val MENU = listOf("M4 6h16M4 12h16M4 18h16")
     val CROWN = listOf("M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z")
+
+    // Merchant OTP mode icons (`OTPI` in `WAB Merchant 01 Onboarding.dc.html`)
+    val HOUSE = listOf("M4 10l8-6 8 6v10H4zM9.5 20v-5h5v5")
+    val BANK = listOf("M3 9l9-5 9 5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18")
 }

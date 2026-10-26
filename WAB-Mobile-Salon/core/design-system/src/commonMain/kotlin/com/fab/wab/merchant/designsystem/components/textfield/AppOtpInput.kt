@@ -1,6 +1,5 @@
 package com.fab.wab.merchant.designsystem.components.textfield
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -12,22 +11,18 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.resources.Res
 import com.fab.wab.merchant.designsystem.resources.otp_description
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import org.jetbrains.compose.resources.stringResource
-
-/** Keeps only ASCII digits and at most [length] of them. Pure and tested. */
-fun sanitizeOtp(input: String, length: Int): String = input.filter { it in '0'..'9' }.take(length)
 
 /**
  * One-time-code input with [length] boxes (the length comes from the backend, never a constant here).
@@ -63,13 +58,12 @@ fun AppOtpInput(
                                 error -> colors.danger
                                 index == value.length -> colors.accent
                                 index < value.length -> colors.gradientStart
-                                else -> Color.Transparent
+                                else -> colors.line
                             }
                             Box(
                                 modifier = Modifier
                                     .size(AppTheme.sizes.otpBoxWidth, AppTheme.sizes.otpBoxHeight)
-                                    .glassBackground(AppTheme.glass, AppTheme.shapes.medium)
-                                    .border(AppTheme.sizes.borderWidth, borderColor, AppTheme.shapes.medium),
+                                    .cardBackground(AppTheme.surfaces, AppTheme.shapes.medium, stateBorder = borderColor),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 AppText(text = value.getOrNull(index)?.toString().orEmpty(), style = AppTheme.typography.titleLarge)

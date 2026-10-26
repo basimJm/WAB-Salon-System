@@ -28,9 +28,8 @@ internal object NotificationsDesign {
     val listBottom = 24.dp
     val listGap = 8.dp
 
-    // Item: `padding:14px;border-radius:16px;gap:12px`, unread border `rgba(168,85,247,.35)`
+    // Item: `padding:14px;border-radius:16px;gap:12px`; unread = `var(--soft)` without an edge (NotificationRow)
     val itemPadding = 14.dp
-    const val unreadBorderAlpha = 0.35f
     val iconBox = 42.dp
     val iconBoxRadius = 13.dp
     val titleSize = 14.sp

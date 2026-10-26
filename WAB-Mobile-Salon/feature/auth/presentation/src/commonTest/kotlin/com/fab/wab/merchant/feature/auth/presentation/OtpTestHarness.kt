@@ -32,6 +32,7 @@ import kotlin.time.Instant
 
 internal val OTP_PHONE = PhoneNumber("JO", "791234567")
 internal const val OTP_E164 = "+962791234567"
+internal const val OTP_DISPLAY = "+962 7 9123 4567"
 internal const val RIGHT_CODE = "123456"
 internal const val ERROR_TEXT = "failed"
 internal const val HTTP_UNAUTHORIZED = 401
@@ -64,7 +65,7 @@ internal class OtpHarness(private val scope: TestScope) {
         override fun now(): Instant = OTP_NOW
     }
 
-    fun viewModel(purpose: AuthPurpose = AuthPurpose.LOGIN): OtpViewModel {
+    fun viewModel(purpose: AuthPurpose = AuthPurpose.LOGIN, collect: Boolean = true): OtpViewModel {
         val viewModel = OtpViewModel(
             purpose = purpose,
             phone = OTP_PHONE,
@@ -81,7 +82,7 @@ internal class OtpHarness(private val scope: TestScope) {
             ),
             testScope = scope.backgroundScope,
         )
-        scope.backgroundScope.launch { viewModel.state.collect {} }
+        if (collect) scope.backgroundScope.launch { viewModel.state.collect {} }
         scope.backgroundScope.launch { viewModel.sideEffect.collect { effects += it } }
         return viewModel
     }

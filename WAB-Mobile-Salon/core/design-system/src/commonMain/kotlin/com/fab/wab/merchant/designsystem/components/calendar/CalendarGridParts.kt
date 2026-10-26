@@ -29,10 +29,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.merchant.core.domain.booking.BookingStatus
-import com.fab.wab.merchant.designsystem.components.booking.bookingStatusTone
 import com.fab.wab.merchant.designsystem.components.badge.statusColors
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
+import com.fab.wab.merchant.designsystem.components.booking.bookingStatusTone
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppColors
@@ -126,7 +125,6 @@ internal fun BoxScope.BlockBox(block: CalendarBlockUi, window: TimeWindow, hourH
     val style = calendarBlockStyle(block.status, colors)
     val shape = if (compact) AppTheme.shapes.extraSmall else AppTheme.shapes.small
     val gap = AppTheme.spacing.space2
-    val press = rememberGlassPress()
     val outline = when {
         block.isBride -> colors.brideEnd
         style.dashed -> style.content
@@ -152,7 +150,7 @@ internal fun BoxScope.BlockBox(block: CalendarBlockUi, window: TimeWindow, hourH
                     )
                 }
             }
-            .then(if (onClick != null) Modifier.glassClickable(press, role = Role.Button, onClick = onClick) else Modifier)
+            .then(if (onClick != null) Modifier.appClickable(role = Role.Button, onClick = onClick) else Modifier)
             .padding(horizontal = AppTheme.spacing.space6, vertical = AppTheme.spacing.space4),
         horizontalAlignment = if (compact) Alignment.CenterHorizontally else Alignment.Start,
     ) {

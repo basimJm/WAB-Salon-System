@@ -28,9 +28,8 @@ import com.fab.wab.merchant.core.domain.model.LocationData
 import com.fab.wab.merchant.core.ui.map.MapProvider
 import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppSearchBar
 import com.fab.wab.merchant.designsystem.icons.AppIcons
@@ -43,7 +42,7 @@ import com.fab.wab.merchant.designsystem.resources.map_search_hint
 import com.fab.wab.merchant.designsystem.resources.map_unknown_address
 import com.fab.wab.merchant.designsystem.resources.map_use_my_location
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import com.fab.wab.merchant.designsystem.theme.GlassStyle
+import com.fab.wab.merchant.designsystem.theme.SurfaceTone
 import org.jetbrains.compose.resources.stringResource
 
 private const val PIN_LIFT = 0.5f
@@ -120,7 +119,7 @@ private fun SearchArea(state: MapPickerUi, onAction: (MapPickerAction) -> Unit, 
             placeholder = stringResource(Res.string.map_search_hint),
         )
         if (state.suggestions.isNotEmpty()) {
-            Column(modifier = Modifier.fillMaxWidth().glassBackground(AppTheme.glass, AppTheme.shapes.medium, GlassStyle.Prominent)) {
+            Column(modifier = Modifier.fillMaxWidth().cardBackground(AppTheme.surfaces, AppTheme.shapes.medium, SurfaceTone.Card)) {
                 state.suggestions.forEach { suggestion ->
                     SuggestionRow(suggestion) { onAction(MapPickerAction.SuggestionPicked(suggestion.id)) }
                 }
@@ -131,11 +130,10 @@ private fun SearchArea(state: MapPickerUi, onAction: (MapPickerAction) -> Unit, 
 
 @Composable
 private fun SuggestionRow(suggestion: PlaceSuggestionUi, onClick: () -> Unit) {
-    val press = rememberGlassPress()
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .glassClickable(press, role = Role.Button, onClick = onClick)
+            .appClickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = AppTheme.spacing.space14, vertical = AppTheme.spacing.space10),
     ) {
         AppText(text = suggestion.title, style = AppTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), maxLines = 1)
@@ -164,7 +162,7 @@ private fun AddressCard(state: MapPickerUi, onConfirm: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .glassBackground(AppTheme.glass, AppTheme.shapes.sheet, GlassStyle.Prominent)
+            .cardBackground(AppTheme.surfaces, AppTheme.shapes.sheet, SurfaceTone.Card)
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(horizontal = spacing.space20, vertical = spacing.space16),
         verticalArrangement = Arrangement.spacedBy(spacing.space6),
