@@ -4,22 +4,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-/** A verification Firebase started by SMS. [autoVerifiedIdToken] is set when Android verified the number silently. */
-data class PhoneVerification(
-    val id: String,
-    val autoVerifiedIdToken: String? = null,
-)
-
-/**
- * Firebase Phone Auth as the app uses it: the backend pre-checks limits, Firebase sends the SMS,
- * the app confirms the code and hands the Firebase ID token to the backend. Nothing else of Firebase Auth leaks out.
- */
-interface PhoneAuthGateway {
-    suspend fun startVerification(phoneE164: String): FirebaseResult<PhoneVerification>
-    suspend fun confirm(verification: PhoneVerification, code: String): FirebaseResult<String>
-    suspend fun signOut()
-}
-
 /** The FCM registration token: current value on demand plus every refresh the platform reports. */
 interface PushTokenProvider {
     suspend fun currentToken(): String?

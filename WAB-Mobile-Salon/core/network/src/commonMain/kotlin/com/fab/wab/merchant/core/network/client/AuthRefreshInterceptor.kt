@@ -31,7 +31,8 @@ private fun HttpRequestBuilder.authorize(accessToken: String) {
  * Adds the stored access token to every request. When the backend answers 401 to a request that carried a
  * token, the tokens are refreshed once and the request is repeated with the new access token. The session
  * ends (`SessionTimeOut`) only when the backend rejects the refresh token itself; a refresh that merely
- * could not reach the backend leaves the user signed in and surfaces the original 401.
+ * could not reach the backend leaves the user signed in and surfaces the original 401. A [publicRequest] goes out
+ * as built: no token, no refresh.
  */
 internal fun HttpClient.installAuthRefresh(
     appSettings: AppSettings,
@@ -39,6 +40,7 @@ internal fun HttpClient.installAuthRefresh(
     sessionTimeOut: SessionTimeOut,
 ) {
     plugin(HttpSend).intercept { request ->
+        if (request.isPublicRequest) return@intercept execute(request)
         val sentToken = appSettings.token.first()?.takeIf { it.isNotBlank() }
         sentToken?.let { request.authorize(it) }
 

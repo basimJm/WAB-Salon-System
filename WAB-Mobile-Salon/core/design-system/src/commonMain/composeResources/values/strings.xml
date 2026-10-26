@@ -49,6 +49,7 @@
     <string name="error_code_otp_blocked">Too many code requests. Please try again later.</string>
     <string name="error_code_otp_invalid">The code you entered is not correct.</string>
     <string name="error_code_otp_expired">This code has expired, please request a new one.</string>
+    <string name="error_code_otp_delivery_failed">We could not send the code on WhatsApp. Make sure this number uses WhatsApp, then try again.</string>
     <string name="error_code_phone_not_registered">This number is not registered.</string>
     <string name="error_code_phone_already_registered">This number is already registered.</string>
     <string name="error_code_account_blocked">Your account is suspended. Please contact us.</string>

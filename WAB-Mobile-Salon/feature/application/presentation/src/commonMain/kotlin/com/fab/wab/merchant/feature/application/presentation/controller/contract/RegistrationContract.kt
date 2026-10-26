@@ -48,7 +48,7 @@ sealed interface RegistrationContract {
         /** Application stored (new or resubmitted): show its status (M05). */
         data object NavigateToStatus : SideEffect
 
-        /** The REGISTER proof is missing (process restart): start again from login. */
+        /** The REGISTER proof is missing (process restart) or was rejected (expired, spent): start again from login. */
         data object NavigateToLogin : SideEffect
         data class OpenContent(val slug: String) : SideEffect
         data class ShowError(val message: String) : SideEffect

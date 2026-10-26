@@ -23,7 +23,7 @@ interface ApplicationRepository {
     suspend fun apply(
         form: RegistrationForm,
         phone: PhoneNumber,
-        idToken: String,
+        otpToken: String,
         installation: InstallationInfo?,
     ): AppResult<ApplicationSession>
 

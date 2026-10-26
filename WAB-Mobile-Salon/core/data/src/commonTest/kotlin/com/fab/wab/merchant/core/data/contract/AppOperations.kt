@@ -36,7 +36,7 @@ internal object AppOperations {
         MerchantOperations.patchSalonServicesById, MerchantOperations.patchTeamMembersById,
         MerchantOperations.patchTeamMembersByIdLeavesByLeaveId, MerchantOperations.postAuthChangePhone,
         MerchantOperations.postAuthCheckPhone, MerchantOperations.postAuthLogin, MerchantOperations.postAuthLogout,
-        MerchantOperations.postAuthOtpRequest, MerchantOperations.postAuthOtpWrongAttempt, MerchantOperations.postBookingsByIdApprove,
+        MerchantOperations.postAuthOtpRequest, MerchantOperations.postAuthOtpVerify, MerchantOperations.postBookingsByIdApprove,
         MerchantOperations.postBookingsByIdCancel, MerchantOperations.postBookingsByIdComplete,
         MerchantOperations.postBookingsByIdNoShow, MerchantOperations.postBookingsByIdReassign,
         MerchantOperations.postBookingsByIdReject, MerchantOperations.postBookingsCancelAffected, MerchantOperations.postBranches,

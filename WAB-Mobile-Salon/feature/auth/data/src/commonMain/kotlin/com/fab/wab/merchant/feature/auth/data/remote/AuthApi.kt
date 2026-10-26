@@ -8,8 +8,9 @@ import com.fab.wab.merchant.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.merchant.core.data.contract.generated.PostAuthLogoutBody
 import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpRequestBody
 import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpRequestData
-import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpWrongAttemptBody
-import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpWrongAttemptData
+import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpVerifyBody
+import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpVerifyData
+import com.fab.wab.merchant.core.network.client.publicRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -24,8 +25,12 @@ class AuthApi(private val client: HttpClient) {
     suspend fun requestOtp(body: PostAuthOtpRequestBody): BaseResponse<PostAuthOtpRequestData> =
         client.post(MerchantOperations.postAuthOtpRequest.path) { setBody(body) }.body()
 
-    suspend fun wrongAttempt(body: PostAuthOtpWrongAttemptBody): BaseResponse<PostAuthOtpWrongAttemptData> =
-        client.post(MerchantOperations.postAuthOtpWrongAttempt.path) { setBody(body) }.body()
+    /** Public: a wrong code answers 401 `OTP_INVALID`, which must not trigger a token refresh and a second try. */
+    suspend fun verifyOtp(body: PostAuthOtpVerifyBody): BaseResponse<PostAuthOtpVerifyData> =
+        client.post(MerchantOperations.postAuthOtpVerify.path) {
+            publicRequest()
+            setBody(body)
+        }.body()
 
     suspend fun login(body: PostAuthLoginBody): BaseResponse<PostAuthLoginData> =
         client.post(MerchantOperations.postAuthLogin.path) { setBody(body) }.body()
