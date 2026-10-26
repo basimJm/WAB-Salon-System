@@ -36,7 +36,9 @@
 
 /* Filters: each control is a 38px pill whose label sits inside, before the value (design dropdown buttons). */
 .wab-filterbar__controls { align-items: center; gap: var(--space-2); }
-.wab-filterbar__controls > .wab-field {
+.wab-filterbar__controls .wab-daterange { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.wab-filterbar__controls > .wab-field,
+.wab-filterbar__controls .wab-daterange > .wab-field {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -46,8 +48,9 @@
   border-radius: var(--radius-control);
   background: var(--c-card);
 }
-.wab-filterbar__controls > .wab-field > .wab-field__label { color: var(--c-ink); font-size: var(--fs-nav); font-weight: var(--fw-semibold); white-space: nowrap; }
-.wab-filterbar__controls > .wab-field .wab-field__control {
+.wab-filterbar__controls .wab-field > .wab-field__label { color: var(--c-ink); font-size: var(--fs-nav); font-weight: var(--fw-semibold); white-space: nowrap; }
+.wab-filterbar__controls > .wab-field .wab-field__control,
+.wab-filterbar__controls .wab-daterange > .wab-field .wab-field__control {
   min-height: calc(var(--size-button) - var(--space-1));
   padding-block: 0;
   border: 0;
@@ -59,3 +62,13 @@
 .wab-filterbar__controls .wab-search .wab-field__control { min-height: var(--size-button); border-radius: var(--radius-control); }
 .wab-filterbar__controls > .wab-search { flex: 1 1 var(--size-field-min); max-width: var(--size-search-max); }
 [data-bp='compact'] .wab-filterbar__controls > * { flex: 1 1 100%; }
+
+/* Design table cells: entity (initial + name + second line) and rating (star). */
+.wab-entity { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.wab-entity__initial { display: grid; flex: none; place-items: center; width: var(--size-control-sm); height: var(--size-control-sm); border-radius: var(--radius-sm); background: var(--c-soft); color: var(--c-accent); font-size: var(--fs-sm); font-weight: var(--fw-bold); }
+.wab-entity__text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-0); min-width: 0; }
+.wab-entity__name { font-weight: var(--fw-semibold); }
+.wab-entity__sub { color: var(--c-muted); font-size: var(--fs-xs); }
+.wab-rating { display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-numeric); font-weight: var(--fw-semibold); }
+.wab-rating .wab-icon { color: var(--c-star); fill: currentColor; }
+.wab-rating__count { color: var(--c-muted); font-weight: var(--fw-regular); }

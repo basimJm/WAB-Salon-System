@@ -16,6 +16,13 @@
 .wab-kpi__delta--up .wab-kpi__chip { background: var(--tone-green-bg); color: var(--tone-green-fg); }
 .wab-kpi__delta--down .wab-kpi__chip { background: var(--tone-rose-bg); color: var(--tone-rose-fg); }
 .wab-kpi__delta-label { color: var(--c-muted); font-weight: var(--fw-regular); }
+.wab-kpi__parts { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin: 0; padding: var(--space-2) 0 0; border-block-start: var(--size-hairline) dashed var(--c-line2); list-style: none; }
+.wab-kpi__part { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--c-muted); font-size: var(--fs-xs); }
+.wab-kpi__part b { color: var(--c-ink); font-family: var(--font-numeric); font-weight: var(--fw-semibold); }
+.wab-kpi__dot { width: var(--size-nav-dot); height: var(--size-nav-dot); border-radius: var(--radius-pill); background: var(--c-primary-end); }
+.wab-kpi__event { font-family: var(--font-numeric); direction: ltr; }
+.wab-kpis { display: grid; gap: var(--space-3); }
+.wab-section-title { font-size: var(--fs-base); font-weight: var(--fw-bold); }
 
 .wab-skeleton {
   display: block;

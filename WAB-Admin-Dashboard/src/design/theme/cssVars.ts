@@ -46,6 +46,7 @@ export function buildCssVars(theme: ThemeName, direction: Direction): CssVars {
     '--c-on-brand-chip': BRAND.onBrandChip,
     '--c-on-brand-soft': BRAND.onBrandSoft,
     '--c-on-brand-text': BRAND.onBrandText,
+    '--c-star': BRAND.star,
     ...tones,
     ...chart,
     ...prefixed('space', SPACING),

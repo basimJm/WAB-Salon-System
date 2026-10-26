@@ -1,3 +1,4 @@
+import { MemoryRouter } from 'react-router-dom';
 import { screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { deltaPercent, sumCounts, withPrefix } from '@/domain/analytics/analytics';
@@ -28,11 +29,20 @@ describe('analytics rules', () => {
 });
 
 describe('analytics pages', () => {
-  it('overview shows the four totals', async () => {
-    renderWithApp(<LiveOverviewPage />, makeContainer());
+  it('overview shows the four totals with their event breakdown (design 02)', async () => {
+    renderWithApp(
+      <MemoryRouter>
+        <LiveOverviewPage />
+      </MemoryRouter>,
+      makeContainer(),
+    );
     expect(await screen.findByText('Payment events')).toBeInTheDocument();
     expect(screen.getByText('64')).toBeInTheDocument();
     expect(screen.getByText('110')).toBeInTheDocument();
+    expect(screen.getByText('payment.succeeded')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: "Today's report" })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /^Alerts \(\d+\)$/ })).toBeInTheDocument();
+    expect(screen.getByText(/· Amman time$/)).toBeInTheDocument();
   });
 
   it('a family page charts only its events', async () => {

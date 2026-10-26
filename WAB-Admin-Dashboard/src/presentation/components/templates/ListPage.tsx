@@ -12,6 +12,8 @@ export interface ListPageProps<Row> {
   subtitle?: string;
   /** Buttons at the end of the header (create, import...). */
   actions?: ReactNode;
+  /** Next to the title (e.g. the realtime "Live" pill on live lists). */
+  badges?: ReactNode;
   /** Filter controls; omit for pages without filters. */
   filters?: Pick<FilterBarProps, 'active' | 'onClearAll'> & { controls: ReactNode };
   toolbar?: TableToolbarProps;
@@ -29,6 +31,7 @@ export function ListPage<Row>({
   title,
   subtitle,
   actions,
+  badges,
   filters,
   toolbar,
   table,
@@ -42,7 +45,12 @@ export function ListPage<Row>({
     table.rows.length > 0;
   return (
     <div className="wab-page wab-stack">
-      <PageHeader title={title} {...(subtitle ? { subtitle } : {})} actions={actions} />
+      <PageHeader
+        title={title}
+        {...(subtitle ? { subtitle } : {})}
+        actions={actions}
+        badges={badges}
+      />
       {filters ? (
         <FilterBar active={filters.active} onClearAll={filters.onClearAll}>
           {filters.controls}

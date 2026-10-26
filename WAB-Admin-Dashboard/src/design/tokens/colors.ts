@@ -11,6 +11,8 @@ export const BRAND = {
   onBrandChip: 'rgba(255,255,255,.16)',
   onBrandSoft: '#E9D5FF',
   onBrandText: '#EDE4FC',
+  /** Rating star (design: #F59E0B in both themes). */
+  star: '#F59E0B',
 } as const;
 
 export const THEME_NAMES = ['light', 'dark'] as const;

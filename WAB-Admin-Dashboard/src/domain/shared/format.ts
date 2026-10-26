@@ -42,9 +42,10 @@ export function formatJodAmount(amount: string, language: Language): string {
   return `${signText}${wholeText}${decimalSeparator(language)}${fractionText}`;
 }
 
-type DateStyle = 'date' | 'time' | 'dateTime';
+type DateStyle = 'date' | 'longDate' | 'time' | 'dateTime';
 const OPTIONS: Readonly<Record<DateStyle, Intl.DateTimeFormatOptions>> = {
   date: { year: 'numeric', month: 'short', day: 'numeric' },
+  longDate: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
   time: { hour: 'numeric', minute: '2-digit', hour12: true },
   dateTime: {
     year: 'numeric',

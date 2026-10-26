@@ -1,5 +1,7 @@
-.wab-chart { display: grid; gap: var(--space-3); margin: 0; min-width: 0; }
-.wab-chart__head { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: var(--space-3); }
+/* Design card block: every chart sits in its own card with a bold 14px title row. */
+.wab-chart { display: grid; gap: var(--space-3); margin: 0; min-width: 0; padding: var(--space-4); border: var(--size-hairline) solid var(--c-line); border-radius: var(--radius-lg); background: var(--c-card); box-shadow: var(--shadow-card); }
+.wab-card .wab-chart { padding: 0; border: 0; box-shadow: none; }
+.wab-chart__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); font-size: var(--fs-md); font-weight: var(--fw-bold); }
 .wab-chart__svg, .wab-sparkline { direction: ltr; }
 .wab-chart__svg { width: 100%; height: auto; max-height: var(--size-chart-max); }
 .wab-chart__svg--donut { max-width: var(--size-donut-max); margin-inline: auto; }
