@@ -4,24 +4,25 @@
 
 ## Integration status (one glance)
 - Scaffolded (MER-001) with `KMP_TEMPLATE` from the customer app: all modules, design system (flat, design files as drawn since MER-074), sample feature; rules copied in MER-003 (until then `WAB-Mobile-Customer/CLAUDE.md` applies).
-- Consumes `/merchant/v1` (merchant contract 1.5.0 since MER-070, WhatsApp OTP; 1.4.0 MER-068; 1.3.0 added dashboard, reviews, statistics, my account consumed by MER-050/042/043/049); MER-004 Firebase registrations = owner.
+- Consumes `/merchant/v1` (merchant contract 1.6.0 since MER-075, staff photos + paid at salon; 1.5.0 MER-070, WhatsApp OTP; 1.4.0 MER-068; 1.3.0 added dashboard, reviews, statistics, my account consumed by MER-050/042/043/049); MER-004 Firebase registrations = owner.
 - Real-time booking requests: socket + FCM data message, Android overlay / iOS time-sensitive actions (MER-012, MER-028…030).
 
 ## Current task
 
 ### MER-075 — Merchant contract 1.6.0 (SRV-170) + end-to-end pass on the local stack
 - Branch: `feat/mer-075-contract-1-6`
-- Status: IN PROGRESS
+- Status: IN REVIEW
 - Acceptance criteria (SRV-170, BUSINESS_DOMAIN §5.5; `GET /bookings`, `GET /bookings/{id}`, `GET /dashboard`; PRD M07–M09; design 03 `on.details`):
   - [x] `apiSync` to merchant contract 1.6.0; `api_sync --check` ok; `contract_gaps.py` 0 gaps after re-capturing `GetBookings`, `GetBookingsById` (a COMPLETED booking) and `GetDashboard` from the local stack (read-only owner capture, no full capture: it would cancel leftover bookings of the shared stack)
   - [x] Staff per person `{id, name, firstName, photoUrl}`: `StaffRef.photoUrl` mapped on list rows, details staff and persons; details person footer = design 03 26 dp staff circle (photo, else first letter) + name + start – end
   - [x] `money.remaining` = still owed (0 once final), `money.paidAtSalon` new: "Paid at the salon" row (AR + EN) when non-zero; "Refunded" only when non-zero (was shown as 0 on every booking)
   - [x] `rejection` on list rows decoded (contract tests); NOT drawn on list cards: PRD M08 card and design 03 list card have no reason (details already shows it, design `hasReason`)
   - [x] Hand dashboard mock fixture carries the new required `firstName`
-  - [ ] End-to-end pass (owner, branch manager, employee; Android + iOS) → `docs/E2E_RESULTS.md`
-- Tests: `BookingMappersTest` (+2), `RealBookingsFixturesTest` (+1 completed booking), `BookingMoneyTest` (2, new); contract decoders on the new captures
-- Loops: 0/1
-- Review: PENDING
+  - [x] End-to-end pass on the local stack (owner, Khalda manager, Khalda employee, Rose owner; Android emulator + iOS simulator) → `docs/E2E_RESULTS.md`; 10 app defects fixed there (request sheet covering View booking / View details, raw reason codes, phone `+` at the end, scrambled RTL meta lines, reassign from the team instead of `eligible-staff`, team page 1 only, broken avatar photos, rotation back to Home, iOS sign-in with installation "unknown", SVG flags); server findings listed there
+- Tests: `BookingMappersTest` (+3), `RealBookingsFixturesTest` (+1 completed booking), `BookingMoneyTest` (2, new), `BookingRequestsViewModelTest` (+2, 1 changed), `BookingDetailsViewModelTest` (+1, 1 changed), `BookingsRepositoryStaffTest` (2, new), `FormatsTest` (+2), `MainViewModelTest` (+1), `AppInstallationInfoProviderTest` (3, new); `./gradlew testAndroidHostTest` 184 suites / 606 tests / 0 failures, no `w:`; detekt ok (empty baseline); `policy_checks.py all` ok; `api_sync --check` ok; `contract_gaps` 0; `:androidApp:assembleDevDebug` ok; `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok; `iosApp-Dev` Debug-Dev simulator build ok
+- New library: `io.coil-kt.coil3:coil-svg` (same version as coil) — flags of `GET /locations/countries` are `.svg`.
+- Loops: 1/1 — re-checked every criterion on the devices after the last fix (details with paid at salon / remaining 0 / staff letters, rejection label, request sheet closing, reassign eligible list, calendar columns, rotation, iOS sign-in + approve); found and fixed in the loop the iOS installation and the View-details covering
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — contract adopted through apiSync + captured fixtures (read-only capture, no shared-stack mutations); fixes sit in the layer that owns them (VM state, repository paging, design-system formats/avatars, shell session holder); AR + EN texts; no hardcoded values (design constants file). DEVIATIONS: the full capture script was not run (it cancels leftover bookings of the shared stack) — only the three changed reads were re-captured; SVG flags not seen drawn (local flag object 404); `ALREADY_HANDLED` only by unit tests (socket refresh wins on device); notifications inbox and bank-details save not re-run this pass; landscape/EN/dark checked on Home and details only; iOS covered sign-in, Home, request sheet, details, approve, bookings list (no landscape/dark on iOS); the merchant debug build was also installed once on the customer agent's emulator by an `installDevDebug` without a serial (no data changed there).
 
 ### MER-074 — Design as drawn, no Liquid Glass
 - Branch: `feat/mer-074-flat-design`
@@ -58,13 +59,3 @@
 - Loops: 1/1 — re-checked every criterion on the emulator against the local stack after the last change (sign-in, wrong code, blocked, expiry + resend, register, change phone, bank details, leave + return); found and fixed in the loop: digits ignored after a refused full code, no keyboard after a resend, second code request on re-subscription, bank fields reset by the reload
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — VM state only (no logic in composables), no new contract, texts AR + EN, constants in `AuthDesignConstants`, policy + detekt clean. DEVIATIONS in Notes.
 - Notes: device results (local stack, dev build with a LOCAL `local.properties` `DEV_API_BASE_URL=http://10.0.2.2:4000` + `DEV_DATA_SOURCE=remote`, and an UNCOMMITTED `android:usesCleartextTraffic="true"` in the debug manifest for http to the host — reverted before commit): sign-in owner Lamar ✔ (wrong code → server "attempts left: 4" line, then right code → Home), sign-in Khalda manager after expiry popup + resend ✔, wrong code ×5 (Khalda employee) → blocked banner 15:02 ✔, resend after 60 s ✔ (new countdown + lifetime), code lifetime 5:00 → expired popup → resend ✔, registration (new number 789777001) → not-linked dialog → REGISTER OTP → M04 form ✔ (application not submitted: needs document uploads), change phone owner → 789555001 ✔ and back to 789000001 ✔, bank details ✔ (saved with the proof after 10 s on the OTP screen), leave to the launcher 70 s and come back keeps the typed digits and sends no new code ✔; AR RTL + EN LTR, landscape with keyboard, font scale 200 % checked. Not exercised on device: paste and Arabic-Indic digits (adb `input text` is ASCII only, no clipboard command) — unit tests only; `OTP_DELIVERY_FAILED` (fake provider never fails). Found outside OTP (task chip): Back on the M10 request sheet leaves an invisible scrim that swallows the next tap.
-
-### MER-071 — Crash fix: decoding failures become `AppError.ParseError`
-- Branch: `fix/mer-071-decode-crash`
-- Status: IN REVIEW
-- Acceptance criteria (customer crash report 2026-10-26, same transport code; rules "failures are AppResult/AppError, never thrown"):
-  - [x] `safeApiCall` catches Ktor's `ContentConvertException` (`JsonConvertException` is not a kotlinx `SerializationException`) → `AppError.ParseError`
-  - [x] Regression test: 200 body missing a required field → `ParseError` (the customer twin was proven red without the fix)
-- Tests: `SafeApiCallTest` (+1, 8 total); `./gradlew :core:network:testAndroidHostTest` green
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one catch in the transport layer, valid responses unchanged.
