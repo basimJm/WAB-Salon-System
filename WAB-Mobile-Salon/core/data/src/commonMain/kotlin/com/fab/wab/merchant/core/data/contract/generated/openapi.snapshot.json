@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Merchant API",
-    "version": "1.4.0"
+    "version": "1.5.0"
   },
   "servers": [
     {
@@ -52,6 +52,7 @@
                   "OTP_BLOCKED",
                   "OTP_INVALID",
                   "OTP_EXPIRED",
+                  "OTP_DELIVERY_FAILED",
                   "PHONE_NOT_REGISTERED",
                   "PHONE_ALREADY_REGISTERED",
                   "ACCOUNT_BLOCKED",
@@ -240,8 +241,8 @@
         "tags": [
           "Auth"
         ],
-        "summary": "OTP pre-check",
-        "description": "Public. Checks the platform limits before the app asks Firebase to send the SMS. A blocked phone or a running resend countdown answers 200 with `allowed: false`.",
+        "summary": "Send an OTP code on WhatsApp",
+        "description": "Public. The platform limits run first (5 requests / 5 min, resend after 60 s, 15 min block); then the server sends a new code on WhatsApp in the `Accept-Language` language (ar default). A blocked phone or a running resend countdown answers 200 with `allowed: false` and sends nothing. A number WhatsApp cannot reach (not on WhatsApp) answers 422 `OTP_DELIVERY_FAILED` (the request still counts). A WhatsApp outage answers 503 `INTERNAL`.",
         "security": [],
         "parameters": [
           {
@@ -310,7 +311,7 @@
                       "properties": {
                         "allowed": {
                           "type": "boolean",
-                          "description": "The app may now ask Firebase to send the SMS."
+                          "description": "A new code was sent on WhatsApp. `false` = blocked or resend countdown running."
                         },
                         "otpLength": {
                           "type": "integer",
@@ -319,6 +320,10 @@
                         "resendAfterSeconds": {
                           "type": "integer",
                           "description": "Resend countdown in seconds."
+                        },
+                        "expiresInSeconds": {
+                          "type": "integer",
+                          "description": "Lifetime of the code just sent (`otp.codeTtlSec`); 0 when no code was sent."
                         },
                         "blockedUntil": {
                           "type": "string",
@@ -329,7 +334,8 @@
                       "required": [
                         "allowed",
                         "otpLength",
-                        "resendAfterSeconds"
+                        "resendAfterSeconds",
+                        "expiresInSeconds"
                       ]
                     },
                     "meta": {
@@ -347,6 +353,16 @@
           },
           "400": {
             "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
             "content": {
               "application/json": {
                 "schema": {
@@ -378,13 +394,13 @@
         }
       }
     },
-    "/merchant/v1/auth/otp/wrong-attempt": {
+    "/merchant/v1/auth/otp/verify": {
       "post": {
         "tags": [
           "Auth"
         ],
-        "summary": "Report a wrong OTP code",
-        "description": "Public. The app reports a wrong code from Firebase; it counts toward the wrong-attempts block.",
+        "summary": "Check the typed code and get an otpToken",
+        "description": "Public. The right code (for this phone and purpose) is used up and answers `otpToken`. Errors: 401 `OTP_INVALID` (wrong code; `details[0].message` says how many attempts are left; the 5th wrong code blocks), 401 `OTP_EXPIRED` (no code, expired or already used: request a new one), 429 `OTP_BLOCKED` (blocked for 15 min).",
         "security": [],
         "parameters": [
           {
@@ -412,10 +428,25 @@
                   "phone": {
                     "type": "string",
                     "pattern": "^\\+[1-9][0-9]{6,14}$"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "enum": [
+                      "LOGIN",
+                      "REGISTER",
+                      "CHANGE_PHONE",
+                      "BANK_DETAILS"
+                    ]
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4,10}$"
                   }
                 },
                 "required": [
-                  "phone"
+                  "phone",
+                  "purpose",
+                  "code"
                 ]
               }
             }
@@ -423,7 +454,7 @@
         },
         "responses": {
           "200": {
-            "description": "Attempts left or the block",
+            "description": "Verified",
             "content": {
               "application/json": {
                 "schema": {
@@ -441,20 +472,18 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "blocked": {
-                          "type": "boolean"
-                        },
-                        "attemptsRemaining": {
-                          "type": "integer"
-                        },
-                        "blockedUntil": {
+                        "otpToken": {
                           "type": "string",
-                          "format": "date-time"
+                          "description": "Signed single-use proof for this phone and purpose. Send it as `otpToken` to the action of that purpose (login, register, change phone, booking confirmation, bank details)."
+                        },
+                        "expiresInSeconds": {
+                          "type": "integer",
+                          "description": "Lifetime of `otpToken` (`otp.proofTtlSec`); ask for a new code after it."
                         }
                       },
                       "required": [
-                        "blocked",
-                        "attemptsRemaining"
+                        "otpToken",
+                        "expiresInSeconds"
                       ]
                     },
                     "meta": {
@@ -472,6 +501,16 @@
           },
           "400": {
             "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
             "content": {
               "application/json": {
                 "schema": {
@@ -640,8 +679,8 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Log in with a Firebase ID token",
-        "description": "The token must prove the phone. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `MEMBER_INACTIVE` (403), `PHONE_NOT_REGISTERED` (404). The profile carries role, salon and permissions for the app to cache.",
+        "summary": "Log in with an otpToken",
+        "description": "`otpToken` = the single-use proof from `POST /auth/otp/verify` (purpose LOGIN) for this phone. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `MEMBER_INACTIVE` (403), `PHONE_NOT_REGISTERED` (404). The profile carries role, salon and permissions for the app to cache.",
         "security": [],
         "parameters": [
           {
@@ -683,10 +722,10 @@
                       "number"
                     ]
                   },
-                  "idToken": {
+                  "otpToken": {
                     "type": "string",
                     "minLength": 1,
-                    "maxLength": 4096
+                    "maxLength": 2048
                   },
                   "installation": {
                     "type": "object",
@@ -733,7 +772,7 @@
                 },
                 "required": [
                   "phone",
-                  "idToken",
+                  "otpToken",
                   "installation"
                 ]
               }
@@ -2351,7 +2390,7 @@
           "Salon application"
         ],
         "summary": "Apply with a new salon (creates the owner, signs them in)",
-        "description": "Public. The phone is proven by a Firebase ID token. The salon waits for admin approval; license documents are private storage keys.",
+        "description": "Public. The phone is proven by an `otpToken` (purpose REGISTER, from `POST /auth/otp/verify`). The salon waits for admin approval; license documents are private storage keys.",
         "security": [],
         "parameters": [
           {
@@ -2393,10 +2432,10 @@
                       "number"
                     ]
                   },
-                  "idToken": {
+                  "otpToken": {
                     "type": "string",
                     "minLength": 1,
-                    "maxLength": 4096
+                    "maxLength": 2048
                   },
                   "firstName": {
                     "type": "string",
@@ -2496,7 +2535,7 @@
                 },
                 "required": [
                   "phone",
-                  "idToken",
+                  "otpToken",
                   "firstName",
                   "lastName",
                   "salon",
@@ -18913,7 +18952,7 @@
           "Payout details"
         ],
         "summary": "Save the bank details (owner only; needs a fresh OTP, purpose BANK_DETAILS)",
-        "description": "The IBAN is validated (ISO 13616 checksum; Jordan = 30 characters) and stored encrypted (AES-256-GCM). A wrong or expired proof is 401 `OTP_INVALID` / `OTP_EXPIRED`; a blocked number 429 `OTP_BLOCKED`; a manager is 403 `OWNER_REQUIRED`.",
+        "description": "The IBAN is validated (ISO 13616 checksum; Jordan = 30 characters) and stored encrypted (AES-256-GCM). `otpToken` = the single-use proof from `POST /auth/otp/verify` (purpose BANK_DETAILS, the owner’s own phone). A wrong, reused or expired proof is 401 `OTP_INVALID` / `OTP_EXPIRED`; a blocked number 429 `OTP_BLOCKED`; a manager is 403 `OWNER_REQUIRED`.",
         "parameters": [
           {
             "schema": {
@@ -18949,16 +18988,17 @@
                   "iban": {
                     "type": "string"
                   },
-                  "idToken": {
+                  "otpToken": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 2048
                   }
                 },
                 "required": [
                   "bankName",
                   "accountHolderName",
                   "iban",
-                  "idToken"
+                  "otpToken"
                 ]
               }
             }
@@ -21948,7 +21988,7 @@
         "tags": [
           "My account"
         ],
-        "summary": "Change my phone: OTP to the new number (purpose CHANGE_PHONE), then this call with its ID token; 409 PHONE_ALREADY_REGISTERED when another member has it",
+        "summary": "Change my phone: OTP to the new number (purpose CHANGE_PHONE), then this call with the `otpToken` from `POST /auth/otp/verify` (single use); 409 PHONE_ALREADY_REGISTERED when another member has it",
         "parameters": [
           {
             "schema": {
@@ -21989,14 +22029,15 @@
                       "number"
                     ]
                   },
-                  "idToken": {
+                  "otpToken": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 2048
                   }
                 },
                 "required": [
                   "phone",
-                  "idToken"
+                  "otpToken"
                 ]
               }
             }

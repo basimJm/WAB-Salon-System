@@ -44,7 +44,7 @@ interface AccountRepository {
     suspend fun update(firstName: String, lastName: String, photo: PhotoChange): AppResult<MyAccount>
 
     /** `409 PHONE_ALREADY_REGISTERED` when another member has the number. */
-    suspend fun changePhone(countryCode: String, number: String, idToken: String): AppResult<MyAccount>
+    suspend fun changePhone(countryCode: String, number: String, otpToken: String): AppResult<MyAccount>
 
     suspend fun setPushEnabled(enabled: Boolean): AppResult<Unit>
 

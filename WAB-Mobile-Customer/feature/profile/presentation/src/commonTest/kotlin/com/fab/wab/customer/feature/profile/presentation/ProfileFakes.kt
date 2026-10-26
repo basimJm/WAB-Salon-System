@@ -25,10 +25,10 @@ import com.fab.wab.customer.feature.auth.domain.model.AuthSession
 import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.customer.feature.auth.domain.model.InstallationLink
 import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
+import com.fab.wab.customer.feature.auth.domain.model.OtpProof
 import com.fab.wab.customer.feature.auth.domain.model.PhoneCheck
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
 import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
-import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
 import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
 import com.fab.wab.customer.feature.auth.domain.repository.InstallationsRepository
 import com.fab.wab.customer.feature.profile.domain.model.CustomerAccount
@@ -168,10 +168,11 @@ class AuthRepoFake : AuthRepository {
     val phoneChanges = mutableListOf<PhoneNumber>()
     override suspend fun checkPhone(phone: PhoneNumber, purpose: AuthPurpose): AppResult<PhoneCheck> = AppResult.Loading
     override suspend fun requestOtp(phoneE164: String, purpose: AuthPurpose): AppResult<OtpPolicy> = AppResult.Loading
-    override suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult> = AppResult.Loading
+    override suspend fun verifyOtp(phoneE164: String, purpose: AuthPurpose, code: String): AppResult<OtpProof> =
+        AppResult.Loading
     override suspend fun login(
         phone: PhoneNumber,
-        idToken: String,
+        otpToken: String,
         installation: InstallationInfo?,
     ): AppResult<AuthSession> = AppResult.Loading
     override suspend fun register(request: RegisterRequest, installation: InstallationInfo?): AppResult<AuthSession> = AppResult.Loading
@@ -179,7 +180,7 @@ class AuthRepoFake : AuthRepository {
         logouts++
         return AppResult.Success(Unit)
     }
-    override suspend fun changePhone(phone: PhoneNumber, idToken: String): AppResult<UserProfile> {
+    override suspend fun changePhone(phone: PhoneNumber, otpToken: String): AppResult<UserProfile> {
         phoneChanges += phone
         return AppResult.Success(UserProfile("c1", "Sara", Gender.FEMALE))
     }

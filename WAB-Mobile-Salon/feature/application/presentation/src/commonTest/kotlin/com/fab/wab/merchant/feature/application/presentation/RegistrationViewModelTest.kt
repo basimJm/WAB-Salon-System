@@ -1,6 +1,9 @@
 package com.fab.wab.merchant.feature.application.presentation
 
 import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
+import com.fab.wab.merchant.core.domain.AppError
+import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.ErrorCode
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
 import com.fab.wab.merchant.core.domain.upload.UploadRejection
 import com.fab.wab.merchant.core.ui.media.FakeFilePicker
@@ -29,6 +32,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+
+private const val UNAUTHORIZED = 401
+private const val CONFLICT = 409
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RegistrationViewModelTest {
@@ -102,6 +108,25 @@ class RegistrationViewModelTest {
         assertEquals("Lina Beauty", applications.applied.single().salonName)
         assertEquals(listOf("key-8"), applications.applied.single().documentKeys)
         assertEquals("Lina", session.member?.firstName)
+    }
+
+    /** MER-070: the REGISTER `otpToken` is single use and short-lived; a rejected one needs a new code from login. */
+    @Test
+    fun aRejectedRegisterProofShowsTheErrorAndReturnsToLogin() = runTest(UnconfinedTestDispatcher()) {
+        proof()
+        applications.applyResult = AppResult.Error(AppError.ServerError(ErrorCode.OTP_EXPIRED, UNAUTHORIZED, null))
+        val vm = viewModel()
+        val effects = mutableListOf<SideEffect>()
+        backgroundScope.launch { vm.sideEffect.collect { effects += it } }
+        vm.state.first { it.cities.isNotEmpty() }
+        vm.fillValidForm()
+        vm.state.first { it.areas.isNotEmpty() && it.canSubmit }
+        vm.onEvent(UiAction.OnSubmit)
+        assertEquals(listOf(SideEffect.ShowError("failed"), SideEffect.NavigateToLogin), effects.takeLast(2))
+
+        applications.applyResult = AppResult.Error(AppError.ServerError(ErrorCode.PHONE_ALREADY_REGISTERED, CONFLICT, null))
+        vm.onEvent(UiAction.OnSubmit)
+        assertEquals(SideEffect.ShowError("failed"), effects.last(), "other refusals keep the form")
     }
 
     @Test

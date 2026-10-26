@@ -44,9 +44,4 @@ class MainActivity : ComponentActivity() {
         getKoin().get<AndroidImagePickerBridge>().detach()
         super.onDestroy()
     }
-
-    override fun onResume() {
-        super.onResume()
-        getKoin().setProperty("androidActivity", this)
-    }
 }

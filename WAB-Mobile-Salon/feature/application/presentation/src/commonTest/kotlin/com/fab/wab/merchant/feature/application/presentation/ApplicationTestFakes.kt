@@ -40,7 +40,7 @@ internal class FakeApplications : ApplicationRepository {
     val applied = mutableListOf<RegistrationForm>()
     val resubmitted = mutableListOf<RegistrationForm>()
 
-    override suspend fun apply(form: RegistrationForm, phone: PhoneNumber, idToken: String, installation: InstallationInfo?) =
+    override suspend fun apply(form: RegistrationForm, phone: PhoneNumber, otpToken: String, installation: InstallationInfo?) =
         applyResult.also { applied += form }
 
     override suspend fun current() = current

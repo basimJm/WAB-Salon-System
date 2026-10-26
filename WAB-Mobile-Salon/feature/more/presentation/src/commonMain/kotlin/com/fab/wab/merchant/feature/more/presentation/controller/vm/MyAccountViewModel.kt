@@ -210,7 +210,7 @@ class MyAccountViewModel(
         proof ?: return
         scope.launch {
             updateState { copy(changingPhone = true) }
-            val result = deps.account.changePhone(proof.phone.countryCode, proof.phone.number, proof.idToken)
+            val result = deps.account.changePhone(proof.phone.countryCode, proof.phone.number, proof.otpToken)
             updateState { copy(changingPhone = false) }
             when (result) {
                 is AppResult.Success -> {

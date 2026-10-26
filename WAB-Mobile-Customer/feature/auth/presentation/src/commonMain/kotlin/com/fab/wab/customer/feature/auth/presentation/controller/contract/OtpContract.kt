@@ -4,8 +4,9 @@ import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
 
 sealed interface OtpContract {
     /**
-     * S13 states: empty with countdown, filled, verifying, wrong code, countdown finished (resend active),
-     * expired (popup), blocked (remaining time). [otpLength] always comes from the backend.
+     * S13 states: requesting, code sent on WhatsApp (countdowns: resend + code expiry), filled, verifying, wrong code
+     * (server text with the attempts left), countdown finished (resend active), expired (popup), blocked (remaining
+     * time), delivery failed (number without WhatsApp, retry). [otpLength] always comes from the backend.
      */
     data class UiState(
         val purpose: AuthPurpose = AuthPurpose.LOGIN,
@@ -13,12 +14,16 @@ sealed interface OtpContract {
         val code: String = "",
         val otpLength: Int = 0,
         val requesting: Boolean = true,
-        /** Firebase confirmed it sent a code; Verify stays off until then (a failed send leaves nothing to confirm). */
+        /** The server sent (or still holds) a code for this phone; Verify stays off until then. */
         val codeSent: Boolean = false,
         val verifying: Boolean = false,
         val codeError: Boolean = false,
+        /** The server's localized wrong-code text (attempts left); null → the screen's own wrong-code text. */
+        val codeErrorMessage: String? = null,
         val resendRemainingSeconds: Int = 0,
         val blockedRemainingSeconds: Int = 0,
+        /** Lifetime left of the code just sent (`expiresInSeconds`); 0 = unknown or over. */
+        val expiresRemainingSeconds: Int = 0,
         val dialog: OtpDialog? = null,
         val requestError: String? = null,
     ) {
@@ -39,10 +44,10 @@ sealed interface OtpContract {
     }
 
     sealed interface SideEffect {
-        /** LOGIN / REGISTER done: the session is stored, the auth flow closes. */
+        /** LOGIN done: the session is stored, the auth flow closes. */
         data object NavigateHome : SideEffect
 
-        /** Non-login purposes: the proof was published, the caller continues. */
+        /** Non-login purposes: the `otpToken` was published, the caller continues. */
         data object NavigateBack : SideEffect
         data class ShowError(val message: String) : SideEffect
     }

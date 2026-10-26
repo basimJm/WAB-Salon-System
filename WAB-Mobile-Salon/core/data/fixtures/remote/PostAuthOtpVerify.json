@@ -2,8 +2,7 @@
   "success": true,
   "message": "Done successfully.",
   "data": {
-    "allowed": true,
-    "otpLength": 6,
-    "resendAfterSeconds": 60
+    "otpToken": "<redacted>",
+    "expiresInSeconds": 600
   }
 }
