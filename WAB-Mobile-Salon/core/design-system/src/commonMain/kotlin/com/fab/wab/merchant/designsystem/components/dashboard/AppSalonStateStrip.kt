@@ -19,9 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.merchant.core.domain.session.SalonState
 import com.fab.wab.merchant.designsystem.components.badge.StatusTone
 import com.fab.wab.merchant.designsystem.components.badge.statusColors
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.glassPressScale
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.resources.Res
@@ -103,8 +101,7 @@ fun AppWarningBanner(
 ) {
     val colors = AppTheme.colors
     val spacing = AppTheme.spacing
-    val press = rememberGlassPress()
-    val clickable = if (onClick != null) Modifier.glassPressScale(press).glassClickable(press, onClick = onClick) else Modifier
+    val clickable = if (onClick != null) Modifier.appClickable(onClick = onClick) else Modifier
     Row(
         modifier = modifier
             .fillMaxWidth()
