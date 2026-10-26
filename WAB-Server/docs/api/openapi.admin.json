@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.7.0"
+    "version": "1.8.0"
   },
   "servers": [
     {
@@ -34947,7 +34947,7 @@
         "tags": [
           "Salon branches"
         ],
-        "summary": "Branches of the salon, main first (admin; reason + audit, the owner is notified)",
+        "summary": "Branches of the salon, main first (admin; reason + audit, the owner is notified); paged, `meta` = {page, pageSize, total}",
         "parameters": [
           {
             "schema": {
@@ -34957,6 +34957,28 @@
             "required": true,
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            },
+            "required": false,
+            "name": "pageSize",
+            "in": "query"
           },
           {
             "schema": {

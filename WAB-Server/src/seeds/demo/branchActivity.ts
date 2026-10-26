@@ -13,6 +13,7 @@ import {
   type DemoBranchSpec,
 } from '../../constants/demoSeed';
 import type { DayOfWeek } from '../../constants/time';
+import { salonTitle } from '../../domain/branches/salonTitle';
 import type { ScheduleDay } from '../../models/salon.model';
 import { addDays, localDateOf } from '../../utils/time';
 import { buildBookings } from './bookings';
@@ -28,9 +29,6 @@ import {
   type DemoDataset,
   type DemoDoc,
 } from './types';
-
-/** Text between the salon and the branch name in notifications ("Salon - Branch", §5.17). */
-const NAME_SEPARATOR = ' - ';
 
 /**
  * Everything one extra branch gets (SRV-160): its place, services, staff, bookings in every state
@@ -67,6 +65,10 @@ interface StaffRow {
     readonly workingDays: { readonly day: DayOfWeek }[];
   };
 }
+
+/** The salon's main branch plus its `DEMO_BRANCHES` extras. */
+const branchCountOf = (salonKey: string): number =>
+  1 + DEMO_BRANCHES.filter((branch) => branch.salon === salonKey).length;
 
 /** The branch seen as a bookable salon by the booking builder. */
 const asBookable = (
@@ -109,7 +111,6 @@ const asBookable = (
     spec: {
       ...salonSpec,
       key: `${spec.salon}:${spec.key}`,
-      name: `${salonSpec.name}${NAME_SEPARATOR}${name.en}`,
     },
     id: source.salonId,
     gender: source.gender,
@@ -120,6 +121,11 @@ const asBookable = (
     // The owner sees every branch; the branch manager answers for theirs (§6 branch scopes).
     responders: [demoId(`member:${spec.salon}:owner`), ...managers],
     takesBookings: true,
+    // Notifications name it "Salon - Branch" in each language, like every branch of the salon.
+    title: {
+      ar: salonTitle(salonSpec.name, name.ar, branchCountOf(spec.salon)),
+      en: salonTitle(salonSpec.name, name.en, branchCountOf(spec.salon)),
+    },
     branch: {
       id: branch._id,
       snapshot: { name, locationText: spec.locationText, phone: spec.phone },

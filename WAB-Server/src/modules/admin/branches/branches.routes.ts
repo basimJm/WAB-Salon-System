@@ -4,7 +4,7 @@ import { ADMIN_BRANCH_ROUTES } from '../../../constants/branches';
 import type { AdminBranchesService } from '../../../domain/branches/adminBranches.service';
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
-import { sendCreated, sendSuccess } from '../../../utils/response/successResponse';
+import { sendCreated, sendPaginated, sendSuccess } from '../../../utils/response/successResponse';
 import { toActor } from '../crud/actor';
 import {
   adminBranchOfflineBody,
@@ -13,9 +13,10 @@ import {
   adminUpdateBranchBody,
   salonBranchParams,
   salonBranchesParams,
+  salonBranchesQuery,
 } from './branches.validation';
 
-const part = <S extends z.ZodType>(req: Request, key: 'body' | 'params'): z.infer<S> =>
+const part = <S extends z.ZodType>(req: Request, key: 'body' | 'params' | 'query'): z.infer<S> =>
   (req.validated as Record<string, z.infer<S>>)[key] as z.infer<S>;
 
 /** Branches of any salon (§5.16, Admin PRD A13): full CRUD with reason + audit + owner notice. */
@@ -34,10 +35,12 @@ export const createAdminBranchesRouter = (
 
   router.get(
     routes.list,
-    validate({ params: salonBranchesParams }),
+    validate({ params: salonBranchesParams, query: salonBranchesQuery }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof salonBranchesParams>(req, 'params');
-      sendSuccess(req, res, { data: await service.list(id) });
+      const params = part<typeof salonBranchesQuery>(req, 'query');
+      const { items, total } = await service.list(id, params);
+      sendPaginated(req, res, items, params, total);
     }),
   );
   router.post(

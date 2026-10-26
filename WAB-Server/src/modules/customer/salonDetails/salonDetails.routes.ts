@@ -4,7 +4,7 @@ import type { SalonDetailsService } from '../../../domain/salonDetails/salonDeta
 import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { sendSuccess } from '../../../utils/response/successResponse';
-import { salonParamsSchema, staffParamsSchema } from './salonDetails.validation';
+import { salonParamsSchema, salonQuerySchema, staffParamsSchema } from './salonDetails.validation';
 
 export interface SalonDetailsRouterOptions {
   readonly service: SalonDetailsService;
@@ -27,13 +27,15 @@ export const createSalonDetailsRouter = ({
     SALON_DETAILS_ROUTES.byId,
     limiter,
     optionalAuth,
-    validate({ params: salonParamsSchema }),
+    validate({ params: salonParamsSchema, query: salonQuerySchema }),
     asyncHandler(async (req: Request, res: Response) => {
+      const { query } = req.validated as { query: { branchId?: string } };
       sendSuccess(req, res, {
         data: await service.get({
           salonId: params(req)['salonId'] ?? '',
           language: req.language,
           customerId: req.auth?.subjectId,
+          branchId: query.branchId,
         }),
       });
     }),
