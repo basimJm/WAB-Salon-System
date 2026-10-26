@@ -21,6 +21,8 @@ export const OTP_SECRET_MIN_LENGTH = 32;
 export const OTP_FIXED_CODE_PATTERN = /^\d{4,10}$/;
 export const MONGO_URI_PATTERN = /^mongodb(\+srv)?:\/\/\S+$/;
 export const REDIS_URL_PATTERN = /^rediss?:\/\/\S+$/;
+/** A MongoDB database name (letters, digits, `_`, `-`; Atlas allows up to 63 bytes). */
+export const MONGO_DATABASE_NAME_PATTERN = /^[A-Za-z0-9_-]{1,63}$/;
 
 export const LIST_SEPARATOR = ',';
 /** Production URLs of external APIs must use TLS. */
@@ -98,6 +100,13 @@ export const ENV_KEYS = {
   cloudfrontBaseUrl: 'CLOUDFRONT_PRIVATE_BASE_URL',
   cloudfrontKeyPairId: 'CLOUDFRONT_KEY_PAIR_ID',
   cloudfrontPrivateKey: 'CLOUDFRONT_PRIVATE_KEY',
+  /** `true` loads the idempotent demo seed after startup (development data only, SRV-160). */
+  seedDemoOnStart: 'SEED_DEMO_ON_START',
+  /**
+   * Under `NODE_ENV=production` (the hosted dev service runs it) the demo seed runs only when this
+   * names the database the server is connected to; the real production database must never be named.
+   */
+  seedDemoDatabase: 'SEED_DEMO_DATABASE',
 } as const;
 
 /**

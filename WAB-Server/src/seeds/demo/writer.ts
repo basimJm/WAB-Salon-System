@@ -1,3 +1,4 @@
+import type { Types } from 'mongoose';
 import { isDuplicateKeyError } from '../../utils/database/errors';
 import { DEMO_COLLECTIONS, type DemoCollection, type DemoDataset, type DemoDoc } from './types';
 
@@ -33,6 +34,16 @@ export const toDemoModel = (model: unknown): DemoModel => {
     insertMany: (docs, options) => typed.insertMany(docs, options),
     validateDoc: (doc) => new typed(doc).validateSync() ?? null,
   };
+};
+
+/** Ids among `ids` that are already stored. */
+export const storedIds = async (
+  model: DemoModel,
+  ids: readonly Types.ObjectId[],
+): Promise<Set<string>> => {
+  if (ids.length === 0) return new Set();
+  const stored = await model.find({ _id: { $in: ids } }, { _id: 1 }).lean();
+  return new Set(stored.map((row) => String(row._id)));
 };
 
 const writtenCount = (error: unknown): number | undefined => {
@@ -77,10 +88,10 @@ export const writeDemoDataset = async (
   for (const collection of DEMO_COLLECTIONS) {
     const model = models.get(collection) as DemoModel;
     const docs: DemoDoc[] = dataset[collection];
-    const stored = await model
-      .find({ _id: { $in: docs.map((doc) => doc._id) } }, { _id: 1 })
-      .lean();
-    const known = new Set(stored.map((row) => String(row._id)));
+    const known = await storedIds(
+      model,
+      docs.map((doc) => doc._id),
+    );
     const fresh = docs.filter((doc) => !known.has(doc._id.toString()));
     let created = fresh.length;
     if (fresh.length > 0) {
@@ -94,4 +105,23 @@ export const writeDemoDataset = async (
     result[collection] = { created, existing: docs.length - created };
   }
   return result;
+};
+
+/**
+ * Writes the base demo data set unless an earlier run finished it (SRV-160). Collections are
+ * written in `DEMO_COLLECTIONS` order, so a stored last upload means every row went in. The rows
+ * depend on the day of the run (bookings around "now"): writing them again on another day would
+ * add appointments that overlap the stored ones, so a finished base is never written again.
+ */
+export const writeDemoBaseOnce = async (
+  dataset: DemoDataset,
+  models: ReadonlyMap<string, DemoModel>,
+): Promise<DemoWriteResult | 'already seeded'> => {
+  const last = dataset.Upload[dataset.Upload.length - 1];
+  const uploads = models.get('Upload');
+  if (last !== undefined && uploads !== undefined) {
+    const stored = await storedIds(uploads, [last._id]);
+    if (stored.size > 0) return 'already seeded';
+  }
+  return writeDemoDataset(dataset, models);
 };
