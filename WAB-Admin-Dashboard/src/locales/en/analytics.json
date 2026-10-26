@@ -1,0 +1,102 @@
+{
+  "analytics": {
+    "noData": "No data yet",
+    "noDataText": "The server does not provide this metric yet.",
+    "noValue": "—",
+    "kpis": "Key figures",
+    "vsPrevious": "vs previous period",
+    "day": "Day",
+    "status": "Status",
+    "count": "Count",
+    "share": "Share",
+    "events": "Events",
+    "eventsByDay": "Server events per day",
+    "openTransactions": "Open transactions",
+    "ofDecisions": "of {{count}} decisions",
+    "ofFinished": "of {{count}} finished attempts",
+    "traffic": {
+      "sub": "Installs, active users and sessions across both apps",
+      "kpi": {
+        "installs": "Installs",
+        "dau": "Daily active (DAU)",
+        "wau": "Weekly active (WAU)",
+        "mau": "Monthly active (MAU)",
+        "sessions": "Sessions",
+        "avgSession": "Avg session length",
+        "conversion": "Guest → registered"
+      },
+      "card": {
+        "active": "Active users and installs",
+        "byApp": "By app",
+        "byPlatform": "By platform",
+        "byVersion": "By app version",
+        "byGender": "By gender",
+        "byCity": "By city",
+        "topDevices": "Top devices",
+        "byLanguage": "By language",
+        "osVersion": "OS version",
+        "daily": "Daily metrics"
+      }
+    },
+    "screens": {
+      "sub": "Views of every screen and event from Firebase Analytics via BigQuery",
+      "kpi": {
+        "events": "Events",
+        "users": "Unique users",
+        "perUser": "Per user"
+      },
+      "card": {
+        "screens": "Screens by views",
+        "overTime": "Count over time",
+        "byParam": "Split by parameter",
+        "raw": "Raw events"
+      }
+    },
+    "funnels": {
+      "sub": "Conversion, drop-off and median time between steps",
+      "kpi": {
+        "overall": "Overall conversion",
+        "entered": "Entered",
+        "completed": "Completed",
+        "median": "Median time to complete"
+      },
+      "card": {
+        "result": "Funnel result"
+      }
+    },
+    "search": {
+      "sub": "Search, filters, banners, recommended and salon page engagement",
+      "kpi": {
+        "searches": "Searches",
+        "zero": "Searches with no results",
+        "bannerCtr": "Banner CTR",
+        "recommended": "Recommended taps",
+        "location": "Location allowed",
+        "favorites": "Favourites"
+      },
+      "card": {
+        "top": "Top searches",
+        "noResults": "Searches with no results",
+        "filters": "Filter use",
+        "entry": "Entry points to “All salons”",
+        "banners": "Banners",
+        "locationPermission": "Location permission (Near me)",
+        "salonPages": "Salon page engagement"
+      }
+    },
+    "retention": {
+      "sub": "Retention cohorts by install week, and repeat booking",
+      "kpi": {
+        "d1": "Active on day 1",
+        "d7": "Day 7",
+        "d30": "Day 30",
+        "repeat30": "Repeat booking (30 days)",
+        "repeat90": "Repeat booking (90 days)"
+      },
+      "card": {
+        "cohorts": "Cohort table",
+        "perCustomer": "Bookings per customer"
+      }
+    }
+  }
+}

@@ -19,6 +19,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 private const val BLOCK_SECONDS = 90
+private const val AWAY_SECONDS = 30
 
 /** MER-070 happy paths: WhatsApp code request → verify → `otpToken` → sign-in or hand-off (BUSINESS_DOMAIN §3.1a). */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -29,7 +30,7 @@ class OtpViewModelTest {
         val harness = OtpHarness(this)
         val viewModel = harness.viewModel()
         val ready = viewModel.state.first { !it.requesting }
-        assertEquals(OTP_E164, ready.phoneDisplay)
+        assertEquals(OTP_DISPLAY, ready.phoneDisplay)
         assertEquals(listOf(OTP_E164), harness.repository.requested)
         assertTrue(ready.codeSent)
         assertEquals(TEST_OTP_LENGTH, ready.otpLength)
@@ -41,9 +42,11 @@ class OtpViewModelTest {
         val resendable = viewModel.state.first { it.resendRemainingSeconds == 0 }
         assertTrue(resendable.canResend)
         assertEquals(TEST_EXPIRES_SECONDS - TEST_RESEND_SECONDS - 1, resendable.expiresRemainingSeconds)
+        assertEquals(1, resendable.codesSent)
         viewModel.onEvent(UiAction.OnResendClick)
         testScheduler.runCurrent()
         assertEquals(2, harness.repository.requested.size)
+        assertEquals(2, viewModel.state.first().codesSent, "a new code gives the field the keyboard again")
     }
 
     @Test
@@ -137,5 +140,19 @@ class OtpViewModelTest {
 
     private companion object {
         const val HTTP_UNPROCESSABLE = 422
+    }
+
+    @Test
+    fun comingBackToTheScreenDoesNotRequestASecondCode() = runTest(UnconfinedTestDispatcher()) {
+        val harness = OtpHarness(this)
+        // No permanent collector: the member leaves for WhatsApp longer than the state timeout, then comes back.
+        val viewModel = harness.viewModel(collect = false)
+        viewModel.state.first { !it.requesting }
+        viewModel.onEvent(UiAction.OnCodeChange("12"))
+        testScheduler.advanceTimeBy(AWAY_SECONDS.seconds)
+        val back = viewModel.state.first()
+        assertEquals(listOf(OTP_E164), harness.repository.requested, "one request per screen")
+        assertEquals("12", back.code)
+        assertTrue(back.codeSent)
     }
 }

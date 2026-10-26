@@ -2,6 +2,7 @@ package com.fab.wab.customer.feature.home.presentation
 
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppError
+import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.auth.AuthTokens
 import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
@@ -126,6 +127,7 @@ class HomeViewModelTest {
     private val realtime = FakeRealtimeClient()
     private val effects = mutableListOf<SideEffect>()
     private var fix: LocationData? = AMMAN
+    private val language = MutableStateFlow(AppLanguage.ARABIC)
 
     private fun kotlinx.coroutines.test.TestScope.viewModel(session: SessionState = GUEST): HomeViewModel {
         val provider = object : DeviceLocationProvider {
@@ -140,6 +142,7 @@ class HomeViewModelTest {
             realtime = realtime,
             analytics = NoOpAnalyticsTracker,
             errorText = { "error" },
+            languageChanges = language,
         )
         val vm = HomeViewModel(deps, testScope = backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
@@ -158,6 +161,17 @@ class HomeViewModelTest {
         assertEquals(NearestUi.LocationOff, state.nearest)
         assertTrue(state.hasContent)
         assertEquals(true, state.recommended.hasMore)
+    }
+
+    @Test
+    fun languageSwitchReloadsTheLocalizedContent() = runTest(UnconfinedTestDispatcher()) {
+        // CUS-092: AR -> EN kept Arabic service names until a pull-to-refresh.
+        viewModel()
+        assertEquals(1, repository.calls.size)
+        language.value = AppLanguage.ARABIC
+        assertEquals(1, repository.calls.size, "same language: no reload")
+        language.value = AppLanguage.ENGLISH
+        assertEquals(2, repository.calls.size)
     }
 
     @Test

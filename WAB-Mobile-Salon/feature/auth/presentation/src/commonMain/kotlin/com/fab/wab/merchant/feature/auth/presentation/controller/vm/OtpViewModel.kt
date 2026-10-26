@@ -16,6 +16,7 @@ import com.fab.wab.merchant.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.merchant.feature.auth.domain.model.OtpPolicy
 import com.fab.wab.merchant.feature.auth.domain.model.OtpVerified
 import com.fab.wab.merchant.feature.auth.domain.model.PhoneNumber
+import com.fab.wab.merchant.feature.auth.domain.model.toDisplay
 import com.fab.wab.merchant.feature.auth.domain.model.toE164
 import com.fab.wab.merchant.feature.auth.domain.repository.PendingOtpVerification
 import com.fab.wab.merchant.feature.auth.domain.usecase.LoginWithOtpTokenUseCase
@@ -60,12 +61,20 @@ class OtpViewModel(
 
     private var phoneE164: String = phone.number
     private var countdownJob: Job? = null
+    private var requested = false
 
+    /**
+     * `onStart` runs again whenever the screen re-subscribes (e.g. back from WhatsApp after copying the code, more
+     * than the state timeout later). The code is requested once per screen: a second request would replace the code
+     * the member just read (or count against the request limit).
+     */
     override fun onStart() {
+        if (requested) return
+        requested = true
         scope.launch {
             val dialCode = (deps.resolveDialCode(phone.countryCode) as? AppResult.Success)?.data.orEmpty()
             phoneE164 = phone.toE164(dialCode)
-            updateState { copy(phoneDisplay = phoneE164) }
+            updateState { copy(phoneDisplay = phone.toDisplay(dialCode)) }
             requestCode(isResend = false)
         }
     }
@@ -94,11 +103,11 @@ class OtpViewModel(
         }
     }
 
-    private fun applyPolicy(policy: OtpPolicy, isResend: Boolean) {
+    private fun applyPolicy(policy: OtpPolicy, isResend: Boolean, tracked: Boolean = true) {
         val fallback = deps.appConfig.current.value?.otp
         val length = policy.otpLength.takeIf { it > 0 } ?: fallback?.length ?: 0
         val resendAfter = policy.resendAfterSeconds.takeIf { it > 0 } ?: fallback?.resendAfterSeconds ?: 0
-        track(if (isResend) OtpAnalytics.ACTION_RESEND else OtpAnalytics.ACTION_REQUEST)
+        if (tracked) track(if (isResend) OtpAnalytics.ACTION_RESEND else OtpAnalytics.ACTION_REQUEST)
         if (!policy.allowed) {
             val blockedFor = policy.blockedUntil?.let { remainingSeconds(it) } ?: resendAfter
             updateState { copy(requesting = false, otpLength = length) }
@@ -111,7 +120,15 @@ class OtpViewModel(
             return
         }
         updateState {
-            copy(requesting = false, codeSent = true, otpLength = length, code = "", codeError = false, codeErrorMessage = null)
+            copy(
+                requesting = false,
+                codeSent = true,
+                codesSent = codesSent + 1,
+                otpLength = length,
+                code = "",
+                codeError = false,
+                codeErrorMessage = null,
+            )
         }
         startCountdown(resend = resendAfter, blocked = 0, expires = policy.expiresInSeconds)
     }
@@ -163,11 +180,23 @@ class OtpViewModel(
             }
             ErrorCode.OTP_EXPIRED -> expire()
             ErrorCode.OTP_BLOCKED -> {
-                val message = deps.errorText(error)
                 updateState { copy(verifying = false, codeSent = false, code = "", expiresRemainingSeconds = 0) }
-                emitSideEffect(SideEffect.ShowError(message))
+                showBlock(error)
             }
             else -> showError(error)
+        }
+    }
+
+    /**
+     * `OTP_BLOCKED` on verify carries no end time; only `otp/request` answers it (a blocked phone gets
+     * `allowed: false` + `blockedUntil` and no code is sent), so the screen asks once and shows the blocked banner with
+     * the remaining time (design `otpBlocked`). If that request fails, the block message is shown instead.
+     */
+    private suspend fun showBlock(blocked: AppError) {
+        when (val result = deps.requestOtp(phoneE164, purpose)) {
+            is AppResult.Success -> applyPolicy(result.data, isResend = true, tracked = false)
+            is AppResult.Error -> emitSideEffect(SideEffect.ShowError(deps.errorText(blocked)))
+            AppResult.Loading -> Unit
         }
     }
 

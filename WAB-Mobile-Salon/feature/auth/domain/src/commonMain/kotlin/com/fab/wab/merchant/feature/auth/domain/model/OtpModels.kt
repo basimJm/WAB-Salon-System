@@ -59,5 +59,28 @@ data class OtpVerified(
 /** `+962791234567` from the country's dial code and the national number. */
 fun PhoneNumber.toE164(dialCode: String): String = dialCode.trim() + number.trim()
 
+/**
+ * `+962 7 9123 4567` for "we sent a code to": the dial code, then the national number grouped like the design
+ * (`phoneFmt`: first digit, next four, the rest). Short numbers stay ungrouped.
+ */
+fun PhoneNumber.toDisplay(dialCode: String): String {
+    val national = number.trim()
+    val grouped = if (national.length > PHONE_GROUP_SECOND_END) {
+        listOf(
+            national.substring(0, PHONE_GROUP_FIRST_END),
+            national.substring(PHONE_GROUP_FIRST_END, PHONE_GROUP_SECOND_END),
+            national.substring(PHONE_GROUP_SECOND_END),
+        ).joinToString(PHONE_GROUP_SEPARATOR)
+    } else {
+        national
+    }
+    val dial = dialCode.trim()
+    return if (dial.isEmpty()) grouped else dial + PHONE_GROUP_SEPARATOR + grouped
+}
+
+private const val PHONE_GROUP_FIRST_END = 1
+private const val PHONE_GROUP_SECOND_END = 5
+private const val PHONE_GROUP_SEPARATOR = " "
+
 /** Answer of `PUT /installations`: whether the backend linked the device to the signed-in member. */
 data class InstallationLink(val installationId: String, val linked: Boolean)

@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { OTP_LENGTH, OTP_VALID_MINUTES } from '@/constants/auth';
 import { Button } from '../../components/core/Button';
-import { TextField } from '../../components/form/TextField';
 import { maskEmail } from '../../controllers/maskEmail';
 import { formatClock, useCountdown } from '../../hooks/useCountdown';
+import { cx } from '../../utils/cx';
 
 export interface OtpStepProps {
   email: string;
@@ -15,6 +15,57 @@ export interface OtpStepProps {
   busy: boolean;
   onCode: (value: string) => void;
   onResend: () => Promise<boolean>;
+}
+
+/** Design `01 Login` code boxes, drawn over one real input (autofill, paste and screen readers keep working). */
+function OtpBoxes({ code, error, onCode }: Pick<OtpStepProps, 'code' | 'error' | 'onCode'>) {
+  const { t } = useTranslation();
+  const id = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  // The user just pressed Continue: move focus to the code field.
+  useEffect(() => inputRef.current?.focus(), []);
+  const digits = Array.from({ length: OTP_LENGTH }, (_, i) => code[i] ?? '');
+  return (
+    <div className={cx('wab-field', error && 'wab-field--error')}>
+      <label className="wab-sr-only" htmlFor={id}>
+        {t('login.code')}
+      </label>
+      <div className="wab-otp">
+        {digits.map((digit, i) => (
+          <span
+            // Fixed number of positional boxes: the position is the identity.
+            key={`box-${String(i)}`}
+            aria-hidden="true"
+            className={cx(
+              'wab-otp__box',
+              digit !== '' && 'wab-otp__box--filled',
+              i === Math.min(code.length, OTP_LENGTH - 1) && 'wab-otp__box--current',
+            )}
+          >
+            {digit}
+          </span>
+        ))}
+        <input
+          id={id}
+          ref={inputRef}
+          className="wab-field__control wab-otp__input"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          dir="ltr"
+          maxLength={OTP_LENGTH}
+          value={code}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
+          onChange={(e) => onCode(e.target.value.replace(/\D/g, ''))}
+        />
+      </div>
+      {error ? (
+        <span id={`${id}-error`} className="wab-field__error wab-otp__error" role="alert">
+          {error}
+        </span>
+      ) : null}
+    </div>
+  );
 }
 
 /** Second login step. Mounted only on this step, so the resend timer starts when the code was sent. */
@@ -29,9 +80,6 @@ export function OtpStep({
 }: OtpStepProps) {
   const { t } = useTranslation();
   const { remaining, restart } = useCountdown(resendSeconds);
-  const inputRef = useRef<HTMLInputElement>(null);
-  // The user just pressed Continue: move focus to the code field.
-  useEffect(() => inputRef.current?.focus(), []);
   const resend = async () => {
     if (await onResend()) restart();
   };
@@ -41,17 +89,7 @@ export function OtpStep({
         {t('login.codeSubtitle', { length: OTP_LENGTH, minutes: OTP_VALID_MINUTES })}{' '}
         <bdi className="wab-login__email">{maskEmail(email)}</bdi>
       </p>
-      <TextField
-        label={t('login.code')}
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        dir="ltr"
-        maxLength={OTP_LENGTH}
-        value={code}
-        onChange={(e) => onCode(e.target.value.replace(/\D/g, ''))}
-        error={error}
-        ref={inputRef}
-      />
+      <OtpBoxes code={code} error={error} onCode={onCode} />
       <div className="wab-login__resend">
         <span>{t('login.noCode')}</span>
         {remaining > 0 ? (

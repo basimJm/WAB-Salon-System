@@ -19,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -27,7 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.merchant.designsystem.components.dialog.AppBottomSheet
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppDatePickerDialog
 import com.fab.wab.merchant.designsystem.components.textfield.DatePickerDates
@@ -167,7 +166,7 @@ private fun SheetField(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(NotificationsDesign.fieldHeight)
-                        .glassBackground(AppTheme.glass, shape, stateBorder = if (error != null) colors.danger else Color.Unspecified)
+                        .cardBackground(AppTheme.surfaces, shape, stateBorder = if (error != null) colors.danger else colors.line)
                         .padding(horizontal = horizontalPadding),
                     contentAlignment = Alignment.CenterStart,
                 ) {
@@ -201,7 +200,7 @@ private fun DateBox(value: String, hasError: Boolean, horizontalPadding: Dp, tex
             .fillMaxWidth()
             .height(NotificationsDesign.fieldHeight)
             .clip(shape)
-            .glassBackground(AppTheme.glass, shape, stateBorder = if (hasError) colors.danger else Color.Unspecified)
+            .cardBackground(AppTheme.surfaces, shape, stateBorder = if (hasError) colors.danger else colors.line)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = horizontalPadding),
         verticalAlignment = Alignment.CenterVertically,

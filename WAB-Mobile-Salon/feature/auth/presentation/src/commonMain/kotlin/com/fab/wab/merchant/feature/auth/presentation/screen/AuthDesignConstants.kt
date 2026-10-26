@@ -8,11 +8,12 @@ import androidx.compose.ui.unit.sp
  * Design px = dp. Everything else on these screens reads `AppTheme` tokens.
  */
 internal object AuthDesign {
-    // Screen padding: `padding:54px 22px 26px` (login/register), `54px 24px 30px` (OTP)
+    // Screen padding: `padding:54px 22px 26px` (login/register), `54px 22px 30px` (OTP)
     val screenTop = 54.dp
+    val screenTopMin = 8.dp // landscape / tall status bars: keep a small gap under the bar
     val screenHorizontal = 22.dp
     val screenBottom = 26.dp
-    val otpHorizontal = 24.dp
+    val otpHorizontal = 22.dp
     val otpBottom = 30.dp
 
     // Top pills: `height:40px;min-width:44px;border-radius:12px;border:1px solid var(--line)`
@@ -85,11 +86,11 @@ internal object AuthDesign {
     val registerFooterTop = 18.dp
     val registerLegalTop = 16.dp
 
-    // OTP: icon box 76/radius 24/icon 34, `margin:34px 0 22px`; title 23; boxes 64 high/radius 16/gap 12, `margin:30px 0 10px`
+    // OTP (merchant M03): icon box 76/radius 24/icon 34, `margin:30px 0 22px`; title 23; boxes 56/radius 14/gap 8, `margin:28px 0 10px`
     val otpIconBox = 76.dp
     val otpIconBoxRadius = 24.dp
     val otpIcon = 34.dp
-    val otpIconTop = 34.dp
+    val otpIconTop = 30.dp
     val otpIconBottom = 22.dp
     val otpTitleSize = 23.sp
     val otpTitleLineHeight = 30.sp
@@ -98,12 +99,12 @@ internal object AuthDesign {
     val otpSentSize = 13.5.sp
     val otpSentLineHeight = 22.sp
     val otpExpiresSize = 12.5.sp
-    val otpBoxHeight = 64.dp
-    val otpBoxRadius = 16.dp
-    val otpBoxGap = 12.dp
-    val otpBoxTop = 30.dp
+    val otpBoxHeight = 56.dp
+    val otpBoxRadius = 14.dp
+    val otpBoxGap = 8.dp
+    val otpBoxTop = 28.dp
     val otpBoxBottom = 10.dp
-    val otpDigitSize = 24.sp
+    val otpDigitSize = 22.sp
     val otpFocusRing = 4.dp
     const val otpFocusRingAlpha = 0.12f
     const val otpBlockedAlpha = 0.5f
@@ -116,7 +117,14 @@ internal object AuthDesign {
     val otpBlockedLineHeight = 19.sp
     val otpBlockedTop = 4.dp
     val otpButtonTop = 22.dp
-    val otpResendTop = 20.dp
+    val otpResendTop = 18.dp
+    // Bank note (BANK_DETAILS): `margin-top:12px;font-size:12.5px;line-height:1.6;padding:10px 12px;border-radius:12px`
+    val otpNoteTop = 12.dp
+    val otpNoteSize = 12.5.sp
+    val otpNoteLineHeight = 20.sp
+    val otpNotePaddingV = 10.dp
+    val otpNotePaddingH = 12.dp
+    val otpNoteRadius = 12.dp
     val otpResendSize = 13.5.sp
     val otpCountingSize = 13.sp
     val otpResendPadding = 10.dp

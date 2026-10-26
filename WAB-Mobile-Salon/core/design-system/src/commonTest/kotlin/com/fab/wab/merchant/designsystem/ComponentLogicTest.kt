@@ -44,7 +44,35 @@ class ComponentLogicTest {
         assertEquals("12", sanitizeOtp("1a2b", 6))
         assertEquals("", sanitizeOtp("abc", 6))
         assertEquals("1234", sanitizeOtp("1234", 4))
-        assertEquals("", sanitizeOtp("١٢٣", 6))
+        assertEquals("", sanitizeOtp("123", 0))
+    }
+
+    @Test
+    fun otpAcceptsArabicIndicDigits() {
+        assertEquals("123", sanitizeOtp("١٢٣", 6))
+        assertEquals("456", sanitizeOtp("۴۵۶", 6))
+        assertEquals("123", sanitizeOtp("1٢3", 6))
+    }
+
+    @Test
+    fun otpPasteOfAWholeCodeReplacesTheTypedDigits() {
+        // Typed "12", then pasted the WhatsApp code after or before it in the hidden field.
+        assertEquals("482193", sanitizeOtp("12482193", 6, previous = "12"))
+        assertEquals("482193", sanitizeOtp("48219312", 6, previous = "12"))
+        // A pasted message keeps only the code.
+        assertEquals("482193", sanitizeOtp("Your WAB code: 482193", 6))
+        // A seventh typed digit on a full code is ignored; a single typed digit is appended.
+        assertEquals("123456", sanitizeOtp("1234567", 6, previous = "123456"))
+        assertEquals("123", sanitizeOtp("123", 6, previous = "12"))
+    }
+
+    @Test
+    fun otpAfterARefusedCodeTheNextDigitStartsANewCode() {
+        assertEquals("4", sanitizeOtp("0000004", 6, previous = "000000", restart = true))
+        assertEquals("4", sanitizeOtp("4000000", 6, previous = "000000", restart = true))
+        // Deleting edits the refused code; a pasted code still replaces it.
+        assertEquals("00000", sanitizeOtp("00000", 6, previous = "000000", restart = true))
+        assertEquals("482193", sanitizeOtp("000000482193", 6, previous = "000000", restart = true))
     }
 
     @Test

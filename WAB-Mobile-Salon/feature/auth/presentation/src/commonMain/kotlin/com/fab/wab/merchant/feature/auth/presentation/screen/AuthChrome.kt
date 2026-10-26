@@ -24,7 +24,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.merchant.core.domain.ThemeMode
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
@@ -62,7 +62,7 @@ internal fun AuthPillButton(
             .defaultMinSize(minWidth = AuthDesign.pillMinWidth)
             .clip(shape)
             .clickable(role = Role.Button, onClickLabel = contentDescription, onClick = onClick)
-            .glassBackground(AppTheme.glass, shape)
+            .cardBackground(AppTheme.surfaces, shape)
             .padding(horizontal = if (label != null) AuthDesign.pillHorizontalPadding else AppTheme.spacing.space0),
         contentAlignment = Alignment.Center,
     ) {
@@ -184,7 +184,7 @@ internal fun AuthCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .glassBackground(AppTheme.glass, shape)
+            .cardBackground(AppTheme.surfaces, shape)
             .padding(vertical = verticalPadding, horizontal = horizontalPadding),
     ) {
         content()

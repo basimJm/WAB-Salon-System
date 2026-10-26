@@ -24,8 +24,8 @@ private const val CODE_UNAUTHORIZED = "UNAUTHORIZED"
 
 /**
  * Socket.IO v4 over one WebSocket: Engine.IO open → namespace connect with the access token → events.
- * Answers pings, treats a silent server as dropped, reconnects with backoff while [connect] is wanted and stops on
- * `UNAUTHORIZED` (the app reconnects after the next refresh / foreground).
+ * Answers pings, treats a silent server as dropped, reconnects with backoff while [connect] is wanted; on
+ * `UNAUTHORIZED` it waits until the stored access token changes (refreshed by the HTTP layer) and stops on sign-out.
  */
 class SocketIoRealtimeClient(
     private val config: RealtimeConfig,
@@ -66,7 +66,10 @@ class SocketIoRealtimeClient(
             when (runSession(token)) {
                 SessionEnd.Unauthorized -> {
                     statusState.value = RealtimeStatus.Unauthorized
-                    return
+                    // CUS-092: an expired access token (15 min) killed the socket until the next foreground, and on
+                    // resume the socket raced the HTTP refresh. Wait for the token the HTTP layer rotates next.
+                    if (!awaitNewToken(rejected = token)) return
+                    attempt = 0
                 }
                 SessionEnd.Dropped -> {
                     statusState.value = RealtimeStatus.Reconnecting
@@ -74,6 +77,18 @@ class SocketIoRealtimeClient(
                     attempt += 1
                 }
             }
+        }
+    }
+
+    /** Re-reads the stored token with backoff (no network); true once it changed, false when the session ended. */
+    private suspend fun awaitNewToken(rejected: String): Boolean {
+        var check = 0
+        while (true) {
+            delay(reconnectDelayMs(check))
+            check += 1
+            val current = accessToken()
+            if (current.isNullOrBlank()) return false
+            if (current != rejected) return true
         }
     }
 

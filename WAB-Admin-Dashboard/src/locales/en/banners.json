@@ -36,6 +36,8 @@
       "schedule": "The end day must be after the start day",
       "actionValue": "Enter a valid value for this action",
       "order": "Whole number from 0"
-    }
+    },
+    "cardTitle": "Order {{order}} · {{action}}",
+    "noPreview": "Artwork preview not available yet"
   }
 }

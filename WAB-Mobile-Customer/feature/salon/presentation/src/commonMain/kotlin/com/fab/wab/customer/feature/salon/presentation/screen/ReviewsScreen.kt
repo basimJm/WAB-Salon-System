@@ -49,6 +49,7 @@ import com.fab.wab.customer.feature.salon.presentation.resources.reviews_staff_t
 import com.fab.wab.customer.feature.salon.presentation.resources.reviews_title
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_retry
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_review_add_button
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** S08 / S09: summary card, paged outlined review cards, sticky "+ Add review" (auth-gated), form sheet. */
@@ -178,7 +179,7 @@ private fun SummaryCard(summary: RatingSummary) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.space4)) {
             AppRatingStars(rating = summary.average, starSize = SalonDesign.summaryStar)
             AppText(
-                text = stringResource(Res.string.reviews_based_on, summary.count),
+                text = pluralStringResource(Res.plurals.reviews_based_on, summary.count, summary.count),
                 style = AppTheme.typography.bodySmall,
                 color = AppTheme.colors.muted,
             )

@@ -18,12 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
-import com.fab.wab.merchant.designsystem.components.glass.glassClickable
-import com.fab.wab.merchant.designsystem.components.glass.glassHighlight
-import com.fab.wab.merchant.designsystem.components.glass.glassPressScale
-import com.fab.wab.merchant.designsystem.components.glass.rememberContentGlass
-import com.fab.wab.merchant.designsystem.components.glass.rememberGlassPress
+import com.fab.wab.merchant.designsystem.components.surface.appClickable
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.designsystem.utils.brandBackground
@@ -98,7 +94,6 @@ fun AppButton(
     val active = enabled && !loading
     val brush = brandBrush()
     val contentColor = buttonContentColor(kind, active)
-    val glass = rememberContentGlass()
     val container = Modifier
         .defaultMinSize(minHeight = sizes.buttonHeight)
         .let { base ->
@@ -106,28 +101,26 @@ fun AppButton(
                 kind == ButtonKind.Primary && active ->
                     base.softShadow(AppTheme.elevation.raised, colors.accent.copy(alpha = AppTheme.elevation.buttonShadowAlpha), shape)
                         .brandBackground(brush, shape)
-                        .glassHighlight(glass, shape)
                 kind == ButtonKind.Primary -> base.clip(shape).background(colors.soft)
-                kind == ButtonKind.Secondary -> base.glassBackground(AppTheme.glass, shape)
+                kind == ButtonKind.Secondary -> base.cardBackground(AppTheme.surfaces, shape)
                 kind == ButtonKind.Success && active ->
                     base.softShadow(AppTheme.elevation.raised, colors.success.copy(alpha = AppTheme.elevation.buttonShadowAlpha), shape)
                         .background(colors.success, shape)
-                        .glassHighlight(glass, shape)
                 kind == ButtonKind.Success -> base.clip(shape).background(colors.successContainer)
                 kind == ButtonKind.Destructive ->
                     base.clip(shape).background(colors.dangerContainer).border(sizes.borderWidth, colors.danger, shape)
-                kind == ButtonKind.Outlined -> base.glassBackground(AppTheme.glass, shape)
+                kind == ButtonKind.Outlined -> base.cardBackground(AppTheme.surfaces, shape)
                 else -> base.clip(shape)
             }
         }
-    val press = rememberGlassPress()
     Row(
         modifier = modifier
-            .glassPressScale(press)
             .defaultMinSize(minHeight = sizes.touchTarget)
             .then(container)
-            .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
-            .glassClickable(press, enabled = active, onClick = onClick)
+            .clip(shape)
+            // Design `btn(false)`: a disabled primary is the soft fill with faint text, not a dimmed gradient.
+            .alpha(if (enabled || kind == ButtonKind.Primary) 1f else AppTheme.alpha.disabled)
+            .appClickable(enabled = active, onClick = onClick)
             .padding(horizontal = spacing.space20, vertical = spacing.space12),
         horizontalArrangement = Arrangement.spacedBy(spacing.space8, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
@@ -166,6 +159,10 @@ private fun buttonContentColor(kind: ButtonKind, active: Boolean): Color {
     }
 }
 
+/**
+ * The design's icon button (Home bell, top-bar actions): `width:46px;height:46px;border-radius:14px;
+ * border:1px solid var(--line);background:var(--card)` inside a 48 dp touch target, 21–24 dp icon.
+ */
 @Composable
 fun AppIconButton(
     icon: ImageVector,
@@ -176,14 +173,14 @@ fun AppIconButton(
     tint: Color = AppTheme.colors.ink,
     size: Dp = AppTheme.sizes.touchTarget,
 ) {
-    val press = rememberGlassPress()
+    val shape = AppTheme.shapes.medium
     Row(
         modifier = modifier
-            .glassPressScale(press)
             .size(size)
-            .glassClickable(press, enabled = enabled, onClick = onClick)
-            .padding(AppTheme.spacing.space4)
-            .glassBackground(AppTheme.glass, AppTheme.shapes.circle)
+            .padding(AppTheme.spacing.space1)
+            .clip(shape)
+            .cardBackground(AppTheme.surfaces, shape)
+            .appClickable(enabled = enabled, onClick = onClick)
             .alpha(if (enabled) 1f else AppTheme.alpha.disabled),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,

@@ -1,5 +1,6 @@
 import { useId, useState, type ReactNode } from 'react';
 import { usePopoverAlign } from '../../hooks/usePopoverAlign';
+import { cx } from '../../utils/cx';
 import { Button, type ButtonVariant } from '../core/Button';
 
 export interface PopoverProps {
@@ -13,6 +14,12 @@ export interface PopoverProps {
   loading?: boolean;
   /** `menu` for a list of actions (the content must then be `menuitem`s), `group` for any other content. */
   panelRole?: 'group' | 'menu';
+  /** Custom trigger content (e.g. avatar + name); `label` then stays the accessible name. */
+  trigger?: ReactNode;
+  /** Class of a custom trigger (replaces the button look). */
+  triggerClassName?: string;
+  /** Extra class of the floating panel (e.g. a wider panel with its own padding). */
+  panelClassName?: string;
 }
 
 /** Button + floating panel. Closes on Escape and when focus leaves; stays inside the viewport. */
@@ -23,6 +30,9 @@ export function Popover({
   disabled,
   loading,
   panelRole = 'group',
+  trigger,
+  triggerClassName,
+  panelClassName,
 }: PopoverProps) {
   const panelId = useId();
   const [open, setOpen] = useState(false);
@@ -46,26 +56,42 @@ export function Popover({
         }
       }}
     >
-      <Button
-        id={triggerId}
-        variant={variant}
-        size="sm"
-        disabled={disabled}
-        loading={loading}
-        aria-haspopup={panelRole === 'menu' ? 'menu' : undefined}
-        aria-expanded={open}
-        aria-controls={open ? panelId : undefined}
-        onClick={() => setOpen((v) => !v)}
-      >
-        {label}
-      </Button>
+      {trigger ? (
+        <button
+          type="button"
+          id={triggerId}
+          className={triggerClassName}
+          disabled={disabled}
+          aria-label={label}
+          aria-haspopup={panelRole === 'menu' ? 'menu' : undefined}
+          aria-expanded={open}
+          aria-controls={open ? panelId : undefined}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {trigger}
+        </button>
+      ) : (
+        <Button
+          id={triggerId}
+          variant={variant}
+          size="sm"
+          disabled={disabled}
+          loading={loading}
+          aria-haspopup={panelRole === 'menu' ? 'menu' : undefined}
+          aria-expanded={open}
+          aria-controls={open ? panelId : undefined}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {label}
+        </Button>
+      )}
       {open ? (
         <div
           ref={panelRef}
           id={panelId}
           role={panelRole}
           aria-label={label}
-          className="wab-popover__panel"
+          className={cx('wab-popover__panel', panelClassName)}
         >
           {children(close)}
         </div>

@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -29,8 +28,8 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.LayoutDirection
 import com.fab.wab.merchant.designsystem.components.form.AppKeyboards
 import com.fab.wab.merchant.designsystem.components.form.CountryUi
-import com.fab.wab.merchant.designsystem.components.glass.glassBackground
 import com.fab.wab.merchant.designsystem.components.image.AppImage
+import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.resources.Res as CoreRes
@@ -71,7 +70,7 @@ internal fun AuthPhoneField(
                 .height(AppTheme.sizes.fieldHeight)
                 .alpha(if (enabled) 1f else AppTheme.alpha.disabled)
                 .clip(shape)
-                .glassBackground(AppTheme.glass, shape, stateBorder = if (error) colors.danger else Color.Unspecified),
+                .cardBackground(AppTheme.surfaces, shape, stateBorder = if (error) colors.danger else colors.line),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             CountryPrefix(country, onCountryClick, enabled, showChevron)

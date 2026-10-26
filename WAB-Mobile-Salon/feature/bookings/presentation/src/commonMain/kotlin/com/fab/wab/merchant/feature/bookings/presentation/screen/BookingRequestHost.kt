@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
@@ -58,12 +59,16 @@ fun BookingRequestHost(onOpenDetails: (String) -> Unit) {
 internal fun BookingRequestSheet(state: UiState, onAction: (UiAction) -> Unit) {
     val sheet = state.toSheet() ?: return
     TrackScreen(BookingsAnalytics.SCREEN_REQUEST)
-    AppBottomSheet(onDismiss = { onAction(if (state.acceptedReference != null) UiAction.OnDone else UiAction.OnDismiss) }) {
-        AppBookingRequestSheetContent(
-            state = sheet,
-            onAction = { onAction(it.toUiAction()) },
-            modifier = Modifier.fillMaxWidth().padding(AppTheme.spacing.space16),
-        )
+    // One sheet per request: Back / a scrim tap hides the sheet and drops the request; without the key the next queued
+    // request reused that hidden sheet, leaving an invisible scrim that swallowed every tap.
+    key(state.current?.summary?.id) {
+        AppBottomSheet(onDismiss = { onAction(if (state.acceptedReference != null) UiAction.OnDone else UiAction.OnDismiss) }) {
+            AppBookingRequestSheetContent(
+                state = sheet,
+                onAction = { onAction(it.toUiAction()) },
+                modifier = Modifier.fillMaxWidth().padding(AppTheme.spacing.space16),
+            )
+        }
     }
     val reject = state.reject
     if (reject != null) {

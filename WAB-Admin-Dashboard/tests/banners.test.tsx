@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
@@ -69,9 +69,13 @@ describe('BannersPage', () => {
 
   it('lists banners with their schedule', async () => {
     open();
-    await waitFor(() => expect(screen.getAllByRole('row')).toHaveLength(2));
-    expect(screen.getByText('banners/summer-en.webp')).toBeInTheDocument();
-    expect(screen.getByText('2026-06-02 → 2026-09-01')).toBeInTheDocument();
+    // Design A24 card grid: one card per banner (title = order + action, artwork key, schedule, Edit).
+    const card = await screen.findByRole('article', { name: 'Order 1 · Nothing' });
+    expect(within(card).getByText('banners/summer-en.webp')).toBeInTheDocument();
+    expect(within(card).getByText('2026-06-02 → 2026-09-01')).toBeInTheDocument();
+    expect(within(card).getByText(/Everyone/)).toBeInTheDocument();
+    expect(within(card).getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('creates a banner: uploads both images, then asks for a reason', async () => {
@@ -90,6 +94,6 @@ describe('BannersPage', () => {
     expect(await screen.findByText('Write the reason (at least 3 characters)')).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText('Reason'), 'Summer campaign');
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(screen.getAllByRole('row')).toHaveLength(3));
+    await waitFor(() => expect(screen.getAllByRole('article')).toHaveLength(2));
   });
 });

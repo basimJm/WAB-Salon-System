@@ -85,4 +85,6 @@ object AppIcons {
     val Store: ImageVector = DesignIcons.Store
     val Menu: ImageVector = DesignIcons.Menu
     val Crown: ImageVector = DesignIcons.Crown
+    val House: ImageVector = DesignIcons.House
+    val Bank: ImageVector = DesignIcons.Bank
 }

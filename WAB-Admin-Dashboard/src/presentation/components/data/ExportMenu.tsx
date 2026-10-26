@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EXPORT_FORMATS, type ExportFormat } from '@/constants/dateRange';
-import { Button } from '../core/Button';
+import { Icon } from '../core/Icon';
 import { Popover } from '../overlay/Popover';
 import { useToast } from '../overlay/Toast';
 
@@ -12,7 +12,10 @@ export interface ExportMenuProps {
   disabled?: boolean;
 }
 
-/** "Export" button: choose Excel / CSV / PDF; shows progress and the outcome as toasts (Admin PRD §2). */
+/**
+ * Design list-card "Export" button (download icon + text) with a menu of file chips: Excel / CSV / PDF. Shows
+ * progress and the outcome as toasts (Admin PRD §2).
+ */
 export function ExportMenu({ onExport, formats = EXPORT_FORMATS, disabled }: ExportMenuProps) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -29,21 +32,38 @@ export function ExportMenu({ onExport, formats = EXPORT_FORMATS, disabled }: Exp
       setBusy(false);
     }
   };
+  const label = t('export.label');
   return (
-    <Popover label={t('export.label')} disabled={disabled} loading={busy}>
+    <Popover
+      label={label}
+      disabled={disabled || busy}
+      triggerClassName="wab-cardbtn"
+      trigger={
+        <>
+          <Icon name="download" size="sm" />
+          <span>{label}</span>
+        </>
+      }
+    >
       {(close) =>
         formats.map((format) => (
-          <Button
+          <button
             key={format}
-            variant="ghost"
-            size="sm"
+            type="button"
+            className="wab-menu__item wab-export__item"
             onClick={() => {
               close();
               void run(format);
             }}
           >
-            {t(`export.format.${format}`)}
-          </Button>
+            <span
+              className={`wab-export__chip wab-export__chip--${format.toLowerCase()}`}
+              aria-hidden="true"
+            >
+              {t(`export.chip.${format}`)}
+            </span>
+            <span>{t(`export.format.${format}`)}</span>
+          </button>
         ))
       }
     </Popover>

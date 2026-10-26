@@ -1,3 +1,4 @@
+import { EntityCell } from '../../components/data/TableCells';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT_PAGE_SIZE } from '@/constants/ui';
@@ -42,7 +43,12 @@ export function TableSection() {
   const columns = useMemo<readonly Column<SalonRow>[]>(
     () => [
       { key: 'id', header: k('colId'), render: (r) => r.id, ltr: true, sortable: true },
-      { key: 'name', header: k('colName'), render: (r) => `${k('salon')} ${r.name}`, sortable: true },
+      {
+        key: 'name',
+        header: k('colName'),
+        render: (r) => <EntityCell name={`${k('salon')} ${r.name}`} sub={r.id} />,
+        sortable: true,
+      },
       { key: 'city', header: k('colCity'), render: (r) => k(`city.${r.city}`) },
       { key: 'state', header: k('colState'), render: (r) => <StatusBadge kind="salon" value={r.state} /> },
     ],

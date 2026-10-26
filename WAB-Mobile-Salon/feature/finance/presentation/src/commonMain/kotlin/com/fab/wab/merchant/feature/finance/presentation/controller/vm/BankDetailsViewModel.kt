@@ -43,7 +43,15 @@ class BankDetailsViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
+    private var loaded = false
+
+    /**
+     * Loads once: `onStart` runs again when the screen comes back from the OTP screen, and a reload there would
+     * replace the typed bank name and holder with the saved ones right before they are sent with the proof.
+     */
     override fun onStart() {
+        if (loaded) return
+        loaded = true
         load()
     }
 
