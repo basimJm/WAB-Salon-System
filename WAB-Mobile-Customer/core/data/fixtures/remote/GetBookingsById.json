@@ -2,77 +2,127 @@
   "success": true,
   "message": "Done successfully.",
   "data": {
-    "id": "6ade37a7c2cfb0cb993a167c",
-    "referenceNumber": "WAB-1N2Z8R",
-    "status": "PENDING",
+    "id": "02ad409c896dcdd1c27de6bd",
+    "referenceNumber": "WAB-W1BETN",
+    "status": "APPROVED",
     "paymentMethod": "PAY_ON_ARRIVAL",
     "paymentStatus": "PAY_ON_ARRIVAL",
     "hasBride": false,
-    "appointmentStart": "2026-10-27T06:00:00.000Z",
-    "appointmentEnd": "2026-10-27T06:45:00.000Z",
-    "respondBy": "2026-10-27T07:00:00.000Z",
-    "requestedAt": "2026-10-25T17:08:55.967Z",
-    "personsCount": 1,
-    "total": "15.000",
+    "appointmentStart": "2026-10-28T17:00:00.000Z",
+    "appointmentEnd": "2026-10-28T17:45:00.000Z",
+    "respondBy": "2026-10-28T18:00:00.000Z",
+    "requestedAt": "2026-10-24T23:00:00.000Z",
+    "personsCount": 2,
+    "total": "40.000",
     "salon": {
-      "id": "6ade37a6c2cfb0cb993a164e",
-      "name": "Noor Salon"
+      "id": "08c23382575950264c482f48",
+      "name": "Gentlemen's Corner"
     },
     "branch": {
-      "id": "6ade37a7c2cfb0cb993a1658",
-      "name": "Tabarbour",
-      "locationText": "Abdoun, Amman"
+      "id": "6adf513d4bd7099438793e86",
+      "name": "Dabouq",
+      "locationText": "Dabouq, King Abdullah II Street, near the roundabout"
     },
     "customer": null,
-    "staff": [],
+    "staff": [
+      {
+        "id": "c93d836986f4e3efba6f2c65",
+        "name": "Sami",
+        "firstName": "Sami",
+        "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/gentlemen-staff1.jpg"
+      },
+      {
+        "id": "14fb07c6a1af7d4a7980cc9d",
+        "name": "Rami",
+        "firstName": "Rami",
+        "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/gentlemen-staff0.jpg"
+      }
+    ],
+    "rejection": null,
     "refundStatus": "NONE",
     "persons": [
       {
-        "name": "Dana",
+        "name": "Yousef",
         "isBride": false,
-        "start": "2026-10-27T06:00:00.000Z",
-        "end": "2026-10-27T06:45:00.000Z",
-        "subtotal": "15.000",
-        "staff": null,
+        "start": "2026-10-28T17:00:00.000Z",
+        "end": "2026-10-28T17:45:00.000Z",
+        "subtotal": "20.800",
+        "staff": {
+          "id": "c93d836986f4e3efba6f2c65",
+          "name": "Sami",
+          "firstName": "Sami",
+          "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/gentlemen-staff1.jpg"
+        },
+        "services": [
+          {
+            "name": "Facial",
+            "price": "16.000",
+            "durationMinutes": 30
+          },
+          {
+            "name": "Wash and style",
+            "price": "4.800",
+            "durationMinutes": 15
+          }
+        ]
+      },
+      {
+        "name": "Yousef +1",
+        "isBride": false,
+        "start": "2026-10-28T17:00:00.000Z",
+        "end": "2026-10-28T17:45:00.000Z",
+        "subtotal": "19.200",
+        "staff": {
+          "id": "14fb07c6a1af7d4a7980cc9d",
+          "name": "Rami",
+          "firstName": "Rami",
+          "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/gentlemen-staff0.jpg"
+        },
         "services": [
           {
             "name": "Hair coloring",
-            "price": "15.000",
+            "price": "19.200",
             "durationMinutes": 45
           }
         ]
       }
     ],
     "money": {
-      "total": "15.000",
+      "total": "40.000",
       "dueOnline": "0.000",
       "paidOnline": "0.000",
-      "remaining": "15.000",
+      "remaining": "40.000",
+      "paidAtSalon": "0.000",
       "refunded": "0.000"
     },
     "policy": {
-      "cancellationWindowHours": 24,
+      "cancellationWindowHours": 12,
       "paymentOptions": [
         "PAY_ON_ARRIVAL",
         "DEPOSIT"
       ],
       "depositPercentage": 30,
-      "depositRefundableOnCustomerCancel": false,
-      "fullPaymentRefundOnCustomerCancel": "FULL",
+      "depositRefundableOnCustomerCancel": true,
+      "fullPaymentRefundOnCustomerCancel": "MINUS_DEPOSIT",
       "noShowDeposit": "KEEP",
-      "noShowFullPayment": "KEEP"
+      "noShowFullPayment": "REFUND_MINUS_DEPOSIT"
     },
     "statusHistory": [
       {
         "status": "PENDING",
         "actorType": "CUSTOMER",
         "reason": null,
-        "at": "2026-10-25T17:08:55.965Z"
+        "at": "2026-10-24T23:00:00.000Z"
+      },
+      {
+        "status": "APPROVED",
+        "actorType": "MEMBER",
+        "reason": null,
+        "at": "2026-10-24T23:29:00.000Z"
       }
     ],
-    "rejection": null,
     "cancellation": null,
-    "createdAt": "2026-10-25T17:08:55.967Z",
+    "createdAt": "2026-10-24T23:00:00.000Z",
     "actions": []
   }
 }

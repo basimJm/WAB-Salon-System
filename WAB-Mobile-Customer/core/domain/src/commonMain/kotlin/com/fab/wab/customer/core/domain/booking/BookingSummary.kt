@@ -18,4 +18,6 @@ data class BookingSummary(
     val salonName: String?,
     val branch: BranchRef? = null,
     val staffNames: List<String>,
+    /** The salon's rejection reason; null unless REJECTED (PRD S14 card, SRV-170). */
+    val rejection: BookingReason? = null,
 )

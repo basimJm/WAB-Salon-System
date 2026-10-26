@@ -17,11 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.text.font.FontWeight
+import com.fab.wab.merchant.designsystem.components.format.metaPair
 import com.fab.wab.merchant.designsystem.components.text.AppText
-import com.fab.wab.merchant.designsystem.resources.Res
-import com.fab.wab.merchant.designsystem.resources.meta_pair
 import com.fab.wab.merchant.designsystem.theme.AppTheme
-import org.jetbrains.compose.resources.stringResource
 
 /** One status change of a booking (PRD M09 status history): pre-localized title, actor, time and optional reason. */
 @Immutable
@@ -68,7 +66,7 @@ private fun TimelineRow(entry: StatusHistoryEntryUi, isLatest: Boolean) {
         Column(modifier = Modifier.weight(1f).padding(bottom = if (isLatest) spacing.space0 else spacing.space14)) {
             AppText(text = entry.title, style = AppTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
             AppText(
-                text = stringResource(Res.string.meta_pair, entry.actor, entry.time),
+                text = metaPair(entry.actor, entry.time),
                 style = AppTheme.typography.bodySmall,
                 color = colors.muted,
             )

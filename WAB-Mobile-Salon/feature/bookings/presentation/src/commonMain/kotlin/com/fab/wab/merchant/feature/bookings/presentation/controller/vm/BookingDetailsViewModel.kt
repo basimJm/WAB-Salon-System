@@ -60,7 +60,10 @@ class BookingDetailsViewModel(
         when (event) {
             is UiAction.OnReasonSelect -> editReason { copy(selected = event.reason) }
             is UiAction.OnReasonText -> editReason { copy(text = event.value.take(BookingsDefaults.REASON_TEXT_MAX)) }
-            is UiAction.OnReassignPerson -> editReassign { copy(personIndex = event.index) }
+            is UiAction.OnReassignPerson -> {
+                editReassign { DetailsDialog.Reassign(personIndex = event.index) }
+                loadEligible(event.index)
+            }
             is UiAction.OnReassignStaff -> editReassign { copy(staffId = event.staffId) }
             UiAction.OnDialogConfirm -> confirm()
             UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
@@ -93,9 +96,10 @@ class BookingDetailsViewModel(
         val dialog = when (action) {
             BookingAction.REJECT, BookingAction.CANCEL -> DetailsDialog.Reason(action)
             BookingAction.COMPLETE, BookingAction.NO_SHOW -> DetailsDialog.Confirm(action)
-            else -> DetailsDialog.Reassign().also { loadStaff() }
+            else -> DetailsDialog.Reassign()
         }
         updateState { copy(dialog = dialog) }
+        if (dialog is DetailsDialog.Reassign) loadEligible(dialog.personIndex)
     }
 
     private fun confirm() {
@@ -148,9 +152,19 @@ class BookingDetailsViewModel(
         }
     }
 
-    private fun loadStaff() {
-        if (uiState.value.staffOptions.isNotEmpty()) return
-        scope.launch { (repository.staff() as? AppResult.Success)?.let { staff -> updateState { copy(staffOptions = staff.data) } } }
+    /** The server's eligible staff of one person; the person's current provider is not offered. */
+    private fun loadEligible(personIndex: Int) {
+        scope.launch {
+            val result = repository.eligibleStaff(bookingId, personIndex)
+            val current = uiState.value.details?.persons?.getOrNull(personIndex)?.staff?.id
+            editReassign {
+                if (this.personIndex != personIndex) return@editReassign this
+                when (result) {
+                    is AppResult.Success -> copy(eligible = result.data.filter { it.id != current }, failed = false)
+                    else -> copy(eligible = emptyList(), failed = true)
+                }
+            }
+        }
     }
 
     private fun load(refresh: Boolean) {

@@ -33,6 +33,7 @@ import com.fab.wab.customer.core.domain.booking.BookingStatus
 import com.fab.wab.customer.core.domain.booking.RefundStatus
 import com.fab.wab.customer.designsystem.components.badge.AppStatusBadge
 import com.fab.wab.customer.designsystem.components.badge.StatusTone
+import com.fab.wab.customer.designsystem.components.avatar.AppAvatar
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.resources.Res as CoreRes
@@ -124,7 +125,7 @@ internal fun StatusBlock(booking: BookingDetails) {
 }
 
 @Composable
-private fun reasonText(reason: BookingReason): String = when (val display = reasonDisplayOf(reason)) {
+internal fun reasonText(reason: BookingReason): String = when (val display = reasonDisplayOf(reason)) {
     is ReasonDisplay.Written -> display.text
     ReasonDisplay.CustomerRequest -> stringResource(Res.string.details_reason_customer_request)
     ReasonDisplay.NotGiven -> stringResource(Res.string.details_reason_not_given)
@@ -238,13 +239,20 @@ internal fun PersonCard(person: BookingPerson) {
                     .dashedTopBorder(colors.line, AppTheme.sizes.hairline)
                     .padding(top = spacing.space8),
                 horizontalArrangement = Arrangement.spacedBy(spacing.space14),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 staffLineName(person.staffName)?.let { name ->
-                    AppText(
-                        text = stringResource(Res.string.details_staff, name),
-                        style = AppTheme.typography.bodySmall,
-                        color = colors.muted,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(spacing.space6),
+                    ) {
+                        AppAvatar(name = name, imageUrl = person.staffPhotoUrl, size = AppTheme.sizes.avatarSmall)
+                        AppText(
+                            text = stringResource(Res.string.details_staff, name),
+                            style = AppTheme.typography.bodySmall,
+                            color = colors.muted,
+                        )
+                    }
                 }
                 AppText(
                     text = listOfNotNull(start?.date, start?.time).joinToString(BookingsDesign.WHEN_SEPARATOR),
@@ -278,7 +286,7 @@ private fun RefundStatus.badge() = when (this) {
 }
 
 /**
- * The staff line of a person: only a real name. The customer API sends `staff: null` for every person (the server hides
- * staff from customers), so "Any available" was shown even when the customer had picked someone (CUS-092).
+ * The staff line of a person: only a real first name (SRV-170 sends `persons[].staff {firstName, photoUrl}`); no line while
+ * nobody is assigned, so "Any available" is never claimed for a person who picked someone (CUS-092).
  */
 internal fun staffLineName(staffName: String?): String? = staffName?.takeIf { it.isNotBlank() }

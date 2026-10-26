@@ -113,18 +113,40 @@ class BookingDetailsViewModelTest {
     }
 
     @Test
-    fun reassignLoadsStaffAndSendsThePersonAndStaff() = runTest(UnconfinedTestDispatcher()) {
+    fun reassignOffersTheServersEligibleStaffAndSendsThePersonAndStaff() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = viewModel()
         val effects = effectsOf(viewModel)
         viewModel.state.first { !it.loading }
         viewModel.onEvent(UiAction.OnActionClick(BookingAction.REASSIGN))
-        assertEquals(listOf(SARA, LINA), viewModel.state.first().staffOptions)
+        val dialog = viewModel.state.first().dialog as DetailsDialog.Reassign
+        assertEquals(listOf(0), repository.eligibleCalls)
+        assertEquals(listOf(LINA), dialog.eligible, "eligible-staff answer without the person's current provider (Sara)")
         viewModel.onEvent(UiAction.OnDialogConfirm)
         assertTrue(repository.actions.isEmpty())
         viewModel.onEvent(UiAction.OnReassignStaff(LINA.id))
         viewModel.onEvent(UiAction.OnDialogConfirm)
         assertEquals(listOf("reassign:0:s2"), repository.actions)
         assertEquals(SideEffect.ShowMessage(ActionMessage.REASSIGNED), effects.last())
+    }
+
+    @Test
+    fun anotherPersonReloadsItsEligibleStaffAndAFailureIsShownAsSuch() = runTest(UnconfinedTestDispatcher()) {
+        // e2e: the team list offered a member the server refused; now every person asks the server.
+        repository.eligibleByPerson[1] = emptyList()
+        val viewModel = viewModel()
+        viewModel.state.first { !it.loading }
+        viewModel.onEvent(UiAction.OnActionClick(BookingAction.REASSIGN))
+        viewModel.onEvent(UiAction.OnReassignStaff(LINA.id))
+        viewModel.onEvent(UiAction.OnReassignPerson(1))
+        val second = viewModel.state.first().dialog as DetailsDialog.Reassign
+        assertEquals(listOf(0, 1), repository.eligibleCalls)
+        assertEquals(true, second.eligible?.isEmpty(), "nobody qualified and free")
+        assertNull(second.staffId, "the choice of another person is not carried over")
+        assertTrue(!second.failed)
+        viewModel.onEvent(UiAction.OnReassignPerson(2))
+        val failed = viewModel.state.first().dialog as DetailsDialog.Reassign
+        assertTrue(failed.failed)
+        assertEquals(true, failed.eligible?.isEmpty())
     }
 
     @Test

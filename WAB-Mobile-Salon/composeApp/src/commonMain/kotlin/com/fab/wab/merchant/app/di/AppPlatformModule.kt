@@ -2,6 +2,7 @@ package com.fab.wab.merchant.app.di
 
 import com.fab.wab.merchant.PlatformNames
 import com.fab.wab.merchant.app.auth.AppInstallationInfoProvider
+import com.fab.wab.merchant.app.auth.localInstallationId
 import com.fab.wab.merchant.core.domain.config.ClientPlatform
 import com.fab.wab.merchant.feature.auth.domain.repository.InstallationInfoProvider
 import com.fab.wab.merchant.getPlatform
@@ -19,6 +20,7 @@ val appPlatformModule = module {
             pushToken = get(),
             osVersion = platform.osVersion,
             deviceModel = platform.deviceModel,
+            localId = { localInstallationId(get()) },
         )
     }
 }

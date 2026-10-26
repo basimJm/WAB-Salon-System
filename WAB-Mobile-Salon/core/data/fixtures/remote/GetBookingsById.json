@@ -2,61 +2,119 @@
   "success": true,
   "message": "Done successfully.",
   "data": {
-    "id": "5c2e8cd3917ba37f01b1b97f",
-    "referenceNumber": "WAB-W41CVC",
-    "status": "PENDING",
-    "paymentMethod": "PAY_ON_ARRIVAL",
-    "paymentStatus": "PAY_ON_ARRIVAL",
+    "id": "9c4da123781722a22f8c9e77",
+    "referenceNumber": "WAB-BMTWC8",
+    "status": "COMPLETED",
+    "paymentMethod": "DEPOSIT",
+    "paymentStatus": "PAID",
     "hasBride": false,
-    "appointmentStart": "2026-10-28T08:30:00.000Z",
-    "appointmentEnd": "2026-10-28T09:15:00.000Z",
-    "respondBy": "2026-10-28T09:30:00.000Z",
-    "requestedAt": "2026-10-25T17:03:44.887Z",
-    "personsCount": 1,
-    "total": "18.000",
+    "appointmentStart": "2026-10-26T07:30:00.000Z",
+    "appointmentEnd": "2026-10-26T08:30:00.000Z",
+    "respondBy": "2026-10-26T08:30:00.000Z",
+    "requestedAt": "2026-10-25T21:30:00.000Z",
+    "personsCount": 3,
+    "total": "63.600",
     "salon": null,
     "branch": {
-      "id": "6ade379d6cbc8f4cb1047d91",
+      "id": "6adf513c4bd7099438793e82",
       "name": "Abdoun",
-      "locationText": "عبدون، شارع القاهرة، بجانب دوار عبدون"
+      "locationText": "Abdoun, Cairo Street, next to Abdoun Circle"
     },
     "customer": {
-      "id": "638e4440cfd0228b33fd0a08",
-      "name": "Zeina Khoury",
-      "phone": "+962799000014"
+      "id": "1ed7a780de132ff95f193801",
+      "name": "Salma Hijazi",
+      "phone": "+962799000015"
     },
     "staff": [
       {
         "id": "fc827df71cbabf2b54c74373",
-        "name": "Lina Hijazi"
+        "name": "Lina Hijazi",
+        "firstName": "Lina",
+        "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/lamar-staff0.jpg"
+      },
+      {
+        "id": "f19e6e99f356e698383204b7",
+        "name": "Dana Majali",
+        "firstName": "Dana",
+        "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/lamar-staff1.jpg"
+      },
+      {
+        "id": "eaf41e0bf439c48d15ee4269",
+        "name": "Sara Shami",
+        "firstName": "Sara",
+        "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/lamar-staff3.jpg"
       }
     ],
+    "rejection": null,
     "refundStatus": "NONE",
     "persons": [
       {
-        "name": "Zeina",
+        "name": "Salma",
         "isBride": false,
-        "start": "2026-10-28T08:30:00.000Z",
-        "end": "2026-10-28T09:15:00.000Z",
-        "subtotal": "18.000",
+        "start": "2026-10-26T07:30:00.000Z",
+        "end": "2026-10-26T08:15:00.000Z",
+        "subtotal": "24.000",
         "staff": {
           "id": "fc827df71cbabf2b54c74373",
-          "name": "Lina Hijazi"
+          "name": "Lina Hijazi",
+          "firstName": "Lina",
+          "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/lamar-staff0.jpg"
         },
         "services": [
           {
-            "name": "Haircut",
-            "price": "18.000",
+            "name": "Henna",
+            "price": "24.000",
             "durationMinutes": 45
+          }
+        ]
+      },
+      {
+        "name": "Salma +1",
+        "isBride": false,
+        "start": "2026-10-26T07:30:00.000Z",
+        "end": "2026-10-26T08:30:00.000Z",
+        "subtotal": "30.000",
+        "staff": {
+          "id": "f19e6e99f356e698383204b7",
+          "name": "Dana Majali",
+          "firstName": "Dana",
+          "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/lamar-staff1.jpg"
+        },
+        "services": [
+          {
+            "name": "Facial",
+            "price": "30.000",
+            "durationMinutes": 60
+          }
+        ]
+      },
+      {
+        "name": "Salma +2",
+        "isBride": false,
+        "start": "2026-10-26T07:30:00.000Z",
+        "end": "2026-10-26T08:00:00.000Z",
+        "subtotal": "9.600",
+        "staff": {
+          "id": "eaf41e0bf439c48d15ee4269",
+          "name": "Sara Shami",
+          "firstName": "Sara",
+          "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/lamar-staff3.jpg"
+        },
+        "services": [
+          {
+            "name": "Manicure",
+            "price": "9.600",
+            "durationMinutes": 30
           }
         ]
       }
     ],
     "money": {
-      "total": "18.000",
-      "dueOnline": "0.000",
-      "paidOnline": "0.000",
-      "remaining": "18.000",
+      "total": "63.600",
+      "dueOnline": "19.080",
+      "paidOnline": "19.080",
+      "remaining": "0.000",
+      "paidAtSalon": "44.520",
       "refunded": "0.000"
     },
     "policy": {
@@ -76,15 +134,23 @@
         "status": "PENDING",
         "actorType": "CUSTOMER",
         "reason": null,
-        "at": "2026-10-25T17:03:44.887Z"
+        "at": "2026-10-25T21:30:00.000Z"
+      },
+      {
+        "status": "APPROVED",
+        "actorType": "MEMBER",
+        "reason": null,
+        "at": "2026-10-25T21:56:00.000Z"
+      },
+      {
+        "status": "COMPLETED",
+        "actorType": "MEMBER",
+        "reason": null,
+        "at": "2026-10-26T09:58:00.000Z"
       }
     ],
-    "rejection": null,
     "cancellation": null,
-    "createdAt": "2026-10-25T17:03:44.887Z",
-    "actions": [
-      "APPROVE",
-      "REJECT"
-    ]
+    "createdAt": "2026-10-25T21:30:00.000Z",
+    "actions": []
   }
 }

@@ -29,8 +29,9 @@ fun AppImage(
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.Crop,
+    fallback: (@Composable () -> Unit)? = null,
 ) {
-    ModelImage(url, contentDescription, contentScale, modifier)
+    ModelImage(url, contentDescription, contentScale, modifier, fallback)
 }
 
 /** Local bytes (picked, not uploaded yet) through the same loader, shimmer and fallback. */
@@ -49,7 +50,13 @@ fun AppImage(
  * constraints; the shimmer and the fallback are overlays driven by the load state.
  */
 @Composable
-private fun ModelImage(model: Any, contentDescription: String?, contentScale: ContentScale, modifier: Modifier = Modifier) {
+private fun ModelImage(
+    model: Any,
+    contentDescription: String?,
+    contentScale: ContentScale,
+    modifier: Modifier = Modifier,
+    fallback: (@Composable () -> Unit)? = null,
+) {
     val imageLoader = LocalImageLoader.current
     var phase by remember(model) { mutableStateOf(ImagePhase.LOADING) }
     Box(modifier = modifier) {
@@ -63,7 +70,8 @@ private fun ModelImage(model: Any, contentDescription: String?, contentScale: Co
         )
         when (phase) {
             ImagePhase.LOADING -> AppShimmerBox(Modifier.fillMaxSize())
-            ImagePhase.ERROR -> AppImageFallback()
+            // A caller fallback (the avatar's letters) replaces the generic placeholder when the URL fails.
+            ImagePhase.ERROR -> if (fallback != null) fallback() else AppImageFallback()
             ImagePhase.READY -> Unit
         }
     }

@@ -2,7 +2,7 @@
   "success": true,
   "message": "Done successfully.",
   "data": {
-    "key": "customers/6ade3faac2cfb0cb993a1744/66a1129d-d1ed-4578-bef0-7d2be02664ee.jpg",
+    "key": "customers/6adf88e16a85c06ca3b80154/16996f57-3e67-42de-8b4e-84be2063a022.jpg",
     "maxBytes": 1024,
     "upload": {
       "url": "https://example.invalid/presigned-upload",
@@ -10,7 +10,7 @@
       "headers": {
         "Content-Type": "image/jpeg"
       },
-      "expiresAt": "2026-10-25T17:48:06.963Z"
+      "expiresAt": "2026-10-26T17:12:45.590Z"
     }
   }
 }

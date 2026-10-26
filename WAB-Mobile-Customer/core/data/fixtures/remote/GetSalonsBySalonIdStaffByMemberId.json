@@ -2,20 +2,25 @@
   "success": true,
   "message": "Done successfully.",
   "data": {
-    "id": "500157bd497447d283767cbd",
-    "firstName": "Noor",
-    "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/rose-staff0.jpg",
-    "status": "DAY_OFF",
-    "branchId": "6addc42774ae573daadd06d6",
-    "role": "MANAGER",
+    "id": "40f0de4db5550e6d577af573",
+    "firstName": "Ruba",
+    "photoUrl": null,
+    "status": "ON_DUTY",
+    "branchId": "444ece388341b640276cd4f0",
+    "role": "EMPLOYEE",
     "rating": {
-      "avg": 0,
-      "count": 0
+      "avg": 3,
+      "count": 1
     },
     "bio": "Fast, friendly and always on time.",
-    "yearsOfExperience": 13,
-    "customersCount": 9,
+    "yearsOfExperience": 5,
+    "customersCount": 8,
     "workingDays": [
+      {
+        "day": "SAT",
+        "start": null,
+        "end": null
+      },
       {
         "day": "MON",
         "start": null,
@@ -44,65 +49,82 @@
     ],
     "services": [
       {
-        "id": "387f8160a24b10c2d3b45546",
-        "catalogServiceId": "6ad867169e63b9a6a612d4a4",
-        "name": "Makeup"
+        "id": "03ef0270c6eea0da6883f0ae",
+        "catalogServiceId": "6adf0d5d1399cd74c64483de",
+        "name": "Makeup",
+        "brideOnly": false
       },
       {
-        "id": "549f6776cd9ce882c6fc96a4",
-        "catalogServiceId": "6ad867169e63b9a6a612d4a2",
-        "name": "Manicure"
+        "id": "3a0d56e8ec1b4defc213f801",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e2",
+        "name": "Henna",
+        "brideOnly": false
       },
       {
-        "id": "605ee55e777f921da282b66b",
-        "catalogServiceId": "6ad867159e63b9a6a612d4a0",
-        "name": "Hair coloring"
+        "id": "5c9e561dfd2745c45c68e6b2",
+        "catalogServiceId": "6adf0d5d1399cd74c64483d8",
+        "name": "Haircut",
+        "brideOnly": false
       },
       {
-        "id": "6189fc909a33eec513e829a2",
-        "catalogServiceId": "6ad867149e63b9a6a612d49e",
-        "name": "Haircut"
+        "id": "7a5a7d4c160857e7d9938fcf",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e0",
+        "name": "Facial",
+        "brideOnly": false
       },
       {
-        "id": "909fddd9386396632153db0c",
-        "catalogServiceId": "6ad867159e63b9a6a612d4a1",
-        "name": "Keratin treatment"
+        "id": "97ea5a0581ab44408182880d",
+        "catalogServiceId": "6adf0d5d1399cd74c64483dc",
+        "name": "Manicure",
+        "brideOnly": false
       },
       {
-        "id": "93d46539a92b1f9031a798ec",
-        "catalogServiceId": "6ad867159e63b9a6a612d49f",
-        "name": "Blow dry"
+        "id": "9e74b2338be4397db3a3fee6",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e1",
+        "name": "Waxing",
+        "brideOnly": false
       },
       {
-        "id": "96e1894af48d287aec173b7a",
-        "catalogServiceId": "6ad867179e63b9a6a612d4a5",
-        "name": "Bridal makeup"
+        "id": "be8c1b6f673021b4a14330f6",
+        "catalogServiceId": "6adf0d5d1399cd74c64483dd",
+        "name": "Pedicure",
+        "brideOnly": false
       },
       {
-        "id": "b82b27d759d4ff4abe6c8a3d",
-        "catalogServiceId": "6ad867179e63b9a6a612d4a7",
-        "name": "Waxing"
+        "id": "bfe121f70757e608dfc4310b",
+        "catalogServiceId": "6adf0d5d1399cd74c64483da",
+        "name": "Hair coloring",
+        "brideOnly": false
       },
       {
-        "id": "d9975ca1a6311d5a893e4ada",
-        "catalogServiceId": "6ad867179e63b9a6a612d4a8",
-        "name": "Henna"
+        "id": "d698719ebfff0f46575ff0bb",
+        "catalogServiceId": "6adf0d5d1399cd74c64483d9",
+        "name": "Blow dry",
+        "brideOnly": false
       },
       {
-        "id": "e83aa9dc20985f8a668b4ba2",
-        "catalogServiceId": "6ad867169e63b9a6a612d4a3",
-        "name": "Pedicure"
-      },
-      {
-        "id": "fb7fc2b5e3a58aa4f539e4e2",
-        "catalogServiceId": "6ad867179e63b9a6a612d4a6",
-        "name": "Facial"
+        "id": "f0c8aec565b69de9a3029682",
+        "catalogServiceId": "6adf0d5d1399cd74c64483db",
+        "name": "Keratin treatment",
+        "brideOnly": false
       }
     ],
     "reviews": {
-      "avg": 0,
-      "count": 0,
-      "latest": []
+      "avg": 3,
+      "count": 1,
+      "latest": [
+        {
+          "id": "829bdba837de2a81f73f4f73",
+          "customerName": "Mais",
+          "rating": 3,
+          "comment": null,
+          "createdAt": "2026-10-05T20:19:00.000Z",
+          "branch": {
+            "id": "444ece388341b640276cd4f0",
+            "name": "Al-Rabyeh"
+          }
+        }
+      ]
     }
   }
 }

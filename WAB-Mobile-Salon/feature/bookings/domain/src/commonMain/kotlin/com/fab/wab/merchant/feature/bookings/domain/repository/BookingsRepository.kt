@@ -25,6 +25,12 @@ interface BookingsRepository {
 
     suspend fun reassign(bookingId: String, personIndex: Int, staffId: String): AppResult<Unit>
 
+    /**
+     * PRD M09 "Reassign staff": who may take person [personIndex] (`GET /bookings/{id}/eligible-staff`: skilled in
+     * every service, bride-qualified for a bride, on duty and free for the whole slot).
+     */
+    suspend fun eligibleStaff(bookingId: String, personIndex: Int): AppResult<List<StaffRef>>
+
     /** Active service providers of the salon (filter sheet and reassignment). */
     suspend fun staff(): AppResult<List<StaffRef>>
 }
