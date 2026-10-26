@@ -9,7 +9,7 @@ import {
 } from '../src/domain/auth/merchantAuth.service';
 import { createRefreshTokenService } from '../src/domain/auth/refreshTokens.service';
 import type { OtpGate } from '../src/domain/otp/otpGate.service';
-import { FakeOtpProvider, fakeOtpProof } from '../src/providers/otp';
+import { proofFor, testOtp } from './helpers/otp';
 import {
   InstallationsRepository,
   MembersRepository,
@@ -69,7 +69,7 @@ const setup = (clock: () => Date = () => NOW): Rig => {
     members: new MembersRepository(members.model as never),
     installations: new InstallationsRepository(installations.model as never),
     countries: new CountriesRepository(countries.model as never),
-    otp: new FakeOtpProvider(),
+    otp: testOtp,
     otpGate: gate,
     refreshTokens: createRefreshTokenService({
       repository: new RefreshTokensRepository(tokens.model as never),
@@ -112,10 +112,10 @@ const failure = async (promise: Promise<unknown>): Promise<Record<string, unknow
 
 const login = (
   rig: Rig,
-  idToken = fakeOtpProof(E164),
+  otpToken = proofFor(E164, 'LOGIN'),
   language: 'ar' | 'en' = 'ar',
 ): Promise<MerchantSession> =>
-  rig.service.login({ phone: PHONE, idToken, device: DEVICE, language });
+  rig.service.login({ phone: PHONE, otpToken, device: DEVICE, language });
 
 describe('merchant auth: check phone', () => {
   it('passes for an active member', async () => {
@@ -151,7 +151,7 @@ describe('merchant auth: login', () => {
   it('signs a member in: merchant-scope token, hashed refresh token, device linked', async () => {
     const rig = setup();
     const id = addMember(rig);
-    const session = await login(rig, fakeOtpProof(E164), 'en');
+    const session = await login(rig, proofFor(E164, 'LOGIN'), 'en');
     expect(verifyAccessToken(SECRET, session.accessToken, NOW)).toMatchObject({
       subjectType: 'MEMBER',
       scope: 'merchant',
@@ -197,7 +197,7 @@ describe('merchant auth: login', () => {
     await login(rig);
     await rig.service.login({
       phone: PHONE,
-      idToken: fakeOtpProof(E164),
+      otpToken: proofFor(E164, 'LOGIN'),
       device: { ...DEVICE, appVersion: '1.1.0', fcmToken: 'fcm-token-1' },
       language: 'ar',
     });
@@ -217,16 +217,27 @@ describe('merchant auth: login', () => {
     expect(rig.installations.docs).toHaveLength(0);
   });
 
+  it('takes a LOGIN otpToken only once; a token of another purpose is refused', async () => {
+    const rig = setup();
+    addMember(rig);
+    const token = proofFor(E164, 'LOGIN');
+    await login(rig, token);
+    expect(await failure(login(rig, token))).toMatchObject({ code: 'OTP_INVALID' });
+    expect(await failure(login(rig, proofFor(E164, 'CHANGE_PHONE')))).toMatchObject({
+      code: 'OTP_INVALID',
+    });
+  });
+
   it('checks the proof first: invalid, expired, another number, blocked', async () => {
     const rig = setup();
     addMember(rig);
-    expect(await failure(login(rig, fakeOtpProof(E164, 'invalid')))).toMatchObject({
+    expect(await failure(login(rig, proofFor(E164, 'LOGIN', 'invalid')))).toMatchObject({
       code: 'OTP_INVALID',
     });
-    expect(await failure(login(rig, fakeOtpProof(E164, 'expired')))).toMatchObject({
+    expect(await failure(login(rig, proofFor(E164, 'LOGIN', 'expired')))).toMatchObject({
       code: 'OTP_EXPIRED',
     });
-    expect(await failure(login(rig, fakeOtpProof(OTHER_E164)))).toMatchObject({
+    expect(await failure(login(rig, proofFor(OTHER_E164, 'LOGIN')))).toMatchObject({
       code: 'OTP_INVALID',
     });
     rig.gate.blocked = true;
@@ -307,7 +318,7 @@ describe('merchant auth: HTTP', () => {
     const res = await request(app)
       .post('/merchant/v1/auth/login')
       .set('Accept-Language', 'en')
-      .send({ phone: PHONE, idToken: fakeOtpProof(E164), installation: DEVICE });
+      .send({ phone: PHONE, otpToken: proofFor(E164, 'LOGIN'), installation: DEVICE });
     expect(res.status).toBe(200);
     expect(bodyOf(res).data?.member.salonId).toBe(rig.salonId.toHexString());
     expect(rig.installations.docs[0]).toMatchObject({ language: 'en' });
@@ -331,12 +342,12 @@ describe('merchant auth: HTTP', () => {
   });
 
   it.each([
-    [{ phone: PHONE, idToken: 'x' }, 'body.installation'],
+    [{ phone: PHONE, otpToken: 'x' }, 'body.installation'],
     [
-      { phone: { countryCode: 'jo', number: '1' }, idToken: 'x', installation: DEVICE },
+      { phone: { countryCode: 'jo', number: '1' }, otpToken: 'x', installation: DEVICE },
       'body.phone.countryCode',
     ],
-    [{ phone: PHONE, idToken: '', installation: DEVICE }, 'body.idToken'],
+    [{ phone: PHONE, otpToken: '', installation: DEVICE }, 'body.otpToken'],
   ])('validates the login body %#', async (body, field) => {
     const res = await request(appFor(setup())).post('/merchant/v1/auth/login').send(body);
     expect(res.status).toBe(400);
@@ -348,7 +359,7 @@ describe('merchant auth: HTTP', () => {
     addMember(rig);
     const res = await request(createApp({ logger, services: { merchantAuth: rig.service } }))
       .post('/customer/v1/auth/login')
-      .send({ phone: PHONE, idToken: fakeOtpProof(E164), installation: DEVICE });
+      .send({ phone: PHONE, otpToken: proofFor(E164, 'LOGIN'), installation: DEVICE });
     expect(res.status).toBe(503);
     expect(rig.tokens.docs).toHaveLength(0);
   });
@@ -356,7 +367,7 @@ describe('merchant auth: HTTP', () => {
   it('answers 503, not 404, when merchant auth is not configured', async () => {
     const res = await request(createApp({ logger }))
       .post('/merchant/v1/auth/login')
-      .send({ phone: PHONE, idToken: 'x', installation: DEVICE });
+      .send({ phone: PHONE, otpToken: 'x', installation: DEVICE });
     expect(res.status).toBe(503);
   });
 });

@@ -92,8 +92,8 @@ export const registerCustomerAuthDocs = (registry: OpenAPIRegistry): void => {
   );
   publicRoute(
     CUSTOMER_AUTH_ROUTES.login,
-    'Log in with a Firebase ID token',
-    'The token must prove the phone. An account in its deletion grace period is restored. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `ACCOUNT_BLOCKED` (403), `PHONE_NOT_REGISTERED` (404).',
+    'Log in with an otpToken',
+    '`otpToken` = the single-use proof from `POST /auth/otp/verify` (purpose LOGIN) for this phone. An account in its deletion grace period is restored. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `ACCOUNT_BLOCKED` (403), `PHONE_NOT_REGISTERED` (404).',
     loginSchema,
     ok,
     [
@@ -105,8 +105,8 @@ export const registerCustomerAuthDocs = (registry: OpenAPIRegistry): void => {
   );
   publicRoute(
     CUSTOMER_AUTH_ROUTES.register,
-    'Register with a Firebase ID token',
-    'Creates the account and signs it in. Errors: `OTP_INVALID`, `OTP_EXPIRED`, `OTP_BLOCKED`, `PHONE_ALREADY_REGISTERED` (409).',
+    'Register with an otpToken',
+    'Creates the account and signs it in. `otpToken` from `POST /auth/otp/verify` (purpose REGISTER), single use. Errors: `OTP_INVALID`, `OTP_EXPIRED`, `OTP_BLOCKED`, `PHONE_ALREADY_REGISTERED` (409).',
     registerSchema,
     { ...ok, status: HTTP_STATUS.created },
     [HTTP_STATUS.unauthorized, HTTP_STATUS.conflict, HTTP_STATUS.tooManyRequests],
@@ -130,7 +130,7 @@ export const registerCustomerAuthDocs = (registry: OpenAPIRegistry): void => {
   publicRoute(
     CUSTOMER_AUTH_ROUTES.changePhone,
     'Change the phone number',
-    'Needs the Firebase ID token of the NEW number. Errors: `OTP_INVALID`, `OTP_EXPIRED`, `OTP_BLOCKED`, `PHONE_ALREADY_REGISTERED`.',
+    'Needs an `otpToken` (purpose CHANGE_PHONE) of the NEW number. Errors: `OTP_INVALID`, `OTP_EXPIRED`, `OTP_BLOCKED`, `PHONE_ALREADY_REGISTERED`.',
     changePhoneSchema,
     { status: HTTP_STATUS.ok, body: profileResultSchema, label: 'Updated profile' },
     [HTTP_STATUS.unauthorized, HTTP_STATUS.conflict, HTTP_STATUS.tooManyRequests],

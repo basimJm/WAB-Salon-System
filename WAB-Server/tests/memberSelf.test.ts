@@ -125,7 +125,7 @@ describe('my account (M25, SRV-129)', () => {
     const changed = await service.changePhone({
       memberId: s(lina),
       phone: { countryCode: 'JO', number: '791234567' },
-      idToken: 'token',
+      otpToken: 'token',
     });
     expect(changed.phone).toBe('+962791234567');
     expect(verified).toEqual(['+962791234567:CHANGE_PHONE']);
@@ -134,7 +134,7 @@ describe('my account (M25, SRV-129)', () => {
       service.changePhone({
         memberId: s(lina),
         phone: { countryCode: 'JO', number: '790000002' },
-        idToken: 'token',
+        otpToken: 'token',
       }),
     ).rejects.toMatchObject({ code: 'PHONE_ALREADY_REGISTERED' });
   });

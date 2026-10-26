@@ -30,10 +30,10 @@ export const createMerchantAuthController = (
   },
 
   async login(req, res) {
-    const { phone, idToken, installation } = bodyOf<typeof loginSchema>(req);
+    const { phone, otpToken, installation } = bodyOf<typeof loginSchema>(req);
     const session = await service.login({
       phone,
-      idToken,
+      otpToken,
       device: installation,
       language: req.language,
     });

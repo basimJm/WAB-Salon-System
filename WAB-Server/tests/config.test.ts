@@ -14,12 +14,20 @@ import {
 const MONGO = 'mongodb://user:s3cret@localhost/wab';
 const REDIS = 'redis://localhost:6379';
 
+/** WhatsApp OTP account + both secrets (values are obviously fake). */
+const WHATSAPP = {
+  WHATSAPP_PHONE_NUMBER_ID: '106540352242922',
+  WHATSAPP_ACCESS_TOKEN: 'not-a-real-access-token',
+  WHATSAPP_TEMPLATE_NAME: 'wab_login_code',
+  OTP_CODE_SECRET: 'c'.repeat(40),
+  OTP_PROOF_SECRET: 'f'.repeat(40),
+};
 const REAL_PROVIDERS = {
-  OTP_PROVIDER: 'real',
+  OTP_PROVIDER: 'whatsapp',
   STORAGE_PROVIDER: 'real',
   NOTIFIER_PROVIDER: 'real',
   PAYMENT_PROVIDER: 'disabled',
-  FIREBASE_PROJECT_ID: 'wab-prod-test',
+  ...WHATSAPP,
   FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
   SMTP_HOST: 'smtp.example.test',
   EMAIL_FROM_ADDRESS: 'noreply@example.test',
@@ -72,13 +80,19 @@ describe('loadConfig', () => {
     expect(invalidKeysOf(validEnv({ PORT: 'abc' }))).toEqual([ENV_KEYS.port]);
   });
 
+  it('maps OTP_PROVIDER=whatsapp to providers.otp and nothing else', () => {
+    expect(loadConfig(validEnv({ OTP_PROVIDER: 'whatsapp', ...WHATSAPP })).providers).toEqual({
+      ...ALL_FAKE_MODES,
+      otp: 'whatsapp',
+    });
+  });
+
   it('defaults every provider to the fake outside production', () => {
     expect(loadConfig(validEnv()).providers).toEqual(ALL_FAKE_MODES);
     expect(loadConfig(validEnv({ NODE_ENV: 'test' })).providers).toEqual(ALL_FAKE_MODES);
   });
 
   it.each([
-    [ENV_KEYS.otpProvider, 'otp'],
     [ENV_KEYS.storageProvider, 'storage'],
     [ENV_KEYS.notifierProvider, 'notifier'],
   ] as const)('maps %s to providers.%s and nothing else', (key, field) => {
@@ -89,14 +103,12 @@ describe('loadConfig', () => {
             SMTP_HOST: 'smtp.example.test',
             EMAIL_FROM_ADDRESS: 'noreply@example.test',
           }
-        : key === ENV_KEYS.storageProvider
-          ? {
-              S3_REGION: 'eu-central-1',
-              S3_PUBLIC_BUCKET: 'wab-public',
-              S3_PRIVATE_BUCKET: 'wab-private',
-              CDN_BASE_URL: 'https://cdn.example.test',
-            }
-          : { FIREBASE_PROJECT_ID: 'wab-dev-test' };
+        : {
+            S3_REGION: 'eu-central-1',
+            S3_PUBLIC_BUCKET: 'wab-public',
+            S3_PRIVATE_BUCKET: 'wab-private',
+            CDN_BASE_URL: 'https://cdn.example.test',
+          };
     expect(loadConfig(validEnv({ [key]: 'real', ...credentials })).providers).toEqual({
       ...ALL_FAKE_MODES,
       [field]: 'real',
@@ -121,8 +133,12 @@ describe('loadConfig', () => {
 
   it('requires production to name every provider as real (payments: disabled), never defaulting or faking', () => {
     const production = validEnv({ NODE_ENV: 'production', ...PAYOUT_KEY });
-    expect(invalidKeysOf(production)).toEqual([...PROVIDER_ENV_KEYS, ENV_KEYS.paymentProvider]);
-    for (const key of [...PROVIDER_ENV_KEYS, ENV_KEYS.paymentProvider]) {
+    expect(invalidKeysOf(production)).toEqual([
+      ...PROVIDER_ENV_KEYS,
+      ENV_KEYS.otpProvider,
+      ENV_KEYS.paymentProvider,
+    ]);
+    for (const key of [...PROVIDER_ENV_KEYS, ENV_KEYS.otpProvider, ENV_KEYS.paymentProvider]) {
       expect(invalidKeysOf({ ...production, ...REAL_PROVIDERS, [key]: 'fake' })).toEqual([key]);
       const others = Object.fromEntries(
         Object.entries(REAL_PROVIDERS).filter(([name]) => name !== key),
@@ -131,7 +147,7 @@ describe('loadConfig', () => {
     }
     const ok = loadConfig({ ...production, ...REAL_PROVIDERS });
     expect(ok.providers).toEqual({
-      otp: 'real',
+      otp: 'whatsapp',
       storage: 'real',
       notifier: 'real',
       payments: 'disabled',
@@ -269,44 +285,81 @@ describe('loadConfig', () => {
     });
   });
 
-  describe('real OTP settings', () => {
-    const base = validEnv({ OTP_PROVIDER: 'real' });
+  describe('WhatsApp OTP settings (SRV-153)', () => {
+    const base = validEnv({ OTP_PROVIDER: 'whatsapp' });
 
-    it('names the missing Firebase project key, never a value', () => {
-      expect(invalidKeysOf(base)).toEqual(['FIREBASE_PROJECT_ID']);
+    it('names every missing key, never a value', () => {
+      expect([...invalidKeysOf(base)].sort()).toEqual(
+        [
+          'OTP_CODE_SECRET',
+          'OTP_PROOF_SECRET',
+          'WHATSAPP_ACCESS_TOKEN',
+          'WHATSAPP_PHONE_NUMBER_ID',
+          'WHATSAPP_TEMPLATE_NAME',
+        ].sort(),
+      );
+      for (const key of Object.keys(WHATSAPP)) {
+        const without = Object.fromEntries(Object.entries(WHATSAPP).filter(([k]) => k !== key));
+        expect(invalidKeysOf({ ...base, ...without })).toEqual([key]);
+      }
     });
 
-    it('builds typed settings, with the emulator host only when given', () => {
-      expect(loadConfig({ ...base, FIREBASE_PROJECT_ID: 'wab-dev-test' }).otp).toEqual({
-        firebase: { projectId: 'wab-dev-test' },
+    it('builds typed settings, with the API version only when given', () => {
+      const config = loadConfig({ ...base, ...WHATSAPP });
+      expect(config.providers.otp).toBe('whatsapp');
+      expect(config.otp).toEqual({
+        codeSecret: WHATSAPP.OTP_CODE_SECRET,
+        proofSecret: WHATSAPP.OTP_PROOF_SECRET,
+        whatsapp: {
+          phoneNumberId: WHATSAPP.WHATSAPP_PHONE_NUMBER_ID,
+          accessToken: WHATSAPP.WHATSAPP_ACCESS_TOKEN,
+          templateName: WHATSAPP.WHATSAPP_TEMPLATE_NAME,
+        },
       });
       expect(
-        loadConfig({
-          ...base,
-          FIREBASE_PROJECT_ID: 'wab-dev-test',
-          FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
-        }).otp,
-      ).toEqual({
-        firebase: { projectId: 'wab-dev-test', authEmulatorHost: 'localhost:9099' },
-      });
+        loadConfig({ ...base, ...WHATSAPP, WHATSAPP_API_VERSION: 'v26.0' }).otp.whatsapp,
+      ).toMatchObject({ apiVersion: 'v26.0' });
     });
 
-    it('rejects a malformed emulator host and is absent for the fake provider', () => {
+    it.each([
+      ['WHATSAPP_PHONE_NUMBER_ID', '+962791234567'],
+      ['WHATSAPP_TEMPLATE_NAME', 'Login Code'],
+      ['WHATSAPP_API_VERSION', '26'],
+      ['OTP_CODE_SECRET', 'short'],
+      ['OTP_PROOF_SECRET', 'x'.repeat(31)],
+      ['OTP_FIXED_CODE', '12ab56'],
+      ['OTP_FIXED_CODE', '123'],
+    ])('rejects a malformed %s', (key, value) => {
+      expect(invalidKeysOf({ ...base, ...WHATSAPP, [key]: value })).toEqual([key]);
+    });
+
+    it('requires the code and proof secrets to differ', () => {
       expect(
-        invalidKeysOf({ ...base, FIREBASE_PROJECT_ID: 'p', FIREBASE_AUTH_EMULATOR_HOST: 'nope' }),
-      ).toEqual(['FIREBASE_AUTH_EMULATOR_HOST']);
-      expect(loadConfig(validEnv()).otp).toBeUndefined();
-      expect(loadConfig(validEnv({ FIREBASE_PROJECT_ID: 'p' })).otp).toBeUndefined();
+        invalidKeysOf({ ...base, ...WHATSAPP, OTP_PROOF_SECRET: WHATSAPP.OTP_CODE_SECRET }),
+      ).toEqual(['OTP_PROOF_SECRET']);
+      expect(
+        invalidKeysOf(
+          validEnv({ OTP_CODE_SECRET: 'a'.repeat(32), OTP_PROOF_SECRET: 'a'.repeat(32) }),
+        ),
+      ).toEqual(['OTP_PROOF_SECRET']);
     });
 
-    it('refuses the Firebase emulator in production', () => {
-      const production = validEnv({
-        ...REAL_PROVIDERS,
-        ...PAYOUT_KEY,
-        NODE_ENV: 'production',
-        FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+    it('the fake provider needs no WhatsApp keys; the fixed code passes through in development', () => {
+      expect(loadConfig(validEnv()).otp).toEqual({});
+      expect(loadConfig(validEnv({ OTP_FIXED_CODE: '123456' })).otp).toEqual({
+        fixedCode: '123456',
       });
-      expect(invalidKeysOf(production)).toEqual(['FIREBASE_AUTH_EMULATOR_HOST']);
+      expect(loadConfig(validEnv()).providers.otp).toBe('fake');
+    });
+
+    it('refuses the retired `real` mode, a fake and a fixed code in production', () => {
+      expect(invalidKeysOf(validEnv({ OTP_PROVIDER: 'real' }))).toEqual(['OTP_PROVIDER']);
+      const production = validEnv({ ...REAL_PROVIDERS, ...PAYOUT_KEY, NODE_ENV: 'production' });
+      expect(loadConfig(production).providers.otp).toBe('whatsapp');
+      expect(invalidKeysOf({ ...production, OTP_PROVIDER: 'fake' })).toEqual(['OTP_PROVIDER']);
+      expect(invalidKeysOf({ ...production, OTP_FIXED_CODE: '123456' })).toEqual([
+        'OTP_FIXED_CODE',
+      ]);
     });
   });
 

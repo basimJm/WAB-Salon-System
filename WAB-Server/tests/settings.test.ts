@@ -35,6 +35,9 @@ const DOMAIN_SETTINGS: Readonly<Record<string, unknown>> = {
   'otp.requestWindowSec': 300,
   'otp.maxWrong': 5,
   'otp.blockSec': 900,
+  'otp.codeTtlSec': 300,
+  'otp.proofTtlSec': 600,
+  'otp.channel': 'WHATSAPP',
   'auth.accessTokenTtlSec': 900,
   'auth.refreshTokenTtlDays': 90,
   'admin.maxFailedLogins': 5,
@@ -62,9 +65,9 @@ const valid = (key: keyof typeof SETTING_DEFINITIONS, value: unknown): boolean =
   SETTING_DEFINITIONS[key].schema.safeParse(value).success;
 
 describe('settings registry', () => {
-  it('has exactly the 39 keys of BUSINESS_DOMAIN.md §10', () => {
+  it('has exactly the 42 keys of BUSINESS_DOMAIN.md §10', () => {
     expect([...SETTING_KEYS].sort()).toEqual(Object.keys(DOMAIN_SETTINGS).sort());
-    expect(SETTING_KEYS).toHaveLength(39);
+    expect(SETTING_KEYS).toHaveLength(42);
     expect(Object.keys(SETTING_DEFAULTS).sort()).toEqual([...SETTING_KEYS].sort());
   });
 
@@ -124,6 +127,9 @@ describe('settings registry', () => {
     ['otp.length', 3, false],
     ['otp.length', 11, false],
     ['otp.length', 6.5, false],
+    ['otp.channel', 'WHATSAPP', true],
+    ['otp.channel', 'SMS', false],
+    ['otp.channel', 'whatsapp', false],
     ['pagination.appPageSize', 1, true],
     ['pagination.appPageSize', 100, true],
     ['pagination.adminPageSize', 101, false],
@@ -158,6 +164,8 @@ describe('settings registry', () => {
     'otp.requestWindowSec',
     'otp.maxWrong',
     'otp.blockSec',
+    'otp.codeTtlSec',
+    'otp.proofTtlSec',
     'auth.accessTokenTtlSec',
     'auth.refreshTokenTtlDays',
     'admin.maxFailedLogins',
@@ -187,6 +195,7 @@ describe('settings registry', () => {
     'currency',
     'discovery.nearbyRadiusKm',
     'otp.length',
+    'otp.channel',
     'booking.reminderMinutes',
     'alerts.paymentFailures',
     'alerts.api5xxRatePct',

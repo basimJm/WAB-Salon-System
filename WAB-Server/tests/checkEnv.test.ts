@@ -15,7 +15,11 @@ const PRODUCTION_VALUES: Readonly<Record<string, string>> = {
   REDIS_URL: 'rediss://cache.example.com:6380',
   JWT_ACCESS_SECRET: 'p'.repeat(48),
   PAYOUT_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
-  FIREBASE_PROJECT_ID: 'wab-prod-example',
+  WHATSAPP_PHONE_NUMBER_ID: '106540352242922',
+  WHATSAPP_ACCESS_TOKEN: 'not-a-real-access-token',
+  WHATSAPP_TEMPLATE_NAME: 'wab_login_code',
+  OTP_CODE_SECRET: 'c'.repeat(40),
+  OTP_PROOF_SECRET: 'f'.repeat(40),
   FCM_SERVICE_ACCOUNT_JSON: '{"type":"service_account"}',
   SMTP_HOST: 'smtp.example.com',
   SMTP_PORT: '465',
@@ -67,7 +71,7 @@ describe('checkEnvText', () => {
 
     it('refuses a fake provider in production', () => {
       const filled = fill(example(template), PRODUCTION_VALUES).replace(
-        'OTP_PROVIDER=real',
+        'OTP_PROVIDER=whatsapp',
         'OTP_PROVIDER=fake',
       );
       expect(checkEnvText(filled)).toMatchObject({ ok: false, invalidKeys: ['OTP_PROVIDER'] });

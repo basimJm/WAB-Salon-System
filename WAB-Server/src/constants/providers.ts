@@ -15,6 +15,15 @@ export const DISABLED_PAYMENT_MODE: PaymentProviderMode = 'disabled';
 export const PAYMENTS_DISABLED_MESSAGE = 'payments are paused: no payment gateway is integrated';
 export const DEFAULT_PAYMENT_PROVIDER_MODE: PaymentProviderMode = 'fake';
 
+/**
+ * Phone OTP (BUSINESS_DOMAIN §3.1a): `whatsapp` = server codes over the WhatsApp Cloud API (the only
+ * production value); `fake` = codes recorded instead of sent (dev/test, optional fixed code).
+ */
+export const OTP_PROVIDER_MODES = ['fake', 'whatsapp'] as const;
+export type OtpProviderMode = (typeof OTP_PROVIDER_MODES)[number];
+export const DEFAULT_OTP_PROVIDER_MODE: OtpProviderMode = 'fake';
+export const WHATSAPP_OTP_MODE: OtpProviderMode = 'whatsapp';
+
 /** Why a purpose is verified (BUSINESS_DOMAIN.md §4.2, wab-otp BRD §4.1). */
 export const OTP_PURPOSES = [
   'LOGIN',
@@ -29,15 +38,19 @@ export type OtpPurpose = (typeof OTP_PURPOSES)[number];
 /** Phone numbers cross the provider boundary in E.164 (`+9627…`). */
 export const E164_PATTERN = /^\+[1-9][0-9]{6,14}$/;
 
-/** Outcomes of checking a provider proof; provider failures are thrown, not returned. */
-export const OTP_OUTCOMES = ['VERIFIED', 'INVALID_PROOF', 'PHONE_MISMATCH', 'EXPIRED'] as const;
+/** Outcomes of checking an `otpToken`; provider failures are thrown, not returned. */
+export const OTP_OUTCOMES = [
+  'VERIFIED',
+  'INVALID_PROOF',
+  'PHONE_MISMATCH',
+  'PURPOSE_MISMATCH',
+  'EXPIRED',
+] as const;
 export type OtpOutcome = (typeof OTP_OUTCOMES)[number];
 
-/** Test proofs of the fake OTP provider: `fake-otp:<kind>:<phone>`. */
-export const FAKE_OTP_PROOF_PREFIX = 'fake-otp';
-export const FAKE_OTP_PROOF_SEPARATOR = ':';
-export const FAKE_OTP_PROOF_KINDS = ['valid', 'expired', 'invalid', 'provider-error'] as const;
-export type FakeOtpProofKind = (typeof FAKE_OTP_PROOF_KINDS)[number];
+/** Outcomes of checking a typed code; a wrong code is `INVALID_CODE`, no/expired/used code `EXPIRED`. */
+export const OTP_CODE_OUTCOMES = ['VERIFIED', 'INVALID_CODE', 'EXPIRED'] as const;
+export type OtpCodeOutcome = (typeof OTP_CODE_OUTCOMES)[number];
 
 /** Longest signed-URL lifetime the storage SDK accepts: the longest the server ever asks for. */
 export const STORAGE_SIGNED_URL_MAX_TTL_SEC = Math.max(LICENSE_URL_TTL_SEC, EXPORT_URL_TTL_SEC);

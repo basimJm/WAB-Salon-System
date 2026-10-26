@@ -125,6 +125,7 @@ describe('error codes', () => {
         'OTP_BLOCKED',
         'OTP_INVALID',
         'OTP_EXPIRED',
+        'OTP_DELIVERY_FAILED',
         'PHONE_NOT_REGISTERED',
         'PHONE_ALREADY_REGISTERED',
         'ACCOUNT_BLOCKED',
