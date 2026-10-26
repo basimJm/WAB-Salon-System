@@ -175,3 +175,15 @@
 - Tests: `tasks.py check` (only the known CUS-047 note); gates above
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — merges + backlog only in this branch. DEVIATIONS: signed-in client flows verified on a local stack (same server code), not on Render (no credentials sent there); device OTP/push (CUS-061/063, MER-055/056) need owner Firebase/APNs inputs.
+
+### T-139 — WhatsApp OTP shipped to main; production WhatsApp plan (owner request 2026-10-26)
+- Project: repo root
+- Branch: `chore/sync-masters-into-main-8` (PR into `main`), then `main` → each master
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Owner set Render dev `OTP_PROVIDER=fake` + fixed code; masters (OTP-011 + SRV-153 #475, MER-070 #476, CUS-089 #477, CUS-090 #478, MER-071 #479) merged into `main`; the only conflicts = generated board
+  - [x] Statuses DONE: OTP-011, SRV-153, CUS-089, MER-070, CUS-090, MER-071; new rows SRV-155 (delivery webhook), SRV-156 (prod tooling + runbook), SRV-157 (owner go-live), CUS-091 / MER-072 (apps react to delivery failure)
+  - [x] Local stack end to end before the sync: register + login through request → verify → `otpToken` (customer + merchant), replay / old `idToken` / removed endpoint refused; customer + merchant full gates green
+- Tests: `tasks.py check` (only the known CUS-047 note); gates above
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — merges + backlog only in this branch.
