@@ -18,6 +18,7 @@ import {
   ARQAM_TEMPLATE_NAME_PATTERN,
   STORAGE_REAL_REQUIRED_KEYS,
   CLOUDFRONT_KEYS,
+  MONGO_DATABASE_NAME_PATTERN,
   MONGO_URI_PATTERN,
   PORT_MAX,
   PORT_MIN,
@@ -98,6 +99,8 @@ export const envSchema = z
     [ENV_KEYS.otpProofSecret]: otpSecret,
     [ENV_KEYS.otpFixedCode]: z.string().regex(OTP_FIXED_CODE_PATTERN).optional(),
     [ENV_KEYS.fcmDryRun]: booleanText.default(false),
+    [ENV_KEYS.seedDemoOnStart]: booleanText.default(false),
+    [ENV_KEYS.seedDemoDatabase]: z.string().regex(MONGO_DATABASE_NAME_PATTERN).optional(),
     [ENV_KEYS.smtpHost]: z.string().min(1).optional(),
     [ENV_KEYS.smtpPort]: z.coerce
       .number()
@@ -173,6 +176,14 @@ export const envSchema = z
       }
     }
     if (env[ENV_KEYS.nodeEnv] !== 'production') return;
+    // Demo data at startup under production rules only with the hosted dev database named (SRV-160).
+    if (env[ENV_KEYS.seedDemoOnStart] && env[ENV_KEYS.seedDemoDatabase] === undefined) {
+      context.addIssue({
+        code: 'custom',
+        path: [ENV_KEYS.seedDemoDatabase],
+        message: ENV_KEYS.seedDemoDatabase,
+      });
+    }
     if (env[ENV_KEYS.payoutEncryptionKey] === undefined) {
       context.addIssue({
         code: 'custom',
