@@ -595,6 +595,12 @@ export const DEMO_IMAGE_SOURCE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '
 /** Uploaded demo photos are re-encoded as JPEG no wider than this, like a phone upload. */
 export const DEMO_IMAGE_MAX_WIDTH = 1_600;
 export const DEMO_IMAGE_QUALITY = 82;
+/**
+ * Demo keys with no photo in the owner's folder (or when no folder is given) get a plain square
+ * of this size and colour, so the seeded URLs never answer 404 (SRV-171 S4).
+ */
+export const DEMO_PLACEHOLDER_SIZE = 512;
+export const DEMO_PLACEHOLDER_BACKGROUND = { r: 214, g: 204, b: 196 } as const;
 
 /** Extra branches of demo salons (§3.3a), added after every salon got its main branch. */
 export interface DemoBranchSpec {
