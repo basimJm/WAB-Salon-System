@@ -89,7 +89,11 @@
       "members": "الأعضاء"
     },
     "profile": "ملفي الشخصي",
-    "otherLanguageShort": "EN"
+    "otherLanguageShort": "EN",
+    "viewAll": "عرض الكل",
+    "markRead": "تمييز كمقروء",
+    "noAlerts": "لا توجد تنبيهات جديدة",
+    "alertsFailed": "تعذّر تحميل التنبيهات."
   },
   "module": {
     "comingSoon": "هذا القسم قادم قريبًا",

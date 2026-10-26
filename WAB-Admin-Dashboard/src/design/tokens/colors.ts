@@ -13,6 +13,10 @@ export const BRAND = {
   onBrandText: '#EDE4FC',
   /** Rating star (design: #F59E0B in both themes). */
   star: '#F59E0B',
+  /** Export menu file chips (design `Blocks`: XLS green, PDF rose, white text in both themes). */
+  fileXlsx: '#23845F',
+  fileCsv: '#585E6E',
+  filePdf: '#C2386B',
 } as const;
 
 export const THEME_NAMES = ['light', 'dark'] as const;

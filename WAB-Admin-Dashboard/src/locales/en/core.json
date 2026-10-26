@@ -89,7 +89,11 @@
       "members": "Members"
     },
     "profile": "My profile",
-    "otherLanguageShort": "ع"
+    "otherLanguageShort": "ع",
+    "viewAll": "View all",
+    "markRead": "Mark as read",
+    "noAlerts": "No new alerts",
+    "alertsFailed": "Alerts could not be loaded."
   },
   "module": {
     "comingSoon": "This section is coming soon",

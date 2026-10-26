@@ -20,7 +20,7 @@ import { Topbar } from './Topbar';
 
 const TRUE = 'true';
 
-/** Sidebar is docked (collapsible) on wide screens and a slide-in drawer on tablets/phones. */
+/** Sidebar is docked (collapsible; the icon rail by default on tablets) and a slide-in drawer on phones. */
 export function AppShell() {
   const { breakpoint } = useViewport();
   const { sessionManager } = useContainer();
@@ -28,10 +28,15 @@ export function AppShell() {
   const location = useLocation();
   const crumbs = useBreadcrumbs();
   const search = useGlobalSearch();
-  const docked = breakpoint === 'expanded';
-  const [collapsed, setCollapsed] = useState(
-    () => safeStorage.get(STORAGE_KEYS.sidebarCollapsed) === TRUE,
-  );
+  // Design `Sidebar`: under 1180 px the sidebar stays docked as the 76 px icon rail; phones keep the drawer
+  // because rail + content overflow a 375 px screen (measured, ADM-099).
+  const docked = breakpoint !== 'compact';
+  const [collapsedPref, setCollapsed] = useState<boolean | null>(() => {
+    const stored = safeStorage.get(STORAGE_KEYS.sidebarCollapsed);
+    return stored === null ? null : stored === TRUE;
+  });
+  // No saved choice: collapsed on tablets (design `pref.collapsed ?? narrow`), expanded on desktops.
+  const collapsed = collapsedPref ?? breakpoint !== 'expanded';
   // The drawer is tied to the page it was opened on, so navigating (or resizing to docked) closes it.
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
   const drawerOpen = !docked && drawerPath === location.pathname;
@@ -49,14 +54,13 @@ export function AppShell() {
 
   const onMenu = useCallback(() => {
     if (docked) {
-      setCollapsed((prev) => {
-        safeStorage.set(STORAGE_KEYS.sidebarCollapsed, String(!prev));
-        return !prev;
-      });
+      const next = !collapsed;
+      safeStorage.set(STORAGE_KEYS.sidebarCollapsed, String(next));
+      setCollapsed(next);
     } else {
       setDrawerOpen(!drawerOpen);
     }
-  }, [docked, drawerOpen, setDrawerOpen]);
+  }, [docked, collapsed, drawerOpen, setDrawerOpen]);
 
   const onLogout = useCallback(() => {
     void sessionManager.signOut();

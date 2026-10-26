@@ -124,7 +124,6 @@ export default function BookingsPage() {
       subtitle={t('bookings.subtitle')}
       actions={
         <>
-          <ExportMenu onExport={runner('BOOKINGS', bookingExportParams(bookingQueryOf(state)))} />
           <SegmentedControl
             ariaLabel={t('bookings.tabs')}
             value={tab}
@@ -136,16 +135,21 @@ export default function BookingsPage() {
           />
         </>
       }
+      exportMenu={
+        <ExportMenu onExport={runner('BOOKINGS', bookingExportParams(bookingQueryOf(state)))} />
+      }
+      search={
+        <SearchField
+          label={t('bookings.search')}
+          initialValue={state.search}
+          onSearch={list.setSearch}
+        />
+      }
       filters={{
         active: chips,
         onClearAll: list.clearFilters,
         controls: (
           <>
-            <SearchField
-              label={t('bookings.search')}
-              initialValue={state.search}
-              onSearch={list.setSearch}
-            />
             <SalonBranchFilters
               salon={f('salon')}
               branch={f('branch')}

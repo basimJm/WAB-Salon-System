@@ -133,7 +133,7 @@ export default function TransactionsPage() {
     <ListPage
       title={title}
       subtitle={t('transactions.subtitle')}
-      actions={
+      exportMenu={
         <ExportMenu
           onExport={runner(
             'TRANSACTIONS',

@@ -107,17 +107,19 @@ export default function CustomersPage() {
     <ListPage
       title={title}
       subtitle={t('customers.subtitle')}
-      actions={<ExportMenu onExport={runner('CUSTOMERS', customerExportParams(apiQuery))} />}
+      exportMenu={<ExportMenu onExport={runner('CUSTOMERS', customerExportParams(apiQuery))} />}
+      search={
+        <SearchField
+          label={t('customers.search')}
+          initialValue={state.search}
+          onSearch={list.setSearch}
+        />
+      }
       filters={{
         active: chips,
         onClearAll: list.clearFilters,
         controls: (
           <>
-            <SearchField
-              label={t('customers.search')}
-              initialValue={state.search}
-              onSearch={list.setSearch}
-            />
             <Select
               label={t('salons.state')}
               value={status ?? ''}

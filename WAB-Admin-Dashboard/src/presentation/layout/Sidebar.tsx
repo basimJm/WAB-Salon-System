@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { NAV_ITEMS, type NavItem } from '@/constants/nav';
 import { BRAND_ICON_URL, BRAND_MARK, BRAND_TAGLINE, SIDEBAR_DRAWER_ID } from '@/constants/ui';
-import { formatNumber } from '@/domain/shared/format';
+import { formatNumber } from '@/domain/shared/numbers';
 import { MAX_COUNTER } from '@/constants/ui';
 import { useLanguage } from '../hooks/useLanguage';
 import { cx } from '../utils/cx';

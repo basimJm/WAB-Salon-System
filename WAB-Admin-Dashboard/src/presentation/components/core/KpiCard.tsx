@@ -18,6 +18,10 @@ export interface KpiCardProps {
   loading?: boolean;
   /** Breakdown under a dashed line (design: "visitors 56 · customers 75"). */
   parts?: readonly KpiPart[];
+  /** Muted line under the value (design `sub`, or "No data yet" when the server has no number). */
+  note?: string;
+  /** Design `tone: 'rose'`: the value is a failure count. */
+  tone?: 'rose';
 }
 
 const ARROW_UP = '↑';
@@ -30,12 +34,19 @@ export function KpiCard({
   deltaLabel,
   loading = false,
   parts,
+  note,
+  tone,
 }: KpiCardProps) {
   const positive = deltaPercent !== undefined && deltaPercent >= 0;
   return (
     <Card className="wab-kpi">
       <span className="wab-kpi__label">{label}</span>
-      {loading ? <Skeleton height="lg" /> : <span className="wab-kpi__value">{value}</span>}
+      {loading ? (
+        <Skeleton height="lg" />
+      ) : (
+        <span className={cx('wab-kpi__value', tone && `wab-kpi__value--${tone}`)}>{value}</span>
+      )}
+      {!loading && note ? <span className="wab-kpi__note">{note}</span> : null}
       {!loading && deltaPercent !== undefined ? (
         <span
           className={cx('wab-kpi__delta', positive ? 'wab-kpi__delta--up' : 'wab-kpi__delta--down')}

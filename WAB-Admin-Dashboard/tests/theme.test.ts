@@ -35,7 +35,9 @@ describe('design tokens', () => {
   });
 
   it('every var(--x) used in a stylesheet is defined by the tokens', () => {
-    const defined = new Set(Object.keys(buildCssVars('light', 'rtl')));
+    // Element-scoped values a component sets inline from constants (analytics board cell spans, ADM-099).
+    const elementVars = ['--span', '--span-md'];
+    const defined = new Set([...Object.keys(buildCssVars('light', 'rtl')), ...elementVars]);
     const used = new Set<string>();
     for (const file of listFiles(SRC, /\.css$/)) {
       for (const m of read(file).matchAll(/var\((--[\w-]+)\)/g)) used.add(m[1] as string);

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OTP_LENGTH } from '@/constants/auth';
 import { SESSION_IDLE_DAYS } from '@/constants/session';
-import { formatNumber } from '@/domain/shared/format';
+import { formatNumber } from '@/domain/shared/numbers';
 import { LOGIN_REDIRECT_PARAM, ROUTES } from '@/constants/routes';
 import { useContainer } from '@/app/ContainerContext';
 import { Button } from '../components/core/Button';
