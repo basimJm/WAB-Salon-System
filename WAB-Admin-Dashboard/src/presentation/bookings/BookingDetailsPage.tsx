@@ -167,7 +167,7 @@ function History({ b }: { b: BookingDetails }) {
       entries={b.statusHistory.map((h, i) => ({
         id: `${h.at}-${String(i)}`,
         title: t(`status.booking.${h.status}`, { defaultValue: h.status }),
-        actor: h.actorType,
+        actor: t(`bookings.actor.${h.actorType}`, { defaultValue: h.actorType }),
         at: h.at,
         ...(h.reason ? { reason: h.reason } : {}),
       }))}

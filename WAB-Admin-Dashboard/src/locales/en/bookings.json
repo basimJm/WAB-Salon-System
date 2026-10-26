@@ -24,7 +24,7 @@
     "total": "Total",
     "from": "From day",
     "to": "To day (included)",
-    "search": "Search reference, customer or salon",
+    "search": "Search booking reference, customer name or phone",
     "empty": "No bookings match",
     "respondBy": "Salon must answer by",
     "requestedAt": "Requested",
@@ -85,6 +85,12 @@
       "PAY_ON_ARRIVAL": "Pay on arrival",
       "DEPOSIT": "Deposit online",
       "FULL_ONLINE": "Full payment online"
+    },
+    "actor": {
+      "CUSTOMER": "Customer",
+      "MEMBER": "Salon member",
+      "ADMIN": "Admin",
+      "SYSTEM": "System"
     }
   }
 }

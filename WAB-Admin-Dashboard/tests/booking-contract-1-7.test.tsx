@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18N_DEFAULT_NAMESPACE } from '@/constants/i18n';
 import { createI18n } from '@/infrastructure/i18n/i18n';
 import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
@@ -81,6 +82,10 @@ describe('admin contract 1.7.0 (SRV-170, ADM-107)', () => {
     expect(within(rejected).getByText('Fully booked')).toBeInTheDocument();
     const pending = screen.getByText('WAB-000001').closest('tr') as HTMLElement;
     expect(within(pending).queryByText('Fully booked')).toBeNull();
+    // The server's admin `q` matches the reference and the customer only (salon has its own filter).
+    expect(
+      screen.getByLabelText('Search booking reference, customer name or phone'),
+    ).toBeInTheDocument();
   });
 
   it('details show the booking staff and each person staff member with photo or initials', async () => {
@@ -131,6 +136,14 @@ describe('admin contract 1.7.0 (SRV-170, ADM-107)', () => {
     render(`/bookings/${String(PENDING)}`, 'en', (b) => ({ ...b, refundStatus: 'NONE' }));
     expect((await fact('Payment method')).textContent).toBe('Pay on arrival');
     expect((await fact('Refund')).textContent).toBe('No refund');
+  });
+
+  it('status history names the actor in words (e2e finding)', async () => {
+    const user = userEvent.setup();
+    render(`/bookings/${String(PENDING)}`, 'ar');
+    await user.click(await screen.findByRole('tab', { name: 'سجل الحالات' }));
+    expect(await screen.findByText(/العميل/, { selector: 'p' })).toBeInTheDocument();
+    expect(screen.queryByText(/CUSTOMER/)).toBeNull();
   });
 
   it('an unknown payment method shows as sent', async () => {
