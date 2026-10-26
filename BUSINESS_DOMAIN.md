@@ -581,7 +581,7 @@ otp.length = 6                              otp.resendAfterSec = 60
 otp.maxRequests = 5   otp.requestWindowSec = 300   otp.maxWrong = 5   otp.blockSec = 900
 otp.codeTtlSec = 300   otp.proofTtlSec = 600   otp.channel = WHATSAPP
 auth.accessTokenTtlSec = 900                auth.refreshTokenTtlDays = 90
-admin.maxFailedLogins = 5   admin.lockSec = 900   admin.sessionIdleSec = 1800
+admin.maxFailedLogins = 5   admin.lockSec = 900   admin.sessionIdleSec = 172800 (2 days, owner 2026-10-26)
 account.deletionGraceDays = 30
 subscription.trialDays = 90                 subscription.warnDaysBefore = 7
 refund.maxRetries = 5                       refund.delayAlertHours = 48

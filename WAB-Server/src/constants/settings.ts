@@ -32,7 +32,8 @@ export const SETTING_DEFAULTS = {
   'auth.refreshTokenTtlDays': 90,
   'admin.maxFailedLogins': 5,
   'admin.lockSec': 900,
-  'admin.sessionIdleSec': 1_800,
+  // Owner 2026-10-26: an admin stays signed in through 2 days without activity (sliding).
+  'admin.sessionIdleSec': 172_800,
   'account.deletionGraceDays': 30,
   'subscription.trialDays': 90,
   'subscription.warnDaysBefore': 7,
