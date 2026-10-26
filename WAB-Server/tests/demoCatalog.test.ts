@@ -127,12 +127,26 @@ describe('seedDemoCatalog', () => {
 });
 
 describe('assertDemoAllowed', () => {
+  const off = { onStart: false };
   it('refuses production and allows everything else', () => {
     expect(() => {
-      assertDemoAllowed({ isProduction: true });
+      assertDemoAllowed({ isProduction: true, demoSeed: off }, 'wab');
     }).toThrow('must not run in production');
     expect(() => {
-      assertDemoAllowed({ isProduction: false });
+      assertDemoAllowed({ isProduction: false, demoSeed: off }, 'wab');
     }).not.toThrow();
+  });
+
+  it('allows production rules only on the database named in SEED_DEMO_DATABASE (hosted dev)', () => {
+    const hostedDev = {
+      isProduction: true,
+      demoSeed: { onStart: true, allowedDatabase: 'wab-dev' },
+    };
+    expect(() => {
+      assertDemoAllowed(hostedDev, 'wab-dev');
+    }).not.toThrow();
+    expect(() => {
+      assertDemoAllowed(hostedDev, 'wab-prod');
+    }).toThrow('SEED_DEMO_DATABASE');
   });
 });

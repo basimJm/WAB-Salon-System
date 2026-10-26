@@ -527,3 +527,29 @@ describe('.env.example', () => {
     expect(entries.every((line) => line.endsWith('='))).toBe(true);
   });
 });
+
+describe('demo seed on start (SRV-160)', () => {
+  it('is off by default and reads SEED_DEMO_ON_START / SEED_DEMO_DATABASE', () => {
+    expect(loadConfig(validEnv()).demoSeed).toEqual({ onStart: false });
+    expect(
+      loadConfig(validEnv({ SEED_DEMO_ON_START: 'true', SEED_DEMO_DATABASE: 'wab-dev' })).demoSeed,
+    ).toEqual({ onStart: true, allowedDatabase: 'wab-dev' });
+    expect(invalidKeysOf(validEnv({ SEED_DEMO_ON_START: 'yes' }))).toEqual(['SEED_DEMO_ON_START']);
+    expect(invalidKeysOf(validEnv({ SEED_DEMO_DATABASE: 'wab/dev' }))).toEqual([
+      'SEED_DEMO_DATABASE',
+    ]);
+  });
+
+  it('under production rules needs the database named before it seeds at startup', () => {
+    const production = { ...REAL_PROVIDERS, ...PAYOUT_KEY, NODE_ENV: 'production' };
+    expect(invalidKeysOf(validEnv({ ...production, SEED_DEMO_ON_START: 'true' }))).toEqual([
+      'SEED_DEMO_DATABASE',
+    ]);
+    expect(
+      loadConfig(
+        validEnv({ ...production, SEED_DEMO_ON_START: 'true', SEED_DEMO_DATABASE: 'wab-dev' }),
+      ).demoSeed,
+    ).toEqual({ onStart: true, allowedDatabase: 'wab-dev' });
+    expect(loadConfig(validEnv(production)).demoSeed).toEqual({ onStart: false });
+  });
+});

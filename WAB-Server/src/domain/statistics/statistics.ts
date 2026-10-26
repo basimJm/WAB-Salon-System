@@ -11,6 +11,7 @@ import { MS_PER_MINUTE } from '../../constants/time';
 import type { BookingRaw } from '../../models/booking.model';
 import type { Entity } from '../../utils/database/plain';
 import { localDateOf } from '../../utils/time';
+import { paidAtSalon } from '../bookings/bookingMoney';
 
 /** The booking facts the statistics read (a subset of the stored booking). */
 export type StatisticsBooking = Pick<
@@ -56,7 +57,7 @@ const has = (list: readonly BookingStatus[], status: BookingStatus): boolean =>
 /** Revenue of one booking in fils: online money kept, plus the rest when paid at the salon. */
 const revenueOf = (b: StatisticsBooking): { online: number; atSalon: number } => ({
   online: Math.max(0, b.money.paidOnline - b.money.refunded),
-  atSalon: b.status === 'COMPLETED' ? b.money.remaining : 0,
+  atSalon: paidAtSalon(b),
 });
 
 /** The first answer (approval or rejection) by the salon, if any. */

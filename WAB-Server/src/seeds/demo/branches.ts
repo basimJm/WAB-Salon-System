@@ -35,6 +35,10 @@ export interface DemoBranchSource {
   }[];
 }
 
+/** The deterministic id of a demo extra branch (the same on every run). */
+export const demoBranchId = (salon: string, key: string): Types.ObjectId =>
+  demoId(`branch:${salon}:${key}`);
+
 const phoneOf = (dialCode: string, index: number): string =>
   `${dialCode}${DEMO_BRANCH_MEMBER_PHONE_PREFIX}${String(index).padStart(DEMO_PHONE_INDEX_DIGITS, '0')}`;
 
@@ -53,7 +57,7 @@ export const buildDemoBranches = (
   for (const spec of specs) {
     const source = sources.get(spec.salon);
     if (source === undefined || source.services.length === 0) continue;
-    const branchId = demoId(`branch:${spec.salon}:${spec.key}`);
+    const branchId = demoBranchId(spec.salon, spec.key);
     const schedule = SCHEDULE_DAY_ORDER.map((day) => ({
       day,
       isOff: spec.offDays.includes(day),

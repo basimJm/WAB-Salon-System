@@ -58,7 +58,13 @@ export interface StaffDetails extends StaffSummary {
   readonly yearsOfExperience: number | null;
   readonly customersCount: number;
   readonly workingDays: { day: string; start: string | null; end: string | null }[];
-  readonly services: { id: string; catalogServiceId: string; name: string }[];
+  readonly services: {
+    id: string;
+    catalogServiceId: string;
+    name: string;
+    /** Bookable only for a bride person (§5.5 BRIDE_ONLY_SERVICE). */
+    brideOnly: boolean;
+  }[];
   readonly reviews: { avg: number; count: number; latest: ReviewView[] };
 }
 
@@ -92,6 +98,8 @@ export interface SalonDetails {
     description: string | null;
     price: string;
     durationMinutes: number;
+    /** Bookable only for a bride person (§5.5 BRIDE_ONLY_SERVICE). */
+    brideOnly: boolean;
     mediaUrls: string[];
   }[];
   readonly gallery: {
@@ -148,6 +156,8 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
   const now = deps.now ?? ((): Date => new Date());
   const url = (key: string | undefined): string | null =>
     key === undefined ? null : storage.getPublicUrl(key);
+  /** Lean reads skip schema defaults: a service stored before `brideOnly` existed has no field. */
+  const isBrideOnly = (stored: boolean | undefined): boolean => stored === true;
 
   /** A salon customers may see (§5.2): LIVE and complete. Anything else is simply not found. */
   const visible = async (salonId: string): Promise<Entity<SalonRaw>> => {
@@ -294,6 +304,7 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
               description: s.extraDescription ?? entry.description[language],
               price: formatJod(s.price),
               durationMinutes: s.durationMinutes,
+              brideOnly: isBrideOnly(s.brideOnly),
               mediaUrls: s.mediaKeys.map((key) => storage.getPublicUrl(key)),
             },
           ];
@@ -352,7 +363,14 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
           const entry = entries.find((c) => c.id === s.catalogServiceId);
           return entry === undefined
             ? []
-            : [{ id: s.id, catalogServiceId: s.catalogServiceId, name: entry.name[language] }];
+            : [
+                {
+                  id: s.id,
+                  catalogServiceId: s.catalogServiceId,
+                  name: entry.name[language],
+                  brideOnly: isBrideOnly(s.brideOnly),
+                },
+              ];
         }),
         reviews: { avg: member.staff.rating.avg, count: member.staff.rating.count, latest },
       };
