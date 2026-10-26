@@ -16,7 +16,7 @@ import { assertPhone, assertPurpose } from '../../validation';
 
 export interface CodeOtpOptions {
   readonly environment: Environment;
-  /** Delivers the code (WhatsApp, SMS, fake). A fake channel is refused in production. */
+  /** Delivers the code (ARQAM, SMS, fake). A fake channel is refused in production. */
   readonly channel: OtpChannel;
   /** Code hashes and used-proof flags; a shared store is required in production. */
   readonly store: CodeStore;
@@ -46,8 +46,10 @@ export interface CodeOtpOptions {
 export interface SendCodeInput {
   readonly phone: string;
   readonly purpose: OtpPurpose;
-  /** App language (`ar`, `en`); the channel maps it to its own language code. */
+  /** App language (`ar`, `en`); the channel maps it to its own template. */
   readonly language: string;
+  /** End user's IP (optional; passed to the channel as is). */
+  readonly ip?: string;
 }
 
 export interface VerifyCodeInput {
@@ -139,7 +141,7 @@ export const createCodeOtp = (options: CodeOtpOptions): CodeOtp => {
     channelName: channel.name,
     proofs: proofs.verifier,
 
-    async sendCode({ phone, purpose, language }) {
+    async sendCode({ phone, purpose, language, ip }) {
       assertPhone(phone, 'phone');
       assertPurpose(purpose);
       if (typeof language !== 'string' || language === '')
@@ -152,7 +154,14 @@ export const createCodeOtp = (options: CodeOtpOptions): CodeOtp => {
         ttlSec * MS_PER_SECOND,
       );
       try {
-        const { id } = await channel.send({ to: phone, code, language, purpose, ttlSec });
+        const { id } = await channel.send({
+          to: phone,
+          code,
+          language,
+          purpose,
+          ttlSec,
+          ...(ip === undefined ? {} : { ip }),
+        });
         logger.info('otp code sent', { channel: channel.name, purpose, phone });
         emit({ type: 'send', channel: channel.name, purpose, delivered: true });
         return { expiresInSec: ttlSec, messageId: id };

@@ -11,18 +11,18 @@ import {
   DEFAULT_SMTP_PORT,
   DEFAULT_EMAIL_FROM_NAME,
   NOTIFIER_REAL_REQUIRED_KEYS,
-  OTP_WHATSAPP_REQUIRED_KEYS,
+  OTP_ARQAM_REQUIRED_KEYS,
   OTP_FIXED_CODE_PATTERN,
   OTP_SECRET_MIN_LENGTH,
-  WHATSAPP_API_VERSION_PATTERN,
-  WHATSAPP_PHONE_NUMBER_ID_PATTERN,
-  WHATSAPP_TEMPLATE_NAME_PATTERN,
+  ARQAM_SENDER_ID_PATTERN,
+  ARQAM_TEMPLATE_NAME_PATTERN,
   STORAGE_REAL_REQUIRED_KEYS,
   CLOUDFRONT_KEYS,
   MONGO_URI_PATTERN,
   PORT_MAX,
   PORT_MIN,
   REDIS_URL_PATTERN,
+  HTTPS_URL_PREFIX,
 } from '../constants/env';
 import { JWT_SECRET_MIN_LENGTH } from '../constants/auth';
 import { isEncryptionKey } from '../utils/crypto/aesGcm';
@@ -30,7 +30,7 @@ import {
   DISABLED_PAYMENT_MODE,
   OTP_PROVIDER_MODES,
   PAYMENT_PROVIDER_MODES,
-  WHATSAPP_OTP_MODE,
+  ARQAM_OTP_MODE,
   PROVIDER_MODES,
   REAL_PROVIDER_MODE,
 } from '../constants/providers';
@@ -88,10 +88,12 @@ export const envSchema = z
     [ENV_KEYS.paymentProvider]: paymentProviderMode,
     [ENV_KEYS.fcmServiceAccountJson]: z.string().min(1).optional(),
     [ENV_KEYS.fcmProjectId]: z.string().min(1).optional(),
-    [ENV_KEYS.whatsappPhoneNumberId]: z.string().regex(WHATSAPP_PHONE_NUMBER_ID_PATTERN).optional(),
-    [ENV_KEYS.whatsappAccessToken]: z.string().trim().min(1).optional(),
-    [ENV_KEYS.whatsappTemplateName]: z.string().regex(WHATSAPP_TEMPLATE_NAME_PATTERN).optional(),
-    [ENV_KEYS.whatsappApiVersion]: z.string().regex(WHATSAPP_API_VERSION_PATTERN).optional(),
+    [ENV_KEYS.arqamApiKey]: z.string().trim().min(1).optional(),
+    [ENV_KEYS.arqamBaseUrl]: optionalUrlOrEmpty,
+    [ENV_KEYS.arqamTemplateAr]: z.string().regex(ARQAM_TEMPLATE_NAME_PATTERN).optional(),
+    [ENV_KEYS.arqamTemplateEn]: z.string().regex(ARQAM_TEMPLATE_NAME_PATTERN).optional(),
+    [ENV_KEYS.arqamSenderId]: z.string().regex(ARQAM_SENDER_ID_PATTERN).optional(),
+    [ENV_KEYS.arqamSendIp]: booleanText.default(false),
     [ENV_KEYS.otpCodeSecret]: otpSecret,
     [ENV_KEYS.otpProofSecret]: otpSecret,
     [ENV_KEYS.otpFixedCode]: z.string().regex(OTP_FIXED_CODE_PATTERN).optional(),
@@ -122,9 +124,9 @@ export const envSchema = z
   })
   // Production never runs on fakes, and never guesses: every provider must be named `real`.
   .superRefine((env, context) => {
-    // WhatsApp OTP needs the Meta number, token, template and both secrets (BUSINESS_DOMAIN §3.1a).
-    if (env[ENV_KEYS.otpProvider] === WHATSAPP_OTP_MODE) {
-      for (const key of OTP_WHATSAPP_REQUIRED_KEYS) {
+    // ARQAM OTP needs the key, both templates and both secrets (BUSINESS_DOMAIN §3.1a).
+    if (env[ENV_KEYS.otpProvider] === ARQAM_OTP_MODE) {
+      for (const key of OTP_ARQAM_REQUIRED_KEYS) {
         if (env[key] === undefined) context.addIssue({ code: 'custom', path: [key], message: key });
       }
     }
@@ -182,8 +184,8 @@ export const envSchema = z
       if (env[key] !== REAL_PROVIDER_MODE)
         context.addIssue({ code: 'custom', path: [key], message: key });
     }
-    // Phone OTP in production is WhatsApp only; the fake channel and its fixed code are refused.
-    if (env[ENV_KEYS.otpProvider] !== WHATSAPP_OTP_MODE) {
+    // Phone OTP in production is ARQAM only; the fake channel and its fixed code are refused.
+    if (env[ENV_KEYS.otpProvider] !== ARQAM_OTP_MODE) {
       context.addIssue({
         code: 'custom',
         path: [ENV_KEYS.otpProvider],
@@ -195,6 +197,14 @@ export const envSchema = z
         code: 'custom',
         path: [ENV_KEYS.otpFixedCode],
         message: ENV_KEYS.otpFixedCode,
+      });
+    }
+    const arqamBaseUrl = env[ENV_KEYS.arqamBaseUrl];
+    if (arqamBaseUrl !== undefined && !arqamBaseUrl.startsWith(HTTPS_URL_PREFIX)) {
+      context.addIssue({
+        code: 'custom',
+        path: [ENV_KEYS.arqamBaseUrl],
+        message: ENV_KEYS.arqamBaseUrl,
       });
     }
     // Payments are paused: production names `disabled` explicitly and never runs a fake gateway.

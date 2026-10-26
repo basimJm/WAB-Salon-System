@@ -13,8 +13,8 @@
 | Actor | Collection | Login | Token scope |
 |---|---|---|---|
 | Guest | none (device only) | — | none (public endpoints) |
-| Customer | `customers` | phone + WhatsApp OTP (§3.1a) | `customer` |
-| Merchant member (Owner / Manager / Employee) | `members` | phone + WhatsApp OTP (§3.1a) | `merchant` (+ `salonId`, permissions) |
+| Customer | `customers` | phone + WhatsApp OTP via ARQAM (§3.1a) | `customer` |
+| Merchant member (Owner / Manager / Employee) | `members` | phone + WhatsApp OTP via ARQAM (§3.1a) | `merchant` (+ `salonId`, permissions) |
 | Admin (single) | `admins` | email + password + email OTP | `admin` |
 | System | — | — | used as `actor: SYSTEM` in histories |
 
@@ -125,13 +125,13 @@ otp:used:{jti}          flag, TTL = settings.otp.proofTtlSec (600) — an OTP pr
 admin:otp:{adminId}     hashed code, TTL 300
 ```
 
-**3.1a Phone OTP over WhatsApp (owner decision 2026-10-26; replaces Firebase Phone Auth)**
-1. The **server** generates the code (`settings.otp.length` digits, CSPRNG), stores only its HMAC (`otp:code:{purpose}:{e164}`), and sends it through the **WhatsApp Cloud API** (Meta) as an approved **authentication template** (copy-code button) in the user's language (`ar` / `en`, from `Accept-Language`). The code is never logged or returned.
+**3.1a Phone OTP over WhatsApp through ARQAM OTP (owner decisions 2026-10-26; replaces Firebase Phone Auth; the direct Meta Cloud API channel is removed)**
+1. The **server** generates the code (`settings.otp.length` digits, CSPRNG), stores only its HMAC (`otp:code:{purpose}:{e164}`), and hands it to **ARQAM OTP** (`POST https://otp.arqam.tech/api/sms/otp`, our code as `otpCode`), which delivers it over WhatsApp from ARQAM's approved sender with an approved **authentication template**; the template is chosen by the user's language (`ar` / `en`, from `Accept-Language`; one ARQAM template per language). ARQAM's own verify endpoint is not used: the server checks the code itself. The code and the ARQAM key are never logged or returned.
 2. `POST /{customer|merchant}/v1/auth/otp/request {phone, purpose}`: the existing limits (§10 `otp.*`: 5 requests / 5 min, resend after 60 s, block 15 min) run first; then the code is sent. Answer = `{allowed, otpLength, resendAfterSeconds, expiresInSeconds, blockedUntil?}`.
 3. `POST /{customer|merchant}/v1/auth/otp/verify {phone, purpose, code}`: wrong code → `OTP_INVALID` (counts toward `otp.maxWrong`, then `OTP_BLOCKED`); expired / no code → `OTP_EXPIRED`; right code → the code is deleted and the answer carries `otpToken` = a short-lived signed proof `{phone (E.164), purpose, jti}` valid `settings.otp.proofTtlSec`.
 4. Every action that needs a verified phone (login, register, change phone, booking confirmation, bank details) takes `otpToken` instead of the former Firebase ID token; the server checks signature, expiry, phone, purpose and single use (`otp:used:{jti}`).
-5. Delivery failure: the number is not on WhatsApp or Meta refuses it → `OTP_DELIVERY_FAILED` (422, no code stored, the request still counts); Meta outage → 503 `INTERNAL`-class `ExternalServiceError`.
-6. Development: test numbers registered in the Meta app; `OTP_PROVIDER=fake` keeps working (fixed code from the fake channel, dev only, refused in production). Admin email OTP is unchanged.
+5. Delivery failure = ARQAM's synchronous answer only (ARQAM webhooks carry no OTP statuses; there is no delivery-status endpoint): `INVALID_PHONE` or `PROVIDER_ERROR` (WhatsApp refused the recipient) → `OTP_DELIVERY_FAILED` (422, no code stored, the request still counts); key, credits, sender, template or ARQAM rate limits/outages → 503 `ExternalServiceError` + a server `error` log for the owner (no admin alert kind: adding one would change the admin contract).
+6. Development: `OTP_PROVIDER=fake` keeps working (codes recorded, optional fixed code, dev only, refused in production); the hosted dev API uses ARQAM with a **test** key (every code goes to the key's own test phone); production uses a **live** key. Admin email OTP is unchanged.
 
 ### 3.2 Reference data
 
@@ -618,4 +618,4 @@ MAINTENANCE  UPDATE_REQUIRED
 5. Payment hold during checkout: 10 minutes.
 6. Reference number format `WAB-XXXXXX` (base32, no ambiguous chars).
 7. Branches (owner decisions 2026-10-25): per branch = location & contacts, hours & closures, services & prices, staff (one branch per member); salon-wide = name, gender, logo/cover/gallery, description, policy, subscription (3 free months per salon), payouts (one bank account), rating, Recommended placement. No admin approval for new branches (live when complete). Managers: one or more per branch, branch data only, no finance/subscription/policy; team members and permissions stay owner-only. Search card = nearest branch; nearest list = one entry per branch, "Salon - Branch". Closing a branch is blocked while it has upcoming bookings; branch or whole salon can go offline; existing salons migrate to one main branch; reviews show their branch; branch limit = setting `salon.maxBranches`.
-8. Phone OTP (owner decision 2026-10-26): WhatsApp Cloud API (Meta) authentication template, server-generated codes (§3.1a); Firebase Phone Auth removed from the server and both apps (Firebase stays for push, analytics, crash reporting). Users without WhatsApp cannot receive a code (no SMS fallback).
+8. Phone OTP (owner decisions 2026-10-26): server-generated codes delivered over WhatsApp by ARQAM OTP (AR + EN authentication templates; the direct Meta Cloud API channel, its delivery webhook and status polling were dropped) (§3.1a); Firebase Phone Auth removed from the server and both apps (Firebase stays for push, analytics, crash reporting). Users without WhatsApp cannot receive a code (no SMS fallback).
