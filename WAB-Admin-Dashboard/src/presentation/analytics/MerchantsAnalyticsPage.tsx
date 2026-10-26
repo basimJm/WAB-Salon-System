@@ -9,6 +9,7 @@ import { DonutChart } from '../components/charts/DonutChart';
 import { useLanguage } from '../hooks/useLanguage';
 import { AnalyticsBoard, type BoardKpi } from './AnalyticsBoard';
 import { pendingOrError } from './boardStates';
+import { ANALYTICS_STRINGS } from '@/locales/lazy/analytics';
 import { useLazyStrings } from '../hooks/useLazyStrings';
 
 const PATH = '/analytics/merchants';
@@ -27,7 +28,7 @@ const SUBSCRIPTION_COUNTS: readonly SubscriptionCount[] = [
  * the subscriptions and salons endpoints (a snapshot, so no range filter). Performance and activity are not sent.
  */
 export default function MerchantsAnalyticsPage() {
-  useLazyStrings('analytics');
+  useLazyStrings(ANALYTICS_STRINGS);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { repositories } = useContainer();

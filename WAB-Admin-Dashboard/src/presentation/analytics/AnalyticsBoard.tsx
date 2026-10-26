@@ -9,6 +9,7 @@ import { FilterBar } from '../components/data/FilterBar';
 import { EmptyState } from '../components/feedback/EmptyState';
 import { ErrorState } from '../components/feedback/ErrorState';
 import { LiveIndicator } from '../components/feedback/LiveIndicator';
+import { ANALYTICS_STRINGS } from '@/locales/lazy/analytics';
 import { useLazyStrings } from '../hooks/useLazyStrings';
 
 /** A KPI the server has a number for. */
@@ -70,7 +71,7 @@ export function AnalyticsBoard({
   error,
   onRetry,
 }: AnalyticsBoardProps) {
-  useLazyStrings('analytics');
+  useLazyStrings(ANALYTICS_STRINGS);
   const { t } = useTranslation();
   const def = ANALYTICS_BOARDS[board];
   const nav = NAV_PAGES.find((n) => n.path === path);

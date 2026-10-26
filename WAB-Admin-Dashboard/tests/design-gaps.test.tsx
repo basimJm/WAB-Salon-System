@@ -12,6 +12,7 @@ import { SearchField } from '@/presentation/components/form/SearchField';
 import { ListPage } from '@/presentation/components/templates/ListPage';
 import { AlertsBell } from '@/presentation/layout/AlertsBell';
 import SettingsPage from '@/presentation/settings/SettingsPage';
+import { ANALYTICS_STRINGS } from '@/locales/lazy/analytics';
 import { useLazyStrings } from '@/presentation/hooks/useLazyStrings';
 import en from '@/locales/en';
 import { makeContainer, renderWithApp } from './helpers/render';
@@ -183,8 +184,8 @@ describe('section card (design card header bar)', () => {
 });
 
 function LazyProbe() {
-  useLazyStrings('analytics');
-  useLazyStrings('analytics');
+  useLazyStrings(ANALYTICS_STRINGS);
+  useLazyStrings(ANALYTICS_STRINGS);
   const { t, i18n } = useTranslation();
   return <output>{`${t('analytics.noData')}|${i18n.t('analytics.noData', { lng: 'ar' })}`}</output>;
 }
@@ -192,6 +193,7 @@ function LazyProbe() {
 describe('lazy locale areas', () => {
   it('the analytics strings are not in the entry bundle languages', () => {
     expect('analytics' in en).toBe(false);
+    expect('bookings' in en).toBe(false);
   });
 
   it('useLazyStrings adds both languages once, before the first t() call', () => {

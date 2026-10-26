@@ -17,12 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.merchant.core.domain.booking.BookingStatus
 import com.fab.wab.merchant.designsystem.components.avatar.AppAvatar
 import com.fab.wab.merchant.designsystem.components.divider.AppDivider
+import com.fab.wab.merchant.designsystem.components.format.metaPair
 import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.resources.Res
 import com.fab.wab.merchant.designsystem.resources.booking_persons
-import com.fab.wab.merchant.designsystem.resources.meta_pair
 import com.fab.wab.merchant.designsystem.resources.request_bride_subtitle
 import com.fab.wab.merchant.designsystem.resources.request_bride_title
 import com.fab.wab.merchant.designsystem.resources.request_handled_approved
@@ -112,7 +112,7 @@ internal fun RequestPersonCard(person: RequestPersonUi, modifier: Modifier = Mod
         }
         AppText(text = person.services, style = AppTheme.typography.bodySmall, color = colors.muted)
         AppText(
-            text = stringResource(Res.string.meta_pair, person.staff, person.whenText),
+            text = metaPair(person.staff, person.whenText),
             style = AppTheme.typography.labelSmall,
             color = colors.faint,
         )

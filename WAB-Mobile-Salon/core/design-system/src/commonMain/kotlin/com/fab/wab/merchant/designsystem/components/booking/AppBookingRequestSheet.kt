@@ -21,10 +21,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
+import com.fab.wab.merchant.designsystem.components.format.metaPair
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.resources.Res
-import com.fab.wab.merchant.designsystem.resources.meta_pair
 import com.fab.wab.merchant.designsystem.resources.request_accept
 import com.fab.wab.merchant.designsystem.resources.request_accepted_body
 import com.fab.wab.merchant.designsystem.resources.request_accepted_title
@@ -123,7 +123,7 @@ private fun RequestHeader(request: BookingRequestUi, queue: RequestQueue) {
         Column(modifier = Modifier.weight(1f)) {
             AppText(text = stringResource(Res.string.request_new_title), style = AppTheme.typography.headlineMedium)
             AppText(
-                text = stringResource(Res.string.meta_pair, pendingAgeText(request.age), request.reference),
+                text = metaPair(pendingAgeText(request.age), request.reference),
                 style = AppTheme.typography.bodySmall,
                 color = colors.muted,
                 maxLines = 1,

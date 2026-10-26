@@ -16,6 +16,20 @@ export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 export type BookingTab = (typeof BOOKING_TABS)[number];
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
+/** A staff member on a booking (SRV-170): full name for the admin, first name and photo as the apps show them. */
+export interface BookingStaff {
+  readonly id: string;
+  readonly name: string;
+  readonly firstName: string;
+  readonly photoUrl: string | null;
+}
+/** Why the salon or the admin refused or ended a booking. */
+export interface BookingReason {
+  readonly reasonCode: string;
+  readonly reasonText: string | null;
+  readonly at: string;
+}
+
 export interface BookingSummary {
   readonly id: string;
   readonly referenceNumber: string;
@@ -39,7 +53,9 @@ export interface BookingSummary {
     readonly locationText: string | null;
   } | null;
   readonly customer: { readonly id: string; readonly name: string; readonly phone: string } | null;
-  readonly staff: readonly { readonly id: string; readonly name: string }[];
+  readonly staff: readonly BookingStaff[];
+  /** Set when the booking was rejected (list rows and details). */
+  readonly rejection: BookingReason | null;
 }
 export interface BookingPerson {
   readonly name: string;
@@ -47,7 +63,7 @@ export interface BookingPerson {
   readonly start: string;
   readonly end: string;
   readonly subtotal: string;
-  readonly staff: { readonly id: string; readonly name: string } | null;
+  readonly staff: BookingStaff | null;
   readonly services: readonly {
     readonly name: string;
     readonly price: string;
@@ -61,7 +77,10 @@ export interface BookingDetails extends BookingSummary {
     readonly total: string;
     readonly dueOnline: string;
     readonly paidOnline: string;
+    /** Still to pay at the salon now: 0 once the booking is final (COMPLETED, rejected, cancelled, no-show). */
     readonly remaining: string;
+    /** Collected at the salon: the at-salon part when COMPLETED, else 0. */
+    readonly paidAtSalon: string;
     readonly refunded: string;
   };
   readonly statusHistory: readonly {
@@ -70,16 +89,7 @@ export interface BookingDetails extends BookingSummary {
     readonly reason: string | null;
     readonly at: string;
   }[];
-  readonly rejection: {
-    readonly reasonCode: string;
-    readonly reasonText: string | null;
-    readonly at: string;
-  } | null;
-  readonly cancellation: {
-    readonly reasonCode: string;
-    readonly reasonText: string | null;
-    readonly at: string;
-  } | null;
+  readonly cancellation: BookingReason | null;
   readonly createdAt: string;
 }
 

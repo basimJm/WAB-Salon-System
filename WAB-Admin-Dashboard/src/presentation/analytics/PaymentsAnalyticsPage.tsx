@@ -9,6 +9,7 @@ import { AnalyticsBoard, type BoardKpi } from './AnalyticsBoard';
 import { EventsTrend } from './EventsTrend';
 import { useAnalyticsRange } from './useAnalyticsRange';
 import { countOf, ratioOf, useOverviewPair } from './useBoardData';
+import { ANALYTICS_STRINGS } from '@/locales/lazy/analytics';
 import { useLazyStrings } from '../hooks/useLazyStrings';
 
 const PATH = '/analytics/payments';
@@ -16,7 +17,7 @@ const TRANSACTIONS_PATH = '/finance/transactions';
 
 /** Admin PRD A08 on the design board: payment and refund server events; per-attempt rows live in Transactions. */
 export default function PaymentsAnalyticsPage() {
-  useLazyStrings('analytics');
+  useLazyStrings(ANALYTICS_STRINGS);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const navigate = useNavigate();

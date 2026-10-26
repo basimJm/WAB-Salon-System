@@ -9,6 +9,7 @@ import com.fab.wab.merchant.core.domain.policy.PolicyRule
 import com.fab.wab.merchant.core.domain.policy.customerRules
 import com.fab.wab.merchant.feature.bookings.data.repository.toDomain
 import com.fab.wab.merchant.feature.bookings.data.repository.toPolicyTerms
+import com.fab.wab.merchant.feature.bookings.domain.model.isZeroAmount
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -44,6 +45,18 @@ class RealBookingsFixturesTest {
         val rules = terms.customerRules()
         assertTrue(rules.isNotEmpty())
         assertTrue(PolicyRule.Window(assertNotNull(window)) in rules)
+    }
+
+    @Test
+    fun completedDetailsOweNothingAndCarryWhatWasPaidAtTheSalonAndStaffPhotos() {
+        val raw = decodeFixture("GetBookingsById", serializer<GetBookingsByIdData>()).data
+        val details = assertNotNull(raw.toDomain())
+        assertEquals("COMPLETED", raw.status, "the 1.6.0 capture is a completed booking")
+        assertEquals(raw.money.paidAtSalon, details.money.paidAtSalon)
+        assertTrue(details.money.hasPaidAtSalon)
+        assertTrue(isZeroAmount(details.money.remaining), "remaining = still owed, 0 once final (contract 1.6.0)")
+        val staff = details.persons.mapNotNull { it.staff }
+        assertTrue(staff.isNotEmpty() && staff.all { it.photoUrl.orEmpty().startsWith("https://") })
     }
 
     @Test
