@@ -5,6 +5,7 @@ import { createApp } from '../src/app';
 import { SETTING_DEFAULTS } from '../src/constants/settings';
 import { composeBookingHooks, createRefundHook } from '../src/domain/refunds/refundHook';
 import { createRefundService } from '../src/domain/refunds/refunds.service';
+import { FAKE_SEEDED_SESSION_PREFIX } from '../src/constants/providers';
 import { FakePaymentProvider } from '../src/providers/payments/fake';
 import { BookingsRepository } from '../src/repositories/bookings.repository';
 import { RefundsRepository } from '../src/repositories/refunds.repository';
@@ -467,5 +468,59 @@ describe('admin refund of a chosen amount', () => {
     expect(row.attempts).toBe(1);
     expect(bookingDoc(bookingId)).toMatchObject({ refundStatus: 'REFUND_PENDING' });
     expect(audits.at(-1)).toMatchObject({ action: 'BOOKING_ADMIN_REFUND' });
+  });
+
+  /** A paid booking whose transaction carries `providerRef` the gateway never created (seeded data). */
+  const seededPayment = (providerRef: string, paid = 10_000): string => {
+    const bookingId = new Types.ObjectId();
+    m.bookings.docs.push({
+      _id: bookingId,
+      refundStatus: 'NONE',
+      money: { total: paid, dueOnline: paid, paidOnline: paid, remaining: 0, refunded: 0 },
+    });
+    m.tx.docs.push({
+      _id: new Types.ObjectId(),
+      bookingId,
+      customerId: customer,
+      salonId: salon,
+      status: 'SUCCEEDED',
+      amount: paid,
+      providerRef,
+    });
+    return bookingId.toHexString();
+  };
+
+  it('SRV-171 S1: a session the gateway does not know is a failed attempt, never a crash', async () => {
+    const bookingId = seededPayment('lost-session-1');
+    const row = await ask(bookingId, 1_000);
+    expect(row).toMatchObject({ status: 'REFUND_PENDING', attempts: 1 });
+    expect(row.lastError).toBe('unknown payment session');
+    expect(bookingDoc(bookingId)).toMatchObject({ refundStatus: 'REFUND_PENDING' });
+  });
+
+  it('SRV-171 S1: a payment written by the demo seed refunds on the fake gateway', async () => {
+    const bookingId = seededPayment(`${FAKE_SEEDED_SESSION_PREFIX}WAB-2Y0C81`);
+    const first = await ask(bookingId, 1_000);
+    expect(first).toMatchObject({ amount: 1_000, status: 'REFUNDED' });
+    const rest = await ask(bookingId, 9_000);
+    expect(rest.status).toBe('REFUNDED');
+    await expect(ask(bookingId, 1)).rejects.toMatchObject({ httpStatus: 400 });
+    expect(bookingDoc(bookingId)).toMatchObject({ money: { refunded: 10_000 } });
+  });
+});
+
+describe('fake gateway and seeded sessions (SRV-171 S1)', () => {
+  it('adopts only demo-seeded sessions for refunds; other unknown sessions still fail', async () => {
+    const fresh = new FakePaymentProvider();
+    const seeded = `${FAKE_SEEDED_SESSION_PREFIX}WAB-ABC123`;
+    await expect(
+      fresh.refund({ idempotencyKey: 'seed-refund-1', sessionId: seeded, amountFils: 500 }),
+    ).resolves.toMatchObject({ status: 'REFUNDED', sessionId: seeded, amountFils: 500 });
+    await expect(
+      fresh.refund({ idempotencyKey: 'seed-refund-2', sessionId: 'other-1', amountFils: 500 }),
+    ).rejects.toBeInstanceOf(RangeError);
+    await expect(fresh.verify(`${FAKE_SEEDED_SESSION_PREFIX}WAB-ZZZ999`)).rejects.toBeInstanceOf(
+      RangeError,
+    );
   });
 });

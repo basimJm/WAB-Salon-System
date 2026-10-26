@@ -1,34 +1,29 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import sharp from 'sharp';
 import { loadConfig } from '../config';
-import {
-  DEMO_FILE_PREFIX,
-  DEMO_IMAGE_CONTENT_TYPE,
-  DEMO_IMAGE_FOLDERS,
-  DEMO_IMAGE_MAX_WIDTH,
-  DEMO_IMAGE_QUALITY,
-} from '../constants/demoSeed';
-import { UPLOAD_POLICIES } from '../constants/uploads';
+import { DEMO_FILE_PREFIX, DEMO_IMAGE_FOLDERS } from '../constants/demoSeed';
 import { createImageVariants } from '../domain/uploads/variants';
 import { UploadModel } from '../models/upload.model';
 import { createRealStorage } from '../providers/storage/real';
 import { connectMongo, disconnectMongo } from '../utils/database/connection';
 import { escapeRegex } from '../utils/format/regex';
 import { createLogger } from '../utils/logger';
-import { isDemoImagePurpose, planDemoImages, type DemoImageTarget } from './demoImages';
+import { uploadDemoImages } from './demoImageUpload';
+import { uploadSeedFlags } from './flagImages';
+import { isDemoImagePurpose, type DemoImageTarget } from './demoImages';
 import { assertDemoAllowed } from './runDemo';
 
 /**
- * `npm run seed:demo-images -- <folder>` (development only): uploads the owner's photos to the
- * keys the demo data points at (salon covers, gallery, staff, customers, banners, catalog,
- * licenses), re-encoded as JPEG, plus the list thumbnails. Run it after `seed:demo`; running it
- * again uploads the same photos to the same keys.
+ * `npm run seed:demo-images [-- <folder>]` (development only): writes an image to every key the
+ * demo data points at (salon covers, gallery, staff, customers, banners, catalog, licenses): the
+ * owner's photo re-encoded as JPEG when the folder has one, else a plain placeholder, so no seeded
+ * URL answers 404 (SRV-171 S4); public images also get their list thumbnails. Run it after
+ * `seed:demo` (and again after a seed added rows); it rewrites the same keys. It also writes the
+ * shipped country flags (SRV-172).
  */
 const main = async (): Promise<void> => {
   const folder = process.argv[2];
-  if (folder === undefined) throw new Error('usage: npm run seed:demo-images -- <photo folder>');
-  const root = resolve(folder);
+  const root = folder === undefined ? undefined : resolve(folder);
   const config = loadConfig();
   const logger = createLogger({ level: config.logLevel });
   if (config.storage === undefined)
@@ -49,37 +44,19 @@ const main = async (): Promise<void> => {
     const targets: DemoImageTarget[] = uploads.flatMap((upload) =>
       isDemoImagePurpose(upload.purpose) ? [{ key: upload.key, purpose: upload.purpose }] : [],
     );
-    const files = new Map(
-      Object.values(DEMO_IMAGE_FOLDERS).map((name) => {
+    const report = await uploadDemoImages(targets, Object.values(DEMO_IMAGE_FOLDERS), {
+      storage,
+      variants,
+      list: (name) => {
+        if (root === undefined) return [];
         const path = join(root, name);
-        return [name, existsSync(path) ? readdirSync(path) : []] as const;
-      }),
-    );
-    const plan = planDemoImages(targets, files);
-    let uploaded = 0;
-    for (const item of plan.assignments) {
-      const body = await sharp(readFileSync(join(root, item.source)))
-        .rotate()
-        .resize({ width: DEMO_IMAGE_MAX_WIDTH, withoutEnlargement: true })
-        .jpeg({ quality: DEMO_IMAGE_QUALITY })
-        .toBuffer();
-      const visibility = UPLOAD_POLICIES[item.purpose].visibility;
-      await storage.write({
-        key: item.key,
-        body,
-        contentType: DEMO_IMAGE_CONTENT_TYPE,
-        visibility,
-      });
-      if (visibility === 'PUBLIC') await variants.generate(item.key);
-      uploaded += 1;
-    }
-    const missingByFolder = Object.fromEntries(
-      Object.entries(DEMO_IMAGE_FOLDERS).map(([purpose, name]) => [
-        name,
-        plan.missing.filter((target) => target.purpose === purpose).length,
-      ]),
-    );
-    logger.info({ uploaded, missingByFolder }, 'demo images uploaded');
+        return existsSync(path) ? readdirSync(path) : [];
+      },
+      read: (path) => readFileSync(join(root ?? '', path)),
+    });
+    logger.info({ ...report }, 'demo images uploaded');
+    // The seeded countries' flags too, so the phone pickers draw them (SRV-172).
+    logger.info({ ...(await uploadSeedFlags(storage)) }, 'country flags written');
   } finally {
     await disconnectMongo();
   }

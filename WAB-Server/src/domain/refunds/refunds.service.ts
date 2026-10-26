@@ -9,14 +9,14 @@ import { ADMIN_BOOKING_EXTRA_AUDIT } from '../../constants/bookings';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import { MS_PER_HOUR } from '../../constants/time';
 import type { RefundRaw } from '../../models/refund.model';
-import type { PaymentProvider } from '../../providers/payments/types';
+import type { PaymentProvider, RefundResult } from '../../providers/payments/types';
 import type { BookingsRepository } from '../../repositories/bookings.repository';
 import type { RefundsRepository } from '../../repositories/refunds.repository';
 import type { TransactionsRepository } from '../../repositories/transactions.repository';
 import { isDuplicateKeyError } from '../../utils/database/errors';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
-import { BaseError, BusinessRuleError, NotFoundError, ValidationError } from '../../utils/errors';
+import { BusinessRuleError, NotFoundError, ValidationError } from '../../utils/errors';
 import type { Logger } from '../../utils/logger';
 import type { PaginationParams } from '../../utils/pagination';
 import type { AuditWriter } from '../audit/audit.service';
@@ -179,8 +179,9 @@ export const createRefundService = (deps: RefundServiceDeps): RefundService => {
     if (refund.status !== 'REFUND_PENDING') return refund;
     const payment = await transactions.findById(refund.transactionId);
     if (payment?.providerRef === undefined) return fail(refund, 'payment has no gateway session');
+    let result: RefundResult;
     try {
-      const result =
+      result =
         refund.providerRef === undefined
           ? await provider.refund({
               idempotencyKey: `${refund.idempotencyKey}:${String(refund.gatewayRound)}`,
@@ -188,27 +189,28 @@ export const createRefundService = (deps: RefundServiceDeps): RefundService => {
               amountFils: refund.amount,
             })
           : await provider.getRefund(refund.providerRef);
-      if (result.status === 'REFUNDED') {
-        return (
-          (await finish(refund, { providerRef: result.refundId })) ??
-          (await refunds.findById(refundId))
-        );
-      }
-      if (result.status === 'REFUND_PENDING') {
-        // The gateway is still working on it: ask again later, without counting a failure.
-        return (
-          (await refunds.transition(refund.id, 'REFUND_PENDING', {
-            providerRef: result.refundId,
-            nextAttemptAt: new Date(now().getTime() + REFUND_RETRY_BASE_DELAY_MS),
-          })) ?? refund
-        );
-      }
-      return await fail(refund, `${result.gatewayCode}: ${result.gatewayMessage}`, true);
     } catch (error) {
-      if (!(error instanceof BaseError)) throw error;
+      // Anything the gateway throws (down, refused, a session it does not know) is a failed
+      // attempt that retries with backoff and then alerts the admin — never a 500 (SRV-171 S1).
       logger.warn({ err: error, refundId }, 'refund attempt failed');
-      return await fail(refund, error.message);
+      return fail(refund, error instanceof Error ? error.message : String(error));
     }
+    if (result.status === 'REFUNDED') {
+      return (
+        (await finish(refund, { providerRef: result.refundId })) ??
+        (await refunds.findById(refundId))
+      );
+    }
+    if (result.status === 'REFUND_PENDING') {
+      // The gateway is still working on it: ask again later, without counting a failure.
+      return (
+        (await refunds.transition(refund.id, 'REFUND_PENDING', {
+          providerRef: result.refundId,
+          nextAttemptAt: new Date(now().getTime() + REFUND_RETRY_BASE_DELAY_MS),
+        })) ?? refund
+      );
+    }
+    return fail(refund, `${result.gatewayCode}: ${result.gatewayMessage}`, true);
   };
 
   /** Creates the refund row (or returns the one that already exists for this key) and tries it. */

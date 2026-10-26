@@ -4,7 +4,7 @@ import { ADMIN_BRANCH_ROUTES } from '../../../constants/branches';
 import { z } from '../../../docs/zod';
 import { registerBranchCrudDocs } from '../../shared/branches/branch.openapi';
 import { reason } from '../salonEdit/salonEdit.validation';
-import { salonBranchesParams } from './branches.validation';
+import { salonBranchesParams, salonBranchesQuery } from './branches.validation';
 
 export const registerAdminBranchDocs = (registry: OpenAPIRegistry): void => {
   registerBranchCrudDocs(registry, {
@@ -12,6 +12,7 @@ export const registerAdminBranchDocs = (registry: OpenAPIRegistry): void => {
     tags: ['Salon branches'],
     who: 'admin; reason + audit, the owner is notified',
     params: salonBranchesParams,
+    listQuery: salonBranchesQuery,
     extraBody: z.object({ reason }),
   });
 };
