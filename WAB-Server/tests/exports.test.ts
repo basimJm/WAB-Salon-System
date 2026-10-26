@@ -3,7 +3,9 @@ import { exportRequestSchema } from '../src/domain/exports/exportRequest';
 import { Types } from 'mongoose';
 import request from 'supertest';
 import { createApp } from '../src/app';
-import { EXPORT_MAX_ROWS } from '../src/constants/exports';
+import { createStorage } from '@wab/storage';
+import { EXPORT_FILES, EXPORT_FORMATS, EXPORT_MAX_ROWS } from '../src/constants/exports';
+import { FAKE_STORAGE_CDN_BASE_URL } from '../src/constants/providers';
 import { createAuditWriter } from '../src/domain/audit/audit.service';
 import type { ExportRequest } from '../src/domain/exports/exportRequest';
 import { createExportsService } from '../src/domain/exports/exports.service';
@@ -105,6 +107,26 @@ describe('file writers', () => {
     expect(text).toContain('"say ""hi""",3');
     expect(text).toContain("'=SUM(A1),4");
     expect(file.contentType).toContain('text/csv');
+  });
+
+  it('SRV-171 S2: every export format is a media type the storage SDK stores', async () => {
+    const storage = createStorage({
+      environment: 'dev',
+      provider: 'memory',
+      cdn: { baseUrl: FAKE_STORAGE_CDN_BASE_URL },
+    });
+    for (const format of EXPORT_FORMATS) {
+      const file = await renderTable(table, format);
+      expect(file.contentType).toBe(EXPORT_FILES[format].contentType);
+      await expect(
+        storage.write({
+          key: `exports/sample.${file.extension}`,
+          body: file.body,
+          contentType: file.contentType,
+          visibility: 'PRIVATE',
+        }),
+      ).resolves.toBeUndefined();
+    }
   });
 
   it('XLSX: real workbook with header, rows, numbers kept and formulas neutralized', async () => {
