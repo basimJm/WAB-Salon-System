@@ -20,6 +20,8 @@ const arFlat = flatten(ar);
 const enFlat = flatten(en);
 const placeholders = (s: string) => (s.match(/{{\s*\w+\s*}}/g) ?? []).sort().join();
 const ARABIC = /[؀-ۿ]/;
+/** Values that name the OTHER language on purpose (design top bar: the Arabic UI shows "EN"). */
+const LATIN_BY_DESIGN = new Set(['topbar.otherLanguageShort']);
 
 describe('locale area files', () => {
   const areas = (lang: string) =>
@@ -67,7 +69,7 @@ describe('locale files', () => {
 
   it('Arabic values are Arabic (except currency-free technical text)', () => {
     const missing = Object.entries(arFlat)
-      .filter(([, v]) => !ARABIC.test(v))
+      .filter(([k, v]) => !ARABIC.test(v) && !LATIN_BY_DESIGN.has(k))
       .map(([k]) => k);
     expect(missing).toEqual([]);
   });

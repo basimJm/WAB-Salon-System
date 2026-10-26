@@ -12,8 +12,8 @@ export interface KpiCardProps {
   loading?: boolean;
 }
 
-const ARROW_UP = '▲';
-const ARROW_DOWN = '▼';
+const ARROW_UP = '↑';
+const ARROW_DOWN = '↓';
 
 export function KpiCard({ label, value, deltaPercent, deltaLabel, loading = false }: KpiCardProps) {
   const positive = deltaPercent !== undefined && deltaPercent >= 0;
@@ -25,8 +25,10 @@ export function KpiCard({ label, value, deltaPercent, deltaLabel, loading = fals
         <span
           className={cx('wab-kpi__delta', positive ? 'wab-kpi__delta--up' : 'wab-kpi__delta--down')}
         >
-          <span aria-hidden="true">{positive ? ARROW_UP : ARROW_DOWN}</span>
-          <span dir="ltr">{Math.abs(deltaPercent)}%</span>
+          <span className="wab-kpi__chip" dir="ltr">
+            <span aria-hidden="true">{positive ? ARROW_UP : ARROW_DOWN}</span>
+            <span>{Math.abs(deltaPercent)}%</span>
+          </span>
           {deltaLabel ? <span className="wab-kpi__delta-label">{deltaLabel}</span> : null}
         </span>
       ) : null}

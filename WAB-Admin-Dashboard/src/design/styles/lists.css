@@ -1,0 +1,61 @@
+/* Design list blocks (`WAB Admin Blocks` filters + card table): compact filter pills and the table card. */
+.wab-listcard {
+  min-width: 0;
+  border: var(--size-hairline) solid var(--c-line);
+  border-radius: var(--radius-lg);
+  background: var(--c-card);
+  box-shadow: var(--shadow-card);
+}
+.wab-listcard__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-block-end: var(--size-hairline) solid var(--c-line);
+}
+.wab-listcard__title { font-size: var(--fs-md); font-weight: var(--fw-bold); }
+.wab-listcard__count {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--c-surface);
+  color: var(--c-muted);
+  font-family: var(--font-numeric);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+}
+.wab-listcard__head .wab-table-toolbar { flex: 1; }
+.wab-listcard .wab-table-wrap { border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.wab-listcard > .wab-state { border-radius: 0; }
+.wab-listcard .wab-pagination {
+  padding: var(--space-2) var(--space-4);
+  border-block-start: var(--size-hairline) solid var(--c-line);
+  color: var(--c-muted);
+  font-size: var(--fs-sm);
+}
+
+/* Filters: each control is a 38px pill whose label sits inside, before the value (design dropdown buttons). */
+.wab-filterbar__controls { align-items: center; gap: var(--space-2); }
+.wab-filterbar__controls > .wab-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-button);
+  padding-inline: var(--space-3) var(--space-1);
+  border: var(--size-hairline) solid var(--c-line2);
+  border-radius: var(--radius-control);
+  background: var(--c-card);
+}
+.wab-filterbar__controls > .wab-field > .wab-field__label { color: var(--c-ink); font-size: var(--fs-nav); font-weight: var(--fw-semibold); white-space: nowrap; }
+.wab-filterbar__controls > .wab-field .wab-field__control {
+  min-height: calc(var(--size-button) - var(--space-1));
+  padding-block: 0;
+  border: 0;
+  background: transparent;
+  color: var(--c-muted);
+  font-size: var(--fs-nav);
+}
+.wab-filterbar__controls > .wab-field:focus-within { border-color: var(--c-focus); }
+.wab-filterbar__controls .wab-search .wab-field__control { min-height: var(--size-button); border-radius: var(--radius-control); }
+.wab-filterbar__controls > .wab-search { flex: 1 1 var(--size-field-min); max-width: var(--size-search-max); }
+[data-bp='compact'] .wab-filterbar__controls > * { flex: 1 1 100%; }

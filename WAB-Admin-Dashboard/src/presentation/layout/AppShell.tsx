@@ -78,6 +78,8 @@ export function AppShell() {
         open={drawerOpen}
         onNavigate={() => setDrawerOpen(false)}
         counters={counters.sidebar}
+        {...(current ? { admin: { name: current.admin.name, email: current.admin.email } } : {})}
+        {...(docked ? { onToggleCollapse: onMenu } : {})}
       />
       {drawerOpen && !docked ? (
         <button
@@ -97,7 +99,8 @@ export function AppShell() {
       <div className="wab-shell__main">
         <Topbar
           adminName={current?.admin.name ?? ''}
-          showMenuButton
+          {...(current ? { adminEmail: current.admin.email } : {})}
+          showMenuButton={!docked}
           menuLabelKey={docked ? 'topbar.toggleSidebar' : 'topbar.openMenu'}
           menuExpanded={docked ? !collapsed : drawerOpen}
           onMenu={onMenu}

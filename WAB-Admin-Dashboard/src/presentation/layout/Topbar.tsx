@@ -4,12 +4,16 @@ import { ROUTES } from '@/constants/routes';
 import { GlobalSearch, type GlobalSearchProps } from '../components/layout/GlobalSearch';
 import { LiveIndicator } from '../components/feedback/LiveIndicator';
 import { Menu } from '../components/overlay/Menu';
+import { Icon } from '../components/core/Icon';
 import { IconButton } from '../components/core/IconButton';
 import { useTheme } from '@/design/theme/useTheme';
 import { useLanguage } from '../hooks/useLanguage';
+import { AdminAvatar } from './AdminAvatar';
 
 export interface TopbarProps {
   adminName: string;
+  /** Shown under the name in the admin menu. */
+  adminEmail?: string;
   showMenuButton: boolean;
   menuLabelKey: string;
   menuExpanded: boolean;
@@ -21,8 +25,10 @@ export interface TopbarProps {
   alertCount?: number;
 }
 
+/** Design `WAB Admin Topbar`: search with Cmd+K, language, theme, alerts bell and the admin menu. */
 export function Topbar({
   adminName,
+  adminEmail,
   showMenuButton,
   menuLabelKey,
   menuExpanded,
@@ -35,6 +41,7 @@ export function Topbar({
   const { t } = useTranslation();
   const { theme, toggle: toggleTheme } = useTheme();
   const { toggle: toggleLanguage } = useLanguage();
+  const name = adminName || t('topbar.adminMenu');
   return (
     <header className="wab-topbar">
       {showMenuButton ? (
@@ -48,21 +55,48 @@ export function Topbar({
       {search ? <GlobalSearch search={search} onSelect={(hit) => void navigate(hit.to)} /> : null}
       <span className="wab-topbar__spacer" />
       <LiveIndicator />
+      <button
+        type="button"
+        className="wab-topbtn wab-topbtn--text"
+        aria-label={t('topbar.language')}
+        title={t('topbar.language')}
+        onClick={toggleLanguage}
+      >
+        {t('topbar.otherLanguageShort')}
+      </button>
       <IconButton
+        className="wab-topbtn"
+        icon={theme === 'dark' ? 'sun' : 'moon'}
+        label={t(theme === 'dark' ? 'topbar.lightTheme' : 'topbar.darkTheme')}
+        onClick={toggleTheme}
+      />
+      <IconButton
+        className="wab-topbtn"
         icon="bell"
         label={t('topbar.alerts')}
         {...(alertCount !== undefined ? { badge: alertCount } : {})}
         onClick={() => void navigate(ROUTES.alerts)}
       />
-      <IconButton icon="globe" label={t('topbar.language')} onClick={toggleLanguage} />
-      <IconButton
-        icon={theme === 'dark' ? 'sun' : 'moon'}
-        label={t(theme === 'dark' ? 'topbar.lightTheme' : 'topbar.darkTheme')}
-        onClick={toggleTheme}
-      />
       <Menu
-        label={adminName || t('topbar.adminMenu')}
-        variant="ghost"
+        label={name}
+        triggerClassName="wab-topbar__admin"
+        trigger={
+          <>
+            <AdminAvatar name={name} small />
+            <span className="wab-topbar__admin-name">{name}</span>
+            <Icon name="chevronDown" size="sm" />
+          </>
+        }
+        header={
+          <>
+            <span className="wab-menu__header-name">{name}</span>
+            {adminEmail ? (
+              <span className="wab-menu__header-email" dir="ltr">
+                {adminEmail}
+              </span>
+            ) : null}
+          </>
+        }
         items={[
           {
             key: 'profile',

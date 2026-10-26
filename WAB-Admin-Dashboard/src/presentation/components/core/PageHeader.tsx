@@ -11,7 +11,7 @@ export function PageHeader({
 }) {
   return (
     <header className="wab-pageheader">
-      <div>
+      <div className="wab-pageheader__text">
         <h1 className="wab-pageheader__title">{title}</h1>
         {subtitle ? <p className="wab-pageheader__subtitle">{subtitle}</p> : null}
       </div>

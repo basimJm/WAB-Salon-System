@@ -1,4 +1,4 @@
-import { ICON_PATHS, type IconName } from '@/constants/icons';
+import { ICON_PATHS, ICON_STROKE_WIDTH, type IconName } from '@/constants/icons';
 import { cx } from '../../utils/cx';
 
 export interface IconProps {
@@ -17,7 +17,7 @@ export function Icon({ name, size = 'md', label, directional = false }: IconProp
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth={ICON_STROKE_WIDTH}
       strokeLinecap="round"
       strokeLinejoin="round"
       role={label ? 'img' : undefined}

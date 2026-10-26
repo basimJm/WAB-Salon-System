@@ -1,4 +1,11 @@
+import brandIcon from '@/assets/wab-app-icon.png';
+
 export const BRAND_MARK = 'WAB';
+/** The WAB app icon (design/assets/wab-app-icon.png): sidebar and login brand. */
+export const BRAND_ICON_URL: string = brandIcon;
+/** Keyboard hint of the global search (Cmd+K on macOS, Ctrl+K elsewhere). */
+export const SEARCH_SHORTCUT_KEY = 'k';
+export const SEARCH_SHORTCUT_HINT = '⌘K';
 export const BRAND_TAGLINE = 'WEDDING & BEAUTY';
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 export const DEFAULT_PAGE_SIZE = 25;

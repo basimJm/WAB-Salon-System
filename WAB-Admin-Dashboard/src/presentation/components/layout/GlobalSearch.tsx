@@ -1,6 +1,11 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SEARCH_DEBOUNCE_MS, SEARCH_MIN_CHARS } from '@/constants/ui';
+import {
+  SEARCH_DEBOUNCE_MS,
+  SEARCH_MIN_CHARS,
+  SEARCH_SHORTCUT_HINT,
+  SEARCH_SHORTCUT_KEY,
+} from '@/constants/ui';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { cx } from '../../utils/cx';
 import { Icon } from '../core/Icon';
@@ -60,6 +65,19 @@ export function GlobalSearch({ search, onSelect }: GlobalSearchProps) {
   const [state, setState] = useState<State>({ kind: 'idle' });
   const query = useDebouncedValue(text.trim(), SEARCH_DEBOUNCE_MS);
   const ready = query.length >= SEARCH_MIN_CHARS;
+  const input = useRef<HTMLInputElement>(null);
+
+  // Cmd+K (macOS) / Ctrl+K anywhere focuses the search, like the design's hint says.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === SEARCH_SHORTCUT_KEY) {
+        event.preventDefault();
+        input.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     if (!ready) return undefined;
@@ -93,7 +111,12 @@ export function GlobalSearch({ search, onSelect }: GlobalSearchProps) {
       <span className="wab-gsearch__icon">
         <Icon name="search" size="sm" />
       </span>
+      <kbd className="wab-gsearch__kbd" aria-hidden="true">
+        <bdi dir="ltr">{SEARCH_SHORTCUT_HINT}</bdi>
+      </kbd>
       <input
+        ref={input}
+        aria-keyshortcuts="Meta+K Control+K"
         className="wab-field__control wab-gsearch__input"
         type="search"
         role="combobox"
@@ -155,10 +178,15 @@ export function GlobalSearch({ search, onSelect }: GlobalSearchProps) {
                       onClick={() => pick(entry.hit)}
                       onKeyDown={() => undefined}
                     >
-                      <span>{entry.hit.label}</span>
-                      {entry.hit.hint ? (
-                        <span className="wab-gsearch__hint">{entry.hit.hint}</span>
-                      ) : null}
+                      <span className="wab-gsearch__initial" aria-hidden="true">
+                        {Array.from(entry.hit.label.trim())[0] ?? ''}
+                      </span>
+                      <span className="wab-gsearch__text">
+                        <span className="wab-gsearch__label">{entry.hit.label}</span>
+                        {entry.hit.hint ? (
+                          <span className="wab-gsearch__hint">{entry.hit.hint}</span>
+                        ) : null}
+                      </span>
                     </div>
                   );
                 })}

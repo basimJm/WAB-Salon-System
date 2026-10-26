@@ -1,4 +1,5 @@
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EnvRibbon } from '@/presentation/layout/EnvRibbon';
 import { ENV_KEYS } from '@/constants/env';
@@ -79,7 +80,8 @@ describe('About page', () => {
     await signInContainer(container);
     renderRoutes(ROUTES.about, { container });
     await screen.findByRole('heading', { name: en.about.title });
-    expect(document.body.textContent).not.toContain('example.test');
+    expect(document.body.textContent).not.toContain('api.example.test');
+    expect(document.body.textContent).not.toContain('socket.example.test');
   });
 
   it('is translated in Arabic', async () => {
@@ -90,11 +92,12 @@ describe('About page', () => {
     expect(screen.getByText(ar.about.version)).toBeInTheDocument();
   });
 
-  it('is reachable from the sidebar footer', async () => {
+  it('is reachable from the admin menu in the top bar', async () => {
     const container = containerFor('dev-debug');
     await signInContainer(container);
     renderRoutes(ROUTES.liveOverview, { container });
-    const link = await screen.findByRole('link', { name: en.about.link });
-    expect(link).toHaveAttribute('href', ROUTES.about);
+    await userEvent.click(await screen.findByRole('button', { name: /WAB Admin|admin@/ }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: en.topbar.about }));
+    expect(await screen.findByRole('heading', { name: en.about.title })).toBeInTheDocument();
   });
 });

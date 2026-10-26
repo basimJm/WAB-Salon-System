@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { formatNumber } from '@/domain/shared/format';
+import { useLanguage } from '../../hooks/useLanguage';
 import { DataTable, type DataTableProps } from '../data/DataTable';
 import { FilterBar, type FilterBarProps } from '../data/FilterBar';
 import { Pagination, type PaginationProps } from '../data/Pagination';
@@ -19,8 +21,9 @@ export interface ListPageProps<Row> {
 }
 
 /**
- * Every list screen: header, filter bar, bulk/tools toolbar, table (loading/empty/error built in) and server
- * pagination, in the same order and spacing. Pages fill the slots; they never lay a list out themselves.
+ * Every list screen: header, filter bar, then the design's table card (title + server total, tools, table with
+ * loading/empty/error built in, server pagination in the card footer). Pages fill the slots; they never lay a
+ * list out themselves.
  */
 export function ListPage<Row>({
   title,
@@ -31,6 +34,7 @@ export function ListPage<Row>({
   table,
   pagination,
 }: ListPageProps<Row>) {
+  const { language } = useLanguage();
   const showPagination =
     pagination !== undefined &&
     !table.loading &&
@@ -44,9 +48,17 @@ export function ListPage<Row>({
           {filters.controls}
         </FilterBar>
       ) : null}
-      {toolbar ? <TableToolbar {...toolbar} /> : null}
-      <DataTable {...table} />
-      {showPagination ? <Pagination {...pagination} /> : null}
+      <div className="wab-listcard">
+        <div className="wab-listcard__head">
+          <span className="wab-listcard__title">{title}</span>
+          {showPagination ? (
+            <span className="wab-listcard__count">{formatNumber(pagination.total, language)}</span>
+          ) : null}
+          {toolbar ? <TableToolbar {...toolbar} /> : null}
+        </div>
+        <DataTable {...table} />
+        {showPagination ? <Pagination {...pagination} /> : null}
+      </div>
     </div>
   );
 }

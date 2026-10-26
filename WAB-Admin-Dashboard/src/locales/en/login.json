@@ -23,7 +23,8 @@
     "brand": {
       "headline": "Full visibility of the platform, full control of every detail.",
       "text": "Every screen, booking, payment attempt and user journey — in one place, with a full log of every action.",
-      "security": "Secure connection · Two-step verification · Session ends after {{days}} days of inactivity"
+      "security": "Secure connection · Two-step verification · Session ends after {{days}} days of inactivity",
+      "chip": "Admin panel"
     },
     "ended": {
       "expired": "Your session expired. Please sign in again.",

@@ -2,13 +2,18 @@ import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { NAV_ITEMS, type NavItem } from '@/constants/nav';
-import { ROUTES } from '@/constants/routes';
-import { BRAND_MARK, SIDEBAR_DRAWER_ID } from '@/constants/ui';
+import { BRAND_ICON_URL, BRAND_MARK, BRAND_TAGLINE, SIDEBAR_DRAWER_ID } from '@/constants/ui';
 import { formatNumber } from '@/domain/shared/format';
 import { MAX_COUNTER } from '@/constants/ui';
 import { useLanguage } from '../hooks/useLanguage';
 import { cx } from '../utils/cx';
 import { Icon } from '../components/core/Icon';
+import { AdminAvatar } from './AdminAvatar';
+
+export interface SidebarAdmin {
+  name: string;
+  email: string;
+}
 
 export interface SidebarProps {
   mode: 'docked' | 'drawer';
@@ -17,6 +22,10 @@ export interface SidebarProps {
   onNavigate: () => void;
   /** Number to show next to a module or sub-page, by nav id (new applications, open alerts...). Filled by live data. */
   counters?: Readonly<Record<string, number>>;
+  /** Signed-in admin shown at the bottom (design: avatar, name, email). */
+  admin?: SidebarAdmin;
+  /** Docked sidebar only: the "Collapse" button at the bottom. */
+  onToggleCollapse?: () => void;
 }
 
 function Counter({ value }: { value: number | undefined }) {
@@ -34,7 +43,7 @@ interface GroupProps {
   onNavigate: () => void;
 }
 
-/** A module with sub-pages: its own link plus a toggle for the sub-menu (open while one of its pages is current). */
+/** A module with sub-pages: the row opens and closes the sub-menu (open while one of its pages is current). */
 function NavGroup({ item, shrink, counters, onNavigate }: GroupProps) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
@@ -44,32 +53,38 @@ function NavGroup({ item, shrink, counters, onNavigate }: GroupProps) {
   const expanded = !shrink && (manual ?? inside);
   const total = children.reduce((sum, c) => sum + (counters[c.id] ?? 0), counters[item.id] ?? 0);
   const name = t(item.labelKey);
+  const headClass = cx(
+    'wab-navitem',
+    'wab-navgroup__head',
+    inside && 'wab-navgroup__head--inside',
+    inside && !expanded && 'wab-navgroup__head--closed',
+  );
+  if (shrink) {
+    // Collapsed rail: the icon goes to the module's first page, like the design.
+    return (
+      <NavLink to={item.path} end onClick={onNavigate} className={headClass} title={name}>
+        <Icon name={item.icon} />
+        <span className="wab-sr-only">{name}</span>
+        <Counter value={total} />
+      </NavLink>
+    );
+  }
   return (
     <div className="wab-navgroup">
-      <div className="wab-navgroup__head">
-        <NavLink
-          to={item.path}
-          end
-          onClick={onNavigate}
-          className={({ isActive }) => cx('wab-navitem', isActive && 'wab-navitem--active')}
-          title={shrink ? name : undefined}
-        >
-          <Icon name={item.icon} />
-          {!shrink ? <span className="wab-navitem__label">{name}</span> : null}
-          {!shrink ? <Counter value={total} /> : null}
-        </NavLink>
-        {!shrink ? (
-          <button
-            type="button"
-            className="wab-navgroup__toggle"
-            aria-expanded={expanded}
-            aria-label={t(expanded ? 'nav.collapse' : 'nav.expand', { name })}
-            onClick={() => setManual(!expanded)}
-          >
-            <Icon name="chevronDown" size="sm" />
-          </button>
-        ) : null}
-      </div>
+      <button
+        type="button"
+        className={headClass}
+        aria-expanded={expanded}
+        aria-label={t(expanded ? 'nav.collapse' : 'nav.expand', { name })}
+        onClick={() => setManual(!expanded)}
+      >
+        <Icon name={item.icon} />
+        <span className="wab-navitem__label">{name}</span>
+        {!expanded ? <Counter value={total} /> : null}
+        <span className="wab-navgroup__chevron" aria-hidden="true">
+          <Icon name="chevronDown" size="sm" />
+        </span>
+      </button>
       {expanded ? (
         <ul className="wab-navgroup__list">
           {children.map((child) => (
@@ -80,6 +95,7 @@ function NavGroup({ item, shrink, counters, onNavigate }: GroupProps) {
                 onClick={onNavigate}
                 className={({ isActive }) => cx('wab-navsub', isActive && 'wab-navsub--active')}
               >
+                <span className="wab-navsub__dot" aria-hidden="true" />
                 <span className="wab-navitem__label">{t(child.labelKey)}</span>
                 <Counter value={counters[child.id]} />
               </NavLink>
@@ -91,7 +107,63 @@ function NavGroup({ item, shrink, counters, onNavigate }: GroupProps) {
   );
 }
 
-export function Sidebar({ mode, collapsed, open, onNavigate, counters = {} }: SidebarProps) {
+function SidebarFooter({
+  admin,
+  shrink,
+  onToggleCollapse,
+}: Pick<SidebarProps, 'admin' | 'onToggleCollapse'> & { shrink: boolean }) {
+  const { t } = useTranslation();
+  if (!admin && !onToggleCollapse) return null;
+  return (
+    <div className="wab-sidebar__footer">
+      {admin && !shrink ? (
+        <div className="wab-sidebar__admin">
+          <AdminAvatar name={admin.name} />
+          <div className="wab-sidebar__admin-text">
+            <span className="wab-sidebar__admin-name">{admin.name}</span>
+            <span className="wab-sidebar__admin-email" dir="ltr">
+              {admin.email}
+            </span>
+          </div>
+        </div>
+      ) : null}
+      {onToggleCollapse ? (
+        <button
+          type="button"
+          className="wab-sidebar__collapse"
+          aria-expanded={!shrink}
+          aria-controls={SIDEBAR_DRAWER_ID}
+          title={shrink ? t('nav.expandSidebar') : undefined}
+          onClick={onToggleCollapse}
+        >
+          <span
+            className={cx(
+              'wab-sidebar__collapse-icon',
+              shrink && 'wab-sidebar__collapse-icon--flip',
+            )}
+          >
+            <Icon name="collapse" size="sm" directional />
+          </span>
+          {shrink ? (
+            <span className="wab-sr-only">{t('nav.expandSidebar')}</span>
+          ) : (
+            <span>{t('nav.collapseSidebar')}</span>
+          )}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export function Sidebar({
+  mode,
+  collapsed,
+  open,
+  onNavigate,
+  counters = {},
+  admin,
+  onToggleCollapse,
+}: SidebarProps) {
   const { t } = useTranslation();
   const shrink = mode === 'docked' && collapsed;
   return (
@@ -108,8 +180,18 @@ export function Sidebar({ mode, collapsed, open, onNavigate, counters = {} }: Si
       inert={mode === 'drawer' && !open}
     >
       <div className="wab-sidebar__brand">
-        <span className="wab-logo">{BRAND_MARK}</span>
-        {!shrink ? <span className="wab-sidebar__admin">{t('app.adminLabel')}</span> : null}
+        <img className="wab-sidebar__icon" src={BRAND_ICON_URL} alt={BRAND_MARK} />
+        {!shrink ? (
+          <div className="wab-sidebar__names">
+            <div className="wab-sidebar__wordmark">
+              <span className="wab-sidebar__mark">{BRAND_MARK}</span>
+              <span className="wab-sidebar__tagline" dir="ltr">
+                {BRAND_TAGLINE}
+              </span>
+            </div>
+            <span className="wab-sidebar__chip">{t('app.adminLabel')}</span>
+          </div>
+        ) : null}
       </div>
       <nav className="wab-sidebar__nav">
         {NAV_ITEMS.map((item) =>
@@ -130,23 +212,19 @@ export function Sidebar({ mode, collapsed, open, onNavigate, counters = {} }: Si
               title={shrink ? t(item.labelKey) : undefined}
             >
               <Icon name={item.icon} />
-              {!shrink ? <span className="wab-navitem__label">{t(item.labelKey)}</span> : null}
-              {!shrink ? <Counter value={counters[item.id]} /> : null}
+              <span className={shrink ? 'wab-sr-only' : 'wab-navitem__label'}>
+                {t(item.labelKey)}
+              </span>
+              <Counter value={counters[item.id]} />
             </NavLink>
           ),
         )}
       </nav>
-      <NavLink
-        to={ROUTES.about}
-        onClick={onNavigate}
-        className={({ isActive }) =>
-          cx('wab-navitem', 'wab-sidebar__about', isActive && 'wab-navitem--active')
-        }
-        title={shrink ? t('about.link') : undefined}
-      >
-        <Icon name="info" />
-        {!shrink ? <span className="wab-navitem__label">{t('about.link')}</span> : null}
-      </NavLink>
+      <SidebarFooter
+        shrink={shrink}
+        {...(admin ? { admin } : {})}
+        {...(onToggleCollapse ? { onToggleCollapse } : {})}
+      />
     </aside>
   );
 }
