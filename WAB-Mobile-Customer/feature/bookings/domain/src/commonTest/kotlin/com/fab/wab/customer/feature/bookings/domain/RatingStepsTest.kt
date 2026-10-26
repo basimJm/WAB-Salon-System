@@ -44,6 +44,13 @@ class RatingStepsTest {
     }
 
     @Test
+    fun theStaffStepShowsTheMembersPhoto() {
+        val served = person("m1", "Lina").copy(staffPhotoUrl = "photos/m1.jpg")
+        val staff = ratingStepsOf(booking("s1", listOf(served))).last()
+        assertEquals(RatingStep.Staff("s1", "m1", "Lina", memberPhotoUrl = "photos/m1.jpg"), staff)
+    }
+
+    @Test
     fun deletedSalonHasNothingToRate() {
         assertEquals(emptyList(), ratingStepsOf(booking(null, listOf(person("m1", "Lina")))))
     }

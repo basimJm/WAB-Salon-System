@@ -231,11 +231,12 @@ def throwaway(rec: Recorder, base: str, ctx: dict, gender: str) -> None:
 
 def book(rec: Recorder, base: str, salon_id: str, e164: str, token: str) -> None:
     detail = rec.call(base, "GET", "/salons/{salonId}", params={"salonId": salon_id}, token=token, save=False, label="GetSalonsBySalonId(signed in)")
-    services = (detail or {}).get("services") or []
-    if not services:
+    branch = next((b["id"] for b in ((detail or {}).get("branches") or []) if b.get("isMain")), None)
+    service = next(  # of the main branch and not bride-only: another branch's service → 400, VIP for a non-bride → 422
+        (s for s in (detail or {}).get("services") or [] if s.get("branchId") in (None, branch) and not s.get("brideOnly")), None)
+    if service is None:
         return
-    branch = next((b["id"] for b in (detail.get("branches") or []) if b.get("isMain")), None)
-    person = {"serviceIds": [services[0]["id"]]}
+    person = {"serviceIds": [service["id"]]}
     for days in BOOKING_DAYS_AHEAD:
         day = (date.today() + timedelta(days=days)).isoformat()
         body = {"date": day, "person": person, **({"branchId": branch} if branch else {})}

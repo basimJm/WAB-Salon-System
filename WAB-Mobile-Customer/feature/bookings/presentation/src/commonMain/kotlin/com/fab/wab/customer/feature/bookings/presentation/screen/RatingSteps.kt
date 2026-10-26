@@ -109,7 +109,7 @@ internal fun StaffStep(state: UiState, step: RatingStep.Staff, onAction: (UiActi
                 horizontalArrangement = Arrangement.spacedBy(spacing.space12),
                 modifier = Modifier.padding(bottom = spacing.space12),
             ) {
-                AppAvatar(name = step.memberName, size = BookingsDesign.staffAvatar)
+                AppAvatar(name = step.memberName, imageUrl = step.memberPhotoUrl, size = BookingsDesign.staffAvatar)
                 AppText(
                     text = step.memberName,
                     style = AppTheme.typography.titleSmall.copy(fontSize = BookingsDesign.fontTitle, fontWeight = FontWeight.Bold),

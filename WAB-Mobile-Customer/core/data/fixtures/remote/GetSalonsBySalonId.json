@@ -16,11 +16,14 @@
     "phone": "+96265921002",
     "whatsapp": "+962790921002",
     "rating": {
-      "avg": 4.7,
-      "count": 3
+      "avg": 4.2,
+      "count": 23
     },
-    "isOpenNow": false,
-    "todayHours": null,
+    "isOpenNow": true,
+    "todayHours": {
+      "open": "11:00",
+      "close": "21:00"
+    },
     "closedReason": null,
     "weeklySchedule": [
       {
@@ -68,44 +71,86 @@
     ],
     "upcomingClosures": [
       {
-        "from": "2026-11-06",
-        "to": "2026-11-06",
+        "from": "2026-11-11",
+        "to": "2026-11-11",
         "reason": "Staff training day"
       }
     ],
     "staff": [
       {
+        "id": "40f0de4db5550e6d577af573",
+        "firstName": "Ruba",
+        "photoUrl": null,
+        "status": "ON_DUTY",
+        "branchId": "444ece388341b640276cd4f0"
+      },
+      {
+        "id": "a6198ca0199decb1f51d6798",
+        "firstName": "Haya",
+        "photoUrl": null,
+        "status": "ON_DUTY",
+        "branchId": "444ece388341b640276cd4f0"
+      },
+      {
+        "id": "ca9a7941e69dcff1fb7acb62",
+        "firstName": "Dima",
+        "photoUrl": null,
+        "status": "ON_DUTY",
+        "branchId": "ce1bd4752df7edefcac0f090"
+      },
+      {
+        "id": "dfec5b1c3f929a2c8ae6b943",
+        "firstName": "Shahd",
+        "photoUrl": null,
+        "status": "ON_DUTY",
+        "branchId": "444ece388341b640276cd4f0"
+      },
+      {
+        "id": "e2c2d56c2f4fc6f11842fc5d",
+        "firstName": "Rasha",
+        "photoUrl": null,
+        "status": "ON_DUTY",
+        "branchId": "ce1bd4752df7edefcac0f090"
+      },
+      {
+        "id": "f95d193089a1df1c0b6f4dd9",
+        "firstName": "Nada",
+        "photoUrl": null,
+        "status": "ON_DUTY",
+        "branchId": "ce1bd4752df7edefcac0f090"
+      },
+      {
         "id": "500157bd497447d283767cbd",
         "firstName": "Noor",
         "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/rose-staff0.jpg",
-        "status": "DAY_OFF",
-        "branchId": "6addc42774ae573daadd06d6"
+        "status": "ON_DUTY",
+        "branchId": "6adf513d4bd7099438793e83"
       },
       {
         "id": "68f31a814c14ec96a21aae43",
         "firstName": "Reem",
         "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/rose-staff1.jpg",
-        "status": "DAY_OFF",
-        "branchId": "6addc42774ae573daadd06d6"
+        "status": "ON_DUTY",
+        "branchId": "6adf513d4bd7099438793e83"
       },
       {
         "id": "b3bb803db1e7cc32fbc4ebbb",
         "firstName": "Farah",
         "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/rose-staff3.jpg",
-        "status": "DAY_OFF",
-        "branchId": "6addc42774ae573daadd06d6"
+        "status": "ON_DUTY",
+        "branchId": "6adf513d4bd7099438793e83"
       },
       {
         "id": "f5a6256a47b58b591e790ecf",
         "firstName": "Aya",
         "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/rose-staff2.jpg",
-        "status": "DAY_OFF",
-        "branchId": "6addc42774ae573daadd06d6"
+        "status": "ON_DUTY",
+        "branchId": "6adf513d4bd7099438793e83"
       }
     ],
     "branches": [
       {
-        "id": "6addc42774ae573daadd06d6",
+        "id": "6adf513d4bd7099438793e83",
         "name": "Sweifieh",
         "isMain": true,
         "locationText": "Sweifieh, Wakalat Street, 2nd floor",
@@ -115,8 +160,11 @@
         },
         "phone": "+96265921002",
         "whatsapp": "+962790921002",
-        "isOpenNow": false,
-        "todayHours": null,
+        "isOpenNow": true,
+        "todayHours": {
+          "open": "11:00",
+          "close": "21:00"
+        },
         "closedReason": null,
         "weeklySchedule": [
           {
@@ -164,8 +212,146 @@
         ],
         "upcomingClosures": [
           {
-            "from": "2026-11-06",
-            "to": "2026-11-06",
+            "from": "2026-11-11",
+            "to": "2026-11-11",
+            "reason": "Staff training day"
+          }
+        ]
+      },
+      {
+        "id": "444ece388341b640276cd4f0",
+        "name": "Al-Rabyeh",
+        "isMain": false,
+        "locationText": "Al-Rabyeh, Abdul Rahim Al-Waked Street",
+        "location": {
+          "lat": 31.9785,
+          "lng": 35.8806
+        },
+        "phone": "+96265921016",
+        "whatsapp": null,
+        "isOpenNow": true,
+        "todayHours": {
+          "open": "11:00",
+          "close": "21:00"
+        },
+        "closedReason": null,
+        "weeklySchedule": [
+          {
+            "day": "SAT",
+            "isOff": false,
+            "open": "11:00",
+            "close": "21:00"
+          },
+          {
+            "day": "SUN",
+            "isOff": true,
+            "open": "11:00",
+            "close": "21:00"
+          },
+          {
+            "day": "MON",
+            "isOff": false,
+            "open": "11:00",
+            "close": "21:00"
+          },
+          {
+            "day": "TUE",
+            "isOff": false,
+            "open": "11:00",
+            "close": "21:00"
+          },
+          {
+            "day": "WED",
+            "isOff": false,
+            "open": "11:00",
+            "close": "21:00"
+          },
+          {
+            "day": "THU",
+            "isOff": false,
+            "open": "11:00",
+            "close": "21:00"
+          },
+          {
+            "day": "FRI",
+            "isOff": false,
+            "open": "11:00",
+            "close": "21:00"
+          }
+        ],
+        "upcomingClosures": [
+          {
+            "from": "2026-11-11",
+            "to": "2026-11-11",
+            "reason": "Staff training day"
+          }
+        ]
+      },
+      {
+        "id": "ce1bd4752df7edefcac0f090",
+        "name": "Jabal Amman",
+        "isMain": false,
+        "locationText": "Jabal Amman, Rainbow Street, near the First Circle",
+        "location": {
+          "lat": 31.9515,
+          "lng": 35.9239
+        },
+        "phone": "+96265921017",
+        "whatsapp": null,
+        "isOpenNow": true,
+        "todayHours": {
+          "open": "12:00",
+          "close": "22:00"
+        },
+        "closedReason": null,
+        "weeklySchedule": [
+          {
+            "day": "SAT",
+            "isOff": false,
+            "open": "12:00",
+            "close": "22:00"
+          },
+          {
+            "day": "SUN",
+            "isOff": false,
+            "open": "12:00",
+            "close": "22:00"
+          },
+          {
+            "day": "MON",
+            "isOff": false,
+            "open": "12:00",
+            "close": "22:00"
+          },
+          {
+            "day": "TUE",
+            "isOff": false,
+            "open": "12:00",
+            "close": "22:00"
+          },
+          {
+            "day": "WED",
+            "isOff": false,
+            "open": "12:00",
+            "close": "22:00"
+          },
+          {
+            "day": "THU",
+            "isOff": false,
+            "open": "12:00",
+            "close": "22:00"
+          },
+          {
+            "day": "FRI",
+            "isOff": true,
+            "open": "12:00",
+            "close": "22:00"
+          }
+        ],
+        "upcomingClosures": [
+          {
+            "from": "2026-11-13",
+            "to": "2026-11-13",
             "reason": "Staff training day"
           }
         ]
@@ -173,124 +359,399 @@
     ],
     "services": [
       {
+        "id": "03ef0270c6eea0da6883f0ae",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483de",
+        "name": "Makeup",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/makeup.jpg",
+        "description": "Makeup for occasions",
+        "price": "46.550",
+        "durationMinutes": 60,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "08562faf2f6e77d10d22157d",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483dc",
+        "name": "Manicure",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/manicure.jpg",
+        "description": "Nail care and polish",
+        "price": "11.760",
+        "durationMinutes": 30,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "1f07ed2e578093977f74aba0",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483df",
+        "name": "Bridal makeup",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/bridal-makeup.jpg",
+        "description": "Complete bridal makeup",
+        "price": "220.500",
+        "durationMinutes": 120,
+        "brideOnly": true,
+        "mediaUrls": []
+      },
+      {
+        "id": "3a0d56e8ec1b4defc213f801",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e2",
+        "name": "Henna",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/henna.jpg",
+        "description": "Henna designs for occasions",
+        "price": "26.600",
+        "durationMinutes": 45,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "3cc1c57725dca30f0382ba06",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483d9",
+        "name": "Blow dry",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/blow-dry.jpg",
+        "description": "Wash and blow-dry styling",
+        "price": "14.700",
+        "durationMinutes": 30,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "3f46e90e8c48284d8a46abc2",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e0",
+        "name": "Facial",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/facial.jpg",
+        "description": "Deep cleansing and hydration",
+        "price": "36.750",
+        "durationMinutes": 60,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "4268da8d41e7865d04d36ae5",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e1",
+        "name": "Waxing",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/waxing.jpg",
+        "description": "Hair removal with wax",
+        "price": "22.050",
+        "durationMinutes": 30,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "537cbb903c57490b2cd4be77",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483df",
+        "name": "Bridal makeup",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/bridal-makeup.jpg",
+        "description": "Complete bridal makeup",
+        "price": "199.500",
+        "durationMinutes": 120,
+        "brideOnly": true,
+        "mediaUrls": []
+      },
+      {
+        "id": "5c9e561dfd2745c45c68e6b2",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483d8",
+        "name": "Haircut",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/haircut.jpg",
+        "description": "Cut and shape to your taste",
+        "price": "19.950",
+        "durationMinutes": 45,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "64fb61356031872754eb3fa0",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483da",
+        "name": "Hair coloring",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/hair-color.jpg",
+        "description": "Full color or highlights",
+        "price": "66.150",
+        "durationMinutes": 120,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "6680493051700daed1bc841e",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483db",
+        "name": "Keratin treatment",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/keratin.jpg",
+        "description": "Smoothing treatment for the hair",
+        "price": "117.600",
+        "durationMinutes": 150,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "6f480a002ec7f46c0046a98e",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e2",
+        "name": "Henna",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/henna.jpg",
+        "description": "Henna designs for occasions",
+        "price": "29.400",
+        "durationMinutes": 45,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "7a5a7d4c160857e7d9938fcf",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e0",
+        "name": "Facial",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/facial.jpg",
+        "description": "Deep cleansing and hydration",
+        "price": "33.250",
+        "durationMinutes": 60,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "97ea5a0581ab44408182880d",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483dc",
+        "name": "Manicure",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/manicure.jpg",
+        "description": "Nail care and polish",
+        "price": "10.640",
+        "durationMinutes": 30,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "9e74b2338be4397db3a3fee6",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e1",
+        "name": "Waxing",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/waxing.jpg",
+        "description": "Hair removal with wax",
+        "price": "19.950",
+        "durationMinutes": 30,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "be5a7cb25d56ca5a2529b87b",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483de",
+        "name": "Makeup",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/makeup.jpg",
+        "description": "Makeup for occasions",
+        "price": "51.450",
+        "durationMinutes": 60,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "be8c1b6f673021b4a14330f6",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483dd",
+        "name": "Pedicure",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/pedicure.jpg",
+        "description": "Foot and toenail care",
+        "price": "15.960",
+        "durationMinutes": 45,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "bfe121f70757e608dfc4310b",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483da",
+        "name": "Hair coloring",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/hair-color.jpg",
+        "description": "Full color or highlights",
+        "price": "59.850",
+        "durationMinutes": 120,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "cb97ec390243da1d18c6a7b1",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483dd",
+        "name": "Pedicure",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/pedicure.jpg",
+        "description": "Foot and toenail care",
+        "price": "17.640",
+        "durationMinutes": 45,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "d698719ebfff0f46575ff0bb",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483d9",
+        "name": "Blow dry",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/blow-dry.jpg",
+        "description": "Wash and blow-dry styling",
+        "price": "13.300",
+        "durationMinutes": 30,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "f026a5493502ab67a1f7b1af",
+        "branchId": "ce1bd4752df7edefcac0f090",
+        "catalogServiceId": "6adf0d5d1399cd74c64483d8",
+        "name": "Haircut",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/haircut.jpg",
+        "description": "Cut and shape to your taste",
+        "price": "22.050",
+        "durationMinutes": 45,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
+        "id": "f0c8aec565b69de9a3029682",
+        "branchId": "444ece388341b640276cd4f0",
+        "catalogServiceId": "6adf0d5d1399cd74c64483db",
+        "name": "Keratin treatment",
+        "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/keratin.jpg",
+        "description": "Smoothing treatment for the hair",
+        "price": "106.400",
+        "durationMinutes": 150,
+        "brideOnly": false,
+        "mediaUrls": []
+      },
+      {
         "id": "387f8160a24b10c2d3b45546",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867169e63b9a6a612d4a4",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483de",
         "name": "Makeup",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/makeup.jpg",
         "description": "Makeup for occasions",
         "price": "49.000",
         "durationMinutes": 60,
+        "brideOnly": false,
         "mediaUrls": []
       },
       {
         "id": "549f6776cd9ce882c6fc96a4",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867169e63b9a6a612d4a2",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483dc",
         "name": "Manicure",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/manicure.jpg",
         "description": "Nail care and polish",
         "price": "11.200",
         "durationMinutes": 30,
+        "brideOnly": false,
         "mediaUrls": []
       },
       {
         "id": "605ee55e777f921da282b66b",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867159e63b9a6a612d4a0",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483da",
         "name": "Hair coloring",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/hair-color.jpg",
         "description": "Full color or highlights",
         "price": "63.000",
         "durationMinutes": 120,
+        "brideOnly": false,
         "mediaUrls": []
       },
       {
         "id": "6189fc909a33eec513e829a2",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867149e63b9a6a612d49e",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483d8",
         "name": "Haircut",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/haircut.jpg",
         "description": "Cut and shape to your taste",
         "price": "21.000",
         "durationMinutes": 45,
+        "brideOnly": false,
         "mediaUrls": []
       },
       {
         "id": "909fddd9386396632153db0c",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867159e63b9a6a612d4a1",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483db",
         "name": "Keratin treatment",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/keratin.jpg",
         "description": "Smoothing treatment for the hair",
         "price": "112.000",
         "durationMinutes": 150,
+        "brideOnly": false,
         "mediaUrls": []
       },
       {
         "id": "93d46539a92b1f9031a798ec",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867159e63b9a6a612d49f",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483d9",
         "name": "Blow dry",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/blow-dry.jpg",
         "description": "Wash and blow-dry styling",
         "price": "14.000",
         "durationMinutes": 30,
+        "brideOnly": false,
         "mediaUrls": []
       },
       {
         "id": "96e1894af48d287aec173b7a",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867179e63b9a6a612d4a5",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483df",
         "name": "Bridal makeup",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/bridal-makeup.jpg",
         "description": "Complete bridal makeup",
         "price": "210.000",
         "durationMinutes": 120,
+        "brideOnly": true,
         "mediaUrls": []
       },
       {
         "id": "b82b27d759d4ff4abe6c8a3d",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867179e63b9a6a612d4a7",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e1",
         "name": "Waxing",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/waxing.jpg",
         "description": "Hair removal with wax",
         "price": "21.000",
         "durationMinutes": 30,
+        "brideOnly": false,
         "mediaUrls": []
       },
       {
         "id": "d9975ca1a6311d5a893e4ada",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867179e63b9a6a612d4a8",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e2",
         "name": "Henna",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/henna.jpg",
         "description": "Henna designs for occasions",
         "price": "28.000",
         "durationMinutes": 45,
+        "brideOnly": false,
         "mediaUrls": []
       },
       {
         "id": "e83aa9dc20985f8a668b4ba2",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867169e63b9a6a612d4a3",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483dd",
         "name": "Pedicure",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/pedicure.jpg",
         "description": "Foot and toenail care",
         "price": "16.800",
         "durationMinutes": 45,
+        "brideOnly": false,
         "mediaUrls": []
       },
       {
         "id": "fb7fc2b5e3a58aa4f539e4e2",
-        "branchId": "6addc42774ae573daadd06d6",
-        "catalogServiceId": "6ad867179e63b9a6a612d4a6",
+        "branchId": "6adf513d4bd7099438793e83",
+        "catalogServiceId": "6adf0d5d1399cd74c64483e0",
         "name": "Facial",
         "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/facial.jpg",
         "description": "Deep cleansing and hydration",
         "price": "35.000",
         "durationMinutes": 60,
+        "brideOnly": false,
         "mediaUrls": []
       }
     ],
@@ -326,40 +787,40 @@
     ],
     "isFavorite": false,
     "reviews": {
-      "avg": 4.7,
-      "count": 3,
+      "avg": 4.2,
+      "count": 23,
       "latest": [
+        {
+          "id": "fd8b0bcb947be715d59b159f",
+          "customerName": "Zeina",
+          "rating": 5,
+          "comment": "أفضل صالون جربته في عمّان، أنصح فيه.",
+          "createdAt": "2026-10-24T16:55:00.000Z",
+          "branch": {
+            "id": "ce1bd4752df7edefcac0f090",
+            "name": "Jabal Amman"
+          }
+        },
         {
           "id": "82ed475d8c96be989ce21736",
           "customerName": "Dima",
           "rating": 5,
           "comment": "أفضل صالون جربته في عمّان، أنصح فيه.",
-          "createdAt": "2026-10-19T20:27:00.000Z",
+          "createdAt": "2026-10-23T20:27:00.000Z",
           "branch": {
-            "id": "6addc42774ae573daadd06d6",
+            "id": "6adf513d4bd7099438793e83",
             "name": "Sweifieh"
           }
         },
         {
-          "id": "c46b0f7892c58adfb14cfe10",
-          "customerName": "Shahd",
-          "rating": 5,
-          "comment": "Friendly staff, but I waited ten minutes past my time.",
-          "createdAt": "2026-10-17T19:36:00.000Z",
-          "branch": {
-            "id": "6addc42774ae573daadd06d6",
-            "name": "Sweifieh"
-          }
-        },
-        {
-          "id": "b27500de792bf10515877868",
-          "customerName": "Dima",
+          "id": "961e9fcdb29918ab05d2c5f1",
+          "customerName": "Yara",
           "rating": 4,
-          "comment": "تجربة ممتازة، الموظفين محترفين والمكان نظيف جدًا.",
-          "createdAt": "2026-10-17T19:25:00.000Z",
+          "comment": "خدمة جيدة لكن المكان كان مزدحمًا.",
+          "createdAt": "2026-10-23T17:15:00.000Z",
           "branch": {
-            "id": "6addc42774ae573daadd06d6",
-            "name": "Sweifieh"
+            "id": "444ece388341b640276cd4f0",
+            "name": "Al-Rabyeh"
           }
         }
       ]

@@ -3,24 +3,24 @@
   "message": "Done successfully.",
   "data": {
     "accessToken": "<redacted>",
-    "accessTokenExpiresAt": "2026-10-25T17:58:06.000Z",
+    "accessTokenExpiresAt": "2026-10-26T17:22:45.000Z",
     "refreshToken": "<redacted>",
-    "refreshTokenExpiresAt": "2027-01-23T17:43:06.870Z",
+    "refreshTokenExpiresAt": "2027-01-24T17:07:45.515Z",
     "customer": {
-      "id": "6ade37a6c2cfb0cb993a1647",
-      "firstName": "Dana",
+      "id": "ba40c6d258b201eb07b4c6a3",
+      "firstName": "Yousef",
       "lastName": "Khoury",
-      "email": "dana@wab.example",
-      "gender": "FEMALE",
+      "email": "yousef.khoury1@demo.wab.test",
+      "gender": "MALE",
       "phone": {
         "countryCode": "JO",
         "dialCode": "+962",
-        "number": "790000001",
-        "e164": "+962790000001"
+        "number": "799000001",
+        "e164": "+962799000001"
       },
-      "cityId": "6ade371b97c38aeef84b9613",
-      "areaId": "6ade371b97c38aeef84b962c",
-      "language": "en",
+      "cityId": "6adf0d5d78e65ddea68fc94d",
+      "areaId": "6adf0d5d78e65ddea68fc959",
+      "language": "ar",
       "pushEnabled": true
     }
   }

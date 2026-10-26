@@ -9,6 +9,22 @@
 
 ## Current task
 
+### CUS-093 — Bride-only services, staff per person, list rejection, completed money (SRV-170, contract 1.5.0)
+- Branch: `feat/cus-093-srv-170-contract`
+- Status: IN PROGRESS
+- Acceptance criteria (PRD S07/S10 staff sheet, S14, S15, S16 step 1, S18; `openapi.customer.json` 1.5.0: `GET /salons/{salonId}` + `/staff/{memberId}` `services[].brideOnly`, `GET /bookings` `rejection`, `GET /bookings/{id}` `persons[].staff {firstName, photoUrl}` + `money.paidAtSalon` + `remaining` 0 once final, `POST /salons/{salonId}/staff/{memberId}/reviews`; closes E2E gaps #26 #28 #30 #33 #35):
+  - [ ] Contract re-synced (`api_sync.py`, snapshot 052913e6) + real fixtures re-captured from the local stack (incl. OTP request/verify); `api_sync --check` ok; `contract_gaps.py` 0
+  - [ ] S16 step 1 offers bride-only services only to a bride person; unmarking the bride drops the VIP picks; VIP rows labelled "Brides only"
+  - [ ] S07 services list + service sheet and the S07a staff sheet show the bride-only label
+  - [ ] S15 person card: staff first name + photo (no line when unassigned); S18 staff step shows the photo and posts the staff review
+  - [ ] S14 card shows the rejection reason on REJECTED bookings
+  - [ ] S15 money: "Remaining" = server `remaining` (0 once final), "Paid at the salon" row for COMPLETED
+  - [ ] AR + EN strings; no hardcoded values; tests for every mapper / VM / helper change
+- Tests: (pending)
+- Loops: 0/1
+- Review: PENDING
+- Notes: (pending)
+
 ### CUS-092 — End-to-end pass against a real server: fix every defect found
 - Branch: `feat/cus-092-e2e-fixes`
 - Status: IN PROGRESS
@@ -31,21 +47,3 @@
 - Tests: `SafeApiCallTest` (+1, 7 total); `./gradlew :core:network:testAndroidHostTest` green; red without the fix
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one catch in the transport layer, no behaviour change for valid responses. NOTE: the OTP screen will still show an error against the hosted dev API until it runs the new server (main sync after the owner sets the Render env, SRV-154).
-
-### CUS-089 — WhatsApp OTP: Firebase Phone Auth removed; request → code → verify → `otpToken` into login / register / change phone / booking
-- Branch: `feat/cus-089-whatsapp-otp` (from `feat/srv-153-whatsapp-otp` + `origin/customer`; ships with SRV-153 / OTP-011)
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §3.1a, §11; PRD S13; `openapi.customer.json` 1.4.0: `POST /auth/otp/request`, NEW `POST /auth/otp/verify`, `otpToken` in `/auth/login`, `/auth/register`, `/auth/change-phone`, `/bookings/drafts/{id}/verify-otp`; REMOVED `/auth/otp/wrong-attempt`):
-  - [x] Contract re-synced (`api_sync.py`, snapshot 0ea82ecb); `api_sync --check` ok; `contract_gaps.py` 0 gaps
-  - [x] Firebase Phone Auth removed: `PhoneAuthGateway`/`PhoneVerification`/`FirebaseResult`/`FirebaseFailure` + `authFailureForCode`, `AndroidPhoneAuthGateway`, `PhoneAuthLog` (Kotlin + Swift), `IosPhoneAuthGateway`, `PhoneAuthBridge` + `SwiftPhoneAuthBridge`, `FakePhoneAuthGateway`, `CurrentActivityProvider` + `androidActivity` Koin property, reCAPTCHA URL scheme (`firebase_config.sh`) + `handleAuthURL`, App Check (Android debug/release `AppCheckSetup`, `AppCheckSetup.swift`, App Attest entitlement + `APP_ATTEST_ENVIRONMENT`), catalog `firebase-auth` / `firebase-appcheck-*`, SPM `FirebaseAuth` / `FirebaseAppCheck` products; FCM, Analytics, Crashlytics, app-instance id unchanged
-  - [x] Wrong-attempt call removed (API, repository, use case, DI, fixtures); `VerifyOtpUseCase` + `AuthRepository.verifyOtp`; `LoginWithOtpTokenUseCase`; `OtpVerified.otpToken`, `RegisterRequest.otpToken`, change phone + booking draft verify send `otpToken`
-  - [x] S13: code boxes = `otpLength`, resend countdown = `resendAfterSeconds`, expiry countdown = `expiresInSeconds` (line under the boxes; at 0 → Expired popup, Verify off), "We sent a code on WhatsApp to" (AR + EN); not allowed without block → earlier code still typeable
-  - [x] Errors through `otpFailureOf` (domain, code-driven): `OTP_INVALID` → server attempts-left text from `details[]` on `body.code` (own text otherwise); `OTP_EXPIRED` / refused token → Expired popup; `OTP_BLOCKED` → code cleared, next request shows `blockedUntil`; `OTP_DELIVERY_FAILED` → request error "number has no WhatsApp" + retry; any failed sign-in after verify needs a new code (single-use token)
-  - [x] `OTP_DELIVERY_FAILED` in `ErrorCode` + `error_code_otp_delivery_failed` AR/EN + error table (DISMISS); `error_code_otp_blocked` now "Too many attempts"
-  - [x] Mock: generated `PostAuthOtpRequest` (`expiresInSeconds` hint 300) / `PostAuthOtpVerify` fixtures, so dev mock still signs in; stale `PostAuthOtpRequest.json` / `PostAuthOtpWrongAttempt.json` captures deleted
-  - [x] Capture tool: `fake-otp:` proofs replaced by `scripts/capture_otp.py` (request + verify with `fakeOtpCode` / `--otp-code`, waits out a resend countdown); `otpToken` redacted
-  - [x] Docs: `docs/FIREBASE_SETUP.md` (push/analytics/crash only), PRD §2.1 + S13 + §13 auth line, `CLAUDE.md` module map, `.claude/Integration.md`, `.claude/memory.md`
-- Tests: new `OtpViewModelTest` (10: request + resend/expiry countdowns, expiry popup, verify → login, server attempts text, blocked on verify → `blockedUntil`, expired + refused token, failed sign-in needs a new code, booking purpose publishes the token, not-allowed keeps code, no-WhatsApp error + retry), `OtpFailureAndUseCasesTest` (3), `AuthRepositoryOtpTest` (4, MockEngine wire bodies + envelopes), `AuthMappersTest` (+1), `RealAuthFixturesTest` (mock OTP fixtures), `ContractFixturesTest`, `FirebaseFacadeTest` trimmed, `ErrorCodeTest`; Python `test_capture_otp.py` (3). Terminal panel: `./gradlew testAndroidHostTest --continue` BUILD SUCCESSFUL, 438 host tests, 0 failures; `:androidApp:assembleDevDebug` ok; `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok; `run_detekt.sh` ok after one MaxLineLength fix; `policy_checks.py all` ok; `scripts/ci/tests` 92 OK; `api_sync.py --check` ok; `contract_gaps.py` 0
-- Loops: 1/1 — re-checked every criterion on the final tree against §3.1a and the 1.4.0 operations (request/verify bodies, all four `otpToken` callers, error codes and statuses); found and fixed: detekt MaxLineLength in `ErrorHandling.kt`, capture script over 300 lines (OTP helper split out), `ContractFixturesTest` still listing the removed operation
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — branch diff read once per role: no Firebase type left in auth; OTP errors mapped by code in domain, texts from resources or the server's localized detail; token never logged/stored beyond the hand-off; contract from the generated DTOs; AR+EN strings; iOS pbxproj only loses the two SPM product refs
-- Notes: DEVIATIONS — OTP request/verify not re-captured (no local stack running; hosted Render not used): synthetic fixtures, `ContractFixturesTest` lists them as not captured until the next capture; no emulator/simulator run and no Xcode scheme build (only the K/N framework link); `Package.resolved` still pins Firebase Auth/App Check transitive packages (Xcode drops them on the next resolve); `OTP_BLOCKED` on verify has no `blockedUntil`, so the remaining time appears after the next request. Pre-existing, not from this task: `KMP_TEMPLATE` end-to-end test fails on WAB terms in `core/realtime` / `core/domain` salon tests (same on `origin/customer`).

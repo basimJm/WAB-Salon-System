@@ -15,6 +15,7 @@ import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
 import com.fab.wab.customer.feature.booking.domain.model.StaffChoice
 import com.fab.wab.customer.feature.booking.domain.model.hasStaffOverlap
 import com.fab.wab.customer.feature.booking.domain.model.selectionTotalsOf
+import com.fab.wab.customer.feature.booking.domain.model.withBride
 import com.fab.wab.customer.feature.booking.domain.usecase.CreateBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.DeleteBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.LoadAvailabilityUseCase
@@ -73,7 +74,9 @@ class BookingFlowViewModel(
             is UiAction.OnBranchSelect -> selectBranch(event.branchId)
             is UiAction.OnNameChange -> updatePerson { copy(name = event.value.take(BookingFlowDefaults.MAX_NAME_LENGTH)) }
                 .also { updateState { copy(nameError = false) } }
-            is UiAction.OnBrideChange -> if (uiState.value.isWomenSalon) updatePerson { copy(isBride = event.isBride) }
+            is UiAction.OnBrideChange -> if (uiState.value.isWomenSalon) {
+                updatePerson { withBride(event.isBride, uiState.value.salon?.services.orEmpty()) }
+            }
             is UiAction.OnServiceToggle -> toggleService(event.serviceId)
             else -> return false
         }
@@ -137,7 +140,9 @@ class BookingFlowViewModel(
 
     /** Multi-select (PRD S16 step 1); the selection is per person. */
     private fun toggleService(serviceId: String) {
-        val selected = uiState.value.person.serviceIds
+        val state = uiState.value
+        if (state.offeredServices.none { it.id == serviceId }) return
+        val selected = state.person.serviceIds
         val next = if (serviceId in selected) selected - serviceId else selected + serviceId
         val selectedNow = (serviceId in next).toString()
         track(BookingAnalytics.ACTION_SERVICE_TOGGLE, BookingAnalytics.PARAM_ID to serviceId, BookingAnalytics.PARAM_VALUE to selectedNow)

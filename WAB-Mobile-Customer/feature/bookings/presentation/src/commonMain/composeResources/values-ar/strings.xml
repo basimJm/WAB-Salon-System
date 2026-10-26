@@ -93,4 +93,6 @@
     <string name="rating_done_button">العودة للحجز</string>
     <string name="rating_salon_unknown">الصالون</string>
     <string name="bookings_branch_label">الفرع: %1$s</string>
+    <string name="details_paid_at_salon">المدفوع في الصالون</string>
+    <string name="card_rejection_reason">السبب: %1$s</string>
 </resources>

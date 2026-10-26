@@ -76,4 +76,6 @@
     <string name="salon_branches">الفروع</string>
     <string name="salon_branch_main">الرئيسي</string>
     <string name="salon_review_branch">فرع %1$s</string>
+    <string name="salon_service_bride_only">للعروس فقط</string>
+    <string name="staff_service_bride_only">%1$s · للعروس فقط</string>
 </resources>

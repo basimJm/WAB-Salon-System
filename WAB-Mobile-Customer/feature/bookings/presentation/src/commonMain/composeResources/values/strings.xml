@@ -89,4 +89,6 @@
     <string name="rating_done_button">Back to booking</string>
     <string name="rating_salon_unknown">the salon</string>
     <string name="bookings_branch_label">Branch: %1$s</string>
+    <string name="details_paid_at_salon">Paid at the salon</string>
+    <string name="card_rejection_reason">Reason: %1$s</string>
 </resources>
