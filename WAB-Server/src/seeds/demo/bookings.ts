@@ -28,6 +28,7 @@ import {
 import type { ActorType, BookingStatus, Language } from '../../constants/enums';
 import { EVENT_BY_BOOKING_STATUS } from '../../constants/notifications';
 import { PAYMENT_CURRENCY } from '../../constants/payments';
+import type { LocalizedName } from '../../constants/referenceData';
 import { FAKE_SEEDED_REFUND_PREFIX, FAKE_SEEDED_SESSION_PREFIX } from '../../constants/providers';
 import type { PAYMENT_OPTIONS } from '../../constants/salon';
 import { MINUTES_PER_HOUR, MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from '../../constants/time';
@@ -130,7 +131,8 @@ export const buildBookings = (
       id: Types.ObjectId;
       reference: string;
       salonId: Types.ObjectId;
-      salonName: string;
+      /** The place as notifications name it (`DemoSalon.title`). */
+      salonName: LocalizedName;
       customer: string;
       start: Date;
     };
@@ -138,7 +140,7 @@ export const buildBookings = (
   }): void => {
     const params = (language: Language): Record<string, string> => ({
       reference: input.booking.reference,
-      salon: input.booking.salonName,
+      salon: input.booking.salonName[language],
       customer: input.booking.customer,
       when: formatDateTime(input.booking.start, ctx.timeZone, language),
     });
@@ -574,7 +576,7 @@ export const buildBookings = (
       id,
       reference,
       salonId: salon.id,
-      salonName: salon.spec.name,
+      salonName: salon.title,
       customer: customerName.get(customer.id.toString())?.firstName ?? '',
       start: appointmentStart,
     };
