@@ -209,7 +209,7 @@ describe('createProviders', () => {
   });
 
   it('refuses a fake payment gateway in production and builds the disabled one anywhere', () => {
-    const real = { ...ALL_FAKE, otp: 'whatsapp', storage: 'real', notifier: 'real' } as const;
+    const real = { ...ALL_FAKE, otp: 'arqam', storage: 'real', notifier: 'real' } as const;
     const failure = (() => {
       try {
         createProviders(real, true);
@@ -225,7 +225,7 @@ describe('createProviders', () => {
   });
 
   it.each([
-    ['otp', 'whatsapp'],
+    ['otp', 'arqam'],
     ['storage', 'real'],
     ['notifier', 'real'],
   ] as const)('fails loudly when %s is %s without its runtime dependencies', (name, mode) => {

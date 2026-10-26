@@ -1,5 +1,3 @@
-import type { Language } from './i18n';
-
 /** OTP platform limits and routes (SRV-027, BUSINESS_DOMAIN.md §3.1, §3.1a and §10). */
 export const OTP_KEY_PREFIX = {
   requests: 'otp:req',
@@ -45,13 +43,7 @@ export const OTP_WRONG_CODE_DETAIL = {
 /** Upper bound on the `otpToken` the apps send back (a signed proof of ~200 characters). */
 export const OTP_TOKEN_MAX_LENGTH = 2048;
 
-/** App language → language of the approved WhatsApp authentication template. */
-export const WHATSAPP_TEMPLATE_LANGUAGES: Readonly<Record<Language, string>> = {
-  ar: 'ar',
-  en: 'en_US',
-};
-
-/** The one OTP channel (BUSINESS_DOMAIN.md §10 `otp.channel`); there is no SMS fallback. */
+/** The one OTP medium (BUSINESS_DOMAIN.md §10 `otp.channel`; delivered by ARQAM); no SMS fallback. */
 export const OTP_CHANNELS = ['WHATSAPP'] as const;
 export type OtpChannelName = (typeof OTP_CHANNELS)[number];
 
