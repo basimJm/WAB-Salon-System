@@ -402,7 +402,9 @@ Input: salonId, **branchId**, date D, services per person (services of that bran
 - `person.subtotal` = Σ price snapshots; `total` = Σ subtotals.
 - `deposit` = round_half_up(total × depositPercentage / 100) to 1 fils (assumption: rounding to whole fils).
 - `dueOnline` = DEPOSIT → deposit; FULL_ONLINE → total; PAY_ON_ARRIVAL → 0.
-- `remaining` = total − paidOnline (+ refunded adjustments shown separately).
+- `remaining` = total − paidOnline (+ refunded adjustments shown separately). Stored once at creation and never rewritten (it is the at-salon part; statistics count it as collected when COMPLETED).
+- Booking views (API, SRV-170): `money.remaining` = what is **still to pay at the salon now** = stored `remaining` while PENDING/APPROVED, **0 once the booking is final** (COMPLETED = settled at the salon, `paymentStatus` PAID per §5.7; REJECTED/CANCELLED_*/AUTO_CANCELLED/NO_SHOW are not collected at the salon). Booking details add `money.paidAtSalon` = stored `remaining` when COMPLETED, else 0.
+- Customer booking views show each person's assigned staff as `{id, firstName, photoUrl}` only (no last name or contact data), and the list row carries `rejection` (S14). Customer salon services carry `brideOnly`; booking a bride-only service for a non-bride person is refused with `BRIDE_ONLY_SERVICE` (§5.4 step 3).
 
 ### 5.6 Booking creation (atomic)
 1. `POST draft` → validate gender, companions ≤ max, services active and belong to salon, bride rules, availability per person; price snapshot; policy snapshot; create **Redis holds** `hold:{staffId}:{start}` with TTL `booking.paymentHoldMinutes` (10) → `bookingDrafts`.
@@ -581,7 +583,7 @@ otp.length = 6                              otp.resendAfterSec = 60
 otp.maxRequests = 5   otp.requestWindowSec = 300   otp.maxWrong = 5   otp.blockSec = 900
 otp.codeTtlSec = 300   otp.proofTtlSec = 600   otp.channel = WHATSAPP
 auth.accessTokenTtlSec = 900                auth.refreshTokenTtlDays = 90
-admin.maxFailedLogins = 5   admin.lockSec = 900   admin.sessionIdleSec = 1800
+admin.maxFailedLogins = 5   admin.lockSec = 900   admin.sessionIdleSec = 172800 (2 days, owner 2026-10-26)
 account.deletionGraceDays = 30
 subscription.trialDays = 90                 subscription.warnDaysBefore = 7
 refund.maxRetries = 5                       refund.delayAlertHours = 48

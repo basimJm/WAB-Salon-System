@@ -187,3 +187,15 @@
 - Tests: `tasks.py check` (only the known CUS-047 note); gates above
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — merges + backlog only in this branch.
+
+### T-140 — Agents' work merged; masters synced through main (2026-10-26)
+- Project: repo root
+- Branch: `chore/sync-main-into-admin-9`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Merged: SRV-160 (#495), SRV-161 (#496), ADM-097 (#497), ADM-098 (#498), CUS-092 (#499), SRV-170 (#500), MER-073 + MER-074 (#501), ADM-099 (#505); statuses DONE
+  - [x] `main` merged into `admin` so `admin` → `main` merges; conflicts = generated board (regenerated) + server backlog rows (SRV-160/161/170 from main and SRV-162…168 from admin both kept)
+  - [ ] `admin`, `customer`, `merchant` → `main`, then `main` → every master
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges + backlog only, no product code written.

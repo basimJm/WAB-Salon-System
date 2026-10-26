@@ -200,6 +200,46 @@ describe('GET /customer/v1/salons/:salonId', () => {
     expect(JSON.stringify(d)).not.toContain('Secret');
   });
 
+  it('flags bride-only services on the profile and the staff sheet (SRV-170)', async () => {
+    addSalon();
+    const member = addStaff();
+    m.services.docs.push(
+      {
+        _id: serviceId,
+        salonId,
+        catalogServiceId: catalogId,
+        price: 1000,
+        durationMinutes: 10,
+        active: true,
+        mediaKeys: [],
+      },
+      {
+        _id: id(),
+        salonId,
+        catalogServiceId: catalogId,
+        price: 150000,
+        durationMinutes: 120,
+        active: true,
+        brideOnly: true,
+        mediaKeys: [],
+      },
+    );
+    const res = await get(salonId.toHexString(), { 'Accept-Language': 'en' });
+    expect(res.status).toBe(200);
+    const flags = (bodyOf(res).data.services as unknown as { price: string; brideOnly: unknown }[])
+      .map((s) => [s.price, s.brideOnly])
+      .sort();
+    // A legacy document without the field reads as false, never as missing.
+    expect(flags).toEqual([
+      ['1.000', false],
+      ['150.000', true],
+    ]);
+    const sheet = await get(`${salonId.toHexString()}/staff/${member.toHexString()}`);
+    expect(bodyOf(sheet).data['services']).toEqual([
+      expect.objectContaining({ id: serviceId.toHexString(), brideOnly: false }),
+    ]);
+  });
+
   it('counts a profile view for merchant statistics (salon.viewed)', async () => {
     addSalon();
     tracked.length = 0;
