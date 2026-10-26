@@ -547,6 +547,7 @@ Default templates: MANAGER = all grantable branch permissions (BOOKINGS_*, SALON
 | promotion | ✔ | — | — |
 
 Merchant recipients are the owner plus members **of the booking's branch** with the permission shown. Push respects `pushEnabled`; in-app notification is always stored.
+Booking notifications name the place like §5.17: **"Salon - Branch"** (branch name as booked, in the recipient's language) for every branch of a salon with more than one non-closed branch, the main branch included; the salon name alone for a single-branch salon (SRV-172).
 
 ---
 

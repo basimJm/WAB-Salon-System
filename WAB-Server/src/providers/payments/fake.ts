@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   FAKE_GATEWAY_CODES,
   FAKE_PAYMENT_CLIENT,
+  FAKE_SEEDED_SESSION_PREFIX,
   FAKE_WEBHOOK_SIGNATURE,
   PAYMENT_REFERENCE_PATTERN,
   PAYMENT_STATUSES,
@@ -159,7 +160,7 @@ export class FakePaymentProvider implements PaymentProvider {
       assertFils(request.amountFils);
       if (request.amountFils <= 0) throw new RangeError('amount must be greater than zero');
       return this.refundStore.run(request.idempotencyKey, JSON.stringify(request), () => {
-        const session = this.require(request.sessionId);
+        const session = this.sessions.get(request.sessionId) ?? this.adoptSeeded(request.sessionId);
         if (session.status !== 'SUCCEEDED') {
           throw new PaymentError({ code: ERROR_CODES.PAYMENT_NOT_VERIFIED });
         }
@@ -225,6 +226,27 @@ export class FakePaymentProvider implements PaymentProvider {
       const { kind, ...rest } = event.data;
       return Promise.resolve(kind === undefined ? rest : { ...rest, kind });
     });
+  }
+
+  /**
+   * A paid session the demo seed wrote straight into the database (never created here, and lost
+   * on restart anyway) is adopted as succeeded so it can be refunded in dev. Its amount is not
+   * known here: the server caps every refund at what is still refundable.
+   */
+  private adoptSeeded(sessionId: string): StoredSession {
+    if (!sessionId.startsWith(FAKE_SEEDED_SESSION_PREFIX)) return this.require(sessionId);
+    const outcome = OUTCOMES.success;
+    const session: StoredSession = {
+      sessionId,
+      reference: sessionId.slice(FAKE_SEEDED_SESSION_PREFIX.length),
+      amountFils: Number.MAX_SAFE_INTEGER,
+      status: outcome.status,
+      gatewayCode: outcome.code,
+      gatewayMessage: outcome.message,
+      refundedFils: 0,
+    };
+    this.sessions.set(sessionId, session);
+    return session;
   }
 
   private require(sessionId: string): StoredSession {

@@ -51,6 +51,8 @@ export const registerBranchCrudDocs = (
     tags: string[];
     who: string;
     params?: z.ZodObject;
+    /** Paging query of the list (admin); the list answer then carries `meta`. */
+    listQuery?: z.ZodObject;
     extraBody?: z.ZodObject;
   },
 ): void => {
@@ -82,8 +84,12 @@ export const registerBranchCrudDocs = (
     method: 'get',
     path: base,
     tags,
-    summary: `Branches of the salon, main first (${who})`,
-    request: { headers, ...(listParams === undefined ? {} : { params: listParams }) },
+    summary: `Branches of the salon, main first (${who})${options.listQuery === undefined ? '' : '; paged, `meta` = {page, pageSize, total}'}`,
+    request: {
+      headers,
+      ...(listParams === undefined ? {} : { params: listParams }),
+      ...(options.listQuery === undefined ? {} : { query: options.listQuery }),
+    },
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Branches', successResponseSchema(z.array(branchViewDoc))),
       ...failures,

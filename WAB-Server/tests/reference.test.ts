@@ -8,6 +8,7 @@ import {
   generateReferenceNumber,
   isReferenceNumber,
   normalizeReferenceNumber,
+  referenceSearchPrefixes,
   withUniqueReference,
 } from '../src/utils/reference';
 import { createRandom } from './helpers/random';
@@ -250,5 +251,24 @@ describe('id utils', () => {
         })(),
       ).httpStatus,
     ).toBe(400);
+  });
+});
+
+describe('referenceSearchPrefixes (SRV-171 S5)', () => {
+  it('reads full and partial codes, with or without the prefix, like normalize', () => {
+    expect(referenceSearchPrefixes('BW1JEZ')).toEqual(['WAB-BW1JEZ']);
+    expect(referenceSearchPrefixes(' wab-bw1 ')).toEqual(['WAB-BW1']);
+    expect(referenceSearchPrefixes('bwi')).toEqual(['WAB-BW1']);
+    // Leading prefix letters are the prefix: `WAB123` = `WAB-123`.
+    expect(referenceSearchPrefixes('WAB123')).toEqual(['WAB-123']);
+    expect(referenceSearchPrefixes('WAB-WAB123')).toEqual(['WAB-WAB123']);
+  });
+  it('ignores too short, too long, foreign symbols and non-text', () => {
+    expect(referenceSearchPrefixes('BW')).toEqual([]);
+    expect(referenceSearchPrefixes('WAB-')).toEqual([]);
+    expect(referenceSearchPrefixes('BW1JEZ7')).toEqual([]);
+    expect(referenceSearchPrefixes('Joury')).toEqual([]);
+    expect(referenceSearchPrefixes('.*')).toEqual([]);
+    expect(referenceSearchPrefixes(42)).toEqual([]);
   });
 });

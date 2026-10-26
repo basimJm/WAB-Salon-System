@@ -14,6 +14,7 @@ import { translate } from '../../utils/i18n';
 import { formatDateTime } from '../../utils/format/localized';
 import { formatJod } from '../../utils/money';
 import type { Logger } from '../../utils/logger';
+import { salonTitle } from '../branches/salonTitle';
 import type { BookingChangedHook } from '../bookings/bookingActions.service';
 import type { BookingCreatedHook } from '../bookings/bookingCreation.service';
 import type { CatalogRequestNotifier } from '../catalog/catalogRequests.service';
@@ -81,13 +82,20 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
 
   const bookingParams = async (booking: Entity<BookingRaw>): Promise<Params> => {
     const [salon, customer, timeZone] = await Promise.all([
-      salonName(booking.salonId),
+      salons.findById(booking.salonId),
       customers.findById(booking.customerId),
       settings.get('timezone'),
     ]);
     return {
       reference: booking.referenceNumber,
-      salon,
+      // "Salon - Branch" for every branch of a multi-branch salon, main included (§5.17), in the
+      // recipient's language, from the branch as booked (§3.5 `branchSnapshot`).
+      salon: (language: Language) =>
+        salonTitle(
+          salon?.name ?? '',
+          booking.branchSnapshot?.name[language],
+          salon?.branchCount ?? 0,
+        ),
       customer: customer?.firstName ?? '',
       when: (language: Language) => formatDateTime(booking.appointmentStart, timeZone, language),
     };

@@ -292,6 +292,14 @@ describe('GET /customer/v1/salons/:salonId', () => {
     expect((await get('nope')).status).toBe(400);
   });
 
+  it('takes an optional branchId query (SRV-172): malformed is 400, ignored without branches', async () => {
+    addSalon();
+    const bad = await get(`${salonId.toHexString()}?branchId=nope`);
+    expect(bad.status).toBe(400);
+    expect(bodyOf(bad).error.code).toBe('VALIDATION_ERROR');
+    expect((await get(`${salonId.toHexString()}?branchId=${id().toHexString()}`)).status).toBe(200);
+  });
+
   it('flags favorites for a signed-in customer; a bad token is refused', async () => {
     addSalon();
     saved.add(salonId.toHexString());
