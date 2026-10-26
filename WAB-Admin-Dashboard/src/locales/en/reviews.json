@@ -24,6 +24,7 @@
     "targets": {
       "SALON": "Salon",
       "STAFF": "Staff"
-    }
+    },
+    "previous": "Previous reviews: {{count}}"
   }
 }

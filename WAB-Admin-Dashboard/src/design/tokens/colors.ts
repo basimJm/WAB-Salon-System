@@ -3,6 +3,16 @@ export const BRAND = {
   primary: '#6D28D9',
   primaryEnd: '#A855F7',
   onPrimary: '#FFFFFF',
+  /** Counter on the active (gradient) nav item. */
+  onPrimarySoft: 'rgba(255,255,255,.22)',
+  /** Login brand panel (design 01): gradient start, rings, chip, tagline and body text on the gradient. */
+  brandDeep: '#4C1D95',
+  onBrandLine: 'rgba(255,255,255,.12)',
+  onBrandChip: 'rgba(255,255,255,.16)',
+  onBrandSoft: '#E9D5FF',
+  onBrandText: '#EDE4FC',
+  /** Rating star (design: #F59E0B in both themes). */
+  star: '#F59E0B',
 } as const;
 
 export const THEME_NAMES = ['light', 'dark'] as const;

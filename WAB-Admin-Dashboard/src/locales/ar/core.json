@@ -63,7 +63,9 @@
     },
     "breadcrumbs": "مسار التنقل",
     "expand": "توسيع {{name}}",
-    "collapse": "طيّ {{name}}"
+    "collapse": "طيّ {{name}}",
+    "collapseSidebar": "طي القائمة",
+    "expandSidebar": "توسيع القائمة"
   },
   "topbar": {
     "alerts": "التنبيهات",
@@ -86,7 +88,8 @@
       "bookings": "الحجوزات",
       "members": "الأعضاء"
     },
-    "profile": "ملفي الشخصي"
+    "profile": "ملفي الشخصي",
+    "otherLanguageShort": "EN"
   },
   "module": {
     "comingSoon": "هذا القسم قادم قريبًا",

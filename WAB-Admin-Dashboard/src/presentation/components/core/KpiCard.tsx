@@ -3,6 +3,12 @@ import { cx } from '../../utils/cx';
 import { Card } from './Card';
 import { Skeleton } from '../feedback/Skeleton';
 
+export interface KpiPart {
+  key: string;
+  label: ReactNode;
+  value: string;
+}
+
 export interface KpiCardProps {
   label: string;
   value: ReactNode;
@@ -10,12 +16,21 @@ export interface KpiCardProps {
   deltaPercent?: number;
   deltaLabel?: string;
   loading?: boolean;
+  /** Breakdown under a dashed line (design: "visitors 56 · customers 75"). */
+  parts?: readonly KpiPart[];
 }
 
-const ARROW_UP = '▲';
-const ARROW_DOWN = '▼';
+const ARROW_UP = '↑';
+const ARROW_DOWN = '↓';
 
-export function KpiCard({ label, value, deltaPercent, deltaLabel, loading = false }: KpiCardProps) {
+export function KpiCard({
+  label,
+  value,
+  deltaPercent,
+  deltaLabel,
+  loading = false,
+  parts,
+}: KpiCardProps) {
   const positive = deltaPercent !== undefined && deltaPercent >= 0;
   return (
     <Card className="wab-kpi">
@@ -25,10 +40,22 @@ export function KpiCard({ label, value, deltaPercent, deltaLabel, loading = fals
         <span
           className={cx('wab-kpi__delta', positive ? 'wab-kpi__delta--up' : 'wab-kpi__delta--down')}
         >
-          <span aria-hidden="true">{positive ? ARROW_UP : ARROW_DOWN}</span>
-          <span dir="ltr">{Math.abs(deltaPercent)}%</span>
+          <span className="wab-kpi__chip" dir="ltr">
+            <span aria-hidden="true">{positive ? ARROW_UP : ARROW_DOWN}</span>
+            <span>{Math.abs(deltaPercent)}%</span>
+          </span>
           {deltaLabel ? <span className="wab-kpi__delta-label">{deltaLabel}</span> : null}
         </span>
+      ) : null}
+      {!loading && parts && parts.length > 0 ? (
+        <ul className="wab-kpi__parts">
+          {parts.map((part) => (
+            <li key={part.key} className="wab-kpi__part">
+              <span className="wab-kpi__dot" aria-hidden="true" />
+              {part.label} <b>{part.value}</b>
+            </li>
+          ))}
+        </ul>
       ) : null}
     </Card>
   );

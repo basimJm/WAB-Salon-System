@@ -13,6 +13,10 @@
     "events": "Events",
     "byName": "Events by name",
     "event": "Event",
-    "noEvents": "No events in this range"
+    "noEvents": "No events in this range",
+    "today": "{{date}} · Amman time",
+    "todayReport": "Today's report",
+    "alerts": "Alerts ({{count}})",
+    "section": "Activity, bookings and payments"
   }
 }
