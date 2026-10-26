@@ -135,3 +135,13 @@
 - Tests: docs only (`python3 scripts/tasks.py next payments` reports no ready task)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — status change only.
+
+### DOCS-HYPERPAY — Full HyperPay integration flow (owner request 2026-10-26)
+- Branch: `docs/hyperpay-integration-flow`
+- Status: DONE
+- Acceptance criteria:
+  - [x] `docs/HYPERPAY_INTEGRATION_FLOW.md`: what exists (reuse), accounts/env/credentials, integration per surface, booking payment (Model A debit vs Model B pre-auth + capture), webhooks (all types, AES-GCM, 30 s, retries), status model (result-code groups → WAB states, every lifecycle state + detection), refunds/reversals/captures, tokenization, subscriptions + placements, settlement/fees/chargebacks, payouts (Phase 1 manual, HyperSplit Phase 2), mobile SDK (KMP), questions for HyperPay, implementation plan, sources
+  - [x] Facts marked ✅ (HyperPay docs, linked) or ⚠️ (to confirm); owner decisions marked [DECIDE]
+- Tests: docs only
+- Loops: 1/1 — re-checked every section against the four research summaries (server-to-server, mobile SDK, recurring/refunds/settlement, current code)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — docs only; no code. Key open item: JOD 3-decimal amounts vs HyperPay 2-decimal format.

@@ -20,7 +20,13 @@ export const createOtpController = (
 } => ({
   async request(req: Request, res: Response): Promise<void> {
     const { phone, purpose } = bodyOf(req);
-    const answer = await service.request({ phone, purpose, language: req.language });
+    // `req.ip` honours TRUST_PROXY_HOPS (the client behind Render / the load balancer).
+    const answer = await service.request({
+      phone,
+      purpose,
+      language: req.language,
+      ...(req.ip === undefined ? {} : { ip: req.ip }),
+    });
     sendSuccess(req, res, {
       data: {
         allowed: answer.allowed,

@@ -319,6 +319,8 @@ const buildServices = (
     logger,
     config,
   });
+  // Startup report only: ARQAM being down never blocks startup or `/ready` (OTP answers 503 instead).
+  void providers.reportOtpAccount();
   const phoneServices = {
     countries: new CountriesRepository(),
     otp: providers.otp,

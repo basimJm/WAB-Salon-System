@@ -15,7 +15,7 @@ import {
   DEFAULT_OTP_PROVIDER_MODE,
   DEFAULT_PAYMENT_PROVIDER_MODE,
   DEFAULT_PROVIDER_MODE,
-  WHATSAPP_OTP_MODE,
+  ARQAM_OTP_MODE,
   type OtpProviderMode,
   type PaymentProviderMode,
   type ProviderMode,
@@ -38,24 +38,28 @@ export interface NotifierSettings {
   readonly from: { readonly address: string; readonly name: string };
 }
 
-/** WhatsApp Cloud API account of the `whatsapp` OTP provider (BUSINESS_DOMAIN §3.1a). */
-export interface WhatsAppSettings {
-  readonly phoneNumberId: string;
-  readonly accessToken: string;
-  readonly templateName: string;
-  readonly apiVersion?: string;
+/** ARQAM OTP project of the `arqam` OTP provider (BUSINESS_DOMAIN §3.1a). */
+export interface ArqamSettings {
+  /** Secret: never logged. */
+  readonly apiKey: string;
+  readonly baseUrl?: string;
+  /** Authentication template per app language. */
+  readonly templates: { readonly ar: string; readonly en: string };
+  readonly senderId?: string;
+  /** Pass the end user's IP to ARQAM (projects with IP rate limiting). */
+  readonly sendIp: boolean;
 }
 
 /**
- * Phone OTP secrets and channel (wab-otp). `whatsapp` is present only for OTP_PROVIDER=whatsapp,
- * which also requires both secrets; the fake provider makes per-process secrets when they are unset.
+ * Phone OTP secrets and channel (wab-otp). `arqam` is present only for OTP_PROVIDER=arqam, which
+ * also requires both secrets; the fake provider makes per-process secrets when they are unset.
  */
 export interface OtpSettings {
   readonly codeSecret?: string;
   readonly proofSecret?: string;
   /** Development only: every code is this value (refused in production). */
   readonly fixedCode?: string;
-  readonly whatsapp?: WhatsAppSettings;
+  readonly arqam?: ArqamSettings;
 }
 
 export interface StorageSettings {
@@ -105,11 +109,11 @@ export interface AppConfig {
   readonly notifier?: NotifierSettings;
   /** S3 + CDN settings of the real storage; present only when the storage is `real`. */
   readonly storage?: StorageSettings;
-  /** Phone OTP secrets and WhatsApp account. */
+  /** Phone OTP secrets and ARQAM project. */
   readonly otp: OtpSettings;
   /** `fake` = in-repo stand-in (dev/test only), `real` = the production integration. */
   readonly providers: {
-    /** `whatsapp` in production; `fake` records codes instead of sending them. */
+    /** `arqam` in production; `fake` records codes instead of sending them. */
     readonly otp: OtpProviderMode;
     readonly storage: ProviderMode;
     readonly notifier: ProviderMode;
@@ -200,19 +204,20 @@ const buildNotifierSettings = (values: RawEnv): NotifierSettings | undefined => 
   });
 };
 
-const buildWhatsAppSettings = (values: RawEnv): WhatsAppSettings | undefined => {
-  if (values[ENV_KEYS.otpProvider] !== WHATSAPP_OTP_MODE) return undefined;
-  const phoneNumberId = values[ENV_KEYS.whatsappPhoneNumberId];
-  const accessToken = values[ENV_KEYS.whatsappAccessToken];
-  const templateName = values[ENV_KEYS.whatsappTemplateName];
-  if (phoneNumberId === undefined || accessToken === undefined || templateName === undefined)
-    return undefined;
-  const apiVersion = values[ENV_KEYS.whatsappApiVersion];
+const buildArqamSettings = (values: RawEnv): ArqamSettings | undefined => {
+  if (values[ENV_KEYS.otpProvider] !== ARQAM_OTP_MODE) return undefined;
+  const apiKey = values[ENV_KEYS.arqamApiKey];
+  const ar = values[ENV_KEYS.arqamTemplateAr];
+  const en = values[ENV_KEYS.arqamTemplateEn];
+  if (apiKey === undefined || ar === undefined || en === undefined) return undefined;
+  const baseUrl = values[ENV_KEYS.arqamBaseUrl];
+  const senderId = values[ENV_KEYS.arqamSenderId];
   return Object.freeze({
-    phoneNumberId,
-    accessToken,
-    templateName,
-    ...(apiVersion === undefined ? {} : { apiVersion }),
+    apiKey: apiKey.trim(),
+    templates: Object.freeze({ ar, en }),
+    sendIp: values[ENV_KEYS.arqamSendIp],
+    ...(baseUrl === undefined ? {} : { baseUrl }),
+    ...(senderId === undefined ? {} : { senderId }),
   });
 };
 
@@ -220,12 +225,12 @@ const buildOtpSettings = (values: RawEnv): OtpSettings => {
   const codeSecret = values[ENV_KEYS.otpCodeSecret];
   const proofSecret = values[ENV_KEYS.otpProofSecret];
   const fixedCode = values[ENV_KEYS.otpFixedCode];
-  const whatsapp = buildWhatsAppSettings(values);
+  const arqam = buildArqamSettings(values);
   return Object.freeze({
     ...(codeSecret === undefined ? {} : { codeSecret }),
     ...(proofSecret === undefined ? {} : { proofSecret }),
     ...(fixedCode === undefined ? {} : { fixedCode }),
-    ...(whatsapp === undefined ? {} : { whatsapp }),
+    ...(arqam === undefined ? {} : { arqam }),
   });
 };
 

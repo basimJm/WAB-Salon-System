@@ -119,11 +119,13 @@ export interface OtpMessage {
   readonly language: string;
   readonly purpose: OtpPurpose;
   readonly ttlSec: number;
+  /** End user's IP, when the consumer passes one (vendors with per-IP limits use it). */
+  readonly ip?: string;
 }
 
-/** A way to deliver a code (WhatsApp, SMS…). Failures throw `OtpError`. */
+/** A way to deliver a code (ARQAM over WhatsApp, SMS…). Failures throw `OtpError`. */
 export interface OtpChannel {
-  /** Short channel name for logs and events (`whatsapp`, `sms`, `fake`). */
+  /** Short channel name for logs and events (`arqam`, `sms`, `fake`). */
   readonly name: string;
   /** A fake channel must say so: production refuses it. */
   readonly isFake?: boolean;

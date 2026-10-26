@@ -16,13 +16,14 @@ export const PAYMENTS_DISABLED_MESSAGE = 'payments are paused: no payment gatewa
 export const DEFAULT_PAYMENT_PROVIDER_MODE: PaymentProviderMode = 'fake';
 
 /**
- * Phone OTP (BUSINESS_DOMAIN §3.1a): `whatsapp` = server codes over the WhatsApp Cloud API (the only
- * production value); `fake` = codes recorded instead of sent (dev/test, optional fixed code).
+ * Phone OTP (BUSINESS_DOMAIN §3.1a): `arqam` = server codes delivered over WhatsApp by ARQAM OTP (the
+ * only production value); `fake` = codes recorded instead of sent (dev/test, optional fixed code).
+ * The former `whatsapp` (direct Meta Cloud API) and `real` values are refused at startup.
  */
-export const OTP_PROVIDER_MODES = ['fake', 'whatsapp'] as const;
+export const OTP_PROVIDER_MODES = ['fake', 'arqam'] as const;
 export type OtpProviderMode = (typeof OTP_PROVIDER_MODES)[number];
 export const DEFAULT_OTP_PROVIDER_MODE: OtpProviderMode = 'fake';
-export const WHATSAPP_OTP_MODE: OtpProviderMode = 'whatsapp';
+export const ARQAM_OTP_MODE: OtpProviderMode = 'arqam';
 
 /** Why a purpose is verified (BUSINESS_DOMAIN.md §4.2, wab-otp BRD §4.1). */
 export const OTP_PURPOSES = [

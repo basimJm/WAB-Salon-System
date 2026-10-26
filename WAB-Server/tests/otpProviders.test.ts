@@ -1,34 +1,36 @@
-import type { FetchLike, RedisClientLike } from '@wab/otp';
+import { FakeOtpChannel, MemoryCodeStore, type FetchLike, type RedisClientLike } from '@wab/otp';
 import type { AppConfig, OtpSettings } from '../src/config';
 import { ERROR_CODES } from '../src/constants/errorCodes';
 import { createPhoneVerifier } from '../src/domain/auth/phoneVerifier';
 import type { OtpGate } from '../src/domain/otp/otpGate.service';
 import { createProviders, ProviderUnavailableError } from '../src/providers';
 import {
-  createWhatsAppOtpProvider,
+  ArqamOtpConfigError,
+  createArqamOtpProvider,
+  createSdkOtp,
   FakeOtpProvider,
   mapOtpSdkError,
+  reportArqamAccount,
   toProofResult,
-  WhatsAppOtpConfigError,
 } from '../src/providers/otp';
 import { BusinessRuleError, ExternalServiceError, RateLimitError } from '../src/utils/errors';
 import type { Logger } from '../src/utils/logger';
 import { normalizeError } from '../src/utils/errors/normalize';
 
-/** SRV-153: the OTP providers (fake + WhatsApp over `@wab/otp`) and `otpToken` checks. */
+/** SRV-153 / SRV-158: the OTP providers (fake + ARQAM over `@wab/otp`) and `otpToken` checks. */
 const PHONE = '+962791234567';
 const OTHER = '+962781234567';
 const RULES = { codeLength: 6, codeTtlSec: 300, proofTtlSec: 600 } as const;
-const ACCESS_TOKEN = 'not-a-real-access-token-value';
-const WHATSAPP_ACCOUNT = {
-  phoneNumberId: '106540352242922',
-  accessToken: ACCESS_TOKEN,
-  templateName: 'wab_login_code',
+const API_KEY = 'not-a-real-arqam-key-value';
+const ARQAM_PROJECT = {
+  apiKey: API_KEY,
+  templates: { ar: 'wab_otp_ar', en: 'wab_otp_en' },
+  sendIp: false,
 };
-const WHATSAPP: OtpSettings = {
+const ARQAM: OtpSettings = {
   codeSecret: 'c'.repeat(40),
   proofSecret: 'f'.repeat(40),
-  whatsapp: WHATSAPP_ACCOUNT,
+  arqam: ARQAM_PROJECT,
 };
 
 /** Just enough of ioredis for `RedisCodeStore` (its two Lua scripts: SET PX and SET PX NX). */
@@ -52,7 +54,7 @@ class MemoryRedis implements RedisClientLike {
   }
 }
 
-/** Records every log call so tests can prove codes, tokens and full phones never reach a log. */
+/** Records every log call so tests can prove codes, keys and full phones never reach a log. */
 const capturingLogger = (): { logger: Logger; lines: () => string } => {
   const calls: unknown[] = [];
   const record = (...args: unknown[]): void => {
@@ -64,142 +66,232 @@ const capturingLogger = (): { logger: Logger; lines: () => string } => {
 
 interface Sent {
   readonly url: string;
+  readonly method: string;
   readonly body: Record<string, unknown>;
   readonly headers: Readonly<Record<string, string>>;
 }
-const metaFetch = (status: number, answer: unknown): { fetch: FetchLike; sent: Sent[] } => {
+/** A stubbed ARQAM API: no network, one scripted answer for every call. */
+const arqamFetch = (status: number, answer: unknown): { fetch: FetchLike; sent: Sent[] } => {
   const sent: Sent[] = [];
   const fetch: FetchLike = (url, init) => {
     sent.push({
       url,
-      body: JSON.parse(init.body) as Record<string, unknown>,
+      method: init.method,
+      body: init.body === undefined ? {} : (JSON.parse(init.body) as Record<string, unknown>),
       headers: init.headers,
     });
     return Promise.resolve({ status, text: () => Promise.resolve(JSON.stringify(answer)) });
   };
   return { fetch, sent };
 };
-const ACCEPTED = { messages: [{ id: 'wamid.HBgLOTYyNzkxMjM0NTY3' }] };
+const ACCEPTED = { success: true, messageId: '7b0c0b8e-msg', status: 'sent', cost: 25 };
+const refusal = (errorCode: string): unknown => ({
+  success: false,
+  errorCode,
+  errorMessage: 'arqam says no',
+});
 
-describe('WhatsApp OTP provider', () => {
+type ArqamProvider = ReturnType<typeof createArqamOtpProvider>;
+
+describe('ARQAM OTP provider', () => {
   const build = (
     status = 200,
     answer: unknown = ACCEPTED,
-    settings: OtpSettings = WHATSAPP,
+    settings: OtpSettings = ARQAM,
     isProduction = false,
-  ): ReturnType<typeof metaFetch> & { otp: ReturnType<typeof createWhatsAppOtpProvider> } & {
+  ): ReturnType<typeof arqamFetch> & {
+    otp: ArqamProvider;
     log: () => string;
     redis: MemoryRedis;
   } => {
     const { logger, lines } = capturingLogger();
-    const meta = metaFetch(status, answer);
+    const stub = arqamFetch(status, answer);
     const redis = new MemoryRedis();
-    const otp = createWhatsAppOtpProvider({
+    const otp = createArqamOtpProvider({
       settings,
       redis,
       logger,
       isProduction,
-      fetch: meta.fetch,
+      fetch: stub.fetch,
     });
-    return { ...meta, otp, log: lines, redis };
+    return { ...stub, otp, log: lines, redis };
   };
+  const send = (otp: ArqamProvider, language: 'ar' | 'en' = 'ar', ip?: string): Promise<unknown> =>
+    otp
+      .sendCode(
+        { phone: PHONE, purpose: 'LOGIN', language, ...(ip === undefined ? {} : { ip }) },
+        RULES,
+      )
+      .catch((error: unknown) => error);
 
-  it('sends the authentication template in the request language and stores only the HMAC', async () => {
+  it('hands our code to ARQAM with the English template and stores only the HMAC', async () => {
     const { otp, sent, redis, log } = build();
     await expect(
       otp.sendCode({ phone: PHONE, purpose: 'LOGIN', language: 'en' }, RULES),
     ).resolves.toEqual({ expiresInSeconds: 300 });
     expect(sent).toHaveLength(1);
-    expect(sent[0]?.url).toBe('https://graph.facebook.com/v26.0/106540352242922/messages');
-    expect(sent[0]?.headers['authorization']).toBe(`Bearer ${ACCESS_TOKEN}`);
-    const template = sent[0]?.body['template'] as {
-      name: string;
-      language: { code: string };
-      components: { parameters: { text: string }[] }[];
-    };
-    expect(sent[0]?.body['to']).toBe('962791234567');
-    expect(template.name).toBe('wab_login_code');
-    expect(template.language.code).toBe('en_US');
-    const code = template.components[0]?.parameters[0]?.text ?? '';
+    expect(sent[0]?.url).toBe('https://otp.arqam.tech/api/sms/otp');
+    expect(sent[0]?.method).toBe('POST');
+    expect(sent[0]?.headers['x-api-key']).toBe(API_KEY);
+    expect(sent[0]?.headers['idempotency-key']).toMatch(/^[0-9a-f-]{36}$/);
+    expect(sent[0]?.body).toMatchObject({ phoneNumber: PHONE, templateName: 'wab_otp_en' });
+    expect(sent[0]?.body).not.toHaveProperty('ipAddress');
+    expect(sent[0]?.body).not.toHaveProperty('senderId');
+    const code = String(sent[0]?.body['otpCode']);
     expect(code).toMatch(/^\d{6}$/);
-    const stored = redis.data.get(`otp:code:LOGIN:${PHONE}`) ?? '';
-    expect(stored).not.toContain(code);
-    // The right code yields a token; nothing secret is logged.
+    expect(redis.data.get(`otp:code:LOGIN:${PHONE}`) ?? '').not.toContain(code);
     const verified = await otp.verifyCode({ phone: PHONE, purpose: 'LOGIN', code }, RULES);
     expect(verified.outcome).toBe('VERIFIED');
     const token = verified.outcome === 'VERIFIED' ? verified.otpToken : '';
     expect(log()).not.toContain(code);
     expect(log()).not.toContain(token);
-    expect(log()).not.toContain(ACCESS_TOKEN);
+    expect(log()).not.toContain(API_KEY);
     expect(log()).not.toContain(PHONE);
   });
 
-  it('uses Arabic for ar and the pinned API version', async () => {
+  it('uses the Arabic template for ar, the sender id and a custom base URL', async () => {
     const { otp, sent } = build(200, ACCEPTED, {
-      ...WHATSAPP,
-      whatsapp: { ...WHATSAPP_ACCOUNT, apiVersion: 'v25.0' },
+      ...ARQAM,
+      arqam: { ...ARQAM_PROJECT, senderId: 'wab_sender', baseUrl: 'http://127.0.0.1:4010/api' },
     });
-    await otp.sendCode({ phone: PHONE, purpose: 'REGISTER', language: 'ar' }, RULES);
-    expect(sent[0]?.url).toContain('/v25.0/');
-    expect((sent[0]?.body['template'] as { language: { code: string } }).language.code).toBe('ar');
+    await send(otp, 'ar');
+    expect(sent[0]?.url).toBe('http://127.0.0.1:4010/api/sms/otp');
+    expect(sent[0]?.body).toMatchObject({ templateName: 'wab_otp_ar', senderId: 'wab_sender' });
   });
 
-  it('maps "not on WhatsApp" (Meta 131026) to 422 OTP_DELIVERY_FAILED and stores no code', async () => {
-    const { otp, redis, log } = build(400, {
-      error: { code: 131026, message: 'Message undeliverable', fbtrace_id: 'trace-1' },
-    });
-    const failure = await otp
-      .sendCode({ phone: PHONE, purpose: 'LOGIN', language: 'ar' }, RULES)
-      .catch((error: unknown) => error);
+  it('passes the client IP only when ARQAM_SEND_IP is on', async () => {
+    const off = build();
+    await send(off.otp, 'ar', '::ffff:203.0.113.7');
+    expect(off.sent[0]?.body).not.toHaveProperty('ipAddress');
+    const on = build(200, ACCEPTED, { ...ARQAM, arqam: { ...ARQAM_PROJECT, sendIp: true } });
+    await send(on.otp, 'ar', '::ffff:203.0.113.7');
+    expect(on.sent[0]?.body['ipAddress']).toBe('203.0.113.7');
+    await send(on.otp, 'ar');
+    expect(on.sent[1]?.body).not.toHaveProperty('ipAddress');
+  });
+
+  it.each([
+    [400, 'INVALID_PHONE'],
+    [502, 'PROVIDER_ERROR'],
+  ])('maps %i %s to 422 OTP_DELIVERY_FAILED and stores no code', async (status, errorCode) => {
+    const { otp, redis, log, sent } = build(status, refusal(errorCode));
+    const failure = await send(otp);
     expect(failure).toBeInstanceOf(BusinessRuleError);
     expect(normalizeError(failure)).toMatchObject({
       code: ERROR_CODES.OTP_DELIVERY_FAILED,
       httpStatus: 422,
     });
+    expect(sent).toHaveLength(1);
     expect(redis.data.size).toBe(0);
-    expect(log()).toContain('trace-1');
+    expect(log()).toContain(errorCode);
     expect(log()).not.toContain(PHONE);
   });
 
-  it('maps a rejected access token (401) to a 503 without vendor text', async () => {
-    const { otp, log } = build(401, { error: { code: 190, message: 'Invalid OAuth token' } });
-    const failure = await otp
-      .sendCode({ phone: PHONE, purpose: 'LOGIN', language: 'ar' }, RULES)
-      .catch((error: unknown) => error);
+  it.each([
+    [401, 'UNAUTHORIZED', 'OTP_AUTH_FAILED'],
+    [402, 'INSUFFICIENT_CREDITS', 'OTP_PROVIDER_UNAVAILABLE'],
+    [403, 'SENDER_NOT_AVAILABLE', 'OTP_PROVIDER_UNAVAILABLE'],
+    [400, 'SENDER_REQUIRED', 'OTP_CONFIG_INVALID'],
+    [400, 'UNKNOWN_AUTH_TEMPLATE', 'OTP_CONFIG_INVALID'],
+    [400, 'INVALID_REQUEST', 'OTP_CONFIG_INVALID'],
+    [429, 'RATE_LIMIT_PHONE', 'OTP_RATE_LIMITED'],
+    [429, 'RATE_LIMIT_IP', 'OTP_RATE_LIMITED'],
+  ])('maps %i %s to a 503 logged as an error (%s)', async (status, errorCode, sdk) => {
+    const { otp, log } = build(status, refusal(errorCode));
+    const failure = await send(otp);
     expect(failure).toBeInstanceOf(ExternalServiceError);
     expect(normalizeError(failure).httpStatus).toBe(503);
-    expect(log()).toContain('OTP_AUTH_FAILED');
-    expect(log()).not.toContain(ACCESS_TOKEN);
+    expect(log()).toContain(sdk);
+    expect(log()).toContain('otp provider failed');
+    expect(log()).not.toContain(API_KEY);
+    expect(log()).not.toContain('arqam says no');
   });
 
-  it('refuses to start without its account or secrets', () => {
-    expect(() => build(200, ACCEPTED, { codeSecret: 'c'.repeat(40) })).toThrow(
-      WhatsAppOtpConfigError,
-    );
+  it('refuses to start without its project or secrets', () => {
+    expect(() => build(200, ACCEPTED, { codeSecret: 'c'.repeat(40) })).toThrow(ArqamOtpConfigError);
     expect(() =>
-      build(200, ACCEPTED, { ...WHATSAPP, proofSecret: undefined } as unknown as OtpSettings),
-    ).toThrow(WhatsAppOtpConfigError);
+      build(200, ACCEPTED, { ...ARQAM, proofSecret: undefined } as unknown as OtpSettings),
+    ).toThrow(ArqamOtpConfigError);
   });
 
-  it('refuses a fixed code in production (503 at the first send)', async () => {
-    const { otp, sent } = build(200, ACCEPTED, { ...WHATSAPP, fixedCode: '123456' }, true);
-    const failure = await otp
-      .sendCode({ phone: PHONE, purpose: 'LOGIN', language: 'ar' }, RULES)
-      .catch((error: unknown) => error);
-    expect(normalizeError(failure).httpStatus).toBe(503);
+  it('refuses http in production at startup and a fixed code at the first send', async () => {
+    const http = { ...ARQAM, arqam: { ...ARQAM_PROJECT, baseUrl: 'http://arqam.test' } };
+    expect(() => build(200, ACCEPTED, http, true)).toThrow('https');
+    const { otp, sent } = build(200, ACCEPTED, { ...ARQAM, fixedCode: '123456' }, true);
+    expect(normalizeError(await send(otp)).httpStatus).toBe(503);
     expect(sent).toHaveLength(0);
   });
 
-  it('rebuilds the code flow when the settings change', async () => {
+  it('rebuilds the code flow when the settings change; a code ARQAM cannot carry is a 503', async () => {
     const { otp, sent } = build();
-    await otp.sendCode(
-      { phone: PHONE, purpose: 'LOGIN', language: 'ar' },
-      { ...RULES, codeLength: 4 },
-    );
-    const template = sent[0]?.body['template'] as {
-      components: { parameters: { text: string }[] }[];
+    const input = { phone: PHONE, purpose: 'LOGIN', language: 'ar' } as const;
+    await otp.sendCode(input, { ...RULES, codeLength: 4 });
+    expect(String(sent[0]?.body['otpCode'])).toMatch(/^\d{4}$/);
+    const tooLong = await otp
+      .sendCode(input, { ...RULES, codeLength: 8 })
+      .catch((error: unknown) => error);
+    expect(normalizeError(tooLong).httpStatus).toBe(503);
+    expect(sent).toHaveLength(1);
+  });
+
+  it('reads the ARQAM account (GET /sms/account)', async () => {
+    const { otp, sent } = build(200, { mode: 'test', balance: 300 });
+    await expect(otp.account()).resolves.toMatchObject({ mode: 'TEST', balance: 300 });
+    expect(sent[0]).toMatchObject({
+      url: 'https://otp.arqam.tech/api/sms/account',
+      method: 'GET',
+    });
+  });
+});
+
+describe('reportArqamAccount (startup, never blocking)', () => {
+  const account = (answer: Promise<unknown>): Parameters<typeof reportArqamAccount>[0] => ({
+    account: () => answer as never,
+  });
+
+  it('logs the mode and balance', async () => {
+    const { logger, lines } = capturingLogger();
+    await reportArqamAccount(account(Promise.resolve({ mode: 'LIVE', balance: 10 })), true, logger);
+    expect(lines()).toContain('arqam otp account');
+    expect(lines()).toContain('LIVE');
+  });
+
+  it('flags a TEST key with NODE_ENV=production as an error, not in development', async () => {
+    const prod = capturingLogger();
+    await reportArqamAccount(account(Promise.resolve({ mode: 'TEST' })), true, prod.logger);
+    expect(prod.lines()).toContain('TEST key with NODE_ENV=production');
+    const dev = capturingLogger();
+    await reportArqamAccount(account(Promise.resolve({ mode: 'TEST' })), false, dev.logger);
+    expect(dev.lines()).not.toContain('TEST key with NODE_ENV=production');
+  });
+
+  it('logs a failed check without throwing', async () => {
+    const { logger, lines } = capturingLogger();
+    const failing = Object.assign(new Error('x'), { code: 'OTP_AUTH_FAILED' });
+    await expect(
+      reportArqamAccount(account(Promise.reject(failing)), true, logger),
+    ).resolves.toBeUndefined();
+    expect(lines()).toContain('OTP_AUTH_FAILED');
+    await reportArqamAccount(account(Promise.reject(new Error('plain'))), true, logger);
+    expect(lines()).toContain('unknown');
+  });
+});
+
+describe('createSdkOtp IP forwarding', () => {
+  it('drops the IP unless forwardIp is on', async () => {
+    const channel = new FakeOtpChannel();
+    const deps = {
+      environment: 'dev' as const,
+      channel,
+      store: new MemoryCodeStore(),
+      codeSecret: 'c'.repeat(40),
+      proofSecret: 'f'.repeat(40),
     };
-    expect(template.components[0]?.parameters[0]?.text).toMatch(/^\d{4}$/);
+    const input = { phone: PHONE, purpose: 'LOGIN', language: 'ar', ip: '203.0.113.1' } as const;
+    await createSdkOtp(deps).sendCode(input, RULES);
+    expect(channel.sent[0]).not.toHaveProperty('ip');
+    await createSdkOtp({ ...deps, forwardIp: true }).sendCode(input, RULES);
+    expect(channel.sent[1]?.ip).toBe('203.0.113.1');
   });
 });
 
@@ -342,12 +434,30 @@ describe('createProviders: OTP', () => {
     expect(otp.channel.lastCode(PHONE)).toBe('135790');
   });
 
-  it('builds WhatsApp from the config and refuses the fake in production', () => {
-    const whatsapp = createProviders({ ...modes, otp: 'whatsapp' }, false, deps(WHATSAPP));
-    expect(whatsapp.otp).not.toBeInstanceOf(FakeOtpProvider);
+  it('builds ARQAM from the config and refuses the fake in production', () => {
+    const arqam = createProviders({ ...modes, otp: 'arqam' }, false, deps(ARQAM));
+    expect(arqam.otp).not.toBeInstanceOf(FakeOtpProvider);
     expect(() => createProviders(modes, true, deps({}))).toThrow(ProviderUnavailableError);
-    expect(() => createProviders({ ...modes, otp: 'whatsapp' }, false, deps({}))).toThrow(
-      WhatsAppOtpConfigError,
+    expect(() => createProviders({ ...modes, otp: 'arqam' }, false, deps({}))).toThrow(
+      ArqamOtpConfigError,
     );
+    expect(() => createProviders({ ...modes, otp: 'arqam' }, false)).toThrow(
+      ProviderUnavailableError,
+    );
+  });
+
+  it('reports the OTP account only for ARQAM (the fake has nothing to report)', async () => {
+    await expect(
+      createProviders(modes, false, deps({})).reportOtpAccount(),
+    ).resolves.toBeUndefined();
+    const realFetch = globalThis.fetch;
+    const stub = arqamFetch(200, { mode: 'live', balance: 5 });
+    globalThis.fetch = stub.fetch as typeof globalThis.fetch;
+    try {
+      await createProviders({ ...modes, otp: 'arqam' }, false, deps(ARQAM)).reportOtpAccount();
+    } finally {
+      globalThis.fetch = realFetch;
+    }
+    expect(stub.sent[0]?.url).toBe('https://otp.arqam.tech/api/sms/account');
   });
 });
