@@ -62,6 +62,9 @@ const setup = async (): Promise<Rig> => {
   return { service, admins, tokens, clock, adminId: adminId.toHexString(), settings: overrides };
 };
 
+/** Admin idle timeout default (owner 2026-10-26: 2 days). */
+const IDLE_SEC = SETTING_DEFAULTS['admin.sessionIdleSec'];
+
 const after = (rig: Rig, seconds: number): void => {
   rig.clock.now = new Date(rig.clock.now.getTime() + seconds * 1000);
 };
@@ -180,10 +183,11 @@ describe('admin auth: session', () => {
     expect(JSON.stringify(rig.tokens.docs)).not.toContain(session.refreshToken);
   });
 
-  it('the refresh token lives for the idle timeout, not for days', async () => {
+  it('the refresh token lives for the idle timeout (2 days by default), not the app 90 days', async () => {
+    expect(IDLE_SEC).toBe(2 * 24 * 60 * 60);
     const rig = await setup();
     const session = await rig.service.openSession({ adminId: rig.adminId, ip: IP });
-    expect(session.refreshTokenExpiresAt.getTime()).toBe(START.getTime() + 1_800_000);
+    expect(session.refreshTokenExpiresAt.getTime()).toBe(START.getTime() + IDLE_SEC * 1000);
   });
 
   it('an unknown admin id cannot open a session', async () => {
@@ -200,9 +204,9 @@ describe('admin auth: session', () => {
     const rig = await setup();
     let { refreshToken } = await rig.service.openSession({ adminId: rig.adminId, ip: IP });
     for (let i = 0; i < 3; i += 1) {
-      after(rig, 1500);
+      after(rig, IDLE_SEC - 60);
       const next = await rig.service.refresh({ refreshToken });
-      expect(next.refreshTokenExpiresAt.getTime()).toBe(rig.clock.now.getTime() + 1_800_000);
+      expect(next.refreshTokenExpiresAt.getTime()).toBe(rig.clock.now.getTime() + IDLE_SEC * 1000);
       refreshToken = next.refreshToken;
     }
   });
@@ -210,11 +214,11 @@ describe('admin auth: session', () => {
   it('ends after the idle timeout: valid one second before, 401 at the limit', async () => {
     const rig = await setup();
     const { refreshToken } = await rig.service.openSession({ adminId: rig.adminId, ip: IP });
-    after(rig, 1800);
+    after(rig, IDLE_SEC);
     expect(await failure(rig.service.refresh({ refreshToken }))).toMatchObject({ httpStatus: 401 });
     const rig2 = await setup();
     const second = await rig2.service.openSession({ adminId: rig2.adminId, ip: IP });
-    after(rig2, 1799);
+    after(rig2, IDLE_SEC - 1);
     await expect(
       rig2.service.refresh({ refreshToken: second.refreshToken }),
     ).resolves.toBeDefined();

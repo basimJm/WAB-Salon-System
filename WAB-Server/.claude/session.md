@@ -10,11 +10,25 @@
 
 ## Current task
 
-### SRV-160 — Demo seed with multiple branches for the merchant app (owner 2026-10-26)
+### SRV-161 — Admin session timeout 2 days (owner 2026-10-26)
 
+- Branch: `feat/srv-161-admin-session-2-days`
+- Branched: from `origin/server` + `origin/main` merged (already up to date); independent of SRV-160 (both add a row after SRV-159 in the backlog: trivial merge)
+- Status: IN REVIEW (committed, not pushed; no PR — the lead ships it)
+- Acceptance criteria (BUSINESS_DOMAIN §10 `admin.sessionIdleSec`; SRV-030 admin refresh lifetime = idle timeout; operations `POST /admin/v1/auth/verify-otp|refresh` unchanged):
+  - [x] Default `admin.sessionIdleSec` = 172 800 s (2 days) in `constants/settings.ts`; `domain/settings/definitions.ts` reads that default (positive int, no upper bound server-side); BUSINESS_DOMAIN §10 updated
+  - [x] Behaviour: every refresh restarts the 2-day window (sliding); 2 days without a refresh → 401 and sign-in again; access token TTL unchanged (`auth.accessTokenTtlSec` 900 s, refreshed silently by the client)
+  - [x] Existing overrides: settings are never seeded (seeds/demo write none), so a database follows the new default unless an admin saved `admin.sessionIdleSec` in Admin → Settings; such a stored value wins and must be changed there (no migration: nothing was seeded explicitly)
+  - [x] Contract: OpenAPI names the setting, not its value → `npm run docs` no diff, no contract bump
+  - [x] Admin client follow-up named: the admin settings registry caps the field at 86 400 (`WAB-Admin-Dashboard/src/domain/settings/registry.ts`), `src/constants/session.ts` + Admin PRD §4 say 30 min — the admin agent's parallel task
+- Tests (full jest 2890 green, gate static checks green): `tests/adminAuth.test.ts` (default is 2 days; token lives the idle window; refreshes keep it alive; 401 at exactly 2 days, valid one second before; setting override still read), `tests/settings.test.ts` (default registry); gate in the Terminal panel: prettier --check, eslint, typecheck, `npm run docs` (build + generate, no diff), full jest
+- API docs: no change
+- Loops: 1/1 — re-read BUSINESS_DOMAIN §10 and SRV-030/031 (refresh lifetime = `admin.sessionIdleSec`, rotation restarts it) against `adminAuth.service.ts` and `refreshTokens.service.ts`; grepped every 1800 / 30-minute use in WAB-Server (none left besides unrelated test values)
+- Review: PASSED (SE ✔ (one constant, setting still overridable), Mobile N/A, Architect ✔ (no contract change; client follow-up named), QA ✔ (boundary at exactly 2 days + sliding refresh tested))
+- Notes: DEVIATION: Admin PRD §4 still says 30 minutes (owner decision supersedes it; the PRD belongs to the admin project, updated by the admin agent).
+### SRV-160 — Demo seed with multiple branches for the merchant app (owner 2026-10-26)
 - Branch: `feat/srv-160-demo-branches-seed`
 - Branched: from `origin/server` + `origin/main` merged (already up to date)
-- Status: IN REVIEW (committed, not pushed; no PR — the lead ships it)
 - Acceptance criteria (BUSINESS_DOMAIN §3.3a branches, §3.5 booking `branchId` + `branchSnapshot`, §5.16–§5.18 branch lifecycle/discovery/booking, §6 branch-scoped permissions, §7/§8 recipients; no operation changed):
   - [x] Two women's (Lamar 4 branches, Rose 3) and two men's salons (Al-Ostaz 3, Gentlemen's Corner 3) in Amman areas; specs appended so SRV-148 staff phones (merchant tooling 789000001 / 789010001 / 789010002) stay stable
   - [x] Each extra branch: place, hours (one day off), phone, services at its own prices, a bride-qualified manager on women's branches, employees with `BOOKINGS_VIEW_OWN` + `REVIEWS_VIEW`, a staff leave and a closure after the booked period; owner per salon (existing)
