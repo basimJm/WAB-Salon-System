@@ -13,7 +13,8 @@ enum class MemberRole(val code: String) {
 /** A working day of a staff member; null hours mean the salon's hours (BUSINESS_DOMAIN staff `workingDays`). */
 data class WorkingDay(val day: DayOfWeek?, val hours: OpeningHours?)
 
-data class StaffServiceRef(val id: String, val catalogServiceId: String, val name: String)
+/** A service the member provides; [brideOnly] = VIP, bookable only for a bride (SRV-170). */
+data class StaffServiceRef(val id: String, val catalogServiceId: String, val name: String, val brideOnly: Boolean = false)
 
 /** `GET /salons/{id}/staff/{memberId}` (PRD S07 staff sheet). */
 data class StaffMember(

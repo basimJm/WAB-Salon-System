@@ -14,11 +14,14 @@ import { ReviewReasonDialog, ReviewRowActions, type Ask } from './reviewParts';
 import { RATINGS, reviewFilters } from './reviewFilters';
 import { SalonBranchFilters } from '../shared/SalonBranchFilters';
 import { useReviewActions } from './useReviewActions';
+import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
+import { useLazyStrings } from '../hooks/useLazyStrings';
 
 const OPTIONS = { filterKeys: ['status', 'target', 'rating', 'salon', 'branch'] };
 
 /** Admin PRD A22 · Reviews: the moderation queue (oldest first), published reviews, bulk decisions, removal. */
 export default function ReviewsPage() {
+  useLazyStrings(BOOKINGS_STRINGS);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { repositories } = useContainer();

@@ -2,15 +2,27 @@
   "success": true,
   "message": "Done successfully.",
   "data": {
-    "items": [],
+    "items": [
+      {
+        "id": "829bdba837de2a81f73f4f73",
+        "customerName": "Mais",
+        "rating": 3,
+        "comment": null,
+        "createdAt": "2026-10-05T20:19:00.000Z",
+        "branch": {
+          "id": "444ece388341b640276cd4f0",
+          "name": "Al-Rabyeh"
+        }
+      }
+    ],
     "summary": {
-      "avg": 0,
-      "count": 0
+      "avg": 3,
+      "count": 1
     }
   },
   "meta": {
     "page": 1,
     "pageSize": 10,
-    "total": 0
+    "total": 1
   }
 }

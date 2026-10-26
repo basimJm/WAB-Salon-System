@@ -41,8 +41,12 @@ const ACTIONS = {
 export class RemoteBranchesRepository implements BranchesRepository {
   constructor(private readonly api: ApiClient) {}
 
+  /**
+   * Every branch at once: the list is not paginated, so `meta` is not required (the contract declares it, but the
+   * server answers without it; see docs/E2E_RESULTS.md).
+   */
   async list(salonId: string) {
-    return (await this.api.executePage(list, { params: { id: salonId } })).items;
+    return (await this.api.execute(list, { params: { id: salonId } })).data;
   }
 
   async create(salonId: string, input: BranchInput, reason: string) {

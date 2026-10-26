@@ -1,5 +1,5 @@
 import { filsToJod, isJodString, jodToFils } from '@/domain/shared/money';
-import type { BookingDetails } from './bookings';
+import type { BookingDetails, BookingStaff } from './bookings';
 
 /** Statuses a booking can still be moved or cancelled in. */
 const OPEN_STATUSES = ['PENDING', 'APPROVED'];
@@ -24,4 +24,10 @@ export const canRefund = (b: Pick<BookingDetails, 'money'>): boolean =>
 /** A positive JOD amount that is not more than what is refundable. */
 export function isRefundAmount(amount: string, max: string): boolean {
   return isJodString(amount) && jodToFils(amount) > 0 && jodToFils(amount) <= jodToFils(max);
+}
+
+/** Each staff member once, in the order the persons list them (two persons can share one stylist). */
+export function uniqueStaff(staff: readonly BookingStaff[]): readonly BookingStaff[] {
+  const seen = new Set<string>();
+  return staff.filter((s) => (seen.has(s.id) ? false : (seen.add(s.id), true)));
 }

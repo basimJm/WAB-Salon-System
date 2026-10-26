@@ -34,6 +34,7 @@ import com.fab.wab.customer.feature.booking.presentation.controller.contract.Boo
 import com.fab.wab.customer.feature.booking.presentation.resources.Res
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_error_server
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_retry
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_service_bride_only
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_services_title
 import org.jetbrains.compose.resources.stringResource
 
@@ -53,7 +54,7 @@ internal fun ServicesStep(state: UiState, onAction: (UiAction) -> Unit) {
         item(key = TITLE_KEY, contentType = TITLE_TYPE) {
             StepTitle(text = stringResource(Res.string.booking_services_title), modifier = Modifier.padding(bottom = spacing.space4))
         }
-        items(state.salon?.services.orEmpty(), key = { it.id }, contentType = { SERVICE_TYPE }) { service ->
+        items(state.offeredServices, key = { it.id }, contentType = { SERVICE_TYPE }) { service ->
             ServiceRow(service, service.id in selected, onToggle = { onAction(UiAction.OnServiceToggle(service.id)) })
         }
     }
@@ -67,6 +68,13 @@ private fun ServiceRow(service: SalonService, checked: Boolean, onToggle: () -> 
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space2)) {
             AppText(text = service.name, style = AppTheme.typography.titleSmall)
             AppText(text = durationText(service.durationMinutes), style = AppTheme.typography.bodySmall, color = colors.muted)
+            if (service.brideOnly) {
+                AppText(
+                    text = stringResource(Res.string.booking_service_bride_only),
+                    style = AppTheme.typography.labelSmall,
+                    color = colors.onDangerContainer,
+                )
+            }
         }
         AppText(
             text = stringResource(CoreRes.string.price_jod, service.price),

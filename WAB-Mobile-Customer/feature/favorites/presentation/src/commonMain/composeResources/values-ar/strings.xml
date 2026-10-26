@@ -14,5 +14,6 @@
     <string name="favorites_reviews">(%1$d)</string>
     <string name="favorites_more">المزيد</string>
     <string name="favorites_open">مفتوح · %1$s</string>
+    <string name="favorites_closed_now">مغلق الآن · %1$s</string>
     <string name="favorites_closed_today">مغلق اليوم</string>
 </resources>

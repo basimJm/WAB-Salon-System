@@ -14,5 +14,6 @@
     <string name="favorites_reviews">(%1$d)</string>
     <string name="favorites_more">more</string>
     <string name="favorites_open">Open · %1$s</string>
+    <string name="favorites_closed_now">Closed · %1$s</string>
     <string name="favorites_closed_today">Closed today</string>
 </resources>

@@ -57,6 +57,16 @@ fun selectionTotalsOf(services: List<SalonService>, selectedIds: Collection<Stri
     return SelectionTotals(selected.sumOf { jodToFils(it.price) }, selected.sumOf { it.durationMinutes })
 }
 
+/** PRD S16 step 1: bride-only (VIP) services are offered only to a person marked as bride (SRV-170). */
+fun servicesOfferedTo(services: List<SalonService>, isBride: Boolean): List<SalonService> =
+    if (isBride) services else services.filterNot { it.brideOnly }
+
+/** A person who stops being a bride keeps only the services still offered to them. */
+fun DraftPerson.withBride(isBride: Boolean, services: List<SalonService>): DraftPerson {
+    val offered = servicesOfferedTo(services, isBride).mapTo(HashSet()) { it.id }
+    return copy(isBride = isBride, serviceIds = serviceIds.filter { it in offered })
+}
+
 private const val DECIMAL_SEPARATOR = '.'
 private const val FILS_DIGITS = 3
 private const val FILS_PER_JOD = 1000L

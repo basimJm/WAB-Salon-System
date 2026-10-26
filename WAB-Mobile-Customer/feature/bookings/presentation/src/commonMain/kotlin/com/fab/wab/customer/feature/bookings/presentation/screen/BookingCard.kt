@@ -42,6 +42,7 @@ import com.fab.wab.customer.feature.bookings.presentation.resources.booking_stat
 import com.fab.wab.customer.feature.bookings.presentation.resources.booking_status_pending
 import com.fab.wab.customer.feature.bookings.presentation.resources.booking_status_rejected
 import com.fab.wab.customer.feature.bookings.presentation.resources.booking_status_unknown
+import com.fab.wab.customer.feature.bookings.presentation.resources.card_rejection_reason
 import com.fab.wab.customer.feature.bookings.presentation.resources.payment_status_deposit_paid
 import com.fab.wab.customer.feature.bookings.presentation.resources.payment_status_fully_paid
 import com.fab.wab.customer.feature.bookings.presentation.resources.payment_status_paid
@@ -103,6 +104,15 @@ fun BookingCard(booking: BookingSummary, onClick: () -> Unit, modifier: Modifier
             val (statusRes, tone) = booking.status.label()
             AppStatusBadge(text = stringResource(statusRes), tone = tone)
             AppStatusBadge(text = stringResource(booking.paymentStatus.label()), tone = StatusTone.Accent)
+        }
+        cardRejectionOf(booking)?.let { reason ->
+            AppText(
+                text = stringResource(Res.string.card_rejection_reason, reasonText(reason)),
+                style = AppTheme.typography.bodySmall.copy(fontSize = BookingsDesign.fontCaption),
+                color = colors.danger,
+                maxLines = BookingsDesign.CARD_REASON_MAX_LINES,
+                modifier = Modifier.padding(top = spacing.space8),
+            )
         }
     }
 }
