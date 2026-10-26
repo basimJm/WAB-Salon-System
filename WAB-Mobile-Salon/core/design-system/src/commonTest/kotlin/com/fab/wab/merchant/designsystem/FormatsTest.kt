@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.designsystem
 
+import com.fab.wab.merchant.designsystem.components.format.bidiIsolate
 import com.fab.wab.merchant.designsystem.components.format.filsToDecimal
 import com.fab.wab.merchant.designsystem.components.format.ltrIsolate
 import com.fab.wab.merchant.designsystem.components.format.oneDecimalText
@@ -38,5 +39,14 @@ class FormatsTest {
         assertEquals('⁦', isolated.first(), "e2e: the '+' of a customer phone moved to the end in Arabic")
         assertEquals('⁩', isolated.last())
         assertEquals("+962799000024", isolated.drop(1).dropLast(1))
+    }
+
+    @Test
+    fun composedLinePartsAreFirstStrongIsolates() {
+        // e2e: "Dana Majali · 11:30 ص – 12:15 م" became an LTR line with the Arabic times out of order.
+        val part = bidiIsolate("11:30 ص – 12:15 م")
+        assertEquals('⁨', part.first())
+        assertEquals('⁩', part.last())
+        assertEquals("", bidiIsolate("").drop(2), "an empty part stays only the two marks")
     }
 }
