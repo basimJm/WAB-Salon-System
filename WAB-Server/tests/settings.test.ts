@@ -42,7 +42,7 @@ const DOMAIN_SETTINGS: Readonly<Record<string, unknown>> = {
   'auth.refreshTokenTtlDays': 90,
   'admin.maxFailedLogins': 5,
   'admin.lockSec': 900,
-  'admin.sessionIdleSec': 1_800,
+  'admin.sessionIdleSec': 172_800,
   'account.deletionGraceDays': 30,
   'subscription.trialDays': 90,
   'subscription.warnDaysBefore': 7,

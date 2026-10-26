@@ -33,7 +33,9 @@ const summary = z.object({
     total: z.string(),
     dueOnline: z.string(),
     paidOnline: z.string(),
-    remaining: z.string(),
+    remaining: z
+      .string()
+      .describe('Still to pay at the salon now (JOD); 0 once the booking is final.'),
   }),
 });
 

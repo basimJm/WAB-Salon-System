@@ -654,6 +654,92 @@ export const DEMO_BRANCHES: readonly DemoBranchSpec[] = [
     pricePercent: 100,
     staff: 2,
   },
+  // SRV-160: two women's and two men's salons with 2–4 branches each, for the merchant app.
+  // Append only: the order fixes the branch staff phone numbers (DEMO_ACCOUNTS.md).
+  {
+    salon: 'lamar',
+    key: 'gardens',
+    name: { ar: 'الجاردنز', en: 'Gardens' },
+    place: { area: 'Gardens', lat: 31.9862, lng: 35.8689 },
+    locationText: 'Gardens, Wasfi Al-Tal Street, Al-Sharq Complex',
+    phone: '+96265921015',
+    open: '10:00',
+    close: '21:00',
+    offDays: ['FRI'],
+    pricePercent: 100,
+    staff: 3,
+  },
+  {
+    salon: 'rose',
+    key: 'rabyeh',
+    name: { ar: 'الرابية', en: 'Al-Rabyeh' },
+    place: { area: 'Al-Rabyeh', lat: 31.9785, lng: 35.8806 },
+    locationText: 'Al-Rabyeh, Abdul Rahim Al-Waked Street',
+    phone: '+96265921016',
+    open: '11:00',
+    close: '21:00',
+    offDays: ['SUN'],
+    pricePercent: 95,
+    staff: 3,
+  },
+  {
+    salon: 'rose',
+    key: 'jabal-amman',
+    name: { ar: 'جبل عمّان', en: 'Jabal Amman' },
+    place: { area: 'Jabal Amman', lat: 31.9515, lng: 35.9239 },
+    locationText: 'Jabal Amman, Rainbow Street, near the First Circle',
+    phone: '+96265921017',
+    open: '12:00',
+    close: '22:00',
+    offDays: ['FRI'],
+    pricePercent: 105,
+    staff: 3,
+  },
+  {
+    salon: 'ostaz',
+    key: 'tabarbour',
+    name: { ar: 'طبربور', en: 'Tabarbour' },
+    place: { area: 'Tabarbour', lat: 32.0077, lng: 35.937 },
+    locationText: 'Tabarbour, Al-Shaheed Street, next to the mosque',
+    phone: '+96265921018',
+    open: '10:00',
+    close: '22:00',
+    offDays: ['FRI'],
+    pricePercent: 85,
+    staff: 3,
+  },
+  {
+    salon: 'gentlemen',
+    key: 'sweifieh',
+    name: { ar: 'الصويفية', en: 'Sweifieh' },
+    place: { area: 'Sweifieh', lat: 31.9571, lng: 35.8606 },
+    locationText: 'Sweifieh, Al-Wakalat Street, Plaza Mall ground floor',
+    phone: '+96265921019',
+    open: '12:00',
+    close: '23:00',
+    offDays: ['MON'],
+    pricePercent: 150,
+    staff: 3,
+  },
+  {
+    salon: 'gentlemen',
+    key: 'um-uthaina',
+    name: { ar: 'أم أذينة', en: 'Um Uthaina' },
+    place: { area: 'Um Uthaina', lat: 31.9707, lng: 35.8716 },
+    locationText: 'Um Uthaina, Saad Bin Abi Waqqas Street',
+    phone: '+96265921020',
+    open: '11:00',
+    close: '22:00',
+    offDays: ['SUN'],
+    pricePercent: 140,
+    staff: 3,
+  },
 ];
+/** Bookings per open day of an extra branch (at least one, so every branch has a calendar). */
+export const DEMO_BRANCH_BOOKINGS_PER_DAY = { min: 1, max: 2 } as const;
+/** A branch closure and a staff leave land this many days after the last booked day. */
+export const DEMO_BRANCH_CLOSURE_AFTER_DAYS = { min: 2, max: 8 } as const;
+export const DEMO_BRANCH_LEAVE_AFTER_DAYS = { min: 9, max: 14 } as const;
+export const DEMO_BRANCH_LEAVE_LENGTH_DAYS = 2;
 /** Branch staff phones: national part = prefix + a 4-digit index (apart from the salon staff). */
 export const DEMO_BRANCH_MEMBER_PHONE_PREFIX = '78901';
