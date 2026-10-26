@@ -5,6 +5,7 @@ import com.fab.wab.customer.core.domain.AppResult
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.ResponseException
+import io.ktor.serialization.ContentConvertException
 import kotlinx.coroutines.CancellationException
 import kotlinx.io.IOException
 import kotlinx.serialization.SerializationException
@@ -21,6 +22,10 @@ suspend fun <T> safeApiCall(block: suspend () -> T): AppResult<T> = try {
 } catch (e: ResponseException) {
     AppResult.Error(e.toAppError())
 } catch (e: SerializationException) {
+    AppResult.Error(AppError.ParseError(e.message?.take(NetworkDefaults.MAX_ERROR_MESSAGE_LENGTH)))
+} catch (e: ContentConvertException) {
+    // Ktor wraps body decoding failures (JsonConvertException) outside SerializationException: a response that
+    // does not match the contract (e.g. a server older than the app) must become an error, never a crash.
     AppResult.Error(AppError.ParseError(e.message?.take(NetworkDefaults.MAX_ERROR_MESSAGE_LENGTH)))
 } catch (e: HttpRequestTimeoutException) {
     AppResult.Error(AppError.NetworkError(e.message.orEmpty().take(NetworkDefaults.MAX_ERROR_MESSAGE_LENGTH)))

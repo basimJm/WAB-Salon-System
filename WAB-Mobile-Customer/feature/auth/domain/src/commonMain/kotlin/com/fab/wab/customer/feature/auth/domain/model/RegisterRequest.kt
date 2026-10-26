@@ -2,7 +2,7 @@ package com.fab.wab.customer.feature.auth.domain.model
 
 import com.fab.wab.customer.core.domain.session.Gender
 
-/** `POST /auth/register` (PRD S12): every field required, the phone proven by the Firebase token. */
+/** `POST /auth/register` (PRD S12): every field required, the phone proven by the OTP token. */
 data class RegisterRequest(
     val firstName: String,
     val lastName: String,
@@ -11,5 +11,5 @@ data class RegisterRequest(
     val cityId: String,
     val areaId: String,
     val phone: PhoneNumber,
-    val idToken: String,
+    val otpToken: String,
 )

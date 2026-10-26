@@ -57,9 +57,10 @@
     <string name="error_code_conflict">This action conflicts with a recent change. Please refresh and try again.</string>
     <string name="error_code_rate_limited">Too many attempts. Please wait a moment and try again.</string>
     <string name="error_code_internal">Something went wrong on our side. Please try again later.</string>
-    <string name="error_code_otp_blocked">Too many code requests. Please try again later.</string>
+    <string name="error_code_otp_blocked">Too many attempts. Please try again later.</string>
     <string name="error_code_otp_invalid">The code you entered is not correct.</string>
     <string name="error_code_otp_expired">This code has expired, please request a new one.</string>
+    <string name="error_code_otp_delivery_failed">We couldn’t send the code: this number has no WhatsApp account. Use a number that has WhatsApp.</string>
     <string name="error_code_phone_not_registered">This number is not registered.</string>
     <string name="error_code_phone_already_registered">This number is already registered.</string>
     <string name="error_code_account_blocked">Your account is suspended. Please contact us.</string>

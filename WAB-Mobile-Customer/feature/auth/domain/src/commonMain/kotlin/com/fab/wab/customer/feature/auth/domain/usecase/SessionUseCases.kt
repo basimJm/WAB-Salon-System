@@ -54,7 +54,7 @@ class SetPushEnabledUseCase(
 /** PRD S22: the verified new number replaces the account's phone; the local profile follows the server answer. */
 class ChangePhoneUseCase(private val repository: AuthRepository, private val sessionStore: SessionStore) {
     suspend operator fun invoke(proof: OtpVerified): AppResult<UserProfile> {
-        val result = repository.changePhone(proof.phone, proof.idToken)
+        val result = repository.changePhone(proof.phone, proof.otpToken)
         if (result is AppResult.Success) sessionStore.updateUser(result.data)
         return result
     }

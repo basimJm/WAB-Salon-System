@@ -7,35 +7,38 @@ import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.customer.feature.auth.domain.model.AuthSession
 import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
+import com.fab.wab.customer.feature.auth.domain.model.OtpProof
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
 import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
-import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
 import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
 import com.fab.wab.customer.feature.auth.domain.repository.InstallationInfoProvider
 
+/** Limits check + WhatsApp send in one server call (BUSINESS_DOMAIN §3.1a). */
 class RequestOtpUseCase(private val repository: AuthRepository) {
     suspend operator fun invoke(phoneE164: String, purpose: AuthPurpose): AppResult<OtpPolicy> =
         repository.requestOtp(phoneE164, purpose)
 }
 
-class ReportWrongOtpAttemptUseCase(private val repository: AuthRepository) {
-    suspend operator fun invoke(phoneE164: String): AppResult<WrongAttemptResult> = repository.reportWrongAttempt(phoneE164)
+/** Checks the typed code on the server; success = the single-use `otpToken` for [purpose]. */
+class VerifyOtpUseCase(private val repository: AuthRepository) {
+    suspend operator fun invoke(phoneE164: String, purpose: AuthPurpose, code: String): AppResult<OtpProof> =
+        repository.verifyOtp(phoneE164, purpose, code)
 }
 
-/** Login with the Firebase proof, then persist the session (PRD S13 "save tokens + first name + gender"). */
-class LoginWithIdTokenUseCase(
+/** Login with the OTP token, then persist the session (PRD S13 "save tokens + first name + gender"). */
+class LoginWithOtpTokenUseCase(
     private val repository: AuthRepository,
     private val installation: InstallationInfoProvider,
     private val sessionStore: SessionStore,
 ) {
-    suspend operator fun invoke(phone: PhoneNumber, idToken: String): AppResult<AuthSession> {
-        val result = repository.login(phone, idToken, installation.current())
+    suspend operator fun invoke(phone: PhoneNumber, otpToken: String): AppResult<AuthSession> {
+        val result = repository.login(phone, otpToken, installation.current())
         if (result is AppResult.Success) sessionStore.signIn(result.data.tokens, result.data.user)
         return result
     }
 }
 
-/** Register with the Firebase proof, then persist the session (PRD S12 "store tokens, first name, gender → Home"). */
+/** Register with the OTP token, then persist the session (PRD S12 "store tokens, first name, gender → Home"). */
 class RegisterUseCase(
     private val repository: AuthRepository,
     private val installation: InstallationInfoProvider,
