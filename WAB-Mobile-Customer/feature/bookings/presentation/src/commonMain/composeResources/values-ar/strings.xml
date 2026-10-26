@@ -44,7 +44,7 @@
     <string name="details_staff">الموظف: %1$s</string>
     <string name="details_payment">تفاصيل الدفع</string>
     <string name="details_total">الإجمالي</string>
-    <string name="details_paid">المدفوع</string>
+    <string name="details_paid">المدفوع إلكترونياً</string>
     <string name="details_remaining">المتبقي عند الوصول</string>
     <string name="details_refunded">تم الاسترجاع</string>
     <string name="details_refund_pending">قيد الاسترجاع</string>
@@ -93,4 +93,6 @@
     <string name="rating_done_button">العودة للحجز</string>
     <string name="rating_salon_unknown">الصالون</string>
     <string name="bookings_branch_label">الفرع: %1$s</string>
+    <string name="details_paid_at_salon">المدفوع في الصالون</string>
+    <string name="card_rejection_reason">السبب: %1$s</string>
 </resources>

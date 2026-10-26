@@ -26,6 +26,7 @@ import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.resources.Res
 import com.fab.wab.customer.designsystem.resources.favorite_add
 import com.fab.wab.customer.designsystem.resources.favorite_remove
+import com.fab.wab.customer.designsystem.resources.salon_closed_now
 import com.fab.wab.customer.designsystem.resources.salon_closed_today
 import com.fab.wab.customer.designsystem.resources.salon_hours_separator
 import com.fab.wab.customer.designsystem.resources.salon_open
@@ -118,6 +119,7 @@ fun OpenStatusLine(isOpen: Boolean, todayHours: String?, modifier: Modifier = Mo
         openLabel = stringResource(Res.string.salon_open),
         closedLabel = stringResource(Res.string.salon_closed_today),
         separator = stringResource(Res.string.salon_hours_separator),
+        closedNowLabel = stringResource(Res.string.salon_closed_now),
     )
     AppStatusBadge(text = text, tone = if (isOpen) StatusTone.Success else StatusTone.Neutral, modifier = modifier)
 }

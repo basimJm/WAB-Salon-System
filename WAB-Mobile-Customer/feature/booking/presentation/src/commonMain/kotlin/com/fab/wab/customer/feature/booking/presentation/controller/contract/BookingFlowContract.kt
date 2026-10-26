@@ -3,6 +3,7 @@ package com.fab.wab.customer.feature.booking.presentation.controller.contract
 import com.fab.wab.customer.core.domain.salon.BranchRules
 import com.fab.wab.customer.core.domain.salon.SalonBranch
 import com.fab.wab.customer.core.domain.salon.SalonDetails
+import com.fab.wab.customer.core.domain.salon.SalonService
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.feature.booking.domain.model.BookingDraft
@@ -12,6 +13,7 @@ import com.fab.wab.customer.feature.booking.domain.model.DayAvailability
 import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
 import com.fab.wab.customer.feature.booking.domain.model.SelectionTotals
 import com.fab.wab.customer.feature.booking.domain.model.selectionTotalsOf
+import com.fab.wab.customer.feature.booking.domain.model.servicesOfferedTo
 import kotlinx.datetime.LocalDate
 
 /** PRD S16 steps + the branch step (BUSINESS_DOMAIN §5.18, only for several bookable branches); verification is a separate screen. */
@@ -66,6 +68,8 @@ sealed interface BookingFlowContract {
         val canContinuePerson: Boolean get() = person.name.isNotBlank()
         val canContinueServices: Boolean get() = person.serviceIds.isNotEmpty()
         val totals: SelectionTotals get() = selectionTotalsOf(salon?.services.orEmpty(), person.serviceIds)
+        /** Step 1 list of the current person: bride-only services only for a bride (PRD S16, SRV-170). */
+        val offeredServices: List<SalonService> get() = servicesOfferedTo(salon?.services.orEmpty(), person.isBride)
     }
 
     sealed interface UiAction {

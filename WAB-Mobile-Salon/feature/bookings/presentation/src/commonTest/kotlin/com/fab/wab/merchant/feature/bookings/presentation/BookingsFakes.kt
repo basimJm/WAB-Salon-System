@@ -87,6 +87,15 @@ internal class FakeBookingsRepository : BookingsRepository {
     var staffList = listOf(SARA, LINA)
     override suspend fun staff(): AppResult<List<StaffRef>> = AppResult.Success(staffList)
 
+    /** Eligible staff per person index; a missing index answers [eligibleError]. */
+    val eligibleByPerson = mutableMapOf(0 to listOf(SARA, LINA))
+    var eligibleError: AppResult.Error = AppResult.Error(AppError.NetworkError("offline"))
+    val eligibleCalls = mutableListOf<Int>()
+    override suspend fun eligibleStaff(bookingId: String, personIndex: Int): AppResult<List<StaffRef>> {
+        eligibleCalls += personIndex
+        return eligibleByPerson[personIndex]?.let { AppResult.Success(it) } ?: eligibleError
+    }
+
     private fun act(call: String): AppResult<Unit> {
         actions += call
         return actionResult

@@ -120,10 +120,60 @@ class BookingRequestsViewModelTest {
         val accepted = viewModel.state.first()
         assertEquals("WAB-r1", accepted.acceptedReference)
         assertEquals("r2", accepted.current?.summary?.id)
+        viewModel.onEvent(UiAction.OnNext)
+        assertNull(viewModel.state.first().acceptedReference)
+        assertEquals("r2", viewModel.state.first().current?.summary?.id)
+        assertTrue(viewModel.state.first().visible)
+        assertTrue(alert.plays >= 2)
+        assertTrue(effects.isEmpty())
+    }
+
+    @Test
+    fun viewBookingAndDoneCloseTheSheetUntilANewRequestOrTheNextStart() = runTest(UnconfinedTestDispatcher()) {
+        repository.detailsById["r3"] = details("r3")
+        val viewModel = viewModel()
+        val effects = effectsOf(viewModel)
+        requests.emit("r1")
+        requests.emit("r2")
+        viewModel.onEvent(UiAction.OnAccept)
+        val plays = alert.plays
         viewModel.onEvent(UiAction.OnViewBooking)
         assertEquals(SideEffect.OpenDetails("r1"), effects.last())
-        assertNull(viewModel.state.first().acceptedReference)
-        assertTrue(alert.plays >= 2)
+        val closed = viewModel.state.first()
+        assertNull(closed.acceptedReference)
+        assertEquals("r2", closed.current?.summary?.id, "the queue is kept")
+        assertTrue(!closed.visible, "e2e: the next request covered the booking the member opened")
+        assertEquals(plays, alert.plays, "no request sound while the sheet is closed")
+        requests.emit("r3")
+        val back = viewModel.state.first()
+        assertTrue(back.visible, "a new request brings the queue back")
+        assertEquals(listOf("r2", "r3"), back.queue.map { it.summary.id })
+        viewModel.onEvent(UiAction.OnAccept)
+        viewModel.onEvent(UiAction.OnDone)
+        assertTrue(!viewModel.state.first().visible)
+    }
+
+    @Test
+    fun aClosedQueueComesBackWhenTheHostStartsAgain() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = BookingRequestsViewModel(
+            BookingRequestsDependencies(repository, requests, updates, emptyFlow(), alert, NoOpAnalyticsTracker, { "x" }, { "failed" }),
+            testScope = backgroundScope,
+        )
+        val first = backgroundScope.launch { viewModel.state.collect { } }
+        requests.emit("r1")
+        requests.emit("r2")
+        viewModel.onEvent(UiAction.OnAccept)
+        viewModel.onEvent(UiAction.OnDone)
+        assertTrue(!viewModel.state.value.visible)
+        // The app goes to the background (no collector past the subscription timeout) and comes back: onStart runs again.
+        first.cancel()
+        advanceTimeBy(BACKGROUND_MS)
+        backgroundScope.launch { viewModel.state.collect { } }
+        assertTrue(viewModel.state.value.visible)
+        assertEquals("r2", viewModel.state.value.current?.summary?.id)
+        repository.detailsById["r3"] = details("r3")
+        requests.emit("r3")
+        assertEquals(listOf("r2", "r3"), viewModel.state.value.queue.map { it.summary.id })
     }
 
     @Test
@@ -182,6 +232,8 @@ class BookingRequestsViewModelTest {
         requests.emit("r2")
         viewModel.onEvent(UiAction.OnViewDetails)
         assertEquals(SideEffect.OpenDetails("r1"), effects.last())
+        assertTrue(!viewModel.state.first().visible, "e2e: the next request covered the details the member opened")
+        assertEquals("r2", viewModel.state.first().current?.summary?.id)
         viewModel.onEvent(UiAction.OnDismiss)
         assertTrue(viewModel.state.first().queue.isEmpty())
         requests.emit("r1")
@@ -191,5 +243,8 @@ class BookingRequestsViewModelTest {
     private companion object {
         const val BUFFER = 8
         const val HTTP_CONFLICT = 409
+
+        /** Longer than BaseViewModel's 5 s subscription timeout. */
+        const val BACKGROUND_MS = 6_000L
     }
 }

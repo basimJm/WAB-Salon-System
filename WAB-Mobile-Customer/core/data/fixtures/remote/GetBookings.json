@@ -3,59 +3,186 @@
   "message": "Done successfully.",
   "data": [
     {
-      "id": "6ade37a7c2cfb0cb993a167c",
-      "referenceNumber": "WAB-1N2Z8R",
-      "status": "PENDING",
+      "id": "02ad409c896dcdd1c27de6bd",
+      "referenceNumber": "WAB-W1BETN",
+      "status": "APPROVED",
       "paymentMethod": "PAY_ON_ARRIVAL",
       "paymentStatus": "PAY_ON_ARRIVAL",
       "hasBride": false,
-      "appointmentStart": "2026-10-27T06:00:00.000Z",
-      "appointmentEnd": "2026-10-27T06:45:00.000Z",
-      "respondBy": "2026-10-27T07:00:00.000Z",
-      "requestedAt": "2026-10-25T17:08:55.967Z",
-      "personsCount": 1,
-      "total": "15.000",
+      "appointmentStart": "2026-10-28T17:00:00.000Z",
+      "appointmentEnd": "2026-10-28T17:45:00.000Z",
+      "respondBy": "2026-10-28T18:00:00.000Z",
+      "requestedAt": "2026-10-24T23:00:00.000Z",
+      "personsCount": 2,
+      "total": "40.000",
       "salon": {
-        "id": "6ade37a6c2cfb0cb993a164e",
-        "name": "Noor Salon"
+        "id": "08c23382575950264c482f48",
+        "name": "Gentlemen's Corner"
       },
       "branch": {
-        "id": "6ade37a7c2cfb0cb993a1658",
-        "name": "Tabarbour",
-        "locationText": "Abdoun, Amman"
+        "id": "6adf513d4bd7099438793e86",
+        "name": "Dabouq",
+        "locationText": "Dabouq, King Abdullah II Street, near the roundabout"
       },
       "customer": null,
-      "staff": []
+      "staff": [
+        {
+          "id": "c93d836986f4e3efba6f2c65",
+          "name": "Sami",
+          "firstName": "Sami",
+          "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/gentlemen-staff1.jpg"
+        },
+        {
+          "id": "14fb07c6a1af7d4a7980cc9d",
+          "name": "Rami",
+          "firstName": "Rami",
+          "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/gentlemen-staff0.jpg"
+        }
+      ],
+      "rejection": null
     },
     {
-      "id": "6ade37a8c2cfb0cb993a1682",
-      "referenceNumber": "WAB-RM7GX8",
+      "id": "1a0b34d4849e855f1120ca7f",
+      "referenceNumber": "WAB-CMJXPJ",
       "status": "PENDING",
       "paymentMethod": "PAY_ON_ARRIVAL",
       "paymentStatus": "PAY_ON_ARRIVAL",
       "hasBride": false,
-      "appointmentStart": "2026-10-28T06:00:00.000Z",
-      "appointmentEnd": "2026-10-28T06:45:00.000Z",
-      "respondBy": "2026-10-28T07:00:00.000Z",
-      "requestedAt": "2026-10-25T17:08:56.060Z",
+      "appointmentStart": "2026-11-01T12:45:00.000Z",
+      "appointmentEnd": "2026-11-01T13:45:00.000Z",
+      "respondBy": "2026-11-01T13:45:00.000Z",
+      "requestedAt": "2026-10-26T12:46:50.761Z",
       "personsCount": 1,
-      "total": "15.000",
+      "total": "12.750",
       "salon": {
-        "id": "6ade37a6c2cfb0cb993a164e",
-        "name": "Noor Salon"
+        "id": "8633ff17c56242378fea2b46",
+        "name": "Al-Ostaz Barber Shop"
       },
       "branch": {
-        "id": "6ade37a7c2cfb0cb993a1658",
+        "id": "c9765013556c5840bb2825aa",
         "name": "Tabarbour",
-        "locationText": "Abdoun, Amman"
+        "locationText": "Tabarbour, Al-Shaheed Street, next to the mosque"
       },
       "customer": null,
-      "staff": []
+      "staff": [
+        {
+          "id": "2364737ffe4b0360624bf7ce",
+          "name": "Sami",
+          "firstName": "Sami",
+          "photoUrl": null
+        }
+      ],
+      "rejection": null
+    },
+    {
+      "id": "05310befeb8850a9c34d4235",
+      "referenceNumber": "WAB-27M3NW",
+      "status": "PENDING",
+      "paymentMethod": "PAY_ON_ARRIVAL",
+      "paymentStatus": "PAY_ON_ARRIVAL",
+      "hasBride": false,
+      "appointmentStart": "2026-11-03T17:45:00.000Z",
+      "appointmentEnd": "2026-11-03T18:15:00.000Z",
+      "respondBy": "2026-11-03T18:45:00.000Z",
+      "requestedAt": "2026-10-26T12:04:50.761Z",
+      "personsCount": 1,
+      "total": "8.500",
+      "salon": {
+        "id": "8633ff17c56242378fea2b46",
+        "name": "Al-Ostaz Barber Shop"
+      },
+      "branch": {
+        "id": "c9765013556c5840bb2825aa",
+        "name": "Tabarbour",
+        "locationText": "Tabarbour, Al-Shaheed Street, next to the mosque"
+      },
+      "customer": null,
+      "staff": [
+        {
+          "id": "2364737ffe4b0360624bf7ce",
+          "name": "Sami",
+          "firstName": "Sami",
+          "photoUrl": null
+        }
+      ],
+      "rejection": null
+    },
+    {
+      "id": "8ef881f63e1c5ed6468e8273",
+      "referenceNumber": "WAB-RX6A31",
+      "status": "PENDING",
+      "paymentMethod": "PAY_ON_ARRIVAL",
+      "paymentStatus": "PAY_ON_ARRIVAL",
+      "hasBride": false,
+      "appointmentStart": "2026-11-04T18:30:00.000Z",
+      "appointmentEnd": "2026-11-04T19:05:00.000Z",
+      "respondBy": "2026-11-04T19:30:00.000Z",
+      "requestedAt": "2026-10-26T11:31:50.761Z",
+      "personsCount": 2,
+      "total": "28.800",
+      "salon": {
+        "id": "08c23382575950264c482f48",
+        "name": "Gentlemen's Corner"
+      },
+      "branch": {
+        "id": "5313f805af719be56f0b6946",
+        "name": "Sweifieh",
+        "locationText": "Sweifieh, Al-Wakalat Street, Plaza Mall ground floor"
+      },
+      "customer": null,
+      "staff": [
+        {
+          "id": "8776b218db576876ed2148a0",
+          "name": "Omar",
+          "firstName": "Omar",
+          "photoUrl": null
+        },
+        {
+          "id": "e2f4c34da15854588ddd04a0",
+          "name": "Khaled",
+          "firstName": "Khaled",
+          "photoUrl": null
+        }
+      ],
+      "rejection": null
+    },
+    {
+      "id": "a24176b9ef983c12cc731641",
+      "referenceNumber": "WAB-2JJKKV",
+      "status": "APPROVED",
+      "paymentMethod": "PAY_ON_ARRIVAL",
+      "paymentStatus": "PAY_ON_ARRIVAL",
+      "hasBride": false,
+      "appointmentStart": "2026-11-05T13:45:00.000Z",
+      "appointmentEnd": "2026-11-05T14:15:00.000Z",
+      "respondBy": "2026-11-05T14:45:00.000Z",
+      "requestedAt": "2026-10-26T11:53:20.164Z",
+      "personsCount": 1,
+      "total": "10.000",
+      "salon": {
+        "id": "8633ff17c56242378fea2b46",
+        "name": "Al-Ostaz Barber Shop"
+      },
+      "branch": {
+        "id": "6adf513d4bd7099438793e85",
+        "name": "Shmeisani",
+        "locationText": "Shmeisani, Abdul Hamid Sharaf Street"
+      },
+      "customer": null,
+      "staff": [
+        {
+          "id": "bfafa0a77a7aa7e3ca95724e",
+          "name": "Basel",
+          "firstName": "Basel",
+          "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/ostaz-staff0.jpg"
+        }
+      ],
+      "rejection": null
     }
   ],
   "meta": {
     "page": 1,
     "pageSize": 10,
-    "total": 2
+    "total": 5
   }
 }

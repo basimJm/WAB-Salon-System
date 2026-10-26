@@ -119,4 +119,5 @@
     <string name="booking_branch_title">اختر الفرع</string>
     <string name="booking_branch_hint">تختلف الخدمات والأسعار والموظفون والمواعيد حسب الفرع.</string>
     <string name="booking_summary_branch">الفرع: %1$s</string>
+    <string name="booking_service_bride_only">للعروس فقط</string>
 </resources>

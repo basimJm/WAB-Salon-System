@@ -60,13 +60,23 @@ class SalonDetailsMappersTest {
     }
 
     @Test
+    fun brideOnlyServicesKeepTheirVipFlag() {
+        val vip = GetSalonsBySalonIdDataServicesItem(
+            id = "s2", branchId = "b1", catalogServiceId = "c2", name = "Bridal makeup", imageUrl = "", price = "120",
+            durationMinutes = 90.0, brideOnly = true, mediaUrls = emptyList(),
+        ).toDomain()
+        assertEquals(true, vip.brideOnly)
+    }
+
+    @Test
     fun staffServicesAndReviewsKeepTheirBranch() {
         assertEquals("b1", GetSalonsBySalonIdDataStaffItem("m1", "Omar", null, "ON_DUTY", branchId = "b1").toDomain().branchId)
         val service = GetSalonsBySalonIdDataServicesItem(
             id = "s1", branchId = "b2", catalogServiceId = "c1", name = "Cut", imageUrl = "", price = "8",
-            durationMinutes = 30.0, mediaUrls = emptyList(),
+            durationMinutes = 30.0, brideOnly = false, mediaUrls = emptyList(),
         ).toDomain()
         assertEquals("b2", service.branchId)
+        assertEquals(false, service.brideOnly)
         val labelled = GetSalonsBySalonIdDataReviewsLatestItem(
             "r1", "Lina", 5.0, null, "2026-10-01T10:00:00Z", GetSalonsBySalonIdDataReviewsLatestItemBranch("b2", "Khalda"),
         ).toDomain()

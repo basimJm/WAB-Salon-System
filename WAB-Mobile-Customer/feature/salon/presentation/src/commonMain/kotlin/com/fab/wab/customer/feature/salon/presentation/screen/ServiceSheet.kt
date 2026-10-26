@@ -69,6 +69,7 @@ fun ServiceSheet(service: SalonService, onMediaClick: (Int) -> Unit, onDismiss: 
                     style = AppTheme.typography.bodySmall,
                     color = colors.muted,
                 )
+                if (service.brideOnly) BrideOnlyLabel()
             }
             service.description?.let {
                 AppText(

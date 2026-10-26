@@ -72,4 +72,6 @@
     <string name="salon_branches">Branches</string>
     <string name="salon_branch_main">Main</string>
     <string name="salon_review_branch">%1$s branch</string>
+    <string name="salon_service_bride_only">Brides only</string>
+    <string name="staff_service_bride_only">%1$s · Brides only</string>
 </resources>

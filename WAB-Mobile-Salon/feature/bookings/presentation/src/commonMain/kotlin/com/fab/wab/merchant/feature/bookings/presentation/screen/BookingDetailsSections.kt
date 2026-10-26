@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import com.fab.wab.merchant.designsystem.components.avatar.AppAvatar
 import com.fab.wab.merchant.designsystem.components.booking.AppBrideBadge
 import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
@@ -20,6 +21,7 @@ import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingAction
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingDetails
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingPerson
+import com.fab.wab.merchant.feature.bookings.domain.model.StaffRef
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiAction
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiState
 import com.fab.wab.merchant.feature.bookings.presentation.resources.Res
@@ -29,13 +31,14 @@ import com.fab.wab.merchant.feature.bookings.presentation.resources.action_compl
 import com.fab.wab.merchant.feature.bookings.presentation.resources.action_no_show
 import com.fab.wab.merchant.feature.bookings.presentation.resources.action_reassign
 import com.fab.wab.merchant.feature.bookings.presentation.resources.action_reject
+import com.fab.wab.merchant.feature.bookings.presentation.resources.details_paid_at_salon
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_paid_online
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_payment
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_persons
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_refunded
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_remaining
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_total
-import com.fab.wab.merchant.feature.bookings.presentation.resources.person_staff_time
+import com.fab.wab.merchant.feature.bookings.presentation.resources.request_time_range
 import com.fab.wab.merchant.feature.bookings.presentation.resources.service_line
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -69,22 +72,38 @@ private fun PersonBlock(person: BookingPerson) {
             if (person.isBride) AppBrideBadge()
             AppText(text = jodText(person.subtotal), style = AppTheme.typography.labelLarge)
         }
-        val start = person.start
-        val end = person.end
-        val staff = person.staff
-        if (staff != null && start != null && end != null) {
-            AppText(
-                text = stringResource(Res.string.person_staff_time, staff.name, dateTimeText(start).time, dateTimeText(end).time),
-                style = AppTheme.typography.bodySmall,
-                color = AppTheme.colors.muted,
-            )
-        }
         person.services.forEach { service ->
             AppText(
                 text = stringResource(Res.string.service_line, service.name, service.durationMinutes, jodText(service.price)),
                 style = AppTheme.typography.bodySmall,
             )
         }
+        val start = person.start
+        val end = person.end
+        val staff = person.staff
+        if (staff != null && start != null && end != null) {
+            PersonStaffRow(staff, stringResource(Res.string.request_time_range, dateTimeText(start).time, dateTimeText(end).time))
+        }
+    }
+}
+
+/** Design 03 person footer: 26 dp staff photo (letter when there is none), staff name, start – end. */
+@Composable
+private fun PersonStaffRow(staff: StaffRef, time: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
+        AppAvatar(
+            name = staff.name,
+            imageUrl = staff.photoUrl,
+            size = BookingsDesignConstants.PERSON_STAFF_AVATAR,
+            initialsStyle = AppTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            maxLetters = 1,
+        )
+        AppText(
+            text = staff.name,
+            style = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+            modifier = Modifier.weight(1f),
+        )
+        AppText(text = time, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
     }
 }
 
@@ -94,8 +113,9 @@ internal fun PaymentCard(details: BookingDetails) {
     SectionCard(stringResource(Res.string.details_payment)) {
         MoneyRow(Res.string.details_total, money.total, bold = true)
         MoneyRow(Res.string.details_paid_online, money.paidOnline)
+        if (money.hasPaidAtSalon) MoneyRow(Res.string.details_paid_at_salon, money.paidAtSalon)
         MoneyRow(Res.string.details_remaining, money.remaining)
-        if (money.refunded.isNotBlank()) MoneyRow(Res.string.details_refunded, money.refunded)
+        if (money.hasRefund) MoneyRow(Res.string.details_refunded, money.refunded)
     }
 }
 
