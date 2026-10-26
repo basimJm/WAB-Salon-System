@@ -412,6 +412,16 @@ describe('admin', () => {
     expect(refsOf(await admin(`?customerId=${c2.toHexString()}`))).toEqual([refs.b4]);
     expect(refsOf(await admin('?status=COMPLETED'))).toEqual([refs.b3]);
   });
+  it('SRV-171 S5: q finds full and partial references, with or without the prefix', async () => {
+    expect(refsOf(await admin('?q=PQR345'))).toEqual([refs.b5]);
+    expect(refsOf(await admin('?q=pqr'))).toEqual([refs.b5]);
+    expect(refsOf(await admin('?q=wab-kmn0'))).toEqual([refs.b4]);
+    expect(refsOf(await admin('?q=WAB-PQR345'))).toEqual([refs.b5]);
+    // Too short for a reference and no customer with that name: nothing, not everything.
+    expect(refsOf(await admin('?q=PQ'))).toEqual([]);
+    // Regex characters are taken literally.
+    expect(refsOf(await admin('?q=.*'))).toEqual([]);
+  });
   it('returns details and 404 for an unknown booking', async () => {
     expect((await admin(`/${ids['b5']?.toHexString() ?? ''}`)).status).toBe(200);
     expect((await admin(`/${id().toHexString()}`)).status).toBe(404);

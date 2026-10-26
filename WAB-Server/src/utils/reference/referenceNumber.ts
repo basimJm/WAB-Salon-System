@@ -7,6 +7,7 @@ import {
   REFERENCE_LOOKALIKES,
   REFERENCE_MAX_ATTEMPTS,
   REFERENCE_PREFIX,
+  REFERENCE_SEARCH_MIN_SYMBOLS,
 } from '../../constants/reference';
 import { isDuplicateKeyError, duplicateKeyFields } from '../database/errors';
 import { InternalError } from '../errors';
@@ -51,6 +52,31 @@ export const normalizeReferenceNumber = (text: unknown): string | null => {
     .replace(LOOKALIKE_PATTERN, (symbol) => REFERENCE_LOOKALIKES[symbol] ?? symbol);
   const candidate = `${REFERENCE_PREFIX}${code}`;
   return isReferenceNumber(candidate) ? candidate : null;
+};
+
+const CODE_SYMBOLS = new RegExp(`^[${REFERENCE_ALPHABET}]+$`);
+
+/**
+ * What a person typed in a booking search box, read as the start of reference numbers: the
+ * canonical prefix it stands for (none or one) (`wab-bw1` and `BW1` both give `WAB-BW1`; a full code gives
+ * the full number). Case, spaces, dashes and look-alikes are ignored like
+ * `normalizeReferenceNumber`; fewer than `REFERENCE_SEARCH_MIN_SYMBOLS` code symbols give none.
+ */
+export const referenceSearchPrefixes = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+  const squeezed = text.replace(/[\s-]/g, '').toUpperCase();
+  const bare = REFERENCE_PREFIX.replace('-', '');
+  // Text starting with the prefix letters is read as prefix + code (a code that itself starts with
+  // them is found with the prefix typed out).
+  const code = (squeezed.startsWith(bare) ? squeezed.slice(bare.length) : squeezed).replace(
+    LOOKALIKE_PATTERN,
+    (symbol) => REFERENCE_LOOKALIKES[symbol] ?? symbol,
+  );
+  const usable =
+    code.length >= REFERENCE_SEARCH_MIN_SYMBOLS &&
+    code.length <= REFERENCE_CODE_LENGTH &&
+    CODE_SYMBOLS.test(code);
+  return usable ? [`${REFERENCE_PREFIX}${code}`] : [];
 };
 
 export interface UniqueReferenceOptions {
