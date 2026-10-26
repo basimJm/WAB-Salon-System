@@ -30,10 +30,10 @@ class ApplicationRepositoryImpl(private val api: ApplicationApi) : ApplicationRe
     override suspend fun apply(
         form: RegistrationForm,
         phone: PhoneNumber,
-        idToken: String,
+        otpToken: String,
         installation: InstallationInfo?,
     ): AppResult<ApplicationSession> {
-        val body = form.toApplyBody(phone, idToken, installation ?: InstallationInfo.UNKNOWN_INSTALLATION)
+        val body = form.toApplyBody(phone, otpToken, installation ?: InstallationInfo.UNKNOWN_INSTALLATION)
         return safeApiCall { api.apply(body) }.mapSuccess { it.data.toDomain() }
     }
 
@@ -48,9 +48,9 @@ private fun stateOf(code: String): SalonState = SalonState.fromCode(code) ?: Sal
 
 private fun instantOrNull(value: String): Instant? = runCatching { Instant.parse(value) }.getOrNull()
 
-fun RegistrationForm.toApplyBody(phone: PhoneNumber, idToken: String, installation: InstallationInfo) = PostSalonApplicationsBody(
+fun RegistrationForm.toApplyBody(phone: PhoneNumber, otpToken: String, installation: InstallationInfo) = PostSalonApplicationsBody(
     phone = PostSalonApplicationsBodyPhone(countryCode = phone.countryCode, number = phone.number),
-    idToken = idToken,
+    otpToken = otpToken,
     firstName = firstName,
     lastName = lastName,
     salon = PostSalonApplicationsBodySalon(

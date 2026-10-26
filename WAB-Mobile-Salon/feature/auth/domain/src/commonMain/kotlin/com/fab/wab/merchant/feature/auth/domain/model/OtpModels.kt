@@ -4,19 +4,22 @@ import com.fab.wab.merchant.core.domain.auth.AuthTokens
 import com.fab.wab.merchant.core.domain.session.MemberProfile
 import kotlin.time.Instant
 
-/** `POST /auth/otp/request`: the platform pre-check before Firebase sends the SMS (PRD M03). */
+/**
+ * `POST /auth/otp/request` (BUSINESS_DOMAIN §3.1a): the limits run first, then the backend sends the code over
+ * WhatsApp. [expiresInSeconds] is how long that code lives (0 when nothing was sent, `allowed = false`).
+ */
 data class OtpPolicy(
     val allowed: Boolean,
     val otpLength: Int,
     val resendAfterSeconds: Int,
+    val expiresInSeconds: Int = 0,
     val blockedUntil: Instant? = null,
 )
 
-/** `POST /auth/otp/wrong-attempt`: wrong codes count toward the 15-minute block. */
-data class WrongAttemptResult(
-    val blocked: Boolean,
-    val attemptsRemaining: Int,
-    val blockedUntil: Instant? = null,
+/** `POST /auth/otp/verify`: the right code is exchanged for a short-lived, single-use `otpToken`. */
+data class OtpProof(
+    val otpToken: String,
+    val expiresInSeconds: Int,
 )
 
 /** What `POST /auth/login` (and the salon application) hands back: tokens, the member and their permission keys. */
@@ -43,11 +46,14 @@ data class InstallationInfo(
     }
 }
 
-/** A phone proven by Firebase for a non-login purpose; the calling flow (registration, bank details) consumes it. */
+/**
+ * A phone proven by the WhatsApp OTP for a non-login purpose; the calling flow (registration, change phone, bank
+ * details) consumes it once: [otpToken] is single use and the backend rejects it after its lifetime.
+ */
 data class OtpVerified(
     val purpose: AuthPurpose,
     val phone: PhoneNumber,
-    val idToken: String,
+    val otpToken: String,
 )
 
 /** `+962791234567` from the country's dial code and the national number. */

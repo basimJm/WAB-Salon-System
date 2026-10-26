@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.feature.auth.presentation
 
+import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.auth.AuthTokens
 import com.fab.wab.merchant.core.domain.session.MemberProfile
@@ -11,9 +12,9 @@ import com.fab.wab.merchant.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.merchant.feature.auth.domain.model.AuthSession
 import com.fab.wab.merchant.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.merchant.feature.auth.domain.model.OtpPolicy
+import com.fab.wab.merchant.feature.auth.domain.model.OtpProof
 import com.fab.wab.merchant.feature.auth.domain.model.PhoneCheck
 import com.fab.wab.merchant.feature.auth.domain.model.PhoneNumber
-import com.fab.wab.merchant.feature.auth.domain.model.WrongAttemptResult
 import com.fab.wab.merchant.feature.auth.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,18 +23,25 @@ internal val OWNER = MemberProfile(id = "m1", salonId = "s1", firstName = "Omar"
 
 internal const val TEST_OTP_LENGTH = 6
 internal const val TEST_RESEND_SECONDS = 60
+internal const val TEST_EXPIRES_SECONDS = 300
+internal const val TEST_PROOF_SECONDS = 600
+internal const val TEST_OTP_TOKEN = "otp-token"
 
 /** Auth repository with a configurable answer per call; records what the view models sent. */
 internal class FakeAuthRepository : AuthRepository {
     var check: AppResult<PhoneCheck> = AppResult.Success(PhoneCheck.REGISTERED)
-    var policy = OtpPolicy(allowed = true, otpLength = TEST_OTP_LENGTH, resendAfterSeconds = TEST_RESEND_SECONDS)
-    var wrong = WrongAttemptResult(blocked = false, attemptsRemaining = 4)
+    var policy = OtpPolicy(
+        allowed = true, otpLength = TEST_OTP_LENGTH, resendAfterSeconds = TEST_RESEND_SECONDS, expiresInSeconds = TEST_EXPIRES_SECONDS,
+    )
+    var requestError: AppError? = null
+    var verifyResult: AppResult<OtpProof> = AppResult.Success(OtpProof(TEST_OTP_TOKEN, TEST_PROOF_SECONDS))
     var loginResult: AppResult<AuthSession> = AppResult.Success(AuthSession(AuthTokens("a1", "r1"), OWNER, setOf("DASHBOARD_VIEW")))
     var logoutResult: AppResult<Unit> = AppResult.Success(Unit)
     val checked = mutableListOf<PhoneNumber>()
     val requested = mutableListOf<String>()
+    val verified = mutableListOf<Pair<AuthPurpose, String>>()
+    val loggedInWith = mutableListOf<String>()
     val loggedOut = mutableListOf<String>()
-    var wrongReports = 0
 
     override suspend fun checkPhone(phone: PhoneNumber): AppResult<PhoneCheck> {
         checked += phone
@@ -42,15 +50,18 @@ internal class FakeAuthRepository : AuthRepository {
 
     override suspend fun requestOtp(phoneE164: String, purpose: AuthPurpose): AppResult<OtpPolicy> {
         requested += phoneE164
-        return AppResult.Success(policy)
+        return requestError?.let { AppResult.Error(it) } ?: AppResult.Success(policy)
     }
 
-    override suspend fun reportWrongAttempt(phoneE164: String): AppResult<WrongAttemptResult> {
-        wrongReports += 1
-        return AppResult.Success(wrong)
+    override suspend fun verifyOtp(phoneE164: String, purpose: AuthPurpose, code: String): AppResult<OtpProof> {
+        verified += purpose to code
+        return verifyResult
     }
 
-    override suspend fun login(phone: PhoneNumber, idToken: String, installation: InstallationInfo?): AppResult<AuthSession> = loginResult
+    override suspend fun login(phone: PhoneNumber, otpToken: String, installation: InstallationInfo?): AppResult<AuthSession> {
+        loggedInWith += otpToken
+        return loginResult
+    }
 
     override suspend fun logout(refreshToken: String): AppResult<Unit> {
         loggedOut += refreshToken

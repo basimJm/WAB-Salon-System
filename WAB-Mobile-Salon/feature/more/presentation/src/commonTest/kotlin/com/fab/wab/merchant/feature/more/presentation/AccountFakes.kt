@@ -25,8 +25,8 @@ internal class FakeAccount(var account: MyAccount = ACCOUNT) : AccountRepository
         return AppResult.Success(account)
     }
 
-    override suspend fun changePhone(countryCode: String, number: String, idToken: String): AppResult<MyAccount> {
-        calls += "phone:$countryCode:$number:$idToken"
+    override suspend fun changePhone(countryCode: String, number: String, otpToken: String): AppResult<MyAccount> {
+        calls += "phone:$countryCode:$number:$otpToken"
         if (fail) return error
         account = account.copy(phone = "+962$number")
         return AppResult.Success(account)

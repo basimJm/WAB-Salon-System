@@ -2,7 +2,7 @@
 // Signing team: the project team by default; a developer overrides it in Local.xcconfig (not committed).
 TEAM_ID = X6UZ9NMK56
 DEVELOPMENT_TEAM = $(TEAM_ID)
-// Full capabilities (push, Associated Domains, App Attest). A free Apple ID cannot sign these: set
+// Full capabilities (push, Associated Domains). A free Apple ID cannot sign these: set
 // APP_ENTITLEMENTS = iosApp/iosApp-Personal.entitlements in Local.xcconfig (see Local.xcconfig.example).
 APP_ENTITLEMENTS = iosApp/iosApp.entitlements
 CODE_SIGN_ENTITLEMENTS = $(APP_ENTITLEMENTS)

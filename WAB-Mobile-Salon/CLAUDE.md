@@ -40,7 +40,7 @@ core/navigation        Typed routes (Graph/Screen), Navigator
 core/notification      In-app banners (NotificationTheme supplied by the shell) + push signals
 core/mvi               MVI base (BaseViewModel, MVIDelegate, CollectSideEffect)
 core/analytics         AnalyticsTracker port, TrackScreen
-core/firebase          Phone auth, push token, crash reporting, analytics behind ports (Swift bridges on iOS)
+core/firebase          Push token, crash reporting, analytics behind ports (Swift bridges on iOS); phone OTP = WhatsApp via the backend
 core/ui                Locale/dark-mode locals, permissions, external actions, image picker
 core/design-system     Tokens, Liquid Glass (AppGlassSurface, glassBackground, liquidGlass), App* components, icons, strings
 core/di                Koin aggregation

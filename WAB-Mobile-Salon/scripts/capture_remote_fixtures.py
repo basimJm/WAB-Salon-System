@@ -9,7 +9,9 @@ Usage:
 * Public, read-only GET operations are captured from --public-base (the hosted dev API). Nothing authenticated, no
   phone number and no credential is ever sent there.
 * Everything else comes from --auth-base, which must be a local stack (localhost / 127.0.0.1) running the fake OTP
-  provider: the phone proof is `fake-otp:valid:<E164>` (WAB-Server src/providers/otp/fake.ts). The seeded salon of
+  provider with a fixed code (`OTP_PROVIDER=fake OTP_FIXED_CODE=<otpFixedCode>`): every phone proof is the real
+  WhatsApp-OTP flow `POST /auth/otp/request` → `POST /auth/otp/verify` → single-use `otpToken` (MER-070, BUSINESS_DOMAIN
+  §3.1a); nothing is ever sent through WhatsApp from a capture. The seeded salon of
   --owner is read; mutations run on throwaway records (a team member, a branch, a closure, a leave, a gallery photo,
   bookings of a throwaway customer, a salon application of a throwaway phone) that the script removes, closes,
   deactivates or cancels again (capture_flows.py). Settings are written back with the values they had.
@@ -41,8 +43,9 @@ CUSTOMER = "customer"
 VERSION_SEGMENT = "v1"
 LOCAL_HOSTS = tuple(CONFIG["localHosts"])
 REDACTED = "<redacted>"
-SECRET_KEYS = ("accessToken", "refreshToken", "idToken")
+SECRET_KEYS = ("accessToken", "refreshToken", "otpToken")
 RATE_LIMITED = 429
+UNAUTHORIZED = 401
 
 
 def prefix(namespace: str) -> str:
@@ -106,8 +109,25 @@ def throwaway_number() -> str:
     return CONFIG["throwawayPrefix"] + "".join(random.choice("0123456789") for _ in range(CONFIG["throwawayDigits"]))
 
 
-def proof(number: str) -> str:
-    return CONFIG["fakeProofFormat"].format(CONFIG["dialCode"] + number)
+def otp_body(number: str, purpose: str) -> dict:
+    return {"phone": CONFIG["dialCode"] + number, "purpose": purpose}
+
+
+def proof(rec: "Recorder", base: str, number: str, purpose: str, save: bool = False, namespace: str = MERCHANT,
+          wrong_first: bool = False) -> str:
+    """A single-use `otpToken` the way the apps get one: request the code, then verify the local stack's fixed code
+    ([save]: the merchant request / verify answers become fixtures; [wrong_first]: one wrong code is probed first and
+    must answer 401 `OTP_INVALID`). A refused request (resend countdown) still verifies a code that is live."""
+    body = otp_body(number, purpose)
+    tag = f"({purpose}, {number[-4:]})"
+    rec.call(base, "POST", "/auth/otp/request", body=body, namespace=namespace, save=save,
+             label=None if save else "otp-request" + tag)
+    if wrong_first:
+        rec.expect("otp-wrong-code" + tag, base, "POST", "/auth/otp/verify", UNAUTHORIZED, "OTP_INVALID",
+                   body={**body, "code": CONFIG["otpWrongCode"]}, namespace=namespace)
+    data = rec.call(base, "POST", "/auth/otp/verify", body={**body, "code": CONFIG["otpFixedCode"]}, namespace=namespace,
+                    save=save, label=None if save else "otp-verify" + tag)
+    return (data or {}).get("otpToken", "")
 
 
 def phone(number: str) -> dict:
@@ -206,7 +226,7 @@ def main(argv: list[str]) -> int:
         if not (args.owner and args.manager and args.employee):
             parser.error("--auth-base needs --owner, --manager and --employee")
         if not is_local(args.auth_base):
-            raise SystemExit("capture: --auth-base must be a local stack (fake OTP provider); refusing to send proofs elsewhere")
+            raise SystemExit("capture: --auth-base must be a local stack (fake OTP provider); refusing to send codes elsewhere")
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         from capture_flows import capture_authenticated  # noqa: E402
 

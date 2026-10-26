@@ -14,6 +14,7 @@ import com.fab.wab.merchant.designsystem.resources.error_code_rate_limited
 import com.fab.wab.merchant.designsystem.resources.error_code_internal
 import com.fab.wab.merchant.designsystem.resources.error_code_otp_blocked
 import com.fab.wab.merchant.designsystem.resources.error_code_otp_invalid
+import com.fab.wab.merchant.designsystem.resources.error_code_otp_delivery_failed
 import com.fab.wab.merchant.designsystem.resources.error_code_otp_expired
 import com.fab.wab.merchant.designsystem.resources.error_code_phone_not_registered
 import com.fab.wab.merchant.designsystem.resources.error_code_phone_already_registered
@@ -74,6 +75,7 @@ internal val ERROR_CODE_STRINGS: Map<ErrorCode, StringResource> = mapOf(
     ErrorCode.OTP_BLOCKED to Res.string.error_code_otp_blocked,
     ErrorCode.OTP_INVALID to Res.string.error_code_otp_invalid,
     ErrorCode.OTP_EXPIRED to Res.string.error_code_otp_expired,
+    ErrorCode.OTP_DELIVERY_FAILED to Res.string.error_code_otp_delivery_failed,
     ErrorCode.PHONE_NOT_REGISTERED to Res.string.error_code_phone_not_registered,
     ErrorCode.PHONE_ALREADY_REGISTERED to Res.string.error_code_phone_already_registered,
     ErrorCode.ACCOUNT_BLOCKED to Res.string.error_code_account_blocked,
