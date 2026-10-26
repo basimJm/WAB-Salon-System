@@ -16,9 +16,14 @@ sealed interface BookingRequestsContract {
         val reject: DetailsDialog.Reason? = null,
         val rejecting: Boolean = false,
         val nowMs: Long = 0L,
+        /**
+         * "Done" / "View booking" after an accept closes the sheet although requests are still queued; the queue comes
+         * back with the next new request or when the app is opened again (they stay on Home and the Pending tab).
+         */
+        val snoozed: Boolean = false,
     ) {
         val current: BookingDetails? get() = queue.firstOrNull()
-        val visible: Boolean get() = current != null || acceptedReference != null
+        val visible: Boolean get() = (current != null && !snoozed) || acceptedReference != null
     }
 
     sealed interface UiAction {

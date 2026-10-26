@@ -19,6 +19,7 @@ import com.fab.wab.merchant.designsystem.components.button.ButtonKind
 import com.fab.wab.merchant.designsystem.components.control.AppRadioButton
 import com.fab.wab.merchant.designsystem.components.dialog.AppBottomSheet
 import com.fab.wab.merchant.designsystem.components.dialog.AppDialog
+import com.fab.wab.merchant.designsystem.components.feedback.AppLoadingIndicator
 import com.fab.wab.merchant.designsystem.components.format.jodText
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppTextField
@@ -59,7 +60,8 @@ import com.fab.wab.merchant.feature.bookings.presentation.resources.reason_salon
 import com.fab.wab.merchant.feature.bookings.presentation.resources.reason_service_unavailable
 import com.fab.wab.merchant.feature.bookings.presentation.resources.reason_staff_unavailable
 import com.fab.wab.merchant.feature.bookings.presentation.resources.reassign_current
-import com.fab.wab.merchant.feature.bookings.presentation.resources.reassign_note
+import com.fab.wab.merchant.feature.bookings.presentation.resources.reassign_failed
+import com.fab.wab.merchant.feature.bookings.presentation.resources.reassign_none
 import com.fab.wab.merchant.feature.bookings.presentation.resources.reassign_sub
 import com.fab.wab.merchant.feature.bookings.presentation.resources.reassign_title
 import com.fab.wab.merchant.feature.bookings.presentation.resources.reject_sub
@@ -180,10 +182,18 @@ private fun ReassignSheet(dialog: DetailsDialog.Reassign, state: UiState, onActi
                 color = AppTheme.colors.muted,
             )
         }
-        state.reassignStaff.filter { it.id != person?.staff?.id }.forEach { staff ->
-            ChoiceRow(staff.name, staff.id == dialog.staffId) { onAction(UiAction.OnReassignStaff(staff.id)) }
+        val eligible = dialog.eligible
+        when {
+            eligible == null -> AppLoadingIndicator()
+            eligible.isEmpty() -> AppText(
+                text = stringResource(if (dialog.failed) Res.string.reassign_failed else Res.string.reassign_none),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.muted,
+            )
+            else -> eligible.forEach { staff ->
+                ChoiceRow(staff.name, staff.id == dialog.staffId) { onAction(UiAction.OnReassignStaff(staff.id)) }
+            }
         }
-        AppText(text = stringResource(Res.string.reassign_note), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
         AppButton(
             text = stringResource(Res.string.confirm_reassign),
             onClick = { onAction(UiAction.OnDialogConfirm) },
@@ -224,7 +234,7 @@ private fun ChoiceRow(text: String, selected: Boolean, onClick: () -> Unit) {
     }
 }
 
-private fun ResponseReason.label(): StringResource = when (this) {
+internal fun ResponseReason.label(): StringResource = when (this) {
     ResponseReason.FULLY_BOOKED -> Res.string.reason_fully_booked
     ResponseReason.STAFF_UNAVAILABLE -> Res.string.reason_staff_unavailable
     ResponseReason.SERVICE_UNAVAILABLE -> Res.string.reason_service_unavailable

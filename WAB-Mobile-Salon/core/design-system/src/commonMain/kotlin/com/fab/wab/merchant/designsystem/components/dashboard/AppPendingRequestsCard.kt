@@ -21,13 +21,13 @@ import com.fab.wab.merchant.designsystem.components.booking.AppBrideBadge
 import com.fab.wab.merchant.designsystem.components.booking.autoCancelText
 import com.fab.wab.merchant.designsystem.components.booking.pendingAgeText
 import com.fab.wab.merchant.designsystem.components.divider.AppDivider
+import com.fab.wab.merchant.designsystem.components.format.metaPair
 import com.fab.wab.merchant.designsystem.components.surface.appClickable
 import com.fab.wab.merchant.designsystem.components.surface.cardBackground
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.resources.Res
 import com.fab.wab.merchant.designsystem.resources.action_view_all
 import com.fab.wab.merchant.designsystem.resources.booking_persons
-import com.fab.wab.merchant.designsystem.resources.meta_pair
 import com.fab.wab.merchant.designsystem.resources.pending_requests_title
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.designsystem.theme.SurfaceTone
@@ -147,7 +147,7 @@ private fun PendingRow(request: PendingRequestUi, onClick: () -> Unit) {
                 if (request.isBride) AppBrideBadge()
             }
             AppText(
-                text = stringResource(Res.string.meta_pair, persons, request.whenText),
+                text = metaPair(persons, request.whenText),
                 style = AppTheme.typography.bodySmall,
                 color = colors.muted,
             )

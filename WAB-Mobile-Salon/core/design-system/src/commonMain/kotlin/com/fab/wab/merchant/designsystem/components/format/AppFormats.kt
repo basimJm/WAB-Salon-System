@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import com.fab.wab.merchant.core.common.DateTimeText
 import com.fab.wab.merchant.core.common.TimeFormat
 import com.fab.wab.merchant.designsystem.resources.Res
+import com.fab.wab.merchant.designsystem.resources.meta_pair
 import com.fab.wab.merchant.designsystem.resources.price_jod
 import com.fab.wab.merchant.designsystem.resources.time_am
 import com.fab.wab.merchant.designsystem.resources.time_pm
@@ -31,6 +32,25 @@ fun trimAmount(amount: String): String {
     if (DECIMAL_POINT !in text) return text
     return text.trimEnd(ZERO).trimEnd(DECIMAL_POINT)
 }
+
+private const val LTR_ISOLATE = '⁦'
+private const val POP_ISOLATE = '⁩'
+
+/** Wraps a phone number, a reference or a time in LTR isolates so it never reorders inside Arabic text ("+962…"). */
+fun ltrIsolate(value: String): String = "$LTR_ISOLATE$value$POP_ISOLATE"
+
+private const val FIRST_STRONG_ISOLATE = '⁨'
+
+/**
+ * Wraps a part of a composed line in a first-strong isolate: it keeps its own direction ("11:30 ص – 12:15 م" stays
+ * Arabic order inside "Dana Majali · …") and no longer decides the direction of the whole line (e2e: a Latin staff
+ * name turned an Arabic line LTR and scrambled the times).
+ */
+fun bidiIsolate(value: String): String = "$FIRST_STRONG_ISOLATE$value$POP_ISOLATE"
+
+/** "first · second" (`meta_pair`) with both parts isolated, so the line follows the app direction. */
+@Composable
+fun metaPair(first: String, second: String): String = stringResource(Res.string.meta_pair, bidiIsolate(first), bidiIsolate(second))
 
 private const val FILS_PER_JOD = 1_000L
 private const val FILS_DIGITS = 3

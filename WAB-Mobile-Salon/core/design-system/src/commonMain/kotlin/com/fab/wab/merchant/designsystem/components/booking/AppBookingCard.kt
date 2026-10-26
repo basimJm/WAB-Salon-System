@@ -23,11 +23,11 @@ import com.fab.wab.merchant.core.domain.booking.BookingStatus
 import com.fab.wab.merchant.core.domain.booking.PaymentStatus
 import com.fab.wab.merchant.core.domain.booking.RefundStatus
 import com.fab.wab.merchant.designsystem.components.card.AppCard
+import com.fab.wab.merchant.designsystem.components.format.metaPair
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.resources.Res
 import com.fab.wab.merchant.designsystem.resources.booking_persons
-import com.fab.wab.merchant.designsystem.resources.meta_pair
 import com.fab.wab.merchant.designsystem.resources.booking_reference
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import org.jetbrains.compose.resources.pluralStringResource
@@ -119,7 +119,7 @@ private fun BookingMeta(booking: BookingCardUi) {
         horizontalArrangement = Arrangement.spacedBy(spacing.space14),
         verticalArrangement = Arrangement.spacedBy(spacing.space6),
     ) {
-        MetaItem(AppIcons.Calendar, stringResource(Res.string.meta_pair, booking.date, booking.time))
+        MetaItem(AppIcons.Calendar, metaPair(booking.date, booking.time))
         MetaItem(AppIcons.Companions, pluralStringResource(Res.plurals.booking_persons, booking.persons, booking.persons))
         if (booking.staff.isNotBlank()) MetaItem(AppIcons.Person, booking.staff)
         booking.branch?.let { MetaItem(AppIcons.Store, it) }
