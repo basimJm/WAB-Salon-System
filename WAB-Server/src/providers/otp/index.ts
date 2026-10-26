@@ -1,10 +1,13 @@
 export { FakeOtpProvider, type FakeOtpOptions } from './fake';
 export { createSdkOtp, mapOtpSdkError, toProofResult, type SdkOtpDeps } from './sdk';
 export {
-  createWhatsAppOtpProvider,
-  WhatsAppOtpConfigError,
-  type WhatsAppOtpDeps,
-} from './whatsapp';
+  ArqamOtpConfigError,
+  createArqamChannelFromSettings,
+  createArqamOtpProvider,
+  reportArqamAccount,
+  type ArqamOtpDeps,
+  type ArqamOtpProvider,
+} from './arqam';
 export type {
   OtpCodeInput,
   OtpCodeResult,

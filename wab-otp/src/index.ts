@@ -31,11 +31,16 @@ export {
   type VerifyCodeInput,
 } from './adapters/code';
 export {
-  createWhatsAppChannel,
-  createWhatsAppOtp,
-  type WhatsAppOtpOptions,
-} from './adapters/whatsapp';
-export type { FetchLike, WhatsAppChannelOptions } from './adapters/whatsapp/options';
+  createArqamChannel,
+  createArqamOtp,
+  type ArqamChannel,
+  type ArqamOtp,
+  type ArqamOtpOptions,
+} from './adapters/arqam';
+export type { ArqamChannelOptions } from './adapters/arqam/options';
+export type { ArqamAccount, DeliveryEvent, DeliveryStatus } from './adapters/arqam/status';
+export { ARQAM_ERRORS, DEFAULT_ARQAM, type ArqamMode, type DeliveryState } from './constants/arqam';
+export type { FetchLike } from './adapters/http';
 export {
   createSmsChannel,
   createSmsOtp,

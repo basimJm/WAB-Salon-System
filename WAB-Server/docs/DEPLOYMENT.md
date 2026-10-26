@@ -5,8 +5,8 @@ Three environments, one image. The image never contains configuration: everythin
 | Environment | Where | `NODE_ENV` | Providers | Firebase project (push) | Buckets / CDN |
 |---|---|---|---|---|---|
 | Local | your machine, `docker compose` for Mongo/Redis/MinIO/Mailpit | `development` | `fake` (or `real` against the emulators) | none (fake) | MinIO |
-| Dev (hosted) | the shared dev server | `production` (the server has only `development`, `production`, `test`) | `real`, OTP `whatsapp`; payments `disabled` | `wab-dev-397ab` | dev public + private buckets, dev CDN |
-| Prod | the live server | `production` | `real`, OTP `whatsapp`; payments `disabled` | `wab-prod-9c58f` | prod public + private buckets, prod CDN |
+| Dev (hosted) | the shared dev server | `production` (the server has only `development`, `production`, `test`) | `real`, OTP `arqam` (TEST key); payments `disabled` | `wab-dev-397ab` | dev public + private buckets, dev CDN |
+| Prod | the live server | `production` | `real`, OTP `arqam` (LIVE key); payments `disabled` | `wab-prod-9c58f` | prod public + private buckets, prod CDN |
 
 Production mode refuses fakes, an OTP fixed code, an http CDN and a missing `PAYOUT_ENCRYPTION_KEY` at startup. Payments are paused: `PAYMENT_PROVIDER=disabled` (checkout answers 503); there is no analytics provider (server events live in MongoDB).
 
@@ -37,7 +37,7 @@ Photos: put them in a folder with the sub-folders `covers`, `profiles`, `gallery
 
 Branches: after the main-branch migration, Lamar Beauty Lounge gets two more branches (Khalda, Dabouq) and Al-Ostaz Barber Shop one (Shmeisani), each with its own hours, prices and staff (a branch manager and an employee), so the branch screens, the "Salon - Branch" nearest list and branch-scoped managers can be tried.
 
-Demo phone numbers are invented Jordanian mobiles (`+96279900xxxx` customers, `+96278900xxxx` staff, `+96278901xxxx` branch staff). They cannot receive WhatsApp codes: sign in as one on a local stack with `OTP_PROVIDER=fake` and `OTP_FIXED_CODE`, or add a real test recipient to the Meta app (dev only).
+Demo phone numbers are invented Jordanian mobiles (`+96279900xxxx` customers, `+96278900xxxx` staff, `+96278901xxxx` branch staff). They cannot receive WhatsApp codes (with an ARQAM TEST key every code goes to the key's own test phone): sign in as one on a local stack with `OTP_PROVIDER=fake` and `OTP_FIXED_CODE`, or add a real test recipient to the Meta app (dev only).
 
 The full local gate, run before every push: `npm run docs && npm run format:check && npm run lint && npm run typecheck && npm run build && npm test && npm audit --omit=dev`.
 
@@ -65,7 +65,7 @@ npm run env:check -- <env file>      # prints key names only, never values
 | `REDIS_URL` | managed Redis (`rediss://…` in production) |
 | `JWT_ACCESS_SECRET` | `openssl rand -base64 48`, one per environment |
 | `PAYOUT_ENCRYPTION_KEY` | `openssl rand -base64 32`, one per environment, never rotated without re-encrypting stored IBANs |
-| `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_TEMPLATE_NAME` (+ optional `WHATSAPP_API_VERSION`) | Meta WhatsApp Cloud API of this environment (`wab-otp/docs/WHATSAPP_SETUP.md`); the token is a secret |
+| `ARQAM_API_KEY`, `ARQAM_TEMPLATE_AR`, `ARQAM_TEMPLATE_EN` (+ optional `ARQAM_SENDER_ID`, `ARQAM_SEND_IP`, `ARQAM_BASE_URL`) | ARQAM OTP project of this environment (`wab-otp/docs/ARQAM_SETUP.md`): TEST key on dev, LIVE key on prod; the key is a secret. Check with `npm run otp:arqam-check` |
 | `OTP_CODE_SECRET`, `OTP_PROOF_SECRET` | `openssl rand -base64 48` twice (different), one pair per environment |
 | `FCM_SERVICE_ACCOUNT_JSON` | Firebase console → Project settings → Service accounts → Generate key (one line) |
 | `SMTP_*`, `EMAIL_FROM_*` | Gmail SMTP with an App Password (`SMTP_PASS`), sender `basim.abusnaimeh@gmail.com` |
@@ -80,7 +80,7 @@ Never commit `.env*` files (only `.env.example` and the `docker/*.example` templ
 2. `npm run env:check` passes for exactly the variables the host will inject.
 3. `npm run seed` once per database, then `seed:admin` once.
 4. `/health` is 200 and `/ready` is 200 behind the load balancer; HTTPS terminates at the load balancer (`TRUST_PROXY_HOPS` matches).
-5. Smoke test with the real providers: phone sign-in with a WhatsApp test recipient (dev Meta app only), an upload through a presigned URL, a push and an email.
+5. Smoke test with the real providers: phone sign-in through ARQAM (dev: the TEST key's test phone receives every code; `npm run otp:arqam-check -- --send …` first), an upload through a presigned URL, a push and an email.
 6. Dev first; prod only after dev passes.
 
 ## 5. Run one environment on any Docker host
@@ -106,7 +106,7 @@ ENV_NAME=production ENV_FILE=.env.production IMAGE_TAG=<tag> docker compose -f d
 | `MONGODB_URI` | local container | Atlas cluster **dev** | Atlas cluster **prod** (own user, IP allow-list, backups on) |
 | `REDIS_URL` | local container | managed Redis dev, or the `redis` profile | managed Redis prod (TLS, `rediss://`) |
 | `JWT_ACCESS_SECRET`, `PAYOUT_ENCRYPTION_KEY` | dev placeholder | generate (different per environment) | generate (different per environment) |
-| `OTP_PROVIDER` + `WHATSAPP_*`, `OTP_CODE_SECRET`, `OTP_PROOF_SECRET` | `fake` (+ `OTP_FIXED_CODE`) | `whatsapp`, dev Meta number + secrets | `whatsapp`, business number + secrets |
+| `OTP_PROVIDER` + `ARQAM_*`, `OTP_CODE_SECRET`, `OTP_PROOF_SECRET` | `fake` (+ `OTP_FIXED_CODE`) | `arqam`, ARQAM TEST key + secrets | `arqam`, ARQAM LIVE key + secrets |
 | `NOTIFIER_PROVIDER` + `FCM_SERVICE_ACCOUNT_JSON`, `SMTP_*`, `EMAIL_FROM_*` | `fake` (Mailpit) | `real`, dev service account | `real`, prod service account |
 | `STORAGE_PROVIDER` + `S3_*`, `CDN_BASE_URL` | `fake` or MinIO | `real`, dev buckets + dev CDN | `real`, prod buckets + prod CDN |
 | `PAYMENT_PROVIDER` | `fake` | `disabled` | `disabled` |

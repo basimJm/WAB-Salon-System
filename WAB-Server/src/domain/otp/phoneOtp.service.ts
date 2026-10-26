@@ -12,6 +12,8 @@ export interface PhoneOtpRequest {
   readonly phone: string;
   readonly purpose: OtpPurpose;
   readonly language: Language;
+  /** Client IP (trust-proxy aware); the provider forwards it only when configured (ARQAM_SEND_IP). */
+  readonly ip?: string;
 }
 
 export interface PhoneOtpRequestAnswer extends OtpRequestDecision {
@@ -26,7 +28,7 @@ export interface PhoneOtpVerified {
 }
 
 export interface PhoneOtpService {
-  /** BUSINESS_DOMAIN §3.1a step 2: limits first, then the code goes out over WhatsApp. */
+  /** BUSINESS_DOMAIN §3.1a step 2: limits first, then ARQAM delivers the code over WhatsApp. */
   request(input: PhoneOtpRequest): Promise<PhoneOtpRequestAnswer>;
   /** Step 3: wrong code → `OTP_INVALID` (counted, then `OTP_BLOCKED`); none/expired → `OTP_EXPIRED`. */
   verify(input: { phone: string; purpose: OtpPurpose; code: string }): Promise<PhoneOtpVerified>;
@@ -39,7 +41,7 @@ export interface PhoneOtpDeps {
 }
 
 /**
- * The server-side WhatsApp OTP flow shared by the customer and merchant apps. Settings are read per
+ * The server-side phone OTP flow (ARQAM over WhatsApp) shared by the customer and merchant apps. Settings are read per
  * call, so an admin change of `otp.length`, `otp.codeTtlSec` or `otp.proofTtlSec` applies at once.
  */
 export const createPhoneOtpService = ({ gate, otp, settings }: PhoneOtpDeps): PhoneOtpService => {
@@ -53,11 +55,14 @@ export const createPhoneOtpService = ({ gate, otp, settings }: PhoneOtpDeps): Ph
   };
 
   return {
-    async request({ phone, purpose, language }) {
+    async request({ phone, purpose, language, ip }) {
       const decision = await gate.request(phone);
       if (!decision.allowed) return { ...decision, expiresInSeconds: 0 };
       // The request already counts: a delivery failure (422) or an outage (503) does not refund it.
-      const sent = await otp.sendCode({ phone, purpose, language }, await rules());
+      const sent = await otp.sendCode(
+        { phone, purpose, language, ...(ip === undefined ? {} : { ip }) },
+        await rules(),
+      );
       return { ...decision, expiresInSeconds: sent.expiresInSeconds };
     },
 
