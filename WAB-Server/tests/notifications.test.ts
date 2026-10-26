@@ -576,3 +576,72 @@ describe('producers', () => {
     });
   });
 });
+
+describe('booking notifications name the branch the same way on every branch (SRV-172, §5.17)', () => {
+  const producersFor = (branchCount: number): ReturnType<typeof createNotificationProducers> =>
+    createNotificationProducers({
+      notifications: service,
+      salons: {
+        findById: () =>
+          Promise.resolve({ id: salon.toHexString(), name: 'Glow', branchCount } as never),
+      },
+      customers: new CustomersRepository(m.customers.model as never),
+      members: new MembersRepository(m.members.model as never),
+      bookings: { findById: () => Promise.resolve(null) },
+      settings: {
+        get: ((k: string) => Promise.resolve(k === 'timezone' ? 'Asia/Amman' : undefined)) as never,
+      },
+      logger,
+    });
+  const cancelled = (status: string, branch?: { ar: string; en: string }): never =>
+    ({
+      id: new Types.ObjectId().toHexString(),
+      referenceNumber: 'WAB-XYZ789',
+      customerId: customer.toHexString(),
+      salonId: salon.toHexString(),
+      ...(branch === undefined
+        ? {}
+        : { branchId: new Types.ObjectId().toHexString(), branchSnapshot: { name: branch } }),
+      status,
+      statusHistory: [{}, {}],
+      appointmentStart: new Date('2026-10-12T08:00:00Z'),
+      respondBy: new Date('2026-10-12T09:00:00Z'),
+      persons: [{ staffId: ids.staff.toHexString(), services: [] }],
+    }) as never;
+  const bodyOfCustomer = (): Record<string, string> =>
+    stored(customer)[0]?.['body'] as Record<string, string>;
+
+  it.each([
+    ['the main branch', { ar: 'عبدون', en: 'Abdoun' }],
+    ['another branch', { ar: 'خلدا', en: 'Khalda' }],
+  ])('customer cancellation at %s: "Salon - Branch" in AR and EN', async (_label, branch) => {
+    await producersFor(3).bookingChanged.changed(
+      cancelled('CANCELLED_BY_CUSTOMER', branch),
+      'APPROVED',
+    );
+    expect(bodyOfCustomer()).toEqual({
+      ar: `تم إلغاء حجزك WAB-XYZ789 لدى Glow - ${branch.ar}.`,
+      en: `Your booking WAB-XYZ789 at Glow - ${branch.en} was cancelled.`,
+    });
+  });
+
+  it('salon cancellation at the main branch names it too', async () => {
+    await producersFor(2).bookingChanged.changed(
+      cancelled('CANCELLED_BY_SALON', { ar: 'عبدون', en: 'Abdoun' }),
+      'APPROVED',
+    );
+    expect(bodyOfCustomer()['en']).toContain('Glow - Abdoun cancelled your booking');
+    expect(bodyOfCustomer()['ar']).toContain('ألغى Glow - عبدون حجزك');
+  });
+
+  it('a single-branch salon and a booking older than branches show the salon name alone', async () => {
+    await producersFor(1).bookingChanged.changed(
+      cancelled('CANCELLED_BY_CUSTOMER', { ar: 'عبدون', en: 'Abdoun' }),
+      'APPROVED',
+    );
+    expect(bodyOfCustomer()['en']).toBe('Your booking WAB-XYZ789 at Glow was cancelled.');
+    m.notifications.docs.length = 0;
+    await producersFor(3).bookingChanged.changed(cancelled('CANCELLED_BY_CUSTOMER'), 'APPROVED');
+    expect(bodyOfCustomer()['en']).toBe('Your booking WAB-XYZ789 at Glow was cancelled.');
+  });
+});

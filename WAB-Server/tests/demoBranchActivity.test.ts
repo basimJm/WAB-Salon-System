@@ -184,6 +184,55 @@ describe('demo branches for the merchant app (SRV-160)', () => {
     }
   });
 
+  it('SRV-172: customer notifications name "Salon - Branch" on every branch, main included, in AR and EN', () => {
+    const texts = (
+      rows: DemoDoc[],
+      salonId: string,
+      event = 'booking.cancelled_by_customer',
+    ): { ar: string; en: string }[] =>
+      rows
+        .filter(
+          (n) =>
+            n['recipientType'] === 'CUSTOMER' &&
+            n['event'] === event &&
+            str((n['data'] as { salonId: string }).salonId) === salonId,
+        )
+        .map((n) => n['body'] as { ar: string; en: string });
+    for (const plan of plans) {
+      const spec = DEMO_BRANCHES.find((b) => b.salon === plan.salon && b.key === plan.key);
+      const salon = DEMO_SALONS.find((s) => s.key === plan.salon);
+      const found = texts(plan.data.Notification, demoId(`salon:${plan.salon}`).toString());
+      expect(found.length).toBeGreaterThan(0);
+      for (const text of found) {
+        expect(text.en).toContain(`${salon?.name ?? ''} - ${spec?.name.en ?? ''}`);
+        expect(text.ar).toContain(`${salon?.name ?? ''} - ${spec?.name.ar ?? ''}`);
+      }
+    }
+    // The main branch (named after the salon's area, §5.16) of the same salons.
+    for (const key of new Set(plans.map((plan) => plan.salon))) {
+      const salon = DEMO_SALONS.find((s) => s.key === key);
+      const area = SEED_AREAS.find((a) => a.name.en === salon?.place.area)?.name;
+      const main = texts(base.Notification, demoId(`salon:${key}`).toString(), 'booking.created');
+      expect(main.length).toBeGreaterThan(0);
+      for (const text of main) {
+        expect(text.en).toContain(`${salon?.name ?? ''} - ${area?.en ?? ''}`);
+        expect(text.ar).toContain(`${salon?.name ?? ''} - ${area?.ar ?? ''}`);
+      }
+    }
+    // A single-branch demo salon keeps its plain name.
+    const single = DEMO_SALONS.find(
+      (s) => s.state === 'LIVE' && !DEMO_BRANCHES.some((b) => b.salon === s.key),
+    );
+    for (const n of base.Notification.filter(
+      (row) =>
+        row['recipientType'] === 'CUSTOMER' &&
+        str((row['data'] as { salonId: string }).salonId) ===
+          demoId(`salon:${single?.key ?? ''}`).toString(),
+    )) {
+      expect((n['body'] as { en: string }).en).not.toContain(`${single?.name ?? ''} - `);
+    }
+  });
+
   it('puts the closure and the staff leave after the booked days of the branch', () => {
     const lastBooked = addDays(today, DEMO_DAYS_AHEAD);
     for (const plan of plans) {

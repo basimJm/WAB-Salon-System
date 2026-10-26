@@ -1,5 +1,6 @@
 import type { Types } from 'mongoose';
 import {
+  DEMO_BRANCHES,
   DEMO_CANCELLATION_WINDOW_HOURS,
   DEMO_CATALOG_REQUESTS,
   DEMO_CLOSURE_REASON,
@@ -28,11 +29,13 @@ import {
 } from '../../constants/demoSeed';
 import type { Gender, MemberRole } from '../../constants/enums';
 import { FULL_PERCENT } from '../../constants/money';
-import type { LocalizedName } from '../../constants/referenceData';
+import { SEED_AREAS, type LocalizedName } from '../../constants/referenceData';
+import { MAIN_BRANCH_DEFAULT_NAME } from '../../constants/branches';
 import { SCHEDULE_DAY_ORDER, type PAYMENT_OPTIONS } from '../../constants/salon';
 import { MS_PER_DAY, type DayOfWeek } from '../../constants/time';
 import { defaultPermissionsFor } from '../../domain/permissions/permissions';
 import { computeBranchMissing } from '../../domain/branches/completeness';
+import { salonTitle } from '../../domain/branches/salonTitle';
 import { computeMissing } from '../../domain/salons/completeness';
 import type { SalonPolicy, ScheduleDay } from '../../models/salon.model';
 import { mulDivRound } from '../../utils/money';
@@ -67,6 +70,11 @@ export interface DemoSalon {
   /** Members told about booking requests (owner + manager). */
   readonly responders: readonly Types.ObjectId[];
   readonly takesBookings: boolean;
+  /**
+   * How notifications name this place (§5.17 via `salonTitle`): "Salon - Branch" on every branch
+   * of a salon with several branches (main included), the salon name alone otherwise.
+   */
+  readonly title: LocalizedName;
   /** Set for an extra branch: its bookings, money and reviews carry the branch (§3.5, §5.16). */
   readonly branch?: {
     readonly id: Types.ObjectId;
@@ -77,6 +85,20 @@ export interface DemoSalon {
     };
   };
 }
+
+/**
+ * The main branch is named after the salon's area (§5.16 migration), else the default name; the
+ * salon has its main branch plus its `DEMO_BRANCHES` extras.
+ */
+const demoMainTitle = (spec: DemoSalonSpec): LocalizedName => {
+  const count = 1 + DEMO_BRANCHES.filter((branch) => branch.salon === spec.key).length;
+  const main =
+    SEED_AREAS.find((area) => area.name.en === spec.place.area)?.name ?? MAIN_BRANCH_DEFAULT_NAME;
+  return {
+    ar: salonTitle(spec.name, main.ar, count),
+    en: salonTitle(spec.name, main.en, count),
+  };
+};
 
 const APPROVED_STATES = new Set(['APPROVED_INCOMPLETE', 'LIVE', 'OFFLINE']);
 const STAFFED_STATES = new Set(['LIVE', 'OFFLINE']);
@@ -461,6 +483,7 @@ export const buildSalons = (
       staff,
       responders,
       takesBookings: staffed,
+      title: demoMainTitle(spec),
     });
   });
 
