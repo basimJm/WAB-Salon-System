@@ -83,7 +83,8 @@
     <string name="reassign_title">إعادة توزيع الموظف</string>
     <string name="reassign_sub">اختر موظفاً مؤهلاً ومتاحاً طوال مدة الخدمة. سيتم إشعار الزبون.</string>
     <string name="reassign_current">الموظف الحالي: %1$s</string>
-    <string name="reassign_note">يتحقق الخادم من أن الموظف المختار يقدم الخدمات ومتاح طوال المدة.</string>
+    <string name="reassign_none">لا يوجد موظف آخر مؤهل ومتاح في هذا الوقت.</string>
+    <string name="reassign_failed">تعذّر تحميل الموظفين المتاحين. أغلق وحاول مرة أخرى.</string>
     <string name="confirm_reassign">تأكيد إعادة التوزيع</string>
     <string name="handled_title">تم التعامل مع هذا الحجز</string>
     <string name="handled_body">تعامل عضو آخر مع هذا الحجز قبل لحظات. تم تحديث التفاصيل.</string>

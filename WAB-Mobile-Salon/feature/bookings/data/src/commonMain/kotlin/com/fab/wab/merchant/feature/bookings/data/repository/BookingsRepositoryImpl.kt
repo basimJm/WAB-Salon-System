@@ -49,6 +49,11 @@ class BookingsRepositoryImpl(private val api: BookingsApi) : BookingsRepository 
     override suspend fun reassign(bookingId: String, personIndex: Int, staffId: String) =
         safeApiCall { api.reassign(bookingId, PostBookingsByIdReassignBody(personIndex, staffId)) }.mapSuccess { }
 
+    override suspend fun eligibleStaff(bookingId: String, personIndex: Int): AppResult<List<StaffRef>> =
+        safeApiCall { api.eligibleStaff(bookingId, personIndex) }.mapSuccess { response ->
+            response.data.map { StaffRef(it.staffId, it.name) }
+        }
+
     override suspend fun staff(): AppResult<List<StaffRef>> =
         safeApiCall { api.team() }.mapSuccess { response -> response.data.filter { it.active && it.providesServices }.map { it.toStaff() } }
 }

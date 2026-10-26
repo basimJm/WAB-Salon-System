@@ -83,7 +83,8 @@
     <string name="reassign_title">Reassign staff</string>
     <string name="reassign_sub">Choose qualified staff free for the full duration. The customer will be notified.</string>
     <string name="reassign_current">Current: %1$s</string>
-    <string name="reassign_note">The server checks that the chosen staff provides the services and is free for the full duration.</string>
+    <string name="reassign_none">No other staff member is qualified and free for this time.</string>
+    <string name="reassign_failed">The available staff could not be loaded. Close and try again.</string>
     <string name="confirm_reassign">Confirm reassignment</string>
     <string name="handled_title">This booking was already handled</string>
     <string name="handled_body">Another member answered this booking moments ago. Details are refreshed.</string>
