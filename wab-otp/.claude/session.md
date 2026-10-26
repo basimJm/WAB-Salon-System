@@ -3,9 +3,24 @@
 > Loaded on every turn while working in this folder. Keep the current task block + the last 2 blocks; move older blocks nowhere (git history keeps them). Next task: `python3 scripts/tasks.py next otp`. Status changes: `tasks.py set <ID> <STATUS>`. Cross-project view: root `.claude/session.md` and `INTEGRATION.md`.
 
 ## Integration status (one glance)
-- 0.2.0 (OTP-011): WhatsApp code channel + signed single-use `otpToken` + OTP limits; Firebase verifier removed. WAB-Server still on 0.1.0 until SRV-153.
+- 0.3.0 (OTP-012): ARQAM OTP channel (WhatsApp delivery through ARQAM) + signed single-use `otpToken` + OTP limits; Meta WhatsApp channel removed. WAB-Server adopts it in SRV-158 (same branch).
 
 ## Current task
+
+### OTP-012 — ARQAM OTP channel; direct Meta WhatsApp channel removed; 0.3.0 (owner decisions 2026-10-26)
+- Branch: `feat/srv-158-arqam-otp` (one branch with SRV-158: the server uses `file:../wab-otp`)
+- Status: IN REVIEW (committed, not pushed; no PR — the lead ships it)
+- Acceptance criteria (BUSINESS_DOMAIN §3.1a, §11 `OTP_DELIVERY_FAILED`, §12.8; ARQAM API docs read 2026-10-26):
+  - [x] `createArqamChannel` implements `OtpChannel`: `POST {baseUrl}/sms/otp` with `x-api-key`, JSON, one `idempotency-key` per send (reused by its retries), body `{phoneNumber (E.164), otpCode (our code), templateName (per app language, fallback), senderId?, ipAddress? (`::ffff:` removed, non-IPs dropped)}`; `messageId` returned; 2xx without it → `OTP_MALFORMED_RESPONSE` (not retried)
+  - [x] `createArqamOtp` (code flow + `getAccount` + `getDeliveryStatus`); `SendCodeInput.ip` / `OtpMessage.ip` pass-through
+  - [x] Error table `ARQAM_ERRORS` (every documented code) + HTTP fallback; `RATE_LIMITED` honours `retryAfter` within `maxRetryAfterMs` (`withRetry` waits ≥ `details.retryAfterMs`), longer waits not retried; timeouts/network/5xx retried; unknown → `OTP_UNKNOWN` logged with ARQAM's message (phones masked)
+  - [x] Prod strict: https `baseUrl`, fake channel and fixed code refused; codes outside 4–6 digits → `OTP_CONFIG_INVALID` before any call; key and code never logged
+  - [x] Removed: `adapters/whatsapp/*`, `constants/whatsapp.ts`, `createWhatsAppOtp`, `createWhatsAppChannel`, Meta options/error table/tests/fixtures, `docs/WHATSAPP_SETUP.md`; generic `adapters/http` (`FetchLike` with optional body, `sendHttp`, `transportError`)
+  - [x] 0.3.0; CHANGELOG (BREAKING), README, `.claude/Integration.md`, `.claude/CLAUDE.md`, memory; owner guide `docs/ARQAM_SETUP.md`
+- Assumed missing (Integration.md §11): `Idempotency-Key` honoured on `/sms/otp`; `senderId` accepted on `/sms/otp`; `/sms/account` field names; delivery failures after acceptance are not reported (no webhook statuses); `otp.length` > 6 breaks ARQAM sends.
+- Tests: `tests/arqam.test.ts`, `arqamErrors.test.ts`, `arqamOptions.test.ts`, `arqamStatus.test.ts`, `http.test.ts`, `kernel.test.ts` (wait hint), `code.test.ts` (ip); `npm run verify` green through the Terminal panel (local ports): typecheck, lint, format, 183 unit tests (coverage 99.53 % stmts / 98.41 % branches / 100 % functions / 99.86 % lines), build, CJS + ESM smoke, loop 2/2 (memory + real Redis)
+- Loops: 1/1 — re-checked every criterion against the ARQAM spec in the task and §3.1a; found and fixed: `::ffff:abcd` is a valid IPv6 (test expectation), `exactOptionalPropertyTypes` in tests, prettier drift in README.
+- Review: PASSED (SE ✔ (ports/adapters, no WAB rule inside, files < 300 lines, no hardcoded wire values outside `constants/`), Mobile N/A, Architect ✔ (channel swap = one adapter; consumer API of the code flow unchanged except the additive `ip`), QA ✔ (every ARQAM code + HTTP fallback, retry/idempotency, malformed answers, logs)) — DEVIATIONS: no real call to otp.arqam.tech (no key); dashboard labels in the owner guide are marked ⚠️ guesses.
 
 ### OTP-011 — WhatsApp channel + signed single-use OTP proof (owner decision 2026-10-26)
 - Branch: `feat/otp-011-whatsapp`

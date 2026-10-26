@@ -1,16 +1,17 @@
 import type { AppConfig } from '../config';
-import {
-  DISABLED_PAYMENT_MODE,
-  REAL_PROVIDER_MODE,
-  WHATSAPP_OTP_MODE,
-} from '../constants/providers';
+import { DISABLED_PAYMENT_MODE, REAL_PROVIDER_MODE, ARQAM_OTP_MODE } from '../constants/providers';
 import { InternalError } from '../utils/errors';
 import { FakeNotifier, type Notifier } from './notifier';
 import { createRealNotifier, type ClosableNotifier } from './notifier/real';
 import type { Redis } from 'ioredis';
 import type { Logger } from '../utils/logger';
 import { RedisCodeStore } from '@wab/otp';
-import { FakeOtpProvider, createWhatsAppOtpProvider, type OtpProvider } from './otp';
+import {
+  FakeOtpProvider,
+  createArqamOtpProvider,
+  reportArqamAccount,
+  type OtpProvider,
+} from './otp';
 import { DisabledPaymentProvider, FakePaymentProvider, type PaymentProvider } from './payments';
 import { FakeStorageProvider, type StorageProvider } from './storage';
 import { createRealStorage } from './storage/real';
@@ -29,6 +30,8 @@ export interface Providers {
   /** Releases provider connections on shutdown. */
   readonly close: () => Promise<void>;
   readonly payments: PaymentProvider;
+  /** Logs the OTP delivery account once (ARQAM mode, balance); never throws, never blocks startup. */
+  readonly reportOtpAccount: () => Promise<void>;
 }
 
 /** The configured provider cannot be built: not integrated yet, or a fake in production. */
@@ -71,17 +74,20 @@ export const createProviders = (
       throw new ProviderUnavailableError('payments', 'fakes are not allowed in production');
     return new FakePaymentProvider();
   };
-  // Phone OTP (BUSINESS_DOMAIN §3.1a): WhatsApp in production; the fake records codes (dev/test).
+  let reportOtpAccount = (): Promise<void> => Promise.resolve();
+  // Phone OTP (BUSINESS_DOMAIN §3.1a): ARQAM in production; the fake records codes (dev/test).
   const pickOtp = (mode: AppConfig['providers']['otp']): OtpProvider => {
-    if (mode === WHATSAPP_OTP_MODE) {
+    if (mode === ARQAM_OTP_MODE) {
       if (deps === undefined)
         throw new ProviderUnavailableError('otp', 'runtime dependencies missing');
-      return createWhatsAppOtpProvider({
+      const arqam = createArqamOtpProvider({
         settings: deps.config.otp,
         redis: deps.redis,
         logger: deps.logger,
         isProduction,
       });
+      reportOtpAccount = () => reportArqamAccount(arqam, isProduction, deps.logger);
+      return arqam;
     }
     if (isProduction)
       throw new ProviderUnavailableError('otp', 'fakes are not allowed in production');
@@ -134,6 +140,7 @@ export const createProviders = (
   };
   return {
     ...built,
+    reportOtpAccount,
     close: async () => {
       await Promise.all(closers.map((close) => close()));
     },

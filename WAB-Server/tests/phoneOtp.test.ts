@@ -104,6 +104,32 @@ describe('POST /auth/otp/request', () => {
     expect(JSON.stringify(bodyOf(res))).not.toContain(sentCode());
   });
 
+  it('hands the client IP (trust-proxy aware) to the provider, which decides whether to forward it', async () => {
+    makeApp();
+    const seen: unknown[] = [];
+    const recording = {
+      sendCode: (input: unknown, rules: never) => {
+        seen.push(input);
+        return provider.sendCode(input as never, rules);
+      },
+      verifyCode: provider.verifyCode,
+      verify: provider.verify,
+    } as unknown as FakeOtpProvider;
+    const phoneOtp = createPhoneOtpService({
+      gate: makeGate(),
+      otp: recording,
+      settings: settings as never,
+    });
+    const app = createApp({ logger, services: { phoneOtp }, trustProxyHops: 1 });
+    await post(app, 'request', { phone: PHONE, purpose: 'LOGIN' }).set(
+      'X-Forwarded-For',
+      '203.0.113.9',
+    );
+    expect(seen[0]).toMatchObject({ phone: PHONE, purpose: 'LOGIN', ip: '203.0.113.9' });
+    // The fake provider is not configured to forward it: the channel never sees the IP.
+    expect(provider.channel.sent[0]).not.toHaveProperty('ip');
+  });
+
   it('sends Arabic by default and reads otp.length / otp.codeTtlSec from settings', async () => {
     values['otp.length'] = 4;
     values['otp.codeTtlSec'] = 120;

@@ -11,12 +11,12 @@
 - Repo-wide context already in context: root `CLAUDE.md`, `.claude/rules.md`; `../BUSINESS_DOMAIN.md` only for names/enums the consumer uses; `../INTEGRATION.md` §3 for the server port this package must satisfy
 
 ## What this package is
-Server-side phone OTP behind provider-independent ports (0.2.0, owner decision 2026-10-26): the server generates the code, stores its HMAC, sends it over the WhatsApp Cloud API authentication template (`OtpChannel`), checks it and issues a signed single-use proof (`otpToken`). Also owns OTP limits (5 requests/5 min → 15 min block; 5 wrong codes → 15 min block; resend after 60 s, all configurable) and exposes `otpLength`/resend config to apps. Owner setup: `docs/WHATSAPP_SETUP.md`.
+Server-side phone OTP behind provider-independent ports (0.3.0, owner decisions 2026-10-26): the server generates the code, stores its HMAC, hands it to ARQAM OTP which delivers it over WhatsApp (`OtpChannel`), checks it and issues a signed single-use proof (`otpToken`). Also owns OTP limits (5 requests/5 min → 15 min block; 5 wrong codes → 15 min block; resend after 60 s, all configurable) and exposes `otpLength`/resend config to apps. Owner setup: `docs/ARQAM_SETUP.md`.
 
 ## Who you are when you work here
 Act as all four at once and challenge your own work from each angle:
 - **Senior Backend Engineer** — correct, typed, performant, safe under concurrency and failure.
-- **Senior Solution Architect** — vendor-independent ports and adapters; no WAB business rules inside; easy evolution (WhatsApp today, another channel = one adapter).
+- **Senior Solution Architect** — vendor-independent ports and adapters; no WAB business rules inside; easy evolution (ARQAM today, another channel = one adapter).
 - **Senior Integration Engineer** — every vendor status/error/timeout/quota mapped; dev (local) and prod behave predictably; idempotent and retry-safe.
 - **Senior Implementation Engineer** — small clean files, full unit tests, builds green, simple for any project to adopt.
 
@@ -33,7 +33,8 @@ src/
   ports/              # OtpProvider, LimitStore, OtpChannel, CodeStore
   proof/              # signed single-use otpToken
   adapters/code/      # server-generated code flow
-  adapters/whatsapp/  # Meta Cloud API channel
+  adapters/arqam/     # ARQAM OTP channel (WhatsApp delivery)
+  adapters/http/      # FetchLike + bounded HTTP helper
   adapters/sms/ adapters/code-store/
   adapters/fake/      # local/dev
   limits/             # request/wrong-attempt limiter over LimitStore

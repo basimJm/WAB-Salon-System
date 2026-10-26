@@ -48,6 +48,14 @@ describe('createCodeOtp (server-generated codes over any channel)', () => {
     expect(stored).not.toContain('000042');
   });
 
+  it('passes the end user IP to the channel only when given', async () => {
+    const otp = make();
+    await otp.sendCode({ ...send, ip: '203.0.113.5' });
+    expect(channel.sent[0]).toMatchObject({ ip: '203.0.113.5' });
+    await otp.sendCode(send);
+    expect(channel.sent[1]).not.toHaveProperty('ip');
+  });
+
   it('verifies the right code once into a usable otpToken', async () => {
     const otp = make();
     await otp.sendCode(send);
@@ -145,7 +153,7 @@ describe('createCodeOtp (server-generated codes over any channel)', () => {
   it('deletes the code and rethrows a typed channel error (DELIVERY_FAILED stays as is)', async () => {
     const events: OtpEvent[] = [];
     const otp = make({ onEvent: (e) => events.push(e) });
-    channel.failWith = new OtpError('OTP_DELIVERY_FAILED', 'not on WhatsApp');
+    channel.failWith = new OtpError('OTP_DELIVERY_FAILED', 'recipient refused');
     await expect(otp.sendCode(send)).rejects.toMatchObject({
       code: 'OTP_DELIVERY_FAILED',
       retryable: false,

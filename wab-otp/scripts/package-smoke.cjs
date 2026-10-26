@@ -32,12 +32,12 @@ try {
       const viaCode = await codes.verifyCode({ phone, purpose: 'LOGIN', code: channel.lastCode(phone) });
       const signed = lib.createOtpService({ environment: 'dev', provider: 'signed', proof: { secret: 'p'.repeat(32), store } });
       const viaToken = await signed.verify({ proof: viaCode.otpToken, expectedPhone: phone, purpose: 'LOGIN' });
-      const wa = lib.createWhatsAppChannel({ environment: 'dev', phoneNumberId: '1', accessToken: 't', templateName: 'otp', languageCodes: { ar: 'ar' },
-        fetch: async () => ({ status: 200, text: async () => JSON.stringify({ messages: [{ id: 'wamid.1' }] }) }) });
-      const sent = await wa.send({ to: phone, code: '123456', language: 'ar', purpose: 'LOGIN', ttlSec: 300 });
+      const aq = lib.createArqamChannel({ environment: 'dev', apiKey: 'k', templates: { ar: 'otp' },
+        fetch: async () => ({ status: 200, text: async () => JSON.stringify({ success: true, messageId: 'aq-1', status: 'sent' }) }) });
+      const sent = await aq.send({ to: phone, code: '123456', language: 'ar', purpose: 'LOGIN', ttlSec: 300 });
       await otp.close();
       await signed.close();
-      if (lib.SDK_NAME !== 'wab-otp' || !pre.allowed || ok.outcome !== 'VERIFIED' || viaToken.outcome !== 'VERIFIED' || sent.id !== 'wamid.1' || lib.ERROR_CODES.DELIVERY_FAILED !== 'OTP_DELIVERY_FAILED' || typeof lib.OtpError !== 'function')
+      if (lib.SDK_NAME !== 'wab-otp' || !pre.allowed || ok.outcome !== 'VERIFIED' || viaToken.outcome !== 'VERIFIED' || sent.id !== 'aq-1' || lib.ERROR_CODES.DELIVERY_FAILED !== 'OTP_DELIVERY_FAILED' || typeof lib.OtpError !== 'function')
         throw new Error('smoke failed');
     };
   `;

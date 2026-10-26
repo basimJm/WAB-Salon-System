@@ -2,7 +2,14 @@ import { ERROR_CODES } from '../src/constants/codes';
 import { configError, isOtpError, OtpError, providerError, validationError } from '../src/errors';
 import { maskPhone, redactFields, redactingLogger, silentLogger } from '../src/logging';
 import type { Logger } from '../src/ports';
-import { delayFor, isRetryable, realRetryDeps, withRetry, type RetryDeps } from '../src/retry';
+import {
+  delayFor,
+  hintedDelayMs,
+  isRetryable,
+  realRetryDeps,
+  withRetry,
+  type RetryDeps,
+} from '../src/retry';
 
 const policy = { maxAttempts: 3, baseDelayMs: 100, maxDelayMs: 250, jitterRatio: 0.5 };
 
@@ -161,6 +168,32 @@ describe('retry', () => {
     expect(result).toBe('ok');
     expect(sleeps).toEqual([100, 200]);
     expect(seen).toEqual([1, 2]);
+  });
+
+  it('reads a vendor wait hint and never retries sooner than it', async () => {
+    const hinted = (ms: unknown): OtpError =>
+      new OtpError(ERROR_CODES.RATE_LIMITED, 'r', {
+        retryable: true,
+        details: { retryAfterMs: ms },
+      });
+    expect(hintedDelayMs(hinted(1500))).toBe(1500);
+    expect(hintedDelayMs(hinted(-1))).toBeUndefined();
+    expect(hintedDelayMs(hinted('1'))).toBeUndefined();
+    expect(hintedDelayMs(hinted(Number.NaN))).toBeUndefined();
+    expect(hintedDelayMs(new Error('x'))).toBeUndefined();
+    const sleeps: number[] = [];
+    let calls = 0;
+    await withRetry(
+      () => {
+        calls += 1;
+        if (calls === 1) return Promise.reject(hinted(1500));
+        if (calls === 2) return Promise.reject(hinted(10));
+        return Promise.resolve('ok');
+      },
+      policy,
+      deps(sleeps),
+    );
+    expect(sleeps).toEqual([1500, 200]);
   });
 
   it('gives up after maxAttempts and never retries other errors', async () => {

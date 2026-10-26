@@ -27,15 +27,18 @@ export interface SdkOtpDeps {
   readonly proofSecret: string;
   /** Development only: every code is this value. */
   readonly fixedCode?: string;
+  /** Pass the end user's IP to the channel (ARQAM projects with IP rate limiting); dropped otherwise. */
+  readonly forwardIp?: boolean;
   readonly logger?: Logger;
   readonly now?: () => Date;
 }
 
 /**
- * SDK failures become typed API errors; the vendor text never reaches a client and codes, tokens
- * and full phone numbers never reach a log. A recipient WhatsApp refuses is the caller's problem
- * (422 `OTP_DELIVERY_FAILED`); anything else (outage, throttling, token or template problem, store
- * down) is a 503 the owner must see in the logs. Invalid input from this server is a bug.
+ * SDK failures become typed API errors; the vendor text never reaches a client and codes, keys
+ * and full phone numbers never reach a log. A recipient ARQAM refuses (`INVALID_PHONE`,
+ * `PROVIDER_ERROR`) is the caller's problem (422 `OTP_DELIVERY_FAILED`); anything else (outage,
+ * throttling, key, credits, sender or template problem, store down) is a 503 the owner must see in
+ * the logs (`error` level). Invalid input from this server is a bug.
  */
 export const mapOtpSdkError = (error: unknown, phone: string, logger?: Logger): never => {
   if (!isOtpError(error)) throw error;
@@ -123,7 +126,10 @@ export const createSdkOtp = (deps: SdkOtpDeps): OtpProvider => {
   return {
     sendCode: (input, rules) =>
       guarded(input.phone, async () => {
-        const sent = await flowFor(rules).sendCode(input);
+        const { ip, ...rest } = input;
+        const sent = await flowFor(rules).sendCode(
+          deps.forwardIp === true && ip !== undefined ? { ...rest, ip } : rest,
+        );
         return { expiresInSeconds: sent.expiresInSec };
       }),
 
