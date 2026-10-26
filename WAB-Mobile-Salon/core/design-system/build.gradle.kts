@@ -20,6 +20,7 @@ kotlin {
     }
     sourceSets.commonMain.dependencies {
         implementation(libs.bundles.compose)
+        implementation(libs.coil.svg)
         api(libs.compose.uiToolingPreview)
         implementation(projects.core.ui)
         implementation(projects.core.domain)
