@@ -226,3 +226,12 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.
+
+### T-141-customer — Sync main into customer (part of T-141)
+- Branch: `chore/sync-main-into-customer-11`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `main` (SRV-171/172) merged into `customer` (no conflicts); finished task set DONE, board regenerated
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge + backlog status only, no product code written.
