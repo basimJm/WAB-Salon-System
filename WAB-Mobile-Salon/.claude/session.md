@@ -9,6 +9,24 @@
 
 ## Current task
 
+### MER-073 — OTP screen fixes + every OTP flow tested on the local stack
+- Branch: `fix/mer-073-otp-screen`
+- Branched: (from `origin/merchant` + `origin/main`, already up to date)
+- Status: IN PROGRESS
+- Acceptance criteria (owner 2026-10-26 "fix merchant OTP screen and test all flows"; PRD M03 + Customer PRD S13; BUSINESS_DOMAIN §3.1a; `POST /auth/otp/request`, `POST /auth/otp/verify`, `otpToken` in login / application / change phone / payout details; design `WAB Merchant 01 Onboarding.dc.html` `on.otp`):
+  - [x] Layout = merchant design (was the customer S13 copy): `padding:54px 22px 30px` measured from the screen top (status bar included, also login), back pill + centered mode title (`t.modes`: Log in / Register salon / Change number / Confirm bank details), icon per mode (phone / house / bank), title "Enter verification code", bank note (bank details), boxes 56 dp / radius 14 / gap 8 / digit 22 / `margin:28px 0 10px`, flat card cells with the 4 dp focus ring drawn outside (the current cell no longer shrinks), resend `margin-top:18px`; phone shown `+962 7 9123 4567`; content keeps the phone width (≤ 560 dp) in landscape / tablets
+  - [x] Keyboard: the field takes focus + keyboard when a code is waiting, after a wrong code and after each new code; `ImeAction.Done` verifies; autofill `ContentType.SmsOtpCode`
+  - [x] Input: Arabic-Indic / Eastern Arabic-Indic digits accepted; a pasted whole code (WhatsApp "copy code" or a message) replaces the typed digits; after a refused code the next digit starts a new code (was: a full wrong code ignored every key until 6 backspaces)
+  - [x] `OTP_BLOCKED` on verify (5th wrong code) shows the blocked banner with the remaining time (one `otp/request` answers `blockedUntil`, nothing is sent while blocked); was a toast + a resend link that could not work
+  - [x] One code request per OTP screen: `onStart` re-ran on every re-subscription (back from WhatsApp after > 5 s) and, past the 60 s cooldown, sent a NEW code that replaced the one the member had just read
+  - [x] Bank details: the form loads once; coming back from the OTP screen re-ran the load and replaced the typed bank name / holder with the saved ones, so the save failed with `VALIDATION_ERROR` after a spent code
+  - [x] Change-phone sheet: phone field box is LTR (`+962` before the number, as in the design), label/error keep the screen direction (`AppTextField(fieldDirection)`)
+  - [x] All flows on the emulator (Pixel 8 Pro, `emulator-5570`) against the local stack (`OTP_PROVIDER=fake`, code 123456) — results in Notes
+- Tests: `ComponentLogicTest` (+3: Arabic digits, paste, restart after a refused code), `PhoneDisplayTest` (2), `OtpVerifyErrorsTest` (blocked banner + blocked without status), `OtpViewModelTest` (+1 no second request on re-subscription, codes counter), `BankDetailsViewModelTest` (+1 typed details survive the OTP round trip); `:feature:auth:presentation`, `:feature:finance:presentation`, `:feature:more:presentation`, `:core:design-system` host tests green; `policy_checks.py all` ok; detekt ok; `:androidApp:assembleDevDebug` ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: device results (local stack, dev build with a LOCAL `local.properties` `DEV_API_BASE_URL=http://10.0.2.2:4000` + `DEV_DATA_SOURCE=remote`, and an UNCOMMITTED `android:usesCleartextTraffic="true"` in the debug manifest for http to the host — reverted before commit): sign-in owner Lamar ✔ (wrong code → server "attempts left: 4" line, then right code → Home), sign-in Khalda manager after expiry popup + resend ✔, wrong code ×5 (Khalda employee) → blocked banner 15:02 ✔, resend after 60 s ✔ (new countdown + lifetime), code lifetime 5:00 → expired popup → resend ✔, registration (new number 789777001) → not-linked dialog → REGISTER OTP → M04 form ✔ (application not submitted: needs document uploads), change phone owner → 789555001 ✔ and back to 789000001 ✔, bank details ✔ (saved with the proof after 10 s on the OTP screen), leave to the launcher 70 s and come back keeps the typed digits and sends no new code ✔; AR RTL + EN LTR, landscape with keyboard, font scale 200 % checked. Not exercised on device: paste and Arabic-Indic digits (adb `input text` is ASCII only, no clipboard command) — unit tests only; `OTP_DELIVERY_FAILED` (fake provider never fails). Found outside OTP (task chip): Back on the M10 request sheet leaves an invisible scrim that swallows the next tap.
+
 ### MER-071 — Crash fix: decoding failures become `AppError.ParseError`
 - Branch: `fix/mer-071-decode-crash`
 - Status: IN REVIEW
@@ -35,14 +53,3 @@
 - Tests: `OtpViewModelTest` (7), `OtpVerifyErrorsTest` (6), `OtpUseCasesTest` (2), `AuthMappersTest` (+1), `RealAuthFixturesTest` (request + verify), `AuthRefreshInterceptorTest` (+1 public request), `RegistrationViewModelTest` (+1 rejected proof), `ErrorCodeTest`, `FirebaseFacadeTest` (phone-auth cases removed), `test_capture_otp.py` (4); `./gradlew testAndroidHostTest` 180 suites / 589 tests / 0 failures; `policy_checks.py all: ok`; script tests 105 OK; detekt clean (empty baseline); `:androidApp:assembleDevDebug` + `:composeApp:linkDebugFrameworkIosSimulatorArm64` green
 - Loops: 1/1 — re-checked every criterion against the contract (operation list, DTOs), the server verify/consume order (`phoneOtp.service`, `phoneVerifier`) and the test reports; found and fixed in the loop: verify 401 would refresh + retry (double wrong count), a refused early resend cleared a live code, registration with an expired token had no way out, detekt line lengths, an unnecessary safe call (`-Werror`)
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — four-role reading of the diff: domain/data/presentation layering kept (verify use case, mapper in data, VM state only), no hardcoded text (AR + EN), timers from the server, Firebase now push/analytics/crash only, contract regenerated by the tool, error-code policy green. DEVIATIONS: no emulator/simulator run and no Xcode app build (Swift edits compiled only through the framework link, not `xcodebuild`); capture fixtures hand-edited, not re-captured (no local stack); proof lifetime 10 min may be short for a slow M04 form (falls back to login; owner/server may raise `otp.proofTtlSec`).
-
-### MER-068a — detekt: wrap the long test line left by MER-068
-- Branch: `fix/mer-068-detekt-line`
-- Branched: (from `origin/merchant`)
-- Status: DONE
-- Acceptance criteria (end-of-backlog gate, rule §3.13):
-  - [x] `ApplicationTestFakes.kt:31` (166 chars) wrapped; detekt clean with the empty baseline
-  - [x] Full `scripts/ci/run_local_checks.sh` green on the final merchant code (MER-067…069): policy tests + checks, contract, detekt, unit tests + 4 Android variants + lint, 4 iOS configurations, K/N tests
-- Tests: `run_local_checks.sh` exit 0
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — test formatting only.

@@ -26,9 +26,6 @@ import com.fab.wab.merchant.designsystem.resources.otp_description
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import org.jetbrains.compose.resources.stringResource
 
-/** Keeps only ASCII digits and at most [length] of them. Pure and tested. */
-fun sanitizeOtp(input: String, length: Int): String = input.filter { it in '0'..'9' }.take(length)
-
 /**
  * One-time-code input with [length] boxes (the length comes from the backend, never a constant here).
  * Digits always run left to right, also in Arabic. States: empty, filling, filled and error.

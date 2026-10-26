@@ -16,6 +16,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.unit.LayoutDirection
 import com.fab.wab.merchant.designsystem.components.image.AppImage
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppTextField
@@ -73,6 +74,7 @@ fun AppPhoneField(
         enabled = enabled,
         keyboardOptions = AppKeyboards.phone,
         textDirection = TextDirection.Ltr,
+        fieldDirection = LayoutDirection.Ltr,
         leading = { CountryChip(country = country, onClick = onCountryClick, enabled = enabled) },
     )
 }

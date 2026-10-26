@@ -17,6 +17,8 @@ sealed interface OtpContract {
         val requesting: Boolean = true,
         /** A live code was sent on WhatsApp; Verify stays off without one (failed send, expired, spent, blocked). */
         val codeSent: Boolean = false,
+        /** Codes sent on this screen; each new one gives the code field the keyboard again. */
+        val codesSent: Int = 0,
         val verifying: Boolean = false,
         val codeError: Boolean = false,
         /** The server's localized "wrong code, N attempts left" line; null = the generic wrong-code text. */
