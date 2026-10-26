@@ -30,7 +30,7 @@
     "requestedAt": "وقت الطلب",
     "dueOnline": "المستحق إلكترونيًا",
     "paidOnline": "المدفوع إلكترونيًا",
-    "remaining": "المتبقي",
+    "remaining": "المتبقي للدفع في الصالون",
     "refunded": "المسترد",
     "details": "التفاصيل",
     "history": "سجل الحالات",
@@ -68,6 +68,18 @@
     "refundMax": "حتى {{max}} كحد أقصى (المدفوع إلكترونيًا ولم يُسترد بعد).",
     "error": {
       "refund": "أدخل مبلغًا أكبر من صفر ولا يتجاوز المسموح باسترداده."
+    },
+    "paidAtSalon": "دُفع في الصالون",
+    "rejection": "سبب الرفض",
+    "cancellation": "سبب الإلغاء",
+    "reasonCode": {
+      "FULLY_BOOKED": "المواعيد ممتلئة",
+      "STAFF_UNAVAILABLE": "الموظف غير متوفر",
+      "SERVICE_UNAVAILABLE": "الخدمة غير متوفرة",
+      "SALON_EMERGENCY": "ظرف طارئ في الصالون",
+      "EXCEPTIONAL_CLOSURE": "إغلاق استثنائي",
+      "OTHER": "سبب آخر",
+      "ADMIN_ACTION": "إجراء من الإدارة"
     }
   }
 }

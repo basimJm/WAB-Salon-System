@@ -49,6 +49,7 @@ describe('booking rules', () => {
           dueOnline: '0.000',
           paidOnline: '0.000',
           remaining: '30.000',
+          paidAtSalon: '0.000',
           refunded: '0.000',
         },
       }),

@@ -13,6 +13,8 @@ import {
 } from '@/domain/bookings/bookings';
 import { formatInstant, formatJodAmount } from '@/domain/shared/format';
 import { BookingActions } from './BookingActions';
+import { StaffCell, StaffList } from './BookingStaff';
+import { reasonLabel } from './bookingReason';
 import { KeyValue } from '../components/core/KeyValue';
 import { StatusBadge } from '../components/core/StatusBadge';
 import { DataTable } from '../components/data/DataTable';
@@ -22,6 +24,8 @@ import { useToast } from '../components/overlay/Toast';
 import { DetailPage } from '../components/templates/DetailPage';
 import { Timeline } from '../components/templates/Timeline';
 import { useLanguage } from '../hooks/useLanguage';
+import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
+import { useLazyStrings } from '../hooks/useLazyStrings';
 
 type Person = BookingDetails['persons'][number];
 
@@ -30,6 +34,12 @@ function Facts({ b }: { b: BookingDetails }) {
   const { language } = useLanguage();
   const jod = (v: string) => `${formatJodAmount(v, language)} ${t('common.currency')}`;
   const when = (iso: string) => formatInstant(iso, language, 'dateTime');
+  const outcome = [
+    ...(b.rejection ? [{ key: 'rejection', label: t('bookings.rejection'), r: b.rejection }] : []),
+    ...(b.cancellation
+      ? [{ key: 'cancellation', label: t('bookings.cancellation'), r: b.cancellation }]
+      : []),
+  ].map(({ key, label, r }) => ({ key, label, value: `${reasonLabel(t, r)} · ${when(r.at)}` }));
   const persons: Column<Person>[] = [
     {
       key: 'name',
@@ -41,7 +51,7 @@ function Facts({ b }: { b: BookingDetails }) {
       header: t('bookings.services'),
       render: (p) => p.services.map((s) => s.name).join(', '),
     },
-    { key: 'staff', header: t('bookings.staff'), render: (p) => p.staff?.name ?? '—' },
+    { key: 'staff', header: t('bookings.staff'), render: (p) => <StaffCell staff={p.staff} /> },
     { key: 'subtotal', header: t('bookings.total'), ltr: true, render: (p) => jod(p.subtotal) },
   ];
   return (
@@ -83,6 +93,8 @@ function Facts({ b }: { b: BookingDetails }) {
             ltr: true,
           },
           { key: 'respond', label: t('bookings.respondBy'), value: when(b.respondBy), ltr: true },
+          { key: 'staff', label: t('bookings.staff'), value: <StaffList staff={b.staff} /> },
+          ...outcome,
           { key: 'method', label: t('bookings.method'), value: b.paymentMethod },
           {
             key: 'payment',
@@ -116,6 +128,12 @@ function Facts({ b }: { b: BookingDetails }) {
             key: 'remaining',
             label: t('bookings.remaining'),
             value: jod(b.money.remaining),
+            ltr: true,
+          },
+          {
+            key: 'paidAtSalon',
+            label: t('bookings.paidAtSalon'),
+            value: jod(b.money.paidAtSalon),
             ltr: true,
           },
           {
@@ -203,6 +221,7 @@ function StatusDrawer({ b, onClose }: { b: BookingDetails; onClose: () => void }
 
 /** Admin PRD A15 · One booking: facts, persons and services, money, status history, and a status change with a reason. */
 export default function BookingDetailsPage() {
+  useLazyStrings(BOOKINGS_STRINGS);
   const { t } = useTranslation();
   const { id = '' } = useParams();
   const { repositories } = useContainer();

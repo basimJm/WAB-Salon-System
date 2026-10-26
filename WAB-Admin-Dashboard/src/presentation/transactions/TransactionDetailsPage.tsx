@@ -12,6 +12,8 @@ import type { Column } from '../components/data/tableTypes';
 import { DetailPage } from '../components/templates/DetailPage';
 import { JsonViewer } from '../components/templates/JsonViewer';
 import { useLanguage } from '../hooks/useLanguage';
+import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
+import { useLazyStrings } from '../hooks/useLazyStrings';
 
 function Body({ tx }: { tx: TransactionDetails }) {
   const { t } = useTranslation();
@@ -91,6 +93,7 @@ function Body({ tx }: { tx: TransactionDetails }) {
 
 /** Admin PRD A16 · One payment attempt: gateway answer as received, fee, and every attempt of the checkout. */
 export default function TransactionDetailsPage() {
+  useLazyStrings(BOOKINGS_STRINGS);
   const { t } = useTranslation();
   const { id = '' } = useParams();
   const { repositories } = useContainer();

@@ -7,6 +7,7 @@ import { AnalyticsBoard } from './AnalyticsBoard';
 import { EventsTrend } from './EventsTrend';
 import { useAnalyticsRange } from './useAnalyticsRange';
 import { countOf, useOverviewPair } from './useBoardData';
+import { ANALYTICS_STRINGS } from '@/locales/lazy/analytics';
 import { useLazyStrings } from '../hooks/useLazyStrings';
 
 const PATH = '/analytics/errors';
@@ -14,7 +15,7 @@ const ITEMS = 'analyticsOps.errors.item';
 
 /** Admin PRD A09 on the design board: error, OTP and failure server events; app-side metrics are not sent yet. */
 export default function ErrorsAnalyticsPage() {
-  useLazyStrings('analytics');
+  useLazyStrings(ANALYTICS_STRINGS);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { value, setValue, current, previous } = useAnalyticsRange();
