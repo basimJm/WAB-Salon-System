@@ -232,8 +232,7 @@ def throwaway(rec: Recorder, base: str, ctx: dict, gender: str) -> None:
 def book(rec: Recorder, base: str, salon_id: str, e164: str, token: str) -> None:
     detail = rec.call(base, "GET", "/salons/{salonId}", params={"salonId": salon_id}, token=token, save=False, label="GetSalonsBySalonId(signed in)")
     branch = next((b["id"] for b in ((detail or {}).get("branches") or []) if b.get("isMain")), None)
-    service = next(  # of the main branch and not bride-only: another branch's service → 400, VIP for a non-bride → 422
-        (s for s in (detail or {}).get("services") or [] if s.get("branchId") in (None, branch) and not s.get("brideOnly")), None)
+    service = next((s for s in (detail or {}).get("services") or [] if s.get("branchId") in (None, branch) and not s.get("brideOnly")), None)  # main branch, non-VIP
     if service is None:
         return
     person = {"serviceIds": [service["id"]]}
@@ -244,7 +243,7 @@ def book(rec: Recorder, base: str, salon_id: str, e164: str, token: str) -> None
         slot = next((s for s in (availability or {}).get("slots", []) if s.get("available")), None)
         if slot:
             break
-    else:
+    if not slot:
         return
     draft = rec.call(base, "POST", "/bookings/drafts", token=token, body={
         "salonId": salon_id, **({"branchId": branch} if branch else {}), "paymentMethod": "PAY_ON_ARRIVAL",
