@@ -24,17 +24,37 @@ import { createLogger, type Logger } from '../utils/logger';
 import { addDays, localDateOf } from '../utils/time';
 import { migrateSalonsToBranches } from '../domain/branches/migration';
 import { createMongoBranchMigrationStore } from '../domain/branches/migrationStore';
-import { buildDemoBranches } from './demo/branches';
-import { loadDemoBranchSources, syncBranchCounts } from './demo/branchSources';
+import {
+  buildDemoBranchPlans,
+  writeDemoBranchPlans,
+  type DemoBranchWriteResult,
+} from './demo/branchActivity';
+import { loadDemoBranchSources, syncBranchCounts, syncDemoRatings } from './demo/branchSources';
 import { loadDemoContext } from './demo/context';
-import { buildDemoDataset } from './demo/dataset';
-import { toDemoModel, writeDemoDataset } from './demo/writer';
+import { buildDemoDatasetParts } from './demo/dataset';
+import { toDemoModel, writeDemoBaseOnce } from './demo/writer';
 import { seedDemoCatalog } from './demoCatalog';
 import { seedReferenceData } from './referenceData';
 
-/** Demo data must never reach production, whatever script is run by mistake. */
-export const assertDemoAllowed = (config: Pick<AppConfig, 'isProduction'>): void => {
-  if (config.isProduction) throw new Error('the demo seed must not run in production');
+/** What decides whether demo data may be written (SRV-160). */
+export type DemoSeedConfig = Pick<AppConfig, 'isProduction' | 'demoSeed'>;
+
+/**
+ * Demo data must never reach production, whatever script is run by mistake. The hosted DEV service
+ * runs `NODE_ENV=production` too: there it is allowed only when `SEED_DEMO_DATABASE` names the
+ * database the server is connected to (an explicit, per-database opt-in the prod service never has).
+ */
+export const assertDemoAllowed = (config: DemoSeedConfig, databaseName: string): void => {
+  if (!config.isProduction) return;
+  const allowed = config.demoSeed.allowedDatabase;
+  if (allowed === undefined) {
+    throw new Error(
+      'the demo seed must not run in production (a hosted dev service opts in with SEED_DEMO_DATABASE)',
+    );
+  }
+  if (allowed !== databaseName) {
+    throw new Error('the demo seed may only write to the database named in SEED_DEMO_DATABASE');
+  }
 };
 
 /** Stores the daily report of each finished demo day, as the nightly job would have. */
@@ -59,43 +79,62 @@ const storeDailyReports = async (timeZone: string, now: Date, logger: Logger): P
   return DEMO_REPORT_DAYS;
 };
 
+/** What one demo seed run did. */
+export interface DemoSeedReport {
+  readonly reference: unknown;
+  readonly catalog: unknown;
+  readonly written: unknown;
+  readonly branches: unknown;
+  readonly extraBranches: DemoBranchWriteResult;
+  readonly reports: number;
+}
+
 /**
- * `npm run seed:demo` (development only): reference data and demo catalog, then a linked sample
- * data set in every collection (salons, staff, customers, bookings, payments, reviews, content…).
- * Insert-only and deterministic: running it again adds nothing and never overwrites admin edits.
- * Needs the admin from `npm run seed:admin`.
+ * The demo seed on an open connection (used by `npm run seed:demo` and `SEED_DEMO_ON_START`):
+ * reference data and demo catalog, then a linked sample data set in every collection (salons,
+ * staff, customers, bookings, payments, reviews, content…), then the extra branches with their own
+ * staff, bookings, reviews and notifications (SRV-148, SRV-160). Insert-only and safe to run again:
+ * a finished part is skipped and admin edits are never overwritten. Needs the admin from
+ * `npm run seed:admin`.
  */
+export const seedDemo = async (logger: Logger, now: Date = new Date()): Promise<DemoSeedReport> => {
+  await ensureIndexes(ALL_MODELS, logger);
+  const reference = await seedReferenceData({
+    countries: new CountriesRepository(),
+    cities: new CitiesRepository(),
+    areas: new AreasRepository(),
+  });
+  const catalog = await seedDemoCatalog(new CatalogServicesRepository());
+  const context = await loadDemoContext(now);
+  const { data, customers } = buildDemoDatasetParts(context);
+  const models = new Map(ALL_MODELS.map((model) => [model.modelName, toDemoModel(model)]));
+  const written = await writeDemoBaseOnce(data, models);
+  // Demo salons get their main branch the same way existing salons do (§5.16).
+  const branches = await migrateSalonsToBranches({
+    store: createMongoBranchMigrationStore(),
+    dryRun: false,
+  });
+  // Then two women's and two men's salons get more branches, each with its own staff, services,
+  // prices, bookings in every state, reviews and notifications.
+  const sources = await loadDemoBranchSources();
+  const extraBranches = await writeDemoBranchPlans(
+    buildDemoBranchPlans(context, sources, customers),
+    models,
+  );
+  await syncBranchCounts(sources);
+  await syncDemoRatings(sources);
+  const reports = await storeDailyReports(context.timeZone, context.now, logger);
+  return { reference, catalog, written, branches, extraBranches, reports };
+};
+
+/** `npm run seed:demo` (development, or the hosted dev database named in `SEED_DEMO_DATABASE`). */
 const main = async (): Promise<void> => {
   const config = loadConfig();
-  assertDemoAllowed(config);
   const logger = createLogger({ level: config.logLevel });
-  await connectMongo(config, logger);
+  const connection = await connectMongo(config, logger);
   try {
-    await ensureIndexes(ALL_MODELS, logger);
-    const reference = await seedReferenceData({
-      countries: new CountriesRepository(),
-      cities: new CitiesRepository(),
-      areas: new AreasRepository(),
-    });
-    const catalog = await seedDemoCatalog(new CatalogServicesRepository());
-    const context = await loadDemoContext();
-    const dataset = buildDemoDataset(context);
-    const models = new Map(ALL_MODELS.map((model) => [model.modelName, toDemoModel(model)]));
-    const written = await writeDemoDataset(dataset, models);
-    // Demo salons get their main branch the same way existing salons do (§5.16).
-    const branches = await migrateSalonsToBranches({
-      store: createMongoBranchMigrationStore(),
-      dryRun: false,
-    });
-    // Then a few salons get more branches, each with its own staff, services and prices.
-    const sources = await loadDemoBranchSources();
-    const extraBranches = await writeDemoDataset(buildDemoBranches(context, sources), models);
-    await syncBranchCounts(sources);
-    const reports = await storeDailyReports(context.timeZone, context.now, logger);
-    logger.info(
-      { reference, catalog, written, branches, extraBranches, reports },
-      'demo data seeded',
-    );
+    assertDemoAllowed(config, connection.name);
+    logger.info({ ...(await seedDemo(logger)) }, 'demo data seeded');
   } finally {
     await disconnectMongo();
   }

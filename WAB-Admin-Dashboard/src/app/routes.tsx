@@ -3,6 +3,7 @@ import { Navigate, useLocation, type RouteObject } from 'react-router-dom';
 import { lazyPage } from './lazyPage';
 import { DESIGN_SYSTEM_PATH, LOGIN_REDIRECT_PARAM, ROUTES } from '@/constants/routes';
 import { NAV_PAGES } from '@/constants/nav';
+import { APP_USAGE_PATHS } from '@/constants/analyticsPaths';
 import { RouteErrorPage } from '@/presentation/pages/RouteErrorPage';
 import { AppShell } from '@/presentation/layout/AppShell';
 import { useSession } from '@/presentation/controllers/useSession';
@@ -12,6 +13,11 @@ const LoginPage = lazyPage(() => import('@/presentation/pages/LoginPage'));
 const NotFoundPage = lazyPage(() => import('@/presentation/pages/NotFoundPage'));
 const ForbiddenPage = lazyPage(() => import('@/presentation/pages/ForbiddenPage'));
 const ServerErrorPage = lazyPage(() => import('@/presentation/pages/ServerErrorPage'));
+
+/** One lazy module for the five app-usage analytics boards (A02-A06). */
+const AppUsageAnalyticsPage = lazyPage(
+  () => import('@/presentation/analytics/AppUsageAnalyticsPage'),
+);
 /** Feature pages that replace the placeholder of their nav entry (one line per finished module task). */
 const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>> = {
   [ROUTES.settings]: lazyPage(() => import('@/presentation/settings/SettingsPage')),
@@ -45,6 +51,9 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
   '/analytics/bookings': lazyPage(() => import('@/presentation/analytics/BookingsAnalyticsPage')),
   '/analytics/payments': lazyPage(() => import('@/presentation/analytics/PaymentsAnalyticsPage')),
   '/analytics/errors': lazyPage(() => import('@/presentation/analytics/ErrorsAnalyticsPage')),
+  '/analytics/merchants': lazyPage(() => import('@/presentation/analytics/MerchantsAnalyticsPage')),
+  ...Object.fromEntries(APP_USAGE_PATHS.map((p) => [p, AppUsageAnalyticsPage])),
+  [ROUTES.userJourney]: lazyPage(() => import('@/presentation/analytics/JourneyPage')),
   [ROUTES.reports]: lazyPage(() => import('@/presentation/reports/ReportsPage')),
   [ROUTES.auditLog]: lazyPage(() => import('@/presentation/audit/AuditPage')),
   '/reports/exports': lazyPage(() => import('@/presentation/exports/ExportsPage')),

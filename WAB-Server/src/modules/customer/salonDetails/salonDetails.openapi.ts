@@ -87,6 +87,9 @@ const details = z.object({
       description: z.string().nullable(),
       price: z.string().describe('JOD, 3 decimals'),
       durationMinutes: z.number(),
+      brideOnly: z
+        .boolean()
+        .describe('Bookable only for a bride person; otherwise 422 BRIDE_ONLY_SERVICE'),
       mediaUrls: z.array(z.string()),
     }),
   ),
@@ -116,6 +119,9 @@ const staffDetails = staffSummary.extend({
       id: z.string().describe('Salon service id (what bookings and availability take)'),
       catalogServiceId: z.string(),
       name: z.string(),
+      brideOnly: z
+        .boolean()
+        .describe('Bookable only for a bride person; otherwise 422 BRIDE_ONLY_SERVICE'),
     }),
   ),
   reviews: reviewsPreview,

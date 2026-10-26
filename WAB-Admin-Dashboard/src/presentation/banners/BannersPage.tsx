@@ -2,26 +2,23 @@ import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import {
   BANNER_GENDERS,
-  instantToDate,
-  instantToEndDate,
   type Banner,
   type BannerGender,
   type BannerInput,
 } from '@/domain/banners/banners';
-import { Badge } from '../components/core/Badge';
 import { Button } from '../components/core/Button';
-import type { Column } from '../components/data/tableTypes';
 import { Select } from '../components/form/Select';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useResourcePanel } from '../hooks/useResourcePanel';
+import { BannerCard } from './BannerCard';
 import { BannerEditor } from './BannerEditor';
 
 const OPTIONS = { filterKeys: ['gender'] };
 const pickGender = (v: string | undefined): BannerGender | undefined =>
   BANNER_GENDERS.find((g) => g === v);
 
-/** Admin PRD A24 · Home banners: artwork per language, action, audience, schedule, order. */
+/** Admin PRD A24 · Home banners (design card grid): artwork per language, action, audience, schedule, order. */
 export default function BannersPage() {
   const { t } = useTranslation();
   const { repositories } = useContainer();
@@ -48,27 +45,7 @@ export default function BannersPage() {
     );
   const data = resource.query.data;
   const title = t('nav.sub.banners');
-  const columns: Column<Banner>[] = [
-    { key: 'order', header: t('banners.order'), ltr: true, render: (r) => r.order },
-    { key: 'image', header: t('banners.image'), ltr: true, render: (r) => r.imageKey.en },
-    { key: 'action', header: t('banners.action'), render: (r) => t(`banners.actions.${r.action}`) },
-    { key: 'gender', header: t('banners.gender'), render: (r) => t(`banners.genders.${r.gender}`) },
-    {
-      key: 'schedule',
-      header: t('banners.schedule'),
-      ltr: true,
-      render: (r) => `${instantToDate(r.startAt) || '—'} → ${instantToEndDate(r.endAt) || '—'}`,
-    },
-    {
-      key: 'active',
-      header: t('locations.status'),
-      render: (r) => (
-        <Badge tone={r.active ? 'green' : 'grey'}>
-          {t(r.active ? 'locations.active' : 'locations.inactive')}
-        </Badge>
-      ),
-    },
-  ];
+  const now = new Date();
   return (
     <ListPage
       title={title}
@@ -97,19 +74,14 @@ export default function BannersPage() {
           />
         ),
       }}
-      table={{
-        columns,
+      grid={{
         rows: data?.items ?? [],
         rowKey: (r) => r.id,
         caption: title,
+        renderCard: (r) => <BannerCard banner={r} now={now} onEdit={resource.openEdit} />,
         loading: resource.query.isPending,
         error: resource.query.error,
         onRetry: () => void resource.query.refetch(),
-        rowActions: (r) => (
-          <Button variant="ghost" size="sm" onClick={() => resource.openEdit(r)}>
-            {t('appConfig.edit')}
-          </Button>
-        ),
       }}
       pagination={
         data

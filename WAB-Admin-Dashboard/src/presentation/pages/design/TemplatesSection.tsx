@@ -5,6 +5,8 @@ import { Button } from '../../components/core/Button';
 import { Card } from '../../components/core/Card';
 import { Heading } from '../../components/core/Heading';
 import { KeyValue } from '../../components/core/KeyValue';
+import { SectionCard } from '../../components/core/SectionCard';
+import { CardGrid } from '../../components/data/CardGrid';
 import { StatusBadge } from '../../components/core/StatusBadge';
 import type { Column } from '../../components/data/DataTable';
 import { ListPage } from '../../components/templates/ListPage';
@@ -33,7 +35,7 @@ const HISTORY: readonly Omit<TimelineEntry, 'title' | 'actor' | 'reason'>[] = [
   { id: 'h1', at: '2026-10-11T18:20:00Z', tone: 'amber' },
 ];
 
-/** Gallery section for the page templates (ADM-018): list page, detail page, timeline, JSON viewer. */
+/** Gallery section for the page templates (ADM-018): list page, section card + card grid, detail page, timeline, JSON viewer. */
 export function TemplatesSection() {
   const { t } = useTranslation();
   const k = (key: string) => t(`designKits.templates.${key}`);
@@ -72,6 +74,21 @@ export function TemplatesSection() {
           ariaLabel: k('pagination'),
         }}
       />
+      <SectionCard title={k('tabOverview')} subtitle={k('listSubtitle')}>
+        <CardGrid
+          caption={k('tabOverview')}
+          rows={BOOKINGS}
+          rowKey={(r) => r.id}
+          renderCard={(r) => (
+            <article className="wab-gridcard">
+              <div className="wab-gridcard__body">
+                <span className="wab-gridcard__title">{r.id}</span>
+                <StatusBadge kind="booking" value={r.status} />
+              </div>
+            </article>
+          )}
+        />
+      </SectionCard>
       <DetailPage
         title={GALLERY_SAMPLE_REF}
         subtitle={k('detailSubtitle')}

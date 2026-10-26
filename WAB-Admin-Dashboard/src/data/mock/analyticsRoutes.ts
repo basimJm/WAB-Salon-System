@@ -17,10 +17,23 @@ export function analyticsRoutes(): readonly MockRoute[] {
         const half = query.get('from') === '2026-09-01T00:00:00.000Z';
         return {
           data: {
-            payments: { 'payment.succeeded': half ? 40 : 60, 'payment.failed': half ? 5 : 4 },
-            refunds: { 'refund.completed': 3 },
-            bookings: { 'booking.created': half ? 80 : 100, 'booking.cancelled': 10 },
-            errors: { 'api.error': 2 },
+            payments: {
+              'payment.started': half ? 50 : 70,
+              'payment.succeeded': half ? 40 : 60,
+              'payment.failed': half ? 5 : 4,
+              'payment.cancelled': 2,
+            },
+            refunds: { 'refund.created': 4, 'refund.completed': 3, 'refund.failed': 1 },
+            bookings: {
+              'booking.created': half ? 80 : 100,
+              'booking.approved': 72,
+              'booking.rejected': 8,
+              'booking.cancelled': 10,
+              'booking.completed': 55,
+              'booking.no_show': 3,
+              'booking.auto_cancelled': 2,
+            },
+            errors: { 'api.error': 2, 'otp.failed': 6, 'otp.blocked': 1 },
           },
         };
       },

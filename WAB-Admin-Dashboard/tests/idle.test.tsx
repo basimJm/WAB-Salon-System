@@ -1,12 +1,15 @@
 import { act, fireEvent, renderHook, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SESSION_IDLE_MS } from '@/constants/session';
 import { MockAuthRepository } from '@/data/auth/MockAuthRepository';
 import { IdleWarningDialog } from '@/presentation/components/feedback/IdleWarningDialog';
 import { useIdleTimeout } from '@/presentation/hooks/useIdleTimeout';
 import { makeContainer, renderRoutes, renderWithApp, signInContainer } from './helpers/render';
 
 const MIN = 60_000;
+/** The mechanics are tested on a short window; the real default (2 days) has its own test below. */
+const IDLE_MS = 30 * MIN;
 
 describe('useIdleTimeout', () => {
   let clock = 0;
@@ -23,7 +26,7 @@ describe('useIdleTimeout', () => {
 
   const setup = (onExpire = vi.fn()) => ({
     onExpire,
-    ...renderHook(() => useIdleTimeout({ onExpire, now })),
+    ...renderHook(() => useIdleTimeout({ onExpire, now, idleMs: IDLE_MS })),
   });
 
   it('stays active, then warns during the last minute with a countdown, then expires once', async () => {
@@ -72,6 +75,25 @@ describe('useIdleTimeout', () => {
     await advance(20 * MIN);
     expect(result.current.status.state).toBe('active');
     expect(onExpire).not.toHaveBeenCalled();
+  });
+
+  it('by default the admin stays signed in for 2 days of inactivity (owner 2026-10-26)', async () => {
+    expect(SESSION_IDLE_MS).toBe(2 * 24 * 60 * MIN);
+    const onExpire = vi.fn();
+    const { result } = renderHook(() => useIdleTimeout({ onExpire, now }));
+    clock += 24 * 60 * MIN; // a whole day idle: the clock jumps, one timer tick reads it
+    await advance(1000);
+    expect(result.current.status.state).toBe('active');
+    clock += SESSION_IDLE_MS - 24 * 60 * MIN - 2 * MIN;
+    await advance(1000);
+    expect(result.current.status.state).toBe('active');
+    clock += MIN + 30_000;
+    await advance(1000);
+    expect(result.current.status.state).toBe('warning');
+    expect(onExpire).not.toHaveBeenCalled();
+    clock += MIN;
+    await advance(1000);
+    expect(onExpire).toHaveBeenCalledTimes(1);
   });
 
   it('can be switched off', async () => {
@@ -136,7 +158,7 @@ describe('shell sign out and login notice', () => {
 
   it.each([
     ['expired', 'Your session expired. Please sign in again.'],
-    ['idle', 'You were signed out after 30 minutes of inactivity.'],
+    ['idle', 'You were signed out after 2 days of inactivity.'],
   ] as const)('the login page explains a session that ended by %s', async (reason, text) => {
     const container = makeContainer();
     await signInContainer(container);

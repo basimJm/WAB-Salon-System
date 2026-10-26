@@ -5,8 +5,8 @@
 | Project (`tasks.py` key) | Master | Current task | Next ready task | Blocked on | Session file |
 |---|---|---|---|---|---|
 | server | `server` | SRV-158 ARQAM OTP (IN REVIEW, `feat/srv-158-arqam-otp`, ships with OTP-012) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-159 owner ARQAM setup; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
-| admin | `admin` | none (ADM-079 #449, ADM-093…096 #453–#455/#465) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking | `WAB-Admin-Dashboard/.claude/session.md` |
-| customer | `customer` | CUS-092 e2e pass vs local stack (IN PROGRESS, `feat/cus-092-e2e-fixes`, 12 defects fixed, 4 server gaps; `docs/E2E_RESULTS.md`) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
+| admin | `admin` | none (ADM-097…099 #497/#498/#505) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking; ADM-100…106 server gaps SRV-162…168 | `WAB-Admin-Dashboard/.claude/session.md` |
+| customer | `customer` | none (CUS-092 e2e #499) | CUS-093 SRV-170 contract adoption | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
 | merchant | `merchant` | MER-070 WhatsApp OTP (IN REVIEW, branch `feat/mer-070-whatsapp-otp` on top of SRV-153) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
 | otp | `server` | OTP-012 ARQAM channel (IN REVIEW, 0.3.0, branch `feat/srv-158-arqam-otp`) | none | SRV-158 server adoption (same branch) | `wab-otp/.claude/session.md` |
@@ -187,3 +187,24 @@
 - Tests: `tasks.py check` (only the known CUS-047 note); gates above
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — merges + backlog only in this branch.
+
+### T-140 — Agents' work merged; masters synced through main (2026-10-26)
+- Project: repo root
+- Branch: `chore/sync-main-into-admin-9`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Merged: SRV-160 (#495), SRV-161 (#496), ADM-097 (#497), ADM-098 (#498), CUS-092 (#499), SRV-170 (#500), MER-073 + MER-074 (#501), ADM-099 (#505); statuses DONE
+  - [x] `main` merged into `admin` so `admin` → `main` merges; conflicts = generated board (regenerated) + server backlog rows (SRV-160/161/170 from main and SRV-162…168 from admin both kept)
+  - [ ] `admin`, `customer`, `merchant` → `main`, then `main` → every master
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges + backlog only, no product code written.
+
+### T-140a — Sync main into customer (part of T-140)
+- Branch: `chore/sync-main-into-customer-9`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `main` merged into `customer`; conflicts = generated board (regenerated), root index lines, customer backlog rows CUS-092 + CUS-093 (both kept); CUS-092 DONE
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.

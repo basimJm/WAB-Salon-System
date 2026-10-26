@@ -17,7 +17,7 @@ export const MOCK_SETTING_DEFAULTS: Readonly<Record<string, unknown>> = {
   'otp.blockSec': 900,
   'admin.maxFailedLogins': 5,
   'admin.lockSec': 900,
-  'admin.sessionIdleSec': 1800,
+  'admin.sessionIdleSec': 172_800,
   'auth.accessTokenTtlSec': 900,
   'auth.refreshTokenTtlDays': 90,
   'account.deletionGraceDays': 30,

@@ -203,6 +203,7 @@ export default function RefundsPage() {
           columns,
           rows: data?.items ?? [],
           rowKey: (r) => r.id,
+          rowAlert: (r) => r.status === 'REFUND_FAILED' || isOverdue(r, now),
           caption: title,
           loading: query.isPending,
           error: query.error,

@@ -5,19 +5,11 @@ import {
   JOD_DECIMAL_PLACES,
   JOD_STRING_PATTERN,
 } from '../../constants/kernel';
+import { formatNumber, localizeDigits } from './numbers';
 import { parseInstant } from './time';
 
-const ARABIC_INDIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
-const DIGIT = /[0-9]/g;
-
-/** Rewrites ASCII digits to the digits of `language` ("numerals follow the language"). */
-export const localizeDigits = (text: string, language: Language): string =>
-  language === 'ar'
-    ? text.replace(DIGIT, (digit) => ARABIC_INDIC_DIGITS.charAt(Number(digit)))
-    : text;
-
-export const formatNumber = (value: number, language: Language): string =>
-  new Intl.NumberFormat(INTL_LOCALES[language]).format(value);
+// Number helpers live in `numbers.ts` (small, used by the shell); re-exported so callers keep one import.
+export { formatNumber, localizeDigits };
 
 function decimalSeparator(language: Language): string {
   const part = new Intl.NumberFormat(INTL_LOCALES[language], { minimumFractionDigits: 1 })
@@ -42,9 +34,10 @@ export function formatJodAmount(amount: string, language: Language): string {
   return `${signText}${wholeText}${decimalSeparator(language)}${fractionText}`;
 }
 
-type DateStyle = 'date' | 'time' | 'dateTime';
+type DateStyle = 'date' | 'longDate' | 'time' | 'dateTime';
 const OPTIONS: Readonly<Record<DateStyle, Intl.DateTimeFormatOptions>> = {
   date: { year: 'numeric', month: 'short', day: 'numeric' },
+  longDate: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
   time: { hour: 'numeric', minute: '2-digit', hour12: true },
   dateTime: {
     year: 'numeric',

@@ -31,6 +31,8 @@ export interface DataTableProps<Row> {
   selection?: TableSelection<Row>;
   /** Adds a trailing cell per row (buttons, menu). Clicks inside it never trigger `onRowClick`. */
   rowActions?: (row: Row) => ReactNode;
+  /** Rows that need attention get the design's rose tint (failed payments, overdue refunds). */
+  rowAlert?: (row: Row) => boolean;
 }
 
 function selectAllOf(selection: SelectionCore | undefined, pageKeys: readonly string[]) {
@@ -92,6 +94,7 @@ export function DataTable<Row>({
   density = 'comfortable',
   selection,
   rowActions,
+  rowAlert,
 }: DataTableProps<Row>) {
   const { t } = useTranslation();
   const fallback = tableFallback({
@@ -132,6 +135,7 @@ export function DataTable<Row>({
                 selection={selection}
                 actions={rowActions}
                 onRowClick={onRowClick}
+                alert={rowAlert?.(row) ?? false}
               />
             ))
           )}

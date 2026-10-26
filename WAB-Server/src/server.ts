@@ -170,6 +170,7 @@ import type { ReadinessCheck } from './utils/health';
 import { REDIS_KEY_PREFIX } from './constants/redis';
 import { ALL_MODELS } from './models';
 import { ensureIndexes } from './utils/database/indexes';
+import { seedDemoOnStart } from './seeds/demoOnStart';
 import { RedisRateLimitStore } from './utils/redis/rateLimitStore';
 import { connectRedis, createRedisReadinessCheck, disconnectRedis } from './utils/redis/client';
 import { createLogger, type Logger } from './utils/logger';
@@ -624,6 +625,7 @@ const buildServices = (
     members: new MembersRepository(),
     salons: new SalonsRepository(),
     settings,
+    storage: providers.storage,
   });
   const bookingAdmin = createBookingAdminService({
     hook: bookingChanges,
@@ -1242,6 +1244,8 @@ const main = async (): Promise<void> => {
         logger.error({ err: error }, 'background jobs could not be reconciled');
       }
     }
+    // Dev data (SEED_DEMO_ON_START): in the background, after the API is up; never throws.
+    void seedDemoOnStart({ config, logger, databaseName: mongo.name });
   } catch (error) {
     if (redis) await disconnectRedis(redis);
     await disconnectMongo();

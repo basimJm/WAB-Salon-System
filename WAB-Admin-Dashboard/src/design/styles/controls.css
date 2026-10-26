@@ -3,14 +3,16 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: var(--size-control);
+  min-height: var(--size-button);
   padding-inline: var(--space-4);
   border: var(--size-hairline) solid transparent;
-  border-radius: var(--radius-md);
-  font-weight: var(--fw-medium);
+  border-radius: var(--radius-control);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
   transition: opacity var(--motion-fast) var(--motion-easing);
 }
-.wab-btn--sm { min-height: var(--size-control-sm); padding-inline: var(--space-3); }
+.wab-btn--sm { min-height: var(--size-button-sm); padding-inline: var(--space-3); font-size: var(--fs-sm); }
 .wab-btn--block { width: 100%; }
 .wab-btn:disabled { opacity: var(--opacity-disabled); }
 .wab-btn:active:not(:disabled) { opacity: var(--opacity-pressed); }
@@ -20,7 +22,10 @@
   box-shadow: var(--shadow-primary);
 }
 .wab-btn--secondary { background: var(--c-soft); color: var(--c-accent); }
-.wab-btn--ghost { background: transparent; color: var(--c-muted); border-color: var(--c-line2); }
+/* Design "default" button: card background, ink text, line2 border. */
+.wab-btn--ghost { background: var(--c-card); color: var(--c-ink); border-color: var(--c-line2); }
+.wab-btn--ghost:hover:not(:disabled) { background: var(--c-hover); }
+.wab-btn--secondary:hover:not(:disabled) { filter: brightness(0.98); }
 .wab-btn--danger { background: var(--c-danger); color: var(--c-card); }
 
 .wab-iconbtn {
@@ -52,10 +57,12 @@
 .wab-badge {
   display: inline-flex;
   align-items: center;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-chip);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  line-height: 1;
   white-space: nowrap;
 }
 .wab-badge--green { color: var(--tone-green-fg); background: var(--tone-green-bg); }
