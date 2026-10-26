@@ -44,7 +44,7 @@
     <string name="details_staff">Staff: %1$s</string>
     <string name="details_payment">Payment</string>
     <string name="details_total">Total</string>
-    <string name="details_paid">Paid</string>
+    <string name="details_paid">Paid online</string>
     <string name="details_remaining">Remaining at the salon</string>
     <string name="details_refunded">Refunded</string>
     <string name="details_refund_pending">Refund pending</string>

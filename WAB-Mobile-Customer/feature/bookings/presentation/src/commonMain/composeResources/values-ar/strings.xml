@@ -44,7 +44,7 @@
     <string name="details_staff">الموظف: %1$s</string>
     <string name="details_payment">تفاصيل الدفع</string>
     <string name="details_total">الإجمالي</string>
-    <string name="details_paid">المدفوع</string>
+    <string name="details_paid">المدفوع إلكترونياً</string>
     <string name="details_remaining">المتبقي عند الوصول</string>
     <string name="details_refunded">تم الاسترجاع</string>
     <string name="details_refund_pending">قيد الاسترجاع</string>
