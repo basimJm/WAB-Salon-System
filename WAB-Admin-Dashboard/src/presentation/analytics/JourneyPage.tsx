@@ -8,6 +8,7 @@ import { PageHeader } from '../components/core/PageHeader';
 import { SectionCard } from '../components/core/SectionCard';
 import { EmptyState } from '../components/feedback/EmptyState';
 import { TextField } from '../components/form/TextField';
+import { ANALYTICS_STRINGS } from '@/locales/lazy/analytics';
 import { useLazyStrings } from '../hooks/useLazyStrings';
 
 const J = 'analyticsOps.journey';
@@ -18,7 +19,7 @@ const J = 'analyticsOps.journey';
  * matching customers instead of an invented timeline.
  */
 export default function JourneyPage() {
-  useLazyStrings('analytics');
+  useLazyStrings(ANALYTICS_STRINGS);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [text, setText] = useState('');

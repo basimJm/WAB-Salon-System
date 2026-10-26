@@ -2,17 +2,17 @@
   "success": true,
   "message": "Created successfully.",
   "data": {
-    "id": "6ade3fabc2cfb0cb993a174a",
+    "id": "6adf88e16a85c06ca3b8015a",
     "salon": {
       "id": "79ea2a78d15934408a10b09f",
       "name": "Rose Bridal Studio"
     },
     "branch": {
-      "id": "6ade379d6cbc8f4cb1047d92",
+      "id": "6adf513d4bd7099438793e83",
       "name": "Sweifieh",
       "locationText": "Sweifieh, Wakalat Street, 2nd floor"
     },
-    "expiresAt": "2026-10-25T17:53:07.002Z",
+    "expiresAt": "2026-10-26T17:17:45.631Z",
     "paymentMethod": "PAY_ON_ARRIVAL",
     "persons": [
       {
@@ -28,12 +28,12 @@
           }
         ],
         "staff": {
-          "id": "b3bb803db1e7cc32fbc4ebbb",
-          "firstName": "Farah"
+          "id": "500157bd497447d283767cbd",
+          "firstName": "Noor"
         },
         "staffSelection": "ANY",
-        "start": "2026-10-29T08:00:00.000Z",
-        "end": "2026-10-29T09:00:00.000Z",
+        "start": "2026-10-30T08:00:00.000Z",
+        "end": "2026-10-30T09:00:00.000Z",
         "subtotal": "49.000"
       }
     ],

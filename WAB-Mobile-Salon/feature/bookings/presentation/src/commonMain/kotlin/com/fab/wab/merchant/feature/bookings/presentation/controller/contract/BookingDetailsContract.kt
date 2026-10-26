@@ -13,8 +13,16 @@ sealed interface DetailsDialog {
     /** Complete & paid or no-show confirmation. */
     data class Confirm(val action: BookingAction) : DetailsDialog
 
-    /** Reassign one person to another provider. */
-    data class Reassign(val personIndex: Int = 0, val staffId: String? = null) : DetailsDialog
+    /**
+     * Reassign one person to another provider; [eligible] = the server's eligible staff of that person (null while
+     * loading). e2e: the team list offered staff the server then refused (a non-bride-qualified member for a bride).
+     */
+    data class Reassign(
+        val personIndex: Int = 0,
+        val staffId: String? = null,
+        val eligible: List<StaffRef>? = null,
+        val failed: Boolean = false,
+    ) : DetailsDialog
 
     /** Another member handled the booking first (`ALREADY_HANDLED`): details refresh. */
     data object AlreadyHandled : DetailsDialog
@@ -28,17 +36,9 @@ sealed interface BookingDetailsContract {
         val error: String? = null,
         val dialog: DetailsDialog? = null,
         val acting: BookingAction? = null,
-        val staffOptions: List<StaffRef> = emptyList(),
         val nowMs: Long = 0L,
     ) {
         val actions: Set<BookingAction> get() = details?.actions.orEmpty()
-
-        /** Reassignment stays inside the booking's branch (MER-063); members without a branch (older data) stay listed. */
-        val reassignStaff: List<StaffRef>
-            get() {
-                val branchId = details?.summary?.branch?.id ?: return staffOptions
-                return staffOptions.filter { it.branchId == null || it.branchId == branchId }
-            }
     }
 
     sealed interface UiAction {

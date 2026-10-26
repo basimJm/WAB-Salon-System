@@ -8,6 +8,7 @@ import { AnalyticsBoard, type BoardKpi } from './AnalyticsBoard';
 import { useAnalyticsRange } from './useAnalyticsRange';
 import { countOf, ratioOf, useDailyByName, useOverviewPair } from './useBoardData';
 import { pendingOrError } from './boardStates';
+import { ANALYTICS_STRINGS } from '@/locales/lazy/analytics';
 import { useLazyStrings } from '../hooks/useLazyStrings';
 
 const PATH = '/analytics/bookings';
@@ -23,7 +24,7 @@ const statusKey = (name: string): string => name.slice(name.indexOf('.') + 1);
 
 /** Admin PRD A07 on the design board: server booking events (counts, acceptance, per-day status stack). */
 export default function BookingsAnalyticsPage() {
-  useLazyStrings('analytics');
+  useLazyStrings(ANALYTICS_STRINGS);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { value, setValue, current, previous } = useAnalyticsRange();

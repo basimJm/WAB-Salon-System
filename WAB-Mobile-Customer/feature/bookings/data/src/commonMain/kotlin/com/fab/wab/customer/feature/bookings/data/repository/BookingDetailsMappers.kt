@@ -58,7 +58,7 @@ fun GetBookingsByIdData.toDomain(): BookingDetails = BookingDetails(
     salonName = salon?.name,
     branch = branch?.let { bookedBranchOf(it.id, it.name, it.locationText) },
     persons = persons.map { it.toDomain() },
-    money = BookingMoney(money.total, money.dueOnline, money.paidOnline, money.remaining, money.refunded),
+    money = BookingMoney(money.total, money.dueOnline, money.paidOnline, money.remaining, money.refunded, money.paidAtSalon),
     policy = policy.toPolicy(),
     rejection = rejection?.let { BookingReason(it.reasonCode, it.reasonText, it.at) },
     cancellation = cancellation?.let { BookingReason(it.reasonCode, it.reasonText, it.at) },
@@ -71,6 +71,7 @@ fun GetBookingsByIdDataPersonsItem.toDomain(): BookingPerson = BookingPerson(
     end = end,
     subtotal = subtotal,
     staffId = staff?.id,
-    staffName = staff?.name,
+    staffName = staff?.let { member -> member.firstName.ifBlank { member.name } },
     services = services.map { BookingService(it.name, it.price, it.durationMinutes.toInt()) },
+    staffPhotoUrl = staff?.photoUrl?.takeIf { it.isNotBlank() },
 )

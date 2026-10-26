@@ -87,7 +87,7 @@ internal fun BookingRequestSheet(state: UiState, onAction: (UiAction) -> Unit) {
 internal fun UiState.toSheet(): RequestSheetUi? {
     val accepted = acceptedReference
     if (accepted != null) return RequestSheetUi.Accepted(reference = accepted, hasNext = queue.isNotEmpty())
-    val details = current ?: return null
+    val details = current?.takeIf { !snoozed } ?: return null
     return RequestSheetUi.Request(
         request = details.toRequest(nowMs),
         queue = RequestQueue.of(0, queue.size),

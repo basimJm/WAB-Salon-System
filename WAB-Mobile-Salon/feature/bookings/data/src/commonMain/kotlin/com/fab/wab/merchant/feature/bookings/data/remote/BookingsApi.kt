@@ -2,6 +2,7 @@ package com.fab.wab.merchant.feature.bookings.data.remote
 
 import com.fab.wab.merchant.core.data.BaseResponse
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdData
+import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdEligibleStaffDataItem
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItem
 import com.fab.wab.merchant.core.data.contract.generated.GetTeamMembersDataItem
 import com.fab.wab.merchant.core.data.contract.generated.MerchantOperations
@@ -34,6 +35,9 @@ internal object BookingsParams {
     const val BRIDE_ONLY = "brideOnly"
     const val PAYMENT_STATUS = "paymentStatus"
     const val BRANCH_ID = "branchId"
+
+    /** `GET /bookings/{id}/eligible-staff?personIndex=`. */
+    const val PERSON_INDEX = "personIndex"
 }
 
 class BookingsApi(private val client: HttpClient) {
@@ -64,7 +68,16 @@ class BookingsApi(private val client: HttpClient) {
     suspend fun reassign(id: String, body: PostBookingsByIdReassignBody): BaseResponse<JsonElement?> =
         client.post(MerchantOperations.postBookingsByIdReassign.pathWith(ID to id)) { setBody(body) }.body()
 
-    suspend fun team(): BaseResponse<List<GetTeamMembersDataItem>> = client.get(MerchantOperations.getTeamMembers.path).body()
+    suspend fun eligibleStaff(id: String, personIndex: Int): BaseResponse<List<GetBookingsByIdEligibleStaffDataItem>> =
+        client.get(MerchantOperations.getBookingsByIdEligibleStaff.pathWith(ID to id)) {
+            parameter(BookingsParams.PERSON_INDEX, personIndex)
+        }.body()
+
+    suspend fun team(page: Int, pageSize: Int): BaseResponse<List<GetTeamMembersDataItem>> =
+        client.get(MerchantOperations.getTeamMembers.path) {
+            parameter(BookingsParams.PAGE, page)
+            parameter(BookingsParams.PAGE_SIZE, pageSize)
+        }.body()
 }
 
 private fun HttpRequestBuilder.queryOf(query: BookingQuery, page: Int, pageSize: Int) {

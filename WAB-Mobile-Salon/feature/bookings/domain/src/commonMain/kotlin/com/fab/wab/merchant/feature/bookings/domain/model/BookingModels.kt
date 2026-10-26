@@ -10,8 +10,11 @@ import kotlin.time.Instant
 /** PRD M08 tabs (`GET /bookings?tab`). */
 enum class BookingsTab { PENDING, UPCOMING, TODAY, PAST }
 
-/** A staff member; [branchId] = the member's branch (null for the owner or an older server). */
-data class StaffRef(val id: String, val name: String, val branchId: String? = null)
+/**
+ * A staff member; [branchId] = the member's branch (null for the owner or an older server); [photoUrl] = the member's
+ * photo on booking rows (contract 1.6.0), null = letter avatar.
+ */
+data class StaffRef(val id: String, val name: String, val branchId: String? = null, val photoUrl: String? = null)
 
 /** The branch of a booking (`branch {id, name, locationText}`, MER-063). */
 data class BranchRef(val id: String, val name: String, val locationText: String?)
@@ -74,7 +77,32 @@ data class BookingPerson(
     val services: List<BookedService>,
 )
 
-data class BookingMoney(val total: String, val dueOnline: String, val paidOnline: String, val remaining: String, val refunded: String)
+/**
+ * `money` of `GET /bookings/{id}` (contract 1.6.0, BUSINESS_DOMAIN §5.5): [remaining] = still to collect at the salon
+ * (0 once the booking is final), [paidAtSalon] = collected at the salon (COMPLETED). Amounts are JOD decimal texts.
+ */
+data class BookingMoney(
+    val total: String,
+    val dueOnline: String,
+    val paidOnline: String,
+    val remaining: String,
+    val refunded: String,
+    val paidAtSalon: String = ZERO_AMOUNT,
+) {
+    /** The "Paid at salon" row shows only once something was collected there. */
+    val hasPaidAtSalon: Boolean get() = !isZeroAmount(paidAtSalon)
+
+    /** The "Refunded" row shows only when money went back to the customer. */
+    val hasRefund: Boolean get() = !isZeroAmount(refunded)
+}
+
+private const val ZERO_AMOUNT = "0.000"
+
+/** True for a blank or all-zero decimal text ("0", "0.000"); a malformed text counts as non-zero so it stays visible. */
+fun isZeroAmount(amount: String): Boolean {
+    val text = amount.trim()
+    return text.isEmpty() || (text.any { it.isDigit() } && text.all { it == '0' || it == '.' })
+}
 
 data class StatusChange(val status: BookingStatus?, val actorType: String, val reason: String?, val at: Instant?)
 
@@ -90,14 +118,25 @@ data class BookingDetails(
     /** The salon policy snapshotted at booking time; null for bookings without one. */
     val policy: PolicyTerms?,
     val history: List<StatusChange>,
+    /** The free text the salon / customer typed (`reasonText`), null when only a code was chosen. */
     val rejectionReason: String?,
     val cancellationReason: String?,
     val createdAt: Instant?,
     val actions: Set<BookingAction>,
+    /** `reasonCode` (e.g. FULLY_BOOKED): shown in the app language when there is no text (e2e: raw code was shown). */
+    val rejectionCode: String? = null,
+    val cancellationCode: String? = null,
 )
 
 /** Reasons offered by the reason picker (Design Script §1.2, design 03); OTHER needs a text. */
-enum class ResponseReason { FULLY_BOOKED, STAFF_UNAVAILABLE, SERVICE_UNAVAILABLE, SALON_EMERGENCY, EXCEPTIONAL_CLOSURE, OTHER }
+enum class ResponseReason {
+    FULLY_BOOKED, STAFF_UNAVAILABLE, SERVICE_UNAVAILABLE, SALON_EMERGENCY, EXCEPTIONAL_CLOSURE, OTHER;
+
+    companion object {
+        /** The picker reason of a server `reasonCode`; null for codes the app has no text for (shown as sent). */
+        fun fromCode(code: String?): ResponseReason? = entries.firstOrNull { it.name == code }
+    }
+}
 
 /** Rejection reasons of a pending request (design 03 `reasons`). */
 val REJECT_REASONS = listOf(

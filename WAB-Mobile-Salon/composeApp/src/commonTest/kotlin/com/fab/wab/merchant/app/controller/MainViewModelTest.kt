@@ -125,6 +125,26 @@ class MainViewModelTest {
     )
 
     @Test
+    fun theSessionIsHeldSoARecreatedScreenReadsItAtOnce() = runTest(UnconfinedTestDispatcher()) {
+        // e2e: rotating the phone rebuilt the navigation from a one-frame "guest" route and showed Home again.
+        val signedIn = SessionState.SignedIn(MemberProfile("m1", "s1", "Rami", MemberRole.OWNER))
+        val vm = MainViewModel(
+            appConfigRepository = FakeAppConfigRepository(AppResult.Success(READY_CONFIG)),
+            appSettings = settings,
+            appearanceSettings = AppearanceSettings(settings),
+            sessionTimeOut = sessionTimeOut,
+            environment = environment,
+            sessionAnalyticsSync = SessionAnalyticsSync(MutableStateFlow(SessionState.Guest), NoOpAnalyticsTracker, FakeCrashReporter()),
+            permissionsSync = permissionsSync,
+            accountEvents = RealtimeAccountEvents(FakeRealtimeClient(), permissionsSync, sessionStore),
+            testScope = backgroundScope,
+            errorText = { CONFIG_ERROR_TEXT },
+            session = MutableStateFlow(signedIn),
+        )
+        assertEquals(signedIn, vm.sessionState.value, "no collector needed: the value is there for the next composition")
+    }
+
+    @Test
     fun stateCarriesTheAppVersion() = runTest(UnconfinedTestDispatcher()) {
         assertEquals("1.2.3", viewModel().state.first().appVersion)
     }

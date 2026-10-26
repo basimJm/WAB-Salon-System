@@ -89,6 +89,8 @@ internal object BookingsDesign {
     val lineHeightBodyPlus = 22.sp
 
     const val SHIMMER_CARDS = 4
+    /** S14 card: the rejection reason is cut after two lines (the details screen shows it whole). */
+    const val CARD_REASON_MAX_LINES = 2
     const val REFERENCE_PREFIX = "#"
     const val BULLET = "•"
     const val DIALOG_ICON_TEXT = "!"

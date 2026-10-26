@@ -27,6 +27,7 @@ import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.favorites.presentation.resources.Res
+import com.fab.wab.customer.feature.favorites.presentation.resources.favorites_closed_now
 import com.fab.wab.customer.feature.favorites.presentation.resources.favorites_closed_today
 import com.fab.wab.customer.feature.favorites.presentation.resources.favorites_more
 import com.fab.wab.customer.feature.favorites.presentation.resources.favorites_open
@@ -142,13 +143,16 @@ private fun DescriptionLine(description: String) {
     }
 }
 
-/** `Open · 10:00 AM – 10:00 PM` in green or `Closed today` in pink, each with a 6 px dot in the same colour. */
+/** `Open · 10:00 AM – 10:00 PM` in green, `Closed · hours` or `Closed today` in pink, each with a 6 px dot in the same colour. */
 @Composable
 private fun StatusLine(salon: SalonSummary) {
-    val hours = salon.toUi().todayHours
-    val open = salon.isOpenNow && !hours.isNullOrBlank()
-    val color = if (open) AppTheme.colors.success else AppTheme.colors.danger
-    val text = if (open) stringResource(Res.string.favorites_open, hours.orEmpty()) else stringResource(Res.string.favorites_closed_today)
+    val status = favoriteStatusOf(salon.isOpenNow, salon.toUi().todayHours)
+    val color = if (status is FavoriteStatus.Open) AppTheme.colors.success else AppTheme.colors.danger
+    val text = when (status) {
+        is FavoriteStatus.Open -> stringResource(Res.string.favorites_open, status.hours)
+        is FavoriteStatus.ClosedNow -> stringResource(Res.string.favorites_closed_now, status.hours)
+        FavoriteStatus.ClosedToday -> stringResource(Res.string.favorites_closed_today)
+    }
     Row(horizontalArrangement = Arrangement.spacedBy(FavoritesDesign.statusGap), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(FavoritesDesign.statusDot).background(color, AppTheme.shapes.circle))
         AppText(

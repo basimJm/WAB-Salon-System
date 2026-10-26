@@ -35,7 +35,6 @@ import com.fab.wab.merchant.core.domain.ThemeMode
 import com.fab.wab.merchant.core.domain.config.AppConfigRepository
 import com.fab.wab.merchant.core.domain.permission.permissionSet
 import com.fab.wab.merchant.core.domain.session.SessionState
-import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.core.domain.session.launchRouteOf
 import com.fab.wab.merchant.core.domain.session.showsOfflineBanner
 import com.fab.wab.merchant.core.firebase.di.platformFirebaseModule
@@ -149,7 +148,7 @@ fun App() {
             AppTheme {
                 SystemBarsAppearance(isDarkTheme)
                 TrackNavigationScreens(navController)
-                val sessionState by koinInject<SessionStore>().state.collectAsStateWithLifecycle(initialValue = null)
+                val sessionState by mainViewModel.sessionState.collectAsStateWithLifecycle()
                 RealtimeConnectionEffect(koinInject<RealtimeClient>(), isSignedIn = sessionState?.isSignedIn == true)
                 val permissions = (sessionState ?: SessionState.Guest).permissionSet()
                 CompositionLocalProvider(LocalPermissions provides permissions) {

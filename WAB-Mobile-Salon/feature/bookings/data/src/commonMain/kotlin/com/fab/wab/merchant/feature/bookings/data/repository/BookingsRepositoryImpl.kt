@@ -49,6 +49,35 @@ class BookingsRepositoryImpl(private val api: BookingsApi) : BookingsRepository 
     override suspend fun reassign(bookingId: String, personIndex: Int, staffId: String) =
         safeApiCall { api.reassign(bookingId, PostBookingsByIdReassignBody(personIndex, staffId)) }.mapSuccess { }
 
-    override suspend fun staff(): AppResult<List<StaffRef>> =
-        safeApiCall { api.team() }.mapSuccess { response -> response.data.filter { it.active && it.providesServices }.map { it.toStaff() } }
+    override suspend fun eligibleStaff(bookingId: String, personIndex: Int): AppResult<List<StaffRef>> =
+        safeApiCall { api.eligibleStaff(bookingId, personIndex) }.mapSuccess { response ->
+            response.data.map { StaffRef(it.staffId, it.name) }
+        }
+
+    /**
+     * Every page of `GET /team/members` (the server answers 10 per page by default; e2e: the 11th and 12th providers
+     * were missing from the staff filter and the calendar columns).
+     */
+    override suspend fun staff(): AppResult<List<StaffRef>> {
+        val all = mutableListOf<StaffRef>()
+        for (page in TeamPaging.FIRST_PAGE..TeamPaging.MAX_PAGES) {
+            when (val result = safeApiCall { api.team(page, TeamPaging.PAGE_SIZE) }) {
+                is AppResult.Success -> {
+                    val rows = result.data.data
+                    all += rows.filter { it.active && it.providesServices }.map { it.toStaff() }
+                    if (rows.size < TeamPaging.PAGE_SIZE) break
+                }
+                is AppResult.Error -> return result
+                AppResult.Loading -> return AppResult.Loading
+            }
+        }
+        return AppResult.Success(all)
+    }
+}
+
+/** `GET /team/members` paging: the contract's largest page, and a ceiling against a server that never ends. */
+internal object TeamPaging {
+    const val FIRST_PAGE = 1
+    const val PAGE_SIZE = 100
+    const val MAX_PAGES = 20
 }

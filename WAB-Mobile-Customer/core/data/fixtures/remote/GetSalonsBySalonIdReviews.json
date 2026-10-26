@@ -4,14 +4,47 @@
   "data": {
     "items": [
       {
+        "id": "fd8b0bcb947be715d59b159f",
+        "customerName": "Zeina",
+        "rating": 5,
+        "comment": "أفضل صالون جربته في عمّان، أنصح فيه.",
+        "createdAt": "2026-10-24T16:55:00.000Z",
+        "branch": {
+          "id": "ce1bd4752df7edefcac0f090",
+          "name": "Jabal Amman"
+        }
+      },
+      {
         "id": "82ed475d8c96be989ce21736",
         "customerName": "Dima",
         "rating": 5,
         "comment": "أفضل صالون جربته في عمّان، أنصح فيه.",
-        "createdAt": "2026-10-19T20:27:00.000Z",
+        "createdAt": "2026-10-23T20:27:00.000Z",
         "branch": {
-          "id": "6addc42774ae573daadd06d6",
+          "id": "6adf513d4bd7099438793e83",
           "name": "Sweifieh"
+        }
+      },
+      {
+        "id": "961e9fcdb29918ab05d2c5f1",
+        "customerName": "Yara",
+        "rating": 4,
+        "comment": "خدمة جيدة لكن المكان كان مزدحمًا.",
+        "createdAt": "2026-10-23T17:15:00.000Z",
+        "branch": {
+          "id": "444ece388341b640276cd4f0",
+          "name": "Al-Rabyeh"
+        }
+      },
+      {
+        "id": "72654604ad1c781d3707fa9d",
+        "customerName": "Haya",
+        "rating": 4,
+        "comment": "خدمة جيدة لكن المكان كان مزدحمًا.",
+        "createdAt": "2026-10-23T15:52:00.000Z",
+        "branch": {
+          "id": "444ece388341b640276cd4f0",
+          "name": "Al-Rabyeh"
         }
       },
       {
@@ -19,9 +52,9 @@
         "customerName": "Shahd",
         "rating": 5,
         "comment": "Friendly staff, but I waited ten minutes past my time.",
-        "createdAt": "2026-10-17T19:36:00.000Z",
+        "createdAt": "2026-10-22T19:36:00.000Z",
         "branch": {
-          "id": "6addc42774ae573daadd06d6",
+          "id": "6adf513d4bd7099438793e83",
           "name": "Sweifieh"
         }
       },
@@ -30,21 +63,65 @@
         "customerName": "Dima",
         "rating": 4,
         "comment": "تجربة ممتازة، الموظفين محترفين والمكان نظيف جدًا.",
-        "createdAt": "2026-10-17T19:25:00.000Z",
+        "createdAt": "2026-10-22T19:25:00.000Z",
         "branch": {
-          "id": "6addc42774ae573daadd06d6",
+          "id": "6adf513d4bd7099438793e83",
           "name": "Sweifieh"
+        }
+      },
+      {
+        "id": "9e90dddb67a32aa3dc150957",
+        "customerName": "Salma",
+        "rating": 5,
+        "comment": "The result was exactly what I asked for.",
+        "createdAt": "2026-10-22T16:05:00.000Z",
+        "branch": {
+          "id": "444ece388341b640276cd4f0",
+          "name": "Al-Rabyeh"
+        }
+      },
+      {
+        "id": "4565fcb62198b35365650682",
+        "customerName": "Haya",
+        "rating": 4,
+        "comment": "Clean, calm and professional. Loved it.",
+        "createdAt": "2026-10-20T19:45:00.000Z",
+        "branch": {
+          "id": "ce1bd4752df7edefcac0f090",
+          "name": "Jabal Amman"
+        }
+      },
+      {
+        "id": "9f0255eda19ddede04b824bf",
+        "customerName": "Raghad",
+        "rating": 3,
+        "comment": "أفضل صالون جربته في عمّان، أنصح فيه.",
+        "createdAt": "2026-10-20T19:42:00.000Z",
+        "branch": {
+          "id": "ce1bd4752df7edefcac0f090",
+          "name": "Jabal Amman"
+        }
+      },
+      {
+        "id": "da3fbac3656a22fa5650fa11",
+        "customerName": "Dima",
+        "rating": 5,
+        "comment": "أفضل صالون جربته في عمّان، أنصح فيه.",
+        "createdAt": "2026-10-16T16:23:00.000Z",
+        "branch": {
+          "id": "444ece388341b640276cd4f0",
+          "name": "Al-Rabyeh"
         }
       }
     ],
     "summary": {
-      "avg": 4.7,
-      "count": 3
+      "avg": 4.2,
+      "count": 23
     }
   },
   "meta": {
     "page": 1,
     "pageSize": 10,
-    "total": 3
+    "total": 23
   }
 }

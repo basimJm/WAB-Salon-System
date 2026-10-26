@@ -4,6 +4,7 @@ import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
 import { MOCK_BRANCH_IDS, bookingBranchRef } from './branchesFixture';
+import { filsToJod, jodToFils } from '@/domain/shared/money';
 
 interface Seed {
   n: number;
@@ -16,6 +17,22 @@ const DAY_MS = 86_400_000;
 /** Appointments are n days from now, so "not started yet" rules stay true whenever the tests run. */
 const inDays = (n: number, hour: number) =>
   new Date(Math.floor(Date.now() / DAY_MS) * DAY_MS + n * DAY_MS + hour * 3_600_000).toISOString();
+const MOCK_STAFF = {
+  id: '64f0000000000000000000a2',
+  name: 'Sara Ali',
+  firstName: 'Sara',
+  photoUrl: null,
+};
+const REJECTED = 'REJECTED';
+/** Booking views (SRV-170): `remaining` is still owed (0 once final); `paidAtSalon` only when COMPLETED. */
+const OPEN = new Set(['PENDING', 'APPROVED']);
+const moneyOf = (status: string, total: string, paidOnline: string) => {
+  const atSalon = filsToJod(jodToFils(total) - jodToFils(paidOnline));
+  return {
+    remaining: OPEN.has(status) ? atSalon : filsToJod(0),
+    paidAtSalon: status === 'COMPLETED' ? atSalon : filsToJod(0),
+  };
+};
 const make = ({ n, status, payment, bride, total }: Seed) => ({
   id: `64h${String(n).padStart(21, '0')}`,
   referenceNumber: `WAB-00000${String(n)}`,
@@ -33,13 +50,18 @@ const make = ({ n, status, payment, bride, total }: Seed) => ({
   salon: { id: '64f000000000000000000001', name: 'Noor Salon' },
   branch: bookingBranchRef(n === 2 ? MOCK_BRANCH_IDS.noorSecond : MOCK_BRANCH_IDS.noorMain),
   customer: { id: '64g000000000000000000001', name: 'Dana Khoury', phone: '+962790000301' },
-  staff: [{ id: '64f0000000000000000000a2', name: 'Sara Ali' }],
+  staff: [MOCK_STAFF],
+  rejection:
+    status === REJECTED
+      ? { reasonCode: 'FULLY_BOOKED', reasonText: null, at: inDays(n - 1, 9) }
+      : null,
 });
 
 export const MOCK_BOOKINGS = [
   make({ n: 1, status: 'PENDING', payment: 'PAY_ON_ARRIVAL', bride: false, total: '25.000' }),
   make({ n: 2, status: 'APPROVED', payment: 'DEPOSIT_PAID', bride: true, total: '120.500' }),
   make({ n: 3, status: 'COMPLETED', payment: 'FULLY_PAID', bride: false, total: '40.000' }),
+  make({ n: 4, status: REJECTED, payment: 'PAY_ON_ARRIVAL', bride: false, total: '18.000' }),
 ];
 
 export function bookingsRoutes(): readonly MockRoute[] {
@@ -76,6 +98,7 @@ export function bookingsRoutes(): readonly MockRoute[] {
       ({ params }) => {
         const r = find(params['id']);
         if (!r) throw new Error('no booking');
+        const paidOnline = r.paymentStatus === 'DEPOSIT_PAID' ? '20.000' : '0.000';
         return {
           data: {
             ...r,
@@ -87,15 +110,15 @@ export function bookingsRoutes(): readonly MockRoute[] {
                 start: r.appointmentStart,
                 end: r.appointmentEnd,
                 subtotal: r.total,
-                staff: { id: '64f0000000000000000000a2', name: 'Sara Ali' },
+                staff: MOCK_STAFF,
                 services: [{ name: 'Haircut', price: r.total, durationMinutes: 60 }],
               },
             ],
             money: {
               total: r.total,
-              dueOnline: r.paymentStatus === 'DEPOSIT_PAID' ? '20.000' : '0.000',
-              paidOnline: r.paymentStatus === 'DEPOSIT_PAID' ? '20.000' : '0.000',
-              remaining: r.total,
+              dueOnline: paidOnline,
+              paidOnline,
+              ...moneyOf(r.status, r.total, paidOnline),
               refunded: '0.000',
             },
             policy: {},
@@ -107,7 +130,6 @@ export function bookingsRoutes(): readonly MockRoute[] {
                 at: '2026-10-10T08:00:00.000Z',
               },
             ],
-            rejection: null,
             cancellation: null,
             createdAt: '2026-10-10T08:00:00.000Z',
             actions: ['APPROVE' as const, 'REJECT' as const],

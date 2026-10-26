@@ -24,13 +24,13 @@
     "total": "Total",
     "from": "From day",
     "to": "To day (included)",
-    "search": "Search reference, customer or salon",
+    "search": "Search booking reference, customer name or phone",
     "empty": "No bookings match",
     "respondBy": "Salon must answer by",
     "requestedAt": "Requested",
     "dueOnline": "Due online",
     "paidOnline": "Paid online",
-    "remaining": "Remaining",
+    "remaining": "Still to pay at the salon",
     "refunded": "Refunded",
     "details": "Details",
     "history": "Status history",
@@ -68,6 +68,29 @@
     "refundMax": "At most {{max}} (paid online, not yet refunded).",
     "error": {
       "refund": "Enter an amount above zero and not above what can be refunded."
+    },
+    "paidAtSalon": "Paid at the salon",
+    "rejection": "Rejection reason",
+    "cancellation": "Cancellation reason",
+    "reasonCode": {
+      "FULLY_BOOKED": "Fully booked",
+      "STAFF_UNAVAILABLE": "Staff unavailable",
+      "SERVICE_UNAVAILABLE": "Service unavailable",
+      "SALON_EMERGENCY": "Salon emergency",
+      "EXCEPTIONAL_CLOSURE": "Exceptional closure",
+      "OTHER": "Other",
+      "ADMIN_ACTION": "Admin action"
+    },
+    "paymentMethod": {
+      "PAY_ON_ARRIVAL": "Pay on arrival",
+      "DEPOSIT": "Deposit online",
+      "FULL_ONLINE": "Full payment online"
+    },
+    "actor": {
+      "CUSTOMER": "Customer",
+      "MEMBER": "Salon member",
+      "ADMIN": "Admin",
+      "SYSTEM": "System"
     }
   }
 }

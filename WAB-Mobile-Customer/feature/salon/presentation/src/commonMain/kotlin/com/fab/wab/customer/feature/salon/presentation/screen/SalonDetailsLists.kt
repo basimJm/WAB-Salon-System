@@ -52,6 +52,7 @@ import com.fab.wab.customer.feature.salon.presentation.resources.Res
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_gallery
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_reviews
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_reviews_empty
+import com.fab.wab.customer.feature.salon.presentation.resources.salon_service_bride_only
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_services
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_staff
 import org.jetbrains.compose.resources.stringResource
@@ -183,6 +184,7 @@ private fun ServiceRow(service: SalonService, onClick: () -> Unit) {
                     style = AppTheme.typography.bodySmall,
                     color = AppTheme.colors.muted,
                 )
+                if (service.brideOnly) BrideOnlyLabel()
             }
             AppText(
                 text = stringResource(CoreRes.string.price_jod, service.price),
@@ -193,6 +195,18 @@ private fun ServiceRow(service: SalonService, onClick: () -> Unit) {
         }
         AppDivider()
     }
+}
+
+/** VIP marker (SRV-170): the service is bookable only for a person marked as bride (PRD S16 step 1). */
+@Composable
+internal fun BrideOnlyLabel(modifier: Modifier = Modifier) {
+    AppText(
+        text = stringResource(Res.string.salon_service_bride_only),
+        style = AppTheme.typography.labelSmall,
+        color = AppTheme.colors.onDangerContainer,
+        maxLines = 1,
+        modifier = modifier,
+    )
 }
 
 /** Instagram-style grid (3 px gaps, 6 px radius) built from rows: the page already scrolls, so no nested lazy grid. */

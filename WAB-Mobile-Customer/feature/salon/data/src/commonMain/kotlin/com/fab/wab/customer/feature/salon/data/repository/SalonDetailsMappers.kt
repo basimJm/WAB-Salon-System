@@ -90,6 +90,7 @@ fun GetSalonsBySalonIdDataServicesItem.toDomain(): SalonService = SalonService(
     durationMinutes = durationMinutes.toInt(),
     mediaUrls = mediaUrls,
     branchId = branchId,
+    brideOnly = brideOnly,
 )
 
 fun GetSalonsBySalonIdDataGalleryItem.toDomain(): GalleryItem = GalleryItem(

@@ -54,6 +54,8 @@
 
 .wab-overlay--drawer {
   grid-template-columns: minmax(0, var(--size-drawer));
+  /* One row exactly the viewport tall: a long form scrolls inside the drawer body instead of pushing Save off screen. */
+  grid-template-rows: minmax(0, 1fr);
   justify-content: end;
   justify-items: stretch;
   align-items: stretch;

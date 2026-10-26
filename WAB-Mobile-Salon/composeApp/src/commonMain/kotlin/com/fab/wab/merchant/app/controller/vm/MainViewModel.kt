@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -107,6 +108,13 @@ class MainViewModel(
         SharingStarted.WhileSubscribed(STATE_SUBSCRIPTION_MS),
         ThemeMode.SYSTEM,
     )
+
+    /**
+     * The stored session, held by the view model so it survives configuration changes: the shell keys its navigation
+     * on the route derived from it, and a fresh `collectAsState(initial = null)` after a rotation answered "guest" for
+     * one frame, rebuilt the navigation and dropped the member back on Home (found in the e2e pass). Null = not read yet.
+     */
+    val sessionState: StateFlow<SessionState?> = session.stateIn(scope, SharingStarted.Eagerly, null)
 
     val sessionTimeOutState = sessionTimeOut.sessionEventTimeOut.receiveAsFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
