@@ -62,8 +62,7 @@ export function BannerCard({
               {' · '}
             </>
           ) : null}
-          {t(`banners.genders.${banner.gender}`)} ·{' '}
-          <bdi dir="ltr">{`${start} → ${end}`}</bdi>
+          {t(`banners.genders.${banner.gender}`)} · <bdi dir="ltr">{`${start} → ${end}`}</bdi>
         </span>
         <div className="wab-gridcard__actions">
           <Button variant="secondary" size="sm" onClick={() => onEdit(banner)}>
