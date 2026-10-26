@@ -64,8 +64,10 @@ fun GetBookingsByIdData.toDomain(): BookingDetails? {
         money = with(money) { BookingMoney(total, dueOnline, paidOnline, remaining, refunded, paidAtSalon) },
         policy = policy.toPolicyTerms(),
         history = statusHistory.map { StatusChange(BookingStatus.fromCode(it.status), it.actorType, it.reason, instantOf(it.at)) },
-        rejectionReason = rejection?.let { it.reasonText ?: it.reasonCode },
-        cancellationReason = cancellation?.let { it.reasonText ?: it.reasonCode },
+        rejectionReason = rejection?.reasonText?.takeIf(String::isNotBlank),
+        cancellationReason = cancellation?.reasonText?.takeIf(String::isNotBlank),
+        rejectionCode = rejection?.reasonCode,
+        cancellationCode = cancellation?.reasonCode,
         createdAt = instantOf(createdAt),
         actions = actions.mapNotNull { code -> BookingAction.entries.firstOrNull { it.name == code } }.toSet(),
     )

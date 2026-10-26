@@ -32,6 +32,12 @@ fun trimAmount(amount: String): String {
     return text.trimEnd(ZERO).trimEnd(DECIMAL_POINT)
 }
 
+private const val LTR_ISOLATE = '⁦'
+private const val POP_ISOLATE = '⁩'
+
+/** Wraps a phone number, a reference or a time in LTR isolates so it never reorders inside Arabic text ("+962…"). */
+fun ltrIsolate(value: String): String = "$LTR_ISOLATE$value$POP_ISOLATE"
+
 private const val FILS_PER_JOD = 1_000L
 private const val FILS_DIGITS = 3
 

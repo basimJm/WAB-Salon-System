@@ -118,14 +118,25 @@ data class BookingDetails(
     /** The salon policy snapshotted at booking time; null for bookings without one. */
     val policy: PolicyTerms?,
     val history: List<StatusChange>,
+    /** The free text the salon / customer typed (`reasonText`), null when only a code was chosen. */
     val rejectionReason: String?,
     val cancellationReason: String?,
     val createdAt: Instant?,
     val actions: Set<BookingAction>,
+    /** `reasonCode` (e.g. FULLY_BOOKED): shown in the app language when there is no text (e2e: raw code was shown). */
+    val rejectionCode: String? = null,
+    val cancellationCode: String? = null,
 )
 
 /** Reasons offered by the reason picker (Design Script §1.2, design 03); OTHER needs a text. */
-enum class ResponseReason { FULLY_BOOKED, STAFF_UNAVAILABLE, SERVICE_UNAVAILABLE, SALON_EMERGENCY, EXCEPTIONAL_CLOSURE, OTHER }
+enum class ResponseReason {
+    FULLY_BOOKED, STAFF_UNAVAILABLE, SERVICE_UNAVAILABLE, SALON_EMERGENCY, EXCEPTIONAL_CLOSURE, OTHER;
+
+    companion object {
+        /** The picker reason of a server `reasonCode`; null for codes the app has no text for (shown as sent). */
+        fun fromCode(code: String?): ResponseReason? = entries.firstOrNull { it.name == code }
+    }
+}
 
 /** Rejection reasons of a pending request (design 03 `reasons`). */
 val REJECT_REASONS = listOf(

@@ -6,6 +6,7 @@ import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataMone
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataPersonsItem
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataPersonsItemServicesItem
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataPersonsItemStaff
+import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataRejection
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataStatusHistoryItem
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItem
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItemBranch
@@ -18,6 +19,7 @@ import com.fab.wab.merchant.core.domain.booking.PaymentStatus
 import com.fab.wab.merchant.feature.bookings.data.repository.toDomain
 import com.fab.wab.merchant.feature.bookings.data.repository.toStaff
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingAction
+import com.fab.wab.merchant.feature.bookings.domain.model.ResponseReason
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
@@ -105,6 +107,19 @@ class BookingMappersTest {
         assertEquals(false, details?.money?.hasRefund)
         assertEquals(PHOTO, details?.persons?.single()?.staff?.photoUrl)
         assertEquals("Rana Odeh", details?.persons?.single()?.staff?.name)
+    }
+
+    @Test
+    fun aCodeOnlyRejectionKeepsTheCodeForTheAppLanguageText() {
+        val codeOnly = detailsData.copy(status = "REJECTED", rejection = GetBookingsByIdDataRejection("FULLY_BOOKED", null, START))
+            .toDomain()
+        assertNull(codeOnly?.rejectionReason, "e2e: the raw code FULLY_BOOKED was shown as the reason")
+        assertEquals("FULLY_BOOKED", codeOnly?.rejectionCode)
+        assertEquals(ResponseReason.FULLY_BOOKED, ResponseReason.fromCode(codeOnly?.rejectionCode))
+        val typed = detailsData.copy(status = "REJECTED", rejection = GetBookingsByIdDataRejection("OTHER", "Closed today", START))
+            .toDomain()
+        assertEquals("Closed today", typed?.rejectionReason)
+        assertNull(ResponseReason.fromCode("CUSTOMER_REQUEST"))
     }
 
     @Test

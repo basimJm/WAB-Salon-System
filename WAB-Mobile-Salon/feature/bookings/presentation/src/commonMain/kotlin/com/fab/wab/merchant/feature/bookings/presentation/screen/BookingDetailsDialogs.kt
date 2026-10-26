@@ -224,7 +224,7 @@ private fun ChoiceRow(text: String, selected: Boolean, onClick: () -> Unit) {
     }
 }
 
-private fun ResponseReason.label(): StringResource = when (this) {
+internal fun ResponseReason.label(): StringResource = when (this) {
     ResponseReason.FULLY_BOOKED -> Res.string.reason_fully_booked
     ResponseReason.STAFF_UNAVAILABLE -> Res.string.reason_staff_unavailable
     ResponseReason.SERVICE_UNAVAILABLE -> Res.string.reason_service_unavailable
