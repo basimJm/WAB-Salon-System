@@ -1,29 +1,28 @@
 # wab-otp
 
-Provider-independent phone OTP for WAB projects (Node >= 22, TypeScript, ESM + CJS): server-generated codes delivered over **WhatsApp** (Meta Cloud API authentication template) or any other channel, a **signed single-use proof** (`otpToken`) after a correct code, and request / wrong-code limits.
+Provider-independent phone OTP for WAB projects (Node >= 22, TypeScript, ESM + CJS): server-generated codes delivered over **WhatsApp by ARQAM OTP** (our code as `otpCode`, one authentication template per language) or any other channel, a **signed single-use proof** (`otpToken`) after a correct code, and request / wrong-code limits.
 
-Owner setup of the Meta side (app, number, token, template): [`docs/WHATSAPP_SETUP.md`](docs/WHATSAPP_SETUP.md).
+Owner setup of the ARQAM side (project, sender, templates, TEST/LIVE keys): [`docs/ARQAM_SETUP.md`](docs/ARQAM_SETUP.md).
 
 ## Quick start
 
 ```ts
-import { createWhatsAppOtp, createOtpService, RedisCodeStore, RedisLimitStore } from '@wab/otp';
+import { createArqamOtp, createOtpService, RedisCodeStore, RedisLimitStore } from '@wab/otp';
 
 const codeStore = new RedisCodeStore(redis); // shared store, required in prod
-const whatsapp = createWhatsAppOtp({
+const otp = createArqamOtp({
   environment: 'prod', // 'dev' | 'prod'
   store: codeStore,
   codeSecret: process.env.OTP_CODE_SECRET!, // >= 32 chars
   proofSecret: process.env.OTP_PROOF_SECRET!, // >= 32 chars, different
-  codeLength: 6, // otp.length
+  codeLength: 6, // otp.length (ARQAM accepts 4-6 digits)
   codeTtlSec: 300, // otp.codeTtlSec
   proofTtlSec: 600, // otp.proofTtlSec
-  whatsapp: {
-    phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID!,
-    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
-    templateName: process.env.WHATSAPP_TEMPLATE_NAME!,
-    languageCodes: { ar: 'ar', en: 'en_US' },
+  arqam: {
+    apiKey: process.env.ARQAM_API_KEY!, // TEST key in dev, LIVE key in prod
+    templates: { ar: process.env.ARQAM_TEMPLATE_AR!, en: process.env.ARQAM_TEMPLATE_EN! },
     fallbackLanguage: 'ar',
+    // senderId: only when ARQAM answers SENDER_REQUIRED
   },
 });
 const limits = createOtpService({
@@ -33,12 +32,12 @@ const limits = createOtpService({
   store: new RedisLimitStore(redis),
 });
 
-// 1. request: limits first, then send
+// 1. request: limits first, then send (ip only when the ARQAM project limits per IP)
 const pre = await limits.precheck({ phone, purpose: 'LOGIN' }); // { allowed, otpLength, resendAfterSeconds, blockedUntil? }
-if (pre.allowed) await whatsapp.sendCode({ phone, purpose: 'LOGIN', language: 'ar' }); // { expiresInSec, messageId }
+if (pre.allowed) await otp.sendCode({ phone, purpose: 'LOGIN', language: 'ar', ip }); // { expiresInSec, messageId }
 
 // 2. verify the typed code
-const r = await whatsapp.verifyCode({ phone, purpose: 'LOGIN', code });
+const r = await otp.verifyCode({ phone, purpose: 'LOGIN', code });
 // { outcome: 'VERIFIED', phone, otpToken, expiresInSec } | { outcome: 'INVALID_PROOF' | 'EXPIRED' }
 if (r.outcome === 'INVALID_PROOF')
   await limits.reportFailure({ phone, purpose: 'LOGIN', reason: 'WRONG_CODE' });
@@ -46,23 +45,27 @@ if (r.outcome === 'INVALID_PROOF')
 // 3. any action that needs a verified phone
 await limits.verify({ proof: otpToken, expectedPhone: phone, purpose: 'LOGIN' });
 // { outcome: 'VERIFIED', phone } | INVALID_PROOF (bad / replayed) | EXPIRED | PHONE_MISMATCH | PURPOSE_MISMATCH | BLOCKED
+
+// ops: account mode (LIVE/TEST) + balance; delivery history of one message
+await otp.getAccount(); // { mode, balance, status }
+await otp.getDeliveryStatus(messageId); // { state: SENT | DELIVERED | READ | FAILED | UNKNOWN, history }
 ```
 
-Only proof verification (when your backend owns the limits): `createOtpVerifier({ environment, provider: 'signed', proof })`, or `whatsapp.proofs.verify(...)`.
+Only proof verification (when your backend owns the limits): `createOtpVerifier({ environment, provider: 'signed', proof })`, or `otp.proofs.verify(...)`.
 
-Failures **throw** `OtpError` (`code`, `retryable`, `details` without secrets). Not on WhatsApp / not deliverable → `OTP_DELIVERY_FAILED` (not retried; the stored code is removed). 429 / 5xx / Meta throughput limits / timeouts are retried with capped backoff + jitter.
+Failures **throw** `OtpError` (`code`, `retryable`, `details` without secrets). ARQAM `INVALID_PHONE` / `PROVIDER_ERROR` → `OTP_DELIVERY_FAILED` (not retried; the stored code is removed). Key / template / sender / credits / per-phone or per-IP limits are not retried; 5xx, timeouts and network errors are retried with capped backoff + jitter and the same `Idempotency-Key`; `RATE_LIMITED` waits its `retryAfter` (up to `maxRetryAfterMs`). Full table: `ARQAM_ERRORS` and `.claude/Integration.md` §6.
 
 ## Environments
 
-|              | dev                                                                               | prod                                                               |
-| ------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| channel      | `FakeOtpChannel` (records codes, `lastCode(phone)`) or WhatsApp with test numbers | WhatsApp (fake channel refused)                                    |
-| fixed code   | `fixedCode: '123456'` allowed                                                     | refused                                                            |
-| stores       | `MemoryCodeStore`, `MemoryLimitStore`                                             | shared stores (`RedisCodeStore`, `RedisLimitStore`); local refused |
-| Graph URL    | any (`baseUrl` for a local mock)                                                  | https only                                                         |
-| proof verify | `provider: 'fake'` (`fakeProof(phone)`) or `'signed'`                             | `'signed'` or `'custom'`                                           |
+|              | dev                                                                          | prod                                                               |
+| ------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| channel      | `FakeOtpChannel` (records codes, `lastCode(phone)`) or ARQAM with a TEST key | ARQAM with a LIVE key (fake channel refused)                       |
+| fixed code   | `fixedCode: '123456'` allowed                                                | refused                                                            |
+| stores       | `MemoryCodeStore`, `MemoryLimitStore`                                        | shared stores (`RedisCodeStore`, `RedisLimitStore`); local refused |
+| ARQAM URL    | any (`baseUrl` for a local mock)                                             | https only                                                         |
+| proof verify | `provider: 'fake'` (`fakeProof(phone)`) or `'signed'`                        | `'signed'` or `'custom'`                                           |
 
-Other channels: `createSmsOtp({ ..., sms: { vendor, templates } })`, or any `OtpChannel` with `createCodeOtp({ ..., channel })`. Behind a proxy: pass `whatsapp.fetch`.
+Other channels: `createSmsOtp({ ..., sms: { vendor, templates } })`, or any `OtpChannel` with `createCodeOtp({ ..., channel })`. Behind a proxy: pass `arqam.fetch`.
 
 ## Develop
 

@@ -1,4 +1,4 @@
-import type { FetchLike } from '../../src/adapters/whatsapp/options';
+import type { FetchLike } from '../../src/adapters/http';
 
 export interface Call {
   readonly url: string;
@@ -9,15 +9,15 @@ export interface Call {
 
 export type Reply = { status: number; body?: unknown; raw?: string } | Error;
 
-/** Scripted Meta endpoint: one reply per call (the last one repeats). */
-export const stubMeta = (...replies: Reply[]): { fetch: FetchLike; calls: Call[] } => {
+/** Scripted ARQAM endpoint: one reply per call (the last one repeats). No network. */
+export const stubArqam = (...replies: Reply[]): { fetch: FetchLike; calls: Call[] } => {
   const calls: Call[] = [];
   const fetch: FetchLike = (url, init) => {
     calls.push({
       url,
       method: init.method,
       headers: init.headers,
-      body: JSON.parse(init.body) as unknown,
+      body: init.body === undefined ? undefined : (JSON.parse(init.body) as unknown),
     });
     const reply = replies[Math.min(calls.length - 1, replies.length - 1)];
     if (reply === undefined) return Promise.reject(new Error('no reply scripted'));
@@ -28,33 +28,25 @@ export const stubMeta = (...replies: Reply[]): { fetch: FetchLike; calls: Call[]
   return { fetch, calls };
 };
 
-export const accepted = (id = 'wamid.TEST'): Reply => ({
+export const accepted = (messageId = 'msg-1'): Reply => ({
   status: 200,
-  body: {
-    messaging_product: 'whatsapp',
-    contacts: [{ input: '962791234567', wa_id: '962791234567' }],
-    messages: [{ id }],
-  },
+  body: { success: true, messageId, status: 'sent', cost: 25 },
 });
 
-export const metaError = (status: number, code: number, subcode?: number): Reply => ({
+export const refused = (status: number, errorCode?: string, retryAfter?: number): Reply => ({
   status,
   body: {
-    error: {
-      message: 'meta says no',
-      type: 'OAuthException',
-      code,
-      ...(subcode === undefined ? {} : { error_subcode: subcode }),
-      fbtrace_id: 'trace-1',
-    },
+    success: false,
+    ...(errorCode === undefined ? {} : { errorCode }),
+    errorMessage: 'arqam says no',
+    ...(retryAfter === undefined ? {} : { retryAfter }),
   },
 });
 
 export const noSleep = { sleep: (): Promise<void> => Promise.resolve(), random: (): number => 0.5 };
 
-export const WA = {
-  phoneNumberId: '1234567890',
-  accessToken: 'EAAtest-token-value',
-  templateName: 'wab_otp',
-  languageCodes: { ar: 'ar', en: 'en_US' },
+export const AQ = {
+  apiKey: 'aq_test_secret_value',
+  templates: { ar: 'wab_otp_ar', en: 'wab_otp_en' },
+  fallbackLanguage: 'ar',
 } as const;
