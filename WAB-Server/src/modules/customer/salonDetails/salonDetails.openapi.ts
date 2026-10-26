@@ -9,7 +9,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
-import { salonParamsSchema, staffParamsSchema } from './salonDetails.validation';
+import { salonParamsSchema, salonQuerySchema, staffParamsSchema } from './salonDetails.validation';
 
 const rating = z.object({ avg: z.number(), count: z.number() });
 const reviewView = z.object({
@@ -76,7 +76,9 @@ const details = z.object({
   staff: z.array(staffSummary),
   branches: z
     .array(branchSummary)
-    .describe('Bookable branches, main first; the place fields above are the main branch'),
+    .describe(
+      'Bookable branches, main first; the place fields above are the selected branch (`branchId`), else the main branch',
+    ),
   services: z.array(
     z.object({
       id: z.string(),
@@ -143,9 +145,9 @@ export const registerCustomerSalonDetailsDocs = (registry: OpenAPIRegistry): voi
     tags: ['Salon details'],
     summary: 'Salon details (S07): hours, closures, staff, services, gallery',
     description:
-      'Public; a valid customer token only adds `isFavorite`. A salon that is not LIVE and complete is 404 `SALON_NOT_FOUND`.',
+      "Public; a valid customer token only adds `isFavorite`. A salon that is not LIVE and complete is 404 `SALON_NOT_FOUND`. With `branchId` (a bookable branch, else 404 `BRANCH_NOT_FOUND`) `staff` and `services` are that branch's only and the place fields are the branch's; without it they cover every bookable branch, each tagged with its `branchId`.",
     security: [],
-    request: { headers, params: salonParamsSchema },
+    request: { headers, params: salonParamsSchema, query: salonQuerySchema },
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Salon', successResponseSchema(details)),
       ...failures,
@@ -156,6 +158,8 @@ export const registerCustomerSalonDetailsDocs = (registry: OpenAPIRegistry): voi
     path: `${base}/{salonId}/staff/{memberId}`,
     tags: ['Salon details'],
     summary: 'Staff sheet of a salon member who provides services',
+    description:
+      "Services are the member's own branch services; a member of an unbookable branch is 404 `NOT_FOUND`.",
     security: [],
     request: { headers, params: staffParamsSchema },
     responses: {

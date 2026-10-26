@@ -1,4 +1,4 @@
-import { BRANCH_TITLE_SEPARATOR } from '../../constants/branches';
+import { salonTitle } from '../branches/salonTitle';
 import type { Language } from '../../constants/enums';
 import { DEFAULT_LANGUAGE } from '../../constants/i18n';
 import type { BranchRaw } from '../../models/branch.model';
@@ -440,8 +440,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
           distance,
           language,
         });
-        const title =
-          count > 1 ? `${salon.name}${BRANCH_TITLE_SEPARATOR}${branch.name[language]}` : salon.name;
+        const title = salonTitle(salon.name, branch.name[language], count);
         return [{ ...base, title }];
       });
       return {

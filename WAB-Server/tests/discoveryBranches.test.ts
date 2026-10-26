@@ -304,6 +304,127 @@ describe('salon details: branches, staff and services per branch (§5.17)', () =
   });
 });
 
+describe('salon details for a selected branch (SRV-172, §5.17/§5.18)', () => {
+  const seedTeam = (): {
+    abdoun: Types.ObjectId;
+    sweifieh: Types.ObjectId;
+    lina: Types.ObjectId;
+    rana: Types.ObjectId;
+  } => {
+    m.catalog.docs.push(
+      {
+        _id: catalogA,
+        name: { ar: 'قص', en: 'Haircut' },
+        description: { ar: 'قص', en: 'Haircut' },
+        gender: 'FEMALE',
+        imageKey: 'catalog/a.jpg',
+        active: true,
+      },
+      {
+        _id: catalogB,
+        name: { ar: 'صبغة', en: 'Color' },
+        description: { ar: 'صبغة', en: 'Color' },
+        gender: 'FEMALE',
+        imageKey: 'catalog/b.jpg',
+        active: true,
+      },
+    );
+    const abdoun = offer(hifa, ids.hifaAbdoun, catalogA, 10_000);
+    const sweifieh = offer(hifa, ids.hifaSweifieh, catalogB, 8_000);
+    const member = (branchId: Types.ObjectId, firstName: string): Types.ObjectId => {
+      const _id = new Types.ObjectId();
+      m.members.docs.push({
+        _id,
+        salonId: hifa,
+        branchId,
+        firstName,
+        lastName: 'X',
+        role: 'EMPLOYEE',
+        active: true,
+        providesServices: true,
+        // A stale pick of another branch's service must not leak onto the sheet.
+        staff: {
+          serviceIds: [abdoun, sweifieh],
+          workingDays: [{ day: 'MON' }],
+          rating: { avg: 0, count: 0 },
+          customersCount: 0,
+        },
+      });
+      return _id;
+    };
+    return {
+      abdoun,
+      sweifieh,
+      lina: member(ids.hifaAbdoun, 'Lina'),
+      rana: member(ids.hifaSweifieh, 'Rana'),
+    };
+  };
+
+  it('lists only the selected branch staff and services, with its place and hours', async () => {
+    const team = seedTeam();
+    const view = await details.get({
+      salonId: hifa.toHexString(),
+      language: 'en',
+      branchId: ids.hifaSweifieh.toHexString(),
+    });
+    expect(view.services.map((s) => [s.id, s.branchId])).toEqual([
+      [team.sweifieh.toHexString(), ids.hifaSweifieh.toHexString()],
+    ]);
+    expect(view.staff.map((s) => s.firstName)).toEqual(['Rana']);
+    expect(view.locationText).toBe('Sweifieh, Amman');
+    expect(view.location).toEqual({ lat: SWEIFIEH[1], lng: SWEIFIEH[0] });
+    // The selector still lists every bookable branch.
+    expect(view.branches.map((b) => b.name)).toEqual(['Abdoun', 'Irbid', 'Sweifieh']);
+  });
+
+  it('without a branch keeps every bookable branch tagged (the app filters by its selector)', async () => {
+    seedTeam();
+    const view = await details.get({ salonId: hifa.toHexString(), language: 'en' });
+    expect(view.services.map((s) => s.branchId).sort()).toEqual(
+      [ids.hifaAbdoun.toHexString(), ids.hifaSweifieh.toHexString()].sort(),
+    );
+    expect(view.locationText).toBe('Abdoun, Amman');
+  });
+
+  it('404s BRANCH_NOT_FOUND for a closed branch, another salon branch or an unknown id', async () => {
+    seedTeam();
+    for (const branchId of [ids.hifaClosed, ids.glowMain, new Types.ObjectId()]) {
+      await expect(
+        details.get({
+          salonId: hifa.toHexString(),
+          language: 'en',
+          branchId: branchId.toHexString(),
+        }),
+      ).rejects.toMatchObject({ code: 'BRANCH_NOT_FOUND' });
+    }
+  });
+
+  it('staff sheet lists only services of the member branch; a member of a closed branch is 404', async () => {
+    const team = seedTeam();
+    const sheet = await details.staff({
+      salonId: hifa.toHexString(),
+      memberId: team.lina.toHexString(),
+      language: 'en',
+    });
+    expect(sheet.services.map((s) => s.id)).toEqual([team.abdoun.toHexString()]);
+    const gone = new Types.ObjectId();
+    m.members.docs.push({
+      _id: gone,
+      salonId: hifa,
+      branchId: ids.hifaClosed,
+      firstName: 'Gone',
+      lastName: 'X',
+      role: 'EMPLOYEE',
+      active: true,
+      providesServices: true,
+      staff: { serviceIds: [], workingDays: [], rating: { avg: 0, count: 0 }, customersCount: 0 },
+    });
+    await expect(
+      details.staff({ salonId: hifa.toHexString(), memberId: gone.toHexString(), language: 'en' }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+});
+
 describe('branch place helpers', () => {
   const asBranch = (id: string, isMain: boolean, at?: [number, number]): Entity<BranchRaw> =>
     ({
