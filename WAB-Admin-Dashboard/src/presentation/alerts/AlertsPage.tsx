@@ -132,6 +132,7 @@ export default function AlertsPage() {
         columns,
         rows: data?.items ?? [],
         rowKey: (r) => r.id,
+        rowAlert: (r) => r.status === 'NEW' && r.severity === 'CRITICAL',
         caption: title,
         loading: query.isPending,
         error: query.error,

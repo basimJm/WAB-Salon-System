@@ -102,7 +102,7 @@ describe('language and theme on the login page', () => {
   it('shows the brand story and security note', async () => {
     renderRoutes(ROUTES.login);
     expect(await screen.findByText(en.login.brand.headline)).toBeInTheDocument();
-    expect(screen.getByText(/Session ends after 30 minutes/)).toBeInTheDocument();
+    expect(screen.getByText(/Session ends after 2 days of inactivity/)).toBeInTheDocument();
   });
 });
 

@@ -32,6 +32,14 @@ describe('AuditPage', () => {
     expect(screen.getAllByText('203.0.113.7').length).toBe(3);
   });
 
+  it('shows the design read-only badge, the raw action code and the device (user agent)', async () => {
+    open();
+    await waitFor(() => expect(bodyRows()).toBe(3));
+    expect(screen.getByText('Read-only')).toBeInTheDocument();
+    expect(screen.getByText('SALON_SET_OFFLINE')).toHaveClass('wab-cell2__code');
+    expect(screen.getByRole('columnheader', { name: 'Device' })).toBeInTheDocument();
+  });
+
   it('opening a record shows the before / after values; one without them says so', async () => {
     open();
     await userEvent.click(await screen.findByText('Salon set offline'));

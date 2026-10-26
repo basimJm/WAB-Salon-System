@@ -95,3 +95,18 @@ export const instantToDate = (iso: string | null | undefined): string =>
 /** Inverse of `endDateToInstant`: the last day the banner still shows. */
 export const instantToEndDate = (iso: string | null | undefined): string =>
   iso ? addDays(localDateOf(parseInstant(iso)), -1) : '';
+
+export type BannerPhase = 'INACTIVE' | 'SCHEDULED' | 'ACTIVE' | 'ENDED';
+
+/** Card badge (design A24 "place" status): switched off, not started yet, showing now, or past its end. */
+export function bannerPhase(
+  banner: Pick<Banner, 'active' | 'startAt' | 'endAt'>,
+  now: Date,
+): BannerPhase {
+  if (!banner.active) return 'INACTIVE';
+  const at = now.getTime();
+  // A missing day means "no limit" on that side (the create body accepts null; old rows may hold none).
+  if (banner.startAt && at < parseInstant(banner.startAt).getTime()) return 'SCHEDULED';
+  if (banner.endAt && at >= parseInstant(banner.endAt).getTime()) return 'ENDED';
+  return 'ACTIVE';
+}

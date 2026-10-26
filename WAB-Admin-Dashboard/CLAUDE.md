@@ -81,7 +81,7 @@ src/
 - All failures become `AppError` (`infrastructure/errors`) with a `kind`; every kind has an `errors.<kind>` message in both locales. Servers' localized `message` is shown when present; branch on `code`/`kind`, never on text.
 - `HttpClient` is the only network code: timeout, retry of idempotent calls on transient failures, envelope validation (zod), 401 → sign-out. Never swallow errors: log through `Logger` (redacts tokens/passwords/OTP) or show `ErrorState`.
 - Render crashes are caught by `ErrorBoundary`; `window.error` and unhandled rejections are logged by `registerGlobalErrorHandlers`.
-- Tokens stay in memory (never `localStorage`); `safeStorage` is only for UI preferences.
+- Tokens stay in memory, mirrored only to the tab's `sessionStorage` (`tabStorage`, so a reload keeps the admin signed in; gone when the tab closes); never `localStorage`. `safeStorage` is only for UI preferences.
 
 ## 6. Tests and Delivery
 

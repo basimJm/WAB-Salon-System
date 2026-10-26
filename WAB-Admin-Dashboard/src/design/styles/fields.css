@@ -1,11 +1,11 @@
 .wab-field { display: grid; gap: var(--space-1); min-width: 0; }
-.wab-field__label { color: var(--c-muted); font-weight: var(--fw-medium); }
+.wab-field__label { color: var(--c-ink); font-size: var(--fs-nav); font-weight: var(--fw-semibold); }
 .wab-field__control {
   width: 100%;
   min-height: var(--size-control);
   padding: var(--space-2) var(--space-3);
   border: var(--size-hairline) solid var(--c-line2);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   background: var(--c-card);
 }
 .wab-field__control--area { resize: vertical; min-height: var(--size-touch-target); }
@@ -38,6 +38,8 @@
 
 .wab-field__box { position: relative; display: grid; }
 .wab-field__control--with-end { padding-inline-end: var(--size-touch-target); }
+.wab-field__control--with-start { padding-inline-start: calc(var(--space-3) * 2 + var(--size-icon-sm)); }
+.wab-field__start { position: absolute; inset-block: 0; inset-inline-start: var(--space-3); display: grid; place-items: center; color: var(--c-faint); pointer-events: none; }
 .wab-field__end {
   position: absolute;
   inset-block: 0;
