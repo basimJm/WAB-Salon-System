@@ -9,6 +9,17 @@
 
 ## Current task
 
+### CUS-090 — Crash fix: decoding failures become `AppError.ParseError`
+- Branch: `fix/cus-090-decode-crash`
+- Status: IN REVIEW
+- Acceptance criteria (owner crash report 2026-10-26; rules §1.7 "failures are AppResult/AppError, never thrown"):
+  - [x] Root cause: Ktor wraps body decoding failures in `io.ktor.serialization.JsonConvertException` (a `ContentConvertException`, not a kotlinx `SerializationException`), so `safeApiCall` let it escape → FATAL on `OTP request` when the hosted dev API (old server) omitted `expiresInSeconds`
+  - [x] `safeApiCall` catches `ContentConvertException` → `AppError.ParseError` (the screen shows its error state instead of crashing)
+  - [x] Regression test: a 200 body missing a required field → `ParseError`; proven to fail without the fix (`JsonConvertException`)
+- Tests: `SafeApiCallTest` (+1, 7 total); `./gradlew :core:network:testAndroidHostTest` green; red without the fix
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one catch in the transport layer, no behaviour change for valid responses. NOTE: the OTP screen will still show an error against the hosted dev API until it runs the new server (main sync after the owner sets the Render env, SRV-154).
+
 ### CUS-089 — WhatsApp OTP: Firebase Phone Auth removed; request → code → verify → `otpToken` into login / register / change phone / booking
 - Branch: `feat/cus-089-whatsapp-otp` (from `feat/srv-153-whatsapp-otp` + `origin/customer`; ships with SRV-153 / OTP-011)
 - Status: IN REVIEW
@@ -26,33 +37,3 @@
 - Loops: 1/1 — re-checked every criterion on the final tree against §3.1a and the 1.4.0 operations (request/verify bodies, all four `otpToken` callers, error codes and statuses); found and fixed: detekt MaxLineLength in `ErrorHandling.kt`, capture script over 300 lines (OTP helper split out), `ContractFixturesTest` still listing the removed operation
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — branch diff read once per role: no Firebase type left in auth; OTP errors mapped by code in domain, texts from resources or the server's localized detail; token never logged/stored beyond the hand-off; contract from the generated DTOs; AR+EN strings; iOS pbxproj only loses the two SPM product refs
 - Notes: DEVIATIONS — OTP request/verify not re-captured (no local stack running; hosted Render not used): synthetic fixtures, `ContractFixturesTest` lists them as not captured until the next capture; no emulator/simulator run and no Xcode scheme build (only the K/N framework link); `Package.resolved` still pins Firebase Auth/App Check transitive packages (Xcode drops them on the next resolve); `OTP_BLOCKED` on verify has no `blockedUntil`, so the remaining time appears after the next request. Pre-existing, not from this task: `KMP_TEMPLATE` end-to-end test fails on WAB terms in `core/realtime` / `core/domain` salon tests (same on `origin/customer`).
-
-### CUS-088 — Re-sync the customer contract 1.3.0 after SRV-151 (`./gradlew apiSync`)
-- Branch: `feat/cus-088-contract-sync` (from `origin/customer`)
-- Status: IN REVIEW
-- Acceptance criteria (CUS-088 row; `openapi.customer.json` 1.3.0: `POST /customer/v1/salons/{salonId}/availability`, `POST /customer/v1/bookings/drafts`, id `pattern`s):
-  - [x] `api_sync.py` re-run: snapshot 4fde7a6f (1.2.0 → 1.3.0); `api_sync --check` ok; DTO changes: availability `others[].start/end` and draft `persons[].start` are non-null `String`; ids `^[a-fA-F0-9]{24}$` (snapshot only; the app does not validate patterns)
-  - [x] Every request builder sends the times: `availabilityBodyOf` already sends only picks with staff + start + end (CUS-060); `draftBodyOf` returns `null` when a person has no slot and `BookingDraftRepositoryImpl.create` answers `AppError.UnknownError` without a request (the flow cannot reach the summary without a slot, so this is a guard, not a UI path); no other body carries a time
-  - [x] Fixtures: regenerated `MockFixtures`/`ContractDecoders` (only the sha header changed; response shapes unchanged, captured ids already ObjectIds); `contract_gaps.py` 0 gaps
-  - [x] `docs/REMOTE_DEV_GAPS.md`: rows 13, 14 Fixed (SRV-151 + this re-sync), 15 and 17 fixed on the server (not re-captured against the hosted dev API), row 1 notes the 1.3.0 snapshot
-- Tests: new `ContractV13RequestBodiesTest` (5: wire JSON of draft `persons[].start` and availability `others[].start/end`, no draft body without a slot, repository sends nothing for an incomplete draft, real fixture ids match the pattern); `BranchRequestBodiesTest` adapted (nullable body); `feature/booking/data` commonTest gets `kotlinx-coroutines-test` + `ktor-client-mock` (catalog entries already used by other data modules). `./gradlew testAndroidHostTest --continue` (Terminal panel) exit 0, 429 host tests, 0 failures; `policy_checks.py all` ok; `scripts/ci/tests` 89 OK; `api_sync.py --check` ok; `contract_gaps.py` 0
-- Loops: 1/1 — §3.13 batch form (host unit tests only) on the final tree; re-checked each criterion against the regenerated DTOs and every generated `*Body` (only availability + drafts carry times); found and fixed: one 142-char test line (detekt MaxLineLength 140), `BranchRequestBodiesTest` relying on a non-null draft body
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — code reading of the branch diff: generated files untouched by hand; the missing-slot guard lives in data (mapper + repository) and never sends an invalid body; error text stays the localized generic one; contract change is additive for the app (no new operation); no UI/strings changed
-- Notes: DEVIATIONS — no detekt, no Android/iOS variant builds, no emulator/simulator (rules §3.13; the lead runs the final gate); fixtures not re-captured (the hosted dev API may not run SRV-151 yet; seed and rate-limit fixes unverified from the client).
-
-### CUS-060 — Dev builds on `DATA_SOURCE=remote` against the dev API: per-feature gap list, socket events verified, fixtures updated to real shapes
-- Branch: `feat/cus-060-remote-dev` (from `origin/customer`)
-- Status: DONE
-- Acceptance criteria (CUS-060 row; `openapi.customer.json` all operations the app calls; BUSINESS_DOMAIN §7 sockets, §11 error codes):
-  - [x] Dev uses `remote` against the dev host on Android (`DEV_DATA_SOURCE`, `DEV_API_BASE_URL`) and iOS (`Dev.xcconfig` `DATA_SOURCE`, `API_BASE_URL`, same host); prod never `mock`; no URL in code
-  - [x] Real responses captured for 46 of the 48 operations the app calls (`scripts/capture_remote_fixtures.py`: public ones from the hosted dev API, authenticated ones from the local real stack on a throwaway customer deleted afterwards; tokens / signed URLs redacted, local media → dev CDN) into `core/data/fixtures/remote/`; not captured: `POST /uploads/confirm`, `PUT /profile/avatar` (need a real image upload)
-  - [x] Wire vs contract: `scripts/contract_gaps.py` = 0 gaps (missing / null / type / enum / undeclared) for all captured envelopes
-  - [x] Contract drift fails a test: `api_sync.py` embeds the captures in `MockFixtures` (`captured` set; `data` last so Empty works with `meta`) and generates `ContractDecoders` (commonTest); `ContractFixturesTest` decodes every fixture with the generated DTOs + the app's `NetworkJson`; per-feature `Real*Fixture(s)Test` run the mappers on the real shapes
-  - [x] Mock/dev fixtures are the real shapes (mock mode serves the captured envelopes)
-  - [x] Client gaps fixed: availability `others[]` now sends `start` + `end` (server rejected `end` missing → `VALIDATION_ERROR`; `DraftPerson.end` from the picked slot); realtime de-duplication no longer drops a real second `booking.updated` with the same status (key + payment status, 5 s window); contract re-synced (drafts `branch`, bookings `requestedAt`)
-  - [x] Socket events verified on the local stack: `booking.updated` summary on create/cancel, `notifications.unread {count}`, bad token → `connect_error` `UNAUTHORIZED`
-  - [x] Gap list per feature with fix + status: `docs/REMOTE_DEV_GAPS.md` (fixed / verified / server-side / open)
-- Tests: `./gradlew testAndroidHostTest --continue` (Terminal panel) → BUILD SUCCESSFUL, 424 host tests, 0 failures; new: `ContractFixturesTest` (3), `RealHomeFixtureTest` (1), `RealSalonsFixtureTest` (1), `RealSalonFixturesTest` (3), `RealBookingFixturesTest` (3), `RealBookingsFixturesTest` (3), `RealNotificationsFixtureTest` (2), `RealProfileFixturesTest` (2), `RealAuthFixturesTest` (2), `RealtimeRefreshTest` (+2), `SocketIoProtocolTest` (+1), `BookingFlowViewModelTest` (slot end); Python `scripts/ci/tests` 89 OK (new `test_contract_gaps.py` 6, `test_dev_remote_config.py` 3, `test_api_sync.py` +2); `policy_checks.py all` ok; `api_sync.py --check` ok
-- Loops: 1/1 — §3.13 batch form (host unit tests only): re-checked every criterion on the final tree with `testAndroidHostTest` (424, 0 failures), Python tests (89 OK), policy `all: ok`, `api_sync --check` ok, `contract_gaps` 0; found and fixed during the loop: `collapse()` joined paths without dots (caught by its test), `BookingsApiTest` missing the new required `requestedAt`, six test lines over 140 chars, capture rate-limited on the shared stack (retry on 429), signed upload URL and local media origin in fixtures (redacted / rewritten)
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — code reading of the branch diff: one JSON config (`NetworkJson`) for client and tests; generated decoders keep the drift check free of hand-kept lists; capture tool refuses non-local auth bases and never commits credentials; fixes are in data/domain with tests; no UI/strings added. Non-blocking: toggling services after a slot pick keeps the old `start`/`end` (pre-existing; the draft call re-validates server-side)
-- Notes: DEVIATIONS — no detekt, no Android/iOS variant builds, no emulator/simulator run (rules §3.13: the lead runs the full gate at the end); the app itself was not run against the dev host on a device. Captures are English only (mock mode shows English data for captured operations in the Arabic UI). `capture_remote_fixtures.py` writes its call report to `build/remote-capture-report.json` (not committed). Server-side items (spec nullability of `others[]`, `/i` in ObjectId patterns, Arabic seed text in EN, OTP limiter on catalog/banners/profile) are listed, not edited.
