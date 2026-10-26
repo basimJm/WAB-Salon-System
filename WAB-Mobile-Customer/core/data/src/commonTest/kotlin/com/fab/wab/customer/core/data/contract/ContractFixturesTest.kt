@@ -31,7 +31,7 @@ class ContractFixturesTest {
         CustomerOperations.getSalonsBySalonIdReviews, CustomerOperations.getSalonsBySalonIdStaffByMemberIdReviews,
         CustomerOperations.postSalonsBySalonIdReviews, CustomerOperations.postSalonsBySalonIdStaffByMemberIdReviews,
         CustomerOperations.getFavorites, CustomerOperations.putFavoritesBySalonId, CustomerOperations.deleteFavoritesBySalonId,
-        CustomerOperations.postAuthCheckPhone, CustomerOperations.postAuthOtpRequest, CustomerOperations.postAuthOtpWrongAttempt,
+        CustomerOperations.postAuthCheckPhone, CustomerOperations.postAuthOtpRequest, CustomerOperations.postAuthOtpVerify,
         CustomerOperations.postAuthLogin, CustomerOperations.postAuthRegister, CustomerOperations.postAuthChangePhone,
         CustomerOperations.postAuthLogout, CustomerOperations.postAuthRefresh, CustomerOperations.putInstallations,
         CustomerOperations.patchInstallationsPushEnabled, CustomerOperations.getProfile, CustomerOperations.patchProfile,
@@ -62,7 +62,13 @@ class ContractFixturesTest {
     fun everyOperationTheAppCallsHasARealCapturedResponse() {
         val notCaptured = appOperations.filterNot { it in MockFixtures.captured }.toSet()
         // A profile picture needs a real image upload to the storage before confirm/avatar; their schema samples stay.
-        val expected = setOf(CustomerOperations.postUploadsConfirm, CustomerOperations.putProfileAvatar).map(::fixtureKeyOf).toSet()
+        // CUS-089: the WhatsApp OTP request / verify (contract 1.4.0) wait for the next local-stack capture.
+        val expected = setOf(
+            CustomerOperations.postUploadsConfirm,
+            CustomerOperations.putProfileAvatar,
+            CustomerOperations.postAuthOtpRequest,
+            CustomerOperations.postAuthOtpVerify,
+        ).map(::fixtureKeyOf).toSet()
         assertEquals(expected, notCaptured)
     }
 

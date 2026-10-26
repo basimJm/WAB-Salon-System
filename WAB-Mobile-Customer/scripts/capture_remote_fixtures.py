@@ -5,10 +5,10 @@ Usage:
   python3 scripts/capture_remote_fixtures.py --public-base <dev API origin> [--auth-base <local API origin>]
       [--phone <seeded customer number>] [--out core/data/fixtures/remote]
 
-* Public, read-only operations are captured from --public-base (the hosted dev API). Nothing authenticated and no
-  credential is ever sent there.
+* Public, read-only operations come from --public-base (the hosted dev API); no credential is ever sent there.
 * Authenticated operations are captured from --auth-base, which must be a local stack (localhost / 127.0.0.1) running
-  the fake OTP provider: the phone proof is `fake-otp:valid:<E164>` (WAB-Server src/providers/otp/fake.ts). The script
+  `OTP_PROVIDER=fake OTP_FIXED_CODE=<code>`: every phone proof is `otp/request` + `otp/verify` with that code
+  (`--otp-code`, default `fakeOtpCode` in the config) → the single-use `otpToken` (BUSINESS_DOMAIN §3.1a). The script
   registers a throwaway customer, walks the booking flow on it, then deletes that account; the seeded customer
   (--phone) is only read.
 * Each success envelope is written to `<out>/<OperationId>.json` (tokens redacted); `api_sync.py` embeds them in
@@ -28,15 +28,17 @@ import urllib.request
 from datetime import date, timedelta
 from pathlib import Path
 
+from capture_otp import otp_token
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = PROJECT_ROOT / "core/data/fixtures/remote"
 REPORT = PROJECT_ROOT / "build/remote-capture-report.json"
 CONFIG = json.loads((PROJECT_ROOT / "config/remote-capture.json").read_text(encoding="utf-8"))
 PREFIX = "/customer/v1"
 LOCAL_HOSTS = tuple(CONFIG["localHosts"])
-FAKE_PROOF = CONFIG["fakeProofFormat"]
+OTP_CODE = CONFIG["fakeOtpCode"]
 REDACTED = "<redacted>"
-SECRET_KEYS = ("accessToken", "refreshToken", "idToken")
+SECRET_KEYS = ("accessToken", "refreshToken", "otpToken")
 LANGUAGE = CONFIG["language"]
 TIMEOUT_S = CONFIG["timeoutSeconds"]
 DIAL = CONFIG["dialCode"]
@@ -180,7 +182,7 @@ def capture_authenticated(rec: Recorder, base: str, seeded_number: str, gender: 
     ctx = capture_public(rec, base, gender)
     seeded = {"countryCode": COUNTRY, "number": seeded_number}
     rec.call(base, "POST", "/auth/check-phone", body={"phone": seeded, "purpose": "LOGIN"})
-    login = rec.call(base, "POST", "/auth/login", body={"phone": seeded, "idToken": FAKE_PROOF.format(DIAL + seeded_number), "installation": installation(seeded_number)})
+    login = rec.call(base, "POST", "/auth/login", body={"phone": seeded, "otpToken": otp_token(rec, base, DIAL + seeded_number, "LOGIN", OTP_CODE, RATE_LIMIT_WAIT_S), "installation": installation(seeded_number)})
     token = (login or {}).get("accessToken")
     upcoming = rec.call(base, "GET", "/bookings", query={**PAGE, "tab": "UPCOMING"}, token=token)
     past = rec.call(base, "GET", "/bookings", query={**PAGE, "tab": "PAST"}, token=token, save=False, label="GetBookings(PAST)")
@@ -198,12 +200,11 @@ def throwaway(rec: Recorder, base: str, ctx: dict, gender: str) -> None:
     e164 = DIAL + number
     phone = {"countryCode": COUNTRY, "number": number}
     rec.call(base, "POST", "/auth/check-phone", body={"phone": phone, "purpose": "REGISTER"}, save=False, label="PostAuthCheckPhone(REGISTER)")
-    rec.call(base, "POST", "/auth/otp/request", body={"phone": e164, "purpose": "REGISTER"})
-    rec.call(base, "POST", "/auth/otp/wrong-attempt", body={"phone": e164})
+    register_token = otp_token(rec, base, e164, "REGISTER", OTP_CODE, RATE_LIMIT_WAIT_S, save=True)
     city, area = ctx["cities"][0]["id"], ctx["areas"][0]["id"]
     reg = rec.call(base, "POST", "/auth/register", body={
         "firstName": "Capture", "lastName": "Fixture", "email": f"capture.{number}@wab.example", "gender": gender,
-        "cityId": city, "areaId": area, "phone": phone, "idToken": FAKE_PROOF.format(e164), "installation": installation(number)})
+        "cityId": city, "areaId": area, "phone": phone, "otpToken": register_token, "installation": installation(number)})
     token, refresh = (reg or {}).get("accessToken"), (reg or {}).get("refreshToken")
     rec.call(base, "PUT", "/installations", body={**installation(number), "language": LANGUAGE}, token=token)
     rec.call(base, "PATCH", "/installations/push-enabled", body={"pushEnabled": True}, token=token)
@@ -221,7 +222,7 @@ def throwaway(rec: Recorder, base: str, ctx: dict, gender: str) -> None:
     if inbox:
         rec.call(base, "POST", "/notifications/read", body={"ids": [inbox[0]["id"]]}, token=token)
     new_number = THROWAWAY_PREFIX + "".join(random.choice("0123456789") for _ in range(5))
-    rec.call(base, "POST", "/auth/change-phone", body={"phone": {"countryCode": COUNTRY, "number": new_number}, "idToken": FAKE_PROOF.format(DIAL + new_number)}, token=token)
+    rec.call(base, "POST", "/auth/change-phone", body={"phone": {"countryCode": COUNTRY, "number": new_number}, "otpToken": otp_token(rec, base, DIAL + new_number, "CHANGE_PHONE", OTP_CODE, RATE_LIMIT_WAIT_S)}, token=token)
     renewed = rec.call(base, "POST", "/auth/refresh", body={"refreshToken": refresh}) or {}
     token, refresh = renewed.get("accessToken", token), renewed.get("refreshToken", refresh)
     rec.call(base, "DELETE", "/profile", token=token)
@@ -250,7 +251,7 @@ def book(rec: Recorder, base: str, salon_id: str, e164: str, token: str) -> None
     if not draft:
         return
     rec.call(base, "GET", "/bookings/drafts/{id}", params={"id": draft["id"]}, token=token)
-    rec.call(base, "POST", "/bookings/drafts/{id}/verify-otp", params={"id": draft["id"]}, body={"idToken": FAKE_PROOF.format(e164)}, token=token)
+    rec.call(base, "POST", "/bookings/drafts/{id}/verify-otp", params={"id": draft["id"]}, body={"otpToken": otp_token(rec, base, e164, "BOOKING_CONFIRMATION", OTP_CODE, RATE_LIMIT_WAIT_S)}, token=token)
     booking = rec.call(base, "POST", "/bookings", body={"draftId": draft["id"]}, token=token)
     if booking:
         rec.call(base, "GET", "/bookings/{id}", params={"id": booking["id"]}, token=token, save=False, label="GetBookingsById(new)")
@@ -274,7 +275,9 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--phone", help="seeded customer national number (local stack only)")
     parser.add_argument("--gender", default="FEMALE", choices=("MALE", "FEMALE"))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
+    parser.add_argument("--otp-code", default=OTP_CODE, help="OTP_FIXED_CODE of the local stack")
     args = parser.parse_args(argv)
+    globals()["OTP_CODE"] = args.otp_code
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     rec = Recorder(out)

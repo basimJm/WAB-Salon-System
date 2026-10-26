@@ -34,8 +34,8 @@ class BookingDraftRepositoryImpl(private val api: BookingDraftApi) : BookingDraf
 
     override suspend fun delete(draftId: String): AppResult<Unit> = safeApiCall { api.delete(draftId) }.mapSuccess { }
 
-    override suspend fun verifyOtp(draftId: String, idToken: String): AppResult<String> =
-        safeApiCall { api.verifyOtp(draftId, PostBookingsDraftsByIdVerifyOtpBody(idToken)) }.mapSuccess { it.data.otpVerifiedAt }
+    override suspend fun verifyOtp(draftId: String, otpToken: String): AppResult<String> =
+        safeApiCall { api.verifyOtp(draftId, PostBookingsDraftsByIdVerifyOtpBody(otpToken)) }.mapSuccess { it.data.otpVerifiedAt }
 
     override suspend fun createBooking(draftId: String): AppResult<CreatedBooking> =
         safeApiCall { api.createBooking(PostBookingsBody(draftId)) }.mapSuccess { it.data.toDomain() }

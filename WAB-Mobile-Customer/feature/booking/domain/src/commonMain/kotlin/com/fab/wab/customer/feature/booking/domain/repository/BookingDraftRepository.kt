@@ -20,8 +20,8 @@ interface BookingDraftRepository {
 
     suspend fun delete(draftId: String): AppResult<Unit>
 
-    /** `POST /bookings/drafts/{id}/verify-otp` with the Firebase ID token (purpose BOOKING_CONFIRMATION); returns `otpVerifiedAt`. */
-    suspend fun verifyOtp(draftId: String, idToken: String): AppResult<String>
+    /** `POST /bookings/drafts/{id}/verify-otp` with the single-use `otpToken` (purpose BOOKING_CONFIRMATION); returns `otpVerifiedAt`. */
+    suspend fun verifyOtp(draftId: String, otpToken: String): AppResult<String>
 
     /** `POST /bookings` from a verified draft. */
     suspend fun createBooking(draftId: String): AppResult<CreatedBooking>

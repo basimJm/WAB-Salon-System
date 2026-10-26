@@ -7,44 +7,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-/** Wraps the Swift phone-auth bridge into the suspending port; no bridge means Firebase is not wired yet. */
-class IosPhoneAuthGateway : PhoneAuthGateway {
-    override suspend fun startVerification(phoneE164: String): FirebaseResult<PhoneVerification> {
-        val bridge = FirebaseBridges.phoneAuth ?: return FirebaseResult.Failure(FirebaseFailure.Unavailable)
-        return suspendCancellableCoroutine { continuation ->
-            bridge.startVerification(
-                phoneE164,
-                onCodeSent = { id -> if (continuation.isActive) continuation.resume(FirebaseResult.Success(PhoneVerification(id))) },
-                onError = { code, message ->
-                    if (continuation.isActive) {
-                        continuation.resume(FirebaseResult.Failure(authFailureForCode(code, PhoneAuthStage.Start, message)))
-                    }
-                },
-            )
-        }
-    }
-
-    override suspend fun confirm(verification: PhoneVerification, code: String): FirebaseResult<String> {
-        val bridge = FirebaseBridges.phoneAuth ?: return FirebaseResult.Failure(FirebaseFailure.Unavailable)
-        return suspendCancellableCoroutine { continuation ->
-            bridge.confirm(
-                verification.id,
-                code,
-                onIdToken = { token -> if (continuation.isActive) continuation.resume(FirebaseResult.Success(token)) },
-                onError = { errorCode, message ->
-                    if (continuation.isActive) {
-                        continuation.resume(FirebaseResult.Failure(authFailureForCode(errorCode, PhoneAuthStage.Confirm, message)))
-                    }
-                },
-            )
-        }
-    }
-
-    override suspend fun signOut() {
-        FirebaseBridges.phoneAuth?.signOut()
-    }
-}
-
 class IosPushTokenProvider : PushTokenProvider {
     override suspend fun currentToken(): String? {
         val bridge = FirebaseBridges.pushToken ?: return null

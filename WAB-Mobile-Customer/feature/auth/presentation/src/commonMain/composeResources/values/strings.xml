@@ -21,7 +21,8 @@
     <string name="login_blocked_contact">Contact us</string>
     <string name="otp_title">Verify your number</string>
     <string name="otp_title_booking">Confirm booking</string>
-    <string name="otp_sent_to">We sent a code to</string>
+    <string name="otp_sent_to">We sent a code on WhatsApp to</string>
+    <string name="otp_expires_in">The code expires in %1$s</string>
     <string name="otp_verify">Verify</string>
     <string name="otp_resend_in">Resend in %1$s</string>
     <string name="otp_resend">Resend code</string>

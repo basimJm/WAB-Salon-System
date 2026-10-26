@@ -50,7 +50,7 @@ private class VerifyRepoFake : BookingDraftRepository {
     override suspend fun create(salonId: String, branchId: String?, paymentMethod: PaymentMethod, persons: List<DraftPerson>) = draft
     override suspend fun get(draftId: String) = draft
     override suspend fun delete(draftId: String): AppResult<Unit> = AppResult.Success(Unit)
-    override suspend fun verifyOtp(draftId: String, idToken: String): AppResult<String> = verify.also { tokens += idToken }
+    override suspend fun verifyOtp(draftId: String, otpToken: String): AppResult<String> = verify.also { tokens += otpToken }
     override suspend fun createBooking(draftId: String): AppResult<CreatedBooking> = create.also { creates++ }
 }
 
