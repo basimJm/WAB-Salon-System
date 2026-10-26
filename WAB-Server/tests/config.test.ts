@@ -14,20 +14,20 @@ import {
 const MONGO = 'mongodb://user:s3cret@localhost/wab';
 const REDIS = 'redis://localhost:6379';
 
-/** WhatsApp OTP account + both secrets (values are obviously fake). */
-const WHATSAPP = {
-  WHATSAPP_PHONE_NUMBER_ID: '106540352242922',
-  WHATSAPP_ACCESS_TOKEN: 'not-a-real-access-token',
-  WHATSAPP_TEMPLATE_NAME: 'wab_login_code',
+/** ARQAM OTP project + both secrets (values are obviously fake). */
+const ARQAM = {
+  ARQAM_API_KEY: 'not-a-real-arqam-key',
+  ARQAM_TEMPLATE_AR: 'wab_otp_ar',
+  ARQAM_TEMPLATE_EN: 'wab_otp_en',
   OTP_CODE_SECRET: 'c'.repeat(40),
   OTP_PROOF_SECRET: 'f'.repeat(40),
 };
 const REAL_PROVIDERS = {
-  OTP_PROVIDER: 'whatsapp',
+  OTP_PROVIDER: 'arqam',
   STORAGE_PROVIDER: 'real',
   NOTIFIER_PROVIDER: 'real',
   PAYMENT_PROVIDER: 'disabled',
-  ...WHATSAPP,
+  ...ARQAM,
   FCM_SERVICE_ACCOUNT_JSON: '{"project_id":"p"}',
   SMTP_HOST: 'smtp.example.test',
   EMAIL_FROM_ADDRESS: 'noreply@example.test',
@@ -63,6 +63,16 @@ const invalidKeysOf = (source: NodeJS.ProcessEnv): readonly string[] => {
   throw new Error('expected loadConfig to throw');
 };
 
+const configProblemsOf = (source: NodeJS.ProcessEnv): ConfigError['problems'] => {
+  try {
+    loadConfig(source);
+  } catch (error) {
+    if (error instanceof ConfigError) return error.problems;
+    throw error;
+  }
+  throw new Error('expected loadConfig to throw');
+};
+
 describe('loadConfig', () => {
   it('applies non-secret defaults', () => {
     const config = loadConfig(validEnv());
@@ -80,10 +90,10 @@ describe('loadConfig', () => {
     expect(invalidKeysOf(validEnv({ PORT: 'abc' }))).toEqual([ENV_KEYS.port]);
   });
 
-  it('maps OTP_PROVIDER=whatsapp to providers.otp and nothing else', () => {
-    expect(loadConfig(validEnv({ OTP_PROVIDER: 'whatsapp', ...WHATSAPP })).providers).toEqual({
+  it('maps OTP_PROVIDER=arqam to providers.otp and nothing else', () => {
+    expect(loadConfig(validEnv({ OTP_PROVIDER: 'arqam', ...ARQAM })).providers).toEqual({
       ...ALL_FAKE_MODES,
-      otp: 'whatsapp',
+      otp: 'arqam',
     });
   });
 
@@ -147,7 +157,7 @@ describe('loadConfig', () => {
     }
     const ok = loadConfig({ ...production, ...REAL_PROVIDERS });
     expect(ok.providers).toEqual({
-      otp: 'whatsapp',
+      otp: 'arqam',
       storage: 'real',
       notifier: 'real',
       payments: 'disabled',
@@ -285,58 +295,76 @@ describe('loadConfig', () => {
     });
   });
 
-  describe('WhatsApp OTP settings (SRV-153)', () => {
-    const base = validEnv({ OTP_PROVIDER: 'whatsapp' });
+  describe('ARQAM OTP settings (SRV-158)', () => {
+    const base = validEnv({ OTP_PROVIDER: 'arqam' });
 
     it('names every missing key, never a value', () => {
       expect([...invalidKeysOf(base)].sort()).toEqual(
         [
+          'ARQAM_API_KEY',
+          'ARQAM_TEMPLATE_AR',
+          'ARQAM_TEMPLATE_EN',
           'OTP_CODE_SECRET',
           'OTP_PROOF_SECRET',
-          'WHATSAPP_ACCESS_TOKEN',
-          'WHATSAPP_PHONE_NUMBER_ID',
-          'WHATSAPP_TEMPLATE_NAME',
         ].sort(),
       );
-      for (const key of Object.keys(WHATSAPP)) {
-        const without = Object.fromEntries(Object.entries(WHATSAPP).filter(([k]) => k !== key));
+      for (const key of Object.keys(ARQAM)) {
+        const without = Object.fromEntries(Object.entries(ARQAM).filter(([k]) => k !== key));
         expect(invalidKeysOf({ ...base, ...without })).toEqual([key]);
       }
+      const problems = configProblemsOf({ ...base, ARQAM_API_KEY: 'x' });
+      expect(JSON.stringify(problems)).not.toContain('"x"');
     });
 
-    it('builds typed settings, with the API version only when given', () => {
-      const config = loadConfig({ ...base, ...WHATSAPP });
-      expect(config.providers.otp).toBe('whatsapp');
+    it('builds typed settings; base URL and sender only when given; IP off by default', () => {
+      const config = loadConfig({ ...base, ...ARQAM, ARQAM_API_KEY: '  key-with-spaces  ' });
+      expect(config.providers.otp).toBe('arqam');
       expect(config.otp).toEqual({
-        codeSecret: WHATSAPP.OTP_CODE_SECRET,
-        proofSecret: WHATSAPP.OTP_PROOF_SECRET,
-        whatsapp: {
-          phoneNumberId: WHATSAPP.WHATSAPP_PHONE_NUMBER_ID,
-          accessToken: WHATSAPP.WHATSAPP_ACCESS_TOKEN,
-          templateName: WHATSAPP.WHATSAPP_TEMPLATE_NAME,
+        codeSecret: ARQAM.OTP_CODE_SECRET,
+        proofSecret: ARQAM.OTP_PROOF_SECRET,
+        arqam: {
+          apiKey: 'key-with-spaces',
+          templates: { ar: ARQAM.ARQAM_TEMPLATE_AR, en: ARQAM.ARQAM_TEMPLATE_EN },
+          sendIp: false,
         },
       });
       expect(
-        loadConfig({ ...base, ...WHATSAPP, WHATSAPP_API_VERSION: 'v26.0' }).otp.whatsapp,
-      ).toMatchObject({ apiVersion: 'v26.0' });
+        loadConfig({
+          ...base,
+          ...ARQAM,
+          ARQAM_BASE_URL: 'https://otp.arqam.example/api',
+          ARQAM_SENDER_ID: 'wab_sender',
+          ARQAM_SEND_IP: 'true',
+        }).otp.arqam,
+      ).toMatchObject({
+        baseUrl: 'https://otp.arqam.example/api',
+        senderId: 'wab_sender',
+        sendIp: true,
+      });
+      expect(loadConfig({ ...base, ...ARQAM, ARQAM_BASE_URL: '' }).otp.arqam).not.toHaveProperty(
+        'baseUrl',
+      );
     });
 
     it.each([
-      ['WHATSAPP_PHONE_NUMBER_ID', '+962791234567'],
-      ['WHATSAPP_TEMPLATE_NAME', 'Login Code'],
-      ['WHATSAPP_API_VERSION', '26'],
+      ['ARQAM_API_KEY', '   '],
+      ['ARQAM_TEMPLATE_AR', 'Login Code'],
+      ['ARQAM_TEMPLATE_EN', 'otp/en'],
+      ['ARQAM_SENDER_ID', 'two words'],
+      ['ARQAM_BASE_URL', 'not a url'],
+      ['ARQAM_SEND_IP', 'yes'],
       ['OTP_CODE_SECRET', 'short'],
       ['OTP_PROOF_SECRET', 'x'.repeat(31)],
       ['OTP_FIXED_CODE', '12ab56'],
       ['OTP_FIXED_CODE', '123'],
     ])('rejects a malformed %s', (key, value) => {
-      expect(invalidKeysOf({ ...base, ...WHATSAPP, [key]: value })).toEqual([key]);
+      expect(invalidKeysOf({ ...base, ...ARQAM, [key]: value })).toEqual([key]);
     });
 
     it('requires the code and proof secrets to differ', () => {
-      expect(
-        invalidKeysOf({ ...base, ...WHATSAPP, OTP_PROOF_SECRET: WHATSAPP.OTP_CODE_SECRET }),
-      ).toEqual(['OTP_PROOF_SECRET']);
+      expect(invalidKeysOf({ ...base, ...ARQAM, OTP_PROOF_SECRET: ARQAM.OTP_CODE_SECRET })).toEqual(
+        ['OTP_PROOF_SECRET'],
+      );
       expect(
         invalidKeysOf(
           validEnv({ OTP_CODE_SECRET: 'a'.repeat(32), OTP_PROOF_SECRET: 'a'.repeat(32) }),
@@ -344,7 +372,7 @@ describe('loadConfig', () => {
       ).toEqual(['OTP_PROOF_SECRET']);
     });
 
-    it('the fake provider needs no WhatsApp keys; the fixed code passes through in development', () => {
+    it('the fake provider needs no ARQAM keys; the fixed code passes through in development', () => {
       expect(loadConfig(validEnv()).otp).toEqual({});
       expect(loadConfig(validEnv({ OTP_FIXED_CODE: '123456' })).otp).toEqual({
         fixedCode: '123456',
@@ -352,14 +380,24 @@ describe('loadConfig', () => {
       expect(loadConfig(validEnv()).providers.otp).toBe('fake');
     });
 
-    it('refuses the retired `real` mode, a fake and a fixed code in production', () => {
-      expect(invalidKeysOf(validEnv({ OTP_PROVIDER: 'real' }))).toEqual(['OTP_PROVIDER']);
+    it.each(['whatsapp', 'real'])('refuses the retired `%s` mode with a hint', (mode) => {
+      expect(invalidKeysOf(validEnv({ OTP_PROVIDER: mode, ...ARQAM }))).toEqual(['OTP_PROVIDER']);
+      expect(JSON.stringify(configProblemsOf(validEnv({ OTP_PROVIDER: mode })))).toContain('arqam');
+    });
+
+    it('refuses a fake, a fixed code and an http ARQAM URL in production', () => {
       const production = validEnv({ ...REAL_PROVIDERS, ...PAYOUT_KEY, NODE_ENV: 'production' });
-      expect(loadConfig(production).providers.otp).toBe('whatsapp');
+      expect(loadConfig(production).providers.otp).toBe('arqam');
       expect(invalidKeysOf({ ...production, OTP_PROVIDER: 'fake' })).toEqual(['OTP_PROVIDER']);
       expect(invalidKeysOf({ ...production, OTP_FIXED_CODE: '123456' })).toEqual([
         'OTP_FIXED_CODE',
       ]);
+      expect(invalidKeysOf({ ...production, ARQAM_BASE_URL: 'http://arqam.test/api' })).toEqual([
+        'ARQAM_BASE_URL',
+      ]);
+      expect(
+        loadConfig({ ...base, ...ARQAM, ARQAM_BASE_URL: 'http://127.0.0.1:4010/api' }).otp.arqam,
+      ).toMatchObject({ baseUrl: 'http://127.0.0.1:4010/api' });
     });
   });
 

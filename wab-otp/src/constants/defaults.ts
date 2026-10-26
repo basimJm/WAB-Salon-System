@@ -42,13 +42,13 @@ export const DEFAULT_LIMITS = {
 
 export const DEFAULT_OTP = { otpLength: 6, resendAfterSec: 60 } as const;
 
-/** Server-generated codes (WhatsApp / SMS channels). */
+/** Server-generated codes (ARQAM / SMS channels). */
 export const DEFAULT_CODE = {
   ttlSec: 300,
   minSecretLength: 32,
   secondsPerMinute: 60,
   radix: 10,
-  /** Longest code a channel may carry (WhatsApp authentication templates accept 15 characters). */
+  /** Longest code the code flow generates (each channel may accept fewer: ARQAM takes 4-6 digits). */
   maxLength: 15,
   hmacAlgorithm: 'sha256',
   hashEncoding: 'hex',

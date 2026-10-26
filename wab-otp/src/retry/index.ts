@@ -27,7 +27,14 @@ export const delayFor = (attempt: number, policy: RetryPolicy, random: () => num
 
 export const isRetryable = (error: unknown): boolean => isOtpError(error) && error.retryable;
 
-/** Runs `operation`, retrying only errors marked retryable. */
+/** A wait the vendor asked for (`details.retryAfterMs`, e.g. ARQAM `retryAfter`), if any. */
+export const hintedDelayMs = (error: unknown): number | undefined => {
+  if (!isOtpError(error)) return undefined;
+  const hint = error.details['retryAfterMs'];
+  return typeof hint === 'number' && Number.isFinite(hint) && hint >= 0 ? hint : undefined;
+};
+
+/** Runs `operation`, retrying only errors marked retryable (never sooner than the vendor's hint). */
 export const withRetry = async <T>(
   operation: (attempt: number) => Promise<T>,
   policy: RetryPolicy,
@@ -40,7 +47,8 @@ export const withRetry = async <T>(
     } catch (error) {
       if (attempt >= policy.maxAttempts || !isRetryable(error)) throw error;
       onRetry?.(attempt, error);
-      await deps.sleep(delayFor(attempt, policy, deps.random));
+      const backoff = delayFor(attempt, policy, deps.random);
+      await deps.sleep(Math.max(backoff, hintedDelayMs(error) ?? 0));
     }
   }
 };

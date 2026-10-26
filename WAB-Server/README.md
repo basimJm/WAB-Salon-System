@@ -31,19 +31,22 @@ npm run build && npm start            # API on the PORT from .env.development
 
 OTP, file storage, push/email, payments and analytics sit behind interfaces in `src/providers`. `STORAGE_PROVIDER` and `NOTIFIER_PROVIDER` choose `fake` (in-repo stand-in, the default outside production) or `real` (the `wab-*` SDKs); production must set them to `real`. `OTP_PROVIDER` is `whatsapp` (production) or `fake`. Payments are paused: `PAYMENT_PROVIDER` is `fake` (dev/test) or `disabled` (production; every gateway call answers 503). Server analytics run on the server's own MongoDB events; there is no analytics provider.
 
-### Phone OTP (WhatsApp, BUSINESS_DOMAIN §3.1a)
+### Phone OTP (WhatsApp through ARQAM OTP, BUSINESS_DOMAIN §3.1a)
 
-The server generates the code, sends it as a WhatsApp authentication template (`@wab/otp`), checks it at `POST /{customer,merchant}/v1/auth/otp/verify` and answers a signed single-use `otpToken`; login, register, change phone, booking confirmation and bank details take that `otpToken`.
+The server generates the code, hands it to ARQAM OTP (`@wab/otp` ARQAM channel), which delivers it over WhatsApp with the Arabic or English authentication template of the request language; the server checks it at `POST /{customer,merchant}/v1/auth/otp/verify` and answers a signed single-use `otpToken`; login, register, change phone, booking confirmation and bank details take that `otpToken`.
 
-| Variable                              | Meaning                                                                                                     |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `OTP_PROVIDER`                        | `whatsapp` (required in production) or `fake` (dev/test: codes are recorded, not sent)                      |
-| `WHATSAPP_PHONE_NUMBER_ID`            | Meta app → WhatsApp → API Setup → Phone number ID (whatsapp only)                                           |
-| `WHATSAPP_ACCESS_TOKEN`               | System-user access token (secret; whatsapp only)                                                            |
-| `WHATSAPP_TEMPLATE_NAME`              | Approved authentication template, same name in `ar` and `en_US` (whatsapp only)                             |
-| `WHATSAPP_API_VERSION`                | Optional Graph API version pin, e.g. `v26.0`                                                                |
-| `OTP_CODE_SECRET`, `OTP_PROOF_SECRET` | HMAC secrets (≥ 32 characters, different); required for whatsapp, generated per process for fake when unset |
-| `OTP_FIXED_CODE`                      | Development only (refused in production): every code is this value                                          |
+| Variable                                 | Meaning                                                                                                        |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `OTP_PROVIDER`                           | `arqam` (required in production) or `fake` (dev/test: codes are recorded, not sent); `whatsapp`/`real` refused |
+| `ARQAM_API_KEY`                          | ARQAM project API key (secret; TEST key on hosted dev, LIVE key in production; arqam only)                     |
+| `ARQAM_TEMPLATE_AR`, `ARQAM_TEMPLATE_EN` | Arabic / English authentication template names exactly as ARQAM shows them (arqam only)                        |
+| `ARQAM_SENDER_ID`                        | Optional: approved sender id, only when ARQAM answers `SENDER_REQUIRED`                                        |
+| `ARQAM_SEND_IP`                          | Optional `true`/`false` (default false): send the client IP (trust-proxy aware) when the project limits per IP |
+| `ARQAM_BASE_URL`                         | Optional, default `https://otp.arqam.tech/api` (https required in production)                                  |
+| `OTP_CODE_SECRET`, `OTP_PROOF_SECRET`    | HMAC secrets (≥ 32 characters, different); required for arqam, generated per process for fake when unset       |
+| `OTP_FIXED_CODE`                         | Development only (refused in production): every code is this value                                             |
+
+`npm run otp:arqam-check` (after `npm run build`, with the same environment as the server) prints the ARQAM account mode (`LIVE`/`TEST`) and balance; `npm run otp:arqam-check -- --send +9627XXXXXXXX --lang ar|en` also sends one test code. It never prints the key. At startup the server logs the account mode once (a `warn` when a TEST key runs with `NODE_ENV=production`: expected on the hosted dev service, wrong on prod); ARQAM outages never block startup or `/ready`.
 
 Local QA sign-in: run with `OTP_PROVIDER=fake OTP_FIXED_CODE=123456`, call `POST …/auth/otp/request {phone, purpose}`, then `POST …/auth/otp/verify {phone, purpose, code: "123456"}` and send the returned `otpToken` (`WAB-Admin-Dashboard/qa/lib.mjs` `proof()` does this).
 

@@ -1,7 +1,7 @@
 {
   "name": "@wab/otp",
-  "version": "0.2.0",
-  "description": "Provider-independent phone OTP for WAB projects: server-generated codes over WhatsApp (or SMS), signed single-use proofs and abuse limits.",
+  "version": "0.3.0",
+  "description": "Provider-independent phone OTP for WAB projects: server-generated codes delivered by ARQAM OTP over WhatsApp (or SMS), signed single-use proofs and abuse limits.",
   "license": "UNLICENSED",
   "engines": {
     "node": ">=22"
