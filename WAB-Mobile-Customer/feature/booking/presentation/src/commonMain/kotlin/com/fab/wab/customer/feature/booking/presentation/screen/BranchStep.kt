@@ -14,6 +14,7 @@ import com.fab.wab.customer.core.domain.salon.SalonBranch
 import com.fab.wab.customer.designsystem.components.domain.hoursLine
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.resources.Res as CoreRes
+import com.fab.wab.customer.designsystem.resources.salon_closed_now
 import com.fab.wab.customer.designsystem.resources.salon_closed_today
 import com.fab.wab.customer.designsystem.resources.salon_hours_separator
 import com.fab.wab.customer.designsystem.resources.salon_open
@@ -90,6 +91,7 @@ private fun branchStatusText(branch: SalonBranch): String = hoursLine(
     openLabel = stringResource(CoreRes.string.salon_open),
     closedLabel = stringResource(CoreRes.string.salon_closed_today),
     separator = stringResource(CoreRes.string.salon_hours_separator),
+    closedNowLabel = stringResource(CoreRes.string.salon_closed_now),
 )
 
 /** Summary line of the chosen branch: "Branch: Mecca Street", then its address. */

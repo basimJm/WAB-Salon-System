@@ -29,6 +29,7 @@ import com.fab.wab.customer.feature.salon.presentation.controller.contract.Staff
 import com.fab.wab.customer.feature.salon.presentation.resources.Res
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_reviews
 import com.fab.wab.customer.feature.salon.presentation.resources.staff_no_reviews
+import com.fab.wab.customer.feature.salon.presentation.resources.staff_service_bride_only
 import com.fab.wab.customer.feature.salon.presentation.resources.staff_services
 import com.fab.wab.customer.feature.salon.presentation.resources.staff_working_days
 import org.jetbrains.compose.resources.stringResource
@@ -112,7 +113,7 @@ internal fun StaffServicesSection(member: StaffMember, modifier: Modifier = Modi
         ) {
             member.services.forEach { service ->
                 AppText(
-                    text = service.name,
+                    text = if (service.brideOnly) stringResource(Res.string.staff_service_bride_only, service.name) else service.name,
                     style = AppTheme.typography.bodySmall,
                     maxLines = 1,
                     modifier = Modifier

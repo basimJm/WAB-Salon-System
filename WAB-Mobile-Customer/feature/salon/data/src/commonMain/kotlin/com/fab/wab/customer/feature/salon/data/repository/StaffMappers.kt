@@ -28,7 +28,7 @@ fun GetSalonsBySalonIdStaffByMemberIdData.toDomain(): StaffMember = StaffMember(
     yearsOfExperience = yearsOfExperience?.toInt(),
     customersCount = customersCount.toInt(),
     workingDays = workingDays.map { it.toDomain() },
-    services = services.map { StaffServiceRef(it.id, it.catalogServiceId, it.name) },
+    services = services.map { StaffServiceRef(it.id, it.catalogServiceId, it.name, it.brideOnly) },
     reviews = ReviewsPreview(RatingSummary(reviews.avg.toFloat(), reviews.count.toInt()), reviews.latest.map { it.toDomain() }),
 )
 

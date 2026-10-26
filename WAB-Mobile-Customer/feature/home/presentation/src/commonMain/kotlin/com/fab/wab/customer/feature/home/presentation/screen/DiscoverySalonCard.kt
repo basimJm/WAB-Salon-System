@@ -30,6 +30,7 @@ import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.resources.Res
 import com.fab.wab.customer.designsystem.resources.favorite_add
 import com.fab.wab.customer.designsystem.resources.favorite_remove
+import com.fab.wab.customer.designsystem.resources.salon_closed_now
 import com.fab.wab.customer.designsystem.resources.salon_closed_today
 import com.fab.wab.customer.designsystem.resources.salon_hours_separator
 import com.fab.wab.customer.designsystem.resources.salon_open
@@ -193,6 +194,7 @@ internal fun StatusLine(salon: SalonSummary, modifier: Modifier = Modifier) {
         openLabel = stringResource(Res.string.salon_open),
         closedLabel = stringResource(Res.string.salon_closed_today),
         separator = stringResource(Res.string.salon_hours_separator),
+        closedNowLabel = stringResource(Res.string.salon_closed_now),
     )
     val color = if (salon.isOpenNow) colors.success else colors.danger
     Row(

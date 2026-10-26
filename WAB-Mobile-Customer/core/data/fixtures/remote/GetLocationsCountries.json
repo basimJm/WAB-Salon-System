@@ -4,7 +4,7 @@
   "data": [
     {
       "code": "JO",
-      "name": "jordan",
+      "name": "Jordan",
       "dialCode": "+962",
       "flagUrl": "https://d3a0ua5olhml0f.cloudfront.net/flags/jo.svg",
       "phoneRegex": "^7[789][0-9]{7}$"
