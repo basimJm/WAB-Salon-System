@@ -113,8 +113,10 @@ describe('routing & auth guard', () => {
     );
     await screen.findByRole('heading', { name: en.nav.liveOverview });
     const nav = screen.getByRole('complementary', { name: en.nav.label });
-    // The About link sits in the sidebar footer, outside the module list.
-    expect(nav.querySelectorAll('nav a')).toHaveLength(NAV_ITEMS.length);
+    // Design sidebar: one row per module (a link, or a button that opens a group); no group is open on /live.
+    expect(nav.querySelectorAll('nav > a, nav > .wab-navgroup > button')).toHaveLength(
+      NAV_ITEMS.length,
+    );
   });
 
   it('logout clears the session and returns to login', async () => {

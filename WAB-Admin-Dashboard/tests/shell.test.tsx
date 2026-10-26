@@ -79,13 +79,22 @@ describe('Sidebar sub-menus and counters', () => {
   });
 
   it('shows counters on the sub-page and the sum on its module; 99+ above 99; nothing for zero', () => {
-    sidebar('/salons/applications', { applications: 3, allSalons: 2, alerts: 150, reviews: 0 });
+    const counters = { applications: 3, allSalons: 2, alerts: 150, reviews: 0 };
+    const view = sidebar('/salons/applications', counters);
     expect(
       within(screen.getByRole('link', { name: /^Applications/ })).getByText('3'),
     ).toBeVisible();
-    expect(within(screen.getByRole('link', { name: /^Salons/ })).getByText('5')).toBeVisible();
+    // An open group shows the counters on its pages, not the sum (design).
+    expect(
+      within(screen.getByRole('button', { name: 'Collapse Salons' })).queryByText('5'),
+    ).toBeNull();
     expect(within(screen.getByRole('link', { name: /^Alerts/ })).getByText('99+')).toBeVisible();
     expect(within(screen.getByRole('link', { name: /^Reviews/ })).queryByText('0')).toBeNull();
+    view.unmount();
+    sidebar('/live', counters);
+    expect(
+      within(screen.getByRole('button', { name: 'Expand Salons' })).getByText('5'),
+    ).toBeVisible();
   });
 
   it('uses Arabic digits in Arabic', () => {
@@ -106,10 +115,10 @@ describe('Sidebar sub-menus and counters', () => {
     expect(screen.getByText('١٢')).toBeVisible();
   });
 
-  it('a collapsed sidebar shows only the modules, no toggles or counters', () => {
+  it('a collapsed sidebar shows only the modules (icon rail with counter badges), no group toggles', () => {
     sidebar('/finance/refunds', { alerts: 4 }, true);
-    expect(screen.queryByRole('button', { name: /Expand|Collapse/ })).toBeNull();
-    expect(screen.queryByText('4')).toBeNull();
+    expect(screen.queryByRole('button', { name: /^(Expand|Collapse) / })).toBeNull();
+    expect(within(screen.getByRole('link', { name: /^Alerts/ })).getByText('4')).toBeVisible();
     expect(screen.queryByRole('link', { name: 'Refunds' })).toBeNull();
   });
 });

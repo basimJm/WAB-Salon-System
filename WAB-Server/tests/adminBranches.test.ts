@@ -8,6 +8,7 @@ import { createBranchesService } from '../src/domain/branches/branches.service';
 import { createAdminSalonsService } from '../src/domain/salons/adminSalons.service';
 import type { SalonStateNotifier } from '../src/domain/salons/salonState.service';
 import { createBookingQueriesService } from '../src/domain/bookings/bookingQueries.service';
+import { FakeStorageProvider } from '../src/providers/storage';
 import { BookingsRepository } from '../src/repositories/bookings.repository';
 import { BranchesRepository } from '../src/repositories/branches.repository';
 import { CustomersRepository, MembersRepository } from '../src/repositories/identity.repository';
@@ -117,6 +118,7 @@ const queries = createBookingQueriesService({
   members: new MembersRepository(m.members.model as never),
   salons: new SalonsRepository(m.salons.model as never),
   settings: { get: (k: string) => Promise.resolve(SETTING_DEFAULTS[k as never]) },
+  storage: new FakeStorageProvider(),
   now: () => NOW,
 });
 

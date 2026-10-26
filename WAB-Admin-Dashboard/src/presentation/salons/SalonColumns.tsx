@@ -1,3 +1,4 @@
+import { EntityCell, RatingCell } from '../components/data/TableCells';
 import type { TFunction } from 'i18next';
 import { hasOpenDeletionRequest } from '@/domain/salons/salonRules';
 import type { SalonSummary } from '@/domain/salons/salons';
@@ -18,12 +19,14 @@ export function salonColumns(
       key: 'name',
       header: t('salons.name'),
       render: (r) => (
-        <>
-          {r.name}
-          {hasOpenDeletionRequest(r) ? (
-            <Badge tone="amber">{t('salons.deletionAsked')}</Badge>
-          ) : null}
-        </>
+        <EntityCell
+          name={r.name}
+          badge={
+            hasOpenDeletionRequest(r) ? (
+              <Badge tone="amber">{t('salons.deletionAsked')}</Badge>
+            ) : undefined
+          }
+        />
       ),
     },
     { key: 'gender', header: t('salons.gender'), render: (r) => t(`catalog.genders.${r.gender}`) },
@@ -37,8 +40,7 @@ export function salonColumns(
       key: 'rating',
       header: t('salons.rating'),
       ltr: true,
-      render: (r) =>
-        `${formatNumber(r.rating.avg, language)} (${formatNumber(r.rating.count, language)})`,
+      render: (r) => <RatingCell avg={r.rating.avg} count={r.rating.count} language={language} />,
     },
     {
       key: 'sub',

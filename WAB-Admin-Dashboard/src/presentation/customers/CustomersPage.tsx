@@ -1,3 +1,4 @@
+import { EntityCell } from '../components/data/TableCells';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -39,7 +40,11 @@ export default function CustomersPage() {
   const cityName = (id: string) => cities.find((c) => c.value === id)?.label ?? '—';
   const title = t('nav.customers');
   const columns: Column<CustomerSummary>[] = [
-    { key: 'name', header: t('customers.name'), render: (r) => r.name },
+    {
+      key: 'name',
+      header: t('customers.name'),
+      render: (r) => <EntityCell name={r.name} />,
+    },
     { key: 'phone', header: t('salons.phone'), ltr: true, render: (r) => r.phone },
     { key: 'gender', header: t('salons.gender'), render: (r) => t(`catalog.genders.${r.gender}`) },
     { key: 'city', header: t('salons.city'), render: (r) => cityName(r.cityId) },
@@ -102,17 +107,19 @@ export default function CustomersPage() {
     <ListPage
       title={title}
       subtitle={t('customers.subtitle')}
-      actions={<ExportMenu onExport={runner('CUSTOMERS', customerExportParams(apiQuery))} />}
+      exportMenu={<ExportMenu onExport={runner('CUSTOMERS', customerExportParams(apiQuery))} />}
+      search={
+        <SearchField
+          label={t('customers.search')}
+          initialValue={state.search}
+          onSearch={list.setSearch}
+        />
+      }
       filters={{
         active: chips,
         onClearAll: list.clearFilters,
         controls: (
           <>
-            <SearchField
-              label={t('customers.search')}
-              initialValue={state.search}
-              onSearch={list.setSearch}
-            />
             <Select
               label={t('salons.state')}
               value={status ?? ''}

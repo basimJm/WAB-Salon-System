@@ -12,6 +12,8 @@ import { AppError } from '@/infrastructure/errors/AppError';
 import { normalizeError } from '@/infrastructure/errors/normalize';
 import { HttpClient, type FetchFn } from '@/infrastructure/http/HttpClient';
 import { createLogger, type Logger } from '@/infrastructure/logger/logger';
+import { tabStorage } from '@/infrastructure/storage/tabStorage';
+import { STORAGE_KEYS } from '@/constants/storage';
 import { createSessionManager, type SessionManager } from './sessionManager';
 import { createSessionStore, type SessionStore } from './session';
 
@@ -37,7 +39,8 @@ export async function createContainer(
   getLanguage: () => Language,
 ): Promise<Container> {
   const logger = createLogger(config.logLevel);
-  const session = createSessionStore();
+  // A reload keeps the admin signed in (this tab only); the server idle limit still applies.
+  const session = createSessionStore({ storage: tabStorage, key: STORAGE_KEYS.session });
   // The manager needs the repositories, which need the HTTP client, which needs the manager: tie the knot lazily.
   const manager: { current?: SessionManager } = {};
   let fetchFn: FetchFn | undefined;

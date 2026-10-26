@@ -41,7 +41,9 @@ describe('demo branches (§3.3a, SRV-148)', () => {
       ]),
     );
     expect(data.Branch.map((b) => (b['name'] as { en: string }).en)).toEqual(
-      DEMO_BRANCHES.map((spec) => spec.name.en),
+      DEMO_BRANCHES.filter((spec) => ['lamar', 'ostaz'].includes(spec.salon)).map(
+        (spec) => spec.name.en,
+      ),
     );
     for (const branch of data.Branch) {
       expect(branch).toMatchObject({
@@ -87,7 +89,7 @@ describe('demo branches (§3.3a, SRV-148)', () => {
     const once = buildDemoBranches(ctx, sources);
     const again = buildDemoBranches(ctx, sources);
     expect(once.Branch.map((b) => String(b._id))).toEqual(again.Branch.map((b) => String(b._id)));
-    expect(once.Branch).toHaveLength(2);
+    expect(once.Branch).toHaveLength(DEMO_BRANCHES.filter((spec) => spec.salon === 'lamar').length);
     const empty = buildDemoBranches(ctx, new Map([['ostaz', { ...ostaz, services: [] }]]));
     expect(empty.Branch).toHaveLength(0);
   });

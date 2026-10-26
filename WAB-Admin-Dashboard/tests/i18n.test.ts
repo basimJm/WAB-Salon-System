@@ -7,6 +7,7 @@ import { NAV_ITEMS } from '@/constants/nav';
 import { createI18n, directionOf } from '@/infrastructure/i18n/i18n';
 import ar from '@/locales/ar';
 import en from '@/locales/en';
+import { LAZY_AREA_FILES, LAZY_AREAS } from '@/locales/lazyAreas';
 import { listFiles, read, SRC } from './helpers/files';
 
 type Tree = { [key: string]: string | Tree };
@@ -16,10 +17,22 @@ const flatten = (tree: Tree, prefix = ''): Record<string, string> =>
     return typeof v === 'string' ? { ...acc, [key]: v } : { ...acc, ...flatten(v, key) };
   }, {});
 
-const arFlat = flatten(ar);
-const enFlat = flatten(en);
+// Lazy areas (loaded with their screens, not the entry) count as defined strings too.
+const lazy = Object.values(LAZY_AREAS);
+const arFlat = flatten(Object.assign({}, ar, ...lazy.map((a) => a.ar)) as Tree);
+const enFlat = flatten(Object.assign({}, en, ...lazy.map((a) => a.en)) as Tree);
+const LAZY_FILES = new Set(Object.values(LAZY_AREA_FILES).flat());
 const placeholders = (s: string) => (s.match(/{{\s*\w+\s*}}/g) ?? []).sort().join();
 const ARABIC = /[؀-ۿ]/;
+/** Values that name the OTHER language on purpose (design top bar: the Arabic UI shows "EN"). */
+// File-type chips (XLS / CSV / PDF) and the em-dash "no value" mark read the same in both languages.
+const LATIN_BY_DESIGN = new Set([
+  'topbar.otherLanguageShort',
+  'export.chip.XLSX',
+  'export.chip.CSV',
+  'export.chip.PDF',
+  'analytics.noValue',
+]);
 
 describe('locale area files', () => {
   const areas = (lang: string) =>
@@ -32,14 +45,16 @@ describe('locale area files', () => {
     expect(areas('en').length).toBeGreaterThan(0);
   });
 
-  it('are all merged into the language module (nothing is left unloaded)', () => {
+  it('are all merged into the language module or a lazy area (nothing is left unloaded)', () => {
     for (const [lang, merged] of [
       ['ar', ar],
       ['en', en],
     ] as const) {
-      const fromDisk = areas(lang).flatMap((file) =>
-        Object.keys(JSON.parse(read(join(SRC, 'locales', lang, file))) as object),
-      );
+      const fromDisk = areas(lang)
+        .filter((file) => !LAZY_FILES.has(file))
+        .flatMap((file) =>
+          Object.keys(JSON.parse(read(join(SRC, 'locales', lang, file))) as object),
+        );
       expect(Object.keys(merged).sort()).toEqual(fromDisk.sort());
     }
   });
@@ -67,7 +82,7 @@ describe('locale files', () => {
 
   it('Arabic values are Arabic (except currency-free technical text)', () => {
     const missing = Object.entries(arFlat)
-      .filter(([, v]) => !ARABIC.test(v))
+      .filter(([k, v]) => !ARABIC.test(v) && !LATIN_BY_DESIGN.has(k))
       .map(([k]) => k);
     expect(missing).toEqual([]);
   });

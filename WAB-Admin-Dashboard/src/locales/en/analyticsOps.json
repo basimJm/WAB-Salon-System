@@ -1,0 +1,112 @@
+{
+  "analyticsOps": {
+    "bookings": {
+      "sub": "Bookings by status, gender, city and salon; response times and cancellations",
+      "kpi": {
+        "bookings": "Bookings",
+        "acceptance": "Acceptance rate",
+        "response": "Avg salon response",
+        "bride": "Bride bookings",
+        "autoCancelled": "Auto-cancelled",
+        "noShow": "No-show",
+        "persons": "Avg persons",
+        "leadTime": "Lead time"
+      },
+      "card": {
+        "byStatus": "Bookings by status",
+        "paymentMethod": "Payment method",
+        "byGender": "By gender",
+        "byCity": "By city",
+        "persons": "Persons per booking",
+        "rejectReasons": "Rejection reasons",
+        "cancelWindow": "Customer cancellations vs the cancellation window",
+        "leadTime": "Time between booking and appointment",
+        "salonCancel": "Salon cancellation reasons",
+        "perSalon": "Performance by salon"
+      },
+      "status": {
+        "completed": "Completed",
+        "approved": "Approved",
+        "cancelled": "Cancelled",
+        "rejected": "Rejected",
+        "no_show": "No-show"
+      }
+    },
+    "payments": {
+      "sub": "Every payment attempt with the gateway code and message",
+      "kpi": {
+        "success": "Success rate",
+        "attempts": "Attempts",
+        "collected": "Collected",
+        "fees": "Gateway fees",
+        "refunds": "Refunds",
+        "refundTime": "Avg refund time",
+        "refundFailed": "Failed refunds"
+      },
+      "card": {
+        "failReason": "Failures by reason",
+        "failPlatform": "Failures by platform and version",
+        "attempts": "All payment attempts",
+        "trend": "Payment events per day"
+      }
+    },
+    "errors": {
+      "sub": "API, client, crash, OTP, payment and notification errors",
+      "kpi": {
+        "apiRate": "API error rate",
+        "p95": "p95 response time",
+        "crashFree": "Crash-free users",
+        "crashes": "Crashes",
+        "otpSent": "OTP sent",
+        "otpBlocked": "OTP blocks",
+        "pushFailed": "Push failures"
+      },
+      "card": {
+        "latency": "p95 response time and error rate",
+        "clientErrors": "Client errors",
+        "endpoints": "API errors by endpoint",
+        "crashes": "Crashes by version",
+        "failures": "Payment, refund and notification failures",
+        "trend": "Error events per day"
+      },
+      "item": {
+        "paymentFailed": "Failed payments",
+        "refundFailed": "Failed refunds",
+        "apiErrors": "API errors",
+        "pushFailed": "Push delivery failures",
+        "otpWrong": "Wrong OTP attempts"
+      }
+    },
+    "merchants": {
+      "sub": "Salon states, completeness, performance, member activity and subscriptions",
+      "kpi": {
+        "acceptTime": "Avg time to accept",
+        "trials": "Active trials",
+        "ending": "Ending in ≤ {{days}} days",
+        "expired": "Expired",
+        "paid": "Paid subscriptions"
+      },
+      "card": {
+        "byState": "Salons by state",
+        "completeness": "Profile completeness",
+        "perSalon": "Performance per salon",
+        "missing": "Missing profile items",
+        "members": "Member activity"
+      },
+      "salons": "salons"
+    },
+    "journey": {
+      "sub": "Every event for every user — grouped by session, incl. guest events before registration",
+      "find": "Find a user",
+      "field": "Phone, name, user/member ID, installation ID or booking ref",
+      "placeholder": "e.g. +962 79 347 2153 or WAB-24809",
+      "search": "Search",
+      "foot": "Results include all linked installations, incl. pre-registration events",
+      "emptyTitle": "Search for a user to see their journey",
+      "emptyText": "Search by phone, name, ID or booking reference.",
+      "noDataTitle": "No journey data yet",
+      "noDataText": "The server does not provide user journeys yet. Open the customer to see their profile, bookings and notifications.",
+      "openCustomers": "Find in customers"
+    }
+  }
+}

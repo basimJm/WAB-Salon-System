@@ -12,6 +12,8 @@ export interface TableRowProps<Row> {
   selection?: TableSelection<Row> | undefined;
   actions?: ((row: Row) => ReactNode) | undefined;
   onRowClick?: ((row: Row) => void) | undefined;
+  /** Rose tint + start border (design: rows that need attention). */
+  alert?: boolean;
 }
 
 export function TableRow<Row>({
@@ -21,12 +23,17 @@ export function TableRow<Row>({
   selection,
   actions,
   onRowClick,
+  alert = false,
 }: TableRowProps<Row>) {
   const { t } = useTranslation();
   const checked = selection?.selected.has(rowId) ?? false;
   return (
     <tr
-      className={cx(onRowClick && 'wab-table__row--click', checked && 'wab-table__row--selected')}
+      className={cx(
+        onRowClick && 'wab-table__row--click',
+        checked && 'wab-table__row--selected',
+        alert && 'wab-table__row--alert',
+      )}
       aria-selected={selection ? checked : undefined}
       {...(onRowClick
         ? {

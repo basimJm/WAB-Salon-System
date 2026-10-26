@@ -17,6 +17,7 @@ export const ERROR_CODE_KIND = {
   OTP_BLOCKED: 'rateLimited',
   OTP_INVALID: 'validation',
   OTP_EXPIRED: 'validation',
+  OTP_DELIVERY_FAILED: 'validation',
   PHONE_NOT_REGISTERED: 'notFound',
   PHONE_ALREADY_REGISTERED: 'conflict',
   ACCOUNT_BLOCKED: 'forbidden',

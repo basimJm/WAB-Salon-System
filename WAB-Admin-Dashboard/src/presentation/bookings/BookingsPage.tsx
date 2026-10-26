@@ -1,3 +1,5 @@
+import { EntityCell } from '../components/data/TableCells';
+import { LiveIndicator } from '../components/feedback/LiveIndicator';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -45,7 +47,11 @@ export default function BookingsPage() {
   const title = t('nav.bookings');
   const columns: Column<BookingSummary>[] = [
     { key: 'ref', header: t('bookings.reference'), ltr: true, render: (r) => r.referenceNumber },
-    { key: 'customer', header: t('bookings.customer'), render: (r) => r.customer?.name ?? '—' },
+    {
+      key: 'customer',
+      header: t('bookings.customer'),
+      render: (r) => (r.customer ? <EntityCell name={r.customer.name} /> : '—'),
+    },
     { key: 'salon', header: t('bookings.salon'), render: (r) => r.salon?.name ?? '—' },
     { key: 'branch', header: t('branches.name'), render: (r) => r.branch?.name ?? '—' },
     {
@@ -114,10 +120,10 @@ export default function BookingsPage() {
   return (
     <ListPage
       title={title}
+      badges={<LiveIndicator />}
       subtitle={t('bookings.subtitle')}
       actions={
         <>
-          <ExportMenu onExport={runner('BOOKINGS', bookingExportParams(bookingQueryOf(state)))} />
           <SegmentedControl
             ariaLabel={t('bookings.tabs')}
             value={tab}
@@ -129,16 +135,21 @@ export default function BookingsPage() {
           />
         </>
       }
+      exportMenu={
+        <ExportMenu onExport={runner('BOOKINGS', bookingExportParams(bookingQueryOf(state)))} />
+      }
+      search={
+        <SearchField
+          label={t('bookings.search')}
+          initialValue={state.search}
+          onSearch={list.setSearch}
+        />
+      }
       filters={{
         active: chips,
         onClearAll: list.clearFilters,
         controls: (
           <>
-            <SearchField
-              label={t('bookings.search')}
-              initialValue={state.search}
-              onSearch={list.setSearch}
-            />
             <SalonBranchFilters
               salon={f('salon')}
               branch={f('branch')}

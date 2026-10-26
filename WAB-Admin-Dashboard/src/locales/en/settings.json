@@ -91,6 +91,7 @@
       "rules": "Booking and verification",
       "security": "Accounts and security",
       "limits": "Limits and alerts"
-    }
+    },
+    "readOnlyNote": "Read only: set on the server"
   }
 }
