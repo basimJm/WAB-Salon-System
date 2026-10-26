@@ -5,6 +5,7 @@ import { createApp } from '../src/app';
 import { SETTING_DEFAULTS } from '../src/constants/settings';
 import { createBookingQueriesService } from '../src/domain/bookings/bookingQueries.service';
 import { requireAuth } from '../src/middlewares/auth';
+import { FakeStorageProvider } from '../src/providers/storage';
 import { BookingsRepository } from '../src/repositories/bookings.repository';
 import { CustomersRepository, MembersRepository } from '../src/repositories/identity.repository';
 import { SalonsRepository } from '../src/repositories/salons.repository';
@@ -54,6 +55,7 @@ const app = createApp({
       settings: {
         get: (key: string) => Promise.resolve(SETTING_DEFAULTS[key as never]),
       },
+      storage: new FakeStorageProvider(),
       now: () => NOW,
     }),
     salonProfile: { service: undefined as never, guard: [guard] },
@@ -141,7 +143,13 @@ beforeEach(() => {
     { _id: c2, firstName: 'Lina', lastName: 'Omar', phone: { e164: '+962792222222' } },
   );
   m.members.docs.push(
-    { _id: staffA, firstName: 'Sara', lastName: 'K', salonId: salon1 },
+    {
+      _id: staffA,
+      firstName: 'Sara',
+      lastName: 'K',
+      salonId: salon1,
+      photoKey: 'members/sara.jpg',
+    },
     { _id: staffB, firstName: 'Dina', lastName: 'M', salonId: salon1 },
   );
   book('b1', { status: 'PENDING', startInHours: 24 });
@@ -185,16 +193,64 @@ describe('customer', () => {
     expect(refsOf(await customer('?tab=PAST'))).toEqual([refs.b3]);
     expect(refsOf(await customer('?pageSize=1&page=2'))).toEqual([refs.b2]);
   });
-  it('hides customer and staff, shows the salon, and never other customers’ bookings', async () => {
+  it('hides the customer, shows the salon and staff first names only, never other customers’ bookings', async () => {
+    const res = await customer('');
     const row = (
-      bodyOf(await customer('')).data as {
+      bodyOf(res).data as {
         salon: { name: string };
         customer: unknown;
         staff: unknown[];
       }[]
     )[0];
-    expect(row).toMatchObject({ salon: { name: 'Glow Salon' }, customer: null, staff: [] });
+    expect(row).toMatchObject({
+      salon: { name: 'Glow Salon' },
+      customer: null,
+      staff: [
+        {
+          id: staffA.toHexString(),
+          name: 'Sara',
+          firstName: 'Sara',
+          photoUrl: expect.stringContaining('members/sara.jpg') as unknown,
+        },
+      ],
+    });
+    // SRV-170: no last name or other private staff data in the customer view.
+    expect(JSON.stringify(bodyOf(res).data)).not.toContain('Sara K');
     expect(refsOf(await customer('', c2))).toEqual([refs.b4]);
+  });
+  it('shows the rejection reason on the list row (S14) and null otherwise (SRV-170)', async () => {
+    const rejected = m.bookings.docs.find((b) => b['referenceNumber'] === refs.b1);
+    if (rejected === undefined) throw new Error('missing booking');
+    rejected['status'] = 'REJECTED';
+    rejected['rejection'] = { reasonCode: 'FULLY_BOOKED', reasonText: 'No staff', at: NOW };
+    const rows = bodyOf(await customer('?tab=PAST')).data as {
+      referenceNumber: string;
+      rejection: unknown;
+    }[];
+    expect(rows.find((r) => r.referenceNumber === refs.b1)?.rejection).toEqual({
+      reasonCode: 'FULLY_BOOKED',
+      reasonText: 'No staff',
+      at: NOW.toISOString(),
+    });
+    expect(rows.find((r) => r.referenceNumber === refs.b3)?.rejection).toBeNull();
+  });
+  it('remaining is 0 once final; a COMPLETED booking reports what was paid at the salon (SRV-170)', async () => {
+    const moneyOf = async (key: string): Promise<Record<string, string>> =>
+      (
+        bodyOf(await customer(`/${ids[key]?.toHexString() ?? ''}`)).data as {
+          money: Record<string, string>;
+        }
+      ).money;
+    expect(await moneyOf('b1')).toMatchObject({ remaining: '12.500', paidAtSalon: '0.000' });
+    expect(await moneyOf('b3')).toMatchObject({
+      total: '12.500',
+      remaining: '0.000',
+      paidAtSalon: '12.500',
+    });
+    const cancelled = m.bookings.docs.find((b) => b['referenceNumber'] === refs.b2);
+    if (cancelled === undefined) throw new Error('missing booking');
+    cancelled['status'] = 'CANCELLED_BY_SALON';
+    expect(await moneyOf('b2')).toMatchObject({ remaining: '0.000', paidAtSalon: '0.000' });
   });
   it('searches by reference (any spelling) and by salon name', async () => {
     expect(refsOf(await customer('?q=wab%20def567'))).toEqual([refs.b2]);
@@ -211,7 +267,13 @@ describe('customer', () => {
       actions: string[];
     };
     expect(data.persons[0]?.services[0]).toMatchObject({ name: 'Cut', price: '12.500' });
-    expect(data.persons[0]?.staff).toBeNull();
+    // SRV-170: each person's staff, first name only (S15, S18 staff rating).
+    expect(data.persons[0]?.staff).toEqual({
+      id: staffB.toHexString(),
+      name: 'Dina',
+      firstName: 'Dina',
+      photoUrl: null,
+    });
     expect(data.money.total).toBe('12.500');
     expect(data.statusHistory).toHaveLength(1);
     expect(data.actions).toEqual([]);
@@ -239,7 +301,8 @@ describe('merchant', () => {
     )[0];
     expect(row).toMatchObject({
       customer: { name: 'Rana Ahmad', phone: '+962791111111' },
-      staff: [{ name: 'Sara K' }],
+      staff: [{ name: 'Sara K', firstName: 'Sara' }],
+      rejection: null,
     });
   });
   it('searches by customer name, phone and reference', async () => {

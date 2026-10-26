@@ -10,6 +10,23 @@
 
 ## Current task
 
+### SRV-170 — Customer booking/salon contract gaps found by CUS-092
+
+- Branch: `feat/srv-170-customer-contract-gaps`
+- Branched: from `origin/server` + `origin/main` merged (already up to date)
+- Status: IN REVIEW (committed, not pushed; no PR — the lead ships it)
+- Acceptance criteria (BUSINESS_DOMAIN §3.3 `brideOnly`, §3.5 bookings money/rejection, §5.4 step 3 bride-only rule, §5.5 amounts (updated), §5.7 COMPLETED → PAID, §6 staff data; PRD S14/S15/S16/S18; operations `GET /customer/v1/salons/{salonId}`, `GET /customer/v1/salons/{salonId}/staff/{memberId}`, `GET /{customer,merchant,admin}/v1/bookings[/{id}]`, merchant dashboard rows, booking summaries):
+  - [x] Bride-only: `services[].brideOnly` on salon details and the staff sheet (legacy docs without the field read `false`); enforcement verified already in `availability.plan` (drafts + creation) → 422 `BRIDE_ONLY_SERVICE` (`tests/bookingDrafts.test.ts` existing case)
+  - [x] Staff per person: rows `staff[]` and details `persons[].staff` = `{id, name, firstName, photoUrl}` for every audience; customers get the first name only (`name` = `firstName`, no last name/phone); staff review endpoint `POST /customer/v1/salons/{salonId}/staff/{memberId}/reviews` already exists (S18)
+  - [x] `rejection {reasonCode, reasonText, at}` on the list row (all audiences; details inherit it)
+  - [x] Remaining rule (§5.5): stored `money.remaining` unchanged (statistics count it as collected when COMPLETED); views answer `remaining` = still to pay at the salon = stored value while PENDING/APPROVED, 0 once final; details add `paidAtSalon` (stored remaining when COMPLETED, else 0); booking summaries (create/cancel/actions/reassign/admin status) use the same rule; one helper `domain/bookings/bookingMoney.ts` (statistics reuse `paidAtSalon`)
+  - [x] Contracts: customer 1.5.0 (CUS-093 added BLOCKED on SRV-170), merchant 1.6.0, admin 1.7.0 (additive + `remaining` semantics; no client row needed)
+- Tests: `tests/bookingMoney.test.ts` (new: open/final/completed/fully-paid), `tests/bookingQueries.test.ts` (customer staff first name + photo, no last name, list rejection, remaining/paidAtSalon for PENDING/COMPLETED/CANCELLED, merchant full name + rejection null), `tests/salonDetails.test.ts` (brideOnly on profile + staff sheet, legacy false); constructors in `adminBranches`/`branchScope` tests. Gate in the Terminal panel: prettier --check, eslint, `tsc --noEmit`, `tsc -p tsconfig.build.json`, docs generate, full jest 163/164 suites, 2893/2915 tests; the one failing suite, `tests/redis.test.ts` (22 tests, Redis under parallel load from other agents; this change does not touch Redis), passed 22/22 when rerun alone
+- API docs: customer/merchant/admin regenerated (`tsc` build + `node dist/docs/generate.js`), `contract:bump` ×3, regenerated again
+- Loops: 1/1 — re-read BUSINESS_DOMAIN §5.4/§5.5/§5.7 and §3.5 against the code and the regenerated contracts; grepped every `money.remaining` reader (statistics, summaries, queries, drafts = pre-booking so unchanged); checked the merchant dashboard reuses the same row builder; found and fixed: an eslint error on `=== true` for the typed `brideOnly` (lean reads skip schema defaults, so it is now an explicit `isBrideOnly` helper), and prettier drift in this file
+- Review: PASSED (SE ✔ (one money helper, no stored data rewritten, storage injected), Mobile ✔ (customer gets first name + photo only; client work named in CUS-093), Architect ✔ (three contracts bumped; payments untouched: no payment flow or stored amount changed), QA ✔ (each gap has a test; final statuses enumerated))
+- Notes: DEVIATIONS: `remaining` semantics also change for merchant/admin views and summaries (0 once final) — chosen so every namespace follows one rule; `photoUrl` uses the public URL directly like salon details (an invalid stored key would throw, same as there); tools run from a symlinked `node_modules` (removed before commit), `ensure-sdks` skipped.
+
 ### SRV-161 — Admin session timeout 2 days (owner 2026-10-26)
 
 - Branch: `feat/srv-161-admin-session-2-days`
@@ -26,7 +43,9 @@
 - Loops: 1/1 — re-read BUSINESS_DOMAIN §10 and SRV-030/031 (refresh lifetime = `admin.sessionIdleSec`, rotation restarts it) against `adminAuth.service.ts` and `refreshTokens.service.ts`; grepped every 1800 / 30-minute use in WAB-Server (none left besides unrelated test values)
 - Review: PASSED (SE ✔ (one constant, setting still overridable), Mobile N/A, Architect ✔ (no contract change; client follow-up named), QA ✔ (boundary at exactly 2 days + sliding refresh tested))
 - Notes: DEVIATION: Admin PRD §4 still says 30 minutes (owner decision supersedes it; the PRD belongs to the admin project, updated by the admin agent).
+
 ### SRV-160 — Demo seed with multiple branches for the merchant app (owner 2026-10-26)
+
 - Branch: `feat/srv-160-demo-branches-seed`
 - Branched: from `origin/server` + `origin/main` merged (already up to date)
 - Acceptance criteria (BUSINESS_DOMAIN §3.3a branches, §3.5 booking `branchId` + `branchSnapshot`, §5.16–§5.18 branch lifecycle/discovery/booking, §6 branch-scoped permissions, §7/§8 recipients; no operation changed):
@@ -42,7 +61,6 @@
 - Loops: 1/1 — re-read §3.3a/§3.5/§5.16–§5.18/§6 against the generated rows (dumped the accounts and per-branch counts: 45–53 bookings, 15–28 reviews per branch, all 8 statuses, 36 bride bookings); found and fixed: a re-run on another day would have inserted overlapping bookings (now base-once + per-branch markers), existing SRV-148 branches had no activity (now completed), old tests assumed 3 branch specs
 - Review: PASSED (SE ✔ (seed-only code; DB access stays in `branchSources`/writer; constants in `demoSeed.ts`; env via config), Mobile ✔ (merchant data: branch-scoped manager/employee accounts, today/tomorrow requests; no contract change), Architect ✔ (no API change; production guard is an explicit per-database opt-in; startup seed never blocks or crashes the API), QA ✔ (shape, rules, idempotency and guard tests; full suite green))
 - Notes: DEVIATIONS: no real MongoDB run (no mongod; writes tested with in-memory models, rows validated against the real schemas); Jordan has no reserved fictional mobile range and the API only accepts `7[789]…`, so the demo keeps the existing invented `78900/78901/79900` blocks (documented); Al-Ostaz's SRV-148 extra branch is named "Shmeisani" like its main area (kept, renaming would change existing dev data).
-
 
 ### SRV-158 — Server adopts ARQAM OTP (owner decisions 2026-10-26)
 

@@ -25,6 +25,19 @@ import {
 } from './bookingQuery.schemas';
 
 const person = z.object({ id: z.string(), name: z.string() });
+const staffRef = person
+  .extend({
+    firstName: z.string(),
+    photoUrl: z.string().nullable(),
+  })
+  .describe(
+    'Assigned staff member. Customer view: first name only (`name` = `firstName`); merchant/admin: `name` is the full name.',
+  );
+const decision = z.object({
+  reasonCode: z.string(),
+  reasonText: z.string().nullable(),
+  at: z.string(),
+});
 const row = z.object({
   id: z.string(),
   referenceNumber: z.string(),
@@ -49,7 +62,8 @@ const row = z.object({
     .extend({ phone: z.string() })
     .nullable()
     .describe('Merchant and admin views only.'),
-  staff: z.array(person).describe('Merchant and admin views only.'),
+  staff: z.array(staffRef).describe('The distinct staff of the booking (every view).'),
+  rejection: decision.nullable().describe('The salon’s rejection reason; null unless REJECTED.'),
 });
 /** A booking row as lists show it (also reused by the merchant dashboard). */
 export const bookingRowDoc = row;
@@ -63,7 +77,7 @@ const detail = row.extend({
       start: z.string(),
       end: z.string(),
       subtotal: z.string(),
-      staff: person.nullable(),
+      staff: staffRef.nullable(),
       services: z.array(
         z.object({ name: z.string(), price: z.string(), durationMinutes: z.number() }),
       ),
@@ -73,7 +87,14 @@ const detail = row.extend({
     total: z.string(),
     dueOnline: z.string(),
     paidOnline: z.string(),
-    remaining: z.string(),
+    remaining: z
+      .string()
+      .describe(
+        'Still to pay at the salon now (JOD): total − paidOnline while PENDING/APPROVED, 0 once the booking is final.',
+      ),
+    paidAtSalon: z
+      .string()
+      .describe('Collected in person (JOD): the at-salon part once COMPLETED, else 0.'),
     refunded: z.string(),
   }),
   policy: z
@@ -87,12 +108,7 @@ const detail = row.extend({
       at: z.string(),
     }),
   ),
-  rejection: z
-    .object({ reasonCode: z.string(), reasonText: z.string().nullable(), at: z.string() })
-    .nullable(),
-  cancellation: z
-    .object({ reasonCode: z.string(), reasonText: z.string().nullable(), at: z.string() })
-    .nullable(),
+  cancellation: decision.nullable(),
   createdAt: z.string(),
   actions: z
     .array(z.enum(['APPROVE', 'REJECT', 'CANCEL', 'REASSIGN', 'COMPLETE', 'NO_SHOW']))

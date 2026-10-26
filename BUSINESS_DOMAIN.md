@@ -402,7 +402,9 @@ Input: salonId, **branchId**, date D, services per person (services of that bran
 - `person.subtotal` = Σ price snapshots; `total` = Σ subtotals.
 - `deposit` = round_half_up(total × depositPercentage / 100) to 1 fils (assumption: rounding to whole fils).
 - `dueOnline` = DEPOSIT → deposit; FULL_ONLINE → total; PAY_ON_ARRIVAL → 0.
-- `remaining` = total − paidOnline (+ refunded adjustments shown separately).
+- `remaining` = total − paidOnline (+ refunded adjustments shown separately). Stored once at creation and never rewritten (it is the at-salon part; statistics count it as collected when COMPLETED).
+- Booking views (API, SRV-170): `money.remaining` = what is **still to pay at the salon now** = stored `remaining` while PENDING/APPROVED, **0 once the booking is final** (COMPLETED = settled at the salon, `paymentStatus` PAID per §5.7; REJECTED/CANCELLED_*/AUTO_CANCELLED/NO_SHOW are not collected at the salon). Booking details add `money.paidAtSalon` = stored `remaining` when COMPLETED, else 0.
+- Customer booking views show each person's assigned staff as `{id, firstName, photoUrl}` only (no last name or contact data), and the list row carries `rejection` (S14). Customer salon services carry `brideOnly`; booking a bride-only service for a non-bride person is refused with `BRIDE_ONLY_SERVICE` (§5.4 step 3).
 
 ### 5.6 Booking creation (atomic)
 1. `POST draft` → validate gender, companions ≤ max, services active and belong to salon, bride rules, availability per person; price snapshot; policy snapshot; create **Redis holds** `hold:{staffId}:{start}` with TTL `booking.paymentHoldMinutes` (10) → `bookingDrafts`.

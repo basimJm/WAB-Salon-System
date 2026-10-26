@@ -27,6 +27,7 @@ import { localDateOf } from '../../utils/time';
 import type { AvailabilityService, BookingPlan } from '../availability/availability.service';
 import type { HoldsStore } from '../availability/holds';
 import { calculateAmounts } from '../pricing/pricing';
+import { outstandingAtSalon } from './bookingMoney';
 import type { SettingsService } from '../settings';
 
 export interface BookingSummary {
@@ -90,7 +91,7 @@ export const toSummary = (booking: Entity<BookingRaw>): BookingSummary => ({
     total: formatJod(booking.money.total),
     dueOnline: formatJod(booking.money.dueOnline),
     paidOnline: formatJod(booking.money.paidOnline),
-    remaining: formatJod(booking.money.remaining),
+    remaining: formatJod(outstandingAtSalon(booking)),
   },
 });
 

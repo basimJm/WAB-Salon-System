@@ -14,6 +14,7 @@ import type {
   CustomersRepository,
   MembersRepository,
 } from '../../repositories/identity.repository';
+import type { StorageProvider } from '../../providers/storage';
 import type { SalonsRepository } from '../../repositories/salons.repository';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
@@ -23,6 +24,7 @@ import type { PaginationParams } from '../../utils/pagination';
 import { normalizeReferenceNumber } from '../../utils/reference';
 import { diffDays, localDateOf, localDayRange } from '../../utils/time';
 import type { SettingsService } from '../settings';
+import { outstandingAtSalon, paidAtSalon } from './bookingMoney';
 import { FINAL_STATUSES } from './stateMachine';
 
 export type BookingAudience =
@@ -74,7 +76,27 @@ export interface BookingRow {
   /** The branch of the appointment, as booked (§3.5 `branchSnapshot`); `null` for older rows. */
   readonly branch: { id: string; name: string; locationText: string | null } | null;
   readonly customer: { id: string; name: string; phone: string } | null;
-  readonly staff: { id: string; name: string }[];
+  /** The distinct staff of the booking (customers see first names only). */
+  readonly staff: BookingStaffRef[];
+  /** The salon's rejection reason (S14 card, M10), `null` unless REJECTED. */
+  readonly rejection: BookingDecision | null;
+}
+
+/**
+ * A staff member as a booking shows them. Customers get the first name only (no last name,
+ * phone or other private data): `name` = `firstName` for them, the full name for salons/admin.
+ */
+export interface BookingStaffRef {
+  readonly id: string;
+  readonly name: string;
+  readonly firstName: string;
+  readonly photoUrl: string | null;
+}
+
+export interface BookingDecision {
+  readonly reasonCode: string;
+  readonly reasonText: string | null;
+  readonly at: string;
 }
 
 export interface BookingDetail extends BookingRow {
@@ -85,14 +107,17 @@ export interface BookingDetail extends BookingRow {
     start: string;
     end: string;
     subtotal: string;
-    staff: { id: string; name: string } | null;
+    staff: BookingStaffRef | null;
     services: { name: string; price: string; durationMinutes: number }[];
   }[];
   readonly money: {
     total: string;
     dueOnline: string;
     paidOnline: string;
+    /** Still to pay at the salon now (§5.5): 0 once the booking is final. */
     remaining: string;
+    /** Collected in person: the at-salon part once COMPLETED, else 0. */
+    paidAtSalon: string;
     refunded: string;
   };
   readonly policy: BookingRaw['policySnapshot'];
@@ -102,8 +127,7 @@ export interface BookingDetail extends BookingRow {
     reason: string | null;
     at: string;
   }[];
-  readonly rejection: { reasonCode: string; reasonText: string | null; at: string } | null;
-  readonly cancellation: { reasonCode: string; reasonText: string | null; at: string } | null;
+  readonly cancellation: BookingDecision | null;
   readonly createdAt: string;
   /** What the viewer may do now (merchant only). */
   readonly actions: BookingAction[];
@@ -147,6 +171,8 @@ export interface BookingQueriesDeps {
   readonly members: Pick<MembersRepository, 'findMany'>;
   readonly salons: Pick<SalonsRepository, 'findMany'>;
   readonly settings: Pick<SettingsService, 'get'>;
+  /** Staff photo URLs. */
+  readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly now?: () => Date;
 }
 
@@ -155,7 +181,7 @@ const iso = (d: Date): string => d.toISOString();
 const ids = (rows: readonly { id: string }[]): string[] => rows.map((r) => r.id);
 
 export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQueriesService => {
-  const { bookings, customers, members, salons, settings } = deps;
+  const { bookings, customers, members, salons, settings, storage } = deps;
   const now = deps.now ?? ((): Date => new Date());
 
   const viewScope = (member: { id: string; permissions: readonly string[] }): { own: boolean } => {
@@ -273,7 +299,7 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
   ): Promise<{
     salon: Map<string, string>;
     customer: Map<string, { name: string; phone: string }>;
-    staff: Map<string, string>;
+    staff: Map<string, { firstName: string; fullName: string; photoUrl: string | null }>;
   }> => {
     const salonIds = [...new Set(rows.map((b) => b.salonId))];
     const customerIds = [...new Set(rows.map((b) => b.customerId))];
@@ -285,9 +311,7 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
       audience.kind === 'CUSTOMER' || customerIds.length === 0
         ? []
         : customers.findMany({ _id: { $in: customerIds } }),
-      audience.kind === 'CUSTOMER' || staffIds.length === 0
-        ? []
-        : members.findMany({ _id: { $in: staffIds } }),
+      staffIds.length === 0 ? [] : members.findMany({ _id: { $in: staffIds } }),
     ]);
     return {
       salon: new Map(salonRows.map((s) => [s.id, s.name])),
@@ -297,11 +321,39 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
           { name: `${c.firstName} ${c.lastName}`.trim(), phone: c.phone.e164 },
         ]),
       ),
-      staff: new Map(staffRows.map((s) => [s.id, `${s.firstName} ${s.lastName}`.trim()])),
+      staff: new Map(
+        staffRows.map((s) => [
+          s.id,
+          {
+            firstName: s.firstName,
+            fullName: `${s.firstName} ${s.lastName}`.trim(),
+            photoUrl: s.photoKey === undefined ? null : storage.getPublicUrl(s.photoKey),
+          },
+        ]),
+      ),
     };
   };
 
   type Lookups = Awaited<ReturnType<typeof lookups>>;
+
+  /** One staff member for this audience; customers never get the last name (§6, S15/S18). */
+  const staffRef = (id: string, audience: BookingAudience, l: Lookups): BookingStaffRef => {
+    const found = l.staff.get(id);
+    const firstName = found?.firstName ?? '';
+    return {
+      id,
+      name: audience.kind === 'CUSTOMER' ? firstName : (found?.fullName ?? ''),
+      firstName,
+      photoUrl: found?.photoUrl ?? null,
+    };
+  };
+
+  const decision = (
+    d: { reasonCode: string; reasonText?: string | undefined; at: Date } | undefined,
+  ): BookingDecision | null =>
+    d === undefined
+      ? null
+      : { reasonCode: d.reasonCode, reasonText: d.reasonText ?? null, at: iso(d.at) };
 
   const toRow = (
     b: Entity<BookingRaw>,
@@ -339,13 +391,8 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
             name: l.customer.get(b.customerId)?.name ?? '',
             phone: l.customer.get(b.customerId)?.phone ?? '',
           },
-    staff:
-      audience.kind === 'CUSTOMER'
-        ? []
-        : [...new Set(b.persons.map((p) => p.staffId))].map((id) => ({
-            id,
-            name: l.staff.get(id) ?? '',
-          })),
+    staff: [...new Set(b.persons.map((p) => p.staffId))].map((id) => staffRef(id, audience, l)),
+    rejection: decision(b.rejection),
   });
 
   const actionsFor = (
@@ -381,12 +428,6 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
       });
       if (found === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       const l = await lookups([found], audience);
-      const decision = (
-        d: { reasonCode: string; reasonText?: string | undefined; at: Date } | undefined,
-      ): { reasonCode: string; reasonText: string | null; at: string } | null =>
-        d === undefined
-          ? null
-          : { reasonCode: d.reasonCode, reasonText: d.reasonText ?? null, at: iso(d.at) };
       return {
         ...toRow(found, audience, l, language),
         refundStatus: found.refundStatus,
@@ -396,10 +437,7 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
           start: iso(p.start),
           end: iso(p.end),
           subtotal: formatJod(p.subtotal),
-          staff:
-            audience.kind === 'CUSTOMER'
-              ? null
-              : { id: p.staffId, name: l.staff.get(p.staffId) ?? '' },
+          staff: staffRef(p.staffId, audience, l),
           services: p.services.map((s) => ({
             name: s.name[language],
             price: formatJod(s.price),
@@ -410,7 +448,8 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
           total: formatJod(found.money.total),
           dueOnline: formatJod(found.money.dueOnline),
           paidOnline: formatJod(found.money.paidOnline),
-          remaining: formatJod(found.money.remaining),
+          remaining: formatJod(outstandingAtSalon(found)),
+          paidAtSalon: formatJod(paidAtSalon(found)),
           refunded: formatJod(found.money.refunded),
         },
         policy: found.policySnapshot,
@@ -420,7 +459,6 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
           reason: h.reason ?? null,
           at: iso(h.at),
         })),
-        rejection: decision(found.rejection),
         cancellation: decision(found.cancellation),
         createdAt: iso(found.createdAt),
         actions: actionsFor(found, audience, now()),
