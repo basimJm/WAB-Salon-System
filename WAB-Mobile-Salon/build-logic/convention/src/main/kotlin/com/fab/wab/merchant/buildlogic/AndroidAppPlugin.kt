@@ -120,8 +120,6 @@ private fun Project.addAppDependencies() {
         add("implementation", libs.findBundle("koin-android").get())
         add("implementation", libs.findBundle("lifecycle").get())
         add("implementation", libs.findLibrary("firebase-messaging").get())
-        add("releaseImplementation", libs.findLibrary("firebase-appcheck-playintegrity").get())
-        add("debugImplementation", libs.findLibrary("firebase-appcheck-debug").get())
         add("debugImplementation", libs.findLibrary("compose-uiTooling").get())
     }
 }

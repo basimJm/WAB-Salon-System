@@ -1,10 +1,10 @@
 import type { RequestHandler, Router } from 'express';
 import { OTP_ROUTE_RATE_LIMIT } from '../../../constants/otp';
 import { ROUTE_LIMIT_FAMILIES, type RouteLimitNamespace } from '../../../constants/security';
-import { unavailableOtpGate, type ApiServices } from '../../services';
+import { unavailablePhoneOtp, type ApiServices } from '../../services';
 import { createRouteLimiter } from '../rateLimits';
 import { createOtpRouter } from './otp.routes';
-import { customerOtpRequestSchema, merchantOtpRequestSchema } from './otp.validation';
+import { CUSTOMER_OTP_SCHEMAS, MERCHANT_OTP_SCHEMAS, type OtpSchemas } from './otp.validation';
 
 /**
  * Per-IP guard shared by the OTP and authentication routes of one namespace (routes that take a phone
@@ -19,15 +19,15 @@ export const createOtpRouteLimiter = (
 const build = (
   services: ApiServices,
   namespace: RouteLimitNamespace,
-  requestSchema: typeof customerOtpRequestSchema,
+  schemas: OtpSchemas,
 ): Router =>
   createOtpRouter({
-    gate: services.otpGate ?? unavailableOtpGate,
-    requestSchema,
+    service: services.phoneOtp ?? unavailablePhoneOtp,
+    schemas,
     limiter: createOtpRouteLimiter(services, namespace),
   });
 
 export const createCustomerOtpRouter = (services: ApiServices): Router =>
-  build(services, 'customer', customerOtpRequestSchema);
+  build(services, 'customer', CUSTOMER_OTP_SCHEMAS);
 export const createMerchantOtpRouter = (services: ApiServices): Router =>
-  build(services, 'merchant', merchantOtpRequestSchema as never);
+  build(services, 'merchant', MERCHANT_OTP_SCHEMAS);

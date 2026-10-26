@@ -1,41 +1,71 @@
-import {
-  E164_PATTERN,
-  FAKE_OTP_PROOF_KINDS,
-  FAKE_OTP_PROOF_PREFIX,
-  FAKE_OTP_PROOF_SEPARATOR,
-  type FakeOtpProofKind,
-} from '../../constants/providers';
-import { ExternalServiceError } from '../../utils/errors';
-import type { OtpProvider, OtpVerifyInput, OtpVerifyResult } from './types';
+import { randomBytes } from 'node:crypto';
+import { createProofs, FakeOtpChannel, MemoryCodeStore, type CodeStore } from '@wab/otp';
+import { OTP_CODE_KEY_PREFIX, OTP_GENERATED_SECRET_BYTES } from '../../constants/otp';
+import type { OtpPurpose } from '../../constants/providers';
+import type { Logger } from '../../utils/logger';
+import { createSdkOtp } from './sdk';
+import type { OtpProvider } from './types';
 
-export const isE164 = (value: unknown): value is string =>
-  typeof value === 'string' && E164_PATTERN.test(value);
+export interface FakeOtpOptions {
+  /** Development only: every code is this value, so local QA can sign in without WhatsApp. */
+  readonly fixedCode?: string;
+  /** Shared store (Redis) in a running dev server; memory by default (unit tests). */
+  readonly store?: CodeStore;
+  /** Missing secrets are generated per process (proofs then die with the process). */
+  readonly codeSecret?: string;
+  readonly proofSecret?: string;
+  readonly logger?: Logger;
+  readonly now?: () => Date;
+}
 
-/** Builds a proof the fake provider understands, for tests and local development. */
-export const fakeOtpProof = (phone: string, kind: FakeOtpProofKind = 'valid'): string =>
-  [FAKE_OTP_PROOF_PREFIX, kind, phone].join(FAKE_OTP_PROOF_SEPARATOR);
+const generatedSecret = (): string => randomBytes(OTP_GENERATED_SECRET_BYTES).toString('base64url');
 
-const parseProof = (proof: string): { kind: FakeOtpProofKind; phone: string } | null => {
-  const [prefix, kind, phone, ...rest] = proof.split(FAKE_OTP_PROOF_SEPARATOR);
-  const knownKind = FAKE_OTP_PROOF_KINDS.find((candidate) => candidate === kind);
-  if (prefix !== FAKE_OTP_PROOF_PREFIX || knownKind === undefined) return null;
-  if (rest.length > 0 || !isE164(phone)) return null;
-  return { kind: knownKind, phone };
-};
-
-/** In-repo stand-in for the Firebase provider (dev/test only; production config refuses it). */
+/**
+ * The real code flow (HMAC store, single use, signed `otpToken`) over a channel that records codes
+ * instead of sending them (dev/test only; production config and the SDK both refuse it).
+ */
 export class FakeOtpProvider implements OtpProvider {
-  verify({ proof, expectedPhone }: OtpVerifyInput): Promise<OtpVerifyResult> {
-    if (!isE164(expectedPhone)) {
-      return Promise.reject(new RangeError('expectedPhone must be an E.164 number'));
-    }
-    const parsed = parseProof(proof);
-    if (parsed === null || parsed.kind === 'invalid') {
-      return Promise.resolve({ outcome: 'INVALID_PROOF' });
-    }
-    if (parsed.kind === 'provider-error') return Promise.reject(new ExternalServiceError());
-    if (parsed.kind === 'expired') return Promise.resolve({ outcome: 'EXPIRED' });
-    if (parsed.phone !== expectedPhone) return Promise.resolve({ outcome: 'PHONE_MISMATCH' });
-    return Promise.resolve({ outcome: 'VERIFIED', phone: parsed.phone });
+  /** What would have been delivered: `channel.lastCode(phone)` is what the user would type. */
+  readonly channel = new FakeOtpChannel();
+  readonly store: CodeStore;
+  private readonly proofSecret: string;
+  private readonly now: (() => Date) | undefined;
+  private readonly flow: OtpProvider;
+
+  constructor(options: FakeOtpOptions = {}) {
+    this.store = options.store ?? new MemoryCodeStore();
+    this.proofSecret = options.proofSecret ?? generatedSecret();
+    this.now = options.now;
+    this.flow = createSdkOtp({
+      environment: 'dev',
+      channel: this.channel,
+      store: this.store,
+      codeSecret: options.codeSecret ?? generatedSecret(),
+      proofSecret: this.proofSecret,
+      ...(options.fixedCode === undefined ? {} : { fixedCode: options.fixedCode }),
+      ...(options.logger === undefined ? {} : { logger: options.logger }),
+      ...(options.now === undefined ? {} : { now: options.now }),
+    });
+  }
+
+  sendCode: OtpProvider['sendCode'] = (input, rules) => this.flow.sendCode(input, rules);
+  verifyCode: OtpProvider['verifyCode'] = (input, rules) => this.flow.verifyCode(input, rules);
+  verify: OtpProvider['verify'] = (input) => this.flow.verify(input);
+
+  /** Tests: an `otpToken` exactly as `POST …/auth/otp/verify` would issue it (optionally back-dated). */
+  issueToken(
+    phone: string,
+    purpose: OtpPurpose,
+    options: { readonly ttlSec?: number; readonly issuedAt?: Date } = {},
+  ): string {
+    const { ttlSec, issuedAt } = options;
+    const now = issuedAt === undefined ? this.now : (): Date => issuedAt;
+    return createProofs({
+      secret: this.proofSecret,
+      store: this.store,
+      keyPrefix: OTP_CODE_KEY_PREFIX,
+      ...(ttlSec === undefined ? {} : { ttlSec }),
+      ...(now === undefined ? {} : { now }),
+    }).issue({ phone, purpose }).otpToken;
   }
 }

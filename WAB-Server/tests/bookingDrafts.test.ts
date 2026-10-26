@@ -72,8 +72,10 @@ beforeAll(async () => {
         customers: new CustomersRepository(m.customers.model as never),
         salons: new SalonsRepository(m.salons.model as never),
         phones: {
-          verify: (phone, idToken) =>
-            idToken === 'valid-proof' && phone.e164 === PHONE.e164
+          verify: (phone, otpToken, purpose) =>
+            otpToken === 'valid-proof' &&
+            phone.e164 === PHONE.e164 &&
+            purpose === 'BOOKING_CONFIRMATION'
               ? Promise.resolve()
               : Promise.reject(new UnauthorizedError({ code: 'OTP_INVALID' })),
         },

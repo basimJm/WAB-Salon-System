@@ -5,3 +5,4 @@
 ## Facts
 
 - Backlog written 2026-10-18; first task via `python3 scripts/tasks.py next <project>`. Copy the `wab-notifications` tooling (SDKs) or the customer template (merchant app).
+- 0.2.0 (OTP-011): WhatsApp Cloud API code channel + signed single-use `otpToken`; Firebase/jose removed. The redacting logger hides any log key containing `code`/`token`/`key` — log error codes under `error`. Redis tests and the loop test need a local port: run `npm run verify` through the Terminal panel. Owner Meta guide: `docs/WHATSAPP_SETUP.md`.

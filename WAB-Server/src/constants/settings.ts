@@ -25,6 +25,9 @@ export const SETTING_DEFAULTS = {
   'otp.requestWindowSec': 300,
   'otp.maxWrong': 5,
   'otp.blockSec': 900,
+  'otp.codeTtlSec': 300,
+  'otp.proofTtlSec': 600,
+  'otp.channel': 'WHATSAPP',
   'auth.accessTokenTtlSec': 900,
   'auth.refreshTokenTtlDays': 90,
   'admin.maxFailedLogins': 5,
@@ -55,7 +58,7 @@ export const SETTING_DEFAULTS = {
 export const SETTING_LIMITS = {
   /** Highest percentage value. */
   percentMax: FULL_PERCENT,
-  /** The Firebase SMS code is 6 digits today; the app shows `otp.length` boxes. */
+  /** The WhatsApp code is 6 digits by default; the app shows `otp.length` boxes. */
   otpLengthMin: 4,
   otpLengthMax: 10,
   /** Longest list of reminder offsets. */

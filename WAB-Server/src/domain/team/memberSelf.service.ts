@@ -31,7 +31,7 @@ export interface MemberSelfService {
   changePhone(input: {
     memberId: string;
     phone: PhoneInput;
-    idToken: string;
+    otpToken: string;
   }): Promise<MemberSelfView>;
   /**
    * A non-owner removes their own access (M25 "Delete my account"): deactivated, sessions ended.
@@ -99,10 +99,10 @@ export const createMemberSelfService = (deps: MemberSelfDeps): MemberSelfService
       );
     },
 
-    async changePhone({ memberId, phone: input, idToken }) {
+    async changePhone({ memberId, phone: input, otpToken }) {
       const member = await active(memberId);
       const phone = await phones.resolve(input);
-      await phones.verify(phone, idToken, 'CHANGE_PHONE');
+      await phones.verify(phone, otpToken, 'CHANGE_PHONE');
       const holder = await members.findByPhone(phone.e164);
       if (holder !== null && holder.id !== member.id) throw phoneTaken();
       let updated: Entity<MemberRaw> | null;

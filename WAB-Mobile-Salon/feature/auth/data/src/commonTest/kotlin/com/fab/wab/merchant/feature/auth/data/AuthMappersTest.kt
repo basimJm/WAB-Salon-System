@@ -3,6 +3,7 @@ package com.fab.wab.merchant.feature.auth.data
 import com.fab.wab.merchant.core.data.contract.generated.MemberProfile
 import com.fab.wab.merchant.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpRequestData
+import com.fab.wab.merchant.core.data.contract.generated.PostAuthOtpVerifyData
 import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.domain.session.MemberScope
 import com.fab.wab.merchant.feature.auth.data.repository.toDomain
@@ -18,10 +19,23 @@ class AuthMappersTest {
 
     @Test
     fun otpPolicyParsesTheBlockTimestampLeniently() {
-        val blocked = PostAuthOtpRequestData(allowed = false, otpLength = 6, resendAfterSeconds = 60, blockedUntil = "2026-10-22T10:00:00Z")
+        val blocked = PostAuthOtpRequestData(
+            allowed = false, otpLength = 6, resendAfterSeconds = 60, expiresInSeconds = 0, blockedUntil = "2026-10-22T10:00:00Z",
+        )
         assertEquals(6, blocked.toDomain().otpLength)
+        assertEquals(0, blocked.toDomain().expiresInSeconds)
         assertEquals("2026-10-22T10:00:00Z", blocked.toDomain().blockedUntil.toString())
         assertNull(blocked.copy(blockedUntil = "not-a-date").toDomain().blockedUntil)
+    }
+
+    @Test
+    fun otpRequestCarriesTheCodeLifetimeAndVerifyTheSingleUseToken() {
+        val sent = PostAuthOtpRequestData(allowed = true, otpLength = 6, resendAfterSeconds = 60, expiresInSeconds = 300).toDomain()
+        assertEquals(300, sent.expiresInSeconds)
+        assertNull(sent.blockedUntil)
+        val proof = PostAuthOtpVerifyData(otpToken = "otp-1", expiresInSeconds = 600).toDomain()
+        assertEquals("otp-1", proof.otpToken)
+        assertEquals(600, proof.expiresInSeconds)
     }
 
     @Test

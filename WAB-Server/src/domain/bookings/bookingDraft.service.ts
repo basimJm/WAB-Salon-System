@@ -69,13 +69,13 @@ export interface BookingDraftService {
   }): Promise<DraftView>;
   get(input: { customerId: string; id: string; language: Language }): Promise<DraftView>;
   /**
-   * Confirmation step (S13, purpose BOOKING_CONFIRMATION): the Firebase proof must belong to the
+   * Confirmation step (S13, purpose BOOKING_CONFIRMATION): the `otpToken` must belong to the
    * customer's own number. Needed before the booking is created.
    */
   verifyOtp(input: {
     customerId: string;
     id: string;
-    idToken: string;
+    otpToken: string;
   }): Promise<{ otpVerifiedAt: Date }>;
   /** Frees the holds and forgets the draft (back from the summary). */
   discard(input: { customerId: string; id: string }): Promise<void>;
@@ -299,7 +299,7 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
       return view(draft, await salonNameOf(draft.salonId), language);
     },
 
-    async verifyOtp({ customerId, id, idToken }) {
+    async verifyOtp({ customerId, id, otpToken }) {
       const draft = await ownDraft(customerId, id);
       if (draft.expiresAt <= now()) {
         await release(draft);
@@ -308,7 +308,7 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
       const customer = await customers.findById(customerId);
       if (customer?.status !== 'ACTIVE')
         throw new ForbiddenError({ code: ERROR_CODES.ACCOUNT_BLOCKED });
-      await phones.verify(customer.phone, idToken, 'BOOKING_CONFIRMATION');
+      await phones.verify(customer.phone, otpToken, 'BOOKING_CONFIRMATION');
       await otpGate.reset(customer.phone.e164);
       const otpVerifiedAt = now();
       await drafts.updateById(id, { otpVerifiedAt });

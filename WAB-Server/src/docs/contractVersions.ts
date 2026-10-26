@@ -10,23 +10,23 @@ export const CONTRACT_VERSIONS: Readonly<
   Record<DocName, { readonly version: string; readonly sha256: string; readonly note: string }>
 > = {
   common: {
-    version: '1.0.0',
-    sha256: '55fa55df8a6c044d6de591140b6b79c9b916d1d67fb740b1eb841e54b401fad8',
-    note: 'Baseline (SRV-111): health, readiness, payment webhook.',
+    version: '1.1.0',
+    sha256: '7f3f181e90340aeb41ef1ababd6a3407d56eb639f4108c02b1a88b9b66a18d5e',
+    note: 'SRV-153: error code OTP_DELIVERY_FAILED added to the error enum only. Clients: none',
   },
   customer: {
-    version: '1.3.0',
-    sha256: 'acac02271d18380376c0daa56ec56e491d154a3d44b9e914c518c8ebc59074e3',
-    note: 'SRV-151: id patterns without the /i flag; availability others[].start/end and draft persons[].start are required non-null ISO date-time strings. Re-sync: customer ./gradlew apiSync (CUS-060).',
+    version: '1.4.0',
+    sha256: '4abb4f99c0dce22ed67f35b77c3b63b66b7f67042741e9b8cd2d128644e5bb6a',
+    note: 'SRV-153 BREAKING (WhatsApp OTP): POST /auth/otp/request now sends the code (answer adds expiresInSeconds; 422 OTP_DELIVERY_FAILED); NEW POST /auth/otp/verify {phone,purpose,code} -> {otpToken,expiresInSeconds}; POST /auth/otp/wrong-attempt REMOVED; idToken -> otpToken in POST /auth/login, /auth/register, /auth/change-phone, /bookings/drafts/{id}/verify-otp; error code OTP_DELIVERY_FAILED. Client: CUS-089 (./gradlew apiSync)',
   },
   merchant: {
-    version: '1.4.0',
-    sha256: '8769412644440bc722cc5a16c0263a4e7aebf50ad1e275f32075a7011c2dafb7',
-    note: 'SRV-151: id patterns without the /i flag; POST /salon/applications member = full MemberProfile. Re-sync: merchant ./gradlew apiSync (MER-054).',
+    version: '1.5.0',
+    sha256: '75d06730cc35c53a631eaea8627bf6f4617517df5695fd7c770274ddfedd1b4f',
+    note: 'SRV-153 BREAKING (WhatsApp OTP): POST /auth/otp/request now sends the code (answer adds expiresInSeconds; 422 OTP_DELIVERY_FAILED); NEW POST /auth/otp/verify {phone,purpose,code} -> {otpToken,expiresInSeconds}; POST /auth/otp/wrong-attempt REMOVED; idToken -> otpToken in POST /auth/login, /auth/change-phone, /salon/applications, PUT /salon/payout-details; error code OTP_DELIVERY_FAILED. Client: MER-070 (./gradlew apiSync)',
   },
   admin: {
-    version: '1.5.0',
-    sha256: 'd61c51ed4386c716bc5e99ebd3eb313d169fa74c18f595181161d930920de1a1',
-    note: 'SRV-151: id patterns without the /i flag (S6); the panel can drop its objectId re-validation. Re-sync: admin npm run api:sync (ADM-079).',
+    version: '1.6.0',
+    sha256: '2da64228c42baab53c5dcdb70564c1f1661bff6e30ee82a55d00c976f2c36d07',
+    note: 'SRV-153: error code OTP_DELIVERY_FAILED added to the error enum only (no admin operation changed). Client: ADM none required (npm run api:sync optional)',
   },
 };

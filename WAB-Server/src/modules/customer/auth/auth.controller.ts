@@ -37,10 +37,10 @@ export const createCustomerAuthController = (
   },
 
   async login(req, res) {
-    const { phone, idToken, installation } = bodyOf<typeof loginSchema>(req);
+    const { phone, otpToken, installation } = bodyOf<typeof loginSchema>(req);
     const session = await service.login({
       phone,
-      idToken,
+      otpToken,
       device: installation,
       language: req.language,
     });
@@ -68,10 +68,10 @@ export const createCustomerAuthController = (
   },
 
   async changePhone(req, res) {
-    const { phone, idToken } = bodyOf<typeof changePhoneSchema>(req);
+    const { phone, otpToken } = bodyOf<typeof changePhoneSchema>(req);
     // `requireAuth` ran before this handler, so the caller is known.
     const customerId = req.auth?.subjectId ?? '';
-    const customer = await service.changePhone({ customerId, phone, idToken });
+    const customer = await service.changePhone({ customerId, phone, otpToken });
     sendSuccess(req, res, { data: { customer } });
   },
 });

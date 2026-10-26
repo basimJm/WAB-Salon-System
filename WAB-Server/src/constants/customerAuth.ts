@@ -12,9 +12,6 @@ export const CUSTOMER_AUTH_ROUTES = {
 /** `check-phone` is asked before the OTP is sent, only for these modes. */
 export const PHONE_CHECK_PURPOSES = ['LOGIN', 'REGISTER'] as const;
 export type PhoneCheckPurpose = (typeof PHONE_CHECK_PURPOSES)[number];
-
-/** Upper bound on the Firebase ID token (a JWT) the app sends. */
-export const ID_TOKEN_MAX_LENGTH = 4096;
 export const REFRESH_TOKEN_MAX_LENGTH = 64;
 
 /** Detail code for a well-formed request field that names something unknown (country, city, area). */

@@ -40,7 +40,7 @@ out.push(`HANDSHAKE bad token -> ${bad.error} (active=${String(bad.active)})`);
 const merchantPhone = '791000001';
 const merchant = await api('merchant', 'POST', '/auth/login', {
   phone: { countryCode: 'JO', number: merchantPhone },
-  idToken: proof(`+962${merchantPhone}`),
+  otpToken: await proof('merchant', `+962${merchantPhone}`, 'LOGIN'),
   installation: installation(`qa-merchant-${merchantPhone}-dev`),
 });
 const wrong = await open({ token: merchant.data?.accessToken });
@@ -64,7 +64,7 @@ const areas = (
 ).data;
 const app = await api('merchant', 'POST', '/salon/applications', {
   phone: { countryCode: 'JO', number: `792${n}` },
-  idToken: proof(`+962792${n}`),
+  otpToken: await proof('merchant', `+962792${n}`, 'REGISTER'),
   firstName: 'Qa',
   lastName: 'Socket',
   salon: { name: `QA Socket ${n}`, gender: 'FEMALE', cityId: areas[0].cityId, areaId: areas[0].id },

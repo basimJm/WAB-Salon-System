@@ -21,13 +21,14 @@
     <string name="login_blocked_body">تم إيقاف هذا الرقم مؤقتاً. يرجى التواصل مع WAB لمزيد من المعلومات.</string>
     <string name="login_blocked_contact">تواصل مع WAB</string>
     <string name="otp_title">تحقق من رقمك</string>
-    <string name="otp_sent_to">أرسلنا رمزاً إلى</string>
+    <string name="otp_sent_to">أرسلنا رمزاً عبر واتساب إلى</string>
+    <string name="otp_expires_in">تنتهي صلاحية الرمز خلال %1$s</string>
     <string name="otp_verify">تحقق</string>
     <string name="otp_resend_in">إعادة الإرسال خلال %1$s</string>
     <string name="otp_resend">إعادة إرسال الرمز</string>
     <string name="otp_wrong">الرمز غير صحيح، حاول مجدداً</string>
     <string name="otp_expired_title">انتهت صلاحية الرمز</string>
-    <string name="otp_expired_body">انتهت صلاحية الرمز، يرجى طلب رمز جديد.</string>
+    <string name="otp_expired_body">انتهت صلاحية الرمز. اطلب رمزاً جديداً عبر واتساب.</string>
     <string name="otp_expired_ok">حسناً</string>
     <string name="otp_blocked">تم تجاوز عدد المحاولات، يرجى المحاولة لاحقاً</string>
     <string name="otp_remaining">الوقت المتبقي %1$s</string>

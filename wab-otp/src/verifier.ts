@@ -1,11 +1,10 @@
 import { createFakeVerifier } from './adapters/fake';
-import { createEmulatorVerifier } from './adapters/firebase/emulator';
-import { createFirebaseVerifier } from './adapters/firebase';
 import { resolveOptions, type OtpOptions, type ResolvedOptions } from './config/options';
 import { ERROR_CODES } from './constants/codes';
 import { VERIFY_OUTCOMES } from './constants/defaults';
 import { configError, isOtpError, OtpError, providerError } from './errors';
 import type { OtpEvent, ProofVerifier, VerifyInput, VerifyResult } from './ports';
+import { createProofs } from './proof';
 import { assertVerifyInput } from './validation';
 
 /** Events are a courtesy to the consumer: a throwing hook must never break a verification. */
@@ -24,10 +23,9 @@ const selectAdapter = (resolved: ResolvedOptions): ProofVerifier => {
     case 'custom':
       if (resolved.verifier === undefined) throw configError('provider "custom" needs a verifier');
       return resolved.verifier;
-    case 'firebase':
-      return resolved.firebase.authEmulatorHost === undefined
-        ? createFirebaseVerifier(resolved)
-        : createEmulatorVerifier(resolved);
+    case 'signed':
+      if (resolved.proof === undefined) throw configError('provider "signed" needs proof options');
+      return createProofs({ ...resolved.proof, now: resolved.now }).verifier;
   }
 };
 
@@ -71,7 +69,7 @@ export const createOtpVerifier = (options: OtpOptions): OtpVerifier => {
         const wrapped = isOtpError(error)
           ? error
           : new OtpError(ERROR_CODES.UNKNOWN, 'Verification failed unexpectedly', { cause: error });
-        resolved.logger.error('otp verification failed', { code: wrapped.code });
+        resolved.logger.error('otp verification failed', { error: wrapped.code });
         safeEmit(resolved, { type: 'provider_error', code: wrapped.code });
         throw wrapped;
       }

@@ -7,8 +7,8 @@ import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.merchant.feature.auth.domain.model.AuthSession
 import com.fab.wab.merchant.feature.auth.domain.model.OtpPolicy
+import com.fab.wab.merchant.feature.auth.domain.model.OtpProof
 import com.fab.wab.merchant.feature.auth.domain.model.PhoneNumber
-import com.fab.wab.merchant.feature.auth.domain.model.WrongAttemptResult
 import com.fab.wab.merchant.feature.auth.domain.repository.AuthRepository
 import com.fab.wab.merchant.feature.auth.domain.repository.InstallationInfoProvider
 
@@ -17,18 +17,20 @@ class RequestOtpUseCase(private val repository: AuthRepository) {
         repository.requestOtp(phoneE164, purpose)
 }
 
-class ReportWrongOtpAttemptUseCase(private val repository: AuthRepository) {
-    suspend operator fun invoke(phoneE164: String): AppResult<WrongAttemptResult> = repository.reportWrongAttempt(phoneE164)
+/** The typed WhatsApp code against the backend; a right code answers the single-use `otpToken`. */
+class VerifyOtpUseCase(private val repository: AuthRepository) {
+    suspend operator fun invoke(phoneE164: String, purpose: AuthPurpose, code: String): AppResult<OtpProof> =
+        repository.verifyOtp(phoneE164, purpose, code)
 }
 
-/** Login with the Firebase proof, then persist the session (PRD §5: tokens, member, role, permission keys). */
-class LoginWithIdTokenUseCase(
+/** Login with the `otpToken`, then persist the session (PRD §5: tokens, member, role, permission keys). */
+class LoginWithOtpTokenUseCase(
     private val repository: AuthRepository,
     private val installation: InstallationInfoProvider,
     private val sessionStore: SessionStore,
 ) {
-    suspend operator fun invoke(phone: PhoneNumber, idToken: String): AppResult<AuthSession> {
-        val result = repository.login(phone, idToken, installation.current())
+    suspend operator fun invoke(phone: PhoneNumber, otpToken: String): AppResult<AuthSession> {
+        val result = repository.login(phone, otpToken, installation.current())
         if (result is AppResult.Success) {
             sessionStore.signIn(result.data.tokens, result.data.member, result.data.permissions, salonState = null)
         }

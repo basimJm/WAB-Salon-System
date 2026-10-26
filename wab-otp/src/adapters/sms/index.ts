@@ -1,109 +1,61 @@
-import { createHmac, randomInt, timingSafeEqual } from 'node:crypto';
-import { ERROR_CODES } from '../../constants/codes';
-import {
-  DEFAULT_OTP,
-  DEFAULT_SMS,
-  MS_PER_SECOND,
-  type Environment,
-} from '../../constants/defaults';
-import { configError, isOtpError, providerError } from '../../errors';
-import type { OtpPurpose } from '../../constants/defaults';
-import type { ProofVerifier, VerifyInput, VerifyResult } from '../../ports';
-import { assertPhone, assertPurpose } from '../../validation';
+import { DEFAULT_CODE } from '../../constants/defaults';
+import { configError, validationError } from '../../errors';
+import type { OtpChannel } from '../../ports';
+import { createCodeOtp, type CodeOtp, type CodeOtpOptions } from '../code';
 
-/** A real SMS vendor (Twilio, a local Jordanian gateway…) implements this; outages throw `OtpError`. */
+/** A real SMS vendor (Twilio, a local gateway…) implements this; outages throw `OtpError`. */
 export interface SmsVendor {
   /** A fake vendor must say so: production refuses it. */
   readonly isFake?: boolean;
   send(message: { readonly to: string; readonly body: string }): Promise<{ readonly id: string }>;
 }
 
-/** Where code hashes live until they are used or expire. Production needs a shared implementation. */
-export interface CodeStore {
-  readonly scope: 'local' | 'shared';
-  set(key: string, value: string, ttlMs: number): Promise<void>;
-  get(key: string): Promise<string | null>;
-  delete(key: string): Promise<void>;
-}
-
-export interface SmsOtpOptions {
-  readonly environment: Environment;
+export interface SmsChannelOptions {
   readonly vendor: SmsVendor;
-  readonly store: CodeStore;
-  /** Secret for hashing codes at rest (>= 32 chars, injected from the consumer's secret store). */
-  readonly secret: string;
-  readonly codeLength?: number;
-  readonly ttlSec?: number;
-  /** Message text; `{code}` and `{minutes}` are replaced. Supplied by the consumer (localized). */
-  readonly template: string;
-  readonly randomDigit?: (maxExclusive: number) => number;
-  readonly now?: () => number;
+  /** Message text per app language; `{code}` and `{minutes}` are replaced (consumer-localized). */
+  readonly templates: Readonly<Record<string, string>>;
+  /** Language used when the requested one has no template (must be a key of `templates`). */
+  readonly fallbackLanguage?: string;
 }
 
-export interface SmsOtp {
-  /** Generates a code, stores only its HMAC, and sends it through the vendor. */
-  sendCode(input: {
-    phone: string;
-    purpose: OtpPurpose;
-  }): Promise<{ readonly expiresInSec: number; readonly messageId: string }>;
-  /** `proof` is the code the user typed. Single use; constant-time comparison. */
-  verifier: ProofVerifier;
-}
+export const SMS_CHANNEL_NAME = 'sms';
+const CODE_PLACEHOLDER = '{code}';
+const MINUTES_PLACEHOLDER = '{minutes}';
 
-const keyOf = (phone: string, purpose: string): string => `otp:code:${purpose}:${phone}`;
-
-/**
- * Skeleton of the future server-verified model (BRD OTP-11): the same `ProofVerifier` port as
- * Firebase, so nothing above it changes. No vendor is chosen yet; only the fake one exists.
- */
-export const createSmsOtp = (options: SmsOtpOptions): SmsOtp => {
-  if (options.secret.length < DEFAULT_SMS.minSecretLength)
-    throw configError('sms secret is too short');
-  if (
-    options.environment === 'prod' &&
-    (options.vendor.isFake === true || options.store.scope === 'local')
-  )
-    throw configError('A fake SMS vendor or a process-local code store is refused in production');
-  const codeLength = options.codeLength ?? DEFAULT_OTP.otpLength;
-  const ttlSec = options.ttlSec ?? DEFAULT_SMS.ttlSec;
-  const draw = options.randomDigit ?? ((max: number): number => randomInt(0, max));
-  const hash = (phone: string, purpose: string, code: string): string =>
-    createHmac('sha256', options.secret).update(`${purpose}\n${phone}\n${code}`).digest('hex');
-
+/** SMS as an `OtpChannel` (no vendor chosen for WAB; kept so a vendor is one adapter away). */
+export const createSmsChannel = (options: SmsChannelOptions): OtpChannel => {
+  const languages = Object.keys(options.templates);
+  if (languages.length === 0) throw configError('sms templates are required');
+  if (Object.values(options.templates).some((text) => !text.includes(CODE_PLACEHOLDER)))
+    throw configError('every sms template needs {code}');
+  if (options.fallbackLanguage !== undefined && !languages.includes(options.fallbackLanguage))
+    throw configError('sms fallbackLanguage has no template');
   return {
-    async sendCode({ phone, purpose }) {
-      assertPhone(phone, 'phone');
-      assertPurpose(purpose);
-      const code = String(draw(10 ** codeLength)).padStart(codeLength, '0');
-      const body = options.template
-        .replace('{code}', code)
-        .replace('{minutes}', String(Math.ceil(ttlSec / DEFAULT_SMS.secondsPerMinute)));
-      await options.store.set(
-        keyOf(phone, purpose),
-        hash(phone, purpose, code),
-        ttlSec * MS_PER_SECOND,
-      );
-      try {
-        const { id } = await options.vendor.send({ to: phone, body });
-        return { expiresInSec: ttlSec, messageId: id };
-      } catch (error) {
-        await options.store.delete(keyOf(phone, purpose));
-        throw isOtpError(error)
-          ? error
-          : providerError(ERROR_CODES.VENDOR_ERROR, 'SMS vendor failed', true, error);
-      }
-    },
-    verifier: {
-      verify: async ({ proof, expectedPhone, purpose }: VerifyInput): Promise<VerifyResult> => {
-        const stored = await options.store.get(keyOf(expectedPhone, purpose));
-        if (stored === null) return { outcome: 'EXPIRED' };
-        const given = Buffer.from(hash(expectedPhone, purpose, proof), 'hex');
-        const expected = Buffer.from(stored, 'hex');
-        const match = given.length === expected.length && timingSafeEqual(given, expected);
-        if (!match) return { outcome: 'INVALID_PROOF' };
-        await options.store.delete(keyOf(expectedPhone, purpose));
-        return { outcome: 'VERIFIED', phone: expectedPhone };
-      },
+    name: SMS_CHANNEL_NAME,
+    ...(options.vendor.isFake === true ? { isFake: true } : {}),
+    send: ({ to, code, language, ttlSec }) => {
+      const own = Object.hasOwn(options.templates, language)
+        ? options.templates[language]
+        : undefined;
+      const template =
+        own ??
+        (options.fallbackLanguage === undefined
+          ? undefined
+          : options.templates[options.fallbackLanguage]);
+      if (template === undefined)
+        return Promise.reject(validationError('No sms template for this language'));
+      const body = template
+        .replace(CODE_PLACEHOLDER, code)
+        .replace(MINUTES_PLACEHOLDER, String(Math.ceil(ttlSec / DEFAULT_CODE.secondsPerMinute)));
+      return options.vendor.send({ to, body });
     },
   };
+};
+
+export type SmsOtpOptions = Omit<CodeOtpOptions, 'channel'> & { readonly sms: SmsChannelOptions };
+
+/** Server-generated codes over SMS (same flow as WhatsApp). */
+export const createSmsOtp = (options: SmsOtpOptions): CodeOtp => {
+  const { sms, ...rest } = options;
+  return createCodeOtp({ ...rest, channel: createSmsChannel(sms) });
 };
