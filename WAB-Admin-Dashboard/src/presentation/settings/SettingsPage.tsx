@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { SETTING_TABS } from '@/constants/settings';
 import { READ_ONLY_SETTING_KEYS } from '@/domain/settings/registry';
 import { settingToText } from '@/domain/settings/validate';
-import { Card } from '../components/core/Card';
+import { SectionCard } from '../components/core/SectionCard';
 import { PageHeader } from '../components/core/PageHeader';
 import { AsyncView } from '../components/feedback/AsyncView';
 import { InlineAlert } from '../components/feedback/InlineAlert';
@@ -24,8 +24,7 @@ function PlatformFacts({
 }) {
   const { t } = useTranslation();
   return (
-    <Card aria-label={t('settings.group.platform')}>
-      <h2 className="wab-settings__title">{t('settings.group.platform')}</h2>
+    <SectionCard title={t('settings.group.platform')} subtitle={t('settings.readOnlyNote')}>
       <KeyValue
         placeholder={t('settings.notSet')}
         items={READ_ONLY_SETTING_KEYS.map((key) => ({
@@ -35,7 +34,7 @@ function PlatformFacts({
           ltr: true,
         }))}
       />
-    </Card>
+    </SectionCard>
   );
 }
 
@@ -85,8 +84,7 @@ export default function SettingsPage() {
               content: (
                 <div className="wab-settings">
                   {groups.map((group) => (
-                    <Card key={group} aria-label={t(`settings.group.${group}`)}>
-                      <h2 className="wab-settings__title">{t(`settings.group.${group}`)}</h2>
+                    <SectionCard key={group} title={t(`settings.group.${group}`)}>
                       <div className="wab-settings__grid">
                         {draft.rows
                           .filter((r) => r.def.group === group)
@@ -99,7 +97,7 @@ export default function SettingsPage() {
                             />
                           ))}
                       </div>
-                    </Card>
+                    </SectionCard>
                   ))}
                   {id === 'limits' ? <PlatformFacts entries={query.data} /> : null}
                 </div>
