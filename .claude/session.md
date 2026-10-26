@@ -226,3 +226,12 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge only, no product code written.
+
+### T-141-merchant — Sync main into merchant (part of T-141)
+- Branch: `chore/sync-main-into-merchant-11`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `main` (SRV-171/172) merged into `merchant` (no conflicts); finished task set DONE, board regenerated
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge + backlog status only, no product code written.
