@@ -74,15 +74,21 @@
     <string name="booking_summary_title">ملخص الحجز</string>
     <string name="booking_grand_total">الإجمالي</string>
     <string name="booking_rules_title">قواعد الصالون</string>
-    <string name="booking_rules_window">يمكن الإلغاء حتى %1$d ساعات قبل الموعد</string>
-    <string name="booking_rules_deposit">العربون %1$d%% من إجمالي الحجز</string>
+    <plurals name="booking_rules_window">
+        <item quantity="one">يمكن الإلغاء حتى ساعة واحدة قبل الموعد</item>
+        <item quantity="two">يمكن الإلغاء حتى ساعتين قبل الموعد</item>
+        <item quantity="few">يمكن الإلغاء حتى %1$d ساعات قبل الموعد</item>
+        <item quantity="many">يمكن الإلغاء حتى %1$d ساعة قبل الموعد</item>
+        <item quantity="other">يمكن الإلغاء حتى %1$d ساعة قبل الموعد</item>
+    </plurals>
+    <string name="booking_rules_deposit">العربون %1$d% من إجمالي الحجز</string>
     <string name="booking_rules_deposit_refundable">يُسترد العربون عند الإلغاء في الوقت المسموح</string>
     <string name="booking_rules_deposit_non_refundable">لا يُسترد العربون عند الإلغاء من قبلك</string>
     <string name="booking_rules_approval">الحجز بحاجة لموافقة الصالون</string>
     <string name="booking_payment_title">طريقة الدفع</string>
     <string name="booking_pay_on_arrival">الدفع عند الوصول</string>
     <string name="booking_pay_on_arrival_sub">ادفع كامل المبلغ في الصالون</string>
-    <string name="booking_pay_deposit">عربون %1$d%% = %2$s د.أ</string>
+    <string name="booking_pay_deposit">عربون %1$d% = %2$s د.أ</string>
     <string name="booking_pay_deposit_sub">ادفع الآن والباقي عند الوصول</string>
     <string name="booking_pay_full">الدفع كاملاً</string>
     <string name="booking_pay_full_sub">ادفع كامل المبلغ أونلاين</string>

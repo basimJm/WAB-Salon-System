@@ -9,6 +9,18 @@
 
 ## Current task
 
+### CUS-092 — End-to-end pass against a real server: fix every defect found
+- Branch: `feat/cus-092-e2e-fixes`
+- Status: IN PROGRESS
+- Acceptance criteria (owner request 2026-10-26; PRD S01…S24, §3.15 real-time; `openapi.customer.json` as served by the local stack; results `docs/E2E_RESULTS.md`):
+  - [x] Every PRD screen walked on the Android emulator against the local stack (AR + EN, light + dark), salon actions through the merchant API; iOS simulator smoke path (launch → home → salon → sign-in)
+  - [x] Each defect fixed with a unit test: S05 stale sheet after chip removal; S07 dead "See more" on reviews; S07 raw closure dates; S06 "more" on one-line texts; S16/S15 "30%%"; S15 misleading "Any available" staff; S15 raw reason code; double-tap Book now; socket dead after token expiry; Home not reloaded on language switch; Arabic/English counted texts (plurals); iOS sign-in 422 without a Firebase app-instance id
+  - [x] Server-side gaps listed, not patched here (bride-only flag, customer staff per person, rejection reason in the list row, remaining after completion)
+- Tests: new `FilterSheetRequestTest`, `ReviewCardStyleTest`, `ClosureDatesTest`, `BookingStaffLineTest`, `BookingReasonTextTest`, `ScreenNavigationTest`, `ExpandToggleTest`; +1 `SocketIoRealtimeClientTest`, +1 `HomeViewModelTest`, +2 `AppInstallationInfoProviderTest`; `test_localization.py` +1 (`%%` rule). Terminal panel batch gate: `policy_checks.py all` ok; `run_detekt.sh` ok (after wrapping 3 long plural lines); `./gradlew testAndroidHostTest --continue` 460 tests, 0 failures; `:androidApp:assembleDevDebug` + `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok; `xcodebuild iosApp-Dev Debug-Dev` (simulator) ok; `scripts/ci/tests` localization 9 OK
+- Loops: 1/1 — re-checked every fix on the device after the final build: S05 sheet clean after chip removal, no dead "See more" on S07 reviews, single-day closure text, S06 "more" only on overflow, "30%" in S16/S15, staff line hidden, localized cancel reason, Home reloads on AR/EN switch, live badge after token refresh, iOS sign-in with demo customer 2 (was 422); found and fixed during the loop: HomeViewModel over 300 lines, detekt MaxLineLength on plural call sites, a `?.` warning in the provider test
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — branch diff read once per role: fixes stay in their layer (presentation helpers pure + tested, socket retry in core/realtime without a second refresher, single-top in the shared navigator), no hardcoded values (new texts in AR + EN resources, plurals for counts), no contract change; server gaps listed in `docs/E2E_RESULTS.md` instead of client workarounds
+- Notes: DEVIATIONS — not pushed / no PR (lead runs the remote loop); S24 maintenance/force-update and the 5-minute OTP expiry not exercised live (shared stack / time; unit-tested); single-top navigation and the review/service "more" toggles are covered by option/rule tests, not Compose UI tests; `InstallationInfo.UNKNOWN_INSTALLATION` (repository fallback) is still contract-invalid but no longer reachable from the app; iOS only a smoke path (no booking on iOS). Local overrides only (untracked `local.properties`, `androidApp/src/devDebug/AndroidManifest.xml`, git-ignored `iosApp/Configuration/Local.xcconfig`); never committed.
+
 ### CUS-090 — Crash fix: decoding failures become `AppError.ParseError`
 - Branch: `fix/cus-090-decode-crash`
 - Status: IN REVIEW
