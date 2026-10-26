@@ -9,7 +9,7 @@
 | customer | `customer` | none (CUS-060 #452, CUS-088 #464; full gate + emulator/simulator journey 2026-10-25) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
 | merchant | `merchant` | none (MER-054 #456, MER-067…069 #463/#466/#467; full gate + journeys 2026-10-25) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
-| otp | `server` | none | OTP-001 scaffold | — | `wab-otp/.claude/session.md` |
+| otp | `server` | OTP-011 WhatsApp + otpToken (IN REVIEW, 0.2.0, branch `feat/otp-011-whatsapp`) | none | SRV-153 server adoption | `wab-otp/.claude/session.md` |
 | notifications | `server` | none (SDK built, wired in the server) | NOT-010 publish | NOT-011 owner App Password | `wab-notifications/.claude/session.md` |
 | analytics | `server` | none | ANA-001 scaffold | — | `wab-analytics/.claude/session.md` |
 | storage | `server` | none | STO-001 scaffold | — | `wab-storage/.claude/session.md` |
