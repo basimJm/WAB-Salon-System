@@ -1,6 +1,6 @@
 {
   "localHosts": ["127.0.0.1", "localhost", "::1"],
-  "fakeProofFormat": "fake-otp:valid:{}",
+  "fakeOtpCode": "123456",
   "language": "en",
   "timeoutSeconds": 120,
   "dialCode": "+962",

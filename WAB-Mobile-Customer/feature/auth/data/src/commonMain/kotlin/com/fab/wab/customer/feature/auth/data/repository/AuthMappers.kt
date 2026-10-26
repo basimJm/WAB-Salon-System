@@ -4,7 +4,7 @@ import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginBodyInstal
 import com.fab.wab.customer.core.data.contract.generated.CustomerProfile
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestData
-import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptData
+import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpVerifyData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterBody
 import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterBodyInstallation
 import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterBodyPhone
@@ -16,7 +16,7 @@ import com.fab.wab.customer.feature.auth.domain.model.AuthSession
 import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.customer.feature.auth.domain.model.OtpPolicy
 import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
-import com.fab.wab.customer.feature.auth.domain.model.WrongAttemptResult
+import com.fab.wab.customer.feature.auth.domain.model.OtpProof
 import kotlin.time.Instant
 
 /** A malformed timestamp from the server must not crash the flow: it reads as "not blocked". */
@@ -27,14 +27,11 @@ fun PostAuthOtpRequestData.toDomain(): OtpPolicy = OtpPolicy(
     allowed = allowed,
     otpLength = otpLength,
     resendAfterSeconds = resendAfterSeconds,
+    expiresInSeconds = expiresInSeconds,
     blockedUntil = parseInstantOrNull(blockedUntil),
 )
 
-fun PostAuthOtpWrongAttemptData.toDomain(): WrongAttemptResult = WrongAttemptResult(
-    blocked = blocked,
-    attemptsRemaining = attemptsRemaining,
-    blockedUntil = parseInstantOrNull(blockedUntil),
-)
+fun PostAuthOtpVerifyData.toDomain(): OtpProof = OtpProof(otpToken = otpToken, expiresInSeconds = expiresInSeconds)
 
 fun PostAuthLoginData.toDomain(): AuthSession = AuthSession(
     tokens = AuthTokens(accessToken = accessToken, refreshToken = refreshToken),
@@ -72,7 +69,7 @@ fun RegisterRequest.toBody(installation: InstallationInfo): PostAuthRegisterBody
     cityId = cityId,
     areaId = areaId,
     phone = PostAuthRegisterBodyPhone(countryCode = phone.countryCode, number = phone.number),
-    idToken = idToken,
+    otpToken = otpToken,
     installation = installation.toRegisterBody(),
 )
 

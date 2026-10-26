@@ -35,7 +35,7 @@ SAMPLE_DIAL_CODE = "+962"
 SAMPLE_PHONE_REGEX = "^7[789][0-9]{7}$"
 SAMPLE_COUNTRY_CODES = ("JO", "SA", "AE")
 # OTP policy samples match the backend defaults (PRD S13: 6 digits, 60 s resend) so the mock flow behaves like production.
-SAMPLE_INTEGER_HINTS = {"otplength": 6, "resendafterseconds": 60, "attemptsremaining": 5}
+SAMPLE_INTEGER_HINTS = {"otplength": 6, "resendafterseconds": 60, "expiresinseconds": 300}
 # Flags that must be true for the mock flow to proceed (a pre-check that is never allowed would block every screen).
 SAMPLE_TRUE_FLAGS = ("allowed", "available")
 # Number samples the UI branches on: salons with several branches show "N branches" (BUSINESS_DOMAIN §5.17).

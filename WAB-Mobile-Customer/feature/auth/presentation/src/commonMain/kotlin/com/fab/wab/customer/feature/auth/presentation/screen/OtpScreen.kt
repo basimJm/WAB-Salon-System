@@ -38,6 +38,7 @@ import com.fab.wab.customer.feature.auth.presentation.resources.auth_dialog_glyp
 import com.fab.wab.customer.feature.auth.presentation.resources.login_dialog_cancel
 import com.fab.wab.customer.feature.auth.presentation.resources.otp_expired_body
 import com.fab.wab.customer.feature.auth.presentation.resources.otp_expired_title
+import com.fab.wab.customer.feature.auth.presentation.resources.otp_expires_in
 import com.fab.wab.customer.feature.auth.presentation.resources.otp_resend
 import com.fab.wab.customer.feature.auth.presentation.resources.otp_resend_in
 import com.fab.wab.customer.feature.auth.presentation.resources.otp_sent_to
@@ -105,12 +106,13 @@ fun OtpScreen(
             }
             if (state.codeError) {
                 AppText(
-                    text = stringResource(Res.string.otp_wrong),
+                    text = state.codeErrorMessage ?: stringResource(Res.string.otp_wrong),
                     style = AppTheme.typography.bodySmall.copy(fontSize = AuthDesign.otpWrongSize),
                     color = colors.danger,
                 )
             }
             if (state.isBlocked) OtpBlockedBanner(state.blockedRemainingSeconds)
+            if (state.codeSent && state.expiresRemainingSeconds > 0) ExpiryLine(state.expiresRemainingSeconds)
             AuthGap(AuthDesign.otpButtonTop)
             AppPrimaryButton(
                 text = stringResource(Res.string.otp_verify),
@@ -168,6 +170,17 @@ private fun SentToLine(phone: String, modifier: Modifier = Modifier) {
         modifier = modifier,
         style = AppTheme.typography.bodyMedium.copy(fontSize = AuthDesign.otpSentSize, lineHeight = AuthDesign.otpSentLineHeight),
         color = colors.muted,
+    )
+}
+
+/** "The code expires in 4:59" in muted text under the boxes, from `expiresInSeconds` of the request. */
+@Composable
+private fun ExpiryLine(seconds: Int, modifier: Modifier = Modifier) {
+    AppText(
+        text = stringResource(Res.string.otp_expires_in, isolateLtr(formatCountdown(seconds))),
+        modifier = modifier,
+        style = AppTheme.typography.bodySmall.copy(fontSize = AuthDesign.otpWrongSize),
+        color = AppTheme.colors.muted,
     )
 }
 

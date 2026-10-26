@@ -2,7 +2,7 @@ package com.fab.wab.customer.feature.auth.data
 
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestData
-import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpWrongAttemptData
+import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpVerifyData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthRegisterData
 import com.fab.wab.customer.core.data.contract.generated.PutInstallationsData
 import com.fab.wab.customer.core.data.mock.decodeFixture
@@ -12,17 +12,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-/** CUS-060: OTP pre-check, wrong attempt, login, register and installation captured from the local real stack. */
+/**
+ * CUS-060: login, register and installation captured from the local real stack. The OTP request / verify fixtures are
+ * generated from the 1.4.0 contract until the next capture (CUS-089: the old captures predate the WhatsApp OTP).
+ */
 class RealAuthFixturesTest {
-
-    @Test
-    fun realOtpPolicyAndWrongAttemptMap() {
-        val policy = decodeFixture("PostAuthOtpRequest", PostAuthOtpRequestData.serializer()).data.toDomain()
-        assertEquals(OTP_LENGTH, policy.otpLength)
-        assertTrue(policy.allowed)
-        val wrong = decodeFixture("PostAuthOtpWrongAttempt", PostAuthOtpWrongAttemptData.serializer()).data.toDomain()
-        assertTrue(wrong.attemptsRemaining >= 0)
-    }
 
     @Test
     fun realLoginAndRegisterSignTheCustomerIn() {
@@ -32,6 +26,16 @@ class RealAuthFixturesTest {
         val register = decodeFixture("PostAuthRegister", PostAuthRegisterData.serializer()).data.toDomain()
         assertTrue(register.user.firstName.isNotBlank())
         assertTrue(decodeFixture("PutInstallations", PutInstallationsData.serializer()).data.installationId.isNotBlank())
+    }
+
+    @Test
+    fun mockOtpFixturesSendAndVerifySoDevMockStillSignsIn() {
+        val policy = decodeFixture("PostAuthOtpRequest", PostAuthOtpRequestData.serializer()).data.toDomain()
+        assertTrue(policy.allowed)
+        assertEquals(OTP_LENGTH, policy.otpLength)
+        assertTrue(policy.expiresInSeconds > 0)
+        val proof = decodeFixture("PostAuthOtpVerify", PostAuthOtpVerifyData.serializer()).data.toDomain()
+        assertTrue(proof.otpToken.isNotBlank())
     }
 
     private companion object {

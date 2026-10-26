@@ -4,10 +4,12 @@ import com.fab.wab.customer.core.data.contract.generated.CustomerProfile
 import com.fab.wab.customer.core.data.contract.generated.CustomerProfilePhone
 import com.fab.wab.customer.core.data.contract.generated.PostAuthLoginData
 import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpRequestData
+import com.fab.wab.customer.core.data.contract.generated.PostAuthOtpVerifyData
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.feature.auth.data.repository.toBody
 import com.fab.wab.customer.feature.auth.data.repository.toDomain
 import com.fab.wab.customer.feature.auth.domain.model.InstallationInfo
+import com.fab.wab.customer.feature.auth.domain.model.OtpProof
 import com.fab.wab.customer.feature.auth.domain.model.PhoneNumber
 import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
 import com.fab.wab.customer.feature.auth.domain.model.toE164
@@ -20,10 +22,18 @@ class AuthMappersTest {
 
     @Test
     fun otpPolicyParsesTheBlockTimestampLeniently() {
-        val blocked = PostAuthOtpRequestData(allowed = false, otpLength = 6, resendAfterSeconds = 60, blockedUntil = "2026-10-18T10:00:00Z")
+        val blocked = PostAuthOtpRequestData(
+            allowed = false, otpLength = 6, resendAfterSeconds = 60, expiresInSeconds = 0, blockedUntil = "2026-10-18T10:00:00Z",
+        )
         assertEquals(Instant.parse("2026-10-18T10:00:00Z"), blocked.toDomain().blockedUntil)
-        assertNull(PostAuthOtpRequestData(true, 6, 60, blockedUntil = "not-a-date").toDomain().blockedUntil)
+        assertNull(PostAuthOtpRequestData(true, 6, 60, 300, blockedUntil = "not-a-date").toDomain().blockedUntil)
         assertEquals(6, blocked.toDomain().otpLength)
+        assertEquals(300, PostAuthOtpRequestData(true, 6, 60, 300).toDomain().expiresInSeconds)
+    }
+
+    @Test
+    fun verifyAnswerBecomesTheSingleUseProof() {
+        assertEquals(OtpProof("tok", 600), PostAuthOtpVerifyData(otpToken = "tok", expiresInSeconds = 600).toDomain())
     }
 
     @Test
@@ -53,7 +63,7 @@ class AuthMappersTest {
         assertEquals("FEMALE", body.gender)
         assertEquals("JO", body.phone.countryCode)
         assertEquals("791234567", body.phone.number)
-        assertEquals("proof", body.idToken)
+        assertEquals("proof", body.otpToken)
         assertEquals("inst", body.installation.installationId)
         assertEquals("fcm", body.installation.fcmToken)
     }

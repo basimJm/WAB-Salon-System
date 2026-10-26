@@ -3,14 +3,8 @@ package com.fab.wab.customer.core.firebase
 /**
  * What Swift implements on the Firebase iOS SDK (see `iosApp/iosApp/FirebaseBridges.swift`) and registers once
  * after `FirebaseApp.configure()`. Callback style keeps the bridge free of Kotlin coroutine types.
- * Errors arrive as the `NSError.code` of the Firebase SDK plus its message.
+ * Phone OTP is not a Firebase concern any more (WhatsApp, server-side: BUSINESS_DOMAIN §3.1a).
  */
-interface PhoneAuthBridge {
-    fun startVerification(phoneE164: String, onCodeSent: (String) -> Unit, onError: (Int, String?) -> Unit)
-    fun confirm(verificationId: String, code: String, onIdToken: (String) -> Unit, onError: (Int, String?) -> Unit)
-    fun signOut()
-}
-
 interface PushTokenBridge {
     fun currentToken(onToken: (String?) -> Unit)
 }
@@ -28,10 +22,8 @@ interface AnalyticsBridge {
     fun appInstanceId(): String?
 }
 
-/** Registration point for Swift: `FirebaseBridges.shared.register(...)`. Unset bridges answer `Unavailable`. */
+/** Registration point for Swift: `FirebaseBridges.shared.register(...)`. Unset bridges fall back to no-ops. */
 object FirebaseBridges {
-    var phoneAuth: PhoneAuthBridge? = null
-        private set
     var pushToken: PushTokenBridge? = null
         private set
     var crashReporter: CrashReporterBridge? = null
@@ -40,12 +32,10 @@ object FirebaseBridges {
         private set
 
     fun register(
-        phoneAuth: PhoneAuthBridge,
         pushToken: PushTokenBridge,
         crashReporter: CrashReporterBridge,
         analytics: AnalyticsBridge,
     ) {
-        this.phoneAuth = phoneAuth
         this.pushToken = pushToken
         this.crashReporter = crashReporter
         this.analytics = analytics

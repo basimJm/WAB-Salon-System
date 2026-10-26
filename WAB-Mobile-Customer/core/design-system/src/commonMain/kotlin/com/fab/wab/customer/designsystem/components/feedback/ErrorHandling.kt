@@ -37,7 +37,8 @@ private val RETRY_CODES = setOf(
 
 /** Business-rule codes whose message is the whole handling (no button). Listed so the policy check sees every code. */
 private val DISMISS_CODES = setOf(
-    ErrorCode.VALIDATION_ERROR, ErrorCode.OTP_BLOCKED, ErrorCode.OTP_INVALID, ErrorCode.PHONE_ALREADY_REGISTERED,
+    ErrorCode.VALIDATION_ERROR, ErrorCode.OTP_BLOCKED, ErrorCode.OTP_INVALID, ErrorCode.OTP_DELIVERY_FAILED,
+    ErrorCode.PHONE_ALREADY_REGISTERED,
     ErrorCode.SALON_NOT_BOOKABLE,
     ErrorCode.SALON_CLOSED, ErrorCode.GENDER_MISMATCH, ErrorCode.TOO_MANY_COMPANIONS, ErrorCode.BRIDE_ONLY_SERVICE,
     ErrorCode.STAFF_NOT_ELIGIBLE,

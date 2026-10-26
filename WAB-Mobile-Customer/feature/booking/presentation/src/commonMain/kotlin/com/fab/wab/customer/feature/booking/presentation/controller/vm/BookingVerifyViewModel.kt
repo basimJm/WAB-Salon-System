@@ -99,13 +99,13 @@ class BookingVerifyViewModel(
         deps.pending.current.filterNotNull().collect { proof ->
             if (proof.purpose != AuthPurpose.BOOKING_CONFIRMATION) return@collect
             deps.pending.consume()
-            verify(proof.idToken)
+            verify(proof.otpToken)
         }
     }
 
-    private suspend fun verify(idToken: String) {
+    private suspend fun verify(otpToken: String) {
         updateState { copy(phase = Phase.PROCESSING, errorMessage = null) }
-        when (val result = deps.verifyOtp(draftId, idToken)) {
+        when (val result = deps.verifyOtp(draftId, otpToken)) {
             is AppResult.Success -> {
                 updateState { copy(otpVerified = true) }
                 create()
