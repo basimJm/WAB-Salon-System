@@ -22,6 +22,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import com.fab.wab.merchant.designsystem.components.format.ltrIsolate
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
@@ -122,10 +123,7 @@ internal fun OtpBankNote(modifier: Modifier = Modifier) {
 }
 
 /** Wraps a phone number or a time in LTR isolates so it never reorders inside Arabic text. */
-internal fun isolateLtr(value: String): String = "$LTR_ISOLATE$value$POP_ISOLATE"
-
-private const val LTR_ISOLATE = '⁦'
-private const val POP_ISOLATE = '⁩'
+internal fun isolateLtr(value: String): String = ltrIsolate(value)
 
 /** Resend link once the countdown ends, "Resend in 0:45" (time bold ink) while it runs, nothing while blocked. */
 @Composable

@@ -41,6 +41,7 @@
     <string name="details_payment">الدفع</string>
     <string name="details_total">الإجمالي</string>
     <string name="details_paid_online">المدفوع أونلاين</string>
+    <string name="details_paid_at_salon">المدفوع في الصالون</string>
     <string name="details_remaining">المتبقي للتحصيل</string>
     <string name="details_refunded">المسترد</string>
     <string name="details_policy">سياسة الحجز (وقت الحجز)</string>
@@ -82,7 +83,8 @@
     <string name="reassign_title">إعادة توزيع الموظف</string>
     <string name="reassign_sub">اختر موظفاً مؤهلاً ومتاحاً طوال مدة الخدمة. سيتم إشعار الزبون.</string>
     <string name="reassign_current">الموظف الحالي: %1$s</string>
-    <string name="reassign_note">يتحقق الخادم من أن الموظف المختار يقدم الخدمات ومتاح طوال المدة.</string>
+    <string name="reassign_none">لا يوجد موظف آخر مؤهل ومتاح في هذا الوقت.</string>
+    <string name="reassign_failed">تعذّر تحميل الموظفين المتاحين. أغلق وحاول مرة أخرى.</string>
     <string name="confirm_reassign">تأكيد إعادة التوزيع</string>
     <string name="handled_title">تم التعامل مع هذا الحجز</string>
     <string name="handled_body">تعامل عضو آخر مع هذا الحجز قبل لحظات. تم تحديث التفاصيل.</string>
@@ -95,7 +97,6 @@
     <string name="done_no_show">تم تسجيل عدم الحضور</string>
     <string name="done_reassigned">تمت إعادة التوزيع وإشعار الزبون</string>
     <string name="person_services">%1$s · %2$s</string>
-    <string name="person_staff_time">%1$s · %2$s – %3$s</string>
     <string name="service_line">%1$s · %2$d د · %3$s</string>
     <string name="history_line">%1$s · %2$s</string>
     <string name="request_time_range">%1$s – %2$s</string>

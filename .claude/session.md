@@ -238,11 +238,30 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges + backlog only, no product code written.
+
 ### T-141-customer — Sync main into customer (part of T-141)
 - Branch: `chore/sync-main-into-customer-11`
 - Status: IN REVIEW
 - Acceptance criteria:
-  - [x] `main` (SRV-171/172) merged into `customer` (no conflicts); finished task set DONE, board regenerated
+  - [x] `main` (SRV-171/172) merged into `customer`; finished task set DONE, board regenerated
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge + backlog status only, no product code written.
+
+### T-141-merchant — Sync main into merchant (part of T-141)
+- Branch: `chore/sync-main-into-merchant-11`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `main` (SRV-171/172) merged into `merchant`; finished task set DONE, board regenerated
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge + backlog status only, no product code written.
+
+### T-141-main — Masters into main (part of T-141)
+- Branch: `chore/sync-masters-into-main-12`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `customer` + `merchant` merged into one branch from `main`; conflicts = generated board (regenerated) + root session blocks (all kept)
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge + backlog status only, no product code written.

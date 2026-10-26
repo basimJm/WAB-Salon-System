@@ -36,6 +36,7 @@ import com.fab.wab.merchant.designsystem.components.card.AppCard
 import com.fab.wab.merchant.designsystem.components.feedback.AppErrorState
 import com.fab.wab.merchant.designsystem.components.feedback.AppLoadingIndicator
 import com.fab.wab.merchant.designsystem.components.format.dateTimeText
+import com.fab.wab.merchant.designsystem.components.format.ltrIsolate
 import com.fab.wab.merchant.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.merchant.designsystem.components.layout.AppScreen
 import com.fab.wab.merchant.designsystem.components.navigation.AppTopBar
@@ -43,6 +44,7 @@ import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingDetails
+import com.fab.wab.merchant.feature.bookings.domain.model.ResponseReason
 import com.fab.wab.merchant.feature.bookings.presentation.analytics.BookingsAnalytics
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiAction
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiState
@@ -154,8 +156,12 @@ private fun Header(details: BookingDetails, nowMs: Long, onAction: (UiAction) ->
             refundNote(details.refundStatus)?.let {
                 AppText(text = stringResource(it), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
             }
-            details.rejectionReason?.let { ReasonLine(stringResource(Res.string.details_reject_reason), it) }
-            details.cancellationReason?.let { ReasonLine(stringResource(Res.string.details_cancel_reason), it) }
+            reasonText(details.rejectionReason, details.rejectionCode)?.let {
+                ReasonLine(stringResource(Res.string.details_reject_reason), it)
+            }
+            reasonText(details.cancellationReason, details.cancellationCode)?.let {
+                ReasonLine(stringResource(Res.string.details_cancel_reason), it)
+            }
         }
     }
 }
@@ -167,7 +173,7 @@ private fun CustomerCard(details: BookingDetails, onAction: (UiAction) -> Unit) 
     SectionCard(stringResource(Res.string.details_customer)) {
         AppText(text = details.summary.customerName, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
         details.summary.customerPhone?.let { phone ->
-            AppText(text = phone, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(text = ltrIsolate(phone), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
             // Side by side when both labels fit, stacked otherwise (narrow phones, large font scales).
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(spacing.space10),
@@ -201,6 +207,11 @@ internal fun SectionCard(title: String, content: @Composable () -> Unit) {
     }
 }
 
+/** The typed text, else the picker reason in the app language, else the code as sent (a code the app does not know). */
+@Composable
+private fun reasonText(text: String?, code: String?): String? =
+    text ?: ResponseReason.fromCode(code)?.let { stringResource(it.label()) } ?: code
+
 @Composable
 private fun ReasonLine(label: String, reason: String) {
     AppText(text = label, style = AppTheme.typography.labelMedium, color = AppTheme.colors.danger)
@@ -222,7 +233,7 @@ private fun com.fab.wab.merchant.feature.bookings.domain.model.StatusChange.toUi
         title = title,
         actor = actorLabel(actorType)?.let { stringResource(it) } ?: actorType,
         time = time?.let { stringResource(Res.string.history_line, it.date, it.time) }.orEmpty(),
-        note = reason,
+        note = reasonText(text = null, code = reason),
     )
 }
 
