@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,7 +64,8 @@ fun BookingCard(booking: BookingSummary, onClick: () -> Unit, modifier: Modifier
     val shape = bookingCardShape
     val am = stringResource(CoreRes.string.time_am)
     val pm = stringResource(CoreRes.string.time_pm)
-    val start = TimeFormat.instantText(booking.appointmentStart, am, pm)
+    // CUS-097: parse + zone conversion once per booking, not on every recomposition of a visible card.
+    val start = remember(booking.appointmentStart, am, pm) { TimeFormat.instantText(booking.appointmentStart, am, pm) }
     val salonName = booking.salonName.orEmpty()
     Column(
         modifier = modifier

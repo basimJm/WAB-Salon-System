@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.designsystem.theme.GlassStyle
 import com.fab.wab.customer.designsystem.theme.GlassTokens
+import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
@@ -92,6 +93,7 @@ internal fun Modifier.glassShadow(t: GlassTokens, elevation: Dp, shape: Shape): 
  * or, without a backdrop, a translucent gradient ([GlassMode.Content]) / the near-opaque chrome tint
  * ([GlassMode.TintOnly]). Then the specular sheen and the refractive rim.
  */
+@OptIn(ExperimentalHazeApi::class)
 internal fun Modifier.glassMaterial(glass: GlassSpec, style: GlassStyle, shape: Shape, rim: Boolean = true): Modifier {
     val t = glass.tokens
     val body = when (glass.mode) {
