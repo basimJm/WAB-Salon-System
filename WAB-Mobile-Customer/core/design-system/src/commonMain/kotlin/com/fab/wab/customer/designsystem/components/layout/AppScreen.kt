@@ -65,7 +65,10 @@ fun AppScreen(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val imeModifier = if (handleIme) Modifier.imePadding() else Modifier
-    val source = rememberGlassSource()
+    // CUS-097: only content that scrolls UNDER this screen's own bars is a backdrop worth recording. In the column
+    // layout the bars sit beside the content and the floating tab bar blurs the scaffold's backdrop, so a second
+    // backdrop here re-recorded the whole screen on every frame for nothing. Bars in the column layout use the tint.
+    val source = if (contentUnderBars) rememberGlassSource() else null
     val rootModifier = modifier
         .fillMaxSize()
         .glassBackdrop(AppTheme.colors.background, AppTheme.glass)

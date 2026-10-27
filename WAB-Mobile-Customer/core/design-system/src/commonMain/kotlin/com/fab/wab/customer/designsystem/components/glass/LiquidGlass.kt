@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.designsystem.theme.GlassStyle
 import com.fab.wab.customer.designsystem.theme.GlassTokens
+import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -103,7 +104,11 @@ internal fun Modifier.glassMaterial(glass: GlassSpec, style: GlassStyle, shape: 
                 noiseFactor = t.noiseFactor,
                 fallbackTint = HazeTint(t.fallbackColor),
             ),
-        )
+        ) {
+            // CUS-097: blur a down-scaled copy of the backdrop (Haze picks the scale per platform) instead of the
+            // full-resolution frame on every frame the content scrolls under the bar.
+            inputScale = HazeInputScale.Auto
+        }
         GlassMode.TintOnly -> background(t.fallbackColor)
         GlassMode.Content -> background(Brush.verticalGradient(listOf(t.fillTop(style), t.fillBottom(style))))
     }
