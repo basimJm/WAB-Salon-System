@@ -21,6 +21,7 @@ import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.domain.session.UserProfile
+import com.fab.wab.customer.core.ui.external.ExternalApp
 import com.fab.wab.customer.core.ui.external.FakeExternalActions
 import com.fab.wab.customer.feature.salon.domain.repository.SalonDetailsRepository
 import com.fab.wab.customer.feature.salon.domain.usecase.GetSalonDetailsUseCase
@@ -101,6 +102,7 @@ class SalonDetailsViewModelTest {
             analytics = NoOpAnalyticsTracker,
             webBaseUrl = WEB,
             errorText = { "error" },
+            externalText = { app -> "unavailable:$app" },
         )
         val vm = SalonDetailsViewModel("s1", deps, initialBranchId = branchId, testScope = backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
@@ -118,6 +120,20 @@ class SalonDetailsViewModelTest {
         vm.onEvent(UiAction.OnShareClick)
         val share = "share:" + shareText("Glow", "$WEB/salon/s1")
         assertEquals(listOf("maps:31.9,35.9:Glow", "tel:+962791234567", "https://wa.me/962791234567", share), external.calls)
+    }
+
+    @Test
+    fun aDeviceWithoutDialerOrMapsShowsAMessageInsteadOfNothing() = runTest(UnconfinedTestDispatcher()) {
+        external.unavailable = setOf(ExternalApp.DIALER, ExternalApp.MAPS)
+        val vm = viewModel()
+        vm.onEvent(UiAction.OnCallClick)
+        vm.onEvent(UiAction.OnLocationClick)
+        vm.onEvent(UiAction.OnWhatsAppClick)
+        assertEquals(
+            listOf<SideEffect>(SideEffect.ShowError("unavailable:DIALER"), SideEffect.ShowError("unavailable:MAPS")),
+            effects.filterIsInstance<SideEffect.ShowError>(),
+        )
+        assertEquals(3, external.calls.size)
     }
 
     @Test

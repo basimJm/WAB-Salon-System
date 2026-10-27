@@ -115,4 +115,16 @@
     <string name="date_picker_cancel">Cancel</string>
     <string name="date_picker_title">Select date</string>
     <string name="date_picker_none">No date selected</string>
+    <!-- CUS-094 device hand-offs, photo picking and permission dialogs -->
+    <string name="external_unavailable_dialer">Calling isn’t available on this device</string>
+    <string name="external_unavailable_whatsapp">WhatsApp couldn’t be opened on this device</string>
+    <string name="external_unavailable_maps">No maps app is available on this device</string>
+    <string name="external_unavailable_browser">This link couldn’t be opened on this device</string>
+    <string name="external_unavailable_email">No email app is set up on this device</string>
+    <string name="external_unavailable_share">Sharing isn’t available right now</string>
+    <string name="photo_camera_unavailable">This device has no camera. Choose a photo from the gallery</string>
+    <string name="photo_read_failed">This photo couldn’t be read. Try another one</string>
+    <string name="photo_camera_denied">Allow camera access to take a photo</string>
+    <string name="dialog_camera_denied_title">Camera access is turned off. Enable it from the device settings</string>
+    <string name="dialog_notifications_denied_title">Notifications are turned off. Enable them from the device settings</string>
 </resources>

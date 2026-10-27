@@ -6,9 +6,7 @@ import com.fab.wab.customer.core.domain.provider.DeviceLocationProvider
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.feature.home.domain.model.HomeContent
 import com.fab.wab.customer.feature.home.domain.repository.HomeRepository
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlin.coroutines.resume
 
 object HomeDefaults {
     /** A fix that takes longer than this is skipped: Home loads without the nearest section rather than hanging. */
@@ -25,9 +23,5 @@ class GetCurrentLocationUseCase(
     private val provider: DeviceLocationProvider,
     private val timeoutMs: Long = HomeDefaults.LOCATION_TIMEOUT_MS,
 ) {
-    suspend operator fun invoke(): LocationData? = withTimeoutOrNull(timeoutMs) {
-        suspendCancellableCoroutine { continuation ->
-            provider.fetchCurrentLocation { location -> if (continuation.isActive) continuation.resume(location) }
-        }
-    }
+    suspend operator fun invoke(): LocationData? = withTimeoutOrNull(timeoutMs) { provider.currentLocation() }
 }

@@ -9,7 +9,11 @@ import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.mvi.BaseViewModel
+import com.fab.wab.customer.core.ui.external.ExternalActions
+import com.fab.wab.customer.core.ui.external.ExternalOutcome
+import com.fab.wab.customer.core.ui.external.unavailableApp
 import com.fab.wab.customer.core.ui.permission.AppPermission
+import com.fab.wab.customer.core.ui.permission.PermissionOutcome
 import com.fab.wab.customer.feature.profile.domain.model.ProfileDefaults
 import com.fab.wab.customer.feature.profile.presentation.analytics.ProfileAnalytics
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ContactChannel
@@ -83,6 +87,7 @@ class ProfileViewModel(
             UiAction.OnDeleteAccountClick -> updateState { copy(overlay = ProfileOverlay.DeleteAccountConfirm) }
             UiAction.OnDeleteAccountConfirm -> account.deleteAccount()
             UiAction.OnOverlayDismiss -> updateState { copy(overlay = null) }
+            UiAction.OnOpenSettings -> openSettings()
             else -> Unit
         }
     }
@@ -142,8 +147,11 @@ class ProfileViewModel(
         track(ProfileAnalytics.ACTION_PUSH, ProfileAnalytics.PARAM_VALUE to enabled.toString())
         updateState { copy(pushEnabled = enabled) }
         scope.launch {
-            // PRD §10.2: delivery also needs the OS permission; a refusal keeps the preference (settings can grant it later).
-            if (enabled) deps.permissions.ensure(AppPermission.NOTIFICATIONS)
+            // PRD §10.2: delivery also needs the OS permission; a refusal keeps the preference and, when the OS will not
+            // ask again, offers the settings app.
+            if (enabled && deps.permissions.ensure(AppPermission.NOTIFICATIONS) == PermissionOutcome.BlockedInSettings) {
+                updateState { copy(overlay = ProfileOverlay.PermissionBlocked(AppPermission.NOTIFICATIONS)) }
+            }
             val result = deps.setPushEnabled(enabled)
             if (result is AppResult.Error) emitSideEffect(SideEffect.ShowError(deps.errorText(result.appError)))
         }
@@ -154,9 +162,23 @@ class ProfileViewModel(
         track(ProfileAnalytics.ACTION_CONTACT, ProfileAnalytics.PARAM_VALUE to channel.name.lowercase())
         updateState { copy(overlay = null) }
         when (channel) {
-            ContactChannel.CALL -> deps.external.dial(info.phone)
-            ContactChannel.WHATSAPP -> deps.external.openWhatsApp(info.whatsapp)
-            ContactChannel.EMAIL -> deps.external.email(info.email)
+            ContactChannel.CALL -> handOff { dial(info.phone) }
+            ContactChannel.WHATSAPP -> handOff { openWhatsApp(info.whatsapp) }
+            ContactChannel.EMAIL -> handOff { email(info.email) }
+        }
+    }
+
+    private fun openSettings() {
+        val blocked = uiState.value.overlay as? ProfileOverlay.PermissionBlocked ?: return
+        track(ProfileAnalytics.ACTION_PERMISSION_SETTINGS, ProfileAnalytics.PARAM_VALUE to blocked.permission.name.lowercase())
+        updateState { copy(overlay = null) }
+        deps.permissions.openSettings(blocked.permission)
+    }
+
+    /** Another app takes over; a device without one (simulator, no mail app) gets a message instead of nothing. */
+    private fun handOff(open: suspend ExternalActions.() -> ExternalOutcome) {
+        scope.launch {
+            deps.external.open().unavailableApp?.let { emitSideEffect(SideEffect.ShowError(deps.externalText(it))) }
         }
     }
 
@@ -166,8 +188,8 @@ class ProfileViewModel(
         when (link) {
             ProfileLink.PERSONAL_INFO -> emitSideEffect(SideEffect.OpenPersonalInfo)
             ProfileLink.FAQ -> emitSideEffect(SideEffect.OpenFaq)
-            ProfileLink.RATE_APP -> storeUrl?.let(deps.external::openUrl)
-            ProfileLink.SHARE_APP -> storeUrl?.let(deps.external::share)
+            ProfileLink.RATE_APP -> storeUrl?.let { url -> handOff { openUrl(url) } }
+            ProfileLink.SHARE_APP -> storeUrl?.let { url -> handOff { share(url) } }
             ProfileLink.REGISTER_SALON -> openMerchantRegistration()
             ProfileLink.PRIVACY -> emitSideEffect(SideEffect.OpenContent(ContentSlugs.PRIVACY))
             ProfileLink.TERMS -> emitSideEffect(SideEffect.OpenContent(ContentSlugs.TERMS))
@@ -179,9 +201,10 @@ class ProfileViewModel(
     private fun openMerchantRegistration() {
         val merchant = deps.environment.merchant
         if (merchant.isConfigured) {
-            deps.external.openApp(merchant.registerUrl, merchant.appId, merchant.storeUrl)
+            handOff { openApp(merchant.registerUrl, merchant.appId, merchant.storeUrl) }
         } else {
-            deps.external.openUrl(DeepLinks.merchantRegistration(deps.environment.webBaseUrl))
+            val url = DeepLinks.merchantRegistration(deps.environment.webBaseUrl)
+            handOff { openUrl(url) }
         }
     }
 

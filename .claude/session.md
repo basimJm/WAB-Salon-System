@@ -266,6 +266,15 @@
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge + backlog status only, no product code written.
 
+### T-142 — Customer integration: CUS-094 + CUS-095 + CUS-096 (2026-10-27)
+- Branch: `chore/customer-integration-perf`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] The three task branches merged into one branch from `origin/customer`; conflicts only in the customer backlog/session (both kept); one detekt fix (Swift-facing `MainViewController` name)
+  - [x] Gate: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + iosApp Dev/Prod × Debug/Release simulator builds green
+- Tests: gate above
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — integration only; deviations in the CUS-094…096 blocks.
 ### T-143 — Merchant integration: MER-076 + MER-077 + MER-078 (2026-10-27)
 - Branch: `chore/merchant-integration-perf`
 - Status: IN REVIEW
@@ -275,3 +284,14 @@
 - Tests: gate above
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — integration only; deviations in the MER-076…078 blocks.
+
+### T-144 — Device + performance round merged; Android skills added; masters synced (2026-10-27)
+- Branch: `chore/sync-masters-into-main-13`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] CUS-094…096 (#543) and MER-076…078 (#544) merged; statuses DONE; board regenerated
+  - [x] Official Android agent skills (`android/skills` @ 45fd1739, Apache-2.0: r8-analyzer, android-profiler, jetpack-compose-performance, anr-audit-and-fix) in `.claude/skills/` (read before use; scripts are local-only analysis)
+  - [ ] masters → `main` → masters; all 0 behind `main`
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges, backlog status and vendored skill docs only.
