@@ -1,6 +1,12 @@
 # Demo accounts (development data only)
 
-Loaded by `npm run seed:demo` or, on the hosted dev service, by `SEED_DEMO_ON_START=true` (+ `SEED_DEMO_DATABASE`; see `docs/DEPLOYMENT.md` → Demo data). Never on production.
+Loaded by `npm run seed:dev` (or `seed:demo` for the data alone) or, on the hosted dev service, by `SEED_DEMO_ON_START=true` (+ `SEED_DEMO_DATABASE`; see `docs/DEPLOYMENT.md` → Demo data). Never on production.
+
+## Fill the dev database
+
+- **Local (one command):** `npm run build && ADMIN_EMAIL=… ADMIN_PASSWORD=… npm run seed:dev [-- <photo folder>]` with `STORAGE_PROVIDER=real` (MinIO from `docker compose up -d`). Reference data, admin (when none exists), every salon and branch below with staff, bookings, reviews and notifications, images + thumbnails + flags, daily reports; safe to run again (it only adds what is missing).
+- **Render dev:** env `SEED_DEMO_ON_START=true` + `SEED_DEMO_DATABASE=<dev database name>` (the service runs `NODE_ENV=production`) and the storage keys; on a fresh database also `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Every start runs the same seed in the background. Or Render Shell: `npm run seed:dev`.
+- No storage configured: the data is seeded, images are skipped with a warning (URLs answer 404 until a run with storage).
 
 **All numbers are invented test numbers.** Jordan has no reserved fictional mobile range and the API accepts only `7[789]xxxxxxx`, so the demo uses fixed blocks that look nothing like a person's number: `+962 78900 0xxx` (salon staff), `+962 78901 0xxx` (branch staff), `+962 79900 0xxx` (customers). Do not reuse them outside dev.
 
