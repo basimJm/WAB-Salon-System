@@ -31,9 +31,10 @@
   - Camera upload: S21 photo → Camera → `com.android.camera2/CaptureActivity` with no CAMERA permission prompt (permission removed), shutter + ✓ → presign → MinIO PUT → confirm → avatar shows the photo
   - Gallery, location "nearest", rotation during a picker: NOT exercised on the device (time limit); covered by code review + unit tests only
   - iOS simulator: NOT run (owner time limit 25 min); only `linkDebugFrameworkIosSimulatorArm64`. Expected iOS results need a real device for tel: and camera (simulator: tel → "not available" message, camera → "no camera" message)
-- Loops: 0/1
+- Gate (Terminal panel): before the last code commit — targeted host tests (core/ui, design-system, profile, salon, bookings, content, home, salons presentation) green, `:androidApp:assembleDevDebug` ok, `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok; after the detekt/policy fixes (b008ec0a) `policy_checks.py all` ok and `run_detekt.sh` ok, but the full `testAndroidHostTest` + assemble + iOS link re-run failed twice on `Timeout waiting to lock journal cache` (another session's Gradle holds `~/.gradle/caches/journal-1`) — NOT re-verified after the MapLinks split
+- Loops: 0/1 — not recorded: full host tests + builds not re-run after the last commit (Gradle lock), iOS simulator not run
 - Review: PENDING
-- Notes: (pending)
+- Notes: DEVIATIONS — owner 25-minute limit: iOS simulator proof, Android gallery / nearest-location / rotation-during-picker checks not done; `androidx.exifinterface` 1.3.7 added (EXIF rotation of camera photos, already in the Gradle cache; android.media.ExifInterface trips lint); not pushed / no PR. Local overrides only (untracked `local.properties`, `androidApp/src/devDebug/AndroidManifest.xml`, git-ignored `Local.xcconfig`), removed at the end.
 
 ### CUS-093 — Bride-only services, staff per person, list rejection, completed money (SRV-170, contract 1.5.0)
 - Branch: `feat/cus-093-srv-170-contract`
