@@ -83,6 +83,15 @@ class CalendarLayoutTest {
         assertEquals(LATE_END, window.endMinute)
     }
 
+    /** MER-077: the screen remembers the layout keyed on its inputs; equal inputs must give an equal layout. */
+    @Test
+    fun equalInputsGiveEqualLayout() {
+        val first = dayColumns(day, entries, listOf(SARA, LINA), emptySet(), null, hours, texts)
+        val second = dayColumns(day, entries.toList(), listOf(SARA, LINA), emptySet(), null, hours, texts)
+        assertEquals(first, second)
+        assertEquals(windowFor(listOf(day), hours, first), windowFor(listOf(day), hours, second))
+    }
+
     private companion object {
         const val OPEN = 540
         const val CLOSE = 1_020
