@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import com.fab.wab.merchant.core.domain.session.LaunchRoute
 import com.fab.wab.merchant.core.navigation.route.Graph
 import com.fab.wab.merchant.designsystem.components.navigation.MerchantTab
+import kotlinx.serialization.KSerializer
 
 /** Graph that roots each bottom-navigation tab (PRD §8.1). */
 fun MerchantTab.graph(): Graph = when (this) {
@@ -19,7 +20,19 @@ fun MerchantTab.graph(): Graph = when (this) {
 val REGISTERED_TABS: Set<MerchantTab> =
     setOf(MerchantTab.HOME, MerchantTab.BOOKINGS, MerchantTab.CALENDAR, MerchantTab.SALON, MerchantTab.MORE)
 
-private val MerchantTab.routeName: String get() = graph()::class.qualifiedName.orEmpty()
+/**
+ * Navigation's route of a tab graph = the serial name of its serializer. Never `KClass.qualifiedName`: R8 renames the
+ * class in release builds while the serial name stays, so the tab (and the bottom bar) was never found there (MER-079).
+ */
+internal val MerchantTab.routeName: String get() = graphSerializer().descriptor.serialName
+
+private fun MerchantTab.graphSerializer(): KSerializer<out Graph> = when (this) {
+    MerchantTab.HOME -> Graph.Home.serializer()
+    MerchantTab.BOOKINGS -> Graph.Bookings.serializer()
+    MerchantTab.CALENDAR -> Graph.Calendar.serializer()
+    MerchantTab.SALON -> Graph.Salon.serializer()
+    MerchantTab.MORE -> Graph.More.serializer()
+}
 
 /** The tab owning the current destination (first route of the hierarchy that roots a tab); null outside the tabs. */
 fun tabForRoutes(hierarchyRoutes: List<String?>): MerchantTab? =
