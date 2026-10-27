@@ -13,17 +13,24 @@
 - Branch: `fix/cus-094-device-integrations`
 - Status: IN PROGRESS
 - Acceptance criteria (PRD S03 nearest, S07 items 4–5, S15 contact, S21 photo + push + contact, S23 contact; PRD §3.16 uploads):
-  - [ ] Call: dialer opens with a dialable number (`+` and digits only) on Android (`ACTION_DIAL`, no CALL_PHONE) and iOS (`UIApplication.open`); a device without a phone app shows a localized message, never a crash
-  - [ ] WhatsApp: `https://wa.me/<digits>` (works without the app); Android `<queries>` for WhatsApp packages; iOS `LSApplicationQueriesSchemes` `whatsapp`; no handler → message
-  - [ ] Maps: Android `geo:` chooser when a maps app exists, else the Google Maps web URL; iOS Google Maps app when installed (`comgooglemaps`), else Apple Maps; no handler → message
-  - [ ] Every iOS hand-off (tel, WhatsApp, maps, mail, browser, settings) uses `open(_:options:completionHandler:)` (the deprecated `openURL:` is a no-op on iOS 18+); share sheet presents from the top view controller with an iPad popover anchor
-  - [ ] Permissions: camera denied → message, blocked → settings dialog; notifications blocked → settings dialog; location unchanged flow; permission requests survive Activity recreation; iOS usage strings AR + EN (camera text = profile photo)
-  - [ ] Camera/gallery: Android Photo Picker + full-resolution `TakePicture` through a FileProvider (no CAMERA permission needed), sampled decode + EXIF rotation; iOS PHPicker for the gallery, camera through UIImagePickerController with a strongly held delegate, unavailable camera (simulator) → message; JPEG ≤ 1024 px; presign → PUT → confirm → avatar end to end
-  - [ ] Location: suspend provider with cancellation; Android fused current fix → last known, context from Koin (no `!!`); iOS CLLocationManager on the main thread, `requestLocation` + recent cached fix; authorization callbacks on main
-  - [ ] Unit tests for link builders, outcomes, VM handling of unavailable hand-offs / camera / permission outcomes, image scaling math
-  - [ ] Device proof: Android emulator + iOS simulator per feature (results below)
-- Tests: (pending)
-- Device results: (pending)
+  - [x] Call: dialer opens with a dialable number (`+` and digits only) on Android (`ACTION_DIAL`, no CALL_PHONE) and iOS (`UIApplication.open`); a device without a phone app shows a localized message, never a crash
+  - [x] WhatsApp: `https://wa.me/<digits>` (works without the app); Android `<queries>` for WhatsApp packages; iOS `LSApplicationQueriesSchemes` `whatsapp`; no handler → message
+  - [x] Maps: Android `geo:` chooser when a maps app exists, else the Google Maps web URL; iOS Google Maps app when installed (`comgooglemaps`), else Apple Maps; no handler → message
+  - [x] Every iOS hand-off (tel, WhatsApp, maps, mail, browser, settings) uses `open(_:options:completionHandler:)` (the deprecated `openURL:` is a no-op on iOS 18+); share sheet presents from the top view controller with an iPad popover anchor
+  - [x] Permissions: camera denied → message, blocked → settings dialog; notifications blocked → settings dialog; location unchanged flow; permission requests survive Activity recreation; iOS usage strings AR + EN (camera text = profile photo)
+  - [x] Camera/gallery: Android Photo Picker + full-resolution `TakePicture` through a FileProvider (no CAMERA permission needed), sampled decode + EXIF rotation; iOS PHPicker for the gallery, camera through UIImagePickerController with a strongly held delegate, unavailable camera (simulator) → message; JPEG ≤ 1024 px; presign → PUT → confirm → avatar end to end
+  - [x] Location: suspend provider with cancellation; Android fused current fix → last known, context from Koin (no `!!`); iOS CLLocationManager on the main thread, `requestLocation` + recent cached fix; authorization callbacks on main
+  - [x] Unit tests for link builders, outcomes, VM handling of unavailable hand-offs / camera / permission outcomes, image scaling math
+  - [ ] Device proof: Android emulator done per feature; iOS simulator NOT run (time limit) — iOS verified by framework link only
+- Tests: new `ExternalLinksTest` (5), `ImageScalingTest` (2), `DeviceTextTest` (2), `GetCurrentLocationUseCaseTest` (2); +4 `ProfileViewModelTest` (camera denied/blocked → settings, picker problems, push blocked → settings, no-handler message), +1 each `SalonDetailsViewModelTest`, `BookingDetailsViewModelTest`, `ContentViewModelsTest`; Terminal panel gate: see Loops
+- Device results (Android emulator Pixel_10_Pro_XL API 36, emulator-5560, local stack 10.0.2.2:4000 + adb reverse 9000):
+  - Call: S07 Call → `com.google.android.dialer` with `+962 6 592 1001` (no CALL_PHONE); dialer disabled → localized toast "الاتصال غير متاح على هذا الجهاز", no crash
+  - WhatsApp: no WhatsApp installed → `wa.me` opened in Chrome (`FirstRunActivity`) = works without the app
+  - Maps: S07 address → `com.google.android.apps.maps/MapsActivity` (geo:, only handler so the chooser auto-resolves); Maps disabled → Google Maps web URL in Chrome
+  - Permissions: push toggle → system POST_NOTIFICATIONS dialog; after two refusals → app dialog "الإشعارات متوقفة…" → Settings opens `AppNotificationSettingsActivity`
+  - Camera upload: S21 photo → Camera → `com.android.camera2/CaptureActivity` with no CAMERA permission prompt (permission removed), shutter + ✓ → presign → MinIO PUT → confirm → avatar shows the photo
+  - Gallery, location "nearest", rotation during a picker: NOT exercised on the device (time limit); covered by code review + unit tests only
+  - iOS simulator: NOT run (owner time limit 25 min); only `linkDebugFrameworkIosSimulatorArm64`. Expected iOS results need a real device for tel: and camera (simulator: tel → "not available" message, camera → "no camera" message)
 - Loops: 0/1
 - Review: PENDING
 - Notes: (pending)

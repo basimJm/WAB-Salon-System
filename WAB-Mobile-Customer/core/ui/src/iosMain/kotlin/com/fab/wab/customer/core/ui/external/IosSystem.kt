@@ -43,10 +43,10 @@ object IosSystem {
     /** The controller on top of the key window of the foreground scene (Compose host or anything it presented). */
     fun topViewController(): UIViewController? {
         var top = keyWindow()?.rootViewController ?: return null
-        while (true) {
-            val presented = top.presentedViewController ?: break
-            if (presented.isBeingDismissed()) break
+        var presented = top.presentedViewController
+        while (presented != null && !presented.isBeingDismissed()) {
             top = presented
+            presented = top.presentedViewController
         }
         return top
     }

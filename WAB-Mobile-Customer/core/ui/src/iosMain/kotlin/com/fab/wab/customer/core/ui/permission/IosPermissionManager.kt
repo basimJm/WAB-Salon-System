@@ -46,9 +46,14 @@ class IosPermissionManager : PermissionManager {
     }
 
     /** The app's page in Settings (notifications have their own page since iOS 16). */
-    override fun openSettings(permission: AppPermission) = IosSystem.launch(
-        if (permission == AppPermission.NOTIFICATIONS) UIApplicationOpenNotificationSettingsURLString else UIApplicationOpenSettingsURLString,
-    )
+    override fun openSettings(permission: AppPermission) {
+        val page = if (permission == AppPermission.NOTIFICATIONS) {
+            UIApplicationOpenNotificationSettingsURLString
+        } else {
+            UIApplicationOpenSettingsURLString
+        }
+        IosSystem.launch(page)
+    }
 
     override fun isLocationServiceEnabled(): Boolean = CLLocationManager.locationServicesEnabled()
 

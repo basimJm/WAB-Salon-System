@@ -23,11 +23,11 @@ class ExternalLinksTest {
 
     @Test
     fun mapsLinksCarryTheCoordinatesAndAnEncodedLabel() {
-        assertEquals("geo:31.95,35.91?q=31.95,35.91(Glow%20%26%20Co)", ExternalLinks.geo(31.95, 35.91, "Glow & Co"))
-        assertEquals("https://www.google.com/maps/search/?api=1&query=31.95,35.91", ExternalLinks.googleMapsWeb(31.95, 35.91))
-        assertEquals("comgooglemaps://?q=31.95,35.91", ExternalLinks.googleMapsApp(31.95, 35.91))
-        assertEquals("comgooglemaps://", ExternalLinks.googleMapsAppProbe())
-        assertEquals("https://maps.apple.com/?ll=31.95,35.91&q=%D8%B5", ExternalLinks.appleMaps(31.95, 35.91, "ص"))
+        assertEquals("geo:31.95,35.91?q=31.95,35.91(Glow%20%26%20Co)", MapLinks.geo(31.95, 35.91, "Glow & Co"))
+        assertEquals("https://google.com/maps/search/?api=1&query=31.95,35.91", MapLinks.googleMapsWeb(31.95, 35.91))
+        assertEquals("comgooglemaps://?q=31.95,35.91", MapLinks.googleMapsApp(31.95, 35.91))
+        assertEquals("comgooglemaps://", MapLinks.googleMapsAppProbe())
+        assertEquals("https://maps.apple.com/?ll=31.95,35.91&q=%D8%B5", MapLinks.appleMaps(31.95, 35.91, "ص"))
         assertEquals("mailto:help@wab.jo", ExternalLinks.mailto(" help@wab.jo "))
     }
 

@@ -21,9 +21,9 @@ class AndroidExternalActions(private val context: Context) : ExternalActions {
 
     /** PRD S07: maps chooser over `geo:`; without a maps app the Google Maps web page (browser) takes over. */
     override suspend fun openMaps(latitude: Double, longitude: Double, label: String): ExternalOutcome {
-        val geo = view(ExternalLinks.geo(latitude, longitude, label))
+        val geo = view(MapLinks.geo(latitude, longitude, label))
         if (canHandle(geo)) return start(Intent.createChooser(geo, null), ExternalApp.MAPS)
-        return start(view(ExternalLinks.googleMapsWeb(latitude, longitude)), ExternalApp.MAPS)
+        return start(view(MapLinks.googleMapsWeb(latitude, longitude)), ExternalApp.MAPS)
     }
 
     /** `ACTION_DIAL` only fills the dialer: no CALL_PHONE permission, the customer presses call. */

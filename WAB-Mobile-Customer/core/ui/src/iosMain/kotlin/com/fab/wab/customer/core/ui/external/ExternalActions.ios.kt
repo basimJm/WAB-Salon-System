@@ -21,10 +21,10 @@ actual val platformExternalActionsModule: Module = module {
 class IosExternalActions : ExternalActions {
 
     override suspend fun openMaps(latitude: Double, longitude: Double, label: String): ExternalOutcome {
-        if (IosSystem.canOpen(ExternalLinks.googleMapsAppProbe()) && IosSystem.open(ExternalLinks.googleMapsApp(latitude, longitude))) {
+        if (IosSystem.canOpen(MapLinks.googleMapsAppProbe()) && IosSystem.open(MapLinks.googleMapsApp(latitude, longitude))) {
             return ExternalOutcome.Opened
         }
-        return open(ExternalLinks.appleMaps(latitude, longitude, label), ExternalApp.MAPS)
+        return open(MapLinks.appleMaps(latitude, longitude, label), ExternalApp.MAPS)
     }
 
     override suspend fun dial(phone: String) = open(ExternalLinks.tel(phone), ExternalApp.DIALER)
