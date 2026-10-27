@@ -16,7 +16,10 @@ import com.fab.wab.merchant.core.domain.upload.acceptUploads
 import com.fab.wab.merchant.core.domain.upload.remainingSlots
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.core.ui.media.FilePicker
+import com.fab.wab.merchant.core.ui.media.PickedFile
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
+import com.fab.wab.merchant.designsystem.components.upload.DOCUMENT_SOURCES
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickHandler
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationInput
 import com.fab.wab.merchant.feature.application.domain.model.registrationErrors
@@ -55,6 +58,7 @@ class RegistrationViewModel(
     private val proof: OtpVerified? = if (mode == RegistrationMode.NEW) deps.pending.consume() else null
     private var uploads: List<DocumentUpload> = emptyList()
     private var nextFileId = 0
+    private val media = MediaPickHandler(deps.filePicker, scope, { uiState.value.media }) { updateState { copy(media = it) } }
 
     override fun onStart() {
         if (uiState.value.mode == RegistrationMode.NEW && proof == null) {
@@ -84,7 +88,8 @@ class RegistrationViewModel(
 
     private fun handleDocuments(event: UiAction): Boolean {
         when (event) {
-            UiAction.OnAddDocuments -> scope.launch { addDocuments() }
+            UiAction.OnAddDocuments -> addDocuments()
+            is UiAction.OnMedia -> media.handle(event.action)
             is UiAction.OnRemoveDocument -> setUploads(uploads.filterNot { it.file.id == event.id })
             is UiAction.OnRetryDocument -> uploads.firstOrNull { it.file.id == event.id }?.let { startUpload(it) }
             UiAction.OnTermsToggle -> edit { copy(termsAccepted = !termsAccepted) }
@@ -125,10 +130,13 @@ class RegistrationViewModel(
         }
     }
 
-    private suspend fun addDocuments() {
+    private fun addDocuments() {
         val remaining = remainingSlots(uploads.size, UploadLimits.DOCUMENT_MAX_FILES)
-        if (remaining == 0) return
-        val picked = deps.filePicker.pickDocuments(remaining).map { it.toLocalFile(id = (nextFileId++).toString()) }
+        media.open(DOCUMENT_SOURCES, maxCount = remaining) { files -> acceptDocuments(files, remaining) }
+    }
+
+    private fun acceptDocuments(files: List<PickedFile>, remaining: Int) {
+        val picked = files.map { it.toLocalFile(id = (nextFileId++).toString()) }
         val (accepted, refused) = acceptUploads(picked, UploadSlot.DOCUMENTS, remaining)
         updateState { copy(documentRejection = refused.firstOrNull()) }
         accepted.forEach { startUpload(DocumentUpload(it, UploadStatus.Uploading(0f))) }

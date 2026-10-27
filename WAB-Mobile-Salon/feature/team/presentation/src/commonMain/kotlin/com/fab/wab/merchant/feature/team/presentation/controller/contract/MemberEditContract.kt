@@ -5,6 +5,8 @@ import com.fab.wab.merchant.core.domain.branch.Branch
 import com.fab.wab.merchant.core.domain.locations.Country
 import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.ui.media.CropRegion
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.team.domain.MemberDraft
@@ -24,6 +26,7 @@ sealed interface MemberEditContract {
         val countryPickerOpen: Boolean = false,
         val photo: UploadItemUi? = null,
         val cropBytes: ByteArray? = null,
+        val media: MediaPickUi = MediaPickUi(),
         val showErrors: Boolean = false,
         val saving: Boolean = false,
         /** Branches a member can belong to (closed ones excluded); empty = the choice is not offered. */
@@ -47,6 +50,7 @@ sealed interface MemberEditContract {
         data class OnCountrySelect(val code: String) : UiAction
         data object OnCountryDismiss : UiAction
         data object OnPickPhoto : UiAction
+        data class OnMedia(val action: MediaPickAction) : UiAction
         data class OnCropConfirm(val region: CropRegion) : UiAction
         data object OnCropCancel : UiAction
         data object OnRemovePhoto : UiAction

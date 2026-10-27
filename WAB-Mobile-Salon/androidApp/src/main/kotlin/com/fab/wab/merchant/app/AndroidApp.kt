@@ -27,9 +27,10 @@ class AndroidApp : Application() {
         }
 
         // FCM token: register (FCM 26) and store it; MyFirebaseMessagingService.onRegistered also stores later refreshes.
-        val appSettings: AppSettings = getKoin().get()
-        val pushTokens: PushTokenProvider = getKoin().get()
+        // Resolved on the IO scope so creating the settings store and Firebase Messaging stays off the main thread.
         appScope.launch {
+            val appSettings: AppSettings = getKoin().get()
+            val pushTokens: PushTokenProvider = getKoin().get()
             val token = pushTokens.currentToken()
             if (token != null) {
                 appSettings.setFcmToken(token)

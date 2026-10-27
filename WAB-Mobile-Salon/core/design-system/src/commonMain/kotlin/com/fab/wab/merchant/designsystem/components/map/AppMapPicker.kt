@@ -77,6 +77,15 @@ fun AppMapPicker(
                 onClick = { onAction(MapPickerAction.UseMyLocation) },
                 modifier = Modifier.align(Alignment.End).padding(AppTheme.spacing.space16),
             )
+            state.notice?.let { notice ->
+                MapNoticeCard(
+                    notice = notice,
+                    onAction = onAction,
+                    modifier = Modifier
+                        .padding(horizontal = AppTheme.spacing.space16)
+                        .padding(bottom = AppTheme.spacing.space12),
+                )
+            }
             AddressCard(state, onConfirm = { onAction(MapPickerAction.Confirm) })
         }
     }

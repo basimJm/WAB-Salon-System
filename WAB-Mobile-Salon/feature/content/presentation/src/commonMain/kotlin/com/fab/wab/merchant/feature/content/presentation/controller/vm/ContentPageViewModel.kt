@@ -8,6 +8,9 @@ import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.config.AppConfigRepository
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.core.ui.external.ExternalActions
+import com.fab.wab.merchant.designsystem.components.external.ExternalHandoff
+import com.fab.wab.merchant.designsystem.components.external.HandoffTexts
+import com.fab.wab.merchant.designsystem.components.external.ResourceHandoffTexts
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.feature.content.domain.model.ContentSlugs
 import com.fab.wab.merchant.feature.content.domain.usecase.LoadContentPageUseCase
@@ -25,6 +28,7 @@ class ContentPageDependencies(
     val external: ExternalActions,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    val handoffTexts: HandoffTexts = ResourceHandoffTexts,
 )
 
 /** S23: privacy / terms / about from the server; `contact` shows the config's phone, WhatsApp and email. */
@@ -35,6 +39,7 @@ class ContentPageViewModel(
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(slug = slug, isContact = slug == ContentSlugs.CONTACT), testScope) {
 
     private var started = false
+    private val handoff = ExternalHandoff(deps.external, deps.handoffTexts) { emitSideEffect(SideEffect.ShowInfo(it)) }
 
     override fun onStart() {
         if (started) return
@@ -51,7 +56,7 @@ class ContentPageViewModel(
             UiAction.OnRetry -> if (!uiState.value.isContact) load()
             is UiAction.OnLinkClick -> {
                 track(ContentAnalytics.ACTION_LINK, ContentAnalytics.PARAM_SLUG to slug)
-                deps.external.openUrl(event.url)
+                scope.launch { handoff.url(event.url) }
             }
             is UiAction.OnContactChannel -> contact(event.channel)
         }
@@ -60,10 +65,12 @@ class ContentPageViewModel(
     private fun contact(channel: ContactChannel) {
         val info = uiState.value.contact ?: return
         track(ContentAnalytics.ACTION_CONTACT, ContentAnalytics.PARAM_VALUE to channel.name.lowercase())
-        when (channel) {
-            ContactChannel.CALL -> deps.external.dial(info.phone)
-            ContactChannel.WHATSAPP -> deps.external.openWhatsApp(info.whatsapp)
-            ContactChannel.EMAIL -> deps.external.email(info.email)
+        scope.launch {
+            when (channel) {
+                ContactChannel.CALL -> handoff.call(info.phone)
+                ContactChannel.WHATSAPP -> handoff.contactWabWhatsApp(info.whatsapp)
+                ContactChannel.EMAIL -> handoff.email(info.email)
+            }
         }
     }
 

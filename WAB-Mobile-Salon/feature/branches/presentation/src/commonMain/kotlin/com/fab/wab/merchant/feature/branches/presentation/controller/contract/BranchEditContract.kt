@@ -45,6 +45,5 @@ sealed interface BranchEditContract {
     sealed interface SideEffect {
         data class Saved(val created: Boolean) : SideEffect
         data class ShowError(val message: String) : SideEffect
-        data object LocationBlocked : SideEffect
     }
 }

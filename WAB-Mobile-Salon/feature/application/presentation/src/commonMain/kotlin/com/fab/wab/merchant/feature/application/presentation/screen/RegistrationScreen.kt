@@ -18,6 +18,7 @@ import com.fab.wab.merchant.designsystem.components.layout.AppScreen
 import com.fab.wab.merchant.designsystem.components.navigation.AppTopBar
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.upload.AppDocumentUploader
+import com.fab.wab.merchant.designsystem.components.upload.AppMediaPicker
 import com.fab.wab.merchant.designsystem.components.upload.uploadRejectionText
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationField
@@ -76,6 +77,7 @@ fun RegistrationScreen(
             )
         }
     }
+    AppMediaPicker(state.media) { onAction(UiAction.OnMedia(it)) }
 }
 
 @Composable

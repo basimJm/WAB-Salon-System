@@ -6,6 +6,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,6 +50,7 @@ import com.fab.wab.merchant.core.ui.external.ExternalActions
 import com.fab.wab.merchant.core.ui.theme.SystemBarsAppearance
 import com.fab.wab.merchant.core.ui.utils.LocalAppLocale
 import com.fab.wab.merchant.core.ui.utils.LocalDarkTheme
+import com.fab.wab.merchant.designsystem.components.external.rememberExternalHandoff
 import com.fab.wab.merchant.designsystem.components.image.LocalImageLoader
 import com.fab.wab.merchant.designsystem.components.image.rememberImageLoader
 import com.fab.wab.merchant.designsystem.components.permission.LocalPermissions
@@ -77,6 +79,7 @@ import com.fab.wab.merchant.feature.salon.presentation.di.salonPresentationModul
 import com.fab.wab.merchant.feature.team.di.teamModule
 import com.fab.wab.merchant.feature.team.presentation.di.teamPresentationModule
 import com.fab.wab.merchant.openStoreLink
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -173,14 +176,15 @@ fun App() {
                         LaunchGateContent(mainState, mainViewModel::onEvent) {
                             val session = sessionState ?: SessionState.Guest
                             val route = launchRouteOf(session)
-                            val externalActions = koinInject<ExternalActions>()
+                            val handoff = rememberExternalHandoff(koinInject<ExternalActions>())
+                            val handoffScope = rememberCoroutineScope()
                             val contact = koinInject<AppConfigRepository>().current.collectAsStateWithLifecycle().value?.contact
                             key(route) {
                                 MerchantShell(
                                     route = route,
                                     permissions = permissions,
                                     offline = session.showsOfflineBanner(),
-                                    onContactWab = { contact?.let { externalActions.openWhatsApp(it.whatsapp) } },
+                                    onContactWab = { contact?.let { handoffScope.launch { handoff.contactWabWhatsApp(it.whatsapp) } } },
                                     navController = navController,
                                 )
                             }

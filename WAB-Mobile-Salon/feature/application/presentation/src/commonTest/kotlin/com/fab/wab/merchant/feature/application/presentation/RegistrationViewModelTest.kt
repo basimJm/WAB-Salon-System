@@ -7,6 +7,8 @@ import com.fab.wab.merchant.core.domain.ErrorCode
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
 import com.fab.wab.merchant.core.domain.upload.UploadRejection
 import com.fab.wab.merchant.core.ui.media.FakeFilePicker
+import com.fab.wab.merchant.core.ui.media.MediaSource
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
 import com.fab.wab.merchant.core.ui.media.PickedFile
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationField
@@ -69,6 +71,7 @@ class RegistrationViewModelTest {
         onEvent(UiAction.OnCitySelect(0))
         onEvent(UiAction.OnAreaSelect(0))
         onEvent(UiAction.OnAddDocuments)
+        onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.FILES)))
         onEvent(UiAction.OnTermsToggle)
     }
 
@@ -135,6 +138,7 @@ class RegistrationViewModelTest {
         uploads.fail = true
         val vm = viewModel()
         vm.onEvent(UiAction.OnAddDocuments)
+        vm.onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.FILES)))
         val failed = vm.state.first { it.documents.isNotEmpty() }.documents.single()
         assertEquals(UploadStatus.Failed, failed.status)
         assertTrue(RegistrationField.DOCUMENTS in vm.state.first().errors)
@@ -146,6 +150,7 @@ class RegistrationViewModelTest {
         )
         picker.documents = listOf(PickedFile("notes.docx", ByteArray(2), "application/msword"))
         vm.onEvent(UiAction.OnAddDocuments)
+        vm.onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.FILES)))
         assertEquals(UploadRejection.WRONG_TYPE, vm.state.first().documentRejection)
         vm.onEvent(UiAction.OnRemoveDocument(failed.file.id))
         assertTrue(vm.state.first().documents.isEmpty())
@@ -159,6 +164,7 @@ class RegistrationViewModelTest {
         vm.onEvent(UiAction.OnSalonNameChange("Gents"))
         vm.onEvent(UiAction.OnGenderSelect(SalonGender.MEN))
         vm.onEvent(UiAction.OnAddDocuments)
+        vm.onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.FILES)))
         assertFalse(vm.state.first { it.documents.isNotEmpty() }.errors.isNotEmpty())
         vm.onEvent(UiAction.OnSubmit)
         assertEquals(listOf<SideEffect>(SideEffect.NavigateToStatus), effects)

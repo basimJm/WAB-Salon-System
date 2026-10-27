@@ -31,6 +31,7 @@ import com.fab.wab.merchant.designsystem.components.textfield.AppDropdownField
 import com.fab.wab.merchant.designsystem.components.textfield.AppTextField
 import com.fab.wab.merchant.designsystem.components.upload.AppImageCropper
 import com.fab.wab.merchant.designsystem.components.upload.AppImageUploader
+import com.fab.wab.merchant.designsystem.components.upload.AppMediaPicker
 import com.fab.wab.merchant.designsystem.components.upload.CropAspect
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.team.domain.ASSIGNABLE_ROLES
@@ -194,6 +195,7 @@ private fun Overlays(state: UiState, onAction: (UiAction) -> Unit) {
             onDismiss = { onAction(UiAction.OnCountryDismiss) },
         )
     }
+    AppMediaPicker(state.media) { onAction(UiAction.OnMedia(it)) }
     state.cropBytes?.let { bytes ->
         AppBottomSheet(onDismiss = { onAction(UiAction.OnCropCancel) }) {
             AppImageCropper(

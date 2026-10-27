@@ -11,14 +11,14 @@ const val PLACE_SEARCH_DEBOUNCE_MS = 400L
 
 /**
  * The map picker reducer shared by the salon profile (M13) and the branch form (MER-062): pin moves re-geocode, typed
- * queries search places, "Use my location" asks first. The owning view model keeps the [MapPickerUi] in its state.
+ * queries search places, "Use my location" asks first and explains every refusal ([MapNotice]). The owning view
+ * model keeps the [MapPickerUi] in its state.
  */
 class MapPickerHandler(
     private val controller: MapPickerController,
     private val scope: CoroutineScope,
     private val readMap: () -> MapPickerUi?,
     private val writeMap: (MapPickerUi?) -> Unit,
-    private val onLocationBlocked: () -> Unit,
 ) {
     private var geocodeJob: Job? = null
     private var searchJob: Job? = null
@@ -47,7 +47,27 @@ class MapPickerHandler(
                 onConfirm(map.target, map.address)
                 writeMap(null)
             }
+            MapPickerAction.NoticeAction -> noticeAction(map.notice)
+            MapPickerAction.DismissNotice -> writeMap(map.copy(notice = null))
         }
+    }
+
+    private fun noticeAction(notice: MapNotice?) {
+        updateMap { copy(notice = null) }
+        when (notice) {
+            MapNotice.DENIED -> locate()
+            MapNotice.BLOCKED -> controller.openAppSettings()
+            MapNotice.SERVICES_OFF -> controller.openLocationServices()
+            MapNotice.NOT_FOUND, null -> Unit
+        }
+    }
+
+    private fun noticeOf(result: LocateResult): MapNotice? = when (result) {
+        is LocateResult.Found -> null
+        LocateResult.Denied -> MapNotice.DENIED
+        LocateResult.Blocked -> MapNotice.BLOCKED
+        LocateResult.ServicesOff -> MapNotice.SERVICES_OFF
+        LocateResult.NotFound -> MapNotice.NOT_FOUND
     }
 
     private fun updateMap(change: MapPickerUi.() -> MapPickerUi) {
@@ -75,16 +95,12 @@ class MapPickerHandler(
 
     private fun locate() {
         scope.launch {
-            updateMap { copy(locating = true) }
+            updateMap { copy(locating = true, notice = null) }
             val result = controller.locate()
-            updateMap { copy(locating = false) }
-            when (result) {
-                is LocateResult.Found -> {
-                    updateMap { copy(target = result.point) }
-                    resolve(result.point)
-                }
-                LocateResult.Blocked -> onLocationBlocked()
-                LocateResult.Denied, LocateResult.Unavailable -> Unit
+            updateMap { copy(locating = false, notice = noticeOf(result)) }
+            if (result is LocateResult.Found) {
+                updateMap { copy(target = result.point) }
+                resolve(result.point)
             }
         }
     }

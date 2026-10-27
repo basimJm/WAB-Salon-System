@@ -14,8 +14,11 @@ import com.fab.wab.merchant.core.domain.upload.UploadSlot
 import com.fab.wab.merchant.core.domain.upload.acceptUploads
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.core.ui.media.FilePicker
+import com.fab.wab.merchant.core.ui.media.PickedFile
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.designsystem.components.upload.MediaGridMode
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickHandler
+import com.fab.wab.merchant.designsystem.components.upload.PHOTO_SOURCES
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.GalleryItem
 import com.fab.wab.merchant.feature.salon.domain.GalleryRepository
@@ -44,6 +47,7 @@ class GalleryViewModel(
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
     private var nextPending = 0
+    private val media = MediaPickHandler(picker, scope, { uiState.value.media }) { updateState { copy(media = it) } }
 
     /** Server order when reorder mode started; restored when saving the new order fails. */
     private var orderBefore = emptyList<GalleryItem>()
@@ -59,6 +63,7 @@ class GalleryViewModel(
     private fun handleGrid(event: UiAction): Boolean {
         when (event) {
             UiAction.OnAdd -> add()
+            is UiAction.OnMedia -> media.handle(event.action)
             is UiAction.OnItemClick -> click(event.id)
             is UiAction.OnRetryItem -> uiState.value.pending.firstOrNull { it.id == event.id }?.let { scope.launch { send(it) } }
             is UiAction.OnMove -> if (uiState.value.mode == MediaGridMode.Reorder) updateState {
@@ -115,32 +120,33 @@ class GalleryViewModel(
     }
 
     private fun add() {
-        scope.launch {
-            val state = uiState.value
-            val (images, videos) = gallerySlots(
-                state.items,
-                state.pending.count { it.type == GalleryType.IMAGE },
-                state.pending.count { it.type == GalleryType.VIDEO },
-            )
-            if (images + videos == 0) return@launch
-            val picked = picker.pickMedia(maxCount = images + videos, includeVideo = videos > 0).map { file ->
-                LocalFile(PENDING_PREFIX + nextPending++, file.name, file.bytes, file.contentType, file.durationMs)
-            }
-            val (photos, clips) = picked.partition { it.kind != UploadKind.VIDEO }
-            val (okPhotos, refusedPhotos) = acceptUploads(photos, UploadSlot.MEDIA, images)
-            val (okClips, refusedClips) = acceptUploads(clips, UploadSlot.MEDIA, videos)
-            val refused = refusedPhotos + refusedClips
-            val pending = (okPhotos + okClips).map { file ->
-                PendingMedia(
-                    file.id,
-                    file,
-                    if (file.kind == UploadKind.VIDEO) GalleryType.VIDEO else GalleryType.IMAGE,
-                    UploadStatus.Uploading(0f),
-                )
-            }
-            updateState { copy(pending = this.pending + pending, rejection = refused.firstOrNull()) }
-            pending.forEach { send(it) }
+        val state = uiState.value
+        val (images, videos) = gallerySlots(
+            state.items,
+            state.pending.count { it.type == GalleryType.IMAGE },
+            state.pending.count { it.type == GalleryType.VIDEO },
+        )
+        media.open(PHOTO_SOURCES, maxCount = images + videos, includeVideo = videos > 0) { files -> accept(files, images, videos) }
+    }
+
+    private suspend fun accept(files: List<PickedFile>, images: Int, videos: Int) {
+        val picked = files.map { file ->
+            LocalFile(PENDING_PREFIX + nextPending++, file.name, file.bytes, file.contentType, file.durationMs)
         }
+        val (photos, clips) = picked.partition { it.kind != UploadKind.VIDEO }
+        val (okPhotos, refusedPhotos) = acceptUploads(photos, UploadSlot.MEDIA, images)
+        val (okClips, refusedClips) = acceptUploads(clips, UploadSlot.MEDIA, videos)
+        val refused = refusedPhotos + refusedClips
+        val pending = (okPhotos + okClips).map { file ->
+            PendingMedia(
+                file.id,
+                file,
+                if (file.kind == UploadKind.VIDEO) GalleryType.VIDEO else GalleryType.IMAGE,
+                UploadStatus.Uploading(0f),
+            )
+        }
+        updateState { copy(pending = this.pending + pending, rejection = refused.firstOrNull()) }
+        pending.forEach { send(it) }
     }
 
     private suspend fun send(media: PendingMedia) {
